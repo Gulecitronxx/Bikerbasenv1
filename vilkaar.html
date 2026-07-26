@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vilkår og betingelser — Bikerbasen</title>
+<meta name="description" content="Læs Bikerbasens vilkår og betingelser, herunder regler for annoncer, forhandlere og betaling mellem brugere.">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Gå til indhold</a>
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brand-mark"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg><span>Biker<span style="color:var(--color-primary)">basen</span></span></a>
+    <nav class="main-nav" aria-label="Hovednavigation">
+      <a href="index.html">Forside</a>
+      <a href="soegning.html">Søg motorcykler</a>
+      <a href="opret-annonce.html">Opret annonce</a>
+      <a href="mine-annoncer.html">Mine annoncer</a>
+    </nav>
+    <div class="header-actions">
+      <a href="mine-annoncer.html?tab=favoritter" class="icon-btn" aria-label="Gemte annoncer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>
+        <span class="fav-count" data-fav-count data-count="0">0</span>
+      </a>
+      <button type="button" class="icon-btn theme-toggle" aria-label="Skift mellem lys og mørk tilstand">
+        <span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span>
+        <span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>
+      </button>
+      <a href="login.html" class="btn btn-outline" data-auth-slot><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind</a>
+      <a href="opret-annonce.html" class="btn btn-primary header-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Opret annonce</a>
+      <button type="button" class="icon-btn mobile-menu-btn" aria-label="Åbn menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="mobile-drawer" id="mobile-drawer">
+  <div class="mobile-drawer-scrim" data-drawer-close></div>
+  <div class="mobile-drawer-panel" role="dialog" aria-label="Menu">
+    <button type="button" class="icon-btn mobile-drawer-close" data-drawer-close aria-label="Luk menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <a href="index.html">Forside</a>
+    <a href="soegning.html">Søg motorcykler</a>
+    <a href="opret-annonce.html">Opret annonce</a>
+    <a href="mine-annoncer.html">Mine annoncer</a>
+    <div class="drawer-divider"></div>
+    <a href="login.html" data-auth-slot-mobile><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind / Opret profil</a>
+    <a href="mine-annoncer.html?tab=favoritter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>Gemte annoncer (<span data-fav-count-mobile>0</span>)</a>
+  </div>
+</div><main id="main-content">
+  <div class="container">
+    <div class="legal-content">
+      <h1>Vilkår og betingelser</h1>
+      <p class="legal-updated">Sidst opdateret: 26. juli 2026</p>
+
+      <div class="legal-toc">
+        <h2>Indhold</h2>
+        <ul>
+          <li><a href="#generelt">1. Generelt</a></li>
+          <li><a href="#konto">2. Din konto og verificering</a></li>
+          <li><a href="#annoncer">3. Annoncer</a></li>
+          <li><a href="#privat-forhandler">4. Privat sælger eller forhandler</a></li>
+          <li><a href="#adfaerd">5. God orden og forbudt indhold</a></li>
+          <li><a href="#anmeldelse">6. Anmeldelse og fjernelse af indhold</a></li>
+          <li><a href="#betaling">7. Betaling mellem brugere</a></li>
+          <li><a href="#ansvar">8. Ansvarsbegrænsning</a></li>
+          <li><a href="#forhandleraftale">9. Særlige vilkår for forhandlere (sælgeraftale)</a></li>
+          <li><a href="#aendringer">10. Ændringer og kontakt</a></li>
+        </ul>
+      </div>
+
+      <h2 id="generelt">1. Generelt</h2>
+      <p>Disse vilkår gælder for din brug af Bikerbasen ("platformen"), der formidler kontakt mellem private sælgere, forhandlere og købere af motorcykler i Danmark. Ved at oprette en profil eller en annonce accepterer du disse vilkår.</p>
+      <p>Bikerbasen er en formidlingsplatform. Vi er ikke part i den handel, der indgås mellem køber og sælger, og vi kontrollerer ikke motorcyklernes fysiske stand.</p>
+
+      <h2 id="konto">2. Din konto og verificering</h2>
+      <p>For at oprette en annonce eller skrive til en sælger skal du oprette en profil med gyldig e-mail og telefonnummer. Du kan frivilligt bekræfte din identitet med MitID for at få badget "Verificeret sælger". Kommercielle konti (forhandlere) skal gennemgå en udvidet verificering (CVR-nummer og virksomhedsoplysninger), før de kan opnå badget "Verificeret forhandler".</p>
+      <p>Du er ansvarlig for at holde dine loginoplysninger fortrolige og for al aktivitet på din konto.</p>
+
+      <h2 id="annoncer">3. Annoncer</h2>
+      <ul>
+        <li>Oplysninger i en annonce (pris, km-stand, stand, stelnummer m.v.) skal være korrekte og retvisende.</li>
+        <li>Billeder skal være af den konkrete motorcykel, der sælges — ikke lånte eller genbrugte billeder.</li>
+        <li>Det er ikke tilladt at annoncere stjålne motorcykler eller motorcykler, du ikke har ret til at sælge.</li>
+        <li>Bikerbasen kan fjerne annoncer, der overtræder disse vilkår eller gældende lovgivning, uden forudgående varsel.</li>
+      </ul>
+
+      <h2 id="privat-forhandler">4. Privat sælger eller forhandler</h2>
+      <p>Annoncer er tydeligt mærket som enten <strong>Privat</strong> eller <strong>Forhandler</strong>. Dette har betydning for dine rettigheder som køber:</p>
+      <ul>
+        <li><strong>Køb hos forhandler:</strong> Købelovens regler om erhvervsmæssigt salg gælder, herunder reklamationsret i op til 24 måneder.</li>
+        <li><strong>Køb hos privat sælger:</strong> Der er ingen forbrugerbeskyttelse mellem private parter. Aftal derfor altid et grundigt eftersyn, og få eventuelle mangler skrevet ind i en købsaftale.</li>
+      </ul>
+
+      <h2 id="adfaerd">5. God orden og forbudt indhold</h2>
+      <p>Det er ikke tilladt at bruge Bikerbasen til svindel, vildledning, salg af stjålet gods, ulovlige varer, eller adfærd der er upassende, truende eller diskriminerende mod andre brugere.</p>
+
+      <h2 id="anmeldelse">6. Anmeldelse og fjernelse af indhold</h2>
+      <p>Alle annoncer og profiler kan anmeldes via knappen "Anmeld annonce" / "Anmeld profil". Bikerbasen gennemgår anmeldelser og kan fjerne indhold eller spærre konti, der overtræder disse vilkår eller loven, i overensstemmelse med EU's forordning om digitale tjenester (Digital Services Act). Du kan se status på egne anmeldelser ved at kontakte support.</p>
+
+      <h2 id="betaling">7. Betaling mellem brugere</h2>
+      <p>Betaling for en motorcykel sker direkte mellem køber og sælger — typisk via MobilePay eller bankoverførsel. Bikerbasen håndterer ikke selv betalingen, med undtagelse af det valgfrie "sikker betaling"-flow, hvor en ekstern, PCI-certificeret betalingspartner holder beløbet, indtil køber har bekræftet modtagelsen af motorcyklen. Bikerbasen opbevarer aldrig dine kortoplysninger.</p>
+
+      <h2 id="ansvar">8. Ansvarsbegrænsning</h2>
+      <p>Bikerbasen er en formidlingsplatform og kan ikke drages til ansvar for tvister, mangler eller skader, der opstår i forbindelse med en handel mellem køber og sælger. Vi anbefaler altid at følge vores <a href="sikkerhed.html">sikkerhedsråd</a> før en handel indgås.</p>
+
+      <h2 id="forhandleraftale">9. Særlige vilkår for forhandlere (sælgeraftale)</h2>
+      <p>Som forhandler accepterer du derudover følgende:</p>
+      <ul>
+        <li>Du bekræfter, at oplysningerne i din virksomhedsprofil (CVR-nummer, virksomhedsnavn) er korrekte, og at du driver lovlig, momsregistreret virksomhed med salg af motorcykler.</li>
+        <li>Du er forpligtet til at oplyse købere korrekt om deres reklamationsret ved erhvervsmæssigt salg.</li>
+        <li>Bikerbasen kan indhente yderligere dokumentation som led i KYC-verificering (Know Your Customer) og kan afvise eller inddrage forhandlerstatus ved mistanke om misbrug.</li>
+      </ul>
+
+      <h2 id="aendringer">10. Ændringer og kontakt</h2>
+      <p>Vi kan opdatere disse vilkår løbende. Væsentlige ændringer meddeles på platformen. Har du spørgsmål til vilkårene, er du velkommen til at kontakte os.</p>
+    </div>
+  </div>
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg><span>Bikerbasen</span></div>
+        <p style="color:#B4AEA3; font-size:14px; max-width:320px;">Danmarks mødested for køb og salg af brugte motorcykler. Bygget til entusiaster, af entusiaster.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Køb & salg</h4>
+        <ul>
+          <li><a href="soegning.html">Søg motorcykler</a></li>
+          <li><a href="opret-annonce.html">Opret annonce</a></li>
+          <li><a href="mine-annoncer.html">Mine annoncer</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Kategorier</h4>
+        <ul>
+          <li><a href="soegning.html?type=sport">Sport</a></li>
+          <li><a href="soegning.html?type=touring">Touring</a></li>
+          <li><a href="soegning.html?type=cruiser">Cruiser</a></li>
+          <li><a href="soegning.html?type=naked">Naked</a></li>
+          <li><a href="soegning.html?type=adventure">Adventure/Enduro</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Om Bikerbasen</h4>
+        <ul>
+          <li><a href="sikkerhed.html">Sikkerhed & gode råd</a></li>
+          <li><a href="vilkaar.html">Vilkår og betingelser</a></li>
+          <li><a href="privatlivspolitik.html">Privatlivspolitik</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Bikerbasen. Alle rettigheder forbeholdes.</span>
+      <span>Priser vises i DKK. Alle annoncer er eksempler til demonstration.</span>
+    </div>
+  </div>
+</footer>
+<script src="js/icons.js"></script>
+<script src="js/bike-art.js"></script>
+<script src="js/data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/components.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => { renderHeader('vilkaar.html'); });
+</script>
+</body>
+</html>

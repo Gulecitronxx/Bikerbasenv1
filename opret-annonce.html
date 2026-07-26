@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opret annonce — Bikerbasen</title>
+<meta name="description" content="Opret en annonce for din motorcykel på Bikerbasen på under 5 minutter — gratis for private sælgere.">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Gå til indhold</a>
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="brand-mark"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg><span>Biker<span style="color:var(--color-primary)">basen</span></span></a>
+    <nav class="main-nav" aria-label="Hovednavigation">
+      <a href="index.html">Forside</a>
+      <a href="soegning.html">Søg motorcykler</a>
+      <a href="opret-annonce.html">Opret annonce</a>
+      <a href="mine-annoncer.html">Mine annoncer</a>
+    </nav>
+    <div class="header-actions">
+      <a href="mine-annoncer.html?tab=favoritter" class="icon-btn" aria-label="Gemte annoncer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>
+        <span class="fav-count" data-fav-count data-count="0">0</span>
+      </a>
+      <button type="button" class="icon-btn theme-toggle" aria-label="Skift mellem lys og mørk tilstand">
+        <span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span>
+        <span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>
+      </button>
+      <a href="login.html" class="btn btn-outline" data-auth-slot><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind</a>
+      <a href="opret-annonce.html" class="btn btn-primary header-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Opret annonce</a>
+      <button type="button" class="icon-btn mobile-menu-btn" aria-label="Åbn menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="mobile-drawer" id="mobile-drawer">
+  <div class="mobile-drawer-scrim" data-drawer-close></div>
+  <div class="mobile-drawer-panel" role="dialog" aria-label="Menu">
+    <button type="button" class="icon-btn mobile-drawer-close" data-drawer-close aria-label="Luk menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <a href="index.html">Forside</a>
+    <a href="soegning.html">Søg motorcykler</a>
+    <a href="opret-annonce.html">Opret annonce</a>
+    <a href="mine-annoncer.html">Mine annoncer</a>
+    <div class="drawer-divider"></div>
+    <a href="login.html" data-auth-slot-mobile><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind / Opret profil</a>
+    <a href="mine-annoncer.html?tab=favoritter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>Gemte annoncer (<span data-fav-count-mobile>0</span>)</a>
+  </div>
+</div>
+
+<main id="main-content">
+  <div class="container" style="max-width:760px;">
+    <div class="page-title-bar">
+      <h1>Opret annonce</h1>
+      <p>Udfyld oplysningerne om din motorcykel — det tager under 5 minutter.</p>
+    </div>
+
+    <div class="stepper" id="stepper"></div>
+
+    <form id="listing-form" novalidate>
+
+      <!-- Step 1: Type & basic specs -->
+      <section class="form-step" data-step="1">
+        <h2 style="margin-bottom:16px;">Motorcykeltype</h2>
+        <div class="radio-card-group" id="type-radio-group"></div>
+
+        <div class="form-grid cols-2" style="margin-top:24px;">
+          <div class="field">
+            <label for="f-brand">Mærke <span class="required-mark">*</span></label>
+            <select class="input" id="f-brand" required></select>
+          </div>
+          <div class="field">
+            <label for="f-model">Model <span class="required-mark">*</span></label>
+            <input class="input" id="f-model" list="model-suggestions" required>
+            <datalist id="model-suggestions"></datalist>
+          </div>
+          <div class="field">
+            <label for="f-year">Årgang <span class="required-mark">*</span></label>
+            <input class="input" id="f-year" type="number" min="1950" max="2026" required>
+          </div>
+          <div class="field">
+            <label for="f-km">Km-stand <span class="required-mark">*</span></label>
+            <input class="input" id="f-km" type="number" min="0" required>
+          </div>
+          <div class="field">
+            <label for="f-ccm">Motorstørrelse (ccm) <span class="required-mark">*</span></label>
+            <input class="input" id="f-ccm" type="number" min="0" required>
+          </div>
+          <div class="field">
+            <label for="f-power">Effekt (hk)</label>
+            <input class="input" id="f-power" type="number" min="0">
+          </div>
+          <div class="field" id="f-vin-field">
+            <label for="f-vin">Stelnummer (VIN)</label>
+            <input class="input" id="f-vin" placeholder="11-17 tegn">
+            <span class="field-hint">Vises kun delvist offentligt indtil køber er godkendt.</span>
+            <span class="field-error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg>Stelnummeret skal være 11-17 tegn (ikke I, O eller Q).</span>
+          </div>
+          <div class="field">
+            <label for="f-registration">Registreringsstatus</label>
+            <select class="input" id="f-registration">
+              <option>Indregistreret</option>
+              <option>Afmeldt</option>
+              <option>Ikke indregistreret (bane/off-road)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-afgift">Afgiftsstatus</label>
+            <select class="input" id="f-afgift"></select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Price, condition, location, description -->
+      <section class="form-step" data-step="2" hidden>
+        <h2 style="margin-bottom:16px;">Pris & beskrivelse</h2>
+        <div class="form-grid cols-2">
+          <div class="field">
+            <label for="f-price">Pris (DKK) <span class="required-mark">*</span></label>
+            <input class="input" id="f-price" type="number" min="0" required>
+          </div>
+          <div class="field">
+            <label for="f-condition">Stand <span class="required-mark">*</span></label>
+            <select class="input" id="f-condition" required></select>
+          </div>
+          <div class="field">
+            <label for="f-postnr">Postnummer <span class="required-mark">*</span></label>
+            <input class="input" id="f-postnr" list="postnr-suggestions" required>
+            <datalist id="postnr-suggestions"></datalist>
+          </div>
+          <div class="field">
+            <label for="f-city">By</label>
+            <input class="input" id="f-city" readonly>
+          </div>
+          <div class="field field-full">
+            <label for="f-desc">Beskrivelse <span class="required-mark">*</span></label>
+            <textarea class="input" id="f-desc" required placeholder="Beskriv stand, historik, evt. ekstraudstyr og servicehistorik..."></textarea>
+            <span class="field-hint">Vær ærlig om stand og eventuelle mangler — det skaber tillid hos køber.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Photos -->
+      <section class="form-step" data-step="3" hidden>
+        <h2 style="margin-bottom:16px;">Billeder</h2>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="photo-input" accept="image/*" multiple hidden>
+          <div id="upload-icon-mount"></div>
+          <h3>Træk billeder herind, eller klik for at vælge</h3>
+          <p>Tilføj op til 12 billeder. Det første billede bliver forsidebillede.</p>
+        </div>
+        <div class="photo-grid" id="photo-grid"></div>
+        <p class="field-hint" id="photo-hint" style="margin-top:12px;">Ingen billeder valgt endnu — vi viser en illustration som eksempel, indtil du uploader dine egne.</p>
+        <p class="field-hint" style="margin-top:6px;">EXIF-/GPS-metadata fjernes automatisk fra dine billeder, så din lokation ikke deles.</p>
+
+        <h2 style="margin:32px 0 16px;">Servicehistorik & dokumentation (valgfrit)</h2>
+        <div class="upload-zone" id="doc-upload-zone">
+          <input type="file" id="doc-input" accept="image/*,.pdf" multiple hidden>
+          <div id="doc-upload-icon-mount"></div>
+          <h3>Upload servicehæfte, fakturaer eller synsrapport</h3>
+          <p>Billeder eller PDF — giver købere mere tillid til annoncen.</p>
+        </div>
+        <div class="photo-grid" id="doc-grid"></div>
+      </section>
+
+      <!-- Step 4: Preview -->
+      <section class="form-step" data-step="4" hidden>
+        <h2 style="margin-bottom:16px;">Gennemse & udgiv</h2>
+        <div class="preview-note" id="preview-note"></div>
+        <div class="preview-card-wrap">
+          <div class="listings-grid" id="preview-card-mount" style="grid-template-columns:1fr;"></div>
+        </div>
+        <div id="preview-details"></div>
+        <div class="checkbox-inline" style="margin-top:16px;">
+          <input type="checkbox" id="f-terms" required>
+          <label for="f-terms">Jeg bekræfter, at oplysningerne og billederne er retvisende, og at jeg accepterer Bikerbasens <a href="vilkaar.html" target="_blank">vilkår</a> for annoncering.</label>
+        </div>
+        <div class="checkbox-inline" style="margin-top:10px;">
+          <input type="checkbox" id="f-captcha" required>
+          <label for="f-captcha">Jeg er ikke en robot</label>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" id="step-back" style="visibility:hidden;"><span id="back-icon"></span>Tilbage</button>
+        <div style="display:flex; gap:12px;">
+          <button type="button" class="btn btn-ghost" id="save-draft">Gem kladde</button>
+          <button type="button" class="btn btn-primary" id="step-next">Fortsæt</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg><span>Bikerbasen</span></div>
+        <p style="color:#B4AEA3; font-size:14px; max-width:320px;">Danmarks mødested for køb og salg af brugte motorcykler. Bygget til entusiaster, af entusiaster.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Køb & salg</h4>
+        <ul>
+          <li><a href="soegning.html">Søg motorcykler</a></li>
+          <li><a href="opret-annonce.html">Opret annonce</a></li>
+          <li><a href="mine-annoncer.html">Mine annoncer</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Kategorier</h4>
+        <ul>
+          <li><a href="soegning.html?type=sport">Sport</a></li>
+          <li><a href="soegning.html?type=touring">Touring</a></li>
+          <li><a href="soegning.html?type=cruiser">Cruiser</a></li>
+          <li><a href="soegning.html?type=naked">Naked</a></li>
+          <li><a href="soegning.html?type=adventure">Adventure/Enduro</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Om Bikerbasen</h4>
+        <ul>
+          <li><a href="sikkerhed.html">Sikkerhed & gode råd</a></li>
+          <li><a href="vilkaar.html">Vilkår og betingelser</a></li>
+          <li><a href="privatlivspolitik.html">Privatlivspolitik</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Bikerbasen. Alle rettigheder forbeholdes.</span>
+      <span>Priser vises i DKK. Alle annoncer er eksempler til demonstration.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/icons.js"></script>
+<script src="js/bike-art.js"></script>
+<script src="js/data.js"></script>
+<script src="js/store.js"></script>
+<script src="js/components.js"></script>
+<script src="js/opret-annonce.js"></script>
+</body>
+</html>
