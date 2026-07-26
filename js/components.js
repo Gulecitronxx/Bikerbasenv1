@@ -11,10 +11,37 @@ function renderHeader(activeOverride){
     if (a.hasAttribute('data-auth-slot-mobile')) return;
     a.classList.toggle('active', a.getAttribute('href') === current);
   });
+  injectDealerNav(current);
   updateFavCount();
   updateAuthSlot();
   wireHeader();
   initCookieConsent();
+}
+
+/* Dashboard is dealer-only, so the link is injected for dealer accounts
+   rather than shipped in the static nav for everyone. */
+function injectDealerNav(current){
+  const user = Store.getUser();
+  if (!user || !user.isDealer) return;
+  if (document.querySelector('[data-dealer-nav]')) return;
+
+  const nav = document.querySelector('.main-nav');
+  if (nav){
+    const a = document.createElement('a');
+    a.href = 'dashboard.html';
+    a.textContent = 'Dashboard';
+    a.setAttribute('data-dealer-nav', '');
+    if (current === 'dashboard.html') a.classList.add('active');
+    nav.appendChild(a);
+  }
+  const drawer = document.querySelector('.mobile-drawer-panel .drawer-divider');
+  if (drawer){
+    const a = document.createElement('a');
+    a.href = 'dashboard.html';
+    a.innerHTML = `${Icon.chart}Dashboard`;
+    a.setAttribute('data-dealer-nav', '');
+    drawer.parentNode.insertBefore(a, drawer);
+  }
 }
 
 function updateFavCount(){
