@@ -278,7 +278,8 @@ function renderDashboard(user){
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
   const user = Store.getUser();
   if (!user){
     window.location.replace('login.html?redirect=' + encodeURIComponent('dashboard.html'));

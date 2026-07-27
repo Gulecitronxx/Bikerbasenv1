@@ -144,7 +144,8 @@ function setActiveTab(tab){
   history.replaceState(null, '', window.location.pathname + '?' + p.toString());
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
   if (!Store.getUser()){
     window.location.replace('login.html?redirect=' + encodeURIComponent('mine-annoncer.html' + window.location.search));
     return;

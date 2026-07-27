@@ -195,7 +195,8 @@ function renderListing(){
   wireFavoriteButtons(similarMount);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
   renderHeader(null);
   renderListing();
 });

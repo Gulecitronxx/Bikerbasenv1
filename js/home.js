@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
   renderHeader('index.html');
 
   document.querySelectorAll('.section-link').forEach(a => {

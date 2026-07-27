@@ -106,7 +106,8 @@ function wirePhotoUpload(){
 function handleFiles(files){
   Array.from(files).slice(0, 12 - uploadedPhotos.length).forEach(file => {
     if (!file.type.startsWith('image/')) return;
-    uploadedPhotos.push({ url: URL.createObjectURL(file), name: file.name });
+    // Selve File-objektet gemmes, så det kan uploades ved udgivelse.
+    uploadedPhotos.push({ url: URL.createObjectURL(file), name: file.name, file });
   });
   renderPhotoGrid();
 }
@@ -210,25 +211,97 @@ function renderPreview(){
     </div>`;
 }
 
-function publishListing(){
+function showUploadProgress(done, total){
+  let el = document.getElementById('upload-progress');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'upload-progress';
+    el.className = 'upload-progress';
+    document.querySelector('.form-actions').insertAdjacentElement('beforebegin', el);
+  }
+  const pct = total ? Math.round((done / total) * 100) : 100;
+  el.innerHTML = `<span>Uploader billeder ${done}/${total}</span><span class="bar"><span style="width:${pct}%"></span></span>`;
+}
+
+async function publishListing(){
   if (!document.getElementById('f-terms').checked || !document.getElementById('f-captcha').checked){
     toast('Bekræft venligst vilkår og robot-tjek for at udgive annoncen');
     return;
   }
-  const user = Store.getUser() || { name: 'Dig', isDealer: false };
-  const newListing = {
-    id: Date.now(), ...formData, isDealer: !!user.isDealer,
-    createdAt: new Date('2026-07-26T09:00:00').toISOString(),
-    photos: Math.max(3, uploadedPhotos.length || 4),
-    seller: sellerFromUser(user),
-  };
-  Store.addMyListing(newListing);
+  const nextBtn = document.getElementById('step-next');
+
+  /* ---- Uden backend: som før, gemt lokalt ---- */
+  if (!db.enabled){
+    const user = Store.getUser() || { name: 'Dig', isDealer: false };
+    const newListing = {
+      id: Date.now(), ...formData, isDealer: !!user.isDealer,
+      createdAt: new Date().toISOString(),
+      photos: Math.max(3, uploadedPhotos.length || 4),
+      seller: sellerFromUser(user),
+    };
+    Store.addMyListing(newListing);
+    Store.clearDraft();
+    toast('Din annonce er udgivet (gemt lokalt)');
+    setTimeout(() => { window.location.href = `annonce.html?id=${newListing.id}`; }, 900);
+    return;
+  }
+
+  /* ---- Med backend: skriv til databasen ---- */
+  const user = await db.currentUser();
+  if (!user){
+    toast('Du skal være logget ind for at udgive en annonce');
+    setTimeout(() => { window.location.href = 'login.html?redirect=opret-annonce.html'; }, 1200);
+    return;
+  }
+
+  nextBtn.disabled = true;
+  nextBtn.textContent = 'Udgiver…';
+
+  const { data: created, error } = await db.createListing({
+    brand: formData.brand, model: formData.model, type: formData.type,
+    year: formData.year, km: formData.km, ccm: formData.ccm, power: formData.power,
+    price: formData.price, condition: formData.condition,
+    vin: formData.vin && isValidVIN(formData.vin) ? formData.vin.toUpperCase() : null,
+    registration: formData.registration, afgift: formData.afgift,
+    postnr: formData.postnr, city: formData.city, region: formData.region,
+    description: formData.description,
+  });
+
+  if (error){
+    nextBtn.disabled = false;
+    nextBtn.textContent = 'Udgiv annonce';
+    toast('Annoncen kunne ikke gemmes: ' + error.message);
+    return;
+  }
+
+  // Billeder uploades efter annoncen, så de kan knyttes til dens id.
+  const withFiles = uploadedPhotos.filter(p => p.file);
+  const failed = [];
+  for (let i = 0; i < withFiles.length; i++){
+    showUploadProgress(i, withFiles.length);
+    const res = await db.uploadListingPhoto(created.id, withFiles[i].file, i);
+    if (res.error) failed.push(withFiles[i].name);
+  }
+  if (withFiles.length) showUploadProgress(withFiles.length, withFiles.length);
+
   Store.clearDraft();
-  toast('Din annonce er udgivet!');
-  setTimeout(() => { window.location.href = `annonce.html?id=${newListing.id}`; }, 900);
+  if (failed.length){
+    toast(`Annoncen er udgivet, men ${failed.length} billede(r) kunne ikke uploades`);
+  } else {
+    toast('Din annonce er udgivet!');
+  }
+  setTimeout(() => { window.location.href = `annonce.html?id=${created.id}`; }, 1000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
+
+  // Med rigtig backend skal annoncen knyttes til en bruger.
+  if (db.enabled && !Store.getUser()?.remote){
+    window.location.replace('login.html?redirect=' + encodeURIComponent('opret-annonce.html'));
+    return;
+  }
+
   renderHeader('opret-annonce.html');
   populateStaticFields();
   wirePhotoUpload();

@@ -1,6 +1,7 @@
 /* Hydrates a brand landing page: renders the listing grid for the brand named
    in [data-brand], sorted newest first. */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
   const mount = document.getElementById('brand-listings');
   const brand = mount && mount.dataset.brand;
 

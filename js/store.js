@@ -34,8 +34,11 @@ const Store = {
     return mine;
   },
 
+  /* Rigtige annoncer fra databasen først, derefter lokale kladder og til sidst
+     demodataene — så et nyt site ikke ser tomt ud, mens databasen fyldes op. */
   getAllListings(){
-    return [...this.getMyListings(), ...LISTINGS];
+    const remote = window.REMOTE_LISTINGS || [];
+    return [...remote, ...this.getMyListings(), ...LISTINGS];
   },
   getListingById(id){
     return this.getAllListings().find(l => String(l.id) === String(id));

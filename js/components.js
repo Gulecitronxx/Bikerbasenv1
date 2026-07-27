@@ -53,7 +53,12 @@ function updateFavCount(){
 function updateAuthSlot(){
   const user = Store.getUser();
   if (!user) return;
-  const onLogout = (e) => { e.preventDefault(); Store.logout(); window.location.href = 'index.html'; };
+  const onLogout = async (e) => {
+    e.preventDefault();
+    if (typeof db !== 'undefined' && db.enabled) await db.signOut();
+    Store.logout();
+    window.location.href = 'index.html';
+  };
   const slot = document.querySelector('[data-auth-slot]');
   if (slot){
     slot.setAttribute('href', '#');
@@ -96,6 +101,15 @@ function toast(msg, opts){
   el._t = setTimeout(() => el.classList.remove('show'), (opts && opts.duration) || 2600);
 }
 
+/* Rigtigt foto hvis annoncen har et; ellers den illustrerede placeholder.
+   loading="lazy" + faste proportioner holder layoutet stabilt (CLS). */
+function listingMediaHTML(l, alt){
+  const url = l.photoUrls && l.photoUrls[0];
+  return url
+    ? `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" loading="lazy" decoding="async" class="card-photo">`
+    : bikeArtSVG(l.type, { id: 'card-' + l.id });
+}
+
 /* ============ Listing card ============ */
 function listingCardHTML(l){
   const fav = Store.isFavorite(l.id);
@@ -104,7 +118,7 @@ function listingCardHTML(l){
   return `
   <article class="card" data-listing-id="${l.id}">
     <div class="card-media">
-      ${bikeArtSVG(l.type, { id: 'card-'+l.id })}
+      ${listingMediaHTML(l, `${brand} ${model}`)}
       <div class="card-badges">
         ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
         ${l.isDealer ? `<span class="badge badge-dealer">${Icon.shieldCheck}Forhandler</span>` : ''}

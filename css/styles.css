@@ -957,3 +957,26 @@ select.input{
 .brand-card-count{ font-size:13px; color: var(--color-fg-muted); }
 .brand-noscript ul, .brand-noscript{ padding-left:18px; }
 .brand-noscript li{ list-style:disc; margin-bottom:6px; color: var(--color-fg-muted); }
+
+/* ============ Rigtige annoncefotos ============ */
+.card-photo{ width:100%; height:100%; object-fit:cover; display:block;
+  transition: transform .5s var(--ease-out); }
+.card:hover .card-photo{ transform: scale(1.04); }
+.gallery-main .card-photo{ width:100%; height:100%; object-fit:cover; }
+.gallery-thumbs .card-photo{ width:100%; height:100%; object-fit:cover; }
+
+/* ============ Auth-fejlbesked ============ */
+.auth-error{
+  background: var(--color-danger-tint); color: var(--color-danger);
+  border:1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
+  border-radius: var(--radius-sm); padding:10px var(--space-4);
+  font-size:13px; line-height:1.5; margin-bottom: var(--space-4);
+}
+
+/* ============ Upload-status ============ */
+.upload-progress{
+  display:flex; align-items:center; gap:10px; font-size:13px;
+  color: var(--color-fg-muted); margin-top: var(--space-3);
+}
+.upload-progress .bar{ flex:1; height:6px; border-radius:3px; background: var(--color-surface-2); overflow:hidden; }
+.upload-progress .bar span{ display:block; height:100%; background: var(--color-primary); transition: width .25s var(--ease-out); }

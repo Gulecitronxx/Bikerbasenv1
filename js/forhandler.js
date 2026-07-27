@@ -120,7 +120,8 @@ function renderProfile(){
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
   renderHeader(null);
   renderProfile();
 });

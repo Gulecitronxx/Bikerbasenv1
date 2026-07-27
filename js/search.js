@@ -312,7 +312,8 @@ function wireControls(){
   overlay.querySelectorAll('[data-close-filters]').forEach(el => el.addEventListener('click', () => overlay.classList.remove('open')));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
   renderHeader('soegning.html');
   populateFilterUI();
   readStateFromURL();

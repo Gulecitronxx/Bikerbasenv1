@@ -8,18 +8,59 @@ let pendingUser = null;
 function markVerifyDone(rowId, btnId){
   const row = document.getElementById(rowId);
   row.classList.add('done');
-  document.getElementById(btnId).outerHTML = `<span class="verify-status-done">${Icon.checkCircle}Bekræftet</span>`;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.outerHTML = `<span class="verify-status-done">${Icon.checkCircle}Bekræftet</span>`;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function authError(msg){
+  let el = document.getElementById('auth-error');
+  if (!el){
+    el = document.createElement('div');
+    el.id = 'auth-error';
+    el.className = 'auth-error';
+    el.setAttribute('role', 'alert');
+    document.querySelector('.auth-tabs').insertAdjacentElement('afterend', el);
+  }
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+/* Supabase-fejl er på engelsk; oversæt de almindelige. */
+function daError(message){
+  const m = (message || '').toLowerCase();
+  if (m.includes('invalid login credentials')) return 'Forkert e-mail eller adgangskode.';
+  if (m.includes('email not confirmed')) return 'Din e-mail er ikke bekræftet endnu. Tjek din indbakke for bekræftelseslinket.';
+  if (m.includes('user already registered')) return 'Der findes allerede en profil med den e-mail. Prøv at logge ind i stedet.';
+  if (m.includes('password should be at least')) return 'Adgangskoden skal være mindst 6 tegn.';
+  if (m.includes('unable to validate email')) return 'E-mailadressen ser ikke gyldig ud.';
+  if (m.includes('rate limit') || m.includes('too many')) return 'For mange forsøg. Vent et øjeblik og prøv igen.';
+  return message || 'Noget gik galt. Prøv igen.';
+}
+
+function setLoading(btn, loading, label){
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Vent…' : label;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
   renderHeader(null);
   document.getElementById('google-icon').innerHTML = Icon.google;
   document.getElementById('verify-phone-icon').innerHTML = Icon.phone;
   document.getElementById('verify-mitid-icon').innerHTML = Icon.fingerprint;
   document.getElementById('verify-cvr-icon').innerHTML = Icon.shieldCheck;
 
+  // Er man allerede logget ind, så videre med det samme.
+  await backendReady();
+  if (db.enabled && Store.getUser()?.remote) { redirectAfterAuth(); return; }
+
+  // Uden backend er login stadig en attrap — sig det ærligt frem for at lade som om.
+  if (!db.enabled){
+    authError('Backend er ikke konfigureret — login gemmes kun lokalt i denne browser.');
+  }
+
   document.querySelectorAll('[data-auth-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
+      authError('');
       document.querySelectorAll('[data-auth-tab]').forEach(b => b.classList.toggle('active', b === btn));
       document.getElementById('login-form').style.display = btn.dataset.authTab === 'login' ? '' : 'none';
       document.getElementById('register-form').style.display = btn.dataset.authTab === 'register' ? '' : 'none';
@@ -32,85 +73,134 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('kyc-fields').classList.toggle('show', e.target.checked);
   });
 
-  document.getElementById('login-form').addEventListener('submit', (e) => {
+  /* ---------- Log ind ---------- */
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    Store.setUser({
-      name: 'Mikkel Jensen', email: document.getElementById('login-email').value, isDealer: false,
-      verified: true, emailVerified: true, phoneVerified: true, mitIdVerified: true,
-    });
+    authError('');
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+
+    if (!db.enabled){
+      Store.setUser({ name: 'Mikkel Jensen', email, isDealer: false, verified: true,
+        emailVerified: true, phoneVerified: true, mitIdVerified: true });
+      toast('Du er nu logget ind (lokalt)');
+      setTimeout(redirectAfterAuth, 500);
+      return;
+    }
+
+    setLoading(btn, true, 'Log ind');
+    const { error } = await db.signIn({ email, password });
+    setLoading(btn, false, 'Log ind');
+    if (error){ authError(daError(error.message)); return; }
+
+    await syncSessionToStore();
     toast('Du er nu logget ind');
-    setTimeout(redirectAfterAuth, 600);
+    setTimeout(redirectAfterAuth, 400);
   });
 
-  document.getElementById('register-form').addEventListener('submit', (e) => {
+  /* ---------- Opret profil ---------- */
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    authError('');
     const isDealer = document.getElementById('reg-dealer').checked;
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
     const phone = document.getElementById('reg-phone').value.trim();
-    if (!phone){ toast('Udfyld venligst telefonnummer'); return; }
+    const password = document.getElementById('reg-password').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+
+    if (!phone){ authError('Udfyld venligst telefonnummer.'); return; }
     let cvr = '', company = '';
     if (isDealer){
       cvr = document.getElementById('reg-cvr').value.trim();
       company = document.getElementById('reg-company').value.trim();
       if (!/^\d{8}$/.test(cvr) || !company){
-        toast('Udfyld venligst virksomhedsnavn og et gyldigt 8-cifret CVR-nummer');
+        authError('Udfyld virksomhedsnavn og et gyldigt 8-cifret CVR-nummer.');
         return;
       }
     }
-    pendingUser = {
-      name: document.getElementById('reg-name').value.trim() || 'Ny bruger',
-      email: document.getElementById('reg-email').value,
-      phone, isDealer, cvr, company,
-      emailVerified: false, phoneVerified: false, mitIdVerified: false, cvrVerified: false,
-    };
+
+    if (!db.enabled){
+      pendingUser = { name: name || 'Ny bruger', email, phone, isDealer, cvr, company,
+        emailVerified: false, phoneVerified: false, mitIdVerified: false, cvrVerified: false };
+      showVerifyStep(isDealer);
+      return;
+    }
+
+    setLoading(btn, true, 'Fortsæt');
+    const { data, error } = await db.signUp({ email, password, name, phone, isDealer, company, cvr });
+    setLoading(btn, false, 'Fortsæt');
+    if (error){ authError(daError(error.message)); return; }
+
+    // Med e-mailbekræftelse slået til findes brugeren, men har ingen session endnu.
+    const needsConfirm = !data.session;
+    pendingUser = { name, email, phone, isDealer, cvr, company, needsConfirm };
+    showVerifyStep(isDealer, needsConfirm);
+  });
+
+  function showVerifyStep(isDealer, needsConfirm){
     document.getElementById('register-form').style.display = 'none';
     document.getElementById('auth-primary-extras').style.display = 'none';
     document.getElementById('verify-cvr-row').style.display = isDealer ? '' : 'none';
     document.getElementById('verify-step').style.display = '';
-  });
+    if (needsConfirm){
+      authError('Profil oprettet. Vi har sendt et bekræftelseslink til din e-mail — klik på det, før du logger ind.');
+      const finish = document.getElementById('finish-registration');
+      finish.textContent = 'Gå til log ind';
+    }
+  }
 
+  /* ---------- Verificeringstrin ---------- */
   document.getElementById('verify-phone-btn').addEventListener('click', () => {
     document.getElementById('phone-code-area').style.display = '';
-    toast('Kode sendt via SMS (demo)');
+    toast('Kode sendt via SMS (simuleret)');
   });
   document.getElementById('confirm-phone-code').addEventListener('click', () => {
     document.getElementById('phone-code-area').style.display = 'none';
     markVerifyDone('verify-phone-row', 'verify-phone-btn');
-    pendingUser.phoneVerified = true;
+    if (pendingUser) pendingUser.phoneVerified = true;
     toast('Telefonnummer bekræftet');
   });
-
   document.getElementById('verify-mitid-btn').addEventListener('click', (e) => {
     e.target.disabled = true;
-    e.target.textContent = 'Bekræfter...';
+    e.target.textContent = 'Bekræfter…';
     setTimeout(() => {
       markVerifyDone('verify-mitid-row', 'verify-mitid-btn');
-      pendingUser.mitIdVerified = true;
+      if (pendingUser) pendingUser.mitIdVerified = true;
       toast('Identitet bekræftet med MitID (simuleret)');
     }, 900);
   });
-
   document.getElementById('verify-cvr-btn').addEventListener('click', () => {
     markVerifyDone('verify-cvr-row', 'verify-cvr-btn');
-    pendingUser.cvrVerified = true;
+    if (pendingUser) pendingUser.cvrVerified = true;
     toast('CVR-nummer bekræftet');
   });
 
-  document.getElementById('finish-registration').addEventListener('click', () => {
+  document.getElementById('finish-registration').addEventListener('click', async () => {
+    if (db.enabled){
+      if (pendingUser?.needsConfirm){
+        // Ingen session før e-mailen er bekræftet — send brugeren til login.
+        document.querySelector('[data-auth-tab="login"]').click();
+        document.getElementById('login-email').value = pendingUser.email || '';
+        authError('Bekræft din e-mail via linket, og log derefter ind.');
+        return;
+      }
+      await syncSessionToStore();
+      toast('Din profil er oprettet');
+      setTimeout(redirectAfterAuth, 400);
+      return;
+    }
     pendingUser.emailVerified = true;
     pendingUser.verified = pendingUser.isDealer
       ? (pendingUser.mitIdVerified && pendingUser.cvrVerified)
       : pendingUser.mitIdVerified;
     Store.setUser(pendingUser);
-    toast('Din profil er oprettet');
-    setTimeout(redirectAfterAuth, 600);
+    toast('Din profil er oprettet (lokalt)');
+    setTimeout(redirectAfterAuth, 400);
   });
 
   document.getElementById('google-btn').addEventListener('click', () => {
-    Store.setUser({
-      name: 'Mikkel Jensen', email: 'mikkel@gmail.com', isDealer: false,
-      verified: false, emailVerified: true, phoneVerified: false, mitIdVerified: false,
-    });
-    toast('Logget ind med Google');
-    setTimeout(redirectAfterAuth, 600);
+    authError('Google-login kræver at OAuth aktiveres i Supabase — ikke sat op endnu.');
   });
 });
