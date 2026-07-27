@@ -14,8 +14,8 @@
    ============================================================ */
 
 const SUPABASE_CONFIG = {
-  url: '',      // fx 'https://abcdefghijkl.supabase.co'
-  anonKey: '',  // "anon public"-nøglen — ikke service_role
+  url: 'https://hkcjrwglwurdjnobewzb.supabase.co',
+  anonKey: 'sb_publishable_m_ZXdYaGVARkJRyDyyJJhA_9lgcw-t5', // publishable (offentlig) — ikke secret/service_role
 };
 
 /* Så længe felterne er tomme, kører siden videre på localStorage-demodata.
