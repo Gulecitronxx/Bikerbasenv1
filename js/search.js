@@ -2,7 +2,7 @@ const PAGE_SIZE = 12;
 let state = {
   q: '', types: [], brands: [], priceMin: null, priceMax: null,
   yearMin: null, yearMax: null, kmMax: null, ccmMin: null, ccmMax: null,
-  regions: [], conditions: [], sort: 'date-desc', page: 1,
+  regions: [], conditions: [], dealerOnly: false, sort: 'date-desc', page: 1,
 };
 
 function readStateFromURL(){
@@ -19,6 +19,7 @@ function readStateFromURL(){
   state.ccmMax = numOrNull(p.get('ccmMax'));
   state.regions = (p.get('regions') || '').split(',').filter(Boolean);
   state.conditions = (p.get('conditions') || '').split(',').filter(Boolean);
+  state.dealerOnly = p.get('dealer') === '1';
   state.sort = p.get('sort') || 'date-desc';
   state.page = numOrNull(p.get('page')) || 1;
 }
@@ -38,6 +39,7 @@ function writeStateToURL(){
   if (state.ccmMax) p.set('ccmMax', state.ccmMax);
   if (state.regions.length) p.set('regions', state.regions.join(','));
   if (state.conditions.length) p.set('conditions', state.conditions.join(','));
+  if (state.dealerOnly) p.set('dealer', '1');
   if (state.sort !== 'date-desc') p.set('sort', state.sort);
   if (state.page > 1) p.set('page', state.page);
   const qs = p.toString();
@@ -62,6 +64,54 @@ function populateFilterUI(){
   document.getElementById('bc-sep-1').innerHTML = Icon.chevronRight;
   document.querySelectorAll('.filter-group summary .chev').forEach(c => c.innerHTML = Icon.chevronDown);
   document.querySelector('.filters-close').innerHTML = Icon.close;
+  document.getElementById('view-grid').innerHTML = Icon.grid;
+  document.getElementById('view-list').innerHTML = Icon.list;
+}
+
+/* Serialise the active filter state so a saved search can be compared/restored. */
+function currentQueryString(){
+  const p = new URLSearchParams();
+  if (state.q) p.set('q', state.q);
+  if (state.types.length) p.set('types', state.types.join(','));
+  if (state.brands.length) p.set('brands', state.brands.join(','));
+  if (state.priceMin) p.set('priceMin', state.priceMin);
+  if (state.priceMax) p.set('priceMax', state.priceMax);
+  if (state.yearMin) p.set('yearMin', state.yearMin);
+  if (state.yearMax) p.set('yearMax', state.yearMax);
+  if (state.kmMax) p.set('kmMax', state.kmMax);
+  if (state.ccmMin) p.set('ccmMin', state.ccmMin);
+  if (state.ccmMax) p.set('ccmMax', state.ccmMax);
+  if (state.regions.length) p.set('regions', state.regions.join(','));
+  if (state.conditions.length) p.set('conditions', state.conditions.join(','));
+  if (state.dealerOnly) p.set('dealer', '1');
+  return p.toString();
+}
+
+function describeCurrentSearch(pills){
+  if (!pills.length && !state.q) return 'Alle motorcykler';
+  const parts = [];
+  if (state.q) parts.push(`"${state.q}"`);
+  pills.forEach(p => parts.push(p.label));
+  return parts.slice(0, 4).join(' · ') + (parts.length > 4 ? ` +${parts.length - 4}` : '');
+}
+
+function refreshSaveSearchButton(){
+  const qs = currentQueryString();
+  const saved = Store.getSavedSearches().some(s => s.query === qs);
+  const btn = document.getElementById('save-search-btn');
+  document.getElementById('save-search-icon').innerHTML = saved ? Icon.checkCircle : Icon.bell;
+  document.getElementById('save-search-label').textContent = saved ? 'Søgning gemt' : 'Gem søgning';
+  btn.classList.toggle('is-saved', saved);
+}
+
+function applyViewMode(){
+  const mode = Store.getViewMode();
+  const grid = document.getElementById('results-grid');
+  grid.classList.toggle('list-view', mode === 'list');
+  document.getElementById('view-grid').classList.toggle('active', mode === 'grid');
+  document.getElementById('view-list').classList.toggle('active', mode === 'list');
+  document.getElementById('view-grid').setAttribute('aria-pressed', mode === 'grid');
+  document.getElementById('view-list').setAttribute('aria-pressed', mode === 'list');
 }
 
 function reflectStateToUI(){
@@ -102,6 +152,7 @@ function getFilteredListings(){
   if (state.ccmMax != null) list = list.filter(l => l.ccm <= state.ccmMax);
   if (state.regions.length) list = list.filter(l => state.regions.includes(l.region));
   if (state.conditions.length) list = list.filter(l => state.conditions.includes(l.condition));
+  if (state.dealerOnly) list = list.filter(l => l.isDealer);
 
   const sorters = {
     'date-desc': (a,b) => new Date(b.createdAt) - new Date(a.createdAt),
@@ -128,6 +179,7 @@ function activeFilterPills(){
   if (state.ccmMin != null || state.ccmMax != null){
     pills.push({ label: `${state.ccmMin||0}–${state.ccmMax||'∞'} ccm`, clear: () => { state.ccmMin=null; state.ccmMax=null; } });
   }
+  if (state.dealerOnly) pills.push({ label: 'Kun forhandlere', clear: () => state.dealerOnly = false });
   state.regions.forEach(r => pills.push({ label: r, clear: () => state.regions = state.regions.filter(x=>x!==r) }));
   state.conditions.forEach(c => pills.push({ label: c, clear: () => state.conditions = state.conditions.filter(x=>x!==c) }));
   return pills;
@@ -143,6 +195,12 @@ function render(){
   document.querySelectorAll('[data-pill-clear]').forEach(btn => {
     btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; render(); });
   });
+
+  const badge = document.getElementById('filter-badge');
+  badge.textContent = pills.length;
+  badge.hidden = pills.length === 0;
+  refreshSaveSearchButton();
+  applyViewMode();
 
   const filtered = getFilteredListings();
   const total = filtered.length;
@@ -224,10 +282,30 @@ function wireControls(){
 
   document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 
-  const resetAll = () => { state = { q:'', types:[], brands:[], priceMin:null, priceMax:null, yearMin:null, yearMax:null, kmMax:null, ccmMin:null, ccmMax:null, regions:[], conditions:[], sort:'date-desc', page:1 }; render(); };
+  const resetAll = () => { state = { q:'', types:[], brands:[], priceMin:null, priceMax:null, yearMin:null, yearMax:null, kmMax:null, ccmMin:null, ccmMax:null, regions:[], conditions:[], dealerOnly:false, sort:'date-desc', page:1 }; render(); };
   document.getElementById('clear-filters').addEventListener('click', resetAll);
   document.getElementById('clear-filters-mobile').addEventListener('click', resetAll);
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);
+
+  document.getElementById('view-grid').addEventListener('click', () => { Store.setViewMode('grid'); applyViewMode(); });
+  document.getElementById('view-list').addEventListener('click', () => { Store.setViewMode('list'); applyViewMode(); });
+
+  document.getElementById('save-search-btn').addEventListener('click', () => {
+    const qs = currentQueryString();
+    const existing = Store.getSavedSearches().find(s => s.query === qs);
+    if (existing){
+      Store.removeSavedSearch(existing.id);
+      toast('Søgeagent fjernet');
+    } else {
+      Store.addSavedSearch({
+        query: qs,
+        label: describeCurrentSearch(activeFilterPills()),
+        count: getFilteredListings().length,
+      });
+      toast('Søgeagent oprettet — se den under Mine annoncer');
+    }
+    refreshSaveSearchButton();
+  });
 
   const overlay = document.getElementById('filters-overlay');
   document.getElementById('open-filters-btn').addEventListener('click', () => overlay.classList.add('open'));

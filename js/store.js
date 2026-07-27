@@ -3,6 +3,7 @@ const Store = {
   KEYS: {
     favorites: 'bb_favorites', myListings: 'bb_my_listings', theme: 'bb_theme', user: 'bb_user', draft: 'bb_draft',
     reviews: 'bb_reviews', reports: 'bb_reports', cookieConsent: 'bb_cookie_consent',
+    savedSearches: 'bb_saved_searches', viewMode: 'bb_view_mode',
   },
 
   getFavorites(){
@@ -99,6 +100,31 @@ const Store = {
   setCookieConsent(level){
     localStorage.setItem(this.KEYS.cookieConsent, JSON.stringify({ level, date: new Date().toISOString() }));
   },
+
+  /* ============ Saved searches (søgeagenter) ============ */
+  getSavedSearches(){
+    try { return JSON.parse(localStorage.getItem(this.KEYS.savedSearches)) || []; } catch(e){ return []; }
+  },
+  addSavedSearch(search){
+    const all = this.getSavedSearches();
+    if (all.some(s => s.query === search.query)) return { added: false, all };
+    all.unshift({ ...search, id: Date.now(), createdAt: new Date().toISOString(), notify: true });
+    localStorage.setItem(this.KEYS.savedSearches, JSON.stringify(all));
+    return { added: true, all };
+  },
+  removeSavedSearch(id){
+    const all = this.getSavedSearches().filter(s => s.id !== id);
+    localStorage.setItem(this.KEYS.savedSearches, JSON.stringify(all));
+    return all;
+  },
+  toggleSavedSearchNotify(id){
+    const all = this.getSavedSearches().map(s => s.id === id ? { ...s, notify: !s.notify } : s);
+    localStorage.setItem(this.KEYS.savedSearches, JSON.stringify(all));
+    return all;
+  },
+
+  getViewMode(){ return localStorage.getItem(this.KEYS.viewMode) || 'grid'; },
+  setViewMode(m){ localStorage.setItem(this.KEYS.viewMode, m); },
 
   /* ============ GDPR self-service erasure ============ */
   deleteAllData(){

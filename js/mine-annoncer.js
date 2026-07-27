@@ -45,6 +45,77 @@ function renderFavorites(){
   wireFavoriteButtons(grid);
 }
 
+/* Count listings matching a saved search that appeared after it was created. */
+function matchesForSavedSearch(search){
+  const p = new URLSearchParams(search.query);
+  const num = v => (v === null || v === '' || isNaN(Number(v))) ? null : Number(v);
+  const csv = k => (p.get(k) || '').split(',').filter(Boolean);
+  const q = (p.get('q') || '').trim().toLowerCase();
+  const types = csv('types'), brands = csv('brands'), regions = csv('regions'), conditions = csv('conditions');
+  const priceMin = num(p.get('priceMin')), priceMax = num(p.get('priceMax'));
+  const yearMin = num(p.get('yearMin')), yearMax = num(p.get('yearMax'));
+  const kmMax = num(p.get('kmMax')), ccmMin = num(p.get('ccmMin')), ccmMax = num(p.get('ccmMax'));
+  const dealerOnly = p.get('dealer') === '1';
+
+  return Store.getAllListings().filter(l => {
+    if (q && !`${l.brand} ${l.model}`.toLowerCase().includes(q)) return false;
+    if (types.length && !types.includes(l.type)) return false;
+    if (brands.length && !brands.includes(l.brand)) return false;
+    if (priceMin != null && l.price < priceMin) return false;
+    if (priceMax != null && l.price > priceMax) return false;
+    if (yearMin != null && l.year < yearMin) return false;
+    if (yearMax != null && l.year > yearMax) return false;
+    if (kmMax != null && l.km > kmMax) return false;
+    if (ccmMin != null && l.ccm < ccmMin) return false;
+    if (ccmMax != null && l.ccm > ccmMax) return false;
+    if (regions.length && !regions.includes(l.region)) return false;
+    if (conditions.length && !conditions.includes(l.condition)) return false;
+    if (dealerOnly && !l.isDealer) return false;
+    return true;
+  });
+}
+
+function renderAgents(){
+  const agents = Store.getSavedSearches();
+  const list = document.getElementById('agents-list');
+  const empty = document.getElementById('agents-empty');
+  if (!agents.length){
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = agents.map(a => {
+    const matches = matchesForSavedSearch(a);
+    const since = new Date(a.createdAt).getTime();
+    const fresh = matches.filter(l => new Date(l.createdAt).getTime() > since).length;
+    return `
+    <div class="agent-item">
+      <div class="agent-info">
+        <div class="agent-label">${escapeHTML(a.label)}${fresh ? `<span class="agent-new">${fresh} ny${fresh === 1 ? '' : 'e'}</span>` : ''}</div>
+        <div class="agent-meta">${matches.length} ${matches.length === 1 ? 'match' : 'matches'} i alt · oprettet ${new Date(a.createdAt).toLocaleDateString('da-DK')}</div>
+      </div>
+      <div class="agent-actions">
+        <a href="soegning.html?${a.query}" class="btn btn-outline btn-sm">Vis</a>
+        <button type="button" class="icon-btn ${a.notify ? '' : 'muted'}" data-notify="${a.id}"
+                aria-label="${a.notify ? 'Slå notifikationer fra' : 'Slå notifikationer til'}"
+                title="${a.notify ? 'Notifikationer slået til' : 'Notifikationer slået fra'}">${a.notify ? Icon.bell : Icon.bellOff}</button>
+        <button type="button" class="icon-btn" data-del-agent="${a.id}" aria-label="Slet søgeagent">${Icon.trash}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-notify]').forEach(b => b.addEventListener('click', () => {
+    Store.toggleSavedSearchNotify(Number(b.dataset.notify));
+    renderAgents();
+  }));
+  list.querySelectorAll('[data-del-agent]').forEach(b => b.addEventListener('click', () => {
+    Store.removeSavedSearch(Number(b.dataset.delAgent));
+    toast('Søgeagent slettet');
+    renderAgents();
+  }));
+}
+
 function renderAccountTab(){
   const user = Store.getUser();
   const rows = [
@@ -64,8 +135,10 @@ function setActiveTab(tab){
   document.querySelectorAll('#tabs-row button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.getElementById('tab-mine').style.display = tab === 'mine' ? '' : 'none';
   document.getElementById('tab-favoritter').style.display = tab === 'favoritter' ? '' : 'none';
+  document.getElementById('tab-agenter').style.display = tab === 'agenter' ? '' : 'none';
   document.getElementById('tab-konto').style.display = tab === 'konto' ? '' : 'none';
   if (tab === 'konto') renderAccountTab();
+  if (tab === 'agenter') renderAgents();
   const p = new URLSearchParams(window.location.search);
   p.set('tab', tab);
   history.replaceState(null, '', window.location.pathname + '?' + p.toString());
@@ -80,6 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHeader('mine-annoncer.html');
   document.getElementById('mine-empty-icon').innerHTML = Icon.bike;
   document.getElementById('fav-empty-icon').innerHTML = Icon.heart;
+  document.getElementById('agents-empty-icon').innerHTML = Icon.bell;
+  document.getElementById('agent-note-icon').innerHTML = Icon.info;
 
   renderMine();
   renderFavorites();
@@ -96,5 +171,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const initialTab = new URLSearchParams(window.location.search).get('tab');
-  if (initialTab === 'favoritter' || initialTab === 'konto') setActiveTab(initialTab);
+  if (['favoritter','konto','agenter'].includes(initialTab)) setActiveTab(initialTab);
 });

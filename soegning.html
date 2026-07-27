@@ -143,7 +143,12 @@
         <div class="results-toolbar">
           <div class="results-count" id="results-count"></div>
           <div class="toolbar-actions">
-            <button type="button" class="btn btn-outline mobile-filter-btn" id="open-filters-btn"><span id="filter-icon-mount"></span>Filtre</button>
+            <button type="button" class="btn btn-outline btn-sm" id="save-search-btn"><span id="save-search-icon"></span><span id="save-search-label">Gem søgning</span></button>
+            <div class="view-toggle" role="group" aria-label="Visningstype">
+              <button type="button" id="view-grid" aria-pressed="true" aria-label="Gallerivisning"></button>
+              <button type="button" id="view-list" aria-pressed="false" aria-label="Listevisning"></button>
+            </div>
+            <button type="button" class="btn btn-outline mobile-filter-btn" id="open-filters-btn"><span id="filter-icon-mount"></span>Filtre<span class="filter-badge" id="filter-badge" hidden>0</span></button>
             <select class="input" id="sort-select" style="min-height:40px; padding:8px 32px 8px 12px;">
               <option value="date-desc">Nyeste først</option>
               <option value="price-asc">Pris: Lav til høj</option>

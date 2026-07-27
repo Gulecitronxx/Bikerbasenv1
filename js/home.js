@@ -21,6 +21,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // hero stats
   document.getElementById('stat-listings').textContent = LISTINGS.length + '+';
 
+  // Curated entry points tailored to motorcycle buyers
+  const POPULAR = [
+    { label: 'Under 50.000 kr.', icon: 'medal', params: { maxPrice: 50000 } },
+    { label: 'A2-venlig (≤ 500 ccm)', icon: 'bike', params: { ccmMax: 500 } },
+    { label: 'Adventure', icon: 'mapPin', params: { type: 'adventure' } },
+    { label: 'Veteran & klassisk', icon: 'clock', params: { type: 'classic' } },
+    { label: 'Under 10.000 km', icon: 'gauge', params: { kmMax: 10000 } },
+    { label: 'Kun forhandlere', icon: 'shieldCheck', params: { dealer: '1' } },
+  ];
+  document.getElementById('popular-searches').innerHTML = POPULAR.map(p => {
+    const qs = new URLSearchParams(p.params).toString();
+    return `<a class="popular-chip" href="soegning.html?${qs}">${Icon[p.icon]}${p.label}</a>`;
+  }).join('');
+
+  // Live result count that reacts to the hero filters before submitting
+  const countHint = document.getElementById('hero-count-hint');
+  const updateHeroCount = () => {
+    const q = document.getElementById('hs-query').value.trim().toLowerCase();
+    const type = document.getElementById('hs-type').value;
+    const maxPrice = Number(document.getElementById('hs-price').value) || null;
+    let list = LISTINGS;
+    if (q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
+    if (type) list = list.filter(l => l.type === type);
+    if (maxPrice) list = list.filter(l => l.price <= maxPrice);
+    const n = list.length;
+    countHint.innerHTML = n
+      ? `Din søgning matcher <b>${n}</b> ${n === 1 ? 'motorcykel' : 'motorcykler'} lige nu.`
+      : `Ingen motorcykler matcher lige nu — prøv at udvide søgningen.`;
+    document.getElementById('hs-submit').textContent = n ? `Vis ${n} ${n === 1 ? 'motorcykel' : 'motorcykler'}` : 'Søg motorcykler';
+  };
+  ['hs-query','hs-type','hs-price'].forEach(id =>
+    document.getElementById(id).addEventListener('input', updateHeroCount));
+  updateHeroCount();
+
   // category tiles
   const tilesMount = document.getElementById('category-tiles');
   tilesMount.innerHTML = TYPES.map(t => `

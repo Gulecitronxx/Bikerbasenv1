@@ -57,6 +57,7 @@
     <div class="tabs-row" id="tabs-row">
       <button type="button" data-tab="mine" class="active">Mine annoncer</button>
       <button type="button" data-tab="favoritter">Gemte annoncer</button>
+      <button type="button" data-tab="agenter">Søgeagenter</button>
       <button type="button" data-tab="konto">Konto</button>
     </div>
 
@@ -78,6 +79,17 @@
         <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
       </div>
       <div id="fav-grid" class="listings-grid"></div>
+    </div>
+
+    <div id="tab-agenter" style="display:none; max-width:760px;">
+      <p class="demo-note" style="margin-top:var(--space-4);"><span id="agent-note-icon"></span>En søgeagent gemmer dine filtre og viser, hvor mange nye annoncer der er kommet til siden du oprettede den. E-mailnotifikationer kræver en server og er ikke aktive i denne prototype.</p>
+      <div id="agents-list"></div>
+      <div id="agents-empty" class="empty-state" style="display:none;">
+        <div id="agents-empty-icon"></div>
+        <h3>Ingen søgeagenter endnu</h3>
+        <p>Sæt dine filtre på søgesiden og klik "Gem søgning" for at blive holdt opdateret.</p>
+        <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
+      </div>
     </div>
 
     <div id="tab-konto" style="display:none; max-width:640px;">
