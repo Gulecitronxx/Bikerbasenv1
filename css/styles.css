@@ -935,3 +935,25 @@ select.input{
 /* Live result count on hero search button */
 .hero-count-hint{ font-size:13px; color:#C7C1B8; margin-top:10px; }
 .hero-count-hint b{ color:#fff; }
+
+/* ============ Brand landing pages ============ */
+.brand-hero{ padding: var(--space-6) 0 var(--space-5); max-width:760px; }
+.brand-hero h1{ font-size: clamp(26px,4vw,38px); margin-bottom: var(--space-3); }
+.brand-intro{ color: var(--color-fg-muted); line-height:1.7; font-size:16px; }
+.brand-intro strong{ color: var(--color-fg); }
+.brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
+.brand-sub{ font-size:19px; margin-bottom: var(--space-4); }
+
+.brand-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
+@media (min-width:640px){ .brand-grid{ grid-template-columns: repeat(3,1fr); } }
+@media (min-width:1024px){ .brand-grid{ grid-template-columns: repeat(4,1fr); } }
+.brand-card{
+  display:flex; flex-direction:column; gap:4px; padding: var(--space-4);
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
+  transition: transform .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+.brand-card:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
+.brand-card-name{ font-family: var(--font-display); font-weight:700; font-size:17px; }
+.brand-card-count{ font-size:13px; color: var(--color-fg-muted); }
+.brand-noscript ul, .brand-noscript{ padding-left:18px; }
+.brand-noscript li{ list-style:disc; margin-bottom:6px; color: var(--color-fg-muted); }

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://gulecitronxx.github.io/Bikerbasenv1/sitemap.xml
