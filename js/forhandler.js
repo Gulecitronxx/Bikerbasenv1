@@ -10,9 +10,26 @@ function starsHTML(rating){
   return `<span class="review-stars">${Array.from({length:5}, (_,i) => Icon.star).map((s,i) => `<span style="opacity:${i < full ? 1 : 0.25}">${s}</span>`).join('')}</span>`;
 }
 
-function renderReviews(){
+/* Databaseanmeldelser når sælgeren er en rigtig bruger; ellers de lokale
+   demoanmeldelser, så profilsiderne for demodata stadig ser levende ud. */
+async function loadReviews(){
   const seller = currentSeller;
-  const reviews = Store.getReviews(seller.name);
+  if (db.enabled && seller.id){
+    const { data, error } = await db.listReviews(seller.id);
+    if (!error && data){
+      return data.map(r => ({
+        author: r.author?.name || 'Bruger',
+        rating: Number(r.rating),
+        comment: r.comment,
+        date: r.created_at,
+      }));
+    }
+  }
+  return Store.getReviews(seller.name);
+}
+
+async function renderReviews(){
+  const reviews = await loadReviews();
   document.getElementById('reviews-list').innerHTML = reviews.length ? reviews.map(r => `
     <div class="review-item">
       <div class="review-head">
@@ -22,6 +39,13 @@ function renderReviews(){
       ${starsHTML(r.rating)}
       <p class="review-comment" style="margin-top:6px;">${escapeHTML(r.comment)}</p>
     </div>`).join('') : `<p style="color:var(--color-fg-muted); font-size:14px;">Ingen anmeldelser endnu.</p>`;
+
+  const avg = reviews.length
+    ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10
+    : null;
+  const stats = document.querySelectorAll('.profile-stats-row .hero-stat b');
+  if (stats[0]) stats[0].textContent = avg ?? '–';
+  if (stats[1]) stats[1].textContent = reviews.length;
 }
 
 function renderStarPicker(){
@@ -32,7 +56,7 @@ function renderStarPicker(){
   });
 }
 
-function renderProfile(){
+async function renderProfile(){
   const id = new URLSearchParams(window.location.search).get('id');
   const sellerName = id ? decodeURIComponent(id) : null;
   const all = Store.getAllListings();
@@ -81,8 +105,12 @@ function renderProfile(){
   document.getElementById('safety-icon').innerHTML = Icon.info;
   document.getElementById('report-profile-btn').innerHTML = `${Icon.flag}Anmeld profil`;
 
-  renderReviews();
+  await renderReviews();
   renderStarPicker();
+
+  // Med rigtig backend kommer navnet fra profilen, så feltet ville være vildledende.
+  const authorField = document.getElementById('review-author')?.closest('.field');
+  if (authorField && db.enabled && seller.id) authorField.style.display = 'none';
 
   document.getElementById('reveal-phone-profile').addEventListener('click', (e) => {
     e.target.innerHTML = `${Icon.phone}<span class="phone-reveal">${seller.phone}</span>`;
@@ -94,19 +122,29 @@ function renderProfile(){
   document.getElementById('report-profile-btn').addEventListener('click', () => {
     openReportModal('profile', seller.name, seller.name);
   });
-  document.getElementById('review-form').addEventListener('submit', (e) => {
+  document.getElementById('review-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const author = document.getElementById('review-author').value.trim() || 'Anonym bruger';
     const comment = document.getElementById('review-comment').value.trim();
-    Store.addReview(seller.name, { author, rating: pickedStars, comment, date: new Date().toISOString() });
+
+    if (db.enabled && seller.id){
+      const { error } = await db.addReview(seller.id, pickedStars, comment);
+      if (error){
+        // Databasen håndhæver selv "én anmeldelse pr. sælger" og "ikke dig selv".
+        const m = error.message || '';
+        if (m.includes('no_self_review') || m.includes('duplicate key')) toast('Du har allerede bedømt denne sælger');
+        else if (m.includes('not_own_profile')) toast('Du kan ikke bedømme dig selv');
+        else toast(error.message);
+        return;
+      }
+    } else {
+      const author = document.getElementById('review-author').value.trim() || 'Anonym bruger';
+      Store.addReview(seller.name, { author, rating: pickedStars, comment, date: new Date().toISOString() });
+    }
+
     e.target.reset();
     pickedStars = 5;
     renderStarPicker();
-    renderReviews();
-    const avg = Store.getAverageRating(seller.name, Number(seller.rating));
-    const count = Store.getReviews(seller.name).length;
-    document.querySelector('.profile-stats-row .hero-stat b').textContent = avg ?? '–';
-    document.querySelectorAll('.profile-stats-row .hero-stat b')[1].textContent = count;
+    await renderReviews();
     toast('Tak for din bedømmelse');
   });
 
@@ -123,5 +161,5 @@ function renderProfile(){
 document.addEventListener('DOMContentLoaded', async () => {
   await backendReady();
   renderHeader(null);
-  renderProfile();
+  await renderProfile();
 });

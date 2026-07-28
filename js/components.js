@@ -207,15 +207,25 @@ function ensureReportModal(){
   const modal = document.getElementById('report-modal');
   modal.querySelectorAll('[data-report-close]').forEach(b => b.addEventListener('click', () => modal.classList.remove('open')));
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
-  document.getElementById('report-form').addEventListener('submit', (e) => {
+  document.getElementById('report-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const reason = (new FormData(e.target)).get('report-reason');
-    Store.addReport({
+    const payload = {
       targetType: modal.dataset.targetType, targetId: modal.dataset.targetId,
       reason, comment: document.getElementById('report-comment').value,
-    });
+    };
     modal.classList.remove('open');
     e.target.reset();
+
+    // Altid en lokal kopi, så anmeldelsen ikke går tabt hvis nettet fejler.
+    Store.addReport(payload);
+    if (typeof db !== 'undefined' && db.enabled){
+      const { error } = await db.addReport(payload);
+      if (error){
+        toast('Anmeldelsen blev gemt lokalt, men kunne ikke sendes');
+        return;
+      }
+    }
     toast('Tak for din anmeldelse — vi gennemgår den hurtigst muligt');
   });
 }

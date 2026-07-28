@@ -82,6 +82,28 @@ async function loadRemoteListings(){
   return window.REMOTE_LISTINGS;
 }
 
+/* Favoritter: databasen er sandheden, når man er logget ind.
+   Det man nåede at gemme som anonym, flyttes med op ved login i stedet for
+   at forsvinde. */
+async function syncFavorites(){
+  if (!db.enabled || !Store.getUser()?.remote) return;
+
+  const remoteIds = await db.listFavorites();
+  const localIds = Store.getFavorites();
+
+  // Kun uuid'er hører til i databasen; demo-annoncer har numeriske id'er.
+  const isUuid = v => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
+  const toPush = localIds.filter(id => isUuid(id) && !remoteIds.includes(id));
+  for (const id of toPush){
+    const { error } = await db.addFavorite(id);
+    if (!error) remoteIds.push(id);
+  }
+
+  // Behold lokale demo-favoritter, så UI'et ikke pludselig glemmer dem.
+  const demoIds = localIds.filter(id => !isUuid(id));
+  localStorage.setItem(Store.KEYS.favorites, JSON.stringify([...remoteIds, ...demoIds]));
+}
+
 /* Kald denne før første render på sider der viser data. */
 let _bootPromise = null;
 function backendReady(){
@@ -91,6 +113,7 @@ function backendReady(){
     try {
       await syncSessionToStore();
       await loadRemoteListings();
+      await syncFavorites();
     } catch (e) {
       console.warn('Backend-opstart fejlede, fortsætter på lokale data:', e);
     }

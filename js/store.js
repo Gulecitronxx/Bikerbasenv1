@@ -10,13 +10,21 @@ const Store = {
     try { return JSON.parse(localStorage.getItem(this.KEYS.favorites)) || []; } catch(e){ return []; }
   },
   isFavorite(id){ return this.getFavorites().includes(id); },
+  /* Synkron af hensyn til UI'et; skrivningen til databasen sker i baggrunden,
+     så hjertet reagerer med det samme. */
   toggleFavorite(id){
     let favs = this.getFavorites();
-    if (favs.includes(id)) favs = favs.filter(f => f !== id);
-    else favs.push(id);
+    const nowFavorite = !favs.includes(id);
+    favs = nowFavorite ? [...favs, id] : favs.filter(f => f !== id);
     localStorage.setItem(this.KEYS.favorites, JSON.stringify(favs));
     document.dispatchEvent(new CustomEvent('bb:favorites-changed', { detail: favs }));
-    return favs.includes(id);
+
+    const isUuid = typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id);
+    if (isUuid && typeof db !== 'undefined' && db.enabled && this.getUser()?.remote){
+      (nowFavorite ? db.addFavorite(id) : db.removeFavorite(id))
+        .then(r => { if (r?.error) console.warn('Favorit blev ikke gemt i databasen:', r.error.message); });
+    }
+    return nowFavorite;
   },
 
   getMyListings(){

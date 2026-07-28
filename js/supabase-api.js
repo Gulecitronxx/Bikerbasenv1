@@ -185,6 +185,84 @@ const db = (function(){
       return c.storage.from('listing-photos').getPublicUrl(storagePath).data.publicUrl;
     },
 
+    /* ---------- Favoritter ---------- */
+    async listFavorites(){
+      const c = init(); if (!c) return [];
+      const user = await this.currentUser();
+      if (!user) return [];
+      const { data } = await c.from('favorites').select('listing_id').eq('user_id', user.id);
+      return (data || []).map(r => r.listing_id);
+    },
+    async addFavorite(listingId){
+      const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };
+      const user = await this.currentUser();
+      if (!user) return { error: { message: 'Log ind for at gemme annoncer på tværs af enheder.' } };
+      return c.from('favorites').insert({ user_id: user.id, listing_id: listingId });
+    },
+    async removeFavorite(listingId){
+      const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };
+      const user = await this.currentUser();
+      if (!user) return { error: { message: 'Ikke logget ind.' } };
+      return c.from('favorites').delete().eq('user_id', user.id).eq('listing_id', listingId);
+    },
+
+    /* ---------- Anmeldelser ---------- */
+    async listReviews(sellerId){
+      const c = init(); if (!c) return { data: [], error: null };
+      return c.from('reviews')
+        .select('*, author:public_profiles!reviews_author_id_fkey(name)')
+        .eq('seller_id', sellerId)
+        .order('created_at', { ascending: false });
+    },
+    async sellerRating(sellerId){
+      const c = init(); if (!c) return null;
+      const { data } = await c.from('seller_ratings').select('*').eq('seller_id', sellerId).maybeSingle();
+      return data || null;
+    },
+    async addReview(sellerId, rating, comment){
+      const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };
+      const user = await this.currentUser();
+      if (!user) return { error: { message: 'Log ind for at skrive en anmeldelse.' } };
+      if (user.id === sellerId) return { error: { message: 'Du kan ikke bedømme dig selv.' } };
+      return c.from('reviews')
+        .insert({ seller_id: sellerId, author_id: user.id, rating, comment })
+        .select().single();
+    },
+
+    /* ---------- Søgeagenter ---------- */
+    async listSavedSearches(){
+      const c = init(); if (!c) return [];
+      const user = await this.currentUser();
+      if (!user) return [];
+      const { data } = await c.from('saved_searches').select('*').eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      return data || [];
+    },
+    async addSavedSearch(query, label){
+      const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };
+      const user = await this.currentUser();
+      if (!user) return { error: { message: 'Log ind for at gemme en søgeagent.' } };
+      return c.from('saved_searches').insert({ user_id: user.id, query, label }).select().single();
+    },
+    async removeSavedSearch(id){
+      const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };
+      return c.from('saved_searches').delete().eq('id', id);
+    },
+    async setSavedSearchNotify(id, notify){
+      const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };
+      return c.from('saved_searches').update({ notify }).eq('id', id);
+    },
+
+    /* ---------- Indberetninger ---------- */
+    async addReport({ targetType, targetId, reason, comment }){
+      const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };
+      const user = await this.currentUser();
+      return c.from('reports').insert({
+        reporter_id: user ? user.id : null,
+        target_type: targetType, target_id: String(targetId), reason, comment: comment || '',
+      });
+    },
+
     async deleteListingPhoto(photoId, storagePath){
       const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
       await c.storage.from('listing-photos').remove([storagePath]);
