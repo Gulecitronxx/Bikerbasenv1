@@ -13,6 +13,13 @@ const Store = {
   /* Synkron af hensyn til UI'et; skrivningen til databasen sker i baggrunden,
      så hjertet reagerer med det samme. */
   toggleFavorite(id){
+    // Sikkerhedsnet: knappen skjules på egne annoncer, men DOM kan manipuleres.
+    const target = this.getAllListings().find(l => String(l.id) === String(id));
+    if (target && typeof isOwnListing === 'function' && isOwnListing(target)){
+      if (typeof toast === 'function') toast('Du kan ikke gemme din egen annonce');
+      return this.isFavorite(id);
+    }
+
     let favs = this.getFavorites();
     const nowFavorite = !favs.includes(id);
     favs = nowFavorite ? [...favs, id] : favs.filter(f => f !== id);

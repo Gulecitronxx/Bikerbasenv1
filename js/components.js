@@ -101,6 +101,15 @@ function toast(msg, opts){
   el._t = setTimeout(() => el.classList.remove('show'), (opts && opts.duration) || 2600);
 }
 
+/* Er annoncen brugerens egen? Fjerntliggende annoncer matches på sælger-id,
+   lokale demo-/kladdeannoncer på navn. */
+function isOwnListing(l){
+  const user = Store.getUser();
+  if (!user || !l || !l.seller) return false;
+  if (user.id && l.seller.id) return user.id === l.seller.id;
+  return Boolean(user.name) && user.name === l.seller.name;
+}
+
 /* Rigtigt foto hvis annoncen har et; ellers den illustrerede placeholder.
    loading="lazy" + faste proportioner holder layoutet stabilt (CLS). */
 function listingMediaHTML(l, alt){
@@ -124,7 +133,7 @@ function listingCardHTML(l){
         ${l.isDealer ? `<span class="badge badge-dealer">${Icon.shieldCheck}Forhandler</span>` : ''}
         ${suspicious ? `<span class="badge badge-warning" title="Prisen er væsentligt under markedsniveau for typen">${Icon.alertTriangle}Tjek prisen</span>` : ''}
       </div>
-      <button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>
+      ${isOwnListing(l) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
     </div>
     <div class="card-body">
       <div class="card-price">${formatPrice(l.price)}</div>
