@@ -90,7 +90,10 @@ const db = (function(){
     async listListings(filters = {}){
       const c = init(); if (!c) return { data: [], error: null };
       let q = c.from('listings')
-        .select('*, seller:public_profiles(*), photos:listing_photos(storage_path, position)')
+        // Nøglen navngives eksplicit: efter at favorites kom til, findes der
+        // to mulige veje fra listings til public_profiles, og PostgREST
+        // afviser forespørgslen (PGRST201) hvis man ikke peger på den rigtige.
+        .select('*, seller:public_profiles!listings_seller_id_fkey(*), photos:listing_photos(storage_path, position)')
         .eq('status', 'active');
 
       if (filters.brands?.length)     q = q.in('brand', filters.brands);
@@ -123,7 +126,10 @@ const db = (function(){
     async getListing(id){
       const c = init(); if (!c) return { data: null, error: null };
       return c.from('listings')
-        .select('*, seller:public_profiles(*), photos:listing_photos(storage_path, position)')
+        // Nøglen navngives eksplicit: efter at favorites kom til, findes der
+        // to mulige veje fra listings til public_profiles, og PostgREST
+        // afviser forespørgslen (PGRST201) hvis man ikke peger på den rigtige.
+        .select('*, seller:public_profiles!listings_seller_id_fkey(*), photos:listing_photos(storage_path, position)')
         .eq('id', id).single();
     },
 
