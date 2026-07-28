@@ -122,14 +122,19 @@
             <label for="f-condition">Stand <span class="required-mark">*</span></label>
             <select class="input" id="f-condition" required></select>
           </div>
-          <div class="field">
-            <label for="f-postnr">Postnummer <span class="required-mark">*</span></label>
-            <input class="input" id="f-postnr" list="postnr-suggestions" required>
-            <datalist id="postnr-suggestions"></datalist>
-          </div>
-          <div class="field">
-            <label for="f-city">By</label>
-            <input class="input" id="f-city" readonly>
+          <div class="field field-full">
+            <label for="f-postnr">Postnummer eller by <span class="required-mark">*</span></label>
+            <div class="combo" id="postnr-combo">
+              <input class="input" id="f-postnr" required autocomplete="postal-code"
+                     placeholder="F.eks. 2100 eller København"
+                     role="combobox" aria-expanded="false" aria-autocomplete="list"
+                     aria-controls="postnr-list">
+              <ul class="combo-list" id="postnr-list" role="listbox" hidden></ul>
+            </div>
+            <span class="field-hint" id="postnr-hint">Søg blandt alle 1.089 danske postnumre.</span>
+            <span class="field-error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg>Vælg et postnummer fra listen.</span>
+            <input type="hidden" id="f-city">
+            <input type="hidden" id="f-region">
           </div>
           <div class="field field-full">
             <label for="f-desc">Beskrivelse <span class="required-mark">*</span></label>
@@ -238,6 +243,7 @@
 <script src="js/supabase-api.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/bike-art.js"></script>
+<script src="js/postnumre.js"></script>
 <script src="js/data.js"></script>
 <script src="js/store.js"></script>
 <script src="js/backend-bridge.js"></script>

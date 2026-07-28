@@ -1,7 +1,9 @@
 /* ============ Reference data ============ */
 const REGIONS = ['Hovedstaden', 'Sjælland', 'Syddanmark', 'Midtjylland', 'Nordjylland'];
 
-const CITIES = [
+/* Kurateret udsnit — bruges kun til at generere demoannoncer.
+   Den fulde postnummerliste (1089) ligger i js/postnumre.js. */
+const DEMO_CITIES = [
   { city: 'København N', postnr: '2200', region: 'Hovedstaden' },
   { city: 'København V', postnr: '1620', region: 'Hovedstaden' },
   { city: 'Frederiksberg', postnr: '2000', region: 'Hovedstaden' },
@@ -160,7 +162,7 @@ function buildListings(){
 
   for (const [brand, model, year, km, ccm, typeOverride] of entries){
     const type = typeOverride || TYPE_BY_MODEL_HINT[model] || 'naked';
-    const city = pick(CITIES);
+    const city = pick(DEMO_CITIES);
     const isDealer = rnd() < 0.32;
     const basePrice = estimatePrice(year, ccm, km, brand, type);
     const daysAgo = Math.floor(rnd() * 34);

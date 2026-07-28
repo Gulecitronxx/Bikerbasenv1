@@ -53,6 +53,15 @@ function validateStep(n){
       toast('Stelnummeret har et ugyldigt format');
     }
   }
+  if (n === 2){
+    // Et frit indtastet postnummer uden bekræftet valg ville give en annonce
+    // uden by/region — og dermed usynlig i regionsfiltret.
+    if (!document.getElementById('f-city').value){
+      valid = false;
+      document.getElementById('f-postnr').closest('.field').classList.add('has-error');
+      toast('Vælg et postnummer fra listen');
+    }
+  }
   if (!valid) toast('Udfyld venligst alle felter markeret med *');
   return valid;
 }
@@ -74,11 +83,7 @@ function populateStaticFields(){
   document.getElementById('f-condition').innerHTML = CONDITIONS.map(c => `<option value="${c}">${c}</option>`).join('');
   document.getElementById('f-afgift').innerHTML = AFGIFT_STATUSES.map(a => `<option value="${a}">${a}</option>`).join('');
 
-  document.getElementById('postnr-suggestions').innerHTML = CITIES.map(c => `<option value="${c.postnr}">${c.city}</option>`).join('');
-  document.getElementById('f-postnr').addEventListener('input', (e) => {
-    const match = CITIES.find(c => c.postnr === e.target.value.trim());
-    document.getElementById('f-city').value = match ? match.city : '';
-  });
+  wirePostnrCombo();
 
   document.getElementById('f-vin').addEventListener('input', (e) => {
     const vin = e.target.value.trim();
@@ -88,6 +93,76 @@ function populateStaticFields(){
   document.getElementById('upload-icon-mount').innerHTML = Icon.upload;
   document.getElementById('doc-upload-icon-mount').innerHTML = Icon.upload;
   document.getElementById('back-icon').innerHTML = Icon.chevronLeft;
+}
+
+/* Søgbar postnummervælger.
+   En dropdown duer ikke: der er 1089 postnumre, og "København K" alene fylder
+   232 af dem. Man skriver i stedet postnummer eller bynavn og vælger et træf.
+   By og region gemmes i skjulte felter, så de altid følger et rigtigt valg. */
+function wirePostnrCombo(){
+  const input = document.getElementById('f-postnr');
+  const list  = document.getElementById('postnr-list');
+  const field = input.closest('.field');
+  let matches = [], active = -1;
+
+  const close = () => {
+    list.hidden = true; active = -1;
+    input.setAttribute('aria-expanded', 'false');
+  };
+
+  const commit = (m) => {
+    input.value = `${m.postnr} ${m.city}`;
+    document.getElementById('f-city').value = m.city;
+    document.getElementById('f-region').value = m.region;
+    field.classList.remove('has-error');
+    document.getElementById('postnr-hint').textContent = `${m.city} · Region ${m.region}`;
+    close();
+  };
+
+  const render = () => {
+    if (!matches.length){ close(); return; }
+    list.innerHTML = matches.map((m, i) => `
+      <li role="option" id="postnr-opt-${i}" aria-selected="${i === active}"
+          class="${i === active ? 'active' : ''}" data-i="${i}">
+        <strong>${escapeHTML(m.postnr)}</strong> ${escapeHTML(m.city)}
+        <span class="combo-region">${escapeHTML(m.region)}</span>
+      </li>`).join('');
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    list.querySelectorAll('li').forEach(li => {
+      // mousedown frem for click: blur ville lukke listen først
+      li.addEventListener('mousedown', (e) => { e.preventDefault(); commit(matches[Number(li.dataset.i)]); });
+    });
+  };
+
+  input.addEventListener('input', () => {
+    // Et frit indtastet felt må ikke efterlade en gammel by/region hængende.
+    document.getElementById('f-city').value = '';
+    document.getElementById('f-region').value = '';
+    document.getElementById('postnr-hint').textContent = 'Søg blandt alle 1.089 danske postnumre.';
+    matches = searchPostnr(input.value, 8);
+    active = -1;
+    render();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (list.hidden || !matches.length) return;
+    if (e.key === 'ArrowDown'){ e.preventDefault(); active = (active + 1) % matches.length; render(); }
+    else if (e.key === 'ArrowUp'){ e.preventDefault(); active = (active - 1 + matches.length) % matches.length; render(); }
+    else if (e.key === 'Enter' && active >= 0){ e.preventDefault(); commit(matches[active]); }
+    else if (e.key === 'Escape'){ close(); }
+  });
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => {
+      close();
+      // Præcis ét træf på det indtastede? Så accepterer vi det uden klik.
+      if (!document.getElementById('f-city').value){
+        const exact = findPostnr(input.value.trim().split(' ')[0]);
+        if (exact) commit(exact);
+      }
+    }, 120);
+  });
 }
 
 function wirePhotoUpload(){
@@ -162,7 +237,8 @@ function renderPhotoGrid(){
 
 function collectFormData(){
   const type = (document.querySelector('input[name="bike-type"]:checked') || {}).value || 'naked';
-  const postnrMatch = CITIES.find(c => c.postnr === document.getElementById('f-postnr').value.trim());
+  // By/region kommer fra det bekræftede valg i vælgeren, ikke fra rå indtastning.
+  const postnr = (document.getElementById('f-postnr').value.trim().split(' ')[0]) || '';
   return {
     type,
     brand: document.getElementById('f-brand').value,
@@ -176,9 +252,9 @@ function collectFormData(){
     afgift: document.getElementById('f-afgift').value,
     price: Number(document.getElementById('f-price').value) || 0,
     condition: document.getElementById('f-condition').value,
-    postnr: document.getElementById('f-postnr').value,
-    city: postnrMatch ? postnrMatch.city : document.getElementById('f-city').value,
-    region: postnrMatch ? postnrMatch.region : 'Hovedstaden',
+    postnr,
+    city: document.getElementById('f-city').value,
+    region: document.getElementById('f-region').value,
     description: document.getElementById('f-desc').value,
     hasDocumentation: uploadedDocs.length > 0,
   };
