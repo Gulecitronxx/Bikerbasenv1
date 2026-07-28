@@ -154,6 +154,7 @@ function renderListing(){
           <button type="button" class="btn btn-primary btn-block" id="open-contact-modal">${Icon.mail}Skriv til sælger</button>
           <button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>
           <button type="button" class="btn btn-outline btn-block" id="open-payment-modal">${Icon.lock}Betal sikkert (MobilePay)</button>
+          <button type="button" class="btn btn-outline btn-block" id="share-listing-btn">${Icon.share}Del annonce</button>
         </div>
         <div class="safety-tip">${Icon.info}<span>Mød altid sælger et sikkert sted, og betal aldrig depositum uden at have set motorcyklen fysisk.</span></div>
       </div>
@@ -178,6 +179,22 @@ function renderListing(){
   revealBtn.addEventListener('click', () => {
     revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${listing.seller.phone}</span>`;
     revealBtn.disabled = true;
+  });
+
+  document.getElementById('share-listing-btn').addEventListener('click', async () => {
+    const url = location.href;
+    const title = `${listing.brand} ${listing.model} — ${formatPrice(listing.price)}`;
+    // Web Share hvor det findes (mobil); ellers kopiér linket.
+    if (navigator.share){
+      try { await navigator.share({ title, url }); return; }
+      catch (e) { if (e.name === 'AbortError') return; /* ellers: fald til kopiering */ }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast('Link kopieret til udklipsholderen');
+    } catch (e) {
+      prompt('Kopiér linket:', url);
+    }
   });
 
   document.getElementById('report-listing-btn').addEventListener('click', () => {

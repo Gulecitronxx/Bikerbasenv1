@@ -3,7 +3,7 @@ const Store = {
   KEYS: {
     favorites: 'bb_favorites', myListings: 'bb_my_listings', theme: 'bb_theme', user: 'bb_user', draft: 'bb_draft',
     reviews: 'bb_reviews', reports: 'bb_reports', cookieConsent: 'bb_cookie_consent',
-    savedSearches: 'bb_saved_searches', viewMode: 'bb_view_mode',
+    savedSearches: 'bb_saved_searches', viewMode: 'bb_view_mode', recentSearches: 'bb_recent_searches',
   },
 
   getFavorites(){
@@ -139,6 +139,17 @@ const Store = {
     const all = this.getSavedSearches().map(s => s.id === id ? { ...s, notify: !s.notify } : s);
     localStorage.setItem(this.KEYS.savedSearches, JSON.stringify(all));
     return all;
+  },
+
+  /* Seneste søgninger — kun lokalt, vises som genveje på forsiden. */
+  getRecentSearches(){
+    try { return JSON.parse(localStorage.getItem(this.KEYS.recentSearches)) || []; } catch(e){ return []; }
+  },
+  addRecentSearch(query, label){
+    if (!query) return;
+    let all = this.getRecentSearches().filter(s => s.query !== query);
+    all.unshift({ query, label, at: Date.now() });
+    localStorage.setItem(this.KEYS.recentSearches, JSON.stringify(all.slice(0, 5)));
   },
 
   getViewMode(){ return localStorage.getItem(this.KEYS.viewMode) || 'grid'; },

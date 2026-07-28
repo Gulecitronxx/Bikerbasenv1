@@ -34,7 +34,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     { label: 'Under 10.000 km', icon: 'gauge', params: { kmMax: 10000 } },
     { label: 'Kun forhandlere', icon: 'shieldCheck', params: { dealer: '1' } },
   ];
-  document.getElementById('popular-searches').innerHTML = POPULAR.map(p => {
+  // Egne seneste søgninger først (Bilbasen-mønster), derefter de kuraterede.
+  const recent = Store.getRecentSearches().slice(0, 3).map(r =>
+    `<a class="popular-chip" href="soegning.html?${r.query}">${Icon.clock}${escapeHTML(r.label)}</a>`);
+  document.getElementById('popular-searches').innerHTML = recent.join('') + POPULAR.map(p => {
     const qs = new URLSearchParams(p.params).toString();
     return `<a class="popular-chip" href="soegning.html?${qs}">${Icon[p.icon]}${p.label}</a>`;
   }).join('');

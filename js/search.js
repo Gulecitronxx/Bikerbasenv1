@@ -319,4 +319,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   readStateFromURL();
   wireControls();
   render();
+
+  // Husk søgningen som genvej på forsiden — kun når der faktisk filtreres.
+  const qs = currentQueryString();
+  if (qs) Store.addRecentSearch(qs, describeCurrentSearch(activeFilterPills()));
 });
