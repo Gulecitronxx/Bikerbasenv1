@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // hero stats
-  document.getElementById('stat-listings').textContent = LISTINGS.length + '+';
+  const ALLE = Store.getAllListings();   // databasen + demodata
+  document.getElementById('stat-listings').textContent = ALLE.length + '+';
 
   // Curated entry points tailored to motorcycle buyers
   const POPULAR = [
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const q = document.getElementById('hs-query').value.trim().toLowerCase();
     const type = document.getElementById('hs-type').value;
     const maxPrice = Number(document.getElementById('hs-price').value) || null;
-    let list = LISTINGS;
+    let list = Store.getAllListings();
     if (q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
     if (type) list = list.filter(l => l.type === type);
     if (maxPrice) list = list.filter(l => l.price <= maxPrice);
@@ -65,11 +66,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     </a>`).join('');
 
   // newest listings (by date)
-  const newest = [...LISTINGS].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
+  const newest = [...ALLE].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
   document.getElementById('newest-listings').innerHTML = newest.map(listingCardHTML).join('');
 
   // featured (curated mid-high price selection)
-  const featuredPool = [...LISTINGS].filter(l => l.price > 60000);
+  const featuredPool = [...ALLE].filter(l => l.price > 60000);
   const rnd = seededRandom(7);
   const featured = featuredPool
     .map(l => ({ l, k: rnd() }))
