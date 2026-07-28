@@ -19,9 +19,26 @@ function slugify(name){
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // Reuse the live header/footer so brand pages never drift from the rest of the site.
-const index = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-const header = index.slice(index.indexOf('<a class="skip-link"'), index.indexOf('</div>\n</div>\n\n<main') + '</div>\n</div>'.length);
-const footer = index.slice(index.indexOf('<footer class="site-footer">'), index.indexOf('</footer>') + '</footer>'.length);
+// Normalise line endings first: git checks these files out as CRLF on Windows,
+// and matching on "\n" silently produced pages with no header at all.
+const index = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').replace(/\r\n/g, '\n');
+
+function slicedBetween(src, startMarker, endMarker, label){
+  const a = src.indexOf(startMarker);
+  const b = src.indexOf(endMarker);
+  if (a === -1 || b === -1 || b <= a){
+    throw new Error(`Kunne ikke udtrække ${label} fra index.html — markørerne matchede ikke. `
+      + `Sider ville blive genereret uden ${label}, så build afbrydes.`);
+  }
+  return src.slice(a, b + endMarker.length);
+}
+
+const header = slicedBetween(index, '<a class="skip-link"', '</div>\n</div>', 'header');
+const footer = slicedBetween(index, '<footer class="site-footer">', '</footer>', 'footer');
+
+// Fail fast hvis resultatet alligevel ser tomt ud.
+if (!/site-header/.test(header)) throw new Error('Udtrukket header mangler .site-header — build afbrudt.');
+if (!/site-footer/.test(footer)) throw new Error('Udtrukket footer mangler .site-footer — build afbrudt.');
 
 const byBrand = {};
 LISTINGS.forEach(l => { (byBrand[l.brand] = byBrand[l.brand] || []).push(l); });

@@ -364,15 +364,23 @@ select.input{
 .badge-dealer svg{ width:12px; height:12px; }
 .badge-neutral{ background: rgba(255,255,255,0.9); color: var(--color-dark); }
 
+/* Trykfeltet er 44x44 (minimumskravet), mens den synlige cirkel bliver 36px
+   via ::before. Ellers ville knappen se klodset stor ud på kortene. */
 .fav-btn{
-  position:absolute; top:10px; right:10px; z-index:2;
-  width:36px; height:36px; border-radius:50%; border:none;
-  background: rgba(255,255,255,0.92); color: var(--color-dark);
+  position:absolute; top:6px; right:6px; z-index:2;
+  width:44px; height:44px; border:none; background:transparent;
+  border-radius:50%; color: var(--color-dark);
   display:flex; align-items:center; justify-content:center; cursor:pointer;
-  transition: transform .15s var(--ease-out), background-color .15s var(--ease-out);
+  transition: transform .15s var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.fav-btn::before{
+  content:''; position:absolute; width:36px; height:36px; border-radius:50%;
+  background: rgba(255,255,255,0.92);
+  transition: background-color .15s var(--ease-out);
 }
 .fav-btn:hover{ transform: scale(1.08); }
-.fav-btn svg{ width:19px; height:19px; }
+.fav-btn svg{ width:19px; height:19px; position:relative; }
 .fav-btn.active{ color: var(--color-primary); }
 .fav-btn.active svg{ fill: var(--color-primary); }
 
@@ -996,3 +1004,6 @@ select.input{
 .combo-list li:hover, .combo-list li.active{ background: var(--color-surface-2); }
 .combo-list li strong{ font-variant-numeric: tabular-nums; min-width:44px; }
 .combo-region{ margin-left:auto; font-size:12px; color: var(--color-fg-muted); }
+
+/* Søgesidens overskrift — diskret, men giver siden en rigtig h1 */
+.search-heading{ font-size: clamp(20px,2.6vw,26px); margin-bottom: var(--space-4); }
