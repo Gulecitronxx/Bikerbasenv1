@@ -6,13 +6,18 @@ function getIdFromURL(){
   return new URLSearchParams(window.location.search).get('id');
 }
 
+/* Rigtige uploadede fotos når annoncen har dem; ellers de illustrerede
+   placeholders, så demoannoncerne stadig ser hele ud. */
 function buildPhotoSet(listing){
-  const count = Math.max(3, listing.photos || 4);
-  const photos = [];
-  for (let i = 0; i < count; i++){
-    photos.push(bikeArtSVG(listing.type, { id: `detail-${listing.id}-${i}`, flip: i % 2 === 1 }));
+  const urls = listing.photoUrls || [];
+  if (urls.length){
+    return urls.map((u, i) =>
+      `<img src="${escapeHTML(u)}" alt="${escapeHTML(listing.brand + ' ' + listing.model)} — billede ${i + 1}"
+            class="card-photo" decoding="async">`);
   }
-  return photos;
+  const count = Math.max(3, listing.photos || 4);
+  return Array.from({ length: count }, (_, i) =>
+    bikeArtSVG(listing.type, { id: `detail-${listing.id}-${i}`, flip: i % 2 === 1 }));
 }
 
 function renderGallery(){
