@@ -221,7 +221,12 @@ function buildDescription(brand, model, year, condition, type){
   return `${brand} ${model} årgang ${year} sælges i ${condition.toLowerCase()}.\n\nMotorcyklen har været velholdt og serviceeftervist gennem hele ejerperioden. Nye dæk og bremseklodser inden for de sidste par tusinde km. ${typeLabel}-modellen er kendt for sin pålidelighed og køreglæde – perfekt til både dagligt brug og længere ture.\n\nIngen kendte fejl eller mangler. Fremvises gerne efter aftale, og der er mulighed for prøvetur ved seriøs interesse. Sælges som den er, fremvist og godkendt af sælger.`;
 }
 
-const LISTINGS = buildListings();
+/* Demoannoncerne er slået fra: siden viser nu kun rigtige annoncer fra
+   databasen. Sæt til true for at få de 51 eksempler tilbage — nyttigt hvis
+   du vil vise designet frem uden at have annoncer endnu. */
+const SHOW_DEMO_DATA = false;
+
+const LISTINGS = SHOW_DEMO_DATA ? buildListings() : [];
 
 /* ============ Formatting helpers (Danish) ============ */
 function formatPrice(n){
@@ -282,12 +287,23 @@ const REPORT_REASONS = [
 ];
 
 /* Lightweight fraud-signal heuristic: flags listings priced well under the market median for their type. */
+/* Mindste antal sammenlignelige annoncer, før en median siger noget.
+   Med færre end dette er "billig i forhold til hvad?" ikke et rigtigt spørgsmål. */
+const MIN_SAMPLE_FOR_PRICE_CHECK = 5;
+
 function medianPriceForType(type, excludeId){
-  const prices = LISTINGS.filter(l => l.type === type && l.id !== excludeId).map(l => l.price).sort((a,b)=>a-b);
-  if (!prices.length) return null;
+  // Bruger alle kendte annoncer (database + evt. demo), ikke kun demodata.
+  const kilde = (typeof Store !== 'undefined' && Store.getAllListings) ? Store.getAllListings() : LISTINGS;
+  const prices = kilde
+    .filter(l => l.type === type && String(l.id) !== String(excludeId))
+    .map(l => l.price).sort((a, b) => a - b);
+  if (prices.length < MIN_SAMPLE_FOR_PRICE_CHECK) return null;
   const mid = Math.floor(prices.length / 2);
   return prices.length % 2 ? prices[mid] : (prices[mid-1] + prices[mid]) / 2;
 }
+
+/* Advarer kun når der faktisk er noget at sammenligne med. Et falsk
+   "Tjek prisen" på en ærlig annonce er værre end ingen advarsel. */
 function isSuspiciouslyCheap(listing){
   const median = medianPriceForType(listing.type, listing.id);
   return median != null && listing.price < median * 0.45;

@@ -20,8 +20,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // hero stats
-  const ALLE = Store.getAllListings();   // databasen + demodata
-  document.getElementById('stat-listings').textContent = ALLE.length + '+';
+  const ALLE = Store.getAllListings();   // databasen (+ demodata hvis slået til)
+  // "+" giver kun mening ved et rundt tal man runder ned til.
+  document.getElementById('stat-listings').textContent =
+    ALLE.length >= 10 ? (Math.floor(ALLE.length / 10) * 10) + '+' : String(ALLE.length);
 
   // Curated entry points tailored to motorcycle buyers
   const POPULAR = [
@@ -77,7 +79,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     .sort((a,b) => a.k - b.k)
     .slice(0, 4)
     .map(x => x.l);
-  document.getElementById('featured-listings').innerHTML = featured.map(listingCardHTML).join('');
+  // En overskrift uden indhold under ser i stykker ud — skjul hele sektionen.
+  const featuredMount = document.getElementById('featured-listings');
+  featuredMount.innerHTML = featured.map(listingCardHTML).join('');
+  const featuredSection = featuredMount.closest('section');
+  if (featuredSection) featuredSection.hidden = featured.length === 0;
+
+  // Samme for "nyeste", hvis databasen er helt tom.
+  const newestSection = document.getElementById('newest-listings').closest('section');
+  if (newestSection && newest.length === 0){
+    document.getElementById('newest-listings').innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        ${Icon.bike}
+        <h3>Der er ingen annoncer endnu</h3>
+        <p>Bliv den første til at sætte en motorcykel til salg.</p>
+        <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
+      </div>`;
+  }
 
   wireFavoriteButtons(document);
 

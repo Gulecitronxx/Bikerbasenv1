@@ -38,7 +38,26 @@ function initials(name){
 
 function renderListing(){
   const id = getIdFromURL();
-  const listing = Store.getListingById(id) || LISTINGS[0];
+  const listing = Store.getListingById(id);
+
+  // Slettet annonce, forkert id eller tom database: vis en ærlig tom tilstand
+  // frem for at falde tilbage på en tilfældig anden annonce.
+  if (!listing){
+    document.title = 'Annoncen findes ikke — Bikerbasen';
+    document.getElementById('bc-current').textContent = 'Ikke fundet';
+    document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
+    document.getElementById('listing-detail').innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1; padding-top:var(--space-8);">
+        ${Icon.search}
+        <h3>Annoncen findes ikke</h3>
+        <p>Den er måske solgt og fjernet, eller linket er forkert.</p>
+        <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
+      </div>`;
+    const similar = document.querySelector('.similar-strip');
+    if (similar) similar.style.display = 'none';
+    return;
+  }
+
   currentListing = listing;
   currentPhotos = buildPhotoSet(listing);
   currentPhotoIndex = 0;

@@ -9,7 +9,34 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const src = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
 eval(src + '\nglobal.__L = LISTINGS; global.__B = BRANDS_BY_MODEL; global.__T = TYPES;');
-const LISTINGS = global.__L, BRANDS_BY_MODEL = global.__B;
+const BRANDS_BY_MODEL = global.__B;
+
+/* Mærkesider skal afspejle de annoncer, der faktisk er til salg. Demodataene
+   er slået fra, så listen hentes fra databasen. Falder tilbage på hvad data.js
+   måtte indeholde, hvis databasen ikke kan nås — et build skal ikke fejle
+   alene på grund af netværket. Kaldes synkront via deasync-agtig top-level await
+   er ikke muligt her, så resultatet hentes før brug nedenfor. */
+async function hentAnnoncer(){
+  const cfg = fs.readFileSync(path.join(ROOT, 'js/supabase-config.js'), 'utf8');
+  const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1];
+  const key = (cfg.match(/anonKey:\s*'([^']+)'/) || [])[1];
+  if (!url || !key){
+    console.warn('Ingen Supabase-konfiguration — bruger annoncer fra js/data.js.');
+    return global.__L;
+  }
+  try {
+    const r = await fetch(`${url}/rest/v1/listings?select=*&status=eq.active`, { headers: { apikey: key } });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const rows = await r.json();
+    console.log(`Hentede ${rows.length} annoncer fra databasen.`);
+    return rows.map(l => ({ ...l, createdAt: l.created_at }));
+  } catch (e) {
+    console.warn('Kunne ikke hente fra databasen (' + e.message + ') — bruger js/data.js.');
+    return global.__L;
+  }
+}
+
+let LISTINGS = [];
 
 function slugify(name){
   return name.toLowerCase()
@@ -40,9 +67,23 @@ const footer = slicedBetween(index, '<footer class="site-footer">', '</footer>',
 if (!/site-header/.test(header)) throw new Error('Udtrukket header mangler .site-header — build afbrudt.');
 if (!/site-footer/.test(footer)) throw new Error('Udtrukket footer mangler .site-footer — build afbrudt.');
 
+function byg(){
 const byBrand = {};
 LISTINGS.forEach(l => { (byBrand[l.brand] = byBrand[l.brand] || []).push(l); });
 const brands = Object.keys(byBrand).sort((a, b) => a.localeCompare(b, 'da'));
+
+/* Ryd forældede mærkesider. Uden dette bliver en side liggende med gammelt
+   indhold, når det sidste eksemplar af et mærke er solgt — og den ville
+   stadig kunne findes via Google. */
+const forventede = new Set(brands.map(b => `maerke-${slugify(b)}.html`));
+let slettet = 0;
+for (const f of fs.readdirSync(ROOT)){
+  if (/^maerke-.+\.html$/.test(f) && !forventede.has(f)){
+    fs.unlinkSync(path.join(ROOT, f));
+    slettet++;
+  }
+}
+if (slettet) console.log(`Fjernede ${slettet} forældede mærkesider.`);
 
 const dkk = n => n.toLocaleString('da-DK') + ' kr.';
 
@@ -217,3 +258,9 @@ Sitemap: ${base}/sitemap.xml
 `, 'utf8');
 
 console.log(`Built ${built} brand pages + maerker.html + sitemap.xml (${urls.length} urls) + robots.txt`);
+}
+
+(async () => {
+  LISTINGS = await hentAnnoncer();
+  byg();
+})().catch(e => { console.error(e.message); process.exit(1); });
