@@ -1,6 +1,10 @@
 function redirectAfterAuth(){
   const back = new URLSearchParams(window.location.search).get('redirect');
-  window.location.href = back || 'mine-annoncer.html';
+  // Kun relative stier på vores eget site. Ellers kunne et link som
+  // login.html?redirect=https://... sende brugeren videre til en falsk side
+  // lige efter de har logget ind — og det ville se helt legitimt ud.
+  const sikker = back && /^[\w-]+\.html(\?[^#]*)?$/.test(back) ? back : null;
+  window.location.href = sikker || 'mine-annoncer.html';
 }
 
 let pendingUser = null;

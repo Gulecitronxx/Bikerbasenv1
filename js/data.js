@@ -388,6 +388,12 @@ function escapeHTML(str){
   }[c]));
 }
 
+/* Databaseannoncer har uuid som id; demo- og localStorage-annoncer har tal.
+   Skellet afgør, om en handling skal ramme Supabase eller browseren. */
+function isUuid(v){
+  return typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
+}
+
 /* Simplified real-world VIN shape check: 11-17 chars, alphanumeric, excludes I/O/Q (not used in real VINs). */
 function isValidVIN(vin){
   return /^[A-HJ-NPR-Z0-9]{11,17}$/i.test(String(vin || '').trim());

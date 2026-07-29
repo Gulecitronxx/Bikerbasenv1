@@ -95,7 +95,6 @@ async function syncFavorites(){
   const localIds = Store.getFavorites();
 
   // Kun uuid'er hører til i databasen; demo-annoncer har numeriske id'er.
-  const isUuid = v => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
   const toPush = localIds.filter(id => isUuid(id) && !remoteIds.includes(id));
   for (const id of toPush){
     const { error } = await db.addFavorite(id);

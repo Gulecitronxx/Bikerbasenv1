@@ -26,34 +26,50 @@ const Store = {
     localStorage.setItem(this.KEYS.favorites, JSON.stringify(favs));
     document.dispatchEvent(new CustomEvent('bb:favorites-changed', { detail: favs }));
 
-    const isUuid = typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id);
-    if (isUuid && typeof db !== 'undefined' && db.enabled && this.getUser()?.remote){
+    if (isUuid(id) && typeof db !== 'undefined' && db.enabled && this.getUser()?.remote){
       (nowFavorite ? db.addFavorite(id) : db.removeFavorite(id))
         .then(r => { if (r?.error) console.warn('Favorit blev ikke gemt i databasen:', r.error.message); });
     }
     return nowFavorite;
   },
 
-  getMyListings(){
+  /* Annoncer der kun ligger i browseren. Stammer fra tiden før databasen og
+     bruges stadig, hvis backend ikke er sat op. */
+  getLocalListings(){
     try { return JSON.parse(localStorage.getItem(this.KEYS.myListings)) || []; } catch(e){ return []; }
   },
+
+  /* Brugerens egne annoncer.
+
+     Efter annoncerne flyttede til Supabase kiggede denne kun i localStorage,
+     så "Mine annoncer" stod tom selv når man havde annoncer i databasen.
+     Nu samles begge kilder. */
+  getMyListings(){
+    const local = this.getLocalListings();
+    const user = this.getUser();
+    if (!user?.remote) return local;
+    const mine = (window.REMOTE_LISTINGS || []).filter(l => l.seller?.id === user.id);
+    return [...mine, ...local];
+  },
   addMyListing(listing){
-    const mine = this.getMyListings();
+    const mine = this.getLocalListings();
     mine.unshift(listing);
     localStorage.setItem(this.KEYS.myListings, JSON.stringify(mine));
     return mine;
   },
   removeMyListing(id){
-    const mine = this.getMyListings().filter(l => l.id !== id);
+    const mine = this.getLocalListings().filter(l => String(l.id) !== String(id));
     localStorage.setItem(this.KEYS.myListings, JSON.stringify(mine));
     return mine;
   },
 
   /* Rigtige annoncer fra databasen først, derefter lokale kladder og til sidst
-     demodataene — så et nyt site ikke ser tomt ud, mens databasen fyldes op. */
+     demodataene — så et nyt site ikke ser tomt ud, mens databasen fyldes op.
+     Her bruges getLocalListings, ellers ville brugerens egne databaseannoncer
+     tælle med to gange. */
   getAllListings(){
     const remote = window.REMOTE_LISTINGS || [];
-    return [...remote, ...this.getMyListings(), ...LISTINGS];
+    return [...remote, ...this.getLocalListings(), ...LISTINGS];
   },
   getListingById(id){
     return this.getAllListings().find(l => String(l.id) === String(id));

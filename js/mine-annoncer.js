@@ -2,7 +2,10 @@ function ownedCardWrapper(l){
   return `
   <div>
     ${listingCardHTML(l)}
-    <button type="button" class="btn btn-outline btn-sm btn-block" style="margin-top:8px;" data-delete-listing="${l.id}">${Icon.trash}Slet annonce</button>
+    <div class="owned-actions">
+      <a class="btn btn-outline btn-sm" href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}">${Icon.edit}Rediger</a>
+      <button type="button" class="btn btn-outline btn-sm" data-delete-listing="${l.id}">${Icon.trash}Slet</button>
+    </div>
   </div>`;
 }
 
@@ -20,9 +23,25 @@ function renderMine(){
   grid.innerHTML = mine.map(ownedCardWrapper).join('');
   wireFavoriteButtons(grid);
   grid.querySelectorAll('[data-delete-listing]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (!confirm('Er du sikker på, at du vil slette denne annonce?')) return;
-      Store.removeMyListing(Number(btn.dataset.deleteListing));
+    btn.addEventListener('click', async () => {
+      if (!confirm('Er du sikker på, at du vil slette denne annonce? Det kan ikke fortrydes.')) return;
+      const id = btn.dataset.deleteListing;
+
+      // Databaseannoncer har uuid som id. Tidligere blev id'et kørt gennem
+      // Number() og endte som NaN, så sletningen ramte kun localStorage og
+      // annoncen blev liggende i databasen.
+      if (isUuid(id)){
+        btn.disabled = true;
+        const { error } = await db.deleteListing(id);
+        if (error){
+          btn.disabled = false;
+          toast('Annoncen kunne ikke slettes: ' + error.message);
+          return;
+        }
+        window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(l => l.id !== id);
+      } else {
+        Store.removeMyListing(id);
+      }
       toast('Annonce slettet');
       renderMine();
     });

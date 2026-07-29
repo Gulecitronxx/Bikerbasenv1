@@ -470,6 +470,9 @@ select.input{
 
 .field-label-sm{ display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
 
+.owned-actions{ display:flex; gap:8px; margin-top:8px; }
+.owned-actions .btn{ flex:1; }
+
 .equipment-list{ list-style:none; display:grid; grid-template-columns:1fr; gap:8px 20px; margin:0; padding:0; }
 @media (min-width:560px){ .equipment-list{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
 .equipment-list li{ display:flex; align-items:center; gap:8px; font-size:14px; }
