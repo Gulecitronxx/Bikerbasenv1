@@ -1,24 +1,38 @@
 const PAGE_SIZE = 12;
-let state = {
+const EMPTY_STATE = {
   q: '', types: [], brands: [], priceMin: null, priceMax: null,
   yearMin: null, yearMax: null, kmMax: null, ccmMin: null, ccmMax: null,
-  regions: [], conditions: [], dealerOnly: false, koerekort: '', sort: 'date-desc', page: 1,
+  hkMin: null, hkMax: null,
+  regions: [], conditions: [], equipment: [], fuels: [], drives: [],
+  cylinders: [], colors: [], maxAgeDays: null, photosOnly: false,
+  dealerOnly: false, koerekort: '', sort: 'date-desc', page: 1,
+};
+let state = { ...EMPTY_STATE };
+
+/* Feltnavne i URL'en. Listen bruges begge veje, så et nyt filter kun skal
+   tilføjes ét sted for at kunne deles, bogmærkes og gemmes som søgeagent. */
+const LIST_PARAMS = {
+  types: 'types', brands: 'brands', regions: 'regions', conditions: 'conditions',
+  equipment: 'udstyr', fuels: 'braendstof', drives: 'traek', colors: 'farve',
+};
+const NUM_PARAMS = {
+  priceMin: 'priceMin', priceMax: 'priceMax', yearMin: 'yearMin', yearMax: 'yearMax',
+  kmMax: 'kmMax', ccmMin: 'ccmMin', ccmMax: 'ccmMax', hkMin: 'hkMin', hkMax: 'hkMax',
+  maxAgeDays: 'oprettet',
 };
 
 function readStateFromURL(){
   const p = new URLSearchParams(window.location.search);
   state.q = p.get('q') || '';
-  state.types = (p.get('type') || p.get('types') || '').split(',').filter(Boolean);
-  state.brands = (p.get('brands') || '').split(',').filter(Boolean);
-  state.priceMin = numOrNull(p.get('priceMin'));
-  state.priceMax = numOrNull(p.get('maxPrice') || p.get('priceMax'));
-  state.yearMin = numOrNull(p.get('yearMin'));
-  state.yearMax = numOrNull(p.get('yearMax'));
-  state.kmMax = numOrNull(p.get('kmMax'));
-  state.ccmMin = numOrNull(p.get('ccmMin'));
-  state.ccmMax = numOrNull(p.get('ccmMax'));
-  state.regions = (p.get('regions') || '').split(',').filter(Boolean);
-  state.conditions = (p.get('conditions') || '').split(',').filter(Boolean);
+  for (const [key, param] of Object.entries(LIST_PARAMS)){
+    state[key] = (p.get(param) || '').split(',').filter(Boolean);
+  }
+  // Forsiden og kategorilinkene sender ?type=sport i ental.
+  if (p.get('type')) state.types = p.get('type').split(',').filter(Boolean);
+  for (const [key, param] of Object.entries(NUM_PARAMS)) state[key] = numOrNull(p.get(param));
+  if (p.get('maxPrice')) state.priceMax = numOrNull(p.get('maxPrice'));
+  state.cylinders = (p.get('cyl') || '').split(',').filter(Boolean).map(Number);
+  state.photosOnly = p.get('billeder') === '1';
   state.dealerOnly = p.get('dealer') === '1';
   state.koerekort = p.get('koerekort') || '';
   state.sort = p.get('sort') || 'date-desc';
@@ -26,23 +40,27 @@ function readStateFromURL(){
 }
 function numOrNull(v){ return (v === null || v === '' || isNaN(Number(v))) ? null : Number(v); }
 
-function writeStateToURL(){
+/* Filtrene som query string. Uden side og sortering er det samtidig den
+   nøgle en søgeagent sammenlignes på, så samme filtre altid genkendes. */
+function currentQueryString(includeSort = false){
   const p = new URLSearchParams();
   if (state.q) p.set('q', state.q);
-  if (state.types.length) p.set('types', state.types.join(','));
-  if (state.brands.length) p.set('brands', state.brands.join(','));
-  if (state.priceMin) p.set('priceMin', state.priceMin);
-  if (state.priceMax) p.set('priceMax', state.priceMax);
-  if (state.yearMin) p.set('yearMin', state.yearMin);
-  if (state.yearMax) p.set('yearMax', state.yearMax);
-  if (state.kmMax) p.set('kmMax', state.kmMax);
-  if (state.ccmMin) p.set('ccmMin', state.ccmMin);
-  if (state.ccmMax) p.set('ccmMax', state.ccmMax);
-  if (state.regions.length) p.set('regions', state.regions.join(','));
-  if (state.conditions.length) p.set('conditions', state.conditions.join(','));
+  for (const [key, param] of Object.entries(LIST_PARAMS)){
+    if (state[key].length) p.set(param, state[key].join(','));
+  }
+  for (const [key, param] of Object.entries(NUM_PARAMS)){
+    if (state[key] != null) p.set(param, state[key]);
+  }
+  if (state.cylinders.length) p.set('cyl', state.cylinders.join(','));
+  if (state.photosOnly) p.set('billeder', '1');
   if (state.dealerOnly) p.set('dealer', '1');
   if (state.koerekort) p.set('koerekort', state.koerekort);
-  if (state.sort !== 'date-desc') p.set('sort', state.sort);
+  if (includeSort && state.sort !== 'date-desc') p.set('sort', state.sort);
+  return p.toString();
+}
+
+function writeStateToURL(){
+  const p = new URLSearchParams(currentQueryString(true));
   if (state.page > 1) p.set('page', state.page);
   const qs = p.toString();
   history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
@@ -64,6 +82,26 @@ function populateFilterUI(){
   document.getElementById('filter-conditions').innerHTML = CONDITIONS.map(c =>
     `<label class="checkbox-row"><input type="checkbox" data-condition="${c}">${c}</label>`).join('');
 
+  // Udstyret er grupperet — en flad liste med 33 checkbokse er ubrugelig
+  // på en telefon, og det er dér de fleste søger.
+  document.getElementById('filter-equipment').innerHTML = EQUIPMENT_GROUPS.map(g => `
+    <div class="filter-subgroup">
+      <p class="filter-subgroup-title">${g.group}</p>
+      ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}">${i.label}</label>`).join('')}
+    </div>`).join('');
+
+  document.getElementById('filter-fuels').innerHTML = FUELS.map(f =>
+    `<label class="checkbox-row"><input type="checkbox" data-fuel="${f}">${f}</label>`).join('');
+  document.getElementById('filter-drives').innerHTML = DRIVES.map(d =>
+    `<label class="checkbox-row"><input type="checkbox" data-drive="${d}">${d}</label>`).join('');
+  document.getElementById('filter-colors').innerHTML = COLORS.map(c =>
+    `<label class="checkbox-row"><input type="checkbox" data-color="${c}">${c}</label>`).join('');
+  document.getElementById('filter-cylinders').innerHTML = CYLINDERS.map(c =>
+    `<button type="button" class="chip" data-cylinder="${c}">${c}</button>`).join('');
+  document.getElementById('filter-age').innerHTML =
+    '<option value="">Alle annoncer</option>' +
+    AGE_FILTERS.map(a => `<option value="${a.id}">${a.label}</option>`).join('');
+
   document.getElementById('filter-icon-mount').innerHTML = Icon.filter;
   document.getElementById('empty-icon').innerHTML = Icon.search;
   document.getElementById('bc-sep-1').innerHTML = Icon.chevronRight;
@@ -71,26 +109,6 @@ function populateFilterUI(){
   document.querySelector('.filters-close').innerHTML = Icon.close;
   document.getElementById('view-grid').innerHTML = Icon.grid;
   document.getElementById('view-list').innerHTML = Icon.list;
-}
-
-/* Serialise the active filter state so a saved search can be compared/restored. */
-function currentQueryString(){
-  const p = new URLSearchParams();
-  if (state.q) p.set('q', state.q);
-  if (state.types.length) p.set('types', state.types.join(','));
-  if (state.brands.length) p.set('brands', state.brands.join(','));
-  if (state.priceMin) p.set('priceMin', state.priceMin);
-  if (state.priceMax) p.set('priceMax', state.priceMax);
-  if (state.yearMin) p.set('yearMin', state.yearMin);
-  if (state.yearMax) p.set('yearMax', state.yearMax);
-  if (state.kmMax) p.set('kmMax', state.kmMax);
-  if (state.ccmMin) p.set('ccmMin', state.ccmMin);
-  if (state.ccmMax) p.set('ccmMax', state.ccmMax);
-  if (state.regions.length) p.set('regions', state.regions.join(','));
-  if (state.conditions.length) p.set('conditions', state.conditions.join(','));
-  if (state.dealerOnly) p.set('dealer', '1');
-  if (state.koerekort) p.set('koerekort', state.koerekort);
-  return p.toString();
 }
 
 function describeCurrentSearch(pills){
@@ -136,6 +154,24 @@ function reflectStateToUI(){
   document.querySelectorAll('#filter-conditions input').forEach(cb => {
     cb.checked = state.conditions.includes(cb.dataset.condition);
   });
+  document.querySelectorAll('#filter-equipment input').forEach(cb => {
+    cb.checked = state.equipment.includes(cb.dataset.equipment);
+  });
+  document.querySelectorAll('#filter-fuels input').forEach(cb => {
+    cb.checked = state.fuels.includes(cb.dataset.fuel);
+  });
+  document.querySelectorAll('#filter-drives input').forEach(cb => {
+    cb.checked = state.drives.includes(cb.dataset.drive);
+  });
+  document.querySelectorAll('#filter-colors input').forEach(cb => {
+    cb.checked = state.colors.includes(cb.dataset.color);
+  });
+  document.querySelectorAll('#filter-cylinders .chip').forEach(ch => {
+    ch.classList.toggle('active', state.cylinders.includes(Number(ch.dataset.cylinder)));
+  });
+  document.getElementById('filter-photos-only').checked = state.photosOnly;
+  document.getElementById('filter-dealer-only').checked = state.dealerOnly;
+  document.getElementById('filter-age').value = state.maxAgeDays || '';
   document.getElementById('filter-price-min').value = state.priceMin || '';
   document.getElementById('filter-price-max').value = state.priceMax || '';
   document.getElementById('filter-year-min').value = state.yearMin || '';
@@ -143,6 +179,8 @@ function reflectStateToUI(){
   document.getElementById('filter-km-max').value = state.kmMax || '';
   document.getElementById('filter-ccm-min').value = state.ccmMin || '';
   document.getElementById('filter-ccm-max').value = state.ccmMax || '';
+  document.getElementById('filter-hk-min').value = state.hkMin || '';
+  document.getElementById('filter-hk-max').value = state.hkMax || '';
   document.getElementById('sort-select').value = state.sort;
 }
 
@@ -159,8 +197,27 @@ function getFilteredListings(){
   if (state.kmMax != null) list = list.filter(l => l.km <= state.kmMax);
   if (state.ccmMin != null) list = list.filter(l => l.ccm >= state.ccmMin);
   if (state.ccmMax != null) list = list.filter(l => l.ccm <= state.ccmMax);
+  if (state.hkMin != null) list = list.filter(l => (l.power || 0) >= state.hkMin);
+  if (state.hkMax != null) list = list.filter(l => (l.power || 0) <= state.hkMax);
   if (state.regions.length) list = list.filter(l => state.regions.includes(l.region));
   if (state.conditions.length) list = list.filter(l => state.conditions.includes(l.condition));
+
+  // Udstyr er et OG-filter: vælger man ABS og varmehåndtag, vil man have
+  // begge dele. Brændstof, træktype, farve og cylindre er ELLER inden for
+  // hver gruppe — dér leder man efter én af flere acceptable værdier.
+  if (state.equipment.length){
+    list = list.filter(l => state.equipment.every(e => (l.equipment || []).includes(e)));
+  }
+  if (state.fuels.length) list = list.filter(l => state.fuels.includes(l.fuel));
+  if (state.drives.length) list = list.filter(l => state.drives.includes(l.drive));
+  if (state.colors.length) list = list.filter(l => state.colors.includes(l.color));
+  if (state.cylinders.length) list = list.filter(l => state.cylinders.includes(Number(l.cylinders)));
+
+  if (state.maxAgeDays != null){
+    const cutoff = Date.now() - state.maxAgeDays * 86400000;
+    list = list.filter(l => new Date(l.createdAt).getTime() >= cutoff);
+  }
+  if (state.photosOnly) list = list.filter(l => (l.photoUrls || []).length > 0);
   if (state.dealerOnly) list = list.filter(l => l.isDealer);
   if (state.koerekort) list = list.filter(l => passerKoerekort(l, state.koerekort));
 
@@ -189,10 +246,23 @@ function activeFilterPills(){
   if (state.ccmMin != null || state.ccmMax != null){
     pills.push({ label: `${state.ccmMin||0}–${state.ccmMax||'∞'} ccm`, clear: () => { state.ccmMin=null; state.ccmMax=null; } });
   }
+  if (state.hkMin != null || state.hkMax != null){
+    pills.push({ label: `${state.hkMin||0}–${state.hkMax||'∞'} hk`, clear: () => { state.hkMin=null; state.hkMax=null; } });
+  }
   if (state.dealerOnly) pills.push({ label: 'Kun forhandlere', clear: () => state.dealerOnly = false });
+  if (state.photosOnly) pills.push({ label: 'Kun med billeder', clear: () => state.photosOnly = false });
+  if (state.maxAgeDays != null){
+    const a = AGE_FILTERS.find(x => Number(x.id) === state.maxAgeDays);
+    pills.push({ label: a ? a.label : `Seneste ${state.maxAgeDays} dage`, clear: () => state.maxAgeDays = null });
+  }
   if (state.koerekort) pills.push({ label: 'Kørekort ' + state.koerekort, clear: () => state.koerekort = '' });
   state.regions.forEach(r => pills.push({ label: r, clear: () => state.regions = state.regions.filter(x=>x!==r) }));
   state.conditions.forEach(c => pills.push({ label: c, clear: () => state.conditions = state.conditions.filter(x=>x!==c) }));
+  state.equipment.forEach(e => pills.push({ label: equipmentLabel(e), clear: () => state.equipment = state.equipment.filter(x=>x!==e) }));
+  state.fuels.forEach(f => pills.push({ label: f, clear: () => state.fuels = state.fuels.filter(x=>x!==f) }));
+  state.drives.forEach(d => pills.push({ label: d, clear: () => state.drives = state.drives.filter(x=>x!==d) }));
+  state.colors.forEach(c => pills.push({ label: c, clear: () => state.colors = state.colors.filter(x=>x!==c) }));
+  state.cylinders.forEach(c => pills.push({ label: `${c} cylindre`, clear: () => state.cylinders = state.cylinders.filter(x=>x!==c) }));
   return pills;
 }
 
@@ -220,6 +290,7 @@ function render(){
   const pageItems = filtered.slice((state.page-1)*PAGE_SIZE, state.page*PAGE_SIZE);
 
   document.getElementById('results-count').innerHTML = `${total} <span>${total===1?'annonce fundet':'annoncer fundet'}</span>`;
+  seoSearchResults(pageItems, document.querySelector('.search-heading').textContent);
 
   const grid = document.getElementById('results-grid');
   const empty = document.getElementById('empty-state');
@@ -283,6 +354,41 @@ function wireControls(){
     });
   });
 
+  /* De nye checkbox-grupper opfører sig ens: slå værdien til eller fra i
+     den tilsvarende liste i state. */
+  const checkboxGroup = (containerId, dataKey, stateKey) => {
+    document.querySelectorAll(`#${containerId} input`).forEach(cb => {
+      cb.addEventListener('change', () => {
+        const v = cb.dataset[dataKey];
+        state[stateKey] = cb.checked ? [...state[stateKey], v] : state[stateKey].filter(x => x !== v);
+        state.page = 1; render();
+      });
+    });
+  };
+  checkboxGroup('filter-equipment', 'equipment', 'equipment');
+  checkboxGroup('filter-fuels', 'fuel', 'fuels');
+  checkboxGroup('filter-drives', 'drive', 'drives');
+  checkboxGroup('filter-colors', 'color', 'colors');
+
+  document.querySelectorAll('#filter-cylinders .chip').forEach(ch => {
+    ch.addEventListener('click', () => {
+      const c = Number(ch.dataset.cylinder);
+      state.cylinders = state.cylinders.includes(c) ? state.cylinders.filter(x=>x!==c) : [...state.cylinders, c];
+      state.page = 1; render();
+    });
+  });
+
+  document.getElementById('filter-age').addEventListener('change', (e) => {
+    state.maxAgeDays = numOrNull(e.target.value);
+    state.page = 1; render();
+  });
+  document.getElementById('filter-photos-only').addEventListener('change', (e) => {
+    state.photosOnly = e.target.checked; state.page = 1; render();
+  });
+  document.getElementById('filter-dealer-only').addEventListener('change', (e) => {
+    state.dealerOnly = e.target.checked; state.page = 1; render();
+  });
+
   const numField = (id, key) => {
     document.getElementById(id).addEventListener('input', (e) => {
       state[key] = numOrNull(e.target.value);
@@ -296,10 +402,12 @@ function wireControls(){
   numField('filter-km-max', 'kmMax');
   numField('filter-ccm-min', 'ccmMin');
   numField('filter-ccm-max', 'ccmMax');
+  numField('filter-hk-min', 'hkMin');
+  numField('filter-hk-max', 'hkMax');
 
   document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 
-  const resetAll = () => { state = { q:'', types:[], brands:[], priceMin:null, priceMax:null, yearMin:null, yearMax:null, kmMax:null, ccmMin:null, ccmMax:null, regions:[], conditions:[], dealerOnly:false, koerekort:'', sort:'date-desc', page:1 }; render(); };
+  const resetAll = () => { state = { ...EMPTY_STATE, types: [], brands: [], regions: [], conditions: [], equipment: [], fuels: [], drives: [], cylinders: [], colors: [] }; render(); };
   document.getElementById('clear-filters').addEventListener('click', resetAll);
   document.getElementById('clear-filters-mobile').addEventListener('click', resetAll);
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);
@@ -325,8 +433,13 @@ function wireControls(){
   });
 
   const overlay = document.getElementById('filters-overlay');
-  document.getElementById('open-filters-btn').addEventListener('click', () => overlay.classList.add('open'));
-  overlay.querySelectorAll('[data-close-filters]').forEach(el => el.addEventListener('click', () => overlay.classList.remove('open')));
+  const setOverlay = (open) => {
+    overlay.classList.toggle('open', open);
+    // Skjuler cookiebanneret, så det ikke dækker skuffens knapper.
+    document.body.classList.toggle('overlay-open', open);
+  };
+  document.getElementById('open-filters-btn').addEventListener('click', () => setOverlay(true));
+  overlay.querySelectorAll('[data-close-filters]').forEach(el => el.addEventListener('click', () => setOverlay(false)));
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

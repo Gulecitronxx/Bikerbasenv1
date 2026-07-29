@@ -32,6 +32,19 @@ storage-bucket til billeder, og — vigtigst — **Row Level Security-politikker
 > nøgle kunne læse og ændre alt i databasen. Politikkerne er det, der gør nøglen
 > ufarlig at have liggende i frontend-koden.
 
+### Migrationer
+
+Kør derefter migrationsfilerne i nummerorden i samme SQL-editor. De kan køres
+oven på et eksisterende skema uden at røre data, du allerede har:
+
+| Fil | Hvad den tilføjer |
+| --- | --- |
+| `002_favorites_reviews.sql` | Favoritter, anmeldelser, søgeagenter og indberetninger i databasen |
+| `003_udstyr.sql` | Udstyr, brændstof, træktype, cylindre og farve på annoncerne — det søgefiltrene på søgesiden filtrerer på |
+
+Annoncer oprettet før `003` har tomt udstyr og dukker derfor ikke op, når nogen
+filtrerer på f.eks. ABS. De kan redigeres og få felterne udfyldt bagefter.
+
 ---
 
 ## 3. Sæt nøglerne ind

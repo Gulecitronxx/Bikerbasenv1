@@ -80,8 +80,13 @@ function wireHeader(){
   const drawer = document.getElementById('mobile-drawer');
   const openBtn = document.querySelector('.mobile-menu-btn');
   if (openBtn && drawer){
-    openBtn.addEventListener('click', () => drawer.classList.add('open'));
-    drawer.querySelectorAll('[data-drawer-close]').forEach(el => el.addEventListener('click', () => drawer.classList.remove('open')));
+    // overlay-open skjuler cookiebanneret, der ellers ligger oven på skuffen.
+    const setDrawer = (open) => {
+      drawer.classList.toggle('open', open);
+      document.body.classList.toggle('overlay-open', open);
+    };
+    openBtn.addEventListener('click', () => setDrawer(true));
+    drawer.querySelectorAll('[data-drawer-close]').forEach(el => el.addEventListener('click', () => setDrawer(false)));
   }
   const themeBtn = document.querySelector('.theme-toggle');
   if (themeBtn) themeBtn.addEventListener('click', toggleTheme);

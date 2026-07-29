@@ -83,6 +83,22 @@ function populateStaticFields(){
   document.getElementById('f-condition').innerHTML = CONDITIONS.map(c => `<option value="${c}">${c}</option>`).join('');
   document.getElementById('f-afgift').innerHTML = AFGIFT_STATUSES.map(a => `<option value="${a}">${a}</option>`).join('');
 
+  // Teknikfelterne er valgfrie — en tom værdi betyder "ikke oplyst" og
+  // udelukker ikke annoncen fra søgninger uden det filter.
+  const blank = '<option value="">Ikke oplyst</option>';
+  document.getElementById('f-fuel').innerHTML = blank + FUELS.map(f => `<option value="${f}">${f}</option>`).join('');
+  document.getElementById('f-drive').innerHTML = blank + DRIVES.map(d => `<option value="${d}">${d}</option>`).join('');
+  document.getElementById('f-cylinders').innerHTML = blank + CYLINDERS.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('f-color').innerHTML = blank + COLORS.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  document.getElementById('equipment-groups').innerHTML = EQUIPMENT_GROUPS.map(g => `
+    <details class="filter-group" open>
+      <summary>${g.group}<span class="chev">${Icon.chevronDown}</span></summary>
+      <div class="filter-body equipment-grid">
+        ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}">${i.label}</label>`).join('')}
+      </div>
+    </details>`).join('');
+
   wirePostnrCombo();
 
   document.getElementById('f-vin').addEventListener('input', (e) => {
@@ -250,6 +266,11 @@ function collectFormData(){
     vin: document.getElementById('f-vin').value || `VIN${Date.now()}`,
     registration: document.getElementById('f-registration').value,
     afgift: document.getElementById('f-afgift').value,
+    fuel: document.getElementById('f-fuel').value || null,
+    drive: document.getElementById('f-drive').value || null,
+    cylinders: Number(document.getElementById('f-cylinders').value) || null,
+    color: document.getElementById('f-color').value || null,
+    equipment: [...document.querySelectorAll('#equipment-groups input:checked')].map(cb => cb.dataset.equipment),
     price: Number(document.getElementById('f-price').value) || 0,
     condition: document.getElementById('f-condition').value,
     postnr,
@@ -339,6 +360,9 @@ async function publishListing(){
     price: formData.price, condition: formData.condition,
     vin: formData.vin && isValidVIN(formData.vin) ? formData.vin.toUpperCase() : null,
     registration: formData.registration, afgift: formData.afgift,
+    fuel: formData.fuel, drive: formData.drive,
+    cylinders: formData.cylinders, color: formData.color,
+    equipment: formData.equipment,
     postnr: formData.postnr, city: formData.city, region: formData.region,
     description: formData.description,
   });
@@ -369,6 +393,37 @@ async function publishListing(){
   setTimeout(() => { window.location.href = `annonce.html?id=${created.id}`; }, 1000);
 }
 
+/* Lægger en gemt kladde tilbage i formularen.
+
+   "Gem kladde" skrev til localStorage, men ingen læste det igen — knappen
+   kvitterede med "Kladde gemt" og smed så indtastningen væk. Her hentes den
+   tilbage, så en afbrudt annonce kan gøres færdig senere. */
+function restoreDraft(){
+  const draft = Store.getDraft()?.form;
+  if (!draft) return false;
+
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el && value != null && value !== '') el.value = value;
+  };
+  const typeRadio = document.querySelector(`input[name="bike-type"][value="${draft.type}"]`);
+  if (typeRadio){ typeRadio.checked = true; typeRadio.dispatchEvent(new Event('change', { bubbles: true })); }
+
+  set('f-brand', draft.brand);
+  // Modelforslagene afhænger af mærket, så det skal opdateres først.
+  document.getElementById('f-brand')?.dispatchEvent(new Event('change', { bubbles: true }));
+  set('f-model', draft.model);
+  ['year','km','ccm','power','vin','registration','afgift','fuel','drive',
+   'cylinders','color','price','condition','postnr','city','region'].forEach(k => set('f-' + k, draft[k]));
+  set('f-desc', draft.description);
+
+  (draft.equipment || []).forEach(id => {
+    const cb = document.querySelector(`#equipment-groups input[data-equipment="${id}"]`);
+    if (cb) cb.checked = true;
+  });
+  return true;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await backendReady();
 
@@ -384,6 +439,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderPhotoGrid();
   wireDocUpload();
   renderDocGrid();
+  if (restoreDraft()) toast('Din gemte kladde er hentet frem');
   goToStep(1);
 
   document.getElementById('step-next').addEventListener('click', () => {

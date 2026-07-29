@@ -61,11 +61,14 @@ async function renderProfile(){
   const sellerName = id ? decodeURIComponent(id) : null;
   const all = Store.getAllListings();
   const sellerListings = sellerName ? all.filter(l => l.seller.name === sellerName) : all.filter(l => l.isDealer).slice(0, 6);
-  const seller = sellerListings.length ? sellerListings[0].seller : all[0].seller;
+  // Tom database eller et sælgernavn der ikke findes: uden dette fallback
+  // ville all[0] være undefined og hele siden fejle med en tom skærm.
+  const seller = sellerListings.length ? sellerListings[0].seller
+    : (all.length ? all[0].seller : { name: sellerName || 'Ukendt sælger', city: '', isDealer: false, memberSince: new Date().getFullYear(), rating: 0, reviews: 0, verified: false, emailVerified: false, phoneVerified: false, mitIdVerified: false, phone: '' });
   currentSeller = seller;
   const sellerNameEsc = escapeHTML(seller.name);
 
-  document.title = `${seller.name} — Bikerbasen`;
+  seoDealerPage(seller, sellerListings.length);
   const ph1 = document.getElementById('profile-h1');
   if (ph1) ph1.textContent = seller.name;
   document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);

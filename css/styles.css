@@ -457,6 +457,24 @@ select.input{
 .chip:hover{ border-color: var(--color-fg-muted); }
 .chip.active{ background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
 
+/* Udstyrsfilteret har 33 muligheder. Uden overskrifter og en scrollgrænse
+   skubber det resten af filterpanelet helt ud af syne. */
+.filter-subgroup + .filter-subgroup{ margin-top: var(--space-3); padding-top: var(--space-3); border-top:1px solid var(--color-border); }
+.filter-subgroup-title{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--color-fg-muted); margin-bottom:8px; }
+#filter-equipment{ max-height: 320px; overflow-y:auto; padding-right:4px; }
+
+/* Samme liste i opret-annonce må gerne brede sig på store skærme. */
+.equipment-grid{ display:grid; grid-template-columns:1fr; gap:4px; }
+@media (min-width:640px){ .equipment-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:960px){ .equipment-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+.field-label-sm{ display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
+
+.equipment-list{ list-style:none; display:grid; grid-template-columns:1fr; gap:8px 20px; margin:0; padding:0; }
+@media (min-width:560px){ .equipment-list{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.equipment-list li{ display:flex; align-items:center; gap:8px; font-size:14px; }
+.equipment-list li svg{ width:16px; height:16px; flex-shrink:0; color: var(--color-success); }
+
 .active-filters{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom: var(--space-4); }
 .active-filter-pill{
   display:inline-flex; align-items:center; gap:6px; background: var(--color-primary-tint); color: var(--color-primary-hover);
@@ -723,6 +741,12 @@ select.input{
 .report-link svg{ width:15px; height:15px; }
 
 /* ============ Cookie consent banner ============ */
+/* Cookiebanneret ligger over alt andet (z-index 500) og dækkede derfor
+   "Vis resultater" i filterskuffen på mobil — man kunne vælge filtre, men
+   ikke komme videre. Skuffen skjuler banneret mens den er åben; det er
+   tilbage igen straks skuffen lukkes, så samtykket ikke kan smutte forbi. */
+body.overlay-open .cookie-banner{ display:none; }
+
 .cookie-banner{
   position:fixed; bottom:0; left:0; right:0; z-index:500;
   background: var(--color-dark); color:#EDEAE4; padding: var(--space-4) var(--space-5);
