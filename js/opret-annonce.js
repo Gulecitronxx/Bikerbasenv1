@@ -6,6 +6,10 @@ let formData = {};
 /* Sat når siden åbnes som ?rediger=<id>. Så gemmer formularen oven i den
    eksisterende annonce i stedet for at oprette en ny. */
 let editingId = null;
+/* Billeder der allerede ligger på annoncen: { id, path, url }. De bevares
+   ved redigering og fjernes kun, hvis brugeren selv trykker på krydset. */
+let existingPhotos = [];
+let removedPhotoIds = [];
 
 function renderStepper(){
   document.getElementById('stepper').innerHTML = STEP_LABELS.map((label, i) => {
@@ -241,18 +245,55 @@ function renderDocGrid(){
 
 function renderPhotoGrid(){
   const grid = document.getElementById('photo-grid');
-  grid.innerHTML = uploadedPhotos.map((p, i) => `
+
+  // Ved redigering vises annoncens nuværende billeder først. De blev slet
+  // ikke vist før, så det lignede at redigeringen havde slettet dem — og
+  // der var ingen måde at fjerne ét enkelt på.
+  const eksisterende = existingPhotos.map((p, i) => `
     <div class="photo-thumb">
-      <img src="${p.url}" alt="${p.name}">
+      <img src="${p.url}" alt="Billede ${i + 1} på annoncen">
       ${i === 0 ? '<span class="cover-tag">Forside</span>' : ''}
+      <button type="button" class="remove-photo" data-remove-existing="${p.id}" aria-label="Fjern dette billede fra annoncen">${Icon.close}</button>
+    </div>`).join('');
+
+  const nye = uploadedPhotos.map((p, i) => `
+    <div class="photo-thumb">
+      <img src="${p.url}" alt="${escapeHTML(p.name)}">
+      ${!existingPhotos.length && i === 0 ? '<span class="cover-tag">Forside</span>' : '<span class="cover-tag new">Ny</span>'}
       <button type="button" class="remove-photo" data-remove="${i}" aria-label="Fjern billede">${Icon.close}</button>
     </div>`).join('');
+
+  grid.innerHTML = eksisterende + nye;
+
   grid.querySelectorAll('[data-remove]').forEach(btn => {
     btn.addEventListener('click', () => { uploadedPhotos.splice(Number(btn.dataset.remove), 1); renderPhotoGrid(); });
   });
-  document.getElementById('photo-hint').textContent = uploadedPhotos.length
-    ? `${uploadedPhotos.length} billede(r) valgt. Bikerbasen viser en stiliseret illustration i denne demo, uanset uploadede billeder.`
-    : 'Ingen billeder valgt endnu — annoncen vises med en illustration som eksempel.';
+  grid.querySelectorAll('[data-remove-existing]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.removeExisting;
+      const foto = existingPhotos.find(p => String(p.id) === String(id));
+      if (!foto) return;
+      if (!confirm('Fjern dette billede fra annoncen? Det sker først når du gemmer.')) return;
+      // Slettes først når annoncen gemmes, så man kan fortryde ved at gå væk.
+      removedPhotoIds.push(foto);
+      existingPhotos = existingPhotos.filter(p => String(p.id) !== String(id));
+      renderPhotoGrid();
+    });
+  });
+
+  const ialt = existingPhotos.length + uploadedPhotos.length;
+  const hint = document.getElementById('photo-hint');
+  if (!ialt){
+    hint.textContent = editingId
+      ? 'Annoncen har ingen billeder. Annoncer med billeder bliver set markant oftere.'
+      : 'Ingen billeder valgt endnu — annoncer med billeder bliver set markant oftere.';
+  } else {
+    const dele = [];
+    if (existingPhotos.length) dele.push(`${existingPhotos.length} på annoncen`);
+    if (uploadedPhotos.length) dele.push(`${uploadedPhotos.length} ny${uploadedPhotos.length === 1 ? 't' : 'e'}`);
+    const fjernet = removedPhotoIds.length ? ` ${removedPhotoIds.length} bliver fjernet når du gemmer.` : '';
+    hint.textContent = `${ialt} billede${ialt === 1 ? '' : 'r'} i alt (${dele.join(', ')}).${fjernet}`;
+  }
 }
 
 function collectFormData(){
@@ -382,12 +423,19 @@ async function publishListing(){
     return;
   }
 
-  // Billeder uploades efter annoncen, så de kan knyttes til dens id.
+  // Kun de billeder brugeren udtrykkeligt har fjernet, slettes.
+  for (const foto of removedPhotoIds){
+    const res = await db.deleteListingPhoto(foto.id, foto.path);
+    if (res.error) console.warn('Billedet kunne ikke slettes:', res.error.message);
+  }
+
+  // Billeder uploades efter annoncen, så de kan knyttes til dens id. Nye
+  // lægges efter dem der bliver liggende, så forsidebilledet ikke skifter.
   const withFiles = uploadedPhotos.filter(p => p.file);
   const failed = [];
   for (let i = 0; i < withFiles.length; i++){
     showUploadProgress(i, withFiles.length);
-    const res = await db.uploadListingPhoto(created.id, withFiles[i].file, i);
+    const res = await db.uploadListingPhoto(created.id, withFiles[i].file, existingPhotos.length + i);
     if (res.error) failed.push(withFiles[i].name);
   }
   if (withFiles.length) showUploadProgress(withFiles.length, withFiles.length);
@@ -457,15 +505,16 @@ function startEditing(id){
   editingId = listing.id;
   fillForm(listing);
 
+  // Annoncens nuværende billeder lægges i gitteret, så de kan ses og
+  // fjernes enkeltvis. Røres de ikke, bliver de på annoncen.
+  existingPhotos = (listing.photoRows || []).slice();
+  removedPhotoIds = [];
+  renderPhotoGrid();
+
   document.title = 'Rediger annonce — Bikerbasen';
   document.querySelector('.page-title-bar h1').textContent = 'Rediger annonce';
   const lead = document.querySelector('.page-title-bar p');
-  if (lead){
-    const antal = (listing.photoUrls || []).length;
-    lead.textContent = antal
-      ? `Ret oplysningerne og gem. Annoncens ${antal} ${antal === 1 ? 'billede' : 'billeder'} bevares — uploader du nye, lægges de til.`
-      : 'Ret oplysningerne og gem — annoncen opdateres med det samme.';
-  }
+  if (lead) lead.textContent = 'Ret oplysningerne og gem. Billederne bliver på annoncen, medmindre du selv fjerner dem.';
   return true;
 }
 

@@ -93,7 +93,7 @@ const db = (function(){
         // Nøglen navngives eksplicit: efter at favorites kom til, findes der
         // to mulige veje fra listings til public_profiles, og PostgREST
         // afviser forespørgslen (PGRST201) hvis man ikke peger på den rigtige.
-        .select('*, seller:public_profiles!listings_seller_id_fkey(*), photos:listing_photos(storage_path, position)')
+        .select('*, seller:public_profiles!listings_seller_id_fkey(*), photos:listing_photos(id, storage_path, position)')
         .eq('status', 'active');
 
       if (filters.brands?.length)     q = q.in('brand', filters.brands);
@@ -129,7 +129,7 @@ const db = (function(){
         // Nøglen navngives eksplicit: efter at favorites kom til, findes der
         // to mulige veje fra listings til public_profiles, og PostgREST
         // afviser forespørgslen (PGRST201) hvis man ikke peger på den rigtige.
-        .select('*, seller:public_profiles!listings_seller_id_fkey(*), photos:listing_photos(storage_path, position)')
+        .select('*, seller:public_profiles!listings_seller_id_fkey(*), photos:listing_photos(id, storage_path, position)')
         .eq('id', id).single();
     },
 
@@ -138,7 +138,7 @@ const db = (function(){
       const user = await this.currentUser();
       if (!user) return { data: [], error: null };
       return c.from('listings')
-        .select('*, photos:listing_photos(storage_path, position)')
+        .select('*, photos:listing_photos(id, storage_path, position)')
         .eq('seller_id', user.id)
         .order('created_at', { ascending: false });
     },
@@ -184,6 +184,18 @@ const db = (function(){
       return c.from('listing_photos')
         .insert({ listing_id: listingId, storage_path: path, position })
         .select().single();
+    },
+
+    /* Fjerner ét billede fra en annonce. Rækken slettes først — RLS afviser
+       den, hvis annoncen ikke er brugerens, og så rører vi ikke filen.
+       Selve filen ryddes bagefter, så der ikke bliver betalt for lagerplads
+       på billeder ingen kan se. */
+    async deleteListingPhoto(photoId, storagePath){
+      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
+      const { error } = await c.from('listing_photos').delete().eq('id', photoId);
+      if (error) return { error };
+      await c.storage.from('listing-photos').remove([storagePath]);
+      return { error: null };
     },
 
     photoUrl(storagePath){

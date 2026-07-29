@@ -640,6 +640,8 @@ select.input{
 .photo-thumb .remove-photo{ position:absolute; top:4px; right:4px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; }
 .photo-thumb .remove-photo svg{ width:14px; height:14px; }
 .photo-thumb .cover-tag{ position:absolute; bottom:4px; left:4px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase; }
+/* Skiller nyligt tilføjede billeder fra dem, der allerede ligger på annoncen. */
+.photo-thumb .cover-tag.new{ background: var(--color-primary); color: var(--color-on-primary); }
 
 .form-actions{ display:flex; justify-content:space-between; gap: var(--space-3); margin-top: var(--space-6); padding-top: var(--space-5); border-top:1px solid var(--color-border); }
 

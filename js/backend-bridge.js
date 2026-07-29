@@ -31,6 +31,9 @@ function normalizeRemoteListing(row){
     isDealer: !!seller.is_dealer,
     isRemote: true,
     photoUrls: photos.map(p => db.photoUrl(p.storage_path)).filter(Boolean),
+    // Id og sti følger med, så redigering kan fjerne ét enkelt billede
+    // i stedet for at røre dem alle.
+    photoRows: photos.map(p => ({ id: p.id, path: p.storage_path, url: db.photoUrl(p.storage_path) })),
     photos: Math.max(3, photos.length || 4),
     seller: {
       id: row.seller_id,
