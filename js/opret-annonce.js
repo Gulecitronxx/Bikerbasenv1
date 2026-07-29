@@ -3,6 +3,9 @@ let currentStep = 1;
 let uploadedPhotos = []; // { url, name }
 let uploadedDocs = []; // { url, name }
 let formData = {};
+/* Sat når siden åbnes som ?rediger=<id>. Så gemmer formularen oven i den
+   eksisterende annonce i stedet for at oprette en ny. */
+let editingId = null;
 
 function renderStepper(){
   document.getElementById('stepper').innerHTML = STEP_LABELS.map((label, i) => {
@@ -23,7 +26,8 @@ function goToStep(n){
   document.querySelectorAll('.form-step').forEach(s => s.hidden = Number(s.dataset.step) !== n);
   renderStepper();
   document.getElementById('step-back').style.visibility = n === 1 ? 'hidden' : 'visible';
-  document.getElementById('step-next').textContent = n === STEP_LABELS.length ? 'Udgiv annonce' : 'Fortsæt';
+  document.getElementById('step-next').textContent =
+    n === STEP_LABELS.length ? (editingId ? 'Gem ændringer' : 'Udgiv annonce') : 'Fortsæt';
   if (n === STEP_LABELS.length) renderPreview();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -82,6 +86,22 @@ function populateStaticFields(){
 
   document.getElementById('f-condition').innerHTML = CONDITIONS.map(c => `<option value="${c}">${c}</option>`).join('');
   document.getElementById('f-afgift').innerHTML = AFGIFT_STATUSES.map(a => `<option value="${a}">${a}</option>`).join('');
+
+  // Teknikfelterne er valgfrie — en tom værdi betyder "ikke oplyst" og
+  // udelukker ikke annoncen fra søgninger uden det filter.
+  const blank = '<option value="">Ikke oplyst</option>';
+  document.getElementById('f-fuel').innerHTML = blank + FUELS.map(f => `<option value="${f}">${f}</option>`).join('');
+  document.getElementById('f-drive').innerHTML = blank + DRIVES.map(d => `<option value="${d}">${d}</option>`).join('');
+  document.getElementById('f-cylinders').innerHTML = blank + CYLINDERS.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('f-color').innerHTML = blank + COLORS.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  document.getElementById('equipment-groups').innerHTML = EQUIPMENT_GROUPS.map(g => `
+    <details class="filter-group" open>
+      <summary>${g.group}<span class="chev">${Icon.chevronDown}</span></summary>
+      <div class="filter-body equipment-grid">
+        ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}">${i.label}</label>`).join('')}
+      </div>
+    </details>`).join('');
 
   wirePostnrCombo();
 
@@ -250,6 +270,11 @@ function collectFormData(){
     vin: document.getElementById('f-vin').value || `VIN${Date.now()}`,
     registration: document.getElementById('f-registration').value,
     afgift: document.getElementById('f-afgift').value,
+    fuel: document.getElementById('f-fuel').value || null,
+    drive: document.getElementById('f-drive').value || null,
+    cylinders: Number(document.getElementById('f-cylinders').value) || null,
+    color: document.getElementById('f-color').value || null,
+    equipment: [...document.querySelectorAll('#equipment-groups input:checked')].map(cb => cb.dataset.equipment),
     price: Number(document.getElementById('f-price').value) || 0,
     condition: document.getElementById('f-condition').value,
     postnr,
@@ -331,21 +356,28 @@ async function publishListing(){
   }
 
   nextBtn.disabled = true;
-  nextBtn.textContent = 'Udgiver…';
+  nextBtn.textContent = editingId ? 'Gemmer…' : 'Udgiver…';
 
-  const { data: created, error } = await db.createListing({
+  const kolonner = {
     brand: formData.brand, model: formData.model, type: formData.type,
     year: formData.year, km: formData.km, ccm: formData.ccm, power: formData.power,
     price: formData.price, condition: formData.condition,
     vin: formData.vin && isValidVIN(formData.vin) ? formData.vin.toUpperCase() : null,
     registration: formData.registration, afgift: formData.afgift,
+    fuel: formData.fuel, drive: formData.drive,
+    cylinders: formData.cylinders, color: formData.color,
+    equipment: formData.equipment,
     postnr: formData.postnr, city: formData.city, region: formData.region,
     description: formData.description,
-  });
+  };
+
+  const { data: created, error } = editingId
+    ? await db.updateListing(editingId, kolonner)
+    : await db.createListing(kolonner);
 
   if (error){
     nextBtn.disabled = false;
-    nextBtn.textContent = 'Udgiv annonce';
+    nextBtn.textContent = editingId ? 'Gem ændringer' : 'Udgiv annonce';
     toast('Annoncen kunne ikke gemmes: ' + error.message);
     return;
   }
@@ -362,11 +394,79 @@ async function publishListing(){
 
   Store.clearDraft();
   if (failed.length){
-    toast(`Annoncen er udgivet, men ${failed.length} billede(r) kunne ikke uploades`);
+    toast(`Annoncen er gemt, men ${failed.length} billede(r) kunne ikke uploades`);
   } else {
-    toast('Din annonce er udgivet!');
+    toast(editingId ? 'Ændringerne er gemt!' : 'Din annonce er udgivet!');
   }
   setTimeout(() => { window.location.href = `annonce.html?id=${created.id}`; }, 1000);
+}
+
+/* Fylder formularen med data i samme form som collectFormData returnerer.
+   Bruges både af den gemte kladde og af redigering af en eksisterende annonce. */
+function fillForm(data){
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el && value != null && value !== '') el.value = value;
+  };
+  const typeRadio = document.querySelector(`input[name="bike-type"][value="${data.type}"]`);
+  if (typeRadio){ typeRadio.checked = true; typeRadio.dispatchEvent(new Event('change', { bubbles: true })); }
+
+  set('f-brand', data.brand);
+  // Modelforslagene afhænger af mærket, så det skal opdateres først.
+  document.getElementById('f-brand')?.dispatchEvent(new Event('change', { bubbles: true }));
+  set('f-model', data.model);
+  ['year','km','ccm','power','vin','registration','afgift','fuel','drive',
+   'cylinders','color','price','condition','city','region'].forEach(k => set('f-' + k, data[k]));
+  set('f-desc', data.description);
+  // Postnummerfeltet viser "1620 København V"; kun tallet gemmes videre.
+  set('f-postnr', data.postnr ? `${data.postnr}${data.city ? ' ' + data.city : ''}` : '');
+
+  document.querySelectorAll('#equipment-groups input[data-equipment]').forEach(cb => {
+    cb.checked = (data.equipment || []).includes(cb.dataset.equipment);
+  });
+}
+
+/* Lægger en gemt kladde tilbage i formularen.
+
+   "Gem kladde" skrev til localStorage, men ingen læste det igen — knappen
+   kvitterede med "Kladde gemt" og smed så indtastningen væk. Her hentes den
+   tilbage, så en afbrudt annonce kan gøres færdig senere. */
+function restoreDraft(){
+  const draft = Store.getDraft()?.form;
+  if (!draft) return false;
+  fillForm(draft);
+  return true;
+}
+
+/* Åbner en eksisterende annonce til redigering. Returnerer false hvis id'et
+   ikke findes eller ikke tilhører den bruger, der er logget ind — RLS ville
+   alligevel afvise gemmet, og det er bedre at sige det med det samme. */
+function startEditing(id){
+  const listing = Store.getAllListings().find(l => String(l.id) === String(id));
+  if (!listing){
+    toast('Annoncen blev ikke fundet');
+    return false;
+  }
+  const user = Store.getUser();
+  const ejer = user && (listing.seller?.id === user.id || !isUuid(String(listing.id)));
+  if (!ejer){
+    toast('Du kan kun redigere dine egne annoncer');
+    return false;
+  }
+
+  editingId = listing.id;
+  fillForm(listing);
+
+  document.title = 'Rediger annonce — Bikerbasen';
+  document.querySelector('.page-title-bar h1').textContent = 'Rediger annonce';
+  const lead = document.querySelector('.page-title-bar p');
+  if (lead){
+    const antal = (listing.photoUrls || []).length;
+    lead.textContent = antal
+      ? `Ret oplysningerne og gem. Annoncens ${antal} ${antal === 1 ? 'billede' : 'billeder'} bevares — uploader du nye, lægges de til.`
+      : 'Ret oplysningerne og gem — annoncen opdateres med det samme.';
+  }
+  return true;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -374,7 +474,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Med rigtig backend skal annoncen knyttes til en bruger.
   if (db.enabled && !Store.getUser()?.remote){
-    window.location.replace('login.html?redirect=' + encodeURIComponent('opret-annonce.html'));
+    // Tag ?rediger= med over login, ellers lander man på en tom ny annonce.
+    const tilbage = 'opret-annonce.html' + window.location.search;
+    window.location.replace('login.html?redirect=' + encodeURIComponent(tilbage));
     return;
   }
 
@@ -384,6 +486,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderPhotoGrid();
   wireDocUpload();
   renderDocGrid();
+
+  const redigerId = new URLSearchParams(window.location.search).get('rediger');
+  if (redigerId){
+    if (!startEditing(redigerId)){
+      setTimeout(() => { window.location.href = 'mine-annoncer.html'; }, 1500);
+      return;
+    }
+  } else if (restoreDraft()){
+    toast('Din gemte kladde er hentet frem');
+  }
   goToStep(1);
 
   document.getElementById('step-next').addEventListener('click', () => {

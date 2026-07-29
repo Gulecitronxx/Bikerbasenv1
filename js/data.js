@@ -298,11 +298,100 @@ function passerKoerekort(listing, kat){
   return true; // A dækker alt
 }
 
+/* ============ Udstyr og teknik ============
+   123mc lader dig filtrere på ~40 udstyrspunkter, farve, brændstof, træktype
+   og cylinderantal. Det er dér de vinder på købere der ved hvad de leder
+   efter — "MT-07 med quickshifter og varmehåndtag" kan ikke søges hos os
+   uden det her.
+
+   Listen er trimmet til det, der reelt afgør et køb på en motorcykel, og
+   grupperet så feltet i opret-annonce ikke bliver en mur af checkbokse. */
+const EQUIPMENT_GROUPS = [
+  { group: 'Sikkerhed og elektronik', items: [
+    { id: 'abs',        label: 'ABS-bremser' },
+    { id: 'corner-abs', label: 'Kurve-ABS' },
+    { id: 'tcs',        label: 'Traction control' },
+    { id: 'koreprogrammer', label: 'Køreprogrammer' },
+    { id: 'quickshifter',   label: 'Quickshifter' },
+    { id: 'slipperkobling', label: 'Slipperkobling' },
+    { id: 'el-affjedring',  label: 'Elektronisk affjedring' },
+    { id: 'gearindikator',  label: 'Gearindikator' },
+  ]},
+  { group: 'Komfort', items: [
+    { id: 'varmehandtag', label: 'Varmehåndtag' },
+    { id: 'saedevarme',   label: 'Sædevarme' },
+    { id: 'fartpilot',    label: 'Fartpilot' },
+    { id: 'vindskaerm',   label: 'Vindskærm' },
+    { id: 'fuldkaabe',    label: 'Fuldkåbe' },
+    { id: 'halvkaabe',    label: 'Halvkåbe' },
+    { id: 'centralstotteben', label: 'Centralstøtteben' },
+  ]},
+  { group: 'Instrumenter og forbindelse', items: [
+    { id: 'tft',       label: 'TFT-/farvedisplay' },
+    { id: 'kurecomputer', label: 'Kørecomputer' },
+    { id: 'navigation', label: 'GPS-navigation' },
+    { id: 'bluetooth', label: 'Bluetooth / intercom' },
+    { id: 'usb',       label: 'USB-udtag' },
+    { id: 'keyless',   label: 'Nøglefri betjening' },
+    { id: 'led-lys',   label: 'LED-lygter' },
+  ]},
+  { group: 'Bagage og beskyttelse', items: [
+    { id: 'sidetasker', label: 'Sidetasker' },
+    { id: 'topboks',    label: 'Topboks' },
+    { id: 'tanktaske',  label: 'Tanktaske' },
+    { id: 'crashpads',  label: 'Crashpads / styrtbøjler' },
+    { id: 'tankbeskytter', label: 'Tankbeskytter' },
+    { id: 'sidevogn',   label: 'Sidevogn' },
+  ]},
+  { group: 'Tyverisikring', items: [
+    { id: 'alarm',      label: 'Alarm' },
+    { id: 'startspaerre', label: 'Startspærre / immobiliser' },
+    { id: 'skivelaas',  label: 'Skivelås' },
+  ]},
+  { group: 'Historik', items: [
+    { id: 'nysynet',    label: 'Nysynet' },
+    { id: 'servicebog', label: 'Servicebog følger med' },
+    { id: 'en-ejer',    label: 'Kun én ejer' },
+    { id: 'garanti',    label: 'Garanti følger med' },
+  ]},
+];
+
+/* Flad opslagstabel — brugt til at vise labels på annoncesiden. */
+const EQUIPMENT = EQUIPMENT_GROUPS.flatMap(g => g.items);
+const EQUIPMENT_LABELS = Object.fromEntries(EQUIPMENT.map(e => [e.id, e.label]));
+
+function equipmentLabel(id){
+  return EQUIPMENT_LABELS[id] || id;
+}
+
+const FUELS = ['Benzin', 'El', 'Hybrid', 'Diesel'];
+const DRIVES = ['Kædetræk', 'Kardantræk', 'Remtræk'];
+const CYLINDERS = [1, 2, 3, 4, 6];
+const COLORS = [
+  'Sort', 'Hvid', 'Grå', 'Sølv', 'Blå', 'Rød', 'Grøn',
+  'Gul', 'Orange', 'Brun', 'Bordeaux', 'Guld', 'Flerfarvet',
+];
+
+/* Hvor gammel må annoncen være? Bruges af "Oprettet"-filteret. */
+const AGE_FILTERS = [
+  { id: '1',  label: 'Seneste døgn' },
+  { id: '3',  label: 'Seneste 3 dage' },
+  { id: '7',  label: 'Seneste uge' },
+  { id: '14', label: 'Seneste 14 dage' },
+  { id: '30', label: 'Seneste 30 dage' },
+];
+
 /* ============ Security / trust helpers ============ */
 function escapeHTML(str){
   return String(str ?? '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
+}
+
+/* Databaseannoncer har uuid som id; demo- og localStorage-annoncer har tal.
+   Skellet afgør, om en handling skal ramme Supabase eller browseren. */
+function isUuid(v){
+  return typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
 }
 
 /* Simplified real-world VIN shape check: 11-17 chars, alphanumeric, excludes I/O/Q (not used in real VINs). */

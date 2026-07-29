@@ -44,6 +44,8 @@ function renderListing(){
   // frem for at falde tilbage på en tilfældig anden annonce.
   if (!listing){
     document.title = 'Annoncen findes ikke — Bikerbasen';
+    // Solgte og slettede annoncer skal ikke ligge tilbage i Googles indeks.
+    Seo.setMeta('meta[name="robots"]', 'name', 'robots', 'noindex, follow');
     document.getElementById('bc-current').textContent = 'Ikke fundet';
     document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
     document.getElementById('listing-detail').innerHTML = `
@@ -62,7 +64,9 @@ function renderListing(){
   currentPhotos = buildPhotoSet(listing);
   currentPhotoIndex = 0;
 
-  document.title = `${listing.brand} ${listing.model} — Bikerbasen`;
+  // Titel, delingsbillede og struktureret data følger annoncen, så et link
+  // delt i en MC-gruppe viser mærke, årgang og pris frem for bare "Annonce".
+  seoListingPage(listing, listing.photoUrls || []);
   // Én h1 pr. side: den statiske i markup opdateres, så også crawlere
   // uden JavaScript ser en overskrift.
   const h1 = document.getElementById('listing-h1');
@@ -121,7 +125,19 @@ function renderListing(){
         <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Stand</span><b>${listing.condition}</b></div>
         <div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Registrering</span><b>${listing.registration}</b></div>
         <div class="spec-item"><span class="spec-icon">${Icon.lock} Afgift</span><b>${listing.afgift || 'Ukendt'}</b></div>
+        ${listing.fuel ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Brændstof</span><b>${escapeHTML(listing.fuel)}</b></div>` : ''}
+        ${listing.drive ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Træktype</span><b>${escapeHTML(listing.drive)}</b></div>` : ''}
+        ${listing.cylinders ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Cylindre</span><b>${Number(listing.cylinders)}</b></div>` : ''}
+        ${listing.color ? `<div class="spec-item"><span class="spec-icon">${Icon.info} Farve</span><b>${escapeHTML(listing.color)}</b></div>` : ''}
       </div>
+
+      ${(listing.equipment || []).length ? `
+      <div class="detail-section" style="margin-top:var(--space-5);">
+        <h2>Udstyr</h2>
+        <ul class="equipment-list">
+          ${listing.equipment.map(e => `<li>${Icon.checkCircle}${escapeHTML(equipmentLabel(e))}</li>`).join('')}
+        </ul>
+      </div>` : ''}
 
       <div class="vin-box">
         ${Icon.vin}Stelnummer (VIN): <code>${escapeHTML(listing.vin)}</code>
