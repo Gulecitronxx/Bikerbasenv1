@@ -2,7 +2,7 @@ const PAGE_SIZE = 12;
 let state = {
   q: '', types: [], brands: [], priceMin: null, priceMax: null,
   yearMin: null, yearMax: null, kmMax: null, ccmMin: null, ccmMax: null,
-  regions: [], conditions: [], dealerOnly: false, sort: 'date-desc', page: 1,
+  regions: [], conditions: [], dealerOnly: false, koerekort: '', sort: 'date-desc', page: 1,
 };
 
 function readStateFromURL(){
@@ -20,6 +20,7 @@ function readStateFromURL(){
   state.regions = (p.get('regions') || '').split(',').filter(Boolean);
   state.conditions = (p.get('conditions') || '').split(',').filter(Boolean);
   state.dealerOnly = p.get('dealer') === '1';
+  state.koerekort = p.get('koerekort') || '';
   state.sort = p.get('sort') || 'date-desc';
   state.page = numOrNull(p.get('page')) || 1;
 }
@@ -40,6 +41,7 @@ function writeStateToURL(){
   if (state.regions.length) p.set('regions', state.regions.join(','));
   if (state.conditions.length) p.set('conditions', state.conditions.join(','));
   if (state.dealerOnly) p.set('dealer', '1');
+  if (state.koerekort) p.set('koerekort', state.koerekort);
   if (state.sort !== 'date-desc') p.set('sort', state.sort);
   if (state.page > 1) p.set('page', state.page);
   const qs = p.toString();
@@ -52,6 +54,9 @@ function populateFilterUI(){
 
   document.getElementById('filter-brands').innerHTML = Object.keys(BRANDS_BY_MODEL).sort().map(b =>
     `<label class="checkbox-row"><input type="checkbox" data-brand="${b}">${b}</label>`).join('');
+
+  document.getElementById('filter-koerekort').innerHTML = KOEREKORT.map(k =>
+    `<button type="button" class="chip" data-koerekort="${k.id}" title="${k.hint}">${k.label}</button>`).join('');
 
   document.getElementById('filter-regions').innerHTML = REGIONS.map(r =>
     `<label class="checkbox-row"><input type="checkbox" data-region="${r}">${r}</label>`).join('');
@@ -84,6 +89,7 @@ function currentQueryString(){
   if (state.regions.length) p.set('regions', state.regions.join(','));
   if (state.conditions.length) p.set('conditions', state.conditions.join(','));
   if (state.dealerOnly) p.set('dealer', '1');
+  if (state.koerekort) p.set('koerekort', state.koerekort);
   return p.toString();
 }
 
@@ -117,6 +123,9 @@ function applyViewMode(){
 function reflectStateToUI(){
   document.querySelectorAll('#filter-types .chip').forEach(chip => {
     chip.classList.toggle('active', state.types.includes(chip.dataset.type));
+  });
+  document.querySelectorAll('#filter-koerekort .chip').forEach(ch => {
+    ch.classList.toggle('active', state.koerekort === ch.dataset.koerekort);
   });
   document.querySelectorAll('#filter-brands input').forEach(cb => {
     cb.checked = state.brands.includes(cb.dataset.brand);
@@ -153,6 +162,7 @@ function getFilteredListings(){
   if (state.regions.length) list = list.filter(l => state.regions.includes(l.region));
   if (state.conditions.length) list = list.filter(l => state.conditions.includes(l.condition));
   if (state.dealerOnly) list = list.filter(l => l.isDealer);
+  if (state.koerekort) list = list.filter(l => passerKoerekort(l, state.koerekort));
 
   const sorters = {
     'date-desc': (a,b) => new Date(b.createdAt) - new Date(a.createdAt),
@@ -180,6 +190,7 @@ function activeFilterPills(){
     pills.push({ label: `${state.ccmMin||0}–${state.ccmMax||'∞'} ccm`, clear: () => { state.ccmMin=null; state.ccmMax=null; } });
   }
   if (state.dealerOnly) pills.push({ label: 'Kun forhandlere', clear: () => state.dealerOnly = false });
+  if (state.koerekort) pills.push({ label: 'Kørekort ' + state.koerekort, clear: () => state.koerekort = '' });
   state.regions.forEach(r => pills.push({ label: r, clear: () => state.regions = state.regions.filter(x=>x!==r) }));
   state.conditions.forEach(c => pills.push({ label: c, clear: () => state.conditions = state.conditions.filter(x=>x!==c) }));
   return pills;
@@ -244,6 +255,12 @@ function wireControls(){
       state.page = 1; render();
     });
   });
+  document.querySelectorAll('#filter-koerekort .chip').forEach(ch => {
+    ch.addEventListener('click', () => {
+      state.koerekort = state.koerekort === ch.dataset.koerekort ? '' : ch.dataset.koerekort;
+      state.page = 1; render();
+    });
+  });
   document.querySelectorAll('#filter-brands input').forEach(cb => {
     cb.addEventListener('change', () => {
       const b = cb.dataset.brand;
@@ -282,7 +299,7 @@ function wireControls(){
 
   document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 
-  const resetAll = () => { state = { q:'', types:[], brands:[], priceMin:null, priceMax:null, yearMin:null, yearMax:null, kmMax:null, ccmMin:null, ccmMax:null, regions:[], conditions:[], dealerOnly:false, sort:'date-desc', page:1 }; render(); };
+  const resetAll = () => { state = { q:'', types:[], brands:[], priceMin:null, priceMax:null, yearMin:null, yearMax:null, kmMax:null, ccmMin:null, ccmMax:null, regions:[], conditions:[], dealerOnly:false, koerekort:'', sort:'date-desc', page:1 }; render(); };
   document.getElementById('clear-filters').addEventListener('click', resetAll);
   document.getElementById('clear-filters-mobile').addEventListener('click', resetAll);
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);

@@ -265,6 +265,39 @@ function typeLabel(id){
   return (TYPES.find(t=>t.id===id) || {}).label || id;
 }
 
+/* ============ Kørekortkategorier ============
+   Kilde: Færdselsstyrelsen, "Kørekort til motorcykel".
+     A1  maks. 125 cm³, maks. 11 kW (15 hk), maks. 0,1 kW/kg — fra 18 år
+     A2  maks. 35 kW (48 hk), maks. 0,2 kW/kg, ikke afledt af mc med
+         mere end dobbelt effekt — fra 20 år
+     A   ingen effektbegrænsning — fra 24 år
+
+   VIGTIGT: A2 har INGEN slagvolumengrænse. Filtrering på ccm ville være
+   forkert og kunne få en køber til at tro, at en for kraftig mc var lovlig.
+
+   Vi kan kun filtrere på effekt. Forholdet kW/kg kræver køreklar vægt, som
+   annoncerne ikke indeholder, og en mc kan være en *begrænset* udgave af en
+   kraftigere model. Derfor er filteret en vejledning, ikke en garanti —
+   det siger UI'et også eksplicit. */
+const KOEREKORT = [
+  { id: 'A1', label: 'A1 (lille mc)',      hint: 'Maks. 125 cm³ og 15 hk' },
+  { id: 'A2', label: 'A2 (mellem mc)',     hint: 'Maks. 48 hk' },
+  { id: 'A',  label: 'A (stor mc)',        hint: 'Ingen effektgrænse' },
+];
+
+const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 48;
+
+/* Må en mc med denne effekt/slagvolumen føres på det valgte kørekort?
+   Et højere kørekort dækker de lavere kategorier. */
+function passerKoerekort(listing, kat){
+  if (!kat) return true;
+  const hk = Number(listing.power) || 0;
+  const ccm = Number(listing.ccm) || 0;
+  if (kat === 'A1') return ccm <= A1_MAX_CCM && hk <= A1_MAX_HK;
+  if (kat === 'A2') return hk <= A2_MAX_HK;
+  return true; // A dækker alt
+}
+
 /* ============ Security / trust helpers ============ */
 function escapeHTML(str){
   return String(str ?? '').replace(/[&<>"']/g, (c) => ({

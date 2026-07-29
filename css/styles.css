@@ -1007,3 +1007,54 @@ select.input{
 
 /* Søgesidens overskrift — diskret, men giver siden en rigtig h1 */
 .search-heading{ font-size: clamp(20px,2.6vw,26px); margin-bottom: var(--space-4); }
+
+/* ============ Mobil: værktøjslinje må ikke sprænge skærmen ============
+   "Gem søgning" + visningsskifter + Filtre + sortering blev tilsammen
+   bredere end en telefon. De wrapper nu i stedet for at give vandret scroll. */
+.results-toolbar{ flex-wrap: wrap; }
+.toolbar-actions{ flex-wrap: wrap; }
+@media (max-width: 620px){
+  .results-toolbar{ align-items: stretch; }
+  .toolbar-actions{ width: 100%; display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
+  .toolbar-actions #save-search-btn{ grid-column: 1 / -1; justify-content: center; }
+  .toolbar-actions #sort-select{ min-width: 0; width: 100%; grid-column: 1; }
+  .results-count{ width: 100%; }
+}
+
+/* ============ Touch-mål (Apple HIG / Material: min. 44px) ============
+   Gælder kun enheder med "grov" pegeenhed, så musebrugere beholder den
+   kompakte visning. */
+/* Bredde frem for pointer-type: en 36px-knap er under anbefalingen på enhver
+   enhed i telefonstørrelse, og reglen kan faktisk verificeres i test. */
+@media (max-width: 620px){
+  .btn-sm{ min-height: 44px; }
+  .view-toggle button{ min-height: 44px; min-width: 44px; }
+  .cookie-banner .btn{ min-height: 44px; }
+  .star-picker button{ min-height: 44px; min-width: 44px; }
+  .agent-actions .icon-btn{ width: 44px; height: 44px; }
+}
+/* Rigtige touch-enheder får det uanset skærmbredde (fx tablets). */
+@media (pointer: coarse){
+  .btn-sm, .cookie-banner .btn{ min-height: 44px; }
+  .view-toggle button, .star-picker button{ min-height: 44px; min-width: 44px; }
+  .agent-actions .icon-btn{ width: 44px; height: 44px; }
+}
+
+/* X'et på et aktivt filter var 18px — for lille at ramme.
+   Hitboksen udvides uden at ændre det visuelle. */
+.active-filter-pill button{
+  position: relative; min-width: 24px; min-height: 24px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.active-filter-pill button::after{
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 44px; height: 44px; transform: translate(-50%, -50%);
+}
+
+/* Profilnavnet er ikke længere et h1 (den ligger statisk i markup for SEO),
+   men skal se ud præcis som før. */
+.profile-name{
+  font-family: var(--font-display); font-weight:700; font-size:24px;
+  line-height:1.15; letter-spacing:-0.01em; margin:0;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}

@@ -63,6 +63,10 @@ function renderListing(){
   currentPhotoIndex = 0;
 
   document.title = `${listing.brand} ${listing.model} — Bikerbasen`;
+  // Én h1 pr. side: den statiske i markup opdateres, så også crawlere
+  // uden JavaScript ser en overskrift.
+  const h1 = document.getElementById('listing-h1');
+  if (h1){ h1.textContent = `${listing.brand} ${listing.model}`; }
   document.getElementById('bc-type').textContent = typeLabel(listing.type);
   document.getElementById('bc-type').href = `soegning.html?type=${listing.type}`;
   document.getElementById('bc-current').textContent = `${listing.brand} ${listing.model}`;
@@ -95,7 +99,7 @@ function renderListing(){
 
       <div class="listing-header">
         <div>
-          <h1 class="listing-title">${brand} ${model}</h1>
+          <p class="listing-title">${brand} ${model}</p>
           <div class="listing-loc">${Icon.mapPin}${escapeHTML(listing.city)}, ${listing.postnr} · ${escapeHTML(listing.region)}</div>
         </div>
         <div style="display:flex; align-items:center; gap:12px;">

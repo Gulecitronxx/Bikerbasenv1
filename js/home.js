@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Curated entry points tailored to motorcycle buyers
   const POPULAR = [
     { label: 'Under 50.000 kr.', icon: 'medal', params: { maxPrice: 50000 } },
-    { label: 'A2-venlig (≤ 500 ccm)', icon: 'bike', params: { ccmMax: 500 } },
+    { label: 'Kan køres på A2', icon: 'bike', params: { koerekort: 'A2' } },
+    { label: 'Kan køres på A1', icon: 'bike', params: { koerekort: 'A1' } },
     { label: 'Adventure', icon: 'mapPin', params: { type: 'adventure' } },
     { label: 'Veteran & klassisk', icon: 'clock', params: { type: 'classic' } },
     { label: 'Under 10.000 km', icon: 'gauge', params: { kmMax: 10000 } },

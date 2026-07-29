@@ -4,3 +4,6 @@ Thumbs.db
 
 # Firecrawl scrape cache
 .firecrawl/
+
+# Playwright MCP artefakter
+.playwright-mcp/

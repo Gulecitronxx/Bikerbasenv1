@@ -66,12 +66,14 @@ async function renderProfile(){
   const sellerNameEsc = escapeHTML(seller.name);
 
   document.title = `${seller.name} — Bikerbasen`;
+  const ph1 = document.getElementById('profile-h1');
+  if (ph1) ph1.textContent = seller.name;
   document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
 
   document.getElementById('profile-top').innerHTML = `
     <div class="avatar-lg">${initials(seller.name)}</div>
     <div class="profile-info">
-      <h1>${sellerNameEsc}</h1>
+      <p class="profile-name">${sellerNameEsc}</p>
       <div style="margin:6px 0 4px;">${verifiedBadgeHTML(seller)}</div>
       <div class="profile-meta">
         <span>${Icon.mapPin}${escapeHTML(seller.city)}</span>

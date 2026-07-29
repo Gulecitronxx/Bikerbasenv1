@@ -115,6 +115,8 @@ for (const brand of brands){
 <title>Brugte ${esc(brand)} motorcykler til salg — Bikerbasen</title>
 <meta name="description" content="Se ${items.length} brugte ${esc(brand)} motorcykler til salg i Danmark. Sammenlign pris, årgang, km-stand og ccm — fra private sælgere og verificerede forhandlere.">
 <link rel="canonical" href="https://gulecitronxx.github.io/Bikerbasenv1/maerke-${slug}.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="favicon.svg">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -196,6 +198,8 @@ const indexHtml = `<!doctype html>
 <title>Alle motorcykelmærker — Bikerbasen</title>
 <meta name="description" content="Find brugte motorcykler efter mærke. Se udvalget fra ${brands.length} mærker med annoncer til salg i Danmark på Bikerbasen.">
 <link rel="canonical" href="https://gulecitronxx.github.io/Bikerbasenv1/maerker.html">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="favicon.svg">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
