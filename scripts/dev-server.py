@@ -14,6 +14,7 @@ import functools
 import http.server
 import os
 import socketserver
+import threading
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PORT = int(os.environ.get("PORT", "8532"))
@@ -32,9 +33,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             super().log_message(fmt, *args)
 
 
-socketserver.TCPServer.allow_reuse_address = True
+class Server(socketserver.ThreadingTCPServer):
+    """Trådet, fordi en browser holder forbindelser åbne (keep-alive).
+
+    Med den enkelte TCPServer blokerede én åben faneblad alle andre
+    forespørgsler — også et curl fra kommandolinjen hang i det uendelige.
+    """
+
+    allow_reuse_address = True
+    daemon_threads = True
+
+
 handler = functools.partial(Handler, directory=ROOT)
 
-with socketserver.TCPServer(("127.0.0.1", PORT), handler) as httpd:
+with Server(("127.0.0.1", PORT), handler) as httpd:
     print(f"Bikerbasen kører på http://127.0.0.1:{PORT}")
     httpd.serve_forever()

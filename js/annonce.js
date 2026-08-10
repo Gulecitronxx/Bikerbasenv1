@@ -36,6 +36,21 @@ function initials(name){
   return name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
 }
 
+/* Tæller én visning pr. annonce pr. browsersession.
+
+   Uden spærren ville et par tryk på tilbage-knappen puste tallet op, og
+   dashboardet ville vise trafik der ikke findes. sessionStorage frem for
+   localStorage: en ny dag eller et nyt vindue er et nyt reelt besøg. */
+function tælVisning(listingId){
+  if (!isUuid(String(listingId))) return;
+  const nøgle = 'bb_set_' + listingId;
+  try {
+    if (sessionStorage.getItem(nøgle)) return;
+    sessionStorage.setItem(nøgle, '1');
+  } catch (e) { /* privat tilstand: tæl hellere for meget end slet ikke */ }
+  db.recordListingEvent?.(listingId, 'view');
+}
+
 function renderListing(){
   const id = getIdFromURL();
   const listing = Store.getListingById(id);
@@ -67,6 +82,7 @@ function renderListing(){
   // Titel, delingsbillede og struktureret data følger annoncen, så et link
   // delt i en MC-gruppe viser mærke, årgang og pris frem for bare "Annonce".
   seoListingPage(listing, listing.photoUrls || []);
+  tælVisning(listing.id);
   // Én h1 pr. side: den statiske i markup opdateres, så også crawlere
   // uden JavaScript ser en overskrift.
   const h1 = document.getElementById('listing-h1');
@@ -180,7 +196,7 @@ function renderListing(){
       </div>
 
       <div class="sidebar-card">
-        <a href="forhandler.html?id=${encodeURIComponent(listing.seller.name)}" class="btn btn-outline btn-block">${Icon.user}Se sælgerprofil</a>
+        <a href="forhandler.html?id=${encodeURIComponent(listing.seller.id || "")}" class="btn btn-outline btn-block">${Icon.user}Se sælgerprofil</a>
       </div>
     </div>
   `;
@@ -199,6 +215,8 @@ function renderListing(){
   revealBtn.addEventListener('click', () => {
     revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${listing.seller.phone}</span>`;
     revealBtn.disabled = true;
+    // Tælles som en henvendelse i sælgerens dashboard.
+    db.recordListingEvent?.(listing.id, 'contact');
   });
 
   document.getElementById('share-listing-btn').addEventListener('click', async () => {

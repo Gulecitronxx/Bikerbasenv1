@@ -19,7 +19,9 @@
   --color-danger: #D6392E;
   --color-danger-tint: #FBE7E5;
   --color-ring: #C6420E;
-  --color-badge-new: #1E8E5A;
+  /* Mørkere end --color-success: badget sætter hvid tekst på farven i 11 px,
+     og #1E8E5A gav kun 4,14:1 mod hvid. #1A7D4F giver 5,13:1. */
+  --color-badge-new: #1A7D4F;
 
   --shadow-sm: 0 1px 2px rgba(28,26,24,0.06);
   --shadow-md: 0 4px 16px rgba(28,26,24,0.08);
@@ -266,8 +268,11 @@ svg{display:block; width:1em; height:1em;}
 @media (min-width:768px){ .footer-grid{ grid-template-columns: 1.4fr 1fr 1fr 1fr; } }
 .footer-brand{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:20px; color:#fff; margin-bottom:var(--space-3); }
 .footer-brand svg{ width:24px; height:24px; color:var(--color-primary); }
-.footer-col h4{ color:#fff; font-size:14px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:var(--space-3); font-family:var(--font-body); font-weight:700; }
+.footer-col h2.footer-col-title, .footer-col h4{ color:#fff; font-size:14px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:var(--space-3); font-family:var(--font-body); font-weight:700; }
 .footer-col ul{ display:flex; flex-direction:column; gap:10px; font-size:14px; }
+/* Fodlinkene var 18 px høje. WCAG 2.5.8 kræver mindst 24×24 for et
+   klikmål, og på en telefon var de reelt svære at ramme. */
+.footer-col ul li a{ display:inline-flex; align-items:center; min-height:24px; }
 .footer-bottom{
   border-top:1px solid rgba(255,255,255,0.1); padding: var(--space-4) 0;
   display:flex; flex-wrap:wrap; gap:var(--space-3); justify-content:space-between; font-size:13px; color:#9C958A;

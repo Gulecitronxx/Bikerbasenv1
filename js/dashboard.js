@@ -1,27 +1,48 @@
 /* ============ Forhandler dashboard ============
-   Views/inquiries are deterministic synthetic demo data (seeded per listing id)
-   so numbers stay stable across reloads. There is no backend collecting real
-   traffic — the UI states this explicitly. */
+   Visninger og henvendelser kommer fra listing_stats (migration 004) —
+   dagstotaler pr. annonce, uden IP eller cookie bag sig. Gemte annoncer
+   tælles via my_listing_saves(), fordi favorites-politikken kun lader en
+   bruger se sine egne favoritter. */
 
 const DASH_DAYS = 30;
 
-function statsForListing(listing){
-  const seed = Number(String(listing.id).slice(-6)) || 1;
-  const rnd = seededRandom(seed * 31 + 7);
-  const popularity = 0.5 + rnd();
-  const series = [];
-  let base = 6 + Math.floor(rnd() * 14 * popularity);
-  for (let i = 0; i < DASH_DAYS; i++){
-    const weekday = (i % 7);
-    const weekendLift = (weekday === 5 || weekday === 6) ? 1.35 : 1;
-    const drift = 1 + (rnd() - 0.45) * 0.5;
-    base = Math.max(1, Math.round(base * drift));
-    series.push(Math.max(0, Math.round(base * weekendLift * popularity)));
+/* Dagstotaler fra databasen, indekseret som listing_id -> {dag -> tal}. */
+let STATS_BY_LISTING = new Map();
+let SAVES_BY_LISTING = new Map();
+
+/* Dagene i rækkefølge, ældst først — samme akse for alle serier. */
+function dashDays(){
+  const ud = [];
+  const nu = new Date();
+  for (let i = DASH_DAYS - 1; i >= 0; i--){
+    ud.push(new Date(nu.getTime() - i * 86400000).toISOString().slice(0, 10));
   }
+  return ud;
+}
+
+async function hentStatistik(){
+  STATS_BY_LISTING = new Map();
+  SAVES_BY_LISTING = new Map();
+  if (!db.enabled) return;
+
+  const [{ data: raekker }, { data: gemte }] = await Promise.all([
+    db.myListingStats(DASH_DAYS),
+    db.myListingSaves(),
+  ]);
+
+  (raekker || []).forEach(r => {
+    if (!STATS_BY_LISTING.has(r.listing_id)) STATS_BY_LISTING.set(r.listing_id, new Map());
+    STATS_BY_LISTING.get(r.listing_id).set(String(r.day).slice(0, 10), r);
+  });
+  (gemte || []).forEach(r => SAVES_BY_LISTING.set(r.listing_id, Number(r.saves) || 0));
+}
+
+function statsForListing(listing){
+  const perDag = STATS_BY_LISTING.get(listing.id) || new Map();
+  const series = dashDays().map(d => perDag.get(d)?.views || 0);
   const views = series.reduce((s, n) => s + n, 0);
-  const inquiries = Math.max(0, Math.round(views * (0.012 + rnd() * 0.02)));
-  const saves = Math.max(0, Math.round(views * (0.02 + rnd() * 0.03)));
-  return { series, views, inquiries, saves };
+  const inquiries = dashDays().reduce((s, d) => s + (perDag.get(d)?.contacts || 0), 0);
+  return { series, views, inquiries, saves: SAVES_BY_LISTING.get(listing.id) || 0 };
 }
 
 function sumSeries(all){
@@ -31,8 +52,9 @@ function sumSeries(all){
 }
 
 function dayLabel(indexFromEnd){
-  const now = new Date('2026-07-26T09:00:00');
-  const d = new Date(now.getTime() - (DASH_DAYS - 1 - indexFromEnd) * 86400000);
+  // Datoen var hårdkodet til demodagen. Nu hvor tallene er rigtige, skal
+  // aksen følge kalenderen — ellers står "26. jul" over dagens trafik.
+  const d = new Date(Date.now() - (DASH_DAYS - 1 - indexFromEnd) * 86400000);
   return d.toLocaleDateString('da-DK', { day: 'numeric', month: 'short' });
 }
 
@@ -250,9 +272,23 @@ function renderDashboard(user){
       </tr>`;
     }).join('');
     tbody.querySelectorAll('[data-del]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!confirm('Er du sikker på, at du vil slette denne annonce?')) return;
-        Store.removeMyListing(Number(btn.dataset.del));
+      btn.addEventListener('click', async () => {
+        if (!confirm('Er du sikker på, at du vil slette denne annonce? Det kan ikke fortrydes.')) return;
+        const id = btn.dataset.del;
+        // Samme fælde som i "Mine annoncer": Number() på et uuid giver NaN,
+        // så sletningen ramte kun localStorage og annoncen blev i databasen.
+        if (isUuid(id)){
+          btn.disabled = true;
+          const { error } = await db.deleteListing(id);
+          if (error){
+            btn.disabled = false;
+            toast('Annoncen kunne ikke slettes: ' + error.message);
+            return;
+          }
+          window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(l => l.id !== id);
+        } else {
+          Store.removeMyListing(id);
+        }
         toast('Annonce slettet');
         renderDashboard(user);
       });
@@ -294,5 +330,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
   document.getElementById('dash-content').style.display = '';
+  await hentStatistik();
   renderDashboard(user);
 });

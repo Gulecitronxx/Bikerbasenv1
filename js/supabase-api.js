@@ -133,6 +133,25 @@ const db = (function(){
         .eq('id', id).single();
     },
 
+    /* Én sælgers offentlige profil. public_profiles udstiller kun de felter,
+       en køber må se — ikke telefonnummer, CVR eller e-mail. */
+    async getPublicProfile(sellerId){
+      const c = init(); if (!c) return { data: null, error: null };
+      return c.from('public_profiles').select('*').eq('id', sellerId).single();
+    },
+
+    /* Alle aktive annoncer fra én sælger. Hentes direkte frem for at filtrere
+       den indlæste side — ellers ville en sælger med mange annoncer kun vise
+       dem, der tilfældigvis var med i de første 200. */
+    async listingsBySeller(sellerId){
+      const c = init(); if (!c) return { data: [], error: null };
+      return c.from('listings')
+        .select('*, seller:public_profiles!listings_seller_id_fkey(*), photos:listing_photos(id, storage_path, position)')
+        .eq('seller_id', sellerId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+    },
+
     async myListings(){
       const c = init(); if (!c) return { data: [], error: null };
       const user = await this.currentUser();
@@ -160,6 +179,29 @@ const db = (function(){
     async deleteListing(id){
       const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
       return c.from('listings').delete().eq('id', id);
+    },
+
+    /* ---------- Statistik ---------- */
+
+    /* Tæller en visning eller en kontaktafsløring. Fejl sluges bevidst:
+       et statistikkald må aldrig ødelægge siden for den besøgende. */
+    async recordListingEvent(listingId, kind){
+      const c = init(); if (!c || !isUuid(listingId)) return;
+      const { error } = await c.rpc('record_listing_event', { p_listing: listingId, p_kind: kind });
+      if (error) console.debug('Statistik ikke registreret:', error.message);
+    },
+
+    /* Dagstotaler for brugerens egne annoncer. RLS sørger for, at man kun
+       får sine egne — der er ingen grund til at filtrere i klienten. */
+    async myListingStats(days = 30){
+      const c = init(); if (!c) return { data: [], error: null };
+      const fra = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
+      return c.from('listing_stats').select('*').gte('day', fra).order('day', { ascending: true });
+    },
+
+    async myListingSaves(){
+      const c = init(); if (!c) return { data: [], error: null };
+      return c.rpc('my_listing_saves');
     },
 
     /* ---------- Billeder ---------- */

@@ -26,10 +26,10 @@
 <meta name="twitter:title" content="Log ind — Bikerbasen">
 <meta name="twitter:description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
 <meta name="twitter:image" content="https://gulecitronxx.github.io/Bikerbasenv1/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="css/styles.css?v=0aee5f2d">
+<link rel="stylesheet" href="css/styles.css?v=ef0cb09a">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -88,11 +88,11 @@
         <div class="form-grid">
           <div class="field field-full">
             <label for="login-email">E-mail</label>
-            <input class="input" id="login-email" type="email" required value="mc@bikerbasen.dk">
+            <input class="input" id="login-email" type="email" required autocomplete="email">
           </div>
           <div class="field field-full">
             <label for="login-password">Adgangskode</label>
-            <input class="input" id="login-password" type="password" required value="demo1234">
+            <input class="input" id="login-password" type="password" required autocomplete="current-password">
           </div>
         </div>
         <button type="submit" class="btn btn-primary btn-block" style="margin-top:20px;">Log ind</button>
@@ -102,20 +102,20 @@
         <div class="form-grid">
           <div class="field field-full">
             <label for="reg-name">Navn <span class="required-mark">*</span></label>
-            <input class="input" id="reg-name" required placeholder="F.eks. Mikkel Jensen">
+            <input class="input" id="reg-name" required autocomplete="name" placeholder="F.eks. Mikkel Jensen">
           </div>
           <div class="field field-full">
             <label for="reg-email">E-mail <span class="required-mark">*</span></label>
-            <input class="input" id="reg-email" type="email" required>
+            <input class="input" id="reg-email" type="email" required autocomplete="email">
           </div>
           <div class="field field-full">
             <label for="reg-phone">Telefonnummer <span class="required-mark">*</span></label>
-            <input class="input" id="reg-phone" type="tel" required placeholder="12 34 56 78">
+            <input class="input" id="reg-phone" type="tel" required autocomplete="tel" placeholder="12 34 56 78">
             <span class="field-hint">Bruges til SMS-bekræftelse af din konto.</span>
           </div>
           <div class="field field-full">
             <label for="reg-password">Adgangskode <span class="required-mark">*</span></label>
-            <input class="input" id="reg-password" type="password" required minlength="6">
+            <input class="input" id="reg-password" type="password" required minlength="6" autocomplete="new-password">
           </div>
           <div class="field field-full">
             <label class="checkbox-row" style="min-height:auto;"><input type="checkbox" id="reg-dealer">Jeg er forhandler (virksomhed)</label>
@@ -124,7 +124,7 @@
             <div class="form-grid cols-2">
               <div class="field">
                 <label for="reg-company">Virksomhedsnavn <span class="required-mark">*</span></label>
-                <input class="input" id="reg-company" placeholder="F.eks. Motorcykel Centret ApS">
+                <input class="input" id="reg-company" autocomplete="organization" placeholder="F.eks. Motorcykel Centret ApS">
               </div>
               <div class="field">
                 <label for="reg-cvr">CVR-nummer <span class="required-mark">*</span></label>
@@ -149,11 +149,14 @@
           <button type="button" class="btn btn-outline btn-sm" id="verify-phone-btn">Send kode</button>
         </div>
         <div id="phone-code-area" style="display:none; margin-bottom:14px;">
-          <div class="code-input-row">
-            <input class="input" maxlength="1" inputmode="numeric">
-            <input class="input" maxlength="1" inputmode="numeric">
-            <input class="input" maxlength="1" inputmode="numeric">
-            <input class="input" maxlength="1" inputmode="numeric">
+          <!-- role=group + aria-label giver skærmlæsere at vide, hvad de fire
+               felter tilsammen er. Uden det læses de op som fire navnløse
+               tekstfelter i træk. -->
+          <div class="code-input-row" role="group" aria-label="Firecifret bekræftelseskode fra sms">
+            <input class="input" maxlength="1" inputmode="numeric" aria-label="Ciffer 1 af 4" autocomplete="one-time-code">
+            <input class="input" maxlength="1" inputmode="numeric" aria-label="Ciffer 2 af 4">
+            <input class="input" maxlength="1" inputmode="numeric" aria-label="Ciffer 3 af 4">
+            <input class="input" maxlength="1" inputmode="numeric" aria-label="Ciffer 4 af 4">
             <button type="button" class="btn btn-primary btn-sm" id="confirm-phone-code" style="margin-left:8px;">Bekræft</button>
           </div>
           <span class="field-hint">Demo: indtast 4 cifre — koden kontrolleres ikke i denne prototype.</span>
@@ -192,7 +195,7 @@
         <p style="color:#B4AEA3; font-size:14px; max-width:320px;">Danmarks mødested for køb og salg af brugte motorcykler. Bygget til entusiaster, af entusiaster.</p>
       </div>
       <div class="footer-col">
-        <h4>Køb & salg</h4>
+        <h2 class="footer-col-title">Køb & salg</h2>
         <ul>
           <li><a href="soegning.html">Søg motorcykler</a></li>
           <li><a href="opret-annonce.html">Opret annonce</a></li>
@@ -200,7 +203,7 @@
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Kategorier</h4>
+        <h2 class="footer-col-title">Kategorier</h2>
         <ul>
           <li><a href="soegning.html?type=sport">Sport</a></li>
           <li><a href="soegning.html?type=touring">Touring</a></li>
@@ -211,7 +214,7 @@
         </ul>
       </div>
       <div class="footer-col">
-        <h4>Om Bikerbasen</h4>
+        <h2 class="footer-col-title">Om Bikerbasen</h2>
         <ul>
           <li><a href="sikkerhed.html">Sikkerhed & gode råd</a></li>
           <li><a href="vilkaar.html">Vilkår og betingelser</a></li>
@@ -226,17 +229,17 @@
   </div>
 </footer>
 
-<script src="js/security.js?v=0aee5f2d"></script>
+<script src="js/security.js?v=ef0cb09a"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js?v=0aee5f2d"></script>
-<script src="js/supabase-api.js?v=0aee5f2d"></script>
-<script src="js/icons.js?v=0aee5f2d"></script>
-<script src="js/bike-art.js?v=0aee5f2d"></script>
-<script src="js/postnumre.js?v=0aee5f2d"></script>
-<script src="js/data.js?v=0aee5f2d"></script>
-<script src="js/store.js?v=0aee5f2d"></script>
-<script src="js/backend-bridge.js?v=0aee5f2d"></script>
-<script src="js/components.js?v=0aee5f2d"></script>
-<script src="js/login.js?v=0aee5f2d"></script>
+<script src="js/supabase-config.js?v=ef0cb09a"></script>
+<script src="js/supabase-api.js?v=ef0cb09a"></script>
+<script src="js/icons.js?v=ef0cb09a"></script>
+<script src="js/bike-art.js?v=ef0cb09a"></script>
+<script src="js/postnumre.js?v=ef0cb09a"></script>
+<script src="js/data.js?v=ef0cb09a"></script>
+<script src="js/store.js?v=ef0cb09a"></script>
+<script src="js/backend-bridge.js?v=ef0cb09a"></script>
+<script src="js/components.js?v=ef0cb09a"></script>
+<script src="js/login.js?v=ef0cb09a"></script>
 </body>
 </html>

@@ -56,15 +56,61 @@ function renderStarPicker(){
   });
 }
 
+/* Viser en ærlig "findes ikke"-tilstand.
+
+   Før faldt siden tilbage på den første sælger i listen, når id'et ikke gav
+   et hit. Man kunne altså klikke ind på én sælger og få en helt anden
+   persons profil, badges og annoncer serveret som om den var rigtig. */
+function renderProfileNotFound(){
+  document.title = 'Sælgeren findes ikke — Bikerbasen';
+  Seo.setMeta('meta[name="robots"]', 'name', 'robots', 'noindex, follow');
+  document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
+  document.getElementById('profile-top').innerHTML = `
+    <div class="empty-state" style="grid-column:1/-1;">
+      ${Icon.user}
+      <h3>Vi kunne ikke finde sælgeren</h3>
+      <p>Profilen er måske slettet, eller linket er forkert.</p>
+      <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
+    </div>`;
+  document.getElementById('profile-stats-row').innerHTML = '';
+  document.querySelector('.profile-tabs')?.remove();
+  ['tab-annoncer','tab-anmeldelser','tab-om'].forEach(id => document.getElementById(id)?.remove());
+}
+
+/* Henter sælgeren ud fra seller_id.
+
+   Tidligere blev der slået op på navn, hvilket gav to problemer: to sælgere
+   med samme navn smeltede sammen til én profil, og navnet lå i URL'en.
+   Annoncerne hentes direkte fra databasen frem for at filtrere den
+   indlæste side, så en sælger med mange annoncer viser dem alle. */
+async function hentSaelger(sellerId){
+  if (!db.enabled){
+    const alle = Store.getAllListings().filter(l => String(l.seller?.id ?? l.seller?.name) === String(sellerId));
+    return { seller: alle[0]?.seller || null, listings: alle };
+  }
+  const [{ data: profil }, { data: annoncer }] = await Promise.all([
+    db.getPublicProfile(sellerId),
+    db.listingsBySeller(sellerId),
+  ]);
+  if (!profil) return { seller: null, listings: [] };
+  return {
+    seller: {
+      id: profil.id, name: profil.name || 'Ukendt sælger', city: profil.city || '',
+      isDealer: !!profil.is_dealer, company: profil.company || null,
+      verified: !!profil.verified, memberSince: profil.member_since,
+      rating: null, reviews: 0, phone: null,
+    },
+    listings: (annoncer || []).map(normalizeRemoteListing),
+  };
+}
+
 async function renderProfile(){
-  const id = new URLSearchParams(window.location.search).get('id');
-  const sellerName = id ? decodeURIComponent(id) : null;
-  const all = Store.getAllListings();
-  const sellerListings = sellerName ? all.filter(l => l.seller.name === sellerName) : all.filter(l => l.isDealer).slice(0, 6);
-  // Tom database eller et sælgernavn der ikke findes: uden dette fallback
-  // ville all[0] være undefined og hele siden fejle med en tom skærm.
-  const seller = sellerListings.length ? sellerListings[0].seller
-    : (all.length ? all[0].seller : { name: sellerName || 'Ukendt sælger', city: '', isDealer: false, memberSince: new Date().getFullYear(), rating: 0, reviews: 0, verified: false, emailVerified: false, phoneVerified: false, mitIdVerified: false, phone: '' });
+  const sellerId = new URLSearchParams(window.location.search).get('id');
+  if (!sellerId){ renderProfileNotFound(); return; }
+
+  const { seller, listings: sellerListings } = await hentSaelger(decodeURIComponent(sellerId));
+  if (!seller){ renderProfileNotFound(); return; }
+
   currentSeller = seller;
   const sellerNameEsc = escapeHTML(seller.name);
 

@@ -187,7 +187,7 @@ function seoSearchResults(listings, heading){
 
 /* Forhandlerprofil. */
 function seoDealerPage(seller, listingCount){
-  const url = `${SITE_URL}/forhandler.html?id=${encodeURIComponent(seller.name)}`;
+  const url = `${SITE_URL}/forhandler.html?id=${encodeURIComponent(seller.id || "")}`;
   Seo.setSocial({
     title: `${seller.name} — motorcykler til salg — Bikerbasen`,
     description: `Se ${listingCount} ${listingCount === 1 ? 'motorcykel' : 'motorcykler'} til salg fra ${seller.name}${seller.city ? ' i ' + seller.city : ''} på Bikerbasen.`,
