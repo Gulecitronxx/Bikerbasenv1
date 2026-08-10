@@ -44,6 +44,8 @@ oven på et eksisterende skema uden at røre data, du allerede har:
 | `004a_tabel.sql` | Tabel til dagstotaler pr. annonce, med RLS så kun ejeren ser sine tal |
 | `004b_visninger.sql` | Funktion der tæller en visning eller en kontaktafsløring |
 | `004c_gemte.sql` | Funktion der tæller hvor mange der har gemt hver af dine annoncer |
+| `005_beskyt_verificering.sql` | Låser `mitid_verified`/`cvr_verified`/`email_verified`, så ingen kan give sig selv et falsk "Verificeret"-badge |
+| `005_tjek.sql` | Kun læsning — viser at flagene er låst for almindelige brugere |
 
 **Kør 004 som tre separate filer, én ad gangen.** SQL-editoren kører et ark
 som én transaktion, så ét fejlende udtryk ruller resten tilbage — og skjuler

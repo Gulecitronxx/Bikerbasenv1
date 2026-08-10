@@ -74,16 +74,18 @@ function updateAuthSlot(){
     Store.logout();
     window.location.href = 'index.html';
   };
+  // Navnet escapes, selvom det er brugerens eget: uden det kunne et navn som
+  // <img onerror> køre kode i ens egen header (self-XSS). Billig forsikring.
   const slot = document.querySelector('[data-auth-slot]');
   if (slot){
     slot.setAttribute('href', '#');
-    slot.innerHTML = `${Icon.user}${user.name.split(' ')[0]} · Log ud`;
+    slot.innerHTML = `${Icon.user}${escapeHTML(String(user.name || '').split(' ')[0])} · Log ud`;
     slot.addEventListener('click', onLogout);
   }
   const slotMobile = document.querySelector('[data-auth-slot-mobile]');
   if (slotMobile){
     slotMobile.setAttribute('href', '#');
-    slotMobile.innerHTML = `${Icon.user}Log ud (${user.name})`;
+    slotMobile.innerHTML = `${Icon.user}Log ud (${escapeHTML(user.name || '')})`;
     slotMobile.addEventListener('click', onLogout);
   }
 }

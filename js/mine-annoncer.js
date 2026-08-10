@@ -191,7 +191,7 @@ function renderAgents(){
         <div class="agent-meta">${matches.length} ${matches.length === 1 ? 'match' : 'matches'} i alt · oprettet ${new Date(a.createdAt).toLocaleDateString('da-DK')}</div>
       </div>
       <div class="agent-actions">
-        <a href="soegning.html?${a.query}" class="btn btn-outline btn-sm">Vis</a>
+        <a href="soegning.html?${escapeHTML(a.query)}" class="btn btn-outline btn-sm">Vis</a>
         <button type="button" class="icon-btn ${a.notify ? '' : 'muted'}" data-notify="${a.id}"
                 aria-label="${a.notify ? 'Slå notifikationer fra' : 'Slå notifikationer til'}"
                 title="${a.notify ? 'Notifikationer slået til' : 'Notifikationer slået fra'}">${a.notify ? Icon.bell : Icon.bellOff}</button>
