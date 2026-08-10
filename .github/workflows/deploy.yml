@@ -1,0 +1,49 @@
+name: Byg og udgiv Bikerbasen
+
+# Kører hele scripts/build.js automatisk ved hvert push til main, saa
+# annonce- og maerkesider, metatags, sitemap og versionsstempel altid er
+# opdateret paa den udgivne side — uanset om nogen huskede at koere det
+# lokalt foerst. Ingen hemmeligheder noedvendige: Supabase-noeglen i
+# js/supabase-config.js er den offentlige anon-noegle, tiltaenkt at ligge i
+# klientkode.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Kun ét udgivelsesforsoeg ad gangen. Skubber nogen igen mens et build
+# koerer, annulleres det gamle forsoeg til fordel for det nye.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Byg annonce- og maerkesider, metatags og versionsstempel
+        run: node scripts/build.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
