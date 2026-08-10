@@ -114,7 +114,7 @@ for (const brand of brands){
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Brugte ${esc(brand)} motorcykler til salg — Bikerbasen</title>
 <meta name="description" content="Se ${items.length} brugte ${esc(brand)} motorcykler til salg i Danmark. Sammenlign pris, årgang, km-stand og ccm — fra private sælgere og verificerede forhandlere.">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -196,7 +196,7 @@ const indexHtml = `<!doctype html>
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Alle motorcykelmærker — Bikerbasen</title>
 <meta name="description" content="Find brugte motorcykler efter mærke. Se udvalget fra ${brands.length} mærker med annoncer til salg i Danmark på Bikerbasen.">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="css/styles.css">
 </head>

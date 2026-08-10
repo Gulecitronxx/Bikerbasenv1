@@ -132,7 +132,7 @@ ${csp}
 <meta name="twitter:image" content="${esc(ogBillede)}">
 <!-- js/annonce.js henter id herfra naar siden ikke er kaldt med ?id= -->
 <meta name="listing-id" content="${esc(l.id)}">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="css/styles.css${v}">
 ${jsonLd(l, url)}
