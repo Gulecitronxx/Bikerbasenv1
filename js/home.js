@@ -54,9 +54,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (type) list = list.filter(l => l.type === type);
     if (maxPrice) list = list.filter(l => l.price <= maxPrice);
     const n = list.length;
-    countHint.innerHTML = n
-      ? `Din søgning matcher <b>${n}</b> ${n === 1 ? 'motorcykel' : 'motorcykler'} lige nu.`
-      : `Ingen motorcykler matcher lige nu — prøv at udvide søgningen.`;
+    const mc = n === 1 ? 'motorcykel' : 'motorcykler';
+    // "Din søgning" giver kun mening, når man faktisk har indtastet noget.
+    // Uden filtre viser vi bare totalen af, hvad der er til salg.
+    const harSøgt = q || type || maxPrice;
+    if (harSøgt){
+      countHint.innerHTML = n
+        ? `Din søgning matcher <b>${n}</b> ${mc} lige nu.`
+        : `Ingen motorcykler matcher lige nu — prøv at udvide søgningen.`;
+    } else {
+      countHint.innerHTML = n
+        ? `Der er <b>${n}</b> ${mc} til salg lige nu.`
+        : `Der er ingen motorcykler til salg lige nu.`;
+    }
     document.getElementById('hs-submit').textContent = n ? `Vis ${n} ${n === 1 ? 'motorcykel' : 'motorcykler'}` : 'Søg motorcykler';
   };
   ['hs-query','hs-type','hs-price'].forEach(id =>
