@@ -223,7 +223,8 @@ function renderPlanCard(){
       <p class="plan-badge">${Icon.shieldCheck} Forhandler · aktivt</p>
       <p style="color:var(--color-fg-muted); font-size:14px; margin:10px 0 0;">
         Du har ubegrænsede annoncer, forhandler-shop og fremhævet placering.</p>
-      <button type="button" class="btn btn-outline btn-sm" id="plan-downgrade" style="margin-top:14px;">Skift til privat (test)</button>`;
+      <button type="button" class="btn btn-outline btn-block" id="plan-portal" style="margin-top:14px;">Administrér abonnement</button>
+      <p style="font-size:12px; color:var(--color-fg-muted); margin:10px 0 0;">Opsig, skift betalingskort eller se kvitteringer via Stripes sikre kundeportal.</p>`;
   } else {
     card.innerHTML = `
       <h3 style="margin-bottom:6px;">Bliv forhandler</h3>
@@ -260,7 +261,20 @@ function renderPlanCard(){
     renderPlanCard();
     toast(plan === 'dealer' ? 'Du er nu forhandler (test)' : 'Skiftet til privat konto');
   };
+  // Åbn Stripes kundeportal, hvor forhandleren selv styrer abonnementet.
+  const åbnPortal = async (btn) => {
+    btn.disabled = true; btn.textContent = 'Åbner…';
+    const { data, error } = await db.openBillingPortal();
+    if (error || !data?.url){
+      btn.disabled = false; btn.textContent = 'Administrér abonnement';
+      toast('Kunne ikke åbne kundeportalen. Prøv igen om lidt.');
+      return;
+    }
+    window.location.href = data.url;
+  };
+
   document.getElementById('plan-upgrade')?.addEventListener('click', (e) => opgrader(e.currentTarget));
+  document.getElementById('plan-portal')?.addEventListener('click', (e) => åbnPortal(e.currentTarget));
   document.getElementById('plan-downgrade')?.addEventListener('click', () => devSkift('free'));
 }
 

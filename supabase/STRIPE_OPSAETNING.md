@@ -26,15 +26,16 @@ Filerne ligger i `supabase/functions/`. To måder:
 
 **A) Via Supabase Dashboard** (nemmest — ingen installation)
 - Supabase → **Edge Functions** → **Deploy a new function**.
-- Opret én ved navn `create-checkout`, indsæt indholdet af
-  `supabase/functions/create-checkout/index.ts`, og deploy.
-- Opret én ved navn `stripe-webhook`, indsæt indholdet af
-  `supabase/functions/stripe-webhook/index.ts`. **Slå "Verify JWT" FRA** for
-  denne (Stripe sender ikke et login med — signaturen er beskyttelsen).
+- Opret `create-checkout`, indsæt `supabase/functions/create-checkout/index.ts`, deploy.
+- Opret `create-portal`, indsæt `supabase/functions/create-portal/index.ts`, deploy.
+- Opret `stripe-webhook`, indsæt `supabase/functions/stripe-webhook/index.ts`.
+  **Slå "Verify JWT" FRA** for denne (Stripe sender ikke et login med —
+  signaturen er beskyttelsen).
 
 **B) Via CLI** (hvis du foretrækker det)
 ```bash
 supabase functions deploy create-checkout
+supabase functions deploy create-portal
 supabase functions deploy stripe-webhook --no-verify-jwt
 ```
 
@@ -71,6 +72,18 @@ automatisk — dem skal du ikke tilføje.
 
 ---
 
+## 4b. Aktivér kundeportalen
+
+For at "Administrér abonnement"-knappen virker, skal Stripes kundeportal slås til:
+
+1. Stripe → **Settings** → **Billing** → **Customer portal**.
+2. Slå den til, og vælg hvad forhandleren må: **opsige abonnement**, skifte
+   betalingskort, se fakturaer. Gem.
+
+(Uden dette svarer portalen med en fejl, og knappen viser "kunne ikke åbne".)
+
+---
+
 ## 5. Test i testtilstand
 
 1. Log ind på bikerbasen.dk med en konto → **Mine annoncer → Konto → Bliv forhandler**.
@@ -80,6 +93,9 @@ automatisk — dem skal du ikke tilføje.
    inden for et par sekunder (webhooken sætter planen).
 4. Prøv at oprette en 4. annonce som privat konto — den skal afvises med
    "bliv forhandler"-beskeden.
+5. Som forhandler: tryk **Administrér abonnement** → du sendes til Stripes
+   portal, hvor du kan opsige. Efter opsigelse (ved periodens udløb) sætter
+   webhooken planen tilbage til privat.
 
 ---
 
