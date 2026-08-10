@@ -11,11 +11,26 @@ function renderHeader(activeOverride){
     if (a.hasAttribute('data-auth-slot-mobile')) return;
     a.classList.toggle('active', a.getAttribute('href') === current);
   });
+  updateAuthVisibility();
   injectDealerNav(current);
   updateFavCount();
   updateAuthSlot();
   wireHeader();
   initCookieConsent();
+}
+
+/* Opret annonce og Mine annoncer kræver login — begge sider sender en
+   anonym bruger direkte videre til login. Derfor skjules de i toppen, når
+   ingen er logget ind, så man ikke lokkes ind i et dødt link. Punkterne
+   står stadig i HTML'en (crawlbare), og vises igen straks man logger ind. */
+function updateAuthVisibility(){
+  const loggedIn = !!Store.getUser();
+  // Fuld href, så "Gemte annoncer" (mine-annoncer.html?tab=favoritter) ikke
+  // rammes — favoritter virker for anonyme og skal blive stående.
+  const authOnly = ['opret-annonce.html', 'mine-annoncer.html'];
+  document.querySelectorAll('.main-nav a, .mobile-drawer-panel a[href], .header-cta').forEach(a => {
+    if (authOnly.includes(a.getAttribute('href'))) a.hidden = !loggedIn;
+  });
 }
 
 /* Dashboard is dealer-only, so the link is injected for dealer accounts
