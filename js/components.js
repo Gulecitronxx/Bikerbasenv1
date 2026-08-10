@@ -324,7 +324,11 @@ function wireFavoriteButtons(root){
   (root || document).querySelectorAll('[data-fav-toggle]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault(); e.stopPropagation();
-      const id = Number(btn.getAttribute('data-fav-toggle'));
+      // Ikke Number(): database-annoncer har uuid som id, og Number('4f2..')
+      // er NaN — så et hjerteklik ramte forbi og kunne hverken like eller
+      // unlike en rigtig annonce. Behold id'et som det er.
+      const raw = btn.getAttribute('data-fav-toggle');
+      const id = /^\d+$/.test(raw) ? Number(raw) : raw;
       const active = Store.toggleFavorite(id);
       btn.classList.toggle('active', active);
       btn.setAttribute('aria-pressed', active);

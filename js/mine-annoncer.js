@@ -25,9 +25,10 @@ function listingRowHTML(l, { owned } = {}){
       <div class="lr-actions">
         <a class="lr-similar" href="soegning.html?type=${encodeURIComponent(l.type)}">${Icon.search}Se lignende motorcykler</a>
         <div class="lr-buttons">
-          ${owned ? `<a class="btn btn-outline btn-sm" href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}">${Icon.edit}Rediger</a>` : ''}
-          <button type="button" class="lr-trash" aria-label="${owned ? 'Slet annonce' : 'Fjern fra favoritter'}"
-            ${owned ? `data-delete-listing="${l.id}"` : `data-fav-toggle="${l.id}"`}>${Icon.trash}</button>
+          ${owned
+            ? `<a class="btn btn-outline btn-sm" href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}">${Icon.edit}Rediger</a>
+               <button type="button" class="lr-trash" data-delete-listing="${l.id}" aria-label="Slet annonce">${Icon.trash}</button>`
+            : `<button type="button" class="lr-fav active" data-fav-toggle="${l.id}" aria-pressed="true" aria-label="Fjern fra favoritter">${Icon.heart}</button>`}
         </div>
       </div>
     </div>

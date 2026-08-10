@@ -9,7 +9,9 @@ const Store = {
   getFavorites(){
     try { return JSON.parse(localStorage.getItem(this.KEYS.favorites)) || []; } catch(e){ return []; }
   },
-  isFavorite(id){ return this.getFavorites().includes(id); },
+  // Sammenlign som streng: favoritter kan være uuid'er (database) eller tal
+  // (gamle/lokale), og et strengt includes ville lade dem forbi hinanden.
+  isFavorite(id){ return this.getFavorites().some(f => String(f) === String(id)); },
   /* Synkron af hensyn til UI'et; skrivningen til databasen sker i baggrunden,
      så hjertet reagerer med det samme. */
   toggleFavorite(id){
@@ -21,8 +23,9 @@ const Store = {
     }
 
     let favs = this.getFavorites();
-    const nowFavorite = !favs.includes(id);
-    favs = nowFavorite ? [...favs, id] : favs.filter(f => f !== id);
+    // Streng-sammenligning, så uuid og tal ikke glider forbi hinanden.
+    const nowFavorite = !favs.some(f => String(f) === String(id));
+    favs = nowFavorite ? [...favs, id] : favs.filter(f => String(f) !== String(id));
     localStorage.setItem(this.KEYS.favorites, JSON.stringify(favs));
     document.dispatchEvent(new CustomEvent('bb:favorites-changed', { detail: favs }));
 

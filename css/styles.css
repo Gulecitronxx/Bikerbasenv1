@@ -825,6 +825,13 @@ select.input{
 .lr-trash{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg-muted); cursor:pointer; flex-shrink:0; }
 .lr-trash:hover{ border-color: var(--color-danger); color: var(--color-danger); }
 .lr-trash svg{ width:18px; height:18px; }
+/* Hjerte på favoritrækker — udfyldt, fordi annoncen allerede er liket; et
+   klik fjerner den fra favoritter. */
+.lr-fav{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg-muted); cursor:pointer; flex-shrink:0; }
+.lr-fav svg{ width:20px; height:20px; }
+.lr-fav.active{ color: var(--color-primary); border-color: var(--color-primary); }
+.lr-fav.active svg{ fill: currentColor; }
+.lr-fav:hover{ border-color: var(--color-primary); }
 @media (max-width:560px){
   .listing-row{ flex-direction:column; }
   .lr-media{ width:100%; aspect-ratio:16/10; }
