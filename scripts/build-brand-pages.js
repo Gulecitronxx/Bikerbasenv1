@@ -116,6 +116,10 @@ for (const brand of brands){
 <meta name="description" content="Se ${items.length} brugte ${esc(brand)} motorcykler til salg i Danmark. Sammenlign pris, årgang, km-stand og ccm — fra private sælgere og verificerede forhandlere.">
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -167,18 +171,18 @@ ${header}
 
 ${footer}
 
-<script src="js/security.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/supabase-api.js"></script>
-<script src="js/icons.js"></script>
-<script src="js/bike-art.js"></script>
-<script src="js/postnumre.js"></script>
-<script src="js/data.js"></script>
-<script src="js/store.js"></script>
-<script src="js/backend-bridge.js"></script>
-<script src="js/components.js"></script>
-<script src="js/maerke.js"></script>
+<script defer src="js/security.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="js/supabase-config.js"></script>
+<script defer src="js/supabase-api.js"></script>
+<script defer src="js/icons.js"></script>
+<script defer src="js/bike-art.js"></script>
+<script defer src="js/postnumre.js"></script>
+<script defer src="js/data.js"></script>
+<script defer src="js/store.js"></script>
+<script defer src="js/backend-bridge.js"></script>
+<script defer src="js/components.js"></script>
+<script defer src="js/maerke.js"></script>
 </body>
 </html>
 `;
@@ -198,6 +202,10 @@ const indexHtml = `<!doctype html>
 <meta name="description" content="Find brugte motorcykler efter mærke. Se udvalget fra ${brands.length} mærker med annoncer til salg i Danmark på Bikerbasen.">
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -227,17 +235,17 @@ ${header}
 
 ${footer}
 
-<script src="js/security.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/supabase-api.js"></script>
-<script src="js/icons.js"></script>
-<script src="js/bike-art.js"></script>
-<script src="js/postnumre.js"></script>
-<script src="js/data.js"></script>
-<script src="js/store.js"></script>
-<script src="js/backend-bridge.js"></script>
-<script src="js/components.js"></script>
+<script defer src="js/security.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="js/supabase-config.js"></script>
+<script defer src="js/supabase-api.js"></script>
+<script defer src="js/icons.js"></script>
+<script defer src="js/bike-art.js"></script>
+<script defer src="js/postnumre.js"></script>
+<script defer src="js/data.js"></script>
+<script defer src="js/store.js"></script>
+<script defer src="js/backend-bridge.js"></script>
+<script defer src="js/components.js"></script>
 <script>document.addEventListener('DOMContentLoaded', () => {
   renderHeader('maerker.html');
   document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);

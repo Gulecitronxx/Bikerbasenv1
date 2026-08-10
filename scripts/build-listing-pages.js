@@ -134,6 +134,10 @@ ${csp}
 <meta name="listing-id" content="${esc(l.id)}">
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="css/styles.css${v}">
 ${jsonLd(l, url)}
 </head>
@@ -227,19 +231,19 @@ ${footer}
 
 ${contactModal}
 
-<script src="js/security.js${v}"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js${v}"></script>
-<script src="js/supabase-api.js${v}"></script>
-<script src="js/icons.js${v}"></script>
-<script src="js/bike-art.js${v}"></script>
-<script src="js/postnumre.js${v}"></script>
-<script src="js/data.js${v}"></script>
-<script src="js/store.js${v}"></script>
-<script src="js/backend-bridge.js${v}"></script>
-<script src="js/components.js${v}"></script>
-<script src="js/seo.js${v}"></script>
-<script src="js/annonce.js${v}"></script>
+<script defer src="js/security.js${v}"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="js/supabase-config.js${v}"></script>
+<script defer src="js/supabase-api.js${v}"></script>
+<script defer src="js/icons.js${v}"></script>
+<script defer src="js/bike-art.js${v}"></script>
+<script defer src="js/postnumre.js${v}"></script>
+<script defer src="js/data.js${v}"></script>
+<script defer src="js/store.js${v}"></script>
+<script defer src="js/backend-bridge.js${v}"></script>
+<script defer src="js/components.js${v}"></script>
+<script defer src="js/seo.js${v}"></script>
+<script defer src="js/annonce.js${v}"></script>
 </body>
 </html>
 `;
