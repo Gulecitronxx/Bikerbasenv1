@@ -108,7 +108,13 @@ async function renderProfile(){
   const sellerId = new URLSearchParams(window.location.search).get('id');
   if (!sellerId){ renderProfileNotFound(); return; }
 
-  const { seller, listings: sellerListings } = await hentSaelger(decodeURIComponent(sellerId));
+  // Med backend er sellerId en uuid. Sender vi noget andet (et navn, en tom
+  // værdi, et manipuleret link) videre til databasen, afviser Postgres det med
+  // en 400 — og det er profil-id-kolonnen der er uuid. Stop før kaldet.
+  const decoded = decodeURIComponent(sellerId);
+  if (db.enabled && !isUuid(decoded)){ renderProfileNotFound(); return; }
+
+  const { seller, listings: sellerListings } = await hentSaelger(decoded);
   if (!seller){ renderProfileNotFound(); return; }
 
   currentSeller = seller;
