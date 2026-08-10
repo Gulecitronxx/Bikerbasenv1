@@ -411,7 +411,8 @@ async function publishListing(){
   // Gratis-grænse: 3 aktive annoncer for private. Serveren håndhæver den
   // (trigger), men vi tjekker først for at give en venlig besked frem for en
   // rå databasefejl. Gælder kun nye annoncer, ikke redigering.
-  if (!editingId && (Store.getUser()?.plan || 'free') !== 'dealer'){
+  // Springes over, mens FRI_ADGANG er slået til.
+  if (!FRI_ADGANG && !editingId && (Store.getUser()?.plan || 'free') !== 'dealer'){
     const antal = await db.myActiveListingCount();
     if (antal >= 3){
       visForhandlerGraense(antal);

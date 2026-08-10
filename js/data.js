@@ -1,4 +1,15 @@
 /* ============ Reference data ============ */
+
+/* GRATIS-TILSTAND
+   Slået til: alle — private som forhandlere — har gratis, ubegrænset adgang,
+   og der er ingen betaling. Sat mens betalingsmodellen endnu ikke er valgt.
+
+   Når du vil aktivere forhandler-abonnementet igen:
+     1. sæt denne til false
+     2. kør supabase/006_forhandler_abonnement.sql igen (genskaber annoncegrænsen)
+   Stripe-koden ligger klar og uændret — den bruges bare ikke, mens dette er true. */
+const FRI_ADGANG = true;
+
 const REGIONS = ['Hovedstaden', 'Sjælland', 'Syddanmark', 'Midtjylland', 'Nordjylland'];
 
 /* Kurateret udsnit — bruges kun til at generere demoannoncer.

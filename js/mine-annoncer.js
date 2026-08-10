@@ -215,6 +215,21 @@ function renderPlanCard(){
   const card = document.getElementById('plan-card');
   if (!card) return;
   const user = Store.getUser();
+
+  // Gratis-tilstand: ingen paywall. Alle har ubegrænset adgang lige nu.
+  if (typeof FRI_ADGANG !== 'undefined' && FRI_ADGANG){
+    card.innerHTML = `
+      <h3 style="margin-bottom:6px;">Adgang</h3>
+      <p class="plan-badge">${Icon.checkCircle} Ubegrænset · gratis</p>
+      <ul class="plan-perks" style="margin-top:12px;">
+        <li>${Icon.checkCircle} Opret så mange annoncer du vil</li>
+        <li>${Icon.checkCircle} Gem favoritter og søgeagenter</li>
+        <li>${Icon.checkCircle} Skriv direkte til sælgere</li>
+      </ul>
+      <p style="font-size:13px; color:var(--color-fg-muted); margin:12px 0 0;">Bikerbasen er gratis for alle i øjeblikket — både private og forhandlere.</p>`;
+    return;
+  }
+
   const erForhandler = user?.plan === 'dealer';
 
   if (erForhandler){
