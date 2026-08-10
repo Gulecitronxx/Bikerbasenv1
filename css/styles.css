@@ -222,7 +222,12 @@ svg{display:block; width:1em; height:1em;}
 .mobile-menu-btn{ display:inline-flex; }
 
 @media (min-width: 1024px){
-  .main-nav{ display:flex; }
+  /* Nav'en flyttes til højre, ved siden af handlingerne: margin-left:auto på
+     nav'en skubber den + alt efter den mod højre, og handlingernes eget
+     auto-mellemrum fjernes, så de to grupper står samlet i højre side.
+     (På mobil beholder .header-actions sit auto, så knapperne stadig er højre.) */
+  .main-nav{ display:flex; margin-left:auto; }
+  .header-actions{ margin-left:0; }
   .header-actions .btn-outline{ display:inline-flex; }
   .header-cta{ display:inline-flex; }
   .mobile-menu-btn{ display:none; }
