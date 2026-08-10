@@ -261,16 +261,41 @@ function renderListing(){
   });
 
   const modal = document.getElementById('contact-modal');
+  // Sælgers navn i titlen, så man kan se, hvem beskeden går til —
+  // "Skriv til sælger" føles anonymt, når navnet står lige ved siden af.
+  document.getElementById('contact-modal-title').textContent = `Skriv til ${listing.seller.name}`;
   document.getElementById('open-contact-modal').addEventListener('click', () => modal.classList.add('open'));
   modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.remove('open')));
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
-  document.getElementById('cf-message').value = `Hej, jeg er interesseret i din ${listing.brand} ${listing.model} fra ${listing.year}. Er den stadig til salg?`;
+
+  const besked = document.getElementById('cf-message');
+  const taeller = document.getElementById('cf-counter');
+  besked.value = `Hej, jeg er interesseret i din ${listing.brand} ${listing.model} fra ${listing.year}. Er den stadig til salg?`;
+  const opdaterTaeller = () => { taeller.textContent = `${besked.value.length}/500`; };
+  besked.addEventListener('input', opdaterTaeller);
+  opdaterTaeller();
+
+  // Er man logget ind, er navn og e-mail allerede kendt — spar indtastningen.
+  const bruger = Store.getUser();
+  if (bruger){
+    const [fornavn, ...rest] = String(bruger.name || '').split(' ');
+    if (fornavn) document.getElementById('cf-firstname').value = fornavn;
+    if (rest.length) document.getElementById('cf-lastname').value = rest.join(' ');
+    if (bruger.email) document.getElementById('cf-email').value = bruger.email;
+    if (bruger.phone) document.getElementById('cf-phone').value = bruger.phone;
+  }
+
   document.getElementById('contact-form').addEventListener('submit', (e) => {
     e.preventDefault();
+    // Hensigterne føjes til beskeden, så sælger ser dem uanset hvordan
+    // beskeden senere leveres.
+    const hensigter = [...modal.querySelectorAll('.contact-intents input:checked')].map(cb => cb.value);
+    void hensigter; // klar til rigtig beskedlevering
     modal.classList.remove('open');
     toast('Din besked er sendt til sælgeren');
     e.target.reset();
-    document.getElementById('cf-message').value = '';
+    besked.value = '';
+    opdaterTaeller();
   });
 
   const similarMount = document.getElementById('similar-listings');

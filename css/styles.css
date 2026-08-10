@@ -696,6 +696,13 @@ select.input{
 .modal-box{ background: var(--color-surface); border-radius: var(--radius-lg); max-width:480px; width:100%; padding: var(--space-5); box-shadow: var(--shadow-lg); max-height:88vh; overflow-y:auto; }
 .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-4); }
 .modal-head h2{ font-size:19px; }
+
+/* Kontaktmodalen: hensigts-checkbokse øverst, tegn-tæller under beskeden
+   og samtykketekst under send-knappen. */
+.contact-intents{ display:flex; flex-direction:column; gap:4px; margin-bottom: var(--space-4); }
+.char-counter{ display:block; text-align:right; font-size:12px; color:var(--color-fg-muted); margin-top:4px; }
+.contact-consent{ font-size:12px; color:var(--color-fg-muted); line-height:1.5; margin-top:12px; }
+.contact-consent a{ color:var(--color-fg); text-decoration:underline; }
 .toast{
   position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); z-index:400;
   background: var(--color-dark); color:#fff; padding:14px 22px; border-radius: var(--radius-pill);

@@ -27,7 +27,7 @@
 <meta name="listing-id" content="4f21b0c3-3ba8-4faf-aa08-12213841a197">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="css/styles.css?v=59461940">
+<link rel="stylesheet" href="css/styles.css?v=44c1ba52">
 <script type="application/ld+json" id="jsonld-vehicle">
 {"@context":"https://schema.org","@type":"Motorcycle","name":"Yamaha Virago 535","brand":{"@type":"Brand","name":"Yamaha"},"model":"Virago 535","vehicleModelDate":"1990","productionDate":"1990","itemCondition":"https://schema.org/UsedCondition","url":"https://bikerbasen.dk/annonce-yamaha-virago-535-1990-4f21b0c3.html","image":["https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/3d71de63-1551-4c2a-b709-d082fce48a6f/4f21b0c3-3ba8-4faf-aa08-12213841a197/6cbd0b83-a979-4ec0-8c58-ee477899f6ac.jpg"],"description":"Virkligt flot men brugt","mileageFromOdometer":{"@type":"QuantitativeValue","value":87000,"unitCode":"KMT"},"vehicleEngine":{"@type":"EngineSpecification","engineDisplacement":{"@type":"QuantitativeValue","value":535,"unitCode":"CMQ"},"enginePower":{"@type":"QuantitativeValue","value":34,"unitText":"hk"}},"offers":{"@type":"Offer","price":15000,"priceCurrency":"DKK","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/UsedCondition","url":"https://bikerbasen.dk/annonce-yamaha-virago-535-1990-4f21b0c3.html","areaServed":{"@type":"Country","name":"Danmark"},"seller":{"@type":"Person","name":"Pascal Andersen","address":{"@type":"PostalAddress","addressLocality":"København V","postalCode":"1620","addressCountry":"DK"}}},"fuelType":"Benzin","color":"Sort"}
 </script>
@@ -193,44 +193,60 @@
 <div class="modal-overlay" id="contact-modal">
   <div class="modal-box">
     <div class="modal-head">
-      <h2>Skriv til sælger</h2>
+      <h2 id="contact-modal-title">Skriv til sælger</h2>
       <button type="button" class="icon-btn" data-modal-close aria-label="Luk"></button>
     </div>
     <form id="contact-form">
+      <!-- Hensigterne lader sælger se med det samme, hvad henvendelsen
+           handler om — og køber slipper for at formulere det selv. -->
+      <div class="contact-intents">
+        <label class="checkbox-row"><input type="checkbox" id="cf-ring" value="Jeg ønsker at blive ringet op">Jeg ønsker at blive ringet op</label>
+        <label class="checkbox-row"><input type="checkbox" id="cf-proevetur" value="Jeg ønsker en prøvetur">Jeg ønsker en prøvetur</label>
+        <label class="checkbox-row"><input type="checkbox" id="cf-bytte" value="Min nuværende motorcykel kan indgå i handlen">Min nuværende motorcykel kan indgå i handlen</label>
+      </div>
+
       <div class="form-grid">
         <div class="field field-full">
-          <label for="cf-name">Dit navn</label>
-          <input class="input" id="cf-name" required>
+          <label for="cf-message">Besked til sælger <span class="required-mark">*</span></label>
+          <textarea class="input" id="cf-message" required maxlength="500" rows="5" placeholder="Skriv din besked til sælgeren her"></textarea>
+          <span class="char-counter" id="cf-counter" aria-live="polite">0/500</span>
+        </div>
+        <div class="field">
+          <label for="cf-firstname">Fornavn <span class="required-mark">*</span></label>
+          <input class="input" id="cf-firstname" required autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label for="cf-lastname">Efternavn <span class="required-mark">*</span></label>
+          <input class="input" id="cf-lastname" required autocomplete="family-name">
         </div>
         <div class="field field-full">
-          <label for="cf-phone">Telefon (valgfrit)</label>
-          <input class="input" id="cf-phone" type="tel">
+          <label for="cf-email">E-mail <span class="required-mark">*</span></label>
+          <input class="input" id="cf-email" type="email" required autocomplete="email">
         </div>
         <div class="field field-full">
-          <label for="cf-message">Besked <span class="required-mark">*</span></label>
-          <textarea class="input" id="cf-message" required></textarea>
+          <label for="cf-phone">Telefonnummer</label>
+          <input class="input" id="cf-phone" type="tel" autocomplete="tel">
         </div>
       </div>
-      <div class="form-actions" style="justify-content:flex-end;">
-        <button type="submit" class="btn btn-primary">Send besked</button>
-      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px;">Send</button>
+      <p class="contact-consent">Når du trykker på "Send", accepterer du, at vi overfører dine oplysninger til sælgeren af motorcyklen. Læs om behandlingen af dine personoplysninger i vores <a href="privatlivspolitik.html" target="_blank">privatlivspolitik</a>.</p>
     </form>
   </div>
 </div>
 
 
-<script src="js/security.js?v=59461940"></script>
+<script src="js/security.js?v=44c1ba52"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js?v=59461940"></script>
-<script src="js/supabase-api.js?v=59461940"></script>
-<script src="js/icons.js?v=59461940"></script>
-<script src="js/bike-art.js?v=59461940"></script>
-<script src="js/postnumre.js?v=59461940"></script>
-<script src="js/data.js?v=59461940"></script>
-<script src="js/store.js?v=59461940"></script>
-<script src="js/backend-bridge.js?v=59461940"></script>
-<script src="js/components.js?v=59461940"></script>
-<script src="js/seo.js?v=59461940"></script>
-<script src="js/annonce.js?v=59461940"></script>
+<script src="js/supabase-config.js?v=44c1ba52"></script>
+<script src="js/supabase-api.js?v=44c1ba52"></script>
+<script src="js/icons.js?v=44c1ba52"></script>
+<script src="js/bike-art.js?v=44c1ba52"></script>
+<script src="js/postnumre.js?v=44c1ba52"></script>
+<script src="js/data.js?v=44c1ba52"></script>
+<script src="js/store.js?v=44c1ba52"></script>
+<script src="js/backend-bridge.js?v=44c1ba52"></script>
+<script src="js/components.js?v=44c1ba52"></script>
+<script src="js/seo.js?v=44c1ba52"></script>
+<script src="js/annonce.js?v=44c1ba52"></script>
 </body>
 </html>
