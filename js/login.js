@@ -53,6 +53,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('verify-mitid-icon').innerHTML = Icon.fingerprint;
   document.getElementById('verify-cvr-icon').innerHTML = Icon.shieldCheck;
 
+  // Brandpanelets ikoner og illustration. Findes kun på login-siden, så
+  // valgfrit hvis markup'en skulle mangle.
+  const benefitIcons = { heart: Icon.heart, bell: Icon.bell, mail: Icon.mail, plus: Icon.plus };
+  document.querySelectorAll('#auth-hero-benefits [data-benefit]').forEach(el => {
+    el.innerHTML = benefitIcons[el.dataset.benefit] || '';
+  });
+  const art = document.getElementById('auth-hero-art');
+  if (art && typeof bikeArtSVG === 'function') art.innerHTML = bikeArtSVG('cruiser', { id: 'auth-hero-bike' });
+
   // Er man allerede logget ind, så videre med det samme.
   await backendReady();
   if (db.enabled && Store.getUser()?.remote) { redirectAfterAuth(); return; }
