@@ -380,6 +380,12 @@ select.input{
 
 /* Trykfeltet er 44x44 (minimumskravet), mens den synlige cirkel bliver 36px
    via ::before. Ellers ville knappen se klodset stor ud på kortene. */
+/* Vises på annoncesiden i stedet for gem-hjertet, når annoncen er ens egen —
+   man kan ikke gemme sin egen annonce, men et tomt felt forvirrer. */
+.own-listing-tag{ display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border:1.5px solid var(--color-border); border-radius: var(--radius-pill); font-weight:600; font-size:14px; color: var(--color-fg-muted); text-decoration:none; white-space:nowrap; }
+.own-listing-tag:hover{ border-color: var(--color-primary); color: var(--color-primary); }
+.own-listing-tag svg{ width:16px; height:16px; }
+
 .fav-btn{
   position:absolute; top:6px; right:6px; z-index:2;
   width:44px; height:44px; border:none; background:transparent;

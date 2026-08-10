@@ -175,7 +175,9 @@ function renderListing(){
           <div class="listing-loc">${Icon.mapPin}${escapeHTML(listing.city)}, ${listing.postnr} · ${escapeHTML(listing.region)}</div>
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
-          ${isOwnListing(listing) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" style="position:static;" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${listing.id}">${Icon.heart}</button>`}
+          ${isOwnListing(listing)
+            ? `<a class="own-listing-tag" href="opret-annonce.html?rediger=${encodeURIComponent(listing.id)}">${Icon.edit}Din annonce</a>`
+            : `<button type="button" class="fav-btn ${fav?'active':''}" style="position:static;" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${listing.id}">${Icon.heart}</button>`}
           <div class="listing-price">${formatPrice(listing.price)}</div>
         </div>
       </div>
