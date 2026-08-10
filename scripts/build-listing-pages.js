@@ -61,11 +61,14 @@ function jsonLd(l, url){
       itemCondition: 'https://schema.org/UsedCondition',
       url,
       areaServed: { '@type': 'Country', name: 'Danmark' },
-      seller: {
-        '@type': l.seller?.is_dealer ? 'AutoDealer' : 'Person',
-        name: l.seller?.name || 'Privat saelger',
-        address: { '@type': 'PostalAddress', addressLocality: l.city, postalCode: l.postnr, addressCountry: 'DK' },
-      },
+      // En forhandler er en offentlig virksomhed — navn og adresse må gerne
+      // stå i struktureret data. En privat sælger er en privatperson: kun
+      // salgsstedets by tages med, aldrig navnet.
+      seller: l.seller?.is_dealer
+        ? { '@type': 'AutoDealer', name: l.seller.name || 'Forhandler',
+            address: { '@type': 'PostalAddress', addressLocality: l.city, postalCode: l.postnr, addressCountry: 'DK' } }
+        : { '@type': 'Person',
+            address: { '@type': 'PostalAddress', addressLocality: l.city, addressCountry: 'DK' } },
     },
   };
   if (l.power) vehicle.vehicleEngine.enginePower = { '@type': 'QuantitativeValue', value: l.power, unitText: 'hk' };
@@ -198,12 +201,15 @@ ${udstyr.map(e => `            <li>${esc(equipmentLabel(e))}</li>`).join('\n')}
         </div>` : ''}
       </div>
 
+      <!-- Sælgeren udelades bevidst af den statiske markup: navn og kontakt
+           er kun for indloggede brugere, og skal derfor heller ikke ligge i
+           kilden, hvor en crawler kunne samle det op. js/annonce.js bygger
+           enten login-kortet eller det fulde sælgerkort, alt efter session. -->
       <div>
         <div class="sidebar-card">
-          <div class="seller-name">${esc(l.seller?.name || 'Privat sælger')}</div>
           <div class="seller-sub">${l.seller?.is_dealer ? 'Forhandler' : 'Privat sælger'} · ${esc(l.city)}</div>
           <p style="margin-top:12px; font-size:14px; color:var(--color-fg-muted);">
-            Kontaktoplysninger vises når du åbner annoncen.
+            Log ind for at se sælger og kontaktoplysninger.
           </p>
           <a href="soegning.html?type=${esc(l.type)}" class="btn btn-outline btn-block" style="margin-top:12px;">Se lignende ${esc(typeLabel(l.type))}</a>
         </div>

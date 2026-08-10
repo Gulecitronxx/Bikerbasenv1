@@ -41,6 +41,52 @@ function initials(name){
   return name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
 }
 
+/* Sælgerens identitet og kontaktoplysninger er kun synlige for indloggede
+   brugere — det beskytter både køber og sælger mod skrabning og uønsket
+   henvendelse. Er man ikke logget ind, vises et login-kort i stedet. */
+function sellerSidebarHTML(listing, { loggedIn, sellerName, avgRating, reviewCount }){
+  if (!loggedIn){
+    const her = location.pathname.split('/').pop() + location.search;
+    const redirect = encodeURIComponent(her);
+    return `
+      <div class="sidebar-card seller-locked">
+        <div class="seller-locked-icon">${Icon.lock}</div>
+        <h2 class="seller-locked-title">Log ind for at se sælger</h2>
+        <p>Sælgerens navn, profil og kontaktoplysninger er kun synlige for indloggede brugere. Det beskytter både købere og sælgere.</p>
+        <a href="login.html?redirect=${redirect}" class="btn btn-primary btn-block">${Icon.user}Log ind</a>
+        <a href="login.html?redirect=${redirect}" class="btn btn-outline btn-block">Opret gratis profil</a>
+        <div class="safety-tip">${Icon.info}<span>Mød altid sælger et sikkert sted, og betal aldrig depositum uden at have set motorcyklen fysisk.</span></div>
+      </div>`;
+  }
+  return `
+      <div class="sidebar-card">
+        <div class="seller-row">
+          <div class="avatar">${initials(listing.seller.name)}</div>
+          <div>
+            <div class="seller-name">${sellerName}</div>
+            <div class="seller-sub">${listing.seller.isDealer ? 'Forhandler' : 'Privat sælger'} · ${escapeHTML(listing.seller.city)}</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;">${verifiedBadgeHTML(listing.seller)}</div>
+        <div class="seller-stats">
+          <div class="seller-stat"><b>${avgRating ?? '–'}</b><span>Bedømmelse</span></div>
+          <div class="seller-stat"><b>${reviewCount}</b><span>Anmeldelser</span></div>
+          <div class="seller-stat"><b>${listing.seller.memberSince}</b><span>Medlem siden</span></div>
+        </div>
+        <div class="contact-actions">
+          <button type="button" class="btn btn-primary btn-block" id="open-contact-modal">${Icon.mail}Skriv til sælger</button>
+          <button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>
+          <button type="button" class="btn btn-outline btn-block" id="open-payment-modal">${Icon.lock}Betal sikkert (MobilePay)</button>
+          <button type="button" class="btn btn-outline btn-block" id="share-listing-btn">${Icon.share}Del annonce</button>
+        </div>
+        <div class="safety-tip">${Icon.info}<span>Mød altid sælger et sikkert sted, og betal aldrig depositum uden at have set motorcyklen fysisk.</span></div>
+      </div>
+
+      <div class="sidebar-card">
+        <a href="forhandler.html?id=${encodeURIComponent(listing.seller.id || "")}" class="btn btn-outline btn-block">${Icon.user}Se sælgerprofil</a>
+      </div>`;
+}
+
 /* Tæller én visning pr. annonce pr. browsersession.
 
    Uden spærren ville et par tryk på tilbage-knappen puste tallet op, og
@@ -98,6 +144,7 @@ function renderListing(){
   document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
 
   const fav = Store.isFavorite(listing.id);
+  const loggedIn = !!Store.getUser();
   const brand = escapeHTML(listing.brand), model = escapeHTML(listing.model);
   const sellerName = escapeHTML(listing.seller.name);
   const avgRating = Store.getAverageRating(listing.seller.name, Number(listing.seller.rating));
@@ -177,32 +224,7 @@ function renderListing(){
     </div>
 
     <div>
-      <div class="sidebar-card">
-        <div class="seller-row">
-          <div class="avatar">${initials(listing.seller.name)}</div>
-          <div>
-            <div class="seller-name">${sellerName}</div>
-            <div class="seller-sub">${listing.seller.isDealer ? 'Forhandler' : 'Privat sælger'} · ${escapeHTML(listing.seller.city)}</div>
-          </div>
-        </div>
-        <div style="margin-top:10px;">${verifiedBadgeHTML(listing.seller)}</div>
-        <div class="seller-stats">
-          <div class="seller-stat"><b>${avgRating ?? '–'}</b><span>Bedømmelse</span></div>
-          <div class="seller-stat"><b>${reviewCount}</b><span>Anmeldelser</span></div>
-          <div class="seller-stat"><b>${listing.seller.memberSince}</b><span>Medlem siden</span></div>
-        </div>
-        <div class="contact-actions">
-          <button type="button" class="btn btn-primary btn-block" id="open-contact-modal">${Icon.mail}Skriv til sælger</button>
-          <button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>
-          <button type="button" class="btn btn-outline btn-block" id="open-payment-modal">${Icon.lock}Betal sikkert (MobilePay)</button>
-          <button type="button" class="btn btn-outline btn-block" id="share-listing-btn">${Icon.share}Del annonce</button>
-        </div>
-        <div class="safety-tip">${Icon.info}<span>Mød altid sælger et sikkert sted, og betal aldrig depositum uden at have set motorcyklen fysisk.</span></div>
-      </div>
-
-      <div class="sidebar-card">
-        <a href="forhandler.html?id=${encodeURIComponent(listing.seller.id || "")}" class="btn btn-outline btn-block">${Icon.user}Se sælgerprofil</a>
-      </div>
+      ${sellerSidebarHTML(listing, { loggedIn, sellerName, avgRating, reviewCount })}
     </div>
   `;
 
@@ -216,30 +238,8 @@ function renderListing(){
 
   wireFavoriteButtons(document);
 
-  const revealBtn = document.getElementById('reveal-phone-btn');
-  revealBtn.addEventListener('click', () => {
-    revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${listing.seller.phone}</span>`;
-    revealBtn.disabled = true;
-    // Tælles som en henvendelse i sælgerens dashboard.
-    db.recordListingEvent?.(listing.id, 'contact');
-  });
-
-  document.getElementById('share-listing-btn').addEventListener('click', async () => {
-    const url = location.href;
-    const title = `${listing.brand} ${listing.model} — ${formatPrice(listing.price)}`;
-    // Web Share hvor det findes (mobil); ellers kopiér linket.
-    if (navigator.share){
-      try { await navigator.share({ title, url }); return; }
-      catch (e) { if (e.name === 'AbortError') return; /* ellers: fald til kopiering */ }
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      toast('Link kopieret til udklipsholderen');
-    } catch (e) {
-      prompt('Kopiér linket:', url);
-    }
-  });
-
+  // Anmeld og VIN-tjek hører til annoncen, ikke til sælgeren, og er derfor
+  // tilgængelige uanset login.
   document.getElementById('report-listing-btn').addEventListener('click', () => {
     openReportModal('listing', `${listing.brand} ${listing.model}`, listing.id);
   });
@@ -252,51 +252,79 @@ function renderListing(){
     `);
   });
 
-  document.getElementById('open-payment-modal').addEventListener('click', () => {
-    openInfoModal('Betal sikkert via MobilePay', `
-      <p>Ved almindelige køb betaler du direkte til sælger via MobilePay, når I mødes og du har godkendt motorcyklen.</p>
-      <p>Ved dyrere motorcykler kan du bede sælger om at bruge Bikerbasens <strong>sikker betaling</strong>: en ekstern, PCI-certificeret betalingspartner holder pengene, indtil du har bekræftet, at du har modtaget motorcyklen som beskrevet — så du ikke sender penge direkte til en fremmed på forhånd.</p>
-      <p style="margin-bottom:0;">Bikerbasen håndterer eller opbevarer aldrig dine kortoplysninger.</p>
-    `);
-  });
+  // Kontaktknapperne findes kun i markup'en, når man er logget ind — al
+  // wiring nedenfor forudsætter derfor login.
+  if (loggedIn){
+    const revealBtn = document.getElementById('reveal-phone-btn');
+    revealBtn.addEventListener('click', () => {
+      revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${listing.seller.phone}</span>`;
+      revealBtn.disabled = true;
+      // Tælles som en henvendelse i sælgerens dashboard.
+      db.recordListingEvent?.(listing.id, 'contact');
+    });
 
-  const modal = document.getElementById('contact-modal');
-  // Sælgers navn i titlen, så man kan se, hvem beskeden går til —
-  // "Skriv til sælger" føles anonymt, når navnet står lige ved siden af.
-  document.getElementById('contact-modal-title').textContent = `Skriv til ${listing.seller.name}`;
-  document.getElementById('open-contact-modal').addEventListener('click', () => modal.classList.add('open'));
-  modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.remove('open')));
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+    document.getElementById('share-listing-btn').addEventListener('click', async () => {
+      const url = location.href;
+      const title = `${listing.brand} ${listing.model} — ${formatPrice(listing.price)}`;
+      // Web Share hvor det findes (mobil); ellers kopiér linket.
+      if (navigator.share){
+        try { await navigator.share({ title, url }); return; }
+        catch (e) { if (e.name === 'AbortError') return; /* ellers: fald til kopiering */ }
+      }
+      try {
+        await navigator.clipboard.writeText(url);
+        toast('Link kopieret til udklipsholderen');
+      } catch (e) {
+        prompt('Kopiér linket:', url);
+      }
+    });
 
-  const besked = document.getElementById('cf-message');
-  const taeller = document.getElementById('cf-counter');
-  besked.value = `Hej, jeg er interesseret i din ${listing.brand} ${listing.model} fra ${listing.year}. Er den stadig til salg?`;
-  const opdaterTaeller = () => { taeller.textContent = `${besked.value.length}/500`; };
-  besked.addEventListener('input', opdaterTaeller);
-  opdaterTaeller();
+    document.getElementById('open-payment-modal').addEventListener('click', () => {
+      openInfoModal('Betal sikkert via MobilePay', `
+        <p>Ved almindelige køb betaler du direkte til sælger via MobilePay, når I mødes og du har godkendt motorcyklen.</p>
+        <p>Ved dyrere motorcykler kan du bede sælger om at bruge Bikerbasens <strong>sikker betaling</strong>: en ekstern, PCI-certificeret betalingspartner holder pengene, indtil du har bekræftet, at du har modtaget motorcyklen som beskrevet — så du ikke sender penge direkte til en fremmed på forhånd.</p>
+        <p style="margin-bottom:0;">Bikerbasen håndterer eller opbevarer aldrig dine kortoplysninger.</p>
+      `);
+    });
 
-  // Er man logget ind, er navn og e-mail allerede kendt — spar indtastningen.
-  const bruger = Store.getUser();
-  if (bruger){
-    const [fornavn, ...rest] = String(bruger.name || '').split(' ');
-    if (fornavn) document.getElementById('cf-firstname').value = fornavn;
-    if (rest.length) document.getElementById('cf-lastname').value = rest.join(' ');
-    if (bruger.email) document.getElementById('cf-email').value = bruger.email;
-    if (bruger.phone) document.getElementById('cf-phone').value = bruger.phone;
-  }
+    const modal = document.getElementById('contact-modal');
+    // Sælgers navn i titlen, så man kan se, hvem beskeden går til —
+    // "Skriv til sælger" føles anonymt, når navnet står lige ved siden af.
+    document.getElementById('contact-modal-title').textContent = `Skriv til ${listing.seller.name}`;
+    document.getElementById('open-contact-modal').addEventListener('click', () => modal.classList.add('open'));
+    modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.remove('open')));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
-  document.getElementById('contact-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    // Hensigterne føjes til beskeden, så sælger ser dem uanset hvordan
-    // beskeden senere leveres.
-    const hensigter = [...modal.querySelectorAll('.contact-intents input:checked')].map(cb => cb.value);
-    void hensigter; // klar til rigtig beskedlevering
-    modal.classList.remove('open');
-    toast('Din besked er sendt til sælgeren');
-    e.target.reset();
-    besked.value = '';
+    const besked = document.getElementById('cf-message');
+    const taeller = document.getElementById('cf-counter');
+    besked.value = `Hej, jeg er interesseret i din ${listing.brand} ${listing.model} fra ${listing.year}. Er den stadig til salg?`;
+    const opdaterTaeller = () => { taeller.textContent = `${besked.value.length}/500`; };
+    besked.addEventListener('input', opdaterTaeller);
     opdaterTaeller();
-  });
+
+    // Navn og e-mail er kendt fra profilen — spar indtastningen.
+    const bruger = Store.getUser();
+    if (bruger){
+      const [fornavn, ...rest] = String(bruger.name || '').split(' ');
+      if (fornavn) document.getElementById('cf-firstname').value = fornavn;
+      if (rest.length) document.getElementById('cf-lastname').value = rest.join(' ');
+      if (bruger.email) document.getElementById('cf-email').value = bruger.email;
+      if (bruger.phone) document.getElementById('cf-phone').value = bruger.phone;
+    }
+
+    document.getElementById('contact-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Hensigterne føjes til beskeden, så sælger ser dem uanset hvordan
+      // beskeden senere leveres.
+      const hensigter = [...modal.querySelectorAll('.contact-intents input:checked')].map(cb => cb.value);
+      void hensigter; // klar til rigtig beskedlevering
+      modal.classList.remove('open');
+      toast('Din besked er sendt til sælgeren');
+      e.target.reset();
+      besked.value = '';
+      opdaterTaeller();
+    });
+  }
 
   const similarMount = document.getElementById('similar-listings');
   const similar = Store.getAllListings().filter(l => l.type === listing.type && l.id !== listing.id).slice(0, 3);

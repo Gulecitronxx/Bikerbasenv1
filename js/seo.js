@@ -160,11 +160,13 @@ function seoListingPage(listing, photoUrls){
       itemCondition: 'https://schema.org/UsedCondition',
       url,
       areaServed: { '@type': 'Country', name: 'Danmark' },
-      seller: {
-        '@type': listing.isDealer ? 'AutoDealer' : 'Person',
-        name: listing.seller.name,
-        address: { '@type': 'PostalAddress', addressLocality: listing.city, postalCode: listing.postnr, addressCountry: 'DK' },
-      },
+      // Forhandler: offentlig virksomhed, navn og adresse er fint.
+      // Privat sælger: kun byen, aldrig navnet i struktureret data.
+      seller: listing.isDealer
+        ? { '@type': 'AutoDealer', name: listing.seller.name,
+            address: { '@type': 'PostalAddress', addressLocality: listing.city, postalCode: listing.postnr, addressCountry: 'DK' } }
+        : { '@type': 'Person',
+            address: { '@type': 'PostalAddress', addressLocality: listing.city, addressCountry: 'DK' } },
     },
   };
   if (listing.power) {
