@@ -716,8 +716,6 @@ select.input{
 .auth-hero-benefits li{ display:flex; align-items:center; gap:12px; font-size:15px; }
 .auth-hero-benefits li span{ flex-shrink:0; width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); }
 .auth-hero-benefits li svg{ width:18px; height:18px; color:#FF6A32; }
-.auth-hero-art{ margin-top:auto; padding-top: var(--space-6); position:relative; opacity:.92; }
-.auth-hero-art svg{ width:100%; height:auto; max-height:170px; }
 
 /* I to-panel-layoutet slutter kortet tæt til panelet uden egen skygge/ramme;
    alene giver det stadig sin egen kant. */

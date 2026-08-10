@@ -59,8 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('#auth-hero-benefits [data-benefit]').forEach(el => {
     el.innerHTML = benefitIcons[el.dataset.benefit] || '';
   });
-  const art = document.getElementById('auth-hero-art');
-  if (art && typeof bikeArtSVG === 'function') art.innerHTML = bikeArtSVG('cruiser', { id: 'auth-hero-bike' });
 
   // Er man allerede logget ind, så videre med det samme.
   await backendReady();
