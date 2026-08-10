@@ -1,18 +1,61 @@
-function ownedCardWrapper(l){
+/* Listerække i Bilbasen-stil: foto til venstre, titel + pris øverst, en
+   kolonnerække med nøgletal, og handlinger nederst. Bruges til både mine
+   annoncer og favoritter. */
+function listingRowHTML(l, { owned } = {}){
+  const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
+  const url = `annonce.html?id=${l.id}`;
+  const spec = (label, value) => `<div class="lr-spec"><span>${label}</span><b>${value}</b></div>`;
   return `
-  <div>
-    ${listingCardHTML(l)}
-    <div class="owned-actions">
-      <a class="btn btn-outline btn-sm" href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}">${Icon.edit}Rediger</a>
-      <button type="button" class="btn btn-outline btn-sm" data-delete-listing="${l.id}">${Icon.trash}Slet</button>
+  <article class="listing-row" data-listing-id="${l.id}">
+    <a class="lr-media" href="${url}" aria-label="Se annonce: ${brand} ${model}">
+      ${listingMediaHTML(l, `${brand} ${model}`)}
+      ${isNewListing(l.createdAt) ? '<span class="badge badge-new lr-badge">Ny</span>' : ''}
+    </a>
+    <div class="lr-body">
+      <div class="lr-head">
+        <a class="lr-title" href="${url}">${brand} ${model}</a>
+        <div class="lr-price">${formatPrice(l.price)}</div>
+      </div>
+      <div class="lr-specs">
+        ${spec('Årgang', l.year)}
+        ${spec('Km-stand', formatKm(l.km))}
+        ${spec('Motor', formatCcm(l.ccm))}
+        ${spec('Sælger', l.isDealer ? 'Forhandler' : 'Privat')}
+      </div>
+      <div class="lr-actions">
+        <a class="lr-similar" href="soegning.html?type=${encodeURIComponent(l.type)}">${Icon.search}Se lignende motorcykler</a>
+        <div class="lr-buttons">
+          ${owned ? `<a class="btn btn-outline btn-sm" href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}">${Icon.edit}Rediger</a>` : ''}
+          <button type="button" class="lr-trash" aria-label="${owned ? 'Slet annonce' : 'Fjern fra favoritter'}"
+            ${owned ? `data-delete-listing="${l.id}"` : `data-fav-toggle="${l.id}"`}>${Icon.trash}</button>
+        </div>
+      </div>
     </div>
-  </div>`;
+  </article>`;
+}
+
+/* Sorterer efter valget i værktøjslinjen. */
+function sortListings(list, mode){
+  const arr = list.slice();
+  if (mode === 'price-desc') arr.sort((a, b) => b.price - a.price);
+  else if (mode === 'price-asc') arr.sort((a, b) => a.price - b.price);
+  else if (mode === 'year-desc') arr.sort((a, b) => b.year - a.year);
+  else arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  return arr;
+}
+
+function setCount(id, n){
+  const el = document.getElementById(id);
+  if (el) el.textContent = n;
 }
 
 function renderMine(){
-  const mine = Store.getMyListings();
+  const mine = sortListings(Store.getMyListings(), document.getElementById('mine-sort')?.value);
   const grid = document.getElementById('mine-grid');
   const empty = document.getElementById('mine-empty');
+  setCount('count-mine', mine.length);
+  setCount('mine-count-inline', mine.length);
+  document.querySelector('.list-toolbar')?.style.setProperty('display', mine.length ? '' : 'none');
   if (!mine.length){
     grid.style.display = 'none';
     empty.style.display = 'block';
@@ -20,8 +63,7 @@ function renderMine(){
   }
   grid.style.display = '';
   empty.style.display = 'none';
-  grid.innerHTML = mine.map(ownedCardWrapper).join('');
-  wireFavoriteButtons(grid);
+  grid.innerHTML = mine.map(l => listingRowHTML(l, { owned: true })).join('');
   grid.querySelectorAll('[data-delete-listing]').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm('Er du sikker på, at du vil slette denne annonce? Det kan ikke fortrydes.')) return;
@@ -50,9 +92,13 @@ function renderMine(){
 
 function renderFavorites(){
   const favIds = Store.getFavorites();
-  const favs = favIds.map(id => Store.getListingById(id)).filter(Boolean);
+  const favs = sortListings(favIds.map(id => Store.getListingById(id)).filter(Boolean),
+    document.getElementById('fav-sort')?.value);
   const grid = document.getElementById('fav-grid');
   const empty = document.getElementById('fav-empty');
+  setCount('count-fav', favs.length);
+  setCount('fav-count-inline', favs.length);
+  document.querySelector('#tab-favoritter .list-toolbar')?.style.setProperty('display', favs.length ? '' : 'none');
   if (!favs.length){
     grid.style.display = 'none';
     empty.style.display = 'block';
@@ -60,7 +106,7 @@ function renderFavorites(){
   }
   grid.style.display = '';
   empty.style.display = 'none';
-  grid.innerHTML = favs.map(listingCardHTML).join('');
+  grid.innerHTML = favs.map(l => listingRowHTML(l, { owned: false })).join('');
   wireFavoriteButtons(grid);
 }
 
@@ -96,6 +142,7 @@ function matchesForSavedSearch(search){
 
 function renderAgents(){
   const agents = Store.getSavedSearches();
+  setCount('count-agenter', agents.length);
   const list = document.getElementById('agents-list');
   const empty = document.getElementById('agents-empty');
   if (!agents.length){
@@ -150,14 +197,34 @@ function renderAccountTab(){
     </div>`).join('');
 }
 
+/* Hjælpe-sidebar i Bilbasen-stil — indholdet følger den aktive fane. */
+function renderAside(tab){
+  const aside = document.getElementById('account-aside');
+  if (!aside) return;
+  const kort = (titel, tekst, linkTekst, href) => `
+    <div class="aside-card">
+      <h3>${titel}</h3>
+      <p>${tekst}</p>
+      <a href="${href}" class="btn btn-outline btn-block">${linkTekst}</a>
+    </div>`;
+  const map = {
+    mine: kort('Sælg hurtigere', 'Annoncer med billeder og fuldt udfyldt udstyr bliver set markant oftere. Gennemgå dine annoncer og gør dem færdige.', 'Opret ny annonce', 'opret-annonce.html'),
+    favoritter: kort('Bikerbasen hjælper dig', 'Vil du finde flere favoritter? Søg blandt alle motorcykler og gem dem, du er interesseret i, med hjertet.', 'Søg motorcykler', 'soegning.html'),
+    agenter: kort('Gå aldrig glip af en handel', 'En søgeagent holder øje for dig. Sæt dine filtre på søgesiden og gem søgningen, så tæller vi de nye annoncer der dukker op.', 'Opret en søgeagent', 'soegning.html'),
+    konto: kort('Byg tillid', 'Verificerede profiler får et badge, som købere kan se. Det gør det trygt at handle med dig.', 'Se sikkerhedsråd', 'sikkerhed.html'),
+  };
+  aside.innerHTML = map[tab] || '';
+}
+
 function setActiveTab(tab){
-  document.querySelectorAll('#tabs-row button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.getElementById('tab-mine').style.display = tab === 'mine' ? '' : 'none';
   document.getElementById('tab-favoritter').style.display = tab === 'favoritter' ? '' : 'none';
   document.getElementById('tab-agenter').style.display = tab === 'agenter' ? '' : 'none';
   document.getElementById('tab-konto').style.display = tab === 'konto' ? '' : 'none';
   if (tab === 'konto') renderAccountTab();
   if (tab === 'agenter') renderAgents();
+  renderAside(tab);
   const p = new URLSearchParams(window.location.search);
   p.set('tab', tab);
   history.replaceState(null, '', window.location.pathname + '?' + p.toString());
@@ -176,12 +243,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('agents-empty-icon').innerHTML = Icon.bell;
   document.getElementById('agent-note-icon').innerHTML = Icon.info;
 
+  // Fane-ikoner.
+  const tabIcons = { bike: Icon.bike, heart: Icon.heart, search: Icon.bell, user: Icon.user };
+  document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = tabIcons[el.dataset.icon] || ''; });
+
   renderMine();
   renderFavorites();
+  renderAgents();
+  renderAside('mine');
 
-  document.querySelectorAll('#tabs-row button').forEach(btn => {
+  document.querySelectorAll('[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
   });
+  document.getElementById('mine-sort').addEventListener('change', renderMine);
+  document.getElementById('fav-sort').addEventListener('change', renderFavorites);
   document.addEventListener('bb:favorites-changed', renderFavorites);
 
   document.getElementById('delete-account-btn').addEventListener('click', () => {

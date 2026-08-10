@@ -29,7 +29,7 @@
 <!-- meta:end -->
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="css/styles.css?v=a241b48a">
+<link rel="stylesheet" href="css/styles.css?v=c85e5ecc">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -72,65 +72,107 @@
 
 <main id="main-content">
   <div class="container">
-    <div class="page-title-bar">
-      <h1>Mine annoncer</h1>
-      <p>Overblik over dine annoncer og gemte motorcykler.</p>
-    </div>
+    <h1 class="visually-hidden">Mine annoncer</h1>
 
-    <div class="tabs-row" id="tabs-row">
-      <button type="button" data-tab="mine" class="active">Mine annoncer</button>
-      <button type="button" data-tab="favoritter">Gemte annoncer</button>
-      <button type="button" data-tab="agenter">Søgeagenter</button>
-      <button type="button" data-tab="konto">Konto</button>
-    </div>
-
-    <div id="tab-mine">
-      <div id="mine-empty" class="empty-state" style="display:none;">
-        <div id="mine-empty-icon"></div>
-        <h3>Du har ingen annoncer endnu</h3>
-        <p>Opret din første annonce, og kom i gang med at sælge.</p>
-        <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
+    <!-- Tælle-faner: hver fane viser sit antal, som på Bilbasen. Den aktive
+         markeres, og Konto ligger som et link til højre. -->
+    <div class="account-head">
+      <div class="count-tabs" id="tabs-row" role="tablist" aria-label="Din konto">
+        <button type="button" class="count-tab active" data-tab="mine" role="tab">
+          <span class="count-tab-icon" data-icon="bike"></span>
+          <span class="count-tab-text"><span class="count-tab-label">Mine annoncer</span><span class="count-tab-num" id="count-mine">0</span></span>
+        </button>
+        <button type="button" class="count-tab" data-tab="favoritter" role="tab">
+          <span class="count-tab-icon" data-icon="heart"></span>
+          <span class="count-tab-text"><span class="count-tab-label">Favoritter</span><span class="count-tab-num" id="count-fav">0</span></span>
+        </button>
+        <button type="button" class="count-tab" data-tab="agenter" role="tab">
+          <span class="count-tab-icon" data-icon="search"></span>
+          <span class="count-tab-text"><span class="count-tab-label">Søgeagenter</span><span class="count-tab-num" id="count-agenter">0</span></span>
+        </button>
       </div>
-      <div id="mine-grid" class="listings-grid"></div>
+      <button type="button" class="account-link" data-tab="konto"><span data-icon="user"></span>Konto</button>
     </div>
 
-    <div id="tab-favoritter" style="display:none;">
-      <div id="fav-empty" class="empty-state" style="display:none;">
-        <div id="fav-empty-icon"></div>
-        <h3>Ingen gemte annoncer</h3>
-        <p>Klik på hjertet på en annonce for at gemme den her.</p>
-        <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
-      </div>
-      <div id="fav-grid" class="listings-grid"></div>
-    </div>
+    <div class="account-layout">
+     <div class="account-main">
 
-    <div id="tab-agenter" style="display:none; max-width:760px;">
-      <p class="demo-note" style="margin-top:var(--space-4);"><span id="agent-note-icon"></span>En søgeagent gemmer dine filtre og viser, hvor mange nye annoncer der er kommet til siden du oprettede den. E-mailnotifikationer kræver en server og er ikke aktive i denne prototype.</p>
-      <div id="agents-list"></div>
-      <div id="agents-empty" class="empty-state" style="display:none;">
-        <div id="agents-empty-icon"></div>
-        <h3>Ingen søgeagenter endnu</h3>
-        <p>Sæt dine filtre på søgesiden og klik "Gem søgning" for at blive holdt opdateret.</p>
-        <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
-      </div>
-    </div>
-
-    <div id="tab-konto" style="display:none; max-width:640px;">
-      <div class="sidebar-card">
-        <h3 style="margin-bottom:14px;">Verificering</h3>
-        <div id="account-verify-rows"></div>
+      <div id="tab-mine" role="tabpanel">
+        <div class="list-toolbar">
+          <h2 class="list-heading">Mine annoncer <span id="mine-count-inline">0</span></h2>
+          <label class="sort-inline">Sorter efter
+            <select class="input" id="mine-sort">
+              <option value="date">Sidst oprettet</option>
+              <option value="price-desc">Pris (høj–lav)</option>
+              <option value="price-asc">Pris (lav–høj)</option>
+              <option value="year-desc">Årgang (nyeste)</option>
+            </select>
+          </label>
+        </div>
+        <div id="mine-empty" class="empty-state" style="display:none;">
+          <div id="mine-empty-icon"></div>
+          <h3>Du har ingen annoncer endnu</h3>
+          <p>Opret din første annonce, og kom i gang med at sælge.</p>
+          <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
+        </div>
+        <div id="mine-grid" class="listing-rows"></div>
       </div>
 
-      <div class="sidebar-card">
-        <h3 style="margin-bottom:6px;">Dine data (GDPR)</h3>
-        <p style="color:var(--color-fg-muted); font-size:14px; margin-bottom:14px;">Du kan til enhver tid få indsigt i eller slette alle dine data. Læs mere i vores <a href="privatlivspolitik.html" style="color:var(--color-primary);">privatlivspolitik</a>.</p>
-        <div class="danger-zone">
-          <h3>Slet min konto og mine data</h3>
-          <p>Dette fjerner permanent din profil, dine annoncer, favoritter, beskeder og bedømmelser fra denne browser. Handlingen kan ikke fortrydes.</p>
-          <button type="button" class="btn btn-danger-outline" id="delete-account-btn">Slet min konto</button>
+      <div id="tab-favoritter" style="display:none;" role="tabpanel">
+        <div class="list-toolbar">
+          <h2 class="list-heading">Favoritter <span id="fav-count-inline">0</span></h2>
+          <label class="sort-inline">Sorter efter
+            <select class="input" id="fav-sort">
+              <option value="date">Sidst tilføjet</option>
+              <option value="price-desc">Pris (høj–lav)</option>
+              <option value="price-asc">Pris (lav–høj)</option>
+              <option value="year-desc">Årgang (nyeste)</option>
+            </select>
+          </label>
+        </div>
+        <div id="fav-empty" class="empty-state" style="display:none;">
+          <div id="fav-empty-icon"></div>
+          <h3>Ingen gemte annoncer</h3>
+          <p>Klik på hjertet på en annonce for at gemme den her.</p>
+          <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
+        </div>
+        <div id="fav-grid" class="listing-rows"></div>
+      </div>
+
+      <div id="tab-agenter" style="display:none;" role="tabpanel">
+        <p class="demo-note" style="margin-top:var(--space-4);"><span id="agent-note-icon"></span>En søgeagent gemmer dine filtre og viser, hvor mange nye annoncer der er kommet til siden du oprettede den. E-mailnotifikationer kræver en server og er ikke aktive i denne prototype.</p>
+        <div id="agents-list"></div>
+        <div id="agents-empty" class="empty-state" style="display:none;">
+          <div id="agents-empty-icon"></div>
+          <h3>Ingen søgeagenter endnu</h3>
+          <p>Sæt dine filtre på søgesiden og klik "Gem søgning" for at blive holdt opdateret.</p>
+          <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
         </div>
       </div>
-    </div>
+
+      <div id="tab-konto" style="display:none; max-width:640px;" role="tabpanel">
+        <div class="sidebar-card">
+          <h3 style="margin-bottom:14px;">Verificering</h3>
+          <div id="account-verify-rows"></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3 style="margin-bottom:6px;">Dine data (GDPR)</h3>
+          <p style="color:var(--color-fg-muted); font-size:14px; margin-bottom:14px;">Du kan til enhver tid få indsigt i eller slette alle dine data. Læs mere i vores <a href="privatlivspolitik.html" style="color:var(--color-primary);">privatlivspolitik</a>.</p>
+          <div class="danger-zone">
+            <h3>Slet min konto og mine data</h3>
+            <p>Dette fjerner permanent din profil, dine annoncer, favoritter, beskeder og bedømmelser fra denne browser. Handlingen kan ikke fortrydes.</p>
+            <button type="button" class="btn btn-danger-outline" id="delete-account-btn">Slet min konto</button>
+          </div>
+        </div>
+      </div>
+
+     </div><!-- /account-main -->
+
+     <!-- Hjælpe-sidebar, som Bilbasens "Bilbasen hjælper dig". Skifter indhold
+          efter hvilken fane man står på. -->
+     <aside class="account-aside" id="account-aside"></aside>
+    </div><!-- /account-layout -->
   </div>
 </main>
 
@@ -176,17 +218,17 @@
   </div>
 </footer>
 
-<script src="js/security.js?v=a241b48a"></script>
+<script src="js/security.js?v=c85e5ecc"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js?v=a241b48a"></script>
-<script src="js/supabase-api.js?v=a241b48a"></script>
-<script src="js/icons.js?v=a241b48a"></script>
-<script src="js/bike-art.js?v=a241b48a"></script>
-<script src="js/postnumre.js?v=a241b48a"></script>
-<script src="js/data.js?v=a241b48a"></script>
-<script src="js/store.js?v=a241b48a"></script>
-<script src="js/backend-bridge.js?v=a241b48a"></script>
-<script src="js/components.js?v=a241b48a"></script>
-<script src="js/mine-annoncer.js?v=a241b48a"></script>
+<script src="js/supabase-config.js?v=c85e5ecc"></script>
+<script src="js/supabase-api.js?v=c85e5ecc"></script>
+<script src="js/icons.js?v=c85e5ecc"></script>
+<script src="js/bike-art.js?v=c85e5ecc"></script>
+<script src="js/postnumre.js?v=c85e5ecc"></script>
+<script src="js/data.js?v=c85e5ecc"></script>
+<script src="js/store.js?v=c85e5ecc"></script>
+<script src="js/backend-bridge.js?v=c85e5ecc"></script>
+<script src="js/components.js?v=c85e5ecc"></script>
+<script src="js/mine-annoncer.js?v=c85e5ecc"></script>
 </body>
 </html>
