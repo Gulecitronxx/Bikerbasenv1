@@ -18,7 +18,7 @@
      node scripts/stamp-version.js
 
    Ingen skråstreg til sidst. */
-const SITE_URL = 'https://gulecitronxx.github.io/Bikerbasenv1';
+const SITE_URL = 'https://bikerbasen.dk';
 const SITE_NAME = 'Bikerbasen';
 
 const Seo = (function(){
