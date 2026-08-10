@@ -90,10 +90,38 @@ function renderMine(){
   });
 }
 
-function renderFavorites(){
+async function renderFavorites(){
   const favIds = Store.getFavorites();
-  const favs = sortListings(favIds.map(id => Store.getListingById(id)).filter(Boolean),
-    document.getElementById('fav-sort')?.value);
+  let favs = favIds.map(id => Store.getListingById(id)).filter(Boolean);
+
+  // Favoritter der ikke er blandt de indlæste annoncer (fx uden for de
+  // hentede 200) hentes enkeltvis. Uden dette kunne en gemt annonce mangle,
+  // selvom hjertet i toppen talte den med — netop den uoverensstemmelse.
+  const kendte = new Set(favs.map(l => String(l.id)));
+  const manglende = favIds.filter(id => !kendte.has(String(id)));
+  const forældede = [];
+  if (manglende.length && typeof db !== 'undefined' && db.enabled){
+    for (const id of manglende){
+      if (!isUuid(String(id))){ forældede.push(id); continue; } // gamle demo-id'er
+      const { data, error } = await db.getListing(id);
+      if (data){ favs.push(normalizeRemoteListing(data)); }
+      // Kun "findes ikke" (PGRST116) prunes — en netværksfejl må ikke slette
+      // en favorit, brugeren stadig har.
+      else if (error && error.code === 'PGRST116'){ forældede.push(id); }
+    }
+  } else if (manglende.length){
+    // Uden backend kan kun lokale/demo-id'er opløses; resten er forældede.
+    manglende.forEach(id => { if (!isUuid(String(id))) forældede.push(id); });
+  }
+
+  // Ryd forældede favoritter, så hjertet i toppen altid matcher listen.
+  if (forældede.length){
+    const rensede = favIds.filter(id => !forældede.includes(id));
+    localStorage.setItem(Store.KEYS.favorites, JSON.stringify(rensede));
+    updateFavCount();
+  }
+
+  favs = sortListings(favs, document.getElementById('fav-sort')?.value);
   const grid = document.getElementById('fav-grid');
   const empty = document.getElementById('fav-empty');
   setCount('count-fav', favs.length);
