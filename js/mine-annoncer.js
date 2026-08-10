@@ -235,18 +235,33 @@ function renderPlanCard(){
         <li>${Icon.checkCircle} Forhandler-badge og fremhævet placering</li>
       </ul>
       <button type="button" class="btn btn-primary btn-block" id="plan-upgrade" style="margin-top:14px;">Bliv forhandler</button>
-      <p style="font-size:12px; color:var(--color-fg-muted); margin:10px 0 0;">Betaling er ikke koblet på endnu — knappen aktiverer et testabonnement.</p>`;
+      <p style="font-size:12px; color:var(--color-fg-muted); margin:10px 0 0;">Sikker betaling via Stripe. Du kan opsige når som helst.</p>`;
   }
 
-  const skift = async (plan) => {
+  // Rigtig betaling: send brugeren til Stripes checkout. Webhooken saetter
+  // planen, naar betalingen er gaaet igennem.
+  const opgrader = async (btn) => {
+    btn.disabled = true; btn.textContent = 'Åbner betaling…';
+    const { data, error } = await db.startCheckout();
+    if (error || !data?.url){
+      btn.disabled = false; btn.textContent = 'Bliv forhandler';
+      toast('Betaling kunne ikke startes. Prøv igen om lidt.');
+      return;
+    }
+    window.location.href = data.url;
+  };
+
+  // Opsigelse haandteres i Stripes kundeportal, ikke her — for nu vises kun
+  // status. (Downgrade-knappen er dev-only og fjernes med dev_set_plan.)
+  const devSkift = async (plan) => {
     const { error } = await db.devSetPlan(plan);
     if (error){ toast('Kunne ikke skifte plan: ' + error.message); return; }
     await syncSessionToStore();
     renderPlanCard();
     toast(plan === 'dealer' ? 'Du er nu forhandler (test)' : 'Skiftet til privat konto');
   };
-  document.getElementById('plan-upgrade')?.addEventListener('click', () => skift('dealer'));
-  document.getElementById('plan-downgrade')?.addEventListener('click', () => skift('free'));
+  document.getElementById('plan-upgrade')?.addEventListener('click', (e) => opgrader(e.currentTarget));
+  document.getElementById('plan-downgrade')?.addEventListener('click', () => devSkift('free'));
 }
 
 function renderAccountTab(){
@@ -333,6 +348,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = 'index.html';
   });
 
-  const initialTab = new URLSearchParams(window.location.search).get('tab');
+  const params = new URLSearchParams(window.location.search);
+  const initialTab = params.get('tab');
   if (['favoritter','konto','agenter'].includes(initialTab)) setActiveTab(initialTab);
+
+  // Retur fra Stripe efter gennemført betaling. Webhooken sætter planen, men
+  // kan være et øjeblik undervejs — hent sessionen igen og opdater kortet.
+  if (params.get('abonnement') === 'ok'){
+    toast('Tak! Din betaling er modtaget.');
+    for (let i = 0; i < 5; i++){
+      await syncSessionToStore();
+      renderPlanCard();
+      if (Store.getUser()?.plan === 'dealer') break;
+      await new Promise(r => setTimeout(r, 1500));
+    }
+    // Ryd parameteren, så en genindlæsning ikke gentager beskeden.
+    history.replaceState(null, '', 'mine-annoncer.html?tab=konto');
+  }
 });

@@ -182,6 +182,13 @@ const db = (function(){
       return count || 0;
     },
 
+    /* Starter Stripe-betalingen: kalder create-checkout-funktionen, som
+       returnerer en URL til Stripes hostede checkout. */
+    async startCheckout(){
+      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
+      return c.functions.invoke('create-checkout', { body: {} });
+    },
+
     /* DEV: skift egen plan uden betaling. Kun til test indtil Stripe er koblet
        på — funktionen fjernes fra databasen før lancering. */
     async devSetPlan(plan){
