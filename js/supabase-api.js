@@ -196,7 +196,7 @@ const db = (function(){
     async myListingStats(days = 30){
       const c = init(); if (!c) return { data: [], error: null };
       const fra = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
-      return c.from('listing_stats').select('*').gte('day', fra).order('day', { ascending: true });
+      return c.from('listing_stats').select('*').gte('stat_day', fra).order('stat_day', { ascending: true });
     },
 
     async myListingSaves(){

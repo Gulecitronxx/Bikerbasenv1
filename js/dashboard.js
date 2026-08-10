@@ -32,9 +32,10 @@ async function hentStatistik(){
 
   (raekker || []).forEach(r => {
     if (!STATS_BY_LISTING.has(r.listing_id)) STATS_BY_LISTING.set(r.listing_id, new Map());
-    STATS_BY_LISTING.get(r.listing_id).set(String(r.day).slice(0, 10), r);
+    STATS_BY_LISTING.get(r.listing_id).set(String(r.stat_day).slice(0, 10), r);
   });
-  (gemte || []).forEach(r => SAVES_BY_LISTING.set(r.listing_id, Number(r.saves) || 0));
+  // my_listing_saves kalder udgangskolonnen "listing", ikke "listing_id".
+  (gemte || []).forEach(r => SAVES_BY_LISTING.set(r.listing, Number(r.saves) || 0));
 }
 
 function statsForListing(listing){
