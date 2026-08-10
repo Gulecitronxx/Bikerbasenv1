@@ -64,9 +64,12 @@ begin
     case when p_kind = 'view'    then 1 else 0 end,
     case when p_kind = 'contact' then 1 else 0 end
   )
+  -- Måltabellen refereres UKVALIFICERET her. "public.listing_stats.views"
+  -- læser Postgres som en FROM-reference, der ikke findes, og så fejler
+  -- hele create function.
   on conflict (listing_id, day) do update set
-    views    = public.listing_stats.views    + excluded.views,
-    contacts = public.listing_stats.contacts + excluded.contacts;
+    views    = listing_stats.views    + excluded.views,
+    contacts = listing_stats.contacts + excluded.contacts;
 end $$;
 
 grant execute on function public.record_listing_event(uuid, text) to anon, authenticated;
