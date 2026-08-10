@@ -150,7 +150,7 @@ ${header}
       <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}"></div>
       <noscript>
         <ul class="brand-noscript">
-          ${items.map(l => `<li><a href="annonce.html?id=${l.id}">${esc(l.brand)} ${esc(l.model)}, ${l.year} — ${dkk(l.price)}, ${l.km.toLocaleString('da-DK')} km (${esc(l.city)})</a></li>`).join('\n          ')}
+          ${items.map(l => `<li><a href="${require('./shared').listingSlug(l)}">${esc(l.brand)} ${esc(l.model)}, ${l.year} — ${dkk(l.price)}, ${l.km.toLocaleString('da-DK')} km (${esc(l.city)})</a></li>`).join('\n          ')}
         </ul>
       </noscript>
     </section>
@@ -256,8 +256,9 @@ const staticPages = ['index.html','soegning.html','maerker.html','opret-annonce.
 /* Annoncerne er sidens egentlige long-tail — uden dem i sitemappet skal
    Google selv gætte sig frem via søgesiden, og den er JavaScript-drevet.
    lastmod følger annoncens updated_at, så en redigeret annonce genbesøges. */
+const { listingSlug } = require('./shared');
 const listingUrls = LISTINGS.map(l => ({
-  loc: `annonce.html?id=${l.id}`,
+  loc: listingSlug(l),
   lastmod: String(l.updated_at || l.createdAt || '').slice(0, 10),
 }));
 

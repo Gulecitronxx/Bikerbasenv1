@@ -100,9 +100,22 @@ const Seo = (function(){
 
 /* Annoncesiden: Vehicle med et Offer, så pris og specifikationer kan vises
    direkte i søgeresultatet. */
+/* Adressen paa annoncens forrenderede side. Skal give samme filnavn som
+   scripts/shared.js listingSlug — ellers ville canonical fra
+   annonce.html?id= pege paa en side der ikke findes. */
+function listingPageUrl(listing){
+  const slug = `${listing.brand} ${listing.model} ${listing.year}`
+    .toLowerCase()
+    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return `${SITE_URL}/annonce-${slug}-${String(listing.id).slice(0, 8)}.html`;
+}
+
 function seoListingPage(listing, photoUrls){
   const navn = `${listing.brand} ${listing.model}`;
-  const url = `${SITE_URL}/annonce.html?id=${encodeURIComponent(listing.id)}`;
+  // Canonical peger altid paa den statiske side, saa Google samler
+  // signalerne dér i stedet for at se to adresser med samme indhold.
+  const url = listingPageUrl(listing);
   const image = (photoUrls && photoUrls[0]) || `${SITE_URL}/og-image.png`;
 
   const dele = [
@@ -165,7 +178,7 @@ function seoListingPage(listing, photoUrls){
   Seo.setJsonLd('breadcrumb', Seo.breadcrumb([
     { name: 'Forside', path: 'index.html' },
     { name: typeLabel(listing.type), path: `soegning.html?type=${listing.type}` },
-    { name: navn, path: `annonce.html?id=${encodeURIComponent(listing.id)}` },
+    { name: navn, path: listingPageUrl(listing).replace(SITE_URL + '/', '') },
   ]));
 }
 
@@ -179,7 +192,7 @@ function seoSearchResults(listings, heading){
     itemListElement: listings.map((l, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      url: `${SITE_URL}/annonce.html?id=${encodeURIComponent(l.id)}`,
+      url: listingPageUrl(l),
       name: `${l.brand} ${l.model} ${l.year}`,
     })),
   } : null);

@@ -98,6 +98,10 @@ const skipped = [];
 
 for (const file of fs.readdirSync(ROOT).sort()){
   if (!file.endsWith('.html')) continue;
+  // Annoncesiderne skriver hele deres eget head i build-listing-pages.js —
+  // titel, canonical og og:-tags afhaenger af annoncen. Kom vi til at koere
+  // dem igennem her, ville de faa et ekstra saet og:-tags oveni.
+  if (/^annonce-.+\.html$/.test(file)) continue;
   const full = path.join(ROOT, file);
   let html = fs.readFileSync(full, 'utf8');
   const before = html;

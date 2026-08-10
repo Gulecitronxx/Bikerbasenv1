@@ -2,8 +2,13 @@ let currentListing = null;
 let currentPhotoIndex = 0;
 let currentPhotos = [];
 
+/* De forrenderede annoncesider har ingen ?id= i adressen — id'et staar i et
+   meta-tag skrevet ved build. Sidens indhold er allerede korrekt naar den
+   loades; herfra overtager vi og goer den interaktiv. */
 function getIdFromURL(){
-  return new URLSearchParams(window.location.search).get('id');
+  return new URLSearchParams(window.location.search).get('id')
+    || document.querySelector('meta[name="listing-id"]')?.content
+    || null;
 }
 
 /* Rigtige uploadede fotos når annoncen har dem; ellers de illustrerede

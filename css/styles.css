@@ -534,6 +534,14 @@ select.input{
 .breadcrumb svg{ width:14px; height:14px; }
 
 /* ============ Listing detail ============ */
+/* Billederne på den forrenderede annonceside. De vises kun i det korte
+   øjeblik før js/annonce.js bytter dem ud med det rigtige galleri — og for
+   crawlere og browsere uden JavaScript, hvor de er det eneste der er. */
+.prerender-gallery{ display:grid; grid-template-columns:1fr; gap:8px; margin-bottom: var(--space-4); }
+.prerender-gallery img{ width:100%; height:auto; border-radius: var(--radius-lg); object-fit:cover; background:var(--color-surface-2); }
+.prerender-gallery img:first-child{ aspect-ratio:4/3; }
+.prerender-gallery img:not(:first-child){ display:none; }
+
 .listing-detail{ display:grid; grid-template-columns:1fr; gap: var(--space-6); padding: var(--space-5) 0 var(--space-9); }
 @media (min-width:960px){ .listing-detail{ grid-template-columns: 1.6fr 1fr; align-items:start; } }
 
