@@ -15,7 +15,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const BASE = 'https://gulecitronxx.github.io/Bikerbasenv1';
+// Adressen står i js/seo.js, så den kun skal rettes ét sted ved domæneskift.
+const BASE = require('./site-url')(ROOT);
 const OG_IMAGE = `${BASE}/og-image.png`;
 
 /* Sider bag login eller uden selvstændig værdi i et søgeresultat. */
@@ -55,6 +56,43 @@ function metaBlock(file, title, description){
   return lines.filter(Boolean).join('\n');
 }
 
+/* Forsidens Organization/WebSite-blok. Den lå hårdkodet i index.html med
+   domænet skrevet ind seks steder — endnu et sted at glemme ved et
+   domæneskift. Nu genereres den her ud fra BASE. */
+const JSONLD_START = '<!-- jsonld:start (genereret af scripts/build-meta.js) -->';
+const JSONLD_END = '<!-- jsonld:end -->';
+
+function siteJsonLd(){
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${BASE}/#website`,
+        url: `${BASE}/`,
+        name: 'Bikerbasen',
+        inLanguage: 'da-DK',
+        description: 'Danmarks mødested for køb og salg af brugte motorcykler.',
+        publisher: { '@id': `${BASE}/#org` },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: { '@type': 'EntryPoint', urlTemplate: `${BASE}/soegning.html?q={search_term_string}` },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': `${BASE}/#org`,
+        name: 'Bikerbasen',
+        url: `${BASE}/`,
+        logo: OG_IMAGE,
+        areaServed: { '@type': 'Country', name: 'Danmark' },
+      },
+    ],
+  };
+  return `${JSONLD_START}\n<script type="application/ld+json">\n${JSON.stringify(graph)}\n</script>\n${JSONLD_END}`;
+}
+
 let written = 0;
 const skipped = [];
 
@@ -80,6 +118,18 @@ for (const file of fs.readdirSync(ROOT).sort()){
     /(<meta name="description" content="[^"]*">)/,
     `$1\n${block}`
   );
+
+  // Kun forsiden bærer site-blokken; på undersider ville den være støj.
+  if (file === 'index.html'){
+    const ld = siteJsonLd();
+    if (html.includes(JSONLD_START)){
+      html = html.replace(new RegExp(`${JSONLD_START.replace(/[()*]/g, '\\$&')}[\\s\\S]*?${JSONLD_END}`), ld);
+    } else {
+      // Erstat en tidligere håndskrevet blok, ellers læg den før </head>.
+      html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/, '');
+      html = html.replace('</head>', `${ld}\n</head>`);
+    }
+  }
 
   if (html !== before){ fs.writeFileSync(full, html, 'utf8'); written++; }
 }

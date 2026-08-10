@@ -248,14 +248,30 @@ ${footer}
 fs.writeFileSync(path.join(ROOT, 'maerker.html'), indexHtml, 'utf8');
 
 /* ---- sitemap.xml so crawlers actually find the new pages ---- */
-const base = 'https://gulecitronxx.github.io/Bikerbasenv1';
-const staticPages = ['index.html','soegning.html','maerker.html','opret-annonce.html','sikkerhed.html','vilkaar.html','privatlivspolitik.html','login.html'];
-const urls = [...staticPages, ...brands.map(b => `maerke-${slugify(b)}.html`)];
+const base = require('./site-url')(ROOT);
+/* login.html er sat til noindex af build-meta.js. En noindex-side i
+   sitemappet er et modsat signal, så den hører ikke med her. */
+const staticPages = ['index.html','soegning.html','maerker.html','opret-annonce.html','sikkerhed.html','vilkaar.html','privatlivspolitik.html'];
+
+/* Annoncerne er sidens egentlige long-tail — uden dem i sitemappet skal
+   Google selv gætte sig frem via søgesiden, og den er JavaScript-drevet.
+   lastmod følger annoncens updated_at, så en redigeret annonce genbesøges. */
+const listingUrls = LISTINGS.map(l => ({
+  loc: `annonce.html?id=${l.id}`,
+  lastmod: String(l.updated_at || l.createdAt || '').slice(0, 10),
+}));
+
 const today = new Date().toISOString().slice(0,10);
+const entries = [
+  ...[...staticPages, ...brands.map(b => `maerke-${slugify(b)}.html`)]
+    .map(u => ({ loc: u, lastmod: today })),
+  ...listingUrls,
+];
+const urls = entries;
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'),
 `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(u => `  <url><loc>${base}/${u}</loc><lastmod>${today}</lastmod></url>`).join('\n')}
+${entries.map(e => `  <url><loc>${base}/${esc(e.loc)}</loc><lastmod>${e.lastmod || today}</lastmod></url>`).join('\n')}
 </urlset>
 `, 'utf8');
 

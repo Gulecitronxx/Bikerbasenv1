@@ -8,6 +8,16 @@
    Struktureret data er det, der giver pris, årgang og km direkte i Googles
    søgeresultat. Både bilbasen.dk og 123mc.dk kører det på deres annoncesider. */
 
+/* Sidens adresse — ÉN kilde til sandhed.
+
+   Den bruges i canonical, og:url og struktureret data, og byggescripterne
+   (build-meta.js, build-brand-pages.js) læser linjen herfra i stedet for at
+   have deres egen kopi. Skifter du domæne, er det kun denne linje der skal
+   rettes; kør derefter:
+     node scripts/build-meta.js && node scripts/build-brand-pages.js
+     node scripts/stamp-version.js
+
+   Ingen skråstreg til sidst. */
 const SITE_URL = 'https://gulecitronxx.github.io/Bikerbasenv1';
 const SITE_NAME = 'Bikerbasen';
 
