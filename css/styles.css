@@ -189,6 +189,9 @@ svg{display:block; width:1em; height:1em;}
 .brand{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:20px; flex-shrink:0; }
 .brand .brand-mark{ color: var(--color-primary); }
 .brand svg{ width:26px; height:26px; }
+/* Logo-badget. Afrundede hjørner, så den orange firkant læser som et
+   app-ikon frem for en hård klods — også på den hvide header. */
+.brand-logo{ width:30px; height:30px; border-radius:8px; display:block; flex-shrink:0; }
 
 .main-nav{ display:none; align-items:center; gap:4px; }
 .main-nav a{
@@ -273,6 +276,7 @@ svg{display:block; width:1em; height:1em;}
 @media (min-width:768px){ .footer-grid{ grid-template-columns: 1.4fr 1fr 1fr 1fr; } }
 .footer-brand{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:20px; color:#fff; margin-bottom:var(--space-3); }
 .footer-brand svg{ width:24px; height:24px; color:var(--color-primary); }
+.footer-brand .brand-logo{ width:30px; height:30px; }
 .footer-col h2.footer-col-title, .footer-col h4{ color:#fff; font-size:14px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:var(--space-3); font-family:var(--font-body); font-weight:700; }
 .footer-col ul{ display:flex; flex-direction:column; gap:10px; font-size:14px; }
 /* Fodlinkene var 18 px høje. WCAG 2.5.8 kræver mindst 24×24 for et
@@ -705,6 +709,7 @@ select.input{
 }
 .auth-hero-brand{ display:inline-flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:800; font-size:22px; color:#fff; text-decoration:none; position:relative; }
 .auth-hero-brand svg{ width:30px; height:30px; color:#FF6A32; }
+.auth-hero-brand .brand-logo{ width:38px; height:38px; border-radius:10px; }
 .auth-hero-title{ font-size:30px; line-height:1.12; letter-spacing:-.02em; margin-top: var(--space-6); position:relative; }
 .auth-hero-lead{ color:#C7C1B8; font-size:15px; margin-top:12px; position:relative; }
 .auth-hero-benefits{ list-style:none; display:flex; flex-direction:column; gap:14px; margin-top: var(--space-6); position:relative; }
