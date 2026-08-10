@@ -365,6 +365,18 @@ function showUploadProgress(done, total){
   el.innerHTML = `<span>Uploader billeder ${done}/${total}</span><span class="bar"><span style="width:${pct}%"></span></span>`;
 }
 
+/* Vises når en privat konto rammer gratis-grænsen på 3 aktive annoncer. */
+function visForhandlerGraense(antal){
+  const nextBtn = document.getElementById('step-next');
+  nextBtn.disabled = false;
+  nextBtn.textContent = 'Udgiv annonce';
+  openInfoModal('Du har nået gratis-grænsen', `
+    <p>Private konti kan have <strong>3 aktive annoncer</strong> gratis, og du har allerede ${antal}.</p>
+    <p>Vil du sælge flere motorcykler, kan du blive <strong>forhandler</strong> og få ubegrænsede annoncer, en shop-side og et forhandler-badge.</p>
+    <p style="margin-bottom:0;"><a href="mine-annoncer.html?tab=konto" class="btn btn-primary btn-block" style="margin-top:8px;">Se forhandler-abonnement</a></p>
+  `);
+}
+
 async function publishListing(){
   if (!document.getElementById('f-terms').checked || !document.getElementById('f-captcha').checked){
     toast('Bekræft venligst vilkår og robot-tjek for at udgive annoncen');
@@ -396,6 +408,17 @@ async function publishListing(){
     return;
   }
 
+  // Gratis-grænse: 3 aktive annoncer for private. Serveren håndhæver den
+  // (trigger), men vi tjekker først for at give en venlig besked frem for en
+  // rå databasefejl. Gælder kun nye annoncer, ikke redigering.
+  if (!editingId && (Store.getUser()?.plan || 'free') !== 'dealer'){
+    const antal = await db.myActiveListingCount();
+    if (antal >= 3){
+      visForhandlerGraense(antal);
+      return;
+    }
+  }
+
   nextBtn.disabled = true;
   nextBtn.textContent = editingId ? 'Gemmer…' : 'Udgiver…';
 
@@ -419,6 +442,9 @@ async function publishListing(){
   if (error){
     nextBtn.disabled = false;
     nextBtn.textContent = editingId ? 'Gem ændringer' : 'Udgiv annonce';
+    // Serveren afviste pga. gratis-grænsen (fallback hvis for-tjekket blev
+    // omgået, fx to faner åbne samtidig).
+    if (/GRAENSE/.test(error.message || '')){ visForhandlerGraense(3); return; }
     toast('Annoncen kunne ikke gemmes: ' + error.message);
     return;
   }

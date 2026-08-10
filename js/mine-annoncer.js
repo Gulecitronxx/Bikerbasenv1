@@ -211,7 +211,46 @@ function renderAgents(){
   }));
 }
 
+function renderPlanCard(){
+  const card = document.getElementById('plan-card');
+  if (!card) return;
+  const user = Store.getUser();
+  const erForhandler = user?.plan === 'dealer';
+
+  if (erForhandler){
+    card.innerHTML = `
+      <h3 style="margin-bottom:6px;">Dit abonnement</h3>
+      <p class="plan-badge">${Icon.shieldCheck} Forhandler · aktivt</p>
+      <p style="color:var(--color-fg-muted); font-size:14px; margin:10px 0 0;">
+        Du har ubegrænsede annoncer, forhandler-shop og fremhævet placering.</p>
+      <button type="button" class="btn btn-outline btn-sm" id="plan-downgrade" style="margin-top:14px;">Skift til privat (test)</button>`;
+  } else {
+    card.innerHTML = `
+      <h3 style="margin-bottom:6px;">Bliv forhandler</h3>
+      <p style="color:var(--color-fg-muted); font-size:14px; margin-bottom:12px;">
+        Private konti kan have 3 aktive annoncer gratis. Som forhandler får du:</p>
+      <ul class="plan-perks">
+        <li>${Icon.checkCircle} Ubegrænsede annoncer</li>
+        <li>${Icon.checkCircle} Egen shop-side med alle dine motorcykler</li>
+        <li>${Icon.checkCircle} Forhandler-badge og fremhævet placering</li>
+      </ul>
+      <button type="button" class="btn btn-primary btn-block" id="plan-upgrade" style="margin-top:14px;">Bliv forhandler</button>
+      <p style="font-size:12px; color:var(--color-fg-muted); margin:10px 0 0;">Betaling er ikke koblet på endnu — knappen aktiverer et testabonnement.</p>`;
+  }
+
+  const skift = async (plan) => {
+    const { error } = await db.devSetPlan(plan);
+    if (error){ toast('Kunne ikke skifte plan: ' + error.message); return; }
+    await syncSessionToStore();
+    renderPlanCard();
+    toast(plan === 'dealer' ? 'Du er nu forhandler (test)' : 'Skiftet til privat konto');
+  };
+  document.getElementById('plan-upgrade')?.addEventListener('click', () => skift('dealer'));
+  document.getElementById('plan-downgrade')?.addEventListener('click', () => skift('free'));
+}
+
 function renderAccountTab(){
+  renderPlanCard();
   const user = Store.getUser();
   const rows = [
     { label: 'E-mail', done: !!user.emailVerified, icon: 'mail' },

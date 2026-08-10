@@ -170,6 +170,25 @@ const db = (function(){
       return c.from('listings').insert({ ...listing, seller_id: user.id }).select().single();
     },
 
+    /* Antal aktive annoncer for den indloggede bruger — bruges til at vise
+       gratis-grænsen, før serveren afviser den. */
+    async myActiveListingCount(){
+      const c = init(); if (!c) return 0;
+      const user = await this.currentUser();
+      if (!user) return 0;
+      const { count } = await c.from('listings')
+        .select('id', { count: 'exact', head: true })
+        .eq('seller_id', user.id).eq('status', 'active');
+      return count || 0;
+    },
+
+    /* DEV: skift egen plan uden betaling. Kun til test indtil Stripe er koblet
+       på — funktionen fjernes fra databasen før lancering. */
+    async devSetPlan(plan){
+      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
+      return c.rpc('dev_set_plan', { p_plan: plan });
+    },
+
     async updateListing(id, patch){
       const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
       // Ingen ejer-tjek nødvendig i klienten — RLS afviser fremmede rækker.

@@ -71,6 +71,8 @@ async function syncSessionToStore(){
     phoneVerified: !!p?.phone_verified,
     mitIdVerified: !!p?.mitid_verified,
     cvrVerified: !!p?.cvr_verified,
+    plan: p?.plan || 'free',
+    subscriptionStatus: p?.subscription_status || null,
     verified: p?.is_dealer ? (!!p?.mitid_verified && !!p?.cvr_verified) : !!p?.mitid_verified,
   };
   Store.setUser(merged);

@@ -492,6 +492,13 @@ select.input{
 
 .field-label-sm{ display:block; font-size:13px; font-weight:600; margin-bottom:6px; }
 
+/* Forhandler-abonnement i Konto-fanen. */
+.plan-badge{ display:inline-flex; align-items:center; gap:6px; font-weight:700; color: var(--color-success); }
+.plan-badge svg{ width:18px; height:18px; }
+.plan-perks{ list-style:none; display:flex; flex-direction:column; gap:8px; margin:0; padding:0; }
+.plan-perks li{ display:flex; align-items:center; gap:8px; font-size:14px; }
+.plan-perks li svg{ width:16px; height:16px; flex-shrink:0; color: var(--color-success); }
+
 .owned-actions{ display:flex; gap:8px; margin-top:8px; }
 .owned-actions .btn{ flex:1; }
 

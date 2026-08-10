@@ -46,6 +46,10 @@ oven på et eksisterende skema uden at røre data, du allerede har:
 | `004c_gemte.sql` | Funktion der tæller hvor mange der har gemt hver af dine annoncer |
 | `005_beskyt_verificering.sql` | Låser `mitid_verified`/`cvr_verified`/`email_verified`, så ingen kan give sig selv et falsk "Verificeret"-badge |
 | `005_tjek.sql` | Kun læsning — viser at flagene er låst for almindelige brugere |
+| `006_forhandler_abonnement.sql` | Abonnement-felter (låst), server-håndhævet gratis-grænse på 3 aktive annoncer, og en **dev-funktion** til at teste forhandler-status uden betaling |
+
+> **`006` indeholder en midlertidig testfunktion** `dev_set_plan`, så forhandler-status kan afprøves før Stripe er koblet på. **Fjern den før lancering** med:
+> `drop function public.dev_set_plan(text);`
 
 **Kør 004 som tre separate filer, én ad gangen.** SQL-editoren kører et ark
 som én transaktion, så ét fejlende udtryk ruller resten tilbage — og skjuler
