@@ -41,6 +41,20 @@ oven på et eksisterende skema uden at røre data, du allerede har:
 | --- | --- |
 | `002_favorites_reviews.sql` | Favoritter, anmeldelser, søgeagenter og indberetninger i databasen |
 | `003_udstyr.sql` | Udstyr, brændstof, træktype, cylindre og farve på annoncerne — det søgefiltrene på søgesiden filtrerer på |
+| `004a_tabel.sql` | Tabel til dagstotaler pr. annonce, med RLS så kun ejeren ser sine tal |
+| `004b_visninger.sql` | Funktion der tæller en visning eller en kontaktafsløring |
+| `004c_gemte.sql` | Funktion der tæller hvor mange der har gemt hver af dine annoncer |
+
+**Kør 004 som tre separate filer, én ad gangen.** SQL-editoren kører et ark
+som én transaktion, så ét fejlende udtryk ruller resten tilbage — og skjuler
+hvor det gik galt. Delt op ser du med det samme hvilken del der fejler, og de
+tidligere dele består. Alle filer kan køres igen uden skade.
+
+Filerne er skrevet i ren ASCII. Danske tegn og tankestreger i SQL har været
+kilde til svære fejl her, og der er intet vundet ved dem.
+
+Bagefter kan `004_tjek.sql` køres — den er kun læsning og rapporterer hvad der
+faktisk findes i databasen.
 
 Annoncer oprettet før `003` har tomt udstyr og dukker derfor ikke op, når nogen
 filtrerer på f.eks. ABS. De kan redigeres og få felterne udfyldt bagefter.
