@@ -22,8 +22,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   // hero stats
   const ALLE = Store.getAllListings();   // databasen (+ demodata hvis slået til)
   // "+" giver kun mening ved et rundt tal man runder ned til.
-  document.getElementById('stat-listings').textContent =
-    ALLE.length >= 10 ? (Math.floor(ALLE.length / 10) * 10) + '+' : String(ALLE.length);
+  // Adaptiv hero-stat: et lille tal ("1") svækker førstehåndsindtrykket, så
+  // under 10 annoncer viser vi en ærlig værdi-pointe i stedet. Fra 10 og op
+  // bliver antallet en styrke og vises som "X+ Aktive annoncer".
+  const statValue = document.getElementById('stat-listings');
+  const statLabel = document.getElementById('stat-listings-label');
+  if (ALLE.length >= 10){
+    statValue.textContent = (Math.floor(ALLE.length / 10) * 10) + '+';
+    if (statLabel) statLabel.textContent = 'Aktive annoncer';
+  } else {
+    statValue.textContent = 'Gratis';
+    if (statLabel) statLabel.textContent = 'for private sælgere';
+  }
 
   // Curated entry points tailored to motorcycle buyers
   const POPULAR = [
@@ -67,7 +77,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? `Der er <b>${n}</b> ${mc} til salg lige nu.`
         : `Der er ingen motorcykler til salg lige nu.`;
     }
-    document.getElementById('hs-submit').textContent = n ? `Vis ${n} ${n === 1 ? 'motorcykel' : 'motorcykler'}` : 'Søg motorcykler';
+    // Vis kun antallet på knappen, når brugeren faktisk har filtreret — ellers
+    // ville standard-CTA'en fremhæve et spinkelt "Vis 1 motorcykel". Uden
+    // filtre er "Søg motorcykler" et stærkere og renere kald til handling.
+    document.getElementById('hs-submit').textContent =
+      (harSøgt && n) ? `Vis ${n} ${n === 1 ? 'motorcykel' : 'motorcykler'}` : 'Søg motorcykler';
   };
   ['hs-query','hs-type','hs-price'].forEach(id =>
     document.getElementById(id).addEventListener('input', updateHeroCount));
@@ -92,6 +106,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Kun mærker der faktisk findes i mærkeuniverset (undgå døde links).
   const KNOWN = new Set(Object.keys(BRANDS_BY_MODEL));
   const brands = POPULAR_BRANDS.filter(b => KNOWN.has(b));
+  // Stor, svag bike-silhuet som vandmærke i hero'ens højre side, så det
+  // mørke felt ved siden af overskriften får brand-relevant dybde i stedet
+  // for tom gradient (Bilbasen fylder sit hero med billeder).
+  const heroShape = document.getElementById('hero-bg-shape');
+  if (heroShape && typeof bikeArtSVG === 'function') heroShape.innerHTML = bikeArtSVG('sport', { flip: true });
+
   // Bike-silhuet i sælg-båndets mini-annonce (ren SVG, ingen billeder krævet).
   const sellBike = document.getElementById('sell-band-bike');
   if (sellBike && typeof bikeArtSVG === 'function') sellBike.insertAdjacentHTML('afterbegin', bikeArtSVG('cruiser', {}));
@@ -130,18 +150,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   // annoncer fylder vi rækken ud med ærlige "opret din annonce"-kort, så
   // forsiden ser levende og intentionel ud — og skubber samtidig udbud.
   const bikeSilhouettes = ['sport','cruiser','adventure','classic'];
-  const fillerCardHTML = (i) => `
-    <a class="card card-cta" href="opret-annonce.html" aria-label="Opret din annonce gratis">
+  // Varieret tekst, så tre udfylderkort ved siden af hinanden ikke gentager
+  // sig, men rammer hver sin vinkel (købers plads, sælgers genvej, "vær først").
+  const FILLER_COPY = [
+    { title: 'Din motorcykel her', text: 'Opret en gratis annonce og bliv set af købere i hele Danmark.' },
+    { title: 'Sælger du snart?', text: 'Sæt din motorcykel til salg på under 5 minutter — helt gratis.' },
+    { title: 'Vær blandt de første', text: 'Nye annoncer lander her. Kom med, mens der er god plads i toppen.' },
+  ];
+  const fillerCardHTML = (i) => {
+    const c = FILLER_COPY[i % FILLER_COPY.length];
+    return `
+    <a class="card card-cta" href="opret-annonce.html" aria-label="${c.title} — opret gratis annonce">
       <div class="card-media card-cta-media">
         ${typeof bikeArtSVG === 'function' ? bikeArtSVG(bikeSilhouettes[i % bikeSilhouettes.length], {}) : ''}
       </div>
       <div class="card-body card-cta-body">
         <span class="card-cta-plus">${Icon.plus}</span>
-        <h3 class="card-cta-title">Din motorcykel her</h3>
-        <p class="card-cta-text">Opret en gratis annonce — vær blandt de første på Bikerbasen.</p>
+        <h3 class="card-cta-title">${c.title}</h3>
+        <p class="card-cta-text">${c.text}</p>
         <span class="card-cta-link">Opret annonce${Icon.arrowRight}</span>
       </div>
     </a>`;
+  };
   // Fyld kun den igangværende række ud — antal kolonner måles på layoutet,
   // så en enkelt annonce på mobil (1 kolonne) ikke får tre udfylderkort
   // stablet under sig, mens desktop (4 kolonner) fylder rækken pænt ud.
