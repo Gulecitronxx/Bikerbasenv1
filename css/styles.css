@@ -1150,6 +1150,100 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-noscript ul, .brand-noscript{ padding-left:18px; }
 .brand-noscript li{ list-style:disc; margin-bottom:6px; color: var(--color-fg-muted); }
 
+/* ============ Forside: Populære mærker (brand cloud) ============ */
+.brand-cloud{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
+@media (min-width:640px){ .brand-cloud{ grid-template-columns: repeat(3,1fr); } }
+@media (min-width:1024px){ .brand-cloud{ grid-template-columns: repeat(6,1fr); } }
+.brand-chip{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding: 14px var(--space-4); border-radius: var(--radius-md);
+  background: var(--color-surface); border:1px solid var(--color-border);
+  transition: transform .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out), background-color .18s var(--ease-out);
+}
+.brand-chip:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
+.brand-chip-name{ font-family: var(--font-display); font-weight:700; font-size:15px; letter-spacing:-0.01em; }
+.brand-chip-go{ color: var(--color-fg-muted); display:inline-flex; opacity:0; transform: translateX(-4px); transition: opacity .18s var(--ease-out), transform .18s var(--ease-out), color .18s var(--ease-out); }
+.brand-chip-go svg{ width:16px; height:16px; }
+.brand-chip:hover .brand-chip-go{ opacity:1; transform: translateX(0); color: var(--color-primary); }
+
+/* ============ Forside: Sælg-bånd ============ */
+.sell-band{
+  display:grid; grid-template-columns: 1fr; gap: var(--space-5);
+  background:
+    radial-gradient(120% 140% at 100% 0%, var(--color-primary-tint) 0%, transparent 55%),
+    var(--color-surface);
+  border:1px solid var(--color-border); border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  overflow:hidden; position:relative;
+}
+@media (min-width:820px){ .sell-band{ grid-template-columns: 1.35fr .65fr; align-items:center; } }
+.sell-band-eyebrow{
+  display:inline-block; font-family:var(--font-display); font-weight:600; font-size:13px;
+  text-transform:uppercase; letter-spacing:.06em; color: var(--color-primary); margin-bottom:8px;
+}
+.sell-band h2{ font-size: clamp(22px,3vw,30px); margin-bottom:8px; }
+.sell-band > .sell-band-copy > p{ color: var(--color-fg-muted); max-width:52ch; margin-bottom: var(--space-4); }
+.sell-points{ display:flex; flex-direction:column; gap:10px; margin-bottom: var(--space-5); }
+.sell-points li{ display:flex; align-items:flex-start; gap:10px; font-size:15px; font-weight:500; }
+.sell-check{ flex-shrink:0; width:22px; height:22px; margin-top:1px; border-radius:50%; background: var(--color-success-tint); color: var(--color-success); position:relative; }
+.sell-check::after{ content:""; position:absolute; left:7px; top:4px; width:6px; height:10px; border:solid currentColor; border-width:0 2px 2px 0; transform: rotate(45deg); }
+.sell-band-actions{ display:flex; flex-wrap:wrap; gap: var(--space-3); }
+/* Beholder til mini-annoncen; selve kortet bærer designet. */
+.sell-band-art{ position:relative; display:none; }
+@media (min-width:820px){ .sell-band-art{ display:flex; align-items:center; justify-content:center; } }
+
+/* ============ Forside: SEO-browse-bånd ============ */
+.seo-browse{ border-top:1px solid var(--color-border); }
+.seo-browse-title{ font-size: clamp(18px,2.4vw,24px); margin-bottom: var(--space-5); }
+.seo-cols{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-5) var(--space-4); }
+@media (min-width:768px){ .seo-cols{ grid-template-columns: repeat(4,1fr); } }
+.seo-col h3{ font-family:var(--font-display); font-size:14px; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); margin-bottom: var(--space-3); }
+.seo-col ul{ display:flex; flex-direction:column; gap:8px; }
+.seo-col a{ font-size:14px; color: var(--color-fg); transition: color .15s var(--ease-out); }
+.seo-col a:hover{ color: var(--color-primary); text-decoration:underline; text-underline-offset:3px; }
+
+/* ============ Forside: mini-annonce i sælg-båndet ============ */
+.mini-card{
+  width:100%; max-width:300px; margin:0 auto;
+  background: var(--color-surface); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); overflow:hidden; box-shadow: var(--shadow-lg);
+  transform: rotate(-2.5deg); transition: transform .3s var(--ease-out);
+}
+.sell-band-art:hover .mini-card{ transform: rotate(0deg) translateY(-4px); }
+.mini-card-media{ position:relative; aspect-ratio:16/10; background: var(--color-surface-2); }
+.mini-card-media .ba-svg{ width:100%; height:100%; }
+.mini-badge{
+  position:absolute; top:10px; left:10px; z-index:1;
+  background: var(--color-badge-new); color:#fff; font-family:var(--font-display);
+  font-weight:700; font-size:11px; letter-spacing:.06em; padding:4px 9px; border-radius: var(--radius-pill);
+}
+.mini-card-body{ padding: var(--space-3) var(--space-4) var(--space-4); }
+.mini-price{ font-family:var(--font-display); font-weight:700; font-size:19px; }
+.mini-title{ font-family:var(--font-display); font-weight:600; font-size:14px; margin-top:2px; }
+.mini-meta{ color: var(--color-fg-muted); font-size:12px; margin-top:4px; }
+
+/* ============ Forside: "din annonce her"-kort (ærlig udfylder) ============ */
+.card-cta{
+  border-style:dashed; border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary-tint) 40%, var(--color-surface));
+  text-align:center;
+}
+.card-cta:hover{ border-style:solid; border-color: var(--color-primary); }
+.card-cta-media{ display:flex; align-items:center; justify-content:center; background:transparent; opacity:.28; }
+.card-cta-media .ba-svg{ width:82%; height:auto; }
+.card-cta-body{ align-items:center; gap:6px; padding: var(--space-4) var(--space-4) var(--space-5); }
+.card-cta-plus{
+  width:44px; height:44px; margin:-42px auto 4px; border-radius:50%;
+  background: var(--color-primary); color: var(--color-on-primary);
+  display:flex; align-items:center; justify-content:center; box-shadow: var(--shadow-md);
+  position:relative; z-index:1;
+}
+.card-cta-plus svg{ width:22px; height:22px; }
+.card-cta-title{ font-size:16px; }
+.card-cta-text{ color: var(--color-fg-muted); font-size:13px; max-width:26ch; }
+.card-cta-link{ margin-top:6px; display:inline-flex; align-items:center; gap:5px; font-weight:600; font-size:14px; color: var(--color-primary); }
+.card-cta-link svg{ width:15px; height:15px; }
+
 /* ============ Rigtige annoncefotos ============ */
 .card-photo{ width:100%; height:100%; object-fit:cover; display:block;
   transition: transform .5s var(--ease-out); }

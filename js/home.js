@@ -73,17 +73,81 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById(id).addEventListener('input', updateHeroCount));
   updateHeroCount();
 
-  // category tiles
+  // category tiles — hver type får sit nærmeste ikon, så rækken ikke er otte
+  // ens cirkler (Bilbasen bruger forskellige billeder pr. kategori).
+  const TYPE_ICONS = {
+    sport: 'gauge', touring: 'mapPin', cruiser: 'bike', naked: 'engine',
+    adventure: 'flag', scooter: 'bike', classic: 'clock', cross: 'medal',
+  };
   const tilesMount = document.getElementById('category-tiles');
   tilesMount.innerHTML = TYPES.map(t => `
     <a href="soegning.html?type=${t.id}" class="tile">
-      <span class="tile-icon">${Icon.bike}</span>
+      <span class="tile-icon">${Icon[TYPE_ICONS[t.id]] || Icon.bike}</span>
       <span>${t.label}</span>
     </a>`).join('');
 
+  // Populære mærker — rigtige links til filtrerede søgninger (Bilbasens
+  // vigtigste scent/SEO-aktiv). Ingen opdigtede annoncetal.
+  const POPULAR_BRANDS = ['Yamaha','Honda','Suzuki','Kawasaki','BMW','Ducati','KTM','Triumph','Aprilia','Husqvarna','Vespa','Indian'];
+  // Kun mærker der faktisk findes i mærkeuniverset (undgå døde links).
+  const KNOWN = new Set(Object.keys(BRANDS_BY_MODEL));
+  const brands = POPULAR_BRANDS.filter(b => KNOWN.has(b));
+  // Bike-silhuet i sælg-båndets mini-annonce (ren SVG, ingen billeder krævet).
+  const sellBike = document.getElementById('sell-band-bike');
+  if (sellBike && typeof bikeArtSVG === 'function') sellBike.insertAdjacentHTML('afterbegin', bikeArtSVG('cruiser', {}));
+
+  const brandCloud = document.getElementById('brand-cloud');
+  if (brandCloud){
+    brandCloud.innerHTML = brands.map(b =>
+      `<a class="brand-chip" href="soegning.html?brands=${encodeURIComponent(b)}">
+         <span class="brand-chip-name">${b}</span>
+         <span class="brand-chip-go" aria-hidden="true">${Icon.arrowRight}</span>
+       </a>`).join('');
+  }
+
+  // SEO-browse-bånd over footeren — rigtige søge-URL'er, ligesom Bilbasens
+  // linkfarm. God for organisk trafik og udfylder siden meningsfuldt.
+  const fillSeoCol = (id, links) => {
+    const ul = document.querySelector('#' + id + ' ul');
+    if (ul) ul.innerHTML = links.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('');
+  };
+  fillSeoCol('seo-brands', brands.slice(0, 8).map(b => ({ label: b, href: `soegning.html?brands=${encodeURIComponent(b)}` })));
+  fillSeoCol('seo-types', TYPES.map(t => ({ label: t.label, href: `soegning.html?type=${t.id}` })));
+  fillSeoCol('seo-regions', (typeof REGIONS !== 'undefined' ? REGIONS : []).map(r => ({ label: r, href: `soegning.html?regions=${encodeURIComponent(r)}` })));
+  fillSeoCol('seo-price', [
+    { label: 'Under 30.000 kr.', href: 'soegning.html?maxPrice=30000' },
+    { label: 'Under 60.000 kr.', href: 'soegning.html?maxPrice=60000' },
+    { label: 'Under 100.000 kr.', href: 'soegning.html?maxPrice=100000' },
+    { label: 'Kan køres på A1', href: 'soegning.html?koerekort=A1' },
+    { label: 'Kan køres på A2', href: 'soegning.html?koerekort=A2' },
+    { label: 'Kun forhandlere', href: 'soegning.html?dealer=1' },
+  ]);
+
   // newest listings (by date)
   const newest = [...ALLE].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
-  document.getElementById('newest-listings').innerHTML = newest.map(listingCardHTML).join('');
+  // Mens databasen er ny, kan en enkelt annonce stå alene i et 4-kolonners
+  // gitter med tre tomme felter ved siden af. I stedet for at opdigte
+  // annoncer fylder vi rækken ud med ærlige "opret din annonce"-kort, så
+  // forsiden ser levende og intentionel ud — og skubber samtidig udbud.
+  const bikeSilhouettes = ['sport','cruiser','adventure','classic'];
+  const fillerCardHTML = (i) => `
+    <a class="card card-cta" href="opret-annonce.html" aria-label="Opret din annonce gratis">
+      <div class="card-media card-cta-media">
+        ${typeof bikeArtSVG === 'function' ? bikeArtSVG(bikeSilhouettes[i % bikeSilhouettes.length], {}) : ''}
+      </div>
+      <div class="card-body card-cta-body">
+        <span class="card-cta-plus">${Icon.plus}</span>
+        <h3 class="card-cta-title">Din motorcykel her</h3>
+        <p class="card-cta-text">Opret en gratis annonce — vær blandt de første på Bikerbasen.</p>
+        <span class="card-cta-link">Opret annonce${Icon.arrowRight}</span>
+      </div>
+    </a>`;
+  // Fyld op til en hel række (4 på desktop). Kun når der reelt er få annoncer.
+  const fillers = newest.length > 0 && newest.length < 4
+    ? Array.from({ length: 4 - newest.length }, (_, i) => fillerCardHTML(i))
+    : [];
+  document.getElementById('newest-listings').innerHTML =
+    newest.map(listingCardHTML).join('') + fillers.join('');
 
   // featured (curated mid-high price selection)
   const featuredPool = [...ALLE].filter(l => l.price > 60000);
