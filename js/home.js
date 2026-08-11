@@ -142,12 +142,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         <span class="card-cta-link">Opret annonce${Icon.arrowRight}</span>
       </div>
     </a>`;
-  // Fyld op til en hel række (4 på desktop). Kun når der reelt er få annoncer.
-  const fillers = newest.length > 0 && newest.length < 4
-    ? Array.from({ length: 4 - newest.length }, (_, i) => fillerCardHTML(i))
-    : [];
-  document.getElementById('newest-listings').innerHTML =
-    newest.map(listingCardHTML).join('') + fillers.join('');
+  // Fyld kun den igangværende række ud — antal kolonner måles på layoutet,
+  // så en enkelt annonce på mobil (1 kolonne) ikke får tre udfylderkort
+  // stablet under sig, mens desktop (4 kolonner) fylder rækken pænt ud.
+  const newestMount = document.getElementById('newest-listings');
+  const realCardsHTML = newest.map(listingCardHTML).join('');
+  const renderNewest = () => {
+    const cols = getComputedStyle(newestMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+    const need = (newest.length > 0 && newest.length < cols) ? cols - newest.length : 0;
+    const fillers = Array.from({ length: need }, (_, i) => fillerCardHTML(i));
+    newestMount.innerHTML = realCardsHTML + fillers.join('');
+  };
+  // Første render wires af den globale wireFavoriteButtons(document) nedenfor.
+  renderNewest();
+  // Tilpas udfylderkort, når man krydser et brudpunkt (fx rotation), og
+  // gen-wire de nye kort — den globale wiring kører kun ved sideindlæsning.
+  let _newestRAF;
+  window.addEventListener('resize', () => {
+    cancelAnimationFrame(_newestRAF);
+    _newestRAF = requestAnimationFrame(() => { renderNewest(); wireFavoriteButtons(newestMount); });
+  });
 
   // featured (curated mid-high price selection)
   const featuredPool = [...ALLE].filter(l => l.price > 60000);

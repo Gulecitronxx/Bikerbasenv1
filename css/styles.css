@@ -1229,7 +1229,7 @@ body.overlay-open .cookie-banner{ display:none; }
   text-align:center;
 }
 .card-cta:hover{ border-style:solid; border-color: var(--color-primary); }
-.card-cta-media{ display:flex; align-items:center; justify-content:center; background:transparent; opacity:.28; }
+.card-cta-media{ display:flex; align-items:center; justify-content:center; background:transparent; opacity:.22; }
 .card-cta-media .ba-svg{ width:82%; height:auto; }
 .card-cta-body{ align-items:center; gap:6px; padding: var(--space-4) var(--space-4) var(--space-5); }
 .card-cta-plus{
