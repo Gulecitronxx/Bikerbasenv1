@@ -346,10 +346,10 @@ function renderPreview(){
       <div class="spec-item"><span class="spec-icon">${Icon.calendar} Årgang</span><b>${formData.year}</b></div>
       <div class="spec-item"><span class="spec-icon">${Icon.gauge} Km-stand</span><b>${formatKm(formData.km)}</b></div>
       <div class="spec-item"><span class="spec-icon">${Icon.engine} Motor</span><b>${formatCcm(formData.ccm)}</b></div>
-      <div class="spec-item"><span class="spec-icon">${Icon.mapPin} Lokation</span><b>${formData.city || '—'}</b></div>
-      <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Stand</span><b>${formData.condition}</b></div>
-      <div class="spec-item"><span class="spec-icon">${Icon.vin} Registrering</span><b>${formData.registration}</b></div>
-      <div class="spec-item"><span class="spec-icon">${Icon.lock} Afgift</span><b>${formData.afgift}</b></div>
+      <div class="spec-item"><span class="spec-icon">${Icon.mapPin} Lokation</span><b>${escapeHTML(formData.city || '—')}</b></div>
+      <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Stand</span><b>${escapeHTML(formData.condition)}</b></div>
+      <div class="spec-item"><span class="spec-icon">${Icon.vin} Registrering</span><b>${escapeHTML(formData.registration)}</b></div>
+      <div class="spec-item"><span class="spec-icon">${Icon.lock} Afgift</span><b>${escapeHTML(formData.afgift)}</b></div>
     </div>`;
 }
 

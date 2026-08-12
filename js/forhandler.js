@@ -170,7 +170,7 @@ async function renderProfile(){
   if (authorField && db.enabled && seller.id) authorField.style.display = 'none';
 
   document.getElementById('reveal-phone-profile').addEventListener('click', (e) => {
-    e.target.innerHTML = `${Icon.phone}<span class="phone-reveal">${seller.phone}</span>`;
+    e.target.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(seller.phone)}</span>`;
     e.target.disabled = true;
   });
   document.getElementById('msg-seller-btn').addEventListener('click', () => {

@@ -61,7 +61,7 @@ function sellerSidebarHTML(listing, { loggedIn, sellerName, avgRating, reviewCou
   return `
       <div class="sidebar-card">
         <div class="seller-row">
-          <div class="avatar">${initials(listing.seller.name)}</div>
+          <div class="avatar">${escapeHTML(initials(listing.seller.name))}</div>
           <div>
             <div class="seller-name">${sellerName}</div>
             <div class="seller-sub">${listing.seller.isDealer ? 'Forhandler' : 'Privat sælger'} · ${escapeHTML(listing.seller.city)}</div>
@@ -172,7 +172,7 @@ function renderListing(){
       <div class="listing-header">
         <div>
           <p class="listing-title">${brand} ${model}</p>
-          <div class="listing-loc">${Icon.mapPin}${escapeHTML(listing.city)}, ${listing.postnr} · ${escapeHTML(listing.region)}</div>
+          <div class="listing-loc">${Icon.mapPin}${escapeHTML(listing.city)}, ${escapeHTML(listing.postnr)} · ${escapeHTML(listing.region)}</div>
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
           ${isOwnListing(listing)
@@ -192,9 +192,9 @@ function renderListing(){
         <div class="spec-item"><span class="spec-icon">${Icon.engine} Motorstørrelse</span><b>${formatCcm(listing.ccm)}</b></div>
         <div class="spec-item"><span class="spec-icon">${Icon.engine} Effekt</span><b>${formatPower(listing.power)}</b></div>
         <div class="spec-item"><span class="spec-icon">${Icon.info} Type</span><b>${typeLabel(listing.type)}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Stand</span><b>${listing.condition}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Registrering</span><b>${listing.registration}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.lock} Afgift</span><b>${listing.afgift || 'Ukendt'}</b></div>
+        <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Stand</span><b>${escapeHTML(listing.condition)}</b></div>
+        <div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Registrering</span><b>${escapeHTML(listing.registration)}</b></div>
+        <div class="spec-item"><span class="spec-icon">${Icon.lock} Afgift</span><b>${escapeHTML(listing.afgift || 'Ukendt')}</b></div>
         ${listing.fuel ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Brændstof</span><b>${escapeHTML(listing.fuel)}</b></div>` : ''}
         ${listing.drive ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Træktype</span><b>${escapeHTML(listing.drive)}</b></div>` : ''}
         ${listing.cylinders ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Cylindre</span><b>${Number(listing.cylinders)}</b></div>` : ''}
@@ -259,7 +259,7 @@ function renderListing(){
   if (loggedIn){
     const revealBtn = document.getElementById('reveal-phone-btn');
     revealBtn.addEventListener('click', () => {
-      revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${listing.seller.phone}</span>`;
+      revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(listing.seller.phone)}</span>`;
       revealBtn.disabled = true;
       // Tælles som en henvendelse i sælgerens dashboard.
       db.recordListingEvent?.(listing.id, 'contact');

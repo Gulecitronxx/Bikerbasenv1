@@ -271,8 +271,11 @@ function render(){
   reflectStateToUI();
 
   const pills = activeFilterPills();
+  // p.label kan stamme fra URL-parametre (brands, regions, conditions, farve …)
+  // og er dermed angriberstyret. Escapes i BÅDE tekst- og attribut-kontekst,
+  // ellers er ?brands=<img onerror=…> reflekteret XSS via et delt link.
   document.getElementById('active-filters').innerHTML = pills.map((p, i) =>
-    `<span class="active-filter-pill">${p.label}<button type="button" data-pill-clear="${i}" aria-label="Fjern filter: ${p.label}">${Icon.close}</button></span>`).join('');
+    `<span class="active-filter-pill">${escapeHTML(p.label)}<button type="button" data-pill-clear="${i}" aria-label="Fjern filter: ${escapeHTML(p.label)}">${Icon.close}</button></span>`).join('');
   document.querySelectorAll('[data-pill-clear]').forEach(btn => {
     btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; render(); });
   });
