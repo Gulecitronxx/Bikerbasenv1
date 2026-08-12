@@ -1,3 +1,20 @@
+/* Strdter en bikeArtSVG-illustration ned til ren line-art: fjerner kort-
+   baggrund + gulvlinje og tegner kun konturerne som ét strøg. Inline styles,
+   så bike-art'ens egne .ba-svg CSS-regler ikke fylder former (fx sorte hjul
+   i mørk tilstand). Genbruges af både hero og kategori-fliser. */
+function stripBikeToLineArt(svg, strokeWidth){
+  if (!svg) return;
+  svg.querySelector('rect')?.remove();
+  svg.querySelector('.ba-ground')?.remove();
+  svg.querySelectorAll('path, line, circle, polygon, ellipse, polyline').forEach(el => {
+    el.style.setProperty('fill', 'none');
+    el.style.setProperty('stroke', 'currentColor');
+    el.style.setProperty('stroke-width', strokeWidth || '3');
+    el.style.setProperty('stroke-linecap', 'round');
+    el.style.setProperty('stroke-linejoin', 'round');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await backendReady();
   renderHeader('index.html');
@@ -87,18 +104,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById(id).addEventListener('input', updateHeroCount));
   updateHeroCount();
 
-  // category tiles — hver type får sit nærmeste ikon, så rækken ikke er otte
-  // ens cirkler (Bilbasen bruger forskellige billeder pr. kategori).
-  const TYPE_ICONS = {
-    sport: 'gauge', touring: 'mapPin', cruiser: 'bike', naked: 'engine',
-    adventure: 'flag', scooter: 'bike', classic: 'clock', cross: 'medal',
-  };
+  // category tiles — hver type får sin egen line-art-motorcykel af netop den
+  // type. Mere distinkt end ét gentaget ikon, og custom pr. kategori frem for
+  // Bilbasens stock-fotos.
   const tilesMount = document.getElementById('category-tiles');
   tilesMount.innerHTML = TYPES.map(t => `
     <a href="soegning.html?type=${t.id}" class="tile">
-      <span class="tile-icon">${Icon[TYPE_ICONS[t.id]] || Icon.bike}</span>
+      <span class="tile-art" data-bike="${t.id}"></span>
       <span>${t.label}</span>
     </a>`).join('');
+  if (typeof bikeArtSVG === 'function'){
+    tilesMount.querySelectorAll('.tile-art[data-bike]').forEach(mount => {
+      mount.insertAdjacentHTML('afterbegin', bikeArtSVG(mount.dataset.bike, {}));
+      stripBikeToLineArt(mount.querySelector('svg'), '4');
+    });
+  }
 
   // Populære mærker — rigtige links til filtrerede søgninger (Bilbasens
   // vigtigste scent/SEO-aktiv). Ingen opdigtede annoncetal.
@@ -111,24 +131,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // for tom gradient (Bilbasen fylder sit hero med billeder).
   const heroShape = document.getElementById('hero-bg-shape');
   if (heroShape && typeof bikeArtSVG === 'function'){
-    // bikeArtSVG er en kort-illustration med egen baggrund + fyldt krop. Til
-    // hero'en strdter vi den ned til ren line-art: fjern kort-baggrund og
-    // gulvlinje, og tegn kun konturerne som ét varmt, glødende strøg.
+    // Komplet line-art-cykel som glødende emblem i hero'ens højre side.
     heroShape.innerHTML = bikeArtSVG('sport', { flip: true, id: 'hero' });
-    const svg = heroShape.querySelector('svg');
-    if (svg){
-      svg.querySelector('rect')?.remove();
-      svg.querySelector('.ba-ground')?.remove();
-      // Inline style vinder over bike-art'ens egne .ba-svg CSS-regler
-      // (attributter gør ikke — derfor fyldte hjulene i mørk tilstand).
-      svg.querySelectorAll('path, line, circle, polygon, ellipse, polyline').forEach(el => {
-        el.style.setProperty('fill', 'none');
-        el.style.setProperty('stroke', 'currentColor');
-        el.style.setProperty('stroke-width', '3');
-        el.style.setProperty('stroke-linecap', 'round');
-        el.style.setProperty('stroke-linejoin', 'round');
-      });
-    }
+    stripBikeToLineArt(heroShape.querySelector('svg'));
   }
 
   // Bike-silhuet i sælg-båndets mini-annonce (ren SVG, ingen billeder krævet).

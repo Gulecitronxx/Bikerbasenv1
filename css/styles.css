@@ -406,6 +406,10 @@ select.input{
 .tile:hover{ transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--color-primary); }
 .tile .tile-icon{ width:64px; height:64px; border-radius:50%; background: var(--color-primary-tint); color: var(--color-primary); display:flex; align-items:center; justify-content:center; }
 .tile .tile-icon svg{ width:34px; height:34px; }
+/* Per-type line-art-motorcykel i flisen */
+.tile .tile-art{ width:100%; max-width:130px; color: var(--color-primary); opacity:.88; transition: opacity .18s var(--ease-out), transform .18s var(--ease-out); }
+.tile .tile-art svg{ width:100%; height:auto; display:block; }
+.tile:hover .tile-art{ opacity:1; transform: translateX(2px); }
 .tile span{ font-size:13px; font-weight:600; }
 
 /* ============ Cards / listings grid ============ */
