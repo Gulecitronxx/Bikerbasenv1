@@ -304,14 +304,52 @@ svg{display:block; width:1em; height:1em;}
 /* Alt hero-indhold (overskrift, søgefelt, statistik) skal ligge over
    vandmærket — ellers maler den absolutte silhuet oven på søgekortet. */
 .hero > .container{ position:relative; z-index:1; }
-/* Stor silhuet der bløder ud i højre kant som et vandmærke. Monokrom og
-   svag, så overskrift og søgefelt altid vinder i kontrast. */
-.hero-bg-shape .ba-svg{
-  position:absolute; right:-6%; top:50%; transform:translateY(-52%);
-  width:min(680px, 62%); height:auto; opacity:.07;
+/* Lagdelt hero-scene i ren CSS/SVG — varm glød, fartstriber og en
+   motorcykel-silhuet der fanger lyset. Ingen billeder, ingen licens.
+   Hero'en er altid mørk (begge temaer), så én belysning passer overalt. */
+.hero-bg-shape::before{
+  /* Ember-glød bag cyklen, øverst til højre */
+  content:""; position:absolute; right:2%; top:-12%;
+  width:54%; height:95%;
+  background: radial-gradient(circle at center,
+    color-mix(in srgb, var(--color-primary) 52%, transparent) 0%,
+    color-mix(in srgb, var(--color-primary) 16%, transparent) 40%,
+    transparent 66%);
+  opacity:.6; pointer-events:none;
 }
-.hero-bg-shape .ba-svg [fill]:not([fill="none"]){ fill:#FFFFFF; }
-.hero-bg-shape .ba-svg [stroke]:not([stroke="none"]){ stroke:#FFFFFF; }
+.hero-bg-shape::after{
+  /* Fine diagonale fartstriber, kun i højre side */
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background: repeating-linear-gradient(114deg,
+    transparent 0 27px, rgba(255,255,255,.05) 27px 28px);
+  -webkit-mask-image: linear-gradient(100deg, transparent 50%, #000 98%);
+          mask-image: linear-gradient(100deg, transparent 50%, #000 98%);
+}
+/* Line-art-cykel: komplet, i top-højre, som ét varmt glødende strøg. */
+.hero-bg-shape .ba-svg{
+  position:absolute; right:5%; top:6%;
+  width:min(360px, 33%); height:auto; opacity:.8;
+  color: color-mix(in srgb, var(--color-primary) 58%, #fff 42%);
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--color-primary) 55%, transparent));
+}
+/* Scrim, så overskrift og lead altid har kontrast — mørkner venstre side,
+   lader scenen til højre stå fri. */
+.hero::after{
+  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background: linear-gradient(90deg,
+    var(--color-dark) 0%,
+    color-mix(in srgb, var(--color-dark) 45%, transparent) 30%,
+    transparent 56%);
+}
+@media (max-width: 760px){
+  /* På mobil ligger søgefeltet over hele bredden; hold cyklen lille og oppe
+     i hjørnet som en diskret accent, og mørkn bunden for kontrast. */
+  .hero-bg-shape .ba-svg{ right:-2%; top:4%; width:56%; opacity:.4; }
+  .hero-bg-shape::before{ opacity:.4; }
+  .hero::after{ background:
+    linear-gradient(180deg, transparent 0%, var(--color-dark) 94%),
+    linear-gradient(90deg, transparent 40%, transparent 100%); }
+}
 @media (max-width: 760px){ .hero-bg-shape .ba-svg{ opacity:.05; right:-18%; width:90%; } }
 .hero-inner{ position:relative; z-index:1; max-width:760px; }
 .hero h1{ font-size: clamp(28px, 5vw, 48px); font-weight:700; margin-bottom: var(--space-3); }

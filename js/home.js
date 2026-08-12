@@ -110,7 +110,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   // mørke felt ved siden af overskriften får brand-relevant dybde i stedet
   // for tom gradient (Bilbasen fylder sit hero med billeder).
   const heroShape = document.getElementById('hero-bg-shape');
-  if (heroShape && typeof bikeArtSVG === 'function') heroShape.innerHTML = bikeArtSVG('sport', { flip: true });
+  if (heroShape && typeof bikeArtSVG === 'function'){
+    // bikeArtSVG er en kort-illustration med egen baggrund + fyldt krop. Til
+    // hero'en strdter vi den ned til ren line-art: fjern kort-baggrund og
+    // gulvlinje, og tegn kun konturerne som ét varmt, glødende strøg.
+    heroShape.innerHTML = bikeArtSVG('sport', { flip: true, id: 'hero' });
+    const svg = heroShape.querySelector('svg');
+    if (svg){
+      svg.querySelector('rect')?.remove();
+      svg.querySelector('.ba-ground')?.remove();
+      // Inline style vinder over bike-art'ens egne .ba-svg CSS-regler
+      // (attributter gør ikke — derfor fyldte hjulene i mørk tilstand).
+      svg.querySelectorAll('path, line, circle, polygon, ellipse, polyline').forEach(el => {
+        el.style.setProperty('fill', 'none');
+        el.style.setProperty('stroke', 'currentColor');
+        el.style.setProperty('stroke-width', '3');
+        el.style.setProperty('stroke-linecap', 'round');
+        el.style.setProperty('stroke-linejoin', 'round');
+      });
+    }
+  }
 
   // Bike-silhuet i sælg-båndets mini-annonce (ren SVG, ingen billeder krævet).
   const sellBike = document.getElementById('sell-band-bike');
