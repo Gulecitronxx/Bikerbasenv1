@@ -29,6 +29,7 @@ function normalizeRemoteListing(row){
     sidsteSyn: row.sidste_syn || null,
     daekAar: row.daek_aar || null,
     vinterklar: !!row.vinterklar,
+    kanNedsaettesA2: !!row.kan_nedsaettes_a2,
     equipment: row.equipment || [],
     postnr: row.postnr, city: row.city, region: row.region,
     description: row.description,

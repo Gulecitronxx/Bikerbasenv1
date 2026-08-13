@@ -320,6 +320,7 @@ function collectFormData(){
     sidsteSyn: Number(document.getElementById('f-synsaar').value) || null,
     daekAar: Number(document.getElementById('f-daek').value) || null,
     vinterklar: document.getElementById('f-vinter').checked,
+    kanNedsaettesA2: document.getElementById('f-a2nedsat').checked,
     equipment: [...document.querySelectorAll('#equipment-groups input:checked')].map(cb => cb.dataset.equipment),
     price: Number(document.getElementById('f-price').value) || 0,
     condition: document.getElementById('f-condition').value,
@@ -360,6 +361,7 @@ function renderPreview(){
       ${formData.sidsteSyn ? `<div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Sidste syn</span><b>${Number(formData.sidsteSyn)}</b></div>` : ''}
       ${formData.daekAar ? `<div class="spec-item"><span class="spec-icon">${Icon.gauge} Dæk skiftet</span><b>${Number(formData.daekAar)}</b></div>` : ''}
       ${formData.vinterklar ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Vinterklargjort</span><b>Ja</b></div>` : ''}
+      ${formData.kanNedsaettesA2 ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Kan nedsættes til A2</span><b>Ja</b></div>` : ''}
     </div>`;
 }
 
@@ -446,6 +448,7 @@ async function publishListing(){
     sidste_syn: formData.sidsteSyn,
     daek_aar: formData.daekAar,
     vinterklar: formData.vinterklar,
+    kan_nedsaettes_a2: formData.kanNedsaettesA2,
     equipment: formData.equipment,
     postnr: formData.postnr, city: formData.city, region: formData.region,
     description: formData.description,
@@ -513,6 +516,7 @@ function fillForm(data){
   set('f-synsaar', data.sidsteSyn);
   set('f-daek', data.daekAar);
   const vinterCb = document.getElementById('f-vinter'); if (vinterCb) vinterCb.checked = !!data.vinterklar;
+  const a2Cb = document.getElementById('f-a2nedsat'); if (a2Cb) a2Cb.checked = !!data.kanNedsaettesA2;
   // Postnummerfeltet viser "1620 København V"; kun tallet gemmes videre.
   set('f-postnr', data.postnr ? `${data.postnr}${data.city ? ' ' + data.city : ''}` : '');
 

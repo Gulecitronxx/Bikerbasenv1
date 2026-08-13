@@ -305,7 +305,8 @@ function passerKoerekort(listing, kat){
   const hk = Number(listing.power) || 0;
   const ccm = Number(listing.ccm) || 0;
   if (kat === 'A1') return ccm <= A1_MAX_CCM && hk <= A1_MAX_HK;
-  if (kat === 'A2') return hk <= A2_MAX_HK;
+  // En stærkere mc tæller også med under A2, hvis den kan effektbegrænses.
+  if (kat === 'A2') return hk <= A2_MAX_HK || !!listing.kanNedsaettesA2;
   return true; // A dækker alt
 }
 
