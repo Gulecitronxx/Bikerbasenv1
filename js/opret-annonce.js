@@ -318,6 +318,8 @@ function collectFormData(){
     serviceHistorik: document.getElementById('f-service').value || null,
     antalEjere: Number(document.getElementById('f-ejere').value) || null,
     sidsteSyn: Number(document.getElementById('f-synsaar').value) || null,
+    daekAar: Number(document.getElementById('f-daek').value) || null,
+    vinterklar: document.getElementById('f-vinter').checked,
     equipment: [...document.querySelectorAll('#equipment-groups input:checked')].map(cb => cb.dataset.equipment),
     price: Number(document.getElementById('f-price').value) || 0,
     condition: document.getElementById('f-condition').value,
@@ -356,6 +358,8 @@ function renderPreview(){
       ${formData.serviceHistorik ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Servicehistorik</span><b>${escapeHTML(formData.serviceHistorik)}</b></div>` : ''}
       ${formData.antalEjere ? `<div class="spec-item"><span class="spec-icon">${Icon.user} Antal ejere</span><b>${Number(formData.antalEjere)}</b></div>` : ''}
       ${formData.sidsteSyn ? `<div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Sidste syn</span><b>${Number(formData.sidsteSyn)}</b></div>` : ''}
+      ${formData.daekAar ? `<div class="spec-item"><span class="spec-icon">${Icon.gauge} Dæk skiftet</span><b>${Number(formData.daekAar)}</b></div>` : ''}
+      ${formData.vinterklar ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Vinterklargjort</span><b>Ja</b></div>` : ''}
     </div>`;
 }
 
@@ -440,6 +444,8 @@ async function publishListing(){
     service_historik: formData.serviceHistorik,
     antal_ejere: formData.antalEjere,
     sidste_syn: formData.sidsteSyn,
+    daek_aar: formData.daekAar,
+    vinterklar: formData.vinterklar,
     equipment: formData.equipment,
     postnr: formData.postnr, city: formData.city, region: formData.region,
     description: formData.description,
@@ -505,6 +511,8 @@ function fillForm(data){
   set('f-service', data.serviceHistorik);
   set('f-ejere', data.antalEjere);
   set('f-synsaar', data.sidsteSyn);
+  set('f-daek', data.daekAar);
+  const vinterCb = document.getElementById('f-vinter'); if (vinterCb) vinterCb.checked = !!data.vinterklar;
   // Postnummerfeltet viser "1620 København V"; kun tallet gemmes videre.
   set('f-postnr', data.postnr ? `${data.postnr}${data.city ? ' ' + data.city : ''}` : '');
 

@@ -27,6 +27,8 @@ function normalizeRemoteListing(row){
     serviceHistorik: row.service_historik || null,
     antalEjere: row.antal_ejere || null,
     sidsteSyn: row.sidste_syn || null,
+    daekAar: row.daek_aar || null,
+    vinterklar: !!row.vinterklar,
     equipment: row.equipment || [],
     postnr: row.postnr, city: row.city, region: row.region,
     description: row.description,
