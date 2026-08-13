@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/styles.css?v=853d45d7">
+<link rel="stylesheet" href="css/styles.css?v=905da0ea">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -150,6 +150,30 @@
           <div class="field">
             <label for="f-color">Farve</label>
             <select class="input" id="f-color"></select>
+          </div>
+        </div>
+
+        <h2 style="margin:28px 0 4px;">Historik</h2>
+        <p class="field-hint" style="margin-bottom:16px;">Historik er det, seriøse købere kigger efter. Udfyld det, du kan stå inde for.</p>
+        <div class="form-grid cols-3">
+          <div class="field">
+            <label for="f-service">Servicehistorik</label>
+            <select class="input" id="f-service">
+              <option value="">Vælg…</option>
+              <option>Fuld</option>
+              <option>Delvis</option>
+              <option>Ingen</option>
+              <option>Ukendt</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-ejere">Antal ejere</label>
+            <input class="input" id="f-ejere" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="f.eks. 2">
+          </div>
+          <div class="field">
+            <label for="f-synsaar">Sidste syn (årstal)</label>
+            <input class="input" id="f-synsaar" type="number" min="1980" max="2026" step="1" inputmode="numeric" placeholder="f.eks. 2025">
+            <span class="field-hint">Lad stå tom, hvis ikke relevant.</span>
           </div>
         </div>
 
@@ -286,17 +310,17 @@
   </div>
 </footer>
 
-<script defer src="js/security.js?v=853d45d7"></script>
+<script defer src="js/security.js?v=905da0ea"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=853d45d7"></script>
-<script defer src="js/supabase-api.js?v=853d45d7"></script>
-<script defer src="js/icons.js?v=853d45d7"></script>
-<script defer src="js/bike-art.js?v=853d45d7"></script>
-<script defer src="js/postnumre.js?v=853d45d7"></script>
-<script defer src="js/data.js?v=853d45d7"></script>
-<script defer src="js/store.js?v=853d45d7"></script>
-<script defer src="js/backend-bridge.js?v=853d45d7"></script>
-<script defer src="js/components.js?v=853d45d7"></script>
-<script defer src="js/opret-annonce.js?v=853d45d7"></script>
+<script defer src="js/supabase-config.js?v=905da0ea"></script>
+<script defer src="js/supabase-api.js?v=905da0ea"></script>
+<script defer src="js/icons.js?v=905da0ea"></script>
+<script defer src="js/bike-art.js?v=905da0ea"></script>
+<script defer src="js/postnumre.js?v=905da0ea"></script>
+<script defer src="js/data.js?v=905da0ea"></script>
+<script defer src="js/store.js?v=905da0ea"></script>
+<script defer src="js/backend-bridge.js?v=905da0ea"></script>
+<script defer src="js/components.js?v=905da0ea"></script>
+<script defer src="js/opret-annonce.js?v=905da0ea"></script>
 </body>
 </html>

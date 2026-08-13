@@ -156,6 +156,7 @@ function listingCardHTML(l){
         ${suspicious ? `<span class="badge badge-warning" title="Prisen er væsentligt under markedsniveau for typen">${Icon.alertTriangle}Tjek prisen</span>` : ''}
       </div>
       ${isOwnListing(l) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
+      ${(() => { const k = koerekortForListing(l); return k ? `<span class="card-koerekort" title="Kan føres på ${k}-kørekort" aria-label="Kan føres på ${k}-kørekort">${k}</span>` : ''; })()}
     </div>
     <div class="card-body">
       <div class="card-price">${formatPrice(l.price)}</div>

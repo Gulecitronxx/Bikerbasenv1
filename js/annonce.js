@@ -184,6 +184,8 @@ function renderListing(){
 
       ${sellerTypeNoteHTML(listing.isDealer)}
 
+      ${listing.serviceHistorik === 'Fuld' ? `<div style="margin-top:var(--space-3);"><span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span></div>` : ''}
+
       <div class="spec-grid" style="margin-top:var(--space-4);">
         <div class="spec-item"><span class="spec-icon">${Icon.bike} Mærke</span><b>${brand}</b></div>
         <div class="spec-item"><span class="spec-icon">${Icon.info} Model</span><b>${model}</b></div>
@@ -199,6 +201,9 @@ function renderListing(){
         ${listing.drive ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Træktype</span><b>${escapeHTML(listing.drive)}</b></div>` : ''}
         ${listing.cylinders ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Cylindre</span><b>${Number(listing.cylinders)}</b></div>` : ''}
         ${listing.color ? `<div class="spec-item"><span class="spec-icon">${Icon.info} Farve</span><b>${escapeHTML(listing.color)}</b></div>` : ''}
+        ${listing.serviceHistorik ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Servicehistorik</span><b>${escapeHTML(listing.serviceHistorik)}</b></div>` : ''}
+        ${listing.antalEjere ? `<div class="spec-item"><span class="spec-icon">${Icon.user} Antal ejere</span><b>${Number(listing.antalEjere)}</b></div>` : ''}
+        ${listing.sidsteSyn ? `<div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Sidste syn</span><b>${Number(listing.sidsteSyn)}</b></div>` : ''}
       </div>
 
       ${(listing.equipment || []).length ? `

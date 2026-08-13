@@ -309,6 +309,17 @@ function passerKoerekort(listing, kat){
   return true; // A dækker alt
 }
 
+/* Mindste kørekortkategori en mc kan føres på, udledt af slagvolumen + effekt.
+   Returnerer null hvis hverken ccm eller hk kendes, så vi ikke gætter. */
+function koerekortForListing(listing){
+  const hk = Number(listing.power) || 0;
+  const ccm = Number(listing.ccm) || 0;
+  if (!hk && !ccm) return null;
+  if (ccm <= A1_MAX_CCM && hk <= A1_MAX_HK) return 'A1';
+  if (hk <= A2_MAX_HK) return 'A2';
+  return 'A';
+}
+
 /* ============ Udstyr og teknik ============
    123mc lader dig filtrere på ~40 udstyrspunkter, farve, brændstof, træktype
    og cylinderantal. Det er dér de vinder på købere der ved hvad de leder

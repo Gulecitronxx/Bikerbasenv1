@@ -315,6 +315,9 @@ function collectFormData(){
     drive: document.getElementById('f-drive').value || null,
     cylinders: Number(document.getElementById('f-cylinders').value) || null,
     color: document.getElementById('f-color').value || null,
+    serviceHistorik: document.getElementById('f-service').value || null,
+    antalEjere: Number(document.getElementById('f-ejere').value) || null,
+    sidsteSyn: Number(document.getElementById('f-synsaar').value) || null,
     equipment: [...document.querySelectorAll('#equipment-groups input:checked')].map(cb => cb.dataset.equipment),
     price: Number(document.getElementById('f-price').value) || 0,
     condition: document.getElementById('f-condition').value,
@@ -350,6 +353,9 @@ function renderPreview(){
       <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Stand</span><b>${escapeHTML(formData.condition)}</b></div>
       <div class="spec-item"><span class="spec-icon">${Icon.vin} Registrering</span><b>${escapeHTML(formData.registration)}</b></div>
       <div class="spec-item"><span class="spec-icon">${Icon.lock} Afgift</span><b>${escapeHTML(formData.afgift)}</b></div>
+      ${formData.serviceHistorik ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Servicehistorik</span><b>${escapeHTML(formData.serviceHistorik)}</b></div>` : ''}
+      ${formData.antalEjere ? `<div class="spec-item"><span class="spec-icon">${Icon.user} Antal ejere</span><b>${Number(formData.antalEjere)}</b></div>` : ''}
+      ${formData.sidsteSyn ? `<div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Sidste syn</span><b>${Number(formData.sidsteSyn)}</b></div>` : ''}
     </div>`;
 }
 
@@ -431,6 +437,9 @@ async function publishListing(){
     registration: formData.registration, afgift: formData.afgift,
     fuel: formData.fuel, drive: formData.drive,
     cylinders: formData.cylinders, color: formData.color,
+    service_historik: formData.serviceHistorik,
+    antal_ejere: formData.antalEjere,
+    sidste_syn: formData.sidsteSyn,
     equipment: formData.equipment,
     postnr: formData.postnr, city: formData.city, region: formData.region,
     description: formData.description,
@@ -493,6 +502,9 @@ function fillForm(data){
   ['year','km','ccm','power','vin','registration','afgift','fuel','drive',
    'cylinders','color','price','condition','city','region'].forEach(k => set('f-' + k, data[k]));
   set('f-desc', data.description);
+  set('f-service', data.serviceHistorik);
+  set('f-ejere', data.antalEjere);
+  set('f-synsaar', data.sidsteSyn);
   // Postnummerfeltet viser "1620 København V"; kun tallet gemmes videre.
   set('f-postnr', data.postnr ? `${data.postnr}${data.city ? ' ' + data.city : ''}` : '');
 

@@ -430,6 +430,16 @@ select.input{
 .card-media{ position:relative; aspect-ratio: 4/3; background: var(--color-surface-2); overflow:hidden; }
 .card-media svg{ width:100%; height:100%; }
 .card-badges{ position:absolute; top:10px; left:10px; display:flex; gap:6px; flex-wrap:wrap; z-index:2; }
+/* Udledt kørekortkategori (A1/A2/A) — MC-køberens vigtigste scan-signal. */
+.card-koerekort{
+  position:absolute; left:10px; bottom:10px; z-index:2;
+  display:inline-flex; align-items:center;
+  background: var(--color-dark); color:#fff;
+  font-family: var(--font-display); font-weight:700; font-size:12px;
+  letter-spacing:.04em; padding:3px 10px; border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm); pointer-events:none;
+}
+.card-koerekort::before{ content:"Kørekort\00a0"; font-weight:600; opacity:.7; font-size:10px; }
 .badge{
   font-size:11px; font-weight:700; padding:4px 9px; border-radius: var(--radius-pill);
   text-transform:uppercase; letter-spacing:.03em; display:inline-flex; align-items:center; gap:4px;
