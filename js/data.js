@@ -254,7 +254,7 @@ function formatPower(hk){
 }
 function timeAgoDa(iso){
   const then = new Date(iso).getTime();
-  const now = new Date('2026-07-26T09:00:00').getTime();
+  const now = Date.now();
   const diffMs = Math.max(0, now - then);
   const mins = Math.floor(diffMs / 60000);
   const hours = Math.floor(mins / 60);
@@ -269,8 +269,8 @@ function timeAgoDa(iso){
 }
 function isNewListing(iso){
   const then = new Date(iso).getTime();
-  const now = new Date('2026-07-26T09:00:00').getTime();
-  return (now - then) < 4 * 86400000;
+  const now = Date.now();
+  return (now - then) >= 0 && (now - then) < 4 * 86400000;
 }
 function typeLabel(id){
   return (TYPES.find(t=>t.id===id) || {}).label || id;
