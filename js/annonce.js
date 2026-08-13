@@ -147,6 +147,7 @@ function renderListing(){
   const loggedIn = !!Store.getUser();
   const brand = escapeHTML(listing.brand), model = escapeHTML(listing.model);
   const sellerName = escapeHTML(listing.seller.name);
+  const kk = (typeof koerekortForListing === 'function') ? koerekortForListing(listing) : null;
   const avgRating = Store.getAverageRating(listing.seller.name, Number(listing.seller.rating));
   const reviewCount = Store.getReviews(listing.seller.name).length;
   const vinLooksValid = isValidVIN(listing.vin);
@@ -184,7 +185,10 @@ function renderListing(){
 
       ${sellerTypeNoteHTML(listing.isDealer)}
 
-      ${listing.serviceHistorik === 'Fuld' ? `<div style="margin-top:var(--space-3);"><span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span></div>` : ''}
+      ${(kk || listing.serviceHistorik === 'Fuld') ? `<div class="detail-chip-row">
+        ${kk ? `<span class="badge badge-koerekort" title="Kan føres på ${kk}-kørekort">${Icon.shieldCheck}Kørekort ${kk}</span>` : ''}
+        ${listing.serviceHistorik === 'Fuld' ? `<span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span>` : ''}
+      </div>` : ''}
 
       <div class="spec-grid" style="margin-top:var(--space-4);">
         <div class="spec-item"><span class="spec-icon">${Icon.bike} Mærke</span><b>${brand}</b></div>

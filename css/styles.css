@@ -445,6 +445,9 @@ select.input{
   text-transform:uppercase; letter-spacing:.03em; display:inline-flex; align-items:center; gap:4px;
 }
 .badge-new{ background: var(--color-badge-new); color:#fff; }
+/* Kørekort-badge på detaljesiden — mørk pille, samme signal som på kortet. */
+.badge-koerekort{ background: var(--color-dark); color:#fff; }
+.detail-chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top: var(--space-3); }
 .badge-dealer{ background: var(--color-dark); color:#fff; }
 .badge-dealer svg{ width:12px; height:12px; }
 .badge-neutral{ background: rgba(255,255,255,0.9); color: var(--color-dark); }
