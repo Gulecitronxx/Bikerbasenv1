@@ -6,6 +6,7 @@ const EMPTY_STATE = {
   regions: [], conditions: [], equipment: [], fuels: [], drives: [],
   service: [],
   cylinders: [], colors: [], maxAgeDays: null, photosOnly: false,
+  ejereMax: null, nysynet: false,
   dealerOnly: false, koerekort: '', sort: 'date-desc', page: 1,
 };
 let state = { ...EMPTY_STATE };
@@ -20,6 +21,7 @@ const LIST_PARAMS = {
 const NUM_PARAMS = {
   priceMin: 'priceMin', priceMax: 'priceMax', yearMin: 'yearMin', yearMax: 'yearMax',
   kmMax: 'kmMax', ccmMin: 'ccmMin', ccmMax: 'ccmMax', hkMin: 'hkMin', hkMax: 'hkMax',
+  ejereMax: 'ejereMax',
   maxAgeDays: 'oprettet',
 };
 
@@ -36,6 +38,7 @@ function readStateFromURL(){
   state.cylinders = (p.get('cyl') || '').split(',').filter(Boolean).map(Number);
   state.photosOnly = p.get('billeder') === '1';
   state.dealerOnly = p.get('dealer') === '1';
+  state.nysynet = p.get('nysynet') === '1';
   state.koerekort = p.get('koerekort') || '';
   state.sort = p.get('sort') || 'date-desc';
   state.page = numOrNull(p.get('page')) || 1;
@@ -56,6 +59,7 @@ function currentQueryString(includeSort = false){
   if (state.cylinders.length) p.set('cyl', state.cylinders.join(','));
   if (state.photosOnly) p.set('billeder', '1');
   if (state.dealerOnly) p.set('dealer', '1');
+  if (state.nysynet) p.set('nysynet', '1');
   if (state.koerekort) p.set('koerekort', state.koerekort);
   if (includeSort && state.sort !== 'date-desc') p.set('sort', state.sort);
   return p.toString();
@@ -179,12 +183,14 @@ function reflectStateToUI(){
   });
   document.getElementById('filter-photos-only').checked = state.photosOnly;
   document.getElementById('filter-dealer-only').checked = state.dealerOnly;
+  document.getElementById('filter-nysynet').checked = state.nysynet;
   document.getElementById('filter-age').value = state.maxAgeDays || '';
   document.getElementById('filter-price-min').value = state.priceMin || '';
   document.getElementById('filter-price-max').value = state.priceMax || '';
   document.getElementById('filter-year-min').value = state.yearMin || '';
   document.getElementById('filter-year-max').value = state.yearMax || '';
   document.getElementById('filter-km-max').value = state.kmMax || '';
+  document.getElementById('filter-ejere-max').value = state.ejereMax || '';
   document.getElementById('filter-ccm-min').value = state.ccmMin || '';
   document.getElementById('filter-ccm-max').value = state.ccmMax || '';
   document.getElementById('filter-hk-min').value = state.hkMin || '';
@@ -228,6 +234,8 @@ function getFilteredListings(){
   }
   if (state.photosOnly) list = list.filter(l => (l.photoUrls || []).length > 0);
   if (state.dealerOnly) list = list.filter(l => l.isDealer);
+  if (state.ejereMax != null) list = list.filter(l => l.antalEjere != null && l.antalEjere <= state.ejereMax);
+  if (state.nysynet) { const y = new Date().getFullYear(); list = list.filter(l => l.sidsteSyn != null && l.sidsteSyn >= y - 1); }
   if (state.koerekort) list = list.filter(l => passerKoerekort(l, state.koerekort));
 
   const sorters = {
@@ -260,6 +268,8 @@ function activeFilterPills(){
   }
   if (state.dealerOnly) pills.push({ label: 'Kun forhandlere', clear: () => state.dealerOnly = false });
   if (state.photosOnly) pills.push({ label: 'Kun med billeder', clear: () => state.photosOnly = false });
+  if (state.ejereMax != null) pills.push({ label: `Maks. ${state.ejereMax} ejer${state.ejereMax===1?'':'e'}`, clear: () => state.ejereMax = null });
+  if (state.nysynet) pills.push({ label: 'Nysynet', clear: () => state.nysynet = false });
   if (state.maxAgeDays != null){
     const a = AGE_FILTERS.find(x => Number(x.id) === state.maxAgeDays);
     pills.push({ label: a ? a.label : `Seneste ${state.maxAgeDays} dage`, clear: () => state.maxAgeDays = null });
@@ -408,6 +418,9 @@ function wireControls(){
   document.getElementById('filter-dealer-only').addEventListener('change', (e) => {
     state.dealerOnly = e.target.checked; state.page = 1; render();
   });
+  document.getElementById('filter-nysynet').addEventListener('change', (e) => {
+    state.nysynet = e.target.checked; state.page = 1; render();
+  });
 
   const numField = (id, key) => {
     document.getElementById(id).addEventListener('input', (e) => {
@@ -424,6 +437,7 @@ function wireControls(){
   numField('filter-ccm-max', 'ccmMax');
   numField('filter-hk-min', 'hkMin');
   numField('filter-hk-max', 'hkMax');
+  numField('filter-ejere-max', 'ejereMax');
 
   document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 
