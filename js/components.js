@@ -166,6 +166,7 @@ function listingCardHTML(l){
         <span>${Icon.gauge}${formatKm(l.km)}</span>
         <span>${Icon.engine}${formatCcm(l.ccm)}</span>
       </div>
+      ${l.serviceHistorik === 'Fuld' ? `<div class="card-trust"><span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span></div>` : ''}
       <div class="card-footer">
         <span>${Icon.mapPin}${city}</span>
         <span>${timeAgoDa(l.createdAt)}</span>
