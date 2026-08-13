@@ -457,6 +457,11 @@ function wireControls(){
   document.getElementById('view-grid').addEventListener('click', () => { Store.setViewMode('grid'); applyViewMode(); });
   document.getElementById('view-list').addEventListener('click', () => { Store.setViewMode('list'); applyViewMode(); });
 
+  // Søgeagent-genvej i tom-tilstanden peger på samme handling som topknappen.
+  document.getElementById('empty-agent-btn')?.addEventListener('click', () => {
+    document.getElementById('save-search-btn').click();
+  });
+
   document.getElementById('save-search-btn').addEventListener('click', () => {
     const qs = currentQueryString();
     const existing = Store.getSavedSearches().find(s => s.query === qs);

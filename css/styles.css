@@ -312,13 +312,13 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 }
 @media (min-width:768px){ .footer-grid{ grid-template-columns: 1.4fr 1fr 1fr 1fr; } }
 .footer-brand{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:20px; color:#fff; margin-bottom:var(--space-3); }
-.footer-brand svg{ width:24px; height:24px; color:var(--color-primary); }
 .footer-brand .brand-logo{ width:30px; height:30px; }
 .footer-col h2.footer-col-title, .footer-col h4{ color:#fff; font-size:14px; text-transform:uppercase; letter-spacing:.06em; margin-bottom:var(--space-3); font-family:var(--font-body); font-weight:700; }
 .footer-col ul{ display:flex; flex-direction:column; gap:10px; font-size:14px; }
 /* Fodlinkene var 18 px høje. WCAG 2.5.8 kræver mindst 24×24 for et
    klikmål, og på en telefon var de reelt svære at ramme. */
 .footer-col ul li a{ display:inline-flex; align-items:center; min-height:24px; }
+@media (pointer:coarse){ .footer-col ul li a{ min-height:40px; } }
 .footer-bottom{
   border-top:1px solid rgba(255,255,255,0.1); padding: var(--space-4) 0;
   display:flex; flex-wrap:wrap; gap:var(--space-3); justify-content:space-between; font-size:13px; color:#9C958A;
@@ -361,35 +361,44 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
       transparent 32%);
 }
 @media (max-width: 760px){
-  .hero-photo{ object-position: 68% center; }
+  /* Hero'en er præcis så høj som sit indhold — ingen tom foto-stribe under
+     teksten, så "Søg efter type" kommer op mod folden. Fotoet fylder nøjagtigt
+     bag indholdet. */
+  .hero{ padding: var(--space-7) 0 var(--space-6); }
+  /* Ultrabredt foto i portræt viser kun en lodret skive — skub den mod cyklen
+     (højre tredjedel), så maskinen faktisk er med i billedet. */
+  .hero-photo{ object-position: 76% center; }
+  /* Side-/bundvægtet scrim: cyklen læses igennem i den øverste to-tredjedel,
+     mens teksten i den nederste tredjedel bevarer fuld kontrast. */
   .hero::after{
-    background: linear-gradient(0deg,
-      var(--color-dark) 6%,
-      color-mix(in srgb, var(--color-dark) 62%, transparent) 46%,
-      color-mix(in srgb, var(--color-dark) 24%, transparent) 100%);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-dark) 32%, transparent) 0%,
+      color-mix(in srgb, var(--color-dark) 12%, transparent) 32%,
+      color-mix(in srgb, var(--color-dark) 62%, transparent) 74%,
+      color-mix(in srgb, var(--color-dark) 92%, transparent) 100%);
   }
 }
-.hero > .container{ position:relative; z-index:2; }
+.hero > .container{ position:relative; z-index:2; width:100%; }
 .hero-inner{ position:relative; z-index:2; max-width:640px; }
 .hero-eyebrow{
   display:inline-flex; align-items:center; gap:8px;
   font-family:var(--font-display); font-size:12px; font-weight:600;
   letter-spacing:.08em; text-transform:uppercase;
-  color: color-mix(in srgb, var(--color-primary) 32%, #fff 68%);
-  background: color-mix(in srgb, var(--color-primary) 24%, transparent);
-  border:1px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+  color: color-mix(in srgb, var(--color-primary) 18%, #fff 82%);
+  background: color-mix(in srgb, var(--color-dark) 58%, transparent);
+  border:1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
   padding:6px 13px; border-radius: var(--radius-pill); margin-bottom: var(--space-4);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
 }
 .hero h1{ font-size: clamp(28px, 5.4vw, 56px); line-height:1.05; font-weight:700; margin-bottom: var(--space-4); text-shadow: 0 2px 28px rgba(0,0,0,.4); text-wrap: balance; }
 /* Grupperer anden sætningshalvdel, så tankestregen ikke hænger midt i en linje. */
-.hero-h1-line{ display:block; color: color-mix(in srgb, #fff 82%, var(--color-primary) 18%); }
-.hero p.lead{ font-size: clamp(16px,2vw,19px); color:#E7E2D8; max-width:540px; margin-bottom: var(--space-5); text-shadow:0 1px 14px rgba(0,0,0,.35); }
+.hero-h1-line{ display:block; color: color-mix(in srgb, #fff 60%, var(--color-primary) 40%); }
+.hero p.lead{ font-size: clamp(16px,2vw,19px); color:#E7E2D8; max-width:580px; margin-bottom: var(--space-5); text-shadow:0 1px 14px rgba(0,0,0,.35); }
 
 .search-panel{
   background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-4);
   box-shadow: var(--shadow-lg); display:flex; flex-direction:column; gap: var(--space-3);
-  color: var(--color-fg); max-width: 780px;
+  color: var(--color-fg); max-width: 720px;
   border: 1px solid color-mix(in srgb, #fff 12%, transparent);
 }
 .search-row{ display:grid; grid-template-columns: 1fr; gap: var(--space-3); }
@@ -413,9 +422,14 @@ select.input{
   background-repeat:no-repeat; background-position: right 12px center; padding-right:38px;
 }
 
-.hero-stats{ display:flex; gap: var(--space-6); margin-top: var(--space-4); flex-wrap:wrap; }
-.hero-stat b{ display:block; font-family:var(--font-display); font-size:26px; }
-.hero-stat span{ font-size:13px; color:#C7C1B8; }
+/* Ærlige tillidspointer i stedet for små tal (8/5) der afslørede tyndt lager. */
+.hero-trust{ display:flex; flex-wrap:wrap; gap:10px var(--space-5); margin-top: var(--space-5); }
+.hero-trust-item{ display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:500; color:#ECE7DD; text-shadow:0 1px 8px rgba(0,0,0,.45); }
+.hero-trust-item::before{
+  content:""; flex:none; width:19px; height:19px; border-radius:50%;
+  background: color-mix(in srgb, var(--color-primary) 34%, transparent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center/11px no-repeat;
+  border:1px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
 
 /* ============ Category tiles ============ */
 .section{ padding: var(--space-8) 0; }
@@ -436,43 +450,59 @@ select.input{
   cursor:pointer;
 }
 .tile:hover{ transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--color-primary); }
-.tile .tile-media{ display:block; aspect-ratio:4/3; overflow:hidden; background: var(--color-surface-2); }
+.tile .tile-media{ position:relative; display:block; aspect-ratio:4/3; overflow:hidden; background: var(--color-surface-2); }
 .tile .tile-media img{ width:100%; height:100%; object-fit:cover; transition: transform .45s var(--ease-out); }
+/* Ensartende, varm tone oven på de forskellige studiebilleder, så et lyst
+   crossbike og en mørk cruiser læses som ét sammenhængende sæt. */
+.tile .tile-media::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-dark) 6%, transparent), color-mix(in srgb, var(--color-dark) 16%, transparent));
+}
 .tile:hover .tile-media img{ transform: scale(1.06); }
 .tile .tile-label{
-  position:absolute; left:0; right:0; bottom:0;
+  position:absolute; left:0; right:0; bottom:0; z-index:1;
   display:flex; align-items:center; justify-content:space-between; gap:8px;
-  padding:16px 14px 12px; color:#fff; font-size:15px; font-weight:600;
+  padding:18px 15px 13px; color:#fff; font-size:16px; font-weight:600;
   font-family: var(--font-display); letter-spacing:-0.01em;
-  text-shadow: 0 1px 8px rgba(0,0,0,.5);
-  background: linear-gradient(to top, rgba(10,8,6,.9) 0%, rgba(10,8,6,.55) 42%, transparent 100%);
+  text-shadow: 0 1px 8px rgba(0,0,0,.55);
+  background: linear-gradient(to top, rgba(10,8,6,.92) 0%, rgba(10,8,6,.55) 44%, transparent 100%);
 }
-.tile .tile-go{ display:inline-flex; opacity:0; transform: translateX(-4px); transition: opacity .18s var(--ease-out), transform .18s var(--ease-out); color: var(--color-on-primary); }
-.tile .tile-go svg{ width:16px; height:16px; }
+.tile .tile-go{ display:inline-flex; opacity:0; transform: translateX(-4px); transition: opacity .18s var(--ease-out), transform .18s var(--ease-out); color:#fff; }
+.tile .tile-go svg{ width:17px; height:17px; }
 .tile:hover .tile-go{ opacity:1; transform: translateX(0); }
+/* Berøringsenheder har ingen hover — vis pilen permanent, så affordansen findes. */
+@media (hover:none){ .tile .tile-go{ opacity:.9; transform:none; } }
+
+/* Reserver plads for JS-injicerede gitre indtil hydrering (undgår CLS). :empty
+   matcher kun før indholdet indsættes, så der ikke bliver tomrum bagefter. */
+.tiles-grid:empty{ min-height: 520px; }
+@media (min-width:640px){ .tiles-grid:empty{ min-height: 448px; } }
+.listings-grid:empty{ min-height: 340px; }
+.brand-cloud:empty{ min-height: 132px; }
+.trust-strip:empty{ min-height: 172px; }
 
 /* ============ Sådan virker det (trin) ============ */
 .steps{ display:grid; grid-template-columns:1fr; gap: var(--space-5); counter-reset:step; }
 @media (min-width:760px){ .steps{ grid-template-columns: repeat(3,1fr); gap: var(--space-6); } }
-.step{ position:relative; display:flex; gap: var(--space-4); align-items:flex-start; }
-/* Forbindelseslinje mellem trinnene på desktop. */
-@media (min-width:760px){
-  .step:not(:last-child)::after{
-    content:""; position:absolute; top:23px; left: calc(48px + var(--space-3));
-    right: calc(-1 * var(--space-6) + var(--space-3)); height:2px;
-    background: linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 40%, var(--color-border)), var(--color-border));
-  }
+/* Hvert trin er nu et rigtigt kort — ikke svævende tekst med tynd hårlinje. */
+.step{
+  position:relative; display:flex; gap: var(--space-4); align-items:flex-start;
+  background: var(--color-surface); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: transform .18s var(--ease-out), box-shadow .18s var(--ease-out), border-color .18s var(--ease-out);
 }
+.step:hover{ transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border)); }
 .step-num{
-  flex:none; width:48px; height:48px; border-radius:50%;
+  flex:none; width:46px; height:46px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  font-family: var(--font-display); font-weight:700; font-size:20px;
-  color: var(--color-primary); background: var(--color-primary-tint);
-  border:1.5px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  font-family: var(--font-display); font-weight:700; font-size:19px;
+  color: var(--color-on-primary); background: var(--color-primary);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--color-primary) 35%, transparent);
   position:relative; z-index:1;
 }
-.step-body h3{ font-size:18px; margin-bottom:6px; }
-.step-body p{ color: var(--color-fg-muted); font-size:14px; line-height:1.55; max-width:34ch; }
+.step-body h3{ font-size:19px; margin-bottom:6px; }
+.step-body p{ color: var(--color-fg-muted); font-size:15px; line-height:1.6; }
 
 /* ============ Cards / listings grid ============ */
 .listings-grid{ display:grid; grid-template-columns: repeat(1,1fr); gap: var(--space-4); }
@@ -668,6 +698,10 @@ select.input{
 .empty-state{ text-align:center; padding: var(--space-8) var(--space-4); color: var(--color-fg-muted); }
 .empty-state svg{ width:64px; height:64px; margin: 0 auto var(--space-3); color: var(--color-border); }
 .empty-state h3{ color: var(--color-fg); margin-bottom:6px; }
+.empty-state p{ max-width: 46ch; margin: 0 auto; }
+.empty-actions{ display:flex; flex-wrap:wrap; gap: var(--space-3); justify-content:center; margin-top: var(--space-5); }
+.empty-agent-hint{ margin-top: var(--space-4); font-size:14px; }
+.link-btn{ background:none; border:none; padding:0; font:inherit; color: var(--color-primary); font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
 
 .pagination{ display:flex; justify-content:center; gap:6px; margin-top: var(--space-6); }
 .pagination button{
@@ -1245,9 +1279,16 @@ body.overlay-open .cookie-banner{ display:none; }
 .agent-actions .icon-btn.muted{ color: var(--color-fg-muted); }
 
 /* ============ Popular searches ============ */
-.popular-row{ display:flex; gap:10px; flex-wrap:wrap; }
+/* Reserver én linje, så chips-injektion ikke skubber tælle-linjen/statistik (CLS). */
+.popular-row{ display:flex; gap:10px; flex-wrap:wrap; min-height:44px; }
+/* På mobil: én vandret-scrollende række i stedet for en 4-rækkers mur. */
+@media (max-width:620px){
+  .popular-row{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; margin:0 calc(-1 * var(--space-4)); padding:2px var(--space-4); }
+  .popular-row::-webkit-scrollbar{ display:none; }
+  .popular-chip{ flex:none; }
+}
 .popular-chip{
-  display:inline-flex; align-items:center; gap:8px; padding:10px 16px;
+  display:inline-flex; align-items:center; gap:8px; padding:10px 16px; min-height:44px;
   border:1.5px solid var(--color-border); border-radius:var(--radius-pill);
   background:var(--color-surface); font-weight:600; font-size:14px; cursor:pointer;
   transition: border-color .15s var(--ease-out), transform .15s var(--ease-out), background-color .15s var(--ease-out);
@@ -1306,23 +1347,17 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-cloud{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
 @media (min-width:640px){ .brand-cloud{ grid-template-columns: repeat(3,1fr); } }
 @media (min-width:1024px){ .brand-cloud{ grid-template-columns: repeat(6,1fr); } }
+/* Rene type-piller — mærkenavnet i display-fonten bærer kortet. Ingen
+   bogstav-i-cirkel (som gav K = KTM/Kawasaki og en template-fornemmelse). */
 .brand-chip{
   display:flex; align-items:center; justify-content:space-between; gap:8px;
-  padding: 14px var(--space-4); border-radius: var(--radius-md);
+  padding: 15px var(--space-4); min-height:52px; border-radius: var(--radius-md);
   background: var(--color-surface); border:1px solid var(--color-border);
   transition: transform .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out), background-color .18s var(--ease-out);
 }
 .brand-chip:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
-.brand-chip-lead{ display:flex; align-items:center; gap:11px; min-width:0; }
-.brand-chip-mark{
-  flex:none; width:32px; height:32px; border-radius:10px;
-  display:flex; align-items:center; justify-content:center;
-  font-family: var(--font-display); font-weight:700; font-size:15px;
-  background: var(--color-primary-tint); color: var(--color-primary);
-  transition: background-color .18s var(--ease-out), color .18s var(--ease-out);
-}
-.brand-chip:hover .brand-chip-mark{ background: var(--color-primary); color: var(--color-on-primary); }
-.brand-chip-name{ font-family: var(--font-display); font-weight:700; font-size:15px; letter-spacing:-0.01em; }
+.brand-chip:hover .brand-chip-name{ color: var(--color-primary); }
+.brand-chip-name{ font-family: var(--font-display); font-weight:700; font-size:16px; letter-spacing:-0.01em; transition: color .18s var(--ease-out); }
 .brand-chip-go{ color: var(--color-fg-muted); display:inline-flex; opacity:0; transform: translateX(-4px); transition: opacity .18s var(--ease-out), transform .18s var(--ease-out), color .18s var(--ease-out); }
 .brand-chip-go svg{ width:16px; height:16px; }
 .brand-chip:hover .brand-chip-go{ opacity:1; transform: translateX(0); color: var(--color-primary); }
@@ -1349,9 +1384,8 @@ body.overlay-open .cookie-banner{ display:none; }
 .sell-check{ flex-shrink:0; width:22px; height:22px; margin-top:1px; border-radius:50%; background: var(--color-success-tint); color: var(--color-success); position:relative; }
 .sell-check::after{ content:""; position:absolute; left:7px; top:4px; width:6px; height:10px; border:solid currentColor; border-width:0 2px 2px 0; transform: rotate(45deg); }
 .sell-band-actions{ display:flex; flex-wrap:wrap; gap: var(--space-3); }
-/* Beholder til mini-annoncen; selve kortet bærer designet. */
-.sell-band-art{ position:relative; display:none; }
-@media (min-width:820px){ .sell-band-art{ display:flex; align-items:center; justify-content:center; } }
+/* Pris-kortet vises nu på alle skærme (også mobil) — det bærer "gratis"-pointen. */
+.sell-band-art{ position:relative; display:flex; align-items:center; justify-content:center; }
 
 /* ============ Forside: SEO-browse-bånd ============ */
 .seo-browse{ border-top:1px solid var(--color-border); }
@@ -1360,29 +1394,45 @@ body.overlay-open .cookie-banner{ display:none; }
 @media (min-width:768px){ .seo-cols{ grid-template-columns: repeat(4,1fr); } }
 .seo-col h3{ font-family:var(--font-display); font-size:14px; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); margin-bottom: var(--space-3); }
 .seo-col ul{ display:flex; flex-direction:column; gap:8px; }
-.seo-col a{ font-size:14px; color: var(--color-fg); transition: color .15s var(--ease-out); }
+.seo-col a{ display:inline-flex; align-items:center; min-height:32px; font-size:14px; color: var(--color-fg); transition: color .15s var(--ease-out); }
 .seo-col a:hover{ color: var(--color-primary); text-decoration:underline; text-underline-offset:3px; }
+@media (pointer:coarse){ .seo-col a{ min-height:40px; } .seo-col li + li{ margin-top:2px; } }
 
-/* ============ Forside: mini-annonce i sælg-båndet ============ */
-.mini-card{
-  width:100%; max-width:300px; margin:0 auto;
+/* ============ Forside: pris-kort i sælg-båndet ============ */
+/* Gør "gratis" til et rigtigt pris-øjeblik: tallet er helten. Erstatter den
+   tidligere dublet-annonce (samme Virago som i Nyeste annoncer). */
+.price-card{
+  width:100%; max-width:340px; margin:0 auto;
   background: var(--color-surface); border:1px solid var(--color-border);
-  border-radius: var(--radius-md); overflow:hidden; box-shadow: var(--shadow-lg);
-  transform: rotate(-2.5deg); transition: transform .3s var(--ease-out);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  padding: var(--space-6) var(--space-5); text-align:center;
 }
-.sell-band-art:hover .mini-card{ transform: rotate(0deg) translateY(-4px); }
-.mini-card-media{ position:relative; aspect-ratio:16/10; background: var(--color-surface-2); overflow:hidden; }
-.mini-card-media .ba-svg{ width:100%; height:100%; }
-.mini-card-media img{ width:100%; height:100%; object-fit:cover; }
-.mini-badge{
-  position:absolute; top:10px; left:10px; z-index:1;
-  background: var(--color-badge-new); color:#fff; font-family:var(--font-display);
-  font-weight:700; font-size:11px; letter-spacing:.06em; padding:4px 9px; border-radius: var(--radius-pill);
+.price-card-label{ font-family:var(--font-display); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color: var(--color-fg-muted); }
+.price-card-amount{ font-family:var(--font-display); font-weight:700; font-size: clamp(48px,8vw,64px); line-height:1; color: var(--color-primary); margin:6px 0 4px; letter-spacing:-0.02em; }
+.price-card-sub{ display:block; font-size:14px; color: var(--color-fg-muted); margin-bottom: var(--space-4); }
+.price-card-list{ display:flex; flex-direction:column; gap:10px; text-align:left; border-top:1px solid var(--color-border); padding-top: var(--space-4); }
+.price-card-list li{ display:flex; align-items:flex-start; gap:10px; font-size:14.5px; font-weight:500; }
+.price-card-list li::before{
+  content:""; flex-shrink:0; width:20px; height:20px; margin-top:1px; border-radius:50%;
+  background: var(--color-success-tint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231A7D4F' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center/13px no-repeat;
 }
-.mini-card-body{ padding: var(--space-3) var(--space-4) var(--space-4); }
-.mini-price{ font-family:var(--font-display); font-weight:700; font-size:19px; }
-.mini-title{ font-family:var(--font-display); font-weight:600; font-size:14px; margin-top:2px; }
-.mini-meta{ color: var(--color-fg-muted); font-size:12px; margin-top:4px; }
+
+/* ============ Forside: afsluttende CTA-bånd ============ */
+/* Varmt gradient-bånd i stedet for et mørkt — ellers endte siden på to næsten
+   ens mørke blokke (dette bånd + footeren). Egen klasse, tokeniserede farver. */
+.cta-band{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  gap: var(--space-5); border-radius: var(--radius-lg);
+  padding: var(--space-7) var(--space-6);
+  background: linear-gradient(120deg, var(--color-primary) 0%, var(--color-primary-hover) 62%, color-mix(in srgb, var(--color-primary-hover) 70%, #000) 130%);
+  color: var(--color-on-primary);
+  box-shadow: 0 18px 44px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+.cta-band-copy{ max-width: 560px; }
+.cta-band-copy h2{ color: var(--color-on-primary); margin-bottom:8px; }
+.cta-band-copy p{ color: color-mix(in srgb, var(--color-on-primary) 85%, transparent); }
+.cta-band-btn{ background: var(--color-on-primary); color: var(--color-primary); font-weight:700; box-shadow: var(--shadow-md); }
+.cta-band-btn:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
 /* ============ Forside: "din annonce her"-kort (ærlig udfylder) ============ */
 /* Ét kort der spænder over de ledige kolonner, når lageret er tyndt — roligt og
@@ -1413,6 +1463,20 @@ body.overlay-open .cookie-banner{ display:none; }
 .newest-cta-link{ display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:14px; color: var(--color-primary); white-space:nowrap; }
 .newest-cta-link svg{ width:16px; height:16px; }
 @media (max-width:559px){ .newest-cta{ flex-direction:column; } .newest-cta-copy{ text-align:center; } }
+/* Når CTA'et spænder over ≥2 kolonner, læses det som et solidt, vandret bånd
+   der fylder rækken kant-til-kant — ikke et stiplet, tomt felt. */
+.newest-cta.is-wide{
+  flex-wrap:nowrap; justify-content:flex-start; text-align:left; gap: var(--space-5);
+  border-style:solid; border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+  box-shadow: var(--shadow-sm);
+}
+.newest-cta.is-wide .newest-cta-copy{ text-align:left; max-width:none; }
+.newest-cta.is-wide .newest-cta-link{ margin-left:auto; padding-left: var(--space-5); }
+@media (max-width:700px){
+  .newest-cta.is-wide{ flex-wrap:wrap; justify-content:center; text-align:center; }
+  .newest-cta.is-wide .newest-cta-copy{ text-align:center; }
+  .newest-cta.is-wide .newest-cta-link{ margin-left:0; padding-left:0; }
+}
 
 /* ============ Rigtige annoncefotos ============ */
 .card-photo{ width:100%; height:100%; object-fit:cover; display:block;

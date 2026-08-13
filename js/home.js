@@ -44,34 +44,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     typeSelect.appendChild(opt);
   });
 
-  // hero stats
   const ALLE = Store.getAllListings();   // databasen (+ demodata hvis slået til)
-  // "+" giver kun mening ved et rundt tal man runder ned til.
-  // Adaptiv hero-stat: et lille tal ("1") svækker førstehåndsindtrykket, så
-  // under 10 annoncer viser vi en ærlig værdi-pointe i stedet. Fra 10 og op
-  // bliver antallet en styrke og vises som "X+ Aktive annoncer".
-  const statValue = document.getElementById('stat-listings');
-  const statLabel = document.getElementById('stat-listings-label');
-  if (ALLE.length >= 10){
-    statValue.textContent = (Math.floor(ALLE.length / 10) * 10) + '+';
-    if (statLabel) statLabel.textContent = 'Aktive annoncer';
-  } else {
-    statValue.textContent = 'Gratis';
-    if (statLabel) statLabel.textContent = 'for private sælgere';
-  }
+  // Hero'ens tillidslinje er nu statiske, ærlige pointer (ingen tal der afslører
+  // et tyndt lager) — se .hero-trust i markup.
 
-  // Curated entry points tailored to motorcycle buyers
+  // Curated entry points tailored to motorcycle buyers. Holdt kort (5) — flere
+  // chips druknede søgekortet og skubbede folden ned.
   const POPULAR = [
     { label: 'Under 50.000 kr.', icon: 'medal', params: { maxPrice: 50000 } },
     { label: 'Kan køres på A2', icon: 'bike', params: { koerekort: 'A2' } },
     { label: 'Kan køres på A1', icon: 'bike', params: { koerekort: 'A1' } },
     { label: 'Adventure', icon: 'mapPin', params: { type: 'adventure' } },
-    { label: 'Veteran & klassisk', icon: 'clock', params: { type: 'classic' } },
     { label: 'Under 10.000 km', icon: 'gauge', params: { kmMax: 10000 } },
-    { label: 'Kun forhandlere', icon: 'shieldCheck', params: { dealer: '1' } },
   ];
   // Egne seneste søgninger først (Bilbasen-mønster), derefter de kuraterede.
-  const recent = Store.getRecentSearches().slice(0, 3).map(r =>
+  const recent = Store.getRecentSearches().slice(0, 2).map(r =>
     `<a class="popular-chip" href="soegning.html?${r.query}">${Icon.clock}${escapeHTML(r.label)}</a>`);
   document.getElementById('popular-searches').innerHTML = recent.join('') + POPULAR.map(p => {
     const qs = new URLSearchParams(p.params).toString();
@@ -98,9 +85,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? `Din søgning matcher <b>${n}</b> ${mc} lige nu.`
         : `Ingen motorcykler matcher lige nu — prøv at udvide søgningen.`;
     } else {
-      countHint.innerHTML = n
-        ? `Der er <b>${n}</b> ${mc} til salg lige nu.`
-        : `Der er ingen motorcykler til salg lige nu.`;
+      // Uden filtre: vis kun totalen, når den er stærk (≥10). Et lavt tal
+      // ("1 motorcykel til salg") reklamerer for en tom markedsplads — vis intet.
+      countHint.innerHTML = n >= 10
+        ? `Der er <b>${Math.floor(n/10)*10}+</b> motorcykler til salg lige nu.`
+        : '';
     }
     // Vis kun antallet på knappen, når brugeren faktisk har filtreret — ellers
     // ville standard-CTA'en fremhæve et spinkelt "Vis 1 motorcykel". Uden
@@ -132,10 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (brandCloud){
     brandCloud.innerHTML = brands.map(b =>
       `<a class="brand-chip" href="soegning.html?brands=${encodeURIComponent(b)}">
-         <span class="brand-chip-lead">
-           <span class="brand-chip-mark" aria-hidden="true">${b.charAt(0)}</span>
-           <span class="brand-chip-name">${b}</span>
-         </span>
+         <span class="brand-chip-name">${b}</span>
          <span class="brand-chip-go" aria-hidden="true">${Icon.arrowRight}</span>
        </a>`).join('');
   }
@@ -181,8 +167,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     </a>`;
   const renderNewest = () => {
     const cols = getComputedStyle(newestMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-    const gap = (newest.length > 0 && newest.length < cols) ? cols - newest.length : 0;
-    newestMount.innerHTML = realCardsHTML + (gap ? wideCtaHTML(gap) : '');
+    // Meget tyndt lager (1-2 annoncer): vis dem som fuldbredde-liste-kort, så den
+    // ene rigtige motorcykel får vægt — det slår ét lille kort ved siden af et
+    // tomt bånd, der bare reklamerer "næsten intet lager". Ingen udfylder.
+    if (newest.length > 0 && newest.length < 3){
+      newestMount.classList.add('list-view');
+      newestMount.innerHTML = realCardsHTML;
+      return;
+    }
+    newestMount.classList.remove('list-view');
+    // Fyld en delvis række ud med ÉT solidt bånd, der spænder de ledige kolonner.
+    const span = (newest.length < cols) ? cols - newest.length : 0;
+    newestMount.innerHTML = realCardsHTML + (span ? wideCtaHTML(span) : '');
+    newestMount.querySelector('.newest-cta')?.classList.toggle('is-wide', span >= 2);
   };
   // Første render wires af den globale wireFavoriteButtons(document) nedenfor.
   renderNewest();
@@ -240,18 +237,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   wireFavoriteButtons(document);
 
   // trust strip
+  // Rækkefølge efter køberens faktiske frygt på en privatsælger-markedsplads:
+  // "er cyklen stjålet/hæftet?" først (konkret stelnummer-tjek), så kontakt,
+  // så forhandler-verificering. Ingen opdigtede tal/anmeldelser.
   document.getElementById('trust-strip').innerHTML = `
     <div class="trust-card">
-      <span class="trust-icon">${Icon.shieldCheck}</span>
-      <div><h3>Verificerede forhandlere</h3><p>Forhandlere gennemgår en godkendelsesproces, så du altid ved, hvem du handler med.</p></div>
-    </div>
-    <div class="trust-card">
       <span class="trust-icon">${Icon.vin}</span>
-      <div><h3>Fuld gennemsigtighed</h3><p>Stelnummer, registreringsstatus og ærlige specifikationer på hver annonce.</p></div>
+      <div><h3>Tjek stelnummer & registrering</h3><p>Stelnummer (VIN) og registreringsstatus står på hver annonce — så du selv kan tjekke, at motorcyklen hverken er stjålet eller hæftet, før du handler.</p></div>
     </div>
     <div class="trust-card">
       <span class="trust-icon">${Icon.mail}</span>
-      <div><h3>Sikker kontakt</h3><p>Skriv til sælger direkte i appen, uden at dele dine oplysninger før du er klar.</p></div>
+      <div><h3>Din kontaktinfo er skjult</h3><p>Skriv til sælger direkte på Bikerbasen. Dit telefonnummer og din e-mail deles først, når du selv vælger det.</p></div>
+    </div>
+    <div class="trust-card">
+      <span class="trust-icon">${Icon.shieldCheck}</span>
+      <div><h3>Verificerede forhandlere</h3><p>Forhandlere godkendes med CVR og MitID, så du ved præcis, hvem der står bag annoncen.</p></div>
     </div>`;
 
   // hero search submit

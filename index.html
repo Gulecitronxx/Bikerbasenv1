@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/styles.css?v=72f7ecc6">
+<link rel="stylesheet" href="css/styles.css?v=a640d2b2">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -127,11 +127,11 @@
       </form>
       <p class="hero-count-hint" id="hero-count-hint"></p>
 
-      <div class="hero-stats">
-        <div class="hero-stat"><b id="stat-listings">–</b><span id="stat-listings-label">Aktive annoncer</span></div>
-        <div class="hero-stat"><b>8</b><span>Motorcykeltyper</span></div>
-        <div class="hero-stat"><b>5</b><span>Regioner i Danmark</span></div>
-      </div>
+      <ul class="hero-trust">
+        <li class="hero-trust-item">Gratis annonce for private</li>
+        <li class="hero-trust-item">Kontaktinfo skjult til du er klar</li>
+        <li class="hero-trust-item">Stelnummer &amp; registrering på hver annonce</li>
+      </ul>
     </div>
   </section>
 
@@ -195,20 +195,19 @@
           </ul>
           <div class="sell-band-actions">
             <a href="opret-annonce.html" class="btn btn-primary btn-lg">Opret annonce</a>
-            <a href="sikkerhed.html" class="btn btn-ghost">Sådan sælger du trygt</a>
+            <a href="sikkerhed.html" class="btn btn-outline btn-lg">Sådan sælger du trygt</a>
           </div>
         </div>
-        <div class="sell-band-art" aria-hidden="true">
-          <div class="mini-card">
-            <div class="mini-card-media" id="sell-band-bike">
-              <img src="img/sell-cruiser.webp" alt="" width="640" height="400" loading="lazy" decoding="async">
-              <span class="mini-badge">NY</span>
-            </div>
-            <div class="mini-card-body">
-              <div class="mini-price">15.000 kr.</div>
-              <div class="mini-title">Yamaha Virago 535</div>
-              <div class="mini-meta">1990 · 87.000 km · 535 ccm</div>
-            </div>
+        <div class="sell-band-art">
+          <div class="price-card">
+            <span class="price-card-label">Din pris som privat</span>
+            <div class="price-card-amount">0 kr.</div>
+            <span class="price-card-sub">Gratis annonce · ingen binding</span>
+            <ul class="price-card-list">
+              <li>Ingen kommission af salget</li>
+              <li>Ingen skjulte gebyrer</li>
+              <li>Behold 100% af salgssummen</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -303,12 +302,12 @@
 
   <section class="section" style="padding-top:0;">
     <div class="container">
-      <div style="background:var(--color-dark); color:#fff; border-radius:var(--radius-lg); padding: var(--space-7) var(--space-6); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--space-5);">
-        <div style="max-width:520px;">
-          <h2 style="color:#fff; margin-bottom:8px;">Klar til at sælge din motorcykel?</h2>
-          <p style="color:#C7C1B8;">Opret en annonce på under 5 minutter — helt gratis for private sælgere.</p>
+      <div class="cta-band">
+        <div class="cta-band-copy">
+          <h2>Din motorcykel fortjener den rette køber</h2>
+          <p>Opret annoncen på under 5 minutter, og behold hele salgssummen. Du bestemmer selv, hvornår din kontaktinfo deles.</p>
         </div>
-        <a href="opret-annonce.html" class="btn btn-primary btn-lg">Opret annonce</a>
+        <a href="opret-annonce.html" class="btn btn-lg cta-band-btn">Opret gratis annonce</a>
       </div>
     </div>
   </section>
@@ -357,17 +356,17 @@
   </div>
 </footer>
 
-<script defer src="js/security.js?v=72f7ecc6"></script>
+<script defer src="js/security.js?v=a640d2b2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=72f7ecc6"></script>
-<script defer src="js/supabase-api.js?v=72f7ecc6"></script>
-<script defer src="js/icons.js?v=72f7ecc6"></script>
-<script defer src="js/bike-art.js?v=72f7ecc6"></script>
-<script defer src="js/postnumre.js?v=72f7ecc6"></script>
-<script defer src="js/data.js?v=72f7ecc6"></script>
-<script defer src="js/store.js?v=72f7ecc6"></script>
-<script defer src="js/backend-bridge.js?v=72f7ecc6"></script>
-<script defer src="js/components.js?v=72f7ecc6"></script>
-<script defer src="js/home.js?v=72f7ecc6"></script>
+<script defer src="js/supabase-config.js?v=a640d2b2"></script>
+<script defer src="js/supabase-api.js?v=a640d2b2"></script>
+<script defer src="js/icons.js?v=a640d2b2"></script>
+<script defer src="js/bike-art.js?v=a640d2b2"></script>
+<script defer src="js/postnumre.js?v=a640d2b2"></script>
+<script defer src="js/data.js?v=a640d2b2"></script>
+<script defer src="js/store.js?v=a640d2b2"></script>
+<script defer src="js/backend-bridge.js?v=a640d2b2"></script>
+<script defer src="js/components.js?v=a640d2b2"></script>
+<script defer src="js/home.js?v=a640d2b2"></script>
 </body>
 </html>
