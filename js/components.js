@@ -157,6 +157,7 @@ function listingCardHTML(l){
       </div>
       ${isOwnListing(l) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
       ${(() => { const k = koerekortForListing(l); return k ? `<span class="card-koerekort" title="Kan føres på ${k}-kørekort" aria-label="Kan føres på ${k}-kørekort">${k}</span>` : ''; })()}
+      <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
     </div>
     <div class="card-body">
       <div class="card-price">${formatPrice(l.price)}</div>
@@ -341,3 +342,92 @@ function wireFavoriteButtons(root){
   });
 }
 
+
+/* ============ Sammenlign-system (bjælke + modal) ============
+   Global og selvstændig: virker på alle sider via event-delegation, så de
+   enkelte siders JS ikke skal røres. Op til 3 annoncer, tilstand i localStorage. */
+(function initCompare(){
+  function ready(fn){ document.readyState !== 'loading' ? fn() : document.addEventListener('DOMContentLoaded', fn); }
+  ready(() => {
+    if (typeof Store === 'undefined') return;
+    const bar = document.createElement('div');
+    bar.className = 'compare-bar'; bar.hidden = true; bar.setAttribute('aria-live', 'polite');
+    document.body.appendChild(bar);
+    const modal = document.createElement('div');
+    modal.className = 'compare-modal'; modal.hidden = true;
+    document.body.appendChild(modal);
+
+    function renderBar(){
+      const ids = Store.getCompare();
+      bar.hidden = ids.length === 0;
+      if (!ids.length) return;
+      bar.innerHTML = `
+        <span class="compare-bar-count">${ids.length} valgt til sammenligning</span>
+        <div class="compare-bar-actions">
+          <button type="button" class="btn btn-outline btn-sm" data-compare-clear>Ryd</button>
+          <button type="button" class="btn btn-primary btn-sm" data-compare-open ${ids.length < 2 ? 'disabled' : ''}>Sammenlign${ids.length >= 2 ? ` (${ids.length})` : ''}</button>
+        </div>`;
+    }
+    function specRows(bikes){
+      const rows = [
+        ['Pris', b => formatPrice(b.price)],
+        ['Årgang', b => b.year],
+        ['Kilometer', b => formatKm(b.km)],
+        ['Motorstørrelse', b => formatCcm(b.ccm)],
+        ['Effekt', b => formatPower(b.power)],
+        ['Kørekort', b => koerekortForListing(b) || '—'],
+        ['Type', b => typeLabel(b.type)],
+        ['Drivlinje', b => b.drive || '—'],
+        ['Stand', b => b.condition || '—'],
+        ['Servicehistorik', b => b.serviceHistorik || '—'],
+        ['Antal ejere', b => b.antalEjere || '—'],
+        ['Sidste syn', b => b.sidsteSyn || '—'],
+      ];
+      return rows.map(([label, fn]) =>
+        `<tr><th scope="row">${label}</th>${bikes.map(b => `<td>${escapeHTML(String(fn(b)))}</td>`).join('')}</tr>`).join('');
+    }
+    function openModal(){
+      const bikes = Store.getCompare().map(id => Store.getListingById(id)).filter(Boolean);
+      if (bikes.length < 2) return;
+      modal.innerHTML = `
+        <div class="compare-modal-scrim" data-compare-close></div>
+        <div class="compare-modal-panel" role="dialog" aria-label="Sammenlign motorcykler" aria-modal="true">
+          <div class="compare-modal-head">
+            <h2>Sammenlign</h2>
+            <button type="button" class="icon-btn" data-compare-close aria-label="Luk sammenligning">${Icon.close}</button>
+          </div>
+          <div class="compare-table-wrap">
+            <table class="compare-table">
+              <thead><tr><th></th>${bikes.map(b => `<th scope="col"><a href="annonce.html?id=${encodeURIComponent(b.id)}">${escapeHTML(b.brand + ' ' + b.model)}</a></th>`).join('')}</tr></thead>
+              <tbody>${specRows(bikes)}</tbody>
+            </table>
+          </div>
+        </div>`;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(){ modal.hidden = true; document.body.style.overflow = ''; }
+
+    document.addEventListener('click', (e) => {
+      const toggle = e.target.closest('[data-compare-toggle]');
+      if (toggle){
+        e.preventDefault(); e.stopPropagation();
+        const on = Store.toggleCompare(toggle.getAttribute('data-compare-toggle'));
+        toggle.classList.toggle('active', on); toggle.setAttribute('aria-pressed', String(on));
+        return;
+      }
+      if (e.target.closest('[data-compare-open]')) return openModal();
+      if (e.target.closest('[data-compare-clear]')) return Store.clearCompare();
+      if (e.target.closest('[data-compare-close]')) return closeModal();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+    document.addEventListener('bb:compare-changed', () => {
+      renderBar();
+      document.querySelectorAll('[data-compare-toggle]').forEach(b => {
+        const on = Store.isComparing(b.getAttribute('data-compare-toggle'));
+        b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on));
+      });
+    });
+    renderBar();
+  });
+})();

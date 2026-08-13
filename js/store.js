@@ -4,6 +4,34 @@ const Store = {
     favorites: 'bb_favorites', myListings: 'bb_my_listings', theme: 'bb_theme', user: 'bb_user', draft: 'bb_draft',
     reviews: 'bb_reviews', reports: 'bb_reports', cookieConsent: 'bb_cookie_consent',
     savedSearches: 'bb_saved_searches', viewMode: 'bb_view_mode', recentSearches: 'bb_recent_searches',
+    compare: 'bb_compare',
+  },
+
+  /* ============ Sammenlign (op til 3 annoncer) ============ */
+  COMPARE_MAX: 3,
+  getCompare(){
+    try { return JSON.parse(localStorage.getItem(this.KEYS.compare)) || []; } catch(e){ return []; }
+  },
+  isComparing(id){ return this.getCompare().some(x => String(x) === String(id)); },
+  toggleCompare(id){
+    let list = this.getCompare();
+    const nowOn = !list.some(x => String(x) === String(id));
+    if (nowOn){
+      if (list.length >= this.COMPARE_MAX){
+        if (typeof toast === 'function') toast(`Du kan sammenligne op til ${this.COMPARE_MAX} ad gangen`);
+        return false;
+      }
+      list = [...list, id];
+    } else {
+      list = list.filter(x => String(x) !== String(id));
+    }
+    localStorage.setItem(this.KEYS.compare, JSON.stringify(list));
+    document.dispatchEvent(new CustomEvent('bb:compare-changed', { detail: list }));
+    return nowOn;
+  },
+  clearCompare(){
+    localStorage.setItem(this.KEYS.compare, '[]');
+    document.dispatchEvent(new CustomEvent('bb:compare-changed', { detail: [] }));
   },
 
   getFavorites(){
