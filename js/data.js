@@ -388,6 +388,7 @@ function equipmentLabel(id){
 
 const FUELS = ['Benzin', 'El', 'Hybrid', 'Diesel'];
 const DRIVES = ['Kædetræk', 'Kardantræk', 'Remtræk'];
+const SERVICE_HISTORIK_OPTIONS = ['Fuld', 'Delvis', 'Ingen', 'Ukendt'];
 const CYLINDERS = [1, 2, 3, 4, 6];
 const COLORS = [
   'Sort', 'Hvid', 'Grå', 'Sølv', 'Blå', 'Rød', 'Grøn',

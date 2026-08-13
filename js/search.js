@@ -4,6 +4,7 @@ const EMPTY_STATE = {
   yearMin: null, yearMax: null, kmMax: null, ccmMin: null, ccmMax: null,
   hkMin: null, hkMax: null,
   regions: [], conditions: [], equipment: [], fuels: [], drives: [],
+  service: [],
   cylinders: [], colors: [], maxAgeDays: null, photosOnly: false,
   dealerOnly: false, koerekort: '', sort: 'date-desc', page: 1,
 };
@@ -14,6 +15,7 @@ let state = { ...EMPTY_STATE };
 const LIST_PARAMS = {
   types: 'types', brands: 'brands', regions: 'regions', conditions: 'conditions',
   equipment: 'udstyr', fuels: 'braendstof', drives: 'traek', colors: 'farve',
+  service: 'service',
 };
 const NUM_PARAMS = {
   priceMin: 'priceMin', priceMax: 'priceMax', yearMin: 'yearMin', yearMax: 'yearMax',
@@ -81,6 +83,9 @@ function populateFilterUI(){
 
   document.getElementById('filter-conditions').innerHTML = CONDITIONS.map(c =>
     `<label class="checkbox-row"><input type="checkbox" data-condition="${c}">${c}</label>`).join('');
+
+  document.getElementById('filter-service').innerHTML = SERVICE_HISTORIK_OPTIONS.map(s =>
+    `<label class="checkbox-row"><input type="checkbox" data-service="${s}">${s}</label>`).join('');
 
   // Udstyret er grupperet — en flad liste med 33 checkbokse er ubrugelig
   // på en telefon, og det er dér de fleste søger.
@@ -154,6 +159,9 @@ function reflectStateToUI(){
   document.querySelectorAll('#filter-conditions input').forEach(cb => {
     cb.checked = state.conditions.includes(cb.dataset.condition);
   });
+  document.querySelectorAll('#filter-service input').forEach(cb => {
+    cb.checked = state.service.includes(cb.dataset.service);
+  });
   document.querySelectorAll('#filter-equipment input').forEach(cb => {
     cb.checked = state.equipment.includes(cb.dataset.equipment);
   });
@@ -201,6 +209,7 @@ function getFilteredListings(){
   if (state.hkMax != null) list = list.filter(l => (l.power || 0) <= state.hkMax);
   if (state.regions.length) list = list.filter(l => state.regions.includes(l.region));
   if (state.conditions.length) list = list.filter(l => state.conditions.includes(l.condition));
+  if (state.service.length) list = list.filter(l => state.service.includes(l.serviceHistorik));
 
   // Udstyr er et OG-filter: vælger man ABS og varmehåndtag, vil man have
   // begge dele. Brændstof, træktype, farve og cylindre er ELLER inden for
@@ -258,6 +267,7 @@ function activeFilterPills(){
   if (state.koerekort) pills.push({ label: 'Kørekort ' + state.koerekort, clear: () => state.koerekort = '' });
   state.regions.forEach(r => pills.push({ label: r, clear: () => state.regions = state.regions.filter(x=>x!==r) }));
   state.conditions.forEach(c => pills.push({ label: c, clear: () => state.conditions = state.conditions.filter(x=>x!==c) }));
+  state.service.forEach(s => pills.push({ label: 'Service: ' + s, clear: () => state.service = state.service.filter(x=>x!==s) }));
   state.equipment.forEach(e => pills.push({ label: equipmentLabel(e), clear: () => state.equipment = state.equipment.filter(x=>x!==e) }));
   state.fuels.forEach(f => pills.push({ label: f, clear: () => state.fuels = state.fuels.filter(x=>x!==f) }));
   state.drives.forEach(d => pills.push({ label: d, clear: () => state.drives = state.drives.filter(x=>x!==d) }));
@@ -356,6 +366,13 @@ function wireControls(){
       state.page = 1; render();
     });
   });
+  document.querySelectorAll('#filter-service input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const s = cb.dataset.service;
+      state.service = cb.checked ? [...state.service, s] : state.service.filter(x=>x!==s);
+      state.page = 1; render();
+    });
+  });
 
   /* De nye checkbox-grupper opfører sig ens: slå værdien til eller fra i
      den tilsvarende liste i state. */
@@ -410,7 +427,7 @@ function wireControls(){
 
   document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 
-  const resetAll = () => { state = { ...EMPTY_STATE, types: [], brands: [], regions: [], conditions: [], equipment: [], fuels: [], drives: [], cylinders: [], colors: [] }; render(); };
+  const resetAll = () => { state = { ...EMPTY_STATE, types: [], brands: [], regions: [], conditions: [], service: [], equipment: [], fuels: [], drives: [], cylinders: [], colors: [] }; render(); };
   document.getElementById('clear-filters').addEventListener('click', resetAll);
   document.getElementById('clear-filters-mobile').addEventListener('click', resetAll);
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);
