@@ -243,6 +243,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>`;
   }
 
+  // Senest sete — kun annoncer der stadig findes/er aktive; skjul sektionen
+  // helt for nye brugere (og når intet er set endnu).
+  const seenIds = Store.getRecentlyViewed();
+  const seen = seenIds.map(id => Store.getListingById(id))
+    .filter(l => l && (l.status ? l.status === 'active' : true))
+    .slice(0, 8);
+  const seenSection = document.getElementById('recently-viewed-section');
+  const seenMount = document.getElementById('recently-viewed');
+  if (seenSection && seenMount){
+    if (seen.length){
+      seenMount.innerHTML = seen.map(listingCardHTML).join('');
+      seenSection.hidden = false;
+    } else {
+      seenSection.hidden = true;
+    }
+  }
+
   wireFavoriteButtons(document);
 
   // trust strip

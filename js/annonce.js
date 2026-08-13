@@ -129,6 +129,7 @@ function renderListing(){
   currentListing = listing;
   currentPhotos = buildPhotoSet(listing);
   currentPhotoIndex = 0;
+  Store.addRecentlyViewed(listing.id);
 
   // Titel, delingsbillede og struktureret data følger annoncen, så et link
   // delt i en MC-gruppe viser mærke, årgang og pris frem for bare "Annonce".

@@ -4,7 +4,18 @@ const Store = {
     favorites: 'bb_favorites', myListings: 'bb_my_listings', theme: 'bb_theme', user: 'bb_user', draft: 'bb_draft',
     reviews: 'bb_reviews', reports: 'bb_reports', cookieConsent: 'bb_cookie_consent',
     savedSearches: 'bb_saved_searches', viewMode: 'bb_view_mode', recentSearches: 'bb_recent_searches',
-    compare: 'bb_compare',
+    compare: 'bb_compare', recentlyViewed: 'bb_recently_viewed',
+  },
+
+  /* ============ Senest sete annoncer ============ */
+  getRecentlyViewed(){
+    try { return JSON.parse(localStorage.getItem(this.KEYS.recentlyViewed)) || []; } catch(e){ return []; }
+  },
+  addRecentlyViewed(id){
+    if (!id) return;
+    let all = this.getRecentlyViewed().filter(x => String(x) !== String(id));
+    all.unshift(id);
+    localStorage.setItem(this.KEYS.recentlyViewed, JSON.stringify(all.slice(0, 8)));
   },
 
   /* ============ Sammenlign (op til 3 annoncer) ============ */
