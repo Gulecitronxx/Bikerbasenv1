@@ -6,7 +6,7 @@ const EMPTY_STATE = {
   regions: [], conditions: [], equipment: [], fuels: [], drives: [],
   service: [],
   cylinders: [], colors: [], maxAgeDays: null, photosOnly: false,
-  ejereMax: null, nysynet: false,
+  ejereMax: null, nysynet: false, vinterklar: false,
   dealerOnly: false, koerekort: '', sort: 'date-desc', page: 1,
 };
 let state = { ...EMPTY_STATE };
@@ -39,6 +39,7 @@ function readStateFromURL(){
   state.photosOnly = p.get('billeder') === '1';
   state.dealerOnly = p.get('dealer') === '1';
   state.nysynet = p.get('nysynet') === '1';
+  state.vinterklar = p.get('vinter') === '1';
   state.koerekort = p.get('koerekort') || '';
   state.sort = p.get('sort') || 'date-desc';
   state.page = numOrNull(p.get('page')) || 1;
@@ -60,6 +61,7 @@ function currentQueryString(includeSort = false){
   if (state.photosOnly) p.set('billeder', '1');
   if (state.dealerOnly) p.set('dealer', '1');
   if (state.nysynet) p.set('nysynet', '1');
+  if (state.vinterklar) p.set('vinter', '1');
   if (state.koerekort) p.set('koerekort', state.koerekort);
   if (includeSort && state.sort !== 'date-desc') p.set('sort', state.sort);
   return p.toString();
@@ -184,6 +186,7 @@ function reflectStateToUI(){
   document.getElementById('filter-photos-only').checked = state.photosOnly;
   document.getElementById('filter-dealer-only').checked = state.dealerOnly;
   document.getElementById('filter-nysynet').checked = state.nysynet;
+  document.getElementById('filter-vinter').checked = state.vinterklar;
   document.getElementById('filter-age').value = state.maxAgeDays || '';
   document.getElementById('filter-price-min').value = state.priceMin || '';
   document.getElementById('filter-price-max').value = state.priceMax || '';
@@ -236,6 +239,7 @@ function getFilteredListings(){
   if (state.dealerOnly) list = list.filter(l => l.isDealer);
   if (state.ejereMax != null) list = list.filter(l => l.antalEjere != null && l.antalEjere <= state.ejereMax);
   if (state.nysynet) { const y = new Date().getFullYear(); list = list.filter(l => l.sidsteSyn != null && l.sidsteSyn >= y - 1); }
+  if (state.vinterklar) list = list.filter(l => l.vinterklar);
   if (state.koerekort) list = list.filter(l => passerKoerekort(l, state.koerekort));
 
   const sorters = {
@@ -270,6 +274,7 @@ function activeFilterPills(){
   if (state.photosOnly) pills.push({ label: 'Kun med billeder', clear: () => state.photosOnly = false });
   if (state.ejereMax != null) pills.push({ label: `Maks. ${state.ejereMax} ejer${state.ejereMax===1?'':'e'}`, clear: () => state.ejereMax = null });
   if (state.nysynet) pills.push({ label: 'Nysynet', clear: () => state.nysynet = false });
+  if (state.vinterklar) pills.push({ label: 'Vinterklargjort', clear: () => state.vinterklar = false });
   if (state.maxAgeDays != null){
     const a = AGE_FILTERS.find(x => Number(x.id) === state.maxAgeDays);
     pills.push({ label: a ? a.label : `Seneste ${state.maxAgeDays} dage`, clear: () => state.maxAgeDays = null });
@@ -420,6 +425,9 @@ function wireControls(){
   });
   document.getElementById('filter-nysynet').addEventListener('change', (e) => {
     state.nysynet = e.target.checked; state.page = 1; render();
+  });
+  document.getElementById('filter-vinter').addEventListener('change', (e) => {
+    state.vinterklar = e.target.checked; state.page = 1; render();
   });
 
   const numField = (id, key) => {
