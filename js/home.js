@@ -19,6 +19,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   await backendReady();
   renderHeader('index.html');
 
+  // Gennemsigtig hero-header: massiv baggrund så snart man scroller forbi toppen.
+  const siteHeader = document.querySelector('.site-header');
+  if (siteHeader){
+    const onScroll = () => siteHeader.classList.toggle('is-scrolled', window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
   document.querySelectorAll('.section-link').forEach(a => {
     const span = a.querySelector('span[aria-hidden]');
     if (span) span.innerHTML = Icon.arrowRight;
@@ -110,15 +118,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tilesMount = document.getElementById('category-tiles');
   tilesMount.innerHTML = TYPES.map(t => `
     <a href="soegning.html?type=${t.id}" class="tile">
-      <span class="tile-art" data-bike="${t.id}"></span>
-      <span>${t.label}</span>
+      <span class="tile-media"><img src="img/type/${t.id}.webp" alt="${t.label}" width="760" height="570" loading="lazy" decoding="async"></span>
+      <span class="tile-label">${t.label}<span class="tile-go" aria-hidden="true">${Icon.arrowRight}</span></span>
     </a>`).join('');
-  if (typeof bikeArtSVG === 'function'){
-    tilesMount.querySelectorAll('.tile-art[data-bike]').forEach(mount => {
-      mount.insertAdjacentHTML('afterbegin', bikeArtSVG(mount.dataset.bike, {}));
-      stripBikeToLineArt(mount.querySelector('svg'), '4');
-    });
-  }
 
   // Populære mærker — rigtige links til filtrerede søgninger (Bilbasens
   // vigtigste scent/SEO-aktiv). Ingen opdigtede annoncetal.
@@ -126,25 +128,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Kun mærker der faktisk findes i mærkeuniverset (undgå døde links).
   const KNOWN = new Set(Object.keys(BRANDS_BY_MODEL));
   const brands = POPULAR_BRANDS.filter(b => KNOWN.has(b));
-  // Stor, svag bike-silhuet som vandmærke i hero'ens højre side, så det
-  // mørke felt ved siden af overskriften får brand-relevant dybde i stedet
-  // for tom gradient (Bilbasen fylder sit hero med billeder).
-  const heroShape = document.getElementById('hero-bg-shape');
-  if (heroShape && typeof bikeArtSVG === 'function'){
-    // Komplet line-art-cykel som glødende emblem i hero'ens højre side.
-    heroShape.innerHTML = bikeArtSVG('sport', { flip: true, id: 'hero' });
-    stripBikeToLineArt(heroShape.querySelector('svg'));
-  }
-
-  // Bike-silhuet i sælg-båndets mini-annonce (ren SVG, ingen billeder krævet).
-  const sellBike = document.getElementById('sell-band-bike');
-  if (sellBike && typeof bikeArtSVG === 'function') sellBike.insertAdjacentHTML('afterbegin', bikeArtSVG('cruiser', {}));
-
   const brandCloud = document.getElementById('brand-cloud');
   if (brandCloud){
     brandCloud.innerHTML = brands.map(b =>
       `<a class="brand-chip" href="soegning.html?brands=${encodeURIComponent(b)}">
-         <span class="brand-chip-name">${b}</span>
+         <span class="brand-chip-lead">
+           <span class="brand-chip-mark" aria-hidden="true">${b.charAt(0)}</span>
+           <span class="brand-chip-name">${b}</span>
+         </span>
          <span class="brand-chip-go" aria-hidden="true">${Icon.arrowRight}</span>
        </a>`).join('');
   }
@@ -173,39 +164,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   // gitter med tre tomme felter ved siden af. I stedet for at opdigte
   // annoncer fylder vi rækken ud med ærlige "opret din annonce"-kort, så
   // forsiden ser levende og intentionel ud — og skubber samtidig udbud.
-  const bikeSilhouettes = ['sport','cruiser','adventure','classic'];
-  // Varieret tekst, så tre udfylderkort ved siden af hinanden ikke gentager
-  // sig, men rammer hver sin vinkel (købers plads, sælgers genvej, "vær først").
-  const FILLER_COPY = [
-    { title: 'Din motorcykel her', text: 'Opret en gratis annonce og bliv set af købere i hele Danmark.' },
-    { title: 'Sælger du snart?', text: 'Sæt din motorcykel til salg på under 5 minutter — helt gratis.' },
-    { title: 'Vær blandt de første', text: 'Nye annoncer lander her. Kom med, mens der er god plads i toppen.' },
-  ];
-  const fillerCardHTML = (i) => {
-    const c = FILLER_COPY[i % FILLER_COPY.length];
-    return `
-    <a class="card card-cta" href="opret-annonce.html" aria-label="${c.title} — opret gratis annonce">
-      <div class="card-media card-cta-media">
-        ${typeof bikeArtSVG === 'function' ? bikeArtSVG(bikeSilhouettes[i % bikeSilhouettes.length], {}) : ''}
-      </div>
-      <div class="card-body card-cta-body">
-        <span class="card-cta-plus">${Icon.plus}</span>
-        <h3 class="card-cta-title">${c.title}</h3>
-        <p class="card-cta-text">${c.text}</p>
-        <span class="card-cta-link">Opret annonce${Icon.arrowRight}</span>
-      </div>
-    </a>`;
-  };
-  // Fyld kun den igangværende række ud — antal kolonner måles på layoutet,
-  // så en enkelt annonce på mobil (1 kolonne) ikke får tre udfylderkort
-  // stablet under sig, mens desktop (4 kolonner) fylder rækken pænt ud.
+  // Tynd lagerbeholdning: i stedet for at stable tomme dublet-kort med line-art
+  // fylder vi resten af rækken med ÉT roligt, intentionelt CTA-kort, der spænder
+  // over de ledige kolonner. Læses som "her lander nye annoncer" — ikke "tomt".
   const newestMount = document.getElementById('newest-listings');
   const realCardsHTML = newest.map(listingCardHTML).join('');
+  const wideCtaHTML = (span) => `
+    <a class="newest-cta" href="opret-annonce.html" style="grid-column: span ${span};"
+       aria-label="Opret en gratis annonce">
+      <span class="newest-cta-plus">${Icon.plus}</span>
+      <span class="newest-cta-copy">
+        <span class="newest-cta-title">Din motorcykel kunne stå her</span>
+        <span class="newest-cta-text">Opret en gratis annonce og bliv set af købere i hele Danmark — på under 5 minutter.</span>
+      </span>
+      <span class="newest-cta-link">Opret annonce${Icon.arrowRight}</span>
+    </a>`;
   const renderNewest = () => {
     const cols = getComputedStyle(newestMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-    const need = (newest.length > 0 && newest.length < cols) ? cols - newest.length : 0;
-    const fillers = Array.from({ length: need }, (_, i) => fillerCardHTML(i));
-    newestMount.innerHTML = realCardsHTML + fillers.join('');
+    const gap = (newest.length > 0 && newest.length < cols) ? cols - newest.length : 0;
+    newestMount.innerHTML = realCardsHTML + (gap ? wideCtaHTML(gap) : '');
   };
   // Første render wires af den globale wireFavoriteButtons(document) nedenfor.
   renderNewest();

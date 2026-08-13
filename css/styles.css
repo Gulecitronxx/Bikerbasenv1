@@ -184,7 +184,40 @@ svg{display:block; width:1em; height:1em;}
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--color-border);
 }
-.site-header .container{ display:flex; align-items:center; gap: var(--space-5); height:100%; }
+.site-header .container{ display:flex; align-items:center; gap: var(--space-5); height:100%; position:relative; z-index:1; }
+
+/* ---- Forside: gennemsigtig header hen over hero-fotoet, massiv ved scroll ---- */
+body.home .site-header{
+  position: fixed; left:0; right:0; top:0;
+  background: transparent; border-bottom-color: transparent; backdrop-filter:none;
+  transition: background-color .25s var(--ease-out), border-color .25s var(--ease-out), backdrop-filter .25s var(--ease-out);
+}
+/* Blød top-scrim, så nav og knapper er læsbare over lyse partier af fotoet. */
+body.home .site-header::before{
+  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background: linear-gradient(180deg, rgba(8,7,5,.42) 0%, rgba(8,7,5,.12) 60%, transparent 100%);
+  opacity:1; transition: opacity .25s var(--ease-out);
+}
+body.home .site-header:not(.is-scrolled) .brand,
+body.home .site-header:not(.is-scrolled) .main-nav a,
+body.home .site-header:not(.is-scrolled) .icon-btn,
+body.home .site-header:not(.is-scrolled) .btn-outline{ color:#fff; }
+body.home .site-header:not(.is-scrolled) .main-nav a:hover,
+body.home .site-header:not(.is-scrolled) .main-nav a.active{ background: rgba(255,255,255,.16); color:#fff; }
+body.home .site-header:not(.is-scrolled) .icon-btn:hover{ background: rgba(255,255,255,.16); }
+body.home .site-header:not(.is-scrolled) .btn-outline{ border-color: rgba(255,255,255,.5); }
+body.home .site-header:not(.is-scrolled) .btn-outline:hover{ background: rgba(255,255,255,.14); border-color:#fff; }
+/* Massiv tilstand ved scroll — som resten af sitet. */
+body.home .site-header.is-scrolled{
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom-color: var(--color-border);
+}
+body.home .site-header.is-scrolled::before{ opacity:0; }
+/* Fixed header ligger uden for flowet, så hero'en starter i toppen bag den;
+   ekstra topluft giver plads til headeren over overskriften. */
+body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
+@media (min-width:768px){ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-7)); } }
 .brand{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:20px; flex-shrink:0; }
 .brand .brand-mark{ color: var(--color-primary); }
 .brand svg{ width:26px; height:26px; }
@@ -294,71 +327,70 @@ svg{display:block; width:1em; height:1em;}
 /* ============ Hero ============ */
 .hero{
   position:relative; overflow:hidden;
-  background: linear-gradient(160deg, var(--color-dark) 0%, #2A2115 60%, var(--color-primary) 145%);
+  background: var(--color-dark);
   color:#fff;
-  /* Strammet lodret luft, så tælle-linjen og statistikkerne kommer op over
-     skærmkanten i stedet for at gemme sig under søgefeltet. */
-  padding: var(--space-6) 0 var(--space-6);
+  padding: var(--space-8) 0 var(--space-7);
 }
-.hero-bg-shape{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-/* Alt hero-indhold (overskrift, søgefelt, statistik) skal ligge over
-   vandmærket — ellers maler den absolutte silhuet oven på søgekortet. */
-.hero > .container{ position:relative; z-index:1; }
-/* Lagdelt hero-scene i ren CSS/SVG — varm glød, fartstriber og en
-   motorcykel-silhuet der fanger lyset. Ingen billeder, ingen licens.
-   Hero'en er altid mørk (begge temaer), så én belysning passer overalt. */
-.hero-bg-shape::before{
-  /* Ember-glød bag cyklen, øverst til højre */
-  content:""; position:absolute; right:2%; top:-12%;
-  width:54%; height:95%;
-  background: radial-gradient(circle at center,
-    color-mix(in srgb, var(--color-primary) 52%, transparent) 0%,
-    color-mix(in srgb, var(--color-primary) 16%, transparent) 40%,
-    transparent 66%);
-  opacity:.6; pointer-events:none;
+@media (min-width:768px){ .hero{ padding: var(--space-9) 0 var(--space-8); } }
+
+/* Fuldflade-foto: motorcyklen står i højre side, vej og hav løber mod venstre,
+   hvor overskrift og søgekort ligger. Rigtige billeder — Bilbasens forside er
+   flad; en filmisk hero slår den. */
+.hero-media{ position:absolute; inset:0; z-index:0; overflow:hidden; background: var(--color-dark); }
+.hero-photo{
+  width:100%; height:100%; object-fit:cover; object-position: 72% center; display:block;
+  /* Ingen ekstra indzoom — billedet vises så tæt på sin egen størrelse som muligt,
+     så det ikke forstørres (og dermed sløres) mere end nødvendigt. */
+  animation: heroPan 26s ease-in-out infinite alternate;
 }
-.hero-bg-shape::after{
-  /* Fine diagonale fartstriber, kun i højre side */
-  content:""; position:absolute; inset:0; pointer-events:none;
-  background: repeating-linear-gradient(114deg,
-    transparent 0 27px, rgba(255,255,255,.05) 27px 28px);
-  -webkit-mask-image: linear-gradient(100deg, transparent 50%, #000 98%);
-          mask-image: linear-gradient(100deg, transparent 50%, #000 98%);
-}
-/* Line-art-cykel: komplet, i top-højre, som ét varmt glødende strøg. */
-.hero-bg-shape .ba-svg{
-  position:absolute; right:5%; top:6%;
-  width:min(360px, 33%); height:auto; opacity:.8;
-  color: color-mix(in srgb, var(--color-primary) 58%, #fff 42%);
-  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--color-primary) 55%, transparent));
-}
-/* Scrim, så overskrift og lead altid har kontrast — mørkner venstre side,
-   lader scenen til højre stå fri. */
+@keyframes heroPan{ from{ transform: scale(1.02) translateX(0.6%); } to{ transform: scale(1.02) translateX(-0.6%); } }
+@media (prefers-reduced-motion: reduce){ .hero-photo{ animation:none; transform:none; } }
+
+/* To lag scrim: mørkt i venstre side bag teksten, og en bund-gradient så det
+   hvide søgekort altid har kontrast under sig. Cyklen til højre står fri. */
 .hero::after{
-  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
-  background: linear-gradient(90deg,
-    var(--color-dark) 0%,
-    color-mix(in srgb, var(--color-dark) 45%, transparent) 30%,
-    transparent 56%);
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(90deg,
+      var(--color-dark) 0%,
+      color-mix(in srgb, var(--color-dark) 84%, transparent) 32%,
+      color-mix(in srgb, var(--color-dark) 32%, transparent) 60%,
+      transparent 82%),
+    linear-gradient(0deg,
+      color-mix(in srgb, var(--color-dark) 60%, transparent) 0%,
+      transparent 32%);
 }
 @media (max-width: 760px){
-  /* På mobil ligger søgefeltet over hele bredden; hold cyklen lille og oppe
-     i hjørnet som en diskret accent, og mørkn bunden for kontrast. */
-  .hero-bg-shape .ba-svg{ right:-2%; top:4%; width:56%; opacity:.4; }
-  .hero-bg-shape::before{ opacity:.4; }
-  .hero::after{ background:
-    linear-gradient(180deg, transparent 0%, var(--color-dark) 94%),
-    linear-gradient(90deg, transparent 40%, transparent 100%); }
+  .hero-photo{ object-position: 68% center; }
+  .hero::after{
+    background: linear-gradient(0deg,
+      var(--color-dark) 6%,
+      color-mix(in srgb, var(--color-dark) 62%, transparent) 46%,
+      color-mix(in srgb, var(--color-dark) 24%, transparent) 100%);
+  }
 }
-@media (max-width: 760px){ .hero-bg-shape .ba-svg{ opacity:.05; right:-18%; width:90%; } }
-.hero-inner{ position:relative; z-index:1; max-width:760px; }
-.hero h1{ font-size: clamp(28px, 5vw, 48px); font-weight:700; margin-bottom: var(--space-3); }
-.hero p.lead{ font-size: clamp(16px,2vw,19px); color:#D8D2C6; max-width:560px; margin-bottom: var(--space-5); }
+.hero > .container{ position:relative; z-index:2; }
+.hero-inner{ position:relative; z-index:2; max-width:640px; }
+.hero-eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--font-display); font-size:12px; font-weight:600;
+  letter-spacing:.08em; text-transform:uppercase;
+  color: color-mix(in srgb, var(--color-primary) 32%, #fff 68%);
+  background: color-mix(in srgb, var(--color-primary) 24%, transparent);
+  border:1px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+  padding:6px 13px; border-radius: var(--radius-pill); margin-bottom: var(--space-4);
+  backdrop-filter: blur(4px);
+}
+.hero h1{ font-size: clamp(28px, 5.4vw, 56px); line-height:1.05; font-weight:700; margin-bottom: var(--space-4); text-shadow: 0 2px 28px rgba(0,0,0,.4); text-wrap: balance; }
+/* Grupperer anden sætningshalvdel, så tankestregen ikke hænger midt i en linje. */
+.hero-h1-line{ display:block; color: color-mix(in srgb, #fff 82%, var(--color-primary) 18%); }
+.hero p.lead{ font-size: clamp(16px,2vw,19px); color:#E7E2D8; max-width:540px; margin-bottom: var(--space-5); text-shadow:0 1px 14px rgba(0,0,0,.35); }
 
 .search-panel{
   background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-4);
   box-shadow: var(--shadow-lg); display:flex; flex-direction:column; gap: var(--space-3);
-  color: var(--color-fg);
+  color: var(--color-fg); max-width: 780px;
+  border: 1px solid color-mix(in srgb, #fff 12%, transparent);
 }
 .search-row{ display:grid; grid-template-columns: 1fr; gap: var(--space-3); }
 @media (min-width: 700px){ .search-row{ grid-template-columns: 1.4fr 1fr 1fr auto; align-items:end; } }
@@ -395,22 +427,52 @@ select.input{
 
 .tiles-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
 @media (min-width:640px){ .tiles-grid{ grid-template-columns: repeat(4,1fr); } }
-@media (min-width:1024px){ .tiles-grid{ grid-template-columns: repeat(8,1fr); } }
+/* Foto-kort pr. type. Studieoptagelser med ens taupe-baggrund giver et roligt,
+   sammenhængende sæt — og rigtige billeder frem for line-art matcher Bilbasen. */
 .tile{
-  display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center;
-  padding: var(--space-4) var(--space-2); border-radius: var(--radius-md);
+  position:relative; display:block; border-radius: var(--radius-md); overflow:hidden;
   background: var(--color-surface); border:1px solid var(--color-border);
   transition: transform .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
   cursor:pointer;
 }
 .tile:hover{ transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--color-primary); }
-.tile .tile-icon{ width:64px; height:64px; border-radius:50%; background: var(--color-primary-tint); color: var(--color-primary); display:flex; align-items:center; justify-content:center; }
-.tile .tile-icon svg{ width:34px; height:34px; }
-/* Per-type line-art-motorcykel i flisen */
-.tile .tile-art{ width:100%; max-width:130px; color: var(--color-primary); opacity:.88; transition: opacity .18s var(--ease-out), transform .18s var(--ease-out); }
-.tile .tile-art svg{ width:100%; height:auto; display:block; }
-.tile:hover .tile-art{ opacity:1; transform: translateX(2px); }
-.tile span{ font-size:13px; font-weight:600; }
+.tile .tile-media{ display:block; aspect-ratio:4/3; overflow:hidden; background: var(--color-surface-2); }
+.tile .tile-media img{ width:100%; height:100%; object-fit:cover; transition: transform .45s var(--ease-out); }
+.tile:hover .tile-media img{ transform: scale(1.06); }
+.tile .tile-label{
+  position:absolute; left:0; right:0; bottom:0;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:16px 14px 12px; color:#fff; font-size:15px; font-weight:600;
+  font-family: var(--font-display); letter-spacing:-0.01em;
+  text-shadow: 0 1px 8px rgba(0,0,0,.5);
+  background: linear-gradient(to top, rgba(10,8,6,.9) 0%, rgba(10,8,6,.55) 42%, transparent 100%);
+}
+.tile .tile-go{ display:inline-flex; opacity:0; transform: translateX(-4px); transition: opacity .18s var(--ease-out), transform .18s var(--ease-out); color: var(--color-on-primary); }
+.tile .tile-go svg{ width:16px; height:16px; }
+.tile:hover .tile-go{ opacity:1; transform: translateX(0); }
+
+/* ============ Sådan virker det (trin) ============ */
+.steps{ display:grid; grid-template-columns:1fr; gap: var(--space-5); counter-reset:step; }
+@media (min-width:760px){ .steps{ grid-template-columns: repeat(3,1fr); gap: var(--space-6); } }
+.step{ position:relative; display:flex; gap: var(--space-4); align-items:flex-start; }
+/* Forbindelseslinje mellem trinnene på desktop. */
+@media (min-width:760px){
+  .step:not(:last-child)::after{
+    content:""; position:absolute; top:23px; left: calc(48px + var(--space-3));
+    right: calc(-1 * var(--space-6) + var(--space-3)); height:2px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 40%, var(--color-border)), var(--color-border));
+  }
+}
+.step-num{
+  flex:none; width:48px; height:48px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-display); font-weight:700; font-size:20px;
+  color: var(--color-primary); background: var(--color-primary-tint);
+  border:1.5px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  position:relative; z-index:1;
+}
+.step-body h3{ font-size:18px; margin-bottom:6px; }
+.step-body p{ color: var(--color-fg-muted); font-size:14px; line-height:1.55; max-width:34ch; }
 
 /* ============ Cards / listings grid ============ */
 .listings-grid{ display:grid; grid-template-columns: repeat(1,1fr); gap: var(--space-4); }
@@ -1217,6 +1279,27 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-card-name{ font-family: var(--font-display); font-weight:700; font-size:17px; }
 .brand-card-count{ font-size:13px; color: var(--color-fg-muted); }
 .brand-noscript ul, .brand-noscript{ padding-left:18px; }
+
+/* Komplet mærke-indeks: kompakt, søgbart browse-gitter (fylder siden ud og
+   giver rigtige interne links, også for mærker uden annoncer lige nu). */
+.brand-index{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-2); }
+@media (min-width:560px){ .brand-index{ grid-template-columns: repeat(3,1fr); } }
+@media (min-width:900px){ .brand-index{ grid-template-columns: repeat(4,1fr); } }
+@media (min-width:1200px){ .brand-index{ grid-template-columns: repeat(5,1fr); } }
+.brand-index-link{
+  display:flex; align-items:center; gap:8px;
+  padding: 11px var(--space-4); border-radius: var(--radius-sm);
+  background: var(--color-surface); border:1px solid var(--color-border);
+  font-weight:600; font-size:14px; color: var(--color-fg);
+  transition: border-color .15s var(--ease-out), background-color .15s var(--ease-out), transform .15s var(--ease-out);
+}
+.brand-index-link::before{
+  content:""; width:7px; height:7px; border-radius:50%; flex:none;
+  background: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  transition: background-color .15s var(--ease-out);
+}
+.brand-index-link:hover{ border-color: var(--color-primary); background: var(--color-surface-2); transform: translateY(-2px); }
+.brand-index-link:hover::before{ background: var(--color-primary); }
 .brand-noscript li{ list-style:disc; margin-bottom:6px; color: var(--color-fg-muted); }
 
 /* ============ Forside: Populære mærker (brand cloud) ============ */
@@ -1230,6 +1313,15 @@ body.overlay-open .cookie-banner{ display:none; }
   transition: transform .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out), background-color .18s var(--ease-out);
 }
 .brand-chip:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
+.brand-chip-lead{ display:flex; align-items:center; gap:11px; min-width:0; }
+.brand-chip-mark{
+  flex:none; width:32px; height:32px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-display); font-weight:700; font-size:15px;
+  background: var(--color-primary-tint); color: var(--color-primary);
+  transition: background-color .18s var(--ease-out), color .18s var(--ease-out);
+}
+.brand-chip:hover .brand-chip-mark{ background: var(--color-primary); color: var(--color-on-primary); }
 .brand-chip-name{ font-family: var(--font-display); font-weight:700; font-size:15px; letter-spacing:-0.01em; }
 .brand-chip-go{ color: var(--color-fg-muted); display:inline-flex; opacity:0; transform: translateX(-4px); transition: opacity .18s var(--ease-out), transform .18s var(--ease-out), color .18s var(--ease-out); }
 .brand-chip-go svg{ width:16px; height:16px; }
@@ -1279,8 +1371,9 @@ body.overlay-open .cookie-banner{ display:none; }
   transform: rotate(-2.5deg); transition: transform .3s var(--ease-out);
 }
 .sell-band-art:hover .mini-card{ transform: rotate(0deg) translateY(-4px); }
-.mini-card-media{ position:relative; aspect-ratio:16/10; background: var(--color-surface-2); }
+.mini-card-media{ position:relative; aspect-ratio:16/10; background: var(--color-surface-2); overflow:hidden; }
 .mini-card-media .ba-svg{ width:100%; height:100%; }
+.mini-card-media img{ width:100%; height:100%; object-fit:cover; }
 .mini-badge{
   position:absolute; top:10px; left:10px; z-index:1;
   background: var(--color-badge-new); color:#fff; font-family:var(--font-display);
@@ -1292,26 +1385,34 @@ body.overlay-open .cookie-banner{ display:none; }
 .mini-meta{ color: var(--color-fg-muted); font-size:12px; margin-top:4px; }
 
 /* ============ Forside: "din annonce her"-kort (ærlig udfylder) ============ */
-.card-cta{
-  border-style:dashed; border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
-  background: color-mix(in srgb, var(--color-primary-tint) 40%, var(--color-surface));
-  text-align:center;
+/* Ét kort der spænder over de ledige kolonner, når lageret er tyndt — roligt og
+   intentionelt frem for gentagne tomme dublet-kort. */
+.newest-cta{
+  grid-column: span 1;
+  display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+  gap: var(--space-3) var(--space-5); text-align:center;
+  padding: var(--space-5) var(--space-6);
+  border:1.5px dashed color-mix(in srgb, var(--color-primary) 42%, var(--color-border));
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(130% 150% at 100% 0%, color-mix(in srgb, var(--color-primary) 13%, transparent), transparent 58%),
+    var(--color-surface);
+  transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out), transform .18s var(--ease-out);
 }
-.card-cta:hover{ border-style:solid; border-color: var(--color-primary); }
-.card-cta-media{ display:flex; align-items:center; justify-content:center; background:transparent; opacity:.22; }
-.card-cta-media .ba-svg{ width:82%; height:auto; }
-.card-cta-body{ align-items:center; gap:6px; padding: var(--space-4) var(--space-4) var(--space-5); }
-.card-cta-plus{
-  width:44px; height:44px; margin:-42px auto 4px; border-radius:50%;
+.newest-cta:hover{ border-style:solid; border-color: var(--color-primary); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.newest-cta-plus{
+  display:inline-flex; align-items:center; justify-content:center; flex:none;
+  width:54px; height:54px; border-radius:50%;
   background: var(--color-primary); color: var(--color-on-primary);
-  display:flex; align-items:center; justify-content:center; box-shadow: var(--shadow-md);
-  position:relative; z-index:1;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-primary) 38%, transparent);
 }
-.card-cta-plus svg{ width:22px; height:22px; }
-.card-cta-title{ font-size:16px; }
-.card-cta-text{ color: var(--color-fg-muted); font-size:13px; max-width:26ch; }
-.card-cta-link{ margin-top:6px; display:inline-flex; align-items:center; gap:5px; font-weight:600; font-size:14px; color: var(--color-primary); }
-.card-cta-link svg{ width:15px; height:15px; }
+.newest-cta-plus svg{ width:26px; height:26px; }
+.newest-cta-copy{ display:flex; flex-direction:column; gap:5px; max-width:44ch; text-align:left; }
+.newest-cta-title{ font-family: var(--font-display); font-weight:700; font-size:18px; letter-spacing:-0.01em; }
+.newest-cta-text{ color: var(--color-fg-muted); font-size:14px; line-height:1.45; }
+.newest-cta-link{ display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:14px; color: var(--color-primary); white-space:nowrap; }
+.newest-cta-link svg{ width:16px; height:16px; }
+@media (max-width:559px){ .newest-cta{ flex-direction:column; } .newest-cta-copy{ text-align:center; } }
 
 /* ============ Rigtige annoncefotos ============ */
 .card-photo{ width:100%; height:100%; object-fit:cover; display:block;

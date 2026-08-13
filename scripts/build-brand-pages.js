@@ -223,15 +223,31 @@ ${header}
 
     <div class="brand-hero">
       <h1>Motorcykler efter mærke</h1>
-      <p class="brand-intro">Vælg et mærke for at se alle brugte modeller til salg lige nu. Vi viser kun mærker, hvor der aktuelt er annoncer.</p>
+      <p class="brand-intro">Gennemse brugte motorcykler efter mærke. Nederst finder du alle mærker — også dem uden annoncer lige nu.</p>
     </div>
 
-    <section class="section" style="padding-top:0;">
+    ${brands.length ? `<section class="section" style="padding-top:0;">
+      <div class="section-head"><div>
+        <h2>Mærker med annoncer nu</h2>
+        <p>Spring direkte til udvalget hos de mærker, der er til salg lige nu.</p>
+      </div></div>
       <div class="brand-grid">
         ${brands.map(b => `<a class="brand-card" href="maerke-${slugify(b)}.html">
           <span class="brand-card-name">${esc(b)}</span>
           <span class="brand-card-count">${byBrand[b].length} ${byBrand[b].length === 1 ? 'annonce' : 'annoncer'}</span>
         </a>`).join('\n        ')}
+      </div>
+    </section>` : ''}
+
+    <section class="section" style="padding-top:0;">
+      <div class="section-head"><div>
+        <h2>Alle mærker</h2>
+        <p>Vælg et mærke og se, hvad der er til salg — eller opret en søgeagent.</p>
+      </div></div>
+      <div class="brand-index">
+        ${Object.keys(BRANDS_BY_MODEL).sort((a,b)=>a.localeCompare(b,'da')).map(b =>
+          `<a class="brand-index-link" href="soegning.html?brands=${encodeURIComponent(b)}">${esc(b)}</a>`
+        ).join('\n        ')}
       </div>
     </section>
   </div>

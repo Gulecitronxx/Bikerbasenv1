@@ -343,8 +343,16 @@ function renderListing(){
 
   const similarMount = document.getElementById('similar-listings');
   const similar = Store.getAllListings().filter(l => l.type === listing.type && l.id !== listing.id).slice(0, 3);
-  similarMount.innerHTML = similar.map(listingCardHTML).join('');
-  wireFavoriteButtons(similarMount);
+  // Skjul hele "Lignende annoncer"-sektionen, når der ingen er — en overskrift
+  // over et tomt gitter ser i stykker ud (samme mønster som forsidens sektioner).
+  const similarStrip = similarMount.closest('.similar-strip');
+  if (similar.length === 0){
+    if (similarStrip) similarStrip.hidden = true;
+  } else {
+    if (similarStrip) similarStrip.hidden = false;
+    similarMount.innerHTML = similar.map(listingCardHTML).join('');
+    wireFavoriteButtons(similarMount);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

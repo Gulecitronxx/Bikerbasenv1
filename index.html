@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/styles.css?v=d064af76">
+<link rel="stylesheet" href="css/styles.css?v=72f7ecc6">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -42,7 +42,7 @@
 </script>
 <!-- jsonld:end -->
 </head>
-<body>
+<body class="home">
 <a class="skip-link" href="#main-content">Gå til indhold</a>
 <header class="site-header">
   <div class="container">
@@ -84,10 +84,16 @@
 <main id="main-content">
 
   <section class="hero">
-    <div class="hero-bg-shape" id="hero-bg-shape" aria-hidden="true"></div>
+    <div class="hero-media" aria-hidden="true">
+      <img class="hero-photo" src="img/hero-1600.webp"
+           srcset="img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
+           sizes="100vw" alt="" width="2560" height="1086"
+           fetchpriority="high" decoding="async">
+    </div>
     <div class="container">
       <div class="hero-inner">
-        <h1>Find din næste motorcykel — eller sælg din nuværende.</h1>
+        <span class="hero-eyebrow">Danmarks mødested for motorcykler</span>
+        <h1>Find din næste motorcykel <span class="hero-h1-line">— eller sælg din nuværende.</span></h1>
         <p class="lead">Bikerbasen samler private sælgere og forhandlere i hele Danmark. Søg på mærke, type og budget, og kom direkte i kontakt med sælgeren.</p>
       </div>
 
@@ -143,6 +149,40 @@
 
   <section class="section" style="padding-top:0;">
     <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Sådan køber du trygt</h2>
+          <p>Fra søgning til nøgler i hånden — tre enkle trin.</p>
+        </div>
+      </div>
+      <ol class="steps" id="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <div class="step-body">
+            <h3>Find den rette</h3>
+            <p>Søg på mærke, type, budget og kørekort. Gem favoritter og sammenlign specs side om side.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <div class="step-body">
+            <h3>Tag kontakt trygt</h3>
+            <p>Skriv til sælger direkte i Bikerbasen. Dine oplysninger deles først, når du selv er klar.</p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <div class="step-body">
+            <h3>Aftal og hent</h3>
+            <p>Se stelnummer og registreringsstatus, aftal fremvisning, og handl med ro i maven.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0;">
+    <div class="container">
       <div class="sell-band">
         <div class="sell-band-copy">
           <span class="sell-band-eyebrow">Sælg din motorcykel</span>
@@ -161,6 +201,7 @@
         <div class="sell-band-art" aria-hidden="true">
           <div class="mini-card">
             <div class="mini-card-media" id="sell-band-bike">
+              <img src="img/sell-cruiser.webp" alt="" width="640" height="400" loading="lazy" decoding="async">
               <span class="mini-badge">NY</span>
             </div>
             <div class="mini-card-body">
@@ -316,17 +357,17 @@
   </div>
 </footer>
 
-<script defer src="js/security.js?v=d064af76"></script>
+<script defer src="js/security.js?v=72f7ecc6"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=d064af76"></script>
-<script defer src="js/supabase-api.js?v=d064af76"></script>
-<script defer src="js/icons.js?v=d064af76"></script>
-<script defer src="js/bike-art.js?v=d064af76"></script>
-<script defer src="js/postnumre.js?v=d064af76"></script>
-<script defer src="js/data.js?v=d064af76"></script>
-<script defer src="js/store.js?v=d064af76"></script>
-<script defer src="js/backend-bridge.js?v=d064af76"></script>
-<script defer src="js/components.js?v=d064af76"></script>
-<script defer src="js/home.js?v=d064af76"></script>
+<script defer src="js/supabase-config.js?v=72f7ecc6"></script>
+<script defer src="js/supabase-api.js?v=72f7ecc6"></script>
+<script defer src="js/icons.js?v=72f7ecc6"></script>
+<script defer src="js/bike-art.js?v=72f7ecc6"></script>
+<script defer src="js/postnumre.js?v=72f7ecc6"></script>
+<script defer src="js/data.js?v=72f7ecc6"></script>
+<script defer src="js/store.js?v=72f7ecc6"></script>
+<script defer src="js/backend-bridge.js?v=72f7ecc6"></script>
+<script defer src="js/components.js?v=72f7ecc6"></script>
+<script defer src="js/home.js?v=72f7ecc6"></script>
 </body>
 </html>
