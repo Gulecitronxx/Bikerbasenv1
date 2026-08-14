@@ -100,6 +100,22 @@ const BRANDS_BY_MODEL = {
   MZ: ['ETZ 251', 'Saxon 500'],
   Peugeot: ['Django 125', 'Metropolis 400'],
   Sachs: ['Roadster 125', 'Madass 125'],
+  // Amerikanske brugtmærker
+  Buell: ['XB12S Lightning', 'XB12R Firebolt', 'XB9SX', '1125R', '1125CR', 'Ulysses XB12X', '1190RX', 'Thunderbolt S3', 'Cyclone M2'],
+  Victory: ['Hammer', 'Vegas', 'Gunner', 'Octane', 'Cross Country', 'Cross Roads', 'Judge', 'High-Ball', 'Kingpin', 'Vision', 'Magnum'],
+  'Can-Am': ['Spyder F3', 'Spyder F3-S', 'Spyder RT', 'Ryker 600', 'Ryker 900', 'Ryker Rally', 'Pulse', 'Origin'],
+  // Moderne A1/A2-mærker (Kina/Europa)
+  Keeway: ['RKF 125', 'RKS 125', 'Superlight 125', 'Superlight 200', 'Vieste 300', 'K-Light 202', 'Cafe 152', 'V302C', 'Sixties 300i'],
+  Mash: ['Seventy 125', 'Five Hundred', 'Two Fifty', 'Black Seven 125', 'Scrambler 400', 'Dirt Track 650', 'X-Ride 650', 'Family Side 400'],
+  Brixton: ['Crossfire 125', 'Crossfire 500', 'Cromwell 125', 'Cromwell 250', 'Cromwell 1200', 'Sunray 125', 'Felsberg 125', 'Storr 500'],
+  Lexmoto: ['LXR 125', 'LXR 380', 'ZSB 125', 'Isca 125', 'Assault 125', 'Michigan 125', 'Storm 125', 'Aspire 125'],
+  'QJ Motor': ['SRK 700', 'SRK 400', 'SRT 550', 'SRT 750', 'SRV 550', 'SRG 600', 'SRK 125'],
+  Kove: ['450 Rally', '450R', '321RR', '321R', '800X', '500R', '525X'],
+  'Super Soco': ['TC Max', 'TC', 'TS Street Hunter', 'CPx', 'VS1'],
+  // Klassisk & scooter
+  Jawa: ['350 OHC', '42', 'Perak', '300 CL', '350 Classic', 'Type 634', 'Californian'],
+  Gilera: ['Fuoco 500', 'Nexus 250', 'Nexus 300', 'GP 800', 'Runner 200', 'Nexus 500'],
+  Lambretta: ['V125 Special', 'V200 Special', 'G350', 'X300', 'Li 150', 'TV 175'],
 };
 
 const TYPE_BY_MODEL_HINT = {
