@@ -78,8 +78,20 @@ function populateFilterUI(){
   document.getElementById('filter-types').innerHTML = TYPES.map(t =>
     `<button type="button" class="chip" data-type="${t.id}">${t.label}</button>`).join('');
 
-  document.getElementById('filter-brands').innerHTML = Object.keys(BRANDS_BY_MODEL).sort().map(b =>
-    `<label class="checkbox-row"><input type="checkbox" data-brand="${b}">${b}</label>`).join('');
+  // Populære mærker først som chips, derefter den fulde, søgbare liste i et
+  // højde-begrænset felt — 60 checkbokse på række skubbede alle andre filtre
+  // under folden.
+  const POPULAR_BRANDS = ['Yamaha','Honda','BMW','Suzuki','Kawasaki','Harley-Davidson','Ducati','KTM'];
+  const known = new Set(Object.keys(BRANDS_BY_MODEL));
+  const brandRows = Object.keys(BRANDS_BY_MODEL).sort((a,b)=>a.localeCompare(b,'da')).map(b =>
+    `<label class="checkbox-row" data-brand-row="${b.toLowerCase()}"><input type="checkbox" data-brand="${b}">${b}</label>`).join('');
+  document.getElementById('filter-brands').innerHTML = `
+    <div class="brand-popular" id="brand-popular">${POPULAR_BRANDS.filter(b=>known.has(b)).map(b =>
+      `<button type="button" class="chip" data-brand-chip="${b}">${b}</button>`).join('')}</div>
+    <div class="filter-search"><input type="text" id="brand-search" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
+    <div class="checkbox-scroll" id="brand-list">${brandRows}
+      <p class="brand-noresult" id="brand-noresult" hidden>Ingen mærker matcher.</p>
+    </div>`;
 
   document.getElementById('filter-koerekort').innerHTML = KOEREKORT.map(k =>
     `<button type="button" class="chip" data-koerekort="${k.id}" title="${k.hint}">${k.label}</button>`).join('');
@@ -114,6 +126,10 @@ function populateFilterUI(){
     AGE_FILTERS.map(a => `<option value="${a.id}">${a.label}</option>`).join('');
 
   document.getElementById('filter-icon-mount').innerHTML = Icon.filter;
+  const srpIcon = document.getElementById('srp-search-icon');
+  if (srpIcon) srpIcon.innerHTML = Icon.search;
+  const qClearBtn = document.getElementById('filter-q-clear');
+  if (qClearBtn) qClearBtn.innerHTML = Icon.close;
   document.getElementById('empty-icon').innerHTML = Icon.search;
   document.getElementById('bc-sep-1').innerHTML = Icon.chevronRight;
   document.querySelectorAll('.filter-group summary .chev').forEach(c => c.innerHTML = Icon.chevronDown);
@@ -156,9 +172,16 @@ function reflectStateToUI(){
   document.querySelectorAll('#filter-koerekort .chip').forEach(ch => {
     ch.classList.toggle('active', state.koerekort === ch.dataset.koerekort);
   });
-  document.querySelectorAll('#filter-brands input').forEach(cb => {
+  document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb => {
     cb.checked = state.brands.includes(cb.dataset.brand);
   });
+  document.querySelectorAll('#brand-popular .chip').forEach(ch => {
+    ch.classList.toggle('active', state.brands.includes(ch.dataset.brandChip));
+  });
+  const qInput = document.getElementById('filter-q');
+  if (qInput && qInput.value !== state.q) qInput.value = state.q;
+  const qClear = document.getElementById('filter-q-clear');
+  if (qClear) qClear.hidden = !state.q;
   document.querySelectorAll('#filter-regions input').forEach(cb => {
     cb.checked = state.regions.includes(cb.dataset.region);
   });
@@ -255,6 +278,7 @@ function getFilteredListings(){
 
 function activeFilterPills(){
   const pills = [];
+  if (state.q) pills.push({ label: `"${state.q}"`, clear: () => state.q = '' });
   state.types.forEach(t => pills.push({ label: typeLabel(t), clear: () => state.types = state.types.filter(x=>x!==t) }));
   state.brands.forEach(b => pills.push({ label: b, clear: () => state.brands = state.brands.filter(x=>x!==b) }));
   if (state.priceMin != null || state.priceMax != null){
@@ -360,13 +384,35 @@ function wireControls(){
       state.page = 1; render();
     });
   });
-  document.querySelectorAll('#filter-brands input').forEach(cb => {
+  document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb => {
     cb.addEventListener('change', () => {
       const b = cb.dataset.brand;
       state.brands = cb.checked ? [...state.brands, b] : state.brands.filter(x=>x!==b);
       state.page = 1; render();
     });
   });
+  // Populære mærker som hurtig-chips (samme state som checkboksene).
+  document.querySelectorAll('#brand-popular .chip').forEach(ch => {
+    ch.addEventListener('click', () => {
+      const b = ch.dataset.brandChip;
+      state.brands = state.brands.includes(b) ? state.brands.filter(x=>x!==b) : [...state.brands, b];
+      state.page = 1; render();
+    });
+  });
+  // Typeahead i mærkelisten — skjuler rækker der ikke matcher.
+  const brandSearch = document.getElementById('brand-search');
+  if (brandSearch){
+    brandSearch.addEventListener('input', () => {
+      const q = brandSearch.value.trim().toLowerCase();
+      let any = false;
+      document.querySelectorAll('#brand-list [data-brand-row]').forEach(row => {
+        const match = row.dataset.brandRow.includes(q);
+        row.hidden = !match; if (match) any = true;
+      });
+      const nr = document.getElementById('brand-noresult');
+      if (nr) nr.hidden = any;
+    });
+  }
   document.querySelectorAll('#filter-regions input').forEach(cb => {
     cb.addEventListener('change', () => {
       const r = cb.dataset.region;
@@ -430,10 +476,28 @@ function wireControls(){
     state.vinterklar = e.target.checked; state.page = 1; render();
   });
 
+  // Fritekst-søgning på resultatsiden (Bilbasen/Idealista-standard). state.q
+  // filtrerede allerede — men der var intet felt at skrive i.
+  const qInput = document.getElementById('filter-q');
+  if (qInput){
+    let qTimer;
+    qInput.addEventListener('input', () => {
+      clearTimeout(qTimer);
+      qTimer = setTimeout(() => { state.q = qInput.value.trim(); state.page = 1; render(); }, 250);
+    });
+    document.getElementById('filter-q-clear')?.addEventListener('click', () => {
+      qInput.value = ''; state.q = ''; state.page = 1; render(); qInput.focus();
+    });
+  }
+
+  // Talfelter debounces, så "150000" ikke udløser seks fulde re-renders + seks
+  // URL-skrivninger undervejs.
   const numField = (id, key) => {
+    let t;
     document.getElementById(id).addEventListener('input', (e) => {
-      state[key] = numOrNull(e.target.value);
-      state.page = 1; render();
+      const v = e.target.value;
+      clearTimeout(t);
+      t = setTimeout(() => { state[key] = numOrNull(v); state.page = 1; render(); }, 300);
     });
   };
   numField('filter-price-min', 'priceMin');

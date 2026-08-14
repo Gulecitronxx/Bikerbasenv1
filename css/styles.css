@@ -684,9 +684,35 @@ select.input{
 .active-filter-pill svg{ width:14px; height:14px; }
 
 .results-toolbar{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap:wrap; }
-.results-count{ font-weight:600; }
+.results-count{ font-weight:600; white-space:nowrap; }
 .results-count span{ color: var(--color-fg-muted); font-weight:400; }
-.toolbar-actions{ display:flex; align-items:center; gap:8px; }
+.toolbar-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
+#sort-select{ width:auto; min-width:168px; }
+
+/* Fritekst-søgefelt øverst i resultatkolonnen */
+.srp-search{ position:relative; margin-bottom: var(--space-4); }
+.srp-search-icon{ position:absolute; left:16px; top:50%; transform:translateY(-50%); width:20px; height:20px; color: var(--color-fg-muted); pointer-events:none; }
+.srp-search-icon svg{ width:20px; height:20px; }
+#filter-q{
+  width:100%; height:52px; padding:0 46px 0 46px; font-size:16px;
+  border:1.5px solid var(--color-border); border-radius: var(--radius-md);
+  background: var(--color-surface); color: var(--color-fg);
+  transition: border-color .15s var(--ease-out), box-shadow .15s var(--ease-out);
+}
+#filter-q::-webkit-search-cancel-button{ -webkit-appearance:none; appearance:none; }
+#filter-q:hover{ border-color: var(--color-fg-muted); }
+#filter-q:focus-visible{ border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent); outline:none; }
+.srp-search-clear{ position:absolute; right:10px; top:50%; transform:translateY(-50%); width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border:none; background:transparent; color: var(--color-fg-muted); cursor:pointer; border-radius:50%; }
+.srp-search-clear:hover{ background: var(--color-surface-2); color: var(--color-fg); }
+.srp-search-clear svg{ width:16px; height:16px; }
+
+/* Mærke-facet: populære chips + søgbar, højde-begrænset liste */
+.brand-popular{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.filter-search{ margin-bottom:8px; }
+#brand-search{ width:100%; height:38px; padding:0 12px; font-size:14px; border:1.5px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-fg); }
+#brand-search:focus-visible{ border-color: var(--color-primary); outline:none; }
+.checkbox-scroll{ max-height:248px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px; }
+.brand-noresult{ color: var(--color-fg-muted); font-size:13px; padding:4px 2px; }
 .view-toggle{ display:flex; border:1.5px solid var(--color-border); border-radius: var(--radius-pill); overflow:hidden; }
 .view-toggle button{ padding:9px 12px; background:transparent; border:none; color:var(--color-fg-muted); cursor:pointer; display:flex; }
 .view-toggle button.active{ background: var(--color-surface-2); color: var(--color-fg); }
