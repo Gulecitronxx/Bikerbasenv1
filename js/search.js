@@ -182,6 +182,7 @@ function reflectStateToUI(){
   if (qInput && qInput.value !== state.q) qInput.value = state.q;
   const qClear = document.getElementById('filter-q-clear');
   if (qClear) qClear.hidden = !state.q;
+  document.querySelectorAll('.dual-range').forEach(el => el._sync && el._sync());
   document.querySelectorAll('#filter-regions input').forEach(cb => {
     cb.checked = state.regions.includes(cb.dataset.region);
   });
@@ -342,7 +343,41 @@ function render(){
   const pageItems = filtered.slice((state.page-1)*PAGE_SIZE, state.page*PAGE_SIZE);
 
   document.getElementById('results-count').innerHTML = `${total} <span>${total===1?'annonce fundet':'annoncer fundet'}</span>`;
-  seoSearchResults(pageItems, document.querySelector('.search-heading').textContent);
+
+  // Dynamisk H1 fra aktive mærker/regioner — scannability + SEO (konkurrenter
+  // scorer på "Brugte Yamaha til salg i København").
+  let heading = state.brands.length
+    ? `Brugte ${state.brands.slice(0,3).join(', ')} til salg`
+    : 'Brugte motorcykler til salg';
+  if (state.regions.length === 1) heading += ` i ${state.regions[0]}`;
+  const headingEl = document.querySelector('.search-heading');
+  if (headingEl.textContent !== heading) headingEl.textContent = heading;
+  seoSearchResults(pageItems, heading);
+
+  // Få-resultater-panel: gør et tyndt resultat til en konvertering i stedet for
+  // et dødt hjørne (kun når brugeren faktisk har filtreret).
+  const thin = document.getElementById('thin-result-panel');
+  if (thin){
+    const hasFilters = pills.length > 0 || !!state.q;
+    if (total > 0 && total < 4 && hasFilters){
+      thin.hidden = false;
+      thin.innerHTML = `
+        <div class="thin-panel-inner">
+          <div class="thin-panel-copy">
+            <p class="thin-panel-title">${total === 1 ? 'Kun 1 match' : 'Kun ' + total + ' resultater'} — udvid din søgning</p>
+            <p class="thin-panel-text">Bikerbasen er nyt, og lageret vokser hver uge. Fjern et filter, eller få besked når der lander flere.</p>
+          </div>
+          <div class="thin-panel-actions">
+            <button type="button" class="btn btn-outline btn-sm" data-thin-reset>Nulstil filtre</button>
+            <button type="button" class="btn btn-primary btn-sm" data-thin-agent>Få besked når der kommer flere</button>
+          </div>
+        </div>`;
+      thin.querySelector('[data-thin-reset]').addEventListener('click', () => document.getElementById('clear-filters').click());
+      thin.querySelector('[data-thin-agent]').addEventListener('click', () => document.getElementById('save-search-btn').click());
+    } else {
+      thin.hidden = true; thin.innerHTML = '';
+    }
+  }
 
   const grid = document.getElementById('results-grid');
   const empty = document.getElementById('empty-state');
@@ -368,6 +403,49 @@ function render(){
       btn.addEventListener('click', () => { state.page = Number(btn.dataset.page); render(); window.scrollTo({top:0, behavior:'smooth'}); });
     });
   }
+}
+
+/* Dobbelt-tommel skyder bygget på to native range-inputs (tilgængelige,
+   tastaturvenlige). Synkroniseres begge veje med talfelterne + state. */
+function wireDualRange(rangeId, minFieldId, maxFieldId, minKey, maxKey){
+  const el = document.getElementById(rangeId);
+  if (!el) return;
+  const floor = Number(el.dataset.floor), ceil = Number(el.dataset.ceil), step = Number(el.dataset.step);
+  const drMin = el.querySelector('.dr-min'), drMax = el.querySelector('.dr-max');
+  const fill = el.querySelector('[data-fill]');
+  const minField = document.getElementById(minFieldId), maxField = document.getElementById(maxFieldId);
+  const pct = v => (v - floor) / (ceil - floor) * 100;
+  const paint = () => {
+    const lo = Number(drMin.value), hi = Number(drMax.value);
+    fill.style.left = pct(lo) + '%';
+    fill.style.right = (100 - pct(hi)) + '%';
+    // Når begge tomler står i bunden, skal min-tomlen kunne gribes ovenpå.
+    drMin.style.zIndex = lo >= ceil - step ? 5 : 4;
+  };
+  // Kaldes fra reflectStateToUI, så URL/talfelt-ændringer flytter tomlerne.
+  el._sync = () => {
+    let lo = state[minKey] == null ? floor : Math.max(floor, Math.min(ceil, state[minKey]));
+    let hi = state[maxKey] == null ? ceil : Math.max(floor, Math.min(ceil, state[maxKey]));
+    if (lo > hi) lo = hi;
+    drMin.value = lo; drMax.value = hi; paint();
+  };
+  let t;
+  const onInput = (which) => {
+    let lo = Number(drMin.value), hi = Number(drMax.value);
+    if (lo > hi){ if (which === 'min') { lo = hi; drMin.value = lo; } else { hi = lo; drMax.value = hi; } }
+    paint();
+    minField.value = lo <= floor ? '' : lo;      // yderpunkt = ingen grænse
+    maxField.value = hi >= ceil ? '' : hi;
+    clearTimeout(t);
+    t = setTimeout(() => {
+      state[minKey] = lo <= floor ? null : lo;
+      state[maxKey] = hi >= ceil ? null : hi;
+      state.page = 1; render();
+    }, 200);
+  };
+  drMin.addEventListener('input', () => onInput('min'));
+  drMax.addEventListener('input', () => onInput('max'));
+  el._sync();
 }
 
 function wireControls(){
@@ -510,6 +588,12 @@ function wireControls(){
   numField('filter-hk-min', 'hkMin');
   numField('filter-hk-max', 'hkMax');
   numField('filter-ejere-max', 'ejereMax');
+
+  // Dual-range skydere for pris og årgang — top-tier SRP-affordance. De rigtige
+  // talfelter beholdes nedenunder til præcis indtastning. Yderpunkt = "ingen
+  // grænse" (null), så en tommel trukket helt ud rydder filteret.
+  wireDualRange('range-price', 'filter-price-min', 'filter-price-max', 'priceMin', 'priceMax');
+  wireDualRange('range-year', 'filter-year-min', 'filter-year-max', 'yearMin', 'yearMax');
 
   document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 

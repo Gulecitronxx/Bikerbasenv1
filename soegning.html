@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Søg motorcykler — Bikerbasen">
 <meta name="twitter:description" content="Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/styles.css?v=50a79ee3">
+<link rel="stylesheet" href="css/styles.css?v=1d902140">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -123,10 +123,16 @@
             <details class="filter-group">
               <summary>Pris (DKK)<span class="chev"></span></summary>
               <div class="filter-body">
+                <div class="dual-range" id="range-price" data-floor="0" data-ceil="300000" data-step="1000">
+                  <span class="dual-range-rail"></span>
+                  <span class="dual-range-fill" data-fill></span>
+                  <input type="range" class="dr-thumb dr-min" min="0" max="300000" step="1000" value="0" aria-label="Laveste pris">
+                  <input type="range" class="dr-thumb dr-max" min="0" max="300000" step="1000" value="300000" aria-label="Højeste pris">
+                </div>
                 <div class="range-row">
-                  <input type="number" class="input" id="filter-price-min" placeholder="Min.">
+                  <input type="number" class="input" id="filter-price-min" placeholder="Min." inputmode="numeric">
                   <span>–</span>
-                  <input type="number" class="input" id="filter-price-max" placeholder="Maks.">
+                  <input type="number" class="input" id="filter-price-max" placeholder="Maks." inputmode="numeric">
                 </div>
               </div>
             </details>
@@ -134,10 +140,16 @@
             <details class="filter-group">
               <summary>Årgang<span class="chev"></span></summary>
               <div class="filter-body">
+                <div class="dual-range" id="range-year" data-floor="1980" data-ceil="2026" data-step="1">
+                  <span class="dual-range-rail"></span>
+                  <span class="dual-range-fill" data-fill></span>
+                  <input type="range" class="dr-thumb dr-min" min="1980" max="2026" step="1" value="1980" aria-label="Ældste årgang">
+                  <input type="range" class="dr-thumb dr-max" min="1980" max="2026" step="1" value="2026" aria-label="Nyeste årgang">
+                </div>
                 <div class="range-row">
-                  <input type="number" class="input" id="filter-year-min" placeholder="Fra">
+                  <input type="number" class="input" id="filter-year-min" placeholder="Fra" inputmode="numeric">
                   <span>–</span>
-                  <input type="number" class="input" id="filter-year-max" placeholder="Til">
+                  <input type="number" class="input" id="filter-year-max" placeholder="Til" inputmode="numeric">
                 </div>
               </div>
             </details>
@@ -270,6 +282,7 @@
         </div>
 
         <div id="results-grid" class="listings-grid"></div>
+        <div id="thin-result-panel" class="thin-panel" hidden></div>
         <div id="empty-state" class="empty-state" style="display:none;">
           <div id="empty-icon"></div>
           <h3>Ingen annoncer matcher lige nu</h3>
@@ -328,18 +341,18 @@
   </div>
 </footer>
 
-<script defer src="js/security.js?v=50a79ee3"></script>
+<script defer src="js/security.js?v=1d902140"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=50a79ee3"></script>
-<script defer src="js/supabase-api.js?v=50a79ee3"></script>
-<script defer src="js/icons.js?v=50a79ee3"></script>
-<script defer src="js/bike-art.js?v=50a79ee3"></script>
-<script defer src="js/postnumre.js?v=50a79ee3"></script>
-<script defer src="js/data.js?v=50a79ee3"></script>
-<script defer src="js/store.js?v=50a79ee3"></script>
-<script defer src="js/backend-bridge.js?v=50a79ee3"></script>
-<script defer src="js/components.js?v=50a79ee3"></script>
-<script defer src="js/seo.js?v=50a79ee3"></script>
-<script defer src="js/search.js?v=50a79ee3"></script>
+<script defer src="js/supabase-config.js?v=1d902140"></script>
+<script defer src="js/supabase-api.js?v=1d902140"></script>
+<script defer src="js/icons.js?v=1d902140"></script>
+<script defer src="js/bike-art.js?v=1d902140"></script>
+<script defer src="js/postnumre.js?v=1d902140"></script>
+<script defer src="js/data.js?v=1d902140"></script>
+<script defer src="js/store.js?v=1d902140"></script>
+<script defer src="js/backend-bridge.js?v=1d902140"></script>
+<script defer src="js/components.js?v=1d902140"></script>
+<script defer src="js/seo.js?v=1d902140"></script>
+<script defer src="js/search.js?v=1d902140"></script>
 </body>
 </html>

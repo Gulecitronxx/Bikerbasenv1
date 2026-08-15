@@ -713,6 +713,32 @@ select.input{
 #brand-search:focus-visible{ border-color: var(--color-primary); outline:none; }
 .checkbox-scroll{ max-height:248px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px; }
 .brand-noresult{ color: var(--color-fg-muted); font-size:13px; padding:4px 2px; }
+
+/* Dual-range skyder (pris/årgang) — to native range-inputs lagt oven på hinanden */
+.dual-range{ position:relative; height:34px; margin:4px 6px 6px; }
+.dual-range-rail{ position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); height:4px; border-radius:999px; background: var(--color-border); }
+.dual-range-fill{ position:absolute; top:50%; transform:translateY(-50%); height:4px; border-radius:999px; background: var(--color-primary); }
+.dr-thumb{ -webkit-appearance:none; appearance:none; position:absolute; left:0; top:0; width:100%; height:34px; margin:0; background:transparent; pointer-events:none; }
+.dr-thumb:focus-visible{ outline:none; }
+.dr-thumb::-webkit-slider-runnable-track{ background:transparent; border:none; height:34px; }
+.dr-thumb::-moz-range-track{ background:transparent; border:none; height:34px; }
+.dr-thumb::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; pointer-events:auto; width:20px; height:20px; border-radius:50%; background: var(--color-surface); border:2px solid var(--color-primary); box-shadow: var(--shadow-sm); cursor:grab; }
+.dr-thumb::-moz-range-thumb{ pointer-events:auto; width:20px; height:20px; border-radius:50%; background: var(--color-surface); border:2px solid var(--color-primary); box-shadow: var(--shadow-sm); cursor:grab; }
+.dr-thumb:active::-webkit-slider-thumb{ cursor:grabbing; }
+.dr-thumb:focus-visible::-webkit-slider-thumb{ box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent); }
+.dr-thumb:focus-visible::-moz-range-thumb{ box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent); }
+
+/* Få-resultater-konverteringspanel */
+.thin-panel{ margin-top: var(--space-4); }
+.thin-panel-inner{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: var(--space-4);
+  padding: var(--space-5); border-radius: var(--radius-md);
+  border:1px solid color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  background: radial-gradient(130% 160% at 100% 0%, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 60%), var(--color-surface);
+}
+.thin-panel-title{ font-family: var(--font-display); font-weight:700; font-size:17px; letter-spacing:-0.01em; margin-bottom:4px; }
+.thin-panel-text{ color: var(--color-fg-muted); font-size:14px; max-width:52ch; }
+.thin-panel-actions{ display:flex; flex-wrap:wrap; gap:8px; }
 .view-toggle{ display:flex; border:1.5px solid var(--color-border); border-radius: var(--radius-pill); overflow:hidden; }
 .view-toggle button{ padding:9px 12px; background:transparent; border:none; color:var(--color-fg-muted); cursor:pointer; display:flex; }
 .view-toggle button.active{ background: var(--color-surface-2); color: var(--color-fg); }
