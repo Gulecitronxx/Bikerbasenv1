@@ -123,9 +123,34 @@ for (const file of files){
 
   const critical = criticalFor(file);
   const block = `<style id="critical">${critical}</style>`;
-  html = /<style id="critical">[\s\S]*?<\/style>/.test(html)
-    ? html.replace(/<style id="critical">[\s\S]*?<\/style>/, block)
-    : html.replace('</head>', block + '\n</head>');
+  {
+    // Fjern altid en tidligere blok først, så placeringen kan rettes på
+    // sider der blev bygget dengang den lå sidst i head.
+    html = html.replace(/<style id="critical">[\s\S]*?<\/style>\n?/, '');
+
+    /* FØR stylesheet-linket, ikke sidst i head.
+
+       Lå den kritiske blok efter linket, vandt den over det fulde ark for
+       enhver regel der stod begge steder — kaskaden blev vendt om. Det tog
+       et konkret offer: `.field{display:flex}` (i den kritiske blok siden
+       runde 12) slog `.kyc-fields{display:none}` fra arket ihjel, så
+       virksomhedsnavn og CVR stod fremme med røde stjerner for alle, der
+       oprettede en privat profil.
+
+       Med blokken før linket er rollerne rigtige: det indlejrede maler
+       hurtigt, og det fulde ark har sidste ord — præcis som hvis den
+       kritiske CSS ikke fandtes. */
+    // Første <link> der peger på arket — preload-varianten står før
+    // <noscript>-fallbacken, så "første match" er den rigtige. Match ikke på
+    // rel-værdien: gør man det, rammer man let linket INDE i <noscript> og
+    // splitter fallbacken.
+    html = html.replace(
+      /(<link\b[^>]*href="css\/styles\.css)/,
+      `${block}\n$1`
+    );
+    // Sikkerhedsnet: matchede formen ikke, så hellere sidst i head end slet ikke.
+    if (!html.includes('<style id="critical">')) html = html.replace('</head>', block + '\n</head>');
+  }
 
   fs.writeFileSync(htmlPath, html);
   console.log(`  ${file.padEnd(46)} ${(critical.length / 1024).toFixed(1)}KB kritisk`);

@@ -83,7 +83,18 @@ function daError(message){
   if (m.includes('user already registered')) return 'Der findes allerede en profil med den e-mail. Prøv at logge ind i stedet.';
   if (m.includes('password should be at least')) return 'Adgangskoden skal være mindst 6 tegn.';
   if (m.includes('unable to validate email')) return 'E-mailadressen ser ikke gyldig ud.';
-  if (m.includes('rate limit') || m.includes('too many')) return 'For mange forsøg. Vent et øjeblik og prøv igen.';
+  /* Mailgrænsen og forsøgsgrænsen er ikke det samme, og forskellen betyder
+     noget for brugeren. Supabases indbyggede mailtjeneste sender som
+     standard kun 2 bekræftelsesmails i timen; bliver man bedt om at "vente
+     et øjeblik", prøver man igen efter et halvt minut, fejler igen og tror
+     sitet er i stykker. Sig hvor længe det drejer sig om — og at profilen
+     sandsynligvis allerede ER oprettet, så man skal logge ind, ikke oprette
+     en ny. */
+  if (m.includes('email rate limit') || m.includes('over_email_send_rate_limit'))
+    return 'Vi kan ikke sende flere bekræftelsesmails lige nu (der er en grænse pr. time). '
+         + 'Er din profil allerede oprettet, så prøv at logge ind i stedet — ellers vent op til en time.';
+  if (m.includes('for security purposes') || m.includes('rate limit') || m.includes('too many'))
+    return 'For mange forsøg på kort tid. Vent et par minutter, og prøv igen.';
   return message || 'Noget gik galt. Prøv igen.';
 }
 
@@ -235,7 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('verify-cvr-btn').addEventListener('click', () => {
     markVerifyDone('verify-cvr-row', 'verify-cvr-btn');
     if (pendingUser) pendingUser.cvrVerified = true;
-    toast('CVR-nummer bekræftet');
+    toast('CVR-nummer bekræftet (simuleret)');
   });
 
   document.getElementById('finish-registration').addEventListener('click', async () => {
