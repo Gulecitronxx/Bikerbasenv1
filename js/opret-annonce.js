@@ -410,9 +410,13 @@ function sellerFromUser(user){
 function renderPreview(){
   formData = collectFormData();
   const user = Store.getUser() || { name: 'Dig', isDealer: false };
-  const previewListing = { id: 'preview', ...formData, isDealer: !!user.isDealer, createdAt: new Date('2026-07-26T09:00:00').toISOString(), photos: 4, seller: sellerFromUser(user) };
+  // Vis det RIGTIGE forsidebillede og antal — ikke en pladsholder. Rækkefølgen
+  // matcher billed-gitteret (eksisterende først, så nye), så forsiden stemmer.
+  const photoUrls = [...existingPhotos.map(p => p.url), ...uploadedPhotos.map(p => p.url)];
+  const previewListing = { id: 'preview', ...formData, isDealer: !!user.isDealer, createdAt: new Date().toISOString(), photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(user) };
   document.getElementById('preview-note').innerHTML = `${Icon.info}<span>Sådan vil din annonce se ud i søgeresultater. Tjek at alt er korrekt, før du udgiver.</span>`;
   document.getElementById('preview-card-mount').innerHTML = listingCardHTML(previewListing).replace('card-link" aria-label', 'card-link" tabindex="-1" style="pointer-events:none;" aria-label');
+  const eqLabels = (formData.equipment || []).map(e => equipmentLabel(e));
   document.getElementById('preview-details').innerHTML = `
     <div class="spec-grid" style="margin-top:24px;">
       <div class="spec-item"><span class="spec-icon">${Icon.calendar} Årgang</span><b>${formData.year}</b></div>
@@ -428,7 +432,9 @@ function renderPreview(){
       ${formData.daekAar ? `<div class="spec-item"><span class="spec-icon">${Icon.gauge} Dæk skiftet</span><b>${Number(formData.daekAar)}</b></div>` : ''}
       ${formData.vinterklar ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Vinterklargjort</span><b>Ja</b></div>` : ''}
       ${formData.kanNedsaettesA2 ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Kan nedsættes til A2</span><b>Ja</b></div>` : ''}
-    </div>`;
+    </div>
+    ${formData.description ? `<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="white-space:pre-wrap;">${escapeHTML(formData.description)}</p></div>` : '<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="color:var(--color-fg-muted);">Du har ikke skrevet en beskrivelse endnu — en god beskrivelse giver flere henvendelser.</p></div>'}
+    ${eqLabels.length ? `<div class="detail-section" style="margin-top:24px;"><h2>Udstyr (${eqLabels.length})</h2><ul class="equipment-list">${eqLabels.map(l => `<li>${Icon.checkCircle}${escapeHTML(l)}</li>`).join('')}</ul></div>` : ''}`;
 }
 
 function showUploadProgress(done, total){
