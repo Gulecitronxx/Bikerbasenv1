@@ -136,6 +136,8 @@ function populateFilterUI(){
   document.querySelector('.filters-close').innerHTML = Icon.close;
   document.getElementById('view-grid').innerHTML = Icon.grid;
   document.getElementById('view-list').innerHTML = Icon.list;
+  const vs = document.getElementById('view-swipe');
+  if (vs) vs.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2" transform="rotate(-6 12 12)"/><path d="M9 20h6"/></svg>`;
 }
 
 function describeCurrentSearch(pills){
@@ -158,11 +160,117 @@ function refreshSaveSearchButton(){
 function applyViewMode(){
   const mode = Store.getViewMode();
   const grid = document.getElementById('results-grid');
+  const deck = document.getElementById('swipe-deck');
+  const swipe = mode === 'swipe';
   grid.classList.toggle('list-view', mode === 'list');
-  document.getElementById('view-grid').classList.toggle('active', mode === 'grid');
-  document.getElementById('view-list').classList.toggle('active', mode === 'list');
-  document.getElementById('view-grid').setAttribute('aria-pressed', mode === 'grid');
-  document.getElementById('view-list').setAttribute('aria-pressed', mode === 'list');
+  grid.hidden = swipe;
+  const pag = document.getElementById('pagination'); if (pag) pag.style.display = swipe ? 'none' : '';
+  if (swipe){
+    document.getElementById('empty-state').style.display = 'none';
+    const thin = document.getElementById('thin-result-panel'); if (thin) thin.hidden = true;
+  }
+  if (deck){ deck.hidden = !swipe; if (swipe) mountSwipeDeck(); }
+  [['view-grid','grid'],['view-list','list'],['view-swipe','swipe']].forEach(([id, m]) => {
+    const b = document.getElementById(id);
+    if (b){ b.classList.toggle('active', mode === m); b.setAttribute('aria-pressed', mode === m); }
+  });
+}
+
+/* ============ Swipe-visning (mobil-first, à la 123mc-appen) ============ */
+let swipeItems = [];
+let swipeIndex = 0;
+
+function swipeCardHTML(l, stackPos){
+  const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
+  const loc = escapeHTML(l.city || l.region || '');
+  const k = koerekortForListing(l);
+  return `
+  <article class="swipe-card" data-stack="${stackPos}" style="--stack:${stackPos}">
+    <div class="swipe-card-media">
+      ${listingMediaHTML(l, `${brand} ${model}`)}
+      <span class="swipe-stamp swipe-stamp-fav">Gem</span>
+      <span class="swipe-stamp swipe-stamp-skip">Spring over</span>
+      ${l.isDealer ? `<span class="badge badge-dealer swipe-card-flag">${Icon.shieldCheck}Forhandler</span>` : ''}
+      ${k ? `<span class="card-koerekort swipe-card-kk">${k}</span>` : ''}
+    </div>
+    <div class="swipe-card-body">
+      <div class="swipe-card-price">${formatPrice(l.price)}</div>
+      <h3 class="swipe-card-title">${brand} ${model}</h3>
+      <div class="swipe-card-meta"><span>${Icon.calendar}${l.year}</span><span>${Icon.gauge}${formatKm(l.km)}</span><span>${Icon.engine}${formatCcm(l.ccm)}</span></div>
+      <div class="swipe-card-loc">${Icon.mapPin}${loc}</div>
+    </div>
+  </article>`;
+}
+
+function mountSwipeDeck(){ swipeItems = getFilteredListings(); swipeIndex = 0; renderSwipeDeck(); }
+
+function renderSwipeDeck(){
+  const deck = document.getElementById('swipe-deck');
+  if (!deck) return;
+  if (!swipeItems.length){
+    deck.innerHTML = `<div class="swipe-empty">${Icon.search}<h3>Ingen annoncer at swipe</h3><p>Justér dine filtre og prøv igen.</p></div>`;
+    return;
+  }
+  if (swipeIndex >= swipeItems.length){
+    deck.innerHTML = `<div class="swipe-empty">${Icon.checkCircle}<h3>Du har set alle ${swipeItems.length}</h3><p>Dine gemte annoncer ligger under Favoritter.</p><button type="button" class="btn btn-outline btn-sm" id="swipe-restart">Start forfra</button></div>`;
+    document.getElementById('swipe-restart').addEventListener('click', () => { swipeIndex = 0; renderSwipeDeck(); });
+    return;
+  }
+  const stack = swipeItems.slice(swipeIndex, swipeIndex + 3);
+  deck.innerHTML = `
+    <div class="swipe-progress" aria-live="polite">${swipeIndex + 1} / ${swipeItems.length}</div>
+    <div class="swipe-stack">${stack.map((l, i) => swipeCardHTML(l, i)).join('')}</div>
+    <div class="swipe-actions">
+      <button type="button" class="swipe-act swipe-act-skip" aria-label="Spring over">${Icon.close}</button>
+      <a class="swipe-act swipe-act-open" href="annonce.html?id=${swipeItems[swipeIndex].id}" aria-label="Åbn annonce">${Icon.arrowRight}</a>
+      <button type="button" class="swipe-act swipe-act-fav" aria-label="Gem annonce">${Icon.heart}</button>
+    </div>
+    <p class="swipe-hint-text">Træk til højre for at gemme · til venstre for at springe over</p>`;
+  wireSwipeGestures();
+}
+
+function advanceSwipe(fav){
+  const cur = swipeItems[swipeIndex];
+  if (fav && cur && !Store.isFavorite(cur.id)){ Store.toggleFavorite(cur.id); if (typeof updateFavCount === 'function') updateFavCount(); toast('Gemt i favoritter'); }
+  swipeIndex++;
+  renderSwipeDeck();
+}
+
+function flingCard(card, dir){
+  if (!card) return;
+  card.style.transition = 'transform .32s var(--ease-out), opacity .30s';
+  card.style.transform = `translate(${dir === 'right' ? 140 : -140}%, 40px) rotate(${dir === 'right' ? 18 : -18}deg)`;
+  card.style.opacity = '0';
+  setTimeout(() => advanceSwipe(dir === 'right'), 190);
+}
+
+function wireSwipeGestures(){
+  const deck = document.getElementById('swipe-deck');
+  const top = deck.querySelector('.swipe-card[data-stack="0"]');
+  deck.querySelector('.swipe-act-skip')?.addEventListener('click', () => flingCard(top, 'left'));
+  deck.querySelector('.swipe-act-fav')?.addEventListener('click', () => flingCard(top, 'right'));
+  if (!top) return;
+  let startX = 0, startY = 0, dx = 0, dy = 0, dragging = false;
+  top.addEventListener('pointerdown', (e) => {
+    dragging = true; startX = e.clientX; startY = e.clientY; dx = dy = 0;
+    top.style.transition = 'none'; top.setPointerCapture?.(e.pointerId);
+  });
+  top.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    dx = e.clientX - startX; dy = e.clientY - startY;
+    top.style.transform = `translate(${dx}px, ${dy * 0.35}px) rotate(${dx / 18}deg)`;
+    top.classList.toggle('show-fav', dx > 45);
+    top.classList.toggle('show-skip', dx < -45);
+  });
+  const end = () => {
+    if (!dragging) return; dragging = false;
+    if (dx > 110) return flingCard(top, 'right');
+    if (dx < -110) return flingCard(top, 'left');
+    top.style.transition = 'transform .25s var(--ease-out)';
+    top.style.transform = ''; top.classList.remove('show-fav', 'show-skip');
+  };
+  top.addEventListener('pointerup', end);
+  top.addEventListener('pointercancel', end);
 }
 
 function reflectStateToUI(){
@@ -638,6 +746,7 @@ function wireControls(){
 
   document.getElementById('view-grid').addEventListener('click', () => { Store.setViewMode('grid'); applyViewMode(); });
   document.getElementById('view-list').addEventListener('click', () => { Store.setViewMode('list'); applyViewMode(); });
+  document.getElementById('view-swipe')?.addEventListener('click', () => { Store.setViewMode('swipe'); applyViewMode(); });
 
   // Søgeagent-genvej i tom-tilstanden peger på samme handling som topknappen.
   document.getElementById('empty-agent-btn')?.addEventListener('click', () => {
