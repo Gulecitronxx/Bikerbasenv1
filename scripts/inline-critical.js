@@ -113,12 +113,11 @@ const IKKE_UDSKUDT = [];
       gevinst: 82 mod 83 i udgangspunktet. Den koster en ny stacking context
       og et nyt containing block pr. sektion — risiko uden modydelse.
 
-   Den rigtige vej viste sig at være at bygge mindre op front i js/home.js
-   (annoncegitrene tegnes først, når de nærmer sig viewporten) frem for at
-   bede browseren om at springe over noget, den har fået at vide skal males. */
-const EKSTRA = [
-  [/^index\.html$/, 'main > .section{content-visibility:auto;contain-intrinsic-size:auto 640px}'],
-];
+   Den rigtige vej viste sig at ligge i js/home.js: kortene sættes ind i
+   portioner med et yield imellem, så det samme arbejde bliver til mange korte
+   opgaver i stedet for én lang. Det giver hele gevinsten uden at bede
+   browseren om at springe noget over, den har fået at vide skal males. */
+const EKSTRA = [];
 
 /* Skærer luften ud af den kritiske blok. Bevidst konservativ: mellemrum
    omkring +, -, * og / røres ALDRIG, fordi calc() kræver dem
