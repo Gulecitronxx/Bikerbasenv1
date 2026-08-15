@@ -506,8 +506,8 @@ display:flex; flex-direction:column; overflow:hidden;
 .compare-table tbody th{ color: var(--color-fg-muted); font-weight:600; white-space:nowrap; }
 .compare-table tbody td{ font-weight:600; }
 @media (max-width:560px){ .compare-bar{ left:12px; right:12px; transform:none; justify-content:space-between; padding-left:16px; } }</style>
-<link rel="preload" as="style" href="css/styles.css?v=493efc75" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="css/styles.css?v=493efc75"></noscript>
+<link rel="preload" as="style" href="css/styles.css?v=5035f515" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="css/styles.css?v=5035f515"></noscript>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -631,38 +631,22 @@ display:flex; flex-direction:column; overflow:hidden;
       </form>
 
       <div id="verify-step" style="display:none;">
-        <h2 style="font-size:18px; margin-bottom:4px;">Bekræft din konto</h2>
-        <p style="color:var(--color-fg-muted); font-size:13px; margin-bottom:16px;">Verificerede profiler får et "Verificeret"-badge, som andre brugere kan se — det skaber tillid. Du kan altid bekræfte senere.</p>
-
-        <div class="verify-row" id="verify-phone-row">
-          <div class="verify-row-info"><span id="verify-phone-icon"></span><span>Telefonnummer</span></div>
-          <button type="button" class="btn btn-outline btn-sm" id="verify-phone-btn">Send kode</button>
-        </div>
-        <div id="phone-code-area" style="display:none; margin-bottom:14px;">
-          <!-- role=group + aria-label giver skærmlæsere at vide, hvad de fire
-               felter tilsammen er. Uden det læses de op som fire navnløse
-               tekstfelter i træk. -->
-          <div class="code-input-row" role="group" aria-label="Firecifret bekræftelseskode fra sms">
-            <input class="input" maxlength="1" inputmode="numeric" aria-label="Ciffer 1 af 4" autocomplete="one-time-code">
-            <input class="input" maxlength="1" inputmode="numeric" aria-label="Ciffer 2 af 4">
-            <input class="input" maxlength="1" inputmode="numeric" aria-label="Ciffer 3 af 4">
-            <input class="input" maxlength="1" inputmode="numeric" aria-label="Ciffer 4 af 4">
-            <button type="button" class="btn btn-primary btn-sm" id="confirm-phone-code" style="margin-left:8px;">Bekræft</button>
-          </div>
-          <span class="field-hint">Demo: indtast 4 cifre — koden kontrolleres ikke i denne prototype.</span>
+        <h2 style="font-size:18px; margin-bottom:4px;">Din profil er oprettet</h2>
+        <!-- Her stod tre "bekraeft"-knapper for SMS, MitID og CVR. Ingen af
+             dem gjorde noget: der blev ikke sendt en sms, MitID blev ikke
+             kaldt, og CVR blev ikke slaaet op. De er fjernet frem for at lade
+             en bruger tro, at de har bekraeftet noget. Naar en rigtig
+             udbyder er koblet paa (se supabase/VERIFICERING.md), kommer de
+             igen — og saa er det Edge Function'en, der afgoer resultatet. -->
+        <p style="color:var(--color-fg-muted); font-size:13px; margin-bottom:16px;" id="verify-intro">
+          Vi har sendt dig en bekræftelsesmail. Klik på linket i mailen, og log derefter ind.
+        </p>
+        <div class="safety-tip" style="margin-bottom:4px;">
+          <span id="verify-info-icon"></span>
+          <span>Identitetskontrol med MitID og SMS er ikke sat op endnu. Ingen profiler på Bikerbasen er identitetsverificerede — vurder altid sælgeren selv, og følg vores <a href="sikkerhed.html">gode råd</a>.</span>
         </div>
 
-        <div class="verify-row" id="verify-mitid-row">
-          <div class="verify-row-info"><span id="verify-mitid-icon"></span><span>Identitet (MitID)</span></div>
-          <button type="button" class="btn btn-outline btn-sm" id="verify-mitid-btn">Bekræft med MitID</button>
-        </div>
-
-        <div class="verify-row" id="verify-cvr-row" style="display:none;">
-          <div class="verify-row-info"><span id="verify-cvr-icon"></span><span>Virksomhed (CVR)</span></div>
-          <button type="button" class="btn btn-outline btn-sm" id="verify-cvr-btn">Bekræft CVR</button>
-        </div>
-
-        <button type="button" class="btn btn-primary btn-block" id="finish-registration" style="margin-top:20px;">Fuldfør oprettelse</button>
+        <button type="button" class="btn btn-primary btn-block" id="finish-registration" style="margin-top:20px;">Fortsæt</button>
       </div>
 
       <div id="auth-primary-extras">
@@ -720,18 +704,18 @@ display:flex; flex-direction:column; overflow:hidden;
   </div>
 </footer>
 
-<script defer src="js/security.js?v=493efc75"></script>
+<script defer src="js/security.js?v=5035f515"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=493efc75"></script>
-<script defer src="js/supabase-api.js?v=493efc75"></script>
-<script defer src="js/icons.js?v=493efc75"></script>
-<script defer src="js/bike-art.js?v=493efc75"></script>
-<script defer src="js/postnumre.js?v=493efc75"></script>
-<script defer src="js/data.js?v=493efc75"></script>
-<script defer src="js/store.js?v=493efc75"></script>
-<script defer src="js/backend-bridge.js?v=493efc75"></script>
-<script defer src="js/components.js?v=493efc75"></script>
-<script defer src="js/login.js?v=493efc75"></script>
+<script defer src="js/supabase-config.js?v=5035f515"></script>
+<script defer src="js/supabase-api.js?v=5035f515"></script>
+<script defer src="js/icons.js?v=5035f515"></script>
+<script defer src="js/bike-art.js?v=5035f515"></script>
+<script defer src="js/postnumre.js?v=5035f515"></script>
+<script defer src="js/data.js?v=5035f515"></script>
+<script defer src="js/store.js?v=5035f515"></script>
+<script defer src="js/backend-bridge.js?v=5035f515"></script>
+<script defer src="js/components.js?v=5035f515"></script>
+<script defer src="js/login.js?v=5035f515"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

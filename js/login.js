@@ -55,13 +55,6 @@ function anvendAuthKontekst(){
 
 let pendingUser = null;
 
-function markVerifyDone(rowId, btnId){
-  const row = document.getElementById(rowId);
-  row.classList.add('done');
-  const btn = document.getElementById(btnId);
-  if (btn) btn.outerHTML = `<span class="verify-status-done">${Icon.checkCircle}Bekræftet</span>`;
-}
-
 function authError(msg){
   let el = document.getElementById('auth-error');
   if (!el){
@@ -106,9 +99,7 @@ function setLoading(btn, loading, label){
 document.addEventListener('DOMContentLoaded', async () => {
   renderHeader(null);
   document.getElementById('google-icon').innerHTML = Icon.google;
-  document.getElementById('verify-phone-icon').innerHTML = Icon.phone;
-  document.getElementById('verify-mitid-icon').innerHTML = Icon.fingerprint;
-  document.getElementById('verify-cvr-icon').innerHTML = Icon.shieldCheck;
+  document.getElementById('verify-info-icon').innerHTML = Icon.info;
 
   // Brandpanelets ikoner og illustration. Findes kun på login-siden, så
   // valgfrit hvis markup'en skulle mangle.
@@ -211,44 +202,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     showVerifyStep(isDealer, needsConfirm);
   });
 
+  /* isDealer bruges ikke laengere: CVR-raekken er fjernet sammen med de to
+     andre attrap-verificeringer. Parameteren bliver staaende, saa kaldene
+     ikke skal roeres, naar rigtig verificering kommer tilbage. */
   function showVerifyStep(isDealer, needsConfirm){
     document.getElementById('register-form').style.display = 'none';
     document.getElementById('auth-primary-extras').style.display = 'none';
-    document.getElementById('verify-cvr-row').style.display = isDealer ? '' : 'none';
     document.getElementById('verify-step').style.display = '';
+    const intro = document.getElementById('verify-intro');
+    const finish = document.getElementById('finish-registration');
     if (needsConfirm){
-      authError('Profil oprettet. Vi har sendt et bekræftelseslink til din e-mail — klik på det, før du logger ind.');
-      const finish = document.getElementById('finish-registration');
+      intro.textContent = 'Vi har sendt dig en bekræftelsesmail. Klik på linket i mailen, og log derefter ind. '
+        + 'Kommer den ikke inden for et kvarter, så tjek dit spamfilter.';
       finish.textContent = 'Gå til log ind';
+    } else {
+      intro.textContent = 'Du er logget ind og klar til at bruge Bikerbasen.';
+      finish.textContent = 'Fortsæt';
     }
   }
 
   /* ---------- Verificeringstrin ---------- */
-  document.getElementById('verify-phone-btn').addEventListener('click', () => {
-    document.getElementById('phone-code-area').style.display = '';
-    toast('Kode sendt via SMS (simuleret)');
-  });
-  document.getElementById('confirm-phone-code').addEventListener('click', () => {
-    document.getElementById('phone-code-area').style.display = 'none';
-    markVerifyDone('verify-phone-row', 'verify-phone-btn');
-    if (pendingUser) pendingUser.phoneVerified = true;
-    toast('Telefonnummer bekræftet');
-  });
-  document.getElementById('verify-mitid-btn').addEventListener('click', (e) => {
-    e.target.disabled = true;
-    e.target.textContent = 'Bekræfter…';
-    setTimeout(() => {
-      markVerifyDone('verify-mitid-row', 'verify-mitid-btn');
-      if (pendingUser) pendingUser.mitIdVerified = true;
-      toast('Identitet bekræftet med MitID (simuleret)');
-    }, 900);
-  });
-  document.getElementById('verify-cvr-btn').addEventListener('click', () => {
-    markVerifyDone('verify-cvr-row', 'verify-cvr-btn');
-    if (pendingUser) pendingUser.cvrVerified = true;
-    toast('CVR-nummer bekræftet (simuleret)');
-  });
-
   document.getElementById('finish-registration').addEventListener('click', async () => {
     if (db.enabled){
       if (pendingUser?.needsConfirm){

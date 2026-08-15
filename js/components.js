@@ -198,10 +198,19 @@ function listingCardHTML(l, i){
 }
 
 /* ============ Trust badges ============ */
+/* Slaaet fra med vilje.
+
+   "Verificeret saelger" er en paastand over for en koeber om, at nogen har
+   kontrolleret personen. Det har ingen. MitID kraever en godkendt broker
+   (Criipto, Signaturgruppen, Nets) og er ikke sat op, SMS-bekraeftelse
+   sender ingen sms, og CVR bliver ikke slaaet op. Indtil en af delene er
+   rigtig, viser vi ingenting frem for at vise noget usandt.
+
+   Naar verificering findes: fjern spaerren herunder. Flagene kan kun saettes
+   af en betroet serverproces (se supabase/VERIFICERING.md og migration
+   005_beskyt_verificering.sql) — aldrig af klienten. */
 function verifiedBadgeHTML(seller){
-  if (!seller || !seller.verified) return '';
-  const label = seller.isDealer ? 'Verificeret forhandler' : 'Verificeret sælger';
-  return `<span class="badge badge-verified">${Icon.shieldCheck}${label}</span>`;
+  return '';
 }
 
 function sellerTypeNoteHTML(isDealer){

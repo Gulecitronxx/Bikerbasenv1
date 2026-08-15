@@ -158,8 +158,13 @@ async function renderProfile(){
   document.getElementById('seller-about').textContent = seller.isDealer
     ? `${seller.name} er en registreret forhandler på Bikerbasen med fokus på kvalitetskontrollerede motorcykler og gennemsigtig stand-vurdering.`
     : `${seller.name} er en privat sælger på Bikerbasen. Kontakt sælger direkte for spørgsmål om annoncerne.`;
+  /* Stod foer som "CVR-verificeret virksomhed" med skjold-ikon — udelukkende
+     fordi saelgeren havde tastet otte cifre ved oprettelsen. Der sker intet
+     opslag i CVR-registret, saa det var en verificerings-paastand over for
+     koeberen uden daekning. Nu staar tallet som dét, det er: oplyst af
+     saelgeren, og til at slaa op selv. */
   document.getElementById('seller-company-info').innerHTML = (seller.isDealer && seller.cvr)
-    ? `<div class="verify-row done" style="margin-top:12px;"><div class="verify-row-info">${Icon.shieldCheck}<span>CVR-verificeret virksomhed · ${escapeHTML(seller.cvr)}</span></div></div>`
+    ? `<div class="verify-row" style="margin-top:12px;"><div class="verify-row-info">${Icon.info}<span>CVR oplyst af sælger: ${escapeHTML(seller.cvr)} — <a href="https://datacvr.virk.dk/soegeresultater?fritekst=${encodeURIComponent(seller.cvr)}" target="_blank" rel="noopener noreferrer">slå op i CVR-registret</a></span></div></div>`
     : '';
   document.getElementById('safety-icon').innerHTML = Icon.info;
   document.getElementById('report-profile-btn').innerHTML = `${Icon.flag}Anmeld profil`;
