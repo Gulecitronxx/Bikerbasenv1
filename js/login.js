@@ -7,6 +7,48 @@ function redirectAfterAuth(){
   window.location.href = sikker || 'mine-annoncer.html';
 }
 
+/* Login-siden ved præcis, hvad brugeren var på vej til — det står i
+   ?redirect= — men sagde det ikke. Man trykkede "Opret annonce", blev
+   sendt hertil, og mødte "Velkommen til Bikerbasen". Konteksten var tabt,
+   og fanen stod på "Log ind", selv om den der vil sælge sin motorcykel
+   lige så ofte er en ny bruger.
+
+   Teksterne slås op i en hvidliste og sættes med textContent. Værdien i
+   ?redirect= kommer fra adresselinjen og er dermed angriberstyret — den
+   må hverken ende i markup eller vælge tekst frit. */
+const AUTH_KONTEKST = {
+  'opret-annonce.html': {
+    titel: 'Sælg din motorcykel',
+    tekst: 'Opret en profil eller log ind, så gemmer vi din annonce undervejs. Det er gratis for private.',
+    fane: 'register',
+  },
+  'mine-annoncer.html': {
+    titel: 'Dine annoncer og favoritter',
+    tekst: 'Log ind for at se de annoncer, du har gemt, og dem du selv har oprettet.',
+  },
+  'dashboard.html': {
+    titel: 'Dit overblik',
+    tekst: 'Log ind for at se visninger, henvendelser og status på dine annoncer.',
+  },
+};
+const AUTH_ANNONCE = {
+  titel: 'Kontakt sælgeren',
+  tekst: 'Log ind for at se sælgerens navn og kontaktoplysninger. Det beskytter både køber og sælger.',
+};
+
+function anvendAuthKontekst(){
+  const back = new URLSearchParams(window.location.search).get('redirect') || '';
+  // Samme mønsterkrav som redirectAfterAuth: kun en relativ .html-sti.
+  if (!/^[\w-]+\.html(\?[^#]*)?$/.test(back)) return;
+  const fil = back.split('?')[0];
+  const k = AUTH_KONTEKST[fil] || (/^annonce(-.+)?\.html$/.test(fil) ? AUTH_ANNONCE : null);
+  if (!k) return;
+
+  document.getElementById('auth-title').textContent = k.titel;
+  document.getElementById('auth-subtitle').textContent = k.tekst;
+  if (k.fane === 'register') document.querySelector('[data-auth-tab="register"]')?.click();
+}
+
 let pendingUser = null;
 
 function markVerifyDone(rowId, btnId){
@@ -79,6 +121,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('auth-primary-extras').style.display = '';
     });
   });
+
+  // Efter fanerne er koblet på — anvendAuthKontekst kan klikke på "Opret
+  // profil", og det skal virke.
+  anvendAuthKontekst();
 
   document.getElementById('reg-dealer').addEventListener('change', (e) => {
     document.getElementById('kyc-fields').classList.toggle('show', e.target.checked);

@@ -1075,6 +1075,11 @@ body.har-actionbar .cookie-banner{ z-index:120; }
 .profile-tabs button.active::after{ content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; background: var(--color-primary); }
 
 /* ============ Auth ============ */
+/* Undertitlen skiftes af js/login.js efter konteksten (?redirect=), og
+   teksterne er ikke lige lange. Uden en reserveret højde ville fanerne
+   og formularen nedenunder hoppe, når den rigtige tekst kom ind. */
+#auth-subtitle{ min-height: 3.2em; }
+@media (min-width:520px){ #auth-subtitle{ min-height: 2.6em; } }
 .auth-wrap{ min-height: calc(100dvh - var(--header-h)); display:flex; align-items:center; justify-content:center; padding: var(--space-6) var(--space-4); }
 
 /* To-panel-login: brandpanel til venstre, formular til højre. Panelet er
