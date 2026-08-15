@@ -1,14 +1,11 @@
 # MC Syd — Rødding. Omkring 500 motorcykler på lager.
 #
-# STATUS: URL-struktur og crawl-regler er verificeret mod det levende site.
-# Felt-selectorene er IKKE udfyldt endnu — se "selectors" nederst og
-# docs/adding-a-source.md. De skal læses af en rigtig browser, ikke gættes;
-# en gættet selector giver enten nul annoncer eller forkerte tal, og begge
-# dele opdages først, når nogen kigger på et kort.
+# STATUS: klar. URL-struktur, crawl-regler og felt-selectors er alle
+# verificeret mod det levende site i en renderet browser.
 
 navn: MC Syd
 domaene: mcsyd.dk
-aktiv: false          # tilladelse OK — mangler kun selectors
+aktiv: true           # tilladelse modtaget, selectors verificeret
 
 # ---------------------------------------------------------------
 # Tilladelse
@@ -31,11 +28,15 @@ crawl_delay_ms: 2000
 # https://mcsyd.dk/motorcykler/harley-davidson-motorcykler/ med curl:
 # 48.807 bytes, nul forekomster af /produkter/motorcykel/.
 #
-# Stylesheet-bundtet hedder /styles/danbase — sitet kører altså på Danbase,
-# et dansk forhandlersystem. Det er værd at undersøge, før vi skriver flere
-# YAML-filer: kører hmcmotorcykler.dk, jensensbike-cars.dk eller kbmotor.dk
-# også på Danbase, dækker én platform-YAML dem alle. Det er forskellen på
-# seks filer at vedligeholde og én.
+# Sitet kører på Danbase, et dansk forhandlersystem. Bekræftet tre steder:
+# stylesheet-bundtet /styles/danbase, kortklassen .dd-entity, og at fotos
+# serveres fra images.danbase.dk/Content/Resellers/321/.
+#
+# VIGTIGT for de næste kilder: jeg grep'ede de fem andre forhandleres FORSIDE
+# for "danbase" og fik nul. Det svar er ikke pålideligt — markørerne står på
+# annoncesiderne, ikke på forsiden. Tjek dem på deres /motorcykler/-side, før
+# I skriver fem separate YAML-filer. Er de også Danbase, virker selectorene
+# nedenfor uændret, fordi data-key er platformens, ikke MC Syds.
 kraever_browser: true
 
 # ---------------------------------------------------------------
@@ -80,25 +81,32 @@ detalje_url_moenster: '(?i)/produkter/motorcykel/[^/]+/[^/]+/(\d+)'
 id_gruppe: 1
 
 # ---------------------------------------------------------------
-# Felter — SKAL UDFYLDES med en browser åben
+# Felter — VERIFICERET i renderet DOM 16.08.2026
 # ---------------------------------------------------------------
-# Sådan gør du:
-#   npm run crawl -- --source=mcsyd --inspect
-# åbner listesiden i Playwright og skriver de gentagne DOM-mønstre ud, så du
-# kan vælge den rigtige selector frem for at gætte.
+# Danbase mærker felterne SEMANTISK med data-key, ikke med stilklasser.
+# Det er en gave: attributterne overlever et designskift, hvor .dd-data.value
+# kan blive omdøbt i morgen. Vælg derfor ALTID data-key frem for klassen.
 #
-# Hvert felt køres gennem crawler/normalize.js bagefter — skriv derfor den
-# RÅ tekst hertil ("Pris 99.800,-"), ikke et forsøg på at rense den i en
-# selector. Normaliseringen er testet; ad hoc-regex i en YAML er ikke.
+# Rå tekst hentes som den står ("99.800", "31.000") og køres gennem
+# crawler/normalize.js. Bemærk at Danbase allerede har formateret tallene med
+# dansk tusindtalsseparator (data-format="decimal"), så parsePris og parseKm
+# er præcis dét, der skal til — punktum må ikke læses som decimaltegn.
+#
+# Målt på Harley-siden: 40 kort i DOM'en, 38 produktlinks.
 selectors:
-  kort: null            # gentaget element pr. annonce på listesiden
-  url: null
-  titel: null
-  pris: null            # rå tekst, fx "Pris 99.800,-"
-  aargang: null         # rå tekst, fx "2007"
-  km: null
-  ccm: null
-  thumbnail: null
+  kort: 'div.product.dd-entity'
+  url: 'a[data-key="Id"][data-format="productlink"]'          # href
+  titel: '[data-key="ModelDescription"]'
+  pris: '[data-key="Price"]'                                  # "99.800"
+  aargang: '[data-key="Year"]'                                # "2007"
+  km: '[data-key="Mileage"]'                                  # "31.000"
+  ccm: '[data-key="CC"]'                                      # "883"
+  hk: '[data-key="HP"]'                                       # "53"
+  thumbnail: 'img[data-key="Image"]'                          # src
+
+# Titlen står i to varianter — hidden-xs og visible-xs — med samme data-key.
+# Tag den FØRSTE; ellers får du teksten to gange sammensat.
+tag_foerste_traef: true
 
 # Sælgertype er givet: MC Syd er forhandler. Alle deres annoncer er
 # forhandlerannoncer, og det skal stå på kortet, fordi det afgør købers
