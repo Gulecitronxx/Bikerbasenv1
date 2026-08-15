@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Bikerbasen — Køb og sælg brugte motorcykler i Danmark</title>
 <meta name="description" content="Bikerbasen er Danmarks mødested for køb og salg af brugte motorcykler. Søg blandt hundredvis af annoncer fra private og forhandlere.">
@@ -31,12 +31,14 @@
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="css/styles.css?v=1f4b97f3">
+<link rel="preload" as="image" href="img/hero-960.webp" imagesrcset="img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" imagesizes="100vw" fetchpriority="high">
+<link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+</style>
+<link rel="stylesheet" href="css/styles.css?v=f28f829c">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -358,17 +360,17 @@
   </div>
 </footer>
 
-<script defer src="js/security.js?v=1f4b97f3"></script>
+<script defer src="js/security.js?v=f28f829c"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=1f4b97f3"></script>
-<script defer src="js/supabase-api.js?v=1f4b97f3"></script>
-<script defer src="js/icons.js?v=1f4b97f3"></script>
-<script defer src="js/bike-art.js?v=1f4b97f3"></script>
-<script defer src="js/postnumre.js?v=1f4b97f3"></script>
-<script defer src="js/data.js?v=1f4b97f3"></script>
-<script defer src="js/store.js?v=1f4b97f3"></script>
-<script defer src="js/backend-bridge.js?v=1f4b97f3"></script>
-<script defer src="js/components.js?v=1f4b97f3"></script>
-<script defer src="js/home.js?v=1f4b97f3"></script>
+<script defer src="js/supabase-config.js?v=f28f829c"></script>
+<script defer src="js/supabase-api.js?v=f28f829c"></script>
+<script defer src="js/icons.js?v=f28f829c"></script>
+<script defer src="js/bike-art.js?v=f28f829c"></script>
+<script defer src="js/postnumre.js?v=f28f829c"></script>
+<script defer src="js/data.js?v=f28f829c"></script>
+<script defer src="js/store.js?v=f28f829c"></script>
+<script defer src="js/backend-bridge.js?v=f28f829c"></script>
+<script defer src="js/components.js?v=f28f829c"></script>
+<script defer src="js/home.js?v=f28f829c"></script>
 </body>
 </html>

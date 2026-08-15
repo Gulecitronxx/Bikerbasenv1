@@ -388,7 +388,6 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   background: color-mix(in srgb, var(--color-dark) 58%, transparent);
   border:1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
   padding:6px 13px; border-radius: var(--radius-pill); margin-bottom: var(--space-4);
-  backdrop-filter: blur(6px);
 }
 .hero h1{ font-size: clamp(28px, 5.4vw, 56px); line-height:1.05; font-weight:700; margin-bottom: var(--space-4); text-shadow: 0 2px 28px rgba(0,0,0,.4); text-wrap: balance; }
 /* Grupperer anden sætningshalvdel, så tankestregen ikke hænger midt i en linje. */
