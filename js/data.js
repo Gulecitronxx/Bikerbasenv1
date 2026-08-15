@@ -96,7 +96,7 @@ const BRANDS_BY_MODEL = {
   Fantic: ['Caballero 500', 'XX 125'],
   SWM: ['Superdual 650', 'Gran Milano 440'],
   Rieju: ['MRT 125', 'Tango 125'],
-  Nimbus: ['Type C "Stovepibe"'],
+  Nimbus: ['Type C "Kakkelovnsrøret"'],
   MZ: ['ETZ 251', 'Saxon 500'],
   Peugeot: ['Django 125', 'Metropolis 400'],
   Sachs: ['Roadster 125', 'Madass 125'],
@@ -133,7 +133,7 @@ const TYPE_BY_MODEL_HINT = {
   'Classic 350': 'classic', 'Interceptor 650': 'classic', 'Himalayan': 'adventure',
   'Primavera 125': 'scooter', 'GTS 300': 'scooter', 'Sprint 150': 'scooter',
   'Liberty 125': 'scooter', 'MP3 400': 'scooter',
-  'Type C "Stovepibe"': 'classic', 'ETZ 251': 'classic', 'Saxon 500': 'classic', 'Django 125': 'scooter', 'Roadster 125': 'classic',
+  'Type C "Kakkelovnsrøret"': 'classic', 'ETZ 251': 'classic', 'Saxon 500': 'classic', 'Django 125': 'scooter', 'Roadster 125': 'classic',
 };
 
 const FIRST_NAMES = ['Mikkel', 'Anders', 'Jonas', 'Rasmus', 'Kasper', 'Frederik', 'Mathias', 'Christian', 'Emil', 'Peter', 'Louise', 'Camilla', 'Sofie', 'Ida', 'Mette', 'Nikolaj', 'Thomas', 'Lars'];
@@ -182,7 +182,7 @@ function buildListings(){
     ['Royal Enfield','Interceptor 650',2020,9600,648,'classic'],
     ['Vespa','Primavera 125',2021,5200,125,'scooter'],['Vespa','GTS 300',2019,14800,278,'scooter'],
     ['Piaggio','Liberty 125',2020,9800,125,'scooter'],
-    ['Nimbus','Type C "Stovepibe"',1968,38000,750,'classic'],
+    ['Nimbus','Type C "Kakkelovnsrøret"',1968,38000,750,'classic'],
     ['MZ','ETZ 251',1985,52000,250,'classic'],
     ['Peugeot','Django 125',2022,3900,125,'scooter'],
   ];
@@ -247,10 +247,16 @@ function buildDescription(brand, model, year, condition, type){
   return `${brand} ${model} årgang ${year} sælges i ${condition.toLowerCase()}.\n\nMotorcyklen har været velholdt og serviceeftervist gennem hele ejerperioden. Nye dæk og bremseklodser inden for de sidste par tusinde km. ${typeLabel}-modellen er kendt for sin pålidelighed og køreglæde – perfekt til både dagligt brug og længere ture.\n\nIngen kendte fejl eller mangler. Fremvises gerne efter aftale, og der er mulighed for prøvetur ved seriøs interesse. Sælges som den er, fremvist og godkendt af sælger.`;
 }
 
-/* Demoannoncerne er slået fra: siden viser nu kun rigtige annoncer fra
-   databasen. Sæt til true for at få de 51 eksempler tilbage — nyttigt hvis
-   du vil vise designet frem uden at have annoncer endnu. */
-const SHOW_DEMO_DATA = false;
+/* Demoannoncerne er slået fra i drift: bikerbasen.dk viser kun rigtige
+   annoncer fra databasen. Det skal blive ved med at være sådan — en køber
+   må aldrig møde en opdigtet motorcykel.
+
+   På localhost tændes de. Uden lager kan hverken design, søgning, filtre
+   eller sammenligningen mod Bilbasen vurderes: en tom skærm taber altid.
+   Byggescripterne kører i Node uden `location` og får derfor false, så de
+   genererede sider og sitemap aldrig kommer til at indeholde demodata. */
+const SHOW_DEMO_DATA = typeof location !== 'undefined'
+  && (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
 
 const LISTINGS = SHOW_DEMO_DATA ? buildListings() : [];
 
@@ -276,11 +282,13 @@ function timeAgoDa(iso){
   const days = Math.floor(hours / 24);
   if (days === 0) return hours <= 0 ? 'i dag' : `i dag, ${hours} t.`;
   if (days === 1) return 'i går';
-  if (days < 7) return `for ${days} dage siden`;
+  // "for 2 uger siden" er ordret "2 weeks ago". Paa en dansk annonceside
+  // staar der "2 uger siden" — det lille "for" afsloerer oversaettelsen.
+  if (days < 7) return `${days} dage siden`;
   const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `for ${weeks} ${weeks===1?'uge':'uger'} siden`;
+  if (weeks < 5) return `${weeks} ${weeks===1?'uge':'uger'} siden`;
   const months = Math.floor(days / 30);
-  return `for ${months} ${months===1?'måned':'måneder'} siden`;
+  return `${months} ${months===1?'måned':'måneder'} siden`;
 }
 function isNewListing(iso){
   const then = new Date(iso).getTime();

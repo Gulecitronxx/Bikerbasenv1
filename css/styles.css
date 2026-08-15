@@ -609,6 +609,20 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .card-link{ position:absolute; inset:0; z-index:1; }
 .card-link:focus-visible{ outline-offset:-2px; }
 
+/* ============ Kort: hvem saelger ============
+   Kritikeren i runde 18 valgte referencen med den begrundelse, at vores kort
+   ikke fortalte hvem der stod bag beloebet. Linjen ligger lige over by og
+   tid — det sidste man laeser foer man beslutter sig for at klikke. */
+.card-seller{
+  display:flex; align-items:center; gap:6px;
+  font-size:13px; color: var(--color-fg-muted);
+  margin-top: 8px; min-width:0;
+}
+.card-seller svg{ width:15px; height:15px; flex-shrink:0; }
+.card-seller span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Forhandlernavnet er det, koeberen genkender — det maa gerne veje mere. */
+.card-seller.is-dealer{ color: var(--color-fg); font-weight:600; }
+
 /* ============ Trust strip ============ */
 .trust-strip{ display:grid; grid-template-columns: repeat(1,1fr); gap: var(--space-4); }
 @media (min-width:768px){ .trust-strip{ grid-template-columns: repeat(3,1fr); } }

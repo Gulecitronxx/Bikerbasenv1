@@ -159,6 +159,26 @@ function listingMediaHTML(l, alt, eager){
     : bikeArtSVG(l.type, { id: 'card-' + l.id });
 }
 
+/* Hvem sælger den?
+
+   Kortet sagde det ikke. Forhandlere fik en lille "Forhandler"-mærkat oven
+   på fotoet; private fik INGENTING — og det er over halvdelen af annoncerne.
+   En køber, der skal skille seriøse forhandlerannoncer fra tilfældige
+   privatopslag i scrollet, kunne altså ikke, uden at klikke ind på hver
+   enkelt. Det er dét, der afgør om en handel til 80.000 kr. føles sikker.
+
+   Forhandleren nævnes ved navn — det er navnet, man genkender og googler.
+   Privatsælgere står som "Privat sælger": ikke ringere, men en anden handel
+   (ingen reklamationsret), og det skal køberen kunne se med det samme. */
+function sellerLineHTML(l){
+  const dealer = l.isDealer || l.seller?.isDealer;
+  const navn = escapeHTML(l.seller?.name || '');
+  if (dealer && navn){
+    return `<div class="card-seller is-dealer">${Icon.store}<span>${navn}</span></div>`;
+  }
+  return `<div class="card-seller">${Icon.user}<span>${dealer ? 'Forhandler' : 'Privat sælger'}</span></div>`;
+}
+
 /* ============ Listing card ============ */
 /* `i` kommer gratis fra .map(listingCardHTML) — kortet på plads 0 er det
    eneste der er above-the-fold på mobil, og får derfor det ivrige foto. */
@@ -173,7 +193,7 @@ function listingCardHTML(l, i){
       <div class="card-badges">
         ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
         ${l.isDealer ? `<span class="badge badge-dealer">${Icon.shieldCheck}Forhandler</span>` : ''}
-        ${suspicious ? `<span class="badge badge-warning" title="Prisen er væsentligt under markedsniveau for typen">${Icon.alertTriangle}Tjek prisen</span>` : ''}
+        ${suspicious ? `<span class="badge badge-warning" title="Prisen ligger væsentligt under markedsniveau for den type og årgang — bed om ekstra dokumentation, og betal aldrig forud">${Icon.alertTriangle}Under markedspris</span>` : ''}
       </div>
       ${isOwnListing(l) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
       ${(() => { const k = koerekortForListing(l); return k ? `<span class="card-koerekort" title="Kan føres på ${k}-kørekort" aria-label="Kan føres på ${k}-kørekort">${k}</span>` : ''; })()}
@@ -188,8 +208,9 @@ function listingCardHTML(l, i){
         <span>${Icon.engine}${formatCcm(l.ccm)}</span>
       </div>
       ${l.serviceHistorik === 'Fuld' ? `<div class="card-trust"><span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span></div>` : ''}
+      ${sellerLineHTML(l)}
       <div class="card-footer">
-        <span>${Icon.mapPin}${city}</span>
+        <span>${Icon.mapPin}${city}${l.region ? ', ' + escapeHTML(l.region) : ''}</span>
         <span>${timeAgoDa(l.createdAt)}</span>
       </div>
     </div>
