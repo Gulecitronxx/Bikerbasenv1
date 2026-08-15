@@ -174,7 +174,6 @@ function seoListingPage(listing, photoUrls){
   }
   if (listing.fuel) vehicle.fuelType = listing.fuel;
   if (listing.color) vehicle.color = listing.color;
-  if (listing.vin && isValidVIN(listing.vin)) vehicle.vehicleIdentificationNumber = listing.vin;
 
   Seo.setJsonLd('vehicle', vehicle);
   Seo.setJsonLd('breadcrumb', Seo.breadcrumb([

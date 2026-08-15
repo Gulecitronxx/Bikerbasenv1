@@ -237,13 +237,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   wireFavoriteButtons(document);
 
   // trust strip
-  // Rækkefølge efter køberens faktiske frygt på en privatsælger-markedsplads:
-  // "er cyklen stjålet/hæftet?" først (konkret stelnummer-tjek), så kontakt,
-  // så forhandler-verificering. Ingen opdigtede tal/anmeldelser.
+  // Rækkefølge efter køberens faktiske behov på en privatsælger-markedsplads:
+  // registrering/gennemsigtighed først, så skjult kontakt, så forhandler-
+  // verificering. Ingen opdigtede tal/anmeldelser.
   document.getElementById('trust-strip').innerHTML = `
     <div class="trust-card">
-      <span class="trust-icon">${Icon.vin}</span>
-      <div><h3>Tjek stelnummer & registrering</h3><p>Stelnummer (VIN) og registreringsstatus står på hver annonce — så du selv kan tjekke, at motorcyklen hverken er stjålet eller hæftet, før du handler.</p></div>
+      <span class="trust-icon">${Icon.checkCircle}</span>
+      <div><h3>Registreringsstatus på hver annonce</h3><p>Se om motorcyklen er indregistreret og afgiftsberigtiget, sammen med ærlige specifikationer — så du ved, hvad du køber, før du handler.</p></div>
     </div>
     <div class="trust-card">
       <span class="trust-icon">${Icon.mail}</span>

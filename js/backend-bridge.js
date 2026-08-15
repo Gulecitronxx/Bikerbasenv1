@@ -21,7 +21,7 @@ function normalizeRemoteListing(row){
     brand: row.brand, model: row.model, type: row.type,
     year: row.year, km: row.km, ccm: row.ccm, power: row.power,
     price: row.price, condition: row.condition,
-    vin: row.vin, registration: row.registration, afgift: row.afgift,
+    registration: row.registration, afgift: row.afgift,
     fuel: row.fuel || null, drive: row.drive || null,
     cylinders: row.cylinders || null, color: row.color || null,
     serviceHistorik: row.service_historik || null,

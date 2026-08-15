@@ -198,7 +198,7 @@ function safetyBannerHTML(){
     <span class="safety-banner-sep">·</span>
     <span>${Icon.shieldCheck}Betal aldrig forud</span>
     <span class="safety-banner-sep">·</span>
-    <span>${Icon.vin}Tjek stelnummer</span>
+    <span>${Icon.mail}Skriv via Bikerbasen</span>
     <a href="sikkerhed.html" class="safety-banner-link">Læs gode råd${Icon.arrowRight}</a>
   </div>`;
 }

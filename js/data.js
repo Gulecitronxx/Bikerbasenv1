@@ -222,7 +222,6 @@ function buildListings(){
         reviews: 3 + Math.floor(rnd()*140),
         city: city.city,
       },
-      vin: `${brand.replace(/[^A-Z0-9]/gi,'').slice(0,3).toUpperCase()}${year}${String(id).padStart(6,'0')}X1`,
       registration,
       afgift,
       description: buildDescription(brand, model, year, condition, type),
@@ -434,10 +433,6 @@ function isUuid(v){
   return typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
 }
 
-/* Simplified real-world VIN shape check: 11-17 chars, alphanumeric, excludes I/O/Q (not used in real VINs). */
-function isValidVIN(vin){
-  return /^[A-HJ-NPR-Z0-9]{11,17}$/i.test(String(vin || '').trim());
-}
 
 const AFGIFT_STATUSES = ['Betalt', 'Ikke betalt', 'Ikke relevant (ikke indregistreret)'];
 const REPORT_REASONS = [

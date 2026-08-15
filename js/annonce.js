@@ -151,7 +151,6 @@ function renderListing(){
   const kk = (typeof koerekortForListing === 'function') ? koerekortForListing(listing) : null;
   const avgRating = Store.getAverageRating(listing.seller.name, Number(listing.seller.rating));
   const reviewCount = Store.getReviews(listing.seller.name).length;
-  const vinLooksValid = isValidVIN(listing.vin);
   const suspicious = isSuspiciouslyCheap(listing);
 
   document.getElementById('listing-detail').innerHTML = `
@@ -222,13 +221,6 @@ function renderListing(){
         </ul>
       </div>` : ''}
 
-      <div class="vin-box">
-        ${Icon.vin}Stelnummer (VIN): ${listing.vin
-          ? `<code>${escapeHTML(listing.vin)}</code>${vinLooksValid ? `<span style="color:var(--color-success); font-weight:600; margin-left:4px;">${Icon.checkCircle} Format OK</span>` : ''}`
-          : `<span style="color:var(--color-fg-muted);">Ikke oplyst</span>`}
-        <button type="button" class="report-link" id="check-vin-btn" style="margin-left:auto;">${Icon.info}Tjek stelnummer</button>
-      </div>
-
       <div class="detail-section">
         <h2>Beskrivelse</h2>
         <p class="desc">${escapeHTML(listing.description)}</p>
@@ -254,18 +246,9 @@ function renderListing(){
 
   wireFavoriteButtons(document);
 
-  // Anmeld og VIN-tjek hører til annoncen, ikke til sælgeren, og er derfor
-  // tilgængelige uanset login.
+  // Anmeld hører til annoncen, ikke til sælgeren, og er tilgængelig uanset login.
   document.getElementById('report-listing-btn').addEventListener('click', () => {
     openReportModal('listing', `${listing.brand} ${listing.model}`, listing.id);
-  });
-
-  document.getElementById('check-vin-btn').addEventListener('click', () => {
-    openInfoModal('Tjek stelnummer (VIN)', `
-      <p>${listing.vin ? `Stelnummeret på denne annonce er <code>${escapeHTML(listing.vin)}</code>.` : 'Sælger har ikke oplyst et stelnummer på denne annonce. Bed altid om det, og sammenlign med registreringsattesten før køb.'}</p>
-      ${listing.vin ? `<p>${vinLooksValid ? 'Formatet ser gyldigt ud (11–17 tegn, kun tilladte bogstaver/cifre).' : 'Formatet kunne ikke bekræftes automatisk — vær ekstra opmærksom, og sammenlign nøje med registreringsattesten.'}</p>` : ''}
-      <p>Ved fremvisning bør du altid sammenligne stelnummeret på selve motorcyklen med både annoncen og registreringsattesten. Et rigtigt opslag i Motorregistret/DMR kræver en integration, som denne demo ikke har adgang til.</p>
-    `);
   });
 
   // Kontaktknapperne findes kun i markup'en, når man er logget ind — al

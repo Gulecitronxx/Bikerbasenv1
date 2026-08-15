@@ -74,7 +74,6 @@ function jsonLd(l, url){
   if (l.power) vehicle.vehicleEngine.enginePower = { '@type': 'QuantitativeValue', value: l.power, unitText: 'hk' };
   if (l.fuel) vehicle.fuelType = l.fuel;
   if (l.color) vehicle.color = l.color;
-  if (l.vin && isValidVIN(l.vin)) vehicle.vehicleIdentificationNumber = l.vin;
 
   const brød = {
     '@context': 'https://schema.org',
@@ -191,8 +190,6 @@ ${[
   specRow('Farve', l.color),
 ].filter(Boolean).join('\n')}
         </div>
-
-${l.vin ? `        <div class="vin-box">Stelnummer (VIN): <code>${esc(l.vin)}</code></div>` : ''}
 
         <div class="detail-section">
           <h2>Beskrivelse</h2>

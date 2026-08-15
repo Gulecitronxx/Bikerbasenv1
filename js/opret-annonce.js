@@ -76,8 +76,6 @@ function validateStep(n){
     bound('f-year', v => v >= 1900 && v <= nowY + 1, `Årgang skal være mellem 1900 og ${nowY + 1}`);
     bound('f-km', v => v >= 0 && v <= 500000, 'Kilometerstanden virker urealistisk (0–500.000)');
     bound('f-ccm', v => v >= 50 && v <= 3000, 'Motorstørrelsen skal være mellem 50 og 3.000 ccm');
-    const vin = document.getElementById('f-vin').value.trim();
-    if (vin && !isValidVIN(vin)){ valid = false; markFieldError(document.getElementById('f-vin'), refs); msg = 'Stelnummeret har et ugyldigt format'; }
   }
   if (n === 2){
     bound('f-price', v => v > 0 && v <= 2000000, 'Angiv en realistisk pris');
@@ -143,11 +141,6 @@ function populateStaticFields(){
       const f = el.closest('.field'); if (f) f.classList.remove('has-error');
       if (el.style) el.style.borderColor = '';
     });
-  });
-
-  document.getElementById('f-vin').addEventListener('input', (e) => {
-    const vin = e.target.value.trim();
-    document.getElementById('f-vin-field').classList.toggle('has-error', vin.length > 0 && !isValidVIN(vin));
   });
 
   document.getElementById('upload-icon-mount').innerHTML = Icon.upload;
@@ -344,7 +337,6 @@ function collectFormData(){
     km: Number(document.getElementById('f-km').value) || 0,
     ccm: Number(document.getElementById('f-ccm').value) || 0,
     power: Number(document.getElementById('f-power').value) || null,
-    vin: document.getElementById('f-vin').value.trim() || null,
     registration: document.getElementById('f-registration').value,
     afgift: document.getElementById('f-afgift').value,
     fuel: document.getElementById('f-fuel').value || null,
@@ -390,7 +382,7 @@ function renderPreview(){
       <div class="spec-item"><span class="spec-icon">${Icon.engine} Motor</span><b>${formatCcm(formData.ccm)}</b></div>
       <div class="spec-item"><span class="spec-icon">${Icon.mapPin} Lokation</span><b>${escapeHTML(formData.city || '—')}</b></div>
       <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Stand</span><b>${escapeHTML(formData.condition)}</b></div>
-      <div class="spec-item"><span class="spec-icon">${Icon.vin} Registrering</span><b>${escapeHTML(formData.registration)}</b></div>
+      <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Registrering</span><b>${escapeHTML(formData.registration)}</b></div>
       <div class="spec-item"><span class="spec-icon">${Icon.lock} Afgift</span><b>${escapeHTML(formData.afgift)}</b></div>
       ${formData.serviceHistorik ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Servicehistorik</span><b>${escapeHTML(formData.serviceHistorik)}</b></div>` : ''}
       ${formData.antalEjere ? `<div class="spec-item"><span class="spec-icon">${Icon.user} Antal ejere</span><b>${Number(formData.antalEjere)}</b></div>` : ''}
@@ -475,7 +467,6 @@ async function publishListing(){
     brand: formData.brand, model: formData.model, type: formData.type,
     year: formData.year, km: formData.km, ccm: formData.ccm, power: formData.power,
     price: formData.price, condition: formData.condition,
-    vin: formData.vin && isValidVIN(formData.vin) ? formData.vin.toUpperCase() : null,
     registration: formData.registration, afgift: formData.afgift,
     fuel: formData.fuel, drive: formData.drive,
     cylinders: formData.cylinders, color: formData.color,
@@ -544,7 +535,7 @@ function fillForm(data){
   // Modelforslagene afhænger af mærket, så det skal opdateres først.
   document.getElementById('f-brand')?.dispatchEvent(new Event('change', { bubbles: true }));
   set('f-model', data.model);
-  ['year','km','ccm','power','vin','registration','afgift','fuel','drive',
+  ['year','km','ccm','power','registration','afgift','fuel','drive',
    'cylinders','color','price','condition','city','region'].forEach(k => set('f-' + k, data[k]));
   set('f-desc', data.description);
   set('f-service', data.serviceHistorik);
