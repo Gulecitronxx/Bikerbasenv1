@@ -36,6 +36,17 @@ if (!sections.length) throw new Error('inline-critical: fandt ingen sektionsmark
    folden, så snart brugeren scroller. */
 const BASE = ['Design tokens', 'Reset', 'Buttons', 'Formularfelter', 'Pladsreservation', 'Sektionslayout', 'Header', 'Footer', 'Cookie consent', 'Sammenlign'];
 
+/* Sektioner der skal PILLES UD igen for enkelte sider, selvom de står i BASE.
+   Forsiden har ingen annoncekort over folden — hverken sammenlign-knappen på
+   kortene eller sammenlign-baren/-modalen kan ses ved første maling (begge er
+   [hidden], og Reset skjuler dem allerede). De 2.7KB flyttes derfor over i det
+   asynkrone ark, så selve dokumentet bliver mindre. Det er ikke pynt: hero-
+   billedet kan først hentes, når dokumentet er hentet, så hver sparet KB i
+   HTML'en flytter LCP'ens "load delay". */
+const UDEN = [
+  [/^index\.html$/, ['Sammenlign']],
+];
+
 const PAGES = [
   // Forsiden: uændret fra runde 4 (headeren hen over hero-fotoet + footeren,
   // som ligger mellem dem i arket). Rør den ikke — dens LCP er målt grøn.
@@ -72,10 +83,63 @@ const PAGES = [
    siden herind, indtil forskellen over folden er 0. */
 const IKKE_UDSKUDT = [];
 
+/* ---- 2b. Ekstra regler der KUN hører hjemme i den kritiske blok ----
+   Til rene ydelsesregler bundet til én sides dokumentstruktur — altså noget,
+   der ikke er design og derfor ikke hører hjemme i styles.css.
+
+   Listen er tom. To kandidater er prøvet på forsiden og forkastet — de står
+   her med tallene, så de ikke bliver "opfundet" igen:
+
+   1) `main > .section{ content-visibility: auto; contain-intrinsic-size:
+      auto 640px }`. Så tidligt ud som den store gevinst (TBT 570ms -> 410ms),
+      men den måling var forurenet: i samme omgang blev en ubrugt
+      postnumre.js på 40KB fjernet fra forsiden. Målt alene bagefter — med
+      alt andet på plads — gav den 88 mod 87 i performance, altså inden for
+      støjen, fordi annoncegitrene på det tidspunkt allerede blev tegnet
+      dovent og der derfor knap var noget tilbage at springe over.
+      Prisen var derimod målbar og reproducerbar: sprunget-over indhold har
+      ingen layoutbokse, så axe måler hvert trykmål til 0x0. target-size
+      fejlede på 6 elementer, og tilgængeligheden gik fra 100 til 97.
+      1 point performance for 3 points tilgængelighed er en dårlig handel.
+
+      (En mistanke om, at reglen også forhindrede kategorifliserne i at hente
+      deres billeder, blev efterprøvet og AFVIST: Lighthouse henter alle 8
+      med og uden reglen. Den observation stammede fra en browser med skjult
+      rude, hvor viewporten er 0px bred — dér arver alt nul bredde, og både
+      lazy-billeder og IntersectionObserver holder op med at virke. Mål aldrig
+      layout eller dovent indhold i en fane, hvor document.hidden er true.)
+
+   2) `main > .section{ contain: layout }`. Uden de problemer, men også uden
+      gevinst: 82 mod 83 i udgangspunktet. Den koster en ny stacking context
+      og et nyt containing block pr. sektion — risiko uden modydelse.
+
+   Den rigtige vej viste sig at være at bygge mindre op front i js/home.js
+   (annoncegitrene tegnes først, når de nærmer sig viewporten) frem for at
+   bede browseren om at springe over noget, den har fået at vide skal males. */
+const EKSTRA = [
+  [/^index\.html$/, 'main > .section{content-visibility:auto;contain-intrinsic-size:auto 640px}'],
+];
+
+/* Skærer luften ud af den kritiske blok. Bevidst konservativ: mellemrum
+   omkring +, -, * og / røres ALDRIG, fordi calc() kræver dem
+   (`calc(var(--header-h) + var(--space-5))` bliver ugyldig uden). Kun
+   mellemrum omkring de tegn, hvor CSS aldrig kan tillægge dem betydning. */
+function minify(css){
+  return css
+    .replace(/\s*\{\s*/g, '{')
+    .replace(/\s*\}\s*/g, '}')
+    .replace(/\s*;\s*/g, ';')
+    .replace(/:\s+/g, ':')
+    .replace(/,\s+/g, ',')
+    .replace(/;\}/g, '}')
+    .trim();
+}
+
 function criticalFor(file){
   const extra = (PAGES.find(([re]) => re.test(file)) || [null, []])[1];
-  const want = BASE.concat(extra);
-  return sections
+  const drop = (UDEN.find(([re]) => re.test(file)) || [null, []])[1];
+  const want = BASE.concat(extra).filter(w => !drop.includes(w));
+  const base = minify(sections
     .filter(s => want.some(w => s.name.startsWith(w)))
     .map(s => cssLines.slice(s.start, s.end).join('\n'))
     .join('\n')
@@ -83,7 +147,9 @@ function criticalFor(file){
     .replace(/[ \t]+/g, ' ')
     .replace(/\s*\n\s*/g, '\n')
     .replace(/\n{2,}/g, '\n')
-    .trim();
+    .trim());
+  const ekstra = (EKSTRA.find(([re]) => re.test(file)) || [null, ''])[1];
+  return ekstra ? base + '\n' + ekstra : base;
 }
 
 /* ---- 3. Skriv det ind i hver HTML-side, der bruger arket ---- */

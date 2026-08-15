@@ -120,6 +120,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('[data-auth-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
       authError('');
+      /* login.html sætter data-authtab på <html> i første HTML-chunk, så den
+         rigtige fane males med det samme (uden det hoppede kortet 0,245 i
+         CLS). Reglerne bruger !important for at slå markuppens inline
+         display, og de skal derfor slippe taget i det sekund brugeren selv
+         vælger — ellers kan man ikke komme tilbage til login-fanen. */
+      document.documentElement.removeAttribute('data-authtab');
       document.querySelectorAll('[data-auth-tab]').forEach(b => b.classList.toggle('active', b === btn));
       document.getElementById('login-form').style.display = btn.dataset.authTab === 'login' ? '' : 'none';
       document.getElementById('register-form').style.display = btn.dataset.authTab === 'register' ? '' : 'none';

@@ -182,12 +182,14 @@ function buildListings(){
     ['Royal Enfield','Interceptor 650',2020,9600,648,'classic'],
     ['Vespa','Primavera 125',2021,5200,125,'scooter'],['Vespa','GTS 300',2019,14800,278,'scooter'],
     ['Piaggio','Liberty 125',2020,9800,125,'scooter'],
-    ['Nimbus','Type C "Kakkelovnsrøret"',1968,38000,750,'classic'],
-    ['MZ','ETZ 251',1985,52000,250,'classic'],
+    // Veteraner foelger ingen formel: Nimbussen yder 0,029 hk pr. ccm,
+    // MZ'en det tredobbelte. Kendte tal staar derfor eksplicit.
+    ['Nimbus','Type C "Kakkelovnsrøret"',1968,38000,750,'classic',22],
+    ['MZ','ETZ 251',1985,52000,250,'classic',21],
     ['Peugeot','Django 125',2022,3900,125,'scooter'],
   ];
 
-  for (const [brand, model, year, km, ccm, typeOverride] of entries){
+  for (const [brand, model, year, km, ccm, typeOverride, kendtHk] of entries){
     const type = typeOverride || TYPE_BY_MODEL_HINT[model] || 'naked';
     const city = pick(DEMO_CITIES);
     const isDealer = rnd() < 0.32;
@@ -196,7 +198,7 @@ function buildListings(){
     const created = new Date(now.getTime() - daysAgo * 86400000 - Math.floor(rnd()*80000000));
     const condition = year >= 2022 ? pick(['Som ny','God stand']) : (year <= 1990 ? pick(['Brugt','God stand','Defekt/Projekt']) : pick(CONDITIONS.slice(0,3)));
     const sellerName = isDealer ? pick(DEALER_NAMES) : `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
-    const power = Math.round(ccm * (type === 'scooter' ? 0.055 : (type === 'cross' ? 0.09 : 0.075)));
+    const power = kendtHk || estimatePower(ccm, type, year, brand);
     const registration = type === 'cross' ? 'Ikke indregistreret (bane/off-road)' : (rnd() < 0.9 ? 'Indregistreret' : 'Afmeldt');
     const afgift = registration.startsWith('Ikke indregistreret') ? 'Ikke relevant (ikke indregistreret)' : (rnd() < 0.92 ? 'Betalt' : 'Ikke betalt');
     listings.push({
@@ -231,6 +233,38 @@ function buildListings(){
   return listings;
 }
 
+/* Hestekraefter.
+
+   Stod foer som ccm x 0,075 for alt andet end scooter og cross. Det gav en
+   Honda CB650R paa 49 hk. Den har 95. En dansk motorcyklist ser dét paa et
+   halvt sekund — og tror saa ikke paa resten af specifikationstabellen
+   heller. Ét forkert tal koster troverdigheden paa hele siden.
+
+   Nu efter type, som er den stoerste enkeltfaktor: en sportsmodel yder
+   omtrent dobbelt saa meget pr. ccm som en cruiser. AEldre maskiner ydede
+   mindre — literklassen fra 80'erne laa langt under nutidens.
+
+   125-loftet er lov, ikke skoen: en A1-motorcykel maa hoejst yde 15 hk
+   (11 kW). Et demotal over det ville vaere ulovligt paa gaden. */
+function estimatePower(ccm, type, year, brand){
+  const perCcm = {
+    sport: 0.150, naked: 0.130, adventure: 0.112, touring: 0.100,
+    classic: 0.095, cruiser: 0.082, scooter: 0.098, cross: 0.120,
+  }[type] || 0.110;
+
+  // Foer ca. 1995 ydede motorerne mindre pr. ccm end i dag.
+  const aarsfaktor = year < 1975 ? 0.48 : year < 1985 ? 0.72 : year < 1995 ? 0.85 : year < 2005 ? 0.94 : 1;
+  let hk = Math.round(ccm * perCcm * aarsfaktor);
+
+  /* Store, langsomtgaaende V-twins yder omtrent det halve pr. ccm af en
+     japansk cruiser: en Iron 883 giver 52 hk, en Vulcan S 61 hk af 649.
+     Uden mærket i regnestykket fik Harleyerne 40% for meget. */
+  if (brand === 'Harley-Davidson' || brand === 'Indian') hk = Math.round(hk * 0.67);
+
+  if (ccm <= 125) hk = Math.min(hk, 15);   // A1-loftet
+  return Math.max(hk, 3);
+}
+
 function estimatePrice(year, ccm, km, brand, type){
   const age = 2026 - year;
   let base = ccm * 165;
@@ -244,7 +278,16 @@ function estimatePrice(year, ccm, km, brand, type){
 
 function buildDescription(brand, model, year, condition, type){
   const typeLabel = (TYPES.find(t=>t.id===type)||{}).label || '';
-  return `${brand} ${model} årgang ${year} sælges i ${condition.toLowerCase()}.\n\nMotorcyklen har været velholdt og serviceeftervist gennem hele ejerperioden. Nye dæk og bremseklodser inden for de sidste par tusinde km. ${typeLabel}-modellen er kendt for sin pålidelighed og køreglæde – perfekt til både dagligt brug og længere ture.\n\nIngen kendte fejl eller mangler. Fremvises gerne efter aftale, og der er mulighed for prøvetur ved seriøs interesse. Sælges som den er, fremvist og godkendt af sælger.`;
+  /* "sælges i ${condition}" gav "sælges i som ny" — skabelonen antog, at
+     standen altid ender på "stand". Den gør den for "God stand" og "Brugt",
+     men ikke for "Som ny" og "Defekt/Projekt". Første linje under
+     overskriften Beskrivelse var altså i halvdelen af annoncerne skrevet
+     forkert dansk. */
+  const standTekst = /stand$/i.test(condition) ? condition.toLowerCase()
+    : condition === 'Som ny' ? 'som ny stand'
+    : condition === 'Defekt/Projekt' ? 'defekt stand som projekt'
+    : condition.toLowerCase() + ' stand';
+  return `${brand} ${model} årgang ${year} sælges i ${standTekst}.\n\nMotorcyklen har været velholdt og serviceeftervist gennem hele ejerperioden. Nye dæk og bremseklodser inden for de sidste par tusinde km. ${typeLabel}-modellen er kendt for sin pålidelighed og køreglæde – perfekt til både dagligt brug og længere ture.\n\nIngen kendte fejl eller mangler. Fremvises gerne efter aftale, og der er mulighed for prøvetur ved seriøs interesse. Sælges som den er, fremvist og godkendt af sælger.`;
 }
 
 /* Demoannoncerne er slået fra i drift: bikerbasen.dk viser kun rigtige

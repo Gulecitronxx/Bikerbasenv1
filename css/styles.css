@@ -547,7 +547,12 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   transition: transform .5s var(--ease-out); }
 .card:hover .card-photo{ transform: scale(1.04); }
 .card-media svg{ width:100%; height:100%; }
-.card-badges{ position:absolute; top:10px; left:10px; display:flex; gap:6px; flex-wrap:wrap; z-index:2; }
+/* right: 56px holder maerkaterne fri af hjerteknappen (44px bred, 6px fra
+   kanten). Uden den loeb "Ny" og "Forhandler" ind under knappen og daekkede
+   den, saa kun 44x13,5px var til at ramme — Lighthouse target-size faldt fra
+   100 til 97 paa forsiden. Fejlen har vaeret der hele tiden; den blev foerst
+   synlig, da forsiden fik annoncer at vise. */
+.card-badges{ position:absolute; top:10px; left:10px; right:56px; display:flex; gap:6px; flex-wrap:wrap; z-index:2; }
 /* Udledt kørekortkategori (A1/A2/A) — MC-køberens vigtigste scan-signal. */
 .card-koerekort{
   position:absolute; left:10px; bottom:10px; z-index:2;
@@ -960,8 +965,22 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 @media (min-width:960px){ .listing-actionbar{ display:none; } }
 /* Bjælken må ikke lægge sig oven på det sidste i footeren. */
 @media (max-width:959px){ body.har-actionbar{ padding-bottom:76px; } }
-/* Cookiebanneret er vigtigere end bjælken, så længe der ikke er svaret. */
+/* Cookiebanneret laa OVEN PAA handlingsbjaelken, saa "Skriv til saelger" —
+   annoncesidens primaere handling — ikke kunne trykkes, foer man havde taget
+   stilling til cookies. Bevist med en hit-test: banneret opfangede klikket.
+   Det ramte alle brugere, ikke kun tastaturbrugere.
+
+   Nu skubbes bjaelken op over banneret i stedet. Samtykket staar stadig
+   oeverst og skal stadig besvares — men det spaerrer ikke for den ene knap,
+   hele siden findes for. */
 body.har-actionbar .cookie-banner{ z-index:120; }
+body.har-actionbar.cookie-banner-vises .listing-actionbar{
+  bottom: calc(var(--cookie-h, 132px) + 8px);
+  transition: bottom .2s var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce){
+  body.har-actionbar.cookie-banner-vises .listing-actionbar{ transition:none; }
+}
 
 .spec-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: 1px; background: var(--color-border); border:1px solid var(--color-border); border-radius: var(--radius-md); overflow:hidden; }
 @media (min-width:560px){ .spec-grid{ grid-template-columns: repeat(3,1fr); } }

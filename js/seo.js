@@ -159,6 +159,10 @@ function seoListingPage(listing, photoUrls){
       availability: 'https://schema.org/InStock',
       itemCondition: 'https://schema.org/UsedCondition',
       url,
+      // Google anbefaler priceValidUntil på Offer, så prisen ikke fremstår
+      // forældet i søgeresultatet. Sat relativt til visningstidspunktet,
+      // så den altid ligger i fremtiden — siden har ingen fast "gyldig til"-dato.
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
       areaServed: { '@type': 'Country', name: 'Danmark' },
       // Forhandler: offentlig virksomhed, navn og adresse er fint.
       // Privat sælger: kun byen, aldrig navnet i struktureret data.
@@ -199,8 +203,12 @@ function seoSearchResults(listings, heading){
   } : null);
 }
 
-/* Forhandlerprofil. */
-function seoDealerPage(seller, listingCount){
+/* Forhandlerprofil.
+   `listings` er valgfri (bagudkompatibel med kald der kun sender antallet) —
+   sendes den med, får siden en rigtig ItemList over det sælgeren faktisk har
+   til salg, i stedet for en tom makesOffer-stub uden navn eller pris, som
+   ikke afspejler noget der reelt står på siden. */
+function seoDealerPage(seller, listingCount, listings){
   const url = `${SITE_URL}/forhandler.html?id=${encodeURIComponent(seller.id || "")}`;
   Seo.setSocial({
     title: `${seller.name} — motorcykler til salg — Bikerbasen`,
@@ -215,6 +223,17 @@ function seoDealerPage(seller, listingCount){
     url,
     address: seller.city ? { '@type': 'PostalAddress', addressLocality: seller.city, addressCountry: 'DK' } : undefined,
     telephone: seller.phone || undefined,
-    makesOffer: { '@type': 'Offer', itemOffered: { '@type': 'Motorcycle' } },
   });
+  Seo.setJsonLd('dealer-items', (listings && listings.length) ? {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: `Motorcykler til salg fra ${seller.name}`,
+    numberOfItems: listings.length,
+    itemListElement: listings.map((l, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: listingPageUrl(l),
+      name: `${l.brand} ${l.model} ${l.year}`,
+    })),
+  } : null);
 }

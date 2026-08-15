@@ -30,6 +30,17 @@ const admin = createClient(
 
 const tal = (n: number) => new Intl.NumberFormat('da-DK').format(n);
 
+/* Saelgerens egne felter (brand, model, city) gik uescaped ind i mailens HTML
+   og i emnelinjen. En annonce med model sat til
+     </h1><a href="https://falsk-bikerbasen.dk/login">Bekraeft din konto</a><h1>
+   ville sende et phishing-link ud til ALLE med en matchende soegeagent — fra
+   vores eget SPF/DKIM-signerede domaene, i vores eget layout. Der koeres ikke
+   scripts i mailklienter, saa det er ikke XSS; det er vaerre, fordi mailen ser
+   aegte ud. Felterne er laengdebegraensede i 008, men laengde er ingen
+   beskyttelse mod markup. */
+const esc = (v: unknown) => String(v ?? '').replace(/[&<>"']/g, c =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+
 /* Matcher én annonce mod én gemt soegning.
 
    Bevidst konservativ: kender vi ikke et filter, lader vi det passere frem
@@ -88,7 +99,7 @@ function matcher(l: Record<string, any>, qs: string): boolean {
 }
 
 function mailHtml(l: Record<string, any>, sti: string, afmeld: string){
-  const titel = `${l.brand} ${l.model}`;
+  const titel = esc(`${l.brand} ${l.model}`);
   return `<!doctype html><html lang="da"><body style="margin:0;background:#F7F5F2;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1C1A18;">
   <div style="max-width:520px;margin:0 auto;padding:24px 16px;">
     <p style="font-size:14px;color:#6B6560;margin:0 0 16px;">Der er kommet en motorcykel, der matcher din søgeagent.</p>
@@ -96,7 +107,7 @@ function mailHtml(l: Record<string, any>, sti: string, afmeld: string){
       <div style="padding:18px;">
         <h1 style="font-size:20px;margin:0 0 6px;">${titel}</h1>
         <p style="font-size:22px;font-weight:700;color:#C6420E;margin:0 0 10px;">${tal(l.price)} kr.</p>
-        <p style="font-size:14px;color:#6B6560;margin:0 0 16px;">${l.year} · ${tal(l.km)} km · ${tal(l.ccm)} ccm${l.city ? ' · ' + l.city : ''}</p>
+        <p style="font-size:14px;color:#6B6560;margin:0 0 16px;">${esc(l.year)} · ${tal(l.km)} km · ${tal(l.ccm)} ccm${l.city ? ' · ' + esc(l.city) : ''}</p>
         <a href="${SITE_URL}/${sti}" style="display:inline-block;background:#C6420E;color:#fff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:999px;">Se annoncen</a>
       </div>
     </div>
@@ -157,7 +168,10 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: 'Bikerbasen <noreply@bikerbasen.dk>',
           to: [email],
-          subject: `${l.brand} ${l.model} — ${tal(l.price)} kr.`,
+          // Emnelinjen taaler ikke markup, men et linjeskift kan injicere headere.
+          subject: `${String(l.brand ?? '').replace(/[
+]/g, ' ')} ${String(l.model ?? '').replace(/[
+]/g, ' ')} — ${tal(l.price)} kr.`,
           html: mailHtml(l, sti, afmeld),
         }),
       });

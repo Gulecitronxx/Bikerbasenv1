@@ -74,6 +74,67 @@ function writeStateToURL(){
   history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
 }
 
+/* ============ Opstart: hvad skal bygges hvornår ============
+
+   Hele filterpanelet blev tidligere bygget på hovedtråden inden første
+   render: ~35 udstyrs-checkbokse, 60 mærker, regioner, farver, chips og
+   options — 470 DOM-knuder, som på mobil ligger i en skuffe med
+   `display:none`, indtil brugeren trykker "Filtre". Målt i Lighthouse lå det
+   i den samme 254 ms-opgave som resultaterne, og var dermed direkte TBT.
+
+   Nu bygges kun det, der er synligt med det samme (populateChrome), og
+   panelet rejses første gang det skal bruges — ved tryk på "Filtre" på
+   mobil, og i en idle-lomme efter første render på desktop, hvor panelet
+   står åbent i sidebaren. */
+let filtersBuilt = false;
+
+/* Ikoner uden for filterpanelet: værktøjslinjen, søgefeltet, brødkrummen og
+   tom-tilstanden. Billigt, og skal stå der ved første maling. */
+function populateChrome(){
+  document.getElementById('filter-icon-mount').innerHTML = Icon.filter;
+  const srpIcon = document.getElementById('srp-search-icon');
+  if (srpIcon) srpIcon.innerHTML = Icon.search;
+  const qClearBtn = document.getElementById('filter-q-clear');
+  if (qClearBtn) qClearBtn.innerHTML = Icon.close;
+  document.getElementById('empty-icon').innerHTML = Icon.search;
+  document.getElementById('bc-sep-1').innerHTML = Icon.chevronRight;
+  document.getElementById('view-grid').innerHTML = Icon.grid;
+  document.getElementById('view-list').innerHTML = Icon.list;
+  const vs = document.getElementById('view-swipe');
+  if (vs) vs.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2" transform="rotate(-6 12 12)"/><path d="M9 20h6"/></svg>`;
+}
+
+/* Bygger panelet én gang og kobler dets kontroller på. Idempotent, så den
+   kan kaldes fra både klik, idle og media-query-skift. */
+function ensureFiltersBuilt(){
+  if (filtersBuilt) return;
+  filtersBuilt = true;
+  populateFilterUI();
+  wireFilterControls();
+  reflectStateToUI();
+}
+
+/* Desktop viser panelet i sidebaren — dér skal det rejses af sig selv, men
+   først når hovedtråden er ledig. På mobil ligger det i en lukket skuffe, så
+   dér venter vi på det tryk der rent faktisk åbner den (eller på at vinduet
+   bliver bredt nok til at panelet vises). */
+function scheduleFilterPanel(){
+  if (filtersBuilt) return;
+  const mq = window.matchMedia('(min-width: 960px)');
+  const build = () => ensureFiltersBuilt();
+  if (mq.matches){
+    (window.requestIdleCallback || ((f) => setTimeout(f, 120)))(build, { timeout: 1200 });
+    return;
+  }
+  // Bliver vinduet bredt nok til at sidebaren vises, skal panelet være der.
+  const onResize = () => {
+    if (!mq.matches) return;
+    window.removeEventListener('resize', onResize);
+    build();
+  };
+  window.addEventListener('resize', onResize, { passive: true });
+}
+
 function populateFilterUI(){
   document.getElementById('filter-types').innerHTML = TYPES.map(t =>
     `<button type="button" class="chip" data-type="${t.id}">${t.label}</button>`).join('');
@@ -125,19 +186,9 @@ function populateFilterUI(){
     '<option value="">Alle annoncer</option>' +
     AGE_FILTERS.map(a => `<option value="${a.id}">${a.label}</option>`).join('');
 
-  document.getElementById('filter-icon-mount').innerHTML = Icon.filter;
-  const srpIcon = document.getElementById('srp-search-icon');
-  if (srpIcon) srpIcon.innerHTML = Icon.search;
-  const qClearBtn = document.getElementById('filter-q-clear');
-  if (qClearBtn) qClearBtn.innerHTML = Icon.close;
-  document.getElementById('empty-icon').innerHTML = Icon.search;
-  document.getElementById('bc-sep-1').innerHTML = Icon.chevronRight;
+  // Ikonerne der bor inde i panelet — hører til her, ikke i populateChrome.
   document.querySelectorAll('.filter-group summary .chev').forEach(c => c.innerHTML = Icon.chevronDown);
   document.querySelector('.filters-close').innerHTML = Icon.close;
-  document.getElementById('view-grid').innerHTML = Icon.grid;
-  document.getElementById('view-list').innerHTML = Icon.list;
-  const vs = document.getElementById('view-swipe');
-  if (vs) vs.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2" transform="rotate(-6 12 12)"/><path d="M9 20h6"/></svg>`;
 }
 
 function describeCurrentSearch(pills){
@@ -277,7 +328,8 @@ function wireSwipeGestures(){
   top.addEventListener('pointercancel', end);
 }
 
-function reflectStateToUI(){
+/* Spejler state ned i de kontroller der først findes, når panelet er bygget. */
+function reflectFilterPanel(){
   document.querySelectorAll('#filter-types .chip').forEach(chip => {
     chip.classList.toggle('active', state.types.includes(chip.dataset.type));
   });
@@ -291,11 +343,6 @@ function reflectStateToUI(){
     ch.classList.toggle('active', state.brands.includes(ch.dataset.brandChip));
   });
   renderModelFilter();
-  const qInput = document.getElementById('filter-q');
-  if (qInput && qInput.value !== state.q) qInput.value = state.q;
-  const qClear = document.getElementById('filter-q-clear');
-  if (qClear) qClear.hidden = !state.q;
-  document.querySelectorAll('.dual-range').forEach(el => el._sync && el._sync());
   document.querySelectorAll('#filter-regions input').forEach(cb => {
     cb.checked = state.regions.includes(cb.dataset.region);
   });
@@ -320,6 +367,18 @@ function reflectStateToUI(){
   document.querySelectorAll('#filter-cylinders .chip').forEach(ch => {
     ch.classList.toggle('active', state.cylinders.includes(Number(ch.dataset.cylinder)));
   });
+}
+
+function reflectStateToUI(){
+  /* Panelets egne kontroller findes kun når panelet er bygget. Er det ikke,
+     springes hele blokken over — ensureFiltersBuilt kalder reflectStateToUI
+     igen umiddelbart efter, så et filter fra URL'en aldrig går tabt. */
+  if (filtersBuilt) reflectFilterPanel();
+  const qInput = document.getElementById('filter-q');
+  if (qInput && qInput.value !== state.q) qInput.value = state.q;
+  const qClear = document.getElementById('filter-q-clear');
+  if (qClear) qClear.hidden = !state.q;
+  document.querySelectorAll('.dual-range').forEach(el => el._sync && el._sync());
   document.getElementById('filter-photos-only').checked = state.photosOnly;
   document.getElementById('filter-dealer-only').checked = state.dealerOnly;
   document.getElementById('filter-nysynet').checked = state.nysynet;
@@ -431,26 +490,69 @@ function activeFilterPills(){
   return pills;
 }
 
+/* ============ Resultatgitteret males i portioner ============
+
+   Et kort er ~80 DOM-knuder (tegningen af motorcyklen er en inline-SVG), så
+   en hel side på 12 kort er ~1000 knuder. Blev de sat ind i ét hug, kostede
+   det opbygning + stilberegning + layout i SAMME opgave — målt 97 ms script
+   og 134 ms layout på en throttlet mobil. Alt over 50 ms i én opgave er
+   blokeret tid, hvor et tryk ikke bliver besvaret.
+
+   Nu males de tre første (dem der er over folden på en telefon) med det
+   samme, og resten portionsvis i hver sin frame. Brugeren ser sit første
+   resultat tidligere, og ingen enkelt opgave holder tråden i mere end et
+   øjeblik. Rækkefølgen er uændret, så intet flytter sig — kortene kommer
+   nedefter, hvor der ikke er noget at skubbe på. */
+const FIRST_CARDS = 2;
+const CARD_CHUNK = 2;
+let cardChunkHandle = 0;
+
+function paintCards(grid, pageItems){
+  if (cardChunkHandle){ clearTimeout(cardChunkHandle); cardChunkHandle = 0; }
+  grid.innerHTML = pageItems.slice(0, FIRST_CARDS).map(listingCardHTML).join('');
+  wireFavoriteButtons(grid);
+  if (pageItems.length <= FIRST_CARDS) return;
+
+  let next = FIRST_CARDS;
+  const step = () => {
+    cardChunkHandle = 0;
+    const from = next, to = Math.min(from + CARD_CHUNK, pageItems.length);
+    const alreadyThere = grid.children.length;
+    grid.insertAdjacentHTML('beforeend',
+      pageItems.slice(from, to).map((l, k) => listingCardHTML(l, from + k)).join(''));
+    // Kun de nye kort kobles på — kører wireFavoriteButtons over hele gitteret
+    // igen, får de gamle hjerter to lyttere og slår sig selv fra igen.
+    for (let i = alreadyThere; i < grid.children.length; i++) wireFavoriteButtons(grid.children[i]);
+    next = to;
+    if (next < pageItems.length) cardChunkHandle = setTimeout(step, 0);
+  };
+  // setTimeout og ikke requestAnimationFrame: rAF står stille i en skjult
+  // fane, og så ville resten af resultaterne aldrig blive tegnet, før
+  // brugeren kiggede forbi.
+  cardChunkHandle = setTimeout(step, 0);
+}
+
+/* ============ Render i to etaper ============
+
+   Alt hvad render() rørte lå i én opgave: resultaterne OG alt rundt om dem
+   (filterpiller, tælle-badge, søgeagent-knap, tyndt-resultat-panel, JSON-LD,
+   paginering). Målt på throttlet mobil blev det til 103 ms script + 59 ms
+   layout i én blok — langt over de 50 ms, hvor et tryk begynder at føles
+   dødt.
+
+   Etape 1 (render) er dét brugeren venter på: overskrift, antal og kortene.
+   Etape 2 (renderSecondary) er rammen om dem, og kan lige så godt komme en
+   opgave senere — det er millisekunder for øjet, men det halverer den
+   længste blokering. Kommer der en ny render inden da, kasseres den gamle
+   etape 2, så der aldrig tegnes noget forældet. */
+let secondaryHandle = 0;
+
 function render(){
   writeStateToURL();
   reflectStateToUI();
-
-  const pills = activeFilterPills();
-  // p.label kan stamme fra URL-parametre (brands, regions, conditions, farve …)
-  // og er dermed angriberstyret. Escapes i BÅDE tekst- og attribut-kontekst,
-  // ellers er ?brands=<img onerror=…> reflekteret XSS via et delt link.
-  document.getElementById('active-filters').innerHTML = pills.map((p, i) =>
-    `<span class="active-filter-pill">${escapeHTML(p.label)}<button type="button" data-pill-clear="${i}" aria-label="Fjern filter: ${escapeHTML(p.label)}">${Icon.close}</button></span>`).join('');
-  document.querySelectorAll('[data-pill-clear]').forEach(btn => {
-    btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; render(); });
-  });
-
-  const badge = document.getElementById('filter-badge');
-  badge.textContent = pills.length;
-  badge.hidden = pills.length === 0;
-  refreshSaveSearchButton();
   applyViewMode();
 
+  const pills = activeFilterPills();
   const filtered = getFilteredListings();
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -467,32 +569,6 @@ function render(){
   if (state.regions.length === 1) heading += ` i ${state.regions[0]}`;
   const headingEl = document.querySelector('.search-heading');
   if (headingEl.textContent !== heading) headingEl.textContent = heading;
-  seoSearchResults(pageItems, heading);
-
-  // Få-resultater-panel: gør et tyndt resultat til en konvertering i stedet for
-  // et dødt hjørne (kun når brugeren faktisk har filtreret).
-  const thin = document.getElementById('thin-result-panel');
-  if (thin){
-    const hasFilters = pills.length > 0 || !!state.q;
-    if (total > 0 && total < 4 && hasFilters){
-      thin.hidden = false;
-      thin.innerHTML = `
-        <div class="thin-panel-inner">
-          <div class="thin-panel-copy">
-            <p class="thin-panel-title">${total === 1 ? 'Kun 1 match' : 'Kun ' + total + ' resultater'} — udvid din søgning</p>
-            <p class="thin-panel-text">Bikerbasen er nyt, og lageret vokser hver uge. Fjern et filter, eller få besked når der lander flere.</p>
-          </div>
-          <div class="thin-panel-actions">
-            <button type="button" class="btn btn-outline btn-sm" data-thin-reset>Nulstil filtre</button>
-            <button type="button" class="btn btn-primary btn-sm" data-thin-agent>Få besked når der kommer flere</button>
-          </div>
-        </div>`;
-      thin.querySelector('[data-thin-reset]').addEventListener('click', () => document.getElementById('clear-filters').click());
-      thin.querySelector('[data-thin-agent]').addEventListener('click', () => document.getElementById('save-search-btn').click());
-    } else {
-      thin.hidden = true; thin.innerHTML = '';
-    }
-  }
 
   const grid = document.getElementById('results-grid');
   const empty = document.getElementById('empty-state');
@@ -502,8 +578,7 @@ function render(){
     // adresser, indtil vi har tegnet de rigtige. Nu er de rigtige.
     grid.style.visibility = '';
     empty.style.display = 'none';
-    grid.innerHTML = pageItems.map(listingCardHTML).join('');
-    wireFavoriteButtons(grid);
+    paintCards(grid, pageItems);
   } else {
     grid.style.display = 'none';
     empty.style.display = 'block';
@@ -529,6 +604,53 @@ function render(){
     nulstil.classList.toggle('btn-primary', !nulstil.hidden);
     saelg.classList.toggle('btn-primary', nulstil.hidden);
     saelg.classList.toggle('btn-outline', !nulstil.hidden);
+  }
+
+  clearTimeout(secondaryHandle);
+  secondaryHandle = setTimeout(() => renderSecondary(pills, pageItems, heading, total, totalPages), 0);
+}
+
+/* Etape 2: rammen om resultaterne. */
+function renderSecondary(pills, pageItems, heading, total, totalPages){
+  // p.label kan stamme fra URL-parametre (brands, regions, conditions, farve …)
+  // og er dermed angriberstyret. Escapes i BÅDE tekst- og attribut-kontekst,
+  // ellers er ?brands=<img onerror=…> reflekteret XSS via et delt link.
+  const filterBar = document.getElementById('active-filters');
+  filterBar.innerHTML = pills.map((p, i) =>
+    `<span class="active-filter-pill">${escapeHTML(p.label)}<button type="button" data-pill-clear="${i}" aria-label="Fjern filter: ${escapeHTML(p.label)}">${Icon.close}</button></span>`).join('');
+  filterBar.querySelectorAll('[data-pill-clear]').forEach(btn => {
+    btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; render(); });
+  });
+
+  const badge = document.getElementById('filter-badge');
+  badge.textContent = pills.length;
+  badge.hidden = pills.length === 0;
+  refreshSaveSearchButton();
+  seoSearchResults(pageItems, heading);
+
+  // Få-resultater-panel: gør et tyndt resultat til en konvertering i stedet for
+  // et dødt hjørne (kun når brugeren faktisk har filtreret).
+  const thin = document.getElementById('thin-result-panel');
+  if (thin){
+    const hasFilters = pills.length > 0 || !!state.q;
+    if (total > 0 && total < 4 && hasFilters){
+      thin.hidden = false;
+      thin.innerHTML = `
+        <div class="thin-panel-inner">
+          <div class="thin-panel-copy">
+            <p class="thin-panel-title">${total === 1 ? 'Kun 1 match' : 'Kun ' + total + ' resultater'} — udvid din søgning</p>
+            <p class="thin-panel-text">Bikerbasen er nyt, og lageret vokser hver uge. Fjern et filter, eller få besked når der lander flere.</p>
+          </div>
+          <div class="thin-panel-actions">
+            <button type="button" class="btn btn-outline btn-sm" data-thin-reset>Nulstil filtre</button>
+            <button type="button" class="btn btn-primary btn-sm" data-thin-agent>Få besked når der kommer flere</button>
+          </div>
+        </div>`;
+      thin.querySelector('[data-thin-reset]').addEventListener('click', () => document.getElementById('clear-filters').click());
+      thin.querySelector('[data-thin-agent]').addEventListener('click', () => document.getElementById('save-search-btn').click());
+    } else {
+      thin.hidden = true; thin.innerHTML = '';
+    }
   }
 
   const pag = document.getElementById('pagination');
@@ -610,7 +732,8 @@ function wireDualRange(rangeId, minFieldId, maxFieldId, minKey, maxKey){
   el._sync();
 }
 
-function wireControls(){
+/* Kontroller der lever inde i filterpanelet — kobles på når panelet bygges. */
+function wireFilterControls(){
   document.querySelectorAll('#filter-types .chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const id = chip.dataset.type;
@@ -707,7 +830,12 @@ function wireControls(){
       state.page = 1; render();
     });
   });
+}
 
+/* Kontroller der står i den statiske HTML og skal virke fra første sekund:
+   søgefelt, talfelter, skydere, sortering, visningsskift, søgeagent og
+   knappen der åbner filterskuffen. */
+function wireCoreControls(){
   document.getElementById('filter-age').addEventListener('change', (e) => {
     state.maxAgeDays = numOrNull(e.target.value);
     state.page = 1; render();
@@ -824,19 +952,53 @@ function wireControls(){
     // Skjuler cookiebanneret, så det ikke dækker skuffens knapper.
     document.body.classList.toggle('overlay-open', open);
   };
-  document.getElementById('open-filters-btn').addEventListener('click', () => setOverlay(true));
+  // Skuffen bygges færdig i samme klik som den åbnes — brugeren har allerede
+  // ventet på sit tryk, og panelet er tegnet inden overgangen er kørt.
+  document.getElementById('open-filters-btn').addEventListener('click', () => {
+    ensureFiltersBuilt();
+    setOverlay(true);
+  });
   overlay.querySelectorAll('[data-close-filters]').forEach(el => el.addEventListener('click', () => setOverlay(false)));
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+/* Giver hovedtråden en pause, så browseren kan male og reagere på input
+   imellem opstartens etaper. Uden den lå hele opstarten i én 254 ms-opgave —
+   alt over 50 ms tæller direkte som blokeret tid. */
+const nextTask = () => new Promise(r => setTimeout(r, 0));
+
+async function boot(){
   await backendReady();
-  renderHeader('soegning.html');
-  populateFilterUI();
+
+  // Etape 1: værktøjslinjens ikoner og de kontroller der står i HTML'en.
+  // Ligger i sin egen opgave, så den ikke klæber til evalueringen af
+  // search.js selv.
+  await nextTask();
   readStateFromURL();
-  wireControls();
+  populateChrome();
+  wireCoreControls();
+
+  // Etape 2: det brugeren er kommet efter — resultaterne.
+  await nextTask();
   render();
 
-  // Husk søgningen som genvej på forsiden — kun når der faktisk filtreres.
+  // Etape 3: headeren er allerede tegnet som statisk HTML; hydreringen
+  // (login-slot, favorittal, menu, cookiebanner) kan vente en opgave.
+  await nextTask();
+  renderHeader('soegning.html');
+
+  // Etape 4: filterpanelet og bogføringen af søgningen.
+  await nextTask();
+  scheduleFilterPanel();
   const qs = currentQueryString();
   if (qs) Store.addRecentSearch(qs, describeCurrentSearch(activeFilterPills()));
-});
+}
+
+/* Scriptet er `defer`, så DOM'en står færdig når vi når hertil — vi behøver
+   ikke vente på DOMContentLoaded. Det er ikke bare tidligere: begivenheden
+   samler alle sidens lyttere i ÉN opgave, så backend-broens arbejde og vores
+   opstart lagde sig oven i hinanden. Nu kører de hver for sig. */
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', boot, { once: true });
+} else {
+  boot();
+}

@@ -9,6 +9,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const { browserModules } = require('./shared');
 const { listingCardHTML, normalizeRemoteListing } = browserModules();
+const BASE = require('./site-url')(ROOT);
 const src = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
 eval(src + '\nglobal.__L = LISTINGS; global.__B = BRANDS_BY_MODEL; global.__T = TYPES;');
 const BRANDS_BY_MODEL = global.__B;
@@ -50,6 +51,41 @@ function slugify(name){
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* Struktureret data til mærkesiderne: BreadcrumbList så Google kan vise
+   brødkrummen i søgeresultatet, og en ItemList over de annoncer der rent
+   faktisk står på siden — samme opskrift som js/seo.js bruger på
+   søgeresultater (seoSearchResults), bare bagt ind i den statiske markup i
+   stedet for sat af JavaScript efter sidens indlæst. */
+function jsonLdBlock(objs){
+  return objs.filter(Boolean).map(o =>
+    `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`
+  ).join('\n');
+}
+function breadcrumbLd(items){
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, i) => ({
+      '@type': 'ListItem', position: i + 1, name: it.name, item: `${BASE}/${it.path}`,
+    })),
+  };
+}
+function brandItemListLd(brand, items){
+  if (!items.length) return null;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: `Brugte ${brand} motorcykler til salg`,
+    numberOfItems: items.length,
+    itemListElement: items.map((l, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${BASE}/${require('./shared').listingSlug(l)}`,
+      name: `${l.brand} ${l.model} ${l.year}`,
+    })),
+  };
+}
 
 // Reuse the live header/footer so brand pages never drift from the rest of the site.
 // Normalise line endings first: git checks these files out as CRLF on Windows,
@@ -136,6 +172,14 @@ for (const brand of brands){
 </style>
 ${foersteFoto ? `<link rel="preload" as="image" href="${foersteFoto}" fetchpriority="high">
 ` : ''}<link rel="stylesheet" href="css/styles.css">
+${jsonLdBlock([
+  breadcrumbLd([
+    { name: 'Forside', path: 'index.html' },
+    { name: 'Mærker', path: 'maerker.html' },
+    { name: brand, path: `maerke-${slug}.html` },
+  ]),
+  brandItemListLd(brand, items),
+])}
 </head>
 <body>
 ${header}
@@ -227,6 +271,12 @@ const indexHtml = `<!doctype html>
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="stylesheet" href="css/styles.css">
+${jsonLdBlock([
+  breadcrumbLd([
+    { name: 'Forside', path: 'index.html' },
+    { name: 'Mærker', path: 'maerker.html' },
+  ]),
+])}
 </head>
 <body>
 ${header}
@@ -292,7 +342,7 @@ ${footer}
 fs.writeFileSync(path.join(ROOT, 'maerker.html'), indexHtml, 'utf8');
 
 /* ---- sitemap.xml so crawlers actually find the new pages ---- */
-const base = require('./site-url')(ROOT);
+const base = BASE;
 /* login.html er sat til noindex af build-meta.js. En noindex-side i
    sitemappet er et modsat signal, så den hører ikke med her. */
 const staticPages = ['index.html','soegning.html','maerker.html','opret-annonce.html','sikkerhed.html','vilkaar.html','privatlivspolitik.html'];
@@ -306,11 +356,29 @@ const listingUrls = LISTINGS.map(l => ({
   lastmod: String(l.updated_at || l.createdAt || '').slice(0, 10),
 }));
 
+/* Forhandlerprofiler har ingen statisk side som annoncerne — forhandler.html?id=
+   ER den kanoniske adresse. Uden et link herind udefra kan den kun findes ved
+   at klikke gennem en af forhandlerens annoncer, så den hører til i sitemappet.
+   Kun forhandlere (offentlig virksomhed), aldrig private sælgere — samme grænse
+   som i JSON-LD'et, hvor en privat sælgers navn heller aldrig eksponeres. */
+const dealerLastmod = new Map();
+for (const l of LISTINGS){
+  if (!l.seller?.isDealer || !l.seller?.id) continue;
+  const dato = String(l.updated_at || l.createdAt || '').slice(0, 10);
+  const gammel = dealerLastmod.get(l.seller.id);
+  if (!gammel || dato > gammel) dealerLastmod.set(l.seller.id, dato);
+}
+const dealerUrls = [...dealerLastmod.entries()].map(([id, lastmod]) => ({
+  loc: `forhandler.html?id=${id}`,
+  lastmod,
+}));
+
 const today = new Date().toISOString().slice(0,10);
 const entries = [
   ...[...staticPages, ...brands.map(b => `maerke-${slugify(b)}.html`)]
     .map(u => ({ loc: u, lastmod: today })),
   ...listingUrls,
+  ...dealerUrls,
 ];
 const urls = entries;
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'),

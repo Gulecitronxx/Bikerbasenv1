@@ -15,8 +15,94 @@ function stripBikeToLineArt(svg, strokeWidth){
   });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await backendReady();
+/* Giver hovedtråden luft mellem to bidder arbejde.
+
+   Forsiden byggede før alt i ét træk inde i DOMContentLoaded — og først
+   EFTER `await backendReady()`, altså efter databasen havde svaret. To ting
+   fulgte af det: intet blev tegnet før netværket var færdigt, og selve
+   opbygningen lå som lange, uafbrydelige opgaver på hovedtråden (målt i
+   trace: 131ms og 67ms alene fra home.js, oven i et par styk på 150-230ms
+   fra de style/layout-opdateringer hver innerHTML udløste). I den tid kan
+   browseren hverken svare på tryk eller male.
+
+   Nu bygges siden i bidder med et yield imellem. Slutresultatet er præcis
+   det samme DOM — men hvert stykke arbejde bliver sin egen korte opgave,
+   som browseren kan afbryde. Og de dele, der ikke kræver data (headeren,
+   hele hero-søgekortet), tegnes med det samme i stedet for at vente på
+   Supabase. */
+const yieldToMain = () =>
+  window.scheduler?.yield?.() ?? new Promise(r => setTimeout(r, 0));
+
+/* Sætter kort ind i portioner med et yield imellem.
+
+   Otte line-art-kort skrevet ind med ét innerHTML blev målt som én
+   sammenhængende opgave på 119ms — nok til at siden føles død, hvis man
+   rammer den midt i. I portioner à tre bliver ingen af dem lange nok til at
+   blokere, og det samlede resultat er det samme DOM. */
+async function saetIndIPortioner(mount, dele, portion = 3){
+  mount.innerHTML = '';
+  for (let i = 0; i < dele.length; i += portion){
+    mount.insertAdjacentHTML('beforeend', dele.slice(i, i + portion).join(''));
+    if (i + portion < dele.length) await yieldToMain();
+  }
+}
+
+/* Bygger et annoncegitter først, når det nærmer sig viewporten.
+
+   Annoncekort er det dyreste på siden: et kort uden foto får en komplet
+   line-art-SVG med defs og gradienter, og forsiden endte med 138 svg'er i
+   dokumentet. Alle tre gitre — nyeste, udvalgte og senest sete — blev bygget
+   ved sideindlæsning, selvom de ligger 4000-6000px nede. Arbejdet lå altså
+   præcis oven i det øjeblik, hvor brugeren prøver at bruge søgekortet
+   øverst.
+
+   800px rootMargin: gitteret er fyldt ud længe før det kommer til syne, så
+   man aldrig scroller hen til et tomt felt. Har browseren ingen
+   IntersectionObserver, tegnes der med det samme — indholdet må aldrig kunne
+   udeblive, kun komme lidt senere. Højden er reserveret i forvejen af
+   `.listings-grid:empty{min-height}` i den kritiske CSS, så der ikke hopper
+   noget, når kortene lander. */
+function tegnNaerViewport(el, draw){
+  if (!el) return;
+  let tegnet = false;
+  const tegnEnGang = () => { if (tegnet) return; tegnet = true; draw(); };
+
+  if (!('IntersectionObserver' in window)){ tegnEnGang(); return; }
+  const io = new IntersectionObserver((entries) => {
+    if (!entries.some(e => e.isIntersecting)) return;
+    io.disconnect();
+    tegnEnGang();
+  }, { rootMargin: '800px 0px' });
+  io.observe(el);
+
+  /* Sikkerhedsnet — og det er ikke teori.
+
+     IntersectionObserver kalder kun tilbage, når siden faktisk renderes. I en
+     fane, der ikke komponerer billeder (document.hidden === true), udebliver
+     kaldet fuldstændigt; præcis som `loading="lazy"` heller aldrig henter et
+     billede dér. Uden et net ville gitrene stå tomme for evigt i sådan en
+     situation, og det er den slags fejl, ingen opdager, før en bruger gør.
+
+     Derfor: observeren er optimeringen — den tegner tidligt, når man nærmer
+     sig. Det her er garantien for, at der ALTID bliver tegnet. Den venter til
+     efter `load`, så den ikke konkurrerer med det, brugeren kigger på. */
+  const net = () => { io.disconnect(); tegnEnGang(); };
+  const planlaeg = () => (window.requestIdleCallback
+    ? requestIdleCallback(net, { timeout: 3000 })
+    : setTimeout(net, 1500));
+  if (document.readyState === 'complete') planlaeg();
+  else window.addEventListener('load', planlaeg, { once: true });
+}
+
+document.addEventListener('DOMContentLoaded', () => { buildForside(); });
+
+async function buildForside(){
+  /* ============ Bid 1: alt over folden — kræver ingen data ============
+     renderHeader læser Store.getUser(), som allerede ligger i localStorage
+     fra sidste besøg. backendReady() opdaterer den bagefter, hvis sessionen
+     er udløbet — derfor køres de tre auth-afhængige opdateringer igen
+     nedenfor (men ikke hele renderHeader: wireHeader ville binde
+     lytterne to gange). */
   renderHeader('index.html');
 
   // Gennemsigtig hero-header: massiv baggrund så snart man scroller forbi toppen.
@@ -44,7 +130,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     typeSelect.appendChild(opt);
   });
 
-  const ALLE = Store.getAllListings();   // databasen (+ demodata hvis slået til)
   // Hero'ens tillidslinje er nu statiske, ærlige pointer (ingen tal der afslører
   // et tyndt lager) — se .hero-trust i markup.
 
@@ -101,6 +186,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById(id).addEventListener('input', updateHeroCount));
   updateHeroCount();
 
+  // hero search submit — bundet her, i første bid, så søgekortet virker
+  // fra det øjeblik det kan ses (før lå det til allersidst).
+  document.getElementById('hero-search-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = document.getElementById('hs-query').value.trim();
+    const type = document.getElementById('hs-type').value;
+    const maxPrice = document.getElementById('hs-price').value;
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (type) params.set('type', type);
+    if (maxPrice) params.set('maxPrice', maxPrice);
+    window.location.href = 'soegning.html' + (params.toString() ? '?' + params.toString() : '');
+  });
+
+  await yieldToMain();
+
+  /* ============ Bid 2: kategorifliserne ============ */
   // category tiles — hver type får sin egen line-art-motorcykel af netop den
   // type. Mere distinkt end ét gentaget ikon, og custom pr. kategori frem for
   // Bilbasens stock-fotos.
@@ -111,6 +213,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       <span class="tile-label">${t.label}<span class="tile-go" aria-hidden="true">${Icon.arrowRight}</span></span>
     </a>`).join('');
 
+  await yieldToMain();
+
+  /* ============ Bid 3: mærkeskyen + SEO-linkbåndet ============ */
   // Populære mærker — rigtige links til filtrerede søgninger (Bilbasens
   // vigtigste scent/SEO-aktiv). Ingen opdigtede annoncetal.
   const POPULAR_BRANDS = ['Yamaha','Honda','Suzuki','Kawasaki','BMW','Ducati','KTM','Triumph','Aprilia','Husqvarna','Vespa','Indian'];
@@ -144,102 +249,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     { label: 'Kun forhandlere', href: 'soegning.html?dealer=1' },
   ]);
 
-  // newest listings (by date)
-  const newest = [...ALLE].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
-  // Mens databasen er ny, kan en enkelt annonce stå alene i et 4-kolonners
-  // gitter med tre tomme felter ved siden af. I stedet for at opdigte
-  // annoncer fylder vi rækken ud med ærlige "opret din annonce"-kort, så
-  // forsiden ser levende og intentionel ud — og skubber samtidig udbud.
-  // Tynd lagerbeholdning: i stedet for at stable tomme dublet-kort med line-art
-  // fylder vi resten af rækken med ÉT roligt, intentionelt CTA-kort, der spænder
-  // over de ledige kolonner. Læses som "her lander nye annoncer" — ikke "tomt".
-  const newestMount = document.getElementById('newest-listings');
-  const realCardsHTML = newest.map(listingCardHTML).join('');
-  const wideCtaHTML = (span) => `
-    <a class="newest-cta" href="opret-annonce.html" style="grid-column: span ${span};"
-       aria-label="Opret en gratis annonce">
-      <span class="newest-cta-plus">${Icon.plus}</span>
-      <span class="newest-cta-copy">
-        <span class="newest-cta-title">Din motorcykel kunne stå her</span>
-        <span class="newest-cta-text">Opret en gratis annonce og bliv set af købere i hele Danmark — på under 5 minutter.</span>
-      </span>
-      <span class="newest-cta-link">Opret annonce${Icon.arrowRight}</span>
-    </a>`;
-  const renderNewest = () => {
-    const cols = getComputedStyle(newestMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-    // Meget tyndt lager (1-2 annoncer): vis dem som fuldbredde-liste-kort, så den
-    // ene rigtige motorcykel får vægt — det slår ét lille kort ved siden af et
-    // tomt bånd, der bare reklamerer "næsten intet lager". Ingen udfylder.
-    if (newest.length > 0 && newest.length < 3){
-      newestMount.classList.add('list-view');
-      newestMount.innerHTML = realCardsHTML;
-      return;
-    }
-    newestMount.classList.remove('list-view');
-    // Fyld en delvis række ud med ÉT solidt bånd, der spænder de ledige kolonner.
-    const span = (newest.length < cols) ? cols - newest.length : 0;
-    newestMount.innerHTML = realCardsHTML + (span ? wideCtaHTML(span) : '');
-    newestMount.querySelector('.newest-cta')?.classList.toggle('is-wide', span >= 2);
-  };
-  // Første render wires af den globale wireFavoriteButtons(document) nedenfor.
-  renderNewest();
-  // Tilpas udfylderkort, når man krydser et brudpunkt (fx rotation), og
-  // gen-wire de nye kort — den globale wiring kører kun ved sideindlæsning.
-  let _newestRAF;
-  window.addEventListener('resize', () => {
-    cancelAnimationFrame(_newestRAF);
-    _newestRAF = requestAnimationFrame(() => { renderNewest(); wireFavoriteButtons(newestMount); });
-  });
+  await yieldToMain();
 
-  // featured (curated mid-high price selection)
-  const featuredPool = [...ALLE].filter(l => l.price > 60000);
-  const rnd = seededRandom(7);
-  const featured = featuredPool
-    .map(l => ({ l, k: rnd() }))
-    .sort((a,b) => a.k - b.k)
-    .slice(0, 4)
-    .map(x => x.l);
-  // En overskrift uden indhold under ser i stykker ud — skjul hele sektionen.
-  const featuredMount = document.getElementById('featured-listings');
-  featuredMount.innerHTML = featured.map(listingCardHTML).join('');
-  const featuredSection = featuredMount.closest('section');
-  if (featuredSection) featuredSection.hidden = featured.length === 0;
-
-  // Samme for "nyeste", hvis databasen er helt tom.
-  const newestSection = document.getElementById('newest-listings').closest('section');
-  if (newestSection && newest.length === 0){
-    document.getElementById('newest-listings').innerHTML = `
-      <div class="empty-state" style="grid-column:1/-1;">
-        ${Icon.bike}
-        <h3>Der er ingen annoncer endnu</h3>
-        <p>Bliv den første til at sætte en motorcykel til salg.</p>
-        <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
-      </div>`;
-  }
-
-  // Senest sete — kun annoncer der stadig findes/er aktive; skjul sektionen
-  // helt for nye brugere (og når intet er set endnu).
-  const seenIds = Store.getRecentlyViewed();
-  const seen = seenIds.map(id => Store.getListingById(id))
-    .filter(l => l && (l.status ? l.status === 'active' : true))
-    .slice(0, 8);
-  const seenSection = document.getElementById('recently-viewed-section');
-  const seenMount = document.getElementById('recently-viewed');
-  if (seenSection && seenMount){
-    if (seen.length){
-      seenMount.innerHTML = seen.map(listingCardHTML).join('');
-      seenSection.hidden = false;
-    } else {
-      seenSection.hidden = true;
-    }
-  }
-
-  wireFavoriteButtons(document);
-
-  // trust strip
-  // Rækkefølge efter køberens faktiske behov på en privatsælger-markedsplads:
-  // registrering/gennemsigtighed først, så skjult kontakt, så forhandler-
-  // verificering. Ingen opdigtede tal/anmeldelser.
+  /* ============ Bid 4: tryghedsbåndet ============
+     Rækkefølge efter køberens faktiske behov på en privatsælger-markedsplads:
+     registrering/gennemsigtighed først, så skjult kontakt, så forhandler-
+     verificering. Ingen opdigtede tal/anmeldelser. */
   document.getElementById('trust-strip').innerHTML = `
     <div class="trust-card">
       <span class="trust-icon">${Icon.checkCircle}</span>
@@ -254,16 +269,123 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div><h3>Verificerede forhandlere</h3><p>Forhandlere godkendes med CVR og MitID, så du ved præcis, hvem der står bag annoncen.</p></div>
     </div>`;
 
-  // hero search submit
-  document.getElementById('hero-search-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const q = document.getElementById('hs-query').value.trim();
-    const type = document.getElementById('hs-type').value;
-    const maxPrice = document.getElementById('hs-price').value;
-    const params = new URLSearchParams();
-    if (q) params.set('q', q);
-    if (type) params.set('type', type);
-    if (maxPrice) params.set('maxPrice', maxPrice);
-    window.location.href = 'soegning.html' + (params.toString() ? '?' + params.toString() : '');
+  /* ============ Bid 5: annoncerne — først HER venter vi på databasen ============
+     Alt ovenfor er tegnet uden at røre netværket. */
+  await backendReady();
+
+  // Sessionen kan være udløbet, siden localStorage sidst blev skrevet.
+  // Kun de rene opdateringer køres igen — wireHeader/initCookieConsent ville
+  // binde deres lyttere en gang til.
+  if (typeof updateAuthVisibility === 'function') updateAuthVisibility();
+  if (typeof updateAuthSlot === 'function') updateAuthSlot();
+  if (typeof updateFavCount === 'function') updateFavCount();
+
+  const ALLE = Store.getAllListings();   // databasen (+ demodata hvis slået til)
+  updateHeroCount();                     // nu med de rigtige tal fra databasen
+
+  await yieldToMain();
+
+  /* ============ Bid 6: nyeste annoncer ============ */
+  // newest listings (by date)
+  const newest = [...ALLE].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
+  // Mens databasen er ny, kan en enkelt annonce stå alene i et 4-kolonners
+  // gitter med tre tomme felter ved siden af. I stedet for at opdigte
+  // annoncer fylder vi rækken ud med ærlige "opret din annonce"-kort, så
+  // forsiden ser levende og intentionel ud — og skubber samtidig udbud.
+  // Tynd lagerbeholdning: i stedet for at stable tomme dublet-kort med line-art
+  // fylder vi resten af rækken med ÉT roligt, intentionelt CTA-kort, der spænder
+  // over de ledige kolonner. Læses som "her lander nye annoncer" — ikke "tomt".
+  const newestMount = document.getElementById('newest-listings');
+  const realCards = newest.map(listingCardHTML);
+  const wideCtaHTML = (span) => `
+    <a class="newest-cta" href="opret-annonce.html" style="grid-column: span ${span};"
+       aria-label="Opret en gratis annonce">
+      <span class="newest-cta-plus">${Icon.plus}</span>
+      <span class="newest-cta-copy">
+        <span class="newest-cta-title">Din motorcykel kunne stå her</span>
+        <span class="newest-cta-text">Opret en gratis annonce og bliv set af købere i hele Danmark — på under 5 minutter.</span>
+      </span>
+      <span class="newest-cta-link">Opret annonce${Icon.arrowRight}</span>
+    </a>`;
+  const renderNewest = async () => {
+    const cols = getComputedStyle(newestMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+    // Meget tyndt lager (1-2 annoncer): vis dem som fuldbredde-liste-kort, så den
+    // ene rigtige motorcykel får vægt — det slår ét lille kort ved siden af et
+    // tomt bånd, der bare reklamerer "næsten intet lager". Ingen udfylder.
+    if (newest.length > 0 && newest.length < 3){
+      newestMount.classList.add('list-view');
+      await saetIndIPortioner(newestMount, realCards);
+      return;
+    }
+    newestMount.classList.remove('list-view');
+    // Fyld en delvis række ud med ÉT solidt bånd, der spænder de ledige kolonner.
+    const span = (newest.length < cols) ? cols - newest.length : 0;
+    await saetIndIPortioner(newestMount, span ? realCards.concat(wideCtaHTML(span)) : realCards);
+    newestMount.querySelector('.newest-cta')?.classList.toggle('is-wide', span >= 2);
+  };
+  const tegnNyeste = () => renderNewest().then(() => wireFavoriteButtons(newestMount));
+  // Er databasen helt tom, tegnes tom-tilstanden med det samme: den er
+  // billig, og den bestemmer sektionens højde.
+  if (newest.length === 0){
+    newestMount.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        ${Icon.bike}
+        <h3>Der er ingen annoncer endnu</h3>
+        <p>Bliv den første til at sætte en motorcykel til salg.</p>
+        <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
+      </div>`;
+  } else {
+    tegnNaerViewport(newestMount, tegnNyeste);
+  }
+  // Tilpas udfylderkort, når man krydser et brudpunkt (fx rotation), og
+  // gen-wire de nye kort. Kun hvis gitteret allerede er tegnet — ellers ville
+  // en rotation nå at bygge det, før man er i nærheden af det.
+  let _newestRAF;
+  window.addEventListener('resize', () => {
+    if (!newestMount.querySelector('.card, .newest-cta')) return;
+    cancelAnimationFrame(_newestRAF);
+    _newestRAF = requestAnimationFrame(tegnNyeste);
   });
-});
+
+  /* ============ Bid 7: udvalgte + senest sete ============ */
+  // featured (curated mid-high price selection)
+  const featuredPool = [...ALLE].filter(l => l.price > 60000);
+  const rnd = seededRandom(7);
+  const featured = featuredPool
+    .map(l => ({ l, k: rnd() }))
+    .sort((a,b) => a.k - b.k)
+    .slice(0, 4)
+    .map(x => x.l);
+  // En overskrift uden indhold under ser i stykker ud — skjul hele sektionen.
+  // Beslutningen tages NU (den er gratis), så sektionen ikke først står som et
+  // tomt bånd og forsvinder, når man scroller ned til den.
+  const featuredMount = document.getElementById('featured-listings');
+  const featuredSection = featuredMount.closest('section');
+  if (featuredSection) featuredSection.hidden = featured.length === 0;
+  if (featured.length){
+    tegnNaerViewport(featuredMount, () =>
+      saetIndIPortioner(featuredMount, featured.map(listingCardHTML))
+        .then(() => wireFavoriteButtons(featuredMount)));
+  }
+
+  // Senest sete — kun annoncer der stadig findes/er aktive; skjul sektionen
+  // helt for nye brugere (og når intet er set endnu).
+  const seenIds = Store.getRecentlyViewed();
+  const seen = seenIds.map(id => Store.getListingById(id))
+    .filter(l => l && (l.status ? l.status === 'active' : true))
+    .slice(0, 8);
+  const seenSection = document.getElementById('recently-viewed-section');
+  const seenMount = document.getElementById('recently-viewed');
+  if (seenSection && seenMount){
+    seenSection.hidden = !seen.length;
+    if (seen.length){
+      tegnNaerViewport(seenMount, () =>
+        saetIndIPortioner(seenMount, seen.map(listingCardHTML))
+          .then(() => wireFavoriteButtons(seenMount)));
+    }
+  }
+
+  // Kort, der allerede står i dokumentet (fx tom-tilstandens knap), samt alt
+  // andet klikbart uden for gitrene. Gitrene wirer sig selv, når de tegnes.
+  wireFavoriteButtons(document);
+}

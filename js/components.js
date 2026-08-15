@@ -192,7 +192,7 @@ function listingCardHTML(l, i){
       ${listingMediaHTML(l, `${brand} ${model}`, i === 0)}
       <div class="card-badges">
         ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
-        ${l.isDealer ? `<span class="badge badge-dealer">${Icon.shieldCheck}Forhandler</span>` : ''}
+        ${l.isDealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : ''}
         ${suspicious ? `<span class="badge badge-warning" title="Prisen ligger væsentligt under markedsniveau for den type og årgang — bed om ekstra dokumentation, og betal aldrig forud">${Icon.alertTriangle}Under markedspris</span>` : ''}
       </div>
       ${isOwnListing(l) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
@@ -357,9 +357,25 @@ function openInfoModal(title, bodyHTML){
 function initCookieConsent(){
   const banner = document.getElementById('cookie-banner');
   if (!banner) return;
-  if (Store.getCookieConsent()){ banner.remove(); return; }
+  if (Store.getCookieConsent()){ banner.remove(); document.body.classList.remove('cookie-banner-vises'); return; }
 
-  const svar = level => () => { Store.setCookieConsent(level); banner.remove(); };
+  /* Fortæl siden at banneret står der, og hvor højt det er. Annoncesidens
+     handlingsbjælke skubbes op oven over det — før lå banneret oven på
+     "Skriv til sælger", så sidens primære handling ikke kunne trykkes,
+     før man havde svaret på cookies. */
+  document.body.classList.add('cookie-banner-vises');
+  const maalHoejde = () => document.body.style.setProperty('--cookie-h', banner.offsetHeight + 'px');
+  maalHoejde();
+  if (window.ResizeObserver) new ResizeObserver(maalHoejde).observe(banner);
+
+  const svar = level => () => {
+    Store.setCookieConsent(level);
+    banner.remove();
+    document.body.classList.remove('cookie-banner-vises');
+    // Statistik er valgfri og starter foerst her — aldrig ved sideindlaesning.
+    // "Kun noedvendige" starter den altsaa aldrig.
+    if (level === 'all' && typeof window.bbStartAnalytics === 'function') window.bbStartAnalytics();
+  };
   document.getElementById('cookie-accept-all').addEventListener('click', svar('all'));
   document.getElementById('cookie-necessary-only').addEventListener('click', svar('necessary'));
 }
