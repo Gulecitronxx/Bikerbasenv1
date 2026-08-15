@@ -1,0 +1,99 @@
+# MC Syd — Rødding. Omkring 500 motorcykler på lager.
+#
+# STATUS: URL-struktur og crawl-regler er verificeret mod det levende site.
+# Felt-selectorene er IKKE udfyldt endnu — se "selectors" nederst og
+# docs/adding-a-source.md. De skal læses af en rigtig browser, ikke gættes;
+# en gættet selector giver enten nul annoncer eller forkerte tal, og begge
+# dele opdages først, når nogen kigger på et kort.
+
+navn: MC Syd
+domaene: mcsyd.dk
+aktiv: false          # tændes når selectors er udfyldt OG der er givet tilladelse
+
+# ---------------------------------------------------------------
+# Tilladelse
+# ---------------------------------------------------------------
+# robots.txt hentet og læst: Allow: / med to disallow-regler, ingen af dem
+# rammer /motorcykler/ eller /produkter/. Ingen Crawl-delay angivet, så vi
+# bruger vores egen grænse på 2 sekunder.
+#
+# Skriftlig tilladelse fra MC Syd: IKKE INDHENTET ENDNU.
+# robots.txt er en teknisk regel, ikke en aftale. Lad aktiv stå på false,
+# indtil der ligger et ja i indbakken.
+robots_tjekket: 2026-08-16
+crawl_delay_ms: 2000
+
+# ---------------------------------------------------------------
+# Hvordan siden er bygget
+# ---------------------------------------------------------------
+# Den rå HTML på en mærkeside indeholder 49 links, og INTET af dem peger på
+# et produkt. Annoncegitteret injiceres af JavaScript. Bekræftet ved at hente
+# https://mcsyd.dk/motorcykler/harley-davidson-motorcykler/ med curl:
+# 48.807 bytes, nul forekomster af /produkter/motorcykel/.
+#
+# Stylesheet-bundtet hedder /styles/danbase — sitet kører altså på Danbase,
+# et dansk forhandlersystem. Det er værd at undersøge, før vi skriver flere
+# YAML-filer: kører hmcmotorcykler.dk, jensensbike-cars.dk eller kbmotor.dk
+# også på Danbase, dækker én platform-YAML dem alle. Det er forskellen på
+# seks filer at vedligeholde og én.
+kraever_browser: true
+
+# ---------------------------------------------------------------
+# Hvor annoncerne findes
+# ---------------------------------------------------------------
+# Mærkesiderne bruges frem for /alle-motorcykler/, fordi mærket dermed er
+# kendt fra URL'en og ikke skal udledes af titlen — det er den hyppigste
+# kilde til forkert mærke i et aggregeret katalog.
+liste_urler:
+  - url: https://mcsyd.dk/motorcykler/alle-motorcykler/
+    maerke: null
+  - url: https://mcsyd.dk/motorcykler/brugte-honda-motorcykler/
+    maerke: Honda
+  - url: https://mcsyd.dk/motorcykler/yamaha-motorcykler/
+    maerke: Yamaha
+  - url: https://mcsyd.dk/motorcykler/bmw-motorcykler/
+    maerke: BMW
+  - url: https://mcsyd.dk/motorcykler/kawasaki-motorcykler/
+    maerke: Kawasaki
+  - url: https://mcsyd.dk/motorcykler/ducati-motorcykler/
+    maerke: Ducati
+  - url: https://mcsyd.dk/motorcykler/triumph-motorcykler/
+    maerke: Triumph
+  - url: https://mcsyd.dk/motorcykler/harley-davidson-motorcykler/
+    maerke: Harley-Davidson
+
+# Detalje-URL, verificeret eksempel:
+# https://www.mcsyd.dk/produkter/motorcykel/brugt/harley-davidson-fxsbse-cvo-breakout/154654?p=154654
+# Det numeriske id til sidst er kilde_annonce_id. Det er stabilt på tværs af
+# kørsler; slug'en kan ændre sig, hvis forhandleren retter titlen.
+detalje_url_moenster: '/produkter/motorcykel/[^/]+/[^/]+/(\d+)'
+id_gruppe: 1
+
+# ---------------------------------------------------------------
+# Felter — SKAL UDFYLDES med en browser åben
+# ---------------------------------------------------------------
+# Sådan gør du:
+#   npm run crawl -- --source=mcsyd --inspect
+# åbner listesiden i Playwright og skriver de gentagne DOM-mønstre ud, så du
+# kan vælge den rigtige selector frem for at gætte.
+#
+# Hvert felt køres gennem crawler/normalize.js bagefter — skriv derfor den
+# RÅ tekst hertil ("Pris 99.800,-"), ikke et forsøg på at rense den i en
+# selector. Normaliseringen er testet; ad hoc-regex i en YAML er ikke.
+selectors:
+  kort: null            # gentaget element pr. annonce på listesiden
+  url: null
+  titel: null
+  pris: null            # rå tekst, fx "Pris 99.800,-"
+  aargang: null         # rå tekst, fx "2007"
+  km: null
+  ccm: null
+  thumbnail: null
+
+# Sælgertype er givet: MC Syd er forhandler. Alle deres annoncer er
+# forhandlerannoncer, og det skal stå på kortet, fordi det afgør købers
+# reklamationsret.
+faste_felter:
+  saelgertype: forhandler
+  by: Rødding
+  postnr: '6630'
