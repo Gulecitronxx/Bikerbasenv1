@@ -8,3 +8,8 @@ Thumbs.db
 # Playwright MCP artefakter
 .playwright-mcp/
 node_modules/
+
+# aim-loop working files (not deployed)
+bar/
+*.report.json
+bar/*.json

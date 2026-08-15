@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tilesMount = document.getElementById('category-tiles');
   tilesMount.innerHTML = TYPES.map(t => `
     <a href="soegning.html?type=${t.id}" class="tile">
-      <span class="tile-media"><img src="img/type/${t.id}.webp" alt="${t.label}" width="760" height="570" loading="lazy" decoding="async"></span>
+      <span class="tile-media"><img src="img/type/${t.id}.webp" alt="" width="760" height="570" loading="lazy" decoding="async"></span>
       <span class="tile-label">${t.label}<span class="tile-go" aria-hidden="true">${Icon.arrowRight}</span></span>
     </a>`).join('');
 
