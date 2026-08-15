@@ -417,13 +417,19 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
      (højre tredjedel), så maskinen faktisk er med i billedet. */
   .hero-photo{ object-position: 76% center; }
   /* Side-/bundvægtet scrim: cyklen læses igennem i den øverste to-tredjedel,
-     mens teksten i den nederste tredjedel bevarer fuld kontrast. */
+     mens teksten i den nederste tredjedel bevarer fuld kontrast.
+
+     Rettet i runde 9: den gamle kurve dykkede til 12% mørke præcis dér hvor
+     overskriften står, og fotoet har luminans ~105 i det felt. Den hvide
+     linje overlevede; accentlinjen og brødteksten gjorde ikke. Lighthouse
+     fanger det aldrig — tekst over billeder tjekkes ikke — så det kunne
+     kun ses ved at se på siden. */
   .hero::after{
     background: linear-gradient(180deg,
-      color-mix(in srgb, var(--color-dark) 32%, transparent) 0%,
-      color-mix(in srgb, var(--color-dark) 12%, transparent) 32%,
-      color-mix(in srgb, var(--color-dark) 62%, transparent) 74%,
-      color-mix(in srgb, var(--color-dark) 92%, transparent) 100%);
+      color-mix(in srgb, var(--color-dark) 46%, transparent) 0%,
+      color-mix(in srgb, var(--color-dark) 34%, transparent) 30%,
+      color-mix(in srgb, var(--color-dark) 72%, transparent) 74%,
+      color-mix(in srgb, var(--color-dark) 94%, transparent) 100%);
   }
 }
 .hero > .container{ position:relative; z-index:2; width:100%; }
@@ -439,8 +445,11 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 }
 .hero h1{ font-size: clamp(28px, 5.4vw, 56px); line-height:1.05; font-weight:700; margin-bottom: var(--space-4); text-shadow: 0 2px 28px rgba(0,0,0,.4); text-wrap: balance; }
 /* Grupperer anden sætningshalvdel, så tankestregen ikke hænger midt i en linje. */
-.hero-h1-line{ display:block; color: color-mix(in srgb, #fff 60%, var(--color-primary) 40%); }
-.hero p.lead{ font-size: clamp(16px,2vw,19px); color:#E7E2D8; max-width:580px; margin-bottom: var(--space-5); text-shadow:0 1px 14px rgba(0,0,0,.35); }
+/* Accentlinjen stod paa 60% hvid over et foto med luminans ~105 — den
+   naaede omkring 2.5:1 og laa i praksis og floed. 82% hvid holder den
+   stadig varm og adskilt fra den hvide linje ovenover, men laesbar. */
+.hero-h1-line{ display:block; color: color-mix(in srgb, #fff 82%, var(--color-primary) 18%); }
+.hero p.lead{ font-size: clamp(16px,2vw,19px); color:#F2EEE7; max-width:580px; margin-bottom: var(--space-5); text-shadow:0 1px 14px rgba(0,0,0,.5); }
 
 .search-panel{
   background: var(--color-surface); border-radius: var(--radius-lg); padding: var(--space-4);
