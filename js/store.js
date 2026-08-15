@@ -188,6 +188,13 @@ const Store = {
     localStorage.setItem(this.KEYS.savedSearches, JSON.stringify(all));
     return { added: true, all };
   },
+  /* Binder den lokale post til raekken i databasen, saa en senere fjernelse
+     kan ramme begge steder. */
+  setSavedSearchRemoteId(localId, remoteId){
+    const all = this.getSavedSearches().map(s => s.id === localId ? { ...s, remoteId } : s);
+    localStorage.setItem(this.KEYS.savedSearches, JSON.stringify(all));
+    return all;
+  },
   removeSavedSearch(id){
     const all = this.getSavedSearches().filter(s => s.id !== id);
     localStorage.setItem(this.KEYS.savedSearches, JSON.stringify(all));

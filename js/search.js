@@ -782,19 +782,38 @@ function wireControls(){
     document.getElementById('save-search-btn').click();
   });
 
-  document.getElementById('save-search-btn').addEventListener('click', () => {
+  document.getElementById('save-search-btn').addEventListener('click', async () => {
     const qs = currentQueryString();
     const existing = Store.getSavedSearches().find(s => s.query === qs);
+    const label = describeCurrentSearch(activeFilterPills());
+
+    /* Søgeagenten blev tidligere KUN gemt i localStorage. Tabellen
+       saved_searches fandtes, metoderne i supabase-api.js fandtes — de blev
+       bare aldrig kaldt. Så vidste serveren ikke, at agenten eksisterede, og
+       kunne aldrig sende den mail, knappen lovede. Nu skrives den begge
+       steder: databasen er den, der udløser mails (migration 013 +
+       notify-saved-searches), og localStorage holder listen synlig med det
+       samme og for brugere der ikke er logget ind. */
     if (existing){
       Store.removeSavedSearch(existing.id);
+      if (existing.remoteId) db.deleteSavedSearch(existing.remoteId);
       toast('Søgeagent fjernet');
     } else {
-      Store.addSavedSearch({
-        query: qs,
-        label: describeCurrentSearch(activeFilterPills()),
-        count: getFilteredListings().length,
-      });
-      toast('Søgeagent oprettet — se den under Mine annoncer');
+      const { all } = Store.addSavedSearch({ query: qs, label, count: getFilteredListings().length });
+
+      if (db.enabled && Store.getUser()?.remote){
+        const { data, error } = await db.addSavedSearch(qs, label);
+        if (error){
+          toast('Søgeagenten er gemt her på enheden, men vi kunne ikke slå beskeder til. Prøv igen senere.', { type: 'error' });
+        } else {
+          // Bind den lokale post til rækken i databasen, så en senere
+          // fjernelse rammer begge steder.
+          Store.setSavedSearchRemoteId(all[0].id, data.id);
+          toast('Søgeagent oprettet — du får en mail, når der kommer en der matcher');
+        }
+      } else {
+        toast('Søgeagent gemt her på enheden. Log ind for at få besked på mail.');
+      }
     }
     refreshSaveSearchButton();
   });

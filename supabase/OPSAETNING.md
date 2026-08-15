@@ -46,6 +46,7 @@ oven på et eksisterende skema uden at røre data, du allerede har:
 | `004c_gemte.sql` | Funktion der tæller hvor mange der har gemt hver af dine annoncer |
 | `005_beskyt_verificering.sql` | Låser `mitid_verified`/`cvr_verified`/`email_verified`, så ingen kan give sig selv et falsk "Verificeret"-badge |
 | `012_email_verified_synk.sql` | Saetter `email_verified` naar brugeren rent faktisk klikker i bekraeftelsesmailen — uden den stod kolonnen `false` for evigt |
+| `013_soegeagenter.sql` | Soegeagenter der faktisk sender mail: trigger paa nye annoncer, afmeldingstoken og log mod dobbeltmails |
 | `005_tjek.sql` | Kun læsning — viser at flagene er låst for almindelige brugere |
 | `006_forhandler_abonnement.sql` | Abonnement-felter (låst), server-håndhævet gratis-grænse på 3 aktive annoncer, og en **dev-funktion** til at teste forhandler-status uden betaling |
 | `007_fri_adgang.sql` | Slår annoncegrænsen **fra** — gratis, ubegrænset adgang for alle, mens betalingsmodellen ikke er valgt. Modstykke til `FRI_ADGANG` i `js/data.js`. Genskabes ved at køre `006` igen |

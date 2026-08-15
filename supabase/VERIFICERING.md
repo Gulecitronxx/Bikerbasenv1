@@ -105,3 +105,40 @@ deres egen række. Det er afprøvet mod den kørende database: forsøget svarer
 Bliver en verificering nogensinde flyttet ud i browseren, kan enhver give sig
 selv et mærke, og hele tillidssystemet er værdiløst. Sæt aldrig et flag et
 andet sted end i `verify-profile`.
+
+---
+
+## 5. Søgeagenter — bygget, mangler to secrets
+
+Søgeagenten var tom hele vejen ned: knappen skrev kun til localStorage,
+tabellen `saved_searches` blev aldrig skrevet til, metoderne i
+`js/supabase-api.js` blev aldrig kaldt, og intet job sendte mail. Teksten
+"Vil du have besked, når der kommer en?" var et løfte uden dækning.
+
+Nu skriver knappen til databasen, en trigger fyrer når en annonce bliver
+aktiv, og Edge Function'en `notify-saved-searches` sender via Resend.
+
+Sådan tænder du den:
+
+1. Vælg en lang tilfældig streng som delt hemmelighed
+2. Åbn `supabase/013_soegeagenter.sql`, erstat `<<HEMMELIGHED>>` med den, og
+   `<<PROJEKT_URL>>` med `https://hkcjrwglwurdjnobewzb.supabase.co`
+3. Kør filen i SQL-editoren
+4. Sæt de tre secrets:
+   ```
+   supabase secrets set NOTIFY_SECRET=<samme streng>
+   supabase secrets set RESEND_API_KEY=<nøglen fra Resend>
+   supabase secrets set SITE_URL=https://bikerbasen.dk
+   ```
+5. `supabase functions deploy notify-saved-searches`
+6. Test: gem en søgeagent, udgiv en annonce der matcher, og se mailen komme
+
+Uden `NOTIFY_SECRET` afviser funktionen alle kald (401), og uden
+`RESEND_API_KEY` svarer den 503 uden at sende. Ingen af delene lader som om.
+
+**Afmelding:** hver søgeagent har sit eget `unsubscribe_token`, og
+`afmeld.html` slår præcis den ene fra uden login. Et lækket link kan altså
+ikke bruges til andet. Det er et krav ved den slags mails, ikke en detalje.
+
+**Dobbeltmails:** tabellen `search_notifications` husker hvem der har fået
+hvilken annonce, så en genudgivelse eller et gentaget kald ikke sender igen.
