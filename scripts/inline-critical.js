@@ -28,11 +28,16 @@ const critical = css.slice(0, boundary).join('\n')
 const htmlPath = path.join(root, 'index.html');
 let html = fs.readFileSync(htmlPath, 'utf8');
 
-// Gør forsidens fulde stylesheet ikke-render-blokerende (kun hvis ikke gjort).
-html = html.replace(
-  /<link rel="stylesheet" href="(css\/styles\.css[^"]*)">/,
-  '<link rel="preload" as="style" href="$1" onload="this.onload=null;this.rel=\'stylesheet\'">\n<noscript><link rel="stylesheet" href="$1"></noscript>'
-);
+// Gør forsidens fulde stylesheet ikke-render-blokerende — KUN hvis den ikke
+// allerede er skiftet. (Ellers rammer regex'en <link> inde i <noscript> og
+// laver indlejrede noscripts.) stamp-version har opdateret ?v= forinden.
+const alreadyAsync = /<link rel="preload" as="style" href="css\/styles\.css[^"]*" onload=/.test(html);
+if (!alreadyAsync){
+  html = html.replace(
+    /<link rel="stylesheet" href="(css\/styles\.css[^"]*)">/,
+    '<link rel="preload" as="style" href="$1" onload="this.onload=null;this.rel=\'stylesheet\'">\n<noscript><link rel="stylesheet" href="$1"></noscript>'
+  );
+}
 
 // Indlejr/genskriv den kritiske CSS.
 const block = `<style id="critical">${critical}</style>`;
