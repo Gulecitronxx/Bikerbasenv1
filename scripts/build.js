@@ -26,7 +26,7 @@
 const { execFileSync } = require('child_process');
 const path = require('path');
 
-const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-meta.js', 'stamp-version.js', 'inline-critical.js'];
+const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-critical.js'];
 
 for (const script of trin){
   console.log(`\n--- ${script} ---`);

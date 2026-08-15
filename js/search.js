@@ -494,6 +494,9 @@ function render(){
   const empty = document.getElementById('empty-state');
   if (pageItems.length){
     grid.style.display = '';
+    // scripts/build-srp.js skjuler de forudtegnede kort på filtrerede
+    // adresser, indtil vi har tegnet de rigtige. Nu er de rigtige.
+    grid.style.visibility = '';
     empty.style.display = 'none';
     grid.innerHTML = pageItems.map(listingCardHTML).join('');
     wireFavoriteButtons(grid);

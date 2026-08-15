@@ -85,13 +85,23 @@ async function syncSessionToStore(){
   return merged;
 }
 
+/* Annoncerne er som regel allerede undervejs: scripts/inline-boot.js sender
+   forespørgslen af sted i sidens første HTML-chunk, længe før SDK'et er
+   hentet. Vi samler den op her og sparer hele den serielle ventetid. Fejler
+   den (offline, ændret skema, blokeret), henter vi som før via SDK'et. */
 async function loadRemoteListings(){
   if (!db.enabled) return [];
-  const { data, error } = await db.listListings({ limit: 200 });
-  if (error){
-    console.warn('Kunne ikke hente annoncer fra databasen:', error.message);
-    return [];
+
+  let data = window.__bbListingsBoot ? await window.__bbListingsBoot : null;
+  if (!Array.isArray(data)){
+    const res = await db.listListings({ limit: 200 });
+    if (res.error){
+      console.warn('Kunne ikke hente annoncer fra databasen:', res.error.message);
+      return [];
+    }
+    data = res.data;
   }
+
   window.REMOTE_LISTINGS = (data || []).map(normalizeRemoteListing);
   return window.REMOTE_LISTINGS;
 }

@@ -133,23 +133,32 @@ function isOwnListing(l){
 }
 
 /* Rigtigt foto hvis annoncen har et; ellers den illustrerede placeholder.
-   loading="lazy" + faste proportioner holder layoutet stabilt (CLS). */
-function listingMediaHTML(l, alt){
+   loading="lazy" + faste proportioner holder layoutet stabilt (CLS).
+
+   Undtagelsen er det første kort i en liste (`eager`): på søgesiden er dets
+   foto sidens LCP-element, og lazy-loading udskyder hentningen til efter
+   layout — det kostede ~2s LCP. Første kort hentes derfor med høj prioritet. */
+function listingMediaHTML(l, alt, eager){
   const url = l.photoUrls && l.photoUrls[0];
+  const loadAttrs = eager
+    ? 'loading="eager" fetchpriority="high" decoding="async"'
+    : 'loading="lazy" decoding="async"';
   return url
-    ? `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" loading="lazy" decoding="async" class="card-photo">`
+    ? `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" ${loadAttrs} class="card-photo">`
     : bikeArtSVG(l.type, { id: 'card-' + l.id });
 }
 
 /* ============ Listing card ============ */
-function listingCardHTML(l){
+/* `i` kommer gratis fra .map(listingCardHTML) — kortet på plads 0 er det
+   eneste der er above-the-fold på mobil, og får derfor det ivrige foto. */
+function listingCardHTML(l, i){
   const fav = Store.isFavorite(l.id);
   const brand = escapeHTML(l.brand), model = escapeHTML(l.model), city = escapeHTML(l.city);
   const suspicious = isSuspiciouslyCheap(l);
   return `
   <article class="card" data-listing-id="${l.id}">
     <div class="card-media">
-      ${listingMediaHTML(l, `${brand} ${model}`)}
+      ${listingMediaHTML(l, `${brand} ${model}`, i === 0)}
       <div class="card-badges">
         ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
         ${l.isDealer ? `<span class="badge badge-dealer">${Icon.shieldCheck}Forhandler</span>` : ''}

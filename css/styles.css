@@ -175,6 +175,42 @@ svg{display:block; width:1em; height:1em;}
 .btn-danger-outline{ background:transparent; color:var(--color-danger); border-color: var(--color-danger); }
 .btn-danger-outline:hover{ background: var(--color-danger-tint); }
 
+/* ============ Formularfelter (generisk) ============
+   Felt + input er primitiver, som hver eneste side bruger. De lå inde i
+   hero-sektionen (forsidens søgeform var første bruger) og kom derfor ikke
+   med i den kritiske CSS andre steder — opret-annonce hoppede 450px, når
+   arket landede. */
+.field{ display:flex; flex-direction:column; gap:6px; }
+.field label{ font-size:12px; font-weight:700; color: var(--color-fg-muted); text-transform:uppercase; letter-spacing:.04em; }
+.input, select.input{
+  appearance:none; -webkit-appearance:none;
+  width:100%; padding: 12px 14px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border); background: var(--color-surface);
+  color: var(--color-fg); font-size:15px; min-height:44px;
+  transition: border-color .15s var(--ease-out);
+}
+.input:hover{ border-color: var(--color-fg-muted); }
+.input:focus-visible{ border-color: var(--color-primary); }
+.input-icon-wrap{ position:relative; }
+.input-icon-wrap .input{ padding-left:42px; }
+.input-icon-wrap svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); width:20px; height:20px; color:var(--color-fg-muted); pointer-events:none; }
+select.input{
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23807A6E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position: right 12px center; padding-right:38px;
+}
+
+/* ============ Sektionslayout (generisk) ============
+   Bruges af alle sider, ikke kun forsiden. Lå tidligere under "Category
+   tiles" og røg dermed ikke med i den kritiske CSS på mærke-, opret- og
+   infosider — dér manglede sektionernes 64px luft ved første maling, og
+   siden hoppede op til 461px, når arket landede. */
+.section{ padding: var(--space-8) 0; }
+.section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-4); margin-bottom: var(--space-5); flex-wrap:wrap; }
+.section-head h2{ font-size: clamp(22px,3vw,30px); }
+.section-head p{ color:var(--color-fg-muted); margin-top:4px; }
+.section-link{ font-weight:600; color:var(--color-primary-hover); display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.section-link svg{ width:16px; height:16px; }
+
 /* ============ Header ============ */
 .site-header{
   position: sticky; top:0; z-index:100;
@@ -402,24 +438,6 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 }
 .search-row{ display:grid; grid-template-columns: 1fr; gap: var(--space-3); }
 @media (min-width: 700px){ .search-row{ grid-template-columns: 1.4fr 1fr 1fr auto; align-items:end; } }
-.field{ display:flex; flex-direction:column; gap:6px; }
-.field label{ font-size:12px; font-weight:700; color: var(--color-fg-muted); text-transform:uppercase; letter-spacing:.04em; }
-.input, select.input{
-  appearance:none; -webkit-appearance:none;
-  width:100%; padding: 12px 14px; border-radius: var(--radius-sm);
-  border: 1.5px solid var(--color-border); background: var(--color-surface);
-  color: var(--color-fg); font-size:15px; min-height:44px;
-  transition: border-color .15s var(--ease-out);
-}
-.input:hover{ border-color: var(--color-fg-muted); }
-.input:focus-visible{ border-color: var(--color-primary); }
-.input-icon-wrap{ position:relative; }
-.input-icon-wrap .input{ padding-left:42px; }
-.input-icon-wrap svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); width:20px; height:20px; color:var(--color-fg-muted); pointer-events:none; }
-select.input{
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23807A6E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position: right 12px center; padding-right:38px;
-}
 
 /* Ærlige tillidspointer i stedet for små tal (8/5) der afslørede tyndt lager. */
 .hero-trust{ display:flex; flex-wrap:wrap; gap:10px var(--space-5); margin-top: var(--space-5); }
@@ -431,13 +449,6 @@ select.input{
 }
 
 /* ============ Category tiles ============ */
-.section{ padding: var(--space-8) 0; }
-.section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-4); margin-bottom: var(--space-5); flex-wrap:wrap; }
-.section-head h2{ font-size: clamp(22px,3vw,30px); }
-.section-head p{ color:var(--color-fg-muted); margin-top:4px; }
-.section-link{ font-weight:600; color:var(--color-primary-hover); display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
-.section-link svg{ width:16px; height:16px; }
-
 .tiles-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
 @media (min-width:640px){ .tiles-grid{ grid-template-columns: repeat(4,1fr); } }
 /* Foto-kort pr. type. Studieoptagelser med ens taupe-baggrund giver et roligt,
@@ -519,6 +530,9 @@ select.input{
 }
 .card:hover{ transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border)); }
 .card-media{ position:relative; aspect-ratio: 4/3; background: var(--color-surface-2); overflow:hidden; }
+.card-photo{ width:100%; height:100%; object-fit:cover; display:block;
+  transition: transform .5s var(--ease-out); }
+.card:hover .card-photo{ transform: scale(1.04); }
 .card-media svg{ width:100%; height:100%; }
 .card-badges{ position:absolute; top:10px; left:10px; display:flex; gap:6px; flex-wrap:wrap; z-index:2; }
 /* Udledt kørekortkategori (A1/A2/A) — MC-køberens vigtigste scan-signal. */
@@ -595,6 +609,12 @@ select.input{
 .trust-card p{ color: var(--color-fg-muted); font-size:14px; }
 
 /* ============ Search / filter layout ============ */
+/* Søgesidens overskrift — diskret, men giver siden en rigtig h1.
+   Skal blive stående i DENNE sektion: den er above-the-fold, og
+   scripts/inline-critical.js indlejrer kritisk CSS pr. sektion. Lå den nede
+   ved postnummervælgeren, faldt h1 tilbage til browserens 2em ved første
+   maling og skubbede hele siden 35px ned, når arket landede. */
+.search-heading{ font-size: clamp(20px,2.6vw,26px); margin-bottom: var(--space-4); }
 .search-layout{ display:grid; grid-template-columns: 1fr; gap: var(--space-5); padding: var(--space-5) 0 var(--space-8); align-items:start; }
 @media (min-width:960px){ .search-layout{ grid-template-columns: 280px 1fr; } }
 
@@ -828,6 +848,8 @@ select.input{
 .breadcrumb svg{ width:14px; height:14px; }
 
 /* ============ Listing detail ============ */
+.gallery-main .card-photo{ width:100%; height:100%; object-fit:cover; }
+.gallery-thumbs .card-photo{ width:100%; height:100%; object-fit:cover; }
 /* Billederne på den forrenderede annonceside. De vises kun i det korte
    øjeblik før js/annonce.js bytter dem ud med det rigtige galleri — og for
    crawlere og browsere uden JavaScript, hvor de er det eneste der er. */
@@ -1587,13 +1609,6 @@ body.overlay-open .cookie-banner{ display:none; }
   .newest-cta.is-wide .newest-cta-link{ margin-left:0; padding-left:0; }
 }
 
-/* ============ Rigtige annoncefotos ============ */
-.card-photo{ width:100%; height:100%; object-fit:cover; display:block;
-  transition: transform .5s var(--ease-out); }
-.card:hover .card-photo{ transform: scale(1.04); }
-.gallery-main .card-photo{ width:100%; height:100%; object-fit:cover; }
-.gallery-thumbs .card-photo{ width:100%; height:100%; object-fit:cover; }
-
 /* ============ Auth-fejlbesked ============ */
 .auth-error{
   background: var(--color-danger-tint); color: var(--color-danger);
@@ -1625,9 +1640,6 @@ body.overlay-open .cookie-banner{ display:none; }
 .combo-list li:hover, .combo-list li.active{ background: var(--color-surface-2); }
 .combo-list li strong{ font-variant-numeric: tabular-nums; min-width:44px; }
 .combo-region{ margin-left:auto; font-size:12px; color: var(--color-fg-muted); }
-
-/* Søgesidens overskrift — diskret, men giver siden en rigtig h1 */
-.search-heading{ font-size: clamp(20px,2.6vw,26px); margin-bottom: var(--space-4); }
 
 /* ============ Mobil: værktøjslinje må ikke sprænge skærmen ============
    "Gem søgning" + visningsskifter + Filtre + sortering blev tilsammen
