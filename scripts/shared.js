@@ -96,4 +96,45 @@ function siteParts(){
   return { header, footer, csp, contactModal };
 }
 
-module.exports = { ROOT, siteUrl, slugify, listingSlug, fetchListings, siteParts, esc };
+/* Sidens EGEN kortmarkup og rækkeoversættelse, kørt i byggeriet.
+
+   Forudtegnede annoncekort (søgeside, mærkesider) skal være tegn for tegn
+   det samme, som js/search.js og js/maerke.js laver bagefter — ellers
+   omrokerer siden, når javascriptet overtager. Derfor evalueres de rigtige
+   browsermoduler her med små stubbe for browser-globalerne i stedet for at
+   duplikere hverken markup eller feltnavne. Vokser modulerne nye
+   browserafhængigheder, fejler byggeriet højlydt, hvilket er meningen.
+
+   Returnerer:
+     listingCardHTML(l, i)        — samme kort som klienten tegner
+     normalizeRemoteListing(row)  — databaserække → UI-form (isDealer,
+                                    serviceHistorik, photoUrls osv.) */
+function browserModules(){
+  const cfg = fs.readFileSync(path.join(ROOT, 'js/supabase-config.js'), 'utf8');
+  const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1] || '';
+
+  // components.js' initCompare og backend-bridge.js venter begge på
+  // DOMContentLoaded; med readyState 'loading' registrerer de bare en
+  // lytter og gør intet.
+  const doc = { readyState: 'loading', addEventListener(){}, querySelector(){ return null; } };
+  // Ingen bruger, ingen favoritter, ingen sammenligning ved første maling.
+  const store = {
+    getUser: () => null,
+    isFavorite: () => false,
+    isComparing: () => false,
+    getCompare: () => [],
+  };
+  // Kun photoUrl bruges af normalizeRemoteListing; resten af db røres ikke.
+  const db = {
+    enabled: false,
+    photoUrl: p => p ? `${url}/storage/v1/object/public/listing-photos/${p}` : null,
+  };
+
+  const src = ['js/data.js', 'js/icons.js', 'js/bike-art.js', 'js/components.js', 'js/backend-bridge.js']
+    .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n;\n');
+
+  return new Function('document', 'Store', 'window', 'db',
+    src + '\n;return { listingCardHTML, normalizeRemoteListing };')(doc, store, {}, db);
+}
+
+module.exports = { ROOT, siteUrl, slugify, listingSlug, fetchListings, siteParts, esc, browserModules };

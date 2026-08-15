@@ -117,7 +117,9 @@ function renderListing(){
     document.getElementById('listing-detail').innerHTML = `
       <div class="empty-state" style="grid-column:1/-1; padding-top:var(--space-8);">
         ${Icon.search}
-        <h3>Annoncen findes ikke</h3>
+        <!-- h2, ikke h3: siden har kun sin (tomme) h1 her, og et spring fra
+             h1 til h3 er et brud på overskriftsrækken (Lighthouse a11y). -->
+        <h2>Annoncen findes ikke</h2>
         <p>Den er måske solgt og fjernet, eller linket er forkert.</p>
         <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
       </div>`;

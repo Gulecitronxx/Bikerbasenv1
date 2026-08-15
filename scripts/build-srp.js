@@ -17,38 +17,20 @@
 
 const fs = require('fs');
 const path = require('path');
-const { ROOT, fetchListings } = require('./shared');
+const { ROOT, fetchListings, browserModules } = require('./shared');
 
 const PAGE_SIZE = 12;   // skal matche PAGE_SIZE i js/search.js
 
-/* ---- Browser-modulerne, evalueret med stubbe ---- */
-function loadCardRenderer(){
-  const sandbox = {
-    // components.js' initCompare venter på DOMContentLoaded; med
-    // readyState 'loading' registrerer den bare en lytter og gør intet.
-    document: { readyState: 'loading', addEventListener(){}, querySelector(){ return null; } },
-    // Ingen bruger, ingen favoritter, ingen sammenligning ved første maling.
-    Store: {
-      getUser: () => null,
-      isFavorite: () => false,
-      isComparing: () => false,
-      getCompare: () => [],
-    },
-  };
-  const src = ['js/data.js', 'js/icons.js', 'js/bike-art.js', 'js/components.js']
-    .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n;\n');
-
-  const fn = new Function('document', 'Store', 'window', src + '\n;return listingCardHTML;');
-  return fn(sandbox.document, sandbox.Store, {});
-}
-
 (async () => {
-  const listings = await fetchListings([]);
+  const { listingCardHTML, normalizeRemoteListing } = browserModules();
+
+  // Rækkerne skal gennem sidens egen oversætter, ellers mangler kortene
+  // forhandler-badge og servicehistorik i forhold til det, klienten tegner.
+  const listings = (await fetchListings([]))
+    .map(l => l.created_at ? normalizeRemoteListing(l) : l);
   // Samme rækkefølge som search.js' standard: 'date-desc'.
   const sorted = listings.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const page = sorted.slice(0, PAGE_SIZE);
-
-  const listingCardHTML = loadCardRenderer();
   const cards = page.map((l, i) => listingCardHTML(l, i)).join('\n');
 
   const total = sorted.length;

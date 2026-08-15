@@ -34,7 +34,7 @@ if (!sections.length) throw new Error('inline-critical: fandt ingen sektionsmark
 /* Footeren er sjældent above-the-fold, men den er billig (1.4KB) og holder
    dokumenthøjden stabil, når det fulde ark lander — ellers hopper alt under
    folden, så snart brugeren scroller. */
-const BASE = ['Design tokens', 'Reset', 'Buttons', 'Formularfelter', 'Sektionslayout', 'Header', 'Footer'];
+const BASE = ['Design tokens', 'Reset', 'Buttons', 'Formularfelter', 'Pladsreservation', 'Sektionslayout', 'Header', 'Footer', 'Cookie consent'];
 
 const PAGES = [
   // Forsiden: uændret fra runde 4 (headeren hen over hero-fotoet + footeren,
@@ -62,15 +62,15 @@ const PAGES = [
   [/^(vilkaar|privatlivspolitik|sikkerhed|404)\.html$/, ['Utility', 'Legal / static content', 'Trust & safety']],
 ];
 
-/* Sider hvor det kritiske udsnit endnu ikke er bevist at give SAMME geometri
-   som det fulde ark over folden. De beholder det render-blokerende <link>:
-   en langsommere første maling er bedre end et layouthop (CLS). Mål siden
-   (kritisk vs fuldt ark, 390px bred) og flyt den herfra, når den er stabil. */
-const IKKE_UDSKUDT = [
-  /^annonce\.html$/,      // tom indtil JS; footeren hopper 362px
-  /^forhandler\.html$/,   // samme mønster
-  /^login\.html$/,        // auth-kortet starter 30px for lavt
-];
+/* Sider hvor det kritiske udsnit ikke er bevist at give SAMME geometri som
+   det fulde ark over folden. De beholder det render-blokerende <link>: en
+   langsommere første maling er bedre end et layouthop (CLS).
+
+   Listen er tom nu — alle 14 sider er målt stabile ved 390px bredde. Kommer
+   der en ny side (eller en ny sektion i styles.css), så mål den samme vej:
+   sammenlign hvert elements top/højde med og uden det asynkrone ark, og sæt
+   siden herind, indtil forskellen over folden er 0. */
+const IKKE_UDSKUDT = [];
 
 function criticalFor(file){
   const extra = (PAGES.find(([re]) => re.test(file)) || [null, []])[1];

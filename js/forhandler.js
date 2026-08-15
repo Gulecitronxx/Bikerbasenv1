@@ -68,7 +68,9 @@ function renderProfileNotFound(){
   document.getElementById('profile-top').innerHTML = `
     <div class="empty-state" style="grid-column:1/-1;">
       ${Icon.user}
-      <h3>Vi kunne ikke finde sælgeren</h3>
+      <!-- h2, ikke h3: samme grund som i annonce.js — siden har kun sin
+           tomme h1, så h3 springer et niveau over. -->
+      <h2>Vi kunne ikke finde sælgeren</h2>
       <p>Profilen er måske slettet, eller linket er forkert.</p>
       <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
     </div>`;

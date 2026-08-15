@@ -199,6 +199,18 @@ select.input{
   background-repeat:no-repeat; background-position: right 12px center; padding-right:38px;
 }
 
+/* ============ Pladsreservation for JS-gitre (generisk) ============
+   Reserver plads for JS-injicerede gitre indtil hydrering (undgår CLS).
+   :empty matcher kun før indholdet indsættes, så der ikke bliver tomrum
+   bagefter. Egen sektion, fordi den skal med i den kritiske CSS paa HVER
+   side — laa den under "Category tiles", var reservationen ikke i spil ved
+   foerste maling, og hele pointen faldt til jorden. */
+.tiles-grid:empty{ min-height: 520px; }
+@media (min-width:640px){ .tiles-grid:empty{ min-height: 448px; } }
+.listings-grid:empty{ min-height: 340px; }
+.brand-cloud:empty{ min-height: 132px; }
+.trust-strip:empty{ min-height: 172px; }
+
 /* ============ Sektionslayout (generisk) ============
    Bruges af alle sider, ikke kun forsiden. Lå tidligere under "Category
    tiles" og røg dermed ikke med i den kritiske CSS på mærke-, opret- og
@@ -482,14 +494,6 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .tile:hover .tile-go{ opacity:1; transform: translateX(0); }
 /* Berøringsenheder har ingen hover — vis pilen permanent, så affordansen findes. */
 @media (hover:none){ .tile .tile-go{ opacity:.9; transform:none; } }
-
-/* Reserver plads for JS-injicerede gitre indtil hydrering (undgår CLS). :empty
-   matcher kun før indholdet indsættes, så der ikke bliver tomrum bagefter. */
-.tiles-grid:empty{ min-height: 520px; }
-@media (min-width:640px){ .tiles-grid:empty{ min-height: 448px; } }
-.listings-grid:empty{ min-height: 340px; }
-.brand-cloud:empty{ min-height: 132px; }
-.trust-strip:empty{ min-height: 172px; }
 
 /* ============ Sådan virker det (trin) ============ */
 .steps{ display:grid; grid-template-columns:1fr; gap: var(--space-5); counter-reset:step; }
@@ -817,7 +821,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 
 .empty-state{ text-align:center; padding: var(--space-8) var(--space-4); color: var(--color-fg-muted); }
 .empty-state svg{ width:64px; height:64px; margin: 0 auto var(--space-3); color: var(--color-border); }
-.empty-state h3{ color: var(--color-fg); margin-bottom:6px; }
+.empty-state h2, .empty-state h3{ color: var(--color-fg); font-size:19px; margin-bottom:6px; }
 .empty-state p{ max-width: 46ch; margin: 0 auto; }
 .empty-actions{ display:flex; flex-wrap:wrap; gap: var(--space-3); justify-content:center; margin-top: var(--space-5); }
 .empty-agent-hint{ margin-top: var(--space-4); font-size:14px; }

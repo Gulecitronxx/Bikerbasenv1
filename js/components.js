@@ -309,29 +309,18 @@ function openInfoModal(title, bodyHTML){
 }
 
 /* ============ Cookie consent (GDPR) ============ */
+/* Banneret står i markuppen (scripts/inline-cookie.js) og vises af en
+   inline-linje i samme sekund som siden males — det var ellers det største
+   element der blev malet på de js-tunge sider, og dermed deres LCP ~4s inde.
+   Her kobles kun knapperne på. */
 function initCookieConsent(){
-  if (Store.getCookieConsent() || document.getElementById('cookie-banner')) return;
-  const el = document.createElement('div');
-  el.innerHTML = `
-  <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke">
-    <div class="cookie-banner-text">
-      <strong>Vi bruger cookies</strong>
-      <p>Bikerbasen bruger nødvendige cookies for at få siden til at fungere, og valgfrie cookies til statistik og forbedring af oplevelsen. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
-    </div>
-    <div class="cookie-banner-actions">
-      <button type="button" class="btn btn-outline btn-sm" id="cookie-necessary-only">Kun nødvendige</button>
-      <button type="button" class="btn btn-primary btn-sm" id="cookie-accept-all">Accepter alle</button>
-    </div>
-  </div>`;
-  document.body.appendChild(el.firstElementChild);
-  document.getElementById('cookie-accept-all').addEventListener('click', () => {
-    Store.setCookieConsent('all');
-    document.getElementById('cookie-banner').remove();
-  });
-  document.getElementById('cookie-necessary-only').addEventListener('click', () => {
-    Store.setCookieConsent('necessary');
-    document.getElementById('cookie-banner').remove();
-  });
+  const banner = document.getElementById('cookie-banner');
+  if (!banner) return;
+  if (Store.getCookieConsent()){ banner.remove(); return; }
+
+  const svar = level => () => { Store.setCookieConsent(level); banner.remove(); };
+  document.getElementById('cookie-accept-all').addEventListener('click', svar('all'));
+  document.getElementById('cookie-necessary-only').addEventListener('click', svar('necessary'));
 }
 
 function wireFavoriteButtons(root){

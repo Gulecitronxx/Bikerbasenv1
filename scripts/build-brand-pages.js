@@ -7,6 +7,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
+const { browserModules } = require('./shared');
+const { listingCardHTML, normalizeRemoteListing } = browserModules();
 const src = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
 eval(src + '\nglobal.__L = LISTINGS; global.__B = BRANDS_BY_MODEL; global.__T = TYPES;');
 const BRANDS_BY_MODEL = global.__B;
@@ -25,11 +27,15 @@ async function hentAnnoncer(){
     return global.__L;
   }
   try {
-    const r = await fetch(`${url}/rest/v1/listings?select=*&status=eq.active`, { headers: { apikey: key } });
+    // Fotos og saelger skal med: maerkesidens kort tegnes nu i byggeriet, og
+    // uden dem ville de vise pladsholder-tegningen og forhandler-badget
+    // ville mangle — begge dele ville hoppe, naar js/maerke.js overtog.
+    const select = '*,photos:listing_photos(id,storage_path,position),seller:public_profiles!listings_seller_id_fkey(*)';
+    const r = await fetch(`${url}/rest/v1/listings?select=${encodeURIComponent(select)}&status=eq.active`, { headers: { apikey: key } });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const rows = await r.json();
     console.log(`Hentede ${rows.length} annoncer fra databasen.`);
-    return rows.map(l => ({ ...l, createdAt: l.created_at }));
+    return rows.map(normalizeRemoteListing);
   } catch (e) {
     console.warn('Kunne ikke hente fra databasen (' + e.message + ') — bruger js/data.js.');
     return global.__L;
@@ -100,7 +106,10 @@ function introFor(brand, items){
 
 let built = 0;
 for (const brand of brands){
-  const items = byBrand[brand];
+  // Samme raekkefoelge som js/maerke.js: nyeste foerst.
+  const items = byBrand[brand].slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const kort = items.map((l, i) => listingCardHTML(l, i)).join('\n      ');
+  const foersteFoto = (items[0] && items[0].photoUrls && items[0].photoUrls[0]) || null;
   const slug = slugify(brand);
   const models = [...new Set(items.map(l => l.model))];
   const allModels = (BRANDS_BY_MODEL[brand] || []).slice(0, 12);
@@ -125,7 +134,8 @@ for (const brand of brands){
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css">
+${foersteFoto ? `<link rel="preload" as="image" href="${foersteFoto}" fetchpriority="high">
+` : ''}<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 ${header}
@@ -156,7 +166,7 @@ ${header}
 
     <section class="section" style="padding-top:var(--space-6);">
       <h2 class="brand-sub">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} til salg nu</h2>
-      <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}"></div>
+      <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}">${kort}</div>
       <noscript>
         <ul class="brand-noscript">
           ${items.map(l => `<li><a href="${require('./shared').listingSlug(l)}">${esc(l.brand)} ${esc(l.model)}, ${l.year} — ${dkk(l.price)}, ${l.km.toLocaleString('da-DK')} km (${esc(l.city)})</a></li>`).join('\n          ')}
