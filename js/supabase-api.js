@@ -27,7 +27,16 @@ const db = (function(){
      hvor billedet er taget — altså typisk sælgers hjemmeadresse.
      Ved at tegne billedet om på et canvas og re-encode det, ryger alle
      EXIF-felter med. Filen krympes samtidig til rimelig web-størrelse. */
-  async function stripExifAndResize(file, maxEdge = 1800, quality = 0.85){
+  /* Tegner billedet om på et canvas: EXIF (herunder GPS-position fra
+     telefonen) forsvinder, og filen bliver mindre.
+
+     WebP frem for JPEG: annoncefotoet er LCP-elementet på både søgesiden,
+     mærkesiderne og annoncesiden, og Supabase' billedtransformation er ikke
+     slået til på planen — så vægten skal ned her, ved uploaden. WebP giver
+     ~30% mindre fil ved samme kvalitet og understøttes af alle browsere,
+     der overhovedet kan køre resten af siden. Falder toBlob tilbage til
+     JPEG (meget gamle browsere), fortsætter uploaden bare med det. */
+  async function stripExifAndResize(file, maxEdge = 1600, quality = 0.82){
     const bitmap = await createImageBitmap(file);
     let { width, height } = bitmap;
     if (Math.max(width, height) > maxEdge){
@@ -39,7 +48,8 @@ const db = (function(){
     canvas.width = width; canvas.height = height;
     canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
     bitmap.close?.();
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', quality))
+      || await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
     if (!blob) throw new Error('Billedet kunne ikke behandles.');
     return blob;
   }
@@ -251,9 +261,13 @@ const db = (function(){
       catch (e) { return { error: { message: 'Billedet kunne ikke behandles.' } }; }
 
       // Mappen SKAL starte med brugerens id — storage-politikken kræver det.
-      const path = `${user.id}/${listingId}/${crypto.randomUUID()}.jpg`;
+      // Endelsen følger det, stripExifAndResize faktisk gav os (webp, eller
+      // jpeg hvis browseren ikke kunne webp) — ellers serverer Supabase
+      // filen med forkert Content-Type.
+      const ext = clean.type === 'image/webp' ? 'webp' : 'jpg';
+      const path = `${user.id}/${listingId}/${crypto.randomUUID()}.${ext}`;
       const up = await c.storage.from('listing-photos')
-        .upload(path, clean, { contentType: 'image/jpeg', upsert: false });
+        .upload(path, clean, { contentType: clean.type, upsert: false });
       if (up.error) return { error: up.error };
 
       return c.from('listing_photos')

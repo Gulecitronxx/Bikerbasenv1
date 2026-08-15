@@ -157,7 +157,6 @@ function renderListing(){
 
   document.getElementById('listing-detail').innerHTML = `
     <div>
-      ${safetyBannerHTML()}
       ${suspicious ? `<div class="safety-banner" style="background:var(--color-danger-tint); color:var(--color-danger); border-color:color-mix(in srgb, var(--color-danger) 30%, transparent);">${Icon.alertTriangle}<span>Prisen er væsentligt under markedsniveau for denne type — vær ekstra opmærksom, og følg altid vores sikkerhedsråd.</span></div>` : ''}
 
       <div class="gallery">
@@ -167,6 +166,7 @@ function renderListing(){
           <button type="button" class="gallery-nav prev" aria-label="Forrige billede">${Icon.chevronLeft}</button>
           <button type="button" class="gallery-nav next" aria-label="Næste billede">${Icon.chevronRight}</button>
         </div>
+        ${isOwnListing(listing) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${listing.id}">${Icon.heart}</button>`}
         <div class="gallery-thumbs">
           ${currentPhotos.map((_, i) => `<button type="button" aria-label="Billede ${i+1}" data-thumb="${i}">${currentPhotos[i]}</button>`).join('')}
         </div>
@@ -177,14 +177,19 @@ function renderListing(){
           <p class="listing-title">${brand} ${model}</p>
           <div class="listing-loc">${Icon.mapPin}${escapeHTML(listing.city)}, ${escapeHTML(listing.postnr)} · ${escapeHTML(listing.region)}</div>
         </div>
-        <div style="display:flex; align-items:center; gap:12px;">
-          ${isOwnListing(listing)
-            ? `<a class="own-listing-tag" href="opret-annonce.html?rediger=${encodeURIComponent(listing.id)}">${Icon.edit}Din annonce</a>`
-            : `<button type="button" class="fav-btn ${fav?'active':''}" style="position:static;" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${listing.id}">${Icon.heart}</button>`}
+        <div class="listing-price-block">
+          <div class="listing-price-label">Pris</div>
           <div class="listing-price">${formatPrice(listing.price)}</div>
+          ${isOwnListing(listing)
+            ? `<a class="own-listing-tag" href="opret-annonce.html?rediger=${encodeURIComponent(listing.id)}" style="margin-top:8px;">${Icon.edit}Din annonce</a>`
+            : ''}
         </div>
       </div>
 
+      <!-- Tillidsstriben laa over galleriet og skubbede fotoet 90px ned.
+           Fotoet er det foerste koeberen vil se; raadene er relevante i det
+           oejeblik man kigger paa pris og saelger — altsaa her. -->
+      ${safetyBannerHTML()}
       ${sellerTypeNoteHTML(listing.isDealer)}
 
       ${(kk || listing.serviceHistorik === 'Fuld' || listing.kanNedsaettesA2) ? `<div class="detail-chip-row">
@@ -252,6 +257,33 @@ function renderListing(){
   document.getElementById('report-listing-btn').addEventListener('click', () => {
     openReportModal('listing', `${listing.brand} ${listing.model}`, listing.id);
   });
+
+  /* Kontaktbjælken i bunden (mobil). Den vises for alle andre end sælgeren
+     selv — også når man ikke er logget ind, for dér er handlingen "log ind
+     for at skrive", ikke "ingenting". Bilbasen lægger de samme knapper
+     øverst, hvor de ruller væk; vores følger med ned gennem specs og
+     beskrivelse, hvor beslutningen faktisk træffes. */
+  const bar = document.getElementById('listing-actionbar');
+  if (bar && !isOwnListing(listing)){
+    bar.hidden = false;
+    document.body.classList.add('har-actionbar');
+    const spring = (id, rulHen) => {
+      const mål = document.getElementById(id);
+      if (!mål){
+        // Ikke logget ind: send til login og tilbage hertil bagefter.
+        // js/login.js læser ?redirect= (og afviser fremmede adresser).
+        location.href = `login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`;
+        return;
+      }
+      mål.click();
+      // Telefonnummeret afsløres nede i sælgerkortet — flyt øjnene derhen,
+      // ellers trykker man på en knap og ser tilsyneladende ingenting ske.
+      // (Beskeden åbner en modal og skal ikke rulle noget.)
+      if (rulHen) mål.closest('.sidebar-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+    document.getElementById('bar-contact').addEventListener('click', () => spring('open-contact-modal', false));
+    document.getElementById('bar-phone').addEventListener('click', () => spring('reveal-phone-btn', true));
+  }
 
   // Kontaktknapperne findes kun i markup'en, når man er logget ind — al
   // wiring nedenfor forudsætter derfor login.

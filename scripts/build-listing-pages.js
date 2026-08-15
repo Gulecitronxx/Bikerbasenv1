@@ -142,7 +142,8 @@ ${csp}
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css${v}">
+${billeder.length ? `<link rel="preload" as="image" href="${esc(billeder[0])}" fetchpriority="high">
+` : ''}<link rel="stylesheet" href="css/styles.css${v}">
 ${jsonLd(l, url)}
 </head>
 <body>
@@ -164,7 +165,7 @@ ${header}
     <div class="listing-detail" id="listing-detail">
       <div>
 ${billeder.length ? `        <div class="prerender-gallery">
-${billeder.map((u, i) => `          <img src="${esc(u)}" alt="${esc(navn)} — billede ${i + 1} af ${billeder.length}"${i ? ' loading="lazy"' : ''} width="800" height="600">`).join('\n')}
+${billeder.map((u, i) => `          <img src="${esc(u)}" alt="${esc(navn)} — billede ${i + 1} af ${billeder.length}"${i ? ' loading="lazy"' : ' fetchpriority="high"'} decoding="async" width="800" height="600">`).join('\n')}
         </div>` : ''}
 
         <div class="listing-header">
@@ -172,7 +173,10 @@ ${billeder.map((u, i) => `          <img src="${esc(u)}" alt="${esc(navn)} — b
             <p class="listing-title">${esc(navn)}</p>
             <div class="listing-loc">${esc(l.city)}, ${esc(l.postnr)} · ${esc(l.region)}</div>
           </div>
-          <div class="listing-price">${formatPrice(l.price)}</div>
+          <div class="listing-price-block">
+            <div class="listing-price-label">Pris</div>
+            <div class="listing-price">${formatPrice(l.price)}</div>
+          </div>
         </div>
 
         <div class="spec-grid" style="margin-top:var(--space-4);">
@@ -228,6 +232,14 @@ ${udstyr.map(e => `            <li>${esc(equipmentLabel(e))}</li>`).join('\n')}
     </section>
   </div>
 </main>
+
+<!-- Kontaktbjaelke (mobil). Staar i markuppen, saa den er der ved foerste
+     maling; js/annonce.js kobler knapperne paa de samme handlinger som
+     kortet i sidebjaelken. position:fixed => skubber intet (ingen CLS). -->
+<div class="listing-actionbar" id="listing-actionbar" hidden>
+  <button type="button" class="btn btn-primary" id="bar-contact">Skriv til sælger</button>
+  <button type="button" class="btn btn-outline" id="bar-phone" aria-label="Vis telefonnummer">Ring op</button>
+</div>
 
 ${footer}
 

@@ -861,12 +861,31 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .prerender-gallery img{ width:100%; height:auto; border-radius: var(--radius-lg); object-fit:cover; background:var(--color-surface-2); }
 .prerender-gallery img:first-child{ aspect-ratio:4/3; }
 .prerender-gallery img:not(:first-child){ display:none; }
+/* Det forrenderede foto skal fylde nøjagtig det samme som det galleri,
+   js/annonce.js bytter det ud med. Ellers bliver LCP-elementet det
+   hydrerede billede — som først findes efter javascriptet er kørt, og
+   sidens LCP falder fra 2.8s til 5.0s (målt). */
+@media (max-width:699px){
+  .prerender-gallery{ margin-inline: calc(var(--space-4) * -1); }
+  .prerender-gallery img{ border-radius:0; }
+}
+@media (min-width:700px){ .prerender-gallery img:first-child{ aspect-ratio:16/10; } }
 
 .listing-detail{ display:grid; grid-template-columns:1fr; gap: var(--space-6); padding: var(--space-5) 0 var(--space-9); }
 @media (min-width:960px){ .listing-detail{ grid-template-columns: 1.6fr 1fr; align-items:start; } }
 
 .gallery{ border-radius: var(--radius-lg); overflow:hidden; background: var(--color-surface-2); position:relative; }
-.gallery-main{ aspect-ratio: 16/10; position:relative; }
+/* Fotoet er det, køberen kigger på først. På mobil gik der 16:10 indrykket
+   billede — under en tredjedel af Bilbasens. Nu kant-til-kant og 4:3, så
+   motorcyklen fylder skærmen; fra 700px er der plads til de runde hjørner. */
+.gallery-main{ aspect-ratio: 4/3; position:relative; }
+@media (min-width:700px){ .gallery-main{ aspect-ratio: 16/10; } }
+@media (max-width:699px){
+  .gallery{ margin-inline: calc(var(--space-4) * -1); border-radius:0; }
+}
+/* Favoritten hører til oven på fotoet (som på kortene), ikke i titelrækken
+   hvor den stjal plads fra modelnavnet. */
+.gallery .fav-btn{ position:absolute; top:12px; right:12px; z-index:3; }
 .gallery-main svg{ width:100%; height:100%; }
 .gallery-counter{ position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.65); color:#fff; font-size:13px; font-weight:600; padding:5px 12px; border-radius: var(--radius-pill); }
 .gallery-nav{ position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.9); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--color-dark); }
@@ -877,11 +896,40 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .gallery-thumbs button.active{ border-color: var(--color-primary); }
 .gallery-thumbs svg{ width:100%; height:100%; }
 
-.listing-header{ display:flex; justify-content:space-between; align-items:flex-start; gap: var(--space-4); margin: var(--space-5) 0; }
+/* Titel og pris stod side om side i én flex-række. På en telefon betød det,
+   at "Yamaha Virago 535" blev klippet til "Yamaha Virago", fordi prisen
+   holdt sin plads med white-space:nowrap. Nu stables de: titlen får hele
+   bredden, og prisen bliver sidens tydeligste tal med sin egen etiket —
+   samme greb som Bilbasens "Kontantpris", bare uden deres leasing-støj. */
+.listing-header{ display:grid; grid-template-columns:1fr; gap: var(--space-3); margin: var(--space-5) 0; }
+@media (min-width:700px){
+  .listing-header{ grid-template-columns: 1fr auto; align-items:flex-start; gap: var(--space-5); }
+  .listing-price-block{ text-align:right; }
+}
 .listing-title{ font-size: clamp(24px,3.4vw,34px); margin-bottom:8px; }
 .listing-loc{ display:flex; align-items:center; gap:6px; color: var(--color-fg-muted); font-size:14px; }
 .listing-loc svg{ width:16px; height:16px; }
-.listing-price{ font-family: var(--font-display); font-size: clamp(26px,3.4vw,34px); font-weight:700; white-space:nowrap; }
+.listing-price-label{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); }
+.listing-price{ font-family: var(--font-display); font-size: clamp(30px,5vw,38px); font-weight:700; white-space:nowrap; line-height:1.1; }
+
+/* Kontaktbjælke i bunden på mobil. Bilbasen lægger "Skriv til sælger" og
+   "Ring op" øverst på siden, hvor de forsvinder, så snart man scroller ned
+   til specs og beskrivelse — dér hvor man faktisk beslutter sig. Vores
+   bliver hængende. Den står i markuppen fra start (ikke bygget af JS), så
+   den er der ved første maling og ikke skubber noget: position:fixed. */
+.listing-actionbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:90;
+  display:flex; gap:10px; padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  backdrop-filter: blur(10px); border-top:1px solid var(--color-border);
+}
+.listing-actionbar .btn{ flex:1; min-height:48px; }
+.listing-actionbar .btn-outline{ flex:0 0 auto; padding-inline: 18px; }
+@media (min-width:960px){ .listing-actionbar{ display:none; } }
+/* Bjælken må ikke lægge sig oven på det sidste i footeren. */
+@media (max-width:959px){ body.har-actionbar{ padding-bottom:76px; } }
+/* Cookiebanneret er vigtigere end bjælken, så længe der ikke er svaret. */
+body.har-actionbar .cookie-banner{ z-index:120; }
 
 .spec-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: 1px; background: var(--color-border); border:1px solid var(--color-border); border-radius: var(--radius-md); overflow:hidden; }
 @media (min-width:560px){ .spec-grid{ grid-template-columns: repeat(3,1fr); } }
