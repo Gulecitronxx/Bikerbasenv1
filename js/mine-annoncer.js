@@ -78,7 +78,7 @@ function renderMine(){
         const { error } = await db.deleteListing(id);
         if (error){
           btn.disabled = false;
-          toast('Annoncen kunne ikke slettes: ' + error.message);
+          toast('Annoncen kunne ikke slettes: ' + error.message, { type: 'error' });
           return;
         }
         window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(l => l.id !== id);
@@ -261,7 +261,7 @@ function renderPlanCard(){
     const { data, error } = await db.startCheckout();
     if (error || !data?.url){
       btn.disabled = false; btn.textContent = 'Bliv forhandler';
-      toast('Betaling kunne ikke startes. Prøv igen om lidt.');
+      toast('Betaling kunne ikke startes. Prøv igen om lidt.', { type: 'error' });
       return;
     }
     window.location.href = data.url;

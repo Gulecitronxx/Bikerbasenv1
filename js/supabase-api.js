@@ -219,9 +219,32 @@ const db = (function(){
       return c.from('listings').update(patch).eq('id', id).select().single();
     },
 
+    /* Sletter annoncen OG dens billedfiler.
+
+       listing_photos-rækkerne forsvinder af sig selv (fremmednøgle med
+       on delete cascade), men filerne i storage gjorde ikke — de blev
+       liggende for evigt og kostede lagerplads for billeder, ingen kunne se.
+       Målt: efter en slettet annonce svarede fotoets offentlige URL stadig 200.
+
+       Rækken slettes først. RLS afgør dér, om man overhovedet må slette
+       annoncen; går det galt, har vi ikke rørt filerne. Fejler oprydningen
+       bagefter, står vi tilbage med en forældreløs fil frem for en række,
+       der peger på ingenting. */
     async deleteListing(id){
       const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
-      return c.from('listings').delete().eq('id', id);
+
+      const { data: fotos } = await c.from('listing_photos').select('storage_path').eq('listing_id', id);
+      const { error } = await c.from('listings').delete().eq('id', id);
+      if (error) return { error };
+
+      const stier = (fotos || []).map(f => f.storage_path).filter(Boolean);
+      if (stier.length){
+        const { error: filFejl } = await c.storage.from('listing-photos').remove(stier);
+        // Annoncen ER væk for brugeren; en fil der ikke kunne fjernes må ikke
+        // få sletningen til at se mislykket ud.
+        if (filFejl) console.warn('Annoncen er slettet, men billedfilerne blev ikke ryddet:', filFejl.message);
+      }
+      return { error: null };
     },
 
     /* ---------- Statistik ---------- */
@@ -370,10 +393,5 @@ const db = (function(){
       });
     },
 
-    async deleteListingPhoto(photoId, storagePath){
-      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
-      await c.storage.from('listing-photos').remove([storagePath]);
-      return c.from('listing_photos').delete().eq('id', photoId);
-    },
   };
 })();

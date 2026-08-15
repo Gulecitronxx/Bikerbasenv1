@@ -110,14 +110,25 @@ function wireHeader(){
   document.addEventListener('bb:favorites-changed', updateFavCount);
 }
 
+/* opts.type: 'success' (standard) eller 'error'.
+
+   Fejlbeskeder blev tidligere vist med det grønne flueben — "Udfyld venligst
+   alle felter markeret med *" så ud som en kvittering. Og elementet havde
+   hverken role eller aria-live, så en skærmlæserbruger fik intet at vide:
+   fokus hoppede bare til et felt uden nogen forklaring. */
 function toast(msg, opts){
+  const fejl = opts && opts.type === 'error';
   let el = document.querySelector('.toast');
   if (!el){
     el = document.createElement('div');
     el.className = 'toast';
     document.body.appendChild(el);
   }
-  el.innerHTML = `${Icon.checkCircle}<span>${msg}</span>`;
+  // role="alert" afbryder oplæsningen ved fejl; "status" venter høfligt.
+  el.setAttribute('role', fejl ? 'alert' : 'status');
+  el.setAttribute('aria-live', fejl ? 'assertive' : 'polite');
+  el.classList.toggle('toast-error', fejl);
+  el.innerHTML = `${fejl ? Icon.alertTriangle : Icon.checkCircle}<span>${msg}</span>`;
   el.classList.add('show');
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), (opts && opts.duration) || 2600);
@@ -265,7 +276,7 @@ function ensureReportModal(){
     if (typeof db !== 'undefined' && db.enabled){
       const { error } = await db.addReport(payload);
       if (error){
-        toast('Anmeldelsen blev gemt lokalt, men kunne ikke sendes');
+        toast('Anmeldelsen blev gemt lokalt, men kunne ikke sendes', { type: 'error' });
         return;
       }
     }

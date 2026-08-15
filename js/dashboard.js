@@ -283,7 +283,7 @@ function renderDashboard(user){
           const { error } = await db.deleteListing(id);
           if (error){
             btn.disabled = false;
-            toast('Annoncen kunne ikke slettes: ' + error.message);
+            toast('Annoncen kunne ikke slettes: ' + error.message, { type: 'error' });
             return;
           }
           window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(l => l.id !== id);

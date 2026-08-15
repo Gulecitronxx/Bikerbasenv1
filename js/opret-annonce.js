@@ -45,10 +45,14 @@ function updateEqCounts(){
   });
 }
 
+/* aria-invalid saettes ogsaa: den roede ramme er farve alene, og farve alene
+   er ikke et signal for alle. Uden den ved en skaermlaeserbruger ikke, at
+   det felt fokus lige hoppede til, er dét der mangler. */
 function markFieldError(el, refs){
   const field = el.closest('.field') || el.closest('.checkbox-inline');
   if (field) field.classList.add('has-error');
   if (el && el.style) el.style.borderColor = 'var(--color-danger)';
+  if (el && el.setAttribute) el.setAttribute('aria-invalid', 'true');
   if (refs && !refs.first) refs.first = el;
 }
 
@@ -61,7 +65,7 @@ function validateStep(n){
     const field = el.closest('.field') || el.closest('.checkbox-inline');
     const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
     if (!ok){ valid = false; markFieldError(el, refs); }
-    else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; }
+    else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); }
   });
   // Grænseværdier — feltet er tomt-tjekket ovenfor; her fanger vi urealistiske tal
   // (formularen er novalidate, så min/max i HTML håndhæves ikke af sig selv).
@@ -77,17 +81,28 @@ function validateStep(n){
     bound('f-km', v => v >= 0 && v <= 500000, 'Kilometerstanden virker urealistisk (0–500.000)');
     bound('f-ccm', v => v >= 50 && v <= 3000, 'Motorstørrelsen skal være mellem 50 og 3.000 ccm');
   }
+  /* Trin 4 er to afkrydsningsfelter, ikke felter man udfylder. Den generelle
+     besked ("Udfyld venligst alle felter markeret med *") gav ingen mening
+     dér: man havde lige skrevet hele annoncen færdig og fik at vide, at man
+     skulle udfylde noget. Sig hvad der mangler. */
+  if (n === 4){
+    const vilkaar = document.getElementById('f-terms');
+    const robot = document.getElementById('f-captcha');
+    if (!vilkaar.checked && !robot.checked) msg = 'Accepter vilkårene og bekræft, at du ikke er en robot';
+    else if (!vilkaar.checked) msg = 'Du skal acceptere vilkårene for annoncering';
+    else if (!robot.checked) msg = 'Bekræft, at du ikke er en robot';
+  }
   if (n === 2){
     bound('f-price', v => v > 0 && v <= 2000000, 'Angiv en realistisk pris');
     // Frit indtastet postnummer uden bekræftet valg = annonce uden by/region.
-    if (!document.getElementById('f-city').value){ valid = false; markFieldError(document.getElementById('f-postnr'), refs); msg = 'Vælg et postnummer fra listen'; }
+    if (!acceptExactPostnr()){ valid = false; markFieldError(document.getElementById('f-postnr'), refs); msg = 'Vælg et postnummer fra listen'; }
   }
   if (!valid){
     if (refs.first){
       refs.first.scrollIntoView({ block: 'center', behavior: 'smooth' });
       setTimeout(() => { try { refs.first.focus({ preventScroll: true }); } catch(e){} }, 280);
     }
-    toast(msg || 'Udfyld venligst alle felter markeret med *');
+    toast(msg || 'Udfyld venligst alle felter markeret med *', { type: 'error' });
   }
   return valid;
 }
@@ -109,7 +124,14 @@ function populateStaticFields(){
     document.getElementById('model-suggestions').innerHTML = models.map(m => `<option value="${m}">`).join('');
   });
 
-  document.getElementById('f-condition').innerHTML = CONDITIONS.map(c => `<option value="${c}">${c}</option>`).join('');
+  /* Tom førstemulighed med vilje. Feltet er påkrævet, men stod som standard
+     på "Som ny" — det mest flatterende af de fire. Sælgeren kunne altså
+     udgive en 20 år gammel motorcykel som "Som ny" uden nogensinde at have
+     truffet et valg, på en side der to felter længere nede beder om ærlighed
+     om stand og mangler. Nu skal standen vælges bevidst. */
+  document.getElementById('f-condition').innerHTML =
+    `<option value="">Vælg stand</option>`
+    + CONDITIONS.map(c => `<option value="${c}">${c}</option>`).join('');
   document.getElementById('f-afgift').innerHTML = AFGIFT_STATUSES.map(a => `<option value="${a}">${a}</option>`).join('');
 
   // Teknikfelterne er valgfrie — en tom værdi betyder "ikke oplyst" og
@@ -152,6 +174,27 @@ function populateStaticFields(){
    En dropdown duer ikke: der er 1089 postnumre, og "København K" alene fylder
    232 af dem. Man skriver i stedet postnummer eller bynavn og vælger et træf.
    By og region gemmes i skjulte felter, så de altid følger et rigtigt valg. */
+/* Accepterer et præcist indtastet postnummer uden at kræve et klik i listen.
+
+   Ét sted, fordi to steder skal bruge den: comboens blur-handler, og
+   valideringen. Blur-handleren venter 120ms (den skal lade et klik i listen
+   nå frem først), og det var 120ms for sent — trykkede man "Næste" efter at
+   have skrevet "2100", blev man afvist med "Vælg et postnummer fra listen",
+   hvorefter feltet udfyldte sig selv med "2100 København Ø" et øjeblik
+   senere. Man fik altså en fejl for noget, der rettede sig selv. */
+function acceptExactPostnr(){
+  if (document.getElementById('f-city').value) return true;
+  const input = document.getElementById('f-postnr');
+  const m = findPostnr(input.value.trim().split(' ')[0]);
+  if (!m) return false;
+  input.value = `${m.postnr} ${m.city}`;
+  document.getElementById('f-city').value = m.city;
+  document.getElementById('f-region').value = m.region;
+  document.getElementById('postnr-hint').textContent = `${m.city} · Region ${m.region}`;
+  input.closest('.field')?.classList.remove('has-error');
+  return true;
+}
+
 function wirePostnrCombo(){
   const input = document.getElementById('f-postnr');
   const list  = document.getElementById('postnr-list');
@@ -210,10 +253,7 @@ function wirePostnrCombo(){
     setTimeout(() => {
       close();
       // Præcis ét træf på det indtastede? Så accepterer vi det uden klik.
-      if (!document.getElementById('f-city').value){
-        const exact = findPostnr(input.value.trim().split(' ')[0]);
-        if (exact) commit(exact);
-      }
+      acceptExactPostnr();
     }, 120);
   });
 }
@@ -535,7 +575,7 @@ async function publishListing(){
     // Serveren afviste pga. gratis-grænsen (fallback hvis for-tjekket blev
     // omgået, fx to faner åbne samtidig).
     if (/GRAENSE/.test(error.message || '')){ visForhandlerGraense(3); return; }
-    toast('Annoncen kunne ikke gemmes: ' + error.message);
+    toast('Annoncen kunne ikke gemmes: ' + error.message, { type: 'error' });
     return;
   }
 

@@ -1174,6 +1174,9 @@ body.har-actionbar .cookie-banner{ z-index:120; }
 }
 .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 .toast svg{ width:18px; height:18px; color: var(--color-success); }
+/* Fejl-toast: rødt ikon og rød kant, så beskeden ikke ligner en kvittering. */
+.toast.toast-error svg{ color: var(--color-danger); }
+.toast.toast-error{ border-color: color-mix(in srgb, var(--color-danger) 55%, var(--color-border)); }
 
 /* ============ Utility ============ */
 .page-title-bar{ padding: var(--space-6) 0 var(--space-2); }
