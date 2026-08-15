@@ -8,7 +8,7 @@
 
 navn: MC Syd
 domaene: mcsyd.dk
-aktiv: false          # tændes når selectors er udfyldt OG der er givet tilladelse
+aktiv: false          # tilladelse OK — mangler kun selectors
 
 # ---------------------------------------------------------------
 # Tilladelse
@@ -17,10 +17,10 @@ aktiv: false          # tændes når selectors er udfyldt OG der er givet tillad
 # rammer /motorcykler/ eller /produkter/. Ingen Crawl-delay angivet, så vi
 # bruger vores egen grænse på 2 sekunder.
 #
-# Skriftlig tilladelse fra MC Syd: IKKE INDHENTET ENDNU.
-# robots.txt er en teknisk regel, ikke en aftale. Lad aktiv stå på false,
-# indtil der ligger et ja i indbakken.
+# Skriftlig tilladelse fra MC Syd: MODTAGET 16.08.2026.
+# robots.txt er en teknisk regel, ikke en aftale — derfor ventede vi på et ja.
 robots_tjekket: 2026-08-16
+tilladelse_modtaget: 2026-08-16   # skriftligt ja fra MC Syd
 crawl_delay_ms: 2000
 
 # ---------------------------------------------------------------
@@ -62,11 +62,21 @@ liste_urler:
   - url: https://mcsyd.dk/motorcykler/harley-davidson-motorcykler/
     maerke: Harley-Davidson
 
-# Detalje-URL, verificeret eksempel:
-# https://www.mcsyd.dk/produkter/motorcykel/brugt/harley-davidson-fxsbse-cvo-breakout/154654?p=154654
-# Det numeriske id til sidst er kilde_annonce_id. Det er stabilt på tværs af
-# kørsler; slug'en kan ændre sig, hvis forhandleren retter titlen.
-detalje_url_moenster: '/produkter/motorcykel/[^/]+/[^/]+/(\d+)'
+# Detalje-URL. VERIFICERET i browser, og den rettede mit første gæt:
+#   https://mcsyd.dk/Produkter/Motorcykel/Brugt/Harley-Davidson%20XL883%20Standard%20Cruiser/178201?p=178201&m=1528
+#
+# Tre ting, der alle ville have givet nul annoncer:
+#   1. Stien har STORE begyndelsesbogstaver — /Produkter/Motorcykel/Brugt/.
+#      Søgeresultater viser den med små, men serveren skriver den med store,
+#      og en case-sensitiv selector finder ingenting.
+#   2. Titlen står URL-kodet i stien (%20 for mellemrum), ikke som slug.
+#   3. Der er en ekstra parameter m=1528 ud over p=. Formålet er ukendt;
+#      den skal ikke bruges til noget, men et mønster der kræver at URL'en
+#      slutter efter p= vil fejle.
+#
+# Det numeriske id er kilde_annonce_id. Stabilt på tværs af kørsler; titlen i
+# stien kan ændre sig, hvis forhandleren retter den.
+detalje_url_moenster: '(?i)/produkter/motorcykel/[^/]+/[^/]+/(\d+)'
 id_gruppe: 1
 
 # ---------------------------------------------------------------
