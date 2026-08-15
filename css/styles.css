@@ -1021,6 +1021,19 @@ body.har-actionbar .cookie-banner{ z-index:120; }
 .step-line{ width:24px; height:2px; background: var(--color-border); flex-shrink:0; }
 @media (min-width:640px){ .step-line{ width:48px; } }
 
+/* På en telefon kunne de fire trinnavne ikke være der, så stepperen fik sin
+   egen vandrette scrollbar med pile — man skulle rulle sidelæns for at se,
+   hvor mange trin der var tilbage. Kun det aktive trin skriver sit navn;
+   prikkerne viser resten. Så er der ingen scrollbar at rulle i. */
+@media (max-width:520px){
+  .stepper{ overflow-x: visible; gap:6px; }
+  .step-item:not(.active) .step-label{
+    position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap;
+  }
+  .step-line{ width:auto; flex:1; min-width:8px; }
+}
+
 .upload-zone{
   border:2px dashed var(--color-border); border-radius: var(--radius-md); padding: var(--space-7) var(--space-4);
   text-align:center; cursor:pointer; transition: border-color .15s var(--ease-out), background-color .15s var(--ease-out);
@@ -1052,6 +1065,15 @@ body.har-actionbar .cookie-banner{ z-index:120; }
 @media (pointer:coarse){ .photo-actions{ opacity:1; } }
 
 .form-actions{ display:flex; justify-content:space-between; gap: var(--space-3); margin-top: var(--space-6); padding-top: var(--space-5); border-top:1px solid var(--color-border); }
+/* Tilbage + Gem kladde + Næste var tilsammen 364px bred i en 343px række.
+   Rækken har ingen overflow, så de 21px skubbede HELE dokumentet 5px ud til
+   højre — siden kunne scrolles vandret. Knapperne må krympe i stedet.
+   (Lighthouse fanger det ikke; vandret scroll er ikke en revision.) */
+@media (max-width:520px){
+  .form-actions{ min-width:0; }
+  .form-actions > div{ min-width:0; }
+  .form-actions .btn{ min-width:0; padding-inline: 12px; }
+}
 
 .preview-card-wrap{ max-width:400px; margin: 0 auto var(--space-6); }
 .preview-note{ display:flex; gap:10px; background: var(--color-primary-tint); color: var(--color-primary-hover); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size:13px; margin-bottom: var(--space-5); }

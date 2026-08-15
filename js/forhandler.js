@@ -43,7 +43,7 @@ async function renderReviews(){
   const avg = reviews.length
     ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10
     : null;
-  const stats = document.querySelectorAll('.profile-stats-row .hero-stat b');
+  const stats = document.querySelectorAll('.profile-stats-row .seller-stat b');
   if (stats[0]) stats[0].textContent = avg ?? '–';
   if (stats[1]) stats[1].textContent = reviews.length;
 }
@@ -133,7 +133,7 @@ async function renderProfile(){
       <p class="profile-name">${sellerNameEsc}</p>
       <div style="margin:6px 0 4px;">${verifiedBadgeHTML(seller)}</div>
       <div class="profile-meta">
-        <span>${Icon.mapPin}${escapeHTML(seller.city)}</span>
+        ${seller.city ? `<span>${Icon.mapPin}${escapeHTML(seller.city)}</span>` : ''}
         <span>${Icon.calendar}Medlem siden ${seller.memberSince}</span>
         <span>${seller.isDealer ? Icon.shieldCheck+'Forhandler' : Icon.user+'Privat sælger'}</span>
       </div>
@@ -146,9 +146,9 @@ async function renderProfile(){
   const avgRating = Store.getAverageRating(seller.name, Number(seller.rating));
   const reviewCount = Store.getReviews(seller.name).length;
   document.getElementById('profile-stats-row').innerHTML = `
-    <div class="hero-stat" style="color:inherit;"><b style="color:var(--color-fg)">${avgRating ?? '–'}</b><span style="color:var(--color-fg-muted)">Bedømmelse</span></div>
-    <div class="hero-stat"><b style="color:var(--color-fg)">${reviewCount}</b><span style="color:var(--color-fg-muted)">Anmeldelser</span></div>
-    <div class="hero-stat"><b style="color:var(--color-fg)">${sellerListings.length}</b><span style="color:var(--color-fg-muted)">Aktive annoncer</span></div>`;
+    <div class="seller-stat"><b>${avgRating ?? '–'}</b><span>Bedømmelse</span></div>
+    <div class="seller-stat"><b>${reviewCount}</b><span>Anmeldelser</span></div>
+    <div class="seller-stat"><b>${sellerListings.length}</b><span>Aktive annoncer</span></div>`;
 
   const grid = document.getElementById('seller-listings');
   grid.innerHTML = sellerListings.length ? sellerListings.map(listingCardHTML).join('') :
@@ -171,9 +171,19 @@ async function renderProfile(){
   const authorField = document.getElementById('review-author')?.closest('.field');
   if (authorField && db.enabled && seller.id) authorField.style.display = 'none';
 
-  document.getElementById('reveal-phone-profile').addEventListener('click', (e) => {
-    e.target.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(seller.phone)}</span>`;
-    e.target.disabled = true;
+  /* Telefonnummeret hentes kun for indloggede — som paa annoncesiden.
+     Foer viste knappen sig selv tom og deaktiveret, naar nummeret manglede:
+     man trykkede "Vis telefonnummer" og fik en graa, tekstloes knap. Nu
+     foerer den samme sted hen som resten af siden gaar ud fra. */
+  const tlfBtn = document.getElementById('reveal-phone-profile');
+  tlfBtn.addEventListener('click', () => {
+    if (!seller.phone){
+      const tilbage = location.pathname.split('/').pop() + location.search;
+      window.location.href = 'login.html?redirect=' + encodeURIComponent(tilbage);
+      return;
+    }
+    tlfBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(seller.phone)}</span>`;
+    tlfBtn.disabled = true;
   });
   document.getElementById('msg-seller-btn').addEventListener('click', () => {
     if (sellerListings[0]) window.location.href = `annonce.html?id=${sellerListings[0].id}`;

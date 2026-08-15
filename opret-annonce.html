@@ -39,8 +39,8 @@
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="preload" as="style" href="css/styles.css?v=c1e3a045" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="css/styles.css?v=c1e3a045"></noscript>
+<link rel="preload" as="style" href="css/styles.css?v=163db29d" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="css/styles.css?v=163db29d"></noscript>
 <style id="critical">:root{
 --color-bg: #F7F5F2;
 --color-surface: #FFFFFF;
@@ -377,6 +377,14 @@ background: var(--color-surface); transition: border-color .15s var(--ease-out),
 .step-item.active .step-label{ color: var(--color-fg); }
 .step-line{ width:24px; height:2px; background: var(--color-border); flex-shrink:0; }
 @media (min-width:640px){ .step-line{ width:48px; } }
+@media (max-width:520px){
+.stepper{ overflow-x: visible; gap:6px; }
+.step-item:not(.active) .step-label{
+position:absolute; width:1px; height:1px; overflow:hidden;
+clip:rect(0,0,0,0); white-space:nowrap;
+}
+.step-line{ width:auto; flex:1; min-width:8px; }
+}
 .upload-zone{
 border:2px dashed var(--color-border); border-radius: var(--radius-md); padding: var(--space-7) var(--space-4);
 text-align:center; cursor:pointer; transition: border-color .15s var(--ease-out), background-color .15s var(--ease-out);
@@ -405,6 +413,11 @@ text-align:center; cursor:pointer; transition: border-color .15s var(--ease-out)
 .photo-actions .photo-cover{ background: var(--color-primary); color: var(--color-on-primary); }
 @media (pointer:coarse){ .photo-actions{ opacity:1; } }
 .form-actions{ display:flex; justify-content:space-between; gap: var(--space-3); margin-top: var(--space-6); padding-top: var(--space-5); border-top:1px solid var(--color-border); }
+@media (max-width:520px){
+.form-actions{ min-width:0; }
+.form-actions > div{ min-width:0; }
+.form-actions .btn{ min-width:0; padding-inline: 12px; }
+}
 .preview-card-wrap{ max-width:400px; margin: 0 auto var(--space-6); }
 .preview-note{ display:flex; gap:10px; background: var(--color-primary-tint); color: var(--color-primary-hover); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size:13px; margin-bottom: var(--space-5); }
 :root[data-theme="dark"] .preview-note{ color: var(--color-primary); }
@@ -751,18 +764,18 @@ display:flex; flex-direction:column; overflow:hidden;
   </div>
 </footer>
 
-<script defer src="js/security.js?v=c1e3a045"></script>
+<script defer src="js/security.js?v=163db29d"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=c1e3a045"></script>
-<script defer src="js/supabase-api.js?v=c1e3a045"></script>
-<script defer src="js/icons.js?v=c1e3a045"></script>
-<script defer src="js/bike-art.js?v=c1e3a045"></script>
-<script defer src="js/postnumre.js?v=c1e3a045"></script>
-<script defer src="js/data.js?v=c1e3a045"></script>
-<script defer src="js/store.js?v=c1e3a045"></script>
-<script defer src="js/backend-bridge.js?v=c1e3a045"></script>
-<script defer src="js/components.js?v=c1e3a045"></script>
-<script defer src="js/opret-annonce.js?v=c1e3a045"></script>
+<script defer src="js/supabase-config.js?v=163db29d"></script>
+<script defer src="js/supabase-api.js?v=163db29d"></script>
+<script defer src="js/icons.js?v=163db29d"></script>
+<script defer src="js/bike-art.js?v=163db29d"></script>
+<script defer src="js/postnumre.js?v=163db29d"></script>
+<script defer src="js/data.js?v=163db29d"></script>
+<script defer src="js/store.js?v=163db29d"></script>
+<script defer src="js/backend-bridge.js?v=163db29d"></script>
+<script defer src="js/components.js?v=163db29d"></script>
+<script defer src="js/opret-annonce.js?v=163db29d"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

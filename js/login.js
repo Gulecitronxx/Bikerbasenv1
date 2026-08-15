@@ -30,6 +30,10 @@ const AUTH_KONTEKST = {
     titel: 'Dit overblik',
     tekst: 'Log ind for at se visninger, henvendelser og status på dine annoncer.',
   },
+  'forhandler.html': {
+    titel: 'Se sælgerens kontaktoplysninger',
+    tekst: 'Telefonnummer og profil er kun synlige for indloggede brugere. Det beskytter både køber og sælger.',
+  },
 };
 const AUTH_ANNONCE = {
   titel: 'Kontakt sælgeren',
