@@ -266,7 +266,7 @@ function formatCcm(n){
   return n.toLocaleString('da-DK') + ' ccm';
 }
 function formatPower(hk){
-  return hk + ' hk';
+  return hk ? hk + ' hk' : '—';
 }
 function timeAgoDa(iso){
   const then = new Date(iso).getTime();

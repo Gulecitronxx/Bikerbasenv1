@@ -223,8 +223,9 @@ function renderListing(){
       </div>` : ''}
 
       <div class="vin-box">
-        ${Icon.vin}Stelnummer (VIN): <code>${escapeHTML(listing.vin)}</code>
-        ${vinLooksValid ? `<span style="color:var(--color-success); font-weight:600; margin-left:4px;">${Icon.checkCircle} Format OK</span>` : ''}
+        ${Icon.vin}Stelnummer (VIN): ${listing.vin
+          ? `<code>${escapeHTML(listing.vin)}</code>${vinLooksValid ? `<span style="color:var(--color-success); font-weight:600; margin-left:4px;">${Icon.checkCircle} Format OK</span>` : ''}`
+          : `<span style="color:var(--color-fg-muted);">Ikke oplyst</span>`}
         <button type="button" class="report-link" id="check-vin-btn" style="margin-left:auto;">${Icon.info}Tjek stelnummer</button>
       </div>
 
@@ -261,8 +262,8 @@ function renderListing(){
 
   document.getElementById('check-vin-btn').addEventListener('click', () => {
     openInfoModal('Tjek stelnummer (VIN)', `
-      <p>Stelnummeret på denne annonce er <code>${escapeHTML(listing.vin)}</code>.</p>
-      <p>${vinLooksValid ? 'Formatet ser gyldigt ud (11–17 tegn, kun tilladte bogstaver/cifre).' : 'Formatet kunne ikke bekræftes automatisk — vær ekstra opmærksom, og sammenlign nøje med registreringsattesten.'}</p>
+      <p>${listing.vin ? `Stelnummeret på denne annonce er <code>${escapeHTML(listing.vin)}</code>.` : 'Sælger har ikke oplyst et stelnummer på denne annonce. Bed altid om det, og sammenlign med registreringsattesten før køb.'}</p>
+      ${listing.vin ? `<p>${vinLooksValid ? 'Formatet ser gyldigt ud (11–17 tegn, kun tilladte bogstaver/cifre).' : 'Formatet kunne ikke bekræftes automatisk — vær ekstra opmærksom, og sammenlign nøje med registreringsattesten.'}</p>` : ''}
       <p>Ved fremvisning bør du altid sammenligne stelnummeret på selve motorcyklen med både annoncen og registreringsattesten. Et rigtigt opslag i Motorregistret/DMR kræver en integration, som denne demo ikke har adgang til.</p>
     `);
   });

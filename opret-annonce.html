@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Opret annonce — Bikerbasen">
 <meta name="twitter:description" content="Opret en annonce for din motorcykel på Bikerbasen på under 5 minutter — gratis for private sælgere.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/styles.css?v=b6de7dcc">
+<link rel="stylesheet" href="css/styles.css?v=5eab2269">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -103,19 +103,19 @@
           </div>
           <div class="field">
             <label for="f-year">Årgang <span class="required-mark">*</span></label>
-            <input class="input" id="f-year" type="number" min="1950" max="2026" required>
+            <input class="input" id="f-year" type="number" inputmode="numeric" min="1950" max="2026" required>
           </div>
           <div class="field">
             <label for="f-km">Km-stand <span class="required-mark">*</span></label>
-            <input class="input" id="f-km" type="number" min="0" required>
+            <input class="input" id="f-km" type="number" inputmode="numeric" min="0" required>
           </div>
           <div class="field">
             <label for="f-ccm">Motorstørrelse (ccm) <span class="required-mark">*</span></label>
-            <input class="input" id="f-ccm" type="number" min="0" required>
+            <input class="input" id="f-ccm" type="number" inputmode="numeric" min="0" required>
           </div>
           <div class="field">
             <label for="f-power">Effekt (hk)</label>
-            <input class="input" id="f-power" type="number" min="0">
+            <input class="input" id="f-power" type="number" inputmode="numeric" min="0">
           </div>
           <div class="field" id="f-vin-field">
             <label for="f-vin">Stelnummer (VIN)</label>
@@ -198,7 +198,7 @@
         <div class="form-grid cols-2">
           <div class="field">
             <label for="f-price">Pris (DKK) <span class="required-mark">*</span></label>
-            <input class="input" id="f-price" type="number" min="0" required>
+            <input class="input" id="f-price" type="number" inputmode="numeric" min="0" required>
           </div>
           <div class="field">
             <label for="f-condition">Stand <span class="required-mark">*</span></label>
@@ -237,7 +237,7 @@
         </div>
         <div class="photo-grid" id="photo-grid"></div>
         <p class="field-hint" id="photo-hint" style="margin-top:12px;">Ingen billeder valgt endnu — vi viser en illustration som eksempel, indtil du uploader dine egne.</p>
-        <p class="field-hint" style="margin-top:6px;">EXIF-/GPS-metadata fjernes automatisk fra dine billeder, så din lokation ikke deles.</p>
+        <p class="field-hint" style="margin-top:6px;">Tip: Undgå billeder hvor nummerplade eller husnummer er tydeligt, hvis du vil beskytte din lokation.</p>
 
         <h2 style="margin:32px 0 16px;">Servicehistorik & dokumentation (valgfrit)</h2>
         <div class="upload-zone" id="doc-upload-zone">
@@ -320,17 +320,17 @@
   </div>
 </footer>
 
-<script defer src="js/security.js?v=b6de7dcc"></script>
+<script defer src="js/security.js?v=5eab2269"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=b6de7dcc"></script>
-<script defer src="js/supabase-api.js?v=b6de7dcc"></script>
-<script defer src="js/icons.js?v=b6de7dcc"></script>
-<script defer src="js/bike-art.js?v=b6de7dcc"></script>
-<script defer src="js/postnumre.js?v=b6de7dcc"></script>
-<script defer src="js/data.js?v=b6de7dcc"></script>
-<script defer src="js/store.js?v=b6de7dcc"></script>
-<script defer src="js/backend-bridge.js?v=b6de7dcc"></script>
-<script defer src="js/components.js?v=b6de7dcc"></script>
-<script defer src="js/opret-annonce.js?v=b6de7dcc"></script>
+<script defer src="js/supabase-config.js?v=5eab2269"></script>
+<script defer src="js/supabase-api.js?v=5eab2269"></script>
+<script defer src="js/icons.js?v=5eab2269"></script>
+<script defer src="js/bike-art.js?v=5eab2269"></script>
+<script defer src="js/postnumre.js?v=5eab2269"></script>
+<script defer src="js/data.js?v=5eab2269"></script>
+<script defer src="js/store.js?v=5eab2269"></script>
+<script defer src="js/backend-bridge.js?v=5eab2269"></script>
+<script defer src="js/components.js?v=5eab2269"></script>
+<script defer src="js/opret-annonce.js?v=5eab2269"></script>
 </body>
 </html>

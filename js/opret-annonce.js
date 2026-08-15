@@ -36,41 +36,61 @@ function goToStep(n){
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function updateEqCounts(){
+  if (typeof EQUIPMENT_GROUPS === 'undefined') return;
+  EQUIPMENT_GROUPS.forEach((g, gi) => {
+    const n = document.querySelectorAll(`#equipment-groups input[data-eq-group="${gi}"]:checked`).length;
+    const badge = document.querySelector(`[data-eq-count="${gi}"]`);
+    if (badge){ badge.textContent = n ? ` · ${n} valgt` : ''; badge.hidden = !n; }
+  });
+}
+
+function markFieldError(el, refs){
+  const field = el.closest('.field') || el.closest('.checkbox-inline');
+  if (field) field.classList.add('has-error');
+  if (el && el.style) el.style.borderColor = 'var(--color-danger)';
+  if (refs && !refs.first) refs.first = el;
+}
+
 function validateStep(n){
   const section = document.querySelector(`.form-step[data-step="${n}"]`);
   let valid = true;
+  const refs = { first: null };
+  let msg = '';
   section.querySelectorAll('[required]').forEach(el => {
     const field = el.closest('.field') || el.closest('.checkbox-inline');
     const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
-    if (!ok){
-      valid = false;
-      if (field) field.classList.add('has-error');
-      el.style.borderColor = 'var(--color-danger)';
-    } else {
-      if (field) field.classList.remove('has-error');
-      el.style.borderColor = '';
-    }
+    if (!ok){ valid = false; markFieldError(el, refs); }
+    else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; }
   });
+  // Grænseværdier — feltet er tomt-tjekket ovenfor; her fanger vi urealistiske tal
+  // (formularen er novalidate, så min/max i HTML håndhæves ikke af sig selv).
+  const bound = (id, ok, m) => {
+    const el = document.getElementById(id);
+    if (!el || el.value.trim() === '') return;
+    if (!ok(Number(el.value))){ valid = false; markFieldError(el, refs); msg = m; }
+  };
   if (n === 1){
-    const typeChecked = document.querySelector('input[name="bike-type"]:checked');
-    if (!typeChecked){ valid = false; toast('Vælg venligst en motorcykeltype'); }
+    if (!document.querySelector('input[name="bike-type"]:checked')){ valid = false; msg = msg || 'Vælg venligst en motorcykeltype'; }
+    const nowY = new Date().getFullYear();
+    bound('f-year', v => v >= 1900 && v <= nowY + 1, `Årgang skal være mellem 1900 og ${nowY + 1}`);
+    bound('f-km', v => v >= 0 && v <= 500000, 'Kilometerstanden virker urealistisk (0–500.000)');
+    bound('f-ccm', v => v >= 50 && v <= 3000, 'Motorstørrelsen skal være mellem 50 og 3.000 ccm');
     const vin = document.getElementById('f-vin').value.trim();
-    if (vin && !isValidVIN(vin)){
-      valid = false;
-      document.getElementById('f-vin-field').classList.add('has-error');
-      toast('Stelnummeret har et ugyldigt format');
-    }
+    if (vin && !isValidVIN(vin)){ valid = false; markFieldError(document.getElementById('f-vin'), refs); msg = 'Stelnummeret har et ugyldigt format'; }
   }
   if (n === 2){
-    // Et frit indtastet postnummer uden bekræftet valg ville give en annonce
-    // uden by/region — og dermed usynlig i regionsfiltret.
-    if (!document.getElementById('f-city').value){
-      valid = false;
-      document.getElementById('f-postnr').closest('.field').classList.add('has-error');
-      toast('Vælg et postnummer fra listen');
-    }
+    bound('f-price', v => v > 0 && v <= 2000000, 'Angiv en realistisk pris');
+    // Frit indtastet postnummer uden bekræftet valg = annonce uden by/region.
+    if (!document.getElementById('f-city').value){ valid = false; markFieldError(document.getElementById('f-postnr'), refs); msg = 'Vælg et postnummer fra listen'; }
   }
-  if (!valid) toast('Udfyld venligst alle felter markeret med *');
+  if (!valid){
+    if (refs.first){
+      refs.first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      setTimeout(() => { try { refs.first.focus({ preventScroll: true }); } catch(e){} }, 280);
+    }
+    toast(msg || 'Udfyld venligst alle felter markeret med *');
+  }
   return valid;
 }
 
@@ -78,7 +98,10 @@ function populateStaticFields(){
   document.getElementById('type-radio-group').innerHTML = TYPES.map(t => `
     <label class="radio-card">
       <input type="radio" name="bike-type" value="${t.id}">
-      <span class="radio-card-inner">${Icon.bike}<span>${t.label}</span></span>
+      <span class="radio-card-inner">
+        <span class="radio-card-media"><img src="img/type/${t.id}.webp" alt="" width="760" height="570" loading="lazy" decoding="async"></span>
+        <span class="radio-card-label">${t.label}</span>
+      </span>
     </label>`).join('');
 
   const brandSelect = document.getElementById('f-brand');
@@ -99,15 +122,28 @@ function populateStaticFields(){
   document.getElementById('f-cylinders').innerHTML = blank + CYLINDERS.map(c => `<option value="${c}">${c}</option>`).join('');
   document.getElementById('f-color').innerHTML = blank + COLORS.map(c => `<option value="${c}">${c}</option>`).join('');
 
-  document.getElementById('equipment-groups').innerHTML = EQUIPMENT_GROUPS.map(g => `
-    <details class="filter-group" open>
-      <summary>${g.group}<span class="chev">${Icon.chevronDown}</span></summary>
+  // Kollapset som standard — 6 åbne grupper = ~34 checkbokse på skærmen på én
+  // gang. Gruppenavn + live "X valgt" gør det scanbart uden at åbne alt.
+  document.getElementById('equipment-groups').innerHTML = EQUIPMENT_GROUPS.map((g, gi) => `
+    <details class="filter-group" data-eq-details="${gi}">
+      <summary>${g.group}<span class="eq-count" data-eq-count="${gi}" hidden></span><span class="chev">${Icon.chevronDown}</span></summary>
       <div class="filter-body equipment-grid">
-        ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}">${i.label}</label>`).join('')}
+        ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}" data-eq-group="${gi}">${i.label}</label>`).join('')}
       </div>
     </details>`).join('');
 
   wirePostnrCombo();
+
+  // Live "X valgt" på udstyrsgrupperne.
+  document.getElementById('equipment-groups').addEventListener('change', updateEqCounts);
+
+  // Ryd fejlmarkeringen mens brugeren retter feltet (rød kant hang før ved).
+  document.querySelectorAll('.form-step .input, .form-step input, .form-step select, .form-step textarea').forEach(el => {
+    el.addEventListener('input', () => {
+      const f = el.closest('.field'); if (f) f.classList.remove('has-error');
+      if (el.style) el.style.borderColor = '';
+    });
+  });
 
   document.getElementById('f-vin').addEventListener('input', (e) => {
     const vin = e.target.value.trim();
@@ -307,8 +343,8 @@ function collectFormData(){
     year: Number(document.getElementById('f-year').value) || 2020,
     km: Number(document.getElementById('f-km').value) || 0,
     ccm: Number(document.getElementById('f-ccm').value) || 0,
-    power: Number(document.getElementById('f-power').value) || Math.round((Number(document.getElementById('f-ccm').value)||0) * 0.07),
-    vin: document.getElementById('f-vin').value || `VIN${Date.now()}`,
+    power: Number(document.getElementById('f-power').value) || null,
+    vin: document.getElementById('f-vin').value.trim() || null,
     registration: document.getElementById('f-registration').value,
     afgift: document.getElementById('f-afgift').value,
     fuel: document.getElementById('f-fuel').value || null,
@@ -523,6 +559,7 @@ function fillForm(data){
   document.querySelectorAll('#equipment-groups input[data-equipment]').forEach(cb => {
     cb.checked = (data.equipment || []).includes(cb.dataset.equipment);
   });
+  updateEqCounts();
 }
 
 /* Lægger en gemt kladde tilbage i formularen.
