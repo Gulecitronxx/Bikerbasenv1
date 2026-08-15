@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Søg motorcykler — Bikerbasen">
 <meta name="twitter:description" content="Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
@@ -40,8 +40,8 @@
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="preload" as="style" href="css/styles.css?v=6fed05d5" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="css/styles.css?v=6fed05d5"></noscript>
+<link rel="preload" as="style" href="css/styles.css?v=f0e5c35e" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="css/styles.css?v=f0e5c35e"></noscript>
 <style id="critical">:root{
 --color-bg: #F7F5F2;
 --color-surface: #FFFFFF;
@@ -411,6 +411,12 @@ transition: background-color .15s var(--ease-out);
 .search-heading{ font-size: clamp(20px,2.6vw,26px); margin-bottom: var(--space-4); }
 .search-layout{ display:grid; grid-template-columns: 1fr; gap: var(--space-5); padding: var(--space-5) 0 var(--space-8); align-items:start; }
 @media (min-width:960px){ .search-layout{ grid-template-columns: 280px 1fr; } }
+@media (max-width:620px){
+.breadcrumb{ padding-top: var(--space-3); }
+.search-heading{ margin-bottom: var(--space-3); }
+.search-layout{ padding-top: var(--space-2); }
+.results-toolbar{ margin-bottom: var(--space-3); }
+}
 .filters-panel{
 background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
 padding: var(--space-4); position:sticky; top: calc(var(--header-h) + 16px);
@@ -662,11 +668,18 @@ background: var(--color-primary); color: var(--color-on-primary); font-size:11px
 .results-toolbar{ flex-wrap: wrap; }
 .toolbar-actions{ flex-wrap: wrap; }
 @media (max-width: 620px){
-.results-toolbar{ align-items: stretch; }
-.toolbar-actions{ width: 100%; display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
-.toolbar-actions #save-search-btn{ grid-column: 1 / -1; justify-content: center; }
-.toolbar-actions #sort-select{ min-width: 0; width: 100%; grid-column: 1; }
-.results-count{ width: 100%; }
+.results-toolbar{
+display:grid; grid-template-columns: 1fr auto auto; align-items:center;
+gap: 8px; row-gap: 10px;
+}
+.results-count{ width:auto; grid-area: 1 / 1; }
+#save-search-btn{ grid-area: 1 / 2; }
+.view-toggle{ grid-area: 1 / 3; }
+.toolbar-actions{ display: contents; }
+#sort-select{ grid-area: 2 / 1 / 3 / 3; width:100%; min-width:0; }
+#open-filters-btn{ grid-area: 2 / 3; }
+#save-search-label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+#save-search-btn{ padding-inline: 12px; }
 }
 @media (max-width: 620px){
 .btn-sm{ min-height: 44px; }
@@ -692,7 +705,49 @@ width: 44px; height: 44px; transform: translate(-50%, -50%);
 font-family: var(--font-display); font-weight:700; font-size:24px;
 line-height:1.15; letter-spacing:-0.01em; margin:0;
 display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-}</style>
+}
+.card-compare{
+position:absolute; right:6px; bottom:6px; z-index:2;
+width:34px; height:34px; border:none; border-radius:50%;
+background: rgba(255,255,255,.92); color: var(--color-fg-muted);
+display:flex; align-items:center; justify-content:center; cursor:pointer;
+box-shadow: var(--shadow-sm);
+transition: transform .15s var(--ease-out), color .15s var(--ease-out), background-color .15s var(--ease-out);
+-webkit-tap-highlight-color: transparent;
+}
+.card-compare svg{ width:17px; height:17px; }
+.card-compare:hover{ transform: scale(1.08); }
+.card-compare.active{ background: var(--color-primary); color: var(--color-on-primary); }
+:root[data-theme="dark"] .card-compare{ background: rgba(31,28,23,.92); }
+.compare-bar{
+position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:60;
+display:flex; align-items:center; gap:16px;
+background: var(--color-surface); border:1px solid var(--color-border);
+border-radius: var(--radius-pill); box-shadow: var(--shadow-lg);
+padding:10px 12px 10px 20px; max-width:calc(100vw - 24px);
+}
+.compare-bar[hidden]{ display:none; }
+.compare-bar-count{ font-weight:600; font-size:14px; white-space:nowrap; }
+.compare-bar-actions{ display:flex; gap:8px; }
+.compare-modal{ position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center; padding:16px; }
+.compare-modal[hidden]{ display:none; }
+.compare-modal-scrim{ position:absolute; inset:0; background:rgba(0,0,0,.5); }
+.compare-modal-panel{
+position:relative; background: var(--color-surface); border:1px solid var(--color-border);
+border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+width:min(760px, 100%); max-height:calc(100dvh - 32px);
+display:flex; flex-direction:column; overflow:hidden;
+}
+.compare-modal-head{ display:flex; align-items:center; justify-content:space-between; padding: var(--space-4) var(--space-5); border-bottom:1px solid var(--color-border); }
+.compare-modal-head h2{ font-size:20px; }
+.compare-table-wrap{ overflow:auto; }
+.compare-table{ width:100%; border-collapse:collapse; font-size:14px; }
+.compare-table th, .compare-table td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--color-border); vertical-align:top; }
+.compare-table thead th{ position:sticky; top:0; background: var(--color-surface); font-family:var(--font-display); z-index:1; }
+.compare-table thead th a{ color: var(--color-primary); }
+.compare-table tbody th{ color: var(--color-fg-muted); font-weight:600; white-space:nowrap; }
+.compare-table tbody td{ font-weight:600; }
+@media (max-width:560px){ .compare-bar{ left:12px; right:12px; transform:none; justify-content:space-between; padding-left:16px; } }</style>
 <link rel="preload" as="image" href="https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/3d71de63-1551-4c2a-b709-d082fce48a6f/4f21b0c3-3ba8-4faf-aa08-12213841a197/6cbd0b83-a979-4ec0-8c58-ee477899f6ac.jpg" fetchpriority="high" id="srp-lcp-preload">
 </head>
 <body>
@@ -1039,19 +1094,19 @@ display:flex; align-items:center; gap:8px; flex-wrap:wrap;
   </div>
 </footer>
 
-<script defer src="js/security.js?v=6fed05d5"></script>
+<script defer src="js/security.js?v=f0e5c35e"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=6fed05d5"></script>
-<script defer src="js/supabase-api.js?v=6fed05d5"></script>
-<script defer src="js/icons.js?v=6fed05d5"></script>
-<script defer src="js/bike-art.js?v=6fed05d5"></script>
-<script defer src="js/postnumre.js?v=6fed05d5"></script>
-<script defer src="js/data.js?v=6fed05d5"></script>
-<script defer src="js/store.js?v=6fed05d5"></script>
-<script defer src="js/backend-bridge.js?v=6fed05d5"></script>
-<script defer src="js/components.js?v=6fed05d5"></script>
-<script defer src="js/seo.js?v=6fed05d5"></script>
-<script defer src="js/search.js?v=6fed05d5"></script>
+<script defer src="js/supabase-config.js?v=f0e5c35e"></script>
+<script defer src="js/supabase-api.js?v=f0e5c35e"></script>
+<script defer src="js/icons.js?v=f0e5c35e"></script>
+<script defer src="js/bike-art.js?v=f0e5c35e"></script>
+<script defer src="js/postnumre.js?v=f0e5c35e"></script>
+<script defer src="js/data.js?v=f0e5c35e"></script>
+<script defer src="js/store.js?v=f0e5c35e"></script>
+<script defer src="js/backend-bridge.js?v=f0e5c35e"></script>
+<script defer src="js/components.js?v=f0e5c35e"></script>
+<script defer src="js/seo.js?v=f0e5c35e"></script>
+<script defer src="js/search.js?v=f0e5c35e"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

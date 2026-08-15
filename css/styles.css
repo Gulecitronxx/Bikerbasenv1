@@ -621,6 +621,15 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .search-heading{ font-size: clamp(20px,2.6vw,26px); margin-bottom: var(--space-4); }
 .search-layout{ display:grid; grid-template-columns: 1fr; gap: var(--space-5); padding: var(--space-5) 0 var(--space-8); align-items:start; }
 @media (min-width:960px){ .search-layout{ grid-template-columns: 280px 1fr; } }
+/* Hver pixel over det første kort er en pixel køberen ikke bruger på en
+   motorcykel. Brødkrumme og h1 bliver (de er både SEO og orientering —
+   Bilbasen har ingen af delene), men luften omkring dem strammes på mobil. */
+@media (max-width:620px){
+  .breadcrumb{ padding-top: var(--space-3); }
+  .search-heading{ margin-bottom: var(--space-3); }
+  .search-layout{ padding-top: var(--space-2); }
+  .results-toolbar{ margin-bottom: var(--space-3); }
+}
 
 .filters-panel{
   background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
@@ -1698,12 +1707,32 @@ body.overlay-open .cookie-banner{ display:none; }
    bredere end en telefon. De wrapper nu i stedet for at give vandret scroll. */
 .results-toolbar{ flex-wrap: wrap; }
 .toolbar-actions{ flex-wrap: wrap; }
+
+/* Målt mod Bilbasens SRP: deres første annoncekort begynder 305px nede,
+   vores begyndte 445px nede. Forskellen var ikke indhold, men rækker —
+   vi brugte fire (antal / Gem søgning / skifter+Filtre / Sortér) hvor de
+   bruger to. Nu to: antal + agent + visningsskifter på den ene, sortering
+   + Filtre på den anden. "Gem søgning" bliver til sin klokke alene, ligesom
+   deres søgeagent-knap; teksten bliver i aria-label, så knappen stadig
+   siger hvad den gør. */
 @media (max-width: 620px){
-  .results-toolbar{ align-items: stretch; }
-  .toolbar-actions{ width: 100%; display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
-  .toolbar-actions #save-search-btn{ grid-column: 1 / -1; justify-content: center; }
-  .toolbar-actions #sort-select{ min-width: 0; width: 100%; grid-column: 1; }
-  .results-count{ width: 100%; }
+  .results-toolbar{
+    display:grid; grid-template-columns: 1fr auto auto; align-items:center;
+    gap: 8px; row-gap: 10px;
+  }
+  /* Rækker og kolonner sættes eksplicit. Med automatisk placering havner
+     Filtre og Sortér på hver sin række, fordi markup-rækkefølgen (Filtre
+     før Sortér) ikke er den samme som den ønskede læserækkefølge. */
+  .results-count{ width:auto; grid-area: 1 / 1; }
+  #save-search-btn{ grid-area: 1 / 2; }
+  .view-toggle{ grid-area: 1 / 3; }
+  /* .toolbar-actions er kun en beholder på mobil — lad børnene gå direkte
+     ind i gitteret, så de to rækker kan blandes på tværs af den. */
+  .toolbar-actions{ display: contents; }
+  #sort-select{ grid-area: 2 / 1 / 3 / 3; width:100%; min-width:0; }
+  #open-filters-btn{ grid-area: 2 / 3; }
+  #save-search-label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  #save-search-btn{ padding-inline: 12px; }
 }
 
 /* ============ Touch-mål (Apple HIG / Material: min. 44px) ============

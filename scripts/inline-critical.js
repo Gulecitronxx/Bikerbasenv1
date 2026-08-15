@@ -34,7 +34,7 @@ if (!sections.length) throw new Error('inline-critical: fandt ingen sektionsmark
 /* Footeren er sjældent above-the-fold, men den er billig (1.4KB) og holder
    dokumenthøjden stabil, når det fulde ark lander — ellers hopper alt under
    folden, så snart brugeren scroller. */
-const BASE = ['Design tokens', 'Reset', 'Buttons', 'Formularfelter', 'Pladsreservation', 'Sektionslayout', 'Header', 'Footer', 'Cookie consent'];
+const BASE = ['Design tokens', 'Reset', 'Buttons', 'Formularfelter', 'Pladsreservation', 'Sektionslayout', 'Header', 'Footer', 'Cookie consent', 'Sammenlign'];
 
 const PAGES = [
   // Forsiden: uændret fra runde 4 (headeren hen over hero-fotoet + footeren,

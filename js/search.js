@@ -152,8 +152,12 @@ function refreshSaveSearchButton(){
   const qs = currentQueryString();
   const saved = Store.getSavedSearches().some(s => s.query === qs);
   const btn = document.getElementById('save-search-btn');
+  const tekst = saved ? 'Søgning gemt' : 'Gem søgning';
   document.getElementById('save-search-icon').innerHTML = saved ? Icon.checkCircle : Icon.bell;
-  document.getElementById('save-search-label').textContent = saved ? 'Søgning gemt' : 'Gem søgning';
+  document.getElementById('save-search-label').textContent = tekst;
+  // På mobil vises kun klokken (teksten er skjult for øjet, men ikke for
+  // skærmlæsere) — title giver den seende bruger det samme svar ved tryk-hold.
+  btn.title = tekst;
   btn.classList.toggle('is-saved', saved);
 }
 
