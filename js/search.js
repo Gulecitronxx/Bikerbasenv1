@@ -507,6 +507,28 @@ function render(){
   } else {
     grid.style.display = 'none';
     empty.style.display = 'block';
+
+    /* To vidt forskellige situationer havde samme tomme skærm — og samme
+       orange knap: "Nulstil filtre". Sætter man ingen filtre, og der bare
+       ikke er nogen annoncer endnu, var sidens primære handling altså en
+       knap, der ikke gjorde noget som helst. Præcis den tilstand er den, et
+       nyt site møder brugerne med hver eneste dag, indtil lageret vokser. */
+    const intetLager = Store.getAllListings().length === 0;
+    document.getElementById('empty-title').textContent = intetLager
+      ? 'Der er ingen annoncer endnu'
+      : 'Ingen annoncer matcher dine filtre';
+    document.getElementById('empty-text').textContent = intetLager
+      ? 'Bikerbasen er helt nyt. Bliv den første til at sætte en motorcykel til salg — eller få besked, så snart der kommer en.'
+      : 'Prøv at fjerne et filter eller udvide dit prisinterval.';
+
+    // Nulstil-knappen giver kun mening, når der ER noget at nulstille.
+    const nulstil = document.getElementById('empty-clear-btn');
+    const saelg = document.getElementById('empty-sell-btn');
+    nulstil.hidden = intetLager || !pills.length;
+    // Den synlige hovedhandling skal være den, der rent faktisk hjælper.
+    nulstil.classList.toggle('btn-primary', !nulstil.hidden);
+    saelg.classList.toggle('btn-primary', nulstil.hidden);
+    saelg.classList.toggle('btn-outline', !nulstil.hidden);
   }
 
   const pag = document.getElementById('pagination');

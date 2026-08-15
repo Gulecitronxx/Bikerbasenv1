@@ -25,7 +25,8 @@
 <meta name="twitter:title" content="Søg motorcykler — Bikerbasen">
 <meta name="twitter:description" content="Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
+
 
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
@@ -746,13 +747,14 @@ display:flex; flex-direction:column; overflow:hidden;
 .compare-table tbody th{ color: var(--color-fg-muted); font-weight:600; white-space:nowrap; }
 .compare-table tbody td{ font-weight:600; }
 @media (max-width:560px){ .compare-bar{ left:12px; right:12px; transform:none; justify-content:space-between; padding-left:16px; } }</style>
-<link rel="preload" as="style" href="css/styles.css?v=5035f515" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="css/styles.css?v=5035f515"></noscript>
+<link rel="preload" as="style" href="css/styles.css?v=f4bf97bb" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="css/styles.css?v=f4bf97bb"></noscript>
 
 
 
 
-<link rel="preload" as="image" href="https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/3d71de63-1551-4c2a-b709-d082fce48a6f/4f21b0c3-3ba8-4faf-aa08-12213841a197/6cbd0b83-a979-4ec0-8c58-ee477899f6ac.jpg" fetchpriority="high" id="srp-lcp-preload">
+
+
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -978,7 +980,7 @@ display:flex; flex-direction:column; overflow:hidden;
       <div>
         <form class="srp-search" id="srp-search" role="search">
           <span class="srp-search-icon" id="srp-search-icon" aria-hidden="true"></span>
-          <input type="search" id="filter-q" placeholder="Søg mærke eller model — fx Yamaha MT-07" autocomplete="off" aria-label="Søg mærke eller model">
+          <input type="search" id="filter-q" placeholder="Søg mærke eller model" autocomplete="off" aria-label="Søg mærke eller model">
           <button type="button" class="srp-search-clear" id="filter-q-clear" aria-label="Ryd søgning" hidden></button>
         </form>
         <div class="active-filters" id="active-filters"></div>
@@ -986,7 +988,7 @@ display:flex; flex-direction:column; overflow:hidden;
           <!-- aria-live: resultattallet ændrer sig når man sætter et filter,
                uden at noget flytter fokus. Uden det får skærmlæserbrugere
                ingen besked om, at søgningen gav et andet antal. -->
-          <div class="results-count" id="results-count" role="status" aria-live="polite" aria-atomic="true">1 <span>annonce fundet</span></div>
+          <div class="results-count" id="results-count" role="status" aria-live="polite" aria-atomic="true">0 <span>annoncer fundet</span></div>
           <div class="toolbar-actions">
             <button type="button" class="btn btn-outline btn-sm" id="save-search-btn"><span id="save-search-icon"></span><span id="save-search-label">Gem søgning</span></button>
             <div class="view-toggle" role="group" aria-label="Visningstype">
@@ -1008,45 +1010,17 @@ display:flex; flex-direction:column; overflow:hidden;
         <!-- Kortenes <h3> hang tidligere direkte under <h1>: filtrenes <h2>
              er skjult på mobil, så overskriftsrækken sprang et niveau over. -->
         <h2 class="visually-hidden">Søgeresultater</h2>
-        <div id="results-grid" class="listings-grid"><!--srp:start-->
-  <article class="card" data-listing-id="4f21b0c3-3ba8-4faf-aa08-12213841a197">
-    <div class="card-media">
-      <img src="https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/3d71de63-1551-4c2a-b709-d082fce48a6f/4f21b0c3-3ba8-4faf-aa08-12213841a197/6cbd0b83-a979-4ec0-8c58-ee477899f6ac.jpg" alt="Yamaha Virago 535" loading="eager" fetchpriority="high" decoding="async" class="card-photo">
-      <div class="card-badges">
-        
-        
-        
-      </div>
-      <button type="button" class="fav-btn " aria-pressed="false" aria-label="Gem annonce" data-fav-toggle="4f21b0c3-3ba8-4faf-aa08-12213841a197"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg></button>
-      <span class="card-koerekort" title="Kan føres på A2-kørekort" aria-label="Kan føres på A2-kørekort">A2</span>
-      <button type="button" class="card-compare " data-compare-toggle="4f21b0c3-3ba8-4faf-aa08-12213841a197" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-price">15.000 kr.</div>
-      <h3 class="card-title">Yamaha Virago 535</h3>
-      <div class="card-meta">
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>1990</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5a8 8 0 1 1 15 0"/><path d="M12 13l3-3.5"/><circle cx="12" cy="13" r="1"/></svg>87.000 km</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.3M12 18.7V21M21 12h-2.3M5.3 12H3M18 6l-1.6 1.6M7.6 16.4 6 18M18 18l-1.6-1.6M7.6 7.6 6 6"/></svg>535 ccm</span>
-      </div>
-      
-      <div class="card-footer">
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>København V</span>
-        <span>for 2 uger siden</span>
-      </div>
-    </div>
-    <a href="annonce.html?id=4f21b0c3-3ba8-4faf-aa08-12213841a197" class="card-link" aria-label="Se annonce: Yamaha Virago 535, 15.000 kr."></a>
-  </article><!--srp:end--></div>
+        <div id="results-grid" class="listings-grid"><!--srp:start--><!--srp:end--></div>
 <script>if(location.search)document.getElementById("results-grid").style.visibility="hidden";</script>
         <div id="swipe-deck" class="swipe-deck" hidden></div>
         <div id="thin-result-panel" class="thin-panel" hidden></div>
         <div id="empty-state" class="empty-state" style="display:none;">
           <div id="empty-icon"></div>
-          <h3>Ingen annoncer matcher lige nu</h3>
-          <p>Bikerbasen er nyt, og lageret vokser hver uge. Vær den første til at fange den rette — eller sæt din egen motorcykel til salg.</p>
+          <h3 id="empty-title">Der er ingen annoncer endnu</h3>
+          <p id="empty-text">Bikerbasen er helt nyt. Bliv den første til at sætte en motorcykel til salg — eller få besked, så snart der kommer en.</p>
           <div class="empty-actions">
-            <button type="button" class="btn btn-primary" id="empty-clear-btn">Nulstil filtre</button>
-            <a href="opret-annonce.html" class="btn btn-outline">Sælg din motorcykel</a>
+            <button type="button" class="btn btn-primary" id="empty-clear-btn" hidden>Nulstil filtre</button>
+            <a href="opret-annonce.html" class="btn btn-primary" id="empty-sell-btn">Sælg din motorcykel</a>
           </div>
           <p class="empty-agent-hint">Vil du have besked, når der kommer en? <button type="button" class="link-btn" id="empty-agent-btn">Gem søgningen som søgeagent</button>.</p>
         </div>
@@ -1098,19 +1072,19 @@ display:flex; flex-direction:column; overflow:hidden;
   </div>
 </footer>
 
-<script defer src="js/security.js?v=5035f515"></script>
+<script defer src="js/security.js?v=f4bf97bb"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=5035f515"></script>
-<script defer src="js/supabase-api.js?v=5035f515"></script>
-<script defer src="js/icons.js?v=5035f515"></script>
-<script defer src="js/bike-art.js?v=5035f515"></script>
-<script defer src="js/postnumre.js?v=5035f515"></script>
-<script defer src="js/data.js?v=5035f515"></script>
-<script defer src="js/store.js?v=5035f515"></script>
-<script defer src="js/backend-bridge.js?v=5035f515"></script>
-<script defer src="js/components.js?v=5035f515"></script>
-<script defer src="js/seo.js?v=5035f515"></script>
-<script defer src="js/search.js?v=5035f515"></script>
+<script defer src="js/supabase-config.js?v=f4bf97bb"></script>
+<script defer src="js/supabase-api.js?v=f4bf97bb"></script>
+<script defer src="js/icons.js?v=f4bf97bb"></script>
+<script defer src="js/bike-art.js?v=f4bf97bb"></script>
+<script defer src="js/postnumre.js?v=f4bf97bb"></script>
+<script defer src="js/data.js?v=f4bf97bb"></script>
+<script defer src="js/store.js?v=f4bf97bb"></script>
+<script defer src="js/backend-bridge.js?v=f4bf97bb"></script>
+<script defer src="js/components.js?v=f4bf97bb"></script>
+<script defer src="js/seo.js?v=f4bf97bb"></script>
+<script defer src="js/search.js?v=f4bf97bb"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">
