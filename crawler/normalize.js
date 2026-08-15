@@ -177,4 +177,8 @@ function fingerprint({ maerke, model, aargang, km, pris_dkk, postnr }){
 module.exports = {
   parsePris, parseKm, parseAargang, parseCcm, parsePostnr,
   normaliserMaerke, normaliserSaelgertype, uddrag, fingerprint,
+  // Eksporteres, så crawleren kan GENKENDE et mærke i starten af en titel og
+  // dele "Harley-Davidson XL883 Standard" op i mærke og model. Kun opslag —
+  // parsningen bliver liggende her.
+  MAERKE_ALIAS,
 };

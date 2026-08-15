@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "crawl": "node crawler/run.js",
+    "test": "node --test crawler/normalize.test.js crawler/parse.test.js crawler/hastighed.test.js",
+    "crawl:tjek": "node crawler/tjek.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +20,9 @@
   "homepage": "https://github.com/Gulecitronxx/Bikerbasenv1#readme",
   "description": "",
   "dependencies": {
-    "motion": "^13.1.0"
+    "@supabase/supabase-js": "^2.112.3",
+    "motion": "^13.1.0",
+    "playwright": "^1.62.1",
+    "yaml": "^2.9.0"
   }
 }
