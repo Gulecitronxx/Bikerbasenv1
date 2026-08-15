@@ -272,6 +272,16 @@ function renderDocGrid(){
   });
 }
 
+/* Flyt et uploadet billede i rækkefølgen (bestemmer forsidebilledet). */
+function movePhoto(from, to){
+  if (to < 0 || to >= uploadedPhotos.length || from === to) return;
+  const [item] = uploadedPhotos.splice(from, 1);
+  uploadedPhotos.splice(to, 0, item);
+  renderPhotoGrid();
+}
+
+let _photoDragIdx = null;
+
 function renderPhotoGrid(){
   const grid = document.getElementById('photo-grid');
 
@@ -285,10 +295,19 @@ function renderPhotoGrid(){
       <button type="button" class="remove-photo" data-remove-existing="${p.id}" aria-label="Fjern dette billede fra annoncen">${Icon.close}</button>
     </div>`).join('');
 
+  const isCover = (i) => !existingPhotos.length && i === 0;
+  const chevL = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>`;
+  const chevR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`;
+  const star  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg>`;
   const nye = uploadedPhotos.map((p, i) => `
-    <div class="photo-thumb">
-      <img src="${p.url}" alt="${escapeHTML(p.name)}">
-      ${!existingPhotos.length && i === 0 ? '<span class="cover-tag">Forside</span>' : '<span class="cover-tag new">Ny</span>'}
+    <div class="photo-thumb" draggable="true" data-idx="${i}">
+      <img src="${p.url}" alt="${escapeHTML(p.name)}" draggable="false">
+      ${isCover(i) ? '<span class="cover-tag">Forside</span>' : '<span class="cover-tag new">Ny</span>'}
+      <div class="photo-actions">
+        <button type="button" class="photo-move" data-move="${i}" data-dir="-1" aria-label="Flyt tidligere"${i === 0 ? ' disabled' : ''}>${chevL}</button>
+        ${(!existingPhotos.length && i > 0) ? `<button type="button" class="photo-cover" data-cover="${i}" aria-label="Sæt som forsidebillede" title="Sæt som forside">${star}</button>` : ''}
+        <button type="button" class="photo-move" data-move="${i}" data-dir="1" aria-label="Flyt senere"${i === uploadedPhotos.length - 1 ? ' disabled' : ''}>${chevR}</button>
+      </div>
       <button type="button" class="remove-photo" data-remove="${i}" aria-label="Fjern billede">${Icon.close}</button>
     </div>`).join('');
 
@@ -296,6 +315,25 @@ function renderPhotoGrid(){
 
   grid.querySelectorAll('[data-remove]').forEach(btn => {
     btn.addEventListener('click', () => { uploadedPhotos.splice(Number(btn.dataset.remove), 1); renderPhotoGrid(); });
+  });
+  grid.querySelectorAll('[data-move]').forEach(btn => {
+    btn.addEventListener('click', () => { const i = Number(btn.dataset.move); movePhoto(i, i + Number(btn.dataset.dir)); });
+  });
+  grid.querySelectorAll('[data-cover]').forEach(btn => {
+    btn.addEventListener('click', () => { movePhoto(Number(btn.dataset.cover), 0); toast('Forsidebillede opdateret'); });
+  });
+  // Træk-og-slip omrokering (desktop) — knapperne er den tilgængelige fallback.
+  grid.querySelectorAll('.photo-thumb[data-idx]').forEach(thumb => {
+    thumb.addEventListener('dragstart', () => { _photoDragIdx = Number(thumb.dataset.idx); thumb.classList.add('dragging'); });
+    thumb.addEventListener('dragend', () => { thumb.classList.remove('dragging'); grid.querySelectorAll('.drag-over').forEach(t => t.classList.remove('drag-over')); });
+    thumb.addEventListener('dragover', (e) => { e.preventDefault(); thumb.classList.add('drag-over'); });
+    thumb.addEventListener('dragleave', () => thumb.classList.remove('drag-over'));
+    thumb.addEventListener('drop', (e) => {
+      e.preventDefault(); thumb.classList.remove('drag-over');
+      const to = Number(thumb.dataset.idx);
+      if (_photoDragIdx !== null && _photoDragIdx !== to) movePhoto(_photoDragIdx, to);
+      _photoDragIdx = null;
+    });
   });
   grid.querySelectorAll('[data-remove-existing]').forEach(btn => {
     btn.addEventListener('click', () => {

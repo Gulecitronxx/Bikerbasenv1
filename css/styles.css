@@ -948,6 +948,17 @@ select.input{
 .photo-thumb .cover-tag{ position:absolute; bottom:4px; left:4px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase; }
 /* Skiller nyligt tilføjede billeder fra dem, der allerede ligger på annoncen. */
 .photo-thumb .cover-tag.new{ background: var(--color-primary); color: var(--color-on-primary); }
+.photo-thumb[draggable="true"]{ cursor:grab; }
+.photo-thumb.dragging{ opacity:.4; }
+.photo-thumb.drag-over{ outline:2.5px dashed var(--color-primary); outline-offset:-2px; }
+.photo-actions{ position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:center; gap:6px; padding:6px; background:linear-gradient(to top, rgba(0,0,0,.6), transparent); opacity:0; transition:opacity .15s var(--ease-out); }
+.photo-thumb:hover .photo-actions, .photo-thumb:focus-within .photo-actions{ opacity:1; }
+.photo-actions button{ width:28px; height:28px; border-radius:50%; border:none; background:rgba(255,255,255,.92); color: var(--color-fg); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow: var(--shadow-sm); }
+.photo-actions button:hover:not(:disabled){ background:#fff; }
+.photo-actions button:disabled{ opacity:.35; cursor:default; }
+.photo-actions button svg{ width:16px; height:16px; }
+.photo-actions .photo-cover{ background: var(--color-primary); color: var(--color-on-primary); }
+@media (pointer:coarse){ .photo-actions{ opacity:1; } }
 
 .form-actions{ display:flex; justify-content:space-between; gap: var(--space-3); margin-top: var(--space-6); padding-top: var(--space-5); border-top:1px solid var(--color-border); }
 
