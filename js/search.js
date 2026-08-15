@@ -553,6 +553,25 @@ function render(){
   applyViewMode();
 
   const pills = activeFilterPills();
+
+  /* Piller, badge og søgeagent-knap står ALLE over resultaterne. Udskydes de
+     til etape 2, dukker de op en opgave senere og skubber værktøjslinjen og
+     kortene nedad — målt som layoutskred. De er billige (under et
+     millisekund), så de hører hjemme her. */
+  const filterBar = document.getElementById('active-filters');
+  // p.label kan stamme fra URL-parametre (brands, regions, conditions, farve …)
+  // og er dermed angriberstyret. Escapes i BÅDE tekst- og attribut-kontekst,
+  // ellers er ?brands=<img onerror=…> reflekteret XSS via et delt link.
+  filterBar.innerHTML = pills.map((p, i) =>
+    `<span class="active-filter-pill">${escapeHTML(p.label)}<button type="button" data-pill-clear="${i}" aria-label="Fjern filter: ${escapeHTML(p.label)}">${Icon.close}</button></span>`).join('');
+  filterBar.querySelectorAll('[data-pill-clear]').forEach(btn => {
+    btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; render(); });
+  });
+  const badge = document.getElementById('filter-badge');
+  badge.textContent = pills.length;
+  badge.hidden = pills.length === 0;
+  refreshSaveSearchButton();
+
   const filtered = getFilteredListings();
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -610,22 +629,9 @@ function render(){
   secondaryHandle = setTimeout(() => renderSecondary(pills, pageItems, heading, total, totalPages), 0);
 }
 
-/* Etape 2: rammen om resultaterne. */
+/* Etape 2: det der står UNDER kortene (eller slet ikke kan ses) — her kan
+   ingenting skubbe til noget, brugeren kigger på. */
 function renderSecondary(pills, pageItems, heading, total, totalPages){
-  // p.label kan stamme fra URL-parametre (brands, regions, conditions, farve …)
-  // og er dermed angriberstyret. Escapes i BÅDE tekst- og attribut-kontekst,
-  // ellers er ?brands=<img onerror=…> reflekteret XSS via et delt link.
-  const filterBar = document.getElementById('active-filters');
-  filterBar.innerHTML = pills.map((p, i) =>
-    `<span class="active-filter-pill">${escapeHTML(p.label)}<button type="button" data-pill-clear="${i}" aria-label="Fjern filter: ${escapeHTML(p.label)}">${Icon.close}</button></span>`).join('');
-  filterBar.querySelectorAll('[data-pill-clear]').forEach(btn => {
-    btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; render(); });
-  });
-
-  const badge = document.getElementById('filter-badge');
-  badge.textContent = pills.length;
-  badge.hidden = pills.length === 0;
-  refreshSaveSearchButton();
   seoSearchResults(pageItems, heading);
 
   // Få-resultater-panel: gør et tyndt resultat til en konvertering i stedet for
@@ -976,6 +982,13 @@ async function boot(){
   readStateFromURL();
   populateChrome();
   wireCoreControls();
+
+  /* Fra 960px står filterpanelet åbent i sidebaren. Dér SKAL det bygges før
+     første maling — bygges det bagefter, folder de sytten filtergrupper sig
+     ud og skubber hinanden nedad, mens man kigger på dem (målt CLS 0,08).
+     Under 960px ligger det i en lukket skuffe, og så koster det ingenting at
+     vente på det tryk der åbner den. */
+  if (window.matchMedia('(min-width: 960px)').matches) ensureFiltersBuilt();
 
   // Etape 2: det brugeren er kommet efter — resultaterne.
   await nextTask();

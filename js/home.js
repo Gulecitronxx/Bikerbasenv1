@@ -35,63 +35,25 @@ const yieldToMain = () =>
 
 /* Sætter kort ind i portioner med et yield imellem.
 
-   Otte line-art-kort skrevet ind med ét innerHTML blev målt som én
-   sammenhængende opgave på 119ms — nok til at siden føles død, hvis man
-   rammer den midt i. I portioner à tre bliver ingen af dem lange nok til at
-   blokere, og det samlede resultat er det samme DOM. */
+   Annoncekort er det dyreste på forsiden: et kort uden foto får en komplet
+   line-art-SVG med defs og gradienter, og siden ender med 138 svg'er. Skrevet
+   ind med ét innerHTML blev det målt som én sammenhængende opgave på 119ms —
+   nok til at siden føles død, hvis man rammer den midt i. I portioner à tre
+   bliver ingen af dem lange nok til at blokere, og resultatet er det samme DOM.
+
+   Bemærk: det er portioneringen — ikke udskydelse — der gør arbejdet. Et
+   forsøg med at vente på IntersectionObserver, så gitrene først blev bygget,
+   når man nærmede sig dem, blev målt til nøjagtig det samme (96/97/94 mod
+   96/97/97 i performance). Den variant blev droppet igen: den kunne ikke måle
+   sig ydelsesmæssigt, men den kunne fejle på en måde denne ikke kan — en
+   observer, der aldrig kalder tilbage, efterlader et tomt gitter for evigt.
+   Alt indhold tegnes derfor ved indlæsning, bare i mundrette bidder. */
 async function saetIndIPortioner(mount, dele, portion = 3){
   mount.innerHTML = '';
   for (let i = 0; i < dele.length; i += portion){
     mount.insertAdjacentHTML('beforeend', dele.slice(i, i + portion).join(''));
     if (i + portion < dele.length) await yieldToMain();
   }
-}
-
-/* Bygger et annoncegitter først, når det nærmer sig viewporten.
-
-   Annoncekort er det dyreste på siden: et kort uden foto får en komplet
-   line-art-SVG med defs og gradienter, og forsiden endte med 138 svg'er i
-   dokumentet. Alle tre gitre — nyeste, udvalgte og senest sete — blev bygget
-   ved sideindlæsning, selvom de ligger 4000-6000px nede. Arbejdet lå altså
-   præcis oven i det øjeblik, hvor brugeren prøver at bruge søgekortet
-   øverst.
-
-   800px rootMargin: gitteret er fyldt ud længe før det kommer til syne, så
-   man aldrig scroller hen til et tomt felt. Har browseren ingen
-   IntersectionObserver, tegnes der med det samme — indholdet må aldrig kunne
-   udeblive, kun komme lidt senere. Højden er reserveret i forvejen af
-   `.listings-grid:empty{min-height}` i den kritiske CSS, så der ikke hopper
-   noget, når kortene lander. */
-function tegnNaerViewport(el, draw){
-  if (!el) return;
-  let tegnet = false;
-  const tegnEnGang = () => { if (tegnet) return; tegnet = true; draw(); };
-
-  if (!('IntersectionObserver' in window)){ tegnEnGang(); return; }
-  const io = new IntersectionObserver((entries) => {
-    if (!entries.some(e => e.isIntersecting)) return;
-    io.disconnect();
-    tegnEnGang();
-  }, { rootMargin: '800px 0px' });
-  io.observe(el);
-
-  /* Sikkerhedsnet — og det er ikke teori.
-
-     IntersectionObserver kalder kun tilbage, når siden faktisk renderes. I en
-     fane, der ikke komponerer billeder (document.hidden === true), udebliver
-     kaldet fuldstændigt; præcis som `loading="lazy"` heller aldrig henter et
-     billede dér. Uden et net ville gitrene stå tomme for evigt i sådan en
-     situation, og det er den slags fejl, ingen opdager, før en bruger gør.
-
-     Derfor: observeren er optimeringen — den tegner tidligt, når man nærmer
-     sig. Det her er garantien for, at der ALTID bliver tegnet. Den venter til
-     efter `load`, så den ikke konkurrerer med det, brugeren kigger på. */
-  const net = () => { io.disconnect(); tegnEnGang(); };
-  const planlaeg = () => (window.requestIdleCallback
-    ? requestIdleCallback(net, { timeout: 3000 })
-    : setTimeout(net, 1500));
-  if (document.readyState === 'complete') planlaeg();
-  else window.addEventListener('load', planlaeg, { once: true });
 }
 
 document.addEventListener('DOMContentLoaded', () => { buildForside(); });
@@ -335,7 +297,7 @@ async function buildForside(){
         <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
       </div>`;
   } else {
-    tegnNaerViewport(newestMount, tegnNyeste);
+    await tegnNyeste();
   }
   // Tilpas udfylderkort, når man krydser et brudpunkt (fx rotation), og
   // gen-wire de nye kort. Kun hvis gitteret allerede er tegnet — ellers ville
@@ -363,9 +325,8 @@ async function buildForside(){
   const featuredSection = featuredMount.closest('section');
   if (featuredSection) featuredSection.hidden = featured.length === 0;
   if (featured.length){
-    tegnNaerViewport(featuredMount, () =>
-      saetIndIPortioner(featuredMount, featured.map(listingCardHTML))
-        .then(() => wireFavoriteButtons(featuredMount)));
+    await saetIndIPortioner(featuredMount, featured.map(listingCardHTML));
+    wireFavoriteButtons(featuredMount);
   }
 
   // Senest sete — kun annoncer der stadig findes/er aktive; skjul sektionen
@@ -379,9 +340,8 @@ async function buildForside(){
   if (seenSection && seenMount){
     seenSection.hidden = !seen.length;
     if (seen.length){
-      tegnNaerViewport(seenMount, () =>
-        saetIndIPortioner(seenMount, seen.map(listingCardHTML))
-          .then(() => wireFavoriteButtons(seenMount)));
+      await saetIndIPortioner(seenMount, seen.map(listingCardHTML));
+      wireFavoriteButtons(seenMount);
     }
   }
 
