@@ -376,23 +376,50 @@ const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 48;
 
 /* Må en mc med denne effekt/slagvolumen føres på det valgte kørekort?
    Et højere kørekort dækker de lavere kategorier. */
+/* UKENDT EFFEKT ER IKKE NUL EFFEKT.
+
+   Her stod `Number(listing.power) || 0`. For vores egne annoncer er det
+   harmløst — formularen kræver hestekræfter. For de indekserede er det ikke:
+   eksterne_annoncer har ingen hk-kolonne, så power er altid null, null bliver
+   til 0, og 0 <= 48 er altid sandt.
+
+   Resultatet var, at 214 af 332 indekserede annoncer fik stemplet A2 — heraf
+   178 på over 600 ccm. En Honda CBR 1000 F på 989 ccm stod med "Kan føres på
+   A2-kørekort". Vi fortalte en tyveårig, at han lovligt måtte køre den.
+
+   Kommentaren ovenfor advarede allerede mod præcis denne fejl: A2 har INGEN
+   slagvolumengrænse, så uden effekt kan kategorien ikke afgøres. Nu siger
+   koden det samme som kommentaren. */
 function passerKoerekort(listing, kat){
   if (!kat) return true;
-  const hk = Number(listing.power) || 0;
+  const hk = listing.power == null || listing.power === '' ? null : Number(listing.power);
   const ccm = Number(listing.ccm) || 0;
-  if (kat === 'A1') return ccm <= A1_MAX_CCM && hk <= A1_MAX_HK;
-  // En stærkere mc tæller også med under A2, hvis den kan effektbegrænses.
-  if (kat === 'A2') return hk <= A2_MAX_HK || !!listing.kanNedsaettesA2;
+
+  // A1 KAN afgøres uden effekt, fordi den har en ccm-grænse: er slagvolumen
+  // over 125, er svaret nej uanset hvor mange hk der står.
+  if (kat === 'A1') return ccm > 0 && ccm <= A1_MAX_CCM && (hk == null || hk <= A1_MAX_HK);
+
+  if (kat === 'A2'){
+    // En stærkere mc tæller også med, hvis den kan effektbegrænses.
+    if (listing.kanNedsaettesA2) return true;
+    // Uden effekt kan vi ikke svare. At vise den ville være et løfte om, at
+    // den er lovlig — og det er den påstand, der koster kørekortet.
+    if (hk == null) return false;
+    return hk <= A2_MAX_HK;
+  }
   return true; // A dækker alt
 }
 
 /* Mindste kørekortkategori en mc kan føres på, udledt af slagvolumen + effekt.
-   Returnerer null hvis hverken ccm eller hk kendes, så vi ikke gætter. */
+   Returnerer null, når spørgsmålet ikke kan besvares — kortet viser så ingen
+   kategori frem for en forkert. */
 function koerekortForListing(listing){
-  const hk = Number(listing.power) || 0;
+  const hk = listing.power == null || listing.power === '' ? null : Number(listing.power);
   const ccm = Number(listing.ccm) || 0;
-  if (!hk && !ccm) return null;
-  if (ccm <= A1_MAX_CCM && hk <= A1_MAX_HK) return 'A1';
+  if (hk == null && !ccm) return null;
+
+  if (ccm > 0 && ccm <= A1_MAX_CCM && (hk == null || hk <= A1_MAX_HK)) return 'A1';
+  if (hk == null) return null;   // over 125 ccm og uden hk: A2 eller A, vi ved det ikke
   if (hk <= A2_MAX_HK) return 'A2';
   return 'A';
 }
