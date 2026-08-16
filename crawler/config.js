@@ -83,6 +83,20 @@ function validerKilde(k){
   kraev('crawl_delay_ms', Number.isFinite(delay) && delay >= MINIMUM_DELAY_MS,
     `skal være mindst ${MINIMUM_DELAY_MS} (databasen afviser mindre)`);
 
+  /* Valgfrie felter. De må mangle — men er de der, skal de være brugbare.
+     Et ugyldigt regex ville først kaste midt i en kørsel, på det 200. kort,
+     og et tomt type_vokabular ville stille og roligt give 343 annoncer uden
+     type, som om kilden ikke havde nogen. */
+  if (k.stand_url_moenster != null){
+    try { byggeRegex(k.stand_url_moenster); }
+    catch (e){ fejl.push(`stand_url_moenster: ugyldigt regex — ${e.message}`); }
+  }
+  if (k.type_vokabular != null){
+    kraev('type_vokabular', Array.isArray(k.type_vokabular) && k.type_vokabular.length > 0
+      && k.type_vokabular.every(t => typeof t === 'string' && t.trim()),
+      'skal være en liste af ikke-tomme ord, eller udelades helt');
+  }
+
   if (k.faste_felter?.saelgertype != null){
     kraev('faste_felter.saelgertype', ['privat', 'forhandler'].includes(k.faste_felter.saelgertype),
       "skal være 'privat' eller 'forhandler'");

@@ -127,6 +127,14 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
       tal.nye = skrevet.nye;
       tal.opdaterede = skrevet.opdaterede;
       log.skriv(`gemt: ${skrevet.nye} nye, ${skrevet.opdaterede} opdaterede`);
+      /* Parseren har hentet noget, tabellen ikke har plads til. Det er ikke
+         en fejl — koerslen er lykkedes — men det er heller ikke ingenting:
+         praecis sadan forsvandt hestekraefterne fra hvert eneste kort i
+         maaneder, uden at noget nogensinde fejlede. Enten skal feltet have en
+         kolonne, eller ogsaa skal parseren holde op med at hente det. */
+      if (skrevet.ukendte_felter?.length){
+        log.skriv(`ADVARSEL: ${skrevet.ukendte_felter.join(', ')} blev parset, men har ingen kolonne — værdien kastes væk ved hver kørsel`);
+      }
     }
 
     // En delvis kørsel har ikke set hele kataloget. Ville vi tælle de

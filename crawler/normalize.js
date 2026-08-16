@@ -92,6 +92,125 @@ function parseCcm(raa){
   return v;
 }
 
+/* ---------- Kubik udledt af modelnavnet ----------
+   109 af MC Syds 332 annoncer har ingen ccm i kortet. Konsekvensen er ikke et
+   tomt felt: koerekortForListing() i js/data.js svarer null, når både hk og
+   ccm mangler, og så forsvinder A1/A2/A-mærkatet fra kortet. Det er det ene
+   felt, vi har, som Bilbasen ikke har brug for og en dansk MC-køber ikke kan
+   undvære — og på 109 kort stod det tomt, selv om "125" stod i titlen.
+
+   Motorcykler navngives efter slagvolumen. "CBR 1000 F", "XV 750",
+   "MSX 125" — tallet ER kubikken, med den afvigelse at navnet er rundt og
+   motoren ikke er (en CBR 1000 er 998 ccm). Målt mod de 229 annoncer, hvor
+   kilden SELV oplyser ccm: 176 gæt, 175 inden for 10 %, ét forkert.
+
+   DET ER ET GÆT, OG DET SKAL KUNNE SES. Værdien skrives i ccm, så filtre og
+   kørekortmærkat virker, men feltet noteres i udledte_felter på rækken.
+   Et gæt, der udgiver sig for at være en måling, er værre end et tomt felt —
+   så hellere fortælle hvor tallet kommer fra.
+
+   Faldgruberne er ikke teoretiske. Alle disse skal give NULL:
+     "ZR-7"        Kawasaki ZR-7 er 738 ccm, ikke 7.
+     "CB 72"       Honda CB72 er 247 ccm. To cifre lyver.
+     "MT-07"       689 ccm.
+     "V7 Stone"    744 ccm.
+     "FLSTC Heritage Softail"   Harley navngiver med bogstaver.
+   Og alle disse skal ramme:
+     "Tre-K 1130", "CMX 1100 D", "K 1200 GT", "ST 1100 Pan", "XJ 900 S",
+     "MSX 125 Street", "ST 125 DAX", "XL883 Standard" (tallet klistrer til
+     bogstaverne — derfor ikke \b omkring cifrene). */
+const MINDSTE_UDLEDTE_CCM = 100;
+
+function udledCcmFraModel(model, { aargang = null } = {}){
+  const s = String(model || '');
+  const kandidater = [];
+
+  for (const m of s.matchAll(/\d{2,4}/g)){
+    /* Årstallet i et modelnavn er ikke kubik. "Softail 2007" på en 2007'er
+       er årgangen, skrevet en gang til. Uden det her tjek ville den blive
+       til en 2007 ccm motorcykel — inden for parseCcm's lovlige interval og
+       dermed usynlig som fejl. */
+    if (aargang && Number(m[0]) === Number(aargang)) continue;
+
+    // Selve talkonverteringen ligger ét sted: parseCcm. Den kender intervallet
+    // og afviser 7 og 11705 uden at vi skal gentage grænserne her.
+    const v = parseCcm(m[0]);
+    /* Egen bund på 100 oveni. parseCcm slipper 25 igennem, fordi "25 ccm"
+       er en gyldig OPLYST kubik — men et tocifret tal i et MODELNAVN er
+       næsten altid noget andet (CB 72, ZR-7, MT-07). Der findes ingen
+       motorcykel i kataloget under 110 ccm, så vi taber intet. */
+    if (v != null && v >= MINDSTE_UDLEDTE_CCM) kandidater.push(v);
+  }
+
+  if (!kandidater.length) return null;
+  /* Største tal vinder. "Tre-K 1130" har både 1130 og ingenting andet, men
+     "GSX-R 1000 K5" har 1000 og 5 — og 5 er allerede sorteret fra. Målt på
+     hele kataloget optræder der aldrig to gyldige kandidater i samme navn,
+     så reglen er et sikkerhedsnet, ikke en afgørelse. */
+  return Math.max(...kandidater);
+}
+
+/* ---------- Hestekræfter ----------
+   "53", "53 HK", "101 hk". MC Syd skriver "-" i feltet, når tallet mangler
+   (Danbase renderer det med class="showempty"), og "-" må blive til null —
+   ikke til nul hestekræfter.
+
+   Hk er ikke pynt på et dansk MC-katalog. Sammen med ccm afgør det, om
+   motorcyklen må køres på A1- eller A2-kørekort, og det er det første en
+   køber under 24 år filtrerer på. En annonce uden hk kan ikke besvare
+   spørgsmålet, og derfor er et forkert tal værre end intet tal. */
+function parseHk(raa){
+  if (raa == null) return null;
+  const s = String(raa).toLowerCase();
+  if (/ukendt|ikke oplyst|n\/a/.test(s)) return null;
+  const tal = s.replace(/[^\d.,]/g, '').replace(/[.,]/g, '');
+  if (!tal) return null;
+  const v = Number(tal);
+  // 0 hk findes ikke, og over 400 gør det heller ikke: verdens kraftigste
+  // serie-motorcykel ligger omkring 310. Et tal over loftet er et
+  // sammenløbet felt (fx ccm læst som hk), ikke et fund.
+  if (!Number.isFinite(v) || v < 1 || v > 400) return null;
+  return v;
+}
+
+/* ---------- Motorcykeltype ----------
+   Cruiser, Touring, Adventure, Sport … Typen er ikke et frit tekstfelt hos
+   kilden, men et opslag fra en fast liste, og listen står i kildens egen
+   YAML. Derfor tager funktionen vokabularet ind som argument: en anden
+   forhandler kan have andre ord, og så skal der rettes i en YAML-fil, ikke
+   her.
+
+   Længste træf vinder. "Sportstouring" indeholder "Sport", og uden
+   sorteringen ville hver eneste sportstourer blive til en sportscykel.
+
+   Vi matcher på hele ord. Ellers ville "Street" i "Streetfighter" tælle med,
+   og — værre — enhver model med et bogstavsammenfald blive kategoriseret. */
+function normaliserType(raa, vokabular){
+  if (!raa || !Array.isArray(vokabular) || !vokabular.length) return null;
+  const t = String(raa);
+  for (const ord of [...vokabular].sort((a, b) => String(b).length - String(a).length)){
+    const m = String(ord).trim();
+    if (!m) continue;
+    // \p{L} frem for \w: æ, ø, å og accenter er bogstaver, og et ordskel må
+    // ikke ligge midt i "Klassiker" eller "Motard".
+    const re = new RegExp(`(^|[^\\p{L}])${m.replace(/\s+/g, '\\s+')}([^\\p{L}]|$)`, 'iu');
+    if (re.test(t)) return m;
+  }
+  return null;
+}
+
+/* ---------- Stand: ny eller brugt ----------
+   Et halvt katalog hos en forhandler er fabriksnye motorcykler, og forskellen
+   er ikke kosmetisk: den afgør garanti, reklamationsret og hvad et bud er
+   værd. "0 km" er ikke svaret — en brugt udstillingsmodel kan også have 0. */
+function normaliserStand(raa){
+  if (!raa) return null;
+  const s = String(raa).toLowerCase();
+  if (/\bbrugt|brugte|used\b/.test(s)) return 'brugt';
+  if (/\bny\b|\bnye\b|\bnew\b|fabriksny/.test(s)) return 'ny';
+  return null;
+}
+
 /* ---------- Postnummer ----------
    Danske postnumre er 1000-9999. "8000 Aarhus C", "DK-8000", "8000". */
 function parsePostnr(raa){
@@ -175,8 +294,10 @@ function fingerprint({ maerke, model, aargang, km, pris_dkk, postnr }){
 }
 
 module.exports = {
-  parsePris, parseKm, parseAargang, parseCcm, parsePostnr,
-  normaliserMaerke, normaliserSaelgertype, uddrag, fingerprint,
+  parsePris, parseKm, parseAargang, parseCcm, parsePostnr, parseHk,
+  udledCcmFraModel, MINDSTE_UDLEDTE_CCM,
+  normaliserMaerke, normaliserSaelgertype, normaliserType, normaliserStand,
+  uddrag, fingerprint,
   // Eksporteres, så crawleren kan GENKENDE et mærke i starten af en titel og
   // dele "Harley-Davidson XL883 Standard" op i mærke og model. Kun opslag —
   // parsningen bliver liggende her.
