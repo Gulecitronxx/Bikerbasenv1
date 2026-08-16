@@ -528,10 +528,24 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .step-body p{ color: var(--color-fg-muted); font-size:15px; line-height:1.6; }
 
 /* ============ Cards / listings grid ============ */
-.listings-grid{ display:grid; grid-template-columns: repeat(1,1fr); gap: var(--space-4); }
-@media (min-width:560px){ .listings-grid{ grid-template-columns: repeat(2,1fr); } }
-@media (min-width:900px){ .listings-grid{ grid-template-columns: repeat(3,1fr); } }
-@media (min-width:1240px){ .listings-grid{ grid-template-columns: repeat(4,1fr); } }
+/* minmax(0,1fr) frem for 1fr: et enkelt bredt barn (en lang titel uden
+   orddeling) må aldrig kunne skubbe hele gitteret bredere end sin spalte. */
+.listings-grid{ display:grid; grid-template-columns: repeat(1,minmax(0,1fr)); gap: var(--space-4); }
+@media (min-width:560px){ .listings-grid{ grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (min-width:900px){ .listings-grid{ grid-template-columns: repeat(3,minmax(0,1fr)); } }
+@media (min-width:1240px){ .listings-grid{ grid-template-columns: repeat(4,minmax(0,1fr)); } }
+
+/* ---------- Søgesidens resultatspalte er smallere end sidens fulde bredde
+   Forsiden har hele containeren (1176px) at lægge kort i; søgesiden har
+   1176 − 280 (filterpanel) − 24 (gap) = 872px. Med de fælles knækpunkter
+   blev det til FIRE spalter à 206px ved 1280px vindue: fotoet et frimærke,
+   titlen klippet midt i modelnavnet, prisen ombrudt.
+   Gulvet er 280px pr. kort — dét er bredden, hvor to-linjers titel, fire
+   specs og pris kan stå uden at klippe. 872px rummer præcis tre.
+   :not(.list-view), fordi listevisningen altid er én række pr. annonce. */
+#results-grid:not(.list-view){ grid-template-columns: repeat(1,minmax(0,1fr)); }
+@media (min-width:624px){ #results-grid:not(.list-view){ grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (min-width:1240px){ #results-grid:not(.list-view){ grid-template-columns: repeat(3,minmax(0,1fr)); } }
 .listings-grid.compact{ grid-template-columns: 1fr; }
 @media (min-width:640px){ .listings-grid.compact{ grid-template-columns: repeat(2,1fr); } }
 @media (min-width:1024px){ .listings-grid.compact{ grid-template-columns: repeat(3,1fr); } }
@@ -674,8 +688,16 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    ved postnummervælgeren, faldt h1 tilbage til browserens 2em ved første
    maling og skubbede hele siden 35px ned, når arket landede. */
 .search-heading{ font-size: clamp(20px,2.6vw,26px); margin-bottom: var(--space-4); }
-.search-layout{ display:grid; grid-template-columns: 1fr; gap: var(--space-5); padding: var(--space-5) 0 var(--space-8); align-items:start; }
-@media (min-width:960px){ .search-layout{ grid-template-columns: 280px 1fr; } }
+/* minmax(0,1fr) og ikke 1fr.
+   Et grid-spor på "1fr" er i virkeligheden minmax(AUTO,1fr), og auto er
+   indholdets min-content-bredde. Da pagineringen voksede fra 5 til 32
+   sidetal (383 annoncer i stedet for 51), blev resultatspaltens
+   min-content 1466px, sporet gav efter, og HELE siden blev 1815px bred i
+   et 1280px vindue — vandret scroll på en søgeside.
+   Med minmax(0,1fr) kan et bredt barn aldrig sprænge spalten igen; det må
+   selv finde ud af at bryde eller scrolle. */
+.search-layout{ display:grid; grid-template-columns: minmax(0,1fr); gap: var(--space-5); padding: var(--space-5) 0 var(--space-8); align-items:start; }
+@media (min-width:960px){ .search-layout{ grid-template-columns: 280px minmax(0,1fr); } }
 /* Hver pixel over det første kort er en pixel køberen ikke bruger på en
    motorcykel. Brødkrumme og h1 bliver (de er både SEO og orientering —
    Bilbasen har ingen af delene), men luften omkring dem strammes på mobil. */
@@ -771,8 +793,34 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .active-filter-pill svg{ width:14px; height:14px; }
 
 .results-toolbar{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap:wrap; }
+.results-headline{ min-width:0; }
 .results-count{ font-weight:600; white-space:nowrap; }
 .results-count span{ color: var(--color-fg-muted); font-weight:400; }
+
+/* ---------- Hvad tallet består af ----------
+   Prikken foran hvert led er den samme farve som mærket på kortet: fyldt og
+   orange for vores egne, dæmpet og stiplet for de indekserede. Så kan
+   linjen aflæses uden at læse den, og "332" bliver bundet til de stiplede
+   kort længere nede i stedet for at være et løsrevet tal. */
+.results-mix{
+  display:flex; align-items:center; flex-wrap:wrap; gap:2px 12px;
+  margin-top:3px; font-size:12.5px; color: var(--color-fg-muted); line-height:1.4;
+}
+.mix-part{ display:inline-flex; align-items:center; gap:6px; }
+.mix-part::before{
+  content:''; width:8px; height:8px; border-radius:50%; flex:0 0 auto;
+}
+.mix-egne::before{ background: var(--color-primary); }
+.mix-ekstern::before{ border:1.5px dashed var(--color-fg-muted); }
+.mix-info{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:22px; height:22px; margin-left:-4px; padding:0;
+  background:none; border:none; border-radius:50%;
+  color: var(--color-fg-muted); cursor:pointer;
+}
+.mix-info svg{ width:15px; height:15px; }
+.mix-info:hover{ color: var(--color-primary); }
+
 .toolbar-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
 #sort-select{ width:auto; min-width:168px; }
 
@@ -891,13 +939,23 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .empty-agent-hint{ margin-top: var(--space-4); font-size:14px; }
 .link-btn{ background:none; border:none; padding:0; font:inherit; color: var(--color-primary); font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
 
-.pagination{ display:flex; justify-content:center; gap:6px; margin-top: var(--space-6); }
+/* flex-wrap som sikkerhedsnet: js/search.js viser højst ni elementer, men
+   en komponent, der kan sprænge sin spalte, skal ikke kunne gøre det igen —
+   uanset hvad nogen en dag putter i den. */
+.pagination{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:6px; margin-top: var(--space-6); }
 .pagination button{
   min-width:40px; height:40px; border-radius:50%; border:1.5px solid var(--color-border); background:transparent;
   color:var(--color-fg); cursor:pointer; font-weight:600;
+  display:inline-flex; align-items:center; justify-content:center;
 }
 .pagination button.active{ background: var(--color-primary); border-color:var(--color-primary); color:var(--color-on-primary); }
 .pagination button:hover:not(.active){ background: var(--color-surface-2); }
+.pag-arrow svg{ width:18px; height:18px; }
+.pagination button:disabled{ opacity:.35; cursor:default; }
+.pag-gap{ min-width:24px; text-align:center; color: var(--color-fg-muted); }
+/* "Side 15 af 32" — referencens egen bundlinje. Den fortæller hvor langt
+   man er, når knapperne ikke længere kan vise alle sider. */
+.pag-status{ flex-basis:100%; text-align:center; margin-top:8px; font-size:13px; color: var(--color-fg-muted); }
 
 /* filter drawer (mobile) reuses mobile-drawer but panel from left/bottom */
 .filter-drawer-panel{
@@ -1539,8 +1597,15 @@ body.overlay-open .cookie-banner{ display:none; }
 #save-search-btn.is-saved{ border-color: var(--color-success); color: var(--color-success); }
 #save-search-btn svg{ width:16px; height:16px; }
 
-/* List view for results */
-.listings-grid.list-view{ grid-template-columns:1fr; gap: var(--space-3); }
+/* ============ Listevisning ============
+
+   Selve rækkerne tegnes af listingRowHTML() i js/search.js som .listing-row.
+   Reglerne herunder for .card er en faldskærm: scripts/build-srp.js skriver
+   den første side ind i markuppen som GALLERIKORT, så i det korte øjeblik
+   mellem "siden er malet" og "js/search.js har tegnet rækkerne", står der
+   kort i et gitter med list-view på. Uden faldskærmen ville de stå som
+   fuldbredde-kort med et 900px højt foto. */
+.listings-grid.list-view{ grid-template-columns:1fr; gap:10px; }
 @media (min-width:640px){
   .listings-grid.list-view .card{ flex-direction:row; align-items:stretch; }
   .listings-grid.list-view .card-media{ width:240px; flex-shrink:0; aspect-ratio:auto; }
@@ -1549,6 +1614,186 @@ body.overlay-open .cookie-banner{ display:none; }
   .listings-grid.list-view .card-title{ order:1; flex-basis:100%; font-size:17px; }
   .listings-grid.list-view .card-meta{ order:2; }
   .listings-grid.list-view .card-footer{ order:4; flex-basis:100%; margin-top:0; }
+}
+
+/* ---------- Rækken ----------
+
+   Fire zoner med navn frem for rækkefølge: media, head, specs, end. Zonerne
+   flytter sig ved hvert knækpunkt, men indholdet står altid samme sted i
+   forhold til hinanden, og — det vigtigste — hver zone har SAMME bredde i
+   hver eneste række. Det er dét, der gør en liste skanbar: kilometer står
+   under kilometer hele vejen ned, uanset hvor lang titlen var.
+
+   Mobil:        [foto] titel      →  specs i fire kolonner nedenunder
+                        pris
+   Fra 640px:    [foto] titel  pris
+                        specs
+   Fra 1100px:   samme, med større foto og mere luft til prisen. */
+.listing-row{
+  position:relative;
+  display:grid;
+  grid-template-columns: 104px minmax(0,1fr);
+  grid-template-areas:
+    "media head"
+    "media end"
+    "specs specs";
+  gap:8px 12px;
+  padding:10px;
+  background: var(--color-surface);
+  border:1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color .16s var(--ease-out), box-shadow .16s var(--ease-out);
+}
+.listing-row:hover{
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  box-shadow: var(--shadow-sm);
+}
+/* Stiplet kant = annoncen ligger et andet sted. Samme signal som på kortet. */
+.listing-row.is-external{ border-style: dashed; }
+
+.row-media{
+  grid-area:media; position:relative; align-self:start;
+  aspect-ratio:4/3; border-radius: var(--radius-sm);
+  overflow:hidden; background: var(--color-surface-2);
+}
+.row-media img, .row-media svg{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.row-head{ grid-area:head; min-width:0; display:flex; flex-direction:column; }
+.row-flags{ display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-bottom:5px; }
+.row-flags:empty{ display:none; }
+/* Titlen i to linjer: model fed og kort, variant dæmpet nedenunder.
+   Begge klippes med ellipse — en forhandlertitel kan være 90 tegn, og en
+   ombrudt titel ville skubbe alle fire specs ud af række med naboen. */
+.row-title{
+  font-family: var(--font-display); font-size:16px; font-weight:700; line-height:1.25;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.row-variant{
+  font-size:13px; color: var(--color-fg-muted); line-height:1.35;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.row-origin{
+  display:flex; align-items:center; flex-wrap:wrap; gap:4px 10px;
+  margin-top:6px; font-size:12.5px; color: var(--color-fg-muted); min-width:0;
+}
+.row-origin svg{ width:14px; height:14px; flex:0 0 auto; }
+.row-origin b{ color: var(--color-fg); font-weight:600; }
+.row-dim{ display:inline-flex; align-items:center; gap:4px; }
+/* Salgsmarkører ("engros", "uden klargøring") er sælgerens vilkår, ikke
+   maskinens navn. De står som små dæmpede mærker, så titlen holdes ren. */
+.row-markers{ display:inline-flex; flex-wrap:wrap; gap:5px; }
+.row-marker{
+  font-size:10.5px; font-weight:600; letter-spacing:.02em;
+  padding:2px 7px; border-radius: var(--radius-pill);
+  background: var(--color-surface-2); color: var(--color-fg-muted);
+}
+
+/* Specrækken: fire faste felter, altid i samme rækkefølge. Etiketten står
+   over værdien, så en tom værdi stadig har en kolonne — der opstår aldrig
+   et hul, hvor øjet mister sporet. */
+/* To kolonner på telefon, fire fra 560px. Fire kolonner på en 390px skærm
+   giver 82px pr. felt, og "1.254 ccm · 140 hk" bliver til "1.254 ccm …".
+   En afklippet værdi er ikke en værdi. */
+.row-specs{
+  grid-area:specs; display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px 12px; padding-top:8px; border-top:1px solid var(--color-border);
+  margin:0;
+}
+/* Ulige spor med vilje: "2021" og "A2" fylder tre tegn, "1.254 ccm · 140 hk"
+   fylder atten. Fire lige kolonner klipper altid den samme — motoren — og
+   det er den, køberen kigger efter. */
+@media (min-width:560px){
+  .row-specs{ grid-template-columns:0.8fr 1fr 1.35fr 0.85fr; gap:2px 10px; }
+}
+/* Browserens egen <dd> har 40px indrykning. Uden nulstillingen står hver
+   værdi forskudt fra sin etiket, og hele pointen — kolonner der flugter —
+   forsvinder. Den kostede også 200px vandret overløb på siden. */
+.row-specs dt, .row-specs dd{ margin:0; }
+.row-spec{ min-width:0; }
+.row-spec dt{
+  font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  color: var(--color-fg-muted); margin-bottom:1px;
+}
+.row-spec dd{
+  font-size:14px; font-weight:600; line-height:1.3;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.row-hk{ font-size:13px; font-weight:400; color: var(--color-fg-muted); }
+.row-unknown{ font-size:13px; font-weight:400; color: var(--color-fg-muted); }
+/* Kørekortet er MC-køberens første spørgsmål: må jeg overhovedet køre den?
+   Samme mørke pille som på gallerikortet, så signalet er det samme i begge
+   visninger. */
+.row-kk{
+  display:inline-block; background: var(--color-dark); color:#fff;
+  font-family: var(--font-display); font-weight:700; font-size:12px; letter-spacing:.04em;
+  padding:1px 9px; border-radius: var(--radius-pill);
+}
+
+.row-end{
+  grid-area:end; display:flex; align-items:center; flex-wrap:wrap; gap:4px 12px;
+  min-width:0;
+}
+.row-price{ font-family: var(--font-display); font-size:20px; font-weight:700; line-height:1.15; }
+.row-when{ font-size:12px; color: var(--color-fg-muted); }
+/* "Se hos MC Syd ↗" står hvor tidsstemplet står på vores egne rækker: det
+   sidste man læser, inden man klikker — og dermed advarslen om, at klikket
+   forlader Bikerbasen. */
+.row-cta{
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:12.5px; font-weight:600; color: var(--color-primary);
+}
+.row-cta svg{ width:13px; height:13px; }
+
+/* Knapperne skal ligge OVER det usynlige link, der dækker hele rækken. */
+.row-tools{ position:relative; z-index:2; display:flex; gap:6px; margin-left:auto; }
+.row-tool{
+  width:36px; height:36px; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--color-border); border-radius:50%;
+  background: var(--color-surface); color: var(--color-fg-muted);
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+  transition: color .15s var(--ease-out), border-color .15s var(--ease-out);
+}
+.row-tool svg{ width:17px; height:17px; }
+.row-tool:hover{ color: var(--color-fg); border-color: var(--color-primary); }
+.row-tool.active{ color: var(--color-primary); border-color: var(--color-primary); }
+.row-tool.row-fav.active svg{ fill: var(--color-primary); }
+
+.row-link{ position:absolute; inset:0; z-index:1; border-radius: var(--radius-md); }
+.row-link:focus-visible{ outline:2px solid var(--color-ring); outline-offset:-3px; }
+
+@media (min-width:640px){
+  .listing-row{
+    grid-template-columns: 132px minmax(0,1fr) 168px;
+    grid-template-areas:
+      "media head  end"
+      "media specs specs";
+    gap:8px 16px; padding:12px;
+  }
+  .row-end{ flex-direction:column; align-items:flex-end; text-align:right; gap:3px; }
+  .row-tools{ margin-left:0; margin-top:4px; }
+  .row-specs{ align-self:end; }
+}
+/* Fra 1100px er der plads til alle fire zoner på ÉN linje, og så bliver
+   listen for alvor en tabel: foto, navn, specs og pris står i hver sin
+   lodrette bane hele vejen ned. Specrækken bliver 2×2 i stedet for 1×4 —
+   fire kolonner à 75px kan ikke rumme "1.254 ccm · 140 hk", og en
+   afklippet værdi er værre end en ekstra linje. */
+@media (min-width:1100px){
+  .listing-row{
+    grid-template-columns: 136px minmax(170px,1fr) minmax(230px,282px) 142px;
+    grid-template-areas: "media head specs end";
+    align-items:center; gap:0 18px; padding:12px 14px;
+  }
+  .row-title{ font-size:17px; }
+  .row-price{ font-size:22px; }
+  .row-specs{
+    grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+    gap:6px 16px; padding:0 0 0 18px;
+    border-top:none; border-left:1px solid var(--color-border);
+    align-self:center;
+  }
+  .row-end{ align-self:center; }
 }
 
 /* ============ Saved searches (søgeagenter) ============ */
@@ -1822,7 +2067,11 @@ body.overlay-open .cookie-banner{ display:none; }
   /* Rækker og kolonner sættes eksplicit. Med automatisk placering havner
      Filtre og Sortér på hver sin række, fordi markup-rækkefølgen (Filtre
      før Sortér) ikke er den samme som den ønskede læserækkefølge. */
-  .results-count{ width:auto; grid-area: 1 / 1; }
+  /* Overskriften er nu to linjer (antal + sammensætning), og det er DEN der
+     er gitterets barn — ikke tallet alene. Sammensætningen bryder inde i
+     cellen i stedet for at kræve en tredje række i værktøjslinjen. */
+  .results-headline{ width:auto; min-width:0; grid-area: 1 / 1; }
+  .results-mix{ font-size:12px; gap:2px 8px; }
   #save-search-btn{ grid-area: 1 / 2; }
   .view-toggle{ grid-area: 1 / 3; }
   /* .toolbar-actions er kun en beholder på mobil — lad børnene gå direkte
