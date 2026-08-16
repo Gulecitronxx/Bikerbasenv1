@@ -290,6 +290,24 @@ function normalizeExternalListing(row){
        gætter sig frem fra en tekststreng. */
     type: typeFraKategoriord(row.type) || typeFraTitel(row.titel || row.model),
 
+    /* Titlens anden linje — Bilbasens "54 Altitude 5d" under "Jeep Avenger".
+       Hos os "Cruiser" under "Yamaha XV 750 Virago". 285 af 332 rækker har
+       den efter 015; uden det her felt stod kortets to-linjers titel med en
+       tom anden linje, mens værdien lå klar i databasen.
+
+       salgsmarkoerer er forhandlerens vilkår, ikke motorcyklens: ENGROS,
+       UDEN KLARGØRING, BYTTER GERNE. "Uden klargøring" betyder, at cyklen
+       sælges som beset — det skal en køber vide FØR han kører til Rødding.
+       Altid et array; kolonnen er not null default '{}'. */
+    variant: row.variant || null,
+    salgsmarkoerer: Array.isArray(row.salgsmarkoerer) ? row.salgsmarkoerer : [],
+
+    /* Hvilke af tallene crawleren har GÆTTET frem for læst — i praksis 'ccm'
+       udledt af modelnavnet på 97 annoncer. Modstykket til manuelle_felter.
+       En visning kan skrive "ca. 750 ccm" i stedet for at lade et gæt stå
+       som en måling. */
+    udledteFelter: Array.isArray(row.udledte_felter) ? row.udledte_felter : [],
+
     year: row.aargang,
     km: row.km,
     ccm: row.ccm,

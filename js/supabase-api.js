@@ -144,8 +144,19 @@ const db = (function(){
     async listExternalListings(filters = {}){
       const c = init(); if (!c) return { data: [], error: null };
       let q = c.from('eksterne_annoncer')
-        .select('id, kilde_annonce_id, url, titel, maerke, model, aargang, km, ccm, pris_dkk, ' +
-                'by, postnr, saelgertype, thumbnail_url, uddrag, status, foerst_set, ' +
+        /* Kolonnerne står eksplicit frem for '*', og listen skal udvides i
+           SAMME ombæring som den migration, der tilføjer kolonnen — aldrig før.
+
+           Grunden er målt: beder vi om en kolonne, der ikke findes endnu,
+           svarer PostgREST 42703, og loadExternalListings() fanger fejlen ved
+           at returnere []. Så forsvinder alle 332 annoncer fra hele sitet på
+           én gang. Fejlen ligner ikke en fejl — den ligner et tomt katalog.
+
+           hk, type, stand, variant, salgsmarkoerer og udledte_felter kom med
+           i 015. */
+        .select('id, kilde_annonce_id, url, titel, maerke, model, variant, type, ' +
+                'aargang, km, ccm, hk, pris_dkk, stand, salgsmarkoerer, udledte_felter, ' +
+                'by, postnr, saelgertype, thumbnail_url, uddrag, status, foerst_set, sidst_set, ' +
                 'kilde:kilder(navn, domaene)')
         .eq('status', 'aktiv');
 

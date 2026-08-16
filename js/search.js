@@ -373,19 +373,25 @@ function koerekortSikkert(l){
   return null;
 }
 
-const UOPLYST = '<span class="row-unknown">Ikke oplyst</span>';
+/* VISNINGENS tomme celle. Hed tidligere UOPLYST og kolliderede med filtrenes
+   UOPLYST-symbol længere nede — to agenter, samme ord, to helt forskellige
+   ting. Git flettede begge uden konflikt, og resultatet var ugyldigt
+   JavaScript: "Identifier 'UOPLYST' has already been declared".
+
+   Navnene siger nu hvad de er: det her er en celle, det andet er et svar. */
+const UOPLYST_CELLE = '<span class="row-unknown">Ikke oplyst</span>';
 
 function rowSpecsHTML(l){
   const kk = koerekortSikkert(l);
   const motor = l.ccm == null
-    ? UOPLYST
+    ? UOPLYST_CELLE
     : escapeHTML(formatCcm(l.ccm)) + (l.power ? ` <span class="row-hk">· ${escapeHTML(formatPower(l.power))}</span>` : '');
   const celle = (label, vaerdi) => `<div class="row-spec"><dt>${label}</dt><dd>${vaerdi}</dd></div>`;
   return `<dl class="row-specs">
-    ${celle('Årgang', l.year == null ? UOPLYST : escapeHTML(String(l.year)))}
-    ${celle('Kilometer', l.km == null ? UOPLYST : escapeHTML(formatKm(l.km)))}
+    ${celle('Årgang', l.year == null ? UOPLYST_CELLE : escapeHTML(String(l.year)))}
+    ${celle('Kilometer', l.km == null ? UOPLYST_CELLE : escapeHTML(formatKm(l.km)))}
     ${celle('Motor', motor)}
-    ${celle('Kørekort', kk ? `<span class="row-kk">${kk}</span>` : UOPLYST)}
+    ${celle('Kørekort', kk ? `<span class="row-kk">${kk}</span>` : UOPLYST_CELLE)}
   </dl>`;
 }
 
