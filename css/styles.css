@@ -578,31 +578,202 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .badge-neutral{ background: rgba(255,255,255,0.9); color: var(--color-dark); }
 
 /* ---------- Indekserede annoncer fra andre sider ----------
-   Signalet skal aflæses på under et sekund, uden at læse noget. Derfor en
-   anden farve end forhandlermærket, en stiplet kant om hele kortet, og
-   pil-ud-ikonet både i mærket og i bunden.
+   Kortet skal kunne aflæses på under et sekund: HVILKEN motorcykel, hvad
+   koster den, hvilket kørekort kræver den, hvor står den — og at annoncen
+   ligger hos en anden. Alt herunder tjener den rækkefølge.
 
-   Det er med vilje ikke pænere end vores egne kort. En indekseret annonce er
-   et lån fra en anden side — den skal kunne ses, ikke fremhæves. */
-.badge-external{ background: var(--color-fg-muted, #5b6472); color:#fff; }
-.badge-external svg{ width:12px; height:12px; }
+   Tre regler holder kortet sammen, og de er ikke til forhandling:
 
-.card-external{ border-style: dashed; }
-.card-external .card-price{ font-weight:700; }
+   1. FASTE SLOTS. Titel, pris, specrække og bund har fast højde, uanset hvad
+      kilden havde med. Skrider ét felt, skrider hele kolonnen, og så kan en
+      side med 40 kort ikke skimmes — man skal læse hvert kort forfra.
+   2. TRE SKRIFTSTØRRELSER: 17 / 14 / 12. Hvert trin er over 1,15x, så
+      forskellen ses. Seks størrelser er ikke et hierarki, det er støj.
+   3. ALLE LODRETTE AFSTANDE ER 4, 8, 12 ELLER 16. Fire værdier, alle
+      multipla af 4. Rytmen er dét, der får kortet til at virke roligt.
+
+   Kanten er heltrukken. Den var stiplet, og det var en fejl: i stort set
+   ethvert designsprog betyder stiplet ramme kladde, drop-zone, uafsluttet.
+   Kortet skulle signalere "lånt fra en anden side" — det signalerede
+   "ufærdig", og det gik ud over MC Syd, ikke os. Signalet er nu kildestriben
+   øverst, som siger det med ord i stedet. */
+
+.card-external{
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--color-fg-muted) 40%, var(--color-border));
+}
+
+/* ---- Kildestriben ----
+   Mærket lå før som en pille oven på fotoet. Målt over et vilkårligt
+   forhandlerfoto gav det 2,64:1 i kontrast — AA kræver 4,5:1 — og det var
+   dermed kortets dårligst læsbare tekst OG den vigtigste. Her har den en
+   kendt baggrund og klarer kravet hver gang. At den ligger øverst er heller
+   ikke tilfældigt: afsenderen er det første, man skal vide. */
+.card-kilde{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 16px; line-height:16px;
+  font-size:12px; font-weight:600;
+  color: var(--color-fg); background: var(--color-surface-2);
+  border-bottom:1px solid var(--color-border);
+}
+.card-kilde svg{ width:14px; height:14px; flex:0 0 auto; color: var(--color-fg-muted); }
+.card-kilde > span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Mærkatvarianten bruges stadig på annoncesiden (js/annonce.js).
+   text-transform:none er ikke kosmetik: .badge gør alt til versaler, hvilket
+   er rigtigt for kategorier ("NY", "FORHANDLER") — men her står der et
+   EGENNAVN, og mærkatets eneste opgave er at sige, hvem afsenderen er.
+   "ANNONCE FRA MC SYD" omskriver forhandlerens navn; det må vi ikke. */
+.badge-external{
+  background: var(--color-fg-muted, #5b6472); color:#fff;
+  text-transform:none; letter-spacing:0; font-size:12px;
+  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.badge-external svg{ width:12px; height:12px; flex:0 0 auto; }
+
+.card-external .card-body{ gap:12px; padding:16px; }
+
+/* ---- Titlen: to linjer, fast højde ----
+   "Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING" på én linje blev
+   klippet efter "Cruiser", og så fortalte kortet kun, at der stod meget.
+   Linje 1 bærer modellen — det man scanner efter, og derfor kortets største
+   og tungeste tekst, på niveau med prisen. Linje 2 bærer varianten, dæmpet.
+
+   Højden er låst til 44px (24+20), også når varianten er tom. Uden det ville
+   et kort uden variant være 20px lavere end naboen, og alt nedenunder ville
+   stå i forskellig højde fra kort til kort. */
+.card-external .card-title{ display:flex; flex-direction:column; min-width:0; height:44px; }
+.card-title-main{
+  font-family: var(--font-display); font-weight:700; font-size:17px;
+  line-height:24px; height:24px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.card-title-variant{
+  font-weight:400; font-size:14px; line-height:20px; height:20px;
+  color: var(--color-fg-muted);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ---- Pris + salgsbetingelser på samme linje ----
+   Prisen fylder sit, og salgsmarkørerne ("ENGROS", "UDEN KLARGØRING") står
+   til højre. De hører til her og ikke i titlen: de forklarer PRISEN. Og de
+   ligger ikke længere oven på fotoet, hvor to piller dækkede 185 af 204 px
+   af billedet ved smal kortbredde. */
+.card-prisrække{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  height:24px; min-width:0;
+}
+.card-external .card-price{
+  font-family: var(--font-display); font-size:17px; font-weight:700;
+  line-height:24px; flex:0 0 auto;
+}
+/* De 22 uden pris: "Pris ved henvendelse" er ikke et beløb og må ikke se ud
+   som et. Linjen skifter ikke højde — kun vægt og farve, så øjet ikke læser
+   det som et tal. */
+.card-external .card-price.pris-mangler{
+  font-family: var(--font-body); font-size:14px; font-weight:500;
+  color: var(--color-fg-muted);
+}
+.card-salgsmarkoerer{
+  flex:0 1 auto; min-width:0;
+  font-size:12px; font-weight:600; line-height:16px; padding:0 8px;
+  border-radius:4px; background: var(--color-surface-2); color: var(--color-fg-muted);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ---- Fire specchips + kørekort ----
+   Tre ikoner på én linje ("2003 · 38.000 km · 750 ccm") tvang læseren til at
+   afkode hvert ikon for at vide, hvad tallet var, og linjen brød på smalle
+   kort. Fire chips i et 2x2-gitter står altid samme sted på hvert eneste
+   kort: øjet lærer positionen én gang og bruger den resten af siden.
+
+   Chip frem for ikon+tekst løser også tomrummet. 163 af 332 annoncer mangler
+   km, 109 mangler kubik. En chip med "Ukendt" ser stadig ud som et felt —
+   et ikon uden tal ser ud som en fejl. Feltnavnet står i et skjult <dt>, så
+   skærmlæseren hører "Kubik: Ukendt" og ikke bare "Ukendt, Ukendt". */
+.card-specblok{ display:flex; flex-direction:column; gap:8px; }
+.card-specs{
+  display:grid; grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:8px; margin:0; padding:0;
+}
+.card-spec{ min-width:0; }
+/* Feltnavnet er der for skærmlæseren; chippen viser kun værdien. */
+.card-spec dt{
+  position:absolute; width:1px; height:1px; margin:0; padding:0;
+  font-size:14px; overflow:hidden; clip-path: inset(50%); white-space:nowrap;
+}
+.card-spec dd{
+  margin:0; font-size:14px; font-weight:600; line-height:20px; padding:4px 8px;
+  border-radius:4px; background: var(--color-surface-2);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* Aldrig et tomt felt, aldrig en bar tankestreg — men heller ikke et tal, vi
+   ikke har. Chippen bliver stående og siger, at kilden ikke oplyste det. */
+.card-spec dd.spec-tom{ font-weight:500; color: var(--color-fg-muted); }
+
+/* Kørekortkategorien er det eneste felt på kortet, der kan gøre hele
+   annoncen irrelevant for læseren: må han køre den eller ej. Den står derfor
+   alene, i fuld bredde, i sitets accentfarve — og den forsvinder ALDRIG.
+   Kan den ikke udledes, står der "Kørekort ukendt", for et manglende felt
+   dér ville læses som "ingen krav". */
+.card-external .card-koerekort{
+  position:static; display:inline-block; align-self:flex-start; max-width:100%;
+  font-family: var(--font-display); font-size:14px; font-weight:700;
+  line-height:20px; padding:4px 8px; letter-spacing:0;
+  border-radius:4px; box-shadow:none;
+  background: var(--color-primary); color: var(--color-on-primary);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* Accentfarven er et udsagn: "sådan her er reglen". Kan vi ikke udlede
+   kategorien, må chippen ikke lyde lige så sikker — den bliver stående, men
+   dæmpet, så farven fortsætter med at betyde "her står svaret". */
+.card-external .card-koerekort.kk-ukendt{
+  background: var(--color-surface-2); color: var(--color-fg-muted);
+}
+/* Teksten står nu i elementet selv, så ::before-etiketten ville stå to
+   gange — og skærmlæseren ville læse den med. */
+.card-external .card-koerekort::before{ content:none; }
+
+/* ---- Bunden: hvor står den, hvem sælger den, hvor lander jeg ----
+   Tre linjer, hver på sin egen række med fast højde. De kunne presses
+   sammen to og to, men så ville de knække forskelligt fra kort til kort, og
+   bundlinjen ville stå i forskellig højde. Det er ikke 16px værd. */
+.card-external .card-footer{
+  display:flex; flex-direction:column; align-items:stretch; gap:4px;
+  padding-top:12px; font-size:12px;
+}
+.card-sted, .card-kildelinje, .card-external-cta{
+  display:flex; align-items:center; gap:8px; min-width:0; line-height:16px;
+}
+.card-sted svg, .card-kildelinje svg, .card-external-cta svg{
+  width:14px; height:14px; flex:0 0 auto;
+}
+.card-sted > span, .card-kildelinje > span, .card-external-cta > span{
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.card-kildelinje{ color: var(--color-fg-muted); }
 
 .card-seller.is-external{
-  display:flex; align-items:center; gap:6px;
-  color: var(--color-fg-muted); font-size:13px;
+  display:flex; align-items:center; gap:8px;
+  color: var(--color-fg-muted); font-size:14px;
 }
-.card-seller.is-external svg{ width:15px; height:15px; flex:0 0 auto; }
+.card-seller.is-external svg{ width:14px; height:14px; flex:0 0 auto; }
 
-/* "Se hos MC Syd" står hvor tidsstemplet står på vores egne kort. Det er
-   ikke en knap — hele kortet er linket — men det skal ligne en destination. */
-.card-external-cta{
-  display:inline-flex; align-items:center; gap:4px;
-  font-weight:600; color: var(--color-primary);
+/* "Se annoncen hos MC Syd" står, hvor tidsstemplet står på vores egne kort.
+   Det er ikke en knap — hele kortet er linket — men det skal ligne en
+   destination, så man ved, at klikket fører væk fra Bikerbasen. Ordlyden er
+   den samme som på vores egen annonceside; to forskellige formuleringer for
+   den samme handling er to ting at lære. */
+.card-external-cta{ font-weight:600; color: var(--color-primary); }
+.card-external:hover .card-external-cta > span{ text-decoration: underline; }
+
+/* Under 280px kan et annoncefoto ikke bære en motorcykel, og specchipsene
+   begynder at klippe. Fire spalter giver 206px ved 1280px viewport; tre
+   giver knap 300px. Reglen hører hjemme hos .listings-grid, men den ejes af
+   søgesidens layout — den står her, indtil den kan flyttes derhen. */
+@media (min-width:1240px) and (max-width:1559px){
+  .listings-grid:has(> .card-external){ grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
-.card-external-cta svg{ width:13px; height:13px; }
 
 /* Trykfeltet er 44x44 (minimumskravet), mens den synlige cirkel bliver 36px
    via ::before. Ellers ville knappen se klodset stor ud på kortene. */
