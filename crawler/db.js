@@ -100,8 +100,53 @@ async function afslutKoersel(sb, koersel_id, tal, log){
    Resten opdateres én ad gangen med et beskåret felt-sæt. */
 const BATCH = 500;
 
+/* Kolonnerne crawleren skriver. Listen er ikke pynt, og den er ikke et
+   dubleret skema — den er graensen mellem parseren og tabellen.
+
+   Uden den spredes hele annonceobjektet ind i upserten, og saa gaelder to
+   ting, der begge har kostet os noget:
+
+     1. Tilfoejer en parser et felt, tabellen ikke har, fejler HELE koerslen
+        med "column does not exist" — 343 annoncer tabt, fordi nogen skrev én
+        linje i parse.js. Ingen test fanger det, fordi ingen test gaar i
+        databasen.
+     2. Den modsatte fejl er vaerre, fordi den er tavs: hk blev parset fra
+        kortet i maaneder og forsvandt, fordi der ikke var en kolonne. Intet
+        fejlede. Feltet var der bare ikke.
+
+   Nu er "ny kolonne" én bevidst handling to steder — en migration og en linje
+   her — og alt andet, en parser vil regne med undervejs, kan ligge frit paa
+   annonceobjektet uden at ramme tabellen.
+
+   foerst_set, ejet_af og manuelle_felter staar med vilje IKKE paa listen.
+   De hoerer til raekken, ikke til kilden, og crawleren ejer dem ikke. */
+const KOLONNER = [
+  'kilde_annonce_id', 'url', 'titel',
+  'maerke', 'model', 'variant', 'type',
+  'aargang', 'km', 'ccm', 'hk', 'pris_dkk',
+  'stand', 'salgsmarkoerer',
+  'by', 'postnr', 'saelgertype',
+  'thumbnail_url', 'uddrag', 'fingerprint',
+  // Crawlerens egne gæt, fx en ccm udledt af modelnavnet. Modstykket til
+  // manuelle_felter, som crawleren netop IKKE ejer.
+  'udledte_felter',
+];
+
+/* Skaer et annonceobjekt ned til de kolonner, tabellen faktisk har, og
+   fortael hvad der blev skaaret fra. Det sidste er pointen: et felt, der
+   bliver droppet i stilhed, er praecis den fejl, listen er lavet for at
+   fange. */
+function tilRaekke(annonce, ukendte){
+  const raekke = {};
+  for (const [k, v] of Object.entries(annonce)){
+    if (KOLONNER.includes(k)) raekke[k] = v;
+    else ukendte.add(k);
+  }
+  return raekke;
+}
+
 async function skrivAnnoncer(sb, kilde_id, annoncer){
-  if (!annoncer.length) return { nye: 0, opdaterede: 0 };
+  if (!annoncer.length) return { nye: 0, opdaterede: 0, ukendte_felter: [] };
 
   const ider = annoncer.map(a => a.kilde_annonce_id);
   const kendte = new Map();
@@ -118,15 +163,24 @@ async function skrivAnnoncer(sb, kilde_id, annoncer){
   const nu = new Date().toISOString();
   const frie = [];      // ingen manuelle felter -> kan skrives i batch
   const beskyttede = [];
+  const ukendte = new Set();
 
   for (const a of annoncer){
-    const raekke = { ...a, kilde_id, sidst_set: nu, status: 'aktiv' };
+    const raekke = { ...tilRaekke(a, ukendte), kilde_id, sidst_set: nu, status: 'aktiv' };
     const kendt = kendte.get(a.kilde_annonce_id);
     if (kendt && kendt.manuelle_felter?.length){
       const beskaaret = { sidst_set: nu };
       for (const [k, v] of Object.entries(raekke)){
         if (k === 'kilde_id' || k === 'kilde_annonce_id') continue;
         if (!kendt.manuelle_felter.includes(k)) beskaaret[k] = v;
+      }
+      /* Har ejeren rettet et felt i hånden, er det ikke længere udledt.
+         Uden det her ville rækken sige "ccm er gættet", mens den viste
+         forhandlerens egen rettelse — og en visning, der skriver "ca." ud
+         fra listen, ville sætte et forbehold på et tal, der er præcist. */
+      if (Array.isArray(beskaaret.udledte_felter)){
+        beskaaret.udledte_felter = beskaaret.udledte_felter
+          .filter(f => !kendt.manuelle_felter.includes(f));
       }
       beskyttede.push({ id: kendt.id, felter: beskaaret });
     } else {
@@ -149,7 +203,7 @@ async function skrivAnnoncer(sb, kilde_id, annoncer){
   }
 
   const nye = annoncer.filter(a => !kendte.has(a.kilde_annonce_id)).length;
-  return { nye, opdaterede: annoncer.length - nye };
+  return { nye, opdaterede: annoncer.length - nye, ukendte_felter: [...ukendte] };
 }
 
 /* ---------- Forsvundne annoncer ----------
@@ -197,4 +251,7 @@ async function markerBorte(sb, kilde_id){
 module.exports = {
   klient, projektUrl, sikrKilde, startKoersel, afslutKoersel,
   skrivAnnoncer, markerBorte, KOERSLER_FOER_BORTE,
+  // Eksporteres, saa en test kan holde parserens felter op mod kolonnerne
+  // uden at have en database. Det er den test, der ville have fanget hk.
+  KOLONNER, tilRaekke,
 };

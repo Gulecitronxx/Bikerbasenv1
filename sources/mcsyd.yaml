@@ -135,8 +135,155 @@ selectors:
   aargang: '[data-key="Year"]'                                # "2007"
   km: '[data-key="Mileage"]'                                  # "31.000"
   ccm: '[data-key="CC"]'                                      # "883"
-  hk: '[data-key="HP"]'                                       # "53"
+  hk: '[data-key="HP"]'                                       # "53"  — se nedenfor
   thumbnail: 'img[data-key="Image"]'                          # src
+
+# ---------------------------------------------------------------
+# Hestekræfter — GENUNDERSØGT i renderet DOM 16.08.2026
+# ---------------------------------------------------------------
+# Kortet har PRÆCIS fire specrækker, og de er de fire, en MC-køber læser:
+#
+#   <div class="attribute-label">...Årgang</div>          data-key="Year"
+#   <div class="attribute-label">...Kilometerstand</div>  data-key="Mileage"
+#   <div class="attribute-label">...HK</div>              data-key="HP"
+#   <div class="attribute-label">...Ccm</div>             data-key="CC"
+#
+# Hk stod altså der hele tiden og blev parset — men kastet væk, fordi
+# eksterne_annoncer ikke havde en kolonne. supabase/015 lukker det hul.
+#
+# Udfyldning, kørt end-to-end gennem den rigtige parser 16.08.2026:
+# 219 af de 332 annoncer, vi faktisk gemmer, har hk (66 %). Spændet er
+# 9-218 hk. De øvrige renderer "-", fordi Danbase sætter class="showempty"
+# på feltet. parseHk() læser "-" som null; ikke som nul hestekræfter.
+#
+# Hvorfor det er det vigtigste hul at lukke: uden hk kan koerekortForListing()
+# i js/data.js ikke afgøre A1/A2/A. Ccm alene rækker ikke — en 650 ccm kan
+# være både A2-lovlig og ikke, alt efter effekten.
+
+# ---------------------------------------------------------------
+# Motorcykeltype — UDLEDES af titlen, ikke af et eget felt
+# ---------------------------------------------------------------
+# Der findes INGEN selector for typen. Danbase har feltet (ModelTypeName),
+# men templaten renderer det ikke for sig — den skriver det ind i
+# ModelDescription, som er det, kortet viser:
+#
+#   <span data-key="ModelDescription" data-format="break-manufacturer">
+#       Harley-Davidson<br> XL883 Standard Cruiser</span>
+#
+# ModelDescription = mærke + model + variant + type. Verificeret: den
+# sammensætning holder på 293 af 343 produkter; resten afviger, fordi
+# forhandleren selv har tastet ekstra ord ind i modelnavnet.
+#
+# Ordlisten nedenfor er ikke gættet. Den er kildens EGEN facetliste, aflæst i
+# det svar siden selv henter for at bygge gitteret ("ModelTypes"). Sammenholdt
+# med produkternes ModelTypeName på hele kataloget:
+#     319/343 enige, 0 forkerte, 19 hvor vi finder en type kildens eget felt
+#     mangler (forhandleren skrev "…BYTTER GERNE Touring" i modelnavnet).
+#
+# Kørt end-to-end gennem den rigtige parser: 285 af 332 annoncer får en type
+# (86 %). Fordelingen: Cruiser 77, Street 55, Adventure 44, Touring 31,
+# Sportstouring 22, Sport 19, Offroader 18, Classic Cruiser 12, Klassiker 6,
+# Motard 1. 47 står uden — og det er det rigtige svar for dem.
+#
+# "Magna" står i kildens liste, men er IKKE med her: det er en Honda-model,
+# nogen har tastet i typefeltet. Et mærkes modelnavn er ikke en type.
+#
+# Rækkefølgen betyder intet — parseren prøver det længste ord først, ellers
+# ville hver Sportstouring blive en Sport.
+type_vokabular:
+  - Classic Cruiser
+  - Sportstouring
+  - Adventure
+  - Offroader
+  - Klassiker
+  - Touring
+  - Cruiser
+  - Scooter
+  - Street
+  - Motard
+  - Sport
+
+# ---------------------------------------------------------------
+# Ny eller brugt — står i produktlinkets sti
+# ---------------------------------------------------------------
+# Heller ikke et eget felt i kortet, men det behøver det ikke at være. Stien
+# i href'en har kategorien som eget segment, aflæst i DOM'en:
+#
+#   /Produkter/Motorcykel/Brugt/Sym%20XS%20125/181552?p=181552&m=1483
+#   /Produkter/45-Scooter-knallert/Ny/Honda%20NSC%20110%20Vision%20.../165596
+#
+# Udfyldning: 332 af 332 — 170 brugte og 162 NYE. Halvdelen af kataloget er
+# fabriksnye motorcykler, og indtil nu stod de på vores kort uden at sige det.
+# Forskellen afgør garanti og reklamationsret, så den må ikke være usynlig.
+#
+# Samme store begyndelsesbogstav-fælde som detalje_url_moenster: (?i) skal med.
+stand_url_moenster: '(?i)/produkter/[^/]+/(ny|brugt)/'
+
+# ---------------------------------------------------------------
+# Ccm — oplyst på to ud af tre kort, udledt på resten
+# ---------------------------------------------------------------
+# [data-key="CC"] er udfyldt på 223 af de 332 annoncer. De resterende 109 er
+# ikke bare et tomt felt: koerekortForListing() i js/data.js svarer null, når
+# BÅDE hk og ccm mangler, og så står der intet A1/A2/A på kortet. Verificeret
+# på "Honda MSX 125 Street 2024" — intet kørekortmærkat, selv om der står 125
+# i titlen.
+#
+# Motorcykler er navngivet efter slagvolumen, og tallet står i modelnavnet:
+# "MSX 125", "CBR 1000 F", "XV 750", "GSX 750 ES". udledCcmFraModel() i
+# crawler/normalize.js henter det — men KUN når kilden selv tier. En oplyst
+# kubik vinder altid.
+#
+# Nøjagtigheden er målt, ikke antaget. Mod de 229 annoncer hvor kilden selv
+# oplyser ccm: 176 gæt, 175 inden for 10 %, ét forkert. Resultat på hele
+# kataloget: ccm går fra 223 til 320 af 332, og antallet af kort helt uden
+# grundlag for et kørekortmærkat falder fra 109 til 12.
+#
+# Gættet er markeret som gæt. Værdien står i ccm, så filtre virker, men
+# 'ccm' skrives samtidig i rækkens udledte_felter (supabase/015), så en
+# visning kan skrive "ca. 750 ccm". Et gæt, der ikke kan skelnes fra en
+# måling, er værre end et tomt felt.
+#
+# Der udledes IKKE fra tocifrede tal: Kawasaki ZR-7 er 738 ccm, Honda CB72 er
+# 247, Yamaha MT-07 er 689. Alle tre giver null frem for en løgn.
+
+# ---------------------------------------------------------------
+# Felter der IKKE findes hos MC Syd — undersøgt 16.08.2026
+# ---------------------------------------------------------------
+# Skrevet ned, så den næste ikke bruger en dag på det samme. Tallene er talt
+# på HELE kataloget (343 produkter), ikke på en stikprøve. De 343 er kildens
+# eget tal; vi gemmer 332 af dem, fordi detalje_url_moenster med vilje sorterer
+# scootere og knallerter fra.
+#
+#   MÅNED for 1. registrering  — FINDES IKKE. Platformen HAR feltet, men det
+#     er tomt på 343 ud af 343 produkter. Kortet viser kun "Årgang: 2007".
+#     Bilbasens "8/2023" kan vi altså ikke matche her. Ingen kolonne.
+#
+#   FARVE                      — FINDES IKKE. Tomt på alle 343. Ingen kolonne.
+#
+#   ANTAL EJERE                — findes slet ikke i platformens datamodel.
+#
+#   UDSTYR som liste           — findes ikke struktureret. Udstyret står i
+#     annoncens fritekst ("motorbøjler, vindskærm, Sissybar"), og den tekst
+#     gemmer vi bevidst ikke (014: ingen fuld annoncetekst).
+#
+#   DRIVMIDDEL                 — tomt på alle 343, og det er alligevel et
+#     bil-felt. Bikerbasen er motorcykler.
+#
+#   FLERE FOTOS                — findes, men KUN på detaljesiden. Kortet har
+#     ét thumbnail (…_0_2.jpg). Detaljesiden har en karrusel,
+#     div#dd-product-images, med den fulde serie — 28 fotos på den annonce vi
+#     åbnede (…_0_1.jpg … _27_1.jpg). Prisen for at hente dem er derfor 332
+#     ekstra sideindlæsninger pr. kørsel i stedet for 8, altså ~25 minutter
+#     mod ~40 sekunder, mod en forhandler vi har en aftale med. Og 014 siger
+#     udtrykkeligt "intet galleri". Vi tager det IKKE uden en beslutning fra
+#     et menneske. Filnavnene kan ikke gættes fra thumbnaillet: antallet
+#     står ingen steder på kortet, og et gæt på _1_2.jpg giver brudte
+#     billeder på de annoncer, der kun har ét.
+#
+# HVOR TALLENE KOMMER FRA: siden henter selv sit gitter fra Danbase-API'et
+# (se beslutningen ovenfor). Udfyldningsgraderne her er aflæst i det svar,
+# mens en HELT ALMINDELIG sideindlæsning kørte — vi har ikke kaldt API'et.
+# Crawleren rører det ikke; alt herunder kommer fra DOM'en.
 
 # Titlen står i to varianter — hidden-xs og visible-xs — med samme data-key.
 # Tag den FØRSTE; ellers får du teksten to gange sammensat.
