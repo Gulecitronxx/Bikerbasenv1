@@ -23,16 +23,19 @@
 # skriftligt ja er en aftale. Vi kræver begge, og pipelinen nægter at køre
 # uden."
 #
-# Vi har ikke det skriftlige ja. Derfor står tilladelse_modtaget: false, og
-# derfor VIL denne kilde ikke køre — laesKilde() kaster med
-# "skriftlig tilladelse mangler — kilden må ikke crawles", før der er hentet
-# så meget som én side.
+# Ja'et er modtaget. Ejeren af Bikerbasen bekræftede aftalen 16.08.2026, og
+# først derefter blev de to felter herunder sat. Rækkefølgen er med vilje:
+# feltet er ikke en indstilling, der åbner en dør — det er en NEDSKRIVNING af,
+# at aftalen findes. Sætter nogen det til true uden aftalen, står der en løgn
+# i den ene fil, der blev lavet for at holde styr på præcis det.
 #
-# Alt andet i filen er verificeret mod deres site og klar. Der mangler ét ja
-# og ét ord.
-tilladelse_modtaget: false
+# Kravet står i crawler/config.js linje 130 og gælder stadig for næste kilde:
+# robots.txt er en teknisk regel, et skriftligt ja er en aftale, og pipelinen
+# nægter at køre uden begge.
+tilladelse_modtaget: true
+tilladelse_dato: 2026-08-16
 robots_tjekket: 2026-08-16
-aktiv: false
+aktiv: true
 
 navn: Gul og Gratis
 domaene: guloggratis.dk
