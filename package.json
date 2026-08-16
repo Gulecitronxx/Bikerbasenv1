@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "crawl": "node crawler/run.js",
-    "test": "node --test crawler/normalize.test.js crawler/parse.test.js crawler/hastighed.test.js",
+    "test": "node --test crawler/normalize.test.js crawler/parse.test.js crawler/hastighed.test.js js/koerekort.test.js",
     "crawl:tjek": "node crawler/tjek.js"
   },
   "repository": {

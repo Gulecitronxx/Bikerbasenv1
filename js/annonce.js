@@ -253,22 +253,23 @@ function renderExternalListing(listing){
   })();
 
   /* ---------- Kørekort ----------
-     koerekortForListing() regner ukendt effekt som 0 hk. Det er rigtigt for
-     en 125'er — loven sætter 125 cm³ OG 15 hk, og over 125 cm³ er A1
-     udelukket uanset hvad. Men for en motorcykel over 125 cm³ uden oplyst
-     effekt ville funktionen svare "A2", fordi 0 hk er under 48. Det svar er
-     ikke bare upræcist, det er farligt: det kan få en 20-årig til at tro,
-     at han lovligt må køre en 1200-kubiks maskine.
+     Over 125 cm³ uden oplyst effekt kan kategorien ikke udledes: A2 har
+     ingen slagvolumengrænse, så maskinen kan være både A2 og A.
+     koerekortForListing() svarer derfor null — at gætte på A2 kunne få en
+     20-årig til at tro, at han lovligt måtte køre en 1200-kubiks maskine.
 
-     Derfor: over 125 cm³ og uden hk siger vi "A2 eller A" og skriver
-     hvorfor, i stedet for at gætte på den forkerte af de to. */
-  const hk  = Number(listing.power) || 0;
+     Men null må ikke blive til et tomt felt her. På detaljesiden har vi
+     plads til at sige, hvad vi så faktisk ved: at A1 er udelukket, og at
+     køberen skal spørge kilden om resten. Derfor kommer det uvisse tilfælde
+     før tomhedstjekket — ellers forsvandt netop den forklaring, der er
+     grunden til at vi ikke gætter. */
+  const hk  = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;
   const kk  = koerekortForListing(listing);
-  const kkUvis = !hk && ccm > A1_MAX_CCM;
+  const kkUvis = hk == null && ccm > A1_MAX_CCM;
   const kkMeta = KOEREKORT.find(k => k.id === kk);
 
-  const koerekortPanel = !kk ? '' : kkUvis
+  const koerekortPanel = kkUvis
     ? `<div class="external-detail-kk is-uvis">
          <span class="external-detail-kk-code">A2/A</span>
          <div>
@@ -278,6 +279,7 @@ function renderExternalListing(listing){
               den er over ${A1_MAX_CCM} cm³. Spørg ${kilde}, før du regner med A2.</p>
          </div>
        </div>`
+    : !kk ? ''   // hverken ccm eller hk: der er intet at sige, heller ikke uvist
     : `<div class="external-detail-kk">
          <span class="external-detail-kk-code">${escapeHTML(kk)}</span>
          <div>

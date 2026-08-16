@@ -353,39 +353,37 @@ function deltTitel(l){
 /* Kørekortkategorien er listens vigtigste felt — og derfor det felt, hvor
    et gæt gør mest skade.
 
-   koerekortForListing() i js/data.js læser manglende effekt som 0 hk. En
-   1200 ccm maskine uden oplyst hk kommer derfor ud som "A2", altså som om
-   en 20-årig måtte køre den. Det passer for hver eneste indekserede
-   annonce, for kilden oplyser ikke effekt.
+   Her stod en lokal kopi af reglen, fordi koerekortForListing() i js/data.js
+   dengang læste manglende effekt som 0 hk og derfor kaldte en 1200 ccm
+   maskine uden oplyst hk for "A2". Fejlen er rettet ved roden, og to steder
+   at afgøre samme spørgsmål er ét sted for meget: den ene kan rettes uden
+   den anden, og så er det tilfældigt, hvilket svar køberen får at se.
 
-   Her vises kategorien kun, når den kan udledes:
-     · effekten er kendt      → udledningen holder
-     · ccm ≤ 125 og ingen hk  → A1 uanset effekt (15 hk-grænsen kan ikke
-                                overskrides med den slagvolumen i praksis,
-                                og A1 er den forsigtige gæt-retning)
-   Ellers står der "Ikke oplyst". Et manglende felt koster et klik; et
-   forkert felt kan koste en bøde og en inddraget motorcykel. */
-function koerekortSikkert(l){
-  const hk = Number(l.power) || 0;
-  const ccm = Number(l.ccm) || 0;
-  if (hk) return koerekortForListing(l);
-  if (ccm && ccm <= A1_MAX_CCM) return 'A1';
-  return null;
-}
+   Funktionen svarer null, når kategorien ikke kan udledes — over 125 cm³
+   uden oplyst effekt kan være både A2 og A. Så står der "Ikke oplyst" her.
+   Et manglende felt koster et klik; et forkert felt kan koste en bøde og en
+   inddraget motorcykel. */
 
-const UOPLYST = '<span class="row-unknown">Ikke oplyst</span>';
+/* Cellen, der siger "vi ved det ikke", i listevisningen. Navnet er
+   UOPLYST_HTML og ikke UOPLYST, fordi filterlaget længere nede i filen
+   allerede har et `const UOPLYST = Symbol('uoplyst')`. To top-level const'er
+   med samme navn i samme script er en SyntaxError — hele js/search.js
+   stopper med at indlæse, og søgesiden bliver en tom skal. De to kom fra
+   hver sin gren og mødtes i en merge, hvor ingen af dem stod i den anden
+   grens diff. */
+const UOPLYST_HTML = '<span class="row-unknown">Ikke oplyst</span>';
 
 function rowSpecsHTML(l){
-  const kk = koerekortSikkert(l);
+  const kk = koerekortForListing(l);
   const motor = l.ccm == null
-    ? UOPLYST
+    ? UOPLYST_HTML
     : escapeHTML(formatCcm(l.ccm)) + (l.power ? ` <span class="row-hk">· ${escapeHTML(formatPower(l.power))}</span>` : '');
   const celle = (label, vaerdi) => `<div class="row-spec"><dt>${label}</dt><dd>${vaerdi}</dd></div>`;
   return `<dl class="row-specs">
-    ${celle('Årgang', l.year == null ? UOPLYST : escapeHTML(String(l.year)))}
-    ${celle('Kilometer', l.km == null ? UOPLYST : escapeHTML(formatKm(l.km)))}
+    ${celle('Årgang', l.year == null ? UOPLYST_HTML : escapeHTML(String(l.year)))}
+    ${celle('Kilometer', l.km == null ? UOPLYST_HTML : escapeHTML(formatKm(l.km)))}
     ${celle('Motor', motor)}
-    ${celle('Kørekort', kk ? `<span class="row-kk">${kk}</span>` : UOPLYST)}
+    ${celle('Kørekort', kk ? `<span class="row-kk">${kk}</span>` : UOPLYST_HTML)}
   </dl>`;
 }
 

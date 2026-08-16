@@ -374,6 +374,23 @@ const KOEREKORT = [
 
 const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 48;
 
+/* Ukendt effekt har mange stavemåder, og de betyder alle det samme:
+     null      databasen (eksterne_annoncer.hk er tom for alle 332)
+     ""        et tomt formularfelt
+     "-"       MC Syds måde at skrive "feltet er tomt"
+     "ukendt"  en tekst, Number() gør til NaN
+     0         en kilde, der skriver nul i stedet for at lade feltet stå tomt
+   0 hk er ikke en oplysning — der findes ikke en motorcykel uden effekt.
+   crawler/normalize.js parseHk() afviser den allerede, men annoncer kommer
+   også fra databasen og formularen, og det er her, svaret bliver til en
+   påstand på skærmen. Derfor ét sted at læse feltet, og ét svar på, hvornår
+   vi ikke ved det — de to funktioner nedenfor skal aldrig kunne blive
+   uenige om, hvad "ingen hk" betyder. */
+function hkEllerNull(power){
+  const v = Number(power);
+  return Number.isFinite(v) && v > 0 ? v : null;
+}
+
 /* Må en mc med denne effekt/slagvolumen føres på det valgte kørekort?
    Et højere kørekort dækker de lavere kategorier. */
 /* UKENDT EFFEKT ER IKKE NUL EFFEKT.
@@ -392,7 +409,7 @@ const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 48;
    koden det samme som kommentaren. */
 function passerKoerekort(listing, kat){
   if (!kat) return true;
-  const hk = listing.power == null || listing.power === '' ? null : Number(listing.power);
+  const hk = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;
 
   // A1 KAN afgøres uden effekt, fordi den har en ccm-grænse: er slagvolumen
@@ -414,7 +431,7 @@ function passerKoerekort(listing, kat){
    Returnerer null, når spørgsmålet ikke kan besvares — kortet viser så ingen
    kategori frem for en forkert. */
 function koerekortForListing(listing){
-  const hk = listing.power == null || listing.power === '' ? null : Number(listing.power);
+  const hk = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;
   if (hk == null && !ccm) return null;
 
