@@ -304,14 +304,24 @@ const SHOW_DEMO_DATA = typeof location !== 'undefined'
 const LISTINGS = SHOW_DEMO_DATA ? buildListings() : [];
 
 /* ============ Formatting helpers (Danish) ============ */
+/* Null betyder "ikke oplyst", ikke nul.
+
+   Egne annoncer har altid pris, årgang og km — formularen kræver dem. De
+   indekserede har ikke: en forhandler, der ikke skriver prisen, efterlader
+   feltet tomt, og normalize.js returnerer null frem for at gætte.
+
+   Uden det her gardin kastede formatPrice(null), og fejlen ramte ikke kun
+   det ene kort — den stoppede hele render-løkken, så en side med 383
+   annoncer viste to. Den slags fejl ligner et tomt katalog, ikke en
+   undtagelse. */
 function formatPrice(n){
-  return n.toLocaleString('da-DK') + ' kr.';
+  return n == null ? 'Pris ikke oplyst' : n.toLocaleString('da-DK') + ' kr.';
 }
 function formatKm(n){
-  return n.toLocaleString('da-DK') + ' km';
+  return n == null ? 'Km ikke oplyst' : n.toLocaleString('da-DK') + ' km';
 }
 function formatCcm(n){
-  return n.toLocaleString('da-DK') + ' ccm';
+  return n == null ? '— ccm' : n.toLocaleString('da-DK') + ' ccm';
 }
 function formatPower(hk){
   return hk ? hk + ' hk' : '—';

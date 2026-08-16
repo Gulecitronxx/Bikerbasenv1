@@ -577,6 +577,33 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .badge-dealer svg{ width:12px; height:12px; }
 .badge-neutral{ background: rgba(255,255,255,0.9); color: var(--color-dark); }
 
+/* ---------- Indekserede annoncer fra andre sider ----------
+   Signalet skal aflæses på under et sekund, uden at læse noget. Derfor en
+   anden farve end forhandlermærket, en stiplet kant om hele kortet, og
+   pil-ud-ikonet både i mærket og i bunden.
+
+   Det er med vilje ikke pænere end vores egne kort. En indekseret annonce er
+   et lån fra en anden side — den skal kunne ses, ikke fremhæves. */
+.badge-external{ background: var(--color-fg-muted, #5b6472); color:#fff; }
+.badge-external svg{ width:12px; height:12px; }
+
+.card-external{ border-style: dashed; }
+.card-external .card-price{ font-weight:700; }
+
+.card-seller.is-external{
+  display:flex; align-items:center; gap:6px;
+  color: var(--color-fg-muted); font-size:13px;
+}
+.card-seller.is-external svg{ width:15px; height:15px; flex:0 0 auto; }
+
+/* "Se hos MC Syd" står hvor tidsstemplet står på vores egne kort. Det er
+   ikke en knap — hele kortet er linket — men det skal ligne en destination. */
+.card-external-cta{
+  display:inline-flex; align-items:center; gap:4px;
+  font-weight:600; color: var(--color-primary);
+}
+.card-external-cta svg{ width:13px; height:13px; }
+
 /* Trykfeltet er 44x44 (minimumskravet), mens den synlige cirkel bliver 36px
    via ::before. Ellers ville knappen se klodset stor ud på kortene. */
 /* Vises på annoncesiden i stedet for gem-hjertet, når annoncen er ens egen —

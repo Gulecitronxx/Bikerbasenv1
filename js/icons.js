@@ -29,6 +29,9 @@ const Icon = {
   // Butiksfacade — bruges paa annoncekortet til at skelne forhandler fra privat.
   store: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg>`,
   user: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>`,
+  // Pil ud af kassen: bruges kun på annoncer, vi ikke hoster. Ikonet er hele
+  // varslet om, at næste klik forlader Bikerbasen.
+  externalLink: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg>`,
   plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`,
   bike: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg>`,
   clock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/></svg>`,

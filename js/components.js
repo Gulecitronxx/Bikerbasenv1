@@ -182,7 +182,57 @@ function sellerLineHTML(l){
 /* ============ Listing card ============ */
 /* `i` kommer gratis fra .map(listingCardHTML) — kortet på plads 0 er det
    eneste der er above-the-fold på mobil, og får derfor det ivrige foto. */
+/* Indekseret annonce fra en anden side.
+
+   Egen funktion frem for en håndfuld if'er inde i det almindelige kort. De to
+   korttyper ligner hinanden i dag, men de skal have lov at skille sig fra
+   hinanden — og et delt kort med syv betingelser er dét, der på et tidspunkt
+   får en ekstern annonce til at se ud som vores egen, fordi nogen tilføjede
+   en knap uden at tænke over grenen.
+
+   Fire ting adskiller den, og alle fire er bevidste:
+     1. Mærket "Hos <kilde>" øverst på billedet, ikke nede i teksten.
+     2. Linjen hvor sælgeren står, siger kildens navn og domæne.
+     3. Kortets link går til KILDEN, i ny fane, med rel=nofollow.
+     4. Ingen favoritknap. Favoritter peger på listings med en
+        fremmednøgle — en uuid herfra ville blive afvist af databasen, og
+        hjertet ville se ud som om det virkede. */
+function externalCardHTML(l, i){
+  const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
+  const kilde = escapeHTML(l.source?.navn || 'ekstern kilde');
+  const sted = [l.city, l.postnr].filter(Boolean).map(escapeHTML).join(' ');
+  return `
+  <article class="card card-external" data-listing-id="${l.id}" data-external="1">
+    <div class="card-media">
+      ${listingMediaHTML(l, `${brand} ${model}`, i === 0)}
+      <div class="card-badges">
+        <span class="badge badge-external" title="Annoncen ligger hos ${kilde}. Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}Hos ${kilde}</span>
+      </div>
+      ${(() => { const k = koerekortForListing(l); return k ? `<span class="card-koerekort" title="Kan føres på ${k}-kørekort">${k}</span>` : ''; })()}
+      <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
+    </div>
+    <div class="card-body">
+      <div class="card-price">${formatPrice(l.price)}</div>
+      <h3 class="card-title">${brand} ${model}</h3>
+      <div class="card-meta">
+        <span>${Icon.calendar}${l.year ?? 'Ikke oplyst'}</span>
+        <span>${Icon.gauge}${l.km == null ? 'Km ikke oplyst' : formatKm(l.km)}</span>
+        <span>${Icon.engine}${l.ccm == null ? '–' : formatCcm(l.ccm)}</span>
+      </div>
+      <div class="card-seller is-external">${Icon.store}<span>${kilde}${l.source?.domaene ? ` · ${escapeHTML(l.source.domaene)}` : ''}</span></div>
+      <div class="card-footer">
+        <span>${Icon.mapPin}${sted || 'Ikke oplyst'}</span>
+        <span class="card-external-cta">Se hos ${kilde}${Icon.externalLink}</span>
+      </div>
+    </div>
+    <a href="${escapeHTML(l.externalUrl)}" target="_blank" rel="noopener noreferrer nofollow"
+       class="card-link"
+       aria-label="Se annonce hos ${kilde} (åbner i ny fane): ${brand} ${model}, ${formatPrice(l.price)}"></a>
+  </article>`;
+}
+
 function listingCardHTML(l, i){
+  if (l.isExternal) return externalCardHTML(l, i);
   const fav = Store.isFavorite(l.id);
   const brand = escapeHTML(l.brand), model = escapeHTML(l.model), city = escapeHTML(l.city);
   const suspicious = isSuspiciouslyCheap(l);

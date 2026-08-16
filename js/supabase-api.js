@@ -133,6 +133,31 @@ const db = (function(){
       return q;
     },
 
+    /* ---------- Indekserede annoncer fra andre sider ----------
+       Vi hoster dem ikke. De ligger i eksterne_annoncer, og køberen sendes
+       videre til kilden. Læsning kræver ingen login: politikken i 014 gør
+       aktive annoncer fra aktive kilder offentlige, og kun dem.
+
+       status filtreres ikke her — politikken skjuler allerede 'borte', og en
+       ekstra .eq('status','aktiv') ville låse os ude af 'solgt', som stadig
+       er værd at vise med et mærke. */
+    async listExternalListings(filters = {}){
+      const c = init(); if (!c) return { data: [], error: null };
+      let q = c.from('eksterne_annoncer')
+        .select('id, kilde_annonce_id, url, titel, maerke, model, aargang, km, ccm, pris_dkk, ' +
+                'by, postnr, saelgertype, thumbnail_url, uddrag, status, foerst_set, ' +
+                'kilde:kilder(navn, domaene)')
+        .eq('status', 'aktiv');
+
+      if (filters.brands?.length) q = q.in('maerke', filters.brands);
+      if (filters.priceMin != null) q = q.gte('pris_dkk', filters.priceMin);
+      if (filters.priceMax != null) q = q.lte('pris_dkk', filters.priceMax);
+
+      q = q.order('sidst_set', { ascending: false });
+      if (filters.limit) q = q.limit(filters.limit);
+      return q;
+    },
+
     async getListing(id){
       const c = init(); if (!c) return { data: null, error: null };
       return c.from('listings')

@@ -109,9 +109,13 @@ const Store = {
      demodataene — så et nyt site ikke ser tomt ud, mens databasen fyldes op.
      Her bruges getLocalListings, ellers ville brugerens egne databaseannoncer
      tælle med to gange. */
+  /* Indekserede forhandlerannoncer lægges EFTER vores egne. Rækkefølgen er
+     ikke tilfældig: en annonce, vi hoster, kan køberen handle på hos os, og
+     den skal ikke skubbes ned af 332 annoncer, vi kun linker videre til. */
   getAllListings(){
     const remote = window.REMOTE_LISTINGS || [];
-    return [...remote, ...this.getLocalListings(), ...LISTINGS];
+    const eksterne = window.EXTERNAL_LISTINGS || [];
+    return [...remote, ...this.getLocalListings(), ...LISTINGS, ...eksterne];
   },
   getListingById(id){
     return this.getAllListings().find(l => String(l.id) === String(id));

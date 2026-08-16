@@ -11,6 +11,7 @@
    ============================================================ */
 
 window.REMOTE_LISTINGS = [];
+window.EXTERNAL_LISTINGS = [];
 
 /* Oversætter en databaserække til den form, UI'et allerede forventer. */
 function normalizeRemoteListing(row){
@@ -106,6 +107,82 @@ async function loadRemoteListings(){
   return window.REMOTE_LISTINGS;
 }
 
+/* ---------- Indekserede annoncer ----------
+   Oversættes til den samme form som alt andet i UI'et, så søgning, filtre og
+   sortering virker uændret. Men de bærer isExternal og source med sig, og de
+   to felter er der ikke for pynt: kortet SKAL kunne se forskel, fordi køberen
+   skal videre til kilden i stedet for at kontakte en sælger hos os.
+
+   Bemærk hvad der IKKE oversættes. Der er ingen seller, fordi vi ikke kender
+   sælgeren — kun forhandleren, annoncen står hos. Sætter man et sellerobjekt
+   op med kildens navn, begynder resten af UI'et at behandle den som en
+   Bikerbasen-sælger med profil, anmeldelser og kontaktknap, og så er
+   skellet væk igen. */
+function normalizeExternalListing(row){
+  const kilde = row.kilde || {};
+  return {
+    id: row.id,
+    brand: row.maerke || 'Ukendt',
+    model: row.model || row.titel || '',
+    type: null,
+    year: row.aargang,
+    km: row.km,
+    ccm: row.ccm,
+    power: null,
+    price: row.pris_dkk,
+    condition: null,
+    postnr: row.postnr,
+    city: row.by || '',
+    region: null,
+    description: row.uddrag || null,
+
+    /* createdAt er MED VILJE null.
+
+       foerst_set er den dag, crawleren så annoncen første gang — ikke den dag
+       forhandleren satte motorcyklen til salg. Den kan være år gammel hos
+       kilden. Bruger vi den som oprettelsesdato, påstår alle 332 at være
+       nyere end alt andet på sitet, og "Nyeste først" begraver hver eneste
+       Bikerbasen-annonce bag en blok, der blev til i det øjeblik, vi crawlede.
+       Målt: 50 ud af de 50 øverste var eksterne.
+
+       Vi kender ikke den rigtige dato, og så er det ærligste at lade være med
+       at have en. Udaterede annoncer sorteres bagest ved datosortering og
+       påvirker ikke pris-, årgangs- og km-sortering, hvor de konkurrerer på
+       lige fod. Dagen vi kan læse en rigtig annoncedato hos kilden, sættes
+       den her. */
+    createdAt: null,
+    indekseretFoerste: row.foerst_set,   // kun til fejlfinding og statistik
+
+    isDealer: row.saelgertype === 'forhandler',
+
+    // Det, der gør den ekstern.
+    isExternal: true,
+    externalUrl: row.url,
+    source: { navn: kilde.navn || 'ekstern kilde', domaene: kilde.domaene || null },
+    sourceListingId: row.kilde_annonce_id,
+
+    // Kun miniaturen. Vi kopierer ikke gallerier — billederne er kildens.
+    photoUrls: row.thumbnail_url ? [row.thumbnail_url] : [],
+    photoRows: [],
+    photos: row.thumbnail_url ? 1 : 0,
+    equipment: [],
+    seller: null,
+  };
+}
+
+async function loadExternalListings(){
+  if (!db.enabled) return [];
+  const res = await db.listExternalListings({ limit: 500 });
+  if (res.error){
+    // En fejl her må ikke tage dine egne annoncer med sig. Søgningen skal
+    // stadig virke, bare uden forhandlerannoncerne.
+    console.warn('Kunne ikke hente indekserede annoncer:', res.error.message);
+    return [];
+  }
+  window.EXTERNAL_LISTINGS = (res.data || []).map(normalizeExternalListing);
+  return window.EXTERNAL_LISTINGS;
+}
+
 /* Favoritter: databasen er sandheden, når man er logget ind.
    Det man nåede at gemme som anonym, flyttes med op ved login i stedet for
    at forsvinde. */
@@ -135,7 +212,9 @@ function backendReady(){
     if (!db.enabled) return { enabled: false };
     try {
       await syncSessionToStore();
-      await loadRemoteListings();
+      // Egne annoncer og indekserede hentes samtidig — de er uafhængige, og
+      // serielt ville de lægge en rundtur oven i sidens første render.
+      await Promise.all([loadRemoteListings(), loadExternalListings()]);
       await syncFavorites();
     } catch (e) {
       console.warn('Backend-opstart fejlede, fortsætter på lokale data:', e);

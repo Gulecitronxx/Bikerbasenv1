@@ -439,12 +439,33 @@ function getFilteredListings(){
   if (state.vinterklar) list = list.filter(l => l.vinterklar);
   if (state.koerekort) list = list.filter(l => passerKoerekort(l, state.koerekort));
 
+  /* Ukendt værdi sorteres ALTID bagest — også når retningen er stigende.
+
+     Uden det her blev null til 0 i minusregningen, og så lå de 22
+     indekserede annoncer uden pris øverst under "Pris: Lav til høj". En
+     annonce uden pris er ikke den billigste; den er uoplyst. Samme fejl
+     ramte "Kilometertal: Lavest først", hvor 163 annoncer uden kilometertal
+     lagde sig foran en cykel med 500 km på uret.
+
+     Det er samme regel som NULLS LAST i SQL, og den gælder begge retninger:
+     det ukendte skal aldrig vinde en sortering, det ikke deltager i. */
+  const medUkendtSidst = (vaelg, retning) => (a, b) => {
+    const x = vaelg(a), y = vaelg(b);
+    const xTom = x == null || Number.isNaN(x);
+    const yTom = y == null || Number.isNaN(y);
+    if (xTom && yTom) return 0;
+    if (xTom) return 1;
+    if (yTom) return -1;
+    return retning === 'asc' ? x - y : y - x;
+  };
+  const tid = l => (l.createdAt ? new Date(l.createdAt).getTime() : null);
+
   const sorters = {
-    'date-desc': (a,b) => new Date(b.createdAt) - new Date(a.createdAt),
-    'price-asc': (a,b) => a.price - b.price,
-    'price-desc': (a,b) => b.price - a.price,
-    'year-desc': (a,b) => b.year - a.year,
-    'km-asc': (a,b) => a.km - b.km,
+    'date-desc':  medUkendtSidst(tid,        'desc'),
+    'price-asc':  medUkendtSidst(l => l.price, 'asc'),
+    'price-desc': medUkendtSidst(l => l.price, 'desc'),
+    'year-desc':  medUkendtSidst(l => l.year,  'desc'),
+    'km-asc':     medUkendtSidst(l => l.km,    'asc'),
   };
   list.sort(sorters[state.sort] || sorters['date-desc']);
   return list;
