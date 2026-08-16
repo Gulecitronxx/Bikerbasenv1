@@ -245,30 +245,15 @@ function sellerLineHTML(l){
    op på noget, der MANGLER i en indekseret annonce. Vores egne annoncer har
    felterne fra formularen; en crawlet annonce har det, kilden gad skrive. */
 
-/* Postnummer → landsdel, uden at hente js/postnumre.js.
+/* Postnummer → landsdel, uden at hente js/postnumre.js: regionFraPostnr()
+   ligger i js/data.js, som hver eneste side loader — også maerker.html og
+   sikkerhed.html, der har den her fil uden js/backend-bridge.js.
    Søgesiden droppede med vilje de 40 KB (1089 rækker), fordi ingen af dens
    scripts slog et postnummer op. Nu gør ét af dem det — til én label pr.
-   kort — og det er ikke 40 KB værd. Tabellen herunder er GENERERET ud fra
-   POSTNUMRE: postnumrene sorteret og foldet sammen til de 31 punkter, hvor
-   regionen skifter. Den giver præcis samme svar som findPostnr() for alle
-   1089 postnumre, på 280 bytes. Findes findPostnr (opret-annonce, dashboard,
-   annonce…), bruges den i stedet — den kender også det officielle bynavn. */
-const EKSTERN_REGIONER = ['Hovedstaden', 'Sjælland', 'Syddanmark', 'Midtjylland', 'Nordjylland'];
-const EKSTERN_REGION_SKIFT = [[1050,0],[2670,1],[2700,0],[4030,1],[4050,0],[4060,1],[5000,2],[6893,3],[7000,2],[7130,3],[7160,2],[7171,3],[7173,2],[7280,3],[7300,2],[7362,3],[7700,4],[7760,3],[7770,4],[7790,3],[7900,4],[8000,3],[8721,2],[8722,3],[9000,4],[9500,3],[9510,4],[9550,3],[9560,4],[9620,3],[9640,4]];
-function regionFraPostnr(postnr){
-  const nr = parseInt(String(postnr ?? '').trim(), 10);
-  if (!Number.isFinite(nr)) return null;
-  if (typeof findPostnr === 'function'){
-    const hit = findPostnr(nr);
-    if (hit) return hit.region;
-  }
-  let navn = null;
-  for (const [start, idx] of EKSTERN_REGION_SKIFT){
-    if (nr < start) break;
-    navn = EKSTERN_REGIONER[idx];
-  }
-  return navn;
-}
+   kort — og det er ikke 40 KB værd. Tabellen i data.js er GENERERET ud fra
+   POSTNUMRE og giver præcis samme svar som findPostnr() for alle 1089
+   postnumre, på 280 bytes. Funktionen stod før både dér og her; se
+   kommentaren ved REGION_KNAEK i js/data.js for hvorfor der nu kun er én. */
 
 /* "Rødding, Syddanmark" — ikke "Rødding 6630".
    Et postnummer er en sorteringsnøgle, ikke et sted. En køber i Aarhus ved

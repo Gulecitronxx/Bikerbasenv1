@@ -108,40 +108,11 @@ async function loadRemoteListings(){
 }
 
 /* ---------- Landsdel ud fra postnummer ----------
-
-   Kilderne oplyser postnummer og by, aldrig landsdel. Uden landsdel forsvandt
-   alle indekserede annoncer, så snart nogen satte ét landsdelsfilter — og det
-   er ærgerligt, for landsdelen er ikke ukendt: den FØLGER af postnummeret.
-   Det er ikke et gæt, det er et opslag.
-
-   Hvorfor ikke bare findPostnr() fra js/postnumre.js? Fordi søgesiden med
-   vilje IKKE loader den fil (se kommentaren i soegning.html): 40 KB og 1089
-   rækker, der skulle hentes, parses og evalueres på hovedtråden for ét eneste
-   opslag. Den blev fjernet dér som en målt forbedring, og den skal ikke
-   snige sig ind igen ad bagvejen.
-
-   I stedet ligger tabellen her i sammentrængt form. Den er ikke en genvej og
-   ikke en tilnærmelse: landsdelene ligger i sammenhængende postnummerspænd,
-   så alle 1089 postnumre koger ned til 31 knækpunkter — "fra dette
-   postnummer og opefter gælder denne landsdel". Verificeret mod js/postnumre.js:
-   0 afvigelser på alle 1089.
-
-   Regenereres med (fra projektroden):
-     node -e "const P=JSON.parse(require('fs').readFileSync('js/postnumre.js','utf8').match(/const POSTNUMRE = (\[.*?\]);/s)[1]);P.sort((a,b)=>a[0].localeCompare(b[0]));let l=null;console.log(P.filter(p=>p[2]!==l&&(l=p[2])).map(p=>p[0]+{Hovedstaden:'H','Sjælland':'S',Syddanmark:'D',Midtjylland:'M',Nordjylland:'N'}[p[2]]).join(' '))"
-
-   Kilde: Dataforsyningen (DAWA), samme som js/postnumre.js. */
-const REGION_KNAEK = '1050H 2670S 2700H 4030S 4050H 4060S 5000D 6893M 7000D 7130M 7160D 7171M 7173D 7280M 7300D 7362M 7700N 7760M 7770N 7790M 7900N 8000M 8721D 8722M 9000N 9500M 9510N 9550M 9560N 9620M 9640N'
-  .split(' ').map(s => [Number(s.slice(0, 4)), { H:'Hovedstaden', S:'Sjælland', D:'Syddanmark', M:'Midtjylland', N:'Nordjylland' }[s[4]]]);
-
-function regionFraPostnr(postnr){
-  const nr = Number(String(postnr ?? '').trim());
-  // Under 1050 findes ikke i postnummerregistret. Så er postnummeret forkert,
-  // og et forkert postnummer skal give "ved ikke" — ikke Hovedstaden.
-  if (!Number.isFinite(nr) || nr < REGION_KNAEK[0][0] || nr > 9999) return null;
-  let fundet = null;
-  for (const [fra, navn] of REGION_KNAEK){ if (nr < fra) break; fundet = navn; }
-  return fundet;
-}
+   regionFraPostnr() bruges af normalizeExternalListing() nedenfor og ligger i
+   js/data.js (se REGION_KNAEK dér). Den stod før BÅDE her og i
+   js/components.js — to tabeller med samme navn i global scope, hvor sidste
+   script-tag vandt for alle kaldere, også for den her fil, der troede den
+   kaldte sin egen. Læg den ikke tilbage. */
 
 /* ---------- Motorcykeltype ----------
 

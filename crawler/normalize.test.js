@@ -265,3 +265,68 @@ test('fingerprint: forskellige cykler holdes adskilt', () => {
   assert.notEqual(n.fingerprint(a), n.fingerprint(c));
   assert.notEqual(n.fingerprint(a), n.fingerprint(d));
 });
+
+/* ---------------------------------------------------------------
+   Personoplysninger i titler
+   ---------------------------------------------------------------
+   Gul og Gratis' annoncer er skrevet af privatpersoner, og overskriften er
+   sælgerens egen sætning. Vi gemmer titlen; derfor skal den renses, før den
+   rammer databasen. Vi linker til kilden — køberen kontakter sælgeren dér,
+   hvor sælgeren selv har lagt sine oplysninger.
+
+   Anden halvdel af testen er lige så vigtig som den første: en rensning, der
+   æder årstal og slagvolumen, ødelægger titlen på hver eneste ærlige annonce. */
+
+test('telefonnumre fjernes, uanset hvordan danskere skriver dem', () => {
+  const f = n.fjernPersonoplysninger;
+  for (const nr of ['12 34 56 78', '12345678', '1234 5678', '12-34-56-78',
+                    '12.34.56.78', '+45 12 34 56 78', '+4512345678']){
+    const ud = f(`BMW R1150RT, ring ${nr}`);
+    assert.ok(!/\d{8}|\d{2}[\s.\-]\d{2}[\s.\-]\d{2}[\s.\-]\d{2}/.test(ud),
+      `nummeret overlevede i "${ud}" (input: ${nr})`);
+    assert.match(ud, /BMW R1150RT/, 'selve motorcyklen skal stå tilbage');
+  }
+});
+
+test('mailadresser og links fjernes', () => {
+  const f = n.fjernPersonoplysninger;
+  assert.ok(!/@/.test(f('Yamaha MT-07 — skriv til anders@eksempel.dk')));
+  assert.ok(!/https?:|www\./.test(f('Se flere billeder på www.eksempel.dk/mc')));
+  assert.match(f('Yamaha MT-07 — skriv til anders@eksempel.dk'), /Yamaha MT-07/);
+});
+
+test('tal, der IKKE er telefonnumre, overlever', () => {
+  // Det her er den dyre fejl: æder rensningen årstal og ccm, ødelægger den
+  // titlen på hver eneste ærlige annonce i kataloget.
+  const f = n.fjernPersonoplysninger;
+  for (const titel of [
+    'BMW R1150RT 2005 — 92.600 km',
+    'Honda CBR 1000 F, 989 ccm, 1993',
+    'Harley-Davidson Iron 883 fra 2019',
+    'Yamaha XVS 1100 Drag Star',
+    'Suzuki GSX-R750 — 148 hk',
+    'Nimbus Type C 1948, 750 ccm',
+    //  duer ikke som ordgraense paa dansk: i JS er OE ikke et ordtegn, saa
+    // ring ramte "RING" inde i "KLARGOERING". Den her titel er fra MC Syd.
+    'Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING',
+    'Suzuki GSX-R750 med ny forsikring',
+    'BMW efter klargøring og syn',
+  ]){
+    assert.equal(f(titel), titel, `rensningen aad noget i "${titel}"`);
+  }
+});
+
+test('tegnsætningen ryddes op, så en renset titel ikke ligner en fejl', () => {
+  const f = n.fjernPersonoplysninger;
+  assert.equal(f('Sælges for min far, ring 12 34 56 78'), 'Sælges for min far');
+  assert.equal(f('12 34 56 78 — BMW R1150RT'), 'BMW R1150RT');
+  assert.equal(f('Honda (ring 12345678)'), 'Honda');
+});
+
+test('uddrag() renser FØR den klipper', () => {
+  // Ellers kunne et nummer overleve, fordi det stod efter tegn 200, og først
+  // dukke op i databasen den dag nogen haevede graensen.
+  const lang = 'Flot motorcykel. ' .repeat(20) + 'Ring 12 34 56 78';
+  const u = n.uddrag(lang);
+  assert.ok(!/\d{2}\s\d{2}\s\d{2}\s\d{2}/.test(u), 'nummeret slap igennem uddrag()');
+});

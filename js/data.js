@@ -12,6 +12,70 @@ const FRI_ADGANG = true;
 
 const REGIONS = ['Hovedstaden', 'Sjælland', 'Syddanmark', 'Midtjylland', 'Nordjylland'];
 
+/* ---------- Landsdel ud fra postnummer ----------
+
+   Kilderne oplyser postnummer og by, aldrig landsdel. Uden landsdel forsvandt
+   alle indekserede annoncer, så snart nogen satte ét landsdelsfilter — og det
+   er ærgerligt, for landsdelen er ikke ukendt: den FØLGER af postnummeret.
+   Det er ikke et gæt, det er et opslag.
+
+   Hvorfor ikke bare findPostnr() fra js/postnumre.js? Fordi søgesiden med
+   vilje IKKE loader den fil (se kommentaren i soegning.html): 40 KB og 1089
+   rækker, der skulle hentes, parses og evalueres på hovedtråden for ét eneste
+   opslag. Den blev fjernet dér som en målt forbedring, og den skal ikke
+   snige sig ind igen ad bagvejen.
+
+   I stedet ligger tabellen her i sammentrængt form. Den er ikke en genvej og
+   ikke en tilnærmelse: landsdelene ligger i sammenhængende postnummerspænd,
+   så alle 1089 postnumre koger ned til 31 knækpunkter — "fra dette
+   postnummer og opefter gælder denne landsdel". Verificeret mod js/postnumre.js:
+   0 afvigelser på alle 1089, på 280 bytes.
+
+   Hvorfor i data.js? Fordi funktionen fandtes TO gange: én i
+   js/backend-bridge.js (for normalizeExternalListing) og én i js/components.js
+   (for eksternStedTekst), begge som global function-erklæring med samme navn.
+   På hver side, der loader begge filer, vandt den sidste script-tag for ALLE
+   kaldere — også for dem, der troede, de kaldte deres egen. I browseren vandt
+   components.js; i scripts/shared.js, der kæder filerne sammen i modsat
+   rækkefølge, vandt backend-bridge.js. To tabeller, to svar, alt efter hvor
+   koden kørte. Her ligger den ét sted, i den fil hver eneste side loader
+   først — også maerker.html og sikkerhed.html, der har components.js uden
+   backend-bridge.js.
+
+   Bogstavet efter postnummeret er pladsen i REGIONS ovenfor.
+   Regenereres med (fra projektroden):
+     node -e "const P=JSON.parse(require('fs').readFileSync('js/postnumre.js','utf8').match(/const POSTNUMRE = (\[.*?\]);/s)[1]);P.sort((a,b)=>a[0].localeCompare(b[0]));let l=null;console.log(P.filter(p=>p[2]!==l&&(l=p[2])).map(p=>p[0]+{Hovedstaden:'H','Sjælland':'S',Syddanmark:'D',Midtjylland:'M',Nordjylland:'N'}[p[2]]).join(' '))"
+
+   Kilde: Dataforsyningen (DAWA), samme som js/postnumre.js. */
+const REGION_KNAEK = '1050H 2670S 2700H 4030S 4050H 4060S 5000D 6893M 7000D 7130M 7160D 7171M 7173D 7280M 7300D 7362M 7700N 7760M 7770N 7790M 7900N 8000M 8721D 8722M 9000N 9500M 9510N 9550M 9560N 9620M 9640N'
+  .split(' ').map(s => [Number(s.slice(0, 4)), REGIONS['HSDMN'.indexOf(s[4])]]);
+
+/* Et postnummer uden for registret skal give "ved ikke" — ikke et svar.
+   Under 1050 findes ikke, og over 9999 er ikke et dansk postnummer. Begge
+   dele er et FORKERT postnummer, og et forkert postnummer må hverken lande
+   på den første række (Hovedstaden) eller den sidste (Nordjylland).
+   Landsdelsfilteret skal hellere mangle en annonce end vise den et forkert
+   sted i landet.
+
+   parseInt og ikke Number: crawleren gemmer postnummeret som ren firecifret
+   streng (parsePostnr i crawler/normalize.js), men "2100 København" fra et
+   frit felt er et rigtigt postnummer med en by klistret på. Spændet ovenfor
+   fanger alligevel alt, der ikke ER et postnummer.
+
+   findPostnr() slås IKKE op, heller ikke når js/postnumre.js tilfældigvis er
+   loadet på siden. Den ville give præcis samme landsdel — det er dét, de 0
+   afvigelser betyder — men svaret ville afhænge af, hvilke andre scripts
+   siden tilfældigvis havde med. Samme postnummer skal give samme landsdel
+   alle steder. Skal bynavnet med, er findPostnr() stadig den rigtige; den
+   kender det officielle bynavn, og det gør tabellen her ikke. */
+function regionFraPostnr(postnr){
+  const nr = parseInt(String(postnr ?? '').trim(), 10);
+  if (!Number.isFinite(nr) || nr < REGION_KNAEK[0][0] || nr > 9999) return null;
+  let fundet = null;
+  for (const [fra, navn] of REGION_KNAEK){ if (nr < fra) break; fundet = navn; }
+  return fundet;
+}
+
 /* Kurateret udsnit — bruges kun til at generere demoannoncer.
    Den fulde postnummerliste (1089) ligger i js/postnumre.js. */
 const DEMO_CITIES = [
@@ -138,7 +202,107 @@ const TYPE_BY_MODEL_HINT = {
 
 const FIRST_NAMES = ['Mikkel', 'Anders', 'Jonas', 'Rasmus', 'Kasper', 'Frederik', 'Mathias', 'Christian', 'Emil', 'Peter', 'Louise', 'Camilla', 'Sofie', 'Ida', 'Mette', 'Nikolaj', 'Thomas', 'Lars'];
 const LAST_NAMES = ['Jensen', 'Nielsen', 'Hansen', 'Pedersen', 'Andersen', 'Christensen', 'Larsen', 'Sørensen', 'Rasmussen', 'Møller'];
-const DEALER_NAMES = ['Motorcykel Centret ApS', 'Nordjysk MC Handel', 'Bike House Aarhus', 'MC Specialisten Fyn', 'Metropol Motor', 'Vestjysk Custom Cycles'];
+/* ============ Demosælgerne ============
+
+   NAVN OG BY BLEV FØR TRUKKET UAFHÆNGIGT AF HINANDEN.
+   `pick(DEALER_NAMES)` og `pick(DEMO_CITIES)` var to selvstændige kast, så
+   "Bike House Aarhus" stod i Næstved med annoncer i Næstved og Hillerød, og
+   "MC Specialisten Fyn" lå i København V. Målt: 5 af de 6 forhandlernavne
+   nævnte et sted, og kun 1 af dem stod dér. En forhandler, hvis navn modsiger
+   hans egen adresse, er det første en køber lægger mærke til — og det er
+   præcis dét, tillidsspørgsmålet i bar/RUBRIC.md handler om.
+   Navn, by, postnummer og landsdel står derfor i ÉN række her og kan ikke
+   komme fra hinanden.
+
+   NAVNENE er sat sammen af en landsdel eller by plus et generisk fagord
+   ("MC Handel", "Motorcykelhus", "MC Center"). De er opdigtede og skal blive
+   ved med at være det: ingen af dem må erstattes med en rigtig dansk
+   forhandler. De har hverken adresse, telefonnummer eller CVR-nummer, så der
+   er intet i dem, en besøgende kan slå op og forveksle med en rigtig butik.
+
+   INTET CVR-NUMMER. Det stod der før, og det bestod ikke sin egen kontrol:
+   `String(20000000 + rnd()*79999999)` giver et tilfældigt ottecifret tal, og
+   målt bestod 0 af 6 modulus 11-kontrollen i `cvrKontrolOK()` (js/forhandler.js).
+   Vi genererer ikke gyldige numre i stedet, og grunden er ikke dovenskab:
+     1. `public_profiles` har ingen cvr-kolonne (se work/DECISIONS.md,
+        "public_profiles bliver SECURITY DEFINER"). Ingen rigtig forhandler på
+        bikerbasen.dk kan have et CVR-nummer på sin profil i dag. Et demofelt,
+        produktionen ikke kan frembringe, er en løgn om systemet — nøjagtig
+        samme fejltype som de halve stjerner.
+     2. Et nummer, der består modulus 11, er en fungerende nøgle ind i et
+        RIGTIGT offentligt register, og siden linker direkte derind
+        (`datacvr.virk.dk/...?fritekst=<nr>` i `efterproevHTML()`). Enten
+        rammer nummeret en virkelig virksomhed — så hænger vi en rigtig
+        forretning op på en opdigtet forhandler, hvilket er samme slags fejl
+        som at bruge en adresse, der findes — eller også rammer det ingenting,
+        og så ser vores egen demoforhandler falsk ud.
+     3. Et manglende felt vejer lettere imod os end et gættet
+        (work/DECISIONS.md, "Ærlighed slår fuldstændighed"). Uden nummer falder
+        profilen i `if (!seller.cvr)`-grenen, som allerede siger det rigtige:
+        spørg sælgeren om nummeret, før du betaler.
+   `cvrKontrolOK()` er ikke død kode — den er den kontrol, der skal køre den
+   dag et cvr-felt kommer ind ad formularen eller fra databasen. Den er bare
+   ikke længere noget, demolageret udløser.
+
+   INTET TELEFONNUMMER. Der stod `+45 ${20+rnd()*60} ...` på alle 37
+   demosælgere. Det er et opdigtet nummer i det danske mobilspænd, altså et
+   nummer, der med stor sandsynlighed tilhører et rigtigt menneske — og
+   js/annonce.js lavede det til et `tel:`-link, man kunne trykke på. Samme
+   grund som CVR'et: `public_profiles` har ingen telefonkolonne, så knappen
+   findes ikke i drift (det var netop derfor, den blev fjernet fra
+   forhandler.html, se work/DECISIONS.md). Uden nummer falder annoncesiden i
+   sin egen gren uden telefonknap, og kontaktvejen er den, der virker.
+
+   INGEN VERIFICERINGSFLAG. `verified`, `emailVerified`, `phoneVerified` og
+   `mitIdVerified` var tilfældige booleans. Ingen af dem læses for en
+   annonces sælger (`verifiedBadgeHTML()` i js/components.js returnerer tom
+   streng, netop fordi ingen verificering er rigtig endnu), så de påstod noget
+   uden at vise noget. Felter, vi ikke har dækning for, får ingen plads. */
+const DEMO_DEALERS = [
+  { key: 'd0', name: 'Nordjysk MC Handel ApS',    city: 'Aalborg',     postnr: '9000', region: 'Nordjylland', memberSince: 2016 },
+  { key: 'd1', name: 'Aarhus Motorcykelhus ApS',  city: 'Aarhus C',    postnr: '8000', region: 'Midtjylland', memberSince: 2018 },
+  { key: 'd2', name: 'Fyns MC Center ApS',        city: 'Odense C',    postnr: '5000', region: 'Syddanmark',  memberSince: 2015 },
+  { key: 'd3', name: 'Roskilde Motorcykler ApS',  city: 'Roskilde',    postnr: '4000', region: 'Sjælland',    memberSince: 2021 },
+  { key: 'd4', name: 'Hovedstadens MC Depot ApS', city: 'København N', postnr: '2200', region: 'Hovedstaden', memberSince: 2019 },
+  { key: 'd5', name: 'Sønderjysk MC Service ApS', city: 'Sønderborg',  postnr: '6400', region: 'Syddanmark',  memberSince: 2023 },
+];
+
+/* De private sælgere. Et personnavn påstår ingen geografi, så her er der ikke
+   noget, byen kan modsige — men sælgeren skal stadig stå ÉT sted, ellers
+   flytter han sig mellem sine egne annoncer. Byerne er valgt fra DEMO_CITIES,
+   så landsdelsfilteret rammer det samme sted som postnummeret.
+   Seks af dem har to annoncer (samme mand, to maskiner). Det er med vilje:
+   uden dem findes sælgerprofilen med mere end ét kort ikke i demoen. */
+const DEMO_PRIVATE = [
+  { key: 'p01', name: 'Mikkel Jensen',       city: 'Vejle',        postnr: '7100', region: 'Syddanmark',  memberSince: 2019 },
+  { key: 'p02', name: 'Anders Hansen',       city: 'Hillerød',     postnr: '3400', region: 'Hovedstaden', memberSince: 2017 },
+  { key: 'p03', name: 'Jonas Pedersen',      city: 'Aarhus C',     postnr: '8000', region: 'Midtjylland', memberSince: 2022 },
+  { key: 'p04', name: 'Rasmus Nielsen',      city: 'Esbjerg',      postnr: '6700', region: 'Syddanmark',  memberSince: 2020 },
+  { key: 'p05', name: 'Kasper Larsen',       city: 'Silkeborg',    postnr: '8600', region: 'Midtjylland', memberSince: 2015 },
+  { key: 'p06', name: 'Frederik Sørensen',   city: 'Helsingør',    postnr: '3000', region: 'Hovedstaden', memberSince: 2024 },
+  { key: 'p07', name: 'Mathias Christensen', city: 'Randers',      postnr: '8900', region: 'Midtjylland', memberSince: 2018 },
+  { key: 'p08', name: 'Christian Andersen',  city: 'Næstved',      postnr: '4700', region: 'Sjælland',    memberSince: 2021 },
+  { key: 'p09', name: 'Emil Møller',         city: 'Kolding',      postnr: '6000', region: 'Syddanmark',  memberSince: 2023 },
+  { key: 'p10', name: 'Peter Rasmussen',     city: 'Frederiksberg',postnr: '2000', region: 'Hovedstaden', memberSince: 2014 },
+  { key: 'p11', name: 'Louise Jensen',       city: 'København V',  postnr: '1620', region: 'Hovedstaden', memberSince: 2020 },
+  { key: 'p12', name: 'Camilla Nielsen',     city: 'Odense C',     postnr: '5000', region: 'Syddanmark',  memberSince: 2022 },
+  { key: 'p13', name: 'Sofie Hansen',        city: 'Aalborg',      postnr: '9000', region: 'Nordjylland', memberSince: 2019 },
+  { key: 'p14', name: 'Ida Pedersen',        city: 'Herning',      postnr: '7400', region: 'Midtjylland', memberSince: 2025 },
+  { key: 'p15', name: 'Mette Larsen',        city: 'Slagelse',     postnr: '4200', region: 'Sjælland',    memberSince: 2016 },
+  { key: 'p16', name: 'Nikolaj Sørensen',    city: 'Hjørring',     postnr: '9800', region: 'Nordjylland', memberSince: 2021 },
+  { key: 'p17', name: 'Thomas Andersen',     city: 'Viborg',       postnr: '8800', region: 'Midtjylland', memberSince: 2018 },
+  { key: 'p18', name: 'Lars Christensen',    city: 'Nykøbing F',   postnr: '4800', region: 'Sjælland',    memberSince: 2017 },
+  { key: 'p19', name: 'Jonas Møller',        city: 'Frederikshavn',postnr: '9900', region: 'Nordjylland', memberSince: 2023 },
+  { key: 'p20', name: 'Kasper Rasmussen',    city: 'Roskilde',     postnr: '4000', region: 'Sjælland',    memberSince: 2020 },
+  { key: 'p21', name: 'Mette Jensen',        city: 'København N',  postnr: '2200', region: 'Hovedstaden', memberSince: 2024 },
+  { key: 'p22', name: 'Emil Hansen',         city: 'Sønderborg',   postnr: '6400', region: 'Syddanmark',  memberSince: 2016 },
+  { key: 'p23', name: 'Ida Nielsen',         city: 'Aarhus C',     postnr: '8000', region: 'Midtjylland', memberSince: 2021 },
+  { key: 'p24', name: 'Peter Larsen',        city: 'Vejle',        postnr: '7100', region: 'Syddanmark',  memberSince: 2015 },
+];
+
+const DEMO_SAELGERE = new Map(
+  [...DEMO_DEALERS.map(d => ({ ...d, isDealer: true })),
+   ...DEMO_PRIVATE.map(p => ({ ...p, isDealer: false }))].map(s => [s.key, s]));
 
 function seededRandom(seed){
   let s = seed % 2147483647;
@@ -148,8 +312,6 @@ function seededRandom(seed){
 
 function buildListings(){
   const rnd = seededRandom(20260726);
-  const pick = (arr) => arr[Math.floor(rnd() * arr.length)];
-  const brands = Object.keys(BRANDS_BY_MODEL);
   const listings = [];
   const now = new Date('2026-07-26T09:00:00');
   let id = 1001;
@@ -157,9 +319,9 @@ function buildListings(){
   /* ÉN sælger pr. navn — ikke ét sælgerobjekt pr. annonce.
 
      Her blev der før bygget et friskt seller-objekt inde i løkken for HVER
-     annonce, også når navnet var det samme. Sælgernavnene kommer fra to små
-     lister (seks forhandlere, atten fornavne), så gengangere er ikke en
-     mulighed, de er givet: målt 9 af 37 demosælgere havde to eller flere
+     annonce, også når navnet var det samme. Sælgernavnene blev trukket fra to
+     små lister (seks forhandlere, atten fornavne), så gengangere ikke var en
+     mulighed men en given ting: målt 9 af 37 demosælgere havde to eller flere
      annoncer, og alle 9 modsagde sig selv. "Motorcykel Centret ApS" stod
      som Frederikshavn / medlem siden 2024 / CVR 37063717 på annonce 1017 og
      som Vejle / medlem siden 2019 / CVR 60996224 på annonce 1001 — og
@@ -167,175 +329,285 @@ function buildListings(){
      js/forhandler.js), så profilen sagde Vejle/2019 om den mand, annoncen
      lige havde kaldt Frederikshavn/2024. Ét klik, to identiteter.
 
-     Byen følger med: en forhandler er én butik ét sted. Lod vi kun
-     medlemsåret og CVR'et være fælles, ville annoncesiden skrive
-     "Forhandler · Vejle" over en motorcykel, der står i Frederikshavn — en
-     modsigelse INDE på samme side, altså værre end den, vi lukkede.
-     Annoncer efter den første fra samme sælger flytter derfor med til
-     sælgerens by, postnummer og landsdel.
+     Sælgeren er nu slået op på en nøgle i DEMO_SAELGERE i stedet for at blive
+     trukket tilfældigt, så gengangeren er noget, tabellen BESTEMMER — seks
+     private sælgere har med vilje to annoncer hver. Byen kommer fra sælgerens
+     række, ikke fra annoncens: en forhandler er én butik ét sted, og hans
+     annoncer står, hvor han står.
 
-     rnd() kaldes uændret mange gange og i samme rækkefølge, så priser,
-     datoer, stand og hk er præcis de samme tal som før. Det eneste, der
-     ændrer sig, er hvilke af dem der bliver BRUGT. */
+     Kun `createdAt` er tilfældig nu. Alt, en køber kan efterprøve, står i
+     DEMO_LAGER. */
   const saelgere = new Map();
 
-  const entries = [
-    ['Yamaha','MT-09',2022,14200,890,'naked'],['Yamaha','YZF-R6',2019,21500,599,'sport'],
-    ['Yamaha','Ténéré 700',2021,9800,689,'adventure'],['Yamaha','XSR700',2020,17400,689,'classic'],
-    ['Yamaha','Tracer 9 GT',2023,6200,890,'touring'],['Yamaha','NMAX 125',2022,4100,125,'scooter'],
-    ['Honda','CB650R',2021,11300,649,'naked'],['Honda','CBR600RR',2018,28900,599,'sport'],
-    ['Honda','Africa Twin',2020,23100,1084,'adventure'],['Honda','Rebel 500',2022,5400,471,'cruiser'],
-    ['Honda','Forza 350',2023,3200,330,'scooter'],['Honda','CRF450R',2023,410,449,'cross'],
-    ['Kawasaki','Ninja 650',2020,15600,649,'sport'],['Kawasaki','Z900',2022,9700,948,'naked'],
-    ['Kawasaki','Versys 650',2019,31200,649,'adventure'],['Kawasaki','Vulcan S',2021,8900,649,'cruiser'],
-    ['Suzuki','GSX-R750',2017,34500,750,'sport'],['Suzuki','V-Strom 650',2019,26800,645,'adventure'],
-    ['Suzuki','SV650',2021,10200,645,'naked'],['Suzuki','Burgman 400',2018,42000,400,'scooter'],
-    ['BMW','R 1250 GS Adventure',2022,18400,1254,'adventure'],['BMW','S 1000 RR',2021,8700,999,'sport'],
-    ['BMW','R nineT',2019,15300,1170,'classic'],['BMW','F 850 GS',2020,21100,853,'adventure'],
-    ['BMW','C 400 X',2021,7600,350,'scooter'],
-    ['Ducati','Monster 937',2023,3400,937,'naked'],['Ducati','Panigale V2',2021,6900,955,'sport'],
-    ['Ducati','Scrambler 800',2019,12700,803,'classic'],
-    ['KTM','Duke 890',2022,7300,889,'naked'],['KTM','1290 Super Adventure',2020,19800,1301,'adventure'],
-    ['KTM','450 SX-F',2023,180,450,'cross'],['KTM','RC 390',2021,9100,373,'sport'],
-    ['Triumph','Street Triple 765',2021,10800,765,'naked'],['Triumph','Bonneville T120',2019,13200,1200,'classic'],
-    ['Triumph','Tiger 900',2022,14600,888,'adventure'],
-    ['Harley-Davidson','Iron 883',2018,19300,883,'cruiser'],['Harley-Davidson','Street Bob',2020,15100,1746,'cruiser'],
-    ['Harley-Davidson','Road King',2017,45200,1746,'touring'],
-    ['Aprilia','RS 660',2022,6100,659,'sport'],['Aprilia','Tuono V4',2020,13400,1077,'naked'],
-    ['Husqvarna','Svartpilen 401',2021,8200,373,'naked'],['Husqvarna','FE 501',2022,950,501,'cross'],
-    ['Royal Enfield','Classic 350',2022,6800,349,'classic'],['Royal Enfield','Himalayan',2021,12300,411,'adventure'],
-    ['Royal Enfield','Interceptor 650',2020,9600,648,'classic'],
-    ['Vespa','Primavera 125',2021,5200,125,'scooter'],['Vespa','GTS 300',2019,14800,278,'scooter'],
-    ['Piaggio','Liberty 125',2020,9800,125,'scooter'],
-    // Veteraner foelger ingen formel: Nimbussen yder 0,029 hk pr. ccm,
-    // MZ'en det tredobbelte. Kendte tal staar derfor eksplicit.
-    ['Nimbus','Type C "Kakkelovnsrøret"',1968,38000,750,'classic',22],
-    ['MZ','ETZ 251',1985,52000,250,'classic',21],
-    ['Peugeot','Django 125',2022,3900,125,'scooter'],
-  ];
-
-  for (const [brand, model, year, km, ccm, typeOverride, kendtHk] of entries){
-    const type = typeOverride || TYPE_BY_MODEL_HINT[model] || 'naked';
-    const city = pick(DEMO_CITIES);
-    const isDealer = rnd() < 0.32;
-    const basePrice = estimatePrice(year, ccm, km, brand, type);
-    const daysAgo = Math.floor(rnd() * 34);
-    const created = new Date(now.getTime() - daysAgo * 86400000 - Math.floor(rnd()*80000000));
-    const condition = year >= 2022 ? pick(['Som ny','God stand']) : (year <= 1990 ? pick(['Brugt','God stand','Defekt/Projekt']) : pick(CONDITIONS.slice(0,3)));
-    const sellerName = isDealer ? pick(DEALER_NAMES) : `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
-    const power = kendtHk || estimatePower(ccm, type, year, brand);
-    const registration = type === 'cross' ? 'Ikke indregistreret (bane/off-road)' : (rnd() < 0.9 ? 'Indregistreret' : 'Afmeldt');
-    const afgift = registration.startsWith('Ikke indregistreret') ? 'Ikke relevant (ikke indregistreret)' : (rnd() < 0.92 ? 'Betalt' : 'Ikke betalt');
-    /* Tallene trækkes ALTID — også når sælgeren er kendt i forvejen — så
-       rnd()-sekvensen (og dermed resten af demolageret) er uændret. */
-    const nySaelger = {
-        name: sellerName,
-        isDealer,
-        verified: isDealer ? rnd() < 0.75 : rnd() < 0.15,
-        emailVerified: true,
-        phoneVerified: isDealer ? true : rnd() < 0.6,
-        mitIdVerified: isDealer ? rnd() < 0.75 : rnd() < 0.15,
-        cvr: isDealer ? String(20000000 + Math.floor(rnd()*79999999)) : null,
-        phone: `+45 ${20 + Math.floor(rnd()*60)} ${10+Math.floor(rnd()*89)} ${10+Math.floor(rnd()*89)} ${10+Math.floor(rnd()*89)}`,
-        memberSince: 2014 + Math.floor(rnd()*11),
-        /* Her stod `rating: (4 + rnd()*0.9).toFixed(1)` og
-           `reviews: 3 + Math.floor(rnd()*140)`. Begge var rene tilfældige
-           tal uden en eneste anmeldelse bag sig, og de modsagde de
-           anmeldelser, siden selv viste: samme sælger bar `reviews: 120`
-           og havde én anmeldelse i SEED_REVIEWS. `rating` blev desuden
-           sendt videre som reservetal til `Store.getAverageRating()`, så en
-           sælger uden anmeldelser fik en bedømmelse alligevel.
-           Bedømmelsen regnes nu ét sted — af de faktiske anmeldelser. Findes
-           de ikke, findes tallet ikke. */
-        city: city.city,
-    };
+  for (const [brand, model, year, km, ccm, type, hk, price, condition, saelgerKey] of DEMO_LAGER){
+    const profil = DEMO_SAELGERE.get(saelgerKey);
 
     /* Kendt navn = kendt sælger. Den første annonce definerer identiteten;
        de følgende låner den, i stedet for at opfinde en ny mand med samme
        navn. Ét sælgerobjekt betyder også, at ændrer man ham ét sted,
-       ændrer han sig alle steder — det var netop dét, der manglede. */
-    let saelger = saelgere.get(sellerName);
-    if (!saelger){ saelger = nySaelger; saelgere.set(sellerName, saelger); }
+       ændrer han sig alle steder — det var netop dét, der manglede.
+       Sælgerobjektet bærer kun de fire felter, en side faktisk viser:
+       navn, type, by og medlemsår. Se noten over DEMO_DEALERS for de fem,
+       der er væk (cvr, phone og de tre verificeringsflag). */
+    let saelger = saelgere.get(profil.name);
+    if (!saelger){
+      saelger = { name: profil.name, isDealer: profil.isDealer, city: profil.city, memberSince: profil.memberSince };
+      saelgere.set(profil.name, saelger);
+    }
 
-    // Annoncen står, hvor sælgeren står. Se noten øverst i funktionen.
-    const sted = saelger === nySaelger
-      ? city
-      : (DEMO_CITIES.find(c => c.city === saelger.city) || city);
+    /* Kun datoen er tilfældig nu. Alt, en køber kan efterprøve — hk, pris,
+       stand, by — står i tabellen. Spredningen er 0-62 dage, så både
+       "i dag" og "2 måneder siden" findes i lageret. */
+    const daysAgo = Math.floor(rnd() * 62);
+    const created = new Date(now.getTime() - daysAgo * 86400000 - Math.floor(rnd()*80000000));
+
+    /* Registrering og afgift FØLGER af de to felter ovenfor i stedet for at
+       blive kastet med terninger. Før kunne en crossmaskine være
+       "Indregistreret" og en projektmotorcykel have betalt afgift; nu kan de
+       ikke. En banemaskine er ikke indregistreret, og et projekt, der ikke
+       kan starte, står afmeldt — det er dét, "Afmeldt" betyder. */
+    const registration = type === 'cross' ? 'Ikke indregistreret (bane/off-road)'
+      : condition === 'Defekt/Projekt' ? 'Afmeldt'
+      : 'Indregistreret';
+    const afgift = type === 'cross' ? 'Ikke relevant (ikke indregistreret)'
+      : registration === 'Afmeldt' ? 'Ikke betalt'
+      : 'Betalt';
 
     listings.push({
       id: id++,
       brand, model, type, year, km, ccm,
-      power,
-      price: basePrice,
+      /* null er "Ikke oplyst", ikke nul. Syv annoncer har det med vilje —
+         se noten over DEMO_LAGER. formatPower() og koerekortForListing()
+         kender begge svaret i forvejen. */
+      power: hk,
+      price,
       condition,
-      city: sted.city, postnr: sted.postnr, region: sted.region,
+      city: profil.city, postnr: profil.postnr, region: profil.region,
       createdAt: created.toISOString(),
-      isDealer,
+      isDealer: profil.isDealer,
       seller: saelger,
       registration,
       afgift,
-      description: buildDescription(brand, model, year, condition, type),
-      photos: 4 + Math.floor(rnd()*4),
+      description: byggBeskrivelse({ brand, model, year, km, type, condition, hk, isDealer: profil.isDealer }, listings.length),
+      /* `photos: 4 + rnd()*4` er væk. Ingen af de 51 annoncer har ét eneste
+         foto (`photoUrls` er tom), så tallet var en påstand om billeder, der
+         ikke findes — og det var netop dét tal, galleriet tegnede fire tomme
+         miniaturer efter, indtil js/annonce.js holdt op med at læse det. */
     });
   }
   return listings;
 }
 
-/* Hestekraefter.
+/* ============ DEMO_LAGER — de 51 annoncer ============
 
-   Stod foer som ccm x 0,075 for alt andet end scooter og cross. Det gav en
-   Honda CB650R paa 49 hk. Den har 95. En dansk motorcyklist ser dét paa et
-   halvt sekund — og tror saa ikke paa resten af specifikationstabellen
-   heller. Ét forkert tal koster troverdigheden paa hele siden.
+   HVAD DER VAR GALT: tre af kolonnerne blev REGNET UD, og alle tre regnede
+   forkert på maskiner, en dansk motorcyklist kender udenad.
 
-   Nu efter type, som er den stoerste enkeltfaktor: en sportsmodel yder
-   omtrent dobbelt saa meget pr. ccm som en cruiser. AEldre maskiner ydede
-   mindre — literklassen fra 80'erne laa langt under nutidens.
+   1. HESTEKRÆFTER kom fra `estimatePower(ccm, type, year, brand)` — ccm gange
+      en faktor pr. type. En formel kan ikke kende forskel på en Royal Enfield
+      Himalayan og en Suzuki GSX-R750, og det viste sig: Himalayanen stod til
+      46 hk (fabrikken siger 24, altså 92 % for meget) og GSX-R750'eren til
+      113 (fabrikken siger 148). Målt mod fabrikanternes egne datablade afveg
+      5 af 51 med over 40 %, og 14 med over 20 %. Ét forkert hk-tal koster
+      ikke bare det tal: det er også kørekortkategorien, siden udleder af det,
+      og kategorien er vores ene strukturelle fordel (GAPS.md, gap 1).
+      Nu står fabrikkens tal i tabellen. En formel gætter; en tabel kan slås op.
 
-   125-loftet er lov, ikke skoen: en A1-motorcykel maa hoejst yde 15 hk
-   (11 kW). Et demotal over det ville vaere ulovligt paa gaden. */
-function estimatePower(ccm, type, year, brand){
-  const perCcm = {
-    sport: 0.150, naked: 0.130, adventure: 0.112, touring: 0.100,
-    classic: 0.095, cruiser: 0.082, scooter: 0.098, cross: 0.120,
-  }[type] || 0.110;
+   2. PRISEN kom fra `estimatePrice()`, som endte i `Math.max(price, 12000)`.
+      Otte vidt forskellige motorcykler ramte gulvet og kostede derfor NØJAGTIG
+      12.000 kr. — en Nimbus Type C fra 1968, en Vespa GTS 300, en Burgman 400
+      og fem til. Et gulv er ikke en pris, det er en formel, der er løbet tør.
 
-  // Foer ca. 1995 ydede motorerne mindre pr. ccm end i dag.
-  const aarsfaktor = year < 1975 ? 0.48 : year < 1985 ? 0.72 : year < 1995 ? 0.85 : year < 2005 ? 0.94 : 1;
-  let hk = Math.round(ccm * perCcm * aarsfaktor);
+   3. STANDEN blev kastet med `pick(CONDITIONS)` uafhængigt af prisen, så en
+      "Defekt/Projekt" kunne koste det samme som en "Som ny".
 
-  /* Store, langsomtgaaende V-twins yder omtrent det halve pr. ccm af en
-     japansk cruiser: en Iron 883 giver 52 hk, en Vulcan S 61 hk af 649.
-     Uden mærket i regnestykket fik Harleyerne 40% for meget. */
-  if (brand === 'Harley-Davidson' || brand === 'Indian') hk = Math.round(hk * 0.67);
+   NU: alle tre kolonner står her, sat efter den enkelte maskine, og de er
+   afstemt indbyrdes — et projekt er billigt, en "Som ny" er dyr, og prisen
+   ligger i det spænd, den model faktisk handles til i Danmark.
 
-  if (ccm <= 125) hk = Math.min(hk, 15);   // A1-loftet
-  return Math.max(hk, 3);
-}
+   `hk = null` betyder IKKE OPLYST, og de syv er valgt med grund:
+     - de tre konkurrencemaskiner (Honda CRF450R, KTM 450 SX-F, Husqvarna
+       FE 501). Fabrikanterne opgiver ikke effekt på dem. Et tal her ville
+       være opfundet, uanset hvor rigtigt det lød.
+     - fire private annoncer, hvor feltet er efterladt tomt. `f-power` i
+       opret-annonce.html er det ENESTE af de her felter uden `required`, så
+       det er præcis den tomme tilstand, formularen selv tillader — og den,
+       alle 332 indekserede annoncer står i. Uden dem fandtes "Ikke oplyst"
+       ikke ét sted i demoen, og så kunne hverken formatPower(),
+       koerekortForListing() eller uoplystTekst() på forsiden ses i arbejde.
 
-function estimatePrice(year, ccm, km, brand, type){
-  const age = 2026 - year;
-  let base = ccm * 165;
-  if (['BMW','Ducati','Triumph','Harley-Davidson','Aprilia'].includes(brand)) base *= 1.35;
-  if (brand === 'Royal Enfield' || brand === 'Vespa' || brand === 'Piaggio' || brand === 'Peugeot') base *= 0.85;
-  if (type === 'classic' && year < 1995) base = 35000 + (1995-year)*900 + ccm*40;
-  let price = base * Math.max(0.32, 1 - age * 0.052) - km * 1.1;
-  price = Math.max(price, 12000);
-  return Math.round(price / 500) * 500;
-}
+   Kolonner: mærke, model, årgang, km, ccm, type, hk, pris, stand, sælger.
+   Sælgernøglen slår op i DEMO_SAELGERE — byen kommer DERFRA, aldrig herfra. */
+const DEMO_LAGER = [
+  ['Yamaha','MT-09',2022,14200,890,'naked',119,99900,'God stand','d1'],
+  ['Yamaha','YZF-R6',2019,21500,599,'sport',118,79900,'God stand','p01'],
+  ['Yamaha','Ténéré 700',2021,9800,689,'adventure',73,84900,'Som ny','d0'],
+  ['Yamaha','XSR700',2020,17400,689,'classic',null,57900,'Brugt','p02'],
+  ['Yamaha','Tracer 9 GT',2023,6200,890,'touring',119,129900,'Som ny','d1'],
+  ['Yamaha','NMAX 125',2022,4100,125,'scooter',12,24900,'God stand','p03'],
+  ['Honda','CB650R',2021,11300,649,'naked',95,72900,'God stand','d2'],
+  ['Honda','CBR600RR',2018,28900,599,'sport',120,34900,'Defekt/Projekt','p04'],
+  ['Honda','Africa Twin',2020,23100,1084,'adventure',102,94900,'God stand','d0'],
+  ['Honda','Rebel 500',2022,5400,471,'cruiser',46,59900,'Som ny','d4'],
+  ['Honda','Forza 350',2023,3200,330,'scooter',29,46900,'Som ny','d4'],
+  ['Honda','CRF450R',2023,410,449,'cross',null,54000,'Som ny','p05'],
+  ['Kawasaki','Ninja 650',2020,15600,649,'sport',68,59900,'God stand','p06'],
+  ['Kawasaki','Z900',2022,9700,948,'naked',125,94500,'Som ny','d1'],
+  ['Kawasaki','Versys 650',2019,31200,649,'adventure',null,47500,'Brugt','p07'],
+  ['Kawasaki','Vulcan S',2021,8900,649,'cruiser',61,62000,'God stand','p08'],
+  ['Suzuki','GSX-R750',2017,34500,750,'sport',148,62900,'Brugt','p09'],
+  ['Suzuki','V-Strom 650',2019,26800,645,'adventure',71,52900,'Brugt','p10'],
+  ['Suzuki','SV650',2021,10200,645,'naked',76,61900,'God stand','d2'],
+  ['Suzuki','Burgman 400',2018,42000,400,'scooter',null,26900,'Brugt','p11'],
+  ['BMW','R 1250 GS Adventure',2022,18400,1254,'adventure',136,159000,'God stand','d0'],
+  ['BMW','S 1000 RR',2021,8700,999,'sport',207,164900,'Som ny','d4'],
+  ['BMW','R nineT',2019,15300,1170,'classic',110,97900,'God stand','p12'],
+  ['BMW','F 850 GS',2020,21100,853,'adventure',95,82900,'God stand','p13'],
+  ['BMW','C 400 X',2021,7600,350,'scooter',34,52900,'God stand','d5'],
+  ['Ducati','Monster 937',2023,3400,937,'naked',111,119900,'Som ny','d1'],
+  ['Ducati','Panigale V2',2021,6900,955,'sport',155,144900,'God stand','d4'],
+  ['Ducati','Scrambler 800',2019,12700,803,'classic',null,69900,'God stand','p14'],
+  ['KTM','Duke 890',2022,7300,889,'naked',115,92900,'God stand','d3'],
+  ['KTM','1290 Super Adventure',2020,19800,1301,'adventure',160,114900,'God stand','p15'],
+  ['KTM','450 SX-F',2023,180,450,'cross',null,63500,'Som ny','p05'],
+  ['KTM','RC 390',2021,9100,373,'sport',44,44900,'God stand','d3'],
+  ['Triumph','Street Triple 765',2021,10800,765,'naked',123,89900,'God stand','p16'],
+  ['Triumph','Bonneville T120',2019,13200,1200,'classic',80,87500,'God stand','d2'],
+  ['Triumph','Tiger 900',2022,14600,888,'adventure',95,104900,'God stand','d2'],
+  ['Harley-Davidson','Iron 883',2018,19300,883,'cruiser',52,67900,'God stand','p17'],
+  ['Harley-Davidson','Street Bob',2020,15100,1746,'cruiser',86,127500,'God stand','d4'],
+  ['Harley-Davidson','Road King',2017,45200,1746,'touring',null,98000,'Brugt','p17'],
+  ['Aprilia','RS 660',2022,6100,659,'sport',100,93500,'Som ny','d3'],
+  ['Aprilia','Tuono V4',2020,13400,1077,'naked',175,124900,'God stand','p18'],
+  ['Husqvarna','Svartpilen 401',2021,8200,373,'naked',44,42900,'God stand','p19'],
+  ['Husqvarna','FE 501',2022,950,501,'cross',null,74900,'Som ny','p19'],
+  ['Royal Enfield','Classic 350',2022,6800,349,'classic',20,36900,'God stand','d5'],
+  ['Royal Enfield','Himalayan',2021,12300,411,'adventure',24,38900,'God stand','p20'],
+  ['Royal Enfield','Interceptor 650',2020,9600,648,'classic',47,49900,'God stand','p21'],
+  ['Vespa','Primavera 125',2021,5200,125,'scooter',12,31900,'God stand','p22'],
+  ['Vespa','GTS 300',2019,14800,278,'scooter',24,33900,'Brugt','p22'],
+  ['Piaggio','Liberty 125',2020,9800,125,'scooter',11,14900,'Brugt','p23'],
+  // Veteranerne: to maskiner, hvor tallene er kendte og ingen formel duer.
+  // Nimbussen yder 22 hk af 750 cm³, MZ'en 21 af 250 — en faktor tre til
+  // forskel pr. ccm. Prisen på Nimbussen er heller ikke et afskrivningstal;
+  // en Type C i god stand er steget, ikke faldet.
+  ['Nimbus','Type C "Kakkelovnsrøret"',1968,38000,750,'classic',22,78000,'God stand','p24'],
+  ['MZ','ETZ 251',1985,52000,250,'classic',21,6500,'Defekt/Projekt','p24'],
+  ['Peugeot','Django 125',2022,3900,125,'scooter',11,22900,'Som ny','p01'],
+];
 
-function buildDescription(brand, model, year, condition, type){
-  const typeLabel = (TYPES.find(t=>t.id===type)||{}).label || '';
-  /* "sælges i ${condition}" gav "sælges i som ny" — skabelonen antog, at
-     standen altid ender på "stand". Den gør den for "God stand" og "Brugt",
-     men ikke for "Som ny" og "Defekt/Projekt". Første linje under
-     overskriften Beskrivelse var altså i halvdelen af annoncerne skrevet
-     forkert dansk. */
-  const standTekst = /stand$/i.test(condition) ? condition.toLowerCase()
-    : condition === 'Som ny' ? 'som ny stand'
-    : condition === 'Defekt/Projekt' ? 'defekt stand som projekt'
-    : condition.toLowerCase() + ' stand';
-  return `${brand} ${model} årgang ${year} sælges i ${standTekst}.\n\nMotorcyklen har været velholdt og serviceeftervist gennem hele ejerperioden. Nye dæk og bremseklodser inden for de sidste par tusinde km. ${typeLabel}-modellen er kendt for sin pålidelighed og køreglæde – perfekt til både dagligt brug og længere ture.\n\nIngen kendte fejl eller mangler. Fremvises gerne efter aftale, og der er mulighed for prøvetur ved seriøs interesse. Sælges som den er, fremvist og godkendt af sælger.`;
+/* ============ Beskrivelserne ============
+
+   HVAD DER VAR GALT: `buildDescription()` skrev den SAMME tekst på alle 51.
+   Kun første linje (mærke, model, årgang, stand) skiftede; de to næste
+   afsnit var ordret ens hver eneste gang:
+
+     "Motorcyklen har været velholdt og serviceeftervist gennem hele
+      ejerperioden. Nye dæk og bremseklodser ... Ingen kendte fejl eller
+      mangler ... perfekt til både dagligt brug og længere ture."
+
+   Målt: 51 af 51 indeholdt sætningen. To steder modsagde den annoncens egne
+   felter direkte — annonce 1050 stod med STAND: Defekt/Projekt over "Ingen
+   kendte fejl eller mangler", og en Nimbus fra 1968 blev anbefalet til
+   "dagligt brug". En beskrivelse, der modsiger specifikationstabellen på
+   samme skærm, gør begge dele utroværdige.
+
+   NU bygges teksten af annoncens egne felter: standen bestemmer, hvad der
+   må stå om maskinens tilstand, typen og årgangen bestemmer, hvad den er
+   blevet brugt til, og sælgertypen bestemmer slutlinjen. Ingen sætning kan
+   nå frem til en annonce, hvis felter modsiger den — pools'ene er slået op
+   PÅ `condition` og `type`, ikke valgt frit.
+
+   Tre længder med vilje, ikke tre af pænhed: `annonceOplysthed()` i
+   js/search.js giver point for en beskrivelse over 80 tegn, og forsidens og
+   søgesidens rangering bygger på det. Havde hver eneste demoannonce en fed
+   tekst, ville reglen aldrig kunne ses arbejde — og en markedsplads, hvor
+   ingen sælger nøjes med "Sælges. Kom og se den", findes ikke. */
+const BESKRIVELSE_STAND = {
+  'Som ny': [
+    'Står som ny. Den har kun kørt sommeren over og har altid stået tørt.',
+    'Fremstår uden brugsspor. Alt er originalt, og der er intet skiftet.',
+    'Kørt meget lidt siden ny. Der er ikke en skramme på den.',
+  ],
+  'God stand': [
+    'Pæn og velholdt med almindelige brugsspor. Et par småridser i lakken.',
+    'Serviceret efter bogen, og dækkene er skiftet inden for det seneste år.',
+    'Kører fint og starter i første forsøg. Et enkelt stenslag i skærmen.',
+    'Har stået inde om vinteren. Ingen kendte fejl, men ny er den ikke længere.',
+  ],
+  'Brugt': [
+    'Brugt maskine med patina. Alt virker, men lakken er slidt flere steder.',
+    'Den har kørt en del og bærer præg af det. Mekanisk er den i orden.',
+    'Slidt, men den har været i daglig brug indtil nu og fejler ikke noget.',
+    'Kilometerne kan ses. Bremser og dæk er skiftet, resten er som det er.',
+  ],
+  'Defekt/Projekt': [
+    'Sælges som projekt. Den starter ikke, og jeg er ikke kommet videre med den.',
+    'Har været væltet. Kåben er ridset og styret er skævt — den skal repareres, før den kan synes igen.',
+  ],
+};
+
+/* Brugen skal passe til maskinen OG til dens alder. Derfor er `classic`
+   delt: en Bonneville fra 2019 og en Nimbus fra 1968 er ikke det samme
+   spørgsmål, og kun den ene af dem kan anbefales til daglig kørsel. */
+const BESKRIVELSE_BRUG = {
+  sport:     ['Den er kørt på landevej, ikke på bane.', 'Bruges om sommeren i weekenderne.'],
+  naked:     ['Nem at have med at gøre i trafikken og let at parkere.', 'God til pendling og en tur ud af byen om søndagen.'],
+  touring:   ['Den har været med på to ferier syd for grænsen.', 'Bygget til lange dage i sadlen, og det er dét, den har lavet.'],
+  adventure: ['Har mest kørt asfalt og lidt grusvej.', 'Brugt til landevej og et par ture på grus.'],
+  cruiser:   ['Kørt stille og roligt, mest om sommeren.', 'Rolig at køre, og den lyder som den skal.'],
+  classic:   ['Kørt om sommeren og opbevaret tørt om vinteren.', 'Klassiker, der bliver kørt — ikke stillet op.'],
+  veteran:   ['Veteran. Den skal køres som det, den er, og ikke som en moderne maskine.', 'Den kører, men reservedele skal findes, hvor de nu findes.'],
+  scooter:   ['Har været brugt til pendling i byen.', 'Kørt til og fra arbejde, aldrig langt ad gangen.'],
+  cross:     ['Banemaskine, aldrig indregistreret. Fabrikanten opgiver ingen hestekræfter på den her model.', 'Kun kørt på lukket bane.'],
+};
+
+const BESKRIVELSE_SLUT_FORHANDLER = [
+  'Står i butikken og kan ses efter aftale. Vi tager gerne din nuværende motorcykel i bytte.',
+  'Kan ses i åbningstiden. Vi hjælper med indregistrering og finansiering.',
+  'Klargjort på vores eget værksted, før den kom på gulvet.',
+];
+
+/* Ingen af slutlinjerne beder køberen om at ringe. Der står ikke et
+   telefonnummer nogen steder i demolageret (se noten over DEMO_DEALERS), og
+   en opfordring til at ringe ville pege på en knap, siden ikke har. */
+const BESKRIVELSE_SLUT_PRIVAT = [
+  'Fremvises efter aftale. Skriv, hvis du vil vide mere.',
+  'Skriv gerne, hvis du vil se den eller har spørgsmål.',
+  'Kom og se den. Prøvetur efter aftale.',
+  'Sælges, fordi jeg har købt noget andet. Skriv, hvis du er interesseret.',
+];
+
+/* De helt korte. En markedsplads uden dem findes ikke, og de er den eneste
+   måde at se `annonceOplysthed()`s 80-tegnsregel arbejde på. */
+const BESKRIVELSE_KORT = [
+  'Sælges. Kom og se den.',
+  'Står klar til afhentning. Skriv for en aftale.',
+  'Skal væk. Kom med et bud.',
+];
+
+function byggBeskrivelse(l, i){
+  const kortNr = i % 17 === 3 ? Math.floor(i / 17) % BESKRIVELSE_KORT.length : -1;
+  if (kortNr >= 0) return BESKRIVELSE_KORT[kortNr];
+
+  const aabning = `${l.brand} ${l.model} årgang ${l.year}, ${l.km.toLocaleString('da-DK')} km.`;
+  const stand = BESKRIVELSE_STAND[l.condition] || BESKRIVELSE_STAND['God stand'];
+  const standLinje = stand[i % stand.length];
+
+  // Kun opslagslinjen på hver femte — samme længde som en rigtig kort annonce.
+  if (i % 5 === 1) return `${aabning}\n\n${standLinje}`;
+
+  const brugNoegle = l.type === 'classic' && l.year < 1990 ? 'veteran' : l.type;
+  const brug = BESKRIVELSE_BRUG[brugNoegle] || BESKRIVELSE_BRUG.naked;
+  const brugLinje = brug[Math.floor(i / 2) % brug.length];
+  const slut = l.isDealer ? BESKRIVELSE_SLUT_FORHANDLER : BESKRIVELSE_SLUT_PRIVAT;
+  /* 7 og ikke 3: `(i*3) % slut.length` er ALTID 0, når listen har tre
+     elementer — og forhandlerlisten har tre. Alle 21 forhandlerannoncer fik
+     derfor den samme slutlinje, altså præcis den skabelon, hele omskrivningen
+     skulle af med. 7 er primisk til både 3 og 4 og roterer gennem begge. */
+  const slutLinje = slut[(i * 7 + 1) % slut.length];
+
+  return `${aabning}\n\n${standLinje} ${brugLinje}\n\n${slutLinje}`;
 }
 
 /* Demoannoncerne er slået fra i drift: bikerbasen.dk viser kun rigtige
@@ -747,28 +1019,114 @@ function isSuspiciouslyCheap(listing){
    2) Alle sælgere havde mindst én anmeldelse (1-4). Så den tomme tilstand —
       dén, hver eneste rigtige profil i databasen står i — kunne ikke ses
       nogen steder i demoen. Nu er spændet 0-6, så alle tre tilstande findes:
-      ingen anmeldelser, under grænsen for et gennemsnit, og over den. */
+      ingen anmeldelser, under grænsen for et gennemsnit, og over den.
+
+   3) STJERNERNE OG TEKSTEN VAR TO UAFHÆNGIGE TRÆK. `rating` blev kastet for
+      sig (3-5) og `comment` for sig, ud af seks sætninger. Målt på det gamle
+      lager: 32 af 97 anmeldelser modsagde sig selv — "Meget tilfreds,
+      motorcyklen var i bedre stand end forventet" stod med tre stjerner, og
+      "Lidt langsom til at svare" stod med fem. En bedømmelse, hvor tallet og
+      teksten peger hver sin vej, er værre end ingen bedømmelse: køberen kan
+      ikke afgøre, hvilken af de to der er sælgeren.
+      KARAKTEREN HØRER NU TIL SÆTNINGEN. De står som ét par i tabellen
+      nedenfor, og der findes ingen kodesti, hvor de kan komme fra hinanden.
+
+   4) SEKS SÆTNINGER TIL 97 ANMELDELSER. Den samme sætning stod ordret op til
+      21 gange, og på 16 profiler stod den samme tekst mere end én gang under
+      hinanden på SAMME side. Puljen er nu 16 sætninger, og hver sælger
+      trækker UDEN tilbagelægning, så en profil aldrig gentager sig selv.
+
+   5) KUN ROS. Alle karakterer lå mellem 3 og 5, og alle seks sætninger var
+      positive. Et demolager uden en eneste utilfreds køber viser ikke, hvad
+      siden gør ved en dårlig anmeldelse — og en profil med lutter firere og
+      femmere er præcis det, en køber holder op med at tro på. Puljen dækker
+      nu 1-5. Den er stadig vægtet positivt (ros trækkes tre gange så ofte som
+      kritik), fordi det er sådan et rigtigt anmeldelseslager ser ud. */
+
+/* Karakter og tekst i ét par. `vaegt` er, hvor mange gange sætningen ligger i
+   trækposen — ikke en påstand om noget, kun demolagerets fordeling. */
+const DEMO_ANMELDELSER = [
+  { rating: 5, vaegt: 2, tekst: 'Nem handel. Motorcyklen var præcis som beskrevet, og papirerne var i orden.' },
+  { rating: 5, vaegt: 2, tekst: 'God kommunikation hele vejen. Han holdt den, til jeg kunne komme og hente den.' },
+  { rating: 5, vaegt: 2, tekst: 'Fair pris og ingen overraskelser. Kan varmt anbefales.' },
+  { rating: 5, vaegt: 2, tekst: 'Tog sig tid til at vise mig det hele og svarede ærligt på det, jeg spurgte om.' },
+  { rating: 5, vaegt: 2, tekst: 'Kørte fra Sjælland til Jylland efter den, og det var turen værd. Alt passede.' },
+  { rating: 5, vaegt: 2, tekst: 'Hjalp med at få den på traileren og gav servicehistorikken med på skrift.' },
+  { rating: 5, vaegt: 2, tekst: 'Første gang jeg køber motorcykel, og han forklarede tålmodigt det hele.' },
+  { rating: 5, vaegt: 2, tekst: 'Ærlig handel. Han sagde selv, hvad der skal laves til foråret.' },
+  { rating: 4, vaegt: 2, tekst: 'God handel. Der var lidt flere ridser end forventet, men det blev vi enige om prisen på.' },
+  { rating: 4, vaegt: 2, tekst: 'Alt gik, som det skulle. Lidt ventetid på papirerne, ellers intet at klage over.' },
+  { rating: 4, vaegt: 2, tekst: 'Rar at handle med. Der manglede en nøgle, som han eftersendte et par dage efter.' },
+  { rating: 4, vaegt: 2, tekst: 'Ærlig omkring standen, så jeg vidste, hvad jeg kom efter.' },
+  { rating: 4, vaegt: 2, tekst: 'Fin motorcykel til pengene. Dækkene var mere slidte, end jeg havde regnet med.' },
+  { rating: 4, vaegt: 2, tekst: 'Hurtigt svar og en ordentlig handel. Batteriet var dødt, da jeg kom, men det tog han af prisen.' },
+  { rating: 3, vaegt: 2, tekst: 'Handlen gik fint, men han var langsom til at svare på beskeder.' },
+  { rating: 3, vaegt: 2, tekst: 'Motorcyklen var i orden. Fremvisningen blev flyttet to gange, og det kostede mig en fridag.' },
+  { rating: 3, vaegt: 2, tekst: 'Hverken godt eller skidt. Den var som beskrevet, men servicebogen manglede.' },
+  { rating: 3, vaegt: 2, tekst: 'Den kørte, som han sagde. Til gengæld var den ikke rengjort, og der var olie under motoren.' },
+  { rating: 2, vaegt: 1, tekst: 'Kilometerstanden passede ikke med servicebogen. Det burde have stået i annoncen.' },
+  { rating: 2, vaegt: 1, tekst: 'Jeg kørte langt efter den, og den var ikke i den stand, annoncen lovede.' },
+  { rating: 2, vaegt: 1, tekst: 'Prisen blev sat op, da jeg stod der. Det gik jeg ikke med til.' },
+  { rating: 1, vaegt: 1, tekst: 'Aftalt tid og sted, og så dukkede han ikke op. Svarede heller ikke bagefter.' },
+  { rating: 1, vaegt: 1, tekst: 'Annoncen passede ikke på den motorcykel, der stod i garagen. Spildt tur.' },
+];
+
 const SEED_REVIEWS = (function(){
   const rnd = seededRandom(4471);
-  const comments = [
-    'Nem og hurtig handel, motorcyklen var som beskrevet.',
-    'God kommunikation og fair pris. Kan varmt anbefales.',
-    'Alt gik som det skulle, mødte op og fik en god handel.',
-    'Lidt langsom til at svare, men ærlig omkring standen.',
-    'Meget tilfreds — motorcyklen var i bedre stand end forventet.',
-    'Professionel og imødekommende. Vil handle igen.',
-  ];
+
+  /* Trækposen: én plads pr. vægt, så fordelingen af stjerner ligger i data og
+     ikke i koden. 41 kort til ~100 anmeldelser.
+
+     KORTSPIL, IKKE TERNINGKAST. Med `pose[Math.floor(rnd()*pose.length)]` er
+     hvert træk uafhængigt, og så samler gentagelserne sig: målt stod ÉN
+     sætning 12 gange i lageret, mens andre stod 3. En besøgende, der klikker
+     tre profiler igennem, møder altså den samme sætning igen og igen — og det
+     er nøjagtig sådan, man opdager, at anmeldelserne er genereret.
+     Posen blandes derfor og deles ud som kort. Først når den er tom, blandes
+     den igen. Så bruges hver sætning lige mange gange (±1 pr. runde), og den
+     hyppigste falder fra 12 til det, matematikken tillader. */
+  const bland = (arr) => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(rnd() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  const pose = DEMO_ANMELDELSER.flatMap((a, i) => Array(a.vaegt).fill(i));
+  let bunke = bland(pose), naeste = 0;
+  const traek = () => {
+    if (naeste >= bunke.length){ bunke = bland(pose); naeste = 0; }
+    return bunke[naeste++];
+  };
+
   const out = {};
   const names = [...new Set(LISTINGS.map(l => l.seller.name))];
   names.forEach(name => {
     const n = Math.floor(rnd() * 7);
-    out[name] = Array.from({ length: n }, (_, i) => ({
-      author: `${FIRST_NAMES[Math.floor(rnd()*FIRST_NAMES.length)]} ${LAST_NAMES[Math.floor(rnd()*LAST_NAMES.length)][0]}.`,
-      // Hele stjerner, 3-5 — præcis de værdier stjernevælgeren kan afgive.
-      rating: 3 + Math.floor(rnd() * 3),
-      comment: comments[Math.floor(rnd()*comments.length)],
-      date: new Date(Date.now() - Math.floor(rnd()*200)*86400000).toISOString(),
-    }));
+    /* Uden gentagelse PR. SÆLGER. To profiler må gerne dele en sætning — to
+       købere kan sagtens skrive det samme om hver sin handel — men den samme
+       sætning to gange under hinanden på ÉN side afslører generatoren med det
+       samme. Det gjorde den på 16 af 37 profiler. */
+    const brugt = new Set();
+    const anmeldelser = [];
+    let forsoeg = 0;
+    while (anmeldelser.length < n && forsoeg < 200){
+      forsoeg++;
+      const idx = traek();
+      if (brugt.has(idx)) continue;
+      brugt.add(idx);
+      const kilde = DEMO_ANMELDELSER[idx];
+      anmeldelser.push({
+        author: `${FIRST_NAMES[Math.floor(rnd()*FIRST_NAMES.length)]} ${LAST_NAMES[Math.floor(rnd()*LAST_NAMES.length)][0]}.`,
+        // Hele stjerner 1-5 — præcis de værdier, stjernevælgeren kan afgive —
+        // og de kommer fra SAMME række som teksten.
+        rating: kilde.rating,
+        comment: kilde.tekst,
+        date: new Date(Date.now() - Math.floor(rnd()*200)*86400000).toISOString(),
+      });
+    }
+    out[name] = anmeldelser;
   });
   return out;
 })();

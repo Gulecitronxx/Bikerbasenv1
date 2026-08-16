@@ -375,12 +375,105 @@ function normaliserSaelgertype(raa){
   return null;
 }
 
+/* ---------- Personoplysninger i fritekst ----------
+   HVORFOR DEN HER FINDES.
+
+   MC Syd er én forhandler. Alt derfra er virksomhedsdata, og en
+   modelbetegnelse indeholder ikke et telefonnummer.
+
+   Gul og Gratis er en markedsplads, hvor annoncerne er skrevet af
+   privatpersoner. Overskriften er sælgerens EGEN sætning, og på et dansk
+   annoncesite er "Sælges for min far, ring 12 34 56 78" eller
+   "BMW R1150RT — kontakt anders@eksempel.dk" helt almindelige overskrifter.
+
+   Vi henter ikke annoncens brødtekst (uddrag står som null i parse.js netop
+   derfor), men titlen GEMMER vi — den er kortets overskrift. Uden rensning
+   ville vores database indeholde telefonnumre og mailadresser på private,
+   som vi hverken har spurgt om lov til at gemme eller har brug for.
+
+   Vi linker til Gul og Gratis. Køberen skal kontakte sælgeren HOS KILDEN,
+   hvor sælgeren selv har valgt at lægge sine oplysninger — ikke gennem en
+   kopi, vi har taget uden at spørge. Derfor er et telefonnummer i vores
+   database ikke bare en risiko; det er også et felt, vi ikke skal bruge.
+
+   Hvad der fjernes, og hvorfor netop det:
+     · Danske telefonnumre — 8 cifre, med eller uden mellemrum, punktum,
+       bindestreg eller +45 foran. Skrevet på alle de måder folk skriver dem.
+     · Mailadresser.
+     · Web- og profiladresser, som kan pege på en person.
+
+   Hvad der IKKE fjernes: postnummer og by. De står i deres egne felter, de
+   er kildens egen strukturerede oplysning, og en køber kan ikke lede efter
+   en motorcykel uden at vide hvor den står. Fire cifre plus en by peger ikke
+   på en person.
+
+   FORSIGTIGHEDSPRINCIPPET: et årstal eller en ccm-værdi må aldrig forveksles
+   med et telefonnummer, for så ødelægger vi titlen på en ærlig annonce.
+   Derfor kræver mønstret enten en adskiller (12 34 56 78), et +45, eller at
+   de otte cifre står helt for sig selv — "1150" og "2005" rammes ikke, og
+   det er der en test på. */
+const TELEFON = new RegExp([
+  // Med landekode: +45 foran gør det utvetydigt, uanset hvordan resten står.
+  /\+?\s*45[\s.\-]*\d{2}[\s.\-]*\d{2}[\s.\-]*\d{2}[\s.\-]*\d{2}/.source,
+  // Grupperet: 12 34 56 78 og 1234 5678. Adskilleren er beviset.
+  /(?<!\d)\d{2}[\s.\-]+\d{2}[\s.\-]+\d{2}[\s.\-]+\d{2}(?!\d)/.source,
+  /(?<!\d)\d{4}[\s.\-]+\d{4}(?!\d)/.source,
+  // Otte cifre helt for sig selv. Lookaround i begge ender, så 1150 og 2005
+  // aldrig kan blive en del af et træf.
+  /(?<!\d)\d{8}(?!\d)/.source,
+].join('|'), 'g');
+const MAIL = /[\w.+-]+@[\w-]+\.[\w.]{2,}/g;
+const ADRESSE = /\b(?:https?:\/\/|www\.)\S+/gi;
+
+/* Ordene, der kun står der for at introducere nummeret. Fjernes nummeret og
+   ikke ordet, ender titlen på "Sælges for min far, ring" — og så ligner det
+   en fejl hos os frem for en oplysning, sælgeren selv har lagt hos kilden. */
+/* ORDGRÆNSEN MÅ IKKE VÆRE \b.
+
+   I JavaScript er \w kun [A-Za-z0-9_]. Æ, Ø og Å tæller altså IKKE som
+   ordtegn, og \b matcher derfor midt inde i et dansk ord. Skrev vi \bring\b,
+   ramte den "RING" inde i "KLARGØRING" — fordi der står et Ø lige før, og \b
+   ser en grænse dér. En MC Syd-titel som
+   "Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING" fik dermed ædt sin
+   sidste stavelse af en rensning, der skulle fjerne telefonnumre.
+
+   Derfor eksplicitte grænser, der kender de danske bogstaver. */
+const DA = 'A-Za-zÆØÅæøå0-9_';
+const OPTAKT = new RegExp(
+  `[\\s,;:\\-–—]*(?<![${DA}])(?:ring(?:\\s+til)?|kontakt|tlf\\.?|telefon|mobil?|sms|skriv(?:\\s+til)?|kontaktes?\\s+p[åa])(?![${DA}])[\\s,;:.\\-–—]*$`,
+  'i');
+
+function fjernPersonoplysninger(raa){
+  if (!raa) return raa;
+  return String(raa)
+    .replace(MAIL, '')
+    .replace(ADRESSE, '')
+    .replace(TELEFON, '')
+    // Efterlader vi "Sælges af Anders,  ,  ring" ser det i stedet ud som en
+    // fejl på vores side. Ryd op i den tegnsætning, fjernelsen efterlader.
+    .replace(/\s*[,;–—-]\s*(?=[,;–—-]|$)/g, '')
+    // Parenteser, der efter fjernelsen kun rummer optaktsordet: "(ring )".
+    // Klammen skal væk sammen med sit indhold, ellers står der en tom parentes
+    // midt i titlen, som ligner en fejl hos os.
+    .replace(/[(\[]\s*(?:ring(?:\s+til)?|kontakt|tlf\.?|telefon|mobil?|sms|skriv(?:\s+til)?)?\s*[)\]]/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .replace(OPTAKT, '')
+    .replace(/^[\s,;:.\-–—]+|[\s,;:\-–—]+$/g, '')
+    .trim();
+}
+
 /* ---------- Uddrag ----------
    Vi gemmer aldrig den fulde annoncetekst. 200 tegn, klippet ved et
-   ordskel, så det ikke stopper midt i et ord. */
+   ordskel, så det ikke stopper midt i et ord.
+
+   Personoplysninger fjernes FØR klipningen. Ellers kunne et telefonnummer
+   overleve, fordi det stod efter tegn 200 i kildeteksten og først dukkede op
+   i databasen, når nogen senere hævede grænsen. */
 function uddrag(raa, maks = 200){
   if (!raa) return null;
-  const t = String(raa).replace(/\s+/g, ' ').trim();
+  const renset = fjernPersonoplysninger(raa);
+  const t = String(renset).replace(/\s+/g, ' ').trim();
   if (!t) return null;
   if (t.length <= maks) return t;
   const skaaret = t.slice(0, maks);
@@ -417,7 +510,7 @@ module.exports = {
   parsePris, parseKm, parseAargang, parseCcm, parsePostnr, parseHk,
   udledCcmFraModel, MINDSTE_UDLEDTE_CCM,
   normaliserMaerke, normaliserSaelgertype, normaliserType, normaliserStand,
-  uddrag, fingerprint,
+  uddrag, fjernPersonoplysninger, fingerprint,
   delModelOgVariant,
   // Eksporteres, så crawleren kan GENKENDE et mærke i starten af en titel og
   // dele "Harley-Davidson XL883 Standard" op i mærke og model. Kun opslag —
