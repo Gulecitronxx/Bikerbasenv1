@@ -56,6 +56,13 @@ Bikerbasen crawler
 
 Kræver SUPABASE_SERVICE_ROLE_KEY i miljøet (ikke ved --toerloeb).
 Kendte kilder: ${alleKilder().join(', ') || '(ingen)'}
+
+PowerShell: "npm run crawl -- --source=..." virker IKKE. PowerShell fjerner
+det frie "--", og så opfatter npm --source og --limit som sine egne config-
+flag i stedet for at sende dem videre. Scriptet får nul argumenter og viser
+den her tekst i stedet for at køre. Kald node direkte:
+
+    node crawler/run.js --source=mcsyd --limit=20
 `.trim();
 
 async function main(){
