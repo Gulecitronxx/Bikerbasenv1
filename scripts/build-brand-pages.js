@@ -236,7 +236,10 @@ ${footer}
 <script defer src="js/supabase-api.js"></script>
 <script defer src="js/icons.js"></script>
 <script defer src="js/bike-art.js"></script>
-<script defer src="js/postnumre.js"></script>
+<!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
+     kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
+     formularfelter. Den lå i den samme kø som fonte og css og forsinkede
+     første maling uden at nogen på siden spurgte efter den. -->
 <script defer src="js/data.js"></script>
 <script defer src="js/store.js"></script>
 <script defer src="js/backend-bridge.js"></script>
@@ -262,8 +265,11 @@ const indexHtml = `<!doctype html>
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
-<link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<!-- Ingen preconnect: maerkeoversigten viser ingen annoncer og henter
+     hverken data fra Supabase eller supabase-js fra jsDelivr (se
+     scriptlisten nederst). En preconnect til en vaert, der aldrig
+     kontaktes, koster DNS + TLS for ingenting — og de to haandtryk laa
+     paa den kritiske sti foran fontene. -->
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <style>
@@ -321,16 +327,19 @@ ${header}
 
 ${footer}
 
+<!-- Mærkeoversigten er ren statisk markup: alle mærkelinks står i HTML'en,
+     og sidens JS er renderHeader() plus brødkrummepilen. Der er intet kald
+     til backendReady(), ingen annoncekort og nul formularfelter — derfor er
+     hele Supabase-stakken (supabase-js fra jsDelivr 55.453 B, config, api,
+     backend-bridge) og js/postnumre.js (40.050 B rå) taget ud. Se den
+     længere begrundelse i sikkerhed.html; det er samme rettelse.
+     RØR IKKE listen uden at rette den tilsvarende i maerker.html — den her
+     er kilden, siden genereres af scripts/build-brand-pages.js. -->
 <script defer src="js/security.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js"></script>
-<script defer src="js/supabase-api.js"></script>
 <script defer src="js/icons.js"></script>
 <script defer src="js/bike-art.js"></script>
-<script defer src="js/postnumre.js"></script>
 <script defer src="js/data.js"></script>
 <script defer src="js/store.js"></script>
-<script defer src="js/backend-bridge.js"></script>
 <script defer src="js/components.js"></script>
 <script>document.addEventListener('DOMContentLoaded', () => {
   renderHeader('maerker.html');

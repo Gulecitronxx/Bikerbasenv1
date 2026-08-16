@@ -149,17 +149,38 @@ function isOwnListing(l){
    Undtagelsen er det første kort i en liste (`eager`): på søgesiden er dets
    foto sidens LCP-element, og lazy-loading udskyder hentningen til efter
    layout — det kostede ~2s LCP. Første kort hentes derfor med høj prioritet. */
-/* Uden foto tegner vi en motorcykel. Den tegning er af EN motorcykel af den
-   type — ikke af DEN her motorcykel, og det kan et kort ikke se forskel på.
-   6 af de 332 indekserede annoncer har intet foto (MC Syd markerer dem selv
-   med class="empty", og deres egen detaljeside har et tomt galleri), og på
-   dem stod vores tegning som var det maskinen. En køber, der scroller, ser
-   en pæn opstillet mc og danner sig et indtryk af stand og udstyr, vi ikke
-   har dækning for.
+/* ---------- Uden foto tegner vi INGENTING ----------
 
-   Tegningen bliver — den holder gitteret helt, og et gråt hul ser ud som en
-   fejl på siden. Men den får en mærkat, så det er tydeligt, at fotoet
-   mangler, og ikke at det ER motorcyklen. */
+   Her stod en tegnet motorcykel af annoncens type med en lille pille "Intet
+   foto" oven på. Argumentet var, at et gråt hul ligner en fejl på siden.
+   Det argument holdt ikke, og det blev målt i runde 1:
+
+     Søgningen "A2 til under 60.000 kr." gav 14 træf. Alle 14 var vores egne
+     annoncer, ingen af dem har uploadet foto, og resultatet var derfor 14
+     ENS grå piktogrammer, hvor det eneste, der skilte kortene ad, var
+     pristeksten. Tegningen bar ingen oplysning — den kostede bare øjet et
+     stop pr. kort, før det kunne komme videre til det, der faktisk var
+     forskelligt.
+
+   Og værre: annoncesiden skriver ordret "Vi viser ikke en tegning i stedet"
+   (js/annonce.js, .gallery-tom). Kortet, køberen kom FRA, tegnede en
+   motorcykel. To sider om den samme annonce sagde hver sit om det samme
+   spørgsmål, og den, der lovede mest, var den, hvor handlen indgås.
+
+   Feltet er nu det samme som detaljesidens `.gallery-tom`: kameraikon,
+   stiplet kant, dæmpet tekst, samme sætning. Ikke et tredje udtryk — der
+   fandtes to ærlige i forvejen, og et tredje ville gøre ærligheden til en
+   smagssag (se work/DECISIONS.md).
+
+   4:3-kassen bliver: højden er reserveret i .card-media, og et kort, der
+   skifter højde alt efter om der er foto, ville rive gitteret skævt og koste
+   CLS. Feltet er lige så højt som et foto — det siger bare, at der ikke er et.
+
+   NB om ikonets inline-mål: den kritiske CSS i hver HTML-side indeholder
+   `.card-media svg{width:100%;height:100%}`. css/styles.css hentes med
+   rel=preload og lander EFTER første maling, så uden et mål på selve
+   wrapperen ville kameraikonet fylde hele kortet i det øjeblik, kortene
+   tegnes. Målet står derfor på elementet og ikke kun i stilarket. */
 function listingMediaHTML(l, alt, eager){
   const url = l.photoUrls && l.photoUrls[0];
   const loadAttrs = eager
@@ -168,8 +189,10 @@ function listingMediaHTML(l, alt, eager){
   if (url){
     return `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" ${loadAttrs} class="card-photo">`;
   }
-  return bikeArtSVG(l.type, { id: 'card-' + l.id })
-    + `<span class="card-intet-foto">${Icon.camera}Intet foto</span>`;
+  return `<div class="foto-tom">`
+    + `<span class="foto-tom-ikon" style="width:26px;height:26px;display:block">${Icon.camera}</span>`
+    + `<p class="foto-tom-titel">Ingen fotos i denne annonce</p>`
+    + `</div>`;
 }
 
 /* Hvem sælger den?
@@ -251,7 +274,19 @@ function listingCardHTML(l, i){
   if (l.isExternal) return externalCardHTML(l, i);
   const fav = Store.isFavorite(l.id);
   const brand = escapeHTML(l.brand), model = escapeHTML(l.model), city = escapeHTML(l.city);
+  /* Mærkatet skal kunne bakkes op med tal, køberen selv kan efterprøve.
+     Før stod der "markedsniveau for den type og årgang" — årgang indgik
+     slet ikke i udregningen, og "markedet" var medianen for en hel type,
+     fra 125 til 1800 cm³. Nu siger forklaringen præcis hvad der er
+     sammenlignet med og hvor mange. Se prisSammenligning() i js/data.js.
+     Grundlaget hentes kun for de kort, der faktisk får mærkatet. */
   const suspicious = isSuspiciouslyCheap(l);
+  const prisBasis = suspicious ? prisSammenligning(l) : null;
+  // Rå mærke/model her — hele strengen escapes én gang nedenfor. Bruges de
+  // allerede escapede `brand`/`model`, bliver et "&" til "&amp;amp;" i tippet.
+  const prisTitel = prisBasis
+    ? `Prisen er under 45 % af medianen for ${prisBasis.antal} andre ${l.brand} ${l.model} fra ${prisBasis.aarFra}-${prisBasis.aarTil} på Bikerbasen (median ${formatPrice(prisBasis.median)}). Bed om ekstra dokumentation, og betal aldrig forud.`
+    : '';
   return `
   <article class="card" data-listing-id="${l.id}">
     <div class="card-media">
@@ -259,7 +294,7 @@ function listingCardHTML(l, i){
       <div class="card-badges">
         ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
         ${l.isDealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : ''}
-        ${suspicious ? `<span class="badge badge-warning" title="Prisen ligger væsentligt under markedsniveau for den type og årgang — bed om ekstra dokumentation, og betal aldrig forud">${Icon.alertTriangle}Under markedspris</span>` : ''}
+        ${suspicious ? `<span class="badge badge-warning" title="${escapeHTML(prisTitel)}">${Icon.alertTriangle}Under markedspris</span>` : ''}
       </div>
       ${isOwnListing(l) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
       ${(() => { const k = koerekortForListing(l); return k ? `<span class="card-koerekort" title="Kan føres på ${k}-kørekort" aria-label="Kan føres på ${k}-kørekort">${k}</span>` : ''; })()}

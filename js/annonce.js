@@ -11,28 +11,63 @@ function getIdFromURL(){
     || null;
 }
 
-/* Rigtige uploadede fotos når annoncen har dem; ellers de illustrerede
-   placeholders, så demoannoncerne stadig ser hele ud. */
+/* ---------- Fotos ----------
+
+   Galleriet viser KUN de billeder, annoncen faktisk har. Tom liste er et
+   gyldigt svar, og kaldstedet siger det så højt.
+
+   Her stod før `Math.max(3, listing.photos || 4)` tegnede pladsholdere, når
+   der ingen fotos var. `listing.photos` er ikke et antal billeder: i
+   demodata er det et tilfældigt tal (`4 + rnd()*4`, js/data.js), og i
+   js/backend-bridge.js er det `Math.max(3, photos.length || 4)` — altså
+   mindst tre, også når der er nul. Tælleren, pilene, miniaturerne og
+   aria-etiketterne byggede alle videre på det tal.
+
+   Resultatet: en annonce uden ét eneste billede stod med "1 / 4", pil frem,
+   fire miniaturer og knapper mærket "Billede 1"–"Billede 4" — alle den samme
+   tegnede motorcykel. Hele siden havde to <img>-elementer, og begge var
+   logoet. Samtidig sagde annoncens eget kort i søgeresultatet ærligt "Intet
+   foto". Vi løj altså præcis dér, hvor beslutningen om 80.000 kr. træffes,
+   og fortalte sandheden ét klik tidligere.
+
+   Feltet `photos` læses derfor ikke længere her — kun `photoUrls`, som er de
+   billeder, der rent faktisk findes. */
 function buildPhotoSet(listing){
-  const urls = listing.photoUrls || [];
-  if (urls.length){
-    return urls.map((u, i) =>
-      `<img src="${escapeHTML(u)}" alt="${escapeHTML(listing.brand + ' ' + listing.model)} — billede ${i + 1}"
-            class="card-photo" decoding="async">`);
-  }
-  const count = Math.max(3, listing.photos || 4);
-  return Array.from({ length: count }, (_, i) =>
-    bikeArtSVG(listing.type, { id: `detail-${listing.id}-${i}`, flip: i % 2 === 1 }));
+  return (listing.photoUrls || []).filter(Boolean);
 }
 
+/* Ét billede, enten som hovedbillede eller som miniature.
+   Miniaturen får alt="": den sidder inde i en knap, der allerede hedder
+   "Billede 2 af 5", og den samme tekst to gange er støj i en skærmlæser. */
+function fotoHTML(i, { thumb = false } = {}){
+  const url = currentPhotos[i];
+  if (!url) return '';
+  const navn = `${currentListing?.brand || ''} ${currentListing?.model || ''}`.trim();
+  // "billede 1 af 1" er en nummerering af noget, der ikke er nummereret.
+  const alt = thumb ? ''
+    : (currentPhotos.length > 1 ? `${navn} — billede ${i + 1} af ${currentPhotos.length}` : navn);
+  /* Det første billede er sidens største element og dermed den, browseren
+     skal hente først; resten hentes, når de skal bruges. (Ingen ændring af
+     den kritiske sti — kun en prioritet på et billede, der hentes alligevel.) */
+  const prio = (i === 0 && !thumb) ? ' fetchpriority="high"' : ' loading="lazy"';
+  return `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt)}" class="card-photo" decoding="async"${prio}>`;
+}
+
+/* Tåler at galleriet slet ikke findes: uden fotos bygger renderListing et
+   ærligt felt i stedet, og så er hverken tæller, pile eller miniaturer i
+   DOM'en. Før kastede den her funktion på `null.textContent`. */
 function renderGallery(){
   const main = document.getElementById('gallery-main-img');
-  main.innerHTML = currentPhotos[currentPhotoIndex];
-  document.getElementById('gallery-counter').textContent = `${currentPhotoIndex+1} / ${currentPhotos.length}`;
+  if (!main || !currentPhotos.length) return;
+  main.innerHTML = fotoHTML(currentPhotoIndex);
+  const taeller = document.getElementById('gallery-counter');
+  if (taeller) taeller.textContent = `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
   document.querySelectorAll('.gallery-thumbs button').forEach((b, i) => b.classList.toggle('active', i === currentPhotoIndex));
 }
 
 function shiftPhoto(dir){
+  // Ét billede er ikke en karrusel — så findes pilene heller ikke.
+  if (currentPhotos.length < 2) return;
   currentPhotoIndex = (currentPhotoIndex + dir + currentPhotos.length) % currentPhotos.length;
   renderGallery();
 }
@@ -41,50 +76,156 @@ function initials(name){
   return name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
 }
 
-/* Sælgerens identitet og kontaktoplysninger er kun synlige for indloggede
-   brugere — det beskytter både køber og sælger mod skrabning og uønsket
-   henvendelse. Er man ikke logget ind, vises et login-kort i stedet. */
-function sellerSidebarHTML(listing, { loggedIn, sellerName, avgRating, reviewCount }){
-  if (!loggedIn){
-    const her = location.pathname.split('/').pop() + location.search;
-    const redirect = encodeURIComponent(her);
-    return `
-      <div class="sidebar-card seller-locked">
-        <div class="seller-locked-icon">${Icon.lock}</div>
-        <h2 class="seller-locked-title">Log ind for at se sælger</h2>
-        <p>Sælgerens navn, profil og kontaktoplysninger er kun synlige for indloggede brugere. Det beskytter både købere og sælgere.</p>
-        <a href="login.html?redirect=${redirect}" class="btn btn-primary btn-block">${Icon.user}Log ind</a>
-        <a href="login.html?redirect=${redirect}" class="btn btn-outline btn-block">Opret gratis profil</a>
-        <div class="safety-tip">${Icon.info}<span>Mød altid sælger et sikkert sted, og betal aldrig depositum uden at have set motorcyklen fysisk.</span></div>
-      </div>`;
-  }
-  return `
-      <div class="sidebar-card">
+/* Datoer i den korte danske form: 16. aug. 2026.
+   Ét sted, så vores egne annoncer og de indekserede ikke ender med hver sin
+   skrivemåde på den samme side. Tom streng når datoen mangler — så kan
+   kaldstedet lade linjen falde helt væk i stedet for at skrive "Invalid Date". */
+function datoKort(iso){
+  const t = new Date(iso || '').getTime();
+  if (!t) return '';
+  return new Date(t).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/* Danske decimaltal: 4,6 — ikke 4.6. En bedømmelse med punktum i afslører
+   en oversat side hurtigere end noget andet tal på siden. */
+function talDa(n){
+  return String(n).replace('.', ',');
+}
+
+/* ---------- Hvem sælger ----------
+   Spørgsmålet "hvem handler jeg med?" skal kunne besvares uden at klikke og
+   uden at logge ind. Her stod før en lukket kasse: udlogget fik man
+   udelukkende "Log ind for at se sælger" — ikke engang om det var en
+   forhandler eller en privatperson. Søgeresultatets kort sagde det på det
+   tidspunkt allerede ("Privat sælger", "MC Specialisten Fyn"), så vi skjulte
+   noget, vi selv viste to klik tidligere, og annoncesiden — den ene side,
+   hvor beslutningen om 80.000 kr. træffes — vidste mindst af alle.
+
+   Skellet går nu ét sted, og det er personoplysningen:
+     forhandler   = en virksomhed. Navn, by og et evt. oplyst CVR-nummer er
+                    offentlige oplysninger og står på kortene i forvejen.
+     privat       = en person. Typen og byen står (byen står alligevel i
+                    annoncen), navnet gør ikke.
+   Telefonnummer og kontaktflade er stadig bag login for begge — det er DÉR
+   skrabning og uønskede henvendelser kommer fra, ikke fra sælgertypen. */
+function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon }){
+  const s = listing.seller || {};
+  const erForhandler = !!s.isDealer;
+  const visNavn = erForhandler || loggedIn;
+  const navn = visNavn && s.name ? escapeHTML(s.name) : (erForhandler ? 'Forhandler' : 'Privat sælger');
+  const type = erForhandler ? 'Forhandler' : 'Privat sælger';
+  const undertekst = [visNavn && s.name ? type : '', s.city ? escapeHTML(s.city) : '']
+    .filter(Boolean).join(' · ');
+
+  const her = location.pathname.split('/').pop() + location.search;
+  const redirect = encodeURIComponent(her);
+
+  /* CVR står som en påstand med afsender, ikke som en verificering. Vi slår
+     ikke op i registret (se verifiedBadgeHTML i js/components.js), så vi
+     skriver hvem der har oplyst nummeret og lader køberen tjekke det selv.
+     Feltet findes ikke i public_profiles, så på rigtige annoncer falder
+     linjen bare væk — den må aldrig få en standardværdi. */
+  const cvrLinje = (erForhandler && s.cvr)
+    ? `<p class="seller-cvr">${Icon.info}<span>CVR oplyst af sælger: ${escapeHTML(s.cvr)} —
+         <a href="https://datacvr.virk.dk/soegeresultater?fritekst=${encodeURIComponent(s.cvr)}"
+            target="_blank" rel="noopener noreferrer">slå det op i CVR-registret</a></span></p>`
+    : '';
+
+  /* Kun de tal, vi har. Et "–" i feltet Bedømmelse ligner en dårlig karakter;
+     et felt, der ikke er der, ligner et felt, der ikke er der. */
+  const tal = [
+    avgRating != null ? [`${talDa(avgRating)} ★`, 'Bedømmelse'] : null,
+    reviewCount ? [String(reviewCount), reviewCount === 1 ? 'Anmeldelse' : 'Anmeldelser'] : null,
+    s.memberSince ? [String(s.memberSince), 'Medlem siden'] : null,
+  ].filter(Boolean);
+
+  /* ---------- Vejen til sælgerprofilen ----------
+
+     Linket stod før som `forhandler.html?id=${s.id}` uden fallback, og
+     `s.id` findes KUN på annoncer fra databasen (normalizeRemoteListing i
+     js/backend-bridge.js sætter `id: row.seller_id`). Demoannoncerne i
+     js/data.js har en sælger med navn, men uden id — så på alle 51 blev
+     linket bogstaveligt `forhandler.html?id=` og profilsiden svarede
+     "Sælgeren findes ikke". Målt: nul annoncer på sitet førte til en
+     udfyldt profil.
+
+     Nøglen er derfor `id` når den findes, ellers navnet. Navnet er nok til
+     demodata (som kun findes på localhost) og bliver aldrig sendt til
+     databasen — js/forhandler.js slår kun op i Postgres, når nøglen er en
+     uuid. Har sælgeren hverken id eller navn, falder knappen væk i stedet
+     for at pege ingen steder hen. */
+  const profilNoegle = s.id || s.name || '';
+  const profilHref = profilNoegle ? `forhandler.html?id=${encodeURIComponent(profilNoegle)}` : '';
+  const profilKnapHTML = profilHref
+    ? `<a href="${profilHref}" class="btn btn-outline btn-block">${Icon.user}Se sælgerprofil</a>`
+    : '';
+
+  /* Navnet ER vejen videre.
+     Kritikeren fandt det som en blindgyde: forhandlerens navn stod som ren
+     tekst, og Bilbasens tilsvarende navn er et link til hele forhandlerens
+     lager. Knappen "Se sælgerprofil" længere nede fører samme sted hen, men
+     et navn i fed skrift er dét, øjet og musen prøver først.
+     Kun når navnet FAKTISK står der: er sælgeren en privatperson, og er man
+     ikke logget ind, står der "Privat sælger", og det må ikke være et link,
+     der afslører navnet i adressen. */
+  const navnHTML = (visNavn && s.name && profilHref)
+    ? `<a class="seller-name-link" href="${profilHref}">${navn}</a>`
+    : navn;
+
+  const identitet = `
         <div class="seller-row">
-          <div class="avatar">${escapeHTML(initials(listing.seller.name))}</div>
+          <div class="avatar">${visNavn && s.name ? escapeHTML(initials(s.name)) : (erForhandler ? Icon.store : Icon.user)}</div>
           <div>
-            <div class="seller-name">${sellerName}</div>
-            <div class="seller-sub">${listing.seller.isDealer ? 'Forhandler' : 'Privat sælger'} · ${escapeHTML(listing.seller.city)}</div>
+            <div class="seller-name">${navnHTML}</div>
+            ${undertekst ? `<div class="seller-sub">${undertekst}</div>` : ''}
           </div>
         </div>
-        <div style="margin-top:10px;">${verifiedBadgeHTML(listing.seller)}</div>
-        <div class="seller-stats">
-          <div class="seller-stat"><b>${avgRating ?? '–'}</b><span>Bedømmelse</span></div>
-          <div class="seller-stat"><b>${reviewCount}</b><span>Anmeldelser</span></div>
-          <div class="seller-stat"><b>${listing.seller.memberSince}</b><span>Medlem siden</span></div>
+        ${verifiedBadgeHTML(s)}
+        ${cvrLinje}
+        ${tal.length ? `<div class="seller-stats">
+          ${tal.map(([v, etiket]) => `<div class="seller-stat"><b>${v}</b><span>${etiket}</span></div>`).join('')}
+        </div>` : ''}`;
+
+  const raad = `<div class="safety-tip">${Icon.info}<span>Mød altid sælger et sikkert sted, og betal aldrig depositum uden at have set motorcyklen fysisk.</span></div>`;
+
+  if (!loggedIn){
+    /* Forhandlerens profil er åben udlogget; privatsælgerens er ikke.
+       Det er præcis samme skel som ovenfor: forhandleren er en virksomhed,
+       hvis navn og by allerede står på kortet, mens privatsælgerens navn er
+       skjult indtil login — og et link til "Anders Hansen" ville afsløre
+       det, kortet lige har holdt tilbage. */
+    return `
+      <div class="sidebar-card">
+        ${identitet}
+        <div class="contact-actions">
+          <a href="login.html?redirect=${redirect}" class="btn btn-primary btn-block">${Icon.mail}Log ind og skriv til sælger</a>
+          ${erForhandler ? profilKnapHTML : `<a href="login.html?redirect=${redirect}" class="btn btn-outline btn-block">${Icon.user}Opret gratis profil</a>`}
         </div>
+        <!-- Siger hvad login giver, og hvorfor — ikke bare at der er en mur. -->
+        <p class="seller-locked-note">${Icon.lock}<span>Kontaktoplysninger${erForhandler ? '' : ' og sælgerens navn'} er kun synlige for indloggede brugere. Det holder telefonnumre væk fra robotter og reklamehenvendelser.</span></p>
+        ${raad}
+      </div>`;
+  }
+
+  /* Telefonknappen vises kun, når der ER et nummer.
+     public_profiles udstiller ikke telefon (se supabase/schema.sql), så på
+     rigtige annoncer er feltet null. Knappen stod der alligevel og skrev
+     "null" ud i sidens største kontaktskrift, når man trykkede. Ingen knap
+     er et bedre svar end et forkert nummer. */
+  return `
+      <div class="sidebar-card">
+        ${identitet}
         <div class="contact-actions">
           <button type="button" class="btn btn-primary btn-block" id="open-contact-modal">${Icon.mail}Skriv til sælger</button>
-          <button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>
+          ${telefon ? `<button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
           <button type="button" class="btn btn-outline btn-block" id="open-payment-modal">${Icon.lock}Betal sikkert (MobilePay)</button>
           <button type="button" class="btn btn-outline btn-block" id="share-listing-btn">${Icon.share}Del annonce</button>
         </div>
-        <div class="safety-tip">${Icon.info}<span>Mød altid sælger et sikkert sted, og betal aldrig depositum uden at have set motorcyklen fysisk.</span></div>
+        ${telefon ? '' : `<p class="seller-locked-note">${Icon.info}<span>Sælgeren har ikke oplyst et telefonnummer. Skriv i stedet — så får du svaret på skrift.</span></p>`}
+        ${raad}
       </div>
 
-      <div class="sidebar-card">
-        <a href="forhandler.html?id=${encodeURIComponent(listing.seller.id || "")}" class="btn btn-outline btn-block">${Icon.user}Se sælgerprofil</a>
-      </div>`;
+      ${profilNoegle ? `<div class="sidebar-card">${profilKnapHTML}</div>` : ''}`;
 }
 
 /* Tæller én visning pr. annonce pr. browsersession.
@@ -365,12 +506,13 @@ function renderExternalListing(listing){
   ].join('');
 
   /* Datoen er den dag, VI fandt annoncen — ikke den dag, den blev oprettet
-     hos kilden. Etiketten siger derfor præcis det, og ikke "Oprettet". */
-  const fundet = (() => {
-    const t = new Date(listing.indekseretFoerste || '').getTime();
-    if (!t) return '';
-    return new Date(t).toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
-  })();
+     hos kilden. Etiketten siger derfor præcis det, og ikke "Oprettet".
+
+     Formateringen lå før her som sin egen lille funktion med month:'long' og
+     skrev "16. august 2026", mens vores egne annoncer skrev "16. aug. 2026" —
+     to skrivemåder for samme dato på samme sidetype. datoKort() er det ene
+     sted, begge går igennem nu. */
+  const fundet = datoKort(listing.indekseretFoerste);
 
   const kildeKort = `
     <aside class="external-detail-source" aria-labelledby="kilde-titel">
@@ -553,6 +695,43 @@ function renderExternalListing(listing){
   document.body.classList.remove('har-actionbar');
 }
 
+/* ---------- "Søg videre" i højre spalte ----------
+
+   Kritikeren målte højre spalte som tom fra ca. y=1000 og ned: omtrent
+   halvdelen af desktopsiden var hvidt felt ved siden af beskrivelsen, mens
+   sælgerkortet lå og sluttede oppe i toppen. Tomhed ved siden af sidens
+   længste tekst er ikke ro — det er en spalte, der holder op med at svare.
+
+   Kortet er den samme opskrift som `.external-detail-next` på
+   kildeannoncerne længere oppe i filen: en kort liste af søgninger, der ALLE
+   findes. Ingen af linjerne er gættet — mærke, type og landsdel står i
+   annoncen, og kørekortlinjen kommer kun med, når koerekortForListing()
+   faktisk kunne regne kategorien ud (den svarer null frem for at gætte).
+
+   Sammen med `.listing-aside{position:sticky}` betyder det, at spalten
+   følger med ned gennem specs og beskrivelse i stedet for at blive
+   efterladt. */
+function videreKortHTML(listing, kk){
+  const brand = escapeHTML(listing.brand || '');
+  const type = listing.type ? typeLabel(listing.type) : '';
+  const links = [
+    listing.brand && listing.brand !== 'Ukendt'
+      ? [`soegning.html?brands=${encodeURIComponent(listing.brand)}`, `Alle ${brand} til salg`] : null,
+    kk ? [`soegning.html?koerekort=${encodeURIComponent(kk)}`, `Motorcykler til ${escapeHTML(kk)}-kørekort`] : null,
+    type ? [`soegning.html?type=${encodeURIComponent(listing.type)}`, `Alle ${escapeHTML(type)}`] : null,
+    listing.region ? [`soegning.html?regions=${encodeURIComponent(listing.region)}`, `Motorcykler i ${escapeHTML(listing.region)}`] : null,
+    ['soegning.html', 'Alle motorcykler'],
+  ].filter(Boolean);
+
+  return `
+      <div class="sidebar-card listing-next">
+        <h2>Søg videre på Bikerbasen</h2>
+        <ul>
+          ${links.map(([href, tekst]) => `<li><a href="${href}">${tekst}</a></li>`).join('')}
+        </ul>
+      </div>`;
+}
+
 function renderListing(){
   const id = getIdFromURL();
   const listing = Store.getListingById(id);
@@ -615,33 +794,70 @@ function renderListing(){
   const fav = Store.isFavorite(listing.id);
   const loggedIn = !!Store.getUser();
   const brand = escapeHTML(listing.brand), model = escapeHTML(listing.model);
-  const sellerName = escapeHTML(listing.seller.name);
   const kk = (typeof koerekortForListing === 'function') ? koerekortForListing(listing) : null;
-  const avgRating = Store.getAverageRating(listing.seller.name, Number(listing.seller.rating));
+  // Number(undefined) er NaN, ikke null — og NaN sluppet igennem blev til
+  // "NaN ★" i sælgerkortet. Falder tilbage på null, som betyder "ingen".
+  const raaRating = Number(listing.seller.rating);
+  const avgRating = Store.getAverageRating(listing.seller.name, Number.isFinite(raaRating) ? raaRating : null);
   const reviewCount = Store.getReviews(listing.seller.name).length;
+  const telefon = String(listing.seller.phone || '').trim();
   const suspicious = isSuspiciouslyCheap(listing);
+  // "Er annoncen fra i år, eller har den ligget her siden 2023?" Bilbasen
+  // svarer slet ikke på det på annoncesiden. Vi har datoen — den skal stå,
+  // hvor prisen og stedet står, ikke kun på kortet i søgeresultatet.
+  const oprettet = datoKort(listing.createdAt);
+
+  /* ---------- Galleriet, eller sandheden om at der ikke er noget ----------
+
+     Tre tilstande, og hver af dem viser kun det, annoncen kan bakke op:
+       flere fotos → karrusel med tæller, pile og miniaturer
+       ét foto     → billedet alene. En tæller der siger "1 / 1" og en pil,
+                     der fører tilbage til det samme billede, foregiver et
+                     galleri, der ikke findes.
+       nul fotos   → ét felt, der siger det. Ingen tæller, ingen pile, ingen
+                     miniaturer — ikke skjulte, men fjernet: en skjult pil
+                     kan stadig tabbes til og læses op.
+
+     Formen på det tomme felt er den samme som .external-detail-photo-tom
+     længere nede i den her fil (kildeannoncen uden foto): kameraikon,
+     stiplet kant, lav kasse. Med vilje samme udtryk — ikke et tredje. */
+  const fotoAntal = currentPhotos.length;
+  const favKnapHTML = isOwnListing(listing)
+    ? ''
+    : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${listing.id}">${Icon.heart}</button>`;
+
+  const galleriHTML = fotoAntal ? `
+      <div class="gallery">
+        <div class="gallery-main">
+          <div id="gallery-main-img"></div>
+          ${fotoAntal > 1 ? `
+          <div class="gallery-counter" id="gallery-counter"></div>
+          <button type="button" class="gallery-nav prev" aria-label="Forrige billede">${Icon.chevronLeft}</button>
+          <button type="button" class="gallery-nav next" aria-label="Næste billede">${Icon.chevronRight}</button>` : ''}
+        </div>
+        ${favKnapHTML}
+        ${fotoAntal > 1 ? `<div class="gallery-thumbs">
+          ${currentPhotos.map((_, i) => `<button type="button" aria-label="Billede ${i+1} af ${fotoAntal}" data-thumb="${i}">${fotoHTML(i, { thumb:true })}</button>`).join('')}
+        </div>` : ''}
+      </div>` : `
+      <div class="gallery-tom">
+        ${favKnapHTML}
+        ${Icon.camera}
+        <p class="gallery-tom-titel">Ingen fotos i denne annonce</p>
+        <p class="gallery-tom-tekst">Sælgeren har ikke lagt billeder op. Vi viser ikke en tegning i stedet —
+          bed sælgeren om fotos af netop den her motorcykel, før du kører efter den.</p>
+      </div>`;
 
   document.getElementById('listing-detail').innerHTML = `
     <div>
       ${suspicious ? `<div class="safety-banner" style="background:var(--color-danger-tint); color:var(--color-danger); border-color:color-mix(in srgb, var(--color-danger) 30%, transparent);">${Icon.alertTriangle}<span>Prisen er væsentligt under markedsniveau for denne type — vær ekstra opmærksom, og følg altid vores sikkerhedsråd.</span></div>` : ''}
-
-      <div class="gallery">
-        <div class="gallery-main">
-          <div id="gallery-main-img"></div>
-          <div class="gallery-counter" id="gallery-counter"></div>
-          <button type="button" class="gallery-nav prev" aria-label="Forrige billede">${Icon.chevronLeft}</button>
-          <button type="button" class="gallery-nav next" aria-label="Næste billede">${Icon.chevronRight}</button>
-        </div>
-        ${isOwnListing(listing) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${listing.id}">${Icon.heart}</button>`}
-        <div class="gallery-thumbs">
-          ${currentPhotos.map((_, i) => `<button type="button" aria-label="Billede ${i+1}" data-thumb="${i}">${currentPhotos[i]}</button>`).join('')}
-        </div>
-      </div>
+${galleriHTML}
 
       <div class="listing-header">
         <div>
           <p class="listing-title">${brand} ${model}</p>
           <div class="listing-loc">${Icon.mapPin}${escapeHTML(listing.city)}, ${escapeHTML(listing.postnr)} · ${escapeHTML(listing.region)}</div>
+          ${oprettet ? `<div class="listing-loc listing-alder">${Icon.clock}Annoncen er oprettet ${escapeHTML(oprettet)} · ${escapeHTML(timeAgoDa(listing.createdAt))}</div>` : ''}
         </div>
         <div class="listing-price-block">
           <div class="listing-price-label">Pris</div>
@@ -707,14 +923,23 @@ function renderListing(){
       </div>
     </div>
 
-    <div>
-      ${sellerSidebarHTML(listing, { loggedIn, sellerName, avgRating, reviewCount })}
+    <!-- To lag med vilje: den ydre er gitterets celle og strækkes ned til
+         venstre spaltes højde, den indre er den, der klæber. Sætter man
+         sticky direkte på cellen, har den ingen strækning at bevæge sig i
+         (se .listing-aside i css/styles.css). -->
+    <div class="listing-aside">
+      <div class="listing-aside-inner">
+        ${saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon })}
+        ${videreKortHTML(listing, kk)}
+      </div>
     </div>
   `;
 
-  document.getElementById('gallery-main-img').innerHTML = currentPhotos[0];
-  document.querySelector('.gallery-nav.prev').addEventListener('click', () => shiftPhoto(-1));
-  document.querySelector('.gallery-nav.next').addEventListener('click', () => shiftPhoto(1));
+  /* Galleriets knapper findes kun, når der ER mere end ét foto — og
+     gallery-main-img findes kun, når der er mindst ét. `?.` frem for et
+     hop over hele blokken, så rækkefølgen står ét sted. */
+  document.querySelector('.gallery-nav.prev')?.addEventListener('click', () => shiftPhoto(-1));
+  document.querySelector('.gallery-nav.next')?.addEventListener('click', () => shiftPhoto(1));
   document.querySelectorAll('.gallery-thumbs [data-thumb]').forEach(btn => {
     btn.addEventListener('click', () => { currentPhotoIndex = Number(btn.dataset.thumb); renderGallery(); });
   });
@@ -751,15 +976,37 @@ function renderListing(){
       if (rulHen) mål.closest('.sidebar-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
     document.getElementById('bar-contact').addEventListener('click', () => spring('open-contact-modal', false));
-    document.getElementById('bar-phone').addEventListener('click', () => spring('reveal-phone-btn', true));
+
+    /* "Ring op" må kun stå der, når der ER et nummer at ringe til.
+       spring() sender til login, når målknappen mangler — rigtigt for en
+       udlogget bruger, men for en indlogget uden sælgertelefon betød det, at
+       et tryk på "Ring op" smed ham ud på login-siden fra en side, han
+       allerede var logget ind på. Nu forsvinder knappen i stedet, og
+       "Skriv til sælger" fylder bjælken alene.
+       Bemærk: [hidden] alene er ikke nok — .btn sætter display, og en
+       klasseregel slår browserens hidden-regel. Se .listing-actionbar
+       [hidden] i css/styles.css. */
+    const barPhone = document.getElementById('bar-phone');
+    if (barPhone){
+      if (loggedIn && !telefon){
+        barPhone.hidden = true;
+      } else {
+        barPhone.addEventListener('click', () => spring('reveal-phone-btn', true));
+      }
+    }
   }
 
   // Kontaktknapperne findes kun i markup'en, når man er logget ind — al
   // wiring nedenfor forudsætter derfor login.
   if (loggedIn){
+    /* Knappen bygges kun, når telefon er sat (se saelgerKortHTML), så den kan
+       mangle her. Uden ?-tjekket kastede wiringen en TypeError midt i
+       opsætningen, og alt nedenfor — deling, betaling, kontaktformular —
+       blev aldrig koblet på. */
     const revealBtn = document.getElementById('reveal-phone-btn');
-    revealBtn.addEventListener('click', () => {
-      revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(listing.seller.phone)}</span>`;
+    revealBtn?.addEventListener('click', () => {
+      // telefon er den trimmede værdi fra renderListing, ikke råfeltet.
+      revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(telefon)}</span>`;
       revealBtn.disabled = true;
       // Tælles som en henvendelse i sælgerens dashboard.
       db.recordListingEvent?.(listing.id, 'contact');
@@ -799,7 +1046,11 @@ function renderListing(){
 
     const besked = document.getElementById('cf-message');
     const taeller = document.getElementById('cf-counter');
-    besked.value = `Hej, jeg er interesseret i din ${listing.brand} ${listing.model} fra ${listing.year}. Er den stadig til salg?`;
+    // Oplægget står som en konstant, fordi formularen nulstilles efter
+    // afsendelse: uden den mødte man et tomt felt anden gang, man åbnede
+    // modalen, og skulle selv finde på begyndelsen igen.
+    const standardBesked = `Hej, jeg er interesseret i din ${listing.brand} ${listing.model} fra ${listing.year}. Er den stadig til salg?`;
+    besked.value = standardBesked;
     const opdaterTaeller = () => { taeller.textContent = `${besked.value.length}/500`; };
     besked.addEventListener('input', opdaterTaeller);
     opdaterTaeller();
@@ -814,16 +1065,94 @@ function renderListing(){
       if (bruger.phone) document.getElementById('cf-phone').value = bruger.phone;
     }
 
-    document.getElementById('contact-form').addEventListener('submit', (e) => {
+    /* ---------- Afsendelse og kvittering ----------
+       Modalen skifter fra formular til kvittering i stedet for at lukke sig
+       selv med en toast. To grunde:
+
+       1. Toasten sagde "Din besked er sendt til sælgeren". Den blev ikke
+          sendt nogen steder — der er ingen beskedtabel i basen (se
+          supabase/). Det er den slags påstand, tillidskategorien straffer
+          hårdest: køberen sidder og venter på et svar, der aldrig kan komme.
+       2. En toast forsvinder efter et par sekunder. Det, der faktisk virker i
+          dag — telefonnummeret — skal blive stående, til køberen har brugt
+          det.
+
+       Det, vi KAN bakke op, er tællingen: record_listing_event registrerer
+       henvendelsen på annoncen, og det tal ser sælgeren i sit dashboard.
+       Kvitteringen siger præcis så meget og ikke mere. */
+    const kvittering = document.getElementById('contact-receipt');
+    const formular = document.getElementById('contact-form');
+
+    // Formularen skal tilbage, næste gang modalen åbnes — ellers møder man
+    // sin egen kvittering fra sidste gang i stedet for et skrivefelt.
+    const nulstilKontakt = () => {
+      if (!kvittering || !formular) return;
+      kvittering.hidden = true;
+      formular.hidden = false;
+    };
+    modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', nulstilKontakt));
+    modal.addEventListener('click', (e) => { if (e.target === modal) nulstilKontakt(); });
+
+    formular.addEventListener('submit', (e) => {
       e.preventDefault();
-      // Hensigterne føjes til beskeden, så sælger ser dem uanset hvordan
-      // beskeden senere leveres.
+
+      /* Hensigterne blev før plukket ud og smidt væk igen (`void hensigter`).
+         Så stod der tre afkrydsningsfelter, der ikke gjorde noget som helst —
+         og når beskeden alligevel ikke leveres, var de rent teater.
+         Nu gentages de i kvitteringen: køberen kan se, hvad han bad om, og
+         har det med, når han ringer. Det er det eneste sted, de kan gøre
+         gavn, før der findes en beskedlevering at sende dem med. */
       const hensigter = [...modal.querySelectorAll('.contact-intents input:checked')].map(cb => cb.value);
-      void hensigter; // klar til rigtig beskedlevering
-      modal.classList.remove('open');
-      toast('Din besked er sendt til sælgeren');
-      e.target.reset();
-      besked.value = '';
+
+      // Det ene, vi faktisk kan: tælle henvendelsen på annoncen.
+      db.recordListingEvent?.(listing.id, 'contact');
+
+      const krop = document.getElementById('contact-receipt-body');
+      const handlinger = document.getElementById('contact-receipt-actions');
+
+      if (krop){
+        krop.textContent = telefon
+          ? 'Sælgeren kan se på sin annonce, at du har henvendt dig. Vi videresender ikke selve teksten endnu, så vil du have svar i dag, er telefonen den hurtigste vej.'
+          : 'Sælgeren kan se på sin annonce, at du har henvendt dig. Vi videresender ikke selve teksten endnu, og sælgeren har ikke oplyst et telefonnummer — gem annoncen, så du kan finde den igen.';
+      }
+
+      /* Det, køberen krydsede af, skrevet tilbage til ham. Listen bygges kun,
+         når der ER krydset noget af — en tom overskrift ser i stykker ud. */
+      const kvitHensigter = document.getElementById('contact-receipt-intents');
+      if (kvitHensigter){
+        kvitHensigter.innerHTML = hensigter.length
+          ? `<p class="contact-receipt-intents-title">Du har bedt om:</p>
+             <ul>${hensigter.map(h => `<li>${escapeHTML(h)}</li>`).join('')}</ul>`
+          : '';
+        kvitHensigter.hidden = !hensigter.length;
+      }
+
+      /* Telefonlinket er den vej, der virker. tel: fordi kvitteringen oftest
+         læses på en telefon; på desktop er nummeret stadig læsbart som tekst. */
+      if (handlinger){
+        handlinger.innerHTML = telefon
+          ? `<a href="tel:${escapeHTML(telefon.replace(/\s+/g, ''))}" class="btn btn-primary btn-block">${Icon.phone}Ring til sælger på ${escapeHTML(telefon)}</a>
+             <button type="button" class="btn btn-outline btn-block" data-modal-close>Luk</button>`
+          : `<button type="button" class="btn btn-primary btn-block" data-modal-close>Luk</button>`;
+        handlinger.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => {
+          modal.classList.remove('open');
+          nulstilKontakt();
+        }));
+      }
+
+      if (kvittering){
+        formular.hidden = true;
+        kvittering.hidden = false;
+        // Skærmlæseren skal have at vide, at der skete noget — modalen ser
+        // ellers bare ud til at være blevet tom.
+        kvittering.setAttribute('tabindex', '-1');
+        kvittering.focus();
+      } else {
+        modal.classList.remove('open');
+      }
+
+      formular.reset();
+      besked.value = standardBesked;
       opdaterTaeller();
     });
   }

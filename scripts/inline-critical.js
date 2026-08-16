@@ -59,8 +59,16 @@ const PAGES = [
     'Breadcrumb', 'Bike art', 'Swipe-visning', 'Search enhancements',
     'Mobil: værktøjslinje', 'Touch-mål']],
   // Annoncesider (incl. de genererede annonce-<slug>.html): galleri + specs.
-  [/^annonce(-.+)?\.html$/, ['Utility', 'Breadcrumb', 'Listing detail', 'Bike art',
-    'Trust & safety', 'Reviews', 'Modal', 'Forms', 'Touch-mål']],
+  // NB: 'annoncedetalje' SKAL med. Sektionen indeholder
+  // `#listing-detail:empty{min-height:100vh}`, som reserverer pladsen til
+  // annoncen, før js/annonce.js har fyldt den. Ligger reglen kun i det
+  // asynkrone ark, findes den ikke ved første maling — altså præcis i det
+  // øjeblik den skal virke — og "Lignende annoncer" plus footeren står
+  // øverst i vinduet og bliver skubbet en hel side ned bagefter (målt CLS
+  // 0,49). Samme sektion har også .avatar svg-størrelsen, uden hvilken
+  // ikon-avataren folder sig ud i 300×150.
+  [/^annonce(-.+)?\.html$/, ['Utility', 'Breadcrumb', 'Listing detail', 'annoncedetalje',
+    'Bike art', 'Trust & safety', 'Reviews', 'Modal', 'Forms', 'Touch-mål']],
   // Mærkesider (genererede) + mærkeoversigten.
   [/^maerke(r|-.+)?\.html$/, ['Utility', 'Breadcrumb', 'Cards / listings grid', 'Bike art',
     'Brand landing pages', 'Popular searches']],

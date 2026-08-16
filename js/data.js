@@ -220,8 +220,15 @@ function buildListings(){
         cvr: isDealer ? String(20000000 + Math.floor(rnd()*79999999)) : null,
         phone: `+45 ${20 + Math.floor(rnd()*60)} ${10+Math.floor(rnd()*89)} ${10+Math.floor(rnd()*89)} ${10+Math.floor(rnd()*89)}`,
         memberSince: 2014 + Math.floor(rnd()*11),
-        rating: (4 + rnd()*0.9).toFixed(1),
-        reviews: 3 + Math.floor(rnd()*140),
+        /* Her stod `rating: (4 + rnd()*0.9).toFixed(1)` og
+           `reviews: 3 + Math.floor(rnd()*140)`. Begge var rene tilfældige
+           tal uden en eneste anmeldelse bag sig, og de modsagde de
+           anmeldelser, siden selv viste: samme sælger bar `reviews: 120`
+           og havde én anmeldelse i SEED_REVIEWS. `rating` blev desuden
+           sendt videre som reservetal til `Store.getAverageRating()`, så en
+           sælger uden anmeldelser fik en bedømmelse alligevel.
+           Bedømmelsen regnes nu ét sted — af de faktiske anmeldelser. Findes
+           de ikke, findes tallet ikke. */
         city: city.city,
       },
       registration,
@@ -565,30 +572,116 @@ const REPORT_REASONS = [
   { id: 'andet', label: 'Andet' },
 ];
 
-/* Lightweight fraud-signal heuristic: flags listings priced well under the market median for their type. */
+/* ============ "Under markedspris" ============
+
+   HVAD DER VAR GALT (fundet i runde 2). Mærkatet hang på en median over
+   annoncens TYPE: alle annoncer med type "classic", alle med "cruiser" og så
+   videre. Tre ting fulgte af det, og alle tre gjorde mærkatet til et gæt,
+   der blev udgivet som en oplysning:
+
+   1. En type spænder fra 125 til 1800 cm³ og fra 1968 til 2026. Medianen for
+      "classic" var 50.000 kr., og en Nimbus Type C fra 1968 til 12.000 kr.
+      blev derfor stemplet "Under markedspris". Der findes ikke ÉN anden
+      Nimbus i lageret at sammenligne med — vi havde intet grundlag for at
+      udtale os om den pris, og gjorde det alligevel.
+   2. Årgang indgik slet ikke i beregningen, selvom mærkatets egen
+      forklaringstekst lovede "for den type og årgang". Teksten beskrev en
+      udregning, der ikke fandtes.
+   3. Lageret er 332 forhandlerannoncer (mest nye/næsten nye maskiner til
+      listepris) og 51 private brugtannoncer. Median for vores egne er
+      64.500 kr., for de indekserede 129.995 kr. — præcis en faktor 2. Med
+      en grænse på 45 % af medianen fandt mærkatet derfor ikke svindel; det
+      fandt "privat sælger". Alle 11 mærkater på siden sad på ærlige private
+      annoncer, og ingen af dem sad på noget mistænkeligt.
+
+   HVAD DER ER GJORT. Sammenligningsgrundlaget er nu samme MÆRKE og MODEL
+   inden for et årgangsvindue. En Honda CMX 500 Rebel 2024 måles mod andre
+   Honda CMX 500 Rebel fra 2021-2027 — ikke mod en Harley. Findes der færre
+   end MIN_SAMPLE_FOR_PRICE_CHECK af dem, siger vi ingenting: en pris uden et
+   sammenligningsgrundlag er ikke "for lav", den er bare ukendt. Samme linje
+   som verifiedBadgeHTML() i js/components.js, der returnerer tom streng,
+   fordi ingen verificering er rigtig endnu.
+
+   Målt på lageret 16. aug. 2026: 88 annoncer har et rigtigt grundlag, og
+   NUL af dem ligger under grænsen. Mærkatet er altså ikke slået fra — det
+   har bare ikke noget at sige om det lager, vi har. Det virker stadig, dér
+   hvor det skal: en planteret annonce til 25 % af medianen for sin egen
+   model bliver fanget.
+
+   Mærkatet kan derfor nu bakkes op med et tal, køberen selv kan efterprøve.
+   prisSammenligning() giver grundlaget frem, så forklaringsteksten kan sige
+   HVAD der er sammenlignet med i stedet for at påstå "markedsniveau". */
+
 /* Mindste antal sammenlignelige annoncer, før en median siger noget.
    Med færre end dette er "billig i forhold til hvad?" ikke et rigtigt spørgsmål. */
 const MIN_SAMPLE_FOR_PRICE_CHECK = 5;
+/* Hvor mange årgange til hver side der stadig er den samme motorcykel.
+   ±3 holder en 2024-model sammen med 2021-2027 og skiller den fra en
+   veteran — og det er netop årgangen, der gør en Nimbus fra 1968
+   usammenlignelig med alt andet i lageret. */
+const PRIS_AARSVINDUE = 3;
+/* Hvor langt under medianen prisen skal ligge, før vi siger noget.
+   0,45 er uændret fra før — det er GRUNDLAGET, der var forkert, ikke
+   grænsen. */
+const PRIS_MISTANKE_FAKTOR = 0.45;
 
-function medianPriceForType(type, excludeId){
+/* Grundlaget bag mærkatet, eller null når der ikke er noget at sammenligne
+   med. Returnerer { median, antal, aarFra, aarTil }, så den, der tegner
+   mærkatet, kan skrive tallene ud i stedet for at påstå et markedsniveau,
+   vi ikke kender. */
+function prisSammenligning(listing){
+  if (!listing || listing.price == null || listing.year == null) return null;
+  if (!listing.brand || !listing.model) return null;
+  const aarFra = listing.year - PRIS_AARSVINDUE;
+  const aarTil = listing.year + PRIS_AARSVINDUE;
   // Bruger alle kendte annoncer (database + evt. demo), ikke kun demodata.
   const kilde = (typeof Store !== 'undefined' && Store.getAllListings) ? Store.getAllListings() : LISTINGS;
-  const prices = kilde
-    .filter(l => l.type === type && String(l.id) !== String(excludeId))
-    .map(l => l.price).sort((a, b) => a - b);
-  if (prices.length < MIN_SAMPLE_FOR_PRICE_CHECK) return null;
-  const mid = Math.floor(prices.length / 2);
-  return prices.length % 2 ? prices[mid] : (prices[mid-1] + prices[mid]) / 2;
+  const priser = kilde
+    .filter(l => String(l.id) !== String(listing.id)
+      // price == null er "ikke oplyst" og ikke "0 kr.". Før røg de med i
+      // sorteringen, hvor null sorteres som 0 og trak medianen ned — en
+      // udregning forurenet af netop de felter, siden ellers nægter at gætte på.
+      && l.price != null && l.year != null
+      && l.brand === listing.brand && l.model === listing.model
+      && l.year >= aarFra && l.year <= aarTil)
+    .map(l => l.price)
+    .sort((a, b) => a - b);
+  if (priser.length < MIN_SAMPLE_FOR_PRICE_CHECK) return null;
+  const mid = Math.floor(priser.length / 2);
+  return {
+    median: priser.length % 2 ? priser[mid] : (priser[mid-1] + priser[mid]) / 2,
+    antal: priser.length,
+    aarFra, aarTil,
+  };
 }
 
 /* Advarer kun når der faktisk er noget at sammenligne med. Et falsk
-   "Tjek prisen" på en ærlig annonce er værre end ingen advarsel. */
+   "Under markedspris" på en ærlig annonce er værre end ingen advarsel —
+   det er en anklage mod sælgeren, som vi ikke kan bakke op. */
 function isSuspiciouslyCheap(listing){
-  const median = medianPriceForType(listing.type, listing.id);
-  return median != null && listing.price < median * 0.45;
+  const grundlag = prisSammenligning(listing);
+  return grundlag != null && listing.price < grundlag.median * PRIS_MISTANKE_FAKTOR;
 }
 
-/* Seeded sample reviews for sellers, kept separate from live localStorage reviews added during a session. */
+/* Demoanmeldelser, holdt adskilt fra de anmeldelser, en session selv lægger
+   i localStorage.
+
+   To ting var galt med dem, og begge fik siden til at vise et tal, køberen
+   ikke kunne regne efter:
+
+   1) Karaktererne var HALVE stjerner (`Math.round((3.5 + rnd()*1.5)*2)/2`
+      gav 3,5 / 4 / 4,5 / 5). Ingen bruger kan afgive en halv stjerne —
+      stjernevælgeren giver 1-5, og `db.addReview()` sender et helt tal. En
+      demoværdi, systemet aldrig selv kan frembringe, er en løgn om systemet.
+      Værre: stjernerækken kunne kun tegne hele stjerner og rundede OP, så en
+      anmeldelse på 4,5 stod med fem fyldte stjerner. Gennemsnittet var
+      regnet rigtigt hele tiden — det var BILLEDERNE, der løj, og derfor så
+      "4,5 af 1 anmeldelse" og "3,8 af 2" umulige ud.
+
+   2) Alle sælgere havde mindst én anmeldelse (1-4). Så den tomme tilstand —
+      dén, hver eneste rigtige profil i databasen står i — kunne ikke ses
+      nogen steder i demoen. Nu er spændet 0-6, så alle tre tilstande findes:
+      ingen anmeldelser, under grænsen for et gennemsnit, og over den. */
 const SEED_REVIEWS = (function(){
   const rnd = seededRandom(4471);
   const comments = [
@@ -602,10 +695,11 @@ const SEED_REVIEWS = (function(){
   const out = {};
   const names = [...new Set(LISTINGS.map(l => l.seller.name))];
   names.forEach(name => {
-    const n = 1 + Math.floor(rnd() * 4);
+    const n = Math.floor(rnd() * 7);
     out[name] = Array.from({ length: n }, (_, i) => ({
       author: `${FIRST_NAMES[Math.floor(rnd()*FIRST_NAMES.length)]} ${LAST_NAMES[Math.floor(rnd()*LAST_NAMES.length)][0]}.`,
-      rating: Math.round((3.5 + rnd() * 1.5) * 2) / 2,
+      // Hele stjerner, 3-5 — præcis de værdier stjernevælgeren kan afgive.
+      rating: 3 + Math.floor(rnd() * 3),
       comment: comments[Math.floor(rnd()*comments.length)],
       date: new Date(Date.now() - Math.floor(rnd()*200)*86400000).toISOString(),
     }));

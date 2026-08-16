@@ -13,3 +13,8 @@ node_modules/
 bar/
 *.report.json
 bar/*.json
+
+# Aim-loopets arbejdsskaermbilleder: regenererbare, og de fylder 12 MB.
+# Dommene, beslutningerne og maalingerne i work/*.md bliver derimod versioneret.
+work/*.png
+work/*.jpg

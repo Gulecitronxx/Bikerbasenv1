@@ -14,8 +14,19 @@ const EMPTY_STATE = {
   service: [],
   cylinders: [], colors: [], maxAgeDays: null, photosOnly: false,
   ejereMax: null, nysynet: false, vinterklar: false,
-  dealerOnly: false, koerekort: '', sort: 'date-desc', page: 1,
+  dealerOnly: false, koerekort: '', sort: 'blandet', page: 1,
 };
+
+/* Sorteringerne, som de står i #sort-select. Listen bruges også til at
+   forkaste en ?sort= fra URL'en, vi ikke kender — før faldt en ukendt værdi
+   igennem til `sorters[state.sort] || …`, og så stod der en sortering i
+   vælgeren, som ikke var den, resultatet var sorteret efter. */
+const SORTERINGER = ['blandet', 'date-desc', 'price-asc', 'price-desc', 'year-desc', 'km-asc'];
+/* Standardsorteringen hed `relevans` i runde 1. Den skrives aldrig i URL'en
+   (den er standard, se currentQueryString), men et delt eller bogmærket link
+   med ?sort=relevans skal ikke lande i "Nyeste først" bare fordi vi rettede
+   et navn. Alias'et koster to linjer og bevarer et link, vi selv har udstedt. */
+const SORT_ALIAS = { relevans: 'blandet' };
 let state = { ...EMPTY_STATE };
 
 /* Feltnavne i URL'en. Listen bruges begge veje, så et nyt filter kun skal
@@ -48,7 +59,8 @@ function readStateFromURL(){
   state.nysynet = p.get('nysynet') === '1';
   state.vinterklar = p.get('vinter') === '1';
   state.koerekort = p.get('koerekort') || '';
-  state.sort = p.get('sort') || 'date-desc';
+  const sort = SORT_ALIAS[p.get('sort')] || p.get('sort') || '';
+  state.sort = SORTERINGER.includes(sort) ? sort : 'blandet';
   state.page = numOrNull(p.get('page')) || 1;
 }
 function numOrNull(v){ return (v === null || v === '' || isNaN(Number(v))) ? null : Number(v); }
@@ -70,7 +82,7 @@ function currentQueryString(includeSort = false){
   if (state.nysynet) p.set('nysynet', '1');
   if (state.vinterklar) p.set('vinter', '1');
   if (state.koerekort) p.set('koerekort', state.koerekort);
-  if (includeSort && state.sort !== 'date-desc') p.set('sort', state.sort);
+  if (includeSort && state.sort !== 'blandet') p.set('sort', state.sort);
   return p.toString();
 }
 
@@ -142,60 +154,292 @@ function scheduleFilterPanel(){
   window.addEventListener('resize', onResize, { passive: true });
 }
 
+/* ============ Prisintervaller som ét klik ============
+
+   Rubrikkens prøve er "fra 'jeg vil have en A2'er til under 60.000' til en
+   liste på under tre klik". Med kun skyder og talfelter var den umulig:
+   fold gruppen ud, grib den rigtige tommel, slip det rigtige sted — eller
+   tast 60000 og vent på debounce. Nu er det ét klik, og facettallet ved
+   siden af siger på forhånd, om der overhovedet er noget dernede.
+
+   Grænserne er valgt efter, hvor det danske mc-marked deler sig: under
+   30.000 er begynder- og projektcykler, 30-60.000 er den typiske A2'er,
+   over 150.000 er tunge tourere og nye maskiner. */
+const PRIS_INTERVALLER = [
+  { id: 'u30',    label: 'Under 30.000',   min: null,   max: 30000  },
+  { id: '30-60',  label: '30–60.000',      min: 30000,  max: 60000  },
+  { id: '60-100', label: '60–100.000',     min: 60000,  max: 100000 },
+  { id: '100-150',label: '100–150.000',    min: 100000, max: 150000 },
+  { id: 'o150',   label: 'Over 150.000',   min: 150000, max: null   },
+];
+
+/* ============ Filtre uden dækning findes ikke ============
+
+   Målt på lageret den 16. aug. 2026: udstyr, brændstof, træktype, farve,
+   cylinderantal, servicehistorik, antal ejere, seneste syn og
+   vinterklargøring er oplyst på NUL af 383 annoncer. De syv filtergrupper,
+   der byggede på dem, stod alligevel i panelet. Ét klik på "ABS-bremser"
+   gav nul træf og linjen "383 annoncer er ikke vist, fordi udstyr ikke er
+   oplyst på dem" — teknisk sandt, men brugeren havde ikke fået et filter,
+   han havde fået en blindgyde.
+
+   Så: gruppen vises kun, hvis mindst én annonce kan svare på feltet. Prøven
+   køres på det lager, der faktisk er hentet, så grupperne dukker op af sig
+   selv den dag kilden begynder at levere felterne — der er ikke noget at
+   huske at slå til igen.
+
+   Samme regel gælder de enkelte valg inde i grupperne: mærkelisten kom fra
+   BRANDS_BY_MODEL og viste 60 mærker, hvoraf 35 ikke fandtes i lageret —
+   og manglede samtidig 7, der gjorde (Moto Guzzi, MV Agusta, Victory …).
+   Den bygges nu af lageret. */
+function feltDaekning(){
+  const L = Store.getAllListings();
+  const har = (f) => L.some(f);
+  return {
+    serviceHistorik: har(l => l.serviceHistorik != null),
+    ejereSyn:        har(l => l.antalEjere != null || l.sidsteSyn != null || l.vinterklar != null),
+    // equipment: [] betyder "spurgt, intet ekstraudstyr" — det er ikke noget
+    // at filtrere på. Kun en udfyldt liste tæller som dækning.
+    equipment:       har(l => Array.isArray(l.equipment) && l.equipment.length > 0),
+    fuel:            har(l => l.fuel != null),
+    drive:           har(l => l.drive != null),
+    cylinders:       har(l => l.cylinders != null),
+    color:           har(l => l.color != null),
+  };
+}
+
+/* Pladsen til facettallet. Den står tom i markuppen og fyldes af
+   renderFacetCounts() — men den STÅR der fra første maling, og css'en giver
+   den fast bredde. Ellers ville tallene dukke op en opgave senere og skubbe
+   hver eneste chip i panelet en tand til højre: et layoutskred i sidebaren,
+   som er synlig fra 960px og opefter. */
+const FACET_SLOT = '<span class="facet-n" aria-hidden="true"></span>';
+
 function populateFilterUI(){
+  const daekning = feltDaekning();
+  const alle = Store.getAllListings();
+
   document.getElementById('filter-types').innerHTML = TYPES.map(t =>
-    `<button type="button" class="chip" data-type="${t.id}">${t.label}</button>`).join('');
+    `<button type="button" class="chip" data-type="${t.id}">${t.label}${FACET_SLOT}</button>`).join('');
+
+  document.getElementById('filter-price-quick').innerHTML = PRIS_INTERVALLER.map(p =>
+    `<button type="button" class="chip" data-pris="${p.id}">${p.label}${FACET_SLOT}</button>`).join('');
 
   // Populære mærker først som chips, derefter den fulde, søgbare liste i et
-  // højde-begrænset felt — 60 checkbokse på række skubbede alle andre filtre
-  // under folden.
+  // højde-begrænset felt. Begge dele bygges af lageret: et mærke, der ikke er
+  // til salg, er ikke et filter.
   const POPULAR_BRANDS = ['Yamaha','Honda','BMW','Suzuki','Kawasaki','Harley-Davidson','Ducati','KTM'];
-  const known = new Set(Object.keys(BRANDS_BY_MODEL));
-  const brandRows = Object.keys(BRANDS_BY_MODEL).sort((a,b)=>a.localeCompare(b,'da')).map(b =>
-    `<label class="checkbox-row" data-brand-row="${b.toLowerCase()}"><input type="checkbox" data-brand="${b}">${b}</label>`).join('');
+  const iLager = new Set(alle.map(l => l.brand).filter(Boolean));
+  // Et mærke valgt via URL bliver stående, selv om det ikke er i lageret —
+  // ellers kunne pillen ikke fjernes fra det sted, den blev sat.
+  state.brands.forEach(b => iLager.add(b));
+  const maerker = [...iLager].sort((a,b) => a.localeCompare(b,'da'));
+  const brandRows = maerker.map(b =>
+    `<label class="checkbox-row" data-brand-row="${escapeHTML(b.toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(b)}"><span>${escapeHTML(b)}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `
-    <div class="brand-popular" id="brand-popular">${POPULAR_BRANDS.filter(b=>known.has(b)).map(b =>
-      `<button type="button" class="chip" data-brand-chip="${b}">${b}</button>`).join('')}</div>
+    <div class="brand-popular" id="brand-popular">${POPULAR_BRANDS.filter(b=>iLager.has(b)).map(b =>
+      `<button type="button" class="chip" data-brand-chip="${escapeHTML(b)}">${escapeHTML(b)}${FACET_SLOT}</button>`).join('')}</div>
     <div class="filter-search"><input type="text" id="brand-search" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
-    <div class="checkbox-scroll" id="brand-list">${brandRows}
+    <div class="checkbox-list" id="brand-list">${brandRows}
       <p class="brand-noresult" id="brand-noresult" hidden>Ingen mærker matcher.</p>
-    </div>`;
+    </div>
+    <button type="button" class="brand-more" id="brand-more" aria-controls="brand-list" aria-expanded="false" hidden></button>`;
 
   document.getElementById('filter-koerekort').innerHTML = KOEREKORT.map(k =>
-    `<button type="button" class="chip" data-koerekort="${k.id}" title="${k.hint}">${k.label}</button>`).join('');
+    `<button type="button" class="chip" data-koerekort="${k.id}" title="${k.hint}">${k.label}${FACET_SLOT}</button>`).join('');
 
   document.getElementById('filter-regions').innerHTML = REGIONS.map(r =>
-    `<label class="checkbox-row"><input type="checkbox" data-region="${r}">${r}</label>`).join('');
+    `<label class="checkbox-row"><input type="checkbox" data-region="${r}"><span>${r}</span>${FACET_SLOT}</label>`).join('');
 
   document.getElementById('filter-conditions').innerHTML = CONDITIONS.map(c =>
-    `<label class="checkbox-row"><input type="checkbox" data-condition="${c}">${c}</label>`).join('');
+    `<label class="checkbox-row"><input type="checkbox" data-condition="${c}"><span>${c}</span>${FACET_SLOT}</label>`).join('');
 
-  document.getElementById('filter-service').innerHTML = SERVICE_HISTORIK_OPTIONS.map(s =>
-    `<label class="checkbox-row"><input type="checkbox" data-service="${s}">${s}</label>`).join('');
-
-  // Udstyret er grupperet — en flad liste med 33 checkbokse er ubrugelig
-  // på en telefon, og det er dér de fleste søger.
-  document.getElementById('filter-equipment').innerHTML = EQUIPMENT_GROUPS.map(g => `
-    <div class="filter-subgroup">
-      <p class="filter-subgroup-title">${g.group}</p>
-      ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}">${i.label}</label>`).join('')}
-    </div>`).join('');
-
-  document.getElementById('filter-fuels').innerHTML = FUELS.map(f =>
-    `<label class="checkbox-row"><input type="checkbox" data-fuel="${f}">${f}</label>`).join('');
-  document.getElementById('filter-drives').innerHTML = DRIVES.map(d =>
-    `<label class="checkbox-row"><input type="checkbox" data-drive="${d}">${d}</label>`).join('');
-  document.getElementById('filter-colors').innerHTML = COLORS.map(c =>
-    `<label class="checkbox-row"><input type="checkbox" data-color="${c}">${c}</label>`).join('');
-  document.getElementById('filter-cylinders').innerHTML = CYLINDERS.map(c =>
-    `<button type="button" class="chip" data-cylinder="${c}">${c}</button>`).join('');
   document.getElementById('filter-age').innerHTML =
     '<option value="">Alle annoncer</option>' +
     AGE_FILTERS.map(a => `<option value="${a.id}">${a.label}</option>`).join('');
 
+  /* Grupperne med data-krav bygges KUN, hvis lageret kan svare på feltet.
+     Det sparer samtidig ~470 DOM-knuder ved opstart — udstyrslisten alene er
+     33 checkbokse i seks undergrupper. */
+  const byg = {
+    serviceHistorik: () => { document.getElementById('filter-service').innerHTML = SERVICE_HISTORIK_OPTIONS.map(s =>
+      `<label class="checkbox-row"><input type="checkbox" data-service="${s}"><span>${s}</span></label>`).join(''); },
+    ejereSyn: () => {},   // felterne står i den statiske markup
+    equipment: () => { document.getElementById('filter-equipment').innerHTML = EQUIPMENT_GROUPS.map(g => `
+      <div class="filter-subgroup">
+        <p class="filter-subgroup-title">${g.group}</p>
+        ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}"><span>${i.label}</span></label>`).join('')}
+      </div>`).join(''); },
+    fuel: () => { document.getElementById('filter-fuels').innerHTML = FUELS.map(f =>
+      `<label class="checkbox-row"><input type="checkbox" data-fuel="${f}"><span>${f}</span></label>`).join(''); },
+    drive: () => { document.getElementById('filter-drives').innerHTML = DRIVES.map(d =>
+      `<label class="checkbox-row"><input type="checkbox" data-drive="${d}"><span>${d}</span></label>`).join(''); },
+    cylinders: () => { document.getElementById('filter-cylinders').innerHTML = CYLINDERS.map(c =>
+      `<button type="button" class="chip" data-cylinder="${c}">${c}</button>`).join(''); },
+    color: () => { document.getElementById('filter-colors').innerHTML = COLORS.map(c =>
+      `<label class="checkbox-row"><input type="checkbox" data-color="${c}"><span>${c}</span></label>`).join(''); },
+  };
+  document.querySelectorAll('.filter-group[data-krav]').forEach(gruppe => {
+    const felt = gruppe.dataset.krav;
+    if (!daekning[felt]){ gruppe.hidden = true; return; }
+    gruppe.hidden = false;
+    byg[felt]?.();
+  });
+
   // Ikonerne der bor inde i panelet — hører til her, ikke i populateChrome.
   document.querySelectorAll('.filter-group summary .chev').forEach(c => c.innerHTML = Icon.chevronDown);
   document.querySelector('.filters-close').innerHTML = Icon.close;
+
+  // Tallene skal stå der ved FØRSTE maling, ikke en opgave senere.
+  renderFacetCounts();
+  // Mærkelisten foldes sammen med det samme — ellers står alle 60 rækker
+  // synlige det ene øjeblik, der går, før reflectStateToUI() når frem.
+  opdaterMaerkeliste();
+}
+
+/* ============ Facettællinger: hvad koster det næste klik? ============
+
+   Bilbasens filterpanel svarer først, når man har lukket det: man vælger i
+   blinde og ser bagefter, om der var noget. Her står tallet ved siden af
+   hvert valg, FØR man klikker — "A2 · 11", "Yamaha · 47", "Under 30.000 ·
+   112" — og et valg, der ville give nul, er nedtonet og kan ikke klikkes.
+
+   Tallet er ægte: det er resultatet af den fulde filterkæde med netop dette
+   ene valg lagt oveni og facettens eget filter slået fra (se anvendFiltre).
+   Det er derfor ikke "hvor mange af den slags findes der", men "hvor mange
+   får JEG, som jeg har sat resten".
+
+   Og — vigtigt for vores linje — tallet tæller kun annoncer, der faktisk
+   ville blive vist. De uoplyste er ikke med, præcis som de ikke er med i
+   resultatet. Linjen over resultaterne siger stadig, hvor mange der blev
+   skjult og hvorfor. */
+function facetTal(){
+  const alle = Store.getAllListings();
+  const basis = (spring) => anvendFiltre(alle, spring, null);
+  const tael = (liste, vaelg) => {
+    const m = new Map();
+    for (const l of liste){ const v = vaelg(l); if (v == null) continue; m.set(v, (m.get(v) || 0) + 1); }
+    return m;
+  };
+
+  const kkBasis = basis('koerekort');
+  const koerekort = new Map();
+  for (const k of KOEREKORT){
+    let n = 0;
+    for (const l of kkBasis) if (koerekortSvar(l, k.id) === true) n++;
+    koerekort.set(k.id, n);
+  }
+
+  const prisBasis = basis('price');
+  const pris = new Map();
+  for (const p of PRIS_INTERVALLER){
+    let n = 0;
+    for (const l of prisBasis){
+      if (l.price == null) continue;                       // uoplyst tæller ikke med
+      if (p.min != null && l.price < p.min) continue;
+      if (p.max != null && l.price > p.max) continue;
+      n++;
+    }
+    pris.set(p.id, n);
+  }
+
+  return {
+    types:      tael(basis('types'),      l => l.type),
+    brands:     tael(basis('brands'),     l => l.brand),
+    regions:    tael(basis('regions'),    l => l.region),
+    conditions: tael(basis('conditions'), l => l.condition),
+    koerekort, pris,
+  };
+}
+
+/* Skriver ét tal ind og markerer blindgyder. `aktiv` beskytter det valg,
+   brugeren allerede har truffet: står man PÅ "Yamaha" og resultatet er nul
+   på grund af et andet filter, skal knappen stadig kunne klikkes — ellers
+   kan man ikke komme ud igen. */
+function saetFacet(el, n, aktiv){
+  const slot = el.querySelector('.facet-n');
+  if (slot) slot.textContent = n == null ? '' : n;
+  const tom = n === 0 && !aktiv;
+  el.classList.toggle('facet-empty', tom);
+  const styr = el.tagName === 'BUTTON' ? el : el.querySelector('input');
+  if (styr) styr.disabled = tom;
+}
+
+function renderFacetCounts(){
+  if (!filtersBuilt) return;
+  const f = facetTal();
+
+  document.querySelectorAll('#filter-types .chip').forEach(c =>
+    saetFacet(c, f.types.get(c.dataset.type) || 0, state.types.includes(c.dataset.type)));
+  document.querySelectorAll('#filter-koerekort .chip').forEach(c =>
+    saetFacet(c, f.koerekort.get(c.dataset.koerekort) || 0, state.koerekort === c.dataset.koerekort));
+  document.querySelectorAll('#filter-price-quick .chip').forEach(c =>
+    saetFacet(c, f.pris.get(c.dataset.pris) || 0, erAktivtPrisinterval(c.dataset.pris)));
+  document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb =>
+    saetFacet(cb.closest('.checkbox-row'), f.brands.get(cb.dataset.brand) || 0, state.brands.includes(cb.dataset.brand)));
+  document.querySelectorAll('#brand-popular .chip').forEach(c =>
+    saetFacet(c, f.brands.get(c.dataset.brandChip) || 0, state.brands.includes(c.dataset.brandChip)));
+  document.querySelectorAll('#filter-regions input[data-region]').forEach(cb =>
+    saetFacet(cb.closest('.checkbox-row'), f.regions.get(cb.dataset.region) || 0, state.regions.includes(cb.dataset.region)));
+  document.querySelectorAll('#filter-conditions input[data-condition]').forEach(cb =>
+    saetFacet(cb.closest('.checkbox-row'), f.conditions.get(cb.dataset.condition) || 0, state.conditions.includes(cb.dataset.condition)));
+}
+
+/* ============ Mærkelisten: ét rullefelt færre ============
+
+   Mærkelisten var en `.checkbox-scroll` med `max-height:248px; overflow-y:auto`.
+   Den lå inde i filterarket, som selv ruller, som ligger inde i siden, som
+   ruller. Tre indlejrede rulleområder på en telefon — målt af kritikeren til
+   ca. to synlige rækker ad gangen. Det er ikke en liste, man kan overskue;
+   det er et kighul, hvor fingeren tit rammer det forkerte lag og flytter
+   arket i stedet for listen.
+
+   Nu er der ingen indre rulning. Listen viser de 12 første mærker og folder
+   resten ud på ét tryk. Tre grunde til 12: det er dobbelt så mange som de
+   otte populære chips lige ovenover, det er stadig kortere end arkets egen
+   højde på en telefon, og det er nok til at alfabetet når fra Aprilia til
+   Husqvarna, så man kan se, at listen ER alfabetisk.
+
+   Søger man, folder listen sig ud af sig selv — en søgning er et spørgsmål
+   om HELE listen, og en skjult række, der matcher, ville ligne et mærke, vi
+   ikke har. Og et mærke, der allerede er krydset af (fx sat fra en delt
+   URL), står altid, uanset hvor i alfabetet det ligger: ellers kunne
+   filteret ikke fjernes det sted, det blev sat. */
+const MAERKER_FOER_UDFOLD = 12;
+let maerkerUdfoldet = false;
+
+function opdaterMaerkeliste(){
+  const liste = document.getElementById('brand-list');
+  if (!liste) return;
+  const soeg = document.getElementById('brand-search');
+  const q = (soeg?.value || '').trim().toLowerCase();
+
+  let matchende = 0, vist = 0;
+  liste.querySelectorAll('[data-brand-row]').forEach(row => {
+    if (!row.dataset.brandRow.includes(q)){ row.hidden = true; return; }
+    matchende++;
+    const valgt = row.querySelector('input')?.checked;
+    const overGraensen = !q && !maerkerUdfoldet && !valgt && matchende > MAERKER_FOER_UDFOLD;
+    row.hidden = overGraensen;
+    if (!overGraensen) vist++;
+  });
+
+  const nr = document.getElementById('brand-noresult');
+  if (nr) nr.hidden = matchende > 0;
+
+  const knap = document.getElementById('brand-more');
+  if (!knap) return;
+  // Under en søgning er der intet at folde ud — alt, der matcher, står der.
+  knap.hidden = !!q || (matchende <= vist && !maerkerUdfoldet);
+  knap.setAttribute('aria-expanded', String(maerkerUdfoldet));
+  knap.textContent = maerkerUdfoldet
+    ? 'Vis færre mærker'
+    : `Vis alle ${matchende} mærker`;
+}
+
+function erAktivtPrisinterval(id){
+  const p = PRIS_INTERVALLER.find(x => x.id === id);
+  return !!p && state.priceMin === p.min && state.priceMax === p.max;
 }
 
 function describeCurrentSearch(pills){
@@ -639,9 +883,14 @@ function reflectFilterPanel(){
   document.querySelectorAll('#filter-koerekort .chip').forEach(ch => {
     ch.classList.toggle('active', state.koerekort === ch.dataset.koerekort);
   });
+  document.querySelectorAll('#filter-price-quick .chip').forEach(ch => {
+    ch.classList.toggle('active', erAktivtPrisinterval(ch.dataset.pris));
+  });
   document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb => {
     cb.checked = state.brands.includes(cb.dataset.brand);
   });
+  // Skal stå EFTER afkrydsningen: et valgt mærke må ikke være foldet væk.
+  opdaterMaerkeliste();
   document.querySelectorAll('#brand-popular .chip').forEach(ch => {
     ch.classList.toggle('active', state.brands.includes(ch.dataset.brandChip));
   });
@@ -750,7 +999,12 @@ const UOPLYST = Symbol('uoplyst');
    én gang — tallene kan lægges sammen uden dobbelttælling. */
 let uoplystSkjult = [];
 
-function filtrerMedUoplyst(list, felt, praedikat){
+/* opsamler: hvor de skjulte skal bogføres, eller null. Facettællingen længere
+   nede kører den samme filterkæde seks gange for at finde ud af, hvor mange
+   træf hvert enkelt valg ville give — de kørsler må ikke lægge deres tal oven
+   i brugerens. Uden parameteren stod der pludselig "2.298 annoncer er ikke
+   vist" under et filter, der havde skjult 383. */
+function filtrerMedUoplyst(list, felt, praedikat, opsamler){
   const beholdt = [];
   let skjult = 0;
   for (const l of list){
@@ -758,7 +1012,7 @@ function filtrerMedUoplyst(list, felt, praedikat){
     if (svar === UOPLYST) skjult++;
     else if (svar) beholdt.push(l);
   }
-  if (skjult) uoplystSkjult.push({ felt, antal: skjult });
+  if (skjult && opsamler) opsamler.push({ felt, antal: skjult });
   return beholdt;
 }
 
@@ -786,59 +1040,97 @@ function filtrerMedUoplyst(list, felt, praedikat){
 function koerekortSvar(l, kat){
   if (passerKoerekort(l, kat)) return true;
 
+  /* 1 og ikke 0 — begge steder, og det er ikke pedanteri.
+
+     hkEllerNull() i js/data.js læser 0 som UKENDT, ikke som nul hestekræfter
+     (`v > 0 ? v : null`). Den regel kom ind for at lukke et falsk A2-stempel
+     på 1200-kubiks maskiner uden oplyst effekt, og den er rigtig. Men den
+     gjorde `proeve.power = 0` selvmodsigende: prøven skulle netop sætte en
+     KENDT, gunstigst mulig værdi ind, og 0 blev læst som "stadig ukendt".
+     A2-grenen svarer false på ukendt effekt, prøven fejlede, og
+     koerekortSvar() svarede false i stedet for UOPLYST.
+
+     Konsekvensen ramte præcis dét, funktionen blev skrevet for at forhindre:
+     ét klik på A2 skjulte 332 annoncer og rapporterede 0 skjulte. Linjen
+     "X annoncer er ikke vist, fordi kørekortkategori ikke er oplyst" — hele
+     ærligheden i filteret — forsvandt lydløst.
+
+     1 hk og 1 ccm er den mindste værdi, der stadig tæller som oplyst.
+     Forenkler nogen dem til 0, fordi "det er jo det laveste", er fejlen
+     tilbage — og den er tavs. Testene står nederst i js/koerekort.test.js.
+
+     Og "mangler" afgøres med js/data.js' egen læsning og ikke med `== null`.
+     Ukendt effekt har mange stavemåder — databasen skriver null, en tom
+     formular "", MC Syd "-", og en kilde, der ikke kan finde tallet, kan
+     finde på at skrive 0. hkEllerNull() kalder dem alle ukendt; `== null`
+     fangede kun de to første. Resten faldt igennem til `return false` og
+     blev skjult uden at blive talt — samme tavshed, anden dør. */
   const proeve = { ...l };
   let manglerNoget = false;
-  if (l.power == null){ proeve.power = 0; manglerNoget = true; }
-  if (l.ccm == null){ proeve.ccm = 1; manglerNoget = true; }
+  if (hkEllerNull(l.power) == null){ proeve.power = 1; manglerNoget = true; }
+  if (!(Number(l.ccm) > 0)){ proeve.ccm = 1; manglerNoget = true; }
   if (manglerNoget && passerKoerekort(proeve, kat)) return UOPLYST;
 
   return false;
 }
 
-function getFilteredListings(){
-  let list = Store.getAllListings();
-  uoplystSkjult = [];
+/* Filterkæden, kørt som ÉN funktion med to skruer på:
+
+     spring     navnet på ét filter, der skal springes over
+     opsamler   hvor de uoplyste bogføres (null = tæl ikke med)
+
+   `spring` er det, der gør facettællingen mulig og rigtig. Tallet ved siden
+   af "Yamaha" skal svare på: hvor mange træf får jeg, hvis jeg vælger Yamaha
+   HER, med alt det andet, jeg allerede har sat, i behold. Så skal mærkefilteret
+   selv være slået fra i den udregning — ellers tæller man kun inden for det
+   mærke, der allerede er valgt, og alle andre mærker viser nul.
+
+   Kæden lå før direkte i getFilteredListings(). Rækkefølge og prædikater er
+   uændrede; det eneste nye er `brug()` foran hver blok. */
+function anvendFiltre(alle, spring, opsamler){
+  let list = alle;
+  const brug = (navn) => navn !== spring;
 
   const q = state.q.trim().toLowerCase();
-  if (q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
+  if (brug('q') && q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
 
   // Mærke, model og titel kender vi altid — de kommer med annoncen fra kilden.
-  if (state.brands.length) list = list.filter(l => state.brands.includes(l.brand));
-  if (state.models.length) list = list.filter(l => state.models.includes(l.model));
+  if (brug('brands') && state.brands.length) list = list.filter(l => state.brands.includes(l.brand));
+  if (brug('models') && state.models.length) list = list.filter(l => state.models.includes(l.model));
 
   // Kategorifiltre: værdien er enten oplyst, eller også er den det ikke.
-  if (state.types.length)
-    list = filtrerMedUoplyst(list, 'motorcykeltype', l => l.type == null ? UOPLYST : state.types.includes(l.type));
-  if (state.regions.length)
-    list = filtrerMedUoplyst(list, 'landsdel', l => l.region == null ? UOPLYST : state.regions.includes(l.region));
-  if (state.conditions.length)
-    list = filtrerMedUoplyst(list, 'stand', l => l.condition == null ? UOPLYST : state.conditions.includes(l.condition));
+  if (brug('types') && state.types.length)
+    list = filtrerMedUoplyst(list, 'motorcykeltype', l => l.type == null ? UOPLYST : state.types.includes(l.type), opsamler);
+  if (brug('regions') && state.regions.length)
+    list = filtrerMedUoplyst(list, 'landsdel', l => l.region == null ? UOPLYST : state.regions.includes(l.region), opsamler);
+  if (brug('conditions') && state.conditions.length)
+    list = filtrerMedUoplyst(list, 'stand', l => l.condition == null ? UOPLYST : state.conditions.includes(l.condition), opsamler);
   if (state.service.length)
-    list = filtrerMedUoplyst(list, 'servicehistorik', l => l.serviceHistorik == null ? UOPLYST : state.service.includes(l.serviceHistorik));
+    list = filtrerMedUoplyst(list, 'servicehistorik', l => l.serviceHistorik == null ? UOPLYST : state.service.includes(l.serviceHistorik), opsamler);
 
   /* Talfiltre. Bemærk at BEGGE ender skal spørge om værdien overhovedet er
      kendt. Før gjorde kun den nedre ende det — ved et tilfælde, fordi
      `null >= 5000` er falsk, mens `null <= 5000` er sandt. Den asymmetri var
      hele grunden til, at "maks."-filtrene løj, mens "min."-filtrene bare
      skjulte. */
-  if (state.priceMin != null)
-    list = filtrerMedUoplyst(list, 'pris', l => l.price == null ? UOPLYST : l.price >= state.priceMin);
-  if (state.priceMax != null)
-    list = filtrerMedUoplyst(list, 'pris', l => l.price == null ? UOPLYST : l.price <= state.priceMax);
+  if (brug('price') && state.priceMin != null)
+    list = filtrerMedUoplyst(list, 'pris', l => l.price == null ? UOPLYST : l.price >= state.priceMin, opsamler);
+  if (brug('price') && state.priceMax != null)
+    list = filtrerMedUoplyst(list, 'pris', l => l.price == null ? UOPLYST : l.price <= state.priceMax, opsamler);
   if (state.yearMin != null)
-    list = filtrerMedUoplyst(list, 'årgang', l => l.year == null ? UOPLYST : l.year >= state.yearMin);
+    list = filtrerMedUoplyst(list, 'årgang', l => l.year == null ? UOPLYST : l.year >= state.yearMin, opsamler);
   if (state.yearMax != null)
-    list = filtrerMedUoplyst(list, 'årgang', l => l.year == null ? UOPLYST : l.year <= state.yearMax);
+    list = filtrerMedUoplyst(list, 'årgang', l => l.year == null ? UOPLYST : l.year <= state.yearMax, opsamler);
   if (state.kmMax != null)
-    list = filtrerMedUoplyst(list, 'kilometertal', l => l.km == null ? UOPLYST : l.km <= state.kmMax);
+    list = filtrerMedUoplyst(list, 'kilometertal', l => l.km == null ? UOPLYST : l.km <= state.kmMax, opsamler);
   if (state.ccmMin != null)
-    list = filtrerMedUoplyst(list, 'ccm', l => l.ccm == null ? UOPLYST : l.ccm >= state.ccmMin);
+    list = filtrerMedUoplyst(list, 'ccm', l => l.ccm == null ? UOPLYST : l.ccm >= state.ccmMin, opsamler);
   if (state.ccmMax != null)
-    list = filtrerMedUoplyst(list, 'ccm', l => l.ccm == null ? UOPLYST : l.ccm <= state.ccmMax);
+    list = filtrerMedUoplyst(list, 'ccm', l => l.ccm == null ? UOPLYST : l.ccm <= state.ccmMax, opsamler);
   if (state.hkMin != null)
-    list = filtrerMedUoplyst(list, 'hestekræfter', l => l.power == null ? UOPLYST : l.power >= state.hkMin);
+    list = filtrerMedUoplyst(list, 'hestekræfter', l => l.power == null ? UOPLYST : l.power >= state.hkMin, opsamler);
   if (state.hkMax != null)
-    list = filtrerMedUoplyst(list, 'hestekræfter', l => l.power == null ? UOPLYST : l.power <= state.hkMax);
+    list = filtrerMedUoplyst(list, 'hestekræfter', l => l.power == null ? UOPLYST : l.power <= state.hkMax, opsamler);
 
   /* Udstyr er et OG-filter: vælger man ABS og varmehåndtag, vil man have
      begge dele. Brændstof, træktype, farve og cylindre er ELLER inden for
@@ -849,16 +1141,16 @@ function getFilteredListings(){
      behandles ens — den tomme liste er et rigtigt nej. */
   if (state.equipment.length){
     list = filtrerMedUoplyst(list, 'udstyr', l =>
-      l.equipment == null ? UOPLYST : state.equipment.every(e => l.equipment.includes(e)));
+      l.equipment == null ? UOPLYST : state.equipment.every(e => l.equipment.includes(e)), opsamler);
   }
   if (state.fuels.length)
-    list = filtrerMedUoplyst(list, 'brændstof', l => l.fuel == null ? UOPLYST : state.fuels.includes(l.fuel));
+    list = filtrerMedUoplyst(list, 'brændstof', l => l.fuel == null ? UOPLYST : state.fuels.includes(l.fuel), opsamler);
   if (state.drives.length)
-    list = filtrerMedUoplyst(list, 'træktype', l => l.drive == null ? UOPLYST : state.drives.includes(l.drive));
+    list = filtrerMedUoplyst(list, 'træktype', l => l.drive == null ? UOPLYST : state.drives.includes(l.drive), opsamler);
   if (state.colors.length)
-    list = filtrerMedUoplyst(list, 'farve', l => l.color == null ? UOPLYST : state.colors.includes(l.color));
+    list = filtrerMedUoplyst(list, 'farve', l => l.color == null ? UOPLYST : state.colors.includes(l.color), opsamler);
   if (state.cylinders.length)
-    list = filtrerMedUoplyst(list, 'cylinderantal', l => l.cylinders == null ? UOPLYST : state.cylinders.includes(Number(l.cylinders)));
+    list = filtrerMedUoplyst(list, 'cylinderantal', l => l.cylinders == null ? UOPLYST : state.cylinders.includes(Number(l.cylinders)), opsamler);
 
   /* "Oprettet inden for" spørger til annoncens alder. De indekserede har med
      vilje ingen createdAt (se normalizeExternalListing i js/backend-bridge.js:
@@ -869,7 +1161,7 @@ function getFilteredListings(){
       if (!l.createdAt) return UOPLYST;
       const t = new Date(l.createdAt).getTime();
       return Number.isNaN(t) ? UOPLYST : t >= cutoff;
-    });
+    }, opsamler);
   }
 
   /* Billeder og sælgertype er IKKE uoplyste. Vi kan selv se, om der fulgte
@@ -879,15 +1171,175 @@ function getFilteredListings(){
   if (state.dealerOnly) list = list.filter(l => l.isDealer);
 
   if (state.ejereMax != null)
-    list = filtrerMedUoplyst(list, 'antal ejere', l => l.antalEjere == null ? UOPLYST : l.antalEjere <= state.ejereMax);
+    list = filtrerMedUoplyst(list, 'antal ejere', l => l.antalEjere == null ? UOPLYST : l.antalEjere <= state.ejereMax, opsamler);
   if (state.nysynet){
     const y = new Date().getFullYear();
-    list = filtrerMedUoplyst(list, 'seneste syn', l => l.sidsteSyn == null ? UOPLYST : l.sidsteSyn >= y - 1);
+    list = filtrerMedUoplyst(list, 'seneste syn', l => l.sidsteSyn == null ? UOPLYST : l.sidsteSyn >= y - 1, opsamler);
   }
   if (state.vinterklar)
-    list = filtrerMedUoplyst(list, 'vinterklargøring', l => l.vinterklar == null ? UOPLYST : !!l.vinterklar);
-  if (state.koerekort)
-    list = filtrerMedUoplyst(list, 'kørekortkategori', l => koerekortSvar(l, state.koerekort));
+    list = filtrerMedUoplyst(list, 'vinterklargøring', l => l.vinterklar == null ? UOPLYST : !!l.vinterklar, opsamler);
+  if (brug('koerekort') && state.koerekort)
+    list = filtrerMedUoplyst(list, 'kørekortkategori', l => koerekortSvar(l, state.koerekort), opsamler);
+
+  return list;
+}
+
+/* ============ Standardsorteringen: "Blandet udbud" ============
+
+   NAVNET ER LAVET OM I RUNDE 2, OG DET ER RETTELSEN.
+
+   Sorteringen hed "Mest relevante". Den regnede allerede på noget rigtigt —
+   men navnet lovede en relevansmodel, og det er ikke det, der sker. En
+   kritiker målte den som "i praksis nyeste først", og selv om dét ikke er
+   præcist (se måltallene nedenfor), var konklusionen rigtig: man kan ikke
+   se relevansen arbejde, og et navn, man ikke kan efterprøve, er et løfte,
+   vi ikke holder. Så navnet siger nu, hvad rækkefølgen faktisk er: en
+   blanding. Hvordan den blandes, står på siden under værktøjslinjen
+   (renderSorteringsNote), med tal fra det aktuelle resultat.
+
+   MÅLT PÅ LAGERET 16. AUG. 2026, før rettelsen:
+
+     Oplysthed, alle 383:  11 point: 51 (vores egne) · 8: 1 · 6: 153 ·
+                           5: 11 · 4: 159 · 2: 7 · 1: 1
+     Side 1, de 24 kort:   3 egne, 21 indekserede · 21 med foto, 3 uden
+     Første egne annonce:  plads 7 af 24
+
+   Oplystheden GØR altså noget: de 153 annoncer med 6 point står foran de
+   159 med 4, og forskellen er synlig som "Km ikke oplyst" på kortet. Men
+   den er usynlig på side 1, hvor alt er 6-pointere, og de tre eneste kort
+   med en dato var vores egne — dét var de "3 uger → 4 uger → 1 måned",
+   kritikeren læste som en datosortering.
+
+   RÆKKEFØLGEN, I TO REGLER — begge kan efterprøves på skærmen:
+
+   1. OPLYSTHED afgør rækkefølgen inden for hver gruppe. En annonce, der
+      svarer på flere af købers spørgsmål, er en bedre annonce end en, der
+      svarer på færre. Point gives kun for felter, kilden faktisk har
+      oplyst — aldrig for et gæt (kørekort tæller kun, når det kan udledes
+      af ccm og hk).
+
+   2. ANNONCER UDEN FOTO FORDELES JÆVNT ud over resultatet i stedet for at
+      ligge i én klump. Deres andel af hver side er den samme som deres
+      andel af lageret: 57 ud af 383 giver 3-4 pr. side à 24.
+
+   Regel 2 slår regel 1 på plads-niveau, og DET er grunden til, at
+   sorteringen ikke må hedde "Mest oplyste først": vores egne 51 annoncer
+   har fuldt hus (11 af 11 point) og står alligevel på plads 4, 11, 17 og 24
+   — ikke på plads 1-24. Et navn skal kunne holde til at blive målt.
+
+   Hvorfor så ikke bare lade oplystheden bestemme alene? Fordi side 1 så
+   bliver 24 kort uden ét eneste billede — 24 gange det samme grå felt. Og
+   hvorfor ikke skubbe dem uden foto helt bagest? Fordi side 1 så bliver 24
+   kort, der ALLE siger "Hos MC Syd" og alle fører væk fra siden. Begge
+   yderpunkter er en side, der ikke ligner det lager, den påstår at vise.
+
+   Og den nyeste annonce er stadig ét klik væk: "Nyeste først" står uændret
+   i vælgeren. Inden for gruppen uden foto sorteres der desuden efter dato,
+   så de pladser, gruppen får på side 1, går til de nyeste annoncer. */
+
+const harFoto = l => !!(l.photoUrls && l.photoUrls[0]);
+
+/* Købers spørgsmål, og hvad det koster ham ikke at få svar.
+
+   Vægtene er ikke stemninger: 2 point er et felt, man ikke kan handle uden
+   (må jeg køre den, hvad koster den, hvor meget har den kørt), 1 point er et
+   felt, der kvalificerer handlen. Fotoet står IKKE på listen — det afgør
+   hvilken af de to grupper annoncen havner i, og ville tælle dobbelt her. */
+const OPLYSTHED = [
+  [l => l.price != null, 2],
+  [l => l.km != null, 2],
+  [l => koerekortForListing(l) != null, 2],
+  [l => l.year != null, 1],
+  [l => l.ccm != null, 1],
+  [l => l.power != null, 1],
+  [l => l.condition != null, 1],
+  [l => String(l.description || '').trim().length > 80, 1],
+];
+
+function annonceOplysthed(l){
+  let n = 0;
+  for (const [svarer, vaegt] of OPLYSTHED) if (svarer(l)) n += vaegt;
+  return n;
+}
+
+function blandetRaekkefoelge(list){
+  const tid = l => (l.createdAt ? new Date(l.createdAt).getTime() : null);
+  /* Tredje niveau er id og ikke "uændret rækkefølge": annoncerne kommer fra
+     to kilder, der flettes i js/backend-bridge.js, og et genbesøg må ikke
+     give en anden rækkefølge, end det link man delte. */
+  const bedstFoerst = (a, b) => {
+    const d = annonceOplysthed(b) - annonceOplysthed(a);
+    if (d) return d;
+    const ta = tid(a), tb = tid(b);
+    if (ta != null && tb != null && ta !== tb) return tb - ta;
+    if (ta == null && tb != null) return 1;
+    if (tb == null && ta != null) return -1;
+    return String(a.id).localeCompare(String(b.id));
+  };
+
+  const medFoto = list.filter(harFoto).sort(bedstFoerst);
+  const udenFoto = list.filter(l => !harFoto(l)).sort(bedstFoerst);
+  if (!medFoto.length || !udenFoto.length) return medFoto.concat(udenFoto);
+
+  /* Fordelingen: hver annonce uden foto lander MIDT i sin egen luns.
+
+     Runde 1 talte op undervejs (`Math.floor((k+1) * andel) > j`), og den
+     tælling lægger det første element ved SLUTNINGEN af den første luns.
+     Med 57 uden foto ud af 383 er lunsen 6,7 kort lang, så den første kom
+     på plads 7 — præcis én plads under de seks kort, der er over folden i
+     tre spalter. Kritikeren målte konsekvensen: "hele første skærm er
+     tredjeparts MC Syd-annoncer, vores egne 51 er usynlige indtil man
+     filtrerer".
+
+     Med midtpunktet — `floor((j + 0,5) * n / m)` — lander de på plads
+     4, 11, 17 og 24 i stedet for 7, 14 og 21. Andelen er den SAMME (den er
+     lagerets egen, 57/383), afstanden er den samme; det er kun fasen, der
+     er rykket en halv luns, så første række også har en af dem. Det er
+     samme greb som midtpunktsudtagning i en rasterlinje.
+
+     Indekserne kan ikke støde sammen: n/m er altid ≥ 1, så udtrykket er
+     strengt voksende i j, og største værdi er floor(n − 0,5·n/m) ≤ n−1. */
+  const n = list.length, m = udenFoto.length;
+  const ud = new Array(n);
+  for (let j = 0; j < m; j++) ud[Math.floor((j + 0.5) * n / m)] = udenFoto[j];
+  let i = 0;
+  for (let k = 0; k < n; k++) if (ud[k] === undefined) ud[k] = medFoto[i++];
+  return ud;
+}
+
+/* ---------- Rækkefølgen skrevet på siden ----------
+
+   Halvdelen af rettelsen. Et navn på tre ord kan ikke bære to regler, og en
+   sortering, hvis regel man ikke kan læse, er ikke forudsigelig — dét er
+   et af de fire spørgsmål under Findbarhed i bar/RUBRIC.md.
+
+   Linjen står kun, når "Blandet udbud" er valgt OG der faktisk er noget at
+   blande (begge grupper har annoncer). Filtrerer man ned til 14 annoncer,
+   der alle mangler foto, er der ingen fordeling at forklare — så er
+   rækkefølgen ren oplysthed, og linjen ville være støj.
+
+   Tallene er talt på det resultat, der står på skærmen. Ingen af dem er
+   skrevet i hånden: skifter lageret sammensætning, skifter sætningen med. */
+function renderSorteringsNote(sideItems, heleResultatet){
+  const el = document.getElementById('sortering-note');
+  if (!el) return;
+
+  const udenIAlt = heleResultatet.filter(l => !harFoto(l)).length;
+  const udenPaaSiden = sideItems.filter(l => !harFoto(l)).length;
+  const blandes = state.sort === 'blandet'
+    && udenIAlt > 0 && udenIAlt < heleResultatet.length;
+  if (!blandes){ el.hidden = true; return; }
+
+  el.hidden = false;
+  el.textContent = `Blandet udbud: annoncerne med flest oplyste felter står `
+    + `først, og de ${udenIAlt} uden foto er fordelt jævnt i stedet for at `
+    + `ligge samlet — ${udenPaaSiden} af de ${sideItems.length} på denne side, `
+    + `samme andel som i hele resultatet.`;
+}
+
+function getFilteredListings(){
+  uoplystSkjult = [];
+  const list = anvendFiltre(Store.getAllListings(), null, uoplystSkjult);
 
   /* Ukendt værdi sorteres ALTID bagest — også når retningen er stigende.
 
@@ -917,6 +1369,10 @@ function getFilteredListings(){
     'year-desc':  medUkendtSidst(l => l.year,  'desc'),
     'km-asc':     medUkendtSidst(l => l.km,    'asc'),
   };
+  /* "Blandet udbud" er ikke en parvis sammenligning — fordelingen af annoncer
+     uden foto er en handling på HELE listen — så den kan ikke ligge i
+     `sorters`. */
+  if (state.sort === 'blandet') return blandetRaekkefoelge(list);
   list.sort(sorters[state.sort] || sorters['date-desc']);
   return list;
 }
@@ -1030,7 +1486,7 @@ const FIRST_CARDS = 2;
 const CARD_CHUNK = 2;
 let cardChunkHandle = 0;
 
-function paintCards(grid, pageItems){
+function paintCards(grid, pageItems, naarFaerdig){
   if (cardChunkHandle){ clearTimeout(cardChunkHandle); cardChunkHandle = 0; }
   // Renderer vælges ÉN gang pr. maling. Slås visningen om midt i en
   // portionsvis maling, ville halvdelen af siden ellers stå som kort og
@@ -1038,7 +1494,7 @@ function paintCards(grid, pageItems){
   const tegn = aktivKortRenderer();
   grid.innerHTML = pageItems.slice(0, FIRST_CARDS).map(tegn).join('');
   wireFavoriteButtons(grid);
-  if (pageItems.length <= FIRST_CARDS) return;
+  if (pageItems.length <= FIRST_CARDS){ naarFaerdig?.(); return; }
 
   let next = FIRST_CARDS;
   const step = () => {
@@ -1052,11 +1508,98 @@ function paintCards(grid, pageItems){
     for (let i = alreadyThere; i < grid.children.length; i++) wireFavoriteButtons(grid.children[i]);
     next = to;
     if (next < pageItems.length) cardChunkHandle = setTimeout(step, 0);
+    else naarFaerdig?.();
   };
   // setTimeout og ikke requestAnimationFrame: rAF står stille i en skjult
   // fane, og så ville resten af resultaterne aldrig blive tegnet, før
   // brugeren kiggede forbi.
   cardChunkHandle = setTimeout(step, 0);
+}
+
+/* ============ Tilbage til dit resultat ============
+
+   Rubrikkens spørgsmål: "Kan jeg komme tilbage til mit resultat efter at
+   have klikket ind?" Filtrene overlevede allerede — de står i URL'en. Men
+   ALT andet gik tabt: man klikkede på annonce nummer 19, trykkede tilbage
+   og landede på toppen af siden og skulle scrolle sig ned og lede efter den
+   igen. På side 2 af 16 er det en reel grund til at opgive søgningen.
+
+   To ting huskes i sessionStorage (ikke localStorage — positionen hører til
+   dette faneblad og denne session, ikke til enheden):
+     y   hvor langt der var scrollet
+     id  hvilken annonce der blev åbnet, så den kan markeres igen
+
+   Nøglen indeholder søgestrengen. Ændrer man et filter, mens man er væk,
+   passer den gamle position ikke længere, og så bruges den ikke.
+
+   scrollRestoration sættes til 'manual', fordi browserens egen genskabelse
+   sker FØR kortene er malet: dokumentet er kun et par hundrede pixels højt
+   på det tidspunkt, så den ruller til bunden af ingenting og giver op. Vi
+   ruller selv, når sidste portion kort er tegnet. */
+const SRP_POSITION = 'bb_srp_position';
+
+function gemPosition(id){
+  try {
+    sessionStorage.setItem(SRP_POSITION, JSON.stringify({
+      soeg: location.search, y: Math.round(window.scrollY), id: String(id || ''),
+    }));
+  } catch (e) { /* privat tilstand: så mister vi positionen, og intet andet */ }
+}
+
+let positionGenskabt = false;
+function genskabPosition(){
+  if (positionGenskabt) return;
+  positionGenskabt = true;
+  let gemt = null;
+  try { gemt = JSON.parse(sessionStorage.getItem(SRP_POSITION) || 'null'); } catch (e) {}
+  if (!gemt || gemt.soeg !== location.search) return;
+  try { sessionStorage.removeItem(SRP_POSITION); } catch (e) {}
+
+  if (gemt.id){
+    const kort = document.querySelector(`#results-grid [data-listing-id="${CSS.escape(gemt.id)}"]`);
+    // Markeringen er der, så øjet ikke skal lede efter den annonce, man lige
+    // har set — den er den eneste med ramme, når man kommer tilbage.
+    if (kort) kort.classList.add('is-set');
+  }
+  // 'auto' og ikke 'smooth': man har trykket tilbage og forventer at VÆRE
+  // der, ikke at se rejsen igen.
+  window.scrollTo({ top: gemt.y, behavior: 'auto' });
+}
+
+/* Den halvdel der manglede: uden det her blev gemPosition() aldrig kaldt, og
+   så havde genskabPosition() aldrig noget at genskabe.
+
+   Lytteren sidder på gitteret og ikke på hvert kort. Kortene males om ved
+   hvert eneste filterklik, og 24 lyttere skulle så sættes op igen hver gang —
+   og de gamle ville hænge på knuder, der var smidt væk.
+
+   Kun kortets rigtige link tæller. Uden den betingelse gemte et tryk på
+   hjertet eller sammenlign-knappen også en position, og så sprang siden ved
+   næste tilbage-tryk hen til et kort, brugeren aldrig havde åbnet. */
+function wirePositionHukommelse(){
+  const grid = document.getElementById('results-grid');
+  if (!grid) return;
+  grid.addEventListener('click', (e) => {
+    const link = e.target.closest('a.card-link, a.row-link');
+    if (!link || !grid.contains(link)) return;
+    const kort = link.closest('[data-listing-id]');
+    if (kort) gemPosition(kort.dataset.listingId);
+  });
+
+  /* Kommer man tilbage fra browserens frem-og-tilbage-cache, køres boot()
+     ikke igen: dokumentet er stadig malet, render() kalder ikke paintCards,
+     og genskabPosition() ville derfor aldrig blive kaldt. Samtidig har vi
+     selv slået browserens egen genskabelse fra (scrollRestoration nedenfor),
+     så ingen ruller. Her nulstilles vagten og vi ruller selv. */
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    positionGenskabt = false;
+    genskabPosition();
+  });
+
+  // Se blokkommentaren over SRP_POSITION: browserens egen genskabelse rammer
+  // et dokument, der endnu ikke har nogen kort i sig, og giver op.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 }
 
 /* ============ Render i to etaper ============
@@ -1108,6 +1651,22 @@ function render(){
   const pageItems = filtered.slice((state.page-1)*PAGE_SIZE, state.page*PAGE_SIZE);
 
   renderResultsCount(filtered);
+  /* Sorteringslinjen tæller på DENNE side og på hele resultatet, så den
+     skal stå efter udsnittet — og i etape 1, fordi den ligger over kortene.
+     Elementet FINDES i soegning.html fra første maling med den samme
+     sætning uden tal; her byttes kun teksten. */
+  renderSorteringsNote(pageItems, filtered);
+
+  /* Skuffens knap er det eneste sted på mobil, hvor man kan se resultatet af
+     et filter uden at lukke skuffen. Baren skriver "Vis 40.474 biler"; vi
+     skriver også, når svaret er nul — så slipper man for at lukke skuffen,
+     opdage den tomme skærm og åbne den igen for at fortryde. */
+  const anvend = document.getElementById('apply-filters-btn');
+  if (anvend){
+    anvend.textContent = total === 0 ? 'Ingen annoncer matcher'
+      : total === 1 ? 'Vis 1 annonce'
+      : `Vis ${total.toLocaleString('da-DK')} annoncer`;
+  }
 
   // Dynamisk H1 fra aktive mærker/regioner — scannability + SEO (konkurrenter
   // scorer på "Brugte Yamaha til salg i København").
@@ -1126,7 +1685,7 @@ function render(){
     // adresser, indtil vi har tegnet de rigtige. Nu er de rigtige.
     grid.style.visibility = '';
     empty.style.display = 'none';
-    paintCards(grid, pageItems);
+    paintCards(grid, pageItems, genskabPosition);
   } else {
     grid.style.display = 'none';
     empty.style.display = 'block';
@@ -1162,6 +1721,11 @@ function render(){
    ingenting skubbe til noget, brugeren kigger på. */
 function renderSecondary(pills, pageItems, heading, total, totalPages){
   seoSearchResults(pageItems, heading);
+
+  /* Facettallene hører til etape 2: de koster seks gennemløb af filterkæden,
+     og ingen venter på dem — panelet står allerede med de foregående tal, og
+     de skifter kun med et ciffer i en boks med fast bredde. */
+  renderFacetCounts();
 
   // Få-resultater-panel: gør et tyndt resultat til en konvertering i stedet for
   // et dødt hjørne (kun når brugeren faktisk har filtreret).
@@ -1265,13 +1829,27 @@ function renderModelFilter(){
   const group = document.getElementById('model-group');
   const mount = document.getElementById('filter-models');
   if (!group || !mount) return;
-  const models = [...availableModels()].sort((a, b) => a.localeCompare(b, 'da'));
+  /* Modelkataloget er større end lageret. Uden tælling stod der 40 modeller
+     under Yamaha, hvoraf 6 fandtes til salg — resten var knapper, der kun
+     kunne give nul. Modellerne tælles med den SAMME prædikat, filteret selv
+     bruger (eksakt match på l.model), så tallet ved siden af er det, klikket
+     rent faktisk giver. Modeller med nul vises ikke. */
+  const basis = anvendFiltre(Store.getAllListings(), 'models', null);
+  const antal = new Map();
+  for (const l of basis){ if (l.model) antal.set(l.model, (antal.get(l.model) || 0) + 1); }
+
+  const models = [...availableModels()]
+    .filter(m => (antal.get(m) || 0) > 0 || state.models.includes(m))
+    .sort((a, b) => a.localeCompare(b, 'da'));
   if (!state.brands.length || !models.length){
     group.hidden = true; mount.innerHTML = ''; return;
   }
   group.hidden = false;
-  mount.innerHTML = `<div class="checkbox-scroll">${models.map(m =>
-    `<label class="checkbox-row"><input type="checkbox" data-model="${escapeHTML(m)}"${state.models.includes(m) ? ' checked' : ''}>${escapeHTML(m)}</label>`).join('')}</div>`;
+  // .checkbox-list og ikke .checkbox-scroll: samme grund som mærkelisten —
+  // et rullefelt inde i arket inde i siden. Modellisten er kort (kun modeller,
+  // der findes i lageret), så den kan bare flyde.
+  mount.innerHTML = `<div class="checkbox-list">${models.map(m =>
+    `<label class="checkbox-row"><input type="checkbox" data-model="${escapeHTML(m)}"${state.models.includes(m) ? ' checked' : ''}><span>${escapeHTML(m)}</span><span class="facet-n" aria-hidden="true">${antal.get(m) || 0}</span></label>`).join('')}</div>`;
 }
 
 /* Dobbelt-tommel skyder bygget på to native range-inputs (tilgængelige,
@@ -1332,6 +1910,18 @@ function wireFilterControls(){
       state.page = 1; render();
     });
   });
+  // Prisintervallerne sætter begge ender på én gang og rydder dem igen ved
+  // andet klik. Skyderen og talfelterne følger med gennem reflectStateToUI.
+  document.querySelectorAll('#filter-price-quick .chip').forEach(ch => {
+    ch.addEventListener('click', () => {
+      const p = PRIS_INTERVALLER.find(x => x.id === ch.dataset.pris);
+      if (!p) return;
+      const alleredeValgt = erAktivtPrisinterval(p.id);
+      state.priceMin = alleredeValgt ? null : p.min;
+      state.priceMax = alleredeValgt ? null : p.max;
+      state.page = 1; render();
+    });
+  });
   // Når mærker ændres, fjern modeller der ikke længere hører til et valgt mærke.
   const pruneModels = () => { const avail = availableModels(); state.models = state.models.filter(m => avail.has(m)); };
   document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb => {
@@ -1356,20 +1946,16 @@ function wireFilterControls(){
     state.models = cb.checked ? [...state.models, m] : state.models.filter(x => x !== m);
     state.page = 1; render();
   });
-  // Typeahead i mærkelisten — skjuler rækker der ikke matcher.
   const brandSearch = document.getElementById('brand-search');
-  if (brandSearch){
-    brandSearch.addEventListener('input', () => {
-      const q = brandSearch.value.trim().toLowerCase();
-      let any = false;
-      document.querySelectorAll('#brand-list [data-brand-row]').forEach(row => {
-        const match = row.dataset.brandRow.includes(q);
-        row.hidden = !match; if (match) any = true;
-      });
-      const nr = document.getElementById('brand-noresult');
-      if (nr) nr.hidden = any;
-    });
-  }
+  if (brandSearch) brandSearch.addEventListener('input', opdaterMaerkeliste);
+  const brandMore = document.getElementById('brand-more');
+  if (brandMore) brandMore.addEventListener('click', () => {
+    maerkerUdfoldet = !maerkerUdfoldet;
+    opdaterMaerkeliste();
+    // Foldes listen sammen igen, skal fokus blive på knappen og ikke ryge
+    // med de rækker, der lige forsvandt.
+    brandMore.focus();
+  });
   document.querySelectorAll('#filter-regions input').forEach(cb => {
     cb.addEventListener('change', () => {
       const r = cb.dataset.region;
@@ -1561,6 +2147,9 @@ async function boot(){
   readStateFromURL();
   populateChrome();
   wireCoreControls();
+  // Skal stå FØR render(): paintCards kalder genskabPosition, når sidste
+  // portion kort er tegnet, og scrollRestoration skal være slået om inden da.
+  wirePositionHukommelse();
 
   /* Fra 960px står filterpanelet åbent i sidebaren. Dér SKAL det bygges før
      første maling — bygges det bagefter, folder de sytten filtergrupper sig

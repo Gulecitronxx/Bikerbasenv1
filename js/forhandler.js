@@ -1,16 +1,76 @@
-function initials(name){
-  return name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
-}
+/* ============================================================
+   Sælgerprofil (forhandler.html)
+
+   Siden har ét formål: svare på "tør jeg overføre 80.000 kr. til ham?".
+   Alt hvad der ikke hjælper med det svar, er væk.
+
+   Baren for FORHANDLERE er Bilbasens forhandlerside (bar/04-*.png). Den
+   viser adresse, åbningstider, telefonnummer, kort og hjemmeside. Vi har
+   ingen af delene: `public_profiles` udstiller syv felter — id, name, city,
+   is_dealer, company, member_since, verified — og ikke ét af dem er en
+   kontaktoplysning. For private sælgere findes baren slet ikke; Bilbasen har
+   ingen profilside for private (GAPS.md, gap 4).
+
+   Vi kan altså ikke vinde på MÆNGDEN af oplysninger. Vi kan vinde på, at
+   køberen får at vide, hvad oplysningerne er værd: hvad er kontrolleret
+   (ingenting), hvad er tastet ind af sælgeren selv (resten), og hvad
+   sælgertypen betyder for hans reklamationsret. Det sidste er den eneste
+   oplysning på siden, der kan koste eller redde ham penge, og Bilbasens
+   forhandlerside nævner det ikke med ét ord.
+   ============================================================ */
 
 let currentSeller = null;
-let pickedStars = 5;
 
-function starsHTML(rating){
-  const full = Math.round(rating);
-  return `<span class="review-stars">${Array.from({length:5}, (_,i) => Icon.star).map((s,i) => `<span style="opacity:${i < full ? 1 : 0.25}">${s}</span>`).join('')}</span>`;
+/* 0 = intet valgt. Stod før på 5, altså en færdigudfyldt topkarakter, som en
+   bruger, der kun ville skrive en kommentar, afgav uden at vide det. Tallet
+   øverst på siden er regnet af netop de karakterer — så en forudfyldt
+   femmer var en stemme, siden lagde i munden på folk. */
+let pickedStars = 0;
+
+function initials(name){
+  // filter(Boolean): to mellemrum i et navn gav et undefined-element, og
+  // "PA" blev til "P".
+  return String(name || '').split(' ').filter(Boolean).map(w => w[0]).slice(0,2).join('').toUpperCase();
 }
 
-/* Databaseanmeldelser når sælgeren er en rigtig bruger; ellers de lokale
+/* Datoer i den korte danske form: 16. aug. 2026.
+   Kopi af datoKort()/talDa() fra js/annonce.js med vilje — den fil indlæses
+   ikke på denne side, og at hive den ind for to hjælpefunktioner ville koste
+   hele annoncesidens JS på en profilside. Skrivemåden skal være den samme
+   begge steder; ændres den ene, skal den anden med. */
+function datoKort(iso){
+  const t = new Date(iso || '').getTime();
+  if (!t) return '';
+  return new Date(t).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function talDa(n){
+  return String(n).replace('.', ',');
+}
+
+/* Stjernerækken må aldrig sige mere end tallet ved siden af den.
+
+   Her stod `Math.round(rating)`. En anmeldelse på 4,5 blev derfor tegnet med
+   FEM fyldte stjerner, mens gennemsnittet stod 4,5 — og på en profil med én
+   anmeldelse så det ud, som om vi havde fundet på tallet. Det havde vi ikke:
+   regnestykket var rigtigt hele tiden, det var BILLEDET, der løj. Samme
+   mekanik gav "3,8 af 2 anmeldelser" på annoncernes sælgerkort, hvor de to
+   anmeldelser på 4 og 3,5 begge stod med fire fyldte stjerner.
+
+   Nu fyldes hver stjerne kun så meget, karakteren rækker til, og der rundes
+   aldrig op. Halve karakterer kan ikke længere opstå (se SEED_REVIEWS i
+   js/data.js), men funktionen skal ikke kunne lyve, hvis de gør. */
+function starsHTML(rating){
+  const v = Math.max(0, Math.min(5, Number(rating) || 0));
+  return `<span class="review-stars" aria-label="${talDa(Math.round(v * 10) / 10)} ud af 5 stjerner">${
+    Array.from({length:5}, (_,i) => {
+      const del = Math.max(0, Math.min(1, v - i));   // 0 = tom stjerne, 1 = fyldt
+      return `<span aria-hidden="true" style="opacity:${(0.25 + 0.75 * del).toFixed(2)}">${Icon.star}</span>`;
+    }).join('')
+  }</span>`;
+}
+
+/* ---------- Anmeldelser ----------
+   Databaseanmeldelser når sælgeren er en rigtig bruger; ellers de lokale
    demoanmeldelser, så profilsiderne for demodata stadig ser levende ud. */
 async function loadReviews(){
   const seller = currentSeller;
@@ -24,39 +84,199 @@ async function loadReviews(){
         date: r.created_at,
       }));
     }
+    // Fejlede kaldet, har vi ingen anmeldelser at vise — og de LOKALE
+    // demoanmeldelser hører til en anden sælger med samme navn. Før faldt
+    // koden tilbage på dem og viste fremmede menneskers ros på en rigtig
+    // profil.
+    return [];
   }
   return Store.getReviews(seller.name);
 }
 
-async function renderReviews(){
-  const reviews = await loadReviews();
-  document.getElementById('reviews-list').innerHTML = reviews.length ? reviews.map(r => `
-    <div class="review-item">
-      <div class="review-head">
-        <span class="review-author">${escapeHTML(r.author)}</span>
-        <span class="review-date">${new Date(r.date).toLocaleDateString('da-DK')}</span>
-      </div>
-      ${starsHTML(r.rating)}
-      <p class="review-comment" style="margin-top:6px;">${escapeHTML(r.comment)}</p>
-    </div>`).join('') : `<p style="color:var(--color-fg-muted); font-size:14px;">Ingen anmeldelser endnu.</p>`;
+/* Gennemsnittet er ikke bare summen delt med antallet.
 
-  const avg = reviews.length
-    ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10
-    : null;
-  const stats = document.querySelectorAll('.profile-stats-row .seller-stat b');
-  if (stats[0]) stats[0].textContent = avg ?? '–';
-  if (stats[1]) stats[1].textContent = reviews.length;
+   Under `Store.MIN_ANMELDELSER_FOR_SNIT` giver vi intet tal — begrundelsen
+   står i js/store.js. Grænsen læses derfra i stedet for at blive skrevet om
+   her, så profilen og sælgerkortet på annoncen ikke kan komme til at sige
+   hver sit om den samme sælger. Anmeldelserne selv skjules ikke; det er kun
+   sammenfatningen til ét tal, der venter, til der er noget at sammenfatte. */
+function gennemsnit(reviews){
+  if (reviews.length < Store.MIN_ANMELDELSER_FOR_SNIT) return null;
+  return Math.round((reviews.reduce((s, r) => s + Number(r.rating), 0) / reviews.length) * 10) / 10;
+}
+
+/* Hvem må skrive en anmeldelse?
+
+   Betingelsen skal stå FØR formularen. En formular, der er dømt til at fejle,
+   koster brugeren arbejdet OG siden dens troværdighed — og en formular, der
+   IKKE fejler, men lader en anonym besøgende fodre stjernetallet, er værre
+   endnu.
+
+   HER SLAP DEN FORBI I RUNDE 1: gaten lå bag `if (!db.enabled || !seller.id)`
+   og greb derfor aldrig i praksis. Alle 51 demosælgere kendes på NAVN og har
+   intet `seller.id` (se hentSaelgerLokalt()), og databasen har nul annoncer —
+   så hver eneste profil, en besøgende faktisk kan nå, faldt i den åbne gren.
+   Efterprøvet udlogget på `forhandler.html?id=Motorcykel Centret ApS`:
+   formularen stod der, og `Store.addReview()` skrev anmeldelsen ind uden ét
+   spørgsmål. Login er nu FØRSTE betingelse, uanset hvor anmeldelsen ender. */
+function anmeldelsesFormHTML(){
+  const seller = currentSeller;
+  const bruger = Store.getUser();
+
+  if (!bruger){
+    const her = location.pathname.split('/').pop() + location.search;
+    return `
+      <p class="anmeld-krav">${Icon.lock}<span>Kun indloggede brugere kan bedømme en sælger. Det er dét, der holder antallet af opdigtede anmeldelser nede — og gør de anmeldelser, der står her, noget værd.</span></p>
+      <a class="btn btn-outline" href="login.html?redirect=${encodeURIComponent(her)}">${Icon.user}Log ind og bedøm</a>`;
+  }
+  if (bruger.id && seller.id && bruger.id === seller.id){
+    return `<p class="anmeld-krav">${Icon.info}<span>Det er din egen profil. Du kan ikke bedømme dig selv.</span></p>`;
+  }
+
+  /* Demosælgeren er ikke en konto. Anmeldelsen kan derfor hverken knyttes til
+     en handel eller nå længere end til denne browser, og det skal stå der —
+     ikke opdages bagefter. */
+  const kunLokalt = (!db.enabled || !seller.id)
+    ? `<p class="anmeld-krav anmeld-krav-lokal">${Icon.info}<span>Denne sælger er ikke en Bikerbasen-konto, så din bedømmelse bliver kun gemt i din egen browser. Den tæller ikke med for andre.</span></p>`
+    : '';
+
+  return `
+    ${kunLokalt}
+    <form id="review-form" class="anmeld-form">
+      <div class="star-picker" id="star-picker" role="group" aria-label="Vælg antal stjerner"></div>
+      <div class="field" style="margin-top:12px;">
+        <label for="review-comment">Kommentar</label>
+        <textarea class="input" id="review-comment" rows="3" placeholder="Hvordan var din oplevelse med denne sælger?" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:14px;">Send bedømmelse</button>
+    </form>`;
 }
 
 function renderStarPicker(){
   const mount = document.getElementById('star-picker');
-  mount.innerHTML = Array.from({length:5}, (_,i) => `<button type="button" data-star="${i+1}" class="${i < pickedStars ? 'active' : ''}">${Icon.star}</button>`).join('');
+  if (!mount) return;
+  mount.innerHTML = Array.from({length:5}, (_,i) =>
+    `<button type="button" data-star="${i+1}" aria-pressed="${i < pickedStars}" aria-label="${i+1} ${i === 0 ? 'stjerne' : 'stjerner'}" class="${i < pickedStars ? 'active' : ''}">${Icon.star}</button>`
+  ).join('');
   mount.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => { pickedStars = Number(btn.dataset.star); renderStarPicker(); });
   });
 }
 
-/* Viser en ærlig "findes ikke"-tilstand.
+async function renderAnmeldelser(){
+  const reviews = await loadReviews();
+  const avg = gennemsnit(reviews);
+  const mount = document.getElementById('profil-anmeldelser');
+
+  /* Overskriften siger antallet. "Anmeldelser" alene tvinger køberen til at
+     tælle selv for at finde ud af, om der står noget bag stjernerne.
+
+     Tre tilstande, ikke to. Den midterste — anmeldelser findes, men for få
+     til et gennemsnit — er den, der før blev pyntet med et tal. Nu siger
+     linjen, hvor mange der er, og hvorfor der ikke står et snit. Antallet
+     står altså tydeligt, uanset om tallet gør. */
+  const antalOrd = `${reviews.length} ${reviews.length === 1 ? 'anmeldelse' : 'anmeldelser'}`;
+  const hoved = !reviews.length
+    ? `<h2>Anmeldelser</h2>
+       <p class="profil-anmeld-snit"><span>Ingen har bedømt denne sælger endnu. En profil uden anmeldelser er ikke en advarsel — den er bare ubeskrevet. Bed om at se motorcyklen, som du ville gøre uanset hvad.</span></p>`
+    : avg != null
+      ? `<h2>Anmeldelser <span class="profil-tal">${reviews.length}</span></h2>
+         <p class="profil-anmeld-snit">${starsHTML(avg)}<span>${talDa(avg)} i gennemsnit af ${antalOrd}</span></p>`
+      : `<h2>Anmeldelser <span class="profil-tal">${reviews.length}</span></h2>
+         <p class="profil-anmeld-snit"><span>Der er ${antalOrd} af denne sælger, og vi regner først et gennemsnit fra ${Store.MIN_ANMELDELSER_FOR_SNIT}. Et snit af ${reviews.length === 1 ? 'én mening' : 'to meninger'} ser ud som en karakter, men er det ikke. Læs ${reviews.length === 1 ? 'den' : 'dem'} i stedet — ${reviews.length === 1 ? 'den' : 'de'} står her.</span></p>`;
+
+  mount.innerHTML = `
+    ${hoved}
+    <div class="anmeld-liste">${reviews.map(r => `
+      <div class="review-item">
+        <div class="review-head">
+          <span class="review-author">${escapeHTML(r.author)}</span>
+          <span class="review-date">${datoKort(r.date)}</span>
+        </div>
+        ${starsHTML(r.rating)}
+        <p class="review-comment" style="margin-top:6px;">${escapeHTML(r.comment)}</p>
+      </div>`).join('')}</div>
+    <div class="anmeld-skriv">
+      <h3>Har du handlet med sælgeren?</h3>
+      ${anmeldelsesFormHTML()}
+    </div>`;
+
+  renderStarPicker();
+  wireAnmeldelsesForm();
+
+  // Tallet i toppen skal matche det, der står længere nede på siden.
+  opdaterBedoemmelse({ reviews: reviews.length, avg });
+}
+
+function wireAnmeldelsesForm(){
+  const form = document.getElementById('review-form');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const seller = currentSeller;
+    const comment = document.getElementById('review-comment').value.trim();
+
+    // Ingen stjerner valgt = ingen karakter at lægge til gennemsnittet.
+    if (!pickedStars){ toast('Vælg et antal stjerner først'); return; }
+
+    if (db.enabled && seller.id){
+      const { error } = await db.addReview(seller.id, pickedStars, comment);
+      if (error){
+        // Databasen håndhæver selv "én anmeldelse pr. sælger" og "ikke dig selv".
+        const m = error.message || '';
+        if (m.includes('no_self_review') || m.includes('duplicate key')) toast('Du har allerede bedømt denne sælger');
+        else if (m.includes('not_own_profile')) toast('Du kan ikke bedømme dig selv');
+        else toast(error.message, { type: 'error' });
+        return;
+      }
+    } else {
+      /* Navnet kommer fra kontoen, ikke fra et frit tekstfelt. Feltet "Dit
+         navn" gjorde enhver anmeldelse anonym i praksis — man kunne skrive
+         hvad som helst, og gjorde man ingenting, stod der "Anonym bruger"
+         under en femstjernet karakter. */
+      const author = Store.getUser()?.name || 'Bruger';
+      Store.addReview(seller.name, { author, rating: pickedStars, comment, date: new Date().toISOString() });
+    }
+
+    pickedStars = 0;
+    await renderAnmeldelser();
+    toast('Tak for din bedømmelse');
+  });
+}
+
+/* ---------- Bedømmelsen i toppen ----------
+
+   Her stod før en hel række nøgletal: "– Bedømmelse / 0 Anmeldelser /
+   0 Aktive annoncer". To ting var galt med den.
+
+   Bindestregen: et "–" i feltet Bedømmelse ligner en dårlig karakter. Ingen
+   af de rigtige profiler har en anmeldelse endnu, så alle tre profiler bar
+   en tom karakter rundt. Annoncesiden løste det for længst ved at UDELADE
+   tallet (saelgerKortHTML i js/annonce.js) — samme regel her.
+
+   Annoncetallet: det stod tre steder på samme skærm (overskriften
+   "5 motorcykler til salg", faktalisten og nøgletallet). Det står nu ét sted.
+
+   Tilbage er bedømmelsen, og den er flyttet ind i linjen under navnet som en
+   lille chip. Den er sidst i rækken, så den kan komme til efter
+   anmeldelseskaldet uden at flytte noget, der allerede er tegnet. */
+function opdaterBedoemmelse({ reviews, avg }){
+  const mount = document.getElementById('profil-bedoemmelse');
+  if (!mount) return;
+  if (!reviews){ mount.innerHTML = ''; return; }
+  const antal = `${reviews} ${reviews === 1 ? 'anmeldelse' : 'anmeldelser'}`;
+  /* Tallet må aldrig stå uden sit antal — "4,5" alene lyder som en karakter,
+     nogen har regnet på et grundlag. Og er der for få anmeldelser til et
+     snit, står ANTALLET alene: det er en oplysning, vi har fuld dækning for,
+     og chippen fører derned, hvor køberen selv kan læse dem. */
+  mount.innerHTML = avg != null
+    ? `<a class="profil-karakter" href="#profil-anmeldelser">${Icon.star}<b>${talDa(avg)}</b>
+       <span>${antal}</span></a>`
+    : `<a class="profil-karakter profil-karakter-uden-snit" href="#profil-anmeldelser">${Icon.star}
+       <span>${antal}</span></a>`;
+}
+
+/* ---------- "Findes ikke" ----------
 
    Før faldt siden tilbage på den første sælger i listen, når id'et ikke gav
    et hit. Man kunne altså klikke ind på én sælger og få en helt anden
@@ -66,7 +286,7 @@ function renderProfileNotFound(){
   Seo.setMeta('meta[name="robots"]', 'name', 'robots', 'noindex, follow');
   document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
   document.getElementById('profile-top').innerHTML = `
-    <div class="empty-state" style="grid-column:1/-1;">
+    <div class="empty-state" style="width:100%;">
       ${Icon.user}
       <!-- h2, ikke h3: samme grund som i annonce.js — siden har kun sin
            tomme h1, så h3 springer et niveau over. -->
@@ -74,36 +294,211 @@ function renderProfileNotFound(){
       <p>Profilen er måske slettet, eller linket er forkert.</p>
       <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
     </div>`;
-  document.getElementById('profile-stats-row').innerHTML = '';
-  document.querySelector('.profile-tabs')?.remove();
-  ['tab-annoncer','tab-anmeldelser','tab-om'].forEach(id => document.getElementById(id)?.remove());
+  document.getElementById('profil-krop')?.remove();
+  document.getElementById('profil-anmeldelser')?.remove();
 }
 
-/* Henter sælgeren ud fra seller_id.
+/* ---------- Henter sælgeren ud fra seller_id ----------
 
    Tidligere blev der slået op på navn, hvilket gav to problemer: to sælgere
    med samme navn smeltede sammen til én profil, og navnet lå i URL'en.
    Annoncerne hentes direkte fra databasen frem for at filtrere den
    indlæste side, så en sælger med mange annoncer viser dem alle. */
+function hentSaelgerLokalt(noegle){
+  /* Eksterne annoncer har `seller: null` (se normalizeExternalListing i
+     js/backend-bridge.js). Uden vagten herunder blev de til strengen
+     "undefined", og en URL med ?id=undefined ville samle dem alle sammen
+     til én opdigtet sælgerprofil. */
+  const alle = Store.getAllListings().filter(l => {
+    const k = l.seller?.id ?? l.seller?.name;
+    return k != null && String(k) === String(noegle);
+  });
+  return { seller: alle[0]?.seller || null, listings: alle };
+}
+
 async function hentSaelger(sellerId){
-  if (!db.enabled){
-    const alle = Store.getAllListings().filter(l => String(l.seller?.id ?? l.seller?.name) === String(sellerId));
-    return { seller: alle[0]?.seller || null, listings: alle };
-  }
+  if (!db.enabled) return hentSaelgerLokalt(sellerId);
+
+  /* Nøglen er ikke en uuid. Så hører den ikke til i databasen — men den kan
+     godt høre til demodataene i js/data.js, hvis sælgeren er en, der kun
+     findes i browseren. Dem har annoncesiden ingen uuid at linke på
+     (demosælgere har navn, ikke id), så nøglen ER navnet.
+
+     Før stod der `renderProfileNotFound()` her, og det ramte alle 51
+     demoannoncer: hver eneste "Se sælgerprofil" endte på "Sælgeren findes
+     ikke", fordi db.enabled er sand på localhost. Opslaget her sker kun i
+     hukommelsen; der går aldrig en ikke-uuid videre til Postgres. I drift
+     er LISTINGS tom (SHOW_DEMO_DATA er false uden for localhost), så en
+     opdigtet nøgle giver stadig "findes ikke" — som den skal. */
+  if (!isUuid(sellerId)) return hentSaelgerLokalt(sellerId);
+
   const [{ data: profil }, { data: annoncer }] = await Promise.all([
     db.getPublicProfile(sellerId),
     db.listingsBySeller(sellerId),
   ]);
   if (!profil) return { seller: null, listings: [] };
   return {
+    /* Præcis de syv kolonner public_profiles har. Der stod før `phone: null`
+       og `rating: null` her, og de to felter fik siden til at tegne en
+       telefonknap og et bedømmelsestal, der aldrig kunne blive til noget.
+       Findes feltet ikke, skal det heller ikke opfindes som null. */
     seller: {
-      id: profil.id, name: profil.name || 'Ukendt sælger', city: profil.city || '',
-      isDealer: !!profil.is_dealer, company: profil.company || null,
-      verified: !!profil.verified, memberSince: profil.member_since,
-      rating: null, reviews: 0, phone: null,
+      id: profil.id,
+      name: profil.name || 'Ukendt sælger',
+      city: profil.city || '',
+      isDealer: !!profil.is_dealer,
+      company: profil.company || null,
+      memberSince: profil.member_since,
     },
     listings: (annoncer || []).map(normalizeRemoteListing),
   };
+}
+
+/* ---------- Identiteten øverst ----------
+
+   Hvem står der på skiltet? For en forhandler er det FIRMAET — det er det
+   navn, en køber genkender, googler og slår op i CVR-registret, og det er
+   sådan Bilbasens forhandlerside gør det ("NBC Biler ApS"). Personens navn
+   forsvinder ikke; det står som en linje i oplysningerne nedenunder, hvor
+   det ikke bliver forvekslet med virksomheden.
+
+   Sælgertypen står som en mærkat, ikke som en grå metalinje. "Er det tydeligt
+   HVEM der sælger — forhandler eller privat — uden at klikke?" er første
+   spørgsmål i tillidskategorien, og svaret skal kunne læses på afstand. */
+function renderIdentitet(seller, listings){
+  const erForhandler = !!seller.isDealer;
+  const titel = erForhandler && seller.company ? seller.company : seller.name;
+  const nyeste = listings.map(l => l.createdAt).filter(Boolean).sort().pop();
+
+  const kontakt = listings.length
+    ? `<a class="btn btn-primary" href="annonce.html?id=${encodeURIComponent(listings[0].id)}">${Icon.mail}Skriv om en annonce</a>
+       <p class="profil-kontakt-note">${Icon.info}<span>Kontakt går gennem annoncen, så sælgeren kan se, hvilken motorcykel du spørger til.</span></p>`
+    /* Ingen annoncer = ingen kontaktvej. Før stod knappen "Skriv besked" her
+       alligevel og gjorde bogstavelig talt ingenting ved klik, fordi den
+       pegede på listings[0]. En knap, der ikke virker, er værre end ingen
+       knap — og værst på den side, hvor køberen prøver at afgøre, om nogen
+       er til at få fat i. */
+    : `<p class="profil-kontakt-note">${Icon.info}<span>Sælgeren har ingen aktive annoncer, og kontakt på Bikerbasen går gennem en annonce. Der er derfor ingen vej til sælgeren herfra lige nu.</span></p>`;
+
+  document.getElementById('profile-top').innerHTML = `
+    <div class="avatar-lg">${erForhandler ? Icon.store : escapeHTML(initials(seller.name))}</div>
+    <div class="profile-info">
+      <p class="profile-name">${escapeHTML(titel)}</p>
+      <p class="profil-type">
+        <span class="badge ${erForhandler ? 'badge-dealer' : 'badge-neutral'}">${erForhandler ? Icon.store+'Forhandler' : Icon.user+'Privat sælger'}</span>
+        ${seller.city ? `<span class="profil-type-sted">${Icon.mapPin}${escapeHTML(seller.city)}</span>` : ''}
+        <span class="profil-type-sted">${Icon.calendar}Medlem siden ${escapeHTML(String(seller.memberSince ?? 'ukendt år'))}</span>
+        <span id="profil-bedoemmelse"></span>
+      </p>
+    </div>
+    <div class="profile-actions">${kontakt}</div>`;
+
+  return nyeste;
+}
+
+/* ---------- Oplysningerne, og hvad de er værd ----------
+
+   Det her er sidens egentlige svar på "kan jeg stole på ham?".
+
+   Bilbasens forhandlerside viser adresse, åbningstider, telefonnummer og
+   hjemmeside, og lader køberen selv slutte, at nogen har tjekket det. Vi kan
+   ikke vise de felter — public_profiles har dem ikke — men vi kan gøre det,
+   ingen af siderne gør: sige lige ud, hvor oplysningerne kommer fra.
+
+   Hver linje er enten et felt fra public_profiles eller et tal, der er talt
+   op på siden. Der er ingen linje, vi ikke har dækning for, og felter uden
+   værdi skriver "Ikke oplyst" i stedet for at falde væk — for på en
+   forhandlerprofil er en manglende by faktisk en oplysning. */
+function renderOplysninger(seller, listings, nyesteAnnonce){
+  const erForhandler = !!seller.isDealer;
+  const titel = erForhandler && seller.company ? seller.company : seller.name;
+  const raekker = [
+    ['Sælgertype', erForhandler ? 'Forhandler' : 'Privat sælger'],
+    /* Firmanavn og profilnavn står KUN, når de tilføjer noget.
+
+       Her stod før "Firmanavn: Ikke oplyst" på enhver forhandler uden et
+       `company`-felt — direkte under en overskrift, hvor der stod
+       "Motorcykel Centret ApS". To ting var galt: linjen modsagde
+       overskriften, og "Ikke oplyst" var et gæt. Vi ved ikke, om en
+       forhandler mangler et firmanavn, eller om navnet ER firmanavnet;
+       `public_profiles` skelner ikke. Ved vi det ikke, siger vi ingenting —
+       i modsætning til `city`, hvor en tom værdi ER en manglende oplysning.
+
+       Samme regel for profilnavnet: er det identisk med overskriften, er
+       rækken bare den samme streng en gang til. */
+    (erForhandler && seller.company) ? ['Firmanavn', escapeHTML(seller.company)] : null,
+    seller.name !== titel ? ['Navn på profilen', escapeHTML(seller.name)] : null,
+    ['By', seller.city ? escapeHTML(seller.city) : 'Ikke oplyst'],
+    ['Medlem siden', seller.memberSince ? escapeHTML(String(seller.memberSince)) : 'Ikke oplyst'],
+    ['Aktive annoncer', String(listings.length)],
+    /* "Ser siden ud til at være vedligeholdt i år, eller ser den forladt ud?"
+       Datoen er ikke et skøn: den er den nyeste createdAt blandt sælgerens
+       egne annoncer. Har han ingen, står der hvad det er — ikke en dato. */
+    ['Seneste annonce', nyesteAnnonce ? datoKort(nyesteAnnonce) : 'Ingen aktive annoncer'],
+  ].filter(Boolean);
+
+  document.getElementById('profil-side').innerHTML = `
+    <div class="sidebar-card">
+      <h2 class="profil-side-titel">Om sælgeren</h2>
+      <dl class="profil-fakta">
+        ${raekker.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}
+      </dl>
+      <!-- Samme linje som verifiedBadgeHTML() i js/components.js er slået fra
+           for: MitID kræver en godkendt broker, der ikke er sat op, og CVR
+           bliver ikke slået op. Her siger vi det højt i stedet for at lade
+           køberen tro, at et pænt profilkort betyder, at nogen har tjekket. -->
+      <p class="profil-kilde">${Icon.info}<span><b>Ingen af oplysningerne er kontrolleret af Bikerbasen.</b> De er tastet ind af sælgeren selv. Vi slår ikke op i CVR- eller MitID-registret, så læs dem som en oplysning — ikke som en godkendelse.</span></p>
+    </div>
+
+    <!-- Den ene oplysning på siden, der kan koste køberen penge. Teksten er
+         den samme som på annoncesiden (sellerTypeNoteHTML i js/components.js),
+         så forhandler/privat betyder det samme begge steder. -->
+    <div class="profil-jura">${sellerTypeNoteHTML(erForhandler)}</div>
+
+    <div class="sidebar-card profil-anmeld-kort">
+      <button type="button" class="report-link" id="report-profile-btn">${Icon.flag}Anmeld profil</button>
+    </div>`;
+
+  document.getElementById('report-profile-btn').addEventListener('click', () => {
+    openReportModal('profile', seller.name, seller.id || seller.name);
+  });
+}
+
+/* ---------- Annoncerne ----------
+
+   Listevisning, ikke gallerikort. Vores egne annoncer har ingen uploadede
+   fotos, så hvert kort ville tegne den illustrerede pladsholder — og tolv
+   ens tegninger i et gitter ligner en side, der er fyldt op med attrapper.
+   I en liste er tegningen lille, mærkaten "Intet foto" står tydeligt, og
+   pris, årgang og km — dét køberen sammenligner på — kommer først.
+   Bilbasens forhandlerside bruger i øvrigt også en tabel, ikke et gitter. */
+function renderAnnoncer(seller, listings){
+  const grid = document.getElementById('seller-listings');
+  const overskrift = document.getElementById('annoncer-overskrift');
+  // Ingen dobbelt-overskrift: står der ingenting, siger den tomme tilstand
+  // hvorfor, og h2 holder sig til at være sidens strukturelle overskrift.
+  overskrift.textContent = listings.length
+    ? `${listings.length} ${listings.length === 1 ? 'motorcykel' : 'motorcykler'} til salg`
+    : 'Annoncer';
+
+  if (!listings.length){
+    document.getElementById('seller-safety').innerHTML = '';
+    // grid-column: gitteret er fire spalter fra 1240px, og uden den her
+    // stod den tomme tilstand klemt sammen i en fjerdedels bredde med
+    // fire ord pr. linje.
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        ${Icon.search}
+        <h3>Der er ikke noget til salg lige nu</h3>
+        <p>${escapeHTML(seller.isDealer && seller.company ? seller.company : seller.name)} har ingen aktive annoncer på Bikerbasen. Profilen bliver stående, så tidligere links ikke ender blindt.</p>
+        <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Se alle motorcykler</a>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('seller-safety').innerHTML = safetyBannerHTML();
+  grid.innerHTML = listings.map(listingCardHTML).join('');
+  wireFavoriteButtons(grid);
 }
 
 async function renderProfile(){
@@ -112,124 +507,25 @@ async function renderProfile(){
 
   // Med backend er sellerId en uuid. Sender vi noget andet (et navn, en tom
   // værdi, et manipuleret link) videre til databasen, afviser Postgres det med
-  // en 400 — og det er profil-id-kolonnen der er uuid. Stop før kaldet.
+  // en 400 — og det er profil-id-kolonnen der er uuid. hentSaelger() holder
+  // den vagt: er nøglen ikke en uuid, slår den kun op lokalt.
   const decoded = decodeURIComponent(sellerId);
-  if (db.enabled && !isUuid(decoded)){ renderProfileNotFound(); return; }
-
-  const { seller, listings: sellerListings } = await hentSaelger(decoded);
+  const { seller, listings } = await hentSaelger(decoded);
   if (!seller){ renderProfileNotFound(); return; }
 
   currentSeller = seller;
-  const sellerNameEsc = escapeHTML(seller.name);
 
-  seoDealerPage(seller, sellerListings.length);
+  // Tredje argument giver en rigtig ItemList i strukturerede data i stedet
+  // for en tom stub. Se seoDealerPage() i js/seo.js.
+  seoDealerPage(seller, listings.length, listings);
   const ph1 = document.getElementById('profile-h1');
-  if (ph1) ph1.textContent = seller.name;
+  if (ph1) ph1.textContent = (seller.isDealer && seller.company) ? seller.company : seller.name;
   document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
 
-  document.getElementById('profile-top').innerHTML = `
-    <div class="avatar-lg">${initials(seller.name)}</div>
-    <div class="profile-info">
-      <p class="profile-name">${sellerNameEsc}</p>
-      <div style="margin:6px 0 4px;">${verifiedBadgeHTML(seller)}</div>
-      <div class="profile-meta">
-        ${seller.city ? `<span>${Icon.mapPin}${escapeHTML(seller.city)}</span>` : ''}
-        <span>${Icon.calendar}Medlem siden ${seller.memberSince}</span>
-        <span>${seller.isDealer ? Icon.shieldCheck+'Forhandler' : Icon.user+'Privat sælger'}</span>
-      </div>
-    </div>
-    <div class="profile-actions">
-      <button type="button" class="btn btn-outline" id="reveal-phone-profile">${Icon.phone}Vis telefonnummer</button>
-      <button type="button" class="btn btn-primary" id="msg-seller-btn">${Icon.mail}Skriv besked</button>
-    </div>`;
-
-  const avgRating = Store.getAverageRating(seller.name, Number(seller.rating));
-  const reviewCount = Store.getReviews(seller.name).length;
-  document.getElementById('profile-stats-row').innerHTML = `
-    <div class="seller-stat"><b>${avgRating ?? '–'}</b><span>Bedømmelse</span></div>
-    <div class="seller-stat"><b>${reviewCount}</b><span>Anmeldelser</span></div>
-    <div class="seller-stat"><b>${sellerListings.length}</b><span>Aktive annoncer</span></div>`;
-
-  const grid = document.getElementById('seller-listings');
-  grid.innerHTML = sellerListings.length ? sellerListings.map(listingCardHTML).join('') :
-    `<div class="empty-state">${Icon.search}<h3>Ingen aktive annoncer</h3><p>Denne sælger har ikke nogen annoncer i øjeblikket.</p></div>`;
-  wireFavoriteButtons(grid);
-
-  document.getElementById('seller-about').textContent = seller.isDealer
-    ? `${seller.name} er en registreret forhandler på Bikerbasen med fokus på kvalitetskontrollerede motorcykler og gennemsigtig stand-vurdering.`
-    : `${seller.name} er en privat sælger på Bikerbasen. Kontakt sælger direkte for spørgsmål om annoncerne.`;
-  /* Stod foer som "CVR-verificeret virksomhed" med skjold-ikon — udelukkende
-     fordi saelgeren havde tastet otte cifre ved oprettelsen. Der sker intet
-     opslag i CVR-registret, saa det var en verificerings-paastand over for
-     koeberen uden daekning. Nu staar tallet som dét, det er: oplyst af
-     saelgeren, og til at slaa op selv. */
-  document.getElementById('seller-company-info').innerHTML = (seller.isDealer && seller.cvr)
-    ? `<div class="verify-row" style="margin-top:12px;"><div class="verify-row-info">${Icon.info}<span>CVR oplyst af sælger: ${escapeHTML(seller.cvr)} — <a href="https://datacvr.virk.dk/soegeresultater?fritekst=${encodeURIComponent(seller.cvr)}" target="_blank" rel="noopener noreferrer">slå op i CVR-registret</a></span></div></div>`
-    : '';
-  document.getElementById('safety-icon').innerHTML = Icon.info;
-  document.getElementById('report-profile-btn').innerHTML = `${Icon.flag}Anmeld profil`;
-
-  await renderReviews();
-  renderStarPicker();
-
-  // Med rigtig backend kommer navnet fra profilen, så feltet ville være vildledende.
-  const authorField = document.getElementById('review-author')?.closest('.field');
-  if (authorField && db.enabled && seller.id) authorField.style.display = 'none';
-
-  /* Telefonnummeret hentes kun for indloggede — som paa annoncesiden.
-     Foer viste knappen sig selv tom og deaktiveret, naar nummeret manglede:
-     man trykkede "Vis telefonnummer" og fik en graa, tekstloes knap. Nu
-     foerer den samme sted hen som resten af siden gaar ud fra. */
-  const tlfBtn = document.getElementById('reveal-phone-profile');
-  tlfBtn.addEventListener('click', () => {
-    if (!seller.phone){
-      const tilbage = location.pathname.split('/').pop() + location.search;
-      window.location.href = 'login.html?redirect=' + encodeURIComponent(tilbage);
-      return;
-    }
-    tlfBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(seller.phone)}</span>`;
-    tlfBtn.disabled = true;
-  });
-  document.getElementById('msg-seller-btn').addEventListener('click', () => {
-    if (sellerListings[0]) window.location.href = `annonce.html?id=${sellerListings[0].id}`;
-  });
-  document.getElementById('report-profile-btn').addEventListener('click', () => {
-    openReportModal('profile', seller.name, seller.name);
-  });
-  document.getElementById('review-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const comment = document.getElementById('review-comment').value.trim();
-
-    if (db.enabled && seller.id){
-      const { error } = await db.addReview(seller.id, pickedStars, comment);
-      if (error){
-        // Databasen håndhæver selv "én anmeldelse pr. sælger" og "ikke dig selv".
-        const m = error.message || '';
-        if (m.includes('no_self_review') || m.includes('duplicate key')) toast('Du har allerede bedømt denne sælger');
-        else if (m.includes('not_own_profile')) toast('Du kan ikke bedømme dig selv');
-        else toast(error.message);
-        return;
-      }
-    } else {
-      const author = document.getElementById('review-author').value.trim() || 'Anonym bruger';
-      Store.addReview(seller.name, { author, rating: pickedStars, comment, date: new Date().toISOString() });
-    }
-
-    e.target.reset();
-    pickedStars = 5;
-    renderStarPicker();
-    await renderReviews();
-    toast('Tak for din bedømmelse');
-  });
-
-  document.querySelectorAll('#profile-tabs button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#profile-tabs button').forEach(b => b.classList.toggle('active', b === btn));
-      document.getElementById('tab-annoncer').style.display = btn.dataset.tab === 'annoncer' ? '' : 'none';
-      document.getElementById('tab-anmeldelser').style.display = btn.dataset.tab === 'anmeldelser' ? '' : 'none';
-      document.getElementById('tab-om').style.display = btn.dataset.tab === 'om' ? '' : 'none';
-    });
-  });
+  const nyeste = renderIdentitet(seller, listings);
+  renderOplysninger(seller, listings, nyeste);
+  renderAnnoncer(seller, listings);
+  await renderAnmeldelser();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

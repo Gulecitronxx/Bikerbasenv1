@@ -211,6 +211,35 @@ select.input{
 .brand-cloud:empty{ min-height: 132px; }
 .trust-strip:empty{ min-height: 172px; }
 
+/* Gulvet under indholdet: <main> må aldrig blive lavere end en skærmfuld.
+
+   De ovenstående reservationer løser det ene halve problem — at indhold
+   ankommer og skubber nedad. Det andet halve er, at indhold ankommer og er
+   MINDRE end det reserverede, så alt nedenunder rykker OPAD. Et skub opad
+   tæller lige så meget i CLS som et skub nedad.
+
+   Det var præcis det, der skete på de tomme tilstande:
+   `/annonce.html?id=1` reserverer 100vh til #listing-detail, får så en
+   fejlkasse på ~300 px og skjuler oveni .similar-strip — og footeren, der
+   var langt under folden ved første maling, sprang op i vinduet. Målt CLS
+   0,205 mobil / 0,260 desktop. `/forhandler.html` uden ?id= er værre:
+   js/forhandler.js FJERNER #profil-krop og #profil-anmeldelser fra DOM'en
+   (så en tom sælgerprofil ikke efterlader tomme sektioner), og footeren
+   flyttede sig i to skub — målt 0,294 i begge bredder. Alle fire tal er
+   røde mod grænsen på 0,10 og fejler gulvet på CLS alene.
+
+   Rettelsen er ikke at gætte hver enkelt tomtilstands højde, men at give
+   dokumentet et gulv: er <main> mindst en skærm høj, starter footeren under
+   folden både før og efter JS har kørt, og et skub uden for vinduet tæller
+   ikke med i CLS. Ingen almindelig side rører grænsen — de er alle højere
+   end 100vh i forvejen — så reglen er usynlig, når der ER indhold.
+
+   Skal med i den KRITISKE CSS (derfor her og ikke i en sidesektion): virker
+   den først, når det asynkrone ark lander, er footeren allerede malet ét
+   sted og flytter sig, når reglen ankommer. Samme grund som resten af
+   sektionen. */
+main#main-content{ min-height: calc(100vh - var(--header-h)); }
+
 /* ============ Sektionslayout (generisk) ============
    Bruges af alle sider, ikke kun forsiden. Lå tidligere under "Category
    tiles" og røg dermed ikke med i den kritiske CSS på mærke-, opret- og
@@ -431,9 +460,22 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
       color-mix(in srgb, var(--color-dark) 72%, transparent) 74%,
       color-mix(in srgb, var(--color-dark) 94%, transparent) 100%);
   }
+
+  /* Højden over søgekortet er den dyreste plads på siden.
+
+     Bilbasen er nede ved deres søgefelt 281px inde på en 844px skærm. Vores
+     brødtekst kostede 88px og gentog kun det, søgekortet selv viser: at man
+     kan filtrere på type, budget og kørekort. Den ryger på mobil — eyebrow,
+     overskrift og antalslinjen svarer allerede på "hvad er det her", og
+     kørekortfeltet står med sin egen hjælpetekst nede i kortet. På desktop er
+     der plads, og der bliver den stående. */
+  .hero p.lead{ display:none; }
+  .hero-eyebrow{ margin-bottom: var(--space-3); }
 }
 .hero > .container{ position:relative; z-index:2; width:100%; }
-.hero-inner{ position:relative; z-index:2; max-width:640px; }
+/* Samme bredde som søgekortet (720px): ved 640px brækkede overskriften i tre
+   linjer, og hver ekstra linje skubber søgekortet 59px længere ned. */
+.hero-inner{ position:relative; z-index:2; max-width:720px; }
 .hero-eyebrow{
   display:inline-flex; align-items:center; gap:8px;
   font-family:var(--font-display); font-size:12px; font-weight:600;
@@ -443,7 +485,25 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   border:1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
   padding:6px 13px; border-radius: var(--radius-pill); margin-bottom: var(--space-4);
 }
-.hero h1{ font-size: clamp(28px, 5.4vw, 56px); line-height:1.05; font-weight:700; margin-bottom: var(--space-4); text-shadow: 0 2px 28px rgba(0,0,0,.4); text-wrap: balance; }
+.hero h1{ font-size: clamp(27px, 5.4vw, 56px); line-height:1.05; font-weight:700; margin-bottom: var(--space-3); text-shadow: 0 2px 28px rgba(0,0,0,.4); text-wrap: balance; }
+
+/* Antalslinjen mellem overskrift og søgekort.
+
+   Bilbasen skriver "50.356 annoncer i dag" direkte under deres overskrift, og
+   det er det stærkeste de gør: et tal, de tør stå ved. Vores lå i 13px grå
+   under søgekortet, hvor ingen så det, og var rundet til "380+" — en afrunding
+   ligner et skøn, når man faktisk har det præcise tal.
+
+   min-height reserverer linjen. Tallet kommer først, når databasen svarer
+   (js/home.js, bid 5), og uden reservationen skubbede den tillidslinjen
+   nedenunder — målt som 0.0040 CLS ved 1252 ms på mobil. */
+.hero-count{
+  font-family: var(--font-display); font-weight:600;
+  font-size: clamp(17px, 2.1vw, 21px); line-height:1.35;
+  color:#EFEAE1; text-shadow: 0 1px 12px rgba(0,0,0,.55);
+  min-height: 1.35em; margin-bottom: var(--space-4);
+}
+.hero-count b{ color:#fff; font-weight:700; }
 /* Grupperer anden sætningshalvdel, så tankestregen ikke hænger midt i en linje. */
 /* Accentlinjen stod paa 60% hvid over et foto med luminans ~105 — den
    naaede omkring 2.5:1 og laa i praksis og floed. 82% hvid holder den
@@ -458,7 +518,60 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   border: 1px solid color-mix(in srgb, #fff 12%, transparent);
 }
 .search-row{ display:grid; grid-template-columns: 1fr; gap: var(--space-3); }
-@media (min-width: 700px){ .search-row{ grid-template-columns: 1.4fr 1fr 1fr auto; align-items:end; } }
+@media (min-width: 700px){ .search-row{ grid-template-columns: 1.4fr 1fr 1fr; align-items:end; } }
+
+/* Anden række i søgekortet: kørekort til venstre, søgeknappen til højre.
+   Knappen flyttede hertil fra første række, da kørekortvælgeren kom ind —
+   fire felter på én linje gjorde hvert felt for smalt til at læse. */
+.search-row-2{ display:flex; gap: var(--space-3); align-items:flex-end; justify-content:space-between; }
+.search-row-2 > .btn{ flex:0 0 auto; }
+
+/* Kørekortvælgeren — vores ene strukturelle fordel, i selve søgekortet.
+   Rigtige radioknapper, så piletaster, formularnulstilling og skærmlæser
+   virker af sig selv; pillerne er kun labels ovenpå. Inputtet skjules IKKE
+   med display:none — det ville tage fokus og tastaturnavigation med sig. */
+.kk-field{ border:0; margin:0; padding:0; min-width:0; flex:1 1 300px; max-width:420px; }
+.kk-field legend{
+  padding:0; margin-bottom:6px; font-size:12px; font-weight:700;
+  color: var(--color-fg-muted); text-transform:uppercase; letter-spacing:.04em;
+}
+.kk-seg{
+  display:flex; gap:4px; padding:4px;
+  background: var(--color-surface-2); border:1.5px solid var(--color-border);
+  border-radius: var(--radius-pill);
+}
+.kk-seg input{ position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+.kk-seg label{
+  flex:1 1 0; display:flex; align-items:center; justify-content:center;
+  min-height:40px; padding:0 10px; border-radius: var(--radius-pill);
+  font-weight:600; font-size:14px; color: var(--color-fg-muted);
+  cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
+  transition: background-color .15s var(--ease-out), color .15s var(--ease-out);
+}
+.kk-seg label:hover{ color: var(--color-fg); background: var(--color-surface); }
+.kk-seg input:checked + label{ background: var(--color-primary); color: var(--color-on-primary); box-shadow: var(--shadow-sm); }
+/* Fokusringen skal vises på pillen, ikke på det 1px-store input. */
+.kk-seg input:focus-visible + label{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
+/* To linjer reserveret: teksten skifter, når man vælger kategori, og uden
+   reservationen hopper chip-rækken nedenunder.
+   Desktop havde kun én linje reserveret. Det holdt, så længe linjen var den
+   samme korte sætning uanset valg — men den siger nu også, hvor mange
+   annoncer der ikke oplyser effekten ("A2: maks. 48 hk. 353 annoncer oplyser
+   ikke effekten og vises ikke."), og den sætning fylder to linjer i et felt
+   på 420 px. Reservationen er derfor to linjer overalt: knappen ved siden af
+   er bundjusteret, så et voksende hjælpefelt ville skubbe hele rækken. */
+.kk-hint{ font-size:12px; line-height:1.35; color: var(--color-fg-muted); margin-top:6px; min-height:2.7em; }
+@media (max-width:699px){
+  .search-row-2{ flex-direction:column; align-items:stretch; }
+  .search-row-2 > .btn{ width:100%; }
+  /* flex-basis følger flex-direction. Rækken er `row` på desktop, hvor
+     `flex:1 1 300px` betyder "start 300 px BRED" — men her vender rækken om
+     til `column`, og så betyder de 300 px "start 300 px HØJ". Feltet blev
+     målt til 300 px med 120 px indhold: 180 px dødt luft mellem
+     kørekortpillerne og søgeknappen, netop på den skærm hvor folden er
+     dyrest. Basis nulstilles derfor, når retningen skifter. */
+  .kk-field{ max-width:none; flex:0 0 auto; }
+}
 
 /* Ærlige tillidspointer i stedet for små tal (8/5) der afslørede tyndt lager. */
 .hero-trust{ display:flex; flex-wrap:wrap; gap:10px var(--space-5); margin-top: var(--space-5); }
@@ -1540,14 +1653,13 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
 .contact-consent{ font-size:12px; color:var(--color-fg-muted); line-height:1.5; margin-top:12px; }
 .contact-consent a{ color:var(--color-fg); text-decoration:underline; }
 
-/* Login-kortet, der erstatter sælgeroplysningerne, når man ikke er logget ind. */
-.seller-locked{ text-align:center; }
-.seller-locked-icon{ width:44px; height:44px; margin:0 auto var(--space-3); border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--color-surface-2); color:var(--color-fg-muted); }
-.seller-locked-icon svg{ width:22px; height:22px; }
-.seller-locked-title{ font-size:17px; margin-bottom:8px; }
-.seller-locked p{ font-size:14px; color:var(--color-fg-muted); line-height:1.5; margin-bottom: var(--space-4); }
-.seller-locked .btn{ margin-bottom:8px; }
-.seller-locked .safety-tip{ margin-top: var(--space-4); text-align:left; }
+/* Her stod reglerne for det gamle login-kort (.seller-locked, -icon, -title),
+   der erstattede HELE sælgerkortet, når man ikke var logget ind. Det kort
+   findes ikke længere: udlogget ser man nu sælgertype, by og bedømmelse, og
+   kun kontaktoplysningerne er bag login. Ingen af klasserne blev skrevet ud
+   af js/annonce.js nogen steder mere, så reglerne kunne ikke ramme noget.
+   Den nye forklaringslinje hedder .seller-locked-note og står i
+   annoncedetalje-sektionen nederst. */
 .toast{
   position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); z-index:400;
   background: var(--color-dark); color:#fff; padding:14px 22px; border-radius: var(--radius-pill);
@@ -2095,10 +2207,8 @@ body.overlay-open .cookie-banner{ display:none; }
 }
 .popular-chip:hover{ border-color: var(--color-primary); transform: translateY(-2px); background: var(--color-primary-tint); }
 .popular-chip svg{ width:16px; height:16px; color: var(--color-primary); }
-
-/* Live result count on hero search button */
-.hero-count-hint{ font-size:13px; color:#C7C1B8; margin-top:10px; }
-.hero-count-hint b{ color:#fff; }
+/* (.hero-count-hint blev flyttet til Hero-sektionen som .hero-count — den skal
+   med i den kritiske CSS, og "Popular searches" er ikke med på forsiden.) */
 
 /* ============ Brand landing pages ============ */
 .brand-hero{ padding: var(--space-6) 0 var(--space-5); max-width:760px; }
@@ -2430,3 +2540,577 @@ body.overlay-open .cookie-banner{ display:none; }
 .compare-table tbody th{ color: var(--color-fg-muted); font-weight:600; white-space:nowrap; }
 .compare-table tbody td{ font-weight:600; }
 @media (max-width:560px){ .compare-bar{ left:12px; right:12px; transform:none; justify-content:space-between; padding-left:16px; } }
+
+/* ===== annoncedetalje ===== */
+
+/* Pladsen til annoncen, FØR js/annonce.js har fyldt den.
+
+   annonce.html holder beholderen tom på én linje netop for at :empty kan
+   ramme (se kommentaren dér). Uden reservationen stod "Lignende annoncer" og
+   footeren øverst i vinduet ved første maling og blev skubbet en hel side ned,
+   når annoncen kom ind — målt CLS 0,49.
+
+   Reservationen er 100vh og ikke annoncens rigtige højde med vilje: højden
+   svinger med antal fotos, udstyrsliste og beskrivelsens længde, så et fast
+   tal ville ramme forkert på hver anden annonce. Det, der tæller i CLS, er
+   om noget SYNLIGT flytter sig — er der en skærmfuld reserveret, starter
+   sektionerne nedenunder under folden og skubber derfor ingenting.
+   Er annoncen højere end reservationen (den er den næsten altid), vokser
+   kassen bare forbi min-height, og der bliver ingen tom plads tilbage. */
+#listing-detail:empty{ min-height:100vh; }
+
+/* Friskhedslinjen under stedet: "Annoncen er oprettet 16. aug. 2026 · 4 uger
+   siden". Arver .listing-loc og skal kun have lidt luft og en mindre grad —
+   datoen er et støttetal, ikke sidestillet med byen. Den vises kun, når vi
+   HAR datoen: eksterne annoncer har createdAt = null (js/backend-bridge.js),
+   og så falder linjen helt væk frem for at gætte en alder. */
+.listing-alder{ margin-top:4px; font-size:13px; }
+
+/* Avataren viser initialer, når vi kender navnet, og ellers et ikon —
+   butik for en forhandler, person for en privat sælger. Uden en
+   størrelsesregel foldede den inline-svg sig ud i sin egen standardstørrelse
+   (300×150) og sprængte kortet. */
+.avatar svg{ width:24px; height:24px; }
+
+/* CVR-linjen og forklaringen under login-knapperne. Samme dæmpede
+   ikon+tekst-form som .safety-tip, men uden stregen over — de hører til
+   oplysningen lige ovenfor, ikke til et nyt afsnit. */
+.seller-cvr,
+.seller-locked-note{
+  display:flex; gap:10px; align-items:flex-start;
+  font-size:13px; line-height:1.5; color: var(--color-fg-muted);
+  margin-top: var(--space-3);
+}
+.seller-cvr svg,
+.seller-locked-note svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
+.seller-cvr a{ color: var(--color-primary); text-decoration:underline; }
+
+/* Ring op-knappen fjernes, når sælgeren ikke har oplyst et nummer.
+   .btn sætter display, og en klasseregel slår browserens indbyggede
+   [hidden]-regel — uden den her blev knappen stående og loggede brugeren ud
+   ved tryk. Se kommentaren i js/annonce.js. */
+.listing-actionbar [hidden]{ display:none; }
+
+/* Kvitteringen i kontaktmodalen.
+   Grøn nok til at læses som "det gik godt", dæmpet nok til ikke at love mere
+   end teksten kan bakke op: henvendelsen er talt på annoncen, beskeden er
+   ikke leveret. Fokus lander her efter afsendelse, så den skal kunne tage en
+   fokusring uden at hoppe. */
+.contact-receipt{
+  background: var(--color-success-tint);
+  border:1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+.contact-receipt:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
+.contact-receipt-title{
+  font-family: var(--font-display); font-weight:700; font-size:17px;
+  color: var(--color-success); margin-bottom:8px;
+}
+.contact-receipt-body{ font-size:14px; line-height:1.55; color: var(--color-fg); margin-bottom: var(--space-4); }
+/* Hensigterne gentaget. Dæmpet: det er en kvittering på noget, køberen selv
+   har skrevet, ikke ny information fra os. */
+.contact-receipt-intents{ margin-bottom: var(--space-4); }
+.contact-receipt-intents-title{ font-size:13px; font-weight:600; color: var(--color-fg-muted); margin-bottom:4px; }
+/* Reset'en sætter list-style:none på alle ul. Her SKAL punkterne være der:
+   det er en opremsning af flere ønsker, og uden mærker læses de to linjer
+   som én sætning, der er brækket forkert. */
+.contact-receipt-intents ul{ margin:0; padding-left:18px; list-style:disc; }
+.contact-receipt-intents li{ font-size:13px; line-height:1.5; color: var(--color-fg); }
+.contact-receipt-actions{ display:flex; flex-direction:column; gap:10px; }
+
+/* ---------- Annoncen uden ét eneste foto ----------
+
+   Erstatter karrusellen helt. Før stod en annonce uden billeder med "1 / 4",
+   pil frem, fire miniaturer og den samme tegnede motorcykel fire gange —
+   se den lange forklaring ved buildPhotoSet() i js/annonce.js.
+
+   Formen er hentet fra `.external-detail-photo-tom` (css/styles.css, afsnittet
+   om indekserede annoncer): kameraikon, stiplet kant, lav kasse, dæmpet
+   tekst. Det er med vilje det SAMME udtryk og ikke et nyt — de to felter
+   svarer på det samme spørgsmål på den samme sidetype, bare med hver sin
+   grund (vores sælger har ikke lagt fotos op / kilden sendte ingen med).
+   Ryddes der op, hører de to regelsæt sammen og bør slås sammen til ét.
+
+   Lav kasse, ikke fotohøjde: en halv skærm tomhed er ikke ærligere end en
+   lav kasse — den er bare tom. Højden er fast (ingen aspect-ratio), så der
+   heller ikke opstår et layouthop, når kassen kommer ind. */
+.gallery-tom{
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px; text-align:center;
+  padding: var(--space-6) var(--space-5);
+  min-height:170px;
+  border:1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  color: var(--color-fg-muted);
+}
+.gallery-tom > svg{ width:30px; height:30px; }
+.gallery-tom-titel{
+  font-family: var(--font-display); font-weight:700; font-size:17px;
+  color: var(--color-fg);
+}
+.gallery-tom-tekst{ font-size:13px; line-height:1.55; max-width:46ch; }
+/* Gemmeknappen sad før i .gallery, som er position:relative. Feltet her
+   overtager rollen, så hjertet bliver hvor køberen er vant til det. */
+.gallery-tom .fav-btn{ position:absolute; top:12px; right:12px; z-index:3; }
+/* Kant til kant på telefon, præcis som .gallery gør det. */
+@media (max-width:699px){
+  .gallery-tom{ margin-inline: calc(var(--space-4) * -1); border-radius:0; border-inline:0; }
+}
+
+/* ---------- Sælgernavnet er et link ----------
+   Understregningen kommer først ved hover/fokus: navnet står i fed i et
+   kort, hvor det tydeligvis er overskriften, og en permanent streg ville
+   gøre det til en knap blandt knapper. */
+.seller-name-link{ text-decoration:none; }
+.seller-name-link:hover,
+.seller-name-link:focus-visible{ text-decoration:underline; color: var(--color-primary-hover); }
+
+/* ---------- Højre spalte ----------
+
+   Målt af kritikeren: tom fra ca. y=1000 og ned på 1440px, altså cirka
+   halvdelen af siden ved siden af beskrivelsen. To ting retter det:
+   sælgerkortet følger med ned (sticky, samme greb som
+   .external-detail-aside bruger på kildeannoncerne), og der er kommet et
+   "Søg videre"-kort under det. */
+.listing-aside{ min-width:0; }
+.listing-aside-inner{ display:flex; flex-direction:column; gap: var(--space-4); }
+@media (min-width:960px){
+  /* .listing-detail har `align-items:start`, og dét er grunden til de to
+     lag. En gittercelle med align-items:start er kun så høj som sit eget
+     indhold — sætter man `position:sticky` direkte på den, har elementet
+     nul strækning at klæbe i, og målingen viser den bare rulle med op
+     (top -332 px i stedet for 84 px). Cellen strækkes derfor til rækkens
+     højde, og det er indholdet inde i den, der klæber.
+     BEMÆRK: `.external-detail-aside` (afsnittet om indekserede annoncer)
+     har præcis samme fejl og ét lag — dens sticky virker ikke i dag. Den
+     hører til en anden hånd; rettelsen er den samme som her. */
+  .listing-aside{ align-self:stretch; }
+  .listing-aside-inner{ position:sticky; top: calc(var(--header-h) + var(--space-4)); }
+}
+/* .sidebar-card + .sidebar-card sætter margin-top; her styrer flex-gap
+   afstanden, så den skal nulstilles for ikke at tælle dobbelt. */
+.listing-aside .sidebar-card + .sidebar-card{ margin-top:0; }
+/* Samme liste som .external-detail-next — med vilje samme udtryk. */
+.listing-next h2{ font-size:15px; margin:0 0 var(--space-3); }
+.listing-next ul{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.listing-next a{ display:block; padding:8px 0; font-size:14px; border-bottom:1px solid var(--color-border); }
+.listing-next a:hover{ color: var(--color-primary-hover); }
+.listing-next li:last-child a{ border-bottom:0; }
+
+/* ---------- Specifikationstabellens sidste række ----------
+
+   Tabellen har 10 faste felter plus dem, annoncen har udfyldt. Ved 3 spalter
+   gav 10 felter en sidste række med to huller, og hullerne var GRÅ: gitteret
+   tegner sine streger med `gap:1px` oven på en baggrund i --color-border, så
+   alt, der ikke er en celle, står som et farvet felt. Kritikeren så det som
+   "en tom celle i sidste række" — og en tom celle i en specifikationstabel
+   læses som en oplysning, der mangler, ikke som et layout, der slap op.
+
+   Flex frem for grid: cellerne får en basis på en tredjedel (halvdelen på
+   smal skærm) og lov at vokse, så den sidste række fylder bredden ud, uanset
+   hvor mange felter annoncen har. Ingen tomme celler, ingen padding-celler
+   med tom tekst, og ingen ændring af hvad der står i tabellen. */
+.spec-grid{ display:flex; flex-wrap:wrap; }
+.spec-item{ flex:1 1 calc(50% - 1px); min-width:0; }
+@media (min-width:560px){
+  .spec-item{ flex-basis: calc(33.3333% - 1px); }
+}
+
+/* ---------- Kontrast på avataren ----------
+   Målt 4,19 (#C6420E på #FFE6D9) — initialerne er 18px fed, altså under
+   grænsen for "stor tekst", så kravet er 4,5. --color-primary-hover på samme
+   flade giver 5,4 i lys tilstand og 5,7 i mørk. Ingen ny farve: det er den
+   token, resten af siden bruger til netop dét, at primærfarven skal bære
+   tekst. Scopet til annoncesiden, fordi .avatar-reglen ligger i den delte
+   del af filen (se work/DECISIONS.md). */
+#listing-detail .avatar{ color: var(--color-primary-hover); }
+
+/* ===== søgning ===== */
+
+/* ---------- Facettal ved hvert filtervalg ----------
+
+   js/search.js skrev allerede tallene ind i <span class="facet-n">, men
+   klassen fandtes ikke her. Resultatet stod på skærmen som "Sport26" og
+   "A1 (lille mc)15" — tallet klistret til etiketten uden luft, uden
+   højrestilling og uden reserveret plads.
+
+   min-width holder pladsen, FØR tallet kommer. Facettallene beregnes i
+   render-etape 2 (renderSecondary), altså en opgave efter kortene; uden en
+   reserveret bredde ville hver eneste chip i panelet rykke sig en tand til
+   højre, når tallene landede. Det er synligt fra 960px, hvor panelet står
+   åbent i sidebaren. */
+.facet-n{
+  display:inline-block; min-width:2.6ch; text-align:right;
+  margin-left:7px; font-size:11px; font-weight:600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-fg-muted);
+}
+/* I en checkbox-række skubbes tallet helt ud til højre, så man kan køre
+   lodret ned ad kolonnen og sammenligne mærker uden at læse navnene. */
+.checkbox-row .facet-n{ margin-left:auto; }
+/* Tallet i en chip dæmpes med FARVE, ikke med opacity.
+
+   Her stod `.chip .facet-n{opacity:.7}` og `.chip.active .facet-n{opacity:.85}`.
+   Opacity blander teksten med det, der ligger bag: --color-fg-muted (#6B6560,
+   5,22:1 mod hvid) blev komposit #979390 — målt 3,04:1 på 21 noder under
+   "Kørekort" og "Type", hvor kravet ved 11 px er 4,5:1. Det ene tal var grunden
+   til, at soegning.html desktop stod på tilgængelighed 97 i stedet for 100 —
+   og gulvet i bar/RUBRIC.md kategori 3 kræver 100, uanset hvor hurtig siden er.
+   På den aktive chip var hvid ved .85 oven på --color-primary 4,04:1; ren
+   arvet forgrundsfarve giver 5,01:1.
+
+   Rangordningen mellem etiket og tal er der stadig: .facet-n er
+   --color-fg-muted, mens chippens etiket er --color-fg. Den forskel kostede
+   aldrig kontrast — den ekstra gennemsigtighed gjorde. */
+.chip.active .facet-n{ color: inherit; }
+
+/* Blindgyde: valget ville give nul træf med de filtre, der allerede er sat.
+   Nedtonet OG slået fra — js/search.js sætter selv `disabled`, så den her
+   regel er kun det, øjet skal kunne se. Det valg, brugeren står PÅ, får
+   aldrig klassen (se saetFacet), ellers kunne man ikke komme ud igen. */
+.facet-empty{ opacity:.42; }
+.chip.facet-empty,
+.checkbox-row.facet-empty{ cursor:not-allowed; }
+.chip.facet-empty:hover{ border-color: var(--color-border); }
+
+/* ---------- "Tilbage til dit resultat"-markering ----------
+
+   Sat på det kort, brugeren åbnede, når han kommer tilbage til listen. Det
+   er en RAMME og ikke en baggrund: kortet skal kunne genkendes på en
+   halvsekunds skimning, uden at det ser ud som om annoncen er fremhævet
+   eller betalt for. */
+.srp .card.is-set,
+.srp .listing-row.is-set{
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 26%, transparent);
+}
+
+/* ---------- Annoncen uden foto: feltet, ikke tegningen ----------
+
+   RUNDE 1 stod her et panel med tegningen som emblem og "INTET FOTO" som
+   billedtekst. RUNDE 2 fjernede tegningen helt (js/components.js,
+   listingMediaHTML). Målt begrundelse står i kommentaren dér; kort:
+   A2-søgningen gav 14 træf, alle uden foto, og resultatet var 14 ENS grå
+   piktogrammer — samtidig med at detaljesiden ét klik senere skriver
+   "Vi viser ikke en tegning i stedet".
+
+   Feltet herunder er detaljesidens `.gallery-tom` skaleret ned til et kort:
+   samme kameraikon, samme stiplede kant, samme sætning. Det er MED VILJE
+   ikke et tredje udtryk (se work/DECISIONS.md, "Det tomme fotofelt
+   genbruger .external-detail-photo-tom's udtryk").
+
+   Reglerne er ikke scopet til .srp. Kortet er en delt komponent, og alle 51
+   annoncer, vi selv hoster, mangler foto — de står også på forsiden under
+   "Nyeste annoncer" og på sælgerprofilen. Ét udtryk, alle tre steder.
+
+   Kassen beholder sine 4:3. Et kort, der skiftede højde alt efter om der er
+   foto, ville rive gitteret skævt og koste CLS; feltet er lige så højt som
+   et foto og siger bare, at der ikke er et. */
+/* Ingen baggrundsregel her: .card-media, .row-media og .swipe-card-media har
+   allerede --color-surface-2 som bund, og feltet skal ikke være en anden
+   flade end den, et manglende foto efterlader. */
+.foto-tom{
+  position:absolute; inset:0; z-index:1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px; text-align:center;
+  /* Nederst er der 38px fri: dér står kørekort-pillen og sammenlign-knappen,
+     og teksten må ikke lande oven i dem. */
+  padding: var(--space-3) var(--space-3) 38px;
+  color: var(--color-fg-muted);
+}
+/* Den stiplede kant er feltets eneste signal om, at det er en TILSTAND og
+   ikke et billede, der ikke kom. Den ligger indad som en ::after-skygge i
+   stedet for på .card-media, fordi kortets egen kant allerede er heltrukket
+   — to kanter uden på hinanden ville se ud som en fejl. Samme 1,5 px
+   stiplede kant som .gallery-tom på detaljesiden. */
+.foto-tom::before{
+  content:""; position:absolute; inset:8px; border-radius: var(--radius-sm);
+  border:1.5px dashed var(--color-border); pointer-events:none;
+}
+/* Ikonets mål står OGSÅ inline i markuppen — den kritiske CSS indeholder
+   `.card-media svg{width:100%;height:100%}`, og dette stilark lander efter
+   første maling. Her sættes det igen, så reglen ikke kun findes ét sted. */
+.foto-tom-ikon{ flex:0 0 auto; }
+.foto-tom-ikon svg{ width:26px; height:26px; display:block; opacity:.75; }
+.foto-tom-titel{
+  margin:0; max-width:22ch;
+  font-size:12.5px; font-weight:600; line-height:1.35;
+  color: var(--color-fg-muted);
+}
+/* Listevisningens miniature er 136x102 px. Samme sætning, mindre skrift —
+   ordene forkortes ikke, for så var der to formuleringer af det samme. */
+.row-media .foto-tom{ padding:6px; gap:4px; }
+.row-media .foto-tom::before{ inset:4px; }
+.row-media .foto-tom-ikon svg{ width:18px; height:18px; }
+.row-media .foto-tom-titel{ font-size:10.5px; line-height:1.3; max-width:16ch; }
+/* Et foto vokser en anelse ved hover — det er en invitation til at klikke.
+   Feltet må ikke gøre det samme: der er ikke noget at se nærmere på. */
+.card:hover .foto-tom{ transform:none; }
+
+/* ---------- Rækkefølgen skrevet ud ----------
+
+   Sorteringen hed "Mest relevante" og var det ikke. Den hedder nu "Blandet
+   udbud", og reglen står her — ikke i en modal, ikke i et værktøjstip. Den
+   er sat som en fodnote og ikke som en boks: den er en oplysning om listen,
+   ikke en advarsel om den, og `#uoplyst-note` lige ovenover ER en boks,
+   fordi den fortæller om noget, der ER skjult. To bokse i træk over
+   resultatet ville gøre begge dele til støj. */
+.sortering-note{
+  margin: calc(var(--space-4) * -1) 0 var(--space-4);
+  font-size:12.5px; line-height:1.45; color: var(--color-fg-muted);
+  max-width: 88ch;
+}
+.sortering-note[hidden]{ display:none; }
+
+/* ---------- Mærke- og modellisten ruller ikke selv ----------
+
+   `.checkbox-scroll` (max-height 248px + overflow-y:auto) er afløst af
+   `.checkbox-list`. Kritikeren målte tre indlejrede rulleområder på en
+   telefon: mærkelisten inde i filterarkets rulning inde i sidens rulning,
+   med ca. to synlige rækker ad gangen. Nu ruller kun arket og siden.
+
+   Højden holdes i stedet af, hvor mange rækker der TEGNES —
+   opdaterMaerkeliste() i js/search.js viser 12 og folder resten ud på ét
+   tryk. Forskellen er, at brugeren kan se, at der er mere, og selv beder om
+   det, i stedet for at skulle opdage det med fingeren.
+
+   `.checkbox-scroll` er ikke slettet: den står også i den inlinede kritiske
+   CSS i hver HTML-side (genereret af scripts/build-meta.js), så en sletning
+   her rydder ikke op — den skaber bare uenighed mellem de to kopier. Ryddes
+   den, skal det ske begge steder i samme ombæring. */
+.checkbox-list{ display:flex; flex-direction:column; gap:10px; }
+.brand-more{
+  margin-top:10px; padding:6px 0; background:none; border:none;
+  font-size:13px; font-weight:600; color: var(--color-primary);
+  cursor:pointer; text-align:left;
+}
+.brand-more:hover{ text-decoration:underline; }
+.brand-more[hidden]{ display:none; }
+/* Trykmålet på en telefon: 44px, samme regel som resten af siden. */
+@media (max-width:620px){ .brand-more{ min-height:44px; } }
+
+/* ---------- Pladsreservation: hvad JS fylder i bagefter ----------
+
+   Målt på desktop 1440: CLS 0,115, hele klumpen ved 1.410 ms, med
+   .filter-group, .field-hint og .toolbar-actions som kilder.
+
+   Hvorfor det sker: filterpanelet kan ikke bygges, før annoncerne er hentet
+   — chip-teksterne, facettallene og mærkelisten kommer ALLE fra lageret (se
+   populateFilterUI og feltDaekning i js/search.js). Browseren maler derfor
+   først den statiske markup med tomme grupper, og først omkring 1,4 s
+   springer der 120 px kørekort-chips ind og skubber alt nedenunder. Panelet
+   står åbent i sidebaren fra 960px, så skreddet er synligt.
+
+   REGLERNE STÅR IKKE HER. De ligger i <style id="soeg-perf"> i
+   soegning.html, og det er ikke en smagssag: denne fil hentes med
+   rel=preload og lander EFTER første maling. En reservation, der først
+   gælder, når stilarket er kommet, kommer for sent — målt gav den et skred
+   på 0,049 ved 588 ms i stedet for 0,115 ved 1.410 ms. Kun den indlejrede
+   stil gælder ved første maling.
+
+   Skal en af højderne rettes, skal den rettes dér. */
+
+/* ===== sælgerprofil =====
+
+   forhandler.html. Baren for FORHANDLERE er bar/04-forhandlerprofil-*.png;
+   for private sælgere findes der ingen bar (GAPS.md, gap 4).
+
+   Layoutet er to spalter, fordi de to ting, siden skal svare på, er
+   forskellige spørgsmål: "hvad har han til salg?" (venstre) og "hvem er
+   han, og hvad er oplysningerne værd?" (højre). På mobil kommer højre
+   spalte FØRST — det er dét, køberen kom for, og Bilbasens egen
+   mobilvisning gør det samme (forhandlerkortet før billisten). */
+.profil-krop{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-4) var(--space-7);
+}
+.profil-hoved{ order:2; min-width:0; }
+.profil-side{ order:1; }
+@media (min-width:768px){ .profil-krop{ padding-left: var(--space-6); padding-right: var(--space-6); } }
+@media (min-width:960px){
+  .profil-krop{ grid-template-columns: minmax(0,1fr) 340px; gap: var(--space-6); }
+  .profil-hoved{ order:1; }
+  .profil-side{ order:2; }
+  /* Oplysningerne følger med ned gennem annoncelisten. En forhandler med
+     tredive motorcykler skubber ellers "ingen af det her er kontrolleret"
+     ud af skærmen efter to skærmhøjder. */
+  .profil-side{ position:sticky; top: calc(var(--header-h) + var(--space-4)); align-self:start; }
+}
+
+/* ---------- Identiteten ---------- */
+.profile-hero .avatar-lg svg{ width:38px; height:38px; }
+.profil-type{
+  display:flex; align-items:center; flex-wrap:wrap;
+  gap: 8px var(--space-4); margin-top:10px;
+}
+.profil-type .badge{ font-size:12px; padding:5px 11px; }
+.profil-type .badge svg{ width:13px; height:13px; }
+/* .badge-neutral er tegnet til at ligge OVEN PÅ et foto (næsten hvid
+   baggrund). På profilens hvide flade forsvandt "Privat sælger" helt.
+   Kun overstyret her; kortene i søgningen rører vi ikke. */
+.profil-type .badge-neutral{
+  background: var(--color-surface-2); color: var(--color-fg);
+  border:1px solid var(--color-border);
+}
+.profil-type-sted{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:14px; color: var(--color-fg-muted);
+}
+.profil-type-sted svg{ width:15px; height:15px; }
+/* Bedømmelsen som chip, ikke som nøgletal. Den er et genvejslink ned til
+   anmeldelserne, fordi et tal uden teksten bag er svært at stole på. */
+.profil-karakter{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:14px; color: var(--color-fg);
+  background: var(--color-surface-2); border:1px solid var(--color-border);
+  border-radius: var(--radius-pill); padding:4px 12px;
+}
+.profil-karakter:hover{ border-color: var(--color-primary); }
+.profil-karakter svg{ width:15px; height:15px; color: var(--color-primary); }
+.profil-karakter b{ font-family: var(--font-display); }
+.profil-karakter span{ color: var(--color-fg-muted); }
+/* Er der for få anmeldelser til et gennemsnit, står chippen uden tal — kun
+   antallet. Så skal den heller ikke ligne en karakter: stjernen tones ned til
+   et ikon på linje med de andre metaoplysninger, og teksten står i ét vægtløst
+   niveau. Uden det her læste "★ 1 anmeldelse" som en etstjernet sælger. */
+.profil-karakter-uden-snit svg{ color: var(--color-fg-muted); }
+
+.profile-hero .profile-actions{ flex-direction:column; align-items:stretch; gap:8px; max-width:300px; }
+/* Noten har en ramme, fordi den står dér hvor en knap ellers ville stå.
+   Uden ramme lignede "sælgeren har ingen aktive annoncer …" en løs
+   tekststump, der var faldet af et sted længere oppe. */
+.profil-kontakt-note{
+  display:flex; gap:8px; align-items:flex-start;
+  font-size:13px; line-height:1.5; color: var(--color-fg-muted);
+  background: var(--color-surface-2); border:1px solid var(--color-border);
+  border-radius: var(--radius-sm); padding: var(--space-3);
+}
+.profil-kontakt-note svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
+
+/* ---------- Oplysningerne ---------- */
+.profil-side-titel{ font-size:17px; margin-bottom: var(--space-2); }
+.profil-fakta{ margin:0; }
+.profil-fakta > div{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap: var(--space-4); padding:9px 0;
+  border-bottom:1px solid var(--color-border);
+}
+.profil-fakta > div:last-child{ border-bottom:none; padding-bottom:0; }
+.profil-fakta dt{ font-size:13px; color: var(--color-fg-muted); flex-shrink:0; }
+.profil-fakta dd{ margin:0; font-size:14px; font-weight:600; text-align:right; word-break:break-word; }
+.profil-kilde{
+  display:flex; gap:8px; align-items:flex-start;
+  font-size:13px; line-height:1.55; color: var(--color-fg-muted);
+  margin-top: var(--space-4); padding-top: var(--space-4);
+  border-top:1px solid var(--color-border);
+}
+.profil-kilde svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
+.profil-kilde b{ color: var(--color-fg); }
+/* .seller-type-note har selv margin-top; wrapperen findes kun for at give
+   den en plads i kolonnen. */
+.profil-jura .seller-type-note{ margin-top: var(--space-4); }
+/* "Anmeld profil" laa foer inde bag en fane og var reelt ikke et
+   touch-maal nogen ramte. Nu staar den fremme, og saa skal den ogsaa
+   overholde de 44px (Apple HIG / Material). */
+.profil-anmeld-kort{ margin-top: var(--space-4); padding: var(--space-2) var(--space-5); }
+.profil-anmeld-kort .report-link{ min-height:44px; }
+
+/* ---------- Annoncelisten ----------
+   Rækkerne er den delte listevisning fra søgesiden. Det eneste, der skal
+   væk, er sælgerlinjen på hvert kort: den siger "Privat sælger" eller
+   forhandlerens navn tolv gange i træk på sælgerens egen side. */
+.profil-hoved .card-seller{ display:none; }
+/* Den delte listevisning sætter aspect-ratio:auto på fotofeltet, så billedet
+   strækkes til rækkens højde. Det virker på et rigtigt foto med
+   object-fit:cover. Vores egne annoncer har ingen uploadede fotos, så feltet
+   indeholder den illustrerede pladsholder — en SVG, der ikke beskæres, men
+   trækkes ud på langs. Faste proportioner her holder tegningen hel. */
+@media (min-width:640px){
+  .profil-hoved .listings-grid.list-view .card-media{ aspect-ratio:4/3; align-self:flex-start; }
+}
+.profil-hoved .section-head{ margin-bottom: var(--space-4); }
+.profil-hoved .section-head h2{ font-size: clamp(20px,2.4vw,26px); }
+
+/* ---------- Anmeldelser ---------- */
+.profil-anmeldelser{
+  max-width: 720px;
+  padding: var(--space-6) 0 var(--space-9);
+  border-top:1px solid var(--color-border);
+}
+.profil-anmeldelser h2{ font-size:22px; display:flex; align-items:center; gap:10px; }
+.profil-tal{
+  font-family: var(--font-body); font-size:13px; font-weight:700;
+  background: var(--color-surface-2); color: var(--color-fg-muted);
+  padding:2px 10px; border-radius: var(--radius-pill);
+}
+.profil-anmeld-snit{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin-top:8px; font-size:14px; color: var(--color-fg-muted); line-height:1.6;
+}
+.anmeld-liste:not(:empty){ margin-top: var(--space-4); }
+.anmeld-skriv{
+  margin-top: var(--space-5); padding: var(--space-5);
+  background: var(--color-surface); border:1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.anmeld-skriv h3{ font-size:17px; margin-bottom: var(--space-3); }
+/* Betingelsen for at måtte skrive står FØR formularen, ikke som en fejl
+   bagefter. Se anmeldelsesFormHTML() i js/forhandler.js. */
+.anmeld-krav{
+  display:flex; gap:8px; align-items:flex-start;
+  font-size:13px; line-height:1.55; color: var(--color-fg-muted);
+  margin-bottom: var(--space-4);
+}
+.anmeld-krav svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
+/* Forbeholdet står OVER formularen og skal kunne ses uden at blive læst som
+   brødtekst — ellers opdager man først efter afsendelsen, at bedømmelsen
+   ikke nåede længere end til ens egen browser. */
+.anmeld-krav-lokal{
+  background: var(--color-surface-2); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-3);
+}
+
+/* ---------- Pladsreservation ----------
+   Hele siden tegnes af JS efter to databasekald. Uden reserveret højde
+   hopper alt under helten, når svaret lander — og ethvert layoutskift
+   trækker fra i hastighedskategorien. Tallene er målt på den tegnede side,
+   ikke gættet. */
+#profile-top:empty{ min-height:296px; }
+#profil-side:empty{ min-height:650px; }
+#profil-anmeldelser:empty{ min-height:416px; }
+@media (min-width:960px){
+  #profile-top:empty{ min-height:140px; }
+}
+
+/* ===== forside ===== */
+
+/* Linjen under søgeknappen: "75 annoncer er ikke talt med, fordi pris og
+   kørekortkategori ikke er oplyst på dem."
+
+   Formen er søgesidens uoplyst-note (js/search.js renderUoplystNote) — samme
+   besked skal ikke se ud som to forskellige slags information på to sider.
+   Den er dæmpet med vilje: det er en fodnote til tallet, ikke en advarsel.
+
+   Ingen fast højde reserveret. Elementet er tomt og [hidden] ved første
+   maling og dukker først op efter et filterklik, så der er ingen
+   indlæsnings-CLS at forebygge — og en reserveret højde ville til gengæld
+   koste 40px permanent luft i hero'en, hvor den primære CTA lige akkurat
+   ligger over folden på 390x844 (se .kk-field-noten længere oppe).
+   Derfor står den også UNDER knappen: dukker den op, skubber den kun
+   chip-rækken, aldrig knappen. */
+.hero-uoplyst{
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-fg-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.hero-uoplyst[hidden]{ display:none; }

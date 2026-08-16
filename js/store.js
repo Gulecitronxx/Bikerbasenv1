@@ -158,9 +158,35 @@ const Store = {
     all[sellerKey].unshift(review);
     localStorage.setItem(this.KEYS.reviews, JSON.stringify(all));
   },
-  getAverageRating(sellerKey, fallback){
+  /* Under så få anmeldelser er et gennemsnit ikke et gennemsnit — det er én
+     persons mening klædt ud som en statistik. Tre er det mindste antal, hvor
+     en enkelt utilfreds eller begejstret køber ikke ejer hele tallet. Ved 1
+     og 2 anmeldelser rummer decimalen desuden ikke ét gran mere information
+     end de anmeldelser, der står lige nedenunder: den er enten selve
+     karakteren eller midtpunktet mellem to. */
+  MIN_ANMELDELSER_FOR_SNIT: 3,
+
+  /* HER OPSTOD LØGNEN, og den skal ikke genopstå:
+
+     1) Funktionen tog et `fallback`-argument. `js/annonce.js` fodrede den med
+        `listing.seller.rating` — et tal, `js/data.js` fandt på med
+        `(4 + rnd()*0.9).toFixed(1)`. Havde sælgeren nul anmeldelser, tegnede
+        sælgerkortet altså "4,7 ★ Bedømmelse" uden at én eneste person havde
+        bedømt noget. Et gennemsnit, der ikke er regnet ud af anmeldelser,
+        er ikke et gennemsnit. Derfor er argumentet væk: findes der ingen
+        anmeldelser, findes der intet tal, og så skal der ikke stå noget.
+        (Kaldere må gerne stadig sende et andet argument — JS ignorerer det.)
+
+     2) Tallet kunne ikke udledes af det, siden selv viste. De seedede
+        anmeldelser havde halve stjerner (3,5 / 4,5), mens stjernerækken kun
+        kan tegne hele — og rundede OP. To anmeldelser på 4 og 3,5 blev til
+        et snit på 3,8 under to billeder med fire fyldte stjerner hver.
+        Rettet i `js/data.js` (SEED_REVIEWS) og `starsHTML()` i
+        `js/forhandler.js`. Reglen bagefter: en anmeldelse kan kun have den
+        værdi, brugeren faktisk kan afgive — et helt tal fra 1 til 5. */
+  getAverageRating(sellerKey){
     const reviews = this.getReviews(sellerKey);
-    if (!reviews.length) return fallback ?? null;
+    if (reviews.length < this.MIN_ANMELDELSER_FOR_SNIT) return null;
     const avg = reviews.reduce((s,r) => s + Number(r.rating), 0) / reviews.length;
     return Math.round(avg * 10) / 10;
   },

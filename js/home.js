@@ -1,19 +1,9 @@
-/* Strdter en bikeArtSVG-illustration ned til ren line-art: fjerner kort-
-   baggrund + gulvlinje og tegner kun konturerne som ét strøg. Inline styles,
-   så bike-art'ens egne .ba-svg CSS-regler ikke fylder former (fx sorte hjul
-   i mørk tilstand). Genbruges af både hero og kategori-fliser. */
-function stripBikeToLineArt(svg, strokeWidth){
-  if (!svg) return;
-  svg.querySelector('rect')?.remove();
-  svg.querySelector('.ba-ground')?.remove();
-  svg.querySelectorAll('path, line, circle, polygon, ellipse, polyline').forEach(el => {
-    el.style.setProperty('fill', 'none');
-    el.style.setProperty('stroke', 'currentColor');
-    el.style.setProperty('stroke-width', strokeWidth || '3');
-    el.style.setProperty('stroke-linecap', 'round');
-    el.style.setProperty('stroke-linejoin', 'round');
-  });
-}
+/* stripBikeToLineArt() stod her: den strøg en bikeArtSVG ned til ren
+   line-art og var skrevet til den gamle hero og de gamle kategorifliser.
+   Begge dele bruger nu rigtige fotos (img/hero-*.webp og img/type/*.webp),
+   så funktionen blev aldrig kaldt af nogen. Den er slettet frem for at ligge
+   og se ud som om forsiden stadig tegner sine egne motorcykler — en funktion,
+   der er defineret men aldrig kaldt, er et forkert kort over koden. */
 
 /* Giver hovedtråden luft mellem to bidder arbejde.
 
@@ -97,11 +87,16 @@ async function buildForside(){
 
   // Curated entry points tailored to motorcycle buyers. Holdt kort (5) — flere
   // chips druknede søgekortet og skubbede folden ned.
+  //
+  // A1/A2 stod her som to selvstændige chips. De er flyttet ind i søgekortet
+  // som et rigtigt felt, og den ene chip der er tilbage er den sammensatte:
+  // "A2 til under 60.000 kr." rammer hele købsscenariet i ét klik i stedet
+  // for tre. De øvrige er type og kilometer — det chips er gode til.
   const POPULAR = [
+    { label: 'A2 under 60.000 kr.', icon: 'bike', params: { koerekort: 'A2', maxPrice: 60000 } },
     { label: 'Under 50.000 kr.', icon: 'medal', params: { maxPrice: 50000 } },
-    { label: 'Kan køres på A2', icon: 'bike', params: { koerekort: 'A2' } },
-    { label: 'Kan køres på A1', icon: 'bike', params: { koerekort: 'A1' } },
     { label: 'Adventure', icon: 'mapPin', params: { type: 'adventure' } },
+    { label: 'Cruiser', icon: 'mapPin', params: { type: 'cruiser' } },
     { label: 'Under 10.000 km', icon: 'gauge', params: { kmMax: 10000 } },
   ];
   // Egne seneste søgninger først (Bilbasen-mønster), derefter de kuraterede.
@@ -112,41 +107,244 @@ async function buildForside(){
     return `<a class="popular-chip" href="soegning.html?${qs}">${Icon[p.icon]}${p.label}</a>`;
   }).join('');
 
-  // Live result count that reacts to the hero filters before submitting
+  /* Hvilket kørekort er valgt i hero'ens segmentvælger. */
+  const valgtKoerekort = () =>
+    document.querySelector('input[name="koerekort"]:checked')?.value || '';
+
+  /* Tal med dansk tusindtalsseparator, samme regel som formatPrice/formatKm i
+     js/data.js. Med 383 annoncer ses forskellen ikke; den dag lageret rammer
+     fire cifre, står der ellers "1400 motorcykler" på forsidens mest læste
+     linje — og det er ikke skrevet af en dansker. */
+  const daTal = (n) => n.toLocaleString('da-DK');
+
   const countHint = document.getElementById('hero-count-hint');
-  const updateHeroCount = () => {
+  const kkHint = document.getElementById('hs-kk-hint');
+  const uoplystHint = document.getElementById('hs-uoplyst-hint');
+  const submitBtn = document.getElementById('hs-submit');
+
+  /* Har lageret svaret? Indtil da er der ikke noget at udtale sig om.
+
+     Hero'en talte før det, der tilfældigvis lå i JS'en, mens netværket stadig
+     kørte. På localhost er demolageret (51) synkront tilgængeligt, mens de
+     indekserede (332) først kommer med backendReady() — så forsiden skrev
+     "51 motorcykler til salg i dag" og knappen "Vis 51 motorcykler" i cirka
+     et sekund, og rettede sig så til 383. Et tal, der retter sig selv, er
+     værre end intet tal: køberen når at se begge, og så tror han på ingen af
+     dem. Linjens højde er reserveret i CSS (.hero-count), så den korte
+     ventetid ikke koster et layouthop. */
+  let dataKlar = false;
+
+  /* Live-tælling der reagerer på hero-filtrene, før man trykker søg.
+     Tallene SKAL stemme med det, søgesiden viser bagefter — et hero-tal på 15
+     og en resultatside med 12 er en løgn, køberen opdager med det samme.
+     Derfor de samme tre regler som js/search.js anvendFiltre():
+       - pris: en annonce UDEN pris matcher ikke et maks-prisfilter
+         (`null <= 60000` er sandt i JS — det var den gamle fejl her),
+       - type: ukendt type tælles ikke med,
+       - kørekort: passerKoerekort() er det ene sted, reglen bor.
+     Efterprøvet: hero'en og soegning.html?koerekort=A2 siger begge 15.
+
+     RUNDE 2, FUND 1: og de skal ikke bare vise samme ANTAL TRÆF — de skal
+     også være enige om, hvor mange annoncer der blev valgt fra, fordi vi
+     ikke kender svaret. Det var de ikke:
+
+       forsiden   (A2 + maks. 60.000 kr.):  "53 annoncer mangler den oplysning"
+       søgesiden  (samme klik):             "75 annoncer er ikke vist"
+
+     Begge tal var rigtige svar — på hvert sit spørgsmål. 53 er de annoncer,
+     kørekortfilteret skjulte uden at kende hk. 75 er 53 + de 22 annoncer,
+     der slet ikke har en pris, og som prisfilteret derfor smed ud. Forsiden
+     talte KUN kørekortet; de 22 forsvandt her i linjen
+     `l.price != null && l.price <= maxPrice` uden at nogen sagde det.
+     Søgesiden bogfører hvert filter for sig (filtrerMedUoplyst) og lagde
+     dem sammen. Det rigtige tal er altså 75, og forsiden var den, der
+     underdrev — med præcis den slags tavse fravalg, hele ærlighedsreglen i
+     work/DECISIONS.md er skrevet imod.
+
+     Nu bogfører hero'en på samme måde: ét regnskab over alle filtre, samme
+     feltnavne og samme rækkefølge som i js/search.js anvendFiltre(), så de
+     to sider kommer frem til samme tal ved konstruktion og ikke ved held.
+
+     BEMÆRK: en annonce fjernes ved det FØRSTE filter, der ikke kan svare
+     for den, og kan derfor kun tælles én gang — ligesom på søgesiden. Det
+     er dét, der gør, at tallene må lægges sammen. */
+  const heroListe = () => {
     const q = document.getElementById('hs-query').value.trim().toLowerCase();
     const type = document.getElementById('hs-type').value;
     const maxPrice = Number(document.getElementById('hs-price').value) || null;
+    const kat = valgtKoerekort();
     let list = Store.getAllListings();
+    // Samme form som js/search.js' `uoplystSkjult`: [{ felt, antal }].
+    const skjult = [];
+
+    /* Søgesidens filtrerMedUoplyst() i hero-udgave: tre svar i stedet for to.
+       `kendt` afgør, om annoncen overhovedet kan svare på spørgsmålet —
+       kan den ikke, tælles den og ryger ud, uden at prædikatet bliver spurgt. */
+    const medUoplyst = (felt, kendt, praedikat) => {
+      const beholdt = [];
+      let antal = 0;
+      for (const l of list){
+        if (!kendt(l)) { antal++; continue; }
+        if (praedikat(l)) beholdt.push(l);
+      }
+      if (antal) skjult.push({ felt, antal });
+      list = beholdt;
+    };
+
+    // Mærke og model kender vi altid — de kommer med annoncen fra kilden.
     if (q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
-    if (type) list = list.filter(l => l.type === type);
-    if (maxPrice) list = list.filter(l => l.price <= maxPrice);
+    // Rækkefølgen er søgesidens: type før pris før kørekort.
+    if (type) medUoplyst('motorcykeltype', l => l.type != null, l => l.type === type);
+    if (maxPrice) medUoplyst('pris', l => l.price != null, l => l.price <= maxPrice);
+    if (kat){
+      /* Kørekortet kan ikke afgøres på ét felt — se skjultAfUvidenhed()
+         nedenfor. Derfor sin egen gren i stedet for `kendt`/`praedikat`. */
+      const beholdt = [];
+      let antal = 0;
+      for (const l of list){
+        if (passerKoerekort(l, kat)) beholdt.push(l);
+        else if (skjultAfUvidenhed(l, kat)) antal++;
+      }
+      if (antal) skjult.push({ felt: 'kørekortkategori', antal });
+      list = beholdt;
+    }
+    return { list, skjult, kat, harSøgt: !!(q || type || maxPrice || kat) };
+  };
+
+  /* Sætningen om de fravalgte. Feltnavnene og opremsningen er ordret dem,
+     js/search.js renderUoplystNote() bruger, så de to sider siger det samme
+     om det samme klik. Kun slutningen er forsidens egen: her er der ikke
+     noget "vist" endnu, der er et tal, man kan tælle med i. */
+  const uoplystTekst = (skjult) => {
+    const antal = skjult.reduce((sum, x) => sum + x.antal, 0);
+    if (!antal) return '';
+    // Samme felt kan skjule i to omgange — nævn det kun én gang.
+    const felter = [...new Set(skjult.map(x => x.felt))];
+    const feltTekst = felter.length === 1
+      ? felter[0]
+      : felter.slice(0, -1).join(', ') + ' og ' + felter[felter.length - 1];
+    return antal === 1
+      ? `1 annonce er ikke talt med, fordi ${feltTekst} ikke er oplyst på den. Den vises heller ikke i søgningen.`
+      : `${daTal(antal)} annoncer er ikke talt med, fordi ${feltTekst} ikke er oplyst på dem. De vises heller ikke i søgningen.`;
+  };
+
+  /* Hvor mange blev valgt fra, fordi vi ikke VED svaret?
+
+     passerKoerekort() kan kun sige ja eller nej, og et nej dækker over to vidt
+     forskellige ting: "motorcyklen er for kraftig" og "hk er ikke oplyst, så
+     vi nægter at gætte" (se kommentaren over passerKoerekort i js/data.js —
+     eksterne_annoncer har ingen hk-kolonne). For en 22-årig, der trykker A2 og
+     ser tallet falde fra 383 til 15, er forskellen alt: er markedspladsen tom,
+     eller mangler kilden bare et felt? Uden den oplysning ligner vores ene
+     strukturelle fordel en tom hylde.
+
+     Udledt uden at gentage en eneste grænse: vi spørger passerKoerekort() igen
+     med de manglende felter sat til den mindst tænkelige rigtige motorcykel
+     (1 hk, 1 cm³). Skifter svaret fra nej til ja, hang nejet på noget, vi ikke
+     ved. Flyttes A2-grænsen i js/data.js, følger tallet her med af sig selv.
+
+     Spørgsmålet er kategori for kategori — ikke "kender vi kategorien".
+     Et første forsøg brugte koerekortForListing() === null, og det var forkert
+     for A1: en 650 cm³ uden hk har ingen kendt kategori, men den er helt
+     sikkert ikke A1, for A1 HAR en ccm-grænse. Den blev talt med som "oplyser
+     ikke effekten", og linjen påstod 321, hvor det rigtige tal var 12.
+
+     Bemærk: 1 er ikke en grænse, men den gunstigste tænkelige værdi, og det
+     virker kun fordi ccm og hk begge er ØVRE grænser i A1/A2. Kommer der en
+     kategori med en nedre grænse, holder antagelsen ikke. Vagtposten er
+     js/koerekort.test.js — samme forudsætning er beskrevet ved
+     koerekortSvar() i js/search.js.
+
+     Og "A" dækker alt, så tallet dér altid bliver 0: A skjuler ingen, og så
+     skal linjen heller ikke påstå det.
+
+     DENNE FUNKTION ER EN TVILLING til koerekortSvar() i js/search.js, som er
+     den kanoniske udgave (og den, der har tests i js/koerekort.test.js).
+     Prøven er skrevet ordret som dens, så to sider ikke kan komme til at
+     svare forskelligt på samme spørgsmål: `!(Number(l.ccm) > 0)` og ikke
+     `!Number(l.ccm)`, og manglende hk afgøres af js/data.js' egen
+     hkEllerNull() — ukendt effekt staves null, "", "-" og 0, og `== null`
+     alene fanger kun de to første. De to bør slås sammen til én delt
+     funktion i js/data.js; se forslaget i work/DECISIONS.md. */
+  const skjultAfUvidenhed = (l, kat) => {
+    if (passerKoerekort(l, kat)) return false;
+    const proeve = { ...l };
+    let mangler = false;
+    if (hkEllerNull(l.power) == null){ proeve.power = 1; mangler = true; }
+    if (!(Number(l.ccm) > 0)){ proeve.ccm = 1; mangler = true; }
+    return mangler && passerKoerekort(proeve, kat);
+  };
+
+  /* Én opdatering for hele søgekortet: hjælpelinjen under kørekortvælgeren,
+     antalslinjen i hero'en og tallet på knappen. De tre siger noget om samme
+     lager og skal aldrig kunne komme ud af trit — derfor ét kald, ikke tre. */
+  const opdaterHero = () => {
+    const { list, skjult, kat, harSøgt } = heroListe();
     const n = list.length;
     const mc = n === 1 ? 'motorcykel' : 'motorcykler';
-    // "Din søgning" giver kun mening, når man faktisk har indtastet noget.
-    // Uden filtre viser vi bare totalen af, hvad der er til salg.
-    const harSøgt = q || type || maxPrice;
+
+    /* Hjælpelinjen under kørekortvælgeren. Grænserne hentes fra KOEREKORT i
+       js/data.js — de må kun stå ét sted, ellers driver de fra hinanden.
+       Etiketten trimmes for parentesen ("A2 (mellem mc)" → "A2"), fordi
+       pillen lige over den allerede siger A2.
+
+       Linjen bar før også ANTALLET af fravalgte ("332 annoncer mangler den
+       oplysning, der afgør det"). Det tal er flyttet ned i
+       #hs-uoplyst-hint, fordi kørekortet ikke er det eneste filter, der kan
+       være i tvivl — prisfilteret smider annoncer uden pris ud på præcis
+       samme måde. Ét regnskab ét sted kan stemme med søgesiden; to
+       halve regnskaber to steder kunne ikke, og det var netop fejlen. */
+    const meta = KOEREKORT.find(k => k.id === kat);
+    kkHint.textContent = !meta
+      ? 'Vi gætter aldrig: er effekten ikke oplyst, siger vi det.'
+      /* "oplysningen, der afgør det" og ikke "effekten": for A2 er det hk,
+         men for A1 er det slagvolumen — en annonce uden ccm kan ikke afvises
+         som A1, mens en på 650 cm³ kan, også uden hk. Én formulering, der er
+         sand for begge, slår to, hvor den ene kan komme til at lyve. */
+      : `${meta.label.replace(/\s*\(.*\)/, '')}: ${meta.hint.toLowerCase()}. `
+        + `Vi viser kun mc'er, vi kan svare for.`;
+
+    // Før databasen har svaret, siger vi ingenting frem for noget forkert.
+    // Det gælder også regnskabet over de fravalgte: et tal udregnet på
+    // demolageret ville rette sig selv, når de indekserede lander.
+    if (uoplystHint){
+      const tekst = dataKlar ? uoplystTekst(skjult) : '';
+      uoplystHint.textContent = tekst;
+      uoplystHint.hidden = !tekst;
+    }
+
+    if (!dataKlar){
+      countHint.textContent = '';
+      submitBtn.textContent = 'Søg motorcykler';
+      return;
+    }
+
     if (harSøgt){
       countHint.innerHTML = n
-        ? `Din søgning matcher <b>${n}</b> ${mc} lige nu.`
+        ? `Din søgning matcher <b>${daTal(n)}</b> ${mc} lige nu.`
         : `Ingen motorcykler matcher lige nu — prøv at udvide søgningen.`;
     } else {
-      // Uden filtre: vis kun totalen, når den er stærk (≥10). Et lavt tal
-      // ("1 motorcykel til salg") reklamerer for en tom markedsplads — vis intet.
+      /* Uden filtre: det præcise tal, ikke et afrundet "380+".
+         Vi HAR tallet, og Bilbasen tør skrive deres ("50.356 annoncer i dag").
+         Et rundet tal ligner et skøn og køber os intet.
+         Under 10 annoncer skriver vi det stadig ikke — så reklamerer vi for
+         en tom markedsplads i stedet for at åbne en søgning. */
       countHint.innerHTML = n >= 10
-        ? `Der er <b>${Math.floor(n/10)*10}+</b> motorcykler til salg lige nu.`
+        ? `<b>${daTal(n)}</b> motorcykler til salg i dag`
         : '';
     }
-    // Vis kun antallet på knappen, når brugeren faktisk har filtreret — ellers
-    // ville standard-CTA'en fremhæve et spinkelt "Vis 1 motorcykel". Uden
-    // filtre er "Søg motorcykler" et stærkere og renere kald til handling.
-    document.getElementById('hs-submit').textContent =
-      (harSøgt && n) ? `Vis ${n} ${n === 1 ? 'motorcykel' : 'motorcykler'}` : 'Søg motorcykler';
+    /* Knappen bærer tallet, ligesom Bilbasens "Vis 40.476 biler". Har man
+       filtreret, vises tallet altid — også et lille, for man har selv bedt om
+       det. Uden filtre kun når totalen er stærk nok (≥10) til at være et
+       argument frem for en advarsel. */
+    submitBtn.textContent =
+      (n && (harSøgt || n >= 10)) ? `Vis ${daTal(n)} ${mc}` : 'Søg motorcykler';
   };
   ['hs-query','hs-type','hs-price'].forEach(id =>
-    document.getElementById(id).addEventListener('input', updateHeroCount));
-  updateHeroCount();
+    document.getElementById(id).addEventListener('input', opdaterHero));
+  document.querySelectorAll('input[name="koerekort"]').forEach(r =>
+    r.addEventListener('change', opdaterHero));
+  opdaterHero();
 
   // hero search submit — bundet her, i første bid, så søgekortet virker
   // fra det øjeblik det kan ses (før lå det til allersidst).
@@ -155,10 +353,12 @@ async function buildForside(){
     const q = document.getElementById('hs-query').value.trim();
     const type = document.getElementById('hs-type').value;
     const maxPrice = document.getElementById('hs-price').value;
+    const kat = valgtKoerekort();
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (type) params.set('type', type);
     if (maxPrice) params.set('maxPrice', maxPrice);
+    if (kat) params.set('koerekort', kat);
     window.location.href = 'soegning.html' + (params.toString() ? '?' + params.toString() : '');
   });
 
@@ -243,13 +443,45 @@ async function buildForside(){
   if (typeof updateFavCount === 'function') updateFavCount();
 
   const ALLE = Store.getAllListings();   // databasen (+ demodata hvis slået til)
-  updateHeroCount();                     // nu med de rigtige tal fra databasen
+  dataKlar = true;                       // først NU må forsiden nævne et antal
+  opdaterHero();                         // nu med de rigtige tal fra databasen
 
   await yieldToMain();
 
   /* ============ Bid 6: nyeste annoncer ============ */
   // newest listings (by date)
   const newest = [...ALLE].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
+
+  /* Underrubrikken skal sige det, kortene siger.
+
+     Den lød "Lige landet på Bikerbasen", og alle otte kort stod med
+     "3 uger siden" under sig. Rubrikken lovede noget, indholdet modbeviste
+     et øjeblik senere — nøjagtig samme fejl som "Kuraterede fund fra hele
+     landet" i bid 7, og den er værre her, fordi "lige landet" er en påstand
+     om friskhed, køberen bruger til at vurdere hele markedspladsen.
+
+     To ting mangler at blive sagt, og begge er sande om lageret:
+       1. Hvor ny "nyeste" faktisk er. Datoen skrives ind fra annoncen selv,
+          så linjen ikke kan blive forældet igen den dag lageret står stille.
+       2. At kun de annoncer, vi selv hoster, overhovedet er med i kapløbet.
+          332 af 383 er indekserede og har med vilje ingen createdAt (se
+          normalizeExternalListing i js/backend-bridge.js — crawledatoen er
+          ikke annoncedatoen). De sorteres derfor altid bagest, og "Nyeste
+          annoncer" er i praksis "nyeste af vores egne". Uden den sætning
+          ville en køber tro, at hele markedspladsen har stået stille i tre
+          uger.
+
+     Rækkefølgen røres ikke: den er et løfte om dato, og et løfte om dato
+     holdes ved at sortere efter dato. Se work/DECISIONS.md. */
+  const nyesteSub = document.getElementById('newest-sub');
+  if (nyesteSub && newest[0]?.createdAt){
+    // Samme datoformat som js/annonce.js og js/forhandler.js: "26. jul. 2026".
+    const dato = new Date(newest[0].createdAt)
+      .toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' });
+    const eksterne = ALLE.length - ALLE.filter(l => l.createdAt).length;
+    nyesteSub.textContent = `De senest oprettede annoncer på Bikerbasen — den nyeste er fra ${dato}.`
+      + (eksterne ? ` De ${daTal(eksterne)} indekserede annoncer er ikke med: vi kender ikke deres dato hos kilden.` : '');
+  }
   // Mens databasen er ny, kan en enkelt annonce stå alene i et 4-kolonners
   // gitter med tre tomme felter ved siden af. I stedet for at opdigte
   // annoncer fylder vi rækken ud med ærlige "opret din annonce"-kort, så
@@ -258,7 +490,19 @@ async function buildForside(){
   // fylder vi resten af rækken med ÉT roligt, intentionelt CTA-kort, der spænder
   // over de ledige kolonner. Læses som "her lander nye annoncer" — ikke "tomt".
   const newestMount = document.getElementById('newest-listings');
-  const realCards = newest.map(listingCardHTML);
+  /* Indeks forskudt med 1 — med vilje.
+
+     listingCardHTML() giver kort nr. 0 loading="eager" fetchpriority="high",
+     fordi det på en resultatliste er det eneste kort, der kan ligge over
+     folden på mobil (se kommentaren i js/components.js). På FORSIDEN passer
+     den antagelse ikke: hero'en fylder hele første skærm, og det første kort
+     ligger målt 2.679 px nede ved 1440×900 — endnu længere nede på 390×844.
+     Et fetchpriority="high"-billede så langt under folden konkurrerer kun med
+     én ting, og det er hero-fotoet, som ER forsidens LCP. Derfor får intet
+     kort på forsiden hastebehandling; de er alle lazy. Samme greb i
+     "Udvalgte" og "Senest sete" nedenfor. */
+  const kortHTML = (l, i) => listingCardHTML(l, i + 1);
+  const realCards = newest.map(kortHTML);
   const wideCtaHTML = (span) => `
     <a class="newest-cta" href="opret-annonce.html" style="grid-column: span ${span};"
        aria-label="Opret en gratis annonce">
@@ -310,14 +554,42 @@ async function buildForside(){
   });
 
   /* ============ Bid 7: udvalgte + senest sete ============ */
-  // featured (curated mid-high price selection)
-  const featuredPool = [...ALLE].filter(l => l.price > 60000);
+  /* "Udvalgte annoncer — kuraterede fund fra hele landet".
+
+     Kurateringen var ren tilfældighed blandt alt over 60.000 kr., og to af de
+     fire kort landede på annoncer helt uden foto: en grå stregtegning med
+     "Intet foto" under overskriften "kuraterede fund". Det er ikke et fund,
+     det er et hul — og lige præcis her, hvor vi selv har valgt, hvad der skal
+     vises, er der ingen undskyldning for det.
+
+     Lageret har 256 annoncer over 60.000 kr. MED foto, så fotoet kan uden
+     videre være et kriterium i kurateringen. Det er ikke at skjule noget:
+     annoncerne uden foto tæller stadig med i totalen, i søgningen og i
+     "Nyeste annoncer", hvor rækkefølgen er et løfte om dato og derfor ikke må
+     pyntes. Her lover overskriften kun, at nogen har valgt dem.
+
+     Er der ikke fire med foto (nyt lager), fyldes der op med de billedløse
+     frem for at vise en halvtom række.
+
+     Rækkefølgen inden for "har foto" er vores egne før de indekserede — samme
+     linje som Store.getAllListings(): en annonce, vi selv hoster, kan køberen
+     handle på her, og den skal ikke skubbes ned af annoncer, vi kun linker
+     videre til. På localhost har demolageret ingen fotos, så rækken bliver i
+     praksis indekseret; i drift er demoannoncerne slået fra (SHOW_DEMO_DATA i
+     js/data.js), og vores egne kommer først.
+
+     Underrubrikken i index.html blev rettet samtidig: den lovede "fra hele
+     landet", men udvalget vælges på pris og foto, ikke på geografi. */
+  const dyre = [...ALLE].filter(l => l.price > 60000);
+  const harFoto = (l) => (l.photoUrls || []).length > 0;
   const rnd = seededRandom(7);
-  const featured = featuredPool
-    .map(l => ({ l, k: rnd() }))
-    .sort((a,b) => a.k - b.k)
-    .slice(0, 4)
-    .map(x => x.l);
+  const bland = (arr) => arr.map(l => ({ l, k: rnd() })).sort((a,b) => a.k - b.k).map(x => x.l);
+  const lag = [
+    dyre.filter(l => harFoto(l) && !l.isExternal),
+    dyre.filter(l => harFoto(l) && l.isExternal),
+    dyre.filter(l => !harFoto(l)),
+  ];
+  const featured = lag.flatMap(bland).slice(0, 4);
   // En overskrift uden indhold under ser i stykker ud — skjul hele sektionen.
   // Beslutningen tages NU (den er gratis), så sektionen ikke først står som et
   // tomt bånd og forsvinder, når man scroller ned til den.
@@ -325,7 +597,7 @@ async function buildForside(){
   const featuredSection = featuredMount.closest('section');
   if (featuredSection) featuredSection.hidden = featured.length === 0;
   if (featured.length){
-    await saetIndIPortioner(featuredMount, featured.map(listingCardHTML));
+    await saetIndIPortioner(featuredMount, featured.map(kortHTML));
     wireFavoriteButtons(featuredMount);
   }
 
@@ -340,7 +612,7 @@ async function buildForside(){
   if (seenSection && seenMount){
     seenSection.hidden = !seen.length;
     if (seen.length){
-      await saetIndIPortioner(seenMount, seen.map(listingCardHTML));
+      await saetIndIPortioner(seenMount, seen.map(kortHTML));
       wireFavoriteButtons(seenMount);
     }
   }
