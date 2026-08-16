@@ -19,7 +19,13 @@ const fs = require('fs');
 const path = require('path');
 const { ROOT, fetchListings, browserModules } = require('./shared');
 
-const PAGE_SIZE = 12;   // skal matche PAGE_SIZE i js/search.js
+/* Hvor mange kort der forudtegnes i markuppen — IKKE sidestørrelsen.
+   js/search.js viser 24 pr. side; de første 12 er dem, der kan nå at være
+   over folden, og de eneste der betaler sig at have i HTML'en. Resten males
+   af search.js i samme rækkefølge, så der ikke opstår en omrokering.
+   Forudtegner man hele siden, fordobles markuppen for kort, ingen ser før
+   de har scrollet. */
+const PRERENDER_COUNT = 12;
 
 (async () => {
   const { listingCardHTML, normalizeRemoteListing } = browserModules();
@@ -30,7 +36,7 @@ const PAGE_SIZE = 12;   // skal matche PAGE_SIZE i js/search.js
     .map(l => l.created_at ? normalizeRemoteListing(l) : l);
   // Samme rækkefølge som search.js' standard: 'date-desc'.
   const sorted = listings.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const page = sorted.slice(0, PAGE_SIZE);
+  const page = sorted.slice(0, PRERENDER_COUNT);
   const cards = page.map((l, i) => listingCardHTML(l, i)).join('\n');
 
   const total = sorted.length;

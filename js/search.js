@@ -1,4 +1,11 @@
-const PAGE_SIZE = 12;
+/* 12 var sat, da lageret var 51 annoncer. Med 383 blev det 32 sider — og en
+   køber, der skal bladre 32 gange for at se udbuddet, bladrer ikke. Bilbasen
+   viser 30 pr. side. 24 halverer sidetallet til 16, passer i både tre
+   spalter (8 rækker) og to (12 rækker), og listevisningen bliver en liste
+   man kan skanne i stedet for et uddrag.
+   Bemærk: scripts/build-srp.js forudtegner kun de første 12 i markuppen —
+   det er dem, der er over folden. js/search.js maler resten. */
+const PAGE_SIZE = 24;
 const EMPTY_STATE = {
   q: '', types: [], brands: [], models: [], priceMin: null, priceMax: null,
   yearMin: null, yearMax: null, kmMax: null, ccmMin: null, ccmMax: null,
@@ -212,6 +219,27 @@ function refreshSaveSearchButton(){
   btn.classList.toggle('is-saved', saved);
 }
 
+/* ============ Visningsskift ============
+
+   Gallerivisning og listevisning er ikke det samme kort i to bredder — det
+   var de før, og det er dét, der gør en listevisning ubrugelig. Et kort
+   lagt ned er stadig et kort: fotoet fylder, felterne står hvor der er
+   plads, og de flytter sig fra række til række.
+
+   En listevisning er til at SKANNE 383 annoncer. Derfor har den sin egen
+   markup (listingRowHTML) med faste zoner, så årgang står under årgang og
+   pris under pris hele vejen ned. Øjet kan køre lodret i én kolonne i
+   stedet for at lede efter det samme felt i tolv forskellige hjørner.
+
+   Valget huskes i Store.getViewMode()/setViewMode() (localStorage,
+   nøglen bb_view_mode), som resten af sitet gør det med tema og favoritter. */
+function setViewMode(mode){
+  Store.setViewMode(mode);
+  // render() og ikke bare applyViewMode(): de to visninger er forskellig
+  // markup, så gitteret skal males om — ikke bare have en ny klasse på.
+  render();
+}
+
 function applyViewMode(){
   const mode = Store.getViewMode();
   const grid = document.getElementById('results-grid');
@@ -229,6 +257,283 @@ function applyViewMode(){
     const b = document.getElementById(id);
     if (b){ b.classList.toggle('active', mode === m); b.setAttribute('aria-pressed', mode === m); }
   });
+}
+
+/* Hvilken funktion tegner ét resultat? Gitteret og listen deler data,
+   sortering, paginering og portionsvis maling — kun markuppen er forskellig. */
+function aktivKortRenderer(){
+  return Store.getViewMode() === 'list' ? listingRowHTML : listingCardHTML;
+}
+
+/* ============ Listevisning: én række pr. annonce ============
+
+   Referencens disciplin, oversat til motorcykler:
+
+     to-linjers titel    model fed og kort, variant dæmpet nedenunder. En
+                         forhandlertitel er sjældent en titel — den er en
+                         model, en variant og et par salgsmarkører klasket
+                         sammen ("XV 750 Cruiser Virago ENGROS/UDEN
+                         KLARGØRING"). Presset ned i én linje er den
+                         uskanbar; delt op kan øjet nøjes med de første to
+                         ord.
+     fire faste specs    årgang · kilometer · motor · KØREKORT, altid i den
+                         rækkefølge, altid i samme kolonne. Referencens
+                         fjerde spec er drivmiddel; vores er den, der
+                         afgør om køberen overhovedet må køre maskinen.
+     intet tomt felt     mangler et tal, står der "Ikke oplyst" dæmpet.
+                         Aldrig en tom kolonne, aldrig en stribe "–".
+
+   Og dét referencen ikke gør: kolonnerne står PÅ LINJE på tværs af rækker.
+   Bilbasens listevisning er kortet lagt ned, så km står tre forskellige
+   steder afhængigt af hvor lang titlen var. Her kan man køre lodret ned ad
+   kilometerkolonnen og sammenligne tolv motorcykler uden at læse et ord. */
+
+/* Salgsmarkører hører ikke til i en titel. De er sælgerens vilkår, ikke
+   maskinens navn, og de fylder halvdelen af linjen på en forhandlerannonce.
+   Listen er de vendinger, MC Syds katalog rent faktisk bruger.
+
+   NÅR CRAWLEREN LEVERER DEM SOM EGET FELT: sæt l.salgsmarkoerer (array) og
+   l.variant, så bruger deltTitel() dem direkte og springer gætteriet over.
+   Det er den ENESTE funktion, der skal ændres. */
+const SALGSMARKOERER = [
+  'ENGROS', 'UDEN KLARGØRING', 'MED KLARGØRING', 'UDEN GARANTI', 'MED GARANTI',
+  'BYTTER GERNE', 'BYTTE MULIGT', 'FAST PRIS', 'NYSYNET', 'SOLGT', 'RESERVERET',
+  'DEMO', 'DEMOCYKEL', 'KAMPAGNE', 'TILBUD', 'FINANSIERING', 'LEASING', 'INDBYTTET',
+];
+
+/* Deler "XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING" i:
+     model    "XV 750"            (fed, kort — det man scanner efter)
+     variant  "Cruiser Virago"    (dæmpet linje 2)
+     markers  ["ENGROS", "UDEN KLARGØRING"]
+
+   Modellen ender ved det sidste tal plus et efterfølgende kort typebogstav,
+   fordi det er sådan mc-modelnavne er skruet sammen: CBR 1000 F, R 1200 GS,
+   XL 1200 N. Uden bogstavet ville "CBR 1000" og "CBR 1000 F" ligne det
+   samme, og det er to forskellige motorcykler. */
+function deltTitel(l){
+  const brand = String(l.brand || '').trim();
+  let rest = String(l.model || '').trim();
+
+  // Kilden gentager tit mærket i titlen: "Yamaha Yamaha XV 750".
+  if (brand && rest.toLowerCase().startsWith(brand.toLowerCase())){
+    rest = rest.slice(brand.length).trim();
+  }
+
+  let markers = Array.isArray(l.salgsmarkoerer) ? l.salgsmarkoerer.slice() : [];
+  if (!markers.length){
+    // SALGSMARKOERER er en fast liste af almindelige ord — ingen
+    // regex-tegn at undslippe. Kommer der en værdi udefra en dag, SKAL den
+    // escapes her først.
+    for (const m of SALGSMARKOERER){
+      const re = new RegExp(`(^|[\\s/,-])${m}([\\s/,-]|$)`, 'i');
+      if (re.test(rest)){ markers.push(m); rest = rest.replace(re, ' ').trim(); }
+    }
+  }
+  rest = rest.replace(/[\s/,\-]+$/, '').replace(/^[\s/,\-]+/, '').replace(/\s{2,}/g, ' ');
+
+  if (typeof l.variant === 'string' && l.variant.trim()){
+    return { model: [brand, rest].filter(Boolean).join(' '), variant: l.variant.trim(), markers };
+  }
+
+  const ord = rest.split(/\s+/).filter(Boolean);
+  let skaer = Math.min(ord.length, 2);
+  const sidsteTal = ord.reduce((idx, o, i) => (/^\d{2,4}$/.test(o) && i < 4 ? i : idx), -1);
+  if (sidsteTal >= 0){
+    skaer = sidsteTal + 1;
+    // Typebogstavet lige efter tallet hører med: GS, F, RS, R, SE.
+    if (ord[skaer] && /^[A-ZÆØÅ]{1,2}$/.test(ord[skaer])) skaer++;
+  }
+  return {
+    model: [brand, ord.slice(0, skaer).join(' ')].filter(Boolean).join(' '),
+    variant: ord.slice(skaer).join(' '),
+    markers,
+  };
+}
+
+/* Kørekortkategorien er listens vigtigste felt — og derfor det felt, hvor
+   et gæt gør mest skade.
+
+   koerekortForListing() i js/data.js læser manglende effekt som 0 hk. En
+   1200 ccm maskine uden oplyst hk kommer derfor ud som "A2", altså som om
+   en 20-årig måtte køre den. Det passer for hver eneste indekserede
+   annonce, for kilden oplyser ikke effekt.
+
+   Her vises kategorien kun, når den kan udledes:
+     · effekten er kendt      → udledningen holder
+     · ccm ≤ 125 og ingen hk  → A1 uanset effekt (15 hk-grænsen kan ikke
+                                overskrides med den slagvolumen i praksis,
+                                og A1 er den forsigtige gæt-retning)
+   Ellers står der "Ikke oplyst". Et manglende felt koster et klik; et
+   forkert felt kan koste en bøde og en inddraget motorcykel. */
+function koerekortSikkert(l){
+  const hk = Number(l.power) || 0;
+  const ccm = Number(l.ccm) || 0;
+  if (hk) return koerekortForListing(l);
+  if (ccm && ccm <= A1_MAX_CCM) return 'A1';
+  return null;
+}
+
+const UOPLYST = '<span class="row-unknown">Ikke oplyst</span>';
+
+function rowSpecsHTML(l){
+  const kk = koerekortSikkert(l);
+  const motor = l.ccm == null
+    ? UOPLYST
+    : escapeHTML(formatCcm(l.ccm)) + (l.power ? ` <span class="row-hk">· ${escapeHTML(formatPower(l.power))}</span>` : '');
+  const celle = (label, vaerdi) => `<div class="row-spec"><dt>${label}</dt><dd>${vaerdi}</dd></div>`;
+  return `<dl class="row-specs">
+    ${celle('Årgang', l.year == null ? UOPLYST : escapeHTML(String(l.year)))}
+    ${celle('Kilometer', l.km == null ? UOPLYST : escapeHTML(formatKm(l.km)))}
+    ${celle('Motor', motor)}
+    ${celle('Kørekort', kk ? `<span class="row-kk">${kk}</span>` : UOPLYST)}
+  </dl>`;
+}
+
+function rowMarkersHTML(markers){
+  if (!markers || !markers.length) return '';
+  return `<span class="row-markers">${markers.slice(0, 2).map(m =>
+    `<span class="row-marker">${escapeHTML(m.toLowerCase())}</span>`).join('')}</span>`;
+}
+
+/* Indekseret annonce som listerække.
+
+   Samme fire løfter som kortet i js/components.js, og de er ikke til
+   forhandling, fordi rækken er smallere: mærket "Hos <kilde>" står først i
+   rækken, kildens navn står hvor sælgeren ellers står, linket går til
+   KILDEN i ny fane med rel=nofollow, og der er intet hjerte — favoritter
+   peger på vores egne annoncer med en fremmednøgle. */
+function externalRowHTML(l, i){
+  const kilde = escapeHTML(l.source?.navn || 'ekstern kilde');
+  const href = sikkerUrl(l.externalUrl);
+  if (!href) return '';
+  const t = deltTitel(l);
+  const model = escapeHTML(t.model), variant = escapeHTML(t.variant);
+  const sted = [l.city, l.postnr].filter(Boolean).map(escapeHTML).join(' ');
+  return `
+  <article class="listing-row is-external" data-listing-id="${l.id}" data-external="1">
+    <div class="row-media">${listingMediaHTML(l, t.model, i === 0)}</div>
+    <div class="row-head">
+      <div class="row-flags">
+        <span class="badge badge-external" title="Annoncen ligger hos ${kilde}. Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}Hos ${kilde}</span>
+        ${rowMarkersHTML(t.markers)}
+      </div>
+      <h3 class="row-title">${model}</h3>
+      ${variant ? `<p class="row-variant">${variant}</p>` : ''}
+      <p class="row-origin">${Icon.store}<b>${kilde}</b>${l.source?.domaene ? `<span class="row-dim">${escapeHTML(l.source.domaene)}</span>` : ''}
+        <span class="row-dim">${Icon.mapPin}${sted || 'Sted ikke oplyst'}</span></p>
+    </div>
+    ${rowSpecsHTML(l)}
+    <div class="row-end">
+      <p class="row-price">${escapeHTML(formatPrice(l.price))}</p>
+      <p class="row-cta">Se hos ${kilde}${Icon.externalLink}</p>
+      <div class="row-tools">
+        <button type="button" class="row-tool ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
+      </div>
+    </div>
+    <a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow" class="row-link"
+       aria-label="Se annonce hos ${kilde} (åbner i ny fane): ${[model, variant].filter(Boolean).join(' ')}, ${escapeHTML(formatPrice(l.price))}"></a>
+  </article>`;
+}
+
+function listingRowHTML(l, i){
+  if (l.isExternal) return externalRowHTML(l, i);
+  const fav = Store.isFavorite(l.id);
+  const t = deltTitel(l);
+  const model = escapeHTML(t.model), variant = escapeHTML(t.variant);
+  const dealer = l.isDealer || l.seller?.isDealer;
+  const sted = [l.city, l.region].filter(Boolean).map(escapeHTML).join(', ');
+  return `
+  <article class="listing-row" data-listing-id="${l.id}">
+    <div class="row-media">${listingMediaHTML(l, t.model, i === 0)}</div>
+    <div class="row-head">
+      <div class="row-flags">
+        ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
+        ${dealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : ''}
+        ${isSuspiciouslyCheap(l) ? `<span class="badge badge-warning" title="Prisen ligger væsentligt under markedsniveau for den type og årgang — bed om ekstra dokumentation, og betal aldrig forud">${Icon.alertTriangle}Under markedspris</span>` : ''}
+        ${l.serviceHistorik === 'Fuld' ? `<span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span>` : ''}
+        ${rowMarkersHTML(t.markers)}
+      </div>
+      <h3 class="row-title">${model}</h3>
+      ${variant || l.type ? `<p class="row-variant">${variant || escapeHTML(typeLabel(l.type))}</p>` : ''}
+      <p class="row-origin">${dealer ? Icon.store : Icon.user}<b>${escapeHTML(dealer ? (l.seller?.name || 'Forhandler') : 'Privat sælger')}</b>
+        <span class="row-dim">${Icon.mapPin}${sted || 'Sted ikke oplyst'}</span></p>
+    </div>
+    ${rowSpecsHTML(l)}
+    <div class="row-end">
+      <p class="row-price">${escapeHTML(formatPrice(l.price))}</p>
+      <p class="row-when">${escapeHTML(timeAgoDa(l.createdAt))}</p>
+      <div class="row-tools">
+        ${isOwnListing(l) ? '' : `<button type="button" class="row-tool row-fav ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
+        <button type="button" class="row-tool ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
+      </div>
+    </div>
+    <a href="annonce.html?id=${l.id}" class="row-link" aria-label="Se annonce: ${[model, variant].filter(Boolean).join(' ')}, ${escapeHTML(formatPrice(l.price))}"></a>
+  </article>`;
+}
+
+/* ============ Resultatlinjen: hvad består tallet af? ============
+
+   "383 annoncer fundet" er sandt og alligevel misvisende. 332 af dem ligger
+   ikke hos os. De er indekseret hos en forhandler, og køberen skal videre
+   til kilden for at handle — der er ingen beskedknap, ingen sælgerprofil og
+   ingen historik hos os. Et tal, der skjuler dét, lover et lager vi ikke har.
+
+   Formuleringen gør ikke de indekserede små. Det ER rigtige motorcykler til
+   salg, og for en køber er 332 ekstra maskiner udelukkende en fordel.
+   Forskellen er HVOR handlen foregår, ikke hvor gode annoncerne er. Derfor
+   "på Bikerbasen" og "indekseret hos MC Syd": to steder, ikke to klasser.
+   Ingen af ordene er en undskyldning. */
+function resultatSammensaetning(list){
+  const kilder = new Map();
+  let egne = 0;
+  for (const l of list){
+    if (!l.isExternal){ egne++; continue; }
+    const navn = l.source?.navn || 'ekstern kilde';
+    kilder.set(navn, (kilder.get(navn) || 0) + 1);
+  }
+  return { egne, eksterne: list.length - egne, kilder };
+}
+
+function forklarIndekseret(){
+  const navne = [...resultatSammensaetning(getFilteredListings()).kilder.keys()].map(escapeHTML);
+  openInfoModal('Hvor kommer annoncerne fra?', `
+    <p><b>Annoncer på Bikerbasen</b> er oprettet her. Du skriver til sælgeren
+    gennem os, du kan gemme dem som favorit, og hele annoncen ligger på vores side.</p>
+    <p style="margin-top:12px;"><b>Indekserede annoncer</b> er rigtige motorcykler til salg,
+    som ligger hos en forhandler${navne.length ? ' — lige nu ' + navne.join(' og ') : ''}.
+    Vi viser dem, så du kan søge på tværs i ét felt, men annoncen hører til hos
+    forhandleren: klikker du på den, åbner den hos kilden i en ny fane, og det er
+    dér, du kontakter sælgeren og ser resten af billederne.</p>
+    <p style="margin-top:12px;">Pris, årgang og kilometertal er læst fra forhandlerens
+    egen annonce. Står der "Ikke oplyst", er det fordi feltet ikke fremgår hos kilden —
+    vi gætter ikke.</p>`);
+}
+
+function renderResultsCount(list){
+  const total = list.length;
+  document.getElementById('results-count').innerHTML =
+    `${total} <span>${total === 1 ? 'annonce fundet' : 'annoncer fundet'}</span>`;
+
+  const mix = document.getElementById('results-mix');
+  if (!mix) return;
+  const { egne, eksterne, kilder } = resultatSammensaetning(list);
+
+  // Ingen indekserede i resultatet: så er der ingen sammensætning at
+  // forklare, og linjen er ren støj.
+  if (!eksterne){ mix.hidden = true; mix.innerHTML = ''; return; }
+
+  const sorteret = [...kilder.entries()].sort((a, b) => b[1] - a[1]);
+  const kildeTekst = sorteret.slice(0, 2)
+    .map(([navn, n]) => `${n} indekseret hos ${escapeHTML(navn)}`).join(' · ');
+  const flere = sorteret.length > 2 ? ` · +${sorteret.length - 2} kilder` : '';
+  const egneTekst = egne
+    ? `<span class="mix-part mix-egne">${egne} ${egne === 1 ? 'annonce' : 'annoncer'} på Bikerbasen</span>`
+    : '';
+
+  mix.hidden = false;
+  mix.innerHTML = `${egneTekst}<span class="mix-part mix-ekstern">${kildeTekst}${flere}</span>` +
+    `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>`;
+  mix.querySelector('#mix-info-btn').addEventListener('click', forklarIndekseret);
 }
 
 /* ============ Swipe-visning (mobil-first, à la 123mc-appen) ============ */
@@ -729,7 +1034,11 @@ let cardChunkHandle = 0;
 
 function paintCards(grid, pageItems){
   if (cardChunkHandle){ clearTimeout(cardChunkHandle); cardChunkHandle = 0; }
-  grid.innerHTML = pageItems.slice(0, FIRST_CARDS).map(listingCardHTML).join('');
+  // Renderer vælges ÉN gang pr. maling. Slås visningen om midt i en
+  // portionsvis maling, ville halvdelen af siden ellers stå som kort og
+  // halvdelen som rækker.
+  const tegn = aktivKortRenderer();
+  grid.innerHTML = pageItems.slice(0, FIRST_CARDS).map(tegn).join('');
   wireFavoriteButtons(grid);
   if (pageItems.length <= FIRST_CARDS) return;
 
@@ -739,7 +1048,7 @@ function paintCards(grid, pageItems){
     const from = next, to = Math.min(from + CARD_CHUNK, pageItems.length);
     const alreadyThere = grid.children.length;
     grid.insertAdjacentHTML('beforeend',
-      pageItems.slice(from, to).map((l, k) => listingCardHTML(l, from + k)).join(''));
+      pageItems.slice(from, to).map((l, k) => tegn(l, from + k)).join(''));
     // Kun de nye kort kobles på — kører wireFavoriteButtons over hele gitteret
     // igen, får de gamle hjerter to lyttere og slår sig selv fra igen.
     for (let i = alreadyThere; i < grid.children.length; i++) wireFavoriteButtons(grid.children[i]);
@@ -800,7 +1109,7 @@ function render(){
   state.page = Math.min(state.page, totalPages);
   const pageItems = filtered.slice((state.page-1)*PAGE_SIZE, state.page*PAGE_SIZE);
 
-  document.getElementById('results-count').innerHTML = `${total} <span>${total===1?'annonce fundet':'annoncer fundet'}</span>`;
+  renderResultsCount(filtered);
 
   // Dynamisk H1 fra aktive mærker/regioner — scannability + SEO (konkurrenter
   // scorer på "Brugte Yamaha til salg i København").
@@ -881,18 +1190,68 @@ function renderSecondary(pills, pageItems, heading, total, totalPages){
     }
   }
 
+  renderPagination(totalPages);
+}
+
+/* ============ Paginering: kun et vindue om den aktuelle side ============
+
+   Den tegnede ALLE sider som knapper. Med 51 annoncer var det fem knapper,
+   og det så pænt ud. Med 383 blev det 32 knapper à 40px på én række =
+   1466px min-content i en spalte, der havde 872px. Sporet i .search-layout
+   var dengang "1fr" (= minmax(auto,1fr)), så det gav efter for indholdet,
+   og HELE søgesiden blev 1815px bred i et 1280px vindue. Vandret scroll på
+   den side, sitet lever af.
+
+   To rettelser, fordi én ikke er nok: sporet er nu minmax(0,1fr), så en
+   bred komponent ikke KAN sprænge layoutet igen — og pagineringen viser
+   højst ni elementer i alt:
+
+     ‹  1  …  14 [15] 16  …  32  ›
+
+   Første og sidste side er altid med (man skal kunne komme til enden af
+   listen i ét klik), og der er altid en nabo på hver side af den aktuelle.
+   Syv pladser til tal og ellipser plus de to pile = ni. */
+const PAGINATION_MAX = 7;
+
+function sideNumre(current, total){
+  if (total <= PAGINATION_MAX) return Array.from({ length: total }, (_, i) => i + 1);
+  const sider = new Set([1, total, current, current - 1, current + 1]);
+  // Nær enderne mangler der naboer på den ene side — fyld op indad, så
+  // rækken ikke skifter bredde, hver gang man bladrer.
+  if (current <= 3) [2, 3, 4].forEach(n => sider.add(n));
+  if (current >= total - 2) [total - 1, total - 2, total - 3].forEach(n => sider.add(n));
+  const liste = [...sider].filter(n => n >= 1 && n <= total).sort((a, b) => a - b);
+
+  const ud = [];
+  liste.forEach((n, i) => {
+    if (i && n - liste[i - 1] > 1) ud.push('…');
+    ud.push(n);
+  });
+  return ud;
+}
+
+function renderPagination(totalPages){
   const pag = document.getElementById('pagination');
-  if (totalPages <= 1){ pag.innerHTML = ''; }
-  else {
-    let html = '';
-    for (let i=1; i<=totalPages; i++){
-      html += `<button type="button" class="${i===state.page?'active':''}" data-page="${i}">${i}</button>`;
-    }
-    pag.innerHTML = html;
-    pag.querySelectorAll('[data-page]').forEach(btn => {
-      btn.addEventListener('click', () => { state.page = Number(btn.dataset.page); render(); window.scrollTo({top:0, behavior:'smooth'}); });
-    });
-  }
+  if (!pag) return;
+  if (totalPages <= 1){ pag.innerHTML = ''; return; }
+
+  const pil = (side, label, tegn) => side < 1 || side > totalPages
+    ? `<button type="button" class="pag-arrow" disabled aria-label="${label}">${tegn}</button>`
+    : `<button type="button" class="pag-arrow" data-page="${side}" aria-label="${label}">${tegn}</button>`;
+
+  const midt = sideNumre(state.page, totalPages).map(n => n === '…'
+    ? `<span class="pag-gap" aria-hidden="true">…</span>`
+    : `<button type="button" class="${n === state.page ? 'active' : ''}" data-page="${n}"` +
+      `${n === state.page ? ' aria-current="page"' : ''} aria-label="Side ${n}${n === state.page ? ' (nuværende)' : ''}">${n}</button>`
+  ).join('');
+
+  pag.innerHTML = pil(state.page - 1, 'Forrige side', Icon.chevronLeft) + midt +
+    pil(state.page + 1, 'Næste side', Icon.chevronRight) +
+    `<span class="pag-status">Side ${state.page} af ${totalPages}</span>`;
+
+  pag.querySelectorAll('[data-page]').forEach(btn => {
+    btn.addEventListener('click', () => { state.page = Number(btn.dataset.page); render(); window.scrollTo({top:0, behavior:'smooth'}); });
+  });
 }
 
 /* Modeller der findes under de valgte mærker (union). */
@@ -1129,9 +1488,9 @@ function wireCoreControls(){
   document.getElementById('clear-filters-mobile').addEventListener('click', resetAll);
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);
 
-  document.getElementById('view-grid').addEventListener('click', () => { Store.setViewMode('grid'); applyViewMode(); });
-  document.getElementById('view-list').addEventListener('click', () => { Store.setViewMode('list'); applyViewMode(); });
-  document.getElementById('view-swipe')?.addEventListener('click', () => { Store.setViewMode('swipe'); applyViewMode(); });
+  document.getElementById('view-grid').addEventListener('click', () => setViewMode('grid'));
+  document.getElementById('view-list').addEventListener('click', () => setViewMode('list'));
+  document.getElementById('view-swipe')?.addEventListener('click', () => setViewMode('swipe'));
 
   // Søgeagent-genvej i tom-tilstanden peger på samme handling som topknappen.
   document.getElementById('empty-agent-btn')?.addEventListener('click', () => {

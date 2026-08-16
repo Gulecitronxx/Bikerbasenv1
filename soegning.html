@@ -321,8 +321,22 @@ try{
         <div class="results-toolbar">
           <!-- aria-live: resultattallet ændrer sig når man sætter et filter,
                uden at noget flytter fokus. Uden det får skærmlæserbrugere
-               ingen besked om, at søgningen gav et andet antal. -->
-          <div class="results-count" id="results-count" role="status" aria-live="polite" aria-atomic="true">0 <span>annoncer fundet</span></div>
+               ingen besked om, at søgningen gav et andet antal.
+
+               Live-området ligger om BEGGE linjer, så oplæsningen bliver
+               "383 annoncer fundet — 51 på Bikerbasen, 332 indekseret hos
+               MC Syd" i ét stykke. Sammensætningen er ikke en fodnote, den
+               hører til tallet.
+
+               #results-count skal blive ved med at være ét fladt element
+               uden indlejrede <div>: scripts/build-srp.js skriver det
+               forudtegnede antal ind i den med en regex, der stopper ved
+               første </div>. #results-mix fyldes kun af js/search.js — ved
+               første maling ved vi ikke, hvor annoncerne kommer fra. -->
+          <div class="results-headline" role="status" aria-live="polite" aria-atomic="true">
+            <div class="results-count" id="results-count">0 <span>annoncer fundet</span></div>
+            <p class="results-mix" id="results-mix" hidden></p>
+          </div>
           <div class="toolbar-actions">
             <button type="button" class="btn btn-outline btn-sm" id="save-search-btn"><span id="save-search-icon"></span><span id="save-search-label">Gem søgning</span></button>
             <div class="view-toggle" role="group" aria-label="Visningstype">
