@@ -104,6 +104,136 @@ test('mærke: ukendt mærke kastes ikke væk', () => {
   assert.equal(n.normaliserMaerke('zündapp'), 'Zündapp');
 });
 
+/* ---------- Model, variant og salgsmarkører ----------
+   Alle titler herunder er MC Syds egne, kopieret fra databasen. Mærket er
+   allerede klippet af, når delModelOgVariant() kaldes — den får kun resten.
+
+   Dommen er ikke "består regexen": det er, om linje 1 og linje 2 læser
+   rigtigt for et menneske, der kender motorcykler. */
+const delt = (rest) => n.delModelOgVariant(rest);
+
+test('typeordet bliver varianten — også når modelnavnet står EFTER det', () => {
+  // "Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING"
+  // Virago er Yamahas modelnavn, Cruiser er typen. At Cruiser står først,
+  // gør den ikke til en del af modellen.
+  assert.deepEqual(delt('XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING'), {
+    model: 'XV 750 Virago',
+    variant: 'Cruiser',
+    salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'],
+  });
+});
+
+test('typeordet bliver varianten — også når modelnavnet står FØR det', () => {
+  // "Honda CMX 1100 D Rebel Cruiser" — omvendt rækkefølge af ovenstående.
+  // Rebel er Hondas modelnavn; opdelingen må give samme slags resultat.
+  assert.deepEqual(delt('CMX 1100 D Rebel Cruiser'), {
+    model: 'CMX 1100 D Rebel',
+    variant: 'Cruiser',
+    salgsmarkoerer: null,
+  });
+});
+
+test('Diversion er modelnavn, Sportstouring er type', () => {
+  // "Yamaha XJ 900 S Sportstouring Diversion BYTTER GERNE"
+  assert.deepEqual(delt('XJ 900 S Sportstouring Diversion BYTTER GERNE'), {
+    model: 'XJ 900 S Diversion',
+    variant: 'Sportstouring',
+    salgsmarkoerer: ['BYTTER GERNE'],
+  });
+});
+
+test('Pan er modelnavn, Touring er type', () => {
+  // "Honda ST 1100 Touring Pan BYTTER GERNE" — Pan European.
+  assert.deepEqual(delt('ST 1100 Touring Pan BYTTER GERNE'), {
+    model: 'ST 1100 Pan',
+    variant: 'Touring',
+    salgsmarkoerer: ['BYTTER GERNE'],
+  });
+});
+
+test('GT er ikke et typeord og bliver hos modellen', () => {
+  // "BMW K 1200 Touring GT ENGROS". Titlens rækkefølge er Touring FØR GT,
+  // men modellen hedder K 1200 GT. Fordi kun kendte typeord flyttes, samler
+  // modellen sig rigtigt af sig selv — uden at vi omrokerer noget.
+  assert.deepEqual(delt('K 1200 Touring GT ENGROS'), {
+    model: 'K 1200 GT',
+    variant: 'Touring',
+    salgsmarkoerer: ['ENGROS'],
+  });
+});
+
+test('salgsmarkører midt i titlen splitter ikke modellen', () => {
+  // "Suzuki GSX 750 ES ENGROS/UDEN KLARGØRING Klassiker" og
+  // "Benelli Tre-K 1130 ENGROS/UDEN KLARGØRING Adventure".
+  assert.deepEqual(delt('GSX 750 ES ENGROS/UDEN KLARGØRING Klassiker'), {
+    model: 'GSX 750 ES', variant: 'Klassiker', salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'],
+  });
+  assert.deepEqual(delt('Tre-K 1130 ENGROS/UDEN KLARGØRING Adventure'), {
+    model: 'Tre-K 1130', variant: 'Adventure', salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'],
+  });
+});
+
+test('skråstregen fra "ENGROS/UDEN KLARGØRING" bliver ikke hængende', () => {
+  const r = delt('Tre-K 1130 ENGROS/UDEN KLARGØRING Adventure');
+  assert.ok(!/[/]/.test(r.model), `modellen har tegnsætning tilbage: ${r.model}`);
+});
+
+test('markørerne kommer i kildens rækkefølge, ikke listens', () => {
+  assert.deepEqual(delt('X 1 ENGROS/UDEN KLARGØRING').salgsmarkoerer,
+    ['ENGROS', 'UDEN KLARGØRING']);
+});
+
+test('resten af MC Syds mønstre', () => {
+  assert.deepEqual(delt('CBR 1000 F Sportstouring'), {
+    model: 'CBR 1000 F', variant: 'Sportstouring', salgsmarkoerer: null });
+  assert.deepEqual(delt('ZR-7 Street'), {
+    model: 'ZR-7', variant: 'Street', salgsmarkoerer: null });
+});
+
+test('ingen type i titlen giver ingen variant — ikke et gæt', () => {
+  // "Honda ST 125 DAX". DAX er modelnavnet; der er ingen type at vise.
+  assert.deepEqual(delt('ST 125 DAX'), {
+    model: 'ST 125 DAX', variant: null, salgsmarkoerer: null });
+});
+
+test('titel med kun mærket: seks MC Syd-annoncer mangler modellen', () => {
+  // Efter mærket er klippet af, er der ingenting tilbage. Så skal der stå
+  // "ikke oplyst" på kortet — ikke en opdigtet model.
+  assert.deepEqual(delt(''), { model: null, variant: null, salgsmarkoerer: null });
+  assert.deepEqual(delt('   '), { model: null, variant: null, salgsmarkoerer: null });
+  assert.deepEqual(delt(null), { model: null, variant: null, salgsmarkoerer: null });
+});
+
+test('et typeord som første ord er en del af modelnavnet', () => {
+  // Ducati Sport 1000 og Triumph Street Triple 765 er modelnavne. Blev
+  // Sport/Street flyttet til varianten, hed modellerne "1000" og "Triple 765".
+  assert.deepEqual(delt('Sport 1000'), {
+    model: 'Sport 1000', variant: null, salgsmarkoerer: null });
+  assert.deepEqual(delt('Street Triple 765'), {
+    model: 'Street Triple 765', variant: null, salgsmarkoerer: null });
+});
+
+test('består titlen KUN af typeord, er der ingen model at beskytte', () => {
+  assert.deepEqual(delt('Touring'), {
+    model: null, variant: 'Touring', salgsmarkoerer: null });
+});
+
+test('kilden må råbe — kortet skriver typen pænt', () => {
+  assert.equal(delt('CBR 1000 SPORTSTOURING').variant, 'Sportstouring');
+  assert.equal(delt('CB 1100 classic').variant, 'Klassiker');
+});
+
+test('samme type nævnt to gange står én gang', () => {
+  assert.equal(delt('ST 1100 Touring Pan Touring').variant, 'Touring');
+});
+
+test('modellen uden type og markør er nøglen — fingerprint afhænger af den', () => {
+  // Samme motorcykel, hvor kun forhandlerens vilkår er skrevet forskelligt,
+  // skal give samme model. Ellers bliver én cykel til to annoncer.
+  assert.equal(delt('ST 1100 Touring Pan BYTTER GERNE').model,
+               delt('ST 1100 Touring Pan').model);
+});
+
 test('sælgertype', () => {
   assert.equal(n.normaliserSaelgertype('Forhandler'), 'forhandler');
   assert.equal(n.normaliserSaelgertype('MC Syd ApS'), 'forhandler');
