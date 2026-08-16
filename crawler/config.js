@@ -15,9 +15,30 @@ const YAML = require('yaml');
 
 const KILDE_MAPPE = path.join(__dirname, '..', 'sources');
 
-// Selectors vi ikke kan undvære. Uden url og titel er der ingen annonce, og
-// uden pris/årgang/km er kortet ikke værd at vise.
-const PAAKRAEVEDE_SELECTORS = ['kort', 'url', 'titel', 'pris', 'aargang', 'km'];
+/* Selectors vi ikke kan undvære. Uden url og titel er der ingen annonce, og
+   uden pris er kortet ikke værd at vise. De tre skal stå på KORTET — de er
+   det, gitteret viser, og de skal være der, før vi beslutter os for at bruge
+   et kald på annoncen. */
+const PAAKRAEVEDE_SELECTORS = ['kort', 'url', 'titel', 'pris'];
+
+/* Årgang og km skal vi HAVE, men ikke nødvendigvis fra kortet.
+   Kravet stod før som en selector, og det passede, dengang MC Syd var den
+   eneste kilde: deres kort har alle fire specrækker. Gul og Gratis har ingen
+   af dem på kortet og alle sammen på annoncens egen side. Kravet er altså
+   ikke "de skal stå i gitteret", men "vi skal kunne skaffe dem" — ellers
+   ville reglen tvinge os til enten at afvise en brugbar kilde eller at lyve
+   en selector ind i YAML'en for at komme forbi valideringen. */
+const PAAKRAEVEDE_FELTER = ['aargang', 'km'];
+
+/* Hvilke feltnavne detalje.felter må bruge, hentet fra parse.js, som ejer
+   normaliseringen af dem. Kaldet er med vilje LAZY: parse.js henter
+   byggeRegex herfra, og en require den anden vej på topniveau ville lukke
+   ringen — den af de to moduler, der blev indlæst først, ville stå med et
+   halvt udfyldt modul, og byggeRegex ville være undefined på det første
+   kort, ikke ved opstart. */
+function detaljeFeltNavne(){
+  return Object.keys(require('./parse').DETALJE_NORMALISERING);
+}
 
 // Databasen håndhæver crawl_delay_ms >= 2000 (014_aggregator.sql). Vi
 // håndhæver det samme her, så en kilde ikke kan crawles hurtigere end
@@ -71,6 +92,36 @@ function validerKilde(k){
   kraev('selectors', k.selectors && typeof k.selectors === 'object', 'mangler');
   for (const s of PAAKRAEVEDE_SELECTORS){
     kraev(`selectors.${s}`, typeof k.selectors?.[s] === 'string' && k.selectors[s].trim(), 'mangler');
+  }
+
+  /* ---- detalje: hent felter fra annoncens egen side ----
+     Valgfrit blok. Er den der, skal den være komplet: en halvt udfyldt
+     detalje-konfiguration henter en side pr. annonce og kaster resultatet
+     væk, og det er både det dyreste og det mest tavse, en kilde kan gøre. */
+  const detaljeFelter = k.detalje?.felter || {};
+  if (k.detalje != null){
+    kraev('detalje', typeof k.detalje === 'object', 'skal være et objekt, eller udelades helt');
+    for (const felt of ['par', 'label', 'vaerdi']){
+      kraev(`detalje.${felt}`, typeof k.detalje?.[felt] === 'string' && k.detalje[felt].trim(),
+        'mangler — uden den kan et etiket/værdi-par ikke findes');
+    }
+    kraev('detalje.felter', k.detalje?.felter && Object.keys(detaljeFelter).length > 0,
+      'mindst ét felt kræves, ellers er der ingen grund til at hente siden');
+    const kendte = detaljeFeltNavne();
+    for (const [felt, etiket] of Object.entries(detaljeFelter)){
+      kraev(`detalje.felter.${felt}`, kendte.includes(felt),
+        `ukendt felt — kendte felter: ${kendte.join(', ')}`);
+      kraev(`detalje.felter.${felt}`, typeof etiket === 'string' && etiket.trim(),
+        'etiketten på kildens side mangler');
+    }
+  }
+
+  // Årgang og km: fra kortet ELLER fra detaljesiden, men de skal komme et sted fra.
+  for (const felt of PAAKRAEVEDE_FELTER){
+    const fraKort = typeof k.selectors?.[felt] === 'string' && k.selectors[felt].trim();
+    const fraDetalje = k.detalje?.hent && typeof detaljeFelter[felt] === 'string' && detaljeFelter[felt].trim();
+    kraev(felt, fraKort || fraDetalje,
+      `mangler — sæt selectors.${felt} (kortet) eller detalje.felter.${felt} (annoncens egen side)`);
   }
 
   // Tilladelse er ikke et teknisk felt, men det er det vigtigste felt i filen.

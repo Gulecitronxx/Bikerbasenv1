@@ -11,10 +11,11 @@
 
 const { chromium } = require('playwright');
 const { medHastighedsgraense } = require('./hastighed');
-const { udtraekKort } = require('./parse');
+const { udtraekKort, udtraekDetalje } = require('./parse');
 
 const NAVIGATION_TIMEOUT_MS = 45_000;
 const GITTER_TIMEOUT_MS = 20_000;
+const DETALJE_TIMEOUT_MS = 15_000;
 
 // Vi siger hvem vi er. En forhandler, der ser trafikken i sin log, skal kunne
 // se, at det er os, og kunne finde en adresse at skrive til.
@@ -66,6 +67,43 @@ async function hentListeside(context, kilde, url){
   });
 }
 
+/* Hent én annonces detaljeside og returnér dens specfelter som etiket -> tekst.
+
+   Det her er det dyre kald. Kommentaren over indsamlAnnoncer() i pipeline.js
+   forklarer, hvorfor MC Syd IKKE får det: alle felter står på deres kort, og
+   332 detaljesider ville koste tyve minutter for ingenting.
+
+   Gul og Gratis er det modsatte. Deres kort har titel, pris, postnummer og
+   dato — og intet andet. Ccm, hk, kilometer og årgang står kun her. Uden
+   dette kald ville hver eneste annonce fra dem stå "Ikke oplyst" i alle
+   felter og blive skjult af alle filtre, inklusive kørekortfiltret.
+
+   Hentningen ligger inde i hastighedsgrænsen, ligesom listesiderne. Én
+   annonce = ét kald = ét ophold. Det er dét, der gør trinet dyrt, og det er
+   dét, der gør det høfligt. */
+async function hentDetaljeside(context, kilde, url){
+  return medHastighedsgraense(kilde.domaene, kilde.crawl_delay_ms, async () => {
+    const page = await context.newPage();
+    try {
+      const svar = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT_MS });
+      if (svar && svar.status() >= 400){
+        throw new Error(`HTTP ${svar.status()} på ${url}`);
+      }
+      try {
+        await page.waitForSelector(kilde.detalje.par, { timeout: DETALJE_TIMEOUT_MS });
+      } catch {
+        /* Ingen specfelter. Kan være en annonce, hvor sælgeren ikke udfyldte
+           noget, og kan være et designskift. Forskellen ses kun på antallet,
+           og derfor tælles og logges det i pipelinen frem for at kaste. */
+        return { url, par: {}, advarsel: `ingen specfelter matchede "${kilde.detalje.par}"` };
+      }
+      return { url, par: await udtraekDetalje(page, kilde.detalje), advarsel: null };
+    } finally {
+      await page.close().catch(() => {});
+    }
+  });
+}
+
 /* Sikkerhedsnet mod efterindlæsning ved scroll. Vi ruller til bunden, indtil
    antallet af kort holder op med at vokse. Loftet er der, fordi en side med
    uendelig scroll ellers ville køre, til hukommelsen løb tør.
@@ -89,4 +127,4 @@ async function rulTilBunden(page, kortSelector, maksRul = 25){
   }
 }
 
-module.exports = { aabnBrowser, hentListeside, USER_AGENT };
+module.exports = { aabnBrowser, hentListeside, hentDetaljeside, USER_AGENT };

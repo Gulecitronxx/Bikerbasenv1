@@ -145,9 +145,21 @@ function tælVisning(listingId){
    for at kunne bakke op. Ny forhandler: hent et ja, skriv det i
    sources/<domaene>.yaml, og skriv det så her.
 
-   `type` er forhandlerens egen beskrivelse, ikke vores gæt. */
+   `type` er forhandlerens egen beskrivelse, ikke vores gæt.
+
+   `markedsplads` siger, at kilden ikke SÆLGER noget. Gul og Gratis er ikke
+   en forhandler med et lager — det er et sted, hvor privatpersoner
+   annoncerer. Forskellen er ikke kosmetisk: sætningen "du handler direkte
+   med <kilde> — de svarer på dine spørgsmål, aftaler prøvetur og laver
+   papirerne" er sand om MC Syd og falsk om Gul og Gratis, hvor det er
+   sælgeren bag annoncen, der gør alle tre ting. Uden feltet ville hver
+   eneste markedspladsannonce sende køberen til den forkerte modpart. */
 const FORHANDLERAFTALER = {
   'mcsyd.dk': { tilladelse: true, type: 'motorcykelforhandler' },
+  // Ingen tilladelse endnu — se sources/guloggratis.yaml. Linjen står her,
+  // fordi markedsplads-formuleringen skal være på plads FØR den første
+  // annonce vises, ikke bagefter.
+  'guloggratis.dk': { tilladelse: false, type: 'markedsplads', markedsplads: true },
 };
 
 /* Reklamationsretten på forhandlerannoncer — slås fra ved at sætte false.
@@ -209,13 +221,44 @@ function renderExternalListing(listing){
      derfor plantede bekymringen frem for at fjerne den.
 
      Byen kommer fra annoncen selv, ikke fra en formodning: på en
-     forhandlerannonce ER motorcyklens sted forhandlerens adresse. */
-  const hvemErDe = aftale?.type
-    ? `${kilde} er ${escapeHTML(aftale.type)}${byNavn ? ` i ${escapeHTML(byNavn)}` : ''}`
-    : '';
+     forhandlerannonce ER motorcyklens sted forhandlerens adresse.
+
+     Men KUN på en forhandlerannonce. På en markedsplads er byen sælgerens,
+     ikke kildens, og "Gul og Gratis er markedsplads i Hedensted" ville være
+     opdigtet geografi om en landsdækkende hjemmeside. */
+  const markedsplads = Boolean(aftale?.markedsplads);
+  const hvemErDe = markedsplads
+    ? `${kilde} er en ${escapeHTML(aftale.type)}`
+    : (aftale?.type
+      ? `${kilde} er ${escapeHTML(aftale.type)}${byNavn ? ` i ${escapeHTML(byNavn)}` : ''}`
+      : '');
+
+  /* "Motorcyklen står hos dem" og "det er dem, du køber af" er sande om en
+     forhandler og falske om en markedsplads: annoncestedet har hverken
+     motorcyklen eller handlen. */
+  const hvorStaarDen = markedsplads
+    ? `${hvemErDe}, og motorcyklen står hos sælgeren. `
+    : (hvemErDe ? `${hvemErDe}, og motorcyklen står hos dem. ` : `Motorcyklen står hos ${kilde}. `);
+  const hvemKoeberDuAf = markedsplads
+    ? `${hvemErDe}, og du køber af sælgeren bag annoncen.`
+    : (hvemErDe ? `${hvemErDe}, og det er dem, du køber af.` : `Det er dem, du køber af.`);
   const medTilladelse = aftale?.tilladelse
     ? `Vi viser deres annoncer med skriftlig tilladelse fra dem.`
     : '';
+
+  /* Hvem køberen faktisk skal tale med.
+     Hos en forhandler er kilden og sælgeren den samme. På en markedsplads er
+     de det ikke: Gul og Gratis svarer ikke på spørgsmål om motorcyklen,
+     aftaler ikke prøvetur og laver ikke papirerne — det gør den
+     privatperson, der har indrykket annoncen. Og netop dér gælder
+     købelovens regler om privatsalg, altså ingen reklamationsret. Den
+     forskel skal stå på siden, ikke opdages ved fremmødet. */
+  const hvemHandlerDuMed = markedsplads
+    ? `Du handler med sælgeren bag annoncen, ikke med ${kilde} — det er sælgeren,
+       der svarer på dine spørgsmål, aftaler prøvetur og laver papirerne.
+       ${kilde} er annoncestedet.`
+    : `Du handler direkte med ${kilde} —
+       de svarer på dine spørgsmål, aftaler prøvetur og laver papirerne.`;
 
   /* ---------- Titlens anden linje, og salgsvilkårene ----------
      Bilbasen sætter model på linje 1 og variant dæmpet på linje 2 ("Jeep
@@ -344,9 +387,8 @@ function renderExternalListing(listing){
               class="btn btn-primary btn-block">Se annoncen hos ${kilde}${Icon.externalLink}</a>`
         : `<p class="external-detail-broken">${Icon.alertTriangle}Annoncen kan ikke åbnes lige nu. Prøv igen senere${domaene ? `, eller find den på ${domaene}` : ''}.</p>`}
       <p class="external-detail-source-body">
-        ${hvemErDe ? `${hvemErDe}, og motorcyklen står hos dem. ` : `Motorcyklen står hos ${kilde}. `}
-        ${medTilladelse ? `${medTilladelse} ` : ''}Du handler direkte med ${kilde} —
-        de svarer på dine spørgsmål, aftaler prøvetur og laver papirerne.
+        ${hvorStaarDen}
+        ${medTilladelse ? `${medTilladelse} ` : ''}${hvemHandlerDuMed}
         Pris og udstyr kan være ændret, siden vi hentede annoncen, så tjek det hos dem.
       </p>
       ${fundet ? `<p class="external-detail-source-meta">${Icon.clock}Annoncen blev hentet hos ${kilde} ${escapeHTML(fundet)}</p>` : ''}
@@ -367,8 +409,10 @@ function renderExternalListing(listing){
   document.getElementById('listing-detail').innerHTML = `
     <div class="external-detail">
       <p class="external-detail-flag">
-        ${Icon.store}<span><b>Motorcyklen står hos ${kilde}${domaene ? `, ${domaene}` : ''}.</b>
-        ${hvemErDe ? `${hvemErDe}, og det er dem, du køber af.` : `Det er dem, du køber af.`}
+        ${Icon.store}<span><b>${markedsplads
+          ? `Annoncen ligger på ${kilde}${domaene ? `, ${domaene}` : ''}.`
+          : `Motorcyklen står hos ${kilde}${domaene ? `, ${domaene}` : ''}.`}</b>
+        ${hvemKoeberDuAf}
         ${medTilladelse}</span>
       </p>
 

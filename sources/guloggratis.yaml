@@ -1,0 +1,174 @@
+# =====================================================================
+# Gul og Gratis — motorcykler
+# =====================================================================
+# Undersøgt i renderet DOM 16.08.2026.
+#
+# Den anden kilde efter MC Syd, og en anden slags kilde. MC Syd er én
+# forhandler med ét lager. Gul og Gratis er en markedsplads, hvor annoncerne
+# er skrevet af privatpersoner og virksomheder i flæng. Det ændrer tre ting,
+# og alle tre står som beslutninger her i filen: tilladelsen, sælgertypen og
+# hvor felterne kommer fra.
+#
+# ---------------------------------------------------------------------
+# TILLADELSE — kilden er SAT INAKTIV, og det er med vilje
+# ---------------------------------------------------------------------
+# robots.txt (16.08.2026) er:
+#
+#     User-agent: *
+#     Allow: /
+#     Sitemap: https://www.guloggratis.dk/sitemap.xml
+#
+# Der er altså ingen teknisk hindring. Men crawler/config.js kræver TO ting,
+# og kommentaren dér siger hvorfor: "robots.txt er en teknisk regel; et
+# skriftligt ja er en aftale. Vi kræver begge, og pipelinen nægter at køre
+# uden."
+#
+# Vi har ikke det skriftlige ja. Derfor står tilladelse_modtaget: false, og
+# derfor VIL denne kilde ikke køre — laesKilde() kaster med
+# "skriftlig tilladelse mangler — kilden må ikke crawles", før der er hentet
+# så meget som én side.
+#
+# Alt andet i filen er verificeret mod deres site og klar. Der mangler ét ja
+# og ét ord.
+tilladelse_modtaget: false
+robots_tjekket: 2026-08-16
+aktiv: false
+
+navn: Gul og Gratis
+domaene: guloggratis.dk
+
+# 2 sekunder er databasens minimum (014_aggregator.sql), og vi bruger ikke
+# minimum her. Detaljetrinet betyder ét kald pr. annonce i stedet for ét pr.
+# 60, altså to størrelsesordener mere trafik mod deres server end MC Syd ser
+# fra os. Så går vi langsommere.
+crawl_delay_ms: 3000
+
+# ---------------------------------------------------------------------
+# Hvad vi indekserer
+# ---------------------------------------------------------------------
+# Kun "Motorcykel". Deres to-hjulssektion har også /knallerter-og-scootere/
+# med knallert, scooter, tilbehør og reservedele — de er valgt fra, præcis
+# som detalje_url_moensteret hos MC Syd sorterer scooterne fra. Bikerbasen er
+# motorcykler.
+liste_urler:
+  - url: https://www.guloggratis.dk/kategori/biler-og-koeretoejer/motorcykler/motorcykel
+
+# Annoncens URL: /annonce/<uuid>/<slug>
+# Id'et er uuid'et. Slug'en er sælgerens overskrift skrevet om, og den ændrer
+# sig, hvis han retter overskriften — den må aldrig blive nøglen.
+detalje_url_moenster: '(?i)/annonce/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
+id_gruppe: 1
+
+# ---------------------------------------------------------------------
+# Kortet i gitteret
+# ---------------------------------------------------------------------
+# Strukturen er:
+#
+#   <article class="relative h-full">
+#     <a title="…" href="/annonce/<uuid>/<slug>">
+#       <figure><img src="…-320x240.webp"><mark>Fremhævet</mark></figure>
+#       <header>
+#         <p><span>7000</span><span>Fredericia · </span><span>26. jun.</span></p>
+#         <h4>Perfekt veteran motorcykel til langtur</h4>
+#         <p>29.990 kr.</p>
+#       </header>
+#     </a>
+#   </article>
+#
+# Selectorne er STRUKTURELLE og ikke klassebaserede. Siden er bygget i
+# Tailwind, hvor klassestrengen er genereret — "text-gray-warm m-0
+# line-clamp-1 flex w-full items-center gap-x-1" skifter, når nogen ændrer en
+# afstand. h4, figure img og rækkefølgen af de to p'er i header skifter kun,
+# hvis de bygger kortet om.
+selectors:
+  kort: 'article:has(a[href^="/annonce/"])'
+  url: 'a[href^="/annonce/"]'
+  titel: 'h4'
+  pris: 'header p:last-of-type'
+  postnr: 'header p:first-of-type span:first-child'
+  by: 'header p:first-of-type span:nth-child(2)'
+  thumbnail: 'figure img'
+
+# ---------------------------------------------------------------------
+# Detaljesiden — grunden til at kilden er værd at have
+# ---------------------------------------------------------------------
+# Kortet har titel, pris, postnummer og dato. Det er ALT. Ingen ccm, ingen
+# hk, ingen kilometer, ingen årgang.
+#
+# Annoncens egen side har dem, som etiket/værdi-par:
+#
+#   <dl><dt>Mærke</dt><dd>BMW</dd></dl>
+#   <dl><dt>Modelårgang</dt><dd>2005</dd></dl>
+#   <dl><dt>Hestekræfter</dt><dd>95 HK</dd></dl>
+#   <dl><dt>Motor (ccm)</dt><dd>1.150 ccm</dd></dl>
+#   <dl><dt>Kilometer</dt><dd>92.600</dd></dl>
+#   <dl><dt>Varens stand</dt><dd>God, men brugt</dd></dl>
+#
+# HESTEKRÆFTER er det vigtigste ord i hele filen. Det er feltet, MC Syd ikke
+# har på nogen af sine 332 annoncer, og derfor står 323 af dem uden
+# kørekortkategori: uden hk kan koerekortForListing() ikke skelne A2 fra A.
+# Gul og Gratis oplyser det. En annonce herfra kan altså svare på det
+# spørgsmål, en køber under 24 stiller først — og det kan ingen MC
+# Syd-annonce.
+#
+# Prisen er ét sidekald pr. annonce. Det er en beslutning, ikke en detalje:
+# 60 annoncer koster 1 kald i dag og 61 med det her trin. Derfor
+# crawl_delay_ms: 3000 ovenfor.
+#
+# Der læses på ETIKETTEN, ikke på klassen — se udtraekDetalje() i
+# crawler/parse.js.
+#
+# "Sidst synet", "Farve" og "Brændstof" står også på siden og hentes IKKE.
+# eksterne_annoncer har ingen kolonner til dem, og db.js ville skrive
+# "ADVARSEL: … blev parset, men har ingen kolonne" ved hver eneste kørsel.
+# Skal de med, er det en migration først.
+detalje:
+  hent: true
+  par: 'dl'
+  label: 'dt'
+  vaerdi: 'dd'
+  felter:
+    maerke: 'Mærke'
+    aargang: 'Modelårgang'
+    hk: 'Hestekræfter'
+    ccm: 'Motor (ccm)'
+    km: 'Kilometer'
+    stand: 'Varens stand'
+
+# ---------------------------------------------------------------------
+# Sælgertype — står med vilje tomt
+# ---------------------------------------------------------------------
+# Hos MC Syd er svaret givet: det er en forhandler, hele lageret er
+# erhvervssalg, og faste_felter siger 'forhandler'.
+#
+# Her er det pr. annonce. Sælgerkassen skriver "Erhverv" på nogle og
+# ingenting på andre, men det står ikke i et struktureret felt — det er en
+# <span> i en boks, som vi ikke kan skelne fra andre <span>s med sikkerhed.
+#
+# Og et gæt er dyrt lige præcis her. VIS_REKLAMATIONSRET i js/annonce.js
+# skriver 24 måneders reklamationsret på annoncer, der er markeret som
+# forhandlersalg. Gætter vi forkert, står der en juridisk oplysning om en
+# privatperson, som ikke passer — og køberen tror, han har en ret, han ikke
+# har. Feltet står tomt, indtil kilden giver os noget at læse det ud af.
+faste_felter: {}
+
+# Typen læses ud af overskriften, som hos MC Syd. Vokabularet er deres ord,
+# ikke vores — og på en markedsplads skriver folk selv overskriften, så
+# træfprocenten bliver lavere end hos en forhandler med faste modelnavne.
+# Uden træf står typen tom, og kortet viser den illustrerede pladsholder for
+# 'naked'. Det er et pænt kort med et ærligt felt, ikke en påstand.
+type_vokabular:
+  - Sport
+  - Naked
+  - Touring
+  - Cruiser
+  - Adventure
+  - Enduro
+  - Offroader
+  - Classic
+  - Veteran
+  - Cross
+  - Scooter
+
+# Titlen står ét sted pr. kort, så der er intet at afgrænse.
+tag_foerste_traef: false

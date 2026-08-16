@@ -43,11 +43,106 @@ async function udtraekKort(page, selectors){
       km:        tekst(kort, sel.km),
       ccm:       tekst(kort, sel.ccm),
       hk:        tekst(kort, sel.hk),
+      /* Sted pr. annonce. MC Syd har ét lager på én adresse og siger det i
+         faste_felter; en markedsplads har en sælger pr. annonce, og så står
+         byen på kortet. Begge veje findes derfor — se tilAnnonce(). */
+      by:        tekst(kort, sel.by),
+      postnr:    tekst(kort, sel.postnr),
       thumbnail: sel.thumbnail
         ? (kort.querySelector(sel.thumbnail)?.currentSrc || kort.querySelector(sel.thumbnail)?.src || null)
         : null,
     }));
   }, selectors);
+}
+
+/* ---------- Trin 1b: detaljesidens specfelter ----------
+   MC Syd har alt på kortet. Gul og Gratis har næsten ingenting: kortet er
+   titel, pris, postnummer og dato. Ccm, hk, kilometer, årgang og stand står
+   KUN på annoncens egen side.
+
+   Derfor det her trin — og derfor er det valgfrit. En kilde uden `detalje:`
+   i YAML'en henter aldrig en detaljeside, præcis som før.
+
+   Feltet aflæses på ETIKETTEN, ikke på en CSS-klasse. Gul og Gratis er bygget
+   i Tailwind, og deres specfelter står som
+     <dl class="border-gray-mid m-0 block border-t"><dt>Hestekræfter</dt><dd>95 HK</dd></dl>
+   Klassestrengen er genereret og skifter, når nogen ændrer en margin; ordet
+   "Hestekræfter" skifter kun, hvis de skriver om på dansk. Et opslag på
+   etiketten overlever altså et designskift, og det er dét, en crawler skal. */
+async function udtraekDetalje(page, detalje){
+  return page.evaluate((d) => {
+    const ud = {};
+    for (const par of document.querySelectorAll(d.par)){
+      const label = par.querySelector(d.label);
+      const vaerdi = par.querySelector(d.vaerdi);
+      if (!label || !vaerdi) continue;
+      const navn = (label.textContent || '').replace(/\s+/g, ' ').trim();
+      const tekst = (vaerdi.textContent || '').replace(/\s+/g, ' ').trim();
+      // Første træf vinder. Står "Mærke" to gange, er den anden en
+      // gentagelse i en mobiludgave, ikke en ny oplysning.
+      if (navn && tekst && !(navn in ud)) ud[navn] = tekst;
+    }
+    return ud;
+  }, detalje);
+}
+
+/* Hvilken normalisering hvert felt skal igennem. Listen er samtidig den
+   eneste tilladte nøglemængde i YAML'ens detalje.felter — config.js afviser
+   et feltnavn, der ikke står her, så en tastefejl bliver en fejl ved
+   opstart og ikke en kolonne, der stille bliver ved med at være tom. */
+const DETALJE_NORMALISERING = {
+  maerke: n.normaliserMaerke,
+  aargang: n.parseAargang,
+  km: n.parseKm,
+  ccm: n.parseCcm,
+  hk: n.parseHk,
+  stand: n.normaliserStand,
+  pris_dkk: n.parsePris,
+};
+
+/* Detaljesiden vinder over kortet.
+
+   Ikke af princip, men fordi de to ting ikke er lige gode. På kortet er
+   mærket et GÆT: delTitel() læser det ud af en fritekst, som sælgeren selv
+   har skrevet, og "Perfekt veteran motorcykel til langtur" giver mærket
+   "Perfekt". På detaljesiden er Mærke et felt, sælgeren har valgt i en
+   rulleliste. Et valgt felt slår en gætning på en overskrift.
+
+   Derfor genudleder vi også model og variant, når mærket kom fra
+   detaljesiden: delTitel() klipper mærket af titlen, og med det rigtige
+   mærke bliver resten en anden — og rigtigere — model. */
+function berigMedDetalje(annonce, par, kilde){
+  const felter = kilde.detalje?.felter || {};
+  const laest = [];
+
+  for (const [felt, label] of Object.entries(felter)){
+    const norm = DETALJE_NORMALISERING[felt];
+    if (!norm) continue;
+    const vaerdi = norm(par[label]);
+    if (vaerdi == null) continue;
+    annonce[felt] = vaerdi;
+    laest.push(felt);
+  }
+
+  if (laest.includes('maerke')){
+    const delt = delTitel(annonce.titel, annonce.maerke);
+    annonce.model = delt.model;
+    annonce.variant = delt.variant;
+    annonce.salgsmarkoerer = delt.salgsmarkoerer || [];
+  }
+
+  /* Et oplyst tal slår vores eget gæt ihjel — også mærkatet om, at det VAR
+     et gæt. Blev ccm udledt af modelnavnet på kortet, og siger detaljesiden
+     nu 1.150 ccm, er tallet ikke længere udledt, og så må det ikke stå på
+     udledte_felter og se ud som noget, vi har fundet på. */
+  for (const felt of laest){
+    annonce.udledte_felter = (annonce.udledte_felter || []).filter(f => f !== felt);
+  }
+
+  /* Mærke og model indgår i fingerprint(). Ændrer detaljesiden dem, peger
+     den gamle nøgle på en motorcykel, der ikke findes mere. */
+  annonce.fingerprint = n.fingerprint(annonce);
+  return { annonce, laest };
 }
 
 /* ---------- Mærke og model ----------
@@ -98,6 +193,13 @@ function delTitel(titel, kendtMaerke){
   const { model, variant, salgsmarkoerer } = n.delModelOgVariant(rest);
 
   return { maerke, model, variant, salgsmarkoerer };
+}
+
+/* Bynavnet, uden det layout der stod rundt om det. */
+function reniStednavn(raa){
+  if (raa == null) return null;
+  const s = String(raa).replace(/[·|,;\-\s]+$/u, '').replace(/^[·|,;\-\s]+/u, '').trim();
+  return s || null;
 }
 
 /* ---------- Ny eller brugt ----------
@@ -174,8 +276,16 @@ function tilAnnonce(raa, kilde, listeMaerke = null){
        i produktlinkets sti. Vi har allerede URL'en, så det koster ingen ekstra
        hentning — kun et mønster i YAML'en. */
     stand: udledStand(raa.url, kilde),
-    by: faste.by || null,
-    postnr: n.parsePostnr(faste.postnr),
+    /* Kortets sted vinder over kildens faste adresse. En markedsplads' kort
+       siger, hvor DEN her motorcykel står; faste_felter siger, hvor kilden
+       ligger. Har kortet intet sted, falder vi tilbage — så virker MC Syd
+       præcis som før.
+
+       "Fredericia · " kommer med separatoren, fordi den står inde i samme
+       <span> som bynavnet hos Gul og Gratis. Den hører til layoutet, ikke
+       til byen. */
+    by: reniStednavn(raa.by) || faste.by || null,
+    postnr: n.parsePostnr(raa.postnr ?? faste.postnr),
     saelgertype: n.normaliserSaelgertype(faste.saelgertype),
     thumbnail_url: raa.thumbnail || null,
     // Kortene i gitteret har ingen beskrivelse, og vi henter ikke detaljesiden
@@ -214,4 +324,7 @@ function tilAnnonce(raa, kilde, listeMaerke = null){
   return { ok: true, annonce };
 }
 
-module.exports = { udtraekKort, tilAnnonce, delTitel, udledStand };
+module.exports = {
+  udtraekKort, tilAnnonce, delTitel, udledStand,
+  udtraekDetalje, berigMedDetalje, DETALJE_NORMALISERING,
+};

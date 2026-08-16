@@ -7,8 +7,8 @@
    kørsel med 0 fundne. */
 
 const { laesKilde } = require('./config');
-const { aabnBrowser, hentListeside } = require('./hent');
-const { tilAnnonce } = require('./parse');
+const { aabnBrowser, hentListeside, hentDetaljeside } = require('./hent');
+const { tilAnnonce, berigMedDetalje } = require('./parse');
 const db = require('./db');
 
 function nyLog(skrivUd = true){
@@ -25,10 +25,13 @@ function nyLog(skrivUd = true){
 }
 
 /* ---------- Discover + fetch + parse + normalize ----------
-   Alle felter står på kortet i gitteret. Vi henter derfor IKKE hver
-   detaljeside: 500 annoncer ville blive 508 sideindlæsninger i stedet for 8,
-   og med 2 sekunders pause er det forskellen på et minut og tyve. Færre kald
-   er både hurtigere for os og venligere mod kilden. */
+   Står alle felter på kortet i gitteret, henter vi IKKE hver detaljeside:
+   500 annoncer ville blive 508 sideindlæsninger i stedet for 8, og med 2
+   sekunders pause er det forskellen på et minut og tyve. Færre kald er både
+   hurtigere for os og venligere mod kilden. Sådan er MC Syd.
+
+   Er kilden derimod en, hvor kortet ikke HAR felterne, sætter YAML'en
+   `detalje.hent: true`, og så følger berigMedDetaljer() nedenfor efter. */
 async function indsamlAnnoncer(context, kilde, { limit, log }){
   const fundne = new Map();   // kilde_annonce_id -> { annonce, maerkeFraUrl }
   let kasseret = 0;
@@ -81,6 +84,53 @@ async function indsamlAnnoncer(context, kilde, { limit, log }){
   return { annoncer: [...fundne.values()].map(v => v.annonce), kasseret };
 }
 
+/* ---------- Berig med detaljesiden ----------
+   Ét kald pr. annonce. Det er kørslens dyreste trin, og derfor rapporterer
+   det sig selv i tal, der kan sammenlignes fra gang til gang: hvor mange
+   sider blev hentet, hvor mange svarede med felter, og — vigtigst — hvor
+   mange annoncer der endte med hestekræfter.
+
+   Hk er grunden til, at trinet findes. Uden effekt kan koerekortForListing()
+   ikke skelne A2 fra A, og alle 332 MC Syd-annoncer står derfor uden
+   kørekortkategori. Falder det tal her, er det ikke en langsom kørsel, det
+   er en kørsel, der har mistet sit formål — og så skal det stå i loggen.
+
+   En enkelt annonce, der fejler, tager ikke resten med sig. Annoncen bliver
+   gemt med det, kortet gav; den mister felter, ikke sin plads. */
+async function berigMedDetaljer(context, kilde, annoncer, { log }){
+  const tal = { hentet: 0, tomme: 0, fejlede: 0, felter: new Map() };
+
+  for (const [i, annonce] of annoncer.entries()){
+    let svar;
+    try {
+      svar = await hentDetaljeside(context, kilde, annonce.url);
+      tal.hentet++;
+    } catch (e){
+      tal.fejlede++;
+      if (tal.fejlede <= 3) log.skriv(`detaljeside fejlede (${annonce.kilde_annonce_id}): ${e.message}`);
+      continue;
+    }
+
+    if (!Object.keys(svar.par).length){ tal.tomme++; continue; }
+
+    const { laest } = berigMedDetalje(annonce, svar.par, kilde);
+    for (const f of laest) tal.felter.set(f, (tal.felter.get(f) || 0) + 1);
+
+    // Et livstegn undervejs. Trinet tager minutter, ikke sekunder, og en
+    // stille terminal i tyve minutter er ikke til at skelne fra en hængt proces.
+    if ((i + 1) % 50 === 0) log.skriv(`   detaljesider: ${i + 1} af ${annoncer.length}`);
+  }
+
+  const daekning = [...tal.felter.entries()]
+    .map(([f, n]) => `${f} ${n}/${annoncer.length}`).join(', ');
+  log.skriv(`detaljesider: ${tal.hentet} hentet, ${tal.tomme} uden specfelter, ${tal.fejlede} fejlede`);
+  log.skriv(`felter fra detaljesiden: ${daekning || 'INGEN — selectors eller etiketter bør efterses'}`);
+  if (!tal.felter.get('hk')){
+    log.skriv('ADVARSEL: ingen annoncer fik hestekræfter. Uden hk kan kørekortkategorien ikke udledes, og det er hele grunden til, at detaljesiderne hentes.');
+  }
+  return tal;
+}
+
 /* ---------- Én kilde ---------- */
 async function koerKilde(navn, { limit = null, toerloeb = false, stille = false } = {}){
   const log = nyLog(!stille);
@@ -120,6 +170,12 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
 
     if (!annoncer.length){
       log.skriv('ingen annoncer fundet. Selectors eller sidestruktur bør efterses, før det gentager sig.');
+    }
+
+    if (kilde.detalje?.hent && annoncer.length){
+      const sek = Math.round(annoncer.length * kilde.crawl_delay_ms / 1000);
+      log.skriv(`henter ${annoncer.length} detaljesider (~${Math.floor(sek/60)} min ${sek%60} s ved ${kilde.crawl_delay_ms} ms mellem kald)`);
+      await berigMedDetaljer(browser.context, kilde, annoncer, { log });
     }
 
     if (!toerloeb && annoncer.length){
