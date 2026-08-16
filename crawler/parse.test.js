@@ -60,13 +60,16 @@ test('mærke fra liste-URL slår mærke gættet ud fra titlen', () => {
   const forkert = { ...KORT, titel: 'XL883 Standard Cruiser' };   // titlen mangler mærket
   const { annonce } = tilAnnonce(forkert, KILDE, 'Harley-Davidson');
   assert.equal(annonce.maerke, 'Harley-Davidson');
-  assert.equal(annonce.model, 'XL883 Standard Cruiser');
+  // Cruiser er karrosseritypen og hører i varianten, ikke i modelnavnet.
+  assert.equal(annonce.model, 'XL883 Standard');
+  assert.equal(annonce.variant, 'Cruiser');
 });
 
 test('uden mærke fra URL genkendes det i titlen', () => {
   const { annonce } = tilAnnonce(KORT, KILDE, null);
   assert.equal(annonce.maerke, 'Harley-Davidson');
-  assert.equal(annonce.model, 'XL883 Standard Cruiser');
+  assert.equal(annonce.model, 'XL883 Standard');
+  assert.equal(annonce.variant, 'Cruiser');
 });
 
 test('mærket klippes af modellen — ellers matcher fingerprint aldrig', () => {
@@ -75,9 +78,43 @@ test('mærket klippes af modellen — ellers matcher fingerprint aldrig', () => 
 });
 
 test('tocifrede mærkenavne deles ikke midt over', () => {
-  assert.deepEqual(delTitel('Moto Guzzi V7 Stone', null), { maerke: 'Moto Guzzi', model: 'V7 Stone' });
-  assert.deepEqual(delTitel('Royal Enfield Himalayan', null), { maerke: 'Royal Enfield', model: 'Himalayan' });
-  assert.deepEqual(delTitel('Harley Davidson Fat Boy', null), { maerke: 'Harley-Davidson', model: 'Fat Boy' });
+  const uden = { variant: null, salgsmarkoerer: null };   // ingen type, ingen markør i titlen
+  assert.deepEqual(delTitel('Moto Guzzi V7 Stone', null), { maerke: 'Moto Guzzi', model: 'V7 Stone', ...uden });
+  assert.deepEqual(delTitel('Royal Enfield Himalayan', null), { maerke: 'Royal Enfield', model: 'Himalayan', ...uden });
+  assert.deepEqual(delTitel('Harley Davidson Fat Boy', null), { maerke: 'Harley-Davidson', model: 'Fat Boy', ...uden });
+});
+
+test('variant og salgsmarkører følger med annoncen ud af parseren', () => {
+  // MC Syd-titel i sin fulde form. Alle tre dele skal kunne læses hver for
+  // sig på den anden side af tilAnnonce() — ellers er opdelingen ligegyldig.
+  const kort = { ...KORT, titel: 'Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING' };
+  const { annonce } = tilAnnonce(kort, KILDE, 'Yamaha');
+  assert.equal(annonce.maerke, 'Yamaha');
+  assert.equal(annonce.model, 'XV 750 Virago');
+  assert.equal(annonce.variant, 'Cruiser');
+  assert.deepEqual(annonce.salgsmarkoerer, ['ENGROS', 'UDEN KLARGØRING']);
+  // Titlen gemmes stadig, som kilden skrev den. Vi rekonstruerer aldrig
+  // annoncens overskrift ud af vores egen opdeling.
+  assert.equal(annonce.titel, 'Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING');
+});
+
+test('salgsmarkører holdes ude af modellen — ellers rammer fingerprint aldrig', () => {
+  // Samme cykel, hvor forhandleren har tilføjet "BYTTER GERNE" mellem to
+  // kørsler. Fingerprint bygger på model; ændrer markøren modellen, bliver
+  // den samme motorcykel til to annoncer.
+  const a = tilAnnonce({ ...KORT, titel: 'Honda ST 1100 Touring Pan' }, KILDE, 'Honda').annonce;
+  const b = tilAnnonce({ ...KORT, titel: 'Honda ST 1100 Touring Pan BYTTER GERNE' }, KILDE, 'Honda').annonce;
+  assert.equal(a.model, 'ST 1100 Pan');
+  assert.equal(a.fingerprint, b.fingerprint);
+  assert.equal(a.salgsmarkoerer, null);
+  assert.deepEqual(b.salgsmarkoerer, ['BYTTER GERNE']);
+});
+
+test('titel med kun mærket giver ingen opdigtet model', () => {
+  const { annonce } = tilAnnonce({ ...KORT, titel: 'Honda' }, KILDE, 'Honda');
+  assert.equal(annonce.maerke, 'Honda');
+  assert.equal(annonce.model, null);
+  assert.equal(annonce.variant, null);
 });
 
 test('ukendt mærke i titlen kastes ikke væk', () => {

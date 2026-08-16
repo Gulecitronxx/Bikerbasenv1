@@ -127,6 +127,126 @@ function normaliserMaerke(raa){
   return n.split(' ').map(o => o.charAt(0).toUpperCase() + o.slice(1)).join(' ');
 }
 
+/* ---------- Model, variant og salgsmarkører ----------
+   Bilbasen deler titlen i to linjer: modellen fed, det der præciserer den
+   dæmpet nedenunder. Vi har én lang streng fra MC Syd og skal finde det
+   samme skel. Princippet kopieres, ikke formen — Bilbasens anden linje er
+   bil-trim med karrosserikode ("54 Altitude 5d"), og det findes ikke på en
+   motorcykel.
+
+   MC Syd bygger titlen sådan her, og rækkefølgen af de sidste to led er
+   IKKE fast:
+
+     mærke + modelkode + [karrosseritype] + [modelnavn] + [salgsmarkør]
+
+     "Yamaha  XV 750    Cruiser        Virago     ENGROS/UDEN KLARGØRING"
+     "Honda   CMX 1100 D  Rebel        Cruiser"      <- omvendt rækkefølge
+
+   Derfor kan skellet ikke findes på position. Det eneste, der kan afgøres
+   uden at gætte, er ORDFORRÅDET: karrosserityperne er en lukket, kendt liste
+   (det er vores egen typetaksonomi, den samme som img/type/), mens
+   modelnavne — Virago, Diversion, Rebel, Pan, GT — er uendeligt mange og
+   umulige at kende uden en modeldatabase pr. mærke.
+
+   Så: kendte typeord bliver til varianten, ALT andet bliver i modellen.
+   Det er den sikre retning. Kender vi et ord, flyttes det; kender vi det
+   ikke, bliver det liggende hos modellen, og modellen er det felt, vi ikke
+   må tabe. Resultatet læser rigtigt for et menneske:
+
+     "Yamaha XV 750 Virago"   / "Cruiser"
+     "Honda CMX 1100 D Rebel" / "Cruiser"
+     "BMW K 1200 GT"          / "Touring"
+
+   Bemærk, at det også løser rækkefølgen i "K 1200 Touring GT": GT er ikke et
+   typeord, så den bliver hos modellen, hvor den hører til. */
+
+/* Salgsmarkører er forhandlerens vilkår, ikke motorcyklen. De skal ud af
+   modelnavnet — ellers er "Honda ST 1100 Pan BYTTER GERNE" en anden model end
+   "Honda ST 1100 Pan", både for øjet og for fingerprint().
+
+   Listen er lukket med vilje. ENGROS, UDEN KLARGØRING og BYTTER GERNE står i
+   MC Syds egne titler; SOLGT og RESERVERET er tilstande, som intet mærke
+   kalder en model. Et ord, vi ikke har set i rigtige data, hører ikke til
+   her: rammer det forkert, æder det et modelnavn i stilhed. */
+const SALGSMARKOERER = [
+  { udtryk: /\b(?:uden|ingen)\s+klarg(?:ø|oe)ring\b/giu, maerkat: 'UDEN KLARGØRING' },
+  { udtryk: /\bbytter(?:\s+gerne)?\b/giu,                maerkat: 'BYTTER GERNE' },
+  { udtryk: /\bengros\b/giu,                             maerkat: 'ENGROS' },
+  { udtryk: /\breserveret\b/giu,                         maerkat: 'RESERVERET' },
+  { udtryk: /\bsolgt\b/giu,                              maerkat: 'SOLGT' },
+];
+
+/* Karrosseri-/brugstyper. Nøglen er ordet renset for alt andet end bogstaver,
+   værdien er den skrivemåde, vi viser. Samme tanke som MAERKE_ALIAS: kilden
+   må gerne råbe "SPORTSTOURING", kortet skal stadig sige "Sportstouring". */
+const KARROSSERITYPER = {
+  cruiser: 'Cruiser', sportstouring: 'Sportstouring', touring: 'Touring',
+  street: 'Street', adventure: 'Adventure', offroader: 'Offroader',
+  offroad: 'Offroader', klassiker: 'Klassiker', klassisk: 'Klassiker',
+  classic: 'Klassiker', veteran: 'Veteran', sport: 'Sport', naked: 'Naked',
+  scooter: 'Scooter', cross: 'Cross', enduro: 'Enduro', supermoto: 'Supermoto',
+  custom: 'Custom',
+};
+
+function traekSalgsmarkoerer(raa){
+  const original = String(raa == null ? '' : raa);
+  let tekst = original;
+  const fundne = [];
+  for (const m of SALGSMARKOERER){
+    const efter = tekst.replace(m.udtryk, ' ');
+    if (efter === tekst) continue;
+    tekst = efter;
+    /* Positionen i den OPRINDELIGE titel gemmes, så mærkaterne kommer ud i
+       den rækkefølge, kilden skrev dem — "ENGROS/UDEN KLARGØRING", ikke
+       omvendt. Ellers bestemte rækkefølgen i listen herover, hvordan et
+       mærkat så ud på kortet, og den rækkefølge betyder ingenting. */
+    fundne.push({ maerkat: m.maerkat, ved: original.search(m.udtryk) });
+  }
+  fundne.sort((a, b) => a.ved - b.ved);
+  /* "ENGROS/UDEN KLARGØRING" efterlader en enlig skråstreg, når begge dele er
+     fjernet. Alt uden bogstav eller ciffer er tegnsætning, der har mistet sit
+     ord, og må ikke ende midt i modelnavnet. */
+  const ord = tekst.split(/\s+/).filter(o => /[\p{L}\d]/u.test(o));
+  // Ingen markører er null, ikke en tom liste — samme kontrakt som resten af
+  // filen, hvor en manglende værdi er null og aldrig noget, der ligner data.
+  return { ord, salgsmarkoerer: fundne.length ? fundne.map(f => f.maerkat) : null };
+}
+
+function delModelOgVariant(raa){
+  const { ord, salgsmarkoerer } = traekSalgsmarkoerer(raa);
+  // Seks MC Syd-annoncer har kun mærket som titel. Der er ingen model at
+  // finde, og en gættet model ville stå som en kendsgerning på kortet.
+  if (!ord.length) return { model: null, variant: null, salgsmarkoerer };
+
+  const type = ord.map(o => KARROSSERITYPER[o.toLowerCase().replace(/[^\p{L}]/gu, '')] || null);
+
+  /* Et typeord som FØRSTE ord er en del af modelnavnet, ikke en type: MC Syd
+     sætter altid typen EFTER modellen. Uden den regel ville "Ducati Sport
+     1000" blive til modellen "1000" og "Triumph Street Triple 765" til
+     "Triple 765" — begge er navne, ingen af dem er typer.
+     Undtagelsen: består resten udelukkende af typeord, er der ingen model at
+     beskytte, og ordet ER typen. */
+  const kunTyper = type.every(Boolean);
+  const foersteTilladt = kunTyper ? 0 : 1;
+
+  const modelOrd = [];
+  const variantOrd = [];
+  ord.forEach((o, i) => {
+    if (type[i] && i >= foersteTilladt){
+      // Samme type nævnt to gange ("Touring ... Touring") skal stå én gang.
+      if (!variantOrd.includes(type[i])) variantOrd.push(type[i]);
+    } else {
+      modelOrd.push(o);
+    }
+  });
+
+  return {
+    model: modelOrd.join(' ') || null,
+    variant: variantOrd.join(' ') || null,
+    salgsmarkoerer,
+  };
+}
+
 /* ---------- Sælgertype ---------- */
 function normaliserSaelgertype(raa){
   if (!raa) return null;
@@ -177,6 +297,7 @@ function fingerprint({ maerke, model, aargang, km, pris_dkk, postnr }){
 module.exports = {
   parsePris, parseKm, parseAargang, parseCcm, parsePostnr,
   normaliserMaerke, normaliserSaelgertype, uddrag, fingerprint,
+  delModelOgVariant,
   // Eksporteres, så crawleren kan GENKENDE et mærke i starten af en titel og
   // dele "Harley-Davidson XL883 Standard" op i mærke og model. Kun opslag —
   // parsningen bliver liggende her.

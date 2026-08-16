@@ -87,10 +87,17 @@ function delTitel(titel, kendtMaerke){
   }
 
   // Titlen starter med mærket: klip det af, uanset om mærket kom fra URL'en.
-  const model = fundet ? ord.slice(fundet.ord).join(' ') : ord.join(' ');
+  const rest = fundet ? ord.slice(fundet.ord).join(' ') : ord.join(' ');
   const maerke = kendtMaerke ? n.normaliserMaerke(kendtMaerke) : (fundet ? fundet.navn : null);
 
-  return { maerke, model: model || null };
+  /* Det, der bliver tilbage, er ikke bare modellen. MC Syd klistrer
+     karrosseritypen og sine egne salgsvilkår ind i samme streng, og de tre
+     ting hører tre forskellige steder hen — se delModelOgVariant() i
+     normalize.js, som ejer den opdeling ligesom al anden parsning af danske
+     annoncedata. */
+  const { model, variant, salgsmarkoerer } = n.delModelOgVariant(rest);
+
+  return { maerke, model, variant, salgsmarkoerer };
 }
 
 /* ---------- Trin 2: rå strenge -> annonce ----------
@@ -109,7 +116,7 @@ function tilAnnonce(raa, kilde, listeMaerke = null){
   const titel = n.uddrag(raa.titel, 200);
   if (!titel) return { ok: false, grund: `annonce ${kilde_annonce_id} har ingen titel` };
 
-  const { maerke, model } = delTitel(titel, listeMaerke);
+  const { maerke, model, variant, salgsmarkoerer } = delTitel(titel, listeMaerke);
   const faste = kilde.faste_felter || {};
 
   const annonce = {
@@ -118,6 +125,12 @@ function tilAnnonce(raa, kilde, listeMaerke = null){
     titel,
     maerke,
     model,
+    // Bilbasens anden linje: det, der præciserer modellen. Null når titlen
+    // ikke siger noget — kortet skriver hellere ingenting end et gæt.
+    variant,
+    // Forhandlerens vilkår, ikke motorcyklens. Eget felt, så det kan vises
+    // som et mærkat og aldrig forurener model eller variant.
+    salgsmarkoerer,
     aargang: n.parseAargang(raa.aargang),
     km: n.parseKm(raa.km),
     ccm: n.parseCcm(raa.ccm),
