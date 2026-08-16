@@ -154,6 +154,31 @@ function buildListings(){
   const now = new Date('2026-07-26T09:00:00');
   let id = 1001;
 
+  /* ÉN sælger pr. navn — ikke ét sælgerobjekt pr. annonce.
+
+     Her blev der før bygget et friskt seller-objekt inde i løkken for HVER
+     annonce, også når navnet var det samme. Sælgernavnene kommer fra to små
+     lister (seks forhandlere, atten fornavne), så gengangere er ikke en
+     mulighed, de er givet: målt 9 af 37 demosælgere havde to eller flere
+     annoncer, og alle 9 modsagde sig selv. "Motorcykel Centret ApS" stod
+     som Frederikshavn / medlem siden 2024 / CVR 37063717 på annonce 1017 og
+     som Vejle / medlem siden 2019 / CVR 60996224 på annonce 1001 — og
+     forhandler.html viser den FØRSTE annonces sælger (hentSaelgerLokalt i
+     js/forhandler.js), så profilen sagde Vejle/2019 om den mand, annoncen
+     lige havde kaldt Frederikshavn/2024. Ét klik, to identiteter.
+
+     Byen følger med: en forhandler er én butik ét sted. Lod vi kun
+     medlemsåret og CVR'et være fælles, ville annoncesiden skrive
+     "Forhandler · Vejle" over en motorcykel, der står i Frederikshavn — en
+     modsigelse INDE på samme side, altså værre end den, vi lukkede.
+     Annoncer efter den første fra samme sælger flytter derfor med til
+     sælgerens by, postnummer og landsdel.
+
+     rnd() kaldes uændret mange gange og i samme rækkefølge, så priser,
+     datoer, stand og hk er præcis de samme tal som før. Det eneste, der
+     ændrer sig, er hvilke af dem der bliver BRUGT. */
+  const saelgere = new Map();
+
   const entries = [
     ['Yamaha','MT-09',2022,14200,890,'naked'],['Yamaha','YZF-R6',2019,21500,599,'sport'],
     ['Yamaha','Ténéré 700',2021,9800,689,'adventure'],['Yamaha','XSR700',2020,17400,689,'classic'],
@@ -201,16 +226,9 @@ function buildListings(){
     const power = kendtHk || estimatePower(ccm, type, year, brand);
     const registration = type === 'cross' ? 'Ikke indregistreret (bane/off-road)' : (rnd() < 0.9 ? 'Indregistreret' : 'Afmeldt');
     const afgift = registration.startsWith('Ikke indregistreret') ? 'Ikke relevant (ikke indregistreret)' : (rnd() < 0.92 ? 'Betalt' : 'Ikke betalt');
-    listings.push({
-      id: id++,
-      brand, model, type, year, km, ccm,
-      power,
-      price: basePrice,
-      condition,
-      city: city.city, postnr: city.postnr, region: city.region,
-      createdAt: created.toISOString(),
-      isDealer,
-      seller: {
+    /* Tallene trækkes ALTID — også når sælgeren er kendt i forvejen — så
+       rnd()-sekvensen (og dermed resten af demolageret) er uændret. */
+    const nySaelger = {
         name: sellerName,
         isDealer,
         verified: isDealer ? rnd() < 0.75 : rnd() < 0.15,
@@ -230,7 +248,30 @@ function buildListings(){
            Bedømmelsen regnes nu ét sted — af de faktiske anmeldelser. Findes
            de ikke, findes tallet ikke. */
         city: city.city,
-      },
+    };
+
+    /* Kendt navn = kendt sælger. Den første annonce definerer identiteten;
+       de følgende låner den, i stedet for at opfinde en ny mand med samme
+       navn. Ét sælgerobjekt betyder også, at ændrer man ham ét sted,
+       ændrer han sig alle steder — det var netop dét, der manglede. */
+    let saelger = saelgere.get(sellerName);
+    if (!saelger){ saelger = nySaelger; saelgere.set(sellerName, saelger); }
+
+    // Annoncen står, hvor sælgeren står. Se noten øverst i funktionen.
+    const sted = saelger === nySaelger
+      ? city
+      : (DEMO_CITIES.find(c => c.city === saelger.city) || city);
+
+    listings.push({
+      id: id++,
+      brand, model, type, year, km, ccm,
+      power,
+      price: basePrice,
+      condition,
+      city: sted.city, postnr: sted.postnr, region: sted.region,
+      createdAt: created.toISOString(),
+      isDealer,
+      seller: saelger,
       registration,
       afgift,
       description: buildDescription(brand, model, year, condition, type),
@@ -362,9 +403,25 @@ function typeLabel(id){
 /* ============ Kørekortkategorier ============
    Kilde: Færdselsstyrelsen, "Kørekort til motorcykel".
      A1  maks. 125 cm³, maks. 11 kW (15 hk), maks. 0,1 kW/kg — fra 18 år
-     A2  maks. 35 kW (48 hk), maks. 0,2 kW/kg, ikke afledt af mc med
+     A2  maks. 35 kW (47 hk), maks. 0,2 kW/kg, ikke afledt af mc med
          mere end dobbelt effekt — fra 20 år
      A   ingen effektbegrænsning — fra 24 år
+
+   HER STOD 48 HK, OG DET VAR EN HK FOR MEGET.
+   Loven er skrevet i kilowatt, ikke i hestekræfter: A2 er 35 kW. Regnestykket
+   er 35 / 0,7355 = 47,59 hk, og 48 blev valgt ved at runde OP. Men 48 hk er
+   35,30 kW — over loftet. En Harley-Davidson Iron 883 med 48 hk oplyst stod
+   derfor med "Kørekort A2" på kortet, og det er ikke lovligt for en tyveårig.
+   Opad afrunding er den forkerte retning, når tallet er en grænse: 47 hk er
+   34,57 kW og ligger sikkert under.
+
+   A1's 15 hk er derimod rigtig. 11 kW er 14,96 hk, så 15 er den samme grænse
+   skrevet i hele tal — og det er også det tal, en dansk køber genkender.
+
+   BEMÆRK, at effekten kun er den ene af to grænser. A2 kræver også maks.
+   0,2 kW/kg køreklar vægt, og at mc'en ikke er afledt af en model med over
+   dobbelt effekt. Ingen af delene står i en annonce, så vi kan aldrig love
+   at en mc ER A2 — kun at den ikke er udelukket på effekt.
 
    VIGTIGT: A2 har INGEN slagvolumengrænse. Filtrering på ccm ville være
    forkert og kunne få en køber til at tro, at en for kraftig mc var lovlig.
@@ -375,11 +432,11 @@ function typeLabel(id){
    det siger UI'et også eksplicit. */
 const KOEREKORT = [
   { id: 'A1', label: 'A1 (lille mc)',      hint: 'Maks. 125 cm³ og 15 hk' },
-  { id: 'A2', label: 'A2 (mellem mc)',     hint: 'Maks. 48 hk' },
+  { id: 'A2', label: 'A2 (mellem mc)',     hint: 'Maks. 35 kW (47 hk)' },
   { id: 'A',  label: 'A (stor mc)',        hint: 'Ingen effektgrænse' },
 ];
 
-const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 48;
+const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 47;
 
 /* Ukendt effekt har mange stavemåder, og de betyder alle det samme:
      null      databasen (eksterne_annoncer.hk er tom for alle 332)

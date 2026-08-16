@@ -48,10 +48,41 @@ test('ukendt effekt til og med 125 ccm er stadig A1', () => {
   }
 });
 
+/* GRÆNSEN ER SKREVET I KILOWATT, IKKE I HESTEKRÆFTER.
+
+   A2 er 35 kW. Omregnet: 35 / 0,7355 = 47,59 hk. Her stod grænsen på 48,
+   fordi nogen rundede op — men 48 hk ER 35,30 kW, altså over loftet. En
+   Harley-Davidson Iron 883 med 48 hk oplyst fik derfor "Kørekort A2" på
+   kortet, og det er ikke lovligt for en tyveårig.
+
+   Testen regner i kW frem for at gentage tallet 47. Ændrer nogen grænsen
+   tilbage til 48 — eller flytter loven sig til 40 kW — fejler den her, og
+   den fejler med en begrundelse, ikke bare med "forventede 47". */
+const KW_PR_HK = 0.7355;
+const A2_KW = 35, A1_KW = 11;
+
+test('effektgrænserne holder i kilowatt, som loven er skrevet i', () => {
+  const grænser = new Function(
+    src + '\nreturn { A1_MAX_HK, A2_MAX_HK, A1_MAX_CCM };')();
+
+  const a2kW = grænser.A2_MAX_HK * KW_PR_HK;
+  assert.ok(a2kW <= A2_KW,
+    `A2-grænsen er ${grænser.A2_MAX_HK} hk = ${a2kW.toFixed(2)} kW, og loftet er ${A2_KW} kW`);
+  // ... men den skal også ligge så tæt på loftet som et helt hk tillader,
+  // ellers udelukker vi lovlige motorcykler.
+  assert.ok((grænser.A2_MAX_HK + 1) * KW_PR_HK > A2_KW,
+    `A2-grænsen er sat unødigt lavt: ${grænser.A2_MAX_HK + 1} hk ville stadig være under ${A2_KW} kW`);
+
+  const a1kW = grænser.A1_MAX_HK * KW_PR_HK;
+  assert.ok(Math.abs(a1kW - A1_KW) < 0.1,
+    `A1-grænsen er ${grænser.A1_MAX_HK} hk = ${a1kW.toFixed(2)} kW, og loftet er ${A1_KW} kW`);
+});
+
 test('kendt effekt afgør kategorien', () => {
   assert.equal(koerekortForListing({ power: 14, ccm: 125 }), 'A1');
   assert.equal(koerekortForListing({ power: 44, ccm: 650 }), 'A2');
-  assert.equal(koerekortForListing({ power: 48, ccm: 750 }), 'A2');
+  assert.equal(koerekortForListing({ power: 47, ccm: 750 }), 'A2');  // 34,57 kW
+  assert.equal(koerekortForListing({ power: 48, ccm: 883 }), 'A');   // 35,30 kW — Iron 883
   assert.equal(koerekortForListing({ power: 49, ccm: 750 }), 'A');
   assert.equal(koerekortForListing({ power: 95, ccm: 900 }), 'A');
   assert.equal(koerekortForListing({ power: '44', ccm: 650 }), 'A2'); // tal som tekst fra databasen
