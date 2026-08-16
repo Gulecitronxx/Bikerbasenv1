@@ -50,6 +50,22 @@ crawl_delay_ms: 2000
 # nedenfor uændret, fordi data-key er platformens, ikke MC Syds.
 kraever_browser: true
 
+# BESLUTTET 16.08.2026: vi bliver ved Playwright og den renderede DOM.
+#
+# Gitteret bygges af et JSON-endpoint hos platformsleverandøren:
+#   POST https://websiteapi.danbase.dk/v1/321/product/search
+# Det er fristende — én forespørgsel i stedet for en browser, formentlig med
+# flere felter end kortene viser, og markant billigere for de næste fem
+# forhandlere, hvis de også kører Danbase.
+#
+# Vi bruger det alligevel ikke. Tilladelsen fra MC Syd gælder deres website.
+# Et udokumenteret internt API hos deres leverandør er ikke det samme, og
+# hverken MC Syd eller Danbase har sagt ja til det. Aftalen er grunden til, at
+# vi overhovedet må hente det her — den skal ikke udvides af en genvej.
+#
+# Find ikke endpointet igen om et halvt år og tro, det er en forbedring.
+# Spørg i stedet Danbase, hvis hastigheden bliver et reelt problem.
+
 # ---------------------------------------------------------------
 # Hvor annoncerne findes
 # ---------------------------------------------------------------
