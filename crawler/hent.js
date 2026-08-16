@@ -66,9 +66,16 @@ async function hentListeside(context, kilde, url){
   });
 }
 
-/* Danbase efterindlæser kort ved scroll. Vi ruller til bunden, indtil antallet
-   af kort holder op med at vokse. Loftet er der, fordi en side med uendelig
-   scroll ellers ville køre, til hukommelsen løb tør. */
+/* Sikkerhedsnet mod efterindlæsning ved scroll. Vi ruller til bunden, indtil
+   antallet af kort holder op med at vokse. Loftet er der, fordi en side med
+   uendelig scroll ellers ville køre, til hukommelsen løb tør.
+
+   MC Syd har det IKKE: hele listen står i DOM'en ved første indlæsning, 345
+   kort både før og efter scroll, og siden skriver selv "343 ud af 343
+   resultater". Løkken koster derfor én ekstra optælling pr. side og stopper.
+   Den bliver stående, fordi den næste Danbase-forhandler kan have flere
+   produkter, end de leverer på én gang — og fordi alternativet er stille
+   datatab: en liste, der er afkortet, ser ud som en liste, der er kort. */
 async function rulTilBunden(page, kortSelector, maksRul = 25){
   let forrige = -1;
   for (let i = 0; i < maksRul; i++){

@@ -1,7 +1,18 @@
-# MC Syd — Rødding. Omkring 500 motorcykler på lager.
+# MC Syd — Rødding. 332 motorcykler på lager (målt 16.08.2026).
 #
 # STATUS: klar. URL-struktur, crawl-regler og felt-selectors er alle
 # verificeret mod det levende site i en renderet browser.
+#
+# OM ANTALLET: her stod tidligere "omkring 500". Det er forkert, og det kostede
+# en søgning efter 150 motorcykler, der ikke findes. Siden skriver det selv
+# nederst i gitteret: "343 ud af 343 resultater". Optalt i renderet DOM er de
+# 345 kort = 332 motorcykler + 11 scootere/knallerter + 2 uden produktlink.
+# Scooterne sorteres fra af detalje_url_moenster, så 332 er det rigtige tal.
+#
+# INGEN PAGINERING. Hele listen ligger i DOM'en ved første indlæsning — 345
+# kort både før og efter scroll. Der er ingen "vis flere"-knap, ingen
+# ?page=-links og ingen efterindlæsning ved scroll. Crawlerens scroll-løkke
+# er derfor et sikkerhedsnet, ikke en nødvendighed, for netop denne kilde.
 
 navn: MC Syd
 domaene: mcsyd.dk
