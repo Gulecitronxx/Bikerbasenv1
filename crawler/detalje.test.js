@@ -40,24 +40,51 @@ const SPECS_BMW = {
 // Tilladelsen
 // ---------------------------------------------------------------
 
-test('guloggratis kan IKKE crawles: den skriftlige tilladelse mangler', () => {
-  // Det her er ikke en fejl i filen — det er filens vigtigste linje.
-  // robots.txt siger Allow: /, men config.js kræver også et skriftligt ja.
-  assert.throws(() => laesKilde('guloggratis'), /tilladelse/i);
+/* DE HER TRE TESTS LÅSTE DEN FORKERTE TING.
+
+   De hed "guloggratis kan IKKE crawles" og påstod, at netop denne kilde
+   manglede sit ja. Det var sandt, da de blev skrevet. Den 16.08.2026 kom
+   aftalen i hus, filen blev sat til true — og så fejlede tre tests, ikke
+   fordi noget var gået i stykker, men fordi de havde skrevet en TILSTAND ned
+   som om den var en REGEL.
+
+   Forskellen er værd at holde fast i: tilstanden ("denne kilde har ikke fået
+   ja endnu") ændrer sig, hver gang nogen indgår en aftale. Reglen ("pipelinen
+   nægter at køre uden et skriftligt ja") skal aldrig ændre sig, og det er den,
+   der skal have en vagthund.
+
+   Testene tester nu reglen, med en syntetisk kilde. Så gælder de også for den
+   næste kilde, nogen tilføjer — og de bliver ikke røde, næste gang nogen gør
+   noget rigtigt. */
+
+test('pipelinen nægter at køre en kilde uden skriftlig tilladelse', () => {
+  const k = raaKilde();
+  k.tilladelse_modtaget = false;
+  assert.throws(() => validerKilde(k), /tilladelse/i);
 });
 
-test('alt ANDET i guloggratis.yaml er gyldigt — der mangler kun ja\'et', () => {
-  const k = raaKilde();
-  assert.equal(k.tilladelse_modtaget, false, 'filen skal stå med tilladelse: false');
-  k.tilladelse_modtaget = true;
-  // Må ikke kaste: er tilladelsen der, er kilden klar til at køre.
-  const valideret = validerKilde(k);
+test('tilladelsen er det ENESTE, der mangler for en ellers gyldig kilde', () => {
+  // Samme konfiguration, kun feltet vippet: uden kaster den, med går den ren
+  // igennem. Det beviser, at vagten står på tilladelsen og ikke på noget andet.
+  const uden = raaKilde(); uden.tilladelse_modtaget = false;
+  assert.throws(() => validerKilde(uden), /tilladelse/i);
+
+  const med = raaKilde(); med.tilladelse_modtaget = true;
+  const valideret = validerKilde(med);
   assert.equal(valideret.domaene, 'guloggratis.dk');
   assert.equal(valideret.detalje.hent, true);
 });
 
-test('kilden er også sat inaktiv, så et ja alene ikke starter en kørsel', () => {
-  assert.equal(raaKilde().aktiv, false);
+test('en aktiv kilde skal have BÅDE tilladelse og en dato for den', () => {
+  // Datoen er ikke pynt. Den er det, der gør en påstand om en aftale til noget,
+  // et menneske kan gå tilbage og efterprøve.
+  const k = raaKilde();
+  if (k.aktiv){
+    assert.equal(k.tilladelse_modtaget, true,
+      'en aktiv kilde uden tilladelse_modtaget er præcis det, vagten findes for');
+    assert.ok(k.tilladelse_dato, 'aktiv kilde mangler tilladelse_dato');
+    assert.match(String(k.tilladelse_dato), /^\d{4}-\d{2}-\d{2}$/);
+  }
 });
 
 // ---------------------------------------------------------------
