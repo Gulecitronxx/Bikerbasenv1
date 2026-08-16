@@ -111,7 +111,10 @@ test('salgsmarkører holdes ude af modellen — ellers rammer fingerprint aldrig
   const b = tilAnnonce({ ...KORT, titel: 'Honda ST 1100 Touring Pan BYTTER GERNE' }, KILDE, 'Honda').annonce;
   assert.equal(a.model, 'ST 1100 Pan');
   assert.equal(a.fingerprint, b.fingerprint);
-  assert.equal(a.salgsmarkoerer, null);
+  // Tom liste, ikke null: kolonnen er `not null default '{}'`, og en eksplicit
+  // null slår defaulten fra frem for at udløse den. Vi mangler ikke
+  // oplysningen — vi ved, at der ingen markører er.
+  assert.deepEqual(a.salgsmarkoerer, []);
   assert.deepEqual(b.salgsmarkoerer, ['BYTTER GERNE']);
 });
 

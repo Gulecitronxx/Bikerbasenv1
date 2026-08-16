@@ -142,9 +142,18 @@ function tilAnnonce(raa, kilde, listeMaerke = null){
     // Bilbasens anden linje: det, der præciserer modellen. Null når titlen
     // ikke siger noget — kortet skriver hellere ingenting end et gæt.
     variant,
-    // Forhandlerens vilkår, ikke motorcyklens. Eget felt, så det kan vises
-    // som et mærkat og aldrig forurener model eller variant.
-    salgsmarkoerer,
+    /* Forhandlerens vilkår, ikke motorcyklens. Eget felt, så det kan vises
+       som et mærkat og aldrig forurener model eller variant.
+
+       ALTID et array, aldrig null. delModelOgVariant() bruger internt null
+       som "ingen markører", men kolonnen er `not null default '{}'`, og en
+       eksplicit null slår en default fra i stedet for at udløse den. Første
+       rigtige kørsel efter migrationen døde på præcis det: 332 annoncer
+       parset, 0 gemt.
+
+       Tom liste frem for null er også det rigtigere svar. Vi VED, at
+       annoncen ingen markører har — vi mangler ikke oplysningen. */
+    salgsmarkoerer: salgsmarkoerer || [],
     aargang: n.parseAargang(raa.aargang),
     km: n.parseKm(raa.km),
     ccm: n.parseCcm(raa.ccm),
