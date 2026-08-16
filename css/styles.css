@@ -1038,6 +1038,249 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
 
 .similar-strip{ margin-top: var(--space-9); }
 
+/* ============ Detaljeside for en INDEKSERET annonce ============
+   Egen blok, ikke en variant af sælgersiden. De to sider har forskellige
+   opgaver: vores egen skal føre til en samtale, den her skal føre til
+   kilden — og undervejs aldrig efterlade tvivl om, hvem der står bag.
+
+   Disciplinen er hentet hos Bilbasens annonceside: prisen med sin etiket
+   over sig, specs i en rolig todelt tabel frem for et gitter af kasser,
+   hver sektion under sin overskrift med en streg imellem, og forhandleren
+   i sit eget kort ved siden af. Formsproget er vores eget.
+
+   Den stiplede kant går igen fra kortene (.card-external): stiplet =
+   lånt fra en anden side. Den er bevidst ikke pænere end vores egne
+   annoncer — den skal kunne kendes, ikke fremhæves. */
+
+/* Sidefoden på .listing-detail er sat til vores egne annoncer, hvor
+   kontaktbjælken ligger fast i bunden på mobil og skal have luft over sig.
+   Her er der ingen kontaktbjælke — den fjernes fra DOM'en — og 96px
+   tomrum oven i stribens egne 96px blev til en halv skærm ingenting
+   mellem sidste afsnit og "Lignende motorcykler". */
+.listing-detail:has(> .external-detail){ padding-bottom: var(--space-5); }
+
+/* Flaget står øverst, før foto og titel. Det er det første, øjet rammer,
+   og det eneste sted på siden, hvor afsenderen kan misforstås. */
+.external-detail-flag{
+  display:flex; align-items:flex-start; gap:10px;
+  border:1.5px dashed var(--color-border); border-radius: var(--radius-md);
+  background: var(--color-surface-2); color: var(--color-fg-muted);
+  padding: var(--space-3) var(--space-4); font-size:14px; line-height:1.5;
+  margin-bottom: var(--space-5);
+}
+.external-detail-flag b{ color: var(--color-fg); }
+.external-detail-flag svg{ width:18px; height:18px; flex:0 0 auto; margin-top:2px; }
+
+.external-detail-photo{ margin:0; }
+.external-detail-photo img,
+.external-detail-photo-tom{
+  width:100%; aspect-ratio:4/3; object-fit:cover; display:block;
+  border-radius: var(--radius-lg); background: var(--color-surface-2);
+}
+@media (min-width:700px){
+  .external-detail-photo img,
+  .external-detail-photo-tom{ aspect-ratio:16/10; }
+}
+/* Uden foto skal kassen ikke fylde det samme som et foto ville. En halv
+   skærm tomhed er ikke ærligere end en lav kasse — den er bare tom. */
+.external-detail-photo-tom{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; color: var(--color-fg-muted); font-size:14px; text-align:center;
+  border:1.5px dashed var(--color-border);
+  aspect-ratio:auto; min-height:150px; padding: var(--space-5);
+}
+@media (min-width:700px){ .external-detail-photo-tom{ aspect-ratio:auto; } }
+.external-detail-photo-tom svg{ width:28px; height:28px; }
+/* Fotoet er forhandlerens. Krediteringen står under billedet, hvor et
+   billedbureau ville sætte den — ikke gemt væk i en title-attribut. */
+.external-detail-photo figcaption{
+  display:flex; align-items:center; gap:6px;
+  font-size:12px; color: var(--color-fg-muted);
+  padding: var(--space-2) 2px 0;
+}
+.external-detail-photo figcaption svg{ width:14px; height:14px; flex:0 0 auto; }
+/* Kant til kant på telefon, præcis som .gallery på vores egne annoncer.
+   Fotoet er det første, en køber ser, og et indrykket billede med runde
+   hjørner gav det under to tredjedele af skærmbredden. */
+@media (max-width:699px){
+  .external-detail-photo{ margin-inline: calc(var(--space-4) * -1); }
+  .external-detail-photo img{ border-radius:0; }
+  .external-detail-photo figcaption{ padding-inline: var(--space-4); }
+  .external-detail-photo-tom{ margin-inline: var(--space-4); }
+}
+
+.external-detail-head{ margin: var(--space-5) 0 0; }
+.external-detail-title{
+  font-family: var(--font-display); font-weight:700; line-height:1.1;
+  font-size: clamp(26px,3.6vw,36px); margin:0;
+}
+/* Bilbasens anden titellinje: variant/trim, dæmpet under modelnavnet.
+   Halvt så tung som linjen over — den skal læses, ikke konkurrere. Findes
+   ingen variant i kilden, står linjen slet ikke, og næste linje rykker op. */
+.external-detail-variant{
+  font-family: var(--font-display); font-weight:500;
+  font-size: clamp(17px,2.2vw,21px); line-height:1.25;
+  color: var(--color-fg-muted); margin:4px 0 0;
+}
+/* Tredje linje: by, landsdel og sælgertype — det, en køber ellers skal
+   lede efter i teksten. */
+.external-detail-sub{
+  display:flex; align-items:center; flex-wrap:wrap; gap:6px;
+  color: var(--color-fg-muted); font-size:14px; margin-top:8px;
+}
+.external-detail-sub svg{ width:16px; height:16px; flex:0 0 auto; }
+.external-detail-dot{ opacity:.5; }
+
+.external-detail-price-block{ margin-top: var(--space-4); }
+.external-detail-price-label{
+  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  color: var(--color-fg-muted); margin:0;
+}
+.external-detail-price{
+  font-family: var(--font-display); font-weight:700; line-height:1.1;
+  font-size: clamp(30px,5vw,38px); margin:2px 0 0;
+}
+.external-detail-price.is-tom{
+  font-size: clamp(17px,2.4vw,20px); font-weight:600; color: var(--color-fg-muted);
+}
+/* Salgsvilkår står LIGE under prisen, ikke nede i beskrivelsen. "Uden
+   klargøring" og "Engros" forklarer, hvorfor tallet er lavt — samme rolle
+   som Bilbasens "(Uden afgift)" under kontantprisen. Ser man dem først,
+   når man står i butikken, har prisen løjet. */
+.external-detail-vilkaar{ display:flex; flex-wrap:wrap; gap:6px; margin: var(--space-3) 0 0; }
+.external-detail-vilkaar-chip{
+  display:inline-flex; align-items:center;
+  border:1px solid var(--color-border); border-radius: var(--radius-pill);
+  background: var(--color-surface-2); color: var(--color-fg);
+  font-size:12px; font-weight:600; padding:4px 11px;
+}
+.external-detail-vilkaar-note{ margin:8px 0 0; font-size:12px; color: var(--color-fg-muted); line-height:1.5; }
+
+/* ---------- Kørekortpanelet ----------
+   Sidens vigtigste enkeltoplysning for en dansk køber, og derfor det
+   eneste element med farve på. Koden i firkanten er læsbar på et halvt
+   sekund; teksten ved siden af siger, hvad den bygger på, så ingen tager
+   den for en garanti. */
+.external-detail-kk{
+  display:flex; align-items:flex-start; gap: var(--space-4);
+  margin-top: var(--space-5); padding: var(--space-4);
+  border:1px solid var(--color-border); border-left:4px solid var(--color-primary);
+  border-radius: var(--radius-md); background: var(--color-surface);
+}
+.external-detail-kk-code{
+  flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  min-width:54px; height:54px; padding:0 10px;
+  background: var(--color-dark); color:#fff;
+  font-family: var(--font-display); font-weight:700; font-size:22px;
+  border-radius: var(--radius-md);
+}
+.external-detail-kk b{ display:block; font-size:16px; }
+.external-detail-kk p{ margin:4px 0 0; font-size:13px; color: var(--color-fg-muted); line-height:1.55; }
+/* Kan vi ikke regne kategorien ud, skal panelet ikke se ud, som om vi kan.
+   Gul kant og en mindre kode: et forbehold, ikke et svar. */
+.external-detail-kk.is-uvis{ border-left-color: var(--color-fg-muted); }
+.external-detail-kk.is-uvis .external-detail-kk-code{
+  background: var(--color-surface-2); color: var(--color-fg-muted);
+  font-size:17px; border:1.5px dashed var(--color-border);
+}
+
+/* Nøgletallene: årgang, km, ccm, hk. Kun dem vi har — auto-fit gør, at to
+   felter fylder rækken lige så pænt som fire. */
+.external-detail-stats{
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:1px;
+  margin-top: var(--space-5);
+  background: var(--color-border); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); overflow:hidden;
+}
+.external-detail-stat{ background: var(--color-surface); padding: var(--space-4); }
+.external-detail-stat-label{
+  display:flex; align-items:center; gap:6px;
+  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+  color: var(--color-fg-muted);
+}
+.external-detail-stat-label svg{ width:15px; height:15px; }
+.external-detail-stat b{ display:block; margin-top:6px; font-family: var(--font-display); font-size:18px; }
+/* Under 560px er der kun plads til to felter i bredden. Med tre nøgletal
+   stod det sidste alene, og den tomme celle ved siden af viste gitterets
+   stregfarve igennem som en grå kasse uden indhold. Er sidste felt ulige,
+   tager det hele rækken i stedet. */
+@media (max-width:559px){
+  .external-detail-stats{ grid-template-columns: repeat(2,1fr); }
+  .external-detail-stat:last-child:nth-child(odd){ grid-column: 1 / -1; }
+}
+
+.external-detail-section{ margin-top: var(--space-7); padding-top: var(--space-6); border-top:1px solid var(--color-border); }
+.external-detail-section h2{ font-size:20px; margin-bottom: var(--space-3); }
+
+/* Specifikationstabellen. Etiket til venstre, værdi til højre, zebra —
+   samme aflæsning som Bilbasens "Detaljer", uden deres udfoldning, fordi
+   vi ikke har rækker nok til at skjule nogen. */
+.external-detail-specs{ margin:0; border:1px solid var(--color-border); border-radius: var(--radius-md); overflow:hidden; }
+.external-detail-row{
+  display:grid; grid-template-columns: 1fr auto; gap: var(--space-4);
+  align-items:baseline; padding: 11px var(--space-4);
+  font-size:15px;
+}
+.external-detail-row:nth-child(odd){ background: var(--color-surface); }
+.external-detail-row:nth-child(even){ background: var(--color-surface-2); }
+.external-detail-row dt{ color: var(--color-fg-muted); }
+.external-detail-row dd{ margin:0; font-weight:600; text-align:right; }
+
+.external-detail-note{ margin-top: var(--space-3); font-size:13px; color: var(--color-fg-muted); line-height:1.6; }
+.external-detail-quote{
+  margin:0; padding: var(--space-4); border-left:3px solid var(--color-border);
+  background: var(--color-surface-2); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--color-fg); line-height:1.7; font-size:15px;
+}
+.external-detail-raad{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.external-detail-raad li{
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:14px; color: var(--color-fg-muted); line-height:1.55;
+}
+.external-detail-raad svg{ width:17px; height:17px; flex:0 0 auto; margin-top:2px; color: var(--color-fg-muted); }
+
+/* ---------- Kildekortet ----------
+   Står, hvor sælgerkortet står på vores egne annoncer. Det er med vilje:
+   det er dét sted, øjet leder efter "hvem handler jeg med" — og svaret
+   skal være MC Syd, ikke Bikerbasen. Ingen knap her fører til en samtale;
+   den ene knap fører ud af sitet. */
+.external-detail-aside{ display:flex; flex-direction:column; gap: var(--space-4); }
+@media (min-width:960px){
+  .external-detail-aside{ position:sticky; top: calc(var(--header-h) + var(--space-4)); }
+}
+.external-detail-source,
+.external-detail-next{
+  background: var(--color-surface); border:1.5px dashed var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-5);
+}
+.external-detail-source-head{ display:flex; align-items:flex-start; gap: var(--space-3); margin-bottom: var(--space-4); }
+.external-detail-source-head > svg{ width:26px; height:26px; flex:0 0 auto; color: var(--color-fg-muted); }
+.external-detail-source-label{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); margin:0; }
+.external-detail-source-name{ font-size:22px; margin:2px 0 0; line-height:1.15; }
+.external-detail-source-domain{ font-size:13px; color: var(--color-fg-muted); margin:2px 0 0; }
+.external-detail-source .btn svg{ width:15px; height:15px; }
+.external-detail-source-body{ margin: var(--space-4) 0 0; font-size:13px; line-height:1.6; color: var(--color-fg-muted); }
+.external-detail-source-meta{
+  display:flex; align-items:flex-start; gap:8px;
+  margin: var(--space-3) 0 0; padding-top: var(--space-3);
+  border-top:1px solid var(--color-border);
+  font-size:12px; color: var(--color-fg-muted); line-height:1.5;
+}
+.external-detail-source-meta svg{ width:15px; height:15px; flex:0 0 auto; }
+.external-detail-broken{
+  display:flex; align-items:flex-start; gap:8px;
+  font-size:13px; color: var(--color-danger); line-height:1.55;
+}
+.external-detail-broken svg{ width:16px; height:16px; flex:0 0 auto; margin-top:1px; }
+
+.external-detail-next h2{ font-size:15px; margin:0 0 var(--space-3); }
+.external-detail-next ul{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.external-detail-next a{
+  display:block; padding:8px 0; font-size:14px;
+  border-bottom:1px solid var(--color-border);
+}
+.external-detail-next li:last-child a{ border-bottom:0; }
+
 /* ============ Forms ============ */
 .form-grid{ display:grid; grid-template-columns:1fr; gap: var(--space-4); }
 @media (min-width:640px){ .form-grid.cols-2{ grid-template-columns: 1fr 1fr; } .form-grid.cols-3{ grid-template-columns: 1fr 1fr 1fr; } }
