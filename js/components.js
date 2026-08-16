@@ -372,8 +372,16 @@ function eksternKoerekort(l){
    "–", "Ikke oplyst" og "—". Seks måder at sige det samme på læses som seks
    forskellige ting — og "Km" med stort er desuden en retskrivningsfejl.
    Specfelterne har feltnavnet i et skjult <dt>, så værdien skal ikke gentage
-   det: chippen siger "Ukendt", skærmlæseren siger "Kilometer: Ukendt". */
-const EKSTERN_UKENDT = 'Ukendt';
+   det: chippen siger "Ikke oplyst", skærmlæseren "Kilometer: Ikke oplyst".
+
+   Ordet var "Ukendt" indtil konsistensgennemgangen. Det var ét ord på ÉT
+   kort, ikke på sitet: søgesidens listerækker (UOPLYST_CELLE i js/search.js),
+   sælgerprofilens faktaliste og annoncesidens pris skrev alle "Ikke oplyst"
+   om det samme, og "Ikke oplyst" er dét, den låste regel i work/DECISIONS.md
+   ("Ærlighed slår fuldstændighed") navngiver. Argumentet i noten ovenfor
+   holder uændret: det gjaldt "Km ikke oplyst", der gentager feltnavnet —
+   "Kilometer: Ikke oplyst" gør ikke. */
+const EKSTERN_UKENDT = 'Ikke oplyst';
 
 /* Fire faste specfelter: årgang, kilometer, ccm, hk — i den rækkefølge, på
    hvert eneste kort, uanset hvad kilden havde med. Hver er en chip, ikke
@@ -725,13 +733,21 @@ function wireFavoriteButtons(root){
         ['Kilometer', b => formatKm(b.km)],
         ['Motorstørrelse', b => formatCcm(b.ccm)],
         ['Effekt', b => formatPower(b.power)],
-        ['Kørekort', b => koerekortForListing(b) || '—'],
+        /* Fem tankestreger stod her, i den samme tabel hvor rækkerne over
+           sagde "Pris ikke oplyst" og "Km ikke oplyst". Sammenligningen er
+           lige præcis det sted, hvor to annoncer stilles op ved siden af
+           hinanden — og et "—" over for en udfyldt celle læses som en
+           dårligere motorcykel, ikke som en oplysning, kilden ikke har.
+           Kørekort er dog UDLEDT, ikke oplyst: kan reglen ikke afgøre
+           kategorien, er svaret "Kan ikke afgøres", ikke "Ikke oplyst" —
+           samme skel som kørekortmærkatet på kortene i js/components.js. */
+        ['Kørekort', b => koerekortForListing(b) || 'Kan ikke afgøres'],
         ['Type', b => typeLabel(b.type)],
-        ['Drivlinje', b => b.drive || '—'],
-        ['Stand', b => b.condition || '—'],
-        ['Servicehistorik', b => b.serviceHistorik || '—'],
-        ['Antal ejere', b => b.antalEjere || '—'],
-        ['Sidste syn', b => b.sidsteSyn || '—'],
+        ['Drivlinje', b => b.drive || 'Ikke oplyst'],
+        ['Stand', b => b.condition || 'Ikke oplyst'],
+        ['Servicehistorik', b => b.serviceHistorik || 'Ikke oplyst'],
+        ['Antal ejere', b => b.antalEjere || 'Ikke oplyst'],
+        ['Sidste syn', b => b.sidsteSyn || 'Ikke oplyst'],
       ];
       return rows.map(([label, fn]) =>
         `<tr><th scope="row">${label}</th>${bikes.map(b => `<td>${escapeHTML(String(fn(b)))}</td>`).join('')}</tr>`).join('');

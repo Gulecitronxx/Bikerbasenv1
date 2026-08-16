@@ -368,10 +368,23 @@ async function buildForside(){
   // category tiles — hver type får sin egen line-art-motorcykel af netop den
   // type. Mere distinkt end ét gentaget ikon, og custom pr. kategori frem for
   // Bilbasens stock-fotos.
+  /* width/height er filernes RIGTIGE mål. De stod på 760×570 efter at
+     billederne blev skaleret ned til 456×342 — forholdet 4:3 var uændret, så
+     pladsreservationen holdt, men tallene passede ikke på filerne længere, og
+     et forkert intrinsic-mål er præcis det, en fremtidig srcset ville regne
+     galt på.
+
+     INGEN srcset, og det er målt frem, ikke glemt: fliserne står i to spalter
+     inden for .container, altså (412 − 32 − 12) / 2 = 184 CSS-px på
+     Lighthouses mobil (Moto G Power, 412 px, DPR 1,75) = 322 fysiske px. En
+     320w-kandidat er to pixel for lille, så browseren ville vælge 456w
+     alligevel, og på DPR 2 (350 px) og DPR 3 (525 px) ligeså. Otte ekstra
+     filer, ingen af dem nogensinde valgt. Skal der spares her, er svaret at
+     gøre 456w-filen mindre — ikke at lægge en kandidat ved siden af. */
   const tilesMount = document.getElementById('category-tiles');
   tilesMount.innerHTML = TYPES.map(t => `
     <a href="soegning.html?type=${t.id}" class="tile">
-      <span class="tile-media"><img src="img/type/${t.id}.webp" alt="" width="760" height="570" loading="lazy" decoding="async"></span>
+      <span class="tile-media"><img src="img/type/${t.id}.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
       <span class="tile-label">${t.label}<span class="tile-go" aria-hidden="true">${Icon.arrowRight}</span></span>
     </a>`).join('');
 
@@ -426,9 +439,18 @@ async function buildForside(){
       <span class="trust-icon">${Icon.mail}</span>
       <div><h3>Din kontaktinfo er skjult</h3><p>Skriv til sælger direkte på Bikerbasen. Dit telefonnummer og din e-mail deles først, når du selv vælger det.</p></div>
     </div>
+    <!-- Her stod "Verificerede forhandlere — Forhandlere godkendes med CVR og
+         MitID". Det passede ikke. verifiedBadgeHTML() i js/components.js
+         returnerer tom streng med vilje, login.html siger ordret "Ingen
+         profiler på Bikerbasen er identitetsverificerede", og
+         sælgerprofilen skriver "Vi slår ikke op i CVR- eller MitID-
+         registret". Forsiden lovede altså på første skærm præcis det, de
+         tre andre sider bagefter tog tilbage — og det er tillidsløftet,
+         køberen dømmer os på. Kortet siger nu det, siden faktisk gør, og
+         det kan efterprøves på et hvilket som helst annoncekort. -->
     <div class="trust-card">
       <span class="trust-icon">${Icon.shieldCheck}</span>
-      <div><h3>Verificerede forhandlere</h3><p>Forhandlere godkendes med CVR og MitID, så du ved præcis, hvem der står bag annoncen.</p></div>
+      <div><h3>Ingen gættede felter</h3><p>Mangler et tal hos sælgeren, står der "Ikke oplyst" — vi fylder ikke hullet ud med et skøn. Og vi sætter ikke et "Verificeret"-stempel på oplysninger, vi ikke har slået op.</p></div>
     </div>`;
 
   /* ============ Bid 5: annoncerne — først HER venter vi på databasen ============

@@ -21,6 +21,13 @@
 
 let currentSeller = null;
 
+/* Den udgave af sælgeren, siden må TEGNE. For en forhandler er den identisk
+   med currentSeller. For en privat sælger set af en udlogget besøgende er
+   navnet skiftet ud med "Privat sælger" — se navneblindProfil() nederst.
+   currentSeller beholder det rigtige navn, fordi Store.getReviews() slår
+   anmeldelser op på netop det. */
+let visSaelger = null;
+
 /* 0 = intet valgt. Stod før på 5, altså en færdigudfyldt topkarakter, som en
    bruger, der kun ville skrive en kommentar, afgav uden at vide det. Tallet
    øverst på siden er regnet af netop de karakterer — så en forudfyldt
@@ -59,9 +66,25 @@ function talDa(n){
    Nu fyldes hver stjerne kun så meget, karakteren rækker til, og der rundes
    aldrig op. Halve karakterer kan ikke længere opstå (se SEED_REVIEWS i
    js/data.js), men funktionen skal ikke kunne lyve, hvis de gør. */
+/* role="img" er ikke pynt — uden den findes stjernerne slet ikke for en
+   skærmlæser.
+
+   Elementet var `<span class="review-stars" aria-label="4,2 ud af 5
+   stjerner">` med fem `aria-hidden`-stjerner indeni. En bar <span> har ingen
+   rolle, og aria-label er FORBUDT på et element uden rolle (WAI-ARIA: kun
+   roller, der tillader "naming from author"). Browseren smider derfor
+   etiketten væk, og fordi indholdet samtidig var skjult, blev hele
+   bedømmelsen tavs: hverken gennemsnittet i toppen eller de seks enkelte
+   anmeldelser havde en karakter, en blind køber kunne høre. Målt af
+   Lighthouse som `aria-prohibited-attr` på 7 elementer — tilgængelighed 97
+   mod gulvet på 100 i bar/RUBRIC.md, og det var netop det tillidskritiske
+   tal, der manglede.
+
+   role="img" giver elementet en rolle, der må navngives, og gør de fem
+   stjerner til ét billede med én etiket i stedet for fem ordløse ikoner. */
 function starsHTML(rating){
   const v = Math.max(0, Math.min(5, Number(rating) || 0));
-  return `<span class="review-stars" aria-label="${talDa(Math.round(v * 10) / 10)} ud af 5 stjerner">${
+  return `<span class="review-stars" role="img" aria-label="${talDa(Math.round(v * 10) / 10)} ud af 5 stjerner">${
     Array.from({length:5}, (_,i) => {
       const del = Math.max(0, Math.min(1, v - i));   // 0 = tom stjerne, 1 = fyldt
       return `<span aria-hidden="true" style="opacity:${(0.25 + 0.75 * del).toFixed(2)}">${Icon.star}</span>`;
@@ -304,14 +327,54 @@ function renderProfileNotFound(){
    med samme navn smeltede sammen til én profil, og navnet lå i URL'en.
    Annoncerne hentes direkte fra databasen frem for at filtrere den
    indlæste side, så en sælger med mange annoncer viser dem alle. */
+/* ---------- Nøglen i adresselinjen ----------
+
+   Profilen slås op på `?id=`. Hvad der står i den nøgle, er en
+   tillidsbeslutning, ikke et teknisk detaljespørgsmål:
+
+     databasesælger   → uuid. Afslører intet.
+     forhandler       → firmanavnet. Det er en offentlig oplysning, står på
+                        annoncekortene i forvejen og ER sidens overskrift.
+     privat sælger    → hverken uuid eller navn findes at bruge på
+                        demodataene, og navnet MÅ ikke i adresselinjen: hele
+                        grunden til, at kortet på annoncen skriver "Privat
+                        sælger" udlogget, er at navnet er en personoplysning.
+                        Han får derfor et pseudonym udledt af navnet.
+
+   Pseudonymet er stabilt (samme navn giver samme nøgle hver gang), kort nok
+   til en URL, og kan ikke regnes tilbage til et navn af den, der ser det.
+   Det er ikke kryptografi og skal ikke være det — den, der allerede kender
+   navnet, kan naturligvis regne nøglen ud. Pointen er alene, at nøglen ikke
+   RØBER navnet for den, der ser linket, deler det, eller ser det i historikken.
+
+   ADVARSEL: den samme funktion står i js/annonce.js (saelgerKortHTML), fordi
+   den fil bygger linket og denne fil læser det. De to skal være ordret ens —
+   ændres den ene, skal den anden med. Samme aftale som datoKort()/talDa()
+   længere oppe. */
+function navneHash(navn){
+  // FNV-1a, 32 bit. Valgt fordi den er fem linjer og deterministisk.
+  let h = 0x811c9dc5;
+  for (let i = 0; i < navn.length; i++){
+    h ^= navn.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(36);
+}
+function profilNoegleFor(s){
+  if (!s) return '';
+  if (s.id) return String(s.id);
+  if (!s.name) return '';
+  return s.isDealer ? String(s.name) : 'p' + navneHash(String(s.name));
+}
+
 function hentSaelgerLokalt(noegle){
   /* Eksterne annoncer har `seller: null` (se normalizeExternalListing i
-     js/backend-bridge.js). Uden vagten herunder blev de til strengen
-     "undefined", og en URL med ?id=undefined ville samle dem alle sammen
-     til én opdigtet sælgerprofil. */
+     js/backend-bridge.js). Uden vagten i profilNoegleFor() blev de til
+     strengen "undefined", og en URL med ?id=undefined ville samle dem alle
+     sammen til én opdigtet sælgerprofil. */
   const alle = Store.getAllListings().filter(l => {
-    const k = l.seller?.id ?? l.seller?.name;
-    return k != null && String(k) === String(noegle);
+    const k = profilNoegleFor(l.seller);
+    return k !== '' && k === String(noegle);
   });
   return { seller: alle[0]?.seller || null, listings: alle };
 }
@@ -364,8 +427,12 @@ async function hentSaelger(sellerId){
 
    Sælgertypen står som en mærkat, ikke som en grå metalinje. "Er det tydeligt
    HVEM der sælger — forhandler eller privat — uden at klikke?" er første
-   spørgsmål i tillidskategorien, og svaret skal kunne læses på afstand. */
-function renderIdentitet(seller, listings){
+   spørgsmål i tillidskategorien, og svaret skal kunne læses på afstand.
+
+   Er sælgeren privat og den besøgende udlogget, er `seller` her den
+   navneblinde udgave: overskriften er "Privat sælger i Næstved", og byen
+   står derfor ikke som sin egen chip bagefter. Se navneblindProfil(). */
+function renderIdentitet(seller, listings, skjultNavn){
   const erForhandler = !!seller.isDealer;
   const titel = erForhandler && seller.company ? seller.company : seller.name;
   const nyeste = listings.map(l => l.createdAt).filter(Boolean).sort().pop();
@@ -429,6 +496,16 @@ function renderOplysninger(seller, listings, nyesteAnnonce){
     (erForhandler && seller.company) ? ['Firmanavn', escapeHTML(seller.company)] : null,
     seller.name !== titel ? ['Navn på profilen', escapeHTML(seller.name)] : null,
     ['By', seller.city ? escapeHTML(seller.city) : 'Ikke oplyst'],
+    /* CVR står på annoncesidens sælgerkort (cvrLinje i js/annonce.js) med et
+       link til registret. Her stod det ikke, så den samme forhandler havde et
+       CVR-nummer ét klik tidligere og intet her — og profilen er netop den
+       side, køberen går til for at slå ham op. Samme betingelse som på
+       annoncen: kun når nummeret FAKTISK er der. `public_profiles` har ingen
+       cvr-kolonne, så på databaseannoncer falder rækken helt væk; den må
+       aldrig få en standardværdi (jf. "Firmanavn: Ikke oplyst"-fejlen). */
+    (erForhandler && seller.cvr)
+      ? ['CVR', `${escapeHTML(String(seller.cvr))} — <a href="https://datacvr.virk.dk/soegeresultater?fritekst=${encodeURIComponent(seller.cvr)}" target="_blank" rel="noopener noreferrer">slå det op i CVR-registret</a>`]
+      : null,
     ['Medlem siden', seller.memberSince ? escapeHTML(String(seller.memberSince)) : 'Ikke oplyst'],
     ['Aktive annoncer', String(listings.length)],
     /* "Ser siden ud til at være vedligeholdt i år, eller ser den forladt ud?"

@@ -447,6 +447,56 @@ async function syncFavorites(){
   localStorage.setItem(Store.KEYS.favorites, JSON.stringify([...remoteIds, ...demoIds]));
 }
 
+/* ---------- Hvilke annoncer har DENNE side brug for? ----------
+
+   De indekserede er målt til 29.867 B gzip (500 rækker, cross-origin, High)
+   og blev hentet på hver side, der rører databasen — også dem, hvor ingen
+   kodesti kan vise en af dem. `/annonce.html?id=1` hentede 332
+   forhandlerannoncer for at skrive "Annoncen findes ikke".
+
+   Listerne er DENYLISTER med vilje: en side, ingen har gennemgået, opfører
+   sig som før. Begrundelsen pr. side:
+   - `forhandler.html`: `hentSaelgerLokalt()` matcher på `seller.id ?? name`,
+     og eksterne har `seller: null` — de frafiltreres altid. Er nøglen en
+     uuid, slår siden op i databasen og rører ingen af listerne. Derfor er
+     `<script id="boot-listings">` også taget ud af den side.
+   - `login.html`: viser ingen annoncer.
+   - `dashboard.html`: bruger `getMyListings()`, ikke `getAllListings()`.
+   - `opret-annonce.html`: slår kun op for at REDIGERE, og en indekseret
+     annonce har hverken ejer eller sælger hos os.
+   - `annonce.html` uden uuid i `?id`: eksterne nøgler ER uuid'er, så svaret
+     kan ikke ligge i listen.
+   Uændret: forsiden, `soegning.html`, `maerke-*.html`, `mine-annoncer.html`
+   (søgeagenter tælles mod HELE lageret) og `annonce.html` med en uuid.
+
+   PRISEN: `prisSammenligning()` i js/data.js regner sit grundlag ud af
+   `getAllListings()`. På de her sider bliver grundlaget mindre, og under fem
+   sammenlignelige svarer den ingenting. Den kan altså UNDLADE et mærkat, den
+   før satte — den kan ikke sætte et forkert. Målt i dag: nul annoncer i hele
+   lageret ligger under grænsen, så ingen synlig forskel.
+
+   Skal en side alligevel bruge listen, kan `loadExternalListings()` kaldes
+   direkte bagefter — den skriver stadig `window.EXTERNAL_LISTINGS`. */
+const SIDER_UDEN_EKSTERNE = new Set([
+  'forhandler.html', 'login.html', 'dashboard.html', 'opret-annonce.html',
+]);
+const SIDER_UDEN_EGNE = new Set([
+  'forhandler.html', 'login.html',
+]);
+
+function sidensNavn(){
+  const navn = String(location.pathname || '').split('/').pop();
+  return navn || 'index.html';
+}
+
+function harBrugForEksterne(){
+  const side = sidensNavn();
+  if (SIDER_UDEN_EKSTERNE.has(side)) return false;
+  if (side !== 'annonce.html') return true;
+  // Kun uuid'er kan pege på en indekseret annonce.
+  return isUuid(new URLSearchParams(location.search).get('id') || '');
+}
+
 /* Kald denne før første render på sider der viser data. */
 let _bootPromise = null;
 function backendReady(){
@@ -457,7 +507,10 @@ function backendReady(){
       await syncSessionToStore();
       // Egne annoncer og indekserede hentes samtidig — de er uafhængige, og
       // serielt ville de lægge en rundtur oven i sidens første render.
-      await Promise.all([loadRemoteListings(), loadExternalListings()]);
+      await Promise.all([
+        SIDER_UDEN_EGNE.has(sidensNavn()) ? Promise.resolve([]) : loadRemoteListings(),
+        harBrugForEksterne() ? loadExternalListings() : Promise.resolve([]),
+      ]);
       await syncFavorites();
     } catch (e) {
       console.warn('Backend-opstart fejlede, fortsætter på lokale data:', e);

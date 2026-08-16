@@ -881,3 +881,98 @@ regex'er i `scripts/inline-critical.js` matcher `css/styles.css` bogstaveligt;
 skifter man filnavnet uden at rette dem, springer scriptet ALLE 14 sider over
 uden at fejle. Tag den i en runde, hvor kun én arbejder i CSS'en.
 HVOR: `css/styles.css`, `scripts/inline-critical.js`
+
+### Standardsorteringen er MÅLT, og navnet holdt — søgning runde 2, 16.08.2026
+HVAD: Ingen kodeændring. Runde 2's omdøbning ("Mest relevante" → "Blandet
+udbud") og `blandetRaekkefoelge()` stod færdig og korrekt koblet; det, der
+manglede, var efterprøvningen. Målt i browseren på topniveau, side 1:
+
+  Blandet udbud (standard):  24 kort — 4 egne, 20 indekserede,
+                             4 uden foto, 0 tegninger.
+                             Egne på plads 4, 11, 17, 24.
+  Nyeste først (date-desc):  24 kort — 24 egne, 0 indekserede,
+                             24 uden foto.
+  Fælles i de første 6:      1 af 6.
+
+HVORFOR DET AFGØR KRITIKKEN: kritikeren skrev, at standarden "i praksis er
+nyeste-først". De to rækkefølger er hinandens modsætninger — den ene er 83 %
+indekserede, den anden 100 % egne. Påstanden er altså modbevist med tal, og
+"hele første skærm er tredjeparts MC Syd" gælder ikke længere: første egne
+annonce står på plads 4, og egne fylder 4 af 24 (16,7 %) mod 13,3 % af
+lageret. De er en anelse OVERrepræsenteret på side 1.
+FORBEHOLD, som skal stå: oplystheden GØR noget, men den kan ikke ses på side
+1. Målt gennemsnit af metafelter pr. kort: side 1 = 0,50, side 8 = 0,50,
+side 16 = 0,00 (23 kort, alle uden km). Gradienten findes altså kun i halen.
+Det er præcis derfor navnet ikke må være "Mest oplyste først" — og derfor
+`renderSorteringsNote()` nævner BEGGE regler og ikke kun oplystheden.
+HVOR: `js/search.js` — `blandetRaekkefoelge()`, `renderSorteringsNote()`
+
+### Tegningen: KORTET holdt op med at tegne — løftet blev stående, 16.08.2026
+HVAD: Valget er truffet og efterprøvet, ikke lavet om. `listingMediaHTML()` i
+`js/components.js` tegner ikke længere en motorcykel ved nul fotos; feltet er
+kameraikon + stiplet kant + "Ingen fotos i denne annonce" — ordret samme
+sætning som annoncesidens `.gallery-tom`. Annoncesidens løfte ("Vi viser ikke
+en tegning i stedet") er URØRT.
+MÅLT: standardsøgningen 0 tegninger af 24 kort; A2 + maks. 60.000 kr. 0
+tegninger af 24 kort, hvoraf 12 er uden foto; `annonce.html?id=1003` har 0
+tegninger i galleriet og de 3 "Lignende annoncer"-kort på samme side bruger
+samme felt med samme sætning. Ét udtryk hele vejen gennem købers sti.
+HVORFOR DEN VEJ OG IKKE DEN ANDEN: løftet er det stærkeste, siden siger om
+sig selv, og det er gratis at holde — tegningen bar ingen oplysning. Havde vi
+i stedet blødt løftet op, ville vi have betalt med tillidskategorien for at
+beholde et piktogram, som kritikeren allerede havde talt op som 14 ENS grå
+felter. Man skriver ikke løftet om for at redde tegningen.
+HVOR: `js/components.js` `listingMediaHTML()`; `css/styles.css` `.foto-tom`
+
+### Resultatlinjen fik sin egen række — og (i) blev bundet til sit led, 16.08.2026
+HVAD: To rettelser mod kritikerens mobilfund, begge målt på 390x844.
+1) `@media (max-width:620px)`: `.results-headline` gik fra `grid-area:1 / 1`
+   (1fr-kolonnen ved siden af Gem søgning + visningsskifteren, MÅLT 149px) til
+   `1 / 1 / 2 / 4` — hele bredden. Gitteret er nu `auto auto 1fr`, sorteringen
+   har sin egen fulde række, og klokke + visningsskifter + Filtre deler den
+   tredje. Kritikeren talte fire linjer; der var i virkeligheden FEM plus (i)
+   som en sjette.
+2) `renderResultsCount()` pakker kildeleddet og (i)-knappen i én `.mix-tail`
+   (`display:inline-flex`), så de ombryder sammen. (i) stod før alene på en
+   linje, fordi de to led fyldte bredden præcis.
+MÅLT FØR → EFTER: overskrift 149px bred / 120px høj (5 linjer) → 340px / 68px
+(2 linjer). Værktøjslinje 175px → 173px. Første kort 494px → 492px. Altså en
+række MERE og alligevel lavere — en række koster ingen højde, når indholdet
+til gengæld slipper for at brække. Efterprøvet uden vandret scroll og uden
+enlig (i) ved 357, 387, 427, 597, 617 og 697px. Desktop er urørt (flex over
+620px): sammensætningen står stadig på én linje med (i) 6px efter.
+FÆLDE: `.view-toggle` bruges også på annonce.html og forhandler.html, som
+ikke har nogen værktøjslinje. Reglen er derfor scopet
+`.results-toolbar .view-toggle`, ikke `.view-toggle`.
+HVOR: `css/styles.css` — "Mobil: værktøjslinje", `.mix-tail`;
+`js/search.js` — `renderResultsCount()`
+
+### Mærkelisten: bekræftet ÉT rullefelt færre — efterprøvet, 16.08.2026
+HVAD: Ingen ændring. Runde 2's `.checkbox-list` + `brand-more` virker.
+MÅLT på 390 med filterarket åbent: rullebare lag om mærkelisten = 2
+(`.filter-body-scroll` + siden selv), mærkelisten selv har ingen. 12 rækker
+vises, knappen siger "Vis alle 25 mærker", ét tryk giver 25 og "Vis færre
+mærker", næste tryk folder tilbage til 12 — ingen indre rulning i nogen af
+tilstandene. Kritikerens tre indlejrede rulleområder er altså to.
+FÆLDE FOR DEN, DER MÅLER EFTER: `opdaterMaerkeliste()` skjuler rækker med
+`row.hidden = true`. De ligger stadig i DOM'en, så `querySelectorAll(
+'.checkbox-row').length` giver 25 og ligner en fejl. Tæl på `!row.hidden`.
+HVOR: `js/search.js` `opdaterMaerkeliste()`; `css/styles.css` `.checkbox-list`
+
+### inline-critical.js kørt — hvad den FAKTISK rørte, 16.08.2026
+HVAD: `node scripts/inline-critical.js` kørt én gang til sidst. Alle 14
+HTML-sider er skrevet, men kun 5 fik ændret kritisk CSS:
+  soegning.html      41.211 → 44.756 tegn  (mine regler + eksternt kort)
+  forhandler.html    28.839 → 32.192       (eksternt kort)
+  maerker.html       26.473 → 29.826       (eksternt kort)
+  mine-annoncer.html 27.884 → 31.237       (eksternt kort)
+  annonce.html       33.637 → 33.698       (.listing-aside-inner)
+De øvrige 9 fik kun en indsat blankline — scriptet er ikke helt idempotent
+på whitespace. Det, de fire sider hentede, er `.card-kilde`/`.badge-external`
+fra en TIDLIGERE runde: den CSS var committet, men aldrig bygget ind i
+siderne. Det var altså en indhentning af committet arbejde, ikke en udrulning
+af nogens ubyggede ændringer — `git diff css/styles.css` indeholdt kun mine
+to hunks, da scriptet kørte, og det var betingelsen for at turde køre den.
+DET, DER VAR FORMÅLET: `soegning.html` manglede som eneste side
+`main#main-content{min-height:...}` i sin kritiske blok. Alle 14 har den nu.
+HVOR: alle 14 `*.html` — `<style id="critical">`

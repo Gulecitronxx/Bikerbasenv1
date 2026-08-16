@@ -40,11 +40,17 @@ const block = `<script id="boot-listings">(function(){var k=${JSON.stringify(key
    sidens LCP, og annoncerne ligger langt nede — dér stjæler prefetchen
    båndbredde og hovedtråd fra det, brugeren rent faktisk ser først
    (målt: FCP 1.3s → 1.8s, TBT 300ms → 440ms). */
+/* `forhandler.html` stod her indtil 16.08.2026 og er taget ud igen — ikke
+   fordi annoncerne ligger under folden, men fordi siden ALDRIG læser listen.
+   `hentSaelgerLokalt()` i js/forhandler.js matcher på sælgerens id eller navn;
+   en egen annonce har `seller.id` = uuid, og den vej slår op direkte i
+   databasen med `db.listingsBySeller()`. Prefetchen hentede altså 200 rækker
+   for at kaste dem væk. Se samme argument i SIDER_UDEN_EGNE i
+   js/backend-bridge.js — de to steder skal ændres sammen. */
 const ANNONCER_OVER_FOLDEN = [
   /^soegning\.html$/,
   /^annonce(-.+)?\.html$/,
   /^maerke(r|-.+)?\.html$/,
-  /^forhandler\.html$/,
   /^mine-annoncer\.html$/,
 ];
 
@@ -59,10 +65,14 @@ for (const file of files){
 
   if (!ANNONCER_OVER_FOLDEN.some(re => re.test(file))){
     const før = html;
-    html = html.replace(/\n?<script id="boot-listings">[\s\S]*?<\/script>/, '');
+    // \r?\n?, ikke \n?: HTML-filerne har CRLF i arbejdstræet (core.autocrlf).
+    // Uden \r? blev linjeskiftet halveret, og der stod et løst CR tilbage —
+    // så holdt git op med at kunne normalisere filen, og HELE filen stod som
+    // ændret i diffen. Set og rettet 16.08.2026.
+    html = html.replace(/\r?\n?<script id="boot-listings">[\s\S]*?<\/script>/, '');
     if (html !== før){
       fs.writeFileSync(htmlPath, html);
-      console.log(`  ${file}: prefetch fjernet (annoncer er ikke above-the-fold)`);
+      console.log(`  ${file}: prefetch fjernet (siden er ikke på listen ovenfor)`);
     }
     continue;
   }

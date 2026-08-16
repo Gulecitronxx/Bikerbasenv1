@@ -777,9 +777,18 @@ function renderResultsCount(list){
     ? `<span class="mix-part mix-egne">${egne} ${egne === 1 ? 'annonce' : 'annoncer'} på Bikerbasen</span>`
     : '';
 
+  /* (i)-knappen ligger i en .mix-tail SAMMEN med kildeleddet, og det er ikke
+     pynt. Linjen er en flex med wrap, og på 390px målte kritikeren knappen
+     som en fjerde linje HELT for sig selv: de to led fyldte præcis bredden,
+     og de sidste 22px havde ingen plads. Et spørgsmålstegnsikon alene på en
+     linje forklarer ingenting — man kan ikke se, hvad det spørger om.
+     Bundet sammen wrapper leddet og knappen som ét, så (i) altid står ved
+     "332 indekseret hos MC Syd", som er dét, den åbner forklaringen på. */
   mix.hidden = false;
-  mix.innerHTML = `${egneTekst}<span class="mix-part mix-ekstern">${kildeTekst}${flere}</span>` +
-    `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>`;
+  mix.innerHTML = `${egneTekst}<span class="mix-tail">` +
+    `<span class="mix-part mix-ekstern">${kildeTekst}${flere}</span>` +
+    `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>` +
+    `</span>`;
   mix.querySelector('#mix-info-btn').addEventListener('click', forklarIndekseret);
 }
 

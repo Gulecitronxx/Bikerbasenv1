@@ -188,7 +188,12 @@ function renderAgents(){
     <div class="agent-item">
       <div class="agent-info">
         <div class="agent-label">${escapeHTML(a.label)}${fresh ? `<span class="agent-new">${fresh} ny${fresh === 1 ? '' : 'e'}</span>` : ''}</div>
-        <div class="agent-meta">${matches.length} ${matches.length === 1 ? 'match' : 'matches'} i alt · oprettet ${new Date(a.createdAt).toLocaleDateString('da-DK')}</div>
+        <!-- "matches" er engelsk, og søgeagenten tæller præcis det, søgesiden
+             tæller — dér hedder det "29 annoncer fundet" (js/search.js).
+             Datoen stod desuden som 16.08.2026, mens annoncesiden og
+             sælgerprofilen skriver 16. aug. 2026: samme dato, to
+             skrivemåder, og den korte er repoets regel. -->
+        <div class="agent-meta">${matches.length} ${matches.length === 1 ? 'annonce' : 'annoncer'} i alt · oprettet ${new Date(a.createdAt).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
       </div>
       <div class="agent-actions">
         <a href="soegning.html?${escapeHTML(a.query)}" class="btn btn-outline btn-sm">Vis</a>
@@ -323,7 +328,13 @@ function renderAside(tab){
     mine: kort('Sælg hurtigere', 'Annoncer med billeder og fuldt udfyldt udstyr bliver set markant oftere. Gennemgå dine annoncer og gør dem færdige.', 'Opret ny annonce', 'opret-annonce.html'),
     favoritter: kort('Bikerbasen hjælper dig', 'Vil du finde flere favoritter? Søg blandt alle motorcykler og gem dem, du er interesseret i, med hjertet.', 'Søg motorcykler', 'soegning.html'),
     agenter: kort('Gå aldrig glip af en handel', 'En søgeagent holder øje for dig. Sæt dine filtre på søgesiden og gem søgningen, så tæller vi de nye annoncer der dukker op.', 'Opret en søgeagent', 'soegning.html'),
-    konto: kort('Byg tillid', 'Verificerede profiler får et badge, som købere kan se. Det gør det trygt at handle med dig.', 'Se sikkerhedsråd', 'sikkerhed.html'),
+    /* Her stod "Verificerede profiler får et badge, som købere kan se".
+       Mærkatet findes ikke — verifiedBadgeHTML() i js/components.js er slået
+       fra, og login.html siger ordret, at ingen profiler er
+       identitetsverificerede. Sælgeren fik altså et løfte om en belønning,
+       han aldrig kunne få øje på. Det, der FAKTISK flytter køberens tillid,
+       er de udfyldte felter — og dét kan han gøre noget ved i dag. */
+    konto: kort('Byg tillid', 'Køberen kan se, hvilke felter du har udfyldt, og hvilke der står som "Ikke oplyst" — vi gætter dem ikke for dig. Jo færre huller, jo lettere er annoncen at sige ja til.', 'Se sikkerhedsråd', 'sikkerhed.html'),
   };
   aside.innerHTML = map[tab] || '';
 }

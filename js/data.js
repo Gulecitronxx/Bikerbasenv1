@@ -368,11 +368,20 @@ function formatPrice(n){
 function formatKm(n){
   return n == null ? 'Km ikke oplyst' : n.toLocaleString('da-DK') + ' km';
 }
+/* De to her sagde "— ccm" og "—", mens naboerne tre linjer oppe sagde
+   "Pris ikke oplyst" og "Km ikke oplyst" om nøjagtig det samme tomrum. På
+   annoncesidens specifikationstabel stod alle fire under hinanden, så den
+   samme mangel havde tre skrivemåder i én tabel — og en tankestreg er
+   desuden ikke et svar, den er en manglende sætning. Den låste regel i
+   work/DECISIONS.md ("Ærlighed slår fuldstændighed") navngiver ordet:
+   "Ikke oplyst". `formatPrice` og `formatKm` beholder deres feltnavn, fordi
+   de også bruges alene på et kort, hvor der ikke står nogen etiket ved
+   siden af — disse to gør ikke. */
 function formatCcm(n){
-  return n == null ? '— ccm' : n.toLocaleString('da-DK') + ' ccm';
+  return n == null ? 'Ikke oplyst' : n.toLocaleString('da-DK') + ' ccm';
 }
 function formatPower(hk){
-  return hk ? hk + ' hk' : '—';
+  return hk ? hk + ' hk' : 'Ikke oplyst';
 }
 function timeAgoDa(iso){
   const then = new Date(iso).getTime();
