@@ -149,14 +149,27 @@ function isOwnListing(l){
    Undtagelsen er det første kort i en liste (`eager`): på søgesiden er dets
    foto sidens LCP-element, og lazy-loading udskyder hentningen til efter
    layout — det kostede ~2s LCP. Første kort hentes derfor med høj prioritet. */
+/* Uden foto tegner vi en motorcykel. Den tegning er af EN motorcykel af den
+   type — ikke af DEN her motorcykel, og det kan et kort ikke se forskel på.
+   6 af de 332 indekserede annoncer har intet foto (MC Syd markerer dem selv
+   med class="empty", og deres egen detaljeside har et tomt galleri), og på
+   dem stod vores tegning som var det maskinen. En køber, der scroller, ser
+   en pæn opstillet mc og danner sig et indtryk af stand og udstyr, vi ikke
+   har dækning for.
+
+   Tegningen bliver — den holder gitteret helt, og et gråt hul ser ud som en
+   fejl på siden. Men den får en mærkat, så det er tydeligt, at fotoet
+   mangler, og ikke at det ER motorcyklen. */
 function listingMediaHTML(l, alt, eager){
   const url = l.photoUrls && l.photoUrls[0];
   const loadAttrs = eager
     ? 'loading="eager" fetchpriority="high" decoding="async"'
     : 'loading="lazy" decoding="async"';
-  return url
-    ? `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" ${loadAttrs} class="card-photo">`
-    : bikeArtSVG(l.type, { id: 'card-' + l.id });
+  if (url){
+    return `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" ${loadAttrs} class="card-photo">`;
+  }
+  return bikeArtSVG(l.type, { id: 'card-' + l.id })
+    + `<span class="card-intet-foto">${Icon.camera}Intet foto</span>`;
 }
 
 /* Hvem sælger den?

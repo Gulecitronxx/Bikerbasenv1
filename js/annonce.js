@@ -376,7 +376,25 @@ function renderExternalListing(listing){
         ${foto
           ? `<img src="${escapeHTML(foto)}" alt="${brand} ${model}" loading="eager" decoding="async">
              <figcaption>${Icon.info}Foto: ${kilde}. Flere billeder af netop denne motorcykel finder du i deres annonce.</figcaption>`
-          : `<div class="external-detail-photo-tom">${Icon.camera}<span>Billederne af den her motorcykel ligger i ${kilde}s annonce</span></div>`}
+          /* Her stod "Billederne af den her motorcykel ligger i <kilde>s
+             annonce". Det var et løfte, vi ikke kunne holde: vi mangler
+             fotoet, fordi kilden ikke har sat et på annoncen. MC Syd
+             markerer dem selv med class="empty" i gitteret, og på de to, vi
+             åbnede (Honda VT 700 137963 og Honda CB 72 128471), var deres
+             egen billedkarrusel også tom. Teksten sendte altså køberen hen
+             til en annonce efter billeder, der ikke er der.
+
+             Nu siger den kun det, vi ved i alle tilfælde — kilden sendte
+             intet foto med — og peger på den vej, der faktisk kan skaffe
+             et: at spørge sælgeren. At påstå "der er heller ingen billeder
+             hos dem" ville være den samme fejl igen, bare med nyt fortegn:
+             en anden forhandler kan have fotos på detaljesiden, som ikke
+             står i gitteret. */
+          : `<div class="external-detail-photo-tom">${Icon.camera}
+               <span><b>${kilde} har ikke sat et foto på den her annonce.</b></span>
+               <span>Vi viser det foto, kilden selv lægger på annoncen, og her er der
+                 ingen. Bed ${kilde} om billeder, før du kører efter den.</span>
+             </div>`}
       </figure>
 
       <header class="external-detail-head">
