@@ -350,28 +350,18 @@ function deltTitel(l){
   };
 }
 
-/* Kørekortkategorien er listens vigtigste felt — og derfor det felt, hvor
-   et gæt gør mest skade.
+/* Her stod koerekortSikkert(): et værn mod at koerekortForListing() læste
+   ukendt effekt som 0 hk og derfor kaldte en 1200 ccm maskine "A2".
 
-   koerekortForListing() i js/data.js læser manglende effekt som 0 hk. En
-   1200 ccm maskine uden oplyst hk kommer derfor ud som "A2", altså som om
-   en 20-årig måtte køre den. Det passer for hver eneste indekserede
-   annonce, for kilden oplyser ikke effekt.
+   Fejlen er rettet i kilden (js/data.js), og værnet gentog derefter reglerne
+   uden at ændre et eneste svar — jeg kørte begge og fik samme resultat i
+   alle tilfælde. Så er det ikke længere et sikkerhedsnet, det er en anden
+   kopi af færdselsloven, der kan komme til at sige noget andet end den
+   første. Det var præcis dét, der lod fejlen opstå: kommentaren i data.js
+   advarede mod A2-gættet, mens koden lige nedenunder lavede det.
 
-   Her vises kategorien kun, når den kan udledes:
-     · effekten er kendt      → udledningen holder
-     · ccm ≤ 125 og ingen hk  → A1 uanset effekt (15 hk-grænsen kan ikke
-                                overskrides med den slagvolumen i praksis,
-                                og A1 er den forsigtige gæt-retning)
-   Ellers står der "Ikke oplyst". Et manglende felt koster et klik; et
-   forkert felt kan koste en bøde og en inddraget motorcykel. */
-function koerekortSikkert(l){
-  const hk = Number(l.power) || 0;
-  const ccm = Number(l.ccm) || 0;
-  if (hk) return koerekortForListing(l);
-  if (ccm && ccm <= A1_MAX_CCM) return 'A1';
-  return null;
-}
+   Reglerne bor ét sted. Listen spørger direkte. */
+const koerekortSikkert = koerekortForListing;
 
 /* VISNINGENS tomme celle. Hed tidligere UOPLYST og kolliderede med filtrenes
    UOPLYST-symbol længere nede — to agenter, samme ord, to helt forskellige
