@@ -200,6 +200,9 @@ function sellerLineHTML(l){
 function externalCardHTML(l, i){
   const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
   const kilde = escapeHTML(l.source?.navn || 'ekstern kilde');
+  // Uden en brugbar URL er kortet et blindt link. Så vises annoncen ikke.
+  const href = sikkerUrl(l.externalUrl);
+  if (!href) return '';
   const sted = [l.city, l.postnr].filter(Boolean).map(escapeHTML).join(' ');
   return `
   <article class="card card-external" data-listing-id="${l.id}" data-external="1">
@@ -225,7 +228,7 @@ function externalCardHTML(l, i){
         <span class="card-external-cta">Se hos ${kilde}${Icon.externalLink}</span>
       </div>
     </div>
-    <a href="${escapeHTML(l.externalUrl)}" target="_blank" rel="noopener noreferrer nofollow"
+    <a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
        class="card-link"
        aria-label="Se annonce hos ${kilde} (åbner i ny fane): ${brand} ${model}, ${formatPrice(l.price)}"></a>
   </article>`;

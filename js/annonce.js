@@ -102,6 +102,83 @@ function tælVisning(listingId){
   db.recordListingEvent?.(listingId, 'view');
 }
 
+/* Detaljevisning af en annonce, vi ikke hoster.
+
+   Bevidst mager. Vi gemmer kun de felter, der skal til for at finde og
+   videresende — der ER ingen fuld beskrivelse, intet galleri og ingen
+   kontaktoplysninger at vise, og et layout, der lader som om, ville bare
+   have tomme felter. Køberen skal videre til kilden, og det er hele siden. */
+function renderExternalListing(listing){
+  const kilde = escapeHTML(listing.source?.navn || 'kilden');
+  const domaene = escapeHTML(listing.source?.domaene || '');
+  const brand = escapeHTML(listing.brand), model = escapeHTML(listing.model);
+  const href = sikkerUrl(listing.externalUrl);
+  const foto = sikkerUrl(listing.photoUrls?.[0]);
+
+  document.title = `${brand} ${model} — hos ${kilde} — Bikerbasen`;
+  // Vi ejer ikke indholdet, og en kopi af forhandlerens annonce skal ikke
+  // konkurrere med originalen i Google.
+  Seo.setMeta('meta[name="robots"]', 'name', 'robots', 'noindex, follow');
+
+  const h1 = document.getElementById('listing-h1');
+  if (h1) h1.textContent = `${listing.brand} ${listing.model}`;
+  const bc = document.getElementById('bc-current');
+  if (bc) bc.textContent = `${listing.brand} ${listing.model}`;
+  document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
+
+  const raekke = (etiket, vaerdi) =>
+    `<div class="spec-row"><dt>${etiket}</dt><dd>${vaerdi}</dd></div>`;
+
+  document.getElementById('listing-detail').innerHTML = `
+    <div class="external-detail" style="grid-column:1/-1;">
+      <div class="badge badge-external" style="margin-bottom:var(--space-3);">
+        ${Icon.externalLink}Hos ${kilde}
+      </div>
+      <h2 style="margin:0 0 var(--space-2);">${brand} ${model}</h2>
+      <p class="external-detail-price" style="font-size:1.5rem;font-weight:700;margin:0 0 var(--space-4);">
+        ${formatPrice(listing.price)}
+      </p>
+
+      ${foto
+        ? `<img src="${escapeHTML(foto)}" alt="${brand} ${model}"
+               style="max-width:100%;border-radius:var(--radius-md);margin-bottom:var(--space-4);">`
+        : ''}
+
+      <dl class="spec-list">
+        ${raekke('Årgang', listing.year ?? 'Ikke oplyst')}
+        ${raekke('Kilometer', listing.km == null ? 'Ikke oplyst' : formatKm(listing.km))}
+        ${raekke('Kubik', listing.ccm == null ? 'Ikke oplyst' : formatCcm(listing.ccm))}
+        ${raekke('Sted', escapeHTML([listing.city, listing.postnr].filter(Boolean).join(' ')) || 'Ikke oplyst')}
+        ${raekke('Sælger', listing.isDealer ? 'Forhandler' : 'Ikke oplyst')}
+      </dl>
+
+      <p style="margin:var(--space-5) 0 var(--space-3);color:var(--color-fg-muted);">
+        Denne annonce ligger hos <strong>${kilde}</strong>${domaene ? ` (${domaene})` : ''}.
+        Bikerbasen viser den, men handlen og al kontakt sker hos ${kilde} —
+        vi er ikke en del af den.
+      </p>
+
+      ${href
+        ? `<a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
+              class="btn btn-primary">Se annoncen hos ${kilde}${Icon.externalLink}</a>`
+        : `<p style="color:var(--color-fg-muted);">Linket til kilden mangler eller er ugyldigt.</p>`}
+      <a href="soegning.html" class="btn btn-outline" style="margin-left:8px;">Tilbage til søgningen</a>
+    </div>`;
+
+  /* Alt, der peger på en sælger, fjernes fra DOM'en frem for bare at blive
+     skjult. En skjult knap er stadig en knap: den kan tabbes til, den kan
+     klikkes af en skærmlæser, og den næste, der kobler en handler på
+     #bar-contact, opdager ikke at den ikke burde findes her.
+
+     Kontaktbjælken står statisk i annonce.html og ligger UDEN for
+     #listing-detail, så den overlevede den første udgave af den her funktion
+     og stod tilbage med "Skriv til sælger" på en annonce uden sælger. */
+  document.getElementById('contact-modal')?.remove();
+  document.getElementById('listing-actionbar')?.remove();
+  const similar = document.querySelector('.similar-strip');
+  if (similar) similar.style.display = 'none';
+}
+
 function renderListing(){
   const id = getIdFromURL();
   const listing = Store.getListingById(id);
@@ -125,6 +202,21 @@ function renderListing(){
       </div>`;
     const similar = document.querySelector('.similar-strip');
     if (similar) similar.style.display = 'none';
+    return;
+  }
+
+  /* Indekseret annonce fra en anden side.
+
+     Uden den her gren rendrede detaljesiden den som vores egen: "Skriv til
+     sælger" og "Ring op" stod på en annonce, vi hverken hoster eller kender
+     sælgeren til — og siden kastede på listing.seller.name, fordi der ikke
+     ER nogen sælger. Det er præcis den sammenblanding, 014_aggregator.sql
+     blev delt i to tabeller for at undgå.
+
+     Vi viser stadig annoncen — et delt link skal ikke ende i en blindgyde —
+     men uden kontaktflade og med kilden som eneste vej videre. */
+  if (listing.isExternal){
+    renderExternalListing(listing);
     return;
   }
 

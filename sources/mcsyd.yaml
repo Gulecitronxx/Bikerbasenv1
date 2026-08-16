@@ -50,6 +50,13 @@ crawl_delay_ms: 2000
 # nedenfor uændret, fordi data-key er platformens, ikke MC Syds.
 kraever_browser: true
 
+# HMC MOTORCYKLER ER UDE — undersøgt og afvist 16.08.2026.
+# Deres mærkesider er tomme skabeloner. Lageret ligger i en iframe fra
+# 123mc.dk (/forhandlerside/hmc-motorcykler/846/), altså en tredjepartsportal
+# bag Cloudflare. Tilladelsen var fra HMC, ikke fra 123mc, og et ja fra den
+# ene er ikke et ja fra den anden. Undersøg ikke hmcmotorcykler.dk igen — der
+# er intet at hente dér, og svaret ligger et sted, vi ikke har adgang til.
+
 # BESLUTTET 16.08.2026: vi bliver ved Playwright og den renderede DOM.
 #
 # Gitteret bygges af et JSON-endpoint hos platformsleverandøren:

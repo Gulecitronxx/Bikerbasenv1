@@ -488,6 +488,23 @@ function escapeHTML(str){
   }[c]));
 }
 
+/* URL'er, der stammer fra en anden side.
+
+   escapeHTML er ikke nok her. Den forhindrer, at en værdi bryder ud af
+   attributten, men "javascript:alert(1)" indeholder ingen af de tegn, den
+   erstatter — den ville stå urørt i href og køre ved klik.
+
+   Kilden til de her URL'er er en forhandlers DOM. I dag er den venlig, og
+   crawlerens detalje_url_moenster afviser i forvejen alt, der ikke ligner en
+   produktside. Men den slags forsvar står ét sted og fjernes en dag af
+   nogen, der ikke kender grunden. Skemaet tjekkes derfor dér, hvor linket
+   faktisk bliver til et link. */
+function sikkerUrl(raa){
+  const s = String(raa ?? '').trim();
+  if (!/^https?:\/\//i.test(s)) return null;
+  try { return new URL(s).href; } catch { return null; }
+}
+
 /* Databaseannoncer har uuid som id; demo- og localStorage-annoncer har tal.
    Skellet afgør, om en handling skal ramme Supabase eller browseren. */
 function isUuid(v){
