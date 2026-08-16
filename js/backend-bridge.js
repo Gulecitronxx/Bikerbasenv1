@@ -280,7 +280,18 @@ function normalizeExternalListing(row){
   return {
     id: row.id,
     brand: row.maerke || 'Ukendt',
-    model: row.model || row.titel || '',
+    /* Falder tilbage på titlen, når kilden ikke har en model — MEN ikke når
+       titlen bare ER mærket. Seks af MC Syds annoncer har kun "Honda" eller
+       "BMW" som titel (deres egen URL-slug siger det samme, så det er ikke
+       vores parsning). Uden det her tjek blev kortet til "Honda Honda".
+
+       Er der intet modelnavn, står der kun mærket. Det er sandt, og det er
+       kildens hul — ikke noget vi skal fylde ud. */
+    model: (() => {
+      if (row.model) return row.model;
+      const t = String(row.titel || '').trim();
+      return t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() ? t : '';
+    })(),
 
     /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og
        vinder ALTID. Titel-scanneren nedenunder er kun nødudgangen for rækker,
