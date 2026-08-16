@@ -233,14 +233,32 @@ test('type: uden vokabular i YAML\'en gættes der ikke', () => {
   assert.equal(tilAnnonce(KORT, uden, null).annonce.type, null);
 });
 
-test('typen klippes IKKE af modellen — fingerprint skal overleve migrationen', () => {
-  /* Fristelsen er at rydde op i modelnavnet, når typen alligevel er udledt.
-     Lad være: model indgår i fingerprint(), og en beskæring ville give alle
-     343 eksisterende annoncer en ny nøgle på én kørsel. Samme motorcykel
-     ville stå som to. Nøglen her er regnet på det uændrede modelnavn. */
+test('type og variant lever side om side — og ingen af dem rører fingerprint', () => {
+  /* To agenter var uenige her, og uenigheden var reel.
+
+     Den ene ville lade typeordet blive i modelnavnet, fordi model indgår i
+     fingerprint(), og en beskæring giver alle 343 annoncer en ny nøgle på én
+     kørsel. Den anden ville klippe det ud, fordi Bilbasens to-linjers titel
+     er hele pointen: "XL883 Standard" fed, "Cruiser" dæmpet nedenunder.
+
+     Beskæringen vandt, fordi frygten ikke holder: fingerprint er IKKE
+     opslagsnøglen. db.js upserter på (kilde_id, kilde_annonce_id), så en ny
+     fingerprint opdaterer den samme række — den laver ikke en dublet. Nøglen
+     bruges til at kende samme motorcykel igen på tværs af KILDER, og der er
+     kun én kilde. Så prisen for at skifte den er nul i dag og stigende hver
+     dag, vi venter.
+
+     De to felter overlapper med vilje og har hver sin opgave:
+       variant  visning — det Bilbasen sætter på anden linje
+       type     filtrering — altid null eller ét af vores 11 kendte ord */
   const a = tilAnnonce(KORT, KILDE, 'Harley-Davidson').annonce;
   assert.equal(a.type, 'Cruiser');
-  assert.equal(a.model, 'XL883 Standard Cruiser');
+  assert.equal(a.model, 'XL883 Standard', 'typeordet hører i variant, ikke i modelnavnet');
+  assert.equal(a.variant, 'Cruiser');
+
+  // Det egentlige krav fra den oprindelige test, og det gælder stadig: de nye
+  // kolonner må ikke snige sig ind i nøglen. Ellers ville en kilde, der
+  // oplyser hk, og en der ikke gør, aldrig kunne genkende samme motorcykel.
   const uden = require('./normalize').fingerprint({ ...a, type: undefined, hk: undefined, stand: undefined });
   assert.equal(a.fingerprint, uden, 'de nye felter må ikke indgå i fingerprint');
 });
