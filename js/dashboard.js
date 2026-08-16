@@ -227,7 +227,13 @@ function renderDashboard(user){
     kpiTile('Visninger (30 dage)', compactNumber(totalViews), { delta: viewsDelta, spark: totalSeries }),
     kpiTile('Henvendelser (30 dage)', compactNumber(totalInquiries)),
     kpiTile('Gemt af købere', compactNumber(totalSaves)),
-    kpiTile('Bedømmelse', avgRating != null ? `${avgRating} ★` : '–', { sub: `${reviewCount} ${reviewCount === 1 ? 'anmeldelse' : 'anmeldelser'}` }),
+    /* Stregen er væk. En sælgerprofil-builder efterlod netop den her linje
+       som en note i work/DECISIONS.md ("den, der ejer dashboardet, bør
+       fjerne stregen som på profilen") — et "–" i feltet Bedømmelse ligner
+       en dårlig karakter, ikke et manglende tal. Under tre anmeldelser er
+       der intet snit at vise (Store.MIN_ANMELDELSER_FOR_SNIT), og så siger
+       feltet hvorfor i stedet for at tegne en streg. */
+    kpiTile('Bedømmelse', avgRating != null ? `${avgRating} ★` : 'Ikke nok endnu', { sub: `${reviewCount} ${reviewCount === 1 ? 'anmeldelse' : 'anmeldelser'}` }),
   ].join('');
 
   document.getElementById('views-summary').textContent =

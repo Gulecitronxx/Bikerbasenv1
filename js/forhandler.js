@@ -448,12 +448,12 @@ function renderIdentitet(seller, listings, skjultNavn){
     : `<p class="profil-kontakt-note">${Icon.info}<span>Sælgeren har ingen aktive annoncer, og kontakt på Bikerbasen går gennem en annonce. Der er derfor ingen vej til sælgeren herfra lige nu.</span></p>`;
 
   document.getElementById('profile-top').innerHTML = `
-    <div class="avatar-lg">${erForhandler ? Icon.store : escapeHTML(initials(seller.name))}</div>
+    <div class="avatar-lg">${erForhandler || skjultNavn ? (erForhandler ? Icon.store : Icon.user) : escapeHTML(initials(seller.name))}</div>
     <div class="profile-info">
       <p class="profile-name">${escapeHTML(titel)}</p>
       <p class="profil-type">
         <span class="badge ${erForhandler ? 'badge-dealer' : 'badge-neutral'}">${erForhandler ? Icon.store+'Forhandler' : Icon.user+'Privat sælger'}</span>
-        ${seller.city ? `<span class="profil-type-sted">${Icon.mapPin}${escapeHTML(seller.city)}</span>` : ''}
+        ${(seller.city && !skjultNavn) ? `<span class="profil-type-sted">${Icon.mapPin}${escapeHTML(seller.city)}</span>` : ''}
         <span class="profil-type-sted">${Icon.calendar}Medlem siden ${escapeHTML(String(seller.memberSince ?? 'ukendt år'))}</span>
         <span id="profil-bedoemmelse"></span>
       </p>
@@ -476,11 +476,99 @@ function renderIdentitet(seller, listings, skjultNavn){
    op på siden. Der er ingen linje, vi ikke har dækning for, og felter uden
    værdi skriver "Ikke oplyst" i stedet for at falde væk — for på en
    forhandlerprofil er en manglende by faktisk en oplysning. */
-function renderOplysninger(seller, listings, nyesteAnnonce){
+/* Modulus 11 — den kontrol, ethvert dansk CVR-nummer selv bærer med sig.
+
+   Cifrene vægtes 2,7,6,5,4,3,2,1, og summen skal gå op i 11. Sidste ciffer
+   ER kontrolcifferet. Det er ren aritmetik på strengen: den siger intet om,
+   hvorvidt virksomheden findes, og må derfor aldrig skrives som en
+   verificering. Men den kan afsløre et nummer, der er tastet forkert eller
+   fundet på — og et opdigtet CVR-nummer er den billigste svindel, der findes
+   på en markedsplads.
+
+   Runde 2's kritiker regnede kontrollen efter i hånden på demoforhandlerens
+   nummer og fandt, at den fejlede, mens siden roligt tilbød at slå det op.
+   Vi lader ikke længere køberen om at opdage det. */
+function cvrKontrolOK(nr){
+  const s = String(nr || '').replace(/\D/g, '');
+  if (s.length !== 8) return false;
+  const vaegte = [2, 7, 6, 5, 4, 3, 2, 1];
+  let sum = 0;
+  for (let i = 0; i < 8; i++) sum += Number(s[i]) * vaegte[i];
+  return sum % 11 === 0;
+}
+
+/* ---------- "Efterprøv ham selv" ----------
+
+   Det navngivne hul efter runde 2: Bilbasens forhandlerside giver gadeadresse,
+   åbningstider, to telefonnumre, hjemmeside og et kort på første skærm. Vi har
+   ingen af felterne — `public_profiles` udstiller syv kolonner, og ikke én af
+   dem er en kontaktoplysning — og vi opfinder dem ikke.
+
+   Men vi kan gøre noget, baren ikke gør. Bilbasens adresse er en påstand,
+   forhandleren selv har tastet ind, og siden lader køberen slutte, at nogen
+   har tjekket den. Vi har CVR-nummeret, og CVR-nummeret er nøglen til
+   Erhvervsstyrelsens eget register, hvor adressen, branchen, stiftelsesåret og
+   antallet af ansatte står — statens oplysninger, ikke sælgerens og ikke
+   vores. Ét klik giver altså køberen den fysiske identitet fra en kilde, der
+   er bedre end den, baren viser.
+
+   Og så siger vi HVORFOR de felter, vi ikke har, ikke står der. En profil,
+   der bare mangler dem, ligner en forhandler, der har undladt at udfylde sin
+   side. En profil, der siger "vi spørger ikke om det", flytter manglen
+   derhen, hvor den hører hjemme: hos os. */
+function efterproevHTML(seller, erForhandler){
+  const felterVi = `<p class="profil-mangler">${Icon.info}<span>Bikerbasen spørger ikke forhandlere om gadeadresse, åbningstider, telefonnummer eller hjemmeside, så de står ikke på profilen. At de mangler her, er ikke noget, forhandleren har undladt.</span></p>`;
+
+  if (!erForhandler){
+    return `
+      <div class="sidebar-card profil-efterproev">
+        <h2 class="profil-side-titel">Hvad kan du efterprøve?</h2>
+        <p class="profil-efterproev-tekst">En privat sælger har hverken CVR-nummer, butik eller åbningstider — der findes ingen registrering af ham at slå op. Det, du kan gå efter, er anmeldelserne længere nede, hvor mange annoncer han har haft, og hvor ny den nyeste er. Resten afgøres, når du står ved motorcyklen.</p>
+      </div>`;
+  }
+
+  if (!seller.cvr){
+    return `
+      <div class="sidebar-card profil-efterproev">
+        <h2 class="profil-side-titel">Efterprøv forhandleren selv</h2>
+        <p class="profil-efterproev-tekst">Der står ikke noget CVR-nummer på denne profil, så der er ikke noget at slå op herfra. Spørg sælgeren om nummeret, før du betaler — en dansk forhandler har altid ét, og med det kan du selv finde adressen i CVR-registret.</p>
+        ${felterVi}
+      </div>`;
+  }
+
+  const nr = String(seller.cvr);
+  const ok = cvrKontrolOK(nr);
+  /* To udsagn, og de skal holdes skarpt adskilt. Kontrolcifferet er noget, vi
+     KAN regne efter og derfor tør sige. Om virksomheden findes, kan vi ikke
+     sige — det skal køberen selv hente i registret. */
+  const kontrolLinje = ok
+    ? `<p class="profil-cvr-ok">${Icon.checkCircle}<span>Nummerets eget kontrolciffer passer. Det er en regnekontrol af de otte cifre — ikke et bevis for, at virksomheden findes. Det svar ligger i registret.</span></p>`
+    : `<p class="profil-cvr-fejl">${Icon.alertTriangle || Icon.info}<span><b>Nummeret består ikke kontrollen.</b> Et dansk CVR-nummer skal gå op i modulus 11, og dette gør ikke. Så er det enten tastet forkert eller fundet på. Bed om nummeret igen, før du betaler noget.</span></p>`;
+
+  return `
+    <div class="sidebar-card profil-efterproev">
+      <h2 class="profil-side-titel">Efterprøv forhandleren selv</h2>
+      <p class="profil-efterproev-tekst">Vi har ikke tjekket noget — men det kan du. I CVR-registret står virksomhedens adresse, branche, stiftelsesår og antal ansatte. Det er Erhvervsstyrelsens oplysninger, ikke sælgerens.</p>
+      ${kontrolLinje}
+      <a class="btn btn-outline btn-block" href="https://datacvr.virk.dk/soegeresultater?fritekst=${encodeURIComponent(nr)}" target="_blank" rel="noopener noreferrer">${Icon.externalLink || Icon.search}Slå CVR ${escapeHTML(nr)} op</a>
+      ${felterVi}
+    </div>`;
+}
+
+function renderOplysninger(seller, listings, nyesteAnnonce, skjultNavn){
   const erForhandler = !!seller.isDealer;
   const titel = erForhandler && seller.company ? seller.company : seller.name;
+  const her = location.pathname.split('/').pop() + location.search;
   const raekker = [
     ['Sælgertype', erForhandler ? 'Forhandler' : 'Privat sælger'],
+    /* Navnet er ikke MANGLENDE her — det er tilbageholdt, og de to ting skal
+       ikke se ens ud. Et felt, vi ikke har, får ingen række ("Ærlighed slår
+       fuldstændighed"); et felt, vi har og med vilje ikke viser, skylder
+       køberen en forklaring og en vej videre. Uden linjen ville profilen se
+       ud, som om vi ikke ved, hvem han er. */
+    skjultNavn
+      ? ['Navn', `<a href="login.html?redirect=${encodeURIComponent(her)}">Kun synligt når du er logget ind</a>`]
+      : null,
     /* Firmanavn og profilnavn står KUN, når de tilføjer noget.
 
        Her stod før "Firmanavn: Ikke oplyst" på enhver forhandler uden et
@@ -504,7 +592,7 @@ function renderOplysninger(seller, listings, nyesteAnnonce){
        cvr-kolonne, så på databaseannoncer falder rækken helt væk; den må
        aldrig få en standardværdi (jf. "Firmanavn: Ikke oplyst"-fejlen). */
     (erForhandler && seller.cvr)
-      ? ['CVR', `${escapeHTML(String(seller.cvr))} — <a href="https://datacvr.virk.dk/soegeresultater?fritekst=${encodeURIComponent(seller.cvr)}" target="_blank" rel="noopener noreferrer">slå det op i CVR-registret</a>`]
+      ? ['CVR oplyst af sælger', escapeHTML(String(seller.cvr))]
       : null,
     ['Medlem siden', seller.memberSince ? escapeHTML(String(seller.memberSince)) : 'Ikke oplyst'],
     ['Aktive annoncer', String(listings.length)],
@@ -526,6 +614,8 @@ function renderOplysninger(seller, listings, nyesteAnnonce){
            køberen tro, at et pænt profilkort betyder, at nogen har tjekket. -->
       <p class="profil-kilde">${Icon.info}<span><b>Ingen af oplysningerne er kontrolleret af Bikerbasen.</b> De er tastet ind af sælgeren selv. Vi slår ikke op i CVR- eller MitID-registret, så læs dem som en oplysning — ikke som en godkendelse.</span></p>
     </div>
+
+    ${efterproevHTML(seller, erForhandler)}
 
     <!-- Den ene oplysning på siden, der kan koste køberen penge. Teksten er
          den samme som på annoncesiden (sellerTypeNoteHTML i js/components.js),
