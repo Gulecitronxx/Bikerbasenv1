@@ -232,41 +232,235 @@ function sellerLineHTML(l){
      3. Kortets link går til KILDEN, i ny fane, med rel=nofollow.
      4. Ingen favoritknap. Favoritter peger på listings med en
         fremmednøgle — en uuid herfra ville blive afvist af databasen, og
-        hjertet ville se ud som om det virkede. */
+        hjertet ville se ud som om det virkede.
+     5. Kildemærket ligger som en stribe ØVER fotoet, ikke som en pille
+        oven på det. Over et vilkårligt forhandlerfoto målte mærket 2,64:1
+        i kontrast — under AA's 4,5:1 — og det er kortets vigtigste tekst.
+        På en flade med kendt baggrund er den læsbar hver gang.
+     6. Kørekortpillen er flyttet ned i kroppen, hvor den kan bære en
+        tekst: uden hk kan A2 og A ikke skelnes, og en pille over fotoet
+        havde kun plads til ét bogstav — det forkerte. Se eksternKoerekort(). */
+/* ---- Hjælpere til det eksterne kort ----
+   De ligger her og ikke i data.js, fordi de alle sammen findes for at rette
+   op på noget, der MANGLER i en indekseret annonce. Vores egne annoncer har
+   felterne fra formularen; en crawlet annonce har det, kilden gad skrive. */
+
+/* Postnummer → landsdel, uden at hente js/postnumre.js.
+   Søgesiden droppede med vilje de 40 KB (1089 rækker), fordi ingen af dens
+   scripts slog et postnummer op. Nu gør ét af dem det — til én label pr.
+   kort — og det er ikke 40 KB værd. Tabellen herunder er GENERERET ud fra
+   POSTNUMRE: postnumrene sorteret og foldet sammen til de 31 punkter, hvor
+   regionen skifter. Den giver præcis samme svar som findPostnr() for alle
+   1089 postnumre, på 280 bytes. Findes findPostnr (opret-annonce, dashboard,
+   annonce…), bruges den i stedet — den kender også det officielle bynavn. */
+const EKSTERN_REGIONER = ['Hovedstaden', 'Sjælland', 'Syddanmark', 'Midtjylland', 'Nordjylland'];
+const EKSTERN_REGION_SKIFT = [[1050,0],[2670,1],[2700,0],[4030,1],[4050,0],[4060,1],[5000,2],[6893,3],[7000,2],[7130,3],[7160,2],[7171,3],[7173,2],[7280,3],[7300,2],[7362,3],[7700,4],[7760,3],[7770,4],[7790,3],[7900,4],[8000,3],[8721,2],[8722,3],[9000,4],[9500,3],[9510,4],[9550,3],[9560,4],[9620,3],[9640,4]];
+function regionFraPostnr(postnr){
+  const nr = parseInt(String(postnr ?? '').trim(), 10);
+  if (!Number.isFinite(nr)) return null;
+  if (typeof findPostnr === 'function'){
+    const hit = findPostnr(nr);
+    if (hit) return hit.region;
+  }
+  let navn = null;
+  for (const [start, idx] of EKSTERN_REGION_SKIFT){
+    if (nr < start) break;
+    navn = EKSTERN_REGIONER[idx];
+  }
+  return navn;
+}
+
+/* "Rødding, Syddanmark" — ikke "Rødding 6630".
+   Et postnummer er en sorteringsnøgle, ikke et sted. En køber i Aarhus ved
+   ikke om 6630 er en køretur eller en weekend; "Syddanmark" ved han. Samme
+   form som på vores egne kort, hvor region kommer fra annoncen selv. */
+function eksternStedTekst(l){
+  const by = String(l.city || '').trim();
+  const region = l.region || regionFraPostnr(l.postnr);
+  if (by && region) return `${by}, ${region}`;
+  return by || region || (l.postnr ? String(l.postnr) : 'Sted ikke oplyst');
+}
+
+/* Titlen deles i to: "Yamaha XV 750" fed, "Cruiser Virago ENGROS/UDEN
+   KLARGØRING" dæmpet under. Hele molevitten på én linje blev klippet midt i
+   modelnavnet, og så kunne man ikke se HVAD det var — kun at der stod meget.
+
+   Kilden leverer ingen variant; vi har kun `model` som én streng. Får
+   objektet på et tidspunkt en rigtig `variant`, bruges den, og gætteriet
+   herunder rører den ikke. */
+function delModelOgVariant(model){
+  const ord = String(model || '').split(/\s+/).filter(Boolean);
+  if (ord.length < 2) return [ord.join(' '), ''];
+  // Modelnavnet er typisk bogstaver + tal ("XV 750", "R 1200 GS", "MT-07").
+  // Første rigtige ORD efter et tal — "Cruiser", "Adventure", "ENGROS/UDEN"
+  // — er hvor modellen holder op og sælgerens tilføjelser begynder.
+  const base = [];
+  let setTal = false;
+  for (const o of ord){
+    const harTal = /\d/.test(o);
+    const bogstaver = o.replace(/[^A-Za-zÆØÅÄÖÜæøåäöü]/g, '').length;
+    if (base.length && setTal && !harTal && bogstaver >= 4) break;
+    if (base.length >= 4) break;
+    base.push(o);
+    if (harTal) setTal = true;
+  }
+  return [base.join(' '), ord.slice(base.length).join(' ')];
+}
+
+function eksternTitel(l){
+  const brand = String(l.brand || '').trim();
+  let model = String(l.model || '').trim();
+  let variant = typeof l.variant === 'string' ? l.variant.trim() : '';
+  if (variant){
+    // Hvis model stadig indeholder varianten, står den ikke to gange.
+    const m = model.toLowerCase(), v = variant.toLowerCase();
+    if (m === v) model = '';
+    else if (m.endsWith(' ' + v)) model = model.slice(0, model.length - variant.length).trim();
+  } else {
+    [model, variant] = delModelOgVariant(model);
+  }
+  return {
+    primaer: [brand, model].filter(Boolean).join(' ').trim() || 'Motorcykel',
+    variant,
+  };
+}
+
+/* Salgsmarkører ("ENGROS", "UDEN KLARGØRING", "BYTTER GERNE") stod før inde
+   midt i titlen og åd den plads, modelnavnet skulle bruge. De er ikke støj —
+   "ENGROS/UDEN KLARGØRING" forklarer, hvorfor prisen er lav, og det vil en
+   køber gerne vide, før han klikker — men de er en salgsbetingelse, ikke en
+   del af, hvad motorcyklen HEDDER.
+
+   Derfor: ÉN neutral chip yderst i prislinjen — dér hvor den forklarer noget
+   — og resten som "+2" i samme chip, med hele listen i title-attributten.
+   Ikke to og tre chips: prislinjen har 264px, prisen tager 90, og to markører
+   ("ENGROS", "UDEN KLARGØRING") fylder 172. Så bliver den ene klippet midt i
+   et ord, og en klippet mærkat ser ud som en fejl frem for en oplysning. */
+function eksternSalgsmarkoerer(l){
+  const raa = l.salgsmarkoerer;
+  const alle = (Array.isArray(raa) ? raa : (typeof raa === 'string' ? raa.split(/\s*[,/]\s*/) : []))
+    .map(s => String(s || '').trim())
+    .filter(Boolean);
+  if (!alle.length) return { tekst: '', alle };
+  return { tekst: alle[0] + (alle.length > 1 ? ` +${alle.length - 1}` : ''), alle };
+}
+
+/* Kørekortkategorien er det felt, der afgør om køberen overhovedet må køre
+   motorcyklen — og derfor det felt, man ikke må gætte forkert på.
+
+   koerekortForListing() læser hk som 0 når effekten er ukendt, og svarer så
+   "A2" på alt over 125 ccm. På vores egne annoncer er hk altid udfyldt, så
+   det holder. På de indekserede er hk ikke i skemaet endnu: hver eneste
+   Kawasaki Z750 (~106 hk, kræver A) ville stå som A2. Det er ikke en
+   skønhedsfejl — det er en køber, der møder op med det forkerte kørekort.
+
+   Så: kender vi hk, bruger vi den fælles regel. Kender vi den ikke, siger vi
+   kun det, slagvolumen alene kan bære — 125 ccm og derunder er A1, alt
+   derover kræver mindst A2. Dagen hk står i basen, bliver det til "A2"
+   eller "A" af sig selv. */
+function eksternKoerekort(l){
+  const hk = Number(l.power) || 0;
+  const ccm = Number(l.ccm) || 0;
+  if (hk > 0 && ccm > 0) return { vaerdi: koerekortForListing(l), praecis: true };
+  if (ccm > 0 && ccm <= A1_MAX_CCM) return { vaerdi: 'A1', praecis: true };
+  if (ccm > A1_MAX_CCM) return { vaerdi: 'mindst A2', praecis: false };
+  return null;   // hverken ccm eller hk: kortet siger "Kørekort ukendt"
+}
+
+/* Ét ord for "det ved vi ikke", ét sted.
+   Kortet nåede at have seks: "Pris ikke oplyst", "Km ikke oplyst", "— ccm",
+   "–", "Ikke oplyst" og "—". Seks måder at sige det samme på læses som seks
+   forskellige ting — og "Km" med stort er desuden en retskrivningsfejl.
+   Specfelterne har feltnavnet i et skjult <dt>, så værdien skal ikke gentage
+   det: chippen siger "Ukendt", skærmlæseren siger "Kilometer: Ukendt". */
+const EKSTERN_UKENDT = 'Ukendt';
+
+/* Fire faste specfelter: årgang, kilometer, ccm, hk — i den rækkefølge, på
+   hvert eneste kort, uanset hvad kilden havde med. Hver er en chip, ikke
+   ikon+tekst: en chip med "Ukendt" ser stadig ud som et felt, hvor et
+   ikon uden tal ser ud som en fejl. Rækken er 2×2 med fast højde, så pris,
+   specrække og sted står i samme lodrette position på alle kort. */
+function eksternSpecs(l){
+  const hk = Number(l.power) > 0 ? Number(l.power) : null;
+  return [
+    { navn: 'Årgang',    vaerdi: l.year == null ? '' : String(l.year) },
+    { navn: 'Kilometer', vaerdi: l.km == null ? '' : formatKm(l.km) },
+    { navn: 'Kubik',     vaerdi: l.ccm == null ? '' : formatCcm(l.ccm) },
+    { navn: 'Effekt',    vaerdi: hk == null ? '' : hk.toLocaleString('da-DK') + ' hk' },
+  ];
+}
+
+/* De 22 uden pris mangler ikke en pris. normalize.js returnerer null, når
+   kilden skriver "Ring for pris", "efter aftale" eller "byd" — prisen ER
+   oplyst, den er oplyst som "spørg". "Pris ikke oplyst" ville påstå, at
+   forhandleren har glemt noget. */
+function eksternPrisTekst(price){
+  return price == null ? 'Pris ved henvendelse' : formatPrice(price);
+}
+
 function externalCardHTML(l, i){
-  const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
   const kilde = escapeHTML(l.source?.navn || 'ekstern kilde');
   // Uden en brugbar URL er kortet et blindt link. Så vises annoncen ikke.
   const href = sikkerUrl(l.externalUrl);
   if (!href) return '';
-  const sted = [l.city, l.postnr].filter(Boolean).map(escapeHTML).join(' ');
+
+  const { primaer, variant } = eksternTitel(l);
+  const titel = escapeHTML(primaer), undertitel = escapeHTML(variant);
+  const altTekst = escapeHTML([l.brand, l.model].filter(Boolean).join(' '));
+  const pris = eksternPrisTekst(l.price);
+  const domaene = l.source?.domaene ? escapeHTML(l.source.domaene) : '';
+  // "Forhandler · mcsyd.dk": kildens navn står allerede i mærkatet og i
+  // linket. Her siger vi i stedet, hvad slags sælger det er, og domænet —
+  // det eneste på kortet, køberen selv kan slå op, før han klikker.
+  const saelger = [l.isDealer ? 'Forhandler' : 'Privat sælger', domaene].filter(Boolean).join(' · ');
+  const mark = eksternSalgsmarkoerer(l);
+  const markHTML = mark.tekst
+    ? `<span class="card-salgsmarkoerer" title="${escapeHTML(mark.alle.join(' · '))}">${escapeHTML(mark.tekst)}</span>`
+    : '';
+  // <dl> med skjult <dt>: chippen viser kun værdien ("2003"), men
+  // skærmlæseren hører "Årgang: 2003" — og to nabofelter uden data læses som
+  // "Kubik: Ukendt. Effekt: Ukendt.", ikke "Ukendt, Ukendt".
+  const specs = eksternSpecs(l).map(s => `
+          <div class="card-spec"><dt>${s.navn}</dt><dd${s.vaerdi ? '' : ' class="spec-tom"'}>${s.vaerdi ? escapeHTML(s.vaerdi) : EKSTERN_UKENDT}</dd></div>`).join('');
+
+  const kk = eksternKoerekort(l);
+  const kkTekst = kk ? kk.vaerdi : 'ukendt';
+  const kkTitel = kk
+    ? (kk.praecis
+        ? `Kan føres på ${kk.vaerdi}-kørekort`
+        : 'Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den kræver A.')
+    : 'Kilden oplyser hverken kubik eller hk, så kategorien kan ikke udledes.';
+
   return `
   <article class="card card-external" data-listing-id="${l.id}" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos ${kilde}. Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}<span>Annonce fra ${kilde}</span></div>
     <div class="card-media">
-      ${listingMediaHTML(l, `${brand} ${model}`, i === 0)}
-      <div class="card-badges">
-        <span class="badge badge-external" title="Annoncen ligger hos ${kilde}. Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}Hos ${kilde}</span>
-      </div>
-      ${(() => { const k = koerekortForListing(l); return k ? `<span class="card-koerekort" title="Kan føres på ${k}-kørekort">${k}</span>` : ''; })()}
+      ${listingMediaHTML(l, altTekst, i === 0)}
       <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
     </div>
     <div class="card-body">
-      <div class="card-price">${formatPrice(l.price)}</div>
-      <h3 class="card-title">${brand} ${model}</h3>
-      <div class="card-meta">
-        <span>${Icon.calendar}${l.year ?? 'Ikke oplyst'}</span>
-        <span>${Icon.gauge}${l.km == null ? 'Km ikke oplyst' : formatKm(l.km)}</span>
-        <span>${Icon.engine}${l.ccm == null ? '–' : formatCcm(l.ccm)}</span>
+      <h3 class="card-title">
+        <span class="card-title-main">${titel}</span>
+        <span class="card-title-variant"${undertitel ? ` title="${undertitel}"` : ''}>${undertitel}</span>
+      </h3>
+      <div class="card-prisrække">
+        <span class="card-price${l.price == null ? ' pris-mangler' : ''}">${pris}</span>
+        ${markHTML}
       </div>
-      <div class="card-seller is-external">${Icon.store}<span>${kilde}${l.source?.domaene ? ` · ${escapeHTML(l.source.domaene)}` : ''}</span></div>
+      <div class="card-specblok">
+        <dl class="card-specs">${specs}
+        </dl>
+        <span class="card-koerekort${kk ? '' : ' kk-ukendt'}" title="${escapeHTML(kkTitel)}">Kørekort ${escapeHTML(kkTekst)}</span>
+      </div>
       <div class="card-footer">
-        <span>${Icon.mapPin}${sted || 'Ikke oplyst'}</span>
-        <span class="card-external-cta">Se hos ${kilde}${Icon.externalLink}</span>
+        <span class="card-sted">${Icon.mapPin}<span>${escapeHTML(eksternStedTekst(l))}</span></span>
+        <span class="card-kildelinje">${Icon.store}<span>${escapeHTML(saelger)}</span></span>
+        <span class="card-external-cta"><span>Se annoncen hos ${kilde}</span>${Icon.externalLink}</span>
       </div>
     </div>
     <a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
        class="card-link"
-       aria-label="Se annonce hos ${kilde} (åbner i ny fane): ${brand} ${model}, ${formatPrice(l.price)}"></a>
+       aria-label="Se annoncen hos ${kilde} (åbner i ny fane): ${titel}${undertitel ? ' ' + undertitel : ''}, ${pris}"></a>
   </article>`;
 }
 

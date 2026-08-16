@@ -594,40 +594,45 @@ function deltTitel(l){
   };
 }
 
-/* Kørekortkategorien er listens vigtigste felt — og derfor det felt, hvor
-   et gæt gør mest skade.
+/* Her stod koerekortSikkert(): et værn mod at koerekortForListing() læste
+   ukendt effekt som 0 hk og derfor kaldte en 1200 ccm maskine "A2".
 
-   Her stod en lokal kopi af reglen, fordi koerekortForListing() i js/data.js
-   dengang læste manglende effekt som 0 hk og derfor kaldte en 1200 ccm
-   maskine uden oplyst hk for "A2". Fejlen er rettet ved roden, og to steder
-   at afgøre samme spørgsmål er ét sted for meget: den ene kan rettes uden
-   den anden, og så er det tilfældigt, hvilket svar køberen får at se.
+   Fejlen er rettet i kilden (js/data.js), og værnet gentog derefter reglerne
+   uden at ændre et eneste svar — begge blev kørt, og resultatet var det samme
+   i alle tilfælde. Så er det ikke længere et sikkerhedsnet, det er en anden
+   kopi af færdselsloven, der kan komme til at sige noget andet end den
+   første. Det var præcis dét, der lod fejlen opstå: kommentaren i data.js
+   advarede mod A2-gættet, mens koden lige nedenunder lavede det.
 
-   Funktionen svarer null, når kategorien ikke kan udledes — over 125 cm³
-   uden oplyst effekt kan være både A2 og A. Så står der "Ikke oplyst" her.
-   Et manglende felt koster et klik; et forkert felt kan koste en bøde og en
-   inddraget motorcykel. */
+   Reglerne bor ét sted. Listen spørger direkte — kaldstederne kalder
+   koerekortForListing(), og der er ingen alias tilbage at forveksle den med. */
 
-/* Cellen, der siger "vi ved det ikke", i listevisningen. Navnet er
-   UOPLYST_HTML og ikke UOPLYST, fordi filterlaget længere nede i filen
-   allerede har et `const UOPLYST = Symbol('uoplyst')`. To top-level const'er
-   med samme navn i samme script er en SyntaxError — hele js/search.js
-   stopper med at indlæse, og søgesiden bliver en tom skal. De to kom fra
-   hver sin gren og mødtes i en merge, hvor ingen af dem stod i den anden
-   grens diff. */
-const UOPLYST_HTML = '<span class="row-unknown">Ikke oplyst</span>';
+/* VISNINGENS tomme celle. Hed tidligere UOPLYST og kolliderede med filtrenes
+   UOPLYST-symbol længere nede — to agenter, samme ord, to helt forskellige
+   ting. Git flettede begge uden konflikt, og resultatet var ugyldigt
+   JavaScript: "Identifier 'UOPLYST' has already been declared". Hele
+   js/search.js stoppede med at indlæse, og søgesiden blev en tom skal.
+
+   Navnene siger nu hvad de er: det her er en celle, det andet er et svar.
+
+   Fodnote til den, der undrer sig over historikken: fejlen blev fundet og
+   rettet TO gange uafhængigt, på hver sin gren, med hvert sit navn
+   (UOPLYST_CELLE og UOPLYST_HTML). Ved sammenfletningen vandt CELLE, fordi
+   det parrer med symbolets rolle som svar. Det er samme slags kollision én
+   gang til — to rettelser af samme fejl, der ikke kunne se hinanden. */
+const UOPLYST_CELLE = '<span class="row-unknown">Ikke oplyst</span>';
 
 function rowSpecsHTML(l){
   const kk = koerekortForListing(l);
   const motor = l.ccm == null
-    ? UOPLYST_HTML
+    ? UOPLYST_CELLE
     : escapeHTML(formatCcm(l.ccm)) + (l.power ? ` <span class="row-hk">· ${escapeHTML(formatPower(l.power))}</span>` : '');
   const celle = (label, vaerdi) => `<div class="row-spec"><dt>${label}</dt><dd>${vaerdi}</dd></div>`;
   return `<dl class="row-specs">
-    ${celle('Årgang', l.year == null ? UOPLYST_HTML : escapeHTML(String(l.year)))}
-    ${celle('Kilometer', l.km == null ? UOPLYST_HTML : escapeHTML(formatKm(l.km)))}
+    ${celle('Årgang', l.year == null ? UOPLYST_CELLE : escapeHTML(String(l.year)))}
+    ${celle('Kilometer', l.km == null ? UOPLYST_CELLE : escapeHTML(formatKm(l.km)))}
     ${celle('Motor', motor)}
-    ${celle('Kørekort', kk ? `<span class="row-kk">${kk}</span>` : UOPLYST_HTML)}
+    ${celle('Kørekort', kk ? `<span class="row-kk">${kk}</span>` : UOPLYST_CELLE)}
   </dl>`;
 }
 
