@@ -397,47 +397,194 @@ function reflectStateToUI(){
   document.getElementById('sort-select').value = state.sort;
 }
 
+/* ================= Filtrering med tre svar =================
+
+   Et filter blev før stillet et ja/nej-spørgsmål. Men en annonce kan svare
+   tre ting: JA, NEJ og VED IKKE — og de 332 indekserede annoncer fra MC Syd
+   svarer VED IKKE på næsten alt. Kilden fortæller mærke, model, årgang, km,
+   ccm, pris, postnummer. Den fortæller ikke stand, udstyr, antal ejere, syn
+   eller vinterklargøring, fordi de felter ikke findes hos den.
+
+   Med kun ja/nej blev VED IKKE tvunget om til ét af de to, og begge udfald
+   var forkerte på hver sin måde. Målt på siden før denne rettelse:
+
+     Tvunget til NEJ  — ét klik på landsdel, type, stand, udstyr, brændstof,
+       træk, farve, cylindre eller service, og alle 332 forsvandt lydløst.
+       Brugeren så et resultattal falde og troede, der ikke var flere
+       motorcykler. Intet sagde, at der lå 332 tilbage bag filteret.
+
+     Tvunget til JA   — værre, og det var der ingen der havde set. `l.km <=
+       10.000` med km = null blev til `null <= 10000`, altså sandt: 163
+       annoncer uden kilometertal påstod at have under 10.000 km. "Maks. 50
+       hk" gav alle 332, Gold Wings inklusive. Og "Kørekort A2" gav ALLE 332
+       — en 20-årig med A2-kort fik en 1800 ccm Harley vist som lovlig.
+       (Kørekortdelen er siden rettet ved roden i js/data.js, commit e29c381;
+       de øvrige "maks."-filtre rettes her.)
+
+   Nu svarer et prædikat UOPLYST, når annoncen ikke kender feltet.
+
+   VALGET: uoplyst tæller som NEJ — annoncen vises ikke — men den tælles, og
+   brugeren får det at vide over resultaterne.
+
+   Begrundelse. Et filter er et løfte. Sætter man "Brugt", er løftet "alt
+   herunder er brugt". En annonce uden stand kan ikke holde det løfte, så
+   den hører ikke med i resultatet — at tage den med ville gøre løftet
+   værdiløst for alle de andre træf, og på kørekortfilteret ville det være
+   direkte farligt. Men at fjerne den UDEN at sige det er den fejl, vi kom
+   fra: brugeren kan ikke se forskel på "der findes ikke flere" og "der er
+   flere, vi bare ikke ved nok om". Derfor det tredje svar: udeluk, og sig
+   det højt. Så kan brugeren selv slå filteret fra og se dem.
+
+   Og vi gætter ikke. Stand kunne sættes til "Brugt", for det er et
+   brugtmarked, og så ville de 332 overleve standsfilteret. Det er en
+   påstand, vi selv har fundet på, som ville stå på kortet som en oplysning
+   fra sælgeren. Et tal, der mangler, er bedre end et tal, der lyver. */
+const UOPLYST = Symbol('uoplyst');
+
+/* Hvor mange annoncer det enkelte filter har skjult, fordi oplysningen
+   manglede. Nulstilles ved hver kørsel af getFilteredListings(). En annonce
+   fjernes ved det FØRSTE filter, der skjuler den, og kan derfor kun tælles
+   én gang — tallene kan lægges sammen uden dobbelttælling. */
+let uoplystSkjult = [];
+
+function filtrerMedUoplyst(list, felt, praedikat){
+  const beholdt = [];
+  let skjult = 0;
+  for (const l of list){
+    const svar = praedikat(l);
+    if (svar === UOPLYST) skjult++;
+    else if (svar) beholdt.push(l);
+  }
+  if (skjult) uoplystSkjult.push({ felt, antal: skjult });
+  return beholdt;
+}
+
+/* Kørekort med tre svar — UDEN at gentage reglerne.
+
+   passerKoerekort() i js/data.js er og bliver det ene sted, der afgør, hvad
+   A1 og A2 betyder. Her spørger vi den bare to gange.
+
+   Den kan kun svare ja eller nej, og et nej dækker over to forskellige ting:
+   "motorcyklen er for kraftig" og "vi mangler den oplysning, der skulle
+   afgøre det". Søgesiden har brug for at skelne — ikke for at kende
+   grænserne. Så vi spørger igen med de manglende felter sat til den
+   gunstigst mulige værdi. Skifter svaret fra nej til ja, afhang nejet af
+   noget, vi ikke ved, og det rigtige svar er UOPLYST.
+
+   Det er med vilje ikke en kopi af reglerne. Flyttes A2-grænsen fra 48 til
+   50 hk i js/data.js, følger denne funktion med af sig selv. En førsteudgave
+   herinde gentog grænserne, og så havde vi to steder, der bestemte hvad A2
+   betød — præcis den slags dobbelthed, der lod den oprindelige fejl opstå,
+   hvor kommentaren i js/data.js sagde ét og koden noget andet.
+
+   Forudsætning: for A1 og A2 er både ccm og hk ØVRE grænser, så lavest
+   muligt er altid det gunstigste. Kommer der en kategori med en nedre
+   grænse, holder den antagelse ikke, og prøven skal skrives om. */
+function koerekortSvar(l, kat){
+  if (passerKoerekort(l, kat)) return true;
+
+  const proeve = { ...l };
+  let manglerNoget = false;
+  if (l.power == null){ proeve.power = 0; manglerNoget = true; }
+  if (l.ccm == null){ proeve.ccm = 1; manglerNoget = true; }
+  if (manglerNoget && passerKoerekort(proeve, kat)) return UOPLYST;
+
+  return false;
+}
+
 function getFilteredListings(){
   let list = Store.getAllListings();
+  uoplystSkjult = [];
+
   const q = state.q.trim().toLowerCase();
   if (q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
-  if (state.types.length) list = list.filter(l => state.types.includes(l.type));
+
+  // Mærke, model og titel kender vi altid — de kommer med annoncen fra kilden.
   if (state.brands.length) list = list.filter(l => state.brands.includes(l.brand));
   if (state.models.length) list = list.filter(l => state.models.includes(l.model));
-  if (state.priceMin != null) list = list.filter(l => l.price >= state.priceMin);
-  if (state.priceMax != null) list = list.filter(l => l.price <= state.priceMax);
-  if (state.yearMin != null) list = list.filter(l => l.year >= state.yearMin);
-  if (state.yearMax != null) list = list.filter(l => l.year <= state.yearMax);
-  if (state.kmMax != null) list = list.filter(l => l.km <= state.kmMax);
-  if (state.ccmMin != null) list = list.filter(l => l.ccm >= state.ccmMin);
-  if (state.ccmMax != null) list = list.filter(l => l.ccm <= state.ccmMax);
-  if (state.hkMin != null) list = list.filter(l => (l.power || 0) >= state.hkMin);
-  if (state.hkMax != null) list = list.filter(l => (l.power || 0) <= state.hkMax);
-  if (state.regions.length) list = list.filter(l => state.regions.includes(l.region));
-  if (state.conditions.length) list = list.filter(l => state.conditions.includes(l.condition));
-  if (state.service.length) list = list.filter(l => state.service.includes(l.serviceHistorik));
 
-  // Udstyr er et OG-filter: vælger man ABS og varmehåndtag, vil man have
-  // begge dele. Brændstof, træktype, farve og cylindre er ELLER inden for
-  // hver gruppe — dér leder man efter én af flere acceptable værdier.
+  // Kategorifiltre: værdien er enten oplyst, eller også er den det ikke.
+  if (state.types.length)
+    list = filtrerMedUoplyst(list, 'motorcykeltype', l => l.type == null ? UOPLYST : state.types.includes(l.type));
+  if (state.regions.length)
+    list = filtrerMedUoplyst(list, 'landsdel', l => l.region == null ? UOPLYST : state.regions.includes(l.region));
+  if (state.conditions.length)
+    list = filtrerMedUoplyst(list, 'stand', l => l.condition == null ? UOPLYST : state.conditions.includes(l.condition));
+  if (state.service.length)
+    list = filtrerMedUoplyst(list, 'servicehistorik', l => l.serviceHistorik == null ? UOPLYST : state.service.includes(l.serviceHistorik));
+
+  /* Talfiltre. Bemærk at BEGGE ender skal spørge om værdien overhovedet er
+     kendt. Før gjorde kun den nedre ende det — ved et tilfælde, fordi
+     `null >= 5000` er falsk, mens `null <= 5000` er sandt. Den asymmetri var
+     hele grunden til, at "maks."-filtrene løj, mens "min."-filtrene bare
+     skjulte. */
+  if (state.priceMin != null)
+    list = filtrerMedUoplyst(list, 'pris', l => l.price == null ? UOPLYST : l.price >= state.priceMin);
+  if (state.priceMax != null)
+    list = filtrerMedUoplyst(list, 'pris', l => l.price == null ? UOPLYST : l.price <= state.priceMax);
+  if (state.yearMin != null)
+    list = filtrerMedUoplyst(list, 'årgang', l => l.year == null ? UOPLYST : l.year >= state.yearMin);
+  if (state.yearMax != null)
+    list = filtrerMedUoplyst(list, 'årgang', l => l.year == null ? UOPLYST : l.year <= state.yearMax);
+  if (state.kmMax != null)
+    list = filtrerMedUoplyst(list, 'kilometertal', l => l.km == null ? UOPLYST : l.km <= state.kmMax);
+  if (state.ccmMin != null)
+    list = filtrerMedUoplyst(list, 'ccm', l => l.ccm == null ? UOPLYST : l.ccm >= state.ccmMin);
+  if (state.ccmMax != null)
+    list = filtrerMedUoplyst(list, 'ccm', l => l.ccm == null ? UOPLYST : l.ccm <= state.ccmMax);
+  if (state.hkMin != null)
+    list = filtrerMedUoplyst(list, 'hestekræfter', l => l.power == null ? UOPLYST : l.power >= state.hkMin);
+  if (state.hkMax != null)
+    list = filtrerMedUoplyst(list, 'hestekræfter', l => l.power == null ? UOPLYST : l.power <= state.hkMax);
+
+  /* Udstyr er et OG-filter: vælger man ABS og varmehåndtag, vil man have
+     begge dele. Brændstof, træktype, farve og cylindre er ELLER inden for
+     hver gruppe — dér leder man efter én af flere acceptable værdier.
+
+     equipment: null betyder "ikke oplyst"; equipment: [] betyder "vi har
+     spurgt sælgeren, og der er intet ekstraudstyr". De to skal ikke
+     behandles ens — den tomme liste er et rigtigt nej. */
   if (state.equipment.length){
-    list = list.filter(l => state.equipment.every(e => (l.equipment || []).includes(e)));
+    list = filtrerMedUoplyst(list, 'udstyr', l =>
+      l.equipment == null ? UOPLYST : state.equipment.every(e => l.equipment.includes(e)));
   }
-  if (state.fuels.length) list = list.filter(l => state.fuels.includes(l.fuel));
-  if (state.drives.length) list = list.filter(l => state.drives.includes(l.drive));
-  if (state.colors.length) list = list.filter(l => state.colors.includes(l.color));
-  if (state.cylinders.length) list = list.filter(l => state.cylinders.includes(Number(l.cylinders)));
+  if (state.fuels.length)
+    list = filtrerMedUoplyst(list, 'brændstof', l => l.fuel == null ? UOPLYST : state.fuels.includes(l.fuel));
+  if (state.drives.length)
+    list = filtrerMedUoplyst(list, 'træktype', l => l.drive == null ? UOPLYST : state.drives.includes(l.drive));
+  if (state.colors.length)
+    list = filtrerMedUoplyst(list, 'farve', l => l.color == null ? UOPLYST : state.colors.includes(l.color));
+  if (state.cylinders.length)
+    list = filtrerMedUoplyst(list, 'cylinderantal', l => l.cylinders == null ? UOPLYST : state.cylinders.includes(Number(l.cylinders)));
 
+  /* "Oprettet inden for" spørger til annoncens alder. De indekserede har med
+     vilje ingen createdAt (se normalizeExternalListing i js/backend-bridge.js:
+     crawledatoen er ikke annoncedatoen). Det er også et uoplyst felt. */
   if (state.maxAgeDays != null){
     const cutoff = Date.now() - state.maxAgeDays * 86400000;
-    list = list.filter(l => new Date(l.createdAt).getTime() >= cutoff);
+    list = filtrerMedUoplyst(list, 'oprettelsesdato', l => {
+      if (!l.createdAt) return UOPLYST;
+      const t = new Date(l.createdAt).getTime();
+      return Number.isNaN(t) ? UOPLYST : t >= cutoff;
+    });
   }
+
+  /* Billeder og sælgertype er IKKE uoplyste. Vi kan selv se, om der fulgte
+     et billede med, og kilden oplyser sælgertypen. Her er et nej et rigtigt
+     nej, og filtrene bliver stående som de var. */
   if (state.photosOnly) list = list.filter(l => (l.photoUrls || []).length > 0);
   if (state.dealerOnly) list = list.filter(l => l.isDealer);
-  if (state.ejereMax != null) list = list.filter(l => l.antalEjere != null && l.antalEjere <= state.ejereMax);
-  if (state.nysynet) { const y = new Date().getFullYear(); list = list.filter(l => l.sidsteSyn != null && l.sidsteSyn >= y - 1); }
-  if (state.vinterklar) list = list.filter(l => l.vinterklar);
-  if (state.koerekort) list = list.filter(l => passerKoerekort(l, state.koerekort));
+
+  if (state.ejereMax != null)
+    list = filtrerMedUoplyst(list, 'antal ejere', l => l.antalEjere == null ? UOPLYST : l.antalEjere <= state.ejereMax);
+  if (state.nysynet){
+    const y = new Date().getFullYear();
+    list = filtrerMedUoplyst(list, 'seneste syn', l => l.sidsteSyn == null ? UOPLYST : l.sidsteSyn >= y - 1);
+  }
+  if (state.vinterklar)
+    list = filtrerMedUoplyst(list, 'vinterklargøring', l => l.vinterklar == null ? UOPLYST : !!l.vinterklar);
+  if (state.koerekort)
+    list = filtrerMedUoplyst(list, 'kørekortkategori', l => koerekortSvar(l, state.koerekort));
 
   /* Ukendt værdi sorteres ALTID bagest — også når retningen er stigende.
 
@@ -469,6 +616,58 @@ function getFilteredListings(){
   };
   list.sort(sorters[state.sort] || sorters['date-desc']);
   return list;
+}
+
+/* ---------- "X annoncer er ikke vist" ----------
+
+   Halvdelen af rettelsen. At udelade en annonce, vi ikke ved nok om, er
+   rigtigt; at gøre det uden at sige det er præcis den fejl, vi kom fra —
+   brugeren så et resultattal falde og kunne ikke skelne "der findes ikke
+   flere" fra "der er flere, vi bare ikke kender standen på".
+
+   Linjen står lige under filterpillerne og over resultattallet, altså dér
+   hvor man kigger, når man lige har sat et filter og undrer sig over tallet.
+
+   Elementet bygges her i JS frem for i soegning.html, og stilen sættes med
+   designtokens inline: css/styles.css og markuppen har andre ejere lige nu,
+   og en ny regel dér ville kollidere. Flyttes den til en klasse senere, er
+   det bare at fjerne cssText-linjen. */
+function renderUoplystNote(){
+  let el = document.getElementById('uoplyst-note');
+  if (!el){
+    const anker = document.getElementById('active-filters');
+    if (!anker) return;
+    el = document.createElement('p');
+    el.id = 'uoplyst-note';
+    // aria-live: linjen dukker op som følge af et filterklik, uden at
+    // flytte fokus. Uden den ville skærmlæserbrugere høre resultattallet
+    // falde og aldrig få forklaringen.
+    el.setAttribute('role', 'status');
+    el.style.cssText = 'margin:0 0 var(--space-4); padding:10px 14px;'
+      + 'border:1px solid var(--color-border); border-radius:var(--radius-sm);'
+      + 'background:var(--color-surface-2); color:var(--color-fg-muted);'
+      + 'font-size:14px; line-height:1.45;';
+    anker.after(el);
+  }
+
+  const antal = uoplystSkjult.reduce((sum, x) => sum + x.antal, 0);
+  if (!antal){ el.hidden = true; el.textContent = ''; return; }
+
+  // Samme felt kan skjule i to omgange (fx både pris-min og pris-maks).
+  const felter = [...new Set(uoplystSkjult.map(x => x.felt))];
+  const feltTekst = felter.length === 1
+    ? felter[0]
+    : felter.slice(0, -1).join(', ') + ' og ' + felter[felter.length - 1];
+
+  const dem = antal === 1 ? 'den' : 'dem';
+  const udvej = felter.length === 1
+    ? `Fjern filteret for at se ${dem}.`
+    : `Fjern et af filtrene for at se ${dem}.`;
+
+  el.hidden = false;
+  el.textContent = antal === 1
+    ? `1 annonce er ikke vist, fordi ${feltTekst} ikke er oplyst på den. ${udvej}`
+    : `${antal} annoncer er ikke vist, fordi ${feltTekst} ikke er oplyst på dem. ${udvej}`;
 }
 
 function activeFilterPills(){
@@ -594,6 +793,8 @@ function render(){
   refreshSaveSearchButton();
 
   const filtered = getFilteredListings();
+  // Skal stå EFTER getFilteredListings(), som er den der tæller de skjulte.
+  renderUoplystNote();
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   state.page = Math.min(state.page, totalPages);

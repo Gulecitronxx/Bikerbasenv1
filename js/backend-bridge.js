@@ -107,6 +107,163 @@ async function loadRemoteListings(){
   return window.REMOTE_LISTINGS;
 }
 
+/* ---------- Landsdel ud fra postnummer ----------
+
+   Kilderne oplyser postnummer og by, aldrig landsdel. Uden landsdel forsvandt
+   alle indekserede annoncer, så snart nogen satte ét landsdelsfilter — og det
+   er ærgerligt, for landsdelen er ikke ukendt: den FØLGER af postnummeret.
+   Det er ikke et gæt, det er et opslag.
+
+   Hvorfor ikke bare findPostnr() fra js/postnumre.js? Fordi søgesiden med
+   vilje IKKE loader den fil (se kommentaren i soegning.html): 40 KB og 1089
+   rækker, der skulle hentes, parses og evalueres på hovedtråden for ét eneste
+   opslag. Den blev fjernet dér som en målt forbedring, og den skal ikke
+   snige sig ind igen ad bagvejen.
+
+   I stedet ligger tabellen her i sammentrængt form. Den er ikke en genvej og
+   ikke en tilnærmelse: landsdelene ligger i sammenhængende postnummerspænd,
+   så alle 1089 postnumre koger ned til 31 knækpunkter — "fra dette
+   postnummer og opefter gælder denne landsdel". Verificeret mod js/postnumre.js:
+   0 afvigelser på alle 1089.
+
+   Regenereres med (fra projektroden):
+     node -e "const P=JSON.parse(require('fs').readFileSync('js/postnumre.js','utf8').match(/const POSTNUMRE = (\[.*?\]);/s)[1]);P.sort((a,b)=>a[0].localeCompare(b[0]));let l=null;console.log(P.filter(p=>p[2]!==l&&(l=p[2])).map(p=>p[0]+{Hovedstaden:'H','Sjælland':'S',Syddanmark:'D',Midtjylland:'M',Nordjylland:'N'}[p[2]]).join(' '))"
+
+   Kilde: Dataforsyningen (DAWA), samme som js/postnumre.js. */
+const REGION_KNAEK = '1050H 2670S 2700H 4030S 4050H 4060S 5000D 6893M 7000D 7130M 7160D 7171M 7173D 7280M 7300D 7362M 7700N 7760M 7770N 7790M 7900N 8000M 8721D 8722M 9000N 9500M 9510N 9550M 9560N 9620M 9640N'
+  .split(' ').map(s => [Number(s.slice(0, 4)), { H:'Hovedstaden', S:'Sjælland', D:'Syddanmark', M:'Midtjylland', N:'Nordjylland' }[s[4]]]);
+
+function regionFraPostnr(postnr){
+  const nr = Number(String(postnr ?? '').trim());
+  // Under 1050 findes ikke i postnummerregistret. Så er postnummeret forkert,
+  // og et forkert postnummer skal give "ved ikke" — ikke Hovedstaden.
+  if (!Number.isFinite(nr) || nr < REGION_KNAEK[0][0] || nr > 9999) return null;
+  let fundet = null;
+  for (const [fra, navn] of REGION_KNAEK){ if (nr < fra) break; fundet = navn; }
+  return fundet;
+}
+
+/* ---------- Motorcykeltype ----------
+
+   MC Syd skriver deres egen kategori direkte ind i titlen — "Honda VT 700
+   Cruiser", "Honda CBR 1000 F Sportstouring", "Yamaha XS 650 Klassiker".
+   Det er ikke noget, vi udleder eller skønner; det er sælgerens egen
+   rubricering, som bare står i et tekstfelt i stedet for et kategorifelt.
+   At læse den er oversættelse, ikke gætteri.
+
+   Oversættelsen og aflæsningen er to ting, og de er delt i to funktioner
+   med vilje. MCSYD_KATEGORI/typeFraKategoriord() er ordbogen fra kildens
+   ord til de gyldige type-id'er i js/data.js. typeFraTitel() er kun
+   nødudgangen, der graver ordet ud af titlen, fordi databasen lige nu ikke
+   har en kategorikolonne (se supabase/014_aggregator.sql — den er bevidst
+   mager). Får rækken en dag et rigtigt kategorifelt fra crawleren, vinder
+   det felt automatisk, og nødudgangen bliver aldrig kaldt. Ordbogen skal
+   ikke skrives to steder.
+
+   To fælder gjorde en naiv understrengs-søgning direkte forkert, målt på
+   alle 332 titler:
+
+   1. Kategoriordet står til SIDST (268 gange som allersidste ord, 15 gange
+      1–2 ord inde, fx "XV 750 Cruiser Virago" og "CB 650 Street R").
+      Ord længere fremme i titlen er modelnavne. Derfor scannes kun de sidste
+      tre ord — og bagfra, så "Road King Classic Cruiser" bliver cruiser og
+      ikke classic.
+
+   2. Nogle modelNAVNE indeholder et kategoriord. "Softail Classic",
+      "Road King Classic", "Electra Glide Ultra Classic" er alle cruisere og
+      tourere — Harleys navne, ikke MC Syds kategori. MC Syds eget ord for
+      den kategori er det danske "Klassiker", og engelsk "Classic" optræder
+      i alle 332 titler UDELUKKENDE som modelnavn. Derfor står "Classic"
+      slet ikke i ordlisten. Af samme grund maskeres Harleys "… Glide"-navne
+      væk først (Sport Glide, Street Glide, Road Glide …), og "Sport" tælles
+      kun, når det er allersidste ord — ellers blev "FLSB Sport Glide"
+      til en sportsmaskine.
+
+   Resultat på de 332: 283 får en type, 49 gør ikke. De 49 er titler helt
+   uden kategoriord ("Honda GL 1800 Gold Wing", "Rewaco Trike", "Honda
+   Honda"). Dér HOLDER vi op. En Gold Wing er åbenlyst en tourer for et
+   menneske, men den slags model-for-model-tabel er en påstand, vi selv
+   finder på, og den ville stå på kortet som om kilden havde sagt den.
+   Ukendt type er ukendt type. */
+const MCSYD_KATEGORI = {
+  cruiser: 'cruiser',
+  street: 'naked',          // "Street" er den danske forhandlerbetegnelse for en naked bike
+  naked: 'naked',
+  adventure: 'adventure',
+  offroader: 'adventure',   // MC Syds "Offroader" er CRF 300 L, V-Strom, Transalp, NC 750 X
+  enduro: 'adventure',      // vores 'adventure' hedder "Adventure/Enduro"
+  touring: 'touring',
+  sportstouring: 'touring', // en sportstourer er en tourer med kåbe, ikke en supersport
+  klassiker: 'classic',
+  veteran: 'classic',
+  scooter: 'scooter',
+  cross: 'cross',
+  sport: 'sport',
+};
+// Se fælde 2 ovenfor: kun gyldig som allersidste ord.
+const KATEGORI_KUN_SIDST = new Set(['sport']);
+const HD_GLIDE = /\b(Sport|Street|Road|Super|Electra|Ultra)\s+Glide\b/gi;
+const TITEL_STOEJ = /\b(BYTTER GERNE|UDEN KLARGØRING|ENGROS|\d+\s*ÅRS FABRIKS GARANTI|FABRIKS GARANTI|NYSYNET|SOLGT)\b/gi;
+
+/* Kildens kategoriord -> vores type-id. Kender vi ikke ordet, siger vi det
+   ved at svare null. Et ukendt kategoriord må ikke lande i en tilfældig
+   nabokategori, bare fordi listen skulle gå op. */
+function typeFraKategoriord(ord){
+  const o = String(ord || '').toLowerCase().trim();
+  return MCSYD_KATEGORI[o] || null;
+}
+
+function typeFraTitel(titel){
+  const ord = String(titel || '')
+    .replace(HD_GLIDE, ' ')
+    .replace(TITEL_STOEJ, ' ')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ');
+  for (let i = ord.length - 1; i >= 0 && i >= ord.length - 3; i--){
+    const o = ord[i].toLowerCase();
+    if (!(o in MCSYD_KATEGORI)) continue;
+    if (KATEGORI_KUN_SIDST.has(o) && i !== ord.length - 1) continue;
+    return MCSYD_KATEGORI[o];
+  }
+  return null;
+}
+
+/* ---------- Kildens stand -> vores CONDITIONS ----------
+
+   Migration 015 giver rækken et `stand`-felt, udledt af produktlinkets sti
+   hos MC Syd: 170 brugte og 162 fabriksnye.
+
+   "brugt" har en hjemmel i vores egen liste. "ny" har ikke.
+
+   CONDITIONS i js/data.js er ['Som ny', 'God stand', 'Brugt',
+   'Defekt/Projekt'] — fire beskrivelser af en BRUGT motorcykels tilstand.
+   "Som ny" betyder "brugt, men næsten uden slid". En fabriksny motorcykel
+   med 0 km er ikke "som ny"; den ER ny. Oversætter vi ny -> 'Som ny', står
+   der på 162 annoncer, at de er brugte motorcykler i fremragende stand, og
+   en køber der filtrerer "Som ny" for at undgå fabriksnye priser, får
+   præcis dem, han sorterede fra.
+
+   Så de 162 får null og bliver ved med at være uoplyste — ikke fordi vi
+   ikke ved det, men fordi vores egen ordliste ikke har et ord for det. Det
+   er en mangel i CONDITIONS, ikke i dataene, og den løses ved at tilføje
+   'Ny' til CONDITIONS i js/data.js og til standfilteret. Den dag det sker,
+   er det linjen herunder, der skal ændres, og intet andet. */
+const KILDE_STAND = {
+  brugt: 'Brugt',
+  used:  'Brugt',
+  ny:    null,   // <- sæt til 'Ny', når CONDITIONS har værdien
+  new:   null,
+};
+
+function conditionFraStand(stand){
+  const s = String(stand || '').toLowerCase().trim();
+  if (!s) return null;
+  // Ukendt ord: sig ved ikke frem for at vælge en nabokategori.
+  return KILDE_STAND[s] ?? null;
+}
+
 /* ---------- Indekserede annoncer ----------
    Oversættes til den samme form som alt andet i UI'et, så søgning, filtre og
    sortering virker uændret. Men de bærer isExternal og source med sig, og de
@@ -124,16 +281,39 @@ function normalizeExternalListing(row){
     id: row.id,
     brand: row.maerke || 'Ukendt',
     model: row.model || row.titel || '',
-    type: null,
+
+    /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og
+       vinder ALTID. Titel-scanneren nedenunder er kun nødudgangen for rækker,
+       der endnu ikke er crawlet igen — og den dag alle 332 har feltet, er
+       fallbacken bare stille. Kildens felt slår en scanner, også når de
+       dækker næsten lige mange (285 mod 283): hans kommer fra kilden, min
+       gætter sig frem fra en tekststreng. */
+    type: typeFraKategoriord(row.type) || typeFraTitel(row.titel || row.model),
+
     year: row.aargang,
     km: row.km,
     ccm: row.ccm,
-    power: null,
+
+    /* MC Syds kort har fire specrækker — årgang, km, HK, ccm. Hestekræfterne
+       stod der hele tiden og blev tabt, fordi kolonnen manglede. Med `hk`
+       (migration 015) kan koerekortForListing() endelig svare: 221 af 332
+       får en kategori mod 9 før. De sidste 111 er over 125 ccm uden oplyst
+       effekt, hvor kategorien ikke KAN afgøres — og efter e29c381 lyver
+       js/data.js ikke længere om dem. */
+    power: row.hk ?? null,
+
     price: row.pris_dkk,
-    condition: null,
     postnr: row.postnr,
     city: row.by || '',
-    region: null,
+
+    // Kildens stand (migration 015). Se ordlisten ovenfor: "brugt" oversættes,
+    // "ny" har endnu ingen plads i CONDITIONS og forbliver uoplyst.
+    condition: conditionFraStand(row.stand),
+
+    /* Landsdel er et opslag på postnummeret, ikke et skøn. Alle 332 MC
+       Syd-annoncer har postnr 6630 Rødding og hører altså til Syddanmark. */
+    region: regionFraPostnr(row.postnr),
+
     description: row.uddrag || null,
 
     /* createdAt er MED VILJE null.
@@ -165,7 +345,41 @@ function normalizeExternalListing(row){
     photoUrls: row.thumbnail_url ? [row.thumbnail_url] : [],
     photoRows: [],
     photos: row.thumbnail_url ? 1 : 0,
-    equipment: [],
+
+    /* ---------- Det vi ikke ved ----------
+
+       Her står felterne, kilden aldrig har fortalt os noget om. De er
+       skrevet ud ét for ét og sat til null MED VILJE. To grunde:
+
+       1. null betyder "uoplyst". Det er ikke det samme som en værdi.
+          equipment var før [], og en tom liste er en PÅSTAND: "denne
+          motorcykel har intet udstyr". Det ved vi ikke. Måske har den ABS,
+          måske har den ikke. En tom liste og et ubesvaret spørgsmål ser ens
+          ud i et filter, men de betyder to vidt forskellige ting, og
+          filtrene i js/search.js skelner nu mellem dem.
+
+       2. Listen skal være læselig. Står de ikke her, ser man ikke, hvad
+          der mangler — man opdager det først den dag et filter opfører sig
+          mærkeligt. Sådan opstod fejlen i første omgang.
+
+       Fristelsen er at fylde dem ud. Vinterklar kunne sættes til false, for
+       det er sikrest; farve kunne læses ud af billedet. Begge dele ville stå
+       på annoncesiden som en oplysning, MC Syd har givet — og det har de
+       ikke. Vi gætter ikke på en andens vegne.
+
+       Listen bliver kortere, efterhånden som kilden leverer mere. Stand,
+       hestekræfter og type stod her indtil migration 015 og er nu flyttet op
+       som rigtige felter. Det er sådan, den skal bruges: et felt forlader
+       listen, når kilden begynder at fortælle os det — ikke når vi bliver
+       trætte af at mangle det. */
+    equipment: null,       // udstyr — ikke oplyst (ikke "intet udstyr")
+    serviceHistorik: null, // servicehistorik
+    antalEjere: null,      // antal ejere
+    sidsteSyn: null,       // seneste syn
+    vinterklar: null,      // vinterklargjort
+    fuel: null, drive: null, cylinders: null, color: null,
+    afgift: null, registration: null, kanNedsaettesA2: null,
+
     seller: null,
   };
 }
