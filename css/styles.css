@@ -1329,7 +1329,6 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .swipe-card:active{ cursor:grabbing; }
 .swipe-card-media{ position:relative; flex:none; aspect-ratio: 4/3; background: var(--color-surface-2); display:flex; align-items:center; justify-content:center; overflow:hidden; }
 .swipe-card-media img{ width:100%; height:100%; object-fit:cover; }
-.swipe-card-media .ba-svg{ width:84%; height:84%; }
 .swipe-card-media::after{ content:""; position:absolute; inset:0; background: linear-gradient(to top, rgba(10,8,6,.28), transparent 40%); pointer-events:none; }
 .swipe-card-flag{ position:absolute; top:12px; left:12px; }
 .swipe-card-kk{ position:absolute; top:12px; right:12px; }
@@ -2053,19 +2052,19 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
 .account-aside p{ font-size:14px; color: var(--color-fg-muted); line-height:1.6; margin-bottom: var(--space-4); }
 @media (max-width:899px){ .account-aside{ display:none; } }
 
-/* ============ Bike art (illustrated placeholder photography) ============ */
-.ba-svg{ width:100%; height:100%; display:block; }
-.ba-ground{ stroke: var(--color-border); stroke-width:2; }
-.ba-tire{ fill: var(--color-fg); opacity:.88; }
-.ba-tread{ stroke: var(--color-surface-2); stroke-width:1.6; opacity:.5; }
-.ba-cut{ fill: var(--color-surface-2); }
-.ba-rim{ stroke: var(--color-surface-2); stroke-width:2.2; }
-.ba-accent{ fill: var(--color-primary); }
-.ba-body{ fill: var(--color-fg); opacity:.88; }
-.ba-line{ stroke: var(--color-fg); opacity:.6; stroke-width:3; stroke-linecap:round; fill:none; }
-.ba-thick{ stroke-width:6; opacity:.75; }
-.gallery-main .ba-svg, .card-media .ba-svg{ transition: transform .5s var(--ease-out); }
-.card:hover .card-media .ba-svg{ transform: scale(1.04); }
+/* Sektionen "Bike art" stod her (C-007). Den stylede den tegnede
+   pladsholdermotorcykel — tolv .ba-*-regler, som kun bikeArtSVG() i
+   js/bike-art.js kunne producere elementer til. Den tegnefunktion kaldes
+   ingen steder mere: pladsholderen er "Ingen fotos i denne annonce" fra
+   listingMediaHTML() i js/components.js. Reglerne var altså regler for
+   elementer, der ikke længere kan opstå, og de blev båret rundt i den
+   kritiske blok på fem sidetyper (soegning, annonce, maerke, forhandler,
+   mine-annoncer), hvor de indlejres i selve dokumentet.
+
+   scripts/inline-critical.js nævner stadig 'Bike art' i sine PAGES-lister.
+   Det er et no-op — filtreringen matcher på sektionsnavne, og et navn, der
+   ikke findes, giver ingen sektion — men listerne bør ryddes samtidig med
+   resten af C-007. */
 
 /* ============ Trust & safety ============ */
 .badge-verified{ background: var(--color-success); color:#fff; }

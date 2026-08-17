@@ -1,4 +1,35 @@
-/* Parametric duotone motorcycle-silhouette illustrations, used as placeholder "photos".
+/* DØD KODE. Filen skal slettes — den kan bare ikke slettes herfra endnu.
+   ------------------------------------------------------------------
+   C-007. `bikeArtSVG()`, `wheelSVG()`, `bodyFor()`, `BIKE_TYPES` og
+   `TYPE_LABELS_DA` kaldes ingen steder. Efterprøvet med et scan over alle
+   js/html/css/json/yaml-filer i repoet på hvert af de fem navne: den eneste
+   forekomst uden for denne fil er en KOMMENTAR i js/home.js:1, som fortæller
+   at tegneren blev fjernet. Pladsholderen tegnes i dag af
+   `listingMediaHTML()` i js/components.js — "Ingen fotos i denne annonce",
+   ingen tegning. De tolv `.ba-*`-regler i css/styles.css er fjernet i samme
+   omgang, og de tolv `<script defer src="js/bike-art.js">` i de statiske
+   sider med dem.
+
+   HVAD DER MANGLER, FØR FILEN KAN SLETTES — fire linjer i scripts/, som
+   tilhører en anden agents arbejdsområde i denne runde:
+
+     scripts/shared.js:189            `browserModules()` LÆSER filen med
+                                      readFileSync. Slettes filen uden at
+                                      linjen fjernes, KASTER hele byggekæden.
+     scripts/build-listing-pages.js:253   skriver script-tagget ind i hver
+                                      genereret annonce-<slug>.html
+     scripts/build-brand-pages.js:401     samme, i hver maerke-*.html
+     scripts/build-brand-pages.js:503     samme, i maerker.html
+
+   Og listerne i scripts/inline-critical.js, der stadig nævner sektionen
+   'Bike art' (harmløst no-op i dag, se kommentaren i css/styles.css).
+
+   Rækkefølgen er vigtig: FØRST de fire linjer, SÅ filen. Omvendt fejler
+   `node scripts/build.js`.
+
+   ------------------------------------------------------------------
+   Oprindelig beskrivelse:
+   Parametric duotone motorcycle-silhouette illustrations, used as placeholder "photos".
    All shapes use currentColor-independent CSS vars so they theme automatically (light/dark). */
 
 function wheelSVG(cx, cy, r, spokes){

@@ -381,6 +381,11 @@ HVAD: På `body.srp` er `.card-media`/`.row-media` uden foto nu et panel med én
 diagonal farverampe, tegningen som et mindre emblem i midten og "Intet foto"
 som billedtekst UNDER emblemet i stedet for en pille oven på det. Tegningens
 egen baggrund (`<rect>` i `bikeArtSVG()`) slukkes, så feltet har én flade.
+**RETTELSE 17.08.2026 (C-007):** der er ingen tegning mere. `bikeArtSVG()`
+kaldes ingen steder — pladsholderen er "Ingen fotos i denne annonce" fra
+`listingMediaHTML()`. Sætningen om `<rect>`'en beskriver en afhængighed til en
+død fil, og den skal ikke genopfindes. Resten af beslutningen (panelet, ét
+flade, teksten under i stedet for oven på) står ved magt.
 HVORFOR: Kortet er en delt komponent — `js/components.js` tegner den samme
 pladsholder på forsiden, og forsiden har en anden ejer lige nu. Reglerne er
 derfor scopet til `.srp` frem for at ændre komponenten for hele sitet.
