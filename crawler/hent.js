@@ -23,6 +23,20 @@ const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
   'Chrome/131.0.0.0 Safari/537.36 Bikerbasen-indeksering/1.0 (+https://bikerbasen.dk/om-indeksering)';
 
+/* Statuskoden skal MED ud af kastet (C-012).
+
+   Før stod der bare `throw new Error('HTTP 403 på ...')`, og pipelinen kunne
+   kun læse den igen ud af en tekststreng. Uden koden kan den ikke skelne de
+   to slags 4xx, og de kræver modsatte reaktioner: 403/429 er kilden, der
+   siger nej til OS — bak ud og alarmér. 404 er én annonce, der er væk —
+   fortsæt. Begge endte før i samme `continue`, og så kunne crawleren lave
+   332 forespørgsler mod en kilde, der havde afvist den første. */
+function httpFejl(status, url){
+  const e = new Error(`HTTP ${status} på ${url}`);
+  e.status = status;
+  return e;
+}
+
 async function aabnBrowser(){
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
@@ -47,7 +61,7 @@ async function hentListeside(context, kilde, url){
     try {
       const svar = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT_MS });
       if (svar && svar.status() >= 400){
-        throw new Error(`HTTP ${svar.status()} på ${url}`);
+        throw httpFejl(svar.status(), url);
       }
 
       try {
@@ -87,7 +101,7 @@ async function hentDetaljeside(context, kilde, url){
     try {
       const svar = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT_MS });
       if (svar && svar.status() >= 400){
-        throw new Error(`HTTP ${svar.status()} på ${url}`);
+        throw httpFejl(svar.status(), url);
       }
       try {
         await page.waitForSelector(kilde.detalje.par, { timeout: DETALJE_TIMEOUT_MS });
