@@ -140,6 +140,43 @@ fem 40 %-trin koster 49 kørsler i stedet for 13. Det er stadig en
 hastighedsbegrænser og ikke et gulv — begrundelsen for, at der ikke sættes et
 absolut gulv, står i [DECISIONS.md](DECISIONS.md) og tallene er låst i testen.
 
+### Efterslæb efter D-010 — død CSS, der først kan fjernes efter merge
+
+D-010 er rettet i `e8f2e60` på grenen `claude/vigorous-cohen-dc1032`: markuppen
+`<div class="brand-index">` med de 60 `<a class="brand-index-link">` er væk fra
+`maerker.html`, og `scripts/build-brand-pages.js` genererer den ikke længere.
+Findingen står stadig som **åben** i tabellen ovenfor, fordi den her på
+designgrenen ikke er rettet — `git merge-base --is-ancestor e8f2e60 HEAD` siger
+nej, og begge grene er ude af `main`.
+
+Følgen er, at reglerne i `css/styles.css` bliver døde i samme øjeblik begge
+grene er på `main` — men **ikke før**. Efterprøvet på denne gren: `maerker.html`
+har 60 levende `.brand-index-link`-ankre, så en sletning nu ville koste 60 links
+deres gitter og pillestyling. Oprydningen hører derfor til efter merge.
+
+Opskriften, så den ikke skal genfindes:
+
+1. Efterprøv igen: `grep -rn brand-index *.html js/ scripts/ crawler/` skal give
+   **nul** træf uden for `css/styles.css`. Træffene i `maerke-*.html` (8 pr. fil,
+   linje ~64) er kun den indlejrede kritiske CSS, ikke markup — de forsvinder af
+   sig selv i skridt 3.
+2. Slet `css/styles.css:2503-2522`: kommentaren "Komplet mærke-indeks",
+   `.brand-index` + de tre `@media`-varianter, `.brand-index-link`, `::before`,
+   `:hover` og `:hover::before`.
+   **Fælden:** blokken er ikke sammenhængende. `.brand-noscript ul` står på 2501
+   og `.brand-noscript li` på **2523** — altså inde i intervallet. Begge er i brug
+   (mærkesidernes noscript-liste, `maerke-honda.html` m.fl.) og skal blive.
+   `.brand-card*` (18 × 3 i `maerker.html`, grid'en "Mærker med annoncer nu") og
+   `.brand-chip*` (forsiden) skal også blive.
+3. Kør `node scripts/build.js`. Nødvendigt, fordi `scripts/inline-critical.js`
+   klipper den kritiske CSS efter sektionsoverskrifter — her
+   `/* ==== Brand landing pages ==== */` på linje 2482 — og ikke efter selektorer.
+   Uden bygget bliver de slettede regler liggende indlejret i hver HTML-side.
+4. Gate: `node --check` på `js/*.js crawler/*.js scripts/*.js`, `npm test`,
+   `node scripts/build.js`, `node scripts/udgiv.js`. Verificér `maerker.html` og
+   én `maerke-*.html` i browseren i lys og mørk tilstand — der må ikke være et
+   layoutskift.
+
 ---
 
 ## Lukket
