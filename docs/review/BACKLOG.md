@@ -39,11 +39,11 @@ reproduktionstrin i én tabelcelle ikke kan læses af nogen.
 | C-011 | critic | funktionalitet | **P1** | `crawler/db.js:255 (bortemarkeringVurdering), crawler/borte.test.js:65-72` | Et selector-skift hos kilden kan tømme hele kataloget | **rettet** (2. gang) — se note nedenfor |
 | C-014 | critic | seo | **P1** | `scripts/shared.js:39-64 (fetchListings)` | Produktionssitet har 7 indekserbare adresser og NUL annonce- eller mærkesider | åben |
 | C-015 | critic | seo | **P1** | `js/seo.js:191-205 (seoSearchResults)` | Søgesidens struktureret data peger på 404'ere | åben |
-| D-001 | designer | design | **P1** | `css/styles.css:456-462 (mobil) og :428-439 (desktop)` | Hero-scrimmens lyseste punkt ligger præcis under teksten | åben |
-| D-002 | designer | design | **P1** | `css/styles.css:815 + :795, js/components.js:439-442` | Prishierarkiet er vendt om på 87 % af lageret | åben |
+| D-001 | designer | design | **P1** | `css/styles.css:456-462 (mobil) og :428-439 (desktop)` | Hero-scrimmens lyseste punkt ligger præcis under teksten | **rettet** — og bredere end fundet: 800px var værre end 390px (h1 1,90:1), se noten nedenfor |
+| D-002 | designer | design | **P1** | `css/styles.css:815 + :795, js/components.js:439-442` | Prishierarkiet er vendt om på 87 % af lageret | **rettet** |
 | D-004 | designer | design | **P1** | `js/annonce.js — videreKortHTML() / den eksterne gren; css/styles.css .listing-next` | På den eksterne annonceside konkurrerer væk-CTA'en med ingenting — den vinder ved walkover | åben |
 | D-005 | designer | design | **P1** | `js/home.js:475 og :499 (gaten), index.html #newest-sub` | I drift påstår forsiden en dato, vi ikke har | åben |
-| D-007 | designer | design | **P1** | `css/styles.css:1963` | .safety-banner-sep{ opacity:.4 } — samme fejl som .facet-n, et andet sted | åben |
+| D-007 | designer | design | **P1** | `css/styles.css:1963` | .safety-banner-sep{ opacity:.4 } — samme fejl som .facet-n, et andet sted | **rettet** |
 | D-013 | **ejer** | design | **P1** | `js/components.js externalCardHTML(), js/search.js externalRowHTML(), css/styles.css .card-external-cta + .row-cta` | Kortet havde stadig en genvej ud af sitet: "Se annoncen hos MC Syd" (304×24 px, ny fane, direkte til kilden) sprang vores egen annonceside over. Vejen ud skal gå IGENNEM den — ejerens ord: "inden vores side viderestiller udbyder af annoncen skal man klikke ind på min annonce, også kan man trykke på knappen til at komme videre" | **rettet** |
 | C-002 | critic | sikkerhed | **P2** | `supabase/016_luk_skrivehul.sql:31-43` | Hullet er lukket, men fabrikken kører videre | åben |
 | C-003 | critic | sikkerhed | **P2** | `supabase/016_luk_skrivehul.sql:155-160` | profiles har stadig INSERT og DELETE til anon | åben |
@@ -64,6 +64,26 @@ reproduktionstrin i én tabelcelle ikke kan læses af nogen.
 | C-018 | critic | seo | **P3** | `alle 14 HTML-sider, <html lang="da">` | Specifikationen siger lang="da-DK"; sitet har lang="da" på alle fjorten sider (efterprøvet) | åben |
 | C-019 | critic | seo | **P3** | `js/search.js:1695-1727` | Der er ingen noindex på et søgeresultat med nul træf | åben |
 | D-012 | designer | design | **P3** | `js/search.js — tomtilstandens hjælpetekst` | soegning.html?q=zzzzqqq (nul træf, ét aktivt filter = frisøgningen) skriver "Prøv at fjerne et filter eller udvide dit prisinterval" | åben |
+
+### Udvidet i runde 2 — D-001 gjaldt flere bredder end de målte
+
+Auditten målte 390 og 1440. Ved implementeringen blev der målt på 390, 760,
+800, 1024 og 1440 i **både lys og mørk tilstand**, og 800px viste sig at være
+værre end 390: `h1` **1,90:1** mod krav 3, og brødteksten **1,39:1** mod krav
+4,5. Årsagen er den samme som findingen beskriver, bare mere generel: den
+vandrette scrims stop stod i **procent af vinduet**, mens teksten er 720px
+bred og starter ved containerens venstre kant — altså låst på 752px ved alle
+bredder under 1240. 1440 er tilfældigvis den ene bredde, hvor procenten
+næsten passer. Stoppene følger nu tekstspalten. Tal før/efter for alle ti
+kombinationer står i commit-beskeden til `fix(design): D-001`.
+
+Samtidig fejlede `p.lead` på desktop (4,07:1 ved 1440) uden at stå i
+findingen. Den er dækket af samme rettelse.
+
+**Ikke rettet, med vilje:** `.brand-mark` ("basen" i logoet, `--color-primary`
+over hero-fotoet) måler 1,18:1 før og 2,62:1 efter. Det er et logotype, og
+WCAG 1.4.3 undtager tekst, der er en del af et logo eller et varemærkenavn.
+Den er nævnt her, så næste sweep ikke bruger tid på at genfinde den.
 
 ### Genåbnet i runde 1 — C-011
 
