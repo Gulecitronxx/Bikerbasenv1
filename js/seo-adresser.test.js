@@ -43,18 +43,29 @@ const { listingSlug } = require('../scripts/shared.js');
 /* Et minimalt <head>, der kan huske det, Seo.setJsonLd lægger i det. Der er
    ingen jsdom i dette repo (nul devDependencies, låst valg), så head'et er en
    liste af de elementer, koden har oprettet. */
+/* Nok af en vælger til de mønstre, js/seo.js faktisk bruger:
+   meta[name="..."], meta[property="..."], link[rel="..."]. Head'et SKAL kunne
+   finde et tag, det allerede har fået — ellers ville setMeta() lægge et nyt
+   ved siden af hver gang, og testen ville måle det første i stedet for det
+   sidste. Præcis den forskel skjulte, at "nul træf" ikke satte description
+   tilbage. */
+function passer(el, vælger){
+  const m = /^([a-z]+)\[([a-zA-Z:-]+)="([^"]+)"\]$/.exec(String(vælger).trim());
+  return !!m && el.__tag === m[1] && el[m[2]] === m[3];
+}
+
 function lavDokument(){
   const børn = [];
   return {
     børn,
     head: {
-      querySelector: () => null,
-      querySelectorAll: () => [],
+      querySelector: v => børn.find(e => passer(e, v)) || null,
+      querySelectorAll: v => børn.filter(e => String(v).split(',').some(d => passer(e, d))),
       appendChild(el){ børn.push(el); },
     },
     getElementById: id => børn.find(e => e.id === id) || null,
-    createElement: () => ({
-      id: '', type: '', textContent: '',
+    createElement: tag => ({
+      __tag: tag, id: '', type: '', textContent: '',
       setAttribute(k, v){ this[k] = v; },
       remove(){ const i = børn.indexOf(this); if (i >= 0) børn.splice(i, 1); },
     }),
@@ -80,10 +91,12 @@ function jsonLd(doc, id){
 }
 
 /* Værdien af et meta-tag, som Seo.setMeta har oprettet det. Attributnavnet
-   skifter mellem 'property' (Open Graph) og 'name' (description, twitter). */
+   skifter mellem 'property' (Open Graph) og 'name' (description, twitter).
+   Der må kun være ÉT af hver — er der to, er det setMeta, der er brækket. */
 function metaVærdi(doc, attr, navn){
-  const el = doc.børn.find(e => e[attr] === navn);
-  return el ? el.content : null;
+  const alle = doc.børn.filter(e => e.__tag === 'meta' && e[attr] === navn);
+  assert.ok(alle.length <= 1, `${alle.length} × <meta ${attr}="${navn}"> i head'et`);
+  return alle.length ? alle[0].content : null;
 }
 
 const egen = extra => Object.assign({
@@ -156,6 +169,55 @@ test('et tomt resultat sætter ingen ItemList (uændret adfærd)', () => {
   const { seoSearchResults } = indlæsSeo(doc);
   seoSearchResults([], 'Ingen træf');
   assert.equal(jsonLd(doc, 'results'), null);
+});
+
+/* ---- Søgesidens titel og description (C-017) ---- */
+
+test('facetten får sin egen titel, hentet fra samme sted som H1', () => {
+  const doc = lavDokument();
+  const { seoSearchResults } = indlæsSeo(doc);
+  seoSearchResults([egen()], 'Brugte Harley-Davidson til salg i København');
+
+  assert.equal(doc.title, 'Brugte Harley-Davidson til salg i København — Bikerbasen');
+  assert.equal(metaVærdi(doc, 'property', 'og:title'), doc.title);
+  assert.ok(metaVærdi(doc, 'name', 'description').startsWith('Brugte Harley-Davidson'),
+    'description skal sige det samme som titlen, ikke den generiske sætning');
+});
+
+test('titlen bliver ikke sat af annoncer uden egen side — den følger resultatet', () => {
+  // ItemList'et bortfalder for indekserede annoncer (C-015), men de STÅR på
+  // siden. Titlen hører til det, brugeren ser, ikke til det, Google må følge.
+  const doc = lavDokument();
+  const { seoSearchResults } = indlæsSeo(doc);
+  seoSearchResults([ekstern(), ekstern()], 'Brugte Honda til salg');
+
+  assert.equal(doc.title, 'Brugte Honda til salg — Bikerbasen');
+  assert.equal(jsonLd(doc, 'results'), null);
+});
+
+test('nul træf giver sidens egne, neutrale tags tilbage', () => {
+  // "Brugte Harley-Davidson til salg" på en side uden en eneste Harley er en
+  // paastand, siden selv modsiger. Og den maa ikke blive haengende fra den
+  // foregaaende facet.
+  const doc = lavDokument();
+  const { seoSearchResults } = indlæsSeo(doc);
+  seoSearchResults([egen()], 'Brugte Yamaha til salg');
+  assert.equal(doc.title, 'Brugte Yamaha til salg — Bikerbasen');
+
+  seoSearchResults([], 'Brugte Harley-Davidson til salg');
+  assert.equal(doc.title, 'Søg motorcykler — Bikerbasen');
+  assert.equal(metaVærdi(doc, 'name', 'description'),
+    'Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.');
+});
+
+test('canonical og og:url røres ikke — facetterne samles stadig ét sted', () => {
+  // Det er den ene ting, der IKKE må følge med titlen. Facet-canonical peger
+  // på bare soegning.html, og det er rigtigt.
+  const doc = lavDokument();
+  const { seoSearchResults } = indlæsSeo(doc);
+  seoSearchResults([egen()], 'Brugte KTM til salg');
+  assert.equal(doc.børn.find(e => e.rel === 'canonical'), undefined);
+  assert.equal(metaVærdi(doc, 'property', 'og:url'), null);
 });
 
 /* ---- Annoncesidens Vehicle.image (C-016) ---- */

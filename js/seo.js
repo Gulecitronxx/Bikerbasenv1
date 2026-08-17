@@ -266,7 +266,55 @@ function seoListingPage(listing, photoUrls){
    Annoncerne står stadig på siden og i sitets egne links; det er kun påstanden
    om deres adresser, der er væk. Genindsæt den ikke uden også at bygge de
    sider, den peger på. */
+/* Søgesidens EGNE, statiske tags — dem vi falder tilbage på.
+
+   Læses første gang seoSearchResults() kaldes, altså før vi selv har skrevet
+   noget i dem. Fallback-strengene er soegning.html's egne værdier skrevet af;
+   de bruges kun, hvis tagget mangler helt. */
+let soegesidensEgneTags = null;
+function egneTags(){
+  if (soegesidensEgneTags) return soegesidensEgneTags;
+  const desc = document.head.querySelector('meta[name="description"]');
+  soegesidensEgneTags = {
+    titel: document.title || `Søg motorcykler — ${SITE_NAME}`,
+    beskrivelse: (desc && desc.getAttribute('content'))
+      || 'Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.',
+  };
+  return soegesidensEgneTags;
+}
+
+/* Titel og description følger H1'en — men KUN når der er noget at vise.
+
+   Målt: ?types=cross&brands=Harley-Davidson&priceMax=1000&koerekort=A1 gav
+   <title>Søg motorcykler — Bikerbasen</title> på hver eneste facet, mens H1
+   korrekt sagde "Brugte Harley-Davidson til salg" (C-017). Fanebladet og det
+   delte link sagde altså ingenting om, hvad man kiggede på.
+
+   To ting bliver med vilje ikke rørt:
+
+   1. canonical og og:url. Hver facet canonical'er til bare soegning.html, og
+      det er den rigtige håndtering af duplicate content fra facetter. Derfor
+      går det her IKKE gennem Seo.setSocial() — den ville sætte canonical med.
+      Rangeringsmæssigt flytter titlen derfor ingenting; den er til brugeren.
+   2. Titlen ved nul træf. Overskriften siger stadig "Brugte Harley-Davidson
+      til salg" på en side, hvor der ikke er nogen — og en <title> med det i
+      ville være en påstand, siden selv modsiger to linjer længere nede.
+      Sidens egne, neutrale tags sættes tilbage i stedet. */
 function seoSearchResults(listings, heading){
+  const egne = egneTags();
+  const harTræf = (listings || []).length > 0;
+  const titel = (harTræf && heading) ? `${heading} — ${SITE_NAME}` : egne.titel;
+  const beskrivelse = (harTræf && heading)
+    ? `${heading} på ${SITE_NAME}. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.`
+    : egne.beskrivelse;
+
+  document.title = titel;
+  Seo.setMeta('meta[name="description"]', 'name', 'description', beskrivelse);
+  Seo.setMeta('meta[property="og:title"]', 'property', 'og:title', titel);
+  Seo.setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', titel);
+  Seo.setMeta('meta[property="og:description"]', 'property', 'og:description', beskrivelse);
+  Seo.setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', beskrivelse);
+
   const poster = itemListElementer(listings);
   Seo.setJsonLd('results', poster.length ? {
     '@context': 'https://schema.org',
