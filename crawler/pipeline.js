@@ -193,11 +193,23 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
       }
     }
 
-    // En delvis kørsel har ikke set hele kataloget. Ville vi tælle de
-    // usete med, ville --limit=20 på sigt sætte de øvrige 480 til 'borte'.
+    /* En delvis kørsel har ikke set hele kataloget. Ville vi tælle de
+       usete med, ville --limit=20 på sigt sætte de øvrige 480 til 'borte'.
+
+       `tal.fundet` gives med, fordi markeringen skal kunne nægte at køre.
+       Se værnet over markerBorte() i crawler/db.js: uden det er tre kørsler
+       med nul kort nok til at sætte hele kataloget til 'borte', og et
+       omdøbt CSS-navn hos kilden er nok til at udløse det. */
     if (!toerloeb && !limit){
-      tal.borte = await db.markerBorte(sb, kilde_id);
-      if (tal.borte) log.skriv(`${tal.borte} annoncer ikke set i ${db.KOERSLER_FOER_BORTE} kørsler — sat til 'borte'`);
+      const b = await db.markerBorte(sb, kilde_id, tal.fundet);
+      tal.borte = b.antal;
+      if (b.sprunget_over){
+        log.skriv(`VÆRN: forsvundne annoncer blev IKKE markeret — ${b.grund}.`);
+        log.skriv('     Kataloget står urørt. Efterse selectors i kildens YAML, før næste kørsel;');
+        log.skriv('     er faldet ægte, går markeringen af sig selv, når fundet er stabilt igen.');
+      } else if (tal.borte){
+        log.skriv(`${tal.borte} annoncer ikke set i ${db.KOERSLER_FOER_BORTE} kørsler — sat til 'borte' (${b.grund})`);
+      }
     }
 
     log.skriv(`FÆRDIG: ${tal.fundet} fundet, ${tal.nye} nye, ${tal.opdaterede} opdaterede, ${tal.borte} borte, ${tal.fejl} kasseret`);

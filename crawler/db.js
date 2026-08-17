@@ -221,10 +221,58 @@ async function skrivAnnoncer(sb, kilde_id, annoncer){
    tidspunkt, har den manglet i alle tre. */
 const KOERSLER_FOER_BORTE = 3;
 
-async function markerBorte(sb, kilde_id){
+/* VÆRNET: tre kørsler beskytter mod et hikke, ikke mod et DOM-skift.
+   ------------------------------------------------------------------
+   Markeringen kørte før uanset hvor lidt kørslen havde fundet. Fem linjer
+   tidligere logges "ingen annoncer fundet. Selectors eller sidestruktur bør
+   efterses" — og så kørte markeringen alligevel, i samme gennemløb. Tre
+   kørsler med nul kort, og alle 332 rækker har `sidst_set` ældre end
+   grænsen: hele kataloget til 'borte', hvorefter politikken "ekstern:
+   offentlig laesning" (status <> 'borte') skjuler dem. Sitet fra 332
+   annoncer til 0, og det kræver kun, at MC Syd omdøber en CSS-klasse.
+   Tre kørsler er ikke et værn mod det: et DOM-skift er ikke et hikke, det
+   er permanent, og det gentager sig hver gang.
+
+   Reglen: fundet skal være mindst 60 % af det HØJESTE, de sammenlignede
+   kørsler fandt. Maksimum frem for median, fordi en gradvis udhuling
+   (55 % tre gange = 17 %) ellers glider igennem tre gange i træk.
+
+   Hvilken vej fejlen skal falde, er valgt med vilje. Værnet kan holde en
+   annonce synlig én kørsel for længe — det koster en forkert annonce i
+   søgeresultatet, og den er stadig i kildens system. Det modsatte koster
+   hele kataloget. Der ER en pris: lukker en forhandler og tømmer sit lager
+   for ægte, bliver de gamle annoncer stående, indtil et menneske ser
+   logbeskeden. Det er den rigtige, fordi "kilden har nul annoncer" og
+   "vores parser er brækket" ser ens ud fra vores side — og bare ÉN af dem
+   må afgøres af en maskine. */
+const BORTE_MIN_ANDEL = 0.6;
+
+function bortemarkeringVurdering(fundet, tidligereFundet){
+  const antal = Number(fundet) || 0;
+  if (antal === 0){
+    return { tilladt: false, grund: 'kørslen fandt nul annoncer' };
+  }
+  const kendte = (tidligereFundet || []).map(n => Number(n) || 0).filter(n => n > 0);
+  if (!kendte.length){
+    // Ingen tidligere kørsel har fundet noget, så der er intet at falde fra.
+    return { tilladt: true, grund: 'ingen tidligere kørsel med fund at sammenligne med' };
+  }
+  const reference = Math.max(...kendte);
+  const andel = antal / reference;
+  if (andel < BORTE_MIN_ANDEL){
+    return {
+      tilladt: false,
+      grund: `kørslen fandt ${antal}, hvor de seneste kørsler fandt op til ${reference} `
+           + `(${Math.round(andel * 100)} % — grænsen er ${Math.round(BORTE_MIN_ANDEL * 100)} %)`,
+    };
+  }
+  return { tilladt: true, grund: `${antal} fundet mod ${reference} tidligere (${Math.round(andel * 100)} %)` };
+}
+
+async function markerBorte(sb, kilde_id, fundet){
   const { data: koersler, error } = await sb
     .from('crawl_koersler')
-    .select('startet')
+    .select('startet, fundet')
     .eq('kilde_id', kilde_id)
     .not('afsluttet', 'is', null)
     .order('startet', { ascending: false })
@@ -232,7 +280,16 @@ async function markerBorte(sb, kilde_id){
   kastVed(error, 'kunne ikke læse tidligere kørsler');
 
   // Færre end tre afsluttede kørsler: ingen annonce KAN have manglet i tre.
-  if (!koersler || koersler.length < KOERSLER_FOER_BORTE) return 0;
+  if (!koersler || koersler.length < KOERSLER_FOER_BORTE){
+    return { antal: 0, sprunget_over: false, grund: 'færre end tre afsluttede kørsler' };
+  }
+
+  /* Værnet ligger HER og ikke i pipeline.js, fordi det er den samme
+     forespørgsel, der bærer begge svar: de tre kørsler, grænsen regnes ud
+     fra, ER de tre kørsler, faldet måles imod. Lå de to steder, kunne de
+     komme til at se på hver sit vindue. */
+  const dom = bortemarkeringVurdering(fundet, koersler.map(k => k.fundet));
+  if (!dom.tilladt) return { antal: 0, sprunget_over: true, grund: dom.grund };
 
   const graense = koersler[KOERSLER_FOER_BORTE - 1].startet;
   const { data, error: opdFejl } = await sb
@@ -245,12 +302,16 @@ async function markerBorte(sb, kilde_id){
     .not('manuelle_felter', 'cs', '{status}')
     .select('id');
   kastVed(opdFejl, 'kunne ikke markere forsvundne annoncer');
-  return data?.length || 0;
+  return { antal: data?.length || 0, sprunget_over: false, grund: dom.grund };
 }
 
 module.exports = {
   klient, projektUrl, sikrKilde, startKoersel, afslutKoersel,
   skrivAnnoncer, markerBorte, KOERSLER_FOER_BORTE,
+  // Vurderingen er ren og eksporteres, saa vaernet kan testes uden en
+  // database. Det er hele pointen: den betingelse, der staar mellem et
+  // kosmetisk skift hos kilden og et tomt katalog, skal have en test.
+  bortemarkeringVurdering, BORTE_MIN_ANDEL,
   // Eksporteres, saa en test kan holde parserens felter op mod kolonnerne
   // uden at have en database. Det er den test, der ville have fanget hk.
   KOLONNER, tilRaekke,
