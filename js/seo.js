@@ -100,10 +100,26 @@ const Seo = (function(){
 
 /* Annoncesiden: Vehicle med et Offer, så pris og specifikationer kan vises
    direkte i søgeresultatet. */
-/* Adressen paa annoncens forrenderede side. Skal give samme filnavn som
-   scripts/shared.js listingSlug — ellers ville canonical fra
-   annonce.html?id= pege paa en side der ikke findes. */
+/* Adressen paa annoncens forrenderede side — eller null, hvis annoncen ikke
+   HAR en.
+
+   Filnavnet skal give det samme som scripts/shared.js listingSlug, ellers ville
+   canonical fra annonce.html?id= pege paa en side, der ikke findes.
+
+   Og netop derfor null-grenen. Kun VORES egne annoncer bliver forrenderet af
+   scripts/build-listing-pages.js. En indekseret annonce faar ingen fil, og den
+   er dertil `noindex, follow` (js/annonce.js) — vi ejer ikke indholdet, og en
+   kopi skal ikke konkurrere med originalen. Funktionen blev alligevel kaldt for
+   dem, og resultatet blev maalt paa produktion: soegesidens ItemList navngav
+   https://bikerbasen.dk/annonce-honda-cbr-250-r-2011-72eb6a40.html, som svarer
+   404. Google fik en liste, hvor hver enkelt adresse var doed.
+
+   Der er intet at rette i selve slug'en. Fejlen er at spoerge om en adresse,
+   der ikke findes — saa den maa kunne svare nej. Kalderne nedenfor haandterer
+   null ved at udelade posten; det er ikke en detalje, de kan springe over.
+   Adressen, en indekseret annonce faktisk kan naas paa, er annonce.html?id=. */
 function listingPageUrl(listing){
+  if (!listing || listing.isExternal) return null;
   const slug = `${listing.brand} ${listing.model} ${listing.year}`
     .toLowerCase()
     .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
@@ -111,11 +127,43 @@ function listingPageUrl(listing){
   return `${SITE_URL}/annonce-${slug}-${String(listing.id).slice(0, 8)}.html`;
 }
 
+/* De poster i et ItemList, der har en adresse, Google kan foelge.
+
+   Bruges af baade soegesiden og forhandlerprofilen, fordi begge lister
+   annoncer, og begge kan faa en indekseret annonce med i listen. En ItemList
+   er en paastand om, at de adresser findes; posterne uden adresse udelades
+   derfor frem for at pege paa en 404 eller paa en noindex-side. Antallet
+   taelles af det, listen faktisk indeholder — ellers ville numberOfItems
+   modsige itemListElement. */
+function itemListElementer(listings){
+  const ud = [];
+  for (const l of (listings || [])){
+    const url = listingPageUrl(l);
+    if (!url) continue;
+    ud.push({
+      '@type': 'ListItem',
+      position: ud.length + 1,
+      url,
+      name: `${l.brand} ${l.model} ${l.year}`,
+    });
+  }
+  return ud;
+}
+
 function seoListingPage(listing, photoUrls){
   const navn = `${listing.brand} ${listing.model}`;
   // Canonical peger altid paa den statiske side, saa Google samler
   // signalerne dér i stedet for at se to adresser med samme indhold.
   const url = listingPageUrl(listing);
+  /* Ingen adresse => ingen canonical. js/annonce.js sender indekserede
+     annoncer til renderExternalListing() og kalder aldrig herind for dem, saa
+     det her skal ikke kunne ske. Sker det alligevel, er det bedre at lade
+     siden staa uden delingstags end at pege canonical paa en 404 — det er den
+     ene fejl, hele findingen handler om. */
+  if (!url){
+    console.warn('seoListingPage kaldt for en annonce uden forrenderet side — springer over.', listing?.id);
+    return;
+  }
   const image = (photoUrls && photoUrls[0]) || `${SITE_URL}/og-image.png`;
 
   const dele = [
@@ -187,19 +235,25 @@ function seoListingPage(listing, photoUrls){
   ]));
 }
 
-/* Søgeresultater: ItemList over de annoncer der faktisk vises. */
+/* Søgeresultater: ItemList over de annoncer på siden, der HAR en adresse.
+
+   Blokken hed før hele resultatsiden og satte url = listingPageUrl(l) for hver
+   post. I drift, hvor 332 af 332 annoncer er indekserede, betød det et ItemList
+   hvor hver eneste URL svarede 404 (C-015). Nu bortfalder blokken helt, hvis
+   ingen af annoncerne har en side — struktureret data, der ikke kan bakkes op,
+   er ikke bedre end ingen struktureret data.
+
+   Annoncerne står stadig på siden og i sitets egne links; det er kun påstanden
+   om deres adresser, der er væk. Genindsæt den ikke uden også at bygge de
+   sider, den peger på. */
 function seoSearchResults(listings, heading){
-  Seo.setJsonLd('results', listings.length ? {
+  const poster = itemListElementer(listings);
+  Seo.setJsonLd('results', poster.length ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: heading,
-    numberOfItems: listings.length,
-    itemListElement: listings.map((l, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      url: listingPageUrl(l),
-      name: `${l.brand} ${l.model} ${l.year}`,
-    })),
+    numberOfItems: poster.length,
+    itemListElement: poster,
   } : null);
 }
 
@@ -224,16 +278,13 @@ function seoDealerPage(seller, listingCount, listings){
     address: seller.city ? { '@type': 'PostalAddress', addressLocality: seller.city, addressCountry: 'DK' } : undefined,
     telephone: seller.phone || undefined,
   });
-  Seo.setJsonLd('dealer-items', (listings && listings.length) ? {
+  // Samme regel som på søgesiden: kun annoncer med en adresse, der findes.
+  const poster = itemListElementer(listings);
+  Seo.setJsonLd('dealer-items', poster.length ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: `Motorcykler til salg fra ${seller.name}`,
-    numberOfItems: listings.length,
-    itemListElement: listings.map((l, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      url: listingPageUrl(l),
-      name: `${l.brand} ${l.model} ${l.year}`,
-    })),
+    numberOfItems: poster.length,
+    itemListElement: poster,
   } : null);
 }
