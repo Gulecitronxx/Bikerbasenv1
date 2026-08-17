@@ -1720,7 +1720,7 @@ function render(){
       : 'Ingen annoncer matcher dine filtre';
     document.getElementById('empty-text').textContent = intetLager
       ? 'Bikerbasen er helt nyt. Bliv den første til at sætte en motorcykel til salg — eller få besked, så snart der kommer en.'
-      : 'Prøv at fjerne et filter eller udvide dit prisinterval.';
+      : tomtilstandsRaad(pills);
 
     // Nulstil-knappen giver kun mening, når der ER noget at nulstille.
     const nulstil = document.getElementById('empty-clear-btn');
@@ -1734,6 +1734,32 @@ function render(){
 
   clearTimeout(secondaryHandle);
   secondaryHandle = setTimeout(() => renderSecondary(pills, pageItems, heading, total, totalPages), 0);
+}
+
+/* Rådet i tomtilstanden skal passe til den tilstand, brugeren står i (D-012).
+
+   Linjen sagde ét og det samme uanset hvad: "Prøv at fjerne et filter eller
+   udvide dit prisinterval." På `soegning.html?q=zzzzqqq` er der nul træf, ét
+   aktivt filter — frisøgningen — og INTET prisinterval. Rådet pegede altså på
+   en indstilling, der ikke var i spil, i den ene situation hvor rådet er det
+   eneste, siden har at give.
+
+   Grundlaget er `pills`, den samme liste som chipsene ved siden af tegnes
+   af, så rådet og det, skærmen viser, ikke kan komme fra hinanden.
+   `state.q` fylder altid præcis én chip (activeFilterPills(), øverst), så
+   "kun frisøgningen" er `state.q` sat OG nøjagtig én chip. */
+function tomtilstandsRaad(pills){
+  const kunSoegeord = !!state.q && pills.length === 1;
+  const harPris = state.priceMin != null || state.priceMax != null;
+  if (kunSoegeord) return `Der er ingen match på "${state.q}". Prøv et kortere søgeord — fx kun mærket.`;
+  // Prisen nævnes KUN, når der faktisk er sat et prisfilter.
+  if (harPris) return 'Prøv at fjerne et filter eller udvide dit prisinterval.';
+  if (pills.length > 1) return 'Prøv at fjerne et af filtrene.';
+  if (pills.length === 1) return 'Prøv at fjerne filteret.';
+  // Nul filtre og nul træf med lager på hylden kan i dag ikke ske — det ville
+  // være intetLager-grenen. Linjen står der, så tilstanden ikke er tom, hvis
+  // en fremtidig filtrering ligger uden for pillerne.
+  return 'Prøv en anden søgning.';
 }
 
 /* En facet uden træf skal ikke indekseres (C-019).

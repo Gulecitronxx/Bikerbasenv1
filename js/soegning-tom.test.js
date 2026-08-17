@@ -1,11 +1,10 @@
-/* Søgesidens TOMTILSTAND — hvad siden signalerer til en crawler, når svaret
-   er nul.
+/* Søgesidens TOMTILSTAND — det siden siger og signalerer, når svaret er nul.
    Kør: npm test
 
    js/search.js er 2.100 linjer og hænger på document, Store og en halv snes
    globale. Filen kan derfor ikke evalueres i node som helhed, sådan som
-   js/koerekort.test.js gør med js/data.js. I stedet klippes funktionen
-   ud af kildeteksten og køres for sig med præcis de globale, den bruger. Det
+   js/koerekort.test.js gør med js/data.js. I stedet klippes de to funktioner
+   ud af kildeteksten og køres for sig med præcis de globale, de bruger. Det
    er stadig den RIGTIGE kode, der prøves — ikke en kopi af den, og heller
    ikke et tekstmatch på en streng, der lige så godt kunne stå i en
    kommentar. */
@@ -30,11 +29,48 @@ function udklip(navn){
   throw new Error(`kunne ikke finde slutningen på ${navn}()`);
 }
 
-const kode = udklip('seoRobots');
+const kode = udklip('tomtilstandsRaad') + '\n' + udklip('seoRobots');
 const lav = (state, Seo) => new Function('state', 'Seo',
-  kode + '\nreturn { seoRobots };')(state, Seo);
+  kode + '\nreturn { tomtilstandsRaad, seoRobots };')(state, Seo);
 
 const tomState = () => ({ q: '', priceMin: null, priceMax: null });
+const pille = n => Array.from({ length: n }, (_, i) => ({ label: 'filter ' + i }));
+
+/* ---------- D-012 ---------- */
+
+test('kun frisøgningen: rådet nævner søgeordet, ikke et prisinterval', () => {
+  /* soegning.html?q=zzzzqqq — nul træf, ét aktivt filter (frisøgningen),
+     INTET prisinterval. Linjen sagde alligevel "udvide dit prisinterval". */
+  const { tomtilstandsRaad } = lav({ q: 'zzzzqqq', priceMin: null, priceMax: null });
+  const raad = tomtilstandsRaad(pille(1));
+  assert.match(raad, /zzzzqqq/, 'rådet skal nævne det søgeord, der ikke gav noget');
+  assert.ok(!/prisinterval/.test(raad),
+    'prisintervallet må ikke nævnes, når brugeren ikke har sat et: ' + raad);
+});
+
+test('prisfilter sat: prisen MÅ nævnes', () => {
+  const { tomtilstandsRaad } = lav({ q: '', priceMin: null, priceMax: 1000 });
+  assert.match(tomtilstandsRaad(pille(2)), /prisinterval/);
+  const kunMin = lav({ q: '', priceMin: 90000, priceMax: null });
+  assert.match(kunMin.tomtilstandsRaad(pille(1)), /prisinterval/,
+    'også når kun minimum er sat');
+});
+
+test('filtre uden pris: rådet peger på filtrene og intet andet', () => {
+  const { tomtilstandsRaad } = lav(tomState());
+  assert.equal(tomtilstandsRaad(pille(2)), 'Prøv at fjerne et af filtrene.');
+  assert.equal(tomtilstandsRaad(pille(1)), 'Prøv at fjerne filteret.');
+  for (const n of [1, 2, 4]){
+    assert.ok(!/prisinterval/.test(tomtilstandsRaad(pille(n))));
+  }
+});
+
+test('søgeord PLUS andre filtre er ikke "kun søgeordet"', () => {
+  /* Med to chips er det ikke frisøgningen alene, der er skyld i nul træf,
+     og så er "prøv et kortere søgeord" et gæt. */
+  const { tomtilstandsRaad } = lav({ q: 'Honda', priceMin: null, priceMax: null });
+  assert.equal(tomtilstandsRaad(pille(3)), 'Prøv at fjerne et af filtrene.');
+});
 
 /* ---------- C-019 ---------- */
 
