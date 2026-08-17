@@ -2066,7 +2066,15 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
 :root[data-theme="dark"] .safety-banner{ color: var(--color-primary); }
 .safety-banner span{ display:inline-flex; align-items:center; gap:6px; }
 .safety-banner svg{ width:16px; height:16px; flex-shrink:0; }
-.safety-banner-sep{ opacity:.4; font-weight:400; }
+/* Separatoren daempes med FARVE, ikke med opacity — samme rettelse som
+   .facet-n fik, og af samme grund: opacity blander teksten med det, der
+   ligger bag, saa tokenet ser rigtigt ud og kompositten fejler.
+   `opacity:.4` gjorde tegnet til rgb(196,178,169) paa rgb(255,230,217) =
+   1,70:1 i lys tilstand og rgb(102,85,72) paa rgb(58,36,23) = 2,04:1 i moerk.
+   Kravet ved 13px er 4,5. --color-fg-muted maaler 4,81:1 i lys og 5,50:1 i
+   moerk og beholder rangordningen: separatoren er stadig svagere end de tre
+   led, den skiller (5,43 og 5,09). */
+.safety-banner-sep{ color: var(--color-fg-muted); font-weight:400; }
 .safety-banner-link{ margin-left:auto; display:inline-flex; align-items:center; gap:4px; text-decoration:underline; white-space:nowrap; }
 .safety-banner-link svg{ width:14px; height:14px; }
 
