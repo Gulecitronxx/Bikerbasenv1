@@ -6,6 +6,11 @@ name: Byg og udgiv Bikerbasen
 # lokalt foerst. Ingen hemmeligheder noedvendige: Supabase-noeglen i
 # js/supabase-config.js er den offentlige anon-noegle, tiltaenkt at ligge i
 # klientkode.
+#
+# Det, der bliver udgivet, er `_site/` — ikke repoet. `path: .` lagde
+# crawler/, supabase/, sources/, scripts/, work/ og docs/ paa
+# bikerbasen.dk (efterproevet: HTTP 200 paa fem af dem). Allowlisten og
+# efterproevningen staar i scripts/udgiv.js.
 
 on:
   push:
@@ -33,10 +38,16 @@ jobs:
           node-version: 20
       - name: Byg annonce- og maerkesider, metatags og versionsstempel
         run: node scripts/build.js
+      # Samler _site fra en allowlist og afbryder, hvis en side peger paa en
+      # fil, der ikke kom med. Hvorfor allowlist frem for `path: .` staar i
+      # scripts/udgiv.js — kort fortalt: crawler/, supabase/, sources/,
+      # scripts/, work/ og docs/ laa offentligt paa handelsdomaenet.
+      - name: Saml udgivelsen og efterproev at intet mangler
+        run: node scripts/udgiv.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
   deploy:
     needs: build

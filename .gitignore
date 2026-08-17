@@ -18,3 +18,8 @@ bar/*.json
 # Dommene, beslutningerne og maalingerne i work/*.md bliver derimod versioneret.
 work/*.png
 work/*.jpg
+
+# Udgivelsesmappen. scripts/udgiv.js bygger den fra en allowlist ved hvert
+# deploy, og den er ren kopi — den skal ikke versioneres. Ligger den i git,
+# bliver den paa et tidspunkt kopieret ind i sig selv.
+_site/

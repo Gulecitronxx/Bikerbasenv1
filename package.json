@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "crawl": "node crawler/run.js",
+    "udgiv": "node scripts/udgiv.js",
     "test": "node --test crawler/normalize.test.js crawler/parse.test.js crawler/hastighed.test.js crawler/detalje.test.js js/koerekort.test.js js/bedoemmelse.test.js js/eksternt-kort.test.js",
     "crawl:tjek": "node crawler/tjek.js"
   },
