@@ -2608,28 +2608,10 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-card:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
 .brand-card-name{ font-family: var(--font-display); font-weight:700; font-size:17px; }
 .brand-card-count{ font-size:13px; color: var(--color-fg-muted); }
+/* Mærkesidernes noscript-liste. (Det komplette mærke-indeks — .brand-index
+   og .brand-index-link — stod her indtil e8f2e60 fjernede markuppen: de 60
+   links pegede på søgninger, hvoraf 44 gav nul træf. Se D-010.) */
 .brand-noscript ul, .brand-noscript{ padding-left:18px; }
-
-/* Komplet mærke-indeks: kompakt, søgbart browse-gitter (fylder siden ud og
-   giver rigtige interne links, også for mærker uden annoncer lige nu). */
-.brand-index{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-2); }
-@media (min-width:560px){ .brand-index{ grid-template-columns: repeat(3,1fr); } }
-@media (min-width:900px){ .brand-index{ grid-template-columns: repeat(4,1fr); } }
-@media (min-width:1200px){ .brand-index{ grid-template-columns: repeat(5,1fr); } }
-.brand-index-link{
-  display:flex; align-items:center; gap:8px;
-  padding: 11px var(--space-4); border-radius: var(--radius-sm);
-  background: var(--color-surface); border:1px solid var(--color-border);
-  font-weight:600; font-size:14px; color: var(--color-fg);
-  transition: border-color .15s var(--ease-out), background-color .15s var(--ease-out), transform .15s var(--ease-out);
-}
-.brand-index-link::before{
-  content:""; width:7px; height:7px; border-radius:50%; flex:none;
-  background: color-mix(in srgb, var(--color-primary) 55%, transparent);
-  transition: background-color .15s var(--ease-out);
-}
-.brand-index-link:hover{ border-color: var(--color-primary); background: var(--color-surface-2); transform: translateY(-2px); }
-.brand-index-link:hover::before{ background: var(--color-primary); }
 .brand-noscript li{ list-style:disc; margin-bottom:6px; color: var(--color-fg-muted); }
 
 /* ============ Forside: Populære mærker (brand cloud) ============ */

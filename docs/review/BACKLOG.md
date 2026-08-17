@@ -211,6 +211,47 @@ uden den linje får hele byggekæden til at kaste. Dertil
 `:503`, der skriver tagget ind i de genererede sider — som derfor stadig
 henter den. Rækkefølgen er: først de fire linjer, så filen. Det står også
 øverst i `js/bike-art.js` selv.
+### Efterslæb efter D-010 — den døde CSS er væk (`bd7b877`)
+
+Markuppen forsvandt i `e8f2e60`, stilen i `bd7b877`. Der lå et merge imellem,
+og det var ikke en formalitet: så længe `e8f2e60` kun fandtes på
+`claude/vigorous-cohen-dc1032`, havde `maerker.html` på designgrenen stadig 60
+levende `.brand-index-link`-ankre. En sletning på det tidspunkt ville have
+kostet dem deres gitter og pillestyling. Oprydningen ventede derfor på, at
+begge grene stod på `main`.
+
+Slettet: kommentaren "Komplet mærke-indeks", `.brand-index` + de tre
+`@media`-varianter, `.brand-index-link`, `::before`, `:hover` og
+`:hover::before` — 20 linjer.
+
+**Fælden, for næste gang noget lignende ryddes:** blokken var ikke
+sammenhængende. `.brand-noscript ul` lå lige før den og `.brand-noscript li`
+**inde i** det interval, en linjebaseret sletning ville have taget. Begge er i
+brug af mærkesidernes noscript-liste. De står nu samlet.
+
+Efterprøvet i browseren på `maerker.html` og `maerke-honda.html`, 1265 px, lys
+og mørk:
+
+```
+                        lys        mørk
+.brand-index i DOM        0          0
+CSS-regler m. brand-index 0          0
+.brand-noscript-regler    4          4     (beholdt)
+.brand-card-regler        8          8     (beholdt)
+main-højde, maerker    1120px     1120px   (intet layoutskift)
+kontrast, tekstlisten  5,28:1     6,97:1   (krav 4,5)
+vandret scroll          nej        nej
+```
+
+`main`-højden er den samme i de to tilstande, og de 18 kort står 4 pr. række
+som før. `maerker.html` har 20 interne links i `<main>`, nul af dem til
+`soegning.html?brands=`. Ingen konsolfejl på nogen af de to sider.
+
+Bygget skal køres efter en sådan sletning: `scripts/inline-critical.js` klipper
+den kritiske CSS efter sektionsoverskrifter, ikke efter selektorer, så de
+indlejrede kopier i de 32 sider følger med af sig selv — men kun hvis bygget
+kører. Gate: `node --check` 60 filer, `npm test` 243/243, `node
+scripts/build.js`, `node scripts/udgiv.js` (78 filer, 32 HTML).
 
 ---
 
