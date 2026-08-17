@@ -229,8 +229,8 @@ function sellerLineHTML(l){
    Fire ting adskiller den, og alle fire er bevidste:
      1. Mærket "Hos <kilde>" øverst på billedet, ikke nede i teksten.
      2. Linjen hvor sælgeren står, siger kildens navn og domæne.
-     3. Kortfladen går til VORES annonceside; kildelinket er sin egen linje i
-        bunden, i ny fane, med rel=nofollow.
+     3. Kortet har ÉT mål: vores egen annonceside. Der er ingen vej ud af
+        sitet herfra.
 
         Sådan var det ikke før. Hele kortet VAR kildelinket — ét <a> på
         357×605 px, 99,3 % af kortets areal, direkte til mcsyd.dk. Det gjorde
@@ -240,9 +240,18 @@ function sellerLineHTML(l){
         ("Regnet ud fra 124 ccm og 11 hk") — den ene oplysning, en køber ikke
         kan få hos kilden.
 
-        Kildelinket er IKKE fjernet, kun skrumpet fra hele kortet til én
-        række. Ordlyden, den nye fane og rel=nofollow er uændret; kortet skal
-        stadig kunne læses som "annoncen bor et andet sted".
+        Første rettelse skrumpede kildelinket fra hele kortet til én række på
+        304×24 px i bunden. Det var stadig en genvej uden om vores egen side,
+        og ejerens krav er, at vejen ud går IGENNEM den: "inden vores side
+        viderestiller udbyder af annoncen skal man klikke ind på min annonce,
+        også kan man trykke på knappen til at komme videre". Rækken er derfor
+        væk. Knappen findes ét sted — på annoncesiden — og dér er den stadig
+        den primære handling.
+
+        Ærligheden om afsenderen bliver: kildestriben "Annonce fra <kilde>"
+        øverst og "Forhandler · mcsyd.dk" i bunden står uændret. De er ikke
+        genvejen; de er grunden til, at køberen ikke bliver overrasket over,
+        hvor annoncesiden sender ham videre hen.
      4. Ingen favoritknap. Favoritter peger på listings med en
         fremmednøgle — en uuid herfra ville blive afvist af databasen, og
         hjertet ville se ud som om det virkede.
@@ -464,9 +473,6 @@ function externalCardHTML(l, i){
       <div class="card-footer">
         <span class="card-sted">${Icon.mapPin}<span>${escapeHTML(eksternStedTekst(l))}</span></span>
         <span class="card-kildelinje">${Icon.store}<span>${escapeHTML(saelger)}</span></span>
-        <a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
-           class="card-external-cta"
-           aria-label="Se annoncen hos ${kilde} (åbner i ny fane): ${titel}${undertitel ? ' ' + undertitel : ''}, ${pris}"><span>Se annoncen hos ${kilde}</span>${Icon.externalLink}</a>
       </div>
     </div>
     <a href="annonce.html?id=${l.id}"

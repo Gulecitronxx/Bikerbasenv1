@@ -1,18 +1,22 @@
-/* Tests for de indekserede annoncers TO links. Kør: npm test
+/* Tests for det indekserede korts ENE link. Kør: npm test
 
-   Hvorfor lige de to links har tests, når resten af markup'en ikke har:
-   fordi de har været forkerte i drift, og fordi fejlen var usynlig. Hele
-   kortet var ÉT <a> direkte til kilden — 357×605 px, 99,3 % af kortets areal,
+   Hvorfor lige linket har tests, når resten af markup'en ikke har: fordi det
+   har været forkert i drift, og fordi fejlen var usynlig. Hele kortet var ÉT
+   <a> direkte til kilden — 357×605 px, 99,3 % af kortets areal,
    target="_blank" — og annonce.html?id=<uuid> kunne dermed ikke nås for 332
    af 383 annoncer. I drift, hvor vi har 0 egne annoncer, kunne den slet ikke
    nås. Siden findes, den virker, og den er det ENESTE sted vi skriver
    kørekortdommen ud med sit regnestykke.
 
-   Rettelsen er to linjer HTML, og det er præcis derfor den skal låses: en
-   senere oprydning, der "samler kortet til ét link igen", ser ud som en
-   forenkling og er et tab af 87 % af trafikken. Omvendt må kildelinket ikke
-   forsvinde i den anden retning — vi må ikke vise en forhandlers annonce uden
-   en vej til forhandleren.
+   Første rettelse vendte kortfladen indad og lod kildelinket blive som en
+   lille række i bunden. Anden rettelse fjernede den række: den var stadig en
+   genvej uden om vores egen side, og vejen ud skal gå igennem den. Vejen ud
+   findes ét sted — knappen på annoncesiden — og annoncen vises ikke uden en
+   brugbar kilde-URL, så der er altid en vej videre til forhandleren.
+
+   Begge retninger er låst her: kortet må ikke samles til ét link ud igen
+   (det ser ud som en forenkling og er et tab af 87 % af trafikken), og der
+   må ikke snige sig et nyt link ud af sitet ind på kortet.
 
    Mønstret er det samme som js/koerekort.test.js: browserscripts uden
    module.exports evalueres i en funktion, der giver navnene tilbage. Det
@@ -91,35 +95,45 @@ test('kortfladen på et indekseret kort peger på VORES annonceside', () => {
   assert.equal(link.rel, undefined, 'nofollow på et internt link ville bede Google droppe vores egen side');
 });
 
-test('kildelinket findes stadig — i ny fane, med noopener og nofollow', () => {
-  const cta = attrFor(externalCardHTML(eksternAnnonce(), 1), 'card-external-cta');
-  assert.ok(cta, 'kortet skal have et link til kilden — en annonce uden vej til forhandleren er en blindgyde');
-  assert.equal(cta.href, KILDE_URL.replace(/&/g, '&amp;'));
-  assert.equal(cta.target, '_blank');
-  for (const r of ['noopener', 'noreferrer', 'nofollow']){
-    assert.ok(cta.rel.includes(r), `rel skal indeholde ${r}`);
-  }
-  // Kilden skal nævnes i det tilgængelige navn: en skærmlæser skal kunne
-  // høre forskel på de to links, når de ligger på samme kort.
-  assert.match(cta['aria-label'], /MC Syd/);
-  assert.match(cta['aria-label'], /åbner i ny fane/);
-});
-
-test('de to links på samme kort har forskellige tilgængelige navne', () => {
+/* Kortet må have ÉN destination, og det er vores egen annonceside.
+   Kildelinket lå en overgang som sin egen 304×24 px-række i bunden af kortet
+   — 3,8 % af arealet, men en genvej der sprang vores side over. Ejerens krav
+   er, at vejen ud går IGENNEM annoncesiden. Testen er skrevet som en tælling
+   frem for som "findes klassen ikke": kommer der en dag et andet link ud af
+   sitet på kortet, skal den også fange det. */
+test('kortet har ingen vej ud af sitet — hverken CTA eller anden ekstern URL', () => {
   const html = externalCardHTML(eksternAnnonce(), 1);
-  const kort = attrFor(html, 'card-link'), cta = attrFor(html, 'card-external-cta');
-  assert.notEqual(kort['aria-label'], cta['aria-label']);
+  const links = html.match(/<a\b[^>]*>/g) || [];
+  assert.equal(links.length, 1, 'der må kun være ét <a> på kortet');
+  assert.match(links[0], /class="card-link"/);
+  assert.equal(attrFor(html, 'card-external-cta'), null, 'kilde-CTA\'en skal være væk');
+  assert.ok(!/href="https?:/.test(html), 'ingen absolut URL i kortets markup');
+  assert.ok(!/target="_blank"/.test(html), 'intet på kortet må åbne en ny fane');
 });
 
-test('listerækken følger kortet: rækkefladen ind, kildelinket ud', () => {
+/* Kilden skal stadig NÆVNES. Det er ikke pynt: en køber, der lander på en
+   annonceside, som sender ham videre til en forhandler, må kunne se det på
+   kortet først. Det er kun det klikbare link ud, der skulle væk. */
+test('kilden nævnes stadig på kortet — stribe, sælgerlinje og navn i kortlinket', () => {
+  const html = externalCardHTML(eksternAnnonce(), 1);
+  assert.match(html, /class="card-kilde"[^>]*>[\s\S]*?Annonce fra MC Syd/);
+  assert.match(html, /class="card-kildelinje"[\s\S]*?mcsyd\.dk/);
+  assert.match(attrFor(html, 'card-link')['aria-label'], /hos MC Syd/);
+});
+
+test('listerækken følger kortet: ét link, og det peger indad', () => {
   const l = eksternAnnonce();
-  const række = attrFor(externalRowHTML(l, 1), 'row-link');
-  const cta = attrFor(externalRowHTML(l, 1), 'row-cta');
+  const html = externalRowHTML(l, 1);
+  const links = html.match(/<a\b[^>]*>/g) || [];
+  assert.equal(links.length, 1, 'der må kun være ét <a> på rækken');
+  const række = attrFor(html, 'row-link');
   assert.equal(række.href, `annonce.html?id=${l.id}`);
   assert.equal(række.target, undefined);
-  assert.ok(cta, 'rækken skal stadig have et link til kilden');
-  assert.equal(cta.target, '_blank');
-  assert.ok(cta.rel.includes('nofollow'));
+  assert.equal(attrFor(html, 'row-cta'), null, 'kilde-CTA\'en skal være væk fra rækken');
+  assert.ok(!/target="_blank"/.test(html), 'intet på rækken må åbne en ny fane');
+  // Kilden nævnes stadig: mærkatet og domænet i .row-origin.
+  assert.match(html, /badge-external[\s\S]*?Hos MC Syd/);
+  assert.match(html, /row-origin[\s\S]*?mcsyd\.dk/);
 });
 
 /* Prisen er det, købet træffes på, og den skal derfor stå først og størst.

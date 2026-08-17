@@ -44,6 +44,7 @@ reproduktionstrin i én tabelcelle ikke kan læses af nogen.
 | D-004 | designer | design | **P1** | `js/annonce.js — videreKortHTML() / den eksterne gren; css/styles.css .listing-next` | På den eksterne annonceside konkurrerer væk-CTA'en med ingenting — den vinder ved walkover | åben |
 | D-005 | designer | design | **P1** | `js/home.js:475 og :499 (gaten), index.html #newest-sub` | I drift påstår forsiden en dato, vi ikke har | åben |
 | D-007 | designer | design | **P1** | `css/styles.css:1963` | .safety-banner-sep{ opacity:.4 } — samme fejl som .facet-n, et andet sted | åben |
+| D-013 | **ejer** | design | **P1** | `js/components.js externalCardHTML(), js/search.js externalRowHTML(), css/styles.css .card-external-cta + .row-cta` | Kortet havde stadig en genvej ud af sitet: "Se annoncen hos MC Syd" (304×24 px, ny fane, direkte til kilden) sprang vores egen annonceside over. Vejen ud skal gå IGENNEM den — ejerens ord: "inden vores side viderestiller udbyder af annoncen skal man klikke ind på min annonce, også kan man trykke på knappen til at komme videre" | **rettet** |
 | C-002 | critic | sikkerhed | **P2** | `supabase/016_luk_skrivehul.sql:31-43` | Hullet er lukket, men fabrikken kører videre | åben |
 | C-003 | critic | sikkerhed | **P2** | `supabase/016_luk_skrivehul.sql:155-160` | profiles har stadig INSERT og DELETE til anon | åben |
 | C-004 | critic | sikkerhed | **P2** | `js/components.js:569 + reports-tabellen` | Anonym, ubegrænset skrivekanal til produktionsdatabasen | åben |

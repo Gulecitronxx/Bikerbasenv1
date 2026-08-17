@@ -988,21 +988,26 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    gange — og skærmlæseren ville læse den med. */
 .card-external .card-koerekort::before{ content:none; }
 
-/* ---- Bunden: hvor står den, hvem sælger den, hvor lander jeg ----
-   Tre linjer, hver på sin egen række med fast højde. De kunne presses
-   sammen to og to, men så ville de knække forskelligt fra kort til kort, og
-   bundlinjen ville stå i forskellig højde. Det er ikke 16px værd. */
+/* ---- Bunden: hvor står den, og hvem sælger den ----
+   To linjer, hver på sin egen række med fast højde. De kunne presses sammen,
+   men så ville de knække forskelligt fra kort til kort, og bundlinjen ville
+   stå i forskellig højde. Det er ikke 16px værd.
+
+   Der var en tredje linje her: "Se annoncen hos <kilde>", et link direkte til
+   kilden. Den er væk, og det er ikke en oprydning — det er kravet om, at
+   vejen ud af sitet går GENNEM vores annonceside, ikke uden om den. Se
+   externalCardHTML() i js/components.js. */
 .card-external .card-footer{
   display:flex; flex-direction:column; align-items:stretch; gap:4px;
   padding-top:12px; font-size:12px;
 }
-.card-sted, .card-kildelinje, .card-external-cta{
+.card-sted, .card-kildelinje{
   display:flex; align-items:center; gap:8px; min-width:0; line-height:16px;
 }
-.card-sted svg, .card-kildelinje svg, .card-external-cta svg{
+.card-sted svg, .card-kildelinje svg{
   width:14px; height:14px; flex:0 0 auto;
 }
-.card-sted > span, .card-kildelinje > span, .card-external-cta > span{
+.card-sted > span, .card-kildelinje > span{
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .card-kildelinje{ color: var(--color-fg-muted); }
@@ -1012,23 +1017,6 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   color: var(--color-fg-muted); font-size:14px;
 }
 .card-seller.is-external svg{ width:14px; height:14px; flex:0 0 auto; }
-
-/* "Se annoncen hos MC Syd" står, hvor tidsstemplet står på vores egne kort.
-   Ordlyden er den samme som på vores egen annonceside; to forskellige
-   formuleringer for den samme handling er to ting at lære.
-
-   Linjen ER nu et link, og den var det ikke før — dengang var HELE kortet
-   linket til kilden, og så havde linjen ingen egen flade at være. Nu peger
-   kortfladen på vores annonceside, og de to destinationer skal kunne skelnes
-   af en finger: linjen ligger OVER kortlinket (z-index) og er 24px høj, som
-   WCAG 2.2 AA SC 2.5.8 kræver af et mål, der ikke er inline i en sætning.
-   De 24px koster 8px i korthøjde; en 16px-linje ville koste et krav. */
-.card-external-cta{
-  position:relative; z-index:2;
-  min-height:24px; font-weight:600; color: var(--color-primary);
-}
-.card-external:hover .card-external-cta > span,
-.card-external-cta:hover > span{ text-decoration: underline; }
 
 /* Under 280px kan et annoncefoto ikke bære en motorcykel, og specchipsene
    begynder at klippe. Fire spalter giver 206px ved 1280px viewport; tre
@@ -2414,21 +2402,12 @@ body.overlay-open .cookie-banner{ display:none; }
 }
 .row-price{ font-family: var(--font-display); font-size:20px; font-weight:700; line-height:1.15; }
 .row-when{ font-size:12px; color: var(--color-fg-muted); }
-/* "Se hos MC Syd ↗" står hvor tidsstemplet står på vores egne rækker: det
-   sidste man læser, inden man klikker — og dermed advarslen om, at klikket
-   forlader Bikerbasen.
-
-   Den er nu selve linket til kilden, ikke bare et varsel om, hvor hele rækken
-   fører hen: rækkefladen går til vores egen annonceside. Derfor z-index over
-   .row-link og 24px højde (WCAG 2.2 AA, SC 2.5.8) — samme rettelse som
-   .card-external-cta fik. */
-.row-cta{
-  position:relative; z-index:2;
-  display:inline-flex; align-items:center; gap:4px; min-height:24px;
-  font-size:12.5px; font-weight:600; color: var(--color-primary);
-}
-.row-cta:hover{ text-decoration: underline; }
-.row-cta svg{ width:13px; height:13px; }
+/* "Se hos MC Syd ↗" stod her, hvor tidsstemplet står på vores egne rækker.
+   Den er væk sammen med kortets tilsvarende linje: rækkefladen går til vores
+   egen annonceside, og vejen ud af sitet skal gå IGENNEM den, ikke uden om.
+   Se externalRowHTML() i js/search.js og externalCardHTML() i
+   js/components.js. Kilden står stadig to steder i rækken — mærkatet "Hos
+   <kilde>" og domænet i .row-origin — men ingen af dem er en vej ud. */
 
 /* Knapperne skal ligge OVER det usynlige link, der dækker hele rækken. */
 .row-tools{ position:relative; z-index:2; display:flex; gap:6px; margin-left:auto; }
