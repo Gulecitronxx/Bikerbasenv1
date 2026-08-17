@@ -314,10 +314,26 @@ body.home .site-header{
   background: transparent; border-bottom-color: transparent; backdrop-filter:none;
   transition: background-color .25s var(--ease-out), border-color .25s var(--ease-out), backdrop-filter .25s var(--ease-out);
 }
-/* Blød top-scrim, så nav og knapper er læsbare over lyse partier af fotoet. */
+/* Top-scrim, så nav og knapper er læsbare over lyse partier af fotoet.
+
+   Den var for blød, og den var det præcis dér, hvor den skulle bære mest.
+   Hero'ens vandrette scrim er gennemsigtig i højre side — det er hele
+   pointen, cyklen står der — men navigationen står OGSÅ i højre side
+   (x832-1300 ved 1440), altså over blank himmel med kun de .12 fra 60%-
+   stoppet under sig. Målt komposit ved 1440×900: `nav a` 3,22:1 og "Log ind"
+   2,90:1, begge mod krav 4,5, og 100 % af målepunkterne under kravet.
+
+   Fotoets lyseste punkt i headerbåndet er luminans ~215, og hvid tekst
+   kræver at kompositten kommer under ~119 for at nå 4,5. Det tager 55 %
+   mørke ved tekstens midterlinje — deraf 66/54. Målt efter: nav 7,59:1,
+   "Log ind" 6,55:1. Farven kommer fra tokenet, ikke fra en rgba-værdi, så
+   den følger med i mørk tilstand som resten af huset. */
 body.home .site-header::before{
   content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
-  background: linear-gradient(180deg, rgba(8,7,5,.42) 0%, rgba(8,7,5,.12) 60%, transparent 100%);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--color-dark) 66%, transparent) 0%,
+    color-mix(in srgb, var(--color-dark) 54%, transparent) 62%,
+    transparent 100%);
   opacity:1; transition: opacity .25s var(--ease-out);
 }
 body.home .site-header:not(.is-scrolled) .brand,
@@ -469,15 +485,34 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 @media (prefers-reduced-motion: reduce){ .hero-photo{ animation:none; transform:none; } }
 
 /* To lag scrim: mørkt i venstre side bag teksten, og en bund-gradient så det
-   hvide søgekort altid har kontrast under sig. Cyklen til højre står fri. */
+   hvide søgekort altid har kontrast under sig. Cyklen til højre står fri.
+
+   Scrimmen slap teksten for tidligt, og den slap den ved ALLE bredder under
+   1240px. Stoppene stod i procent af VINDUET, men teksten er ikke en procent
+   af vinduet: .hero-inner er 720px bred og starter ved containerens venstre
+   kant. Under 1240px er tekstens højre kant derfor låst på 752px (32px
+   polstring + 720), mens 60%-stoppet vandrer med vinduet — ved 800px lå det
+   ved 480px, altså 272px INDE i overskriften. Målt komposit på 800×900 før:
+   h1 1,90:1 (krav 3) og brødteksten 1,39:1 (krav 4,5); ved 1440 slap h1 med
+   3,21 og brødteksten fejlede med 4,07. Kun 390 og 1440 var målt i auditten,
+   og 1440 er tilfældigvis den ene bredde, hvor procenten næsten passer.
+
+   Stoppene følger nu tekstspalten i stedet for vinduet: max(752px, 50%+132px)
+   er tekstens højre kant ved enhver bredde (over 1240px centreres containeren,
+   og så er kanten 50% + 132px, fordi containeren er 1240 bred og teksten 720).
+   Overgangen til gennemsigtig tager 240px DERFRA, så cyklen i højre side står
+   lige så fri som før: målt over 90 punkter i cyklens felt (x900-1430,
+   y310-760) ved 1440 flytter kompositten sig 0,9 luminansenhed i gennemsnit —
+   nogle punkter er mørkere, andre lysere, fordi udtoningen nu slutter ved
+   1092px i stedet for ved 82% = 1168px. */
 .hero::after{
   content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
   background:
     linear-gradient(90deg,
       var(--color-dark) 0%,
       color-mix(in srgb, var(--color-dark) 84%, transparent) 32%,
-      color-mix(in srgb, var(--color-dark) 32%, transparent) 60%,
-      transparent 82%),
+      color-mix(in srgb, var(--color-dark) 56%, transparent) max(752px, 50% + 132px),
+      transparent calc(max(752px, 50% + 132px) + 240px)),
     linear-gradient(0deg,
       color-mix(in srgb, var(--color-dark) 60%, transparent) 0%,
       transparent 32%);
@@ -490,18 +525,33 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   /* Ultrabredt foto i portræt viser kun en lodret skive — skub den mod cyklen
      (højre tredjedel), så maskinen faktisk er med i billedet. */
   .hero-photo{ object-position: 76% center; }
-  /* Side-/bundvægtet scrim: cyklen læses igennem i den øverste to-tredjedel,
-     mens teksten i den nederste tredjedel bevarer fuld kontrast.
+  /* Bundvægtet scrim, så teksten bevarer fuld kontrast.
 
      Rettet i runde 9: den gamle kurve dykkede til 12% mørke præcis dér hvor
      overskriften står, og fotoet har luminans ~105 i det felt. Den hvide
      linje overlevede; accentlinjen og brødteksten gjorde ikke. Lighthouse
      fanger det aldrig — tekst over billeder tjekkes ikke — så det kunne
-     kun ses ved at se på siden. */
+     kun ses ved at se på siden.
+
+     Runde 9 hævede kurven fra 12% til 34%, og det var stadig ikke nok. Dykket
+     lå på 30% af hero'ens højde = y270 af 899, og teksten står y92-231 — altså
+     midt i selve dykket. Målt komposit på 390×844: .hero-count 2,12:1 (100 %
+     af 90 målepunkter under 4,5), h1 2,63:1 mod krav 3.
+
+     Grunden til at dykket lå der, holder ikke på mobil. Kommentaren sagde
+     "cyklen læses igennem i den øverste to-tredjedel" — men et ultrabredt foto
+     i portræt viser kun en lodret skive, og i den skive ER der ingen cykel
+     foroven: fotoets egen luminans er 166-241 (himmel/dis) fra y0 til y370,
+     og hver eneste mørke pixel — maskinen — ligger under y400, altså BAG det
+     hvide søgekort (y247-760). Dykket lyste ikke en cykel op; det lyste en
+     himmel op, og satte overskriften ovenpå.
+
+     Kurven starter derfor højt og bliver der. Teksten måler nu 5,16 og 6,25,
+     og de eneste pixels, der er blevet mørkere, er himmel. */
   .hero::after{
     background: linear-gradient(180deg,
-      color-mix(in srgb, var(--color-dark) 46%, transparent) 0%,
-      color-mix(in srgb, var(--color-dark) 34%, transparent) 30%,
+      color-mix(in srgb, var(--color-dark) 70%, transparent) 0%,
+      color-mix(in srgb, var(--color-dark) 66%, transparent) 30%,
       color-mix(in srgb, var(--color-dark) 72%, transparent) 74%,
       color-mix(in srgb, var(--color-dark) 94%, transparent) 100%);
   }
