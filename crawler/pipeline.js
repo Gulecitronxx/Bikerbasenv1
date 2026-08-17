@@ -9,6 +9,7 @@
 const { laesKilde } = require('./config');
 const { aabnBrowser, hentListeside, hentDetaljeside } = require('./hent');
 const { tilAnnonce, berigMedDetalje } = require('./parse');
+const { nyRobotsVagt } = require('./robots');
 const db = require('./db');
 
 function nyLog(skrivUd = true){
@@ -200,8 +201,8 @@ async function indsamlAnnoncer(context, kilde, { limit, log, hent = hentListesid
    MEN: fejler de i træk, og fejler de med kildens nej, stopper vi. Se vagten
    øverst i filen. `hent` kan byttes ud af samme grund som i
    indsamlAnnoncer(): afbrydelsen skal kunne afprøves mod en attrap. */
-async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDetaljeside }){
-  const tal = { hentet: 0, tomme: 0, fejlede: 0, ikke_fundet: 0, felter: new Map() };
+async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDetaljeside, robots = null }){
+  const tal = { hentet: 0, tomme: 0, fejlede: 0, ikke_fundet: 0, spaerret: 0, felter: new Map() };
   const vagt = nyAfvisningsvagt();
   let afbryd = null;
   let behandlet = 0;
@@ -209,6 +210,23 @@ async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDeta
   for (const [i, annonce] of annoncer.entries()){
     let svar;
     behandlet = i + 1;
+
+    /* robots.txt gælder også detaljesiderne, og de er dem, der er 332 af
+       (C-013). En kilde kan sagtens have sit gitter åbent og sine
+       produktsider lukkede — og så må vi ikke hente dem, uanset hvad et
+       felt i YAML'en siger. Den spærrede side hentes ikke; den bliver ikke
+       til en fejl, for der er ikke noget galt. */
+    if (robots){
+      const dom = await robots.maaHente(annonce.url);
+      if (!dom.tilladt){
+        tal.spaerret++;
+        if (tal.spaerret <= 3){
+          log.skriv(`robots.txt spærrer ${annonce.url}${dom.regel ? ` (${dom.regel})` : ''} — siden hentes ikke`);
+        }
+        continue;
+      }
+    }
+
     try {
       svar = await hent(context, kilde, annonce.url);
       tal.hentet++;
@@ -236,7 +254,8 @@ async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDeta
   const daekning = [...tal.felter.entries()]
     .map(([f, n]) => `${f} ${n}/${annoncer.length}`).join(', ');
   log.skriv(`detaljesider: ${tal.hentet} hentet, ${tal.tomme} uden specfelter, ${tal.fejlede} fejlede`
-    + (tal.ikke_fundet ? ` (heraf ${tal.ikke_fundet} annoncer der ikke findes længere)` : ''));
+    + (tal.ikke_fundet ? ` (heraf ${tal.ikke_fundet} annoncer der ikke findes længere)` : '')
+    + (tal.spaerret ? `, ${tal.spaerret} sprunget over fordi robots.txt spærrer dem` : ''));
   log.skriv(`felter fra detaljesiden: ${daekning || 'INGEN — selectors eller etiketter bør efterses'}`);
   if (!tal.felter.get('hk')){
     log.skriv('ADVARSEL: ingen annoncer fik hestekræfter. Uden hk kan kørekortkategorien ikke udledes, og det er hele grunden til, at detaljesiderne hentes.');
@@ -269,6 +288,46 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false,
   }
   if (limit) log.skriv(`DELVIS KØRSEL: højst ${limit} annoncer. Forsvundne annoncer markeres IKKE.`);
   if (toerloeb) log.skriv('TØRLØB: der skrives ikke til databasen.');
+
+  /* ---------- robots.txt, hentet NU og ikke attesteret (C-013) ----------
+     Spærren hed `robots_tjekket` og var en dato, nogen havde skrevet.
+     Filen blev aldrig hentet i kørselsstien: tilføjede kilden
+     `Disallow: /Produkter/` i morgen, kørte crawleren videre.
+
+     Kontrollen ligger FØR databasen med vilje. Bliver svaret nej, skal der
+     hverken oprettes en kørsel eller skrives en linje — kørslen fandt ikke
+     sted, den blev afvist, og det skal ikke se ud som en kørsel med nul
+     fund i crawl_koersler. Det er også den mildeste rækkefølge for kilden:
+     nej'et koster ét kald til /robots.txt og ikke ét mere. */
+  const robots = nyRobotsVagt({ hent: hentere.hentRobots });
+
+  /* Listesiderne holdes op mod reglerne én for én. En spærret listeside
+     hentes ikke — og er de ALLE spærrede, er der ikke en kørsel tilbage at
+     lave. `kilde` er et friskt objekt pr. kørsel, så listen må gerne
+     beskæres her. */
+  const tilladteLister = [];
+  for (const l of kilde.liste_urler){
+    const dom = await robots.maaHente(l.url);
+    if (dom.tilladt){ tilladteLister.push(l); continue; }
+    log.skriv(`robots.txt spærrer listesiden ${l.url}${dom.regel ? ` (${dom.regel})` : ''} — ${dom.grund}`);
+  }
+  for (const g of robots.grunde()) log.skriv(`robots.txt: ${g}`);
+
+  if (!tilladteLister.length){
+    log.skriv('SPÆRRE: robots.txt spærrer samtlige liste-URL\'er — kilden crawles ikke i denne kørsel.');
+    log.skriv('        Tvivl falder ud til kildens fordel: en fil, vi ikke kunne læse, tæller også som et nej.');
+    return { navn, sprunget_over: true, robots_naegtede: true, log: log.tekst() };
+  }
+  kilde.liste_urler = tilladteLister;
+
+  /* Kildens egen forsinkelse vinder, når den er LÆNGERE end vores. Aldrig
+     når den er kortere: 2000 ms er databasens minimum (014_aggregator.sql),
+     og en kilde skal kunne bede om mere høflighed, ikke om mindre. */
+  const robotsDelay = robots.crawlDelayMs();
+  if (robotsDelay && robotsDelay > kilde.crawl_delay_ms){
+    log.skriv(`robots.txt beder om ${robotsDelay} ms mellem kald — vores ${kilde.crawl_delay_ms} ms hæves til det.`);
+    kilde.crawl_delay_ms = robotsDelay;
+  }
 
   let sb = null, kilde_id = null, koersel = null;
   if (!toerloeb){
@@ -303,7 +362,9 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false,
     if (kilde.detalje?.hent && annoncer.length){
       const sek = Math.round(annoncer.length * kilde.crawl_delay_ms / 1000);
       log.skriv(`henter ${annoncer.length} detaljesider (~${Math.floor(sek/60)} min ${sek%60} s ved ${kilde.crawl_delay_ms} ms mellem kald)`);
-      await berigMedDetaljer(browser.context, kilde, annoncer, { log, hent: hentere.hentDetaljeside });
+      await berigMedDetaljer(browser.context, kilde, annoncer, {
+        log, hent: hentere.hentDetaljeside, robots,
+      });
     }
 
     if (!toerloeb && annoncer.length){

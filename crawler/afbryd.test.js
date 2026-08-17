@@ -206,6 +206,9 @@ test('en afbrudt koersel markerer INTET som borte og skriver ingen annoncer', as
     const r = await pipeline.koerKilde('guloggratis', {
       stille: true,
       hentere: {
+        // robots.txt hentes ved hver koersel (C-013). Den skal ogsaa vaere en
+        // attrap her — en test maa ikke ringe til guloggratis.dk.
+        hentRobots: async () => ({ status: 200, text: async () => 'User-agent: *\nAllow: /\n' }),
         aabnBrowser: async () => ({ context: null, luk: async () => {} }),
         /* Listesiden svarer normalt med ti kort, saa detaljetrinet naas og
            naar at ramme graensen paa fem afvisninger. */
