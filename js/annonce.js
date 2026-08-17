@@ -273,18 +273,20 @@ function tælVisning(listingId){
 
 /* Aftalerne med de forhandlere, vi viser annoncer fra.
    ------------------------------------------------------------------
-   sources/mcsyd.yaml, linje 30: `tilladelse_modtaget: 2026-08-16` — et
-   skriftligt ja fra MC Syd, indhentet FØR første crawl, fordi robots.txt
-   er en teknisk regel og ikke en aftale. Det er det stærkeste, vi kan sige
-   om os selv over for en køber, og det stod ubrugt i en YAML-fil, browseren
-   aldrig ser.
+   HER STOD ET `tilladelse`-FLAG, OG SÆTNINGEN "Vi viser deres annoncer med
+   skriftlig tilladelse fra dem." Begge er fjernet på ejerens anmodning.
 
-   Kildetabellen i 014 har ingen kolonne til aftalen, så indtil den får en,
-   står den her. Tabellen fejler sikkert: en forhandler uden linje får ingen
-   sætning. Den må ALDRIG få en standardværdi — at skrive "med tilladelse"
-   om nogen, der ikke har givet den, er præcis den påstand, aftalen findes
-   for at kunne bakke op. Ny forhandler: hent et ja, skriv det i
-   sources/<domaene>.yaml, og skriv det så her.
+   Skriv den ikke tilbage. Aftalen med en kilde er ikke noget, køberen skal
+   bruge til at afgøre sit køb — den er vores forhold til kilden, og at
+   trykke den på en annonceside gør en tredjeparts samtykke til
+   markedsføringsmateriale. Køberen har brug for at vide, HVEM han handler
+   med, og hvor motorcyklen står. Det siger de øvrige sætninger her.
+
+   Selve optegnelsen af aftalen bliver hvor den hører til:
+   `tilladelse_modtaget` og `tilladelse_dato` i sources/<domaene>.yaml, hvor
+   crawler/config.js linje 130 nægter at køre uden den. Det er en spærre i
+   pipelinen, ikke en påstand på en side — og det er den rigtige placering,
+   fordi den skal stoppe en kørsel, ikke overbevise en køber.
 
    `type` er forhandlerens egen beskrivelse, ikke vores gæt.
 
@@ -296,11 +298,8 @@ function tælVisning(listingId){
    sælgeren bag annoncen, der gør alle tre ting. Uden feltet ville hver
    eneste markedspladsannonce sende køberen til den forkerte modpart. */
 const FORHANDLERAFTALER = {
-  'mcsyd.dk': { tilladelse: true, type: 'motorcykelforhandler' },
-  // Ingen tilladelse endnu — se sources/guloggratis.yaml. Linjen står her,
-  // fordi markedsplads-formuleringen skal være på plads FØR den første
-  // annonce vises, ikke bagefter.
-  'guloggratis.dk': { tilladelse: false, type: 'markedsplads', markedsplads: true },
+  'mcsyd.dk': { type: 'motorcykelforhandler' },
+  'guloggratis.dk': { type: 'markedsplads', markedsplads: true },
 };
 
 /* Reklamationsretten på forhandlerannoncer — slås fra ved at sætte false.
@@ -383,9 +382,6 @@ function renderExternalListing(listing){
   const hvemKoeberDuAf = markedsplads
     ? `${hvemErDe}, og du køber af sælgeren bag annoncen.`
     : (hvemErDe ? `${hvemErDe}, og det er dem, du køber af.` : `Det er dem, du køber af.`);
-  const medTilladelse = aftale?.tilladelse
-    ? `Vi viser deres annoncer med skriftlig tilladelse fra dem.`
-    : '';
 
   /* Hvem køberen faktisk skal tale med.
      Hos en forhandler er kilden og sælgeren den samme. På en markedsplads er
@@ -530,7 +526,7 @@ function renderExternalListing(listing){
         : `<p class="external-detail-broken">${Icon.alertTriangle}Annoncen kan ikke åbnes lige nu. Prøv igen senere${domaene ? `, eller find den på ${domaene}` : ''}.</p>`}
       <p class="external-detail-source-body">
         ${hvorStaarDen}
-        ${medTilladelse ? `${medTilladelse} ` : ''}${hvemHandlerDuMed}
+        ${hvemHandlerDuMed}
         Pris og udstyr kan være ændret, siden vi hentede annoncen, så tjek det hos dem.
       </p>
       ${fundet ? `<p class="external-detail-source-meta">${Icon.clock}Annoncen blev hentet hos ${kilde} ${escapeHTML(fundet)}</p>` : ''}
@@ -554,8 +550,7 @@ function renderExternalListing(listing){
         ${Icon.store}<span><b>${markedsplads
           ? `Annoncen ligger på ${kilde}${domaene ? `, ${domaene}` : ''}.`
           : `Motorcyklen står hos ${kilde}${domaene ? `, ${domaene}` : ''}.`}</b>
-        ${hvemKoeberDuAf}
-        ${medTilladelse}</span>
+        ${hvemKoeberDuAf}</span>
       </p>
 
       <figure class="external-detail-photo">
