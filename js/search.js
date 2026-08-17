@@ -1720,7 +1720,7 @@ function render(){
       : 'Ingen annoncer matcher dine filtre';
     document.getElementById('empty-text').textContent = intetLager
       ? 'Bikerbasen er helt nyt. Bliv den første til at sætte en motorcykel til salg — eller få besked, så snart der kommer en.'
-      : 'Prøv at fjerne et filter eller udvide dit prisinterval.';
+      : tomtilstandsRaad(pills);
 
     // Nulstil-knappen giver kun mening, når der ER noget at nulstille.
     const nulstil = document.getElementById('empty-clear-btn');
@@ -1736,10 +1736,57 @@ function render(){
   secondaryHandle = setTimeout(() => renderSecondary(pills, pageItems, heading, total, totalPages), 0);
 }
 
+/* Rådet i tomtilstanden skal passe til den tilstand, brugeren står i (D-012).
+
+   Linjen sagde ét og det samme uanset hvad: "Prøv at fjerne et filter eller
+   udvide dit prisinterval." På `soegning.html?q=zzzzqqq` er der nul træf, ét
+   aktivt filter — frisøgningen — og INTET prisinterval. Rådet pegede altså på
+   en indstilling, der ikke var i spil, i den ene situation hvor rådet er det
+   eneste, siden har at give.
+
+   Grundlaget er `pills`, den samme liste som chipsene ved siden af tegnes
+   af, så rådet og det, skærmen viser, ikke kan komme fra hinanden.
+   `state.q` fylder altid præcis én chip (activeFilterPills(), øverst), så
+   "kun frisøgningen" er `state.q` sat OG nøjagtig én chip. */
+function tomtilstandsRaad(pills){
+  const kunSoegeord = !!state.q && pills.length === 1;
+  const harPris = state.priceMin != null || state.priceMax != null;
+  if (kunSoegeord) return `Der er ingen match på "${state.q}". Prøv et kortere søgeord — fx kun mærket.`;
+  // Prisen nævnes KUN, når der faktisk er sat et prisfilter.
+  if (harPris) return 'Prøv at fjerne et filter eller udvide dit prisinterval.';
+  if (pills.length > 1) return 'Prøv at fjerne et af filtrene.';
+  if (pills.length === 1) return 'Prøv at fjerne filteret.';
+  // Nul filtre og nul træf med lager på hylden kan i dag ikke ske — det ville
+  // være intetLager-grenen. Linjen står der, så tilstanden ikke er tom, hvis
+  // en fremtidig filtrering ligger uden for pillerne.
+  return 'Prøv en anden søgning.';
+}
+
+/* En facet uden træf skal ikke indekseres (C-019).
+
+   Det er livrem og seler, og det skal siges ærligt: canonical peger allerede
+   på bare `soegning.html` på hver eneste facet, så en tom kombination
+   indekseres i praksis ikke som sin egen adresse, og `jsonld-results` falder
+   korrekt bort, når listen er tom. Der er altså ikke målt en skade. Det, der
+   ER tilbage, er tilfældet hvor Google vælger at ignorere canonical'en — det
+   sker, og så er "Ingen annoncer matcher dine filtre" den side, en søgende
+   lander på.
+
+   Begge retninger sættes med vilje. Siden skifter tilstand uden en ny
+   indlæsning: sætter man kun `noindex` ved nul træf, bliver den hængende,
+   når brugeren fjerner filteret igen — og så ville et fuldt resultat stå
+   med `noindex`. `index, follow` er standardadfærden skrevet ud, ikke en ny
+   påstand. */
+function seoRobots(total){
+  Seo.setMeta('meta[name="robots"]', 'name', 'robots',
+    total === 0 ? 'noindex, follow' : 'index, follow');
+}
+
 /* Etape 2: det der står UNDER kortene (eller slet ikke kan ses) — her kan
    ingenting skubbe til noget, brugeren kigger på. */
 function renderSecondary(pills, pageItems, heading, total, totalPages){
   seoSearchResults(pageItems, heading);
+  seoRobots(total);
 
   /* Facettallene hører til etape 2: de koster seks gennemløb af filterkæden,
      og ingen venter på dem — panelet står allerede med de foregående tal, og

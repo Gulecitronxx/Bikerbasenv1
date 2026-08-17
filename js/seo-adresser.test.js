@@ -1,5 +1,5 @@
-/* Tests for de adresser, js/seo.js skriver ind i struktureret data.
-   Kør: npm test
+/* Tests for de PÅSTANDE, js/seo.js skriver ind i struktureret data — adresser
+   og billeder. Kør: npm test
 
    Hvorfor de her tests findes:
 
@@ -22,6 +22,13 @@
    pege på sider der ikke findes"). Indtil nu var det en hensigt. Nu er det
    målt.
 
+   Den sidste gruppe er C-016 og handler om det samme, bare om et billede:
+   `Vehicle.image` faldt tilbage på `og-image.png` — Bikerbasens logo —
+   på en annonce, hvis egen side skrev "Ingen fotos i denne annonce". Et
+   JSON-LD, der påstår noget, siden nægter, er den fejl, hele projektet er
+   skrevet imod, og en fallback er præcis den slags kode, en senere oprydning
+   sætter tilbage "for fuldstændighedens skyld".
+
    Mønstret er det samme som js/koerekort.test.js og js/eksternt-kort.test.js:
    browserscripts uden module.exports evalueres i en funktion, der giver
    navnene tilbage. */
@@ -36,18 +43,29 @@ const { listingSlug } = require('../scripts/shared.js');
 /* Et minimalt <head>, der kan huske det, Seo.setJsonLd lægger i det. Der er
    ingen jsdom i dette repo (nul devDependencies, låst valg), så head'et er en
    liste af de elementer, koden har oprettet. */
+/* Nok af en vælger til de mønstre, js/seo.js faktisk bruger:
+   meta[name="..."], meta[property="..."], link[rel="..."]. Head'et SKAL kunne
+   finde et tag, det allerede har fået — ellers ville setMeta() lægge et nyt
+   ved siden af hver gang, og testen ville måle det første i stedet for det
+   sidste. Præcis den forskel skjulte, at "nul træf" ikke satte description
+   tilbage. */
+function passer(el, vælger){
+  const m = /^([a-z]+)\[([a-zA-Z:-]+)="([^"]+)"\]$/.exec(String(vælger).trim());
+  return !!m && el.__tag === m[1] && el[m[2]] === m[3];
+}
+
 function lavDokument(){
   const børn = [];
   return {
     børn,
     head: {
-      querySelector: () => null,
-      querySelectorAll: () => [],
+      querySelector: v => børn.find(e => passer(e, v)) || null,
+      querySelectorAll: v => børn.filter(e => String(v).split(',').some(d => passer(e, d))),
       appendChild(el){ børn.push(el); },
     },
     getElementById: id => børn.find(e => e.id === id) || null,
-    createElement: () => ({
-      id: '', type: '', textContent: '',
+    createElement: tag => ({
+      __tag: tag, id: '', type: '', textContent: '',
       setAttribute(k, v){ this[k] = v; },
       remove(){ const i = børn.indexOf(this); if (i >= 0) børn.splice(i, 1); },
     }),
@@ -55,16 +73,30 @@ function lavDokument(){
   };
 }
 
+/* seo.js kalder fire formateringsfunktioner, der bor i js/data.js. De sendes
+   ind som parametre i stedet for at hele data.js evalueres med: testen her
+   handler om hvad der PÅSTÅS i struktureret data, ikke om hvordan et tal
+   skrives på dansk. */
 function indlæsSeo(doc){
   const src = fs.readFileSync(path.join(__dirname, 'seo.js'), 'utf8');
-  return new Function('document', 'console',
-    src + '\n;return { listingPageUrl, itemListElementer, seoSearchResults, seoDealerPage, Seo };'
-  )(doc, { warn(){}, log(){} });
+  return new Function('document', 'console', 'formatKm', 'formatCcm', 'formatPrice', 'typeLabel',
+    src + '\n;return { listingPageUrl, itemListElementer, seoListingPage, seoSearchResults, seoDealerPage, Seo };'
+  )(doc, { warn(){}, log(){} },
+    n => `${n} km`, n => `${n} ccm`, n => `${n} kr.`, t => String(t));
 }
 
 function jsonLd(doc, id){
   const el = doc.børn.find(e => e.id === 'jsonld-' + id);
   return el ? JSON.parse(el.textContent) : null;
+}
+
+/* Værdien af et meta-tag, som Seo.setMeta har oprettet det. Attributnavnet
+   skifter mellem 'property' (Open Graph) og 'name' (description, twitter).
+   Der må kun være ÉT af hver — er der to, er det setMeta, der er brækket. */
+function metaVærdi(doc, attr, navn){
+  const alle = doc.børn.filter(e => e.__tag === 'meta' && e[attr] === navn);
+  assert.ok(alle.length <= 1, `${alle.length} × <meta ${attr}="${navn}"> i head'et`);
+  return alle.length ? alle[0].content : null;
 }
 
 const egen = extra => Object.assign({
@@ -137,6 +169,99 @@ test('et tomt resultat sætter ingen ItemList (uændret adfærd)', () => {
   const { seoSearchResults } = indlæsSeo(doc);
   seoSearchResults([], 'Ingen træf');
   assert.equal(jsonLd(doc, 'results'), null);
+});
+
+/* ---- Søgesidens titel og description (C-017) ---- */
+
+test('facetten får sin egen titel, hentet fra samme sted som H1', () => {
+  const doc = lavDokument();
+  const { seoSearchResults } = indlæsSeo(doc);
+  seoSearchResults([egen()], 'Brugte Harley-Davidson til salg i København');
+
+  assert.equal(doc.title, 'Brugte Harley-Davidson til salg i København — Bikerbasen');
+  assert.equal(metaVærdi(doc, 'property', 'og:title'), doc.title);
+  assert.ok(metaVærdi(doc, 'name', 'description').startsWith('Brugte Harley-Davidson'),
+    'description skal sige det samme som titlen, ikke den generiske sætning');
+});
+
+test('titlen bliver ikke sat af annoncer uden egen side — den følger resultatet', () => {
+  // ItemList'et bortfalder for indekserede annoncer (C-015), men de STÅR på
+  // siden. Titlen hører til det, brugeren ser, ikke til det, Google må følge.
+  const doc = lavDokument();
+  const { seoSearchResults } = indlæsSeo(doc);
+  seoSearchResults([ekstern(), ekstern()], 'Brugte Honda til salg');
+
+  assert.equal(doc.title, 'Brugte Honda til salg — Bikerbasen');
+  assert.equal(jsonLd(doc, 'results'), null);
+});
+
+test('nul træf giver sidens egne, neutrale tags tilbage', () => {
+  // "Brugte Harley-Davidson til salg" på en side uden en eneste Harley er en
+  // paastand, siden selv modsiger. Og den maa ikke blive haengende fra den
+  // foregaaende facet.
+  const doc = lavDokument();
+  const { seoSearchResults } = indlæsSeo(doc);
+  seoSearchResults([egen()], 'Brugte Yamaha til salg');
+  assert.equal(doc.title, 'Brugte Yamaha til salg — Bikerbasen');
+
+  seoSearchResults([], 'Brugte Harley-Davidson til salg');
+  assert.equal(doc.title, 'Søg motorcykler — Bikerbasen');
+  assert.equal(metaVærdi(doc, 'name', 'description'),
+    'Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.');
+});
+
+test('canonical og og:url røres ikke — facetterne samles stadig ét sted', () => {
+  // Det er den ene ting, der IKKE må følge med titlen. Facet-canonical peger
+  // på bare soegning.html, og det er rigtigt.
+  const doc = lavDokument();
+  const { seoSearchResults } = indlæsSeo(doc);
+  seoSearchResults([egen()], 'Brugte KTM til salg');
+  assert.equal(doc.børn.find(e => e.rel === 'canonical'), undefined);
+  assert.equal(metaVærdi(doc, 'property', 'og:url'), null);
+});
+
+/* ---- Annoncesidens Vehicle.image (C-016) ---- */
+
+/* En fuldt udfyldt egen annonce. seoListingPage() læser flere felter end
+   resten af filen, og de skal være der, ellers tester vi en TypeError. */
+const annonce = extra => Object.assign({
+  id: 1017, brand: 'Suzuki', model: 'GSX-R750', year: 2017,
+  price: 62900, km: 18400, ccm: 750, condition: 'God', city: 'Odense',
+  postnr: '5000', type: 'sport', description: 'Velholdt.',
+  isDealer: false, seller: { name: 'Privat' },
+}, extra || {});
+
+test('uden fotos påstår Vehicle intet billede — men delingskortet består', () => {
+  const doc = lavDokument();
+  const { seoListingPage } = indlæsSeo(doc);
+  seoListingPage(annonce(), []);
+
+  const v = jsonLd(doc, 'vehicle');
+  assert.ok(v, 'annoncen har en egen side, så blokken skal skrives');
+  assert.ok(!('image' in v),
+    'og-image.png er Bikerbasens logo, ikke motorcyklen — siden skrev selv "Ingen fotos i denne annonce"');
+  assert.equal(metaVærdi(doc, 'property', 'og:image'), 'https://bikerbasen.dk/og-image.png',
+    'og:image er et kort om SIDEN og skal blive');
+});
+
+test('med fotos er Vehicle.image annoncens egne billeder, alle sammen', () => {
+  const doc = lavDokument();
+  const { seoListingPage } = indlæsSeo(doc);
+  const fotos = ['https://eksempel.dk/a.jpg', 'https://eksempel.dk/b.jpg'];
+  seoListingPage(annonce(), fotos);
+
+  assert.deepEqual(jsonLd(doc, 'vehicle').image, fotos);
+  assert.equal(metaVærdi(doc, 'property', 'og:image'), fotos[0],
+    'delingskortet bruger det første foto, når der ER et');
+});
+
+test('tomme pladser i fotolisten bliver ikke til et billede', () => {
+  // photoUrls kommer fra databasen; en manglende storage_path gav før en
+  // undefined midt i listen, og JSON.stringify skriver den som null.
+  const doc = lavDokument();
+  const { seoListingPage } = indlæsSeo(doc);
+  seoListingPage(annonce(), [null, undefined, '']);
+  assert.ok(!('image' in jsonLd(doc, 'vehicle')));
 });
 
 /* ---- Forhandlerprofilen har samme liste og samme fælde ---- */

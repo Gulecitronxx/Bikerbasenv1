@@ -53,6 +53,77 @@ ikke i hk, så en fremtidig "oprydning" ikke kan flytte den tilbage.
 opt-out. `tilladelse_modtaget` er ikke en indstilling, der åbner en dør — det er
 en nedskrivning af, at en aftale findes.
 
+### Crawleren fejler LUKKET, når den ikke kan læse robots.txt
+Skrevet 17.08.2026 sammen med C-013, hvor robots.txt gik fra at være en dato
+i en YAML-fil til at være en kontrol, der køres ved hver kørsel
+(`crawler/robots.js`).
+
+Retningen, tvivl falder i, er valgt og skal ikke laves om uden at spørge:
+
+| svar | hvad vi gør | hvorfor |
+|---|---|---|
+| 2xx | reglerne gælder | |
+| 4xx | alt tilladt | der ER ingen robots.txt. En manglende fil siger ikke nej |
+| 5xx | **vi crawler ikke** | vi ved ikke hvad der står. En server, der svarer 503, skal heller ikke have 332 kald oveni |
+| netværksfejl | **vi crawler ikke** | samme |
+
+Prisen betales den anden vej: er kildens server nede en nat, springer
+kørslen over, og kataloget står urørt en dag længere. Det er den rigtige vej
+at fejle — en dags gammelt katalog mod at hente sider, vi måske ikke må.
+
+`Crawl-delay` respekteres, når den er **længere** end vores egen, aldrig når
+den er kortere. 2000 ms er databasens minimum (`014_aggregator.sql`), og en
+kilde skal kunne bede om mere høflighed, ikke om mindre.
+
+Opslaget sker på **URL'ens vært**, ikke på kildens `domaene`-felt. De to er
+ikke det samme: `sources/guloggratis.yaml` har `domaene: guloggratis.dk`,
+mens dens liste-URL står på `www.guloggratis.dk`. robots.txt gælder pr.
+oprindelse, så et opslag på domæne-feltet ville have hentet reglerne fra et
+andet sted, end vi henter sider fra — og så beskytter kontrollen ingenting.
+
+### ÅBENT SPØRGSMÅL til mennesket: en delvist spærret kilde
+Samme rettelse. En liste-URL, robots.txt spærrer, **springes over**; resten
+af kørslen fortsætter, og kilden afvises først, når ALLE liste-URL'er er
+spærrede. En spærret detaljeside hentes ikke og tælles i loggen.
+
+Det andet valg er strengere: ÉT `Disallow`, der rammer noget af vores, og
+hele kilden lægges død, indtil et menneske har set på det. Argumentet for
+det er, at det er sådan resten af spærrerne opfører sig — de er alle
+alt-eller-intet. Argumentet imod er, at et `Disallow: /motorcykler/print/`
+ikke handler om os, og at reglen dermed ville lukke en kilde, vi har et
+skriftligt ja fra, på en regel, der ikke siger nej til os.
+
+`dev` har valgt den mildeste af de to, fordi den ikke kan gøre skade i sig
+selv — vi henter aldrig noget, vi ikke må. Men det er en juridisk afvejning
+og ikke en teknisk, og derfor står den her frem for kun i koden.
+
+### Vagten mod gentagne 4xx er asymmetrisk med vilje
+Skrevet 17.08.2026 sammen med C-012.
+
+**Listesider: ét afvisningssvar stopper kørslen.** Der er 1-8 af dem, og de
+er hoveddøren. Er den lukket, er der ingen mening i at gå videre til de 332
+detaljesider bagved.
+
+**Detaljesider: fem i træk stopper.** Der er hundredvis af døre, og én af
+dem kan være låst, uden at huset er det.
+
+**404 er ikke et nej til os.** En annonce kan blive slettet mellem
+listesiden og detaljekaldet; det er hverdag på en markedsplads, og kørslen
+fortsætter. Men 25 forsvundne i træk er ikke hverdag — så er det ikke
+annoncerne, der er væk, det er detalje-URL'erne, vi bygger, og det stopper
+med en anden diagnose i loggen.
+
+**Tællerne nulstilles kun af et svar, der kom igennem.** En timeout hverken
+bekræfter eller afkræfter et nej. Nulstillede den, kunne en kilde, der
+svarer 403, timeout, 403, timeout, holde vagten i skak for evigt. Det er
+låst i `crawler/afbryd.test.js`.
+
+En afbrudt kørsel markerer **intet** som borte: kastet forlader det `try`,
+`db.markerBorte()` står inde i. Værnet fra C-011 ville også blokere
+markeringen, men den skal aldrig nå derhen. To spærrer om det samme, med
+vilje — og hvis en senere runde flytter `markerBorte()` ud af det `try`,
+falder den ene af dem.
+
 ### Kilden ejer sine billeder
 Vi indekserer miniaturen og linker til kilden. Vi kopierer ikke gallerier, og vi
 viser ikke et pressefoto af modellen som om det var annoncens.
@@ -101,6 +172,74 @@ lade som om det er en ny kilde. Se `crawler/db.js`, `bortemarkeringVurdering()`.
 ## Afvist
 
 <!-- dev skriver herunder -->
+
+### C-004 delvist afvist — 17.08.2026
+**FINDING:** "Anonym, ubegrænset skrivekanal til produktionsdatabasen." Findingen
+peger på tre ting: intet størrelsesloft, ingen rate limit, ingen captcha.
+
+**HVAD DER ER LAVET** (migration 018, afsnit 3): størrelsesloftet.
+`reports_text_len_chk` (comment ≤ 2000, target_id ≤ 64), `reviews_text_len_chk`
+(comment ≤ 2000) og `krav_dok_len_chk` (dokumentation ≤ 2000).
+
+**HVAD DER ER AFVIST:** rate limiting og captcha **i databasen**.
+
+**HVORFOR AFVIST:**
+
+*Der er ingen identitet at tælle på.* Politikken `indberetning: alle må oprette`
+tillader `reporter_id is null` — det er hele pointen med en
+notice-and-action-kanal, og en tæller pr. bruger har derfor ingen nøgle for
+præcis de indsendelser, findingen handler om. Det eneste, Postgres kan se, er
+`current_setting('request.headers')::json->>'x-forwarded-for'`, som afsenderen
+selv sætter. En rate limit på et felt, angriberen selv skriver, er ikke en
+grænse; den er en indbydelse til at skrive et nyt tal.
+
+*Den globale tæller vender våbnet om.* En trigger, der afviser INSERT når der er
+mere end N anonyme indberetninger i det sidste minut, gør en flodbølge til en
+afbrudt anmeldelsesfunktion. Angriberen betaler ingenting for at holde den
+lukket, og den, der taber, er det menneske, der prøver at anmelde en svindler.
+For en tabel, hvis hele formål er at tage imod advarsler fra fremmede, er
+"afvis ved travlhed" den forkerte vej at fejle.
+
+*Og `target_id` er fri tekst uden fremmednøgle*, så en kvote pr. mål kan omgås
+ved at variere målet. Efterprøvet i `information_schema` og `pg_constraint`:
+`reports.target_id` er `text` med kun et CHECK på `target_type`.
+
+**HVAD LOFTET SÅ KØBER — målt:** Postgres' `text` tager op til 1 GB pr. værdi.
+Før: én række kunne koste ~2 GB (comment + target_id). Efter: ~2 KB. Det er en
+faktor på ca. **10⁶ pr. række**. Antallet af rækker er derefter bundet af
+netværket, ikke af disken, og det er den samme grænse enhver anonym
+API-endpoint har.
+
+**HVOR DEN RIGTIGE GRÆNSE HØRER TIL:** i kanten — Supabase' API-gateway eller
+Cloudflare foran den — hvor afsenderens IP er observeret og ikke oplyst. Det er
+ikke SQL, og det er derfor ikke i denne migration. Det står her, så næste runde
+ikke genfinder det som "dev glemte rate limiting".
+
+**IKKE MIN FIL, MEN HØRER TIL FINDINGEN:** `<textarea id="report-comment">` i
+`js/components.js:569` har ingen `maxlength`. Databasen afviser nu ved 2000
+tegn, men brugeren får det at vide som en API-fejl i stedet for som en
+tællekant i feltet. `js/` ejes af en anden agent i denne runde.
+
+**BEVIS:** `pg_constraint` før ændringen: `reports` havde CHECK på `reason`,
+`status`, `target_type` og intet på `comment`/`target_id`. Data målt før
+migrationen: 1 række i `reports` (længste comment 17 tegn, længste target_id
+8 tegn), 0 rækker i `reviews`, 0 i `krav` — nul rækker bryder de nye CHECKs, så
+valideringen går igennem.
+
+### C-002 delvist gennemført — 17.08.2026
+Ikke en afvisning, men en grænse, der skal stå skrevet: `pg_default_acl` har
+**to** grantors for skema `public` — `postgres` og `supabase_admin`. Migration
+018 lukker postgres-posten. Supabase_admin-posten kan vi ikke nå: efterprøvet i
+produktion er `current_user` = `postgres`, `rolsuper` = **false**, og
+`pg_has_role('postgres','supabase_admin','MEMBER')` = **false**. Postgres må kun
+ændre default privileges for roller, den er medlem af, så sætningen giver 42501.
+Den står derfor i en `do`-blok, der fanger fejlen og siger den højt.
+
+Det betyder i praksis ingenting i dag: en default-ACL fyrer kun, når **den
+grantor selv** opretter objektet, og alle 15 tabeller og views i `public` er
+ejet af `postgres` — vores migrationer kører som `postgres`. Restrisikoen
+gælder objekter, Supabase' egen platform måtte oprette i `public`. Skal den
+lukkes, kræver det superuser, altså Supabase-support.
 
 ### C-014 delvist afvist — 17.08.2026
 **FINDING:** "Produktionssitet har 7 indekserbare adresser og NUL annonce-
@@ -201,3 +340,39 @@ nøgle (`select=id,kilde_annonce_id,titel,maerke,model,aargang,km,pris_dkk,postn
 `fingerprint()` og holdt op mod den gemte kolonne: **0 af 332 er uenige**, så
 grupperingen er kildens tal og ikke min omregning. Ingen skrivning til
 databasen. `npm run crawl:tjek` bagefter: MC Syd, 332 aktive annoncer, urørt.
+
+### C-018 afvist — 17.08.2026
+**FINDING:** "Specifikationen siger `lang="da-DK"`; sitet har `lang="da"` på alle
+fjorten sider." Findingen tilbyder selv to udgange — ret attributterne, eller ret
+specifikationen — og siger ligeud: *"Jeg vil ikke påstå, at `da` koster noget."*
+
+**HVORFOR AFVIST — målt, i browseren på `maerker.html` og i node:**
+
+| spørgsmål | svar |
+|---|---|
+| er `da` gyldig BCP-47? | `Intl.getCanonicalLocales('da')` → `["da"]` — ja, uændret |
+| ved en klient så, at det er Danmark? | `new Intl.Locale('da').maximize()` → **`da-Latn-DK`**. Regionen udledes; den skal ikke skrives |
+| formaterer sproget tal og datoer anderledes? | `(1234.5).toLocaleString('da')` = `(1234.5).toLocaleString('da-DK')` = **1.234,5**. Dato: **17.8.2026** i begge |
+| læser vores egen kode attributten? | **nul** forekomster af `documentElement.lang` i `js/`, `crawler/`, `scripts/`. Alle formateringer er hårdkodet `'da-DK'` og rører ikke `<html>` |
+| ændrer siden sig, hvis man skifter den? | Sat til `da-DK` i browseren og målt igen: samme font, samme `font-size`, samme `hyphens: manual`, og **dokumenthøjde 2982 → 2982 px** |
+| er der noget i CSS eller markup, der kan reagere? | nul `:lang()`, nul `hyphens: auto`, nul `quotes:` i `css/styles.css`, og **nul `<q>`-elementer** på nogen side. Der er ikke en regel at aktivere |
+| står regionen så ingen steder? | Jo — `<meta property="og:locale" content="da_DK">` på **32 af 32 sider**. Dér forventer Facebook en region, og dér står den |
+
+Der er altså ingen målbar modtager af forskellen: ikke browseren, ikke `Intl`,
+ikke vores egen kode, ikke stilarket og ikke delingskortet.
+
+**HVAD DET VILLE KOSTE:** 32 HTML-filer (ikke 14 — C-014 byggede 18 mærkesider
+til) plus fire generatorskabeloner (`build-brand-pages.js` ×2,
+`build-listing-pages.js`, `build-progress.js`). Alle 32 filer skulle røres i en
+runde, hvor tre andre agenter arbejder i de samme filer. En ændring uden
+modtager, betalt i konflikter.
+
+**HVOR UENIGHEDEN SÅ LIGGER:** i `.claude/agents/critic.md:50`, hvor `lang="da-DK"`
+står på tjeklisten. Den fil er en rollebeskrivelse, ikke en produktionsfil, og
+den redigerer `dev` ikke. Afvisningen står her, så næste runde kan se, at
+punktet ER behandlet og med hvilke tal — ikke sprunget over. Skal linjen rettes,
+er det menneskets beslutning, ikke min.
+
+**BEVIS:** målingerne ovenfor er kørt i Browser-panelet mod dev-serveren på
+55559 (`maerker.html`, forrest fane) og med `grep` over `js/`, `crawler/`,
+`scripts/`, `css/` og alle 32 HTML-sider. Ingen fil er ændret.

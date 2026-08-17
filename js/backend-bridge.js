@@ -404,23 +404,60 @@ async function loadExternalListings(){
 
 /* Favoritter: databasen er sandheden, når man er logget ind.
    Det man nåede at gemme som anonym, flyttes med op ved login i stedet for
-   at forsvinde. */
+   at forsvinde.
+
+   HVAD DER GIK GALT FØR (C-008). Funktionen skrev ALTID til localStorage,
+   også når læsningen fra databasen var fejlet. Kæden var:
+   `listFavorites()` slugte sin `error` og svarede `[]`; `toPush` blev
+   dermed alle brugerens uuid-favoritter; hvert `addFavorite()` ramte
+   primærnøglen `favorites_pkey (user_id, listing_id)` og fejlede som
+   dublet; `remoteIds.push(id)` blev derfor sprunget over; og sidste linje
+   skrev listen tilbage UDEN brugerens favoritter. Hjerterne slukkede,
+   "Gemte" stod tom, og der kom ingen fejlbesked nogen steder.
+
+   To ting holder den lukket nu, og de skal begge blive:
+     1. Fejler læsningen, skrives der IKKE. En sammenfletning, der bygger på
+        et tomt svar, må aldrig være destruktiv.
+     2. Sammenfletningen er en UNION af databasen og det lokale. En favorit,
+        der ikke kunne skrives op, bliver liggende lokalt, så næste
+        synkronisering kan prøve igen — før faldt den på gulvet. */
 async function syncFavorites(){
   if (!db.enabled || !Store.getUser()?.remote) return;
 
-  const remoteIds = await db.listFavorites();
+  const { ids: remoteIds, error } = await db.listFavorites();
+  if (error){
+    /* Vi ved ikke, hvad der står i databasen. Så rører vi ikke det, der
+       står i browseren — det er brugerens eneste kopi lige nu. */
+    console.warn('Favoritterne blev ikke synkroniseret, og de lokale står urørt:', error.message);
+    return;
+  }
+
   const localIds = Store.getFavorites();
 
   // Kun uuid'er hører til i databasen; demo-annoncer har numeriske id'er.
-  const toPush = localIds.filter(id => isUuid(id) && !remoteIds.includes(id));
+  const toPush = localIds.filter(id => isUuid(id) && !remoteIds.some(r => String(r) === String(id)));
+  let ikkeSkrevet = 0;
   for (const id of toPush){
-    const { error } = await db.addFavorite(id);
-    if (!error) remoteIds.push(id);
+    const { error: skrivFejl } = await db.addFavorite(id);
+    if (skrivFejl) ikkeSkrevet++;
+  }
+  if (ikkeSkrevet){
+    console.warn(`${ikkeSkrevet} af ${toPush.length} favoritter kunne ikke gemmes i databasen — de bliver liggende lokalt.`);
   }
 
-  // Behold lokale demo-favoritter, så UI'et ikke pludselig glemmer dem.
-  const demoIds = localIds.filter(id => !isUuid(id));
-  localStorage.setItem(Store.KEYS.favorites, JSON.stringify([...remoteIds, ...demoIds]));
+  /* Union, sammenlignet som streng: favoritter kan være uuid'er (database)
+     eller tal (demo), og et strengt includes ville lade dem forbi hinanden.
+     Rækkefølgen er database først, så den kopi, der overlever på tværs af
+     enheder, står øverst. */
+  const flettet = [];
+  const set = new Set();
+  for (const id of [...remoteIds, ...localIds]){
+    const noegle = String(id);
+    if (set.has(noegle)) continue;
+    set.add(noegle);
+    flettet.push(id);
+  }
+  localStorage.setItem(Store.KEYS.favorites, JSON.stringify(flettet));
 }
 
 /* ---------- Hvilke annoncer har DENNE side brug for? ----------

@@ -164,7 +164,25 @@ function seoListingPage(listing, photoUrls){
     console.warn('seoListingPage kaldt for en annonce uden forrenderet side — springer over.', listing?.id);
     return;
   }
-  const image = (photoUrls && photoUrls[0]) || `${SITE_URL}/og-image.png`;
+  /* To billeder, to forskellige påstande — og de blev blandet sammen her.
+
+     og:image er et kort om SIDEN. Har annoncen ingen fotos, er Bikerbasens
+     eget delingsbillede det rigtige svar: kortet siger "det her er en side på
+     Bikerbasen", og det er sandt.
+
+     Vehicle.image er en påstand om PRODUKTET. Googles retningslinjer for
+     køretøjsannoncer forventer, at billedet ER køretøjet. Målt på
+     annonce.html?id=1017: siden skrev korrekt "Ingen fotos i denne annonce",
+     mens jsonld-vehicle erklærede image: ["https://bikerbasen.dk/og-image.png"]
+     — vores logo, udgivet som om det var en Suzuki GSX-R750 (findingen C-016).
+     Det er samme fejl, buildPhotoSet() blev rettet for at fjerne fra DOM'en;
+     den var bare flyttet ned i <head>.
+
+     Prisen for at udelade feltet er, at annoncen ikke er berettiget til et
+     billed-rigt resultat. Den pris er den rigtige: et manglende felt vejer
+     lettere imod os end et gættet. */
+  const fotos = (photoUrls || []).filter(Boolean);
+  const delebillede = fotos[0] || `${SITE_URL}/og-image.png`;
 
   const dele = [
     `Årgang ${listing.year}`,
@@ -177,7 +195,7 @@ function seoListingPage(listing, photoUrls){
     title: `${navn} ${listing.year} — ${formatPrice(listing.price)} — Bikerbasen`,
     description: `${navn}, ${dele.join(', ')}. Til salg i ${listing.city} på Bikerbasen.`,
     url,
-    image,
+    image: delebillede,
     type: 'product',
   });
   Seo.setMeta('meta[property="product:price:amount"]', 'property', 'product:price:amount', String(listing.price));
@@ -193,7 +211,6 @@ function seoListingPage(listing, photoUrls){
     productionDate: String(listing.year),
     itemCondition: 'https://schema.org/UsedCondition',
     url,
-    image: (photoUrls && photoUrls.length) ? photoUrls : [image],
     description: listing.description,
     mileageFromOdometer: { '@type': 'QuantitativeValue', value: listing.km, unitCode: 'KMT' },
     vehicleEngine: {
@@ -221,6 +238,9 @@ function seoListingPage(listing, photoUrls){
             address: { '@type': 'PostalAddress', addressLocality: listing.city, addressCountry: 'DK' } },
     },
   };
+  // image kun når der ER et foto af netop denne motorcykel. Se begrundelsen
+  // ovenfor; feltet må ikke falde tilbage på delingsbilledet.
+  if (fotos.length) vehicle.image = fotos;
   if (listing.power) {
     vehicle.vehicleEngine.enginePower = { '@type': 'QuantitativeValue', value: listing.power, unitText: 'hk' };
   }
@@ -246,7 +266,55 @@ function seoListingPage(listing, photoUrls){
    Annoncerne står stadig på siden og i sitets egne links; det er kun påstanden
    om deres adresser, der er væk. Genindsæt den ikke uden også at bygge de
    sider, den peger på. */
+/* Søgesidens EGNE, statiske tags — dem vi falder tilbage på.
+
+   Læses første gang seoSearchResults() kaldes, altså før vi selv har skrevet
+   noget i dem. Fallback-strengene er soegning.html's egne værdier skrevet af;
+   de bruges kun, hvis tagget mangler helt. */
+let soegesidensEgneTags = null;
+function egneTags(){
+  if (soegesidensEgneTags) return soegesidensEgneTags;
+  const desc = document.head.querySelector('meta[name="description"]');
+  soegesidensEgneTags = {
+    titel: document.title || `Søg motorcykler — ${SITE_NAME}`,
+    beskrivelse: (desc && desc.getAttribute('content'))
+      || 'Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.',
+  };
+  return soegesidensEgneTags;
+}
+
+/* Titel og description følger H1'en — men KUN når der er noget at vise.
+
+   Målt: ?types=cross&brands=Harley-Davidson&priceMax=1000&koerekort=A1 gav
+   <title>Søg motorcykler — Bikerbasen</title> på hver eneste facet, mens H1
+   korrekt sagde "Brugte Harley-Davidson til salg" (C-017). Fanebladet og det
+   delte link sagde altså ingenting om, hvad man kiggede på.
+
+   To ting bliver med vilje ikke rørt:
+
+   1. canonical og og:url. Hver facet canonical'er til bare soegning.html, og
+      det er den rigtige håndtering af duplicate content fra facetter. Derfor
+      går det her IKKE gennem Seo.setSocial() — den ville sætte canonical med.
+      Rangeringsmæssigt flytter titlen derfor ingenting; den er til brugeren.
+   2. Titlen ved nul træf. Overskriften siger stadig "Brugte Harley-Davidson
+      til salg" på en side, hvor der ikke er nogen — og en <title> med det i
+      ville være en påstand, siden selv modsiger to linjer længere nede.
+      Sidens egne, neutrale tags sættes tilbage i stedet. */
 function seoSearchResults(listings, heading){
+  const egne = egneTags();
+  const harTræf = (listings || []).length > 0;
+  const titel = (harTræf && heading) ? `${heading} — ${SITE_NAME}` : egne.titel;
+  const beskrivelse = (harTræf && heading)
+    ? `${heading} på ${SITE_NAME}. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.`
+    : egne.beskrivelse;
+
+  document.title = titel;
+  Seo.setMeta('meta[name="description"]', 'name', 'description', beskrivelse);
+  Seo.setMeta('meta[property="og:title"]', 'property', 'og:title', titel);
+  Seo.setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', titel);
+  Seo.setMeta('meta[property="og:description"]', 'property', 'og:description', beskrivelse);
+  Seo.setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', beskrivelse);
+
   const poster = itemListElementer(listings);
   Seo.setJsonLd('results', poster.length ? {
     '@context': 'https://schema.org',

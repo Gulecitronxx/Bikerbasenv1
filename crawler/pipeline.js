@@ -9,6 +9,7 @@
 const { laesKilde } = require('./config');
 const { aabnBrowser, hentListeside, hentDetaljeside } = require('./hent');
 const { tilAnnonce, berigMedDetalje } = require('./parse');
+const { nyRobotsVagt } = require('./robots');
 const db = require('./db');
 
 function nyLog(skrivUd = true){
@@ -24,6 +25,86 @@ function nyLog(skrivUd = true){
   };
 }
 
+/* ---------- Vagten mod at banke på en dør, der siger nej (C-012) ----------
+
+   Før løb detaljetrinet alle annoncer igennem, uanset hvor mange der
+   fejlede. `tal.fejlede` blev talt, men brugt til ÉN ting: at dæmpe loggen.
+   Begyndte kilden at svare 403, lavede crawleren alligevel alle 332
+   forespørgsler — elleve minutter ved 2000 ms, tyve ved 3000 — mod en kilde,
+   der aktivt sagde nej. For en crawler, der kører på et skriftligt ja
+   (sources/mcsyd.yaml, sources/guloggratis.yaml), er det præcis den adfærd,
+   der får et ja trukket tilbage.
+
+   DE TO SLAGS 4xx KRÆVER MODSATTE REAKTIONER, og de endte før i samme
+   `continue`:
+
+     403 / 429 / 401 / 407 / 451  — kilden afviser OS. Bak ud, og skriv det
+       i loggen, så et menneske ser det. Fem i træk er ikke et uheld.
+     404 / 410                    — DENNE annonce er væk. Det er hverdag på
+       en markedsplads: en annonce kan sagtens blive slettet mellem
+       listesiden og detaljekaldet. Fortsæt.
+
+   Men 25 forsvundne i TRÆK er ikke hverdag. Adresserne kom fra en listeside
+   for få minutter siden, så det er ikke annoncerne, der er væk — det er
+   detalje-URL'erne, vi bygger, der er forkerte. Det skal også stoppe, bare
+   med en anden diagnose.
+
+   Tællerne nulstilles KUN af et svar, der lykkedes. En timeout hverken
+   bekræfter eller afkræfter et nej, og hvis den nulstillede, kunne en kilde,
+   der svarer 403, timeout, 403, timeout, holde vagten i skak for evigt. */
+const AFVISNINGSKODER = new Set([401, 403, 407, 429, 451]);
+const AFVISNINGER_FOER_STOP = 5;
+const IKKE_FUNDET_FOER_STOP = 25;
+
+function statusFra(e){
+  return Number.isInteger(e?.status) ? e.status : null;
+}
+
+/* Kastet, når kørslen stoppes af kildens svar og ikke af en fejl hos os.
+   Markøren gør, at koerKilde() kan skrive en anden logbesked — og at en
+   test kan skelne den fra en tilfældig undtagelse. */
+function afbrydelsesFejl(besked, status){
+  const e = new Error(besked);
+  e.afbrudt_af_kilden = true;
+  e.status = status ?? null;
+  return e;
+}
+
+function nyAfvisningsvagt({ afvisninger = AFVISNINGER_FOER_STOP, ikkeFundet = IKKE_FUNDET_FOER_STOP } = {}){
+  let afvist = 0;
+  let forsvundne = 0;
+  return {
+    // Et svar, der kom igennem. Kun dét renser tavlen.
+    svarede(){ afvist = 0; forsvundne = 0; },
+    /* Returnerer { status, besked }, hvis kørslen skal stoppe — ellers null. */
+    tael(e){
+      const status = statusFra(e);
+      if (status !== null && AFVISNINGSKODER.has(status)){
+        forsvundne = 0;
+        afvist++;
+        if (afvist >= afvisninger){
+          return { status, besked: `${afvist} svar i træk med HTTP ${status} — kilden afviser os` };
+        }
+        return null;
+      }
+      if (status === 404 || status === 410){
+        afvist = 0;
+        forsvundne++;
+        if (forsvundne >= ikkeFundet){
+          return {
+            status,
+            besked: `${forsvundne} adresser i træk gav HTTP ${status} — så mange annoncer forsvinder ikke `
+                  + 'mellem listesiden og detaljekaldet; detalje-URL\'erne bør efterses',
+          };
+        }
+        return null;
+      }
+      // Timeout, DNS, en tom side: ikke et nej fra kilden. Tællerne står.
+      return null;
+    },
+  };
+}
+
 /* ---------- Discover + fetch + parse + normalize ----------
    Står alle felter på kortet i gitteret, henter vi IKKE hver detaljeside:
    500 annoncer ville blive 508 sideindlæsninger i stedet for 8, og med 2
@@ -31,8 +112,13 @@ function nyLog(skrivUd = true){
    hurtigere for os og venligere mod kilden. Sådan er MC Syd.
 
    Er kilden derimod en, hvor kortet ikke HAR felterne, sætter YAML'en
-   `detalje.hent: true`, og så følger berigMedDetaljer() nedenfor efter. */
-async function indsamlAnnoncer(context, kilde, { limit, log }){
+   `detalje.hent: true`, og så følger berigMedDetaljer() nedenfor efter.
+
+   `hent` kan byttes ud. Det er ikke et lag for lagets skyld: afbrydelsen
+   ovenfor SKAL kunne efterprøves, og den eneste anden måde at fremkalde et
+   403 på ville være at få kilden til at blokere os. Standardværdien er den
+   rigtige funktion, så driften ikke går gennem en omvej. */
+async function indsamlAnnoncer(context, kilde, { limit, log, hent = hentListeside }){
   const fundne = new Map();   // kilde_annonce_id -> { annonce, maerkeFraUrl }
   let kasseret = 0;
   const grunde = new Map();
@@ -45,9 +131,23 @@ async function indsamlAnnoncer(context, kilde, { limit, log }){
 
     let side;
     try {
-      side = await hentListeside(context, kilde, liste.url);
+      side = await hent(context, kilde, liste.url);
     } catch (e){
-      // En enkelt listeside, der fejler, må ikke tage de øvrige med sig.
+      /* Et afvisningssvar på en LISTESIDE tåler ingen tæller. Der er 1-8 af
+         dem, og de er hoveddøren: er den lukket, er der ingen mening i at
+         gå videre til de 332 detaljesider bagved. Detaljetrinet har en
+         tæller på fem, fordi der er hundredvis af døre og én af dem kan
+         være låst uden at huset er det. Her er huset lukket. */
+      const status = statusFra(e);
+      if (status !== null && AFVISNINGSKODER.has(status)){
+        throw afbrydelsesFejl(
+          `HTTP ${status} på listesiden ${liste.url} — kilden afviser os ved hoveddøren, `
+          + 'og kørslen stopper her frem for at gå videre til detaljesiderne',
+          status,
+        );
+      }
+      // En enkelt listeside, der fejler af andre grunde, må ikke tage de
+      // øvrige med sig: en timeout på én mærkeside er ikke et nej.
       log.skriv(`FEJL på ${liste.url}: ${e.message}`);
       continue;
     }
@@ -96,18 +196,48 @@ async function indsamlAnnoncer(context, kilde, { limit, log }){
    er en kørsel, der har mistet sit formål — og så skal det stå i loggen.
 
    En enkelt annonce, der fejler, tager ikke resten med sig. Annoncen bliver
-   gemt med det, kortet gav; den mister felter, ikke sin plads. */
-async function berigMedDetaljer(context, kilde, annoncer, { log }){
-  const tal = { hentet: 0, tomme: 0, fejlede: 0, felter: new Map() };
+   gemt med det, kortet gav; den mister felter, ikke sin plads.
+
+   MEN: fejler de i træk, og fejler de med kildens nej, stopper vi. Se vagten
+   øverst i filen. `hent` kan byttes ud af samme grund som i
+   indsamlAnnoncer(): afbrydelsen skal kunne afprøves mod en attrap. */
+async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDetaljeside, robots = null }){
+  const tal = { hentet: 0, tomme: 0, fejlede: 0, ikke_fundet: 0, spaerret: 0, felter: new Map() };
+  const vagt = nyAfvisningsvagt();
+  let afbryd = null;
+  let behandlet = 0;
 
   for (const [i, annonce] of annoncer.entries()){
     let svar;
+    behandlet = i + 1;
+
+    /* robots.txt gælder også detaljesiderne, og de er dem, der er 332 af
+       (C-013). En kilde kan sagtens have sit gitter åbent og sine
+       produktsider lukkede — og så må vi ikke hente dem, uanset hvad et
+       felt i YAML'en siger. Den spærrede side hentes ikke; den bliver ikke
+       til en fejl, for der er ikke noget galt. */
+    if (robots){
+      const dom = await robots.maaHente(annonce.url);
+      if (!dom.tilladt){
+        tal.spaerret++;
+        if (tal.spaerret <= 3){
+          log.skriv(`robots.txt spærrer ${annonce.url}${dom.regel ? ` (${dom.regel})` : ''} — siden hentes ikke`);
+        }
+        continue;
+      }
+    }
+
     try {
-      svar = await hentDetaljeside(context, kilde, annonce.url);
+      svar = await hent(context, kilde, annonce.url);
       tal.hentet++;
+      vagt.svarede();
     } catch (e){
       tal.fejlede++;
+      const status = statusFra(e);
+      if (status === 404 || status === 410) tal.ikke_fundet++;
       if (tal.fejlede <= 3) log.skriv(`detaljeside fejlede (${annonce.kilde_annonce_id}): ${e.message}`);
+      afbryd = vagt.tael(e);
+      if (afbryd) break;
       continue;
     }
 
@@ -123,16 +253,31 @@ async function berigMedDetaljer(context, kilde, annoncer, { log }){
 
   const daekning = [...tal.felter.entries()]
     .map(([f, n]) => `${f} ${n}/${annoncer.length}`).join(', ');
-  log.skriv(`detaljesider: ${tal.hentet} hentet, ${tal.tomme} uden specfelter, ${tal.fejlede} fejlede`);
+  log.skriv(`detaljesider: ${tal.hentet} hentet, ${tal.tomme} uden specfelter, ${tal.fejlede} fejlede`
+    + (tal.ikke_fundet ? ` (heraf ${tal.ikke_fundet} annoncer der ikke findes længere)` : '')
+    + (tal.spaerret ? `, ${tal.spaerret} sprunget over fordi robots.txt spærrer dem` : ''));
   log.skriv(`felter fra detaljesiden: ${daekning || 'INGEN — selectors eller etiketter bør efterses'}`);
   if (!tal.felter.get('hk')){
     log.skriv('ADVARSEL: ingen annoncer fik hestekræfter. Uden hk kan kørekortkategorien ikke udledes, og det er hele grunden til, at detaljesiderne hentes.');
   }
+
+  /* Loggen skrives FØRST. Det, trinet nåede at samle, er stadig det tal, der
+     fortæller hvor det gik galt — og et kast, der tager tallene med sig,
+     efterlader kun "AFBRUDT" uden noget at måle på. */
+  if (afbryd){
+    log.skriv(`STOP: ${afbryd.besked}. ${annoncer.length - behandlet} detaljesider blev IKKE hentet.`);
+    throw afbrydelsesFejl(afbryd.besked, afbryd.status);
+  }
   return tal;
 }
 
-/* ---------- Én kilde ---------- */
-async function koerKilde(navn, { limit = null, toerloeb = false, stille = false } = {}){
+/* ---------- Én kilde ----------
+   `hentere` er testens indgang og driftens ingenting: udelades den, bruges
+   de rigtige funktioner. Den findes, fordi C-012's afbrydelse ellers kun
+   kunne efterprøves ved at få en rigtig forhandler til at svare 403 på
+   hundredvis af kald i træk — altså ved at gøre præcis det, rettelsen er
+   lavet for at undgå. */
+async function koerKilde(navn, { limit = null, toerloeb = false, stille = false, hentere = {} } = {}){
   const log = nyLog(!stille);
   const kilde = laesKilde(navn);
 
@@ -143,6 +288,46 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
   }
   if (limit) log.skriv(`DELVIS KØRSEL: højst ${limit} annoncer. Forsvundne annoncer markeres IKKE.`);
   if (toerloeb) log.skriv('TØRLØB: der skrives ikke til databasen.');
+
+  /* ---------- robots.txt, hentet NU og ikke attesteret (C-013) ----------
+     Spærren hed `robots_tjekket` og var en dato, nogen havde skrevet.
+     Filen blev aldrig hentet i kørselsstien: tilføjede kilden
+     `Disallow: /Produkter/` i morgen, kørte crawleren videre.
+
+     Kontrollen ligger FØR databasen med vilje. Bliver svaret nej, skal der
+     hverken oprettes en kørsel eller skrives en linje — kørslen fandt ikke
+     sted, den blev afvist, og det skal ikke se ud som en kørsel med nul
+     fund i crawl_koersler. Det er også den mildeste rækkefølge for kilden:
+     nej'et koster ét kald til /robots.txt og ikke ét mere. */
+  const robots = nyRobotsVagt({ hent: hentere.hentRobots });
+
+  /* Listesiderne holdes op mod reglerne én for én. En spærret listeside
+     hentes ikke — og er de ALLE spærrede, er der ikke en kørsel tilbage at
+     lave. `kilde` er et friskt objekt pr. kørsel, så listen må gerne
+     beskæres her. */
+  const tilladteLister = [];
+  for (const l of kilde.liste_urler){
+    const dom = await robots.maaHente(l.url);
+    if (dom.tilladt){ tilladteLister.push(l); continue; }
+    log.skriv(`robots.txt spærrer listesiden ${l.url}${dom.regel ? ` (${dom.regel})` : ''} — ${dom.grund}`);
+  }
+  for (const g of robots.grunde()) log.skriv(`robots.txt: ${g}`);
+
+  if (!tilladteLister.length){
+    log.skriv('SPÆRRE: robots.txt spærrer samtlige liste-URL\'er — kilden crawles ikke i denne kørsel.');
+    log.skriv('        Tvivl falder ud til kildens fordel: en fil, vi ikke kunne læse, tæller også som et nej.');
+    return { navn, sprunget_over: true, robots_naegtede: true, log: log.tekst() };
+  }
+  kilde.liste_urler = tilladteLister;
+
+  /* Kildens egen forsinkelse vinder, når den er LÆNGERE end vores. Aldrig
+     når den er kortere: 2000 ms er databasens minimum (014_aggregator.sql),
+     og en kilde skal kunne bede om mere høflighed, ikke om mindre. */
+  const robotsDelay = robots.crawlDelayMs();
+  if (robotsDelay && robotsDelay > kilde.crawl_delay_ms){
+    log.skriv(`robots.txt beder om ${robotsDelay} ms mellem kald — vores ${kilde.crawl_delay_ms} ms hæves til det.`);
+    kilde.crawl_delay_ms = robotsDelay;
+  }
 
   let sb = null, kilde_id = null, koersel = null;
   if (!toerloeb){
@@ -163,8 +348,10 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
   let browser = null;
 
   try {
-    browser = await aabnBrowser();
-    const { annoncer, kasseret } = await indsamlAnnoncer(browser.context, kilde, { limit, log });
+    browser = await (hentere.aabnBrowser || aabnBrowser)();
+    const { annoncer, kasseret } = await indsamlAnnoncer(browser.context, kilde, {
+      limit, log, hent: hentere.hentListeside,
+    });
     tal.fundet = annoncer.length;
     tal.fejl = kasseret;
 
@@ -175,7 +362,9 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
     if (kilde.detalje?.hent && annoncer.length){
       const sek = Math.round(annoncer.length * kilde.crawl_delay_ms / 1000);
       log.skriv(`henter ${annoncer.length} detaljesider (~${Math.floor(sek/60)} min ${sek%60} s ved ${kilde.crawl_delay_ms} ms mellem kald)`);
-      await berigMedDetaljer(browser.context, kilde, annoncer, { log });
+      await berigMedDetaljer(browser.context, kilde, annoncer, {
+        log, hent: hentere.hentDetaljeside, robots,
+      });
     }
 
     if (!toerloeb && annoncer.length){
@@ -230,6 +419,23 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
   } catch (e){
     log.skriv(`AFBRUDT: ${e.message}`);
     tal.fejl++;
+    /* Stoppede KILDEN os (C-012), skal det stå tydeligt i loggen — det er
+       den linje, et menneske skal se, før næste kørsel starter, og den
+       gemmes med i crawl_koersler nedenfor.
+
+       Og bemærk hvor den her gren ligger: markerBorte() står inde i try'et,
+       som kastet lige har forladt. En afbrudt kørsel markerer altså INTET
+       som borte, og det er den rigtige rækkefølge. Værnet i crawler/db.js
+       (C-011) ville også blokere den — en kørsel, der blev stoppet ved
+       hoveddøren, finder færre end 60 % af kildens aktive rækker — men den
+       skal ikke blokeres af et værn, den skal aldrig nå derhen. To spærrer
+       om det samme, med vilje. */
+    if (e.afbrudt_af_kilden){
+      log.skriv(`     Kørslen blev stoppet MED VILJE efter kildens svar${e.status ? ` (HTTP ${e.status})` : ''}.`);
+      log.skriv('     Der er hverken skrevet annoncer eller markeret noget som borte.');
+      log.skriv('     Er svaret 403/401/451, skal tilladelsen efterses, før crawleren startes igen;');
+      log.skriv('     er det 429, skal crawl_delay_ms op i kildens YAML.');
+    }
     // Kørslen lukkes også når den fejler. En række uden afsluttet-tidsstempel
     // er umulig at skelne fra en kørsel, der stadig er i gang.
     if (koersel){
@@ -259,4 +465,12 @@ async function koerKilder(navne, muligheder = {}){
   return resultater;
 }
 
-module.exports = { koerKilde, koerKilder, indsamlAnnoncer };
+module.exports = {
+  koerKilde, koerKilder, indsamlAnnoncer,
+  /* Eksporteres, saa afbrydelsen kan efterproeves mod en attrap frem for mod
+     kildens rigtige server. Det er hele pointen med C-012: den betingelse,
+     der staar mellem os og elleve minutters bankning paa en doer, der siger
+     nej, skal have en test. */
+  berigMedDetaljer, nyAfvisningsvagt, AFVISNINGSKODER,
+  AFVISNINGER_FOER_STOP, IKKE_FUNDET_FOER_STOP,
+};

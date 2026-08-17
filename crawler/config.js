@@ -124,11 +124,39 @@ function validerKilde(k){
       `mangler — sæt selectors.${felt} (kortet) eller detalje.felter.${felt} (annoncens egen side)`);
   }
 
-  // Tilladelse er ikke et teknisk felt, men det er det vigtigste felt i filen.
-  // robots.txt er en teknisk regel; et skriftligt ja er en aftale. Vi kræver
-  // begge, og pipelinen nægter at køre uden.
+  /* Tilladelse er ikke et teknisk felt, men det er det vigtigste felt i filen.
+     robots.txt er en teknisk regel; et skriftligt ja er en aftale. Vi kræver
+     begge, og pipelinen nægter at køre uden.
+
+     KRAVET ER SKÆRPET (C-013). Før gatede begge felter på `Boolean()`, og en
+     bar `true` var nok. `true` nedskriver hverken hvornår, med hvem eller
+     under hvilke vilkår — og feltet er ifølge DECISIONS.md netop "en
+     nedskrivning af, at en aftale findes". En nedskrivning uden dato er
+     ingen nedskrivning.
+
+     Datoen må stå i `tilladelse_modtaget` selv (sådan gør mcsyd.yaml) eller
+     i `tilladelse_dato` ved siden af (sådan gør guloggratis.yaml, hvor
+     `tilladelse_modtaget: true` er skrevet som et ja/nej). Begge former
+     nedskriver DATOEN, og det er den, kravet handler om. Ingen af de to
+     eksisterende filer skal derfor rettes — men en tredje kilde kan ikke
+     længere slippe forbi med et blot `true`.
+
+     Kontrollen af, at robots.txt STADIG tillader os, ligger i
+     crawler/robots.js og køres ved hver kørsel. Datoen her siger, hvornår et
+     menneske læste filen; den kan ikke sige, hvad der står i den i dag. De
+     to erstatter ikke hinanden. */
+  const ISO_DATO = /^\d{4}-\d{2}-\d{2}$/;
+  const somDato = v => (v instanceof Date ? v.toISOString().slice(0, 10) : String(v ?? ''));
+  const tilladelsesDato = [k.tilladelse_modtaget, k.tilladelse_dato].map(somDato).find(v => ISO_DATO.test(v));
+
   kraev('tilladelse_modtaget', Boolean(k.tilladelse_modtaget), 'skriftlig tilladelse mangler — kilden må ikke crawles');
+  kraev('tilladelse_modtaget', Boolean(tilladelsesDato),
+    'mangler en DATO for, hvornår det skriftlige ja blev modtaget. Skriv den som '
+    + 'tilladelse_modtaget: ÅÅÅÅ-MM-DD, eller sæt tilladelse_dato ved siden af. '
+    + 'Et bart "true" nedskriver hverken hvornår, med hvem eller under hvilke vilkår');
   kraev('robots_tjekket', Boolean(k.robots_tjekket), 'robots.txt er ikke tjekket');
+  kraev('robots_tjekket', ISO_DATO.test(somDato(k.robots_tjekket)),
+    'skal være en dato (ÅÅÅÅ-MM-DD) for, hvornår et menneske læste filen');
 
   const delay = Number(k.crawl_delay_ms);
   kraev('crawl_delay_ms', Number.isFinite(delay) && delay >= MINIMUM_DELAY_MS,
