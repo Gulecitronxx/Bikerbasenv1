@@ -77,6 +77,32 @@ function slugify(name){
 }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+/* De mærker, vi KENDER, men ikke har på lager lige nu.
+
+   BRANDS_BY_MODEL i js/data.js er en redaktionel liste over 60 mærker, og
+   mærkeindekset linkede hver enkelt til soegning.html?brands=X. Målt på drift:
+   44 af de 60 gav nul træf (findingen D-010) — 44 tynde interne sider, en
+   crawler bruger budget på, og 44 klik, der lander på "Ingen annoncer matcher
+   dine filtre". C-014 lagde en grid med de 18 mærker, der HAR lager, ovenover,
+   men rørte ikke de 44; de stod stadig som links.
+
+   De nævnes stadig, men som TEKST. Løftet i indledningen holdes, sidens ord
+   kan stadig findes på mærkenavnet, og en køber, der leder efter en Vespa, får
+   svaret med det samme frem for efter et klik. Et link er en påstand om, at
+   der er noget for enden af det.
+
+   Sammenligningen er versalUfølsom med vilje: listen skriver "SYM", lageret
+   skriver "Sym", og soegning.html?brands=SYM gav derfor nul træf på et mærke,
+   vi HAR — mærkefiltret er versalfølsomt (efterprøvet i browseren: ?brands=SYM
+   → 0 annoncer, ?brands=Sym → 1). Uden det her ville Sym stå både i grid'en
+   over mærker MED annoncer og på listen over dem uden. */
+function maerkerUdenLager(kendte, medLager){
+  const harLager = new Set((medLager || []).map(b => String(b).toLowerCase()));
+  return (kendte || [])
+    .filter(b => !harLager.has(String(b).toLowerCase()))
+    .sort((a, b) => a.localeCompare(b, 'da'));
+}
+
 /* Struktureret data til mærkesiderne: BreadcrumbList så Google kan vise
    brødkrummen i søgeresultatet, og en ItemList over de annoncer der rent
    faktisk står på siden — samme opskrift som js/seo.js bruger på
@@ -416,6 +442,8 @@ ${footer}
 }
 
 /* ---- Brand index ---- */
+const udenLager = maerkerUdenLager(Object.keys(BRANDS_BY_MODEL), brands);
+
 const indexHtml = `<!doctype html>
 <html lang="da">
 <head>
@@ -458,7 +486,7 @@ ${header}
 
     <div class="brand-hero">
       <h1>Motorcykler efter mærke</h1>
-      <p class="brand-intro">Gennemse brugte motorcykler efter mærke. Nederst finder du alle mærker — også dem uden annoncer lige nu.</p>
+      <p class="brand-intro">Gennemse brugte motorcykler efter mærke. Øverst dem, der er til salg lige nu — nederst dem, vi kender, men ikke har på lager i øjeblikket.</p>
     </div>
 
     ${brands.length ? `<section class="section" style="padding-top:0;">
@@ -474,17 +502,16 @@ ${header}
       </div>
     </section>` : ''}
 
-    <section class="section" style="padding-top:0;">
+    ${udenLager.length ? `<section class="section" style="padding-top:0;">
       <div class="section-head"><div>
-        <h2>Alle mærker</h2>
-        <p>Vælg et mærke og se, hvad der er til salg — eller opret en søgeagent.</p>
+        <h2>Mærker uden annoncer lige nu (${udenLager.length})</h2>
+        <p>Dem kender vi godt — der er bare ingen til salg i øjeblikket. Vi linker dem, når der er noget at vise.</p>
       </div></div>
-      <div class="brand-index">
-        ${Object.keys(BRANDS_BY_MODEL).sort((a,b)=>a.localeCompare(b,'da')).map(b =>
-          `<a class="brand-index-link" href="soegning.html?brands=${encodeURIComponent(b)}">${esc(b)}</a>`
-        ).join('\n        ')}
+      <p class="brand-intro">${udenLager.map(esc).join(', ')}.</p>
+      <div class="brand-actions">
+        <a href="soegning.html" class="btn btn-outline">Søg blandt alle ${tal(LISTINGS.length)} annoncer</a>
       </div>
-    </section>
+    </section>` : ''}
   </div>
 </main>
 
@@ -612,4 +639,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse };
+module.exports = { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager };

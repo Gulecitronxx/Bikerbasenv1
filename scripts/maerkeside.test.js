@@ -16,14 +16,20 @@
    annonce-<slug>.html for hver annonce, også de indekserede, som ikke HAR en
    (samme fejl som C-015 i js/seo.js: struktureret data, der peger på 404).
 
-   De tre ting er små nok til at blive "ryddet op" af en senere runde og dyre
+   Den sidste gruppe er D-010 og handler om det samme et niveau højere:
+   mærkeindekset linkede alle 60 kendte mærker til soegning.html?brands=X, og
+   44 af de links gav nul træf. Et link er en påstand om, at der er noget for
+   enden. Reglen — nævn mærket, men link det først når der er lager — er en
+   linje kode, og den er nem at "forenkle" tilbage.
+
+   De fire ting er små nok til at blive "ryddet op" af en senere runde og dyre
    nok til at blive låst her. */
 
 const test = require('node:test');
 const assert = require('node:assert');
 
 // require.main-gaten i build-brand-pages.js gør, at det her IKKE kører et byg.
-const { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse }
+const { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager }
   = require('./build-brand-pages.js');
 
 function ekstern(extra){
@@ -113,4 +119,32 @@ test('ItemList udelader annoncer uden egen side — og bortfalder, når ingen ha
   assert.equal(blandet.itemListElement.length, 1);
   assert.equal(blandet.itemListElement[0].position, 1, 'positionerne skal være sammenhængende');
   assert.match(blandet.itemListElement[0].url, /\/annonce-suzuki-gsx-r750-2017-1017\.html$/);
+});
+
+/* ---- Mærkeindekset: intet link uden noget for enden (D-010) ---- */
+
+test('et mærke uden lager bliver ikke til et link', () => {
+  const uden = maerkerUdenLager(['Honda', 'Vespa', 'Nimbus'], ['Honda']);
+  assert.deepEqual(uden, ['Nimbus', 'Vespa'],
+    'de to uden lager nævnes stadig — de skal bare ikke være links til nul træf');
+});
+
+test('Sym og SYM er samme mærke — ellers står det begge steder', () => {
+  // Mærkefiltret er versalfølsomt: soegning.html?brands=SYM gav 0 annoncer,
+  // ?brands=Sym gav 1. Listen i js/data.js skriver "SYM", lageret "Sym".
+  // Uden en versalufølsom sammenligning ville Sym stå både i grid'en over
+  // mærker MED annoncer og på listen over mærker UDEN.
+  assert.deepEqual(maerkerUdenLager(['SYM', 'Vespa'], ['Sym']), ['Vespa']);
+});
+
+test('et mærke, listen ikke kender, dukker ikke op blandt dem uden lager', () => {
+  // Rewaco har lager, men står ikke i BRANDS_BY_MODEL. Den hører hjemme i
+  // grid'en ovenfor, ikke på nogen af de to lister her.
+  assert.deepEqual(maerkerUdenLager(['Honda'], ['Honda', 'Rewaco']), []);
+});
+
+test('rækkefølgen er dansk, og tomme lister vælter ikke', () => {
+  assert.deepEqual(maerkerUdenLager(['Ural', 'Beta', 'Zontes'], []), ['Beta', 'Ural', 'Zontes']);
+  assert.deepEqual(maerkerUdenLager([], ['Honda']), []);
+  assert.deepEqual(maerkerUdenLager(['Honda'], null), ['Honda']);
 });
