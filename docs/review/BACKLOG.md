@@ -49,21 +49,21 @@ reproduktionstrin i én tabelcelle ikke kan læses af nogen.
 | C-003 | critic | sikkerhed | **P2** | `supabase/016_luk_skrivehul.sql:155-160` | profiles har stadig INSERT og DELETE til anon | åben |
 | C-004 | critic | sikkerhed | **P2** | `js/components.js:569 + reports-tabellen` | Anonym, ubegrænset skrivekanal til produktionsdatabasen | åben |
 | C-005 | critic | sikkerhed | **P2** | `krav-tabellen, INSERT-politikken "krav: opret eget"` | Claim-flowet kan selvgodkendes på papiret | åben |
-| C-007 | critic | kodefejl | **P2** | `js/bike-art.js:90, indlæst fra 12 HTML-sider` | 8,2 kB død JavaScript på hver side | åben |
+| C-007 | critic | kodefejl | **P2** | `js/bike-art.js:90, indlæst fra 12 HTML-sider` | 8,2 kB død JavaScript på hver side | **delvist rettet** — de elleve statiske sider; filen selv kan ikke slettes, se noten |
 | C-008 | critic | kodefejl | **P2** | `js/supabase-api.js:384 + js/backend-bridge.js:411-424` | En slugt fejl kan tømme brugerens gemte annoncer | **rettet** — se note nedenfor |
 | C-012 | critic | funktionalitet | **P2** | `crawler/pipeline.js:103-122` | Ingen afbrydelse ved gentagne 4xx | **rettet** (`045c579`) — 332 kald → 5 |
 | C-013 | critic | funktionalitet | **P2** | `crawler/config.js:130-131` | De juridiske spærrer er attestationer, ikke kontroller | **rettet** (`cd42a4b`) — se note nedenfor |
 | C-016 | critic | seo | **P2** | `js/seo.js:118 og :145` | Struktureret data påstår et foto, siden selv nægter at påstå: jsonld-vehicle erklærer og-image.png som om det var motorcyklen | **rettet** (`57777f1`) |
-| D-008 | designer | design | **P2** | `js/components.js:428-457 (eksternt kort, ingen .fav-btn)` | Favoritfunktionen har i drift ingenting at virke på | åben |
+| D-008 | designer | design | **P2** | `js/components.js:428-457 (eksternt kort, ingen .fav-btn)` | Favoritfunktionen har i drift ingenting at virke på | **delvist afvist** — DECISIONS.md; indgangen skjules, naar der intet er gemt |
 | D-009 | designer | design | **P2** | `maerker.html (genereres af scripts/build-brand-pages.js)` | Mærkeindekset er 73 % blindgyder, og det taber to mærker, der HAR lager | åben |
 | D-010 | designer | seo | **P2** | `maerker.html, sitemap.xml` | Følger af D-009, men det er et selvstændigt forhold: mærkeindekset udstiller 44 interne links til søgeresultater med nul indhold | **rettet** (`e8f2e60`) — C-014 løste kun halvdelen, se noten nedenfor |
-| D-011 | designer | design | **P2** | `css/styles.css:749-916 (.card-external), js/components.js eksternSpecs()` | De to korttyper i samme liste har to forskellige rytmer | åben |
+| D-011 | designer | design | **P2** | `css/styles.css:749-916 (.card-external), js/components.js eksternSpecs()` | De to korttyper i samme liste har to forskellige rytmer | **rettet** — 118 px → 54 px ved 390 px, lige hoeje fra 768 px |
 | C-006 | critic | sikkerhed | **P3** | `unsubscribe_saved_search` | Otte af ni funktioner i public blev hærdet til search_path="" af 016 | åben |
 | C-009 | critic | kodefejl | **P3** | `js/opret-annonce.js, byte-offset 7334` | En rå NUL-byte gør filen binær for git og grep | **rettet** (`381f0b8`) |
 | C-017 | critic | seo | **P3** | `js/seo.js:191` | Søgesidens <title> og meta description er identiske på hver facet | **rettet** (`687e5f9`) |
 | C-018 | critic | seo | **P3** | `alle 14 HTML-sider, <html lang="da">` | Specifikationen siger lang="da-DK"; sitet har lang="da" på alle fjorten sider (efterprøvet) | **afvist** — begrundelse og syv målinger i [DECISIONS.md](DECISIONS.md) |
-| C-019 | critic | seo | **P3** | `js/search.js:1695-1727` | Der er ingen noindex på et søgeresultat med nul træf | åben |
-| D-012 | designer | design | **P3** | `js/search.js — tomtilstandens hjælpetekst` | soegning.html?q=zzzzqqq (nul træf, ét aktivt filter = frisøgningen) skriver "Prøv at fjerne et filter eller udvide dit prisinterval" | åben |
+| C-019 | critic | seo | **P3** | `js/search.js:1695-1727` | Der er ingen noindex på et søgeresultat med nul træf | **rettet** |
+| D-012 | designer | design | **P3** | `js/search.js — tomtilstandens hjælpetekst` | soegning.html?q=zzzzqqq (nul træf, ét aktivt filter = frisøgningen) skriver "Prøv at fjerne et filter eller udvide dit prisinterval" | **rettet** |
 
 ### Udvidet i runde 2 — D-001 gjaldt flere bredder end de målte
 
@@ -178,6 +178,39 @@ Den gradvise udhuling: referencevinduet er udvidet fra 3 til 12 kørsler, så de
 fem 40 %-trin koster 49 kørsler i stedet for 13. Det er stadig en
 hastighedsbegrænser og ikke et gulv — begrundelsen for, at der ikke sættes et
 absolut gulv, står i [DECISIONS.md](DECISIONS.md) og tallene er låst i testen.
+
+### Nyt i runde 2 — cookiebanneret, samme succeskriterium som D-006
+
+Critic målte det under verifikationen af D-006 og skrev det i
+[rounds/round-1.md](rounds/round-1.md) uden at give det et ID: cookiebanneret
+er `position:fixed` i bunden på alle 14 sider ved første besøg, og fem af 30
+Tab-stop lå bag det. `dev` har rettet det som **D-006b** i `0552436`.
+
+Målt på `annonce.html?id=1021`, 390×844, tømt storage, rigtige Tab-tryk:
+**18 af 40** Tab-stop lå helt eller delvis bag en fast flade før, **0 af 44**
+efter. Også 0 af 45 på `index.html` og `soegning.html`. Tallet var højere end
+critic's fem, fordi banneret skubber `.listing-actionbar` 195 px op — bjælkens
+top gik fra y 775 til y 580, mens `scroll-padding-bottom` stod på 76 px, så
+banneret gjorde bjælken til en fejl igen.
+
+To ting gjorde det til et valg: `--cookie-h` stod på `document.body` (flyttet
+til `documentElement`, så `html`-reglen kan læse den), og den frie zone er
+summen af begge faste flader, ikke den højeste. Dertil `padding-bottom` på
+`body`, fordi `scroll-padding` ikke kan hjælpe det sidste element på siden.
+Reglerne hænger på `#cookie-banner:not([hidden])`, så de gælder fra første
+maling uden at røre `scripts/inline-cookie.js`. Fire vagthunde i
+`js/scroll-padding.test.js`.
+
+### C-007 er ikke lukket — fire linjer i `scripts/` holder filen i live
+
+Script-tagget er fjernet fra de elleve statiske sider, og den døde
+`.ba-*`-CSS er væk. Selve `js/bike-art.js` kan ikke slettes af `dev` i denne
+runde: `scripts/shared.js:189` LÆSER filen med `readFileSync`, så en sletning
+uden den linje får hele byggekæden til at kaste. Dertil
+`scripts/build-listing-pages.js:253` og `scripts/build-brand-pages.js:401` og
+`:503`, der skriver tagget ind i de genererede sider — som derfor stadig
+henter den. Rækkefølgen er: først de fire linjer, så filen. Det står også
+øverst i `js/bike-art.js` selv.
 
 ---
 
