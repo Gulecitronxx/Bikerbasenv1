@@ -39,8 +39,13 @@ function normalizeRemoteListing(row){
     isRemote: true,
     photoUrls: photos.map(p => db.photoUrl(p.storage_path)).filter(Boolean),
     // Id og sti følger med, så redigering kan fjerne ét enkelt billede
-    // i stedet for at røre dem alle.
-    photoRows: photos.map(p => ({ id: p.id, path: p.storage_path, url: db.photoUrl(p.storage_path) })),
+    // i stedet for at røre dem alle. `position` følger med, fordi
+    // js/opret-annonce.js skal kende den HØJESTE position, der bliver
+    // liggende, for at kunne lægge et nyt billede bagefter uden at ramme
+    // samme position som et billede, der stadig er der (position 0 er
+    // forsidebilledet). Antallet af rækker duer ikke som mål: efter en
+    // sletning midt i rækken er der huller i positionerne.
+    photoRows: photos.map(p => ({ id: p.id, path: p.storage_path, position: p.position, url: db.photoUrl(p.storage_path) })),
     photos: Math.max(3, photos.length || 4),
     seller: {
       id: row.seller_id,

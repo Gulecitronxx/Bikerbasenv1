@@ -54,11 +54,27 @@ const db = (function(){
     return blob;
   }
 
-  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
   const MAX_BYTES = 12 * 1024 * 1024; // 12 MB før komprimering
 
+  /* Endelse → MIME, brugt når filen ikke selv oplyser en type.
+     Windows har ingen registrering for .heic, så et iPhone-foto lagt over
+     på en pc kommer med `file.type === ''`. Uden det her gardin blev det
+     afvist som "Filtypen understøttes ikke", selvom typen aldrig var oplyst
+     — vi afviste altså på en oplysning, vi ikke havde. */
+  const ENDELSE_TIL_TYPE = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+    webp: 'image/webp', heic: 'image/heic', heif: 'image/heif',
+  };
+
+  function billedType(file){
+    if (file.type) return file.type;
+    const e = (file.name || '').split('.').pop().toLowerCase();
+    return ENDELSE_TIL_TYPE[e] || '';
+  }
+
   function validateImage(file){
-    if (!ALLOWED_TYPES.includes(file.type)) return 'Filtypen understøttes ikke. Brug JPG, PNG eller WebP.';
+    if (!ALLOWED_TYPES.includes(billedType(file))) return 'Filtypen understøttes ikke. Brug JPG, PNG eller WebP.';
     if (file.size > MAX_BYTES) return 'Billedet er for stort (maks. 12 MB).';
     return null;
   }
@@ -317,7 +333,16 @@ const db = (function(){
 
       let clean;
       try { clean = await stripExifAndResize(file); }
-      catch (e) { return { error: { message: 'Billedet kunne ikke behandles.' } }; }
+      catch (e) {
+        /* Sig hvilken fil, og hvad sælgeren kan gøre. HEIC/HEIF er tilladt,
+           men kun Safari kan afkode formatet — i Chrome og Firefox kaster
+           createImageBitmap. "Billedet kunne ikke behandles." fortalte
+           hverken hvilket af tolv billeder det var, eller at problemet har
+           en løsning. */
+        const heic = /heic|heif/i.test(billedType(file));
+        return { error: { message: `"${file.name}" kunne ikke læses som billede.`
+          + (heic ? ' HEIC-billeder fra iPhone virker ikke i alle browsere — gem det som JPG først.' : '') } };
+      }
 
       // Mappen SKAL starte med brugerens id — storage-politikken kræver det.
       // Endelsen følger det, stripExifAndResize faktisk gav os (webp, eller

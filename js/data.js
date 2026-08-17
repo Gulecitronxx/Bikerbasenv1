@@ -257,14 +257,26 @@ const LAST_NAMES = ['Jensen', 'Nielsen', 'Hansen', 'Pedersen', 'Andersen', 'Chri
    `mitIdVerified` var tilfældige booleans. Ingen af dem læses for en
    annonces sælger (`verifiedBadgeHTML()` i js/components.js returnerer tom
    streng, netop fordi ingen verificering er rigtig endnu), så de påstod noget
-   uden at vise noget. Felter, vi ikke har dækning for, får ingen plads. */
+   uden at vise noget. Felter, vi ikke har dækning for, får ingen plads.
+
+   ANTALLET AF ANMELDELSER ER EN KOLONNE, IKKE ET TERNINGKAST. Se noten over
+   DEMO_ANMELDELSER for hvorfor `Math.floor(rnd()*7)` ikke kunne blive
+   stående. En forhandler, der har handlet siden 2015, har flere handler bag
+   sig end en privat, der solgte sin første motorcykel i år — og det tal er
+   det stærkeste tillidssignal på profilen, så det skal følge af sælgerens
+   egen række og ikke af en terning. */
 const DEMO_DEALERS = [
-  { key: 'd0', name: 'Nordjysk MC Handel ApS',    city: 'Aalborg',     postnr: '9000', region: 'Nordjylland', memberSince: 2016 },
-  { key: 'd1', name: 'Aarhus Motorcykelhus ApS',  city: 'Aarhus C',    postnr: '8000', region: 'Midtjylland', memberSince: 2018 },
-  { key: 'd2', name: 'Fyns MC Center ApS',        city: 'Odense C',    postnr: '5000', region: 'Syddanmark',  memberSince: 2015 },
-  { key: 'd3', name: 'Roskilde Motorcykler ApS',  city: 'Roskilde',    postnr: '4000', region: 'Sjælland',    memberSince: 2021 },
-  { key: 'd4', name: 'Hovedstadens MC Depot ApS', city: 'København N', postnr: '2200', region: 'Hovedstaden', memberSince: 2019 },
-  { key: 'd5', name: 'Sønderjysk MC Service ApS', city: 'Sønderborg',  postnr: '6400', region: 'Syddanmark',  memberSince: 2023 },
+  { key: 'd0', name: 'Nordjysk MC Handel ApS',    city: 'Aalborg',     postnr: '9000', region: 'Nordjylland', memberSince: 2016, anmeldelser: 12 },
+  { key: 'd1', name: 'Aarhus Motorcykelhus ApS',  city: 'Aarhus C',    postnr: '8000', region: 'Midtjylland', memberSince: 2018, anmeldelser: 9 },
+  { key: 'd2', name: 'Fyns MC Center ApS',        city: 'Odense C',    postnr: '5000', region: 'Syddanmark',  memberSince: 2015, anmeldelser: 14 },
+  { key: 'd3', name: 'Roskilde Motorcykler ApS',  city: 'Roskilde',    postnr: '4000', region: 'Sjælland',    memberSince: 2021, anmeldelser: 5 },
+  { key: 'd4', name: 'Hovedstadens MC Depot ApS', city: 'København N', postnr: '2200', region: 'Hovedstaden', memberSince: 2019, anmeldelser: 8 },
+  /* Den nyeste butik ligger med VILJE under Store.MIN_ANMELDELSER_FOR_SNIT (3).
+     Uden den findes "for få anmeldelser til et gennemsnit" kun på private
+     profiler, og det er netop på en forhandler, en køber vil se den tilstand:
+     en butik, der er ny hos os, er ikke en butik uden ry — vi har bare ikke
+     noget at vise endnu, og forhandler.js siger det med egne ord. */
+  { key: 'd5', name: 'Sønderjysk MC Service ApS', city: 'Sønderborg',  postnr: '6400', region: 'Syddanmark',  memberSince: 2023, anmeldelser: 2 },
 ];
 
 /* De private sælgere. Et personnavn påstår ingen geografi, så her er der ikke
@@ -272,32 +284,42 @@ const DEMO_DEALERS = [
    flytter han sig mellem sine egne annoncer. Byerne er valgt fra DEMO_CITIES,
    så landsdelsfilteret rammer det samme sted som postnummeret.
    Seks af dem har to annoncer (samme mand, to maskiner). Det er med vilje:
-   uden dem findes sælgerprofilen med mere end ét kort ikke i demoen. */
+   uden dem findes sælgerprofilen med mere end ét kort ikke i demoen.
+
+   `anmeldelser` er samme kolonne som hos forhandlerne. En privat sælger, der
+   handler én motorcykel hvert par år, har få anmeldelser — ikke tolv. Seks
+   står på 0, og det er den tilstand, hver eneste rigtige profil i databasen
+   står i lige nu. */
 const DEMO_PRIVATE = [
-  { key: 'p01', name: 'Mikkel Jensen',       city: 'Vejle',        postnr: '7100', region: 'Syddanmark',  memberSince: 2019 },
-  { key: 'p02', name: 'Anders Hansen',       city: 'Hillerød',     postnr: '3400', region: 'Hovedstaden', memberSince: 2017 },
-  { key: 'p03', name: 'Jonas Pedersen',      city: 'Aarhus C',     postnr: '8000', region: 'Midtjylland', memberSince: 2022 },
-  { key: 'p04', name: 'Rasmus Nielsen',      city: 'Esbjerg',      postnr: '6700', region: 'Syddanmark',  memberSince: 2020 },
-  { key: 'p05', name: 'Kasper Larsen',       city: 'Silkeborg',    postnr: '8600', region: 'Midtjylland', memberSince: 2015 },
-  { key: 'p06', name: 'Frederik Sørensen',   city: 'Helsingør',    postnr: '3000', region: 'Hovedstaden', memberSince: 2024 },
-  { key: 'p07', name: 'Mathias Christensen', city: 'Randers',      postnr: '8900', region: 'Midtjylland', memberSince: 2018 },
-  { key: 'p08', name: 'Christian Andersen',  city: 'Næstved',      postnr: '4700', region: 'Sjælland',    memberSince: 2021 },
-  { key: 'p09', name: 'Emil Møller',         city: 'Kolding',      postnr: '6000', region: 'Syddanmark',  memberSince: 2023 },
-  { key: 'p10', name: 'Peter Rasmussen',     city: 'Frederiksberg',postnr: '2000', region: 'Hovedstaden', memberSince: 2014 },
-  { key: 'p11', name: 'Louise Jensen',       city: 'København V',  postnr: '1620', region: 'Hovedstaden', memberSince: 2020 },
-  { key: 'p12', name: 'Camilla Nielsen',     city: 'Odense C',     postnr: '5000', region: 'Syddanmark',  memberSince: 2022 },
-  { key: 'p13', name: 'Sofie Hansen',        city: 'Aalborg',      postnr: '9000', region: 'Nordjylland', memberSince: 2019 },
-  { key: 'p14', name: 'Ida Pedersen',        city: 'Herning',      postnr: '7400', region: 'Midtjylland', memberSince: 2025 },
-  { key: 'p15', name: 'Mette Larsen',        city: 'Slagelse',     postnr: '4200', region: 'Sjælland',    memberSince: 2016 },
-  { key: 'p16', name: 'Nikolaj Sørensen',    city: 'Hjørring',     postnr: '9800', region: 'Nordjylland', memberSince: 2021 },
-  { key: 'p17', name: 'Thomas Andersen',     city: 'Viborg',       postnr: '8800', region: 'Midtjylland', memberSince: 2018 },
-  { key: 'p18', name: 'Lars Christensen',    city: 'Nykøbing F',   postnr: '4800', region: 'Sjælland',    memberSince: 2017 },
-  { key: 'p19', name: 'Jonas Møller',        city: 'Frederikshavn',postnr: '9900', region: 'Nordjylland', memberSince: 2023 },
-  { key: 'p20', name: 'Kasper Rasmussen',    city: 'Roskilde',     postnr: '4000', region: 'Sjælland',    memberSince: 2020 },
-  { key: 'p21', name: 'Mette Jensen',        city: 'København N',  postnr: '2200', region: 'Hovedstaden', memberSince: 2024 },
-  { key: 'p22', name: 'Emil Hansen',         city: 'Sønderborg',   postnr: '6400', region: 'Syddanmark',  memberSince: 2016 },
-  { key: 'p23', name: 'Ida Nielsen',         city: 'Aarhus C',     postnr: '8000', region: 'Midtjylland', memberSince: 2021 },
-  { key: 'p24', name: 'Peter Larsen',        city: 'Vejle',        postnr: '7100', region: 'Syddanmark',  memberSince: 2015 },
+  { key: 'p01', name: 'Mikkel Jensen',       city: 'Vejle',        postnr: '7100', region: 'Syddanmark',  memberSince: 2019, anmeldelser: 3 },
+  { key: 'p02', name: 'Anders Hansen',       city: 'Hillerød',     postnr: '3400', region: 'Hovedstaden', memberSince: 2017, anmeldelser: 3 },
+  { key: 'p03', name: 'Jonas Pedersen',      city: 'Aarhus C',     postnr: '8000', region: 'Midtjylland', memberSince: 2022, anmeldelser: 0 },
+  { key: 'p04', name: 'Rasmus Nielsen',      city: 'Esbjerg',      postnr: '6700', region: 'Syddanmark',  memberSince: 2020, anmeldelser: 2 },
+  { key: 'p05', name: 'Kasper Larsen',       city: 'Silkeborg',    postnr: '8600', region: 'Midtjylland', memberSince: 2015, anmeldelser: 4 },
+  { key: 'p06', name: 'Frederik Sørensen',   city: 'Helsingør',    postnr: '3000', region: 'Hovedstaden', memberSince: 2024, anmeldelser: 0 },
+  { key: 'p07', name: 'Mathias Christensen', city: 'Randers',      postnr: '8900', region: 'Midtjylland', memberSince: 2018, anmeldelser: 3 },
+  { key: 'p08', name: 'Christian Andersen',  city: 'Næstved',      postnr: '4700', region: 'Sjælland',    memberSince: 2021, anmeldelser: 1 },
+  { key: 'p09', name: 'Emil Møller',         city: 'Kolding',      postnr: '6000', region: 'Syddanmark',  memberSince: 2023, anmeldelser: 0 },
+  /* Medlem siden 2014 og NUL anmeldelser. Med vilje: anciennitet er ikke
+     handelshistorik. En profil kan være ti år gammel, fordi manden oprettede
+     den for at kigge, og først sælger sin første motorcykel nu. Uden den her
+     række ville "0 anmeldelser" i demoen udelukkende ramme nye medlemmer, og
+     så ville den tomme tilstand ligne noget, der går væk af sig selv. */
+  { key: 'p10', name: 'Peter Rasmussen',     city: 'Frederiksberg',postnr: '2000', region: 'Hovedstaden', memberSince: 2014, anmeldelser: 0 },
+  { key: 'p11', name: 'Louise Jensen',       city: 'København V',  postnr: '1620', region: 'Hovedstaden', memberSince: 2020, anmeldelser: 2 },
+  { key: 'p12', name: 'Camilla Nielsen',     city: 'Odense C',     postnr: '5000', region: 'Syddanmark',  memberSince: 2022, anmeldelser: 1 },
+  { key: 'p13', name: 'Sofie Hansen',        city: 'Aalborg',      postnr: '9000', region: 'Nordjylland', memberSince: 2019, anmeldelser: 3 },
+  { key: 'p14', name: 'Ida Pedersen',        city: 'Herning',      postnr: '7400', region: 'Midtjylland', memberSince: 2025, anmeldelser: 0 },
+  { key: 'p15', name: 'Mette Larsen',        city: 'Slagelse',     postnr: '4200', region: 'Sjælland',    memberSince: 2016, anmeldelser: 3 },
+  { key: 'p16', name: 'Nikolaj Sørensen',    city: 'Hjørring',     postnr: '9800', region: 'Nordjylland', memberSince: 2021, anmeldelser: 2 },
+  { key: 'p17', name: 'Thomas Andersen',     city: 'Viborg',       postnr: '8800', region: 'Midtjylland', memberSince: 2018, anmeldelser: 3 },
+  { key: 'p18', name: 'Lars Christensen',    city: 'Nykøbing F',   postnr: '4800', region: 'Sjælland',    memberSince: 2017, anmeldelser: 2 },
+  { key: 'p19', name: 'Jonas Møller',        city: 'Frederikshavn',postnr: '9900', region: 'Nordjylland', memberSince: 2023, anmeldelser: 1 },
+  { key: 'p20', name: 'Kasper Rasmussen',    city: 'Roskilde',     postnr: '4000', region: 'Sjælland',    memberSince: 2020, anmeldelser: 2 },
+  { key: 'p21', name: 'Mette Jensen',        city: 'København N',  postnr: '2200', region: 'Hovedstaden', memberSince: 2024, anmeldelser: 0 },
+  { key: 'p22', name: 'Emil Hansen',         city: 'Sønderborg',   postnr: '6400', region: 'Syddanmark',  memberSince: 2016, anmeldelser: 4 },
+  { key: 'p23', name: 'Ida Nielsen',         city: 'Aarhus C',     postnr: '8000', region: 'Midtjylland', memberSince: 2021, anmeldelser: 1 },
+  { key: 'p24', name: 'Peter Larsen',        city: 'Vejle',        postnr: '7100', region: 'Syddanmark',  memberSince: 2015, anmeldelser: 5 },
 ];
 
 const DEMO_SAELGERE = new Map(
@@ -541,26 +563,117 @@ const BESKRIVELSE_STAND = {
     'Slidt, men den har været i daglig brug indtil nu og fejler ikke noget.',
     'Kilometerne kan ses. Bremser og dæk er skiftet, resten er som det er.',
   ],
+  /* FIRE OG IKKE TO. De to projekter i lageret ligger på plads 7 og 49, og
+     49 - 7 = 42 = 2·3·7. Med `i % puljens længde` falder de derfor på SAMME
+     sætning i enhver pulje med 2, 3, 6, 7, 14, 21 eller 42 linjer — begge
+     annoncer fik ordret "Har været væltet ...". En pulje på fire skiller dem
+     (7 % 4 = 3, 49 % 4 = 1). Det er samme slags sammenfald som `(i*3) % 3`
+     i slutlinjen nedenfor: en modulo, hvor tallene passer for godt sammen. */
   'Defekt/Projekt': [
     'Sælges som projekt. Den starter ikke, og jeg er ikke kommet videre med den.',
     'Har været væltet. Kåben er ridset og styret er skævt — den skal repareres, før den kan synes igen.',
+    'Motoren er skilt ad, og delene ligger i kasser, der følger med. Der mangler en toppakning.',
+    'Den gik i stå og er ikke startet siden. Jeg ved ikke, hvad der er i vejen med den.',
   ],
 };
 
 /* Brugen skal passe til maskinen OG til dens alder. Derfor er `classic`
    delt: en Bonneville fra 2019 og en Nimbus fra 1968 er ikke det samme
-   spørgsmål, og kun den ene af dem kan anbefales til daglig kørsel. */
+   spørgsmål, og kun den ene af dem kan anbefales til daglig kørsel.
+
+   FIRE LINJER PR. TYPE, IKKE TO. Med to gav puljen kun 3-4 × 2 = 6-8
+   mulige midterafsnit pr. (stand, type)-par, og der er flere annoncer end
+   det i de almindelige par: fire annoncer (1001, 1029, 1033, 1041 — alle
+   "God stand" + naked) endte med ORDRET samme midterafsnit, "Pæn og
+   velholdt ... Nem at have med at gøre i trafikken og let at parkere."
+   Hele beskrivelsen var forskellig, fordi åbnings- og slutlinjen skiftede,
+   men midterafsnittet er dét, en læser læser som sælgerens egne ord — og
+   den samme krop på fire annoncer er den samme skabelonfejl som før, bare
+   mindre. Fire linjer fordobler rummet til 12-16. */
 const BESKRIVELSE_BRUG = {
-  sport:     ['Den er kørt på landevej, ikke på bane.', 'Bruges om sommeren i weekenderne.'],
-  naked:     ['Nem at have med at gøre i trafikken og let at parkere.', 'God til pendling og en tur ud af byen om søndagen.'],
-  touring:   ['Den har været med på to ferier syd for grænsen.', 'Bygget til lange dage i sadlen, og det er dét, den har lavet.'],
-  adventure: ['Har mest kørt asfalt og lidt grusvej.', 'Brugt til landevej og et par ture på grus.'],
-  cruiser:   ['Kørt stille og roligt, mest om sommeren.', 'Rolig at køre, og den lyder som den skal.'],
-  classic:   ['Kørt om sommeren og opbevaret tørt om vinteren.', 'Klassiker, der bliver kørt — ikke stillet op.'],
-  veteran:   ['Veteran. Den skal køres som det, den er, og ikke som en moderne maskine.', 'Den kører, men reservedele skal findes, hvor de nu findes.'],
-  scooter:   ['Har været brugt til pendling i byen.', 'Kørt til og fra arbejde, aldrig langt ad gangen.'],
-  cross:     ['Banemaskine, aldrig indregistreret. Fabrikanten opgiver ingen hestekræfter på den her model.', 'Kun kørt på lukket bane.'],
+  sport: [
+    'Den er kørt på landevej, ikke på bane.',
+    'Bruges om sommeren i weekenderne.',
+    'Har aldrig været på trackday.',
+    'Kørt ordentligt ind og aldrig trukket hårdt fra kold motor.',
+  ],
+  naked: [
+    'Nem at have med at gøre i trafikken og let at parkere.',
+    'God til pendling og en tur ud af byen om søndagen.',
+    'Har kørt til og fra arbejde det meste af sæsonen.',
+    'Bruges mest til korte ture og ærinder i byen.',
+  ],
+  touring: [
+    'Den har været med på to ferier syd for grænsen.',
+    'Bygget til lange dage i sadlen, og det er dét, den har lavet.',
+    'Har kørt Tyskland og et stykke ned i Alperne med fuld bagage.',
+    'Mest motorvej og landevej, sjældent bykørsel.',
+  ],
+  adventure: [
+    'Har mest kørt asfalt og lidt grusvej.',
+    'Brugt til landevej og et par ture på grus.',
+    'Har aldrig været ude i egentligt terræn.',
+    'Kørt på sommerferie med sidetasker på.',
+  ],
+  cruiser: [
+    'Kørt stille og roligt, mest om sommeren.',
+    'Rolig at køre, og den lyder som den skal.',
+    'Har mest kørt søndagsture langs kysten.',
+    'Aldrig kørt i regn, hvis jeg kunne undgå det.',
+  ],
+  classic: [
+    'Kørt om sommeren og opbevaret tørt om vinteren.',
+    'Klassiker, der bliver kørt — ikke stillet op.',
+    'Har været til et par træf, ellers står den i garagen.',
+    'Kørt nogle hundrede kilometer om året de seneste somre.',
+  ],
+  veteran: [
+    'Veteran. Den skal køres som det, den er, og ikke som en moderne maskine.',
+    'Den kører, men reservedele skal findes, hvor de nu findes.',
+    'Bliver kørt til træf om sommeren og ellers ikke.',
+    'Original og urestaureret. Patinaen er, som den skal være på en i den alder.',
+  ],
+  scooter: [
+    'Har været brugt til pendling i byen.',
+    'Kørt til og fra arbejde, aldrig langt ad gangen.',
+    'Bruges til at komme rundt i byen, ikke til længere ture.',
+    'Har stået i carport og er kørt det meste af året.',
+  ],
+  cross: [
+    'Banemaskine, aldrig indregistreret. Fabrikanten opgiver ingen hestekræfter på den her model.',
+    'Kun kørt på lukket bane.',
+    'Kørt på bane om sommeren, aldrig på vej.',
+    'Serviceret efter hver anden kørsel, som man skal på en crosser.',
+  ],
 };
+
+/* ET PROJEKT HAR INGEN NUVÆRENDE BRUG.
+
+   BESKRIVELSE_BRUG er slået op på `type` alene, og typen ved ikke, om
+   maskinen kører. Derfor kunne en linje i nutid lande på en motorcykel, der
+   ikke starter: annonce 1008 (Honda CBR600RR, STAND: Defekt/Projekt,
+   Indregistrering: Afmeldt) stod med "Har været væltet ... den skal
+   repareres, før den kan synes igen. Bruges om sommeren i weekenderne."
+   De to sætninger stod ved siden af hinanden i samme afsnit.
+
+   Det er nøjagtig den fejl, hele omskrivningen af beskrivelserne handlede om
+   — en tekst, der modsiger annoncens egne felter — den var bare flyttet fra
+   skabelonen ned i brugslinjen. Nutid er ikke det eneste problem: `veteran`
+   har "Den kører, men reservedele skal findes", og `cruiser` har "den lyder
+   som den skal", som begge påstår en kørende maskine.
+
+   Standen slår derfor brugspuljen op FØR typen. Et projekt får en linje om,
+   hvor den har stået — ikke om, hvad den bruges til.
+
+   Fire linjer, af samme grund som standpuljen ovenfor: med `Math.floor(i/2)`
+   giver plads 7 og 49 indeks 3 og 24, og de falder sammen i en pulje på
+   både to og tre. */
+const BESKRIVELSE_BRUG_PROJEKT = [
+  'Den har stået i garagen de sidste par år.',
+  'Papirerne følger med, men den skal på værksted, før den kan køre igen.',
+  'Jeg havde selv tænkt at samle den op, og der ligger nogle af delene, der skal bruges.',
+  'Den har stået under presenning bag huset, så regn har den fået.',
+];
 
 const BESKRIVELSE_SLUT_FORHANDLER = [
   'Står i butikken og kan ses efter aftale. Vi tager gerne din nuværende motorcykel i bytte.',
@@ -577,6 +690,25 @@ const BESKRIVELSE_SLUT_PRIVAT = [
   'Kom og se den. Prøvetur efter aftale.',
   'Sælges, fordi jeg har købt noget andet. Skriv, hvis du er interesseret.',
 ];
+
+/* EN SLUTLINJE MÅ IKKE LOVE NOGET, STANDEN UDELUKKER.
+
+   Annonce 1008 sluttede med "Kom og se den. Prøvetur efter aftale." — på en
+   motorcykel, der er AFMELDT, har været væltet og "skal repareres, før den
+   kan synes igen". Man kan ikke tage en prøvetur på en afmeldt maskine, der
+   ikke kører, og det er ikke en detalje: en køber, der kører efter den på
+   det tilbud, har fået en aftale, sælgeren ikke kan holde.
+
+   Samme problem venter på forhandlersiden. "Klargjort på vores eget
+   værksted, før den kom på gulvet" er det stik modsatte af Defekt/Projekt.
+   Ingen forhandler i DEMO_LAGER har et projekt i dag, men standen er en
+   kolonne, nogen kan ændre — så linjen skal sorteres fra på reglen og ikke
+   på held.
+
+   Linjerne sorteres derfor fra, når de forudsætter en maskine, der kan
+   køre nu. Det er et filter og ikke en fjerde pulje, så en ny linje, der
+   lover en prøvetur, bliver fanget af sig selv. */
+const SLUT_FORUDSAETTER_KOEREKLAR = /Prøvetur|Klargjort/;
 
 /* De helt korte. En markedsplads uden dem findes ikke, og de er den eneste
    måde at se `annonceOplysthed()`s 80-tegnsregel arbejde på. */
@@ -597,10 +729,28 @@ function byggBeskrivelse(l, i){
   // Kun opslagslinjen på hver femte — samme længde som en rigtig kort annonce.
   if (i % 5 === 1) return `${aabning}\n\n${standLinje}`;
 
+  /* Standen først, typen bagefter. Se noten over BESKRIVELSE_BRUG_PROJEKT:
+     en maskine, der ikke kører, har en historie om hvor den har stået — ikke
+     en om hvad den bruges til. */
   const brugNoegle = l.type === 'classic' && l.year < 1990 ? 'veteran' : l.type;
-  const brug = BESKRIVELSE_BRUG[brugNoegle] || BESKRIVELSE_BRUG.naked;
-  const brugLinje = brug[Math.floor(i / 2) % brug.length];
-  const slut = l.isDealer ? BESKRIVELSE_SLUT_FORHANDLER : BESKRIVELSE_SLUT_PRIVAT;
+  const brug = l.condition === 'Defekt/Projekt'
+    ? BESKRIVELSE_BRUG_PROJEKT
+    : (BESKRIVELSE_BRUG[brugNoegle] || BESKRIVELSE_BRUG.naked);
+  /* KILOMETERTÆLLER, IKKE TO VISERE I TAKT. Før stod her `Math.floor(i/2)`,
+     mens standlinjen bruger `i % stand.length`. Begge tal er afgjort af
+     `i mod 4`, når standpuljen har fire linjer — så de to visere gik i takt
+     og gentog sig hver fjerde annonce, uanset hvor store puljerne var. Det
+     var derfor de fire naked-annoncer fik samme krop.
+     Ved at dividere med standpuljens længde tæller brugslinjen først op, når
+     standlinjen har været hele vejen rundt. Så bruges alle
+     stand.length × brug.length kombinationer, før nogen gentages. */
+  const brugLinje = brug[Math.floor(i / stand.length) % brug.length];
+  const alleSlut = l.isDealer ? BESKRIVELSE_SLUT_FORHANDLER : BESKRIVELSE_SLUT_PRIVAT;
+  /* Se noten over SLUT_FORUDSAETTER_KOEREKLAR: et projekt kan ikke tilbydes
+     til prøvetur eller kaldes klargjort. */
+  const slut = l.condition === 'Defekt/Projekt'
+    ? alleSlut.filter(s => !SLUT_FORUDSAETTER_KOEREKLAR.test(s))
+    : alleSlut;
   /* 7 og ikke 3: `(i*3) % slut.length` er ALTID 0, når listen har tre
      elementer — og forhandlerlisten har tre. Alle 21 forhandlerannoncer fik
      derfor den samme slutlinje, altså præcis den skabelon, hele omskrivningen
@@ -1016,10 +1166,23 @@ function isSuspiciouslyCheap(listing){
       regnet rigtigt hele tiden — det var BILLEDERNE, der løj, og derfor så
       "4,5 af 1 anmeldelse" og "3,8 af 2" umulige ud.
 
-   2) Alle sælgere havde mindst én anmeldelse (1-4). Så den tomme tilstand —
-      dén, hver eneste rigtige profil i databasen står i — kunne ikke ses
-      nogen steder i demoen. Nu er spændet 0-6, så alle tre tilstande findes:
-      ingen anmeldelser, under grænsen for et gennemsnit, og over den.
+   2) ANTALLET BLEV KASTET MED EN TERNING. Først `1 + rnd()*4`, så alle havde
+      mindst én, og den tomme tilstand — dén, hver eneste rigtige profil i
+      databasen står i — fandtes ikke i demoen. Så `Math.floor(rnd()*7)`, som
+      gav nullerne, men stadig var en terning: målt gav den fire private
+      sælgere med ÉN annonce seks anmeldelser hver, mens Fyns MC Center ApS,
+      forhandler siden 2015 med fire maskiner på gulvet, fik én. En butik med
+      elleve år bag sig og færre anmeldelser end manden, der sælger sin
+      scooter, er ikke et marked, der findes — og antallet er det stærkeste
+      tillidssignal på profilen, så det er også den løgn, en køber først
+      lægger mærke til.
+      ANTALLET ER NU EN KOLONNE på sælgerens række (`anmeldelser` i
+      DEMO_DEALERS og DEMO_PRIVATE), ligesom hk og pris blev kolonner i
+      DEMO_LAGER. Det følger af, hvor længe sælgeren har været medlem, og af
+      om han er forhandler — og det kan ikke længere flytte sig fra sælgeren.
+      De tre tilstande, siden skal kunne vise, er dermed VALGT og ikke
+      tilfældige: seks profiler på 0, ti under Store.MIN_ANMELDELSER_FOR_SNIT
+      (heriblandt én forhandler, se noten ved d5), resten over.
 
    3) STJERNERNE OG TEKSTEN VAR TO UAFHÆNGIGE TRÆK. `rating` blev kastet for
       sig (3-5) og `comment` for sig, ud af seks sætninger. Målt på det gamle
@@ -1100,25 +1263,51 @@ const SEED_REVIEWS = (function(){
     return bunke[naeste++];
   };
 
+  /* Antallet slås op på sælgerens række. Terningen er væk — se punkt 2
+     ovenfor. Navnet er nøglen, fordi det er navnet, Store.getReviews() slår
+     op med; navnene i DEMO_DEALERS og DEMO_PRIVATE er derfor unikke, og det
+     skal de blive ved med at være. */
+  const antalPrSaelger = new Map(
+    [...DEMO_SAELGERE.values()].map(s => [s.name, s.anmeldelser]));
+
+  /* En anmelder må ikke hedde det samme som den, han anmelder.
+     `Mathias Christensen` fik en enkelt stjerne af `Mathias C.` — altså en
+     sælger, der ser ud til at have givet sig selv en dårlig anmeldelse. Det
+     er samme fejltype som resten af filen: to uafhængige træk, der lander
+     oven i hinanden og påstår noget, ingen kan bakke op. Fornavnet trækkes
+     derfor fra dem, der ikke er sælgerens eget. */
+  const anmelderNavn = (saelgerNavn) => {
+    const eget = saelgerNavn.split(' ')[0];
+    const valg = FIRST_NAMES.filter(f => f !== eget);
+    const fornavn = valg[Math.floor(rnd() * valg.length)];
+    const efter = LAST_NAMES[Math.floor(rnd() * LAST_NAMES.length)];
+    return `${fornavn} ${efter[0]}.`;
+  };
+
   const out = {};
   const names = [...new Set(LISTINGS.map(l => l.seller.name))];
   names.forEach(name => {
-    const n = Math.floor(rnd() * 7);
+    const n = antalPrSaelger.get(name) ?? 0;
     /* Uden gentagelse PR. SÆLGER. To profiler må gerne dele en sætning — to
        købere kan sagtens skrive det samme om hver sin handel — men den samme
        sætning to gange under hinanden på ÉN side afslører generatoren med det
-       samme. Det gjorde den på 16 af 37 profiler. */
+       samme. Det gjorde den på 16 af 37 profiler.
+
+       Puljen er 23 sætninger, så `n` kan ikke overstige 23 uden at løkken
+       giver op og leverer en kortere liste end kolonnen lover. Den højeste
+       kolonneværdi er 14. Skal en profil have flere, skal puljen vokse
+       først — ellers ville profilen vise et andet antal end tabellen siger. */
     const brugt = new Set();
     const anmeldelser = [];
     let forsoeg = 0;
-    while (anmeldelser.length < n && forsoeg < 200){
+    while (anmeldelser.length < n && forsoeg < 400){
       forsoeg++;
       const idx = traek();
       if (brugt.has(idx)) continue;
       brugt.add(idx);
       const kilde = DEMO_ANMELDELSER[idx];
       anmeldelser.push({
-        author: `${FIRST_NAMES[Math.floor(rnd()*FIRST_NAMES.length)]} ${LAST_NAMES[Math.floor(rnd()*LAST_NAMES.length)][0]}.`,
+        author: anmelderNavn(name),
         // Hele stjerner 1-5 — præcis de værdier, stjernevælgeren kan afgive —
         // og de kommer fra SAMME række som teksten.
         rating: kilde.rating,
