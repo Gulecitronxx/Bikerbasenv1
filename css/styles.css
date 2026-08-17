@@ -38,6 +38,11 @@
   --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
 
   --header-h: 68px;
+  /* Annoncesidens faste handlingsbjælke. Målt til 69px (10 + 48 + 10 + 1px
+     kant); de 76 er den plads, body'en allerede holdt fri under den, og nu
+     er det ét tal i stedet for to — se scroll-padding-bottom i reset'en og
+     body.har-actionbar. */
+  --actionbar-h: 76px;
   --ease-out: cubic-bezier(0.16,1,0.3,1);
   color-scheme: light;
 }
@@ -96,6 +101,46 @@
 [hidden]{display:none !important;}
 html,body{margin:0;padding:0;}
 html{-webkit-text-size-adjust:100%;}
+
+/* WCAG 2.2 AA, SC 2.4.11 "Focus Not Obscured (Minimum)".
+   ------------------------------------------------------------------
+   Der fandtes ingen scroll-padding nogen steder i dette stilark, og det
+   fejlede i BEGGE ender. Efterprøvet med rigtige tastetryk på
+   annonce.html?id=1021 ved 390x844:
+
+     Shift+Tab  fokus landede på "Alle BMW til salg" med blækkassen y 0-38,
+                mens den sticky .site-header dækker y 0-68 — fokusringen helt
+                skjult. Den ende gælder alle 14 sider, fordi headeren er
+                position:sticky/fixed i 68px uden sidescope.
+     Tab        fokus landede på "Motorcykler til A-kørekort" med blækkassen
+                y 800-838, mens .listing-actionbar dækker y 775-844.
+
+   Årsagen var den samme begge steder: browseren regner et element som "i
+   viewporten", så snart det er inden for rullehøjden, og ruller derfor ikke
+   fri af noget, der ligger OVEN PÅ. scroll-padding fortæller den, hvor
+   viewporten reelt begynder og ender.
+
+   Fokusringen SELV var i orden hele tiden — 23 varianter gennemgået, alle
+   får outline via :focus-visible. Det var kun rulningen, der manglede.
+
+   Efterprøv med Tab og Shift+Tab, ikke med element.focus(): programmatisk
+   fokus udløser ikke :focus-visible ens og ruller efter samme regel, så en
+   test dér kan se grøn ud uden at være det.
+
+   IKKE dækket her, og det er bevidst: cookiebanneret er også position:fixed
+   i bunden på alle sider, indtil man har svaret. Dens højde står i
+   --cookie-h, som js/components.js sætter på document.body — og en variabel
+   på body kan et html-regelsæt ikke læse. Det er en selvstændig sag, ikke
+   noget der skal gættes på her. */
+html{ scroll-padding-top: var(--header-h); }
+
+/* Bunden gælder kun dér, hvor bjælken faktisk vises: annoncesiden
+   (body.har-actionbar, sat i js/annonce.js) under 960px, jf. media-reglen
+   ved .listing-actionbar. --actionbar-h er det samme tal, som body'ens
+   padding-bottom bruger, så bjælkens højde står ét sted. */
+@media (max-width:959px){
+  html:has(body.har-actionbar){ scroll-padding-bottom: var(--actionbar-h); }
+}
 body{
   font-family: var(--font-body);
   background: var(--color-bg);
@@ -1369,8 +1414,10 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .listing-actionbar .btn{ flex:1; min-height:48px; }
 .listing-actionbar .btn-outline{ flex:0 0 auto; padding-inline: 18px; }
 @media (min-width:960px){ .listing-actionbar{ display:none; } }
-/* Bjælken må ikke lægge sig oven på det sidste i footeren. */
-@media (max-width:959px){ body.har-actionbar{ padding-bottom:76px; } }
+/* Bjælken må ikke lægge sig oven på det sidste i footeren. Samme tal bruges
+   som scroll-padding-bottom i reset'en, så et tastetryk ikke lander under
+   bjælken (SC 2.4.11) — derfor er det en variabel og ikke to 76'ere. */
+@media (max-width:959px){ body.har-actionbar{ padding-bottom: var(--actionbar-h); } }
 /* Cookiebanneret laa OVEN PAA handlingsbjaelken, saa "Skriv til saelger" —
    annoncesidens primaere handling — ikke kunne trykkes, foer man havde taget
    stilling til cookies. Bevist med en hit-test: banneret opfangede klikket.
