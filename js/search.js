@@ -1736,10 +1736,31 @@ function render(){
   secondaryHandle = setTimeout(() => renderSecondary(pills, pageItems, heading, total, totalPages), 0);
 }
 
+/* En facet uden træf skal ikke indekseres (C-019).
+
+   Det er livrem og seler, og det skal siges ærligt: canonical peger allerede
+   på bare `soegning.html` på hver eneste facet, så en tom kombination
+   indekseres i praksis ikke som sin egen adresse, og `jsonld-results` falder
+   korrekt bort, når listen er tom. Der er altså ikke målt en skade. Det, der
+   ER tilbage, er tilfældet hvor Google vælger at ignorere canonical'en — det
+   sker, og så er "Ingen annoncer matcher dine filtre" den side, en søgende
+   lander på.
+
+   Begge retninger sættes med vilje. Siden skifter tilstand uden en ny
+   indlæsning: sætter man kun `noindex` ved nul træf, bliver den hængende,
+   når brugeren fjerner filteret igen — og så ville et fuldt resultat stå
+   med `noindex`. `index, follow` er standardadfærden skrevet ud, ikke en ny
+   påstand. */
+function seoRobots(total){
+  Seo.setMeta('meta[name="robots"]', 'name', 'robots',
+    total === 0 ? 'noindex, follow' : 'index, follow');
+}
+
 /* Etape 2: det der står UNDER kortene (eller slet ikke kan ses) — her kan
    ingenting skubbe til noget, brugeren kigger på. */
 function renderSecondary(pills, pageItems, heading, total, totalPages){
   seoSearchResults(pageItems, heading);
+  seoRobots(total);
 
   /* Facettallene hører til etape 2: de koster seks gennemløb af filterkæden,
      og ingen venter på dem — panelet står allerede med de foregående tal, og
