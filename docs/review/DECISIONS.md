@@ -102,6 +102,74 @@ lade som om det er en ny kilde. Se `crawler/db.js`, `bortemarkeringVurdering()`.
 
 <!-- dev skriver herunder -->
 
+### C-004 delvist afvist — 17.08.2026
+**FINDING:** "Anonym, ubegrænset skrivekanal til produktionsdatabasen." Findingen
+peger på tre ting: intet størrelsesloft, ingen rate limit, ingen captcha.
+
+**HVAD DER ER LAVET** (migration 018, afsnit 3): størrelsesloftet.
+`reports_text_len_chk` (comment ≤ 2000, target_id ≤ 64), `reviews_text_len_chk`
+(comment ≤ 2000) og `krav_dok_len_chk` (dokumentation ≤ 2000).
+
+**HVAD DER ER AFVIST:** rate limiting og captcha **i databasen**.
+
+**HVORFOR AFVIST:**
+
+*Der er ingen identitet at tælle på.* Politikken `indberetning: alle må oprette`
+tillader `reporter_id is null` — det er hele pointen med en
+notice-and-action-kanal, og en tæller pr. bruger har derfor ingen nøgle for
+præcis de indsendelser, findingen handler om. Det eneste, Postgres kan se, er
+`current_setting('request.headers')::json->>'x-forwarded-for'`, som afsenderen
+selv sætter. En rate limit på et felt, angriberen selv skriver, er ikke en
+grænse; den er en indbydelse til at skrive et nyt tal.
+
+*Den globale tæller vender våbnet om.* En trigger, der afviser INSERT når der er
+mere end N anonyme indberetninger i det sidste minut, gør en flodbølge til en
+afbrudt anmeldelsesfunktion. Angriberen betaler ingenting for at holde den
+lukket, og den, der taber, er det menneske, der prøver at anmelde en svindler.
+For en tabel, hvis hele formål er at tage imod advarsler fra fremmede, er
+"afvis ved travlhed" den forkerte vej at fejle.
+
+*Og `target_id` er fri tekst uden fremmednøgle*, så en kvote pr. mål kan omgås
+ved at variere målet. Efterprøvet i `information_schema` og `pg_constraint`:
+`reports.target_id` er `text` med kun et CHECK på `target_type`.
+
+**HVAD LOFTET SÅ KØBER — målt:** Postgres' `text` tager op til 1 GB pr. værdi.
+Før: én række kunne koste ~2 GB (comment + target_id). Efter: ~2 KB. Det er en
+faktor på ca. **10⁶ pr. række**. Antallet af rækker er derefter bundet af
+netværket, ikke af disken, og det er den samme grænse enhver anonym
+API-endpoint har.
+
+**HVOR DEN RIGTIGE GRÆNSE HØRER TIL:** i kanten — Supabase' API-gateway eller
+Cloudflare foran den — hvor afsenderens IP er observeret og ikke oplyst. Det er
+ikke SQL, og det er derfor ikke i denne migration. Det står her, så næste runde
+ikke genfinder det som "dev glemte rate limiting".
+
+**IKKE MIN FIL, MEN HØRER TIL FINDINGEN:** `<textarea id="report-comment">` i
+`js/components.js:569` har ingen `maxlength`. Databasen afviser nu ved 2000
+tegn, men brugeren får det at vide som en API-fejl i stedet for som en
+tællekant i feltet. `js/` ejes af en anden agent i denne runde.
+
+**BEVIS:** `pg_constraint` før ændringen: `reports` havde CHECK på `reason`,
+`status`, `target_type` og intet på `comment`/`target_id`. Data målt før
+migrationen: 1 række i `reports` (længste comment 17 tegn, længste target_id
+8 tegn), 0 rækker i `reviews`, 0 i `krav` — nul rækker bryder de nye CHECKs, så
+valideringen går igennem.
+
+### C-002 delvist gennemført — 17.08.2026
+Ikke en afvisning, men en grænse, der skal stå skrevet: `pg_default_acl` har
+**to** grantors for skema `public` — `postgres` og `supabase_admin`. Migration
+018 lukker postgres-posten. Supabase_admin-posten kan vi ikke nå: efterprøvet i
+produktion er `current_user` = `postgres`, `rolsuper` = **false**, og
+`pg_has_role('postgres','supabase_admin','MEMBER')` = **false**. Postgres må kun
+ændre default privileges for roller, den er medlem af, så sætningen giver 42501.
+Den står derfor i en `do`-blok, der fanger fejlen og siger den højt.
+
+Det betyder i praksis ingenting i dag: en default-ACL fyrer kun, når **den
+grantor selv** opretter objektet, og alle 15 tabeller og views i `public` er
+ejet af `postgres` — vores migrationer kører som `postgres`. Restrisikoen
+gælder objekter, Supabase' egen platform måtte oprette i `public`. Skal den
+lukkes, kræver det superuser, altså Supabase-support.
+
 ### C-014 delvist afvist — 17.08.2026
 **FINDING:** "Produktionssitet har 7 indekserbare adresser og NUL annonce-
 eller mærkesider." Findingen peger på to slags manglende sider: mærkesider og
