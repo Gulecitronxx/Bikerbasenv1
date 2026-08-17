@@ -122,6 +122,21 @@ test('listerækken følger kortet: rækkefladen ind, kildelinket ud', () => {
   assert.ok(cta.rel.includes('nofollow'));
 });
 
+/* Prisen er det, købet træffes på, og den skal derfor stå først og størst.
+   Den stod sidst og lige så stor som titlen: `.card-external .card-price` var
+   sat ned til 17px — samme størrelse og vægt som `.card-title-main` — og
+   prisrækken kom efter titlen i DOM'en. Målt på 1440 lå prisen 56px UNDER
+   titlen. Rækkefølgen låses her, fordi den ikke kan ses i en CSS-fil: en
+   senere oprydning, der "samler titlen øverst som på vores egne kort", ville
+   vende hierarkiet om igen uden at nogen opdagede det. */
+test('prisen står FØR titlen på det indekserede kort', () => {
+  const html = externalCardHTML(eksternAnnonce(), 1);
+  const pris = html.indexOf('card-prisrække');
+  const titel = html.indexOf('card-title-main');
+  assert.ok(pris > -1 && titel > -1, 'begge felter skal findes');
+  assert.ok(pris < titel, 'prisrækken skal stå før titlen i DOM-rækkefølgen');
+});
+
 test('uden en brugbar kilde-URL vises den indekserede annonce slet ikke', () => {
   // Guarden er ældre end denne rettelse, men den betyder noget andet nu:
   // kortet VILLE virke uden kildens URL, fordi fladen peger på vores side.

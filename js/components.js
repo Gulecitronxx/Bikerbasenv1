@@ -448,14 +448,14 @@ function externalCardHTML(l, i){
       <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
     </div>
     <div class="card-body">
-      <h3 class="card-title">
-        <span class="card-title-main">${titel}</span>
-        <span class="card-title-variant"${undertitel ? ` title="${undertitel}"` : ''}>${undertitel}</span>
-      </h3>
       <div class="card-prisrække">
         <span class="card-price${l.price == null ? ' pris-mangler' : ''}">${pris}</span>
         ${markHTML}
       </div>
+      <h3 class="card-title">
+        <span class="card-title-main">${titel}</span>
+        <span class="card-title-variant"${undertitel ? ` title="${undertitel}"` : ''}>${undertitel}</span>
+      </h3>
       <div class="card-specblok">
         <dl class="card-specs">${specs}
         </dl>

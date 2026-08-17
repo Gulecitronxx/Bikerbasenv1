@@ -830,8 +830,10 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    1. FASTE SLOTS. Titel, pris, specrække og bund har fast højde, uanset hvad
       kilden havde med. Skrider ét felt, skrider hele kolonnen, og så kan en
       side med 40 kort ikke skimmes — man skal læse hvert kort forfra.
-   2. TRE SKRIFTSTØRRELSER: 17 / 14 / 12. Hvert trin er over 1,15x, så
-      forskellen ses. Seks størrelser er ikke et hierarki, det er støj.
+   2. FIRE SKRIFTSTØRRELSER: 21 / 17 / 14 / 12, og prisen har de 21. Hvert
+      trin er over 1,15x, så forskellen ses. Seks størrelser er ikke et
+      hierarki, det er støj — men tre var én for få: prisen stod på 17 som
+      titlen, og et hierarki uden forskel er heller ikke et hierarki.
    3. ALLE LODRETTE AFSTANDE ER 4, 8, 12 ELLER 16. Fire værdier, alle
       multipla af 4. Rytmen er dét, der får kortet til at virke roligt.
 
@@ -879,8 +881,8 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* ---- Titlen: to linjer, fast højde ----
    "Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING" på én linje blev
    klippet efter "Cruiser", og så fortalte kortet kun, at der stod meget.
-   Linje 1 bærer modellen — det man scanner efter, og derfor kortets største
-   og tungeste tekst, på niveau med prisen. Linje 2 bærer varianten, dæmpet.
+   Linje 1 bærer modellen, linje 2 varianten, dæmpet. Titlen står UNDER
+   prisen og et trin mindre end den — se prisrækken nedenfor.
 
    Højden er låst til 44px (24+20), også når varianten er tom. Uden det ville
    et kort uden variant være 20px lavere end naboen, og alt nedenunder ville
@@ -897,22 +899,31 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 
-/* ---- Pris + salgsbetingelser på samme linje ----
+/* ---- Pris + salgsbetingelser på samme linje, ØVERST i kroppen ----
    Prisen fylder sit, og salgsmarkørerne ("ENGROS", "UDEN KLARGØRING") står
    til højre. De hører til her og ikke i titlen: de forklarer PRISEN. Og de
    ligger ikke længere oven på fotoet, hvor to piller dækkede 185 af 204 px
-   af billedet ved smal kortbredde. */
+   af billedet ved smal kortbredde.
+
+   Prishierarkiet var vendt om, og det gjaldt 87 % af lageret. `.card-price`
+   var sat ned til 17px HER — nøjagtig samme størrelse og vægt som
+   `.card-title-main` — og rækken stod efter titlen i DOM'en. Målt på 1440:
+   titel y669, pris y725. Prisen laa altsaa 56px UNDER titlen og var lige saa
+   stor. Vores eget kort gør det modsatte i samme gitter (pris 21px over titel
+   15px), saa de to korttyper i den samme liste svarede paa hver sit
+   spoergsmaal foerst.
+
+   Rækken er nu 28px, så de 21px fra den delte `.card-price` (:1007) kan stå
+   i den, og overskrivningen herunder sætter kun linjehøjde og flex.
+
+   De 22 uden pris: "Pris ved henvendelse" er ikke et beløb og må ikke se ud
+   som et. Linjen skifter ikke højde — kun størrelse, vægt og farve, så øjet
+   ikke læser det som et tal. */
 .card-prisrække{
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  height:24px; min-width:0;
+  display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+  height:28px; min-width:0;
 }
-.card-external .card-price{
-  font-family: var(--font-display); font-size:17px; font-weight:700;
-  line-height:24px; flex:0 0 auto;
-}
-/* De 22 uden pris: "Pris ved henvendelse" er ikke et beløb og må ikke se ud
-   som et. Linjen skifter ikke højde — kun vægt og farve, så øjet ikke læser
-   det som et tal. */
+.card-external .card-price{ line-height:28px; flex:0 0 auto; }
 .card-external .card-price.pris-mangler{
   font-family: var(--font-body); font-size:14px; font-weight:500;
   color: var(--color-fg-muted);
