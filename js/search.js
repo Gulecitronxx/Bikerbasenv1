@@ -646,9 +646,15 @@ function rowMarkersHTML(markers){
 
    Samme fire løfter som kortet i js/components.js, og de er ikke til
    forhandling, fordi rækken er smallere: mærket "Hos <kilde>" står først i
-   rækken, kildens navn står hvor sælgeren ellers står, linket går til
-   KILDEN i ny fane med rel=nofollow, og der er intet hjerte — favoritter
-   peger på vores egne annoncer med en fremmednøgle. */
+   rækken, kildens navn står hvor sælgeren ellers står, kildelinket åbner i ny
+   fane med rel=nofollow, og der er intet hjerte — favoritter peger på vores
+   egne annoncer med en fremmednøgle.
+
+   Rækkefladen gik før til KILDEN. Den går nu til vores egen annonceside, af
+   samme grund som kortet (se blokken over externalCardHTML i
+   js/components.js): den side findes, den er god, og den var uopnåelig for
+   87 % af lageret. "Se hos <kilde>" er stadig på rækken — nu som sit eget
+   link, i stedet for som hele rækken. */
 function externalRowHTML(l, i){
   const kilde = escapeHTML(l.source?.navn || 'ekstern kilde');
   const href = sikkerUrl(l.externalUrl);
@@ -672,13 +678,14 @@ function externalRowHTML(l, i){
     ${rowSpecsHTML(l)}
     <div class="row-end">
       <p class="row-price">${escapeHTML(formatPrice(l.price))}</p>
-      <p class="row-cta">Se hos ${kilde}${Icon.externalLink}</p>
+      <a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow" class="row-cta"
+         aria-label="Se annoncen hos ${kilde} (åbner i ny fane): ${[model, variant].filter(Boolean).join(' ')}, ${escapeHTML(formatPrice(l.price))}">Se hos ${kilde}${Icon.externalLink}</a>
       <div class="row-tools">
         <button type="button" class="row-tool ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
       </div>
     </div>
-    <a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow" class="row-link"
-       aria-label="Se annonce hos ${kilde} (åbner i ny fane): ${[model, variant].filter(Boolean).join(' ')}, ${escapeHTML(formatPrice(l.price))}"></a>
+    <a href="annonce.html?id=${l.id}" class="row-link"
+       aria-label="Se annonce: ${[model, variant].filter(Boolean).join(' ')}, ${escapeHTML(formatPrice(l.price))} — hos ${kilde}"></a>
   </article>`;
 }
 
