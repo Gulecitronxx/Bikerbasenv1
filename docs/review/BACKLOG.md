@@ -30,19 +30,19 @@ Auditeret 17.08.2026 på commit `4a33b41`. 31 findings: 0 × P0, 12 × P1, 13 ×
 Tabellen her er indekset; beviset bliver hos findingen, fordi 34 KB
 reproduktionstrin i én tabelcelle ikke kan læses af nogen.
 
+**Verifikation af runde 1** — hvad der blev efterprøvet og hvordan — står i
+[rounds/round-1.md](rounds/round-1.md). Fem findings blev behandlet: fire holder,
+én er genåbnet.
+
 | ID | rolle | akse | sev | fil | problem | status |
 |---|---|---|---|---|---|---|
-| C-001 | critic | sikkerhed | **P1** | `.github/workflows/deploy.yml:41 (path: .)` | Hele repoet ligger offentligt på bikerbasen.dk | åben |
-| C-010 | critic | funktionalitet | **P1** | `crawler/normalize.js:484-507, crawler/db.js:196` | fingerprint-reglen er skrevet ned, men ikke implementeret | åben |
-| C-011 | critic | funktionalitet | **P1** | `crawler/pipeline.js:198-201` | Et selector-skift hos kilden kan tømme hele kataloget | åben |
+| C-011 | critic | funktionalitet | **P1** | `crawler/db.js:255 (bortemarkeringVurdering), crawler/borte.test.js:65-72` | Et selector-skift hos kilden kan tømme hele kataloget | **rettet** (2. gang) — se note nedenfor |
 | C-014 | critic | seo | **P1** | `scripts/shared.js:39-64 (fetchListings)` | Produktionssitet har 7 indekserbare adresser og NUL annonce- eller mærkesider | åben |
 | C-015 | critic | seo | **P1** | `js/seo.js:191-205 (seoSearchResults)` | Søgesidens struktureret data peger på 404'ere | åben |
 | D-001 | designer | design | **P1** | `css/styles.css:456-462 (mobil) og :428-439 (desktop)` | Hero-scrimmens lyseste punkt ligger præcis under teksten | åben |
 | D-002 | designer | design | **P1** | `css/styles.css:815 + :795, js/components.js:439-442` | Prishierarkiet er vendt om på 87 % af lageret | åben |
-| D-003 | designer | design | **P1** | `js/components.js:454-456` | Søgeresultatet sender 87 % af trafikken ud af sitet ét klik efter søgningen — og springer vores egen annonceside over | åben |
 | D-004 | designer | design | **P1** | `js/annonce.js — videreKortHTML() / den eksterne gren; css/styles.css .listing-next` | På den eksterne annonceside konkurrerer væk-CTA'en med ingenting — den vinder ved walkover | åben |
 | D-005 | designer | design | **P1** | `js/home.js:475 og :499 (gaten), index.html #newest-sub` | I drift påstår forsiden en dato, vi ikke har | åben |
-| D-006 | designer | design | **P1** | `css/styles.css — html (ingen scroll-padding); .site-header:256, .listing-actionbar:1354` | WCAG 2.2 AA, SC 2.4.11 "Focus Not Obscured (Minimum)" fejler i BEGGE ender, og den ene ende er hele sitet | åben |
 | D-007 | designer | design | **P1** | `css/styles.css:1963` | .safety-banner-sep{ opacity:.4 } — samme fejl som .facet-n, et andet sted | åben |
 | C-002 | critic | sikkerhed | **P2** | `supabase/016_luk_skrivehul.sql:31-43` | Hullet er lukket, men fabrikken kører videre | åben |
 | C-003 | critic | sikkerhed | **P2** | `supabase/016_luk_skrivehul.sql:155-160` | profiles har stadig INSERT og DELETE til anon | åben |
@@ -64,9 +64,73 @@ reproduktionstrin i én tabelcelle ikke kan læses af nogen.
 | C-019 | critic | seo | **P3** | `js/search.js:1695-1727` | Der er ingen noindex på et søgeresultat med nul træf | åben |
 | D-012 | designer | design | **P3** | `js/search.js — tomtilstandens hjælpetekst` | soegning.html?q=zzzzqqq (nul træf, ét aktivt filter = frisøgningen) skriver "Prøv at fjerne et filter eller udvide dit prisinterval" | åben |
 
+### Genåbnet i runde 1 — C-011
+
+Værnet fra `baa7add` gør det, dev siger: fundet=0 og fundet=100 sender ikke et
+UPDATE, grænsen er 60 % af maksimum, og den ligger i `db.js`. Findingen er
+alligevel ikke løst, fordi værnet har en omvej, det selv laver:
+
+`crawler/pipeline.js:216` afslutter også en kørsel, hvor markeringen blev
+sprunget over, så den lander i `crawl_koersler` med `fundet: 0`. Efter tre
+nul-kørsler er historikken `[0,0,0]`, og `bortemarkeringVurdering()`
+(`crawler/db.js:255`) filtrerer med `.filter(n => n > 0)` — nullerne ryger ud,
+`kendte` er tom, og den tomme mængde læses som "ny kilde, intet at sammenligne
+med" → `tilladt: true`. Fjerde kørsel behøver at finde ÉN annonce, og så sendes
+`update {status:'borte'}` på 327 af 332 rækker. Efterprøvet mod den rigtige
+`db.markerBorte()` med en attrap-klient, ingen database rørt:
+
+```
+fundet=0  historik=[332,332,332]  -> BLOKERER
+fundet=0  historik=[0,332,332]    -> BLOKERER
+fundet=0  historik=[0,0,332]      -> BLOKERER
+fundet=1  historik=[0,0,0]        -> UPDATE SENDT, 327 raekker
+```
+
+`crawler/borte.test.js:65-72` asserterer netop den omvej som ønsket adfærd, så
+testen låser hullet fast. Koden kan ikke skelne "ny kilde uden fund" fra "kendt
+kilde med 332 rækker, hvis parser brækkede for tre kørsler siden" — de to giver
+samme historik. Det tal, der kan skelne dem, er antallet af aktive rækker for
+`kilde_id`: nul for den nye kilde, 332 for MC Syd.
+
+Fuld reproduktion, tallene for den gradvise udhuling (332 → 27 over fjorten
+kørsler) og resten står i [rounds/round-1.md](rounds/round-1.md).
+
+#### dev, 2. rettelse — status `rettet`
+
+`bortemarkeringVurdering()` dømmer nu mod **det højeste af to tal**: største fund
+i de sammenlignede kørsler OG kildens antal aktive rækker, hentet i
+`markerBorte()` med samme filter som opdateringen selv bruger. "Der er intet at
+falde fra" er dermed ikke længere udledt af kørselshistorikken, men af rækkerne
+— nul for en ægte ny kilde, 332 for MC Syd. Argumentet er obligatorisk;
+funktionen kaster, hvis det udelades, så værnet ikke kan slås fra ved en
+forglemmelse. Kan rækkerne ikke tælles, markeres der ikke.
+
+Nullerne skrives stadig til `crawl_koersler` — en kørsel, der er sket, skal
+kunne ses — men de kan ikke længere læses som "ny kilde".
+
+`crawler/borte.test.js:65-72` er skrevet OM, ikke udvidet: testen, der
+asserterede omvejen, er erstattet af to, der holder de to tilfælde op mod
+hinanden (`[0,0,0]` + 0 rækker → tilladt; `[0,0,0]` + 332 rækker → nægtet).
+Filen kører desuden den rigtige `markerBorte()` mod en attrap-klient og
+asserterer, om der overhovedet sendes et UPDATE.
+
+Den gradvise udhuling: referencevinduet er udvidet fra 3 til 12 kørsler, så de
+fem 40 %-trin koster 49 kørsler i stedet for 13. Det er stadig en
+hastighedsbegrænser og ikke et gulv — begrundelsen for, at der ikke sættes et
+absolut gulv, står i [DECISIONS.md](DECISIONS.md) og tallene er låst i testen.
+
 ---
 
 ## Lukket
 
 <!-- Verificerede findings flyttes herned med rundenummer, så tabellen ovenfor
      kun viser det, der stadig er i spil. -->
+
+Verifikationen af hver af dem står i [rounds/round-1.md](rounds/round-1.md).
+
+| ID | rolle | akse | sev | rettet i | status | verificeret |
+|---|---|---|---|---|---|---|
+| D-003 | designer | design | **P1** | `6ab87fe` | **verificeret** (runde 1) | Rigtigt museklik midt på kortet → `annonce.html?id=<uuid>`, vores side tegner den eksterne annonce med kørekortdommens regnestykke. Klik på CTA-linjen → ny fane til mcsyd.dk. Kilde-CTA'en måler 310×24 px = 3,60 % af kortet; ordlyd, `target="_blank"` og `rel="noopener noreferrer nofollow"` uændret. Samme i listevisning (`row-link` intern, `row-cta` 101×24 ekstern) og i swipe-visningen |
+| C-001 | critic | sikkerhed | **P1** | `6d150fb` | **verificeret** (runde 1) | `_site` = 60 filer, 14 HTML-sider. `supabase/`, `crawler/`, `sources/`, `work/`, `docs/`, `.claude/`, `.github/`, `scripts/` alle fraværende; nul `*.test.js`; alt siderne refererer er med. Værnet afprøvet på en `git archive`-kopi: exit 1 med navn på den manglende fil i fire ud af fire prøver. DRIFT målt 19:07:51 (4½ min efter push 19:03:27): alle fem læk **404**, sitets egne filer 200, og drift-md5 = `4e518a0` |
+| D-006 | designer | design | **P1** | `5ca02d8` | **verificeret** (runde 1) | Rigtige tastetryk på `annonce.html?id=1021`, 390×844: 35 × Tab og 42 × Shift+Tab, **nul** fokusringe dækket af header eller bjælke. "Alle BMW til salg" lander y 399-437, overlap 0 begge veje. Scopet holder: `scroll-padding-top: 68px` på alle 15 sider i to viewports, `scroll-padding-bottom: 76px` KUN på annoncesiden med synlig bjælke — `auto` på de øvrige, på den eksterne annonceside og ved 1280px. Separat, dev's egen disclosure: cookiebanneret (187 px, fixed, alle sider ved første besøg) skjuler 5 af 30 Tab-stop — noteret i rounds/round-1.md, ikke en del af D-006 |
+| C-010 | critic | funktionalitet | **P1** | `f7dbe76` | **afvist — accepteret** (runde 1) | Sammenlægningen er afvist, kommentaren skrevet om. Alle elleve tal i DECISIONS.md genmålt uafhængigt og reproducerer præcist: 332 aktive, 0 uden `fingerprint`, 0 af 332 uenige med lokal genberegning, 238 unikke, 41 grupper / 135 rækker / 40,7 %, største gruppe 13, 128 med `stand: 'ny'`, 41 af 41 med forskellige `kilde_annonce_id`, med `km` 37/126. `kilder` har én række (MC Syd), alle 332 samme `kilde_id`. Konklusionen følger: 13 × Honda CMX 1100 D Rebel 2024 med 13 lagernumre er 13 maskiner. Findingens kerne — et løfte uden logik — er lukket af den omskrevne kommentar plus test |

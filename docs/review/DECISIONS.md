@@ -57,6 +57,45 @@ en nedskrivning af, at en aftale findes.
 Vi indekserer miniaturen og linker til kilden. Vi kopierer ikke gallerier, og vi
 viser ikke et pressefoto af modellen som om det var annoncens.
 
+### Bortemarkeringens værn er en hastighedsbegrænser, ikke et gulv
+Skrevet 17.08.2026 sammen med anden runde af C-011, fordi critic målte det og
+bad om en stillingtagen. Det står her, så ingen senere runde læser "gradvis
+udhuling er lukket" ind i koden.
+
+`markerBorte()` kræver, at kørslen har fundet mindst **60 % af referencen**, og
+referencen er det højeste af to tal: største fund i de seneste
+`REFERENCE_KOERSLER` afsluttede kørsler, og kildens antal aktive rækker lige nu.
+
+**Det stopper ikke et vilkårligt langsomt fald, og det kan det ikke.** Slipper
+et fald på 39 % igennem, falder både rækketallet og historikken med, og næste
+trin måles mod det nye, lavere udgangspunkt. Målt, som værste tilfælde — hver
+kørsel finder det allerlaveste, værnet vil tillade:
+
+| referencevindue | 332 → 200 → 120 → 72 → 44 → 27 tager |
+|---|---|
+| 3 kørsler (første udgave, `baa7add`) | **13 kørsler** |
+| 12 kørsler (nu) | **49 kørsler** |
+
+Tallene er låst i `crawler/borte.test.js` ("et referencevindue på tre kørsler…"
+og "vinduet på tolv kørsler…").
+
+**Hvorfor der ikke er sat et absolut gulv.** Et gulv ville sige "kilden må
+aldrig automatisk komme under N rækker". Så snart en forhandler ærligt lukker
+eller halverer sit lager, holder vi et katalog i live, kilden ikke længere står
+inde for — og vi kan ikke skelne de to situationer fra hinanden i tal: et ægte
+udsalg og en langsomt smuldrende parser ser ens ud herfra. Det er samme
+erkendelse som resten af værnet bygger på, og bare ÉN af de to må afgøres af en
+maskine.
+
+Det, der KAN gøres, er at købe tid, og det er valget: tolv kørslers hukommelse
+i stedet for tre. Prisen betales den anden vej — falder et lager ærligt med mere
+end 40 %, bliver de gamle annoncer stående i op til tolv kørsler, mens loggen
+skriver `VÆRN: forsvundne annoncer blev IKKE markeret` med tallene i. Det er den
+rigtige vej at fejle: en forkert annonce i søgeresultatet mod et tomt katalog.
+
+**Det, der ER lukket, er noget andet og skarpere:** et brat fald kan ikke længere
+lade som om det er en ny kilde. Se `crawler/db.js`, `bortemarkeringVurdering()`.
+
 ---
 
 ## Afvist

@@ -233,9 +233,30 @@ const KOERSLER_FOER_BORTE = 3;
    Tre kørsler er ikke et værn mod det: et DOM-skift er ikke et hikke, det
    er permanent, og det gentager sig hver gang.
 
-   Reglen: fundet skal være mindst 60 % af det HØJESTE, de sammenlignede
-   kørsler fandt. Maksimum frem for median, fordi en gradvis udhuling
-   (55 % tre gange = 17 %) ellers glider igennem tre gange i træk.
+   Reglen: fundet skal være mindst 60 % af REFERENCEN, og referencen er det
+   højeste af to tal — det største fund i de sammenlignede kørsler OG antallet
+   af aktive rækker, kilden har i dag.
+
+   HVORFOR DE AKTIVE RÆKKER ER MED (C-011, genåbnet efter baa7add).
+   Første udgave af værnet så kun på tidligere kørsler, og den lavede selv det
+   hul, den skulle lukke:
+
+     fundet=0  historik=[332,332,332]  -> BLOKERER   (kørsel 1 efter DOM-skiftet)
+     fundet=0  historik=[0,332,332]    -> BLOKERER   (kørsel 2)
+     fundet=0  historik=[0,0,332]      -> BLOKERER   (kørsel 3)
+     fundet=1  historik=[0,0,0]        -> TILLADT — og 327 rækker gik til 'borte'
+
+   En blokeret kørsel bliver stadig afsluttet i `crawl_koersler` med `fundet:
+   0` — og det SKAL den, en kørsel der skete, skal kunne ses. Men efter tre af
+   dem var historikken bare nuller, nullerne blev filtreret fra, og den tomme
+   mængde blev læst som "ny kilde, intet at falde fra". Jo længere værnet holdt,
+   jo tættere kom historikken på den tilstand, der lukkede op.
+
+   Fejlen var, at "ny kilde" blev udledt af kørselshistorikken. Historikken kan
+   ikke skelne "kilden har aldrig fundet noget" fra "kilden svarede ikke tre
+   gange" — de to giver samme tal. Antallet af aktive rækker KAN: nul for en
+   ægte ny kilde, 332 for MC Syd. Derfor er det tal med i referencen, og derfor
+   afgøres "der er intet at falde fra" nu af rækkerne, ikke af historikken.
 
    Hvilken vej fejlen skal falde, er valgt med vilje. Værnet kan holde en
    annonce synlig én kørsel for længe — det koster en forkert annonce i
@@ -247,26 +268,68 @@ const KOERSLER_FOER_BORTE = 3;
    må afgøres af en maskine. */
 const BORTE_MIN_ANDEL = 0.6;
 
-function bortemarkeringVurdering(fundet, tidligereFundet){
+/* Hvor mange afsluttede kørsler referencen hentes fra. Fire gange så mange som
+   markeringsvinduet, og det er en bevidst forskel:
+
+   Værnet er en HASTIGHEDSBEGRÆNSER, ikke et gulv — hvert fald på under 40 %
+   slipper igennem, og når det har gjort det, er både de aktive rækker og
+   kørselshistorikken faldet med. Med et referencevindue på tre kørsler kan et
+   40 %-fald derfor gentage sig hver tredje kørsel: 332 -> 200 -> 120 -> 72 ->
+   44 -> 27 på tretten kørsler, med markering tilladt hele vejen (målt af
+   critic i runde 1). Med tolv kørslers hukommelse koster hvert trin tolv
+   kørsler i stedet for tre: de samme fem trin tager 49 kørsler, og efter
+   fjorten står kilden på 120 i stedet for 27. Tallene er låst i
+   crawler/borte.test.js.
+
+   Det er stadig ikke et gulv, og der findes ikke et ærligt et: et ægte
+   udsalg og en langsomt smuldrende parser ser ens ud i tallene. Vi køber tid
+   til, at et menneske når at læse loggen. Se docs/review/DECISIONS.md. */
+const REFERENCE_KOERSLER = 12;
+
+/* aktiveRaekker er ikke valgfri. Et værn, man kan slå fra ved at glemme et
+   argument, er ikke et værn — og det var præcis dét tal, hullet manglede. */
+function bortemarkeringVurdering(fundet, tidligereFundet, aktiveRaekker){
+  if (!Number.isFinite(aktiveRaekker) || aktiveRaekker < 0){
+    throw new Error(
+      'bortemarkeringVurdering(): aktiveRaekker skal være et tal >= 0. ' +
+      'Det er tallet, der skelner en ny kilde fra en kilde, hvis parser er brækket.'
+    );
+  }
   const antal = Number(fundet) || 0;
-  if (antal === 0){
+  if (antal <= 0){
     return { tilladt: false, grund: 'kørslen fandt nul annoncer' };
   }
+
   const kendte = (tidligereFundet || []).map(n => Number(n) || 0).filter(n => n > 0);
-  if (!kendte.length){
-    // Ingen tidligere kørsel har fundet noget, så der er intet at falde fra.
-    return { tilladt: true, grund: 'ingen tidligere kørsel med fund at sammenligne med' };
+  const hoejesteFund = kendte.length ? Math.max(...kendte) : 0;
+  const reference = Math.max(hoejesteFund, aktiveRaekker);
+
+  /* Kun her er "der er intet at falde fra" sandt: kilden har hverken fundet
+     noget før ELLER rækker i tabellen. En markering kan pr. definition ikke
+     ramme noget, og en ægte ny kilde kommer videre fra første kørsel. */
+  if (reference === 0){
+    return { tilladt: true, grund: 'ny kilde: hverken tidligere fund eller aktive rækker at falde fra' };
   }
-  const reference = Math.max(...kendte);
-  const andel = antal / reference;
-  if (andel < BORTE_MIN_ANDEL){
+
+  const referenceTekst = aktiveRaekker > hoejesteFund
+    ? `${aktiveRaekker} aktive rækker i databasen`
+    : `højeste fund i de seneste ${REFERENCE_KOERSLER} kørsler`;
+  // Nedad, ikke nærmeste: 199 af 332 er 59,9 %, og "60 % — grænsen er 60 %"
+  // læses af en operatør som "den var på grænsen og blev afvist alligevel".
+  const procent = Math.floor((antal / reference) * 100);
+
+  if (antal < reference * BORTE_MIN_ANDEL){
     return {
       tilladt: false,
-      grund: `kørslen fandt ${antal}, hvor de seneste kørsler fandt op til ${reference} `
-           + `(${Math.round(andel * 100)} % — grænsen er ${Math.round(BORTE_MIN_ANDEL * 100)} %)`,
+      grund: `kørslen fandt ${antal}, hvor kilden står med ${reference} `
+           + `(${procent} % — grænsen er ${Math.round(BORTE_MIN_ANDEL * 100)} %; `
+           + `referencen er ${referenceTekst})`,
     };
   }
-  return { tilladt: true, grund: `${antal} fundet mod ${reference} tidligere (${Math.round(andel * 100)} %)` };
+  return {
+    tilladt: true,
+    grund: `${antal} fundet mod ${reference} (${procent} % — referencen er ${referenceTekst})`,
+  };
 }
 
 async function markerBorte(sb, kilde_id, fundet){
@@ -276,7 +339,7 @@ async function markerBorte(sb, kilde_id, fundet){
     .eq('kilde_id', kilde_id)
     .not('afsluttet', 'is', null)
     .order('startet', { ascending: false })
-    .limit(KOERSLER_FOER_BORTE);
+    .limit(REFERENCE_KOERSLER);
   kastVed(error, 'kunne ikke læse tidligere kørsler');
 
   // Færre end tre afsluttede kørsler: ingen annonce KAN have manglet i tre.
@@ -284,11 +347,27 @@ async function markerBorte(sb, kilde_id, fundet){
     return { antal: 0, sprunget_over: false, grund: 'færre end tre afsluttede kørsler' };
   }
 
+  /* Det andet tal værnet dømmer på: hvor mange rækker kilden HAR lige nu.
+     Samme filter som opdateringen nedenfor bruger, så referencen er præcis den
+     mængde, markeringen kan ramme. */
+  const { count: aktive, error: taelFejl } = await sb
+    .from('eksterne_annoncer')
+    .select('id', { count: 'exact', head: true })
+    .eq('kilde_id', kilde_id)
+    .eq('status', 'aktiv');
+  kastVed(taelFejl, 'kunne ikke tælle kildens aktive annoncer');
+
+  /* Kan vi ikke tælle rækkerne, kan vi ikke skelne en ny kilde fra en brækket
+     parser — og så markerer vi ikke. Værnet fejler lukket. */
+  if (!Number.isFinite(aktive) || aktive < 0){
+    return { antal: 0, sprunget_over: true, grund: 'kunne ikke tælle kildens aktive rækker' };
+  }
+
   /* Værnet ligger HER og ikke i pipeline.js, fordi det er den samme
-     forespørgsel, der bærer begge svar: de tre kørsler, grænsen regnes ud
-     fra, ER de tre kørsler, faldet måles imod. Lå de to steder, kunne de
+     forespørgsel, der bærer begge svar: kørslerne, referencen regnes ud fra,
+     ER kørslerne, grænsen for `sidst_set` tages fra. Lå de to steder, kunne de
      komme til at se på hver sit vindue. */
-  const dom = bortemarkeringVurdering(fundet, koersler.map(k => k.fundet));
+  const dom = bortemarkeringVurdering(fundet, koersler.map(k => k.fundet), aktive);
   if (!dom.tilladt) return { antal: 0, sprunget_over: true, grund: dom.grund };
 
   const graense = koersler[KOERSLER_FOER_BORTE - 1].startet;
@@ -311,7 +390,7 @@ module.exports = {
   // Vurderingen er ren og eksporteres, saa vaernet kan testes uden en
   // database. Det er hele pointen: den betingelse, der staar mellem et
   // kosmetisk skift hos kilden og et tomt katalog, skal have en test.
-  bortemarkeringVurdering, BORTE_MIN_ANDEL,
+  bortemarkeringVurdering, BORTE_MIN_ANDEL, REFERENCE_KOERSLER,
   // Eksporteres, saa en test kan holde parserens felter op mod kolonnerne
   // uden at have en database. Det er den test, der ville have fanget hk.
   KOLONNER, tilRaekke,

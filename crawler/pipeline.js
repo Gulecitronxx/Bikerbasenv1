@@ -199,7 +199,9 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
        `tal.fundet` gives med, fordi markeringen skal kunne nægte at køre.
        Se værnet over markerBorte() i crawler/db.js: uden det er tre kørsler
        med nul kort nok til at sætte hele kataloget til 'borte', og et
-       omdøbt CSS-navn hos kilden er nok til at udløse det. */
+       omdøbt CSS-navn hos kilden er nok til at udløse det. Værnet henter
+       selv kildens aktive rækketal — pipelinen skal ikke sende det med, for
+       så kunne de to komme til at se på hver sin mængde. */
     if (!toerloeb && !limit){
       const b = await db.markerBorte(sb, kilde_id, tal.fundet);
       tal.borte = b.antal;
@@ -213,6 +215,15 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false 
     }
 
     log.skriv(`FÆRDIG: ${tal.fundet} fundet, ${tal.nye} nye, ${tal.opdaterede} opdaterede, ${tal.borte} borte, ${tal.fejl} kasseret`);
+    /* Også en kørsel, hvor værnet sprang markeringen over, afsluttes her — med
+       `fundet: 0`, hvis den fandt nul. Det er med vilje: en kørsel, der er
+       sket, skal kunne ses i crawl_koersler, og en række uden `afsluttet` er
+       umulig at skelne fra en kørsel, der stadig er i gang.
+
+       Det var den historik, C-011 red på: tre nul-kørsler blev til `[0,0,0]`,
+       og værnet læste det som "ny kilde". Rettelsen er ikke at holde op med at
+       skrive nullerne ned — den er, at værnet ikke længere afgør "ny kilde" ud
+       fra kørselshistorikken, men ud fra kildens aktive rækker. */
     if (koersel) await db.afslutKoersel(sb, koersel.id, tal, log.tekst());
     return { navn, ok: true, tal, annoncer, log: log.tekst() };
 
