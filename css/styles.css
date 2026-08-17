@@ -127,12 +127,34 @@ html{-webkit-text-size-adjust:100%;}
    fokus udløser ikke :focus-visible ens og ruller efter samme regel, så en
    test dér kan se grøn ud uden at være det.
 
-   IKKE dækket her, og det er bevidst: cookiebanneret er også position:fixed
-   i bunden på alle sider, indtil man har svaret. Dens højde står i
-   --cookie-h, som js/components.js sætter på document.body — og en variabel
-   på body kan et html-regelsæt ikke læse. Det er en selvstændig sag, ikke
-   noget der skal gættes på her. */
+   Cookiebanneret er den TREDJE faste flade, og det er nu også dækket — se
+   blokken lige under. */
 html{ scroll-padding-top: var(--header-h); }
+
+/* Cookiebanneret: samme succeskriterium, tredje flade.
+   ------------------------------------------------------------------
+   Banneret er position:fixed i bunden på ALLE 14 sider ved første besøg, og
+   det er højt: målt 206px ved 320px bredde, 187px ved 390px, 80px ved 1280px.
+   Med kun scroll-padding-bottom for handlingsbjælken landede 18 af 40 Tab-stop
+   på annonce.html?id=1021 (390x844, tømt storage) helt eller delvis bag en
+   fast flade — "Se sælgerprofil" med alle 48 px af sin fokusramme skjult.
+
+   To ting gjorde det til et selvstændigt valg og ikke en linje mere:
+
+   1. HØJDEN KENDES FØRST AF JAVASCRIPT. js/components.js måler banneret og
+      skrev tallet i --cookie-h på document.body — og en variabel på body kan
+      et html-regelsæt ikke læse. Den skrives derfor nu på
+      document.documentElement. Fallbacken på 208px gælder kun i vinduet
+      mellem første maling (hvor den indlejrede linje i markuppen viser
+      banneret) og det øjeblik js/components.js har målt: 208 er over den
+      højeste målte højde, og at reservere for meget koster kun, at browseren
+      ruller nogle få pixels ekstra.
+   2. BJÆLKEN FLYTTER SIG, NÅR BANNERET ER DER. .listing-actionbar skubbes op
+      til bottom: --cookie-h + 8px (se blokken ved .listing-actionbar), så på
+      annoncesiden er den frie zone BEGGE højder plus mellemrummet — ikke den
+      højeste af dem. Målt: bjælkens top gik fra y 775 til y 580, mens
+      scroll-padding-bottom stod på 76px. */
+html:has(#cookie-banner:not([hidden])){ scroll-padding-bottom: var(--cookie-h, 208px); }
 
 /* Bunden gælder kun dér, hvor bjælken faktisk vises: annoncesiden
    (body.har-actionbar, sat i js/annonce.js) under 960px, jf. media-reglen
@@ -140,6 +162,25 @@ html{ scroll-padding-top: var(--header-h); }
    padding-bottom bruger, så bjælkens højde står ét sted. */
 @media (max-width:959px){
   html:has(body.har-actionbar){ scroll-padding-bottom: var(--actionbar-h); }
+  /* Begge faste flader på én gang. De 8px er det samme mellemrum, som
+     .listing-actionbar skubbes op med. */
+  html:has(body.har-actionbar):has(#cookie-banner:not([hidden])){
+    scroll-padding-bottom: calc(var(--cookie-h, 208px) + 8px + var(--actionbar-h));
+  }
+}
+
+/* Og pladsen i selve dokumentet. scroll-padding kan ikke hjælpe det sidste
+   element på siden: er der ikke mere at rulle, ruller browseren ikke. Det er
+   præcis den grund, body.har-actionbar allerede holder --actionbar-h fri
+   nederst. Banneret har brug for det samme — uden det stod "Vilkår og
+   betingelser" i footeren bag banneret uden nogen vej fri (målt: 24 af 24 px).
+   Pladsen tilføjes NEDERST, så intet element flytter sig; kun dokumentet
+   bliver højere, og banneret dækker præcis den strimmel, det selv lagde. */
+body:has(#cookie-banner:not([hidden])){ padding-bottom: var(--cookie-h, 208px); }
+@media (max-width:959px){
+  body.har-actionbar:has(#cookie-banner:not([hidden])){
+    padding-bottom: calc(var(--cookie-h, 208px) + 8px + var(--actionbar-h));
+  }
 }
 body{
   font-family: var(--font-body);

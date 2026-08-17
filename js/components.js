@@ -666,17 +666,32 @@ function openInfoModal(title, bodyHTML){
    inline-linje i samme sekund som siden males — det var ellers det største
    element der blev malet på de js-tunge sider, og dermed deres LCP ~4s inde.
    Her kobles kun knapperne på. */
+/* Højden skal væk igen, når banneret er væk — ellers ville
+   scroll-padding-bottom blive stående og holde 187px fri af ingenting resten
+   af sessionen. Reglen i stilarket hænger på #cookie-banner:not([hidden]),
+   så den slipper af sig selv; det her rydder variablen med. */
+function ryddCookieHoejde(){
+  document.documentElement.style.removeProperty('--cookie-h');
+}
+
 function initCookieConsent(){
   const banner = document.getElementById('cookie-banner');
   if (!banner) return;
-  if (Store.getCookieConsent()){ banner.remove(); document.body.classList.remove('cookie-banner-vises'); return; }
+  if (Store.getCookieConsent()){ banner.remove(); document.body.classList.remove('cookie-banner-vises'); ryddCookieHoejde(); return; }
 
   /* Fortæl siden at banneret står der, og hvor højt det er. Annoncesidens
      handlingsbjælke skubbes op oven over det — før lå banneret oven på
      "Skriv til sælger", så sidens primære handling ikke kunne trykkes,
-     før man havde svaret på cookies. */
+     før man havde svaret på cookies.
+
+     Tallet skrives på documentElement og IKKE på body. Det er ikke kosmetik:
+     WCAG 2.2 SC 2.4.11 kræver, at rulningen holder fokus fri af banneret, og
+     den regel skal stå på html (scroll-padding-bottom). Et html-regelsæt kan
+     ikke læse en variabel, der er sat på body — det var netop derfor
+     cookiebanneret stod tilbage, da resten af 2.4.11 blev lukket. body arver
+     stadig værdien, så .listing-actionbar's calc() er uændret. */
   document.body.classList.add('cookie-banner-vises');
-  const maalHoejde = () => document.body.style.setProperty('--cookie-h', banner.offsetHeight + 'px');
+  const maalHoejde = () => document.documentElement.style.setProperty('--cookie-h', banner.offsetHeight + 'px');
   maalHoejde();
   if (window.ResizeObserver) new ResizeObserver(maalHoejde).observe(banner);
 
@@ -684,6 +699,7 @@ function initCookieConsent(){
     Store.setCookieConsent(level);
     banner.remove();
     document.body.classList.remove('cookie-banner-vises');
+    ryddCookieHoejde();
     // Statistik er valgfri og starter foerst her — aldrig ved sideindlaesning.
     // "Kun noedvendige" starter den altsaa aldrig.
     if (level === 'all' && typeof window.bbStartAnalytics === 'function') window.bbStartAnalytics();
