@@ -164,7 +164,25 @@ function seoListingPage(listing, photoUrls){
     console.warn('seoListingPage kaldt for en annonce uden forrenderet side — springer over.', listing?.id);
     return;
   }
-  const image = (photoUrls && photoUrls[0]) || `${SITE_URL}/og-image.png`;
+  /* To billeder, to forskellige påstande — og de blev blandet sammen her.
+
+     og:image er et kort om SIDEN. Har annoncen ingen fotos, er Bikerbasens
+     eget delingsbillede det rigtige svar: kortet siger "det her er en side på
+     Bikerbasen", og det er sandt.
+
+     Vehicle.image er en påstand om PRODUKTET. Googles retningslinjer for
+     køretøjsannoncer forventer, at billedet ER køretøjet. Målt på
+     annonce.html?id=1017: siden skrev korrekt "Ingen fotos i denne annonce",
+     mens jsonld-vehicle erklærede image: ["https://bikerbasen.dk/og-image.png"]
+     — vores logo, udgivet som om det var en Suzuki GSX-R750 (findingen C-016).
+     Det er samme fejl, buildPhotoSet() blev rettet for at fjerne fra DOM'en;
+     den var bare flyttet ned i <head>.
+
+     Prisen for at udelade feltet er, at annoncen ikke er berettiget til et
+     billed-rigt resultat. Den pris er den rigtige: et manglende felt vejer
+     lettere imod os end et gættet. */
+  const fotos = (photoUrls || []).filter(Boolean);
+  const delebillede = fotos[0] || `${SITE_URL}/og-image.png`;
 
   const dele = [
     `Årgang ${listing.year}`,
@@ -177,7 +195,7 @@ function seoListingPage(listing, photoUrls){
     title: `${navn} ${listing.year} — ${formatPrice(listing.price)} — Bikerbasen`,
     description: `${navn}, ${dele.join(', ')}. Til salg i ${listing.city} på Bikerbasen.`,
     url,
-    image,
+    image: delebillede,
     type: 'product',
   });
   Seo.setMeta('meta[property="product:price:amount"]', 'property', 'product:price:amount', String(listing.price));
@@ -193,7 +211,6 @@ function seoListingPage(listing, photoUrls){
     productionDate: String(listing.year),
     itemCondition: 'https://schema.org/UsedCondition',
     url,
-    image: (photoUrls && photoUrls.length) ? photoUrls : [image],
     description: listing.description,
     mileageFromOdometer: { '@type': 'QuantitativeValue', value: listing.km, unitCode: 'KMT' },
     vehicleEngine: {
@@ -221,6 +238,9 @@ function seoListingPage(listing, photoUrls){
             address: { '@type': 'PostalAddress', addressLocality: listing.city, addressCountry: 'DK' } },
     },
   };
+  // image kun når der ER et foto af netop denne motorcykel. Se begrundelsen
+  // ovenfor; feltet må ikke falde tilbage på delingsbilledet.
+  if (fotos.length) vehicle.image = fotos;
   if (listing.power) {
     vehicle.vehicleEngine.enginePower = { '@type': 'QuantitativeValue', value: listing.power, unitText: 'hk' };
   }

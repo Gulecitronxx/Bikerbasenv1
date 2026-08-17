@@ -376,13 +376,27 @@ const db = (function(){
       return c.storage.from('listing-photos').getPublicUrl(storagePath).data.publicUrl;
     },
 
-    /* ---------- Favoritter ---------- */
+    /* ---------- Favoritter ----------
+       Returnerer { ids, error } og ikke bare en liste. Forskellen er ikke
+       kosmetisk: en tom liste fra en fejlet læsning så før ud præcis som
+       "brugeren har ingen favoritter", og syncFavorites() i
+       js/backend-bridge.js flettede den tomme liste ind i localStorage som
+       om den var sandheden. Hjerterne slukkede, og "Gemte" stod tom.
+       Rækkerne var der stadig i basen — det var visningen, der forsvandt,
+       uden at nogen fik en fejlbesked.
+
+       "Ingen session" er også en fejl her og ikke et tomt svar. Kaldes
+       funktionen, når vi tror, brugeren er logget ind, og auth så svarer
+       null, er der intet at flette MED — og en sammenfletning ud fra det
+       ville slette lige så meget som en netværksfejl. */
     async listFavorites(){
-      const c = init(); if (!c) return [];
+      const c = init();
+      if (!c) return { ids: [], error: { message: 'Backend er ikke konfigureret.' } };
       const user = await this.currentUser();
-      if (!user) return [];
-      const { data } = await c.from('favorites').select('listing_id').eq('user_id', user.id);
-      return (data || []).map(r => r.listing_id);
+      if (!user) return { ids: [], error: { message: 'Ingen aktiv session — favoritterne kunne ikke læses.' } };
+      const { data, error } = await c.from('favorites').select('listing_id').eq('user_id', user.id);
+      if (error) return { ids: [], error };
+      return { ids: (data || []).map(r => r.listing_id), error: null };
     },
     async addFavorite(listingId){
       const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };

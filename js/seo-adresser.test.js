@@ -1,5 +1,5 @@
-/* Tests for de adresser, js/seo.js skriver ind i struktureret data.
-   Kør: npm test
+/* Tests for de PÅSTANDE, js/seo.js skriver ind i struktureret data — adresser
+   og billeder. Kør: npm test
 
    Hvorfor de her tests findes:
 
@@ -21,6 +21,13 @@
    sådan ("Lå adresseberegningen to steder, ville et sitemap før eller siden
    pege på sider der ikke findes"). Indtil nu var det en hensigt. Nu er det
    målt.
+
+   Den sidste gruppe er C-016 og handler om det samme, bare om et billede:
+   `Vehicle.image` faldt tilbage på `og-image.png` — Bikerbasens logo —
+   på en annonce, hvis egen side skrev "Ingen fotos i denne annonce". Et
+   JSON-LD, der påstår noget, siden nægter, er den fejl, hele projektet er
+   skrevet imod, og en fallback er præcis den slags kode, en senere oprydning
+   sætter tilbage "for fuldstændighedens skyld".
 
    Mønstret er det samme som js/koerekort.test.js og js/eksternt-kort.test.js:
    browserscripts uden module.exports evalueres i en funktion, der giver
@@ -55,16 +62,28 @@ function lavDokument(){
   };
 }
 
+/* seo.js kalder fire formateringsfunktioner, der bor i js/data.js. De sendes
+   ind som parametre i stedet for at hele data.js evalueres med: testen her
+   handler om hvad der PÅSTÅS i struktureret data, ikke om hvordan et tal
+   skrives på dansk. */
 function indlæsSeo(doc){
   const src = fs.readFileSync(path.join(__dirname, 'seo.js'), 'utf8');
-  return new Function('document', 'console',
-    src + '\n;return { listingPageUrl, itemListElementer, seoSearchResults, seoDealerPage, Seo };'
-  )(doc, { warn(){}, log(){} });
+  return new Function('document', 'console', 'formatKm', 'formatCcm', 'formatPrice', 'typeLabel',
+    src + '\n;return { listingPageUrl, itemListElementer, seoListingPage, seoSearchResults, seoDealerPage, Seo };'
+  )(doc, { warn(){}, log(){} },
+    n => `${n} km`, n => `${n} ccm`, n => `${n} kr.`, t => String(t));
 }
 
 function jsonLd(doc, id){
   const el = doc.børn.find(e => e.id === 'jsonld-' + id);
   return el ? JSON.parse(el.textContent) : null;
+}
+
+/* Værdien af et meta-tag, som Seo.setMeta har oprettet det. Attributnavnet
+   skifter mellem 'property' (Open Graph) og 'name' (description, twitter). */
+function metaVærdi(doc, attr, navn){
+  const el = doc.børn.find(e => e[attr] === navn);
+  return el ? el.content : null;
 }
 
 const egen = extra => Object.assign({
@@ -137,6 +156,50 @@ test('et tomt resultat sætter ingen ItemList (uændret adfærd)', () => {
   const { seoSearchResults } = indlæsSeo(doc);
   seoSearchResults([], 'Ingen træf');
   assert.equal(jsonLd(doc, 'results'), null);
+});
+
+/* ---- Annoncesidens Vehicle.image (C-016) ---- */
+
+/* En fuldt udfyldt egen annonce. seoListingPage() læser flere felter end
+   resten af filen, og de skal være der, ellers tester vi en TypeError. */
+const annonce = extra => Object.assign({
+  id: 1017, brand: 'Suzuki', model: 'GSX-R750', year: 2017,
+  price: 62900, km: 18400, ccm: 750, condition: 'God', city: 'Odense',
+  postnr: '5000', type: 'sport', description: 'Velholdt.',
+  isDealer: false, seller: { name: 'Privat' },
+}, extra || {});
+
+test('uden fotos påstår Vehicle intet billede — men delingskortet består', () => {
+  const doc = lavDokument();
+  const { seoListingPage } = indlæsSeo(doc);
+  seoListingPage(annonce(), []);
+
+  const v = jsonLd(doc, 'vehicle');
+  assert.ok(v, 'annoncen har en egen side, så blokken skal skrives');
+  assert.ok(!('image' in v),
+    'og-image.png er Bikerbasens logo, ikke motorcyklen — siden skrev selv "Ingen fotos i denne annonce"');
+  assert.equal(metaVærdi(doc, 'property', 'og:image'), 'https://bikerbasen.dk/og-image.png',
+    'og:image er et kort om SIDEN og skal blive');
+});
+
+test('med fotos er Vehicle.image annoncens egne billeder, alle sammen', () => {
+  const doc = lavDokument();
+  const { seoListingPage } = indlæsSeo(doc);
+  const fotos = ['https://eksempel.dk/a.jpg', 'https://eksempel.dk/b.jpg'];
+  seoListingPage(annonce(), fotos);
+
+  assert.deepEqual(jsonLd(doc, 'vehicle').image, fotos);
+  assert.equal(metaVærdi(doc, 'property', 'og:image'), fotos[0],
+    'delingskortet bruger det første foto, når der ER et');
+});
+
+test('tomme pladser i fotolisten bliver ikke til et billede', () => {
+  // photoUrls kommer fra databasen; en manglende storage_path gav før en
+  // undefined midt i listen, og JSON.stringify skriver den som null.
+  const doc = lavDokument();
+  const { seoListingPage } = indlæsSeo(doc);
+  seoListingPage(annonce(), [null, undefined, '']);
+  assert.ok(!('image' in jsonLd(doc, 'vehicle')));
 });
 
 /* ---- Forhandlerprofilen har samme liste og samme fælde ---- */
