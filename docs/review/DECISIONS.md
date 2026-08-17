@@ -53,6 +53,77 @@ ikke i hk, så en fremtidig "oprydning" ikke kan flytte den tilbage.
 opt-out. `tilladelse_modtaget` er ikke en indstilling, der åbner en dør — det er
 en nedskrivning af, at en aftale findes.
 
+### Crawleren fejler LUKKET, når den ikke kan læse robots.txt
+Skrevet 17.08.2026 sammen med C-013, hvor robots.txt gik fra at være en dato
+i en YAML-fil til at være en kontrol, der køres ved hver kørsel
+(`crawler/robots.js`).
+
+Retningen, tvivl falder i, er valgt og skal ikke laves om uden at spørge:
+
+| svar | hvad vi gør | hvorfor |
+|---|---|---|
+| 2xx | reglerne gælder | |
+| 4xx | alt tilladt | der ER ingen robots.txt. En manglende fil siger ikke nej |
+| 5xx | **vi crawler ikke** | vi ved ikke hvad der står. En server, der svarer 503, skal heller ikke have 332 kald oveni |
+| netværksfejl | **vi crawler ikke** | samme |
+
+Prisen betales den anden vej: er kildens server nede en nat, springer
+kørslen over, og kataloget står urørt en dag længere. Det er den rigtige vej
+at fejle — en dags gammelt katalog mod at hente sider, vi måske ikke må.
+
+`Crawl-delay` respekteres, når den er **længere** end vores egen, aldrig når
+den er kortere. 2000 ms er databasens minimum (`014_aggregator.sql`), og en
+kilde skal kunne bede om mere høflighed, ikke om mindre.
+
+Opslaget sker på **URL'ens vært**, ikke på kildens `domaene`-felt. De to er
+ikke det samme: `sources/guloggratis.yaml` har `domaene: guloggratis.dk`,
+mens dens liste-URL står på `www.guloggratis.dk`. robots.txt gælder pr.
+oprindelse, så et opslag på domæne-feltet ville have hentet reglerne fra et
+andet sted, end vi henter sider fra — og så beskytter kontrollen ingenting.
+
+### ÅBENT SPØRGSMÅL til mennesket: en delvist spærret kilde
+Samme rettelse. En liste-URL, robots.txt spærrer, **springes over**; resten
+af kørslen fortsætter, og kilden afvises først, når ALLE liste-URL'er er
+spærrede. En spærret detaljeside hentes ikke og tælles i loggen.
+
+Det andet valg er strengere: ÉT `Disallow`, der rammer noget af vores, og
+hele kilden lægges død, indtil et menneske har set på det. Argumentet for
+det er, at det er sådan resten af spærrerne opfører sig — de er alle
+alt-eller-intet. Argumentet imod er, at et `Disallow: /motorcykler/print/`
+ikke handler om os, og at reglen dermed ville lukke en kilde, vi har et
+skriftligt ja fra, på en regel, der ikke siger nej til os.
+
+`dev` har valgt den mildeste af de to, fordi den ikke kan gøre skade i sig
+selv — vi henter aldrig noget, vi ikke må. Men det er en juridisk afvejning
+og ikke en teknisk, og derfor står den her frem for kun i koden.
+
+### Vagten mod gentagne 4xx er asymmetrisk med vilje
+Skrevet 17.08.2026 sammen med C-012.
+
+**Listesider: ét afvisningssvar stopper kørslen.** Der er 1-8 af dem, og de
+er hoveddøren. Er den lukket, er der ingen mening i at gå videre til de 332
+detaljesider bagved.
+
+**Detaljesider: fem i træk stopper.** Der er hundredvis af døre, og én af
+dem kan være låst, uden at huset er det.
+
+**404 er ikke et nej til os.** En annonce kan blive slettet mellem
+listesiden og detaljekaldet; det er hverdag på en markedsplads, og kørslen
+fortsætter. Men 25 forsvundne i træk er ikke hverdag — så er det ikke
+annoncerne, der er væk, det er detalje-URL'erne, vi bygger, og det stopper
+med en anden diagnose i loggen.
+
+**Tællerne nulstilles kun af et svar, der kom igennem.** En timeout hverken
+bekræfter eller afkræfter et nej. Nulstillede den, kunne en kilde, der
+svarer 403, timeout, 403, timeout, holde vagten i skak for evigt. Det er
+låst i `crawler/afbryd.test.js`.
+
+En afbrudt kørsel markerer **intet** som borte: kastet forlader det `try`,
+`db.markerBorte()` står inde i. Værnet fra C-011 ville også blokere
+markeringen, men den skal aldrig nå derhen. To spærrer om det samme, med
+vilje — og hvis en senere runde flytter `markerBorte()` ud af det `try`,
+falder den ene af dem.
+
 ### Kilden ejer sine billeder
 Vi indekserer miniaturen og linker til kilden. Vi kopierer ikke gallerier, og vi
 viser ikke et pressefoto af modellen som om det var annoncens.
