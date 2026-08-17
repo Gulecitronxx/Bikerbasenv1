@@ -53,15 +53,15 @@ reproduktionstrin i én tabelcelle ikke kan læses af nogen.
 | C-008 | critic | kodefejl | **P2** | `js/supabase-api.js:384 + js/backend-bridge.js:411-424` | En slugt fejl kan tømme brugerens gemte annoncer | åben |
 | C-012 | critic | funktionalitet | **P2** | `crawler/pipeline.js:103-122` | Ingen afbrydelse ved gentagne 4xx | åben |
 | C-013 | critic | funktionalitet | **P2** | `crawler/config.js:130-131` | De juridiske spærrer er attestationer, ikke kontroller | åben |
-| C-016 | critic | seo | **P2** | `js/seo.js:118 og :145` | Struktureret data påstår et foto, siden selv nægter at påstå: jsonld-vehicle erklærer og-image.png som om det var motorcyklen | åben |
+| C-016 | critic | seo | **P2** | `js/seo.js:118 og :145` | Struktureret data påstår et foto, siden selv nægter at påstå: jsonld-vehicle erklærer og-image.png som om det var motorcyklen | **rettet** (`57777f1`) |
 | D-008 | designer | design | **P2** | `js/components.js:428-457 (eksternt kort, ingen .fav-btn)` | Favoritfunktionen har i drift ingenting at virke på | åben |
 | D-009 | designer | design | **P2** | `maerker.html (genereres af scripts/build-brand-pages.js)` | Mærkeindekset er 73 % blindgyder, og det taber to mærker, der HAR lager | åben |
-| D-010 | designer | seo | **P2** | `maerker.html, sitemap.xml` | Følger af D-009, men det er et selvstændigt forhold: mærkeindekset udstiller 44 interne links til søgeresultater med nul indhold | åben |
+| D-010 | designer | seo | **P2** | `maerker.html, sitemap.xml` | Følger af D-009, men det er et selvstændigt forhold: mærkeindekset udstiller 44 interne links til søgeresultater med nul indhold | **rettet** (`e8f2e60`) — C-014 løste kun halvdelen, se noten nedenfor |
 | D-011 | designer | design | **P2** | `css/styles.css:749-916 (.card-external), js/components.js eksternSpecs()` | De to korttyper i samme liste har to forskellige rytmer | åben |
 | C-006 | critic | sikkerhed | **P3** | `unsubscribe_saved_search` | Otte af ni funktioner i public blev hærdet til search_path="" af 016 | åben |
 | C-009 | critic | kodefejl | **P3** | `js/opret-annonce.js, byte-offset 7334` | En rå NUL-byte gør filen binær for git og grep | åben |
-| C-017 | critic | seo | **P3** | `js/seo.js:191` | Søgesidens <title> og meta description er identiske på hver facet | åben |
-| C-018 | critic | seo | **P3** | `alle 14 HTML-sider, <html lang="da">` | Specifikationen siger lang="da-DK"; sitet har lang="da" på alle fjorten sider (efterprøvet) | åben |
+| C-017 | critic | seo | **P3** | `js/seo.js:191` | Søgesidens <title> og meta description er identiske på hver facet | **rettet** (`687e5f9`) |
+| C-018 | critic | seo | **P3** | `alle 14 HTML-sider, <html lang="da">` | Specifikationen siger lang="da-DK"; sitet har lang="da" på alle fjorten sider (efterprøvet) | **afvist** — begrundelse og syv målinger i [DECISIONS.md](DECISIONS.md) |
 | C-019 | critic | seo | **P3** | `js/search.js:1695-1727` | Der er ingen noindex på et søgeresultat med nul træf | åben |
 | D-012 | designer | design | **P3** | `js/search.js — tomtilstandens hjælpetekst` | soegning.html?q=zzzzqqq (nul træf, ét aktivt filter = frisøgningen) skriver "Prøv at fjerne et filter eller udvide dit prisinterval" | åben |
 
@@ -84,6 +84,24 @@ findingen. Den er dækket af samme rettelse.
 over hero-fotoet) måler 1,18:1 før og 2,62:1 efter. Det er et logotype, og
 WCAG 1.4.3 undtager tekst, der er en del af et logo eller et varemærkenavn.
 Den er nævnt her, så næste sweep ikke bruger tid på at genfinde den.
+
+### D-010 — hvad C-014 løste, og hvad den ikke gjorde
+
+Efterprøvet før noget blev rettet, fordi C-014 kunne have lukket findingen.
+**Halvdelen var lukket:** grid'en "Mærker med annoncer nu" er ny, de 18 mærker
+med lager har hver sin side, alle 18 er i sitemappet, og `Sym` og `Rewaco` —
+de to, findingen sagde manglede en indgang — står der nu.
+
+**Den anden halvdel stod urørt.** Sektionen "Alle mærker" nedenunder linkede
+stadig alle 60 kendte mærker til `soegning.html?brands=X`, og målt mod drift
+(332 indekserede, 0 egne) gav **44 af de 60 nul træf** — nøjagtig det tal,
+findingen navngav. C-014 lagde noget nyt ovenpå; den fjernede ikke blindgyderne.
+Det er værd at holde fast i som mønster: en finding kan se løst ud, fordi det,
+den bad om, er kommet til — uden at det, den klagede over, er gået væk.
+
+De 43 (ikke 44 — `SYM` faldt bort, fordi den er samme mærke som lagerets `Sym`)
+nævnes stadig på siden, som tekst. Tallene står i commit-beskeden til
+`fix(seo): D-010`.
 
 ### Genåbnet i runde 1 — C-011
 

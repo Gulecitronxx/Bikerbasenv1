@@ -269,3 +269,39 @@ nøgle (`select=id,kilde_annonce_id,titel,maerke,model,aargang,km,pris_dkk,postn
 `fingerprint()` og holdt op mod den gemte kolonne: **0 af 332 er uenige**, så
 grupperingen er kildens tal og ikke min omregning. Ingen skrivning til
 databasen. `npm run crawl:tjek` bagefter: MC Syd, 332 aktive annoncer, urørt.
+
+### C-018 afvist — 17.08.2026
+**FINDING:** "Specifikationen siger `lang="da-DK"`; sitet har `lang="da"` på alle
+fjorten sider." Findingen tilbyder selv to udgange — ret attributterne, eller ret
+specifikationen — og siger ligeud: *"Jeg vil ikke påstå, at `da` koster noget."*
+
+**HVORFOR AFVIST — målt, i browseren på `maerker.html` og i node:**
+
+| spørgsmål | svar |
+|---|---|
+| er `da` gyldig BCP-47? | `Intl.getCanonicalLocales('da')` → `["da"]` — ja, uændret |
+| ved en klient så, at det er Danmark? | `new Intl.Locale('da').maximize()` → **`da-Latn-DK`**. Regionen udledes; den skal ikke skrives |
+| formaterer sproget tal og datoer anderledes? | `(1234.5).toLocaleString('da')` = `(1234.5).toLocaleString('da-DK')` = **1.234,5**. Dato: **17.8.2026** i begge |
+| læser vores egen kode attributten? | **nul** forekomster af `documentElement.lang` i `js/`, `crawler/`, `scripts/`. Alle formateringer er hårdkodet `'da-DK'` og rører ikke `<html>` |
+| ændrer siden sig, hvis man skifter den? | Sat til `da-DK` i browseren og målt igen: samme font, samme `font-size`, samme `hyphens: manual`, og **dokumenthøjde 2982 → 2982 px** |
+| er der noget i CSS eller markup, der kan reagere? | nul `:lang()`, nul `hyphens: auto`, nul `quotes:` i `css/styles.css`, og **nul `<q>`-elementer** på nogen side. Der er ikke en regel at aktivere |
+| står regionen så ingen steder? | Jo — `<meta property="og:locale" content="da_DK">` på **32 af 32 sider**. Dér forventer Facebook en region, og dér står den |
+
+Der er altså ingen målbar modtager af forskellen: ikke browseren, ikke `Intl`,
+ikke vores egen kode, ikke stilarket og ikke delingskortet.
+
+**HVAD DET VILLE KOSTE:** 32 HTML-filer (ikke 14 — C-014 byggede 18 mærkesider
+til) plus fire generatorskabeloner (`build-brand-pages.js` ×2,
+`build-listing-pages.js`, `build-progress.js`). Alle 32 filer skulle røres i en
+runde, hvor tre andre agenter arbejder i de samme filer. En ændring uden
+modtager, betalt i konflikter.
+
+**HVOR UENIGHEDEN SÅ LIGGER:** i `.claude/agents/critic.md:50`, hvor `lang="da-DK"`
+står på tjeklisten. Den fil er en rollebeskrivelse, ikke en produktionsfil, og
+den redigerer `dev` ikke. Afvisningen står her, så næste runde kan se, at
+punktet ER behandlet og med hvilke tal — ikke sprunget over. Skal linjen rettes,
+er det menneskets beslutning, ikke min.
+
+**BEVIS:** målingerne ovenfor er kørt i Browser-panelet mod dev-serveren på
+55559 (`maerker.html`, forrest fane) og med `grep` over `js/`, `crawler/`,
+`scripts/`, `css/` og alle 32 HTML-sider. Ingen fil er ændret.
