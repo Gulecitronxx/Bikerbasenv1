@@ -10,16 +10,31 @@ GRØN:  LCP ≤ 2.500 ms   ·   CLS ≤ 0,10   ·   TBT ≤ 200 ms
 ```
 
 **Status efter runde 4 (måler): 0 af 16 kombinationer består.**
-**Status efter runde 6 (builder "ydelse"): 10 af 16.** Tilgængelighed er nu 100 på
-alle 16, CLS grøn på alle 16, TBT 0–30 ms på alle 16. **Alle seks resterende fejl
-er mobil-LCP**, og de tre poster, der bærer dem, er de samme på hver side:
-`css/styles.css` (45,5 KB), de to fonte (68,4 KB) og supabase-js fra jsDelivr
-(55,1 KB) — 169 KB, før siden har vist ét eget byte.
+**Status efter runde 6 (builder "ydelse"): 10 af 16.**
+**Status efter runde 10 (måler, 17.08.2026, commit `4a33b41`): 9 af 14 på opgavens
+syv URL'er — og fortsat 10 af 16 på det historiske sæt, altså uændret antal.**
+Tilgængelighed er 100 på alle 18 målte celler, CLS er grøn på alle 18 (maks. 0,063),
+TBT er grøn på alle 18 medianer (0–56 ms). **Hver eneste resterende fejl er
+mobil-LCP.** De tre poster, der bærer dem, er de samme på hver side:
+`css/styles.css` (nu **49,6 KB** — voksede 4,2 KB siden runde 6), de to fonte
+(68,4 KB) og supabase-js fra jsDelivr (55,1 KB) — **173 KB**, før siden har vist ét
+eget byte.
+
+**A/B'EN PÅ SUPABASE-JS ER GJORT FÆRDIG, OG DEN TIDLIGERE KONKLUSION FALDER.**
+De 142 ms LCP, runde 6 tilskrev "supabase-js på egen origin", holder ikke: 20
+flettede par giver **4,3 ms ± 299 ms** i gevinst, D er bedst i 11 af 20 kørsler.
+Se afsnittet "Runde 10" nedenfor før nogen checker et 212 KB bundt ind i repoet på
+et ydelsesargument.
 
 ADVARSEL FØR DU SAMMENLIGNER TAL PÅ TVÆRS: runde 5–6 er kørt på en anden maskintilstand
 end runde 1–4. Samme TTFB, men under det halve FCP på en side, ingen har rørt.
 Runde 4 og runde 6 kan IKKE stilles ved siden af hinanden. Læs runde 5 → runde 6,
 og læs afsnittet "Runde 5 og 6" nedenfor, før du bruger et absolut tal til noget.
+Runde 10 ligger på samme maskintilstand som runde 5–6 (FCP ~1.058 ms på de lette
+sider i begge), så de to kan sammenlignes — men **runde 10 er den eneste runde, der
+er målt på en fast commit** (`4a33b41`, udpakket med `git archive`), mens runde 1–9
+alle målte uncommittede ændringer under aktiv redigering. Er du i tvivl, så stol på
+runde 10's INTERNE sammenligninger (A mod D, side mod side) frem for et absolut tal.
 
 ---
 
@@ -197,7 +212,33 @@ runde	dato	tid	server	side	bredde	ydelse	a11y	lcp_ms	cls	tbt_ms	fcp_ms	si_ms	kb	
 6	2026-08-16	15:22	gzip	opret-login	desktop	98	100	1061	0.006	0	344	344	441	49	222	ja
 6	2026-08-16	15:23	gzip	sikkerhed	mobil	100	100	1881	0.000	0	1056	1056	167	12	211	ja
 6	2026-08-16	15:23	gzip	sikkerhed	desktop	100	100	430	0.035	0	290	290	167	12	211	ja
+10	2026-08-17	17:27	gzip	forside	mobil	90	100	3691	0.000	0	1058	1264	448	33	1097	nej
+10	2026-08-17	17:28	gzip	forside	desktop	99	100	883	0.056	0	289	487	784	37	1097	ja
+10	2026-08-17	17:29	gzip	soegning	mobil	86	100	4162	0.000	2	1059	1107	627	28	1563	nej
+10	2026-08-17	17:29	gzip	soegning	desktop	99	100	906	0.026	0	289	392	1404	41	1799	ja
+10	2026-08-17	17:30	gzip	annonce-1021	mobil	95	100	2932	0.001	56	1059	1093	290	21	497	nej
+10	2026-08-17	17:31	gzip	annonce-1021	desktop	100	100	633	0.008	0	291	371	290	21	497	ja
+10	2026-08-17	17:32	gzip	forhandler-mc	mobil	97	100	2664	0.000	0	1059	1059	272	18	139	nej
+10	2026-08-17	17:32	gzip	forhandler-mc	desktop	100	100	575	0.007	0	288	312	272	18	139	ja
+10	2026-08-17	17:33	gzip	maerker	mobil	99	100	1959	0.000	0	1065	1065	186	12	192	ja
+10	2026-08-17	17:34	gzip	maerker	desktop	100	100	434	0.007	0	289	289	186	12	192	ja
+10	2026-08-17	17:35	gzip	opret-login	mobil	90	100	3596	0.000	4	1258	1258	406	45	222	nej
+10	2026-08-17	17:35	gzip	opret-login	desktop	100	100	772	0.006	0	344	344	406	45	222	ja
+10	2026-08-17	17:36	gzip	sikkerhed	mobil	99	100	1961	0.000	0	1061	1061	186	12	215	ja
+10	2026-08-17	17:36	gzip	sikkerhed	desktop	100	100	437	0.031	0	290	290	186	12	215	ja
+10	2026-08-17	17:37	gzip	annonce-tom	mobil	95	100	2934	0.000	0	1059	1060	290	21	192	nej
+10	2026-08-17	17:38	gzip	annonce-tom	desktop	100	100	628	0.007	0	291	291	290	21	192	ja
+10	2026-08-17	17:38	gzip	forhandler-tom	mobil	97	100	2685	0.000	0	1057	1057	272	18	139	nej
+10	2026-08-17	17:39	gzip	forhandler-tom	desktop	100	100	581	0.007	0	289	319	272	18	139	ja
 ```
+
+Runde 10-rækkerne er **medianer** pr. celle (3 mobilkørsler, 2 desktopkørsler).
+Alle 45 enkeltkørsler ligger i `scratchpad/runde-10.tsv`, spredningen står i tabellen
+under "Runde 10". Runde 7, 8 og 9 blev kørt af forgængere i samme session og ligger
+som rå TSV i scratchpad (`runde-7.tsv`, `runde-8.tsv`, `runde-9.tsv`); de er **ikke**
+optaget i blokken her, fordi jeg ikke kan stå inde for deres maskintilstand.
+Runde 9 er den nærmeste forgænger-baseline og har samme syv URL'er — dens medianer
+er stillet op mod runde 10 nedenfor.
 
 ### Gulvet pr. side — runde 4 (produktionslignende)
 
@@ -404,6 +445,216 @@ Fundet undervejs, uden for dette stykkes filer:
   genbygget, så `main#main-content{min-height:…}` når den først med det asynkrone
   ark. Søgesiden har CLS 0,002 og har ikke brug for reglen tidligt, men **kør
   `node scripts/inline-critical.js` på den, næste gang filen er fri.**
+
+---
+
+## Runde 10 — MÅLER, 17.08.2026: A/B'en er færdig, og gulvet er målt igen
+
+### Sådan er der målt
+
+| | |
+|---|---|
+| Værktøj | Lighthouse 12.8.2 CLI (`npx lighthouse --output=json`), Node v22.14.0 |
+| Browser | Chrome headless (`--headless=new --no-sandbox --disable-gpu`) |
+| Mobil | Lighthouse standardpreset: Moto G Power, 4x CPU-throttling, langsom 4G (Lantern) |
+| Desktop | `--preset=desktop` |
+| Server | `scratchpad/gzserver.js` — gzip på html/css/js/svg, `Cache-Control: max-age=600`, `Server: GitHub.com`. Verificeret: `css/styles.css` udleveres i **49.407 B** gzip mod 196.276 B rå |
+| **Målt på** | **commit `4a33b41`, udpakket med `git archive HEAD`** — ikke arbejdstræet |
+| Klokkeslæt | A/B 17:12–17:26, gulvet 17:26–17:39 |
+| Gentagelser | A/B: 6 par pr. side på to sider, 4 par på to sider. Gulv: 3 mobil + 2 desktop pr. celle, 45 kørsler |
+| Kildefiler rørt | **ingen.** Variant D findes kun i en kopi under scratchpad |
+
+**Dette er den første runde, der er målt på en fast commit.** Runde 1–9 målte alle
+uncommittede ændringer, mens andre agenter skrev i filerne — derfor advarslen øverst
+om, at runde 2, 3 og 4 er tre forskellige sider. Jeg pakkede `4a33b41` ud to gange med
+`git archive` og satte de to arme op på hver sin kopi. **De to arme er derfor
+byte-identiske bortset fra variant D.** Mens jeg målte, ændrede andre agenter
+`js/data.js`, `js/backend-bridge.js`, `js/supabase-api.js`, `js/opret-annonce.js` og
+`opret-annonce.html` i arbejdstræet. Det påvirker ikke tallene her, men det betyder,
+at **runde 10 beskriver `4a33b41`, ikke arbejdstræet i dag.**
+
+### 1. A/B: supabase-js på egen origin — de 142 ms holder ikke
+
+**Opsætning.** To komplette kopier af `4a33b41`, to gzip-servere, kørt FLETTET
+(A, D, A, D, … umiddelbart efter hinanden pr. side), så maskintilstanden er den samme
+for begge arme. Kun mobil — desktop består i forvejen overalt.
+
+- **Arm A (kontrol):** `<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">`, port 61030. Lighthouse henter faktisk fra det rigtige jsDelivr over det rigtige net.
+- **Arm D:** samme bundt fra egen origin, `/js/vendor/supabase-js.js`, port 61031. 10 scripttags, 11 `preconnect` og 12 CSP-poster ændret; `cdn.jsdelivr.net` nævnes ikke længere i én eneste HTML-fil.
+
+**Virker D funktionelt? Ja, efterprøvet igen på den friske kopi:** `/soegning.html`
+viser **383 annoncer** og 24 kort i begge arme, `window.supabase.createClient` findes
+i begge, **nul `pageerror`** i begge, og netværkslisten bekræfter, at A hentede fra
+`cdn.jsdelivr.net` og D fra egen origin.
+
+**Resultatet, 20 flettede par:**
+
+| Side | par | A LCP median | D LCP median | A spredning | D spredning | parvis A−D | sd | t | D bedst i |
+|---|---|---|---|---|---|---|---|---|---|
+| `annonce.html?id=1021` | 6 | 2.931 | **2.714** | 181 ms | 340 ms | **+161 ms** | 208 | 1,9 | 4/6 |
+| `forhandler.html?id=Motorcykel Centret ApS` | 6 | 2.621 | 2.609 | 123 ms | 97 ms | +11 ms | 60 | 0,4 | 4/6 |
+| `soegning.html` | 4 | 4.165 | 4.164 | 10 ms | 160 ms | +25 ms | 72 | 0,7 | 2/4 |
+| `/` (forside) | 4 | 3.199 | 3.515 | 935 ms | 487 ms | **−261 ms** | 583 | −0,9 | 1/4 |
+| **alle 20 par** | **20** | — | — | — | — | **+4,3 ms** | **299** | **0,1** | **11/20** |
+
+**Dommen: de 142 ms er afvist som en generel effekt.** Den reproducerer på ÉN side —
+`annonce.html?id=1021`, hvor 161 ms parvist ligner runde 6's 142 ms ret præcist — men
+selv der er t = 1,9 (p ≈ 0,11 med 5 frihedsgrader), altså ikke til at skelne fra støj,
+fordi D's egen spredning på den side er 340 ms. På forhandlersiden er gevinsten 11 ms.
+På forsiden er D **dårligere** med 261 ms. Samlet over alle 20 par: **4,3 ms med en
+spredning på 299 ms.** Det er nul.
+
+**Hvorfor runde 6 kunne måle 142 ms og jeg ikke kan.** Runde 6 målte ét par på én
+side. De 142 ms er ikke en observeret tid — det er et output fra Lanterns
+simuleringsmodel. Målt observeret i runde 10 tog jsDelivr-hentningen **87 ms**
+(`networkRequestTime` 29,2 → `networkEndTime` 116,4, h2, `entity: JSDelivr CDN`).
+Lantern lægger en fast ekstra rundtur på for en ny origin, men **om den ekstra rundtur
+lander på LCP-grafens kritiske sti afhænger af, hvilken knude der tilfældigvis er
+flaskehals i netop den kørsel.** Derfor dukker effekten op på annoncesiden og
+forsvinder alle andre steder. Bytes flytter sig ikke: A overfører 55.119 B, D 54.676 B
+— 443 B forskel, og sidens samlede vægt er den samme (290 mod 289 KB).
+
+Bemærk også, at A's egne bytes svinger: jsDelivr leverede 55.119, 55.437 og 55.441 B
+i tre kørsler af samme side. Det er rigtigt nok — sådan opfører en fremmed CDN sig
+også i produktionen — men det er variation, egen origin ikke har.
+
+### Hvad det KOSTER at checke bundtet ind — for det er en beslutning, ikke en detalje
+
+**Bundtet er verificeret identisk med det, CDN'en serverer i dag.**
+`cdn.jsdelivr.net/npm/@supabase/supabase-js@2` svarer `X-JSD-Version: 2.112.3` og
+212.199 B; `node_modules/@supabase/supabase-js/dist/umd/supabase.js` er 211.907 B, og
+de 292 B forskel er jsDelivrs egen bannerkommentar. Koden er byte for byte den samme,
+og `package.json` står i forvejen på `^2.112.3`. Der er altså ingen tvivl om, hvad der
+skulle checkes ind.
+
+| Pris | Tal |
+|---|---|
+| **Repostørrelse** | +211.907 B rå på et arbejdstræ, der uden `node_modules`/`.git` er **23 MB** — altså **+0,9 %**. Til sammenligning er `logo.png` alene 1.025.234 B, fem gange bundtet. **Størrelsen er ikke argumentet imod.** |
+| **Git-historik** | Bundtet er minificeret på én linje. Hver opdatering skriver et helt nyt 212 KB blob, som ikke kan delta-komprimeres mod det gamle. Ti opdateringer = ~2 MB permanent i historikken. |
+| **Opdateringer** | `@2` følger i dag automatisk seneste 2.x. Med egen origin fryser versionen, til nogen kopierer filen igen. Det skal være et `npm`-script, ikke en hukommelsessag, ellers står vi med en gammel auth-klient uden at nogen har besluttet det. |
+| **CSP** | `https://cdn.jsdelivr.net` kan ryge ud af `script-src` i **13 HTML-filer** + de to generatorer `scripts/build-brand-pages.js` og `scripts/build-listing-pages.js` (dem må man ikke glemme — `maerker.html` og annoncesiderne GENERERES). Tilbage står `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com`. **Bemærk: `'unsafe-inline'` bliver der. Gevinsten er, at én fremmed vært ikke længere må udføre kode hos os — ikke at CSP'en bliver stram.** |
+| **SRI** | Det her er den stærkeste grund, og den handler ikke om hastighed. jsDelivr skriver selv i filens hoved: *"Do NOT use SRI with dynamically generated files"*. Vi henter altså i dag 212 KB eksekverbar tredjepartskode fra en flydende `@2`-adresse **uden integritetshash og uden fastlåst version**. Med egen origin kan filen versionsmærkes og hashes. |
+| **Modsat vej** | En fremmed origin giver også en ekstra parallel forbindelse, og bundtet ligger på `Low` prioritet — den kø, det ikke haster med. Preconnecten dækker DNS+TLS i en rigtig browser. Derfor er der ingen hastighedsgevinst at hente, og det passer med tallene ovenfor. |
+
+### 2. Gulvet, runde 10 — 9 af 14 på opgavens syv URL'er
+
+Medianer af 3 mobilkørsler / 2 desktopkørsler. Spredningen er den fulde
+min–maks over kørslerne, så man kan se, hvad et enkelt tal er værd.
+
+| Side | Bredde | Ydelse (≥95) | A11y (=100) | LCP (≤2500) | CLS (≤0,10) | TBT (≤200) | LCP-spredning | **Består** |
+|---|---|---|---|---|---|---|---|---|
+| `/` | mobil | 90 ✗ | 100 ✓ | 3.691 ✗ | 0,000 ✓ | 0 ✓ | 3.320–3.717 | **NEJ** |
+| `/` | desktop | 99 ✓ | 100 ✓ | 883 ✓ | 0,056 ✓ | 0 ✓ | 826–939 | **JA** |
+| `/soegning.html` | mobil | 86 ✗ | 100 ✓ | 4.162 ✗ | 0,000 ✓ | 2 ✓ | 4.115–4.191 | **NEJ** |
+| `/soegning.html` | desktop | 99 ✓ | 100 ✓ | 906 ✓ | 0,026 ✓ | 0 ✓ | 896–916 | **JA** |
+| `/annonce.html?id=1021` | mobil | 95 ✓ | 100 ✓ | 2.932 ✗ | 0,001 ✓ | 56 ✓ | 2.905–2.998 | **NEJ** |
+| `/annonce.html?id=1021` | desktop | 100 ✓ | 100 ✓ | 633 ✓ | 0,008 ✓ | 0 ✓ | 632–633 | **JA** |
+| `/forhandler.html?id=Motorcykel Centret ApS` | mobil | 97 ✓ | 100 ✓ | **2.664 ✗** | 0,000 ✓ | 0 ✓ | 2.617–2.673 | **NEJ** |
+| `/forhandler.html?id=…` | desktop | 100 ✓ | 100 ✓ | 575 ✓ | 0,007 ✓ | 0 ✓ | 572–578 | **JA** |
+| `/maerker.html` | mobil | 99 ✓ | 100 ✓ | 1.959 ✓ | 0,000 ✓ | 0 ✓ | 1.958–1.965 | **JA** |
+| `/maerker.html` | desktop | 100 ✓ | 100 ✓ | 434 ✓ | 0,007 ✓ | 0 ✓ | 433–435 | **JA** |
+| `/opret-annonce.html` → login | mobil | 90 ✗ | 100 ✓ | 3.596 ✗ | 0,000 ✓ | 4 ✓ | 3.567–3.699 | **NEJ** |
+| `/opret-annonce.html` → login | desktop | 100 ✓ | 100 ✓ | 772 ✓ | 0,006 ✓ | 0 ✓ | 763–780 | **JA** |
+| `/sikkerhed.html` | mobil | 99 ✓ | 100 ✓ | 1.961 ✓ | 0,000 ✓ | 0 ✓ | 1.959–1.963 | **JA** |
+| `/sikkerhed.html` | desktop | 100 ✓ | 100 ✓ | 437 ✓ | 0,031 ✓ | 0 ✓ | 435–439 | **JA** |
+
+**9 af 14.** De to tomme tilstande er målt med, så tallet kan holdes op mod de
+historiske 16:
+
+| Side | Bredde | Ydelse | LCP | Består |
+|---|---|---|---|---|
+| `/annonce.html?id=1` (tom) | mobil | 95 | 2.934 ✗ | NEJ (434 ms over) |
+| `/annonce.html?id=1` (tom) | desktop | 100 | 628 | JA |
+| `/forhandler.html` (tom) | mobil | 97 | 2.685 ✗ | NEJ (185 ms over) |
+| `/forhandler.html` (tom) | desktop | 100 | 581 | JA |
+
+**11 af 18 i alt. På det historiske 16-sæt (samme otte sider som runde 6): 10 af 16 —
+uændret fra runde 6.** Ingen celle er skiftet retning. Men tallene under dem er
+flyttet: `annonce-tom` mobil gik fra LCP 2.708 til 2.934 og `forhandler-tom` fra
+2.716 til 2.685, mens ALLE sider blev 7–8 KB tungere end i forgængerens runde 9
+(forside 441 → 448 KB, søgning 620 → 627, annonce 283 → 290, mærker 178 → 186).
+**Det er den samme vægt på hver side, altså en fælles fil.** `css/styles.css`
+udleveres nu i **49.644 B** gzip mod 45.459 B i runde 6 og 41.363 B i runde 4.
+Den vokser stille, og den er den eneste post på `VeryHigh`.
+
+Alle 18 celler: **a11y 100** (ingen `color-contrast`-fejl nogen steder — runde 6's
+rettelse holder), **CLS grøn** (maks. 0,063 på opret/login mobil), **TBT grøn** på
+alle medianer. Én enkeltkørsel stikker ud: `annonce-tom` mobil kørsel 1 gav TBT 318 ms
+og ydelse 87, mens kørsel 2 og 3 gav 0 ms og 95. Det er harness-støj, ikke siden —
+derfor står medianen i blokken.
+
+### 3. De tre dyreste resterende huller
+
+Rangeret efter hvor mange millisekunder en celle mangler for at nå gulvet.
+
+#### Hul A — `/soegning.html` mobil: LCP-elementet er et fremmed foto, der opdages 2.656 ms for sent
+
+Sidens dyreste celle, **1.662 ms over grænsen**, og den eneste, hvor LCP ikke er tekst.
+LCP-faserne siger det hele:
+
+```
+TTFB          455 ms
+Load Delay  2.656 ms   ← billedet findes ikke i HTML'en
+Load Time   1.010 ms   ← 59.732 B JPEG fra images.danbase.dk
+Render Delay   70 ms
+```
+
+LCP-elementet er `<img src="https://images.danbase.dk/…/Honda_CB_1000_0_2.jpg">`.
+De fem tungeste poster på siden er alle fremmede JPEG'er (55.872–65.209 B), og
+`modern-image-formats` alene peger på 119.232 B. **De 3.666 ms er ikke vægt vi kan
+komprimere — de er en opdagelseskæde:** HTML → CSS+JS → JS henter data → JS skriver
+`<img>` → browseren opdager fotoet. Ingen `preload` kan komme foran det, fordi
+adressen først findes, når dataene er hjemme. Enten skal det første korts foto ligge
+i HTML'en (eller en `preload`, serveren kan gætte), eller det første kort skal ikke
+have foto. Vægten er 627 KB, hvoraf ~355 KB er `images.danbase.dk`. Vi kan ikke
+konvertere deres JPEG'er — vi kan vælge, hvad der står øverst.
+
+#### Hul B — `css/styles.css`, 49.644 B på `VeryHigh` på alle 14 sider, hvoraf 44–47 KB er ubrugt
+
+På de fem tekst-LCP-sider er **hele LCP'en TTFB + Render Delay**, med Load Delay 0 og
+Load Time 0. Målt (mobil, runde 10):
+
+```
+forside        Render Delay 3.238 ms af LCP 3.691
+opret/login    Render Delay 3.142 ms af LCP 3.596
+annonce-tom    Render Delay 2.572 ms af LCP 3.027
+annonce-1021   Render Delay 2.451 ms af LCP 2.905
+forhandler-tom Render Delay 2.231 ms af LCP 2.685
+forhandler-mc  Render Delay 2.210 ms af LCP 2.664
+maerker        Render Delay 1.507 ms af LCP 1.965
+sikkerhed      Render Delay 1.505 ms af LCP 1.959
+```
+
+Der er intet at hente på hovedtråden — TBT er 0 på seks af de otte. Det er kø.
+`unused-css-rules` måler **44.009–47.271 B ubrugt på hver enkelt side**, altså
+90 % af filen. Runde 6's tal står stadig: minificeret ville den være gzip 20.480 B,
+og forsøg B målte 148 ms FCP for de 25 KB. Prisen er uændret den, runde 6 beskrev
+(et genereret `css/styles.min.css` plus de fire regex'er i
+`scripts/inline-critical.js`, der matcher `css/styles.css` bogstaveligt) — men
+**filen er nu 8,3 KB gzip større end da beslutningen blev udskudt**, så gevinsten
+vokser, hver gang den udskydes igen.
+
+#### Hul C — `/opret-annonce.html` omdirigerer stadig: 2.726 ms simuleret
+
+`redirects`-auditten, mobil runde 10: **2.726 ms**. 45 requests over to dokumenter.
+Ydelse 90 mobil, FCP 1.258 ms mod 1.058 ms på alle andre sider — de 200 ms ekstra
+FCP er den ekstra rundtur, og de er den eneste side med det tal. Hullet er kendt fra
+runde 4 (hul 5) og har ikke flyttet sig.
+
+**Lige under de tre:** `js/data.js` overføres med **27.012 B** (75.649 B rå) på
+`Low` på alle otte målte sider — også `maerker.html` og `sikkerhed.html`, som ikke
+viser en annonce. Og forsiden henter nu **30.515 B fra
+`hkcjrwglwurdjnobewzb.supabase.co/rest/v1/eksterne_annoncer` på `High` prioritet**,
+altså i samme kø som heroen og fontene. På en side, hvis LCP er `<h1>`, er det
+30 KB `High` foran første maling.
+
+### Hvad jeg IKKE kan svare på
+
+- **Lantern mod observeret.** LCP/FCP/SI er simulerede; `network-requests`-tiderne er observerede. Den ene tidslinje er ikke den anden — det er hele forklaringen på, hvorfor 142 ms kunne måles og ikke kan reproduceres.
+- **Kontrolarmen hænger på det rigtige internet.** Arm A henter fra det rigtige jsDelivr. Det er realistisk, men det er også en støjkilde, jeg ikke styrer.
+- **Ingen produktionsmåling.** Alt er localhost. Ingen rigtig latenstid til Supabase, ingen rigtig CDN-geografi.
+- **`/opret-annonce.html` og `js/data.js` blev ændret af andre agenter, mens jeg målte.** Tallene for `opret-login` gælder `4a33b41`.
+- **Søgesiden er målt i headless Lighthouse, ikke i en forreste fane.** Kortene tegnes to ad gangen via `setTimeout(0)`; Lighthouse holder siden aktiv, så timerne klemmes ikke, og DOM'en når 1.563 elementer i alle tre kørsler. Men den advarsel gælder stadig alle, der måler siden i en baggrundsfane eller iframe.
 
 ---
 
@@ -636,6 +887,27 @@ konvertere dem.
 ## Næste runde
 
 Kør de samme syv URL'er mod en gzip-server (`Cache-Control: max-age=600`), mobil og
-desktop, og føj rækkerne til TSV-blokken med runde 5. Mål **`?id=1007`, ikke `?id=1`**,
-og noter klokkeslæt + `git rev-parse --short HEAD`, så tallene kan placeres i tid.
-Median af tre mobilkørsler pr. side hvis der er tid — én kørsel har ±3 points støj.
+desktop, og føj medianrækkerne til TSV-blokken med et nyt rundenummer. Mål
+**`?id=1021`, ikke `?id=1`**. Tre ting, runde 10 gjorde, som er værd at gentage:
+
+1. **Mål på en commit, ikke på arbejdstræet.** `git archive HEAD | tar -x -C <kopi>`
+   og server kopien. Så ved du, hvad tallet beskriver, også når fire andre agenter
+   skriver i filerne imens. Noter hashen.
+2. **Flet en A/B, kør den aldrig i blokke.** A, D, A, D umiddelbart efter hinanden,
+   mindst 6 par, og rapportér den parvise forskel MED spredning. Runde 6's 142 ms
+   var ét par på én side og holdt ikke for 20.
+3. **Tre mobilkørsler pr. celle er minimum.** Enkeltkørsler så `annonce-tom` mobil
+   svinge mellem ydelse 87 og 95 og TBT mellem 318 og 0 ms uden nogen ændring.
+
+Det, der ikke behøver måles igen: **a11y (100 på 18 af 18), CLS (grøn på 18 af 18) og
+TBT (grøn på 18 af 18).** De tre er færdige emner og har været det siden runde 6.
+Mål dem, men brug ikke tid på dem. **Hele det resterende hul er mobil-LCP**, og efter
+runde 10 er det tre ting: søgesidens fremmede LCP-foto (3.666 ms opdagelse + hentning),
+`css/styles.css` (49.644 B `VeryHigh`, 90 % ubrugt pr. side) og omdirigeringen på
+`/opret-annonce.html` (2.726 ms).
+
+Det, der IKKE skal prøves igen uden en ny idé: **supabase-js på egen origin som
+hastighedsrettelse.** Den er nu målt to gange — 142 ms på ét par i runde 6, 4,3 ms
+± 299 på 20 par i runde 10. Der er stadig gode grunde til at flytte bundtet
+(SRI, fastlåst version, én fremmed vært mindre i `script-src`), men hastighed er
+ikke en af dem, og de grunde hører til sikkerhedsstykket, ikke ydelsesstykket.

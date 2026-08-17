@@ -976,3 +976,104 @@ to hunks, da scriptet kørte, og det var betingelsen for at turde køre den.
 DET, DER VAR FORMÅLET: `soegning.html` manglede som eneste side
 `main#main-content{min-height:...}` i sin kritiske blok. Alle 14 har den nu.
 HVOR: alle 14 `*.html` — `<style id="critical">`
+
+### UPLOADVEJEN VIRKER — hullet er, at der ikke findes én egen annonce — fotospørgsmålet, 17.08.2026
+HVAD: Hypotesen "uploadvejen virker slet ikke" er EFTERPRØVET OG AFVIST. Målt
+mod produktion (hkcjrwglwurdjnobewzb):
+  - Bucket'en `listing-photos` FINDES: oprettet 27.07.2026, `public = true`,
+    `file_size_limit = null`, `allowed_mime_types = null`. Ingen grænse spærrer.
+  - Alle fire storage-politikker står i produktion, og alle tre
+    `listing_photos`-politikker gør. 017 ER kørt (`auth.uid()` er pakket i
+    `(select auth.uid())` i hver politik) — modsat noten længere oppe i filen.
+  - RLS accepterer HELE kæden. Efterprøvet med `set local role authenticated`
+    + `request.jwt.claims` for en rigtig bruger: `insert into listings` og
+    derefter `insert into listing_photos` gik begge igennem. Kørt i en
+    transaktion med `rollback` — der er IKKE skrevet noget til produktion.
+  - Der ligger ét rigtigt uploadet foto i bucket'en: 50.884 B jpeg,
+    28.07.2026, stien `<bruger>/<annonce>/<uuid>.jpg` — altså præcis den form
+    `uploadListingPhoto()` bygger. Dens offentlige URL svarer 200 i dag, så
+    `photoUrl()` bygger adressen rigtigt. Ejeren (3d71de63…) findes ikke
+    længere i `auth.users`; filen er forældreløs affald fra en tidligere
+    omgang, ikke et bevis på en fejl.
+  - Billedbehandlingen virker i browseren: 2400×1200 jpeg → 1600×800 webp,
+    2.844 B. `canvas.toBlob('image/webp')` falder ikke tilbage.
+  - CSP på `opret-annonce.html` tillader både `blob:` (miniaturerne) og
+    supabase-værten i `img-src` og `connect-src`. Intet blokeres.
+DEN RIGTIGE ÅRSAG: `listings` har NUL rækker i produktion, og `listing_photos`
+har nul. De 51 "egne" annoncer, tre kritikere har talt, er `js/data.js`'
+demolager, og `SHOW_DEMO_DATA` er kun sandt på localhost — på bikerbasen.dk er
+der 0 egne annoncer og 332 indekserede, ikke 51 + 332. Demoannoncer har med
+vilje ingen `photoUrls` (se blokken om galleriet), og de kan ikke få nogen:
+et demofoto ville være et opdigtet foto.
+DERFOR: fotospørgsmålet kan IKKE lukkes af en builder. Det kræver, at der
+findes annoncer, et menneske har oprettet. Se anbefalingen i rapporten.
+HVOR: `supabase/schema.sql` linje 189-216 (uændret — den er korrekt)
+
+### Den eneste rigtige fejl i uploadvejen: filer forsvandt TAVST — fotospørgsmålet, 17.08.2026
+HVAD: `handleFiles()` er skrevet om. Tre fejl, alle målt i browseren:
+  1. `slice(0, 12 - uploadedPhotos.length)` skar FØR ikke-billeder blev
+     sorteret fra, så en PDF blandt de første 12 filer spiste en billedplads.
+  2. Filer ud over grænsen forsvandt uden et ord. MÅLT FØR: 17 filer ind, 12 i
+     gitteret, 5 væk, nul beskeder. MÅLT EFTER: "4 billeder kom ikke med —
+     der er plads til 12 i alt. 1 fil er ikke et billede."
+  3. `file.type.startsWith('image/')` smed telefonfotos væk. Windows har ingen
+     registrering for .heic, så et iPhone-foto lagt over på en pc kommer med
+     `file.type === ''`. MÅLT FØR: `IMG_4711.HEIC` forsvandt tavst. EFTER:
+     den lander i gitteret. `erBilledfil()` falder tilbage på endelsen, og
+     `validateImage()` i `js/supabase-api.js` gør det samme
+     (`billedType()`) — vi afviste før på en oplysning, vi ikke havde.
+     `accept` på feltet er også udvidet med `.heic,.heif`, ellers var filen
+     grå i filvælgeren i forvejen.
+HVORFOR: En annonce uden foto er det dyreste hul på hele sitet (tre domme i
+træk). At en sælger, der GJORDE det rigtige, kunne miste tre af sine femten
+fotos uden en lyd, er derfor den værste tavse fejl der fandtes. Samme regel som
+"en formular, der er dømt til at fejle" fra sælgerprofilen: sig betingelsen.
+HVOR: `js/opret-annonce.js` — `erBilledfil()`, `handleFiles()`,
+`handleDocFiles()`, `MAX_FOTOS`/`MAX_DOKUMENTER`; `js/supabase-api.js` —
+`billedType()`, `validateImage()`, fejlbeskeden i `uploadListingPhoto()`;
+`opret-annonce.html` — `#photo-input` accept
+
+### Forsidebilledets position var overladt til tilfældet ved redigering — fotospørgsmålet, 17.08.2026
+HVAD: `db.uploadListingPhoto(id, fil, existingPhotos.length + i)` er blevet
+`naestePosition + i`, hvor `naestePosition` er den HØJESTE position blandt de
+billeder, der bliver liggende, plus én.
+HVORFOR: Tre billeder på position 0, 1, 2 — fjern det i MIDTEN, og
+`existingPhotos.length` er 2. Det næste nye billede fik altså position 2:
+samme position som det billede, der stadig lå der. Rækkefølgen mellem to lige
+positioner er udefineret, og position 0 er forsidebilledet — altså var den ene
+ting, køberen ser først på kortet, overladt til hvad Postgres leverede først.
+Målt på fire tilfælde: ny annonce 0/0, intet fjernet 3/3, MIDTEN fjernet
+**3 mod gammel 2 (kollision)**, rækker uden position 1/2.
+RØRT EN ANDEN BUILDERS FIL: `js/backend-bridge.js` `photoRows` bærer nu
+`position` med. Ét felt, rent additivt — ingen eksisterende læser af
+`photoRows` (kun `js/opret-annonce.js`) mister noget. Uden feltet kan
+positionen ikke kendes i browseren, og antallet af rækker duer ikke som mål,
+fordi der er huller i positionerne efter en sletning. `normalizeRemoteListing()`
+sorterede allerede korrekt på `position` (linje 18) — det er dét, der gør
+positionen en oplysning og ikke pynt.
+HVOR: `js/opret-annonce.js` `publishListing()`; `js/backend-bridge.js` linje 43
+
+### Formularen lovede en illustration, siden ikke længere tegner — fotospørgsmålet, 17.08.2026
+HVAD: `#photo-hint` i `opret-annonce.html` lød "Ingen billeder valgt endnu —
+vi viser en illustration som eksempel, indtil du uploader dine egne." Den er
+nu ORDRET den samme som `renderPhotoGrid()` skriver et øjeblik senere:
+"Ingen billeder valgt endnu — annoncer med billeder bliver set markant oftere."
+HVORFOR: To fejl i én sætning. Den var USAND — tegningen er fjernet fra hele
+sitet, og en annonce uden foto står nu med "Ingen fotos i denne annonce". Og
+den fjernede sælgerens eneste grund til at uploade: får man at vide, at siden
+tegner en motorcykel, er tolv fotos spildt arbejde. Det er den slags tekst,
+der KAN være en del af årsagen til, at der ikke er fotos. Teksten stod kun til
+første maling (JS'en overskrev den), men første maling er der, hvor sælgeren
+læser, hvad der forventes af ham.
+HVOR: `opret-annonce.html` — `#photo-hint`
+
+### Fejlbeskeden ved en mislykket upload sagde ikke hvad eller hvorfor — fotospørgsmålet, 17.08.2026
+HVAD: "Annoncen er gemt, men N billede(r) kunne ikke uploades" er nu
+"Annoncen er gemt, men N af M billeder kunne ikke uploades: <grunden> Du kan
+prøve igen under 'Rediger annonce'." Grunden og filnavnet logges desuden pr.
+billede. Ved fejl går der 4.500 ms før viderestillingen i stedet for 1.000.
+HVORFOR: `failed.push(withFiles[i].name)` smed `res.error.message` væk, og så
+blev sælgeren sendt videre efter ét sekund til en annonce uden billeder — uden
+at vide hvad der gik galt, og uden at vide at billederne kan lægges på igen.
+Beskeden skal kunne læses, før siden skifter.
+HVOR: `js/opret-annonce.js` — `publishListing()`
