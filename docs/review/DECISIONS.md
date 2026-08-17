@@ -376,3 +376,77 @@ er det menneskets beslutning, ikke min.
 **BEVIS:** målingerne ovenfor er kørt i Browser-panelet mod dev-serveren på
 55559 (`maerker.html`, forrest fane) og med `grep` over `js/`, `crawler/`,
 `scripts/`, `css/` og alle 32 HTML-sider. Ingen fil er ændret.
+
+### D-008 delvist afvist — 17.08.2026
+**FINDING:** "Favoritfunktionen har i drift ingenting at virke på." 0 af 20
+eksterne kort har en "Gem annonce"-knap, 4 af 4 egne har den, og da drift har
+0 egne annoncer kan hjertet i toppen — som står på alle 14 sider — aldrig
+blive andet end 0. Findingen foreslår at sætte `.fav-btn` på det eksterne kort
+og skriver: *"Findes der en grund til, at eksterne ikke må gemmes, skal den
+skrives i work/DECISIONS.md — for lige nu ligner det en forglemmelse, ikke et
+valg."*
+
+**HVAD DER ER AFVIST:** `.fav-btn` på det eksterne kort.
+**HVAD DER ER LAVET:** indgangen til "Gemte annoncer" i headeren og i
+mobilskuffen vises først, når der ER noget gemt. En global knap, hele lageret
+er udelukket fra, står ikke og lover noget.
+
+**HVORFOR AFVIST — det er databasen, ikke smag:**
+
+`supabase/002_favorites_reviews.sql:11-16`
+
+    create table if not exists public.favorites (
+      user_id    uuid not null references public.profiles(id) on delete cascade,
+      listing_id uuid not null references public.listings(id) on delete cascade,
+      ...
+
+Indekserede annoncer ligger i `eksterne_annoncer`, ikke i `listings`. En
+favorit på en ekstern annonce kan altså ikke skrives — fremmednøglen afviser
+den. Det er ikke en antagelse om koden; det er tabellens definition.
+
+| | |
+|---|---|
+| egne annoncer i drift (`listings`, status active) | **0** |
+| indekserede i drift (`eksterne_annoncer`, status aktiv) | **332** |
+| af de 332, der kan gemmes i `favorites` | **0** — fremmednøglen |
+| sider hjerteikonet står på | **14 af 14** |
+
+**HVAD DET VILLE KOSTE AT GØRE DET "RIGTIGT" I DAG.** `Store.toggleFavorite()`
+skriver altid til localStorage og synkroniserer kun, når id'et er en uuid og
+brugeren er logget ind. En ekstern uuid opfylder præcis den betingelse, så
+knappen ville:
+
+1. gemme lokalt og se ud som om den virkede,
+2. sende et `insert` mod `favorites`, som fremmednøglen afviser,
+3. give en advarsel pr. synkronisering ("N af M favoritter kunne ikke gemmes"
+   — teksten kom med C-008's rettelse samme dag),
+4. og for en LOGGET IND bruger aldrig nå hans konto. Siden hedder "Mine
+   annoncer › Gemte annoncer". Det ord er et løfte om, at det følger med til
+   næste enhed. Det ville det ikke.
+
+Punkt 4 er hele afvisningen. Et hjerte, der gemmer forskelligt afhængigt af
+om man er logget ind, uden at sige det, er den samme fejl som et gættet felt:
+*"Ærlighed slår fuldstændighed"*. C-008's rettelse gør i øvrigt fejlen
+u-destruktiv — favoritten bliver liggende lokalt — men u-destruktiv er ikke
+det samme som ærlig.
+
+**AT SAMMENLIGN VIRKER PÅ EKSTERNE ER IKKE EN MODSÆTNING.** `.card-compare`
+bruger det samme `l.id` på de samme kort, og den knap ER der. Forskellen er,
+at sammenligning ikke har nogen database bag sig overhovedet — den er ærligt
+og udelukkende lokal, og der er ingen konto, den kunne have fulgt med til.
+
+**HVAD DER SKULLE TIL:** enten en `favorites`-tabel, der kan pege på begge
+kilder (fx `kilde` + `annonce_id` uden fremmednøgle, eller en separat
+`eksterne_favoritter`), eller at eksterne annoncer får en række i `listings`.
+Begge dele er en migration mod produktionsdatabasen, og migrationer køres
+ikke uden mennesket. Den dag den findes, er `.fav-btn` på det eksterne kort
+den rigtige rettelse — findingens forslag er ikke forkert, det er for tidligt.
+
+**BEVIS:** tabeldefinitionen ovenfor er læst i `supabase/002_favorites_reviews.sql`
+og bekræftet uændret i `supabase/017_ydelse.sql` (indekset
+`favorites_listing_idx on public.favorites (listing_id)`). Antallene 0/332 er
+dem, C-014's afvisning målte samme dag mod drift. Efter rettelsen målt i
+browseren på 55559: med tom favoritliste er hjertet i headeren og "Gemte
+annoncer" i mobilskuffen `hidden` på alle prøvede sider; efter ét klik på et
+hjerte på et EGET kort dukker begge op med tallet 1 uden genindlæsning, og de
+forsvinder igen, når favoritten fjernes.

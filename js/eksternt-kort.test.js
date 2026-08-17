@@ -213,3 +213,29 @@ test('kilden nævnes stadig i bunden, nu på samme linje som stedet', () => {
   assert.match(html, /class="card-sted"[\s\S]*?Rødding/);
   assert.match(html, /class="card-kildelinje"[\s\S]*?Forhandler · mcsyd\.dk/);
 });
+
+/* ---------- D-008: favoritten, der ikke kan gemmes ----------
+   `favorites.listing_id` er `uuid not null references public.listings(id)`.
+   Indekserede annoncer ligger i `eksterne_annoncer`, så en favorit på dem
+   bliver afvist af fremmednøglen — og et hjerte, der ser ud som om det
+   virkede, er værre end intet hjerte. Hele afvisningen med tallene står i
+   docs/review/DECISIONS.md. Testen ligger her, fordi det er den slags, en
+   senere "konsistens-oprydning" retter uden at kende grunden. */
+
+test('det indekserede kort har intet gem-hjerte — og vores eget har ét', () => {
+  const ekstern = externalCardHTML(eksternAnnonce(), 1);
+  assert.ok(!/fav-btn/.test(ekstern), 'en favorit, databasen afviser, må ikke se ud som om den virker');
+  assert.ok(!/data-fav-toggle/.test(ekstern));
+  assert.match(ekstern, /data-compare-toggle/,
+    'sammenlign SKAL blive: den er ærligt og udelukkende lokal og har ingen konto at svigte');
+
+  const eget = listingCardHTML({
+    id: 1021, brand: 'KTM', model: 'RC 390', price: 44900, year: 2021,
+    km: 9100, ccm: 373, power: 44, city: 'Aarhus',
+  }, 1);
+  assert.match(eget, /class="fav-btn [^"]*" aria-pressed="false" aria-label="Gem annonce" data-fav-toggle="1021"/);
+});
+
+test('rækken følger kortet: heller ikke dér et hjerte', () => {
+  assert.ok(!/fav-btn|data-fav-toggle/.test(externalRowHTML(eksternAnnonce(), 1)));
+});

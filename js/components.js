@@ -59,10 +59,36 @@ function injectDealerNav(current){
   }
 }
 
+/* D-008: hjertet i toppen står på alle 14 sider og viste "0" — og i drift kan
+   det ALDRIG blive andet end 0.
+
+   Regnestykket: databasen har 0 egne annoncer (`listings`) og 332 indekserede
+   (`eksterne_annoncer`). Kun egne annoncer kan gemmes — `favorites.listing_id`
+   er `uuid not null references public.listings(id)`, så en uuid fra
+   `eksterne_annoncer` bliver afvist af fremmednøglen. Der stod altså en
+   global knap i toppen af hver eneste side, som 100 % af det aktuelle lager
+   var udelukket fra.
+
+   Valget er beskrevet i docs/review/DECISIONS.md: vi opfinder ikke en
+   favorit, der ikke kan gemmes. Så bliver den anden udgang tilbage —
+   funktionen må ikke fremstå tilgængelig, når den ikke er det.
+
+   Reglen er selvsandende og kræver ikke at kende lagerets sammensætning:
+   indgangen til "Gemte annoncer" vises, når der ER noget gemt. Den dukker op
+   i samme sekund, det første hjerte trykkes (bb:favorites-changed), og den
+   forsvinder igen, når det sidste fjernes. Den dag `listings` får rækker,
+   virker den af sig selv — der skal ikke huskes noget.
+
+   Selve markuppen bliver stående i HTML'en, så siden er crawlbar og virker
+   uden javascript; det er kun visningen, der styres her. Favoritfanen er
+   uændret tilgængelig fra mine-annoncer.html's egne faneblade. */
 function updateFavCount(){
   const n = Store.getFavorites().length;
-  document.querySelectorAll('[data-fav-count]').forEach(el => { el.textContent = n; el.setAttribute('data-count', n); });
-  document.querySelectorAll('[data-fav-count-mobile]').forEach(el => { el.textContent = n; });
+  const skjul = el => { const a = el.closest && el.closest('a'); if (a) a.hidden = n === 0; };
+  document.querySelectorAll('[data-fav-count]').forEach(el => {
+    el.textContent = n; el.setAttribute('data-count', n); skjul(el);
+  });
+  document.querySelectorAll('[data-fav-count-mobile]').forEach(el => { el.textContent = n; skjul(el); });
 }
 
 function updateAuthSlot(){
@@ -253,8 +279,15 @@ function sellerLineHTML(l){
         genvejen; de er grunden til, at køberen ikke bliver overrasket over,
         hvor annoncesiden sender ham videre hen.
      4. Ingen favoritknap. Favoritter peger på listings med en
-        fremmednøgle — en uuid herfra ville blive afvist af databasen, og
-        hjertet ville se ud som om det virkede.
+        fremmednøgle — `favorites.listing_id uuid not null references
+        public.listings(id)` — så en uuid herfra bliver afvist af databasen,
+        og hjertet ville se ud som om det virkede.
+
+        D-008 spurgte, om det var et valg eller en forglemmelse. Det er et
+        valg, og det er nu skrevet ned med tallene i docs/review/DECISIONS.md.
+        Følgen — at hjertet i toppen aldrig kan blive andet end 0, så længe
+        `listings` har 0 rækker — er håndteret dér, hvor den hører hjemme:
+        updateFavCount() viser først indgangen, når der ER noget gemt.
      5. Kildemærket ligger som en stribe ØVER fotoet, ikke som en pille
         oven på det. Over et vilkårligt forhandlerfoto målte mærket 2,64:1
         i kontrast — under AA's 4,5:1 — og det er kortets vigtigste tekst.
