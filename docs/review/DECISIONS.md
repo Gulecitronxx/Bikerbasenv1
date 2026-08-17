@@ -63,6 +63,51 @@ viser ikke et pressefoto af modellen som om det var annoncens.
 
 <!-- dev skriver herunder -->
 
+### C-014 delvist afvist — 17.08.2026
+**FINDING:** "Produktionssitet har 7 indekserbare adresser og NUL annonce-
+eller mærkesider." Findingen peger på to slags manglende sider: mærkesider og
+annoncesider.
+
+**HVAD DER ER LAVET:** mærkesiderne. Byggekæden læser nu også
+`eksterne_annoncer`, og `maerke-*.html` bygges af egne og indekserede annoncer
+tilsammen. Målt: **7 → 25** indekserbare adresser, 0 → 18 mærkesider, og
+`maerker.html` gik fra 0 til 18 links til sider, der findes.
+
+**HVAD DER ER AFVIST:** en forrenderet `annonce-<slug>.html` pr. indekseret
+annonce — de 332.
+
+**HVORFOR AFVIST — målt:**
+
+| | |
+|---|---|
+| egne annoncer i `listings` (status active) | **0** |
+| indekserede i `eksterne_annoncer` (status aktiv) | **332** |
+| af de 332, der ville blive indekseret af Google | **0** |
+
+Den sidste linje er hele begrundelsen. `js/annonce.js:334` sætter
+`noindex, follow` på hver enkelt indekseret annonce, og det er en truffet
+beslutning, ikke en forglemmelse: *"Vi ejer ikke indholdet, og en kopi af
+forhandlerens annonce skal ikke konkurrere med originalen i Google."* Den står
+sammen med "Kilden ejer sine billeder" ovenfor. Forrendering findes for at give
+en crawler noget at læse. På 332 sider, en crawler har fået besked på ikke at
+indeksere, køber den ingenting — og prisen er 332 filer med MC Syds annoncetekst
+liggende på handelsdomænet.
+
+Nul annoncesider er derfor det RIGTIGE tal i dag, ikke en mangel: der er nul
+annoncer, vi ejer. Får `listings` rækker, bygger `build-listing-pages.js` dem
+automatisk, og den kode er urørt.
+
+Adressen på en indekseret annonce er `annonce.html?id=<uuid>`. Den findes (200)
+og viser kildeoplysning, prislabel og kørekortdommen. Det er den, mærkesidernes
+`<noscript>`-liste og kortenes `.card-link` peger på — aldrig en
+`annonce-<slug>.html`, som ikke findes. `harEgenSide()` i
+`scripts/build-brand-pages.js` er den ene regel, der holder sitemap, ItemList og
+interne links enige om det.
+
+**BEVIS:** `node scripts/build.js` → 18 mærkesider, sitemap 25 URL'er; hver af
+de 25 hentet lokalt: **25 × HTTP 200, 0 × ikke-200**. `node scripts/udgiv.js`:
+alle referencer opløst. `grep 'href="annonce-'` i alle 18 mærkesider: 0 træf.
+
 ### C-010 delvist afvist — 17.08.2026
 **FINDING:** "`fingerprint`-reglen er skrevet ned, men ikke implementeret.
 Kommentaren i `crawler/normalize.js:485` lover: *Samme motorcykel annonceret tre

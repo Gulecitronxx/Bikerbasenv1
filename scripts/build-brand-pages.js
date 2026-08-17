@@ -7,8 +7,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const { browserModules } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing } = browserModules();
+const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing } = browserModules();
 const BASE = require('./site-url')(ROOT);
 const src = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
 eval(src + '\nglobal.__L = LISTINGS; global.__B = BRANDS_BY_MODEL; global.__T = TYPES;');
@@ -18,7 +18,13 @@ const BRANDS_BY_MODEL = global.__B;
    er slået fra, så listen hentes fra databasen. Falder tilbage på hvad data.js
    måtte indeholde, hvis databasen ikke kan nås — et build skal ikke fejle
    alene på grund af netværket. Kaldes synkront via deasync-agtig top-level await
-   er ikke muligt her, så resultatet hentes før brug nedenfor. */
+   er ikke muligt her, så resultatet hentes før brug nedenfor.
+
+   BEMÆRK: den her henter kun VORES EGNE annoncer (`listings`). Den tabel har
+   0 rækker i drift, og det var hele grunden til at sitet havde syv
+   indekserbare adresser: mærkeindekset blev bygget af et tomt datasæt, mens
+   332 indekserede annoncer lå i `eksterne_annoncer`. De hentes af
+   hentEksterne() nedenfor og lægges sammen med disse. */
 async function hentAnnoncer(){
   const cfg = fs.readFileSync(path.join(ROOT, 'js/supabase-config.js'), 'utf8');
   const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1];
@@ -43,7 +49,26 @@ async function hentAnnoncer(){
   }
 }
 
+/* De indekserede annoncer, oversat med sidens EGEN normalisering. */
+async function hentEksterne(){
+  return (await fetchExternalListings()).map(normalizeExternalListing);
+}
+
 let LISTINGS = [];
+
+/* Har annoncen en forrenderet annonce-<slug>.html?
+
+   Kun vores egne har. En indekseret annonce er `noindex, follow`
+   (js/annonce.js) — vi ejer ikke indholdet, og en kopi skal ikke konkurrere
+   med originalen. Derfor får den ingen genereret side, og derfor må hverken
+   sitemappet, <noscript>-listen eller struktureret data pege på en
+   annonce-<slug>.html for den. Det var findingen C-015: ItemList'et navngav
+   adresser, der svarede 404. Én regel, ét sted. */
+const harEgenSide = l => !l.isExternal;
+
+/* Adressen, en indekseret annonce faktisk KAN nås på. Siden findes (200) og
+   viser kildeoplysning, prislabel og kørekortdommen — den er bare noindex. */
+const internAdresse = l => harEgenSide(l) ? listingSlug(l) : `annonce.html?id=${l.id}`;
 
 function slugify(name){
   return name.toLowerCase()
@@ -71,17 +96,29 @@ function breadcrumbLd(items){
     })),
   };
 }
+/* ItemList — men KUN over de annoncer, der har en adresse, Google kan følge.
+
+   Blokken hed tidligere hele `items` og satte url = listingSlug(l) for hver.
+   På en side, hvor annoncerne er indekserede, ville hver enkelt URL svare 404
+   (findingen C-015, samme fejl i js/seo.js). En ItemList er en påstand om, at
+   de adresser findes, og den påstand skal kunne bakkes op.
+
+   Er der ingen med egen side, bortfalder blokken helt. Det er med vilje: et
+   ItemList med nul brugbare elementer er ikke bedre end ingen, og
+   BreadcrumbList'en står stadig. Genindsæt den ikke uden også at bygge de
+   sider, den peger på. */
 function brandItemListLd(brand, items){
-  if (!items.length) return null;
+  const medSide = items.filter(harEgenSide);
+  if (!medSide.length) return null;
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: `Brugte ${brand} motorcykler til salg`,
-    numberOfItems: items.length,
-    itemListElement: items.map((l, i) => ({
+    numberOfItems: medSide.length,
+    itemListElement: medSide.map((l, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      url: `${BASE}/${require('./shared').listingSlug(l)}`,
+      url: `${BASE}/${listingSlug(l)}`,
       name: `${l.brand} ${l.model} ${l.year}`,
     })),
   };
@@ -109,10 +146,119 @@ const footer = slicedBetween(index, '<footer class="site-footer">', '</footer>',
 if (!/site-header/.test(header)) throw new Error('Udtrukket header mangler .site-header — build afbrudt.');
 if (!/site-footer/.test(footer)) throw new Error('Udtrukket footer mangler .site-footer — build afbrudt.');
 
+/* CSP'en LÆSES fra index.html i stedet for at stå skrevet her.
+   Den stod hårdkodet, og kopien var kommet bagud: den manglede
+   images.danbase.dk, hvor de indekserede annoncers miniaturer ligger. Da
+   mærkesiderne begyndte at vise dem, ville hvert kort have stået med et
+   blokeret billede — og CSP-fejl vises kun i konsollen, ikke på siden. To
+   politikker at holde i sync var problemet; nu er der én.
+   maerker.html beholder sin egen, strammere: den viser ingen billeder og
+   henter ingen data (se scriptlisten nederst i den). */
+const csp = (index.match(/<meta http-equiv="Content-Security-Policy"[^>]*>/) || [])[0];
+if (!csp) throw new Error('Fandt ingen Content-Security-Policy i index.html — build afbrudt.');
+
+const dkk = n => Number(n).toLocaleString('da-DK') + ' kr.';
+const tal = n => Number(n).toLocaleString('da-DK');
+
+/* Et tal, eller null. Og det er IKKE det samme som Number(v).
+
+   Number(null) er 0, og 0 er et gyldigt tal. Så `Number.isFinite(Number(l.km))`
+   siger sandt om en annonce uden kilometerstand, og listen skrev "0 km" — en
+   påstand om en fabriksny maskine, på 163 af 332 annoncer. Samme fælde gav
+   "årgang 0". null betyder uoplyst; det skal ikke kunne blive til et nul
+   undervejs. Se den længere version i js/backend-bridge.js. */
+function tilTal(v){
+  if (v === null || v === undefined || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/* Mærkesidens indledning. Den er sidens ENESTE egne ord, og derfor det sted,
+   hvor en manglende værdi bliver en påstand.
+
+   Hvert led er betinget, og det er ikke pedanteri: målt på lageret har 22 af
+   332 annoncer ingen pris (kilden skriver "ring for pris" — prisen ER oplyst,
+   som "spørg"), og 163 af 332 har ingen kilometerstand. Den gamle udgave
+   skrev prisspændet ubetinget og ville have sat "null kr." på siden, og
+   Math.min over et felt med huller giver NaN.
+
+   Sætningen om kilden står med, når annoncerne er indekserede. En side, der
+   siger "til salg på Bikerbasen" om 204 motorcykler, der står hos MC Syd og
+   handles dér, ville påstå at være markedsplads for dem. Kortene siger det
+   allerede ("Annonce fra MC Syd"); indledningen skal sige det samme. */
+function introFor(brand, items){
+  const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0)
+    .sort((a, b) => a - b);
+  const aar = items.map(l => tilTal(l.year)).filter(y => y !== null && y > 0);
+  const types = [...new Set(items.map(l => l.type))]
+    .map(t => ((global.__T || []).find(x => x.id === t) || {}).label).filter(Boolean);
+  const eksterne = items.filter(l => l.isExternal);
+  const kilder = [...new Set(eksterne.map(l => l.source?.navn).filter(Boolean))];
+
+  const en = items.length === 1;
+  const dele = [`Der er lige nu <strong>${items.length}</strong> ${en ? 'brugt' : 'brugte'} ${esc(brand)} `
+    + `${en ? 'motorcykel' : 'motorcykler'} til salg på Bikerbasen`];
+
+  if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
+    dele.push(` — fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}`);
+  } else if (priser.length){
+    dele.push(` — til ${dkk(priser[0])}`);
+  }
+  if (aar.length){
+    const lav = Math.min(...aar), hoej = Math.max(...aar);
+    dele.push(lav === hoej ? `, årgang ${lav}.` : `, med årgange mellem ${lav} og ${hoej}.`);
+  } else {
+    dele.push('.');
+  }
+  if (types.length){
+    // "m.fl." har sit eget punktum. Uden det her tjek stod der "m.fl..".
+    dele.push(` Udvalget dækker ${types.slice(0, 3).map(esc).join(', ')}${types.length > 3 ? ' m.fl.' : '.'}`);
+  }
+  if (priser.length && priser.length < items.length){
+    const uden = items.length - priser.length;
+    dele.push(` ${uden} ${uden === 1 ? 'annonce oplyser' : 'annoncer oplyser'} pris ved henvendelse.`);
+  }
+  if (eksterne.length && kilder.length){
+    const hvem = eksterne.length === items.length
+      ? (en ? 'Annoncen er' : 'Annoncerne er')
+      : `${eksterne.length} af annoncerne er`;
+    dele.push(` ${hvem} indekseret fra ${kilder.map(esc).join(' og ')}, og handlen sker hos kilden.`);
+  }
+  if (eksterne.length < items.length){
+    dele.push(' Alle annoncer er mærket som enten privat sælger eller forhandler,'
+      + ' så du kan se dine rettigheder før du køber.');
+  }
+  return dele.join('');
+}
+
+/* Linjen i <noscript>-listen. Hvert led er betinget af samme grund som i
+   introFor(): 163 af 332 annoncer har ingen kilometerstand, og den gamle
+   udgave kaldte l.km.toLocaleString() ubetinget. Det ville ikke have givet et
+   grimt tal — det ville have kastet en TypeError midt i byggeriet af siden.
+   Manglende felter nævnes ikke; en liste er ikke stedet for "Ikke oplyst". */
+function noscriptLinje(l){
+  const navn = [l.brand, l.model].filter(Boolean).map(esc).join(' ');
+  const aar = tilTal(l.year), pris = tilTal(l.price), km = tilTal(l.km);
+  const fakta = [
+    aar && aar > 0 ? String(aar) : null,
+    pris !== null && pris > 0 ? dkk(pris) : 'pris ved henvendelse',
+    km !== null ? `${tal(km)} km` : null,
+  ].filter(Boolean);
+  const sted = String(l.city || '').trim();
+  return `${navn}${fakta.length ? ' — ' + fakta.map(esc).join(', ') : ''}${sted ? ` (${esc(sted)})` : ''}`;
+}
+
 function byg(){
 const byBrand = {};
-LISTINGS.forEach(l => { (byBrand[l.brand] = byBrand[l.brand] || []).push(l); });
-const brands = Object.keys(byBrand).sort((a, b) => a.localeCompare(b, 'da'));
+/* "Ukendt" er ikke et mærke, man søger på — normalizeExternalListing sætter
+   det, når kilden ikke oplyser mærket. En maerke-ukendt.html ville være en
+   side uden søgeord og uden mening. I dag er der 0 af dem; spærren er der,
+   fordi den næste kilde kan have nogle. */
+LISTINGS.filter(l => l.brand && l.brand !== 'Ukendt')
+  .forEach(l => { (byBrand[l.brand] = byBrand[l.brand] || []).push(l); });
+const brands = Object.keys(byBrand)
+  .filter(b => byBrand[b].length > 0)   // en tom mærkeside er en blindgyde, ikke en landingsside
+  .sort((a, b) => a.localeCompare(b, 'da'));
 
 /* Ryd forældede mærkesider. Uden dette bliver en side liggende med gammelt
    indhold, når det sidste eksemplar af et mærke er solgt — og den ville
@@ -127,19 +273,6 @@ for (const f of fs.readdirSync(ROOT)){
 }
 if (slettet) console.log(`Fjernede ${slettet} forældede mærkesider.`);
 
-const dkk = n => n.toLocaleString('da-DK') + ' kr.';
-
-function introFor(brand, items){
-  const prices = items.map(l => l.price).sort((a,b) => a-b);
-  const years = items.map(l => l.year);
-  const types = [...new Set(items.map(l => l.type))]
-    .map(t => (global.__T.find(x => x.id === t) || {}).label).filter(Boolean);
-  return `Der er lige nu <strong>${items.length}</strong> brugte ${esc(brand)} ${items.length === 1 ? 'motorcykel' : 'motorcykler'} til salg på Bikerbasen — `
-    + `fra ${dkk(prices[0])} til ${dkk(prices[prices.length-1])}, med årgange mellem ${Math.min(...years)} og ${Math.max(...years)}. `
-    + `Udvalget dækker ${types.slice(0,3).join(', ')}${types.length > 3 ? ' m.fl.' : ''}. `
-    + `Alle annoncer er mærket som enten privat sælger eller forhandler, så du kan se dine rettigheder før du køber.`;
-}
-
 let built = 0;
 for (const brand of brands){
   // Samme raekkefoelge som js/maerke.js: nyeste foerst.
@@ -147,18 +280,44 @@ for (const brand of brands){
   const kort = items.map((l, i) => listingCardHTML(l, i)).join('\n      ');
   const foersteFoto = (items[0] && items[0].photoUrls && items[0].photoUrls[0]) || null;
   const slug = slugify(brand);
-  const models = [...new Set(items.map(l => l.model))];
-  const allModels = (BRANDS_BY_MODEL[brand] || []).slice(0, 12);
+
+  /* Modelchips: de modeller, der ER på lager, ikke en kurateret liste.
+
+     BRANDS_BY_MODEL i js/data.js er en redaktionel liste over kendte modeller,
+     og hvert chip er et link til soegning.html?brands=X&q=model. Er modellen
+     ikke på lager, er linket en blindgyde — samme fejl som mærkeindekset blev
+     kritiseret for (D-010: 44 links til søgeresultater med nul indhold). Vi
+     bruger derfor de modeller, annoncerne faktisk har. De rammer altid noget,
+     og listen holder sig selv opdateret.
+
+     Sorteret efter antal, så det største udvalg står først. */
+  const modelAntal = new Map();
+  for (const l of items){
+    const m = String(l.model || '').trim();
+    if (m) modelAntal.set(m, (modelAntal.get(m) || 0) + 1);
+  }
+  const allModels = [...modelAntal.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'da'))
+    .slice(0, 12).map(([m]) => m);
+
+  const beskrivelse = `Se ${items.length} brugte ${brand} `
+    + `${items.length === 1 ? 'motorcykel' : 'motorcykler'} til salg i Danmark. `
+    + 'Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.';
 
   const html = `<!doctype html>
 <html lang="da">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+${csp}
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Brugte ${esc(brand)} motorcykler til salg — Bikerbasen</title>
-<meta name="description" content="Se ${items.length} brugte ${esc(brand)} motorcykler til salg i Danmark. Sammenlign pris, årgang, km-stand og ccm — fra private sælgere og verificerede forhandlere.">
+<meta name="description" content="${esc(beskrivelse)}">
+<!-- Canonical staar HER, ikke kun i det blok scripts/build-meta.js skriver
+     bagefter. En ny side skal aldrig kunne naa produktionen uden: soegesidens
+     facetter samler sig allerede paa soegning.html, og en maerkeside uden
+     canonical ville vaere den naeste kilde til duplicate content. -->
+<link rel="canonical" href="${BASE}/maerke-${slug}.html">
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
@@ -202,7 +361,11 @@ ${header}
     </div>
 
     ${allModels.length ? `<section class="section" style="padding-top:0;">
-      <h2 class="brand-sub">Populære ${esc(brand)}-modeller</h2>
+      <!-- "Se X efter model", ikke "Populaere X-modeller" og ikke "alle
+           modeller til salg": raekken er de 12 med flest annoncer, og
+           overskriften maa hverken paastaa popularitet, vi ikke maaler, eller
+           fuldstaendighed, den ikke har. Den er en navigationsetiket. -->
+      <h2 class="brand-sub">Se ${esc(brand)} efter model</h2>
       <div class="popular-row">
         ${allModels.map(m => `<a class="popular-chip" href="soegning.html?brands=${encodeURIComponent(brand)}&amp;q=${encodeURIComponent(m)}">${esc(m)}</a>`).join('\n        ')}
       </div>
@@ -213,7 +376,7 @@ ${header}
       <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}">${kort}</div>
       <noscript>
         <ul class="brand-noscript">
-          ${items.map(l => `<li><a href="${require('./shared').listingSlug(l)}">${esc(l.brand)} ${esc(l.model)}, ${l.year} — ${dkk(l.price)}, ${l.km.toLocaleString('da-DK')} km (${esc(l.city)})</a></li>`).join('\n          ')}
+          ${items.map(l => `<li><a href="${esc(internAdresse(l))}">${noscriptLinje(l)}</a></li>`).join('\n          ')}
         </ul>
       </noscript>
     </section>
@@ -358,9 +521,14 @@ const staticPages = ['index.html','soegning.html','maerker.html','opret-annonce.
 
 /* Annoncerne er sidens egentlige long-tail — uden dem i sitemappet skal
    Google selv gætte sig frem via søgesiden, og den er JavaScript-drevet.
-   lastmod følger annoncens updated_at, så en redigeret annonce genbesøges. */
-const { listingSlug } = require('./shared');
-const listingUrls = LISTINGS.map(l => ({
+   lastmod følger annoncens updated_at, så en redigeret annonce genbesøges.
+
+   KUN egne annoncer. De indekserede har ingen annonce-<slug>.html (den fil
+   findes ikke, og deres side er noindex) — de ville have været 332 URL'er,
+   der alle svarede 404. Et sitemap må kun indeholde adresser, der svarer 200,
+   ellers er hele filen mistænkelig for Google, ikke bare den ene linje.
+   harEgenSide() er den samme regel, som holder dem ude af ItemList'et. */
+const listingUrls = LISTINGS.filter(harEgenSide).map(l => ({
   loc: listingSlug(l),
   lastmod: String(l.updated_at || l.createdAt || '').slice(0, 10),
 }));
@@ -369,9 +537,14 @@ const listingUrls = LISTINGS.map(l => ({
    ER den kanoniske adresse. Uden et link herind udefra kan den kun findes ved
    at klikke gennem en af forhandlerens annoncer, så den hører til i sitemappet.
    Kun forhandlere (offentlig virksomhed), aldrig private sælgere — samme grænse
-   som i JSON-LD'et, hvor en privat sælgers navn heller aldrig eksponeres. */
+   som i JSON-LD'et, hvor en privat sælgers navn heller aldrig eksponeres.
+
+   En indekseret annonce har ingen seller (normalizeExternalListing sætter den
+   til null med vilje: vi kender kilden, ikke sælgeren), så MC Syd får ingen
+   forhandlerprofil her. Det er rigtigt — vi har ingen side om dem at vise. */
 const dealerLastmod = new Map();
 for (const l of LISTINGS){
+  if (!harEgenSide(l)) continue;
   if (!l.seller?.isDealer || !l.seller?.id) continue;
   const dato = String(l.updated_at || l.createdAt || '').slice(0, 10);
   const gammel = dealerLastmod.get(l.seller.id);
@@ -404,9 +577,39 @@ Sitemap: ${base}/sitemap.xml
 `, 'utf8');
 
 console.log(`Built ${built} brand pages + maerker.html + sitemap.xml (${urls.length} urls) + robots.txt`);
+console.log(`  heraf ${listingUrls.length} annoncesider og ${brands.length} maerkesider. `
+  + `${LISTINGS.length - LISTINGS.filter(harEgenSide).length} indekserede annoncer er MED VILJE ude af sitemappet (noindex).`);
 }
 
-(async () => {
-  LISTINGS = await hentAnnoncer();
-  byg();
-})().catch(e => { console.error(e.message); process.exit(1); });
+/* Rækkefølgen skal være den SAMME som js/maerke.js ser den, ellers omrokerer
+   mærkesiden, når javascriptet overtager. Klienten læser
+   Store.getAllListings() = [egne fra db, lokale, demo, eksterne] og sorterer
+   derefter på createdAt faldende. Eksterne har createdAt: null med vilje
+   (foerst_set er crawldatoen, ikke annoncedatoen), så de falder bagest og
+   holder deres indbyrdes orden fra databasen — sidst_set faldende. Den orden
+   laves her ved at lægge listerne sammen i samme rækkefølge og bruge samme
+   sammenligning; Array.prototype.sort er stabil. */
+async function hentAlt(){
+  const egne = await hentAnnoncer();
+  const eksterne = await hentEksterne();
+  if (!egne.length && !eksterne.length){
+    throw new Error('Nul annoncer i alt — hverken egne eller indekserede. Build afbrudt: '
+      + 'byg videre ville slette alle maerkesider og skrive et sitemap uden long-tail. '
+      + 'Det er praecis den tilstand, findingen C-014 beskriver.');
+  }
+  return [...egne, ...eksterne]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+if (require.main === module){
+  (async () => {
+    LISTINGS = await hentAlt();
+    byg();
+  })().catch(e => { console.error(e.message); process.exit(1); });
+}
+
+/* Kun til tests (scripts/maerkeside.test.js). Sidens egne ord er det ene
+   sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
+   sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
+   gør en require() fra en test til noget andet end et helt byg. */
+module.exports = { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse };

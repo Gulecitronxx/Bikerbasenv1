@@ -64,6 +64,57 @@ async function fetchListings(fallback = []){
   }
 }
 
+/* Henter de INDEKSEREDE annoncer fra `eksterne_annoncer`.
+
+   Hvorfor funktionen findes: byggekæden læste kun `listings`, og den har 0
+   rækker i drift. Målt resultat: 7 indekserbare adresser, nul mærkesider,
+   404 på maerke-honda.html — mens 332 aktive rækker lå i `eksterne_annoncer`
+   og aldrig blev læst af et byggescript. Mærkesider er VORES aggregering (et
+   antal, et prisspænd, veje ind i vores søgning), så de må gerne bygges af
+   dem. De enkelte annoncer forbliver noindex — se js/annonce.js.
+
+   Kolonnelisten er den samme som js/supabase-api.js listExternalListings og
+   skal udvides i SAMME ombæring som migrationen. Grunden er den samme dér som
+   her, men konsekvensen er ikke: beder vi om en kolonne, der ikke findes,
+   svarer PostgREST 42703. I klienten forsvinder annoncerne fra siden; her
+   ville et build skrive et sitemap uden dem. Derfor KASTES fejlen i stedet for
+   at falde tilbage til et tomt array. Et build, der stopper, kan ses. Et
+   sitemap, der stilfærdigt skrumper til 7 URL'er, kan ikke — og det er
+   præcis den tilstand, der blev fundet i drift.
+
+   `ejet_af` og `manuelle_felter` er MED VILJE ude af listen: de bruges ikke i
+   en genereret side, og `ejet_af` er et bruger-id. Vi henter ikke
+   personoplysninger ind i en byggeproces, der ingen brug har for dem. */
+const EKSTERNE_KOLONNER =
+  'id, kilde_annonce_id, url, titel, maerke, model, variant, type, ' +
+  'aargang, km, ccm, hk, pris_dkk, stand, salgsmarkoerer, udledte_felter, ' +
+  'by, postnr, saelgertype, thumbnail_url, uddrag, status, foerst_set, sidst_set, ' +
+  'kilde:kilder(navn, domaene)';
+
+async function fetchExternalListings(){
+  const cfg = fs.readFileSync(path.join(ROOT, 'js/supabase-config.js'), 'utf8');
+  const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1];
+  const key = (cfg.match(/anonKey:\s*'([^']+)'/) || [])[1];
+  if (!url || !key){
+    throw new Error('Ingen Supabase-konfiguration — de indekserede annoncer kan ikke hentes, '
+      + 'og et maerkeindeks bygget uden dem ville vaere tomt. Build afbrudt.');
+  }
+  // Samme raekkefoelge som klienten (js/supabase-api.js): sidst_set faldende.
+  // Maerkesidens forudtegnede kort skal staa i samme orden som js/maerke.js
+  // tegner dem bagefter, ellers omrokerer siden naar javascriptet overtager.
+  const r = await fetch(
+    `${url}/rest/v1/eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
+    + '&status=eq.aktiv&order=sidst_set.desc',
+    { headers: { apikey: key } });
+  if (!r.ok){
+    throw new Error(`Kunne ikke hente eksterne_annoncer (HTTP ${r.status}: ${await r.text()}). `
+      + 'Build afbrudt frem for at skrive et sitemap uden annoncer.');
+  }
+  const rows = await r.json();
+  console.log(`Hentede ${rows.length} indekserede annoncer fra databasen.`);
+  return rows;
+}
+
 /* Genbruger den levende header og footer, så genererede sider aldrig
    driver fra resten af sitet. */
 function sliceBetween(src, start, end, label){
@@ -106,9 +157,14 @@ function siteParts(){
    browserafhængigheder, fejler byggeriet højlydt, hvilket er meningen.
 
    Returnerer:
-     listingCardHTML(l, i)        — samme kort som klienten tegner
-     normalizeRemoteListing(row)  — databaserække → UI-form (isDealer,
-                                    serviceHistorik, photoUrls osv.) */
+     listingCardHTML(l, i)          — samme kort som klienten tegner
+     normalizeRemoteListing(row)    — databaserække → UI-form (isDealer,
+                                      serviceHistorik, photoUrls osv.)
+     normalizeExternalListing(row)  — række i eksterne_annoncer → samme UI-form,
+                                      med isExternal og source. Skal gennem den
+                                      HER, ikke en kopi: den er stedet, hvor det
+                                      står skrevet ned hvad vi IKKE ved om en
+                                      indekseret annonce (equipment: null osv.). */
 function browserModules(){
   const cfg = fs.readFileSync(path.join(ROOT, 'js/supabase-config.js'), 'utf8');
   const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1] || '';
@@ -134,7 +190,8 @@ function browserModules(){
     .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n;\n');
 
   return new Function('document', 'Store', 'window', 'db',
-    src + '\n;return { listingCardHTML, normalizeRemoteListing };')(doc, store, {}, db);
+    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing };')(doc, store, {}, db);
 }
 
-module.exports = { ROOT, siteUrl, slugify, listingSlug, fetchListings, siteParts, esc, browserModules };
+module.exports = { ROOT, siteUrl, slugify, listingSlug, fetchListings, fetchExternalListings,
+  siteParts, esc, browserModules };
