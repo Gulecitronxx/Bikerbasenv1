@@ -482,20 +482,74 @@ function uddrag(raa, maks = 200){
 }
 
 /* ---------- Fingerprint ----------
-   Samme motorcykel annonceret tre steder skal være ÉN annonce hos os med tre
-   kilde-links. Nøglen er de felter, der ikke ændrer sig mellem kilder.
+   En KANDIDATNØGLE til at finde annoncer, der KUNNE være samme motorcykel.
+   Ikke et bevis på, at de er det, og ikke noget, der må slås sammen på egen
+   hånd. Hvad hashen kan bruges til, står nedenfor; hvorfor den ikke må mere
+   end det, er målt.
 
-   Prisen er bevidst afrundet til nærmeste 1.000: samme cykel annonceres tit
-   til 124.900 ét sted og 125.000 et andet, og uden afrunding ville de aldrig
-   mødes. */
+   HER STOD DER NOGET ANDET, OG DET VAR FORKERT.
+   ------------------------------------------------------------------
+   Kommentaren lovede: "Samme motorcykel annonceret tre steder skal være ÉN
+   annonce hos os med tre kilde-links." Løftet havde en kolonne
+   (014_aggregator.sql:53) og et indeks (:65) bag sig og ingen logik nogen
+   steder — hverken i js/, i crawler/db.js's læse- eller skrivesti eller i et
+   view. En regel, der er skrevet ned uden at være håndhævet, får den næste
+   læser til at tro, at sagen er lukket. Derfor er den skrevet om til det,
+   koden gør, i stedet for at koden blev bygget til at gøre det, der stod.
+
+   Grunden er målt på driftlageret 17.08.2026, 332 aktive annoncer fra ÉN
+   kilde: 238 unikke fingerprints. 41 grupper deler nøgle, og de dækker 135
+   rækker — 40,7 % af lageret. Den største gruppe er 13 rækker. Alle 41
+   grupper har forskellige `kilde_annonce_id`, altså 41 grupper af annoncer,
+   kilden selv holder adskilt. 128 af de 135 har `stand: 'ny'`.
+
+   Det er ikke en fejl i hashen. Det er syv ens nye Honda CMX 500 Rebel 2024
+   på lager hos samme forhandler til samme listepris — syv forskellige
+   motorcykler med hver sit stelnummer. En sammenlægning på fingerprint ville
+   gøre 332 annoncer til 238 og skjule 94 motorcykler, en forhandler faktisk
+   har til salg, bag et kort der påstod "13 kilde-links" til 13 forskellige
+   maskiner.
+
+   Km i nøglen løser det ikke: 128 af de 135 er nye og har ingen
+   kilometerstand. Målt med km i nøglen falder det til 37 grupper og 126
+   rækker — stadig 38 % af lageret.
+
+   HVAD DER SKULLE TIL FOR AT KUNNE SLÅ SAMMEN
+   Et felt, der adskiller to ens maskiner fra den samme maskine to steder:
+   stelnummer, registreringsnummer, eller et billedmatch. Ingen af dem
+   findes i felt-whitelisten i crawler/db.js, og ingen kilde giver os dem i
+   dag. Indtil da er sammenlægning et gæt på en forhandlers vegne, og
+   "Ærlighed slår fuldstændighed" i work/DECISIONS.md gælder også her: at
+   skjule en rigtig annonce vejer tungere imod os end at vise to.
+
+   HVAD HASHEN SÅ ER TIL
+   En stabil nøgle over de felter, der IKKE flytter sig mellem kilder eller
+   mellem kørsler. To ting, den kan bære, uden at påstå identitet:
+   genkendelse af, at en annonce er lagt op igen under et nyt lagernummer,
+   og en KANDIDATLISTE til et menneske eller til en senere
+   discriminator-regel. Kolonnen og indekset bliver liggende af den grund —
+   de koster et sha1 pr. annonce, og de er den rigtige halvdel af et
+   opslag, der mangler sin anden halvdel.
+
+   Prisen er afrundet til nærmeste 1.000: samme cykel annonceres tit til
+   124.900 ét sted og 125.000 et andet, og uden afrunding ville de aldrig
+   mødes. Det er stadig rigtigt for det, nøglen NU er — en kandidatnøgle
+   skal favne bredt; det er dommen bagefter, der skal være streng.
+
+   Se docs/review/DECISIONS.md, C-010. */
 const crypto = require('crypto');
 
 function fingerprint({ maerke, model, aargang, km, pris_dkk, postnr }){
   /* Km indgår IKKE. Afrunding kan ikke samle to tal på hver side af en
      grænse — 12.400 bliver 12, 12.600 bliver 13, og så er samme cykel to
      annoncer. Og kilometerstanden er alligevel målt på hvert sit tidspunkt,
-     når den samme motorcykel står to steder. Mærke, model, årgang, prisniveau
-     og postnummer er nok til at kende den igen. */
+     når den samme motorcykel står to steder.
+
+     Det er præcis den udeladelse, der gør nøglen bred nok til at finde en
+     KANDIDAT og for bred til at afgøre identitet. Se blokken ovenfor: uden
+     km deler 135 af 332 annoncer nøgle med en anden, og 128 af dem er nye
+     maskiner på samme lager. Argumentet holder for det, nøglen skal — det
+     holdt ikke for det, den lovede. */
   const dele = [
     (maerke || '').toLowerCase(),
     (model || '').toLowerCase().replace(/[\s-]+/g, ''),

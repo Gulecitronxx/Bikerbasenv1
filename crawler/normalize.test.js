@@ -258,6 +258,33 @@ test('fingerprint: samme cykel på tre kilder giver samme nøgle', () => {
     'små forskelle i pris og km må ikke give to annoncer');
 });
 
+/* DEN HER TEST BEVISER, AT NØGLEN IKKE MÅ BRUGES TIL AT SLÅ SAMMEN.
+
+   Kommentaren over fingerprint() lovede engang "ÉN annonce hos os med tre
+   kilde-links". Målt på driftlageret: 332 aktive annoncer fra én kilde giver
+   238 unikke fingerprints — 41 grupper deler nøgle og dækker 135 rækker
+   (40,7 %), største gruppe 13, og 128 af de 135 har stand 'ny'. Det er ens
+   nye maskiner på samme lager hos samme forhandler, ikke samme maskine flere
+   steder. Testen holder det mønster fast i et minimalt eksempel, så det står
+   i suiten og ikke kun i en kommentar: nogen, der senere vil "færdiggøre"
+   dedupliseringen, fejler her først. Se docs/review/DECISIONS.md, C-010. */
+test('fingerprint kan IKKE skelne ens nyt lager — derfor er den en kandidat, ikke en identitet', () => {
+  // Syv ens Honda CMX 500 Rebel 2024 til listepris hos samme forhandler.
+  // Hver har sit eget lagernummer hos kilden og sit eget stelnummer.
+  const nyPaaLager = (kildeAnnonceId) => ({
+    kilde_annonce_id: kildeAnnonceId,
+    maerke: 'Honda', model: 'CMX 500 Rebel', aargang: 2024,
+    km: null, pris_dkk: 84995, postnr: '6630',
+  });
+  const lager = ['108939', '110578', '132964', '132965', '150352', '150353', '150354'].map(nyPaaLager);
+  const noegler = new Set(lager.map(n.fingerprint));
+  assert.equal(noegler.size, 1,
+    'syv forskellige motorcykler deler én nøgle — det er derfor sammenlægning ville skjule seks af dem');
+
+  // Og km i nøglen ville ikke redde det: nye maskiner har ingen km at skelne på.
+  assert.equal(new Set(lager.map(l => n.fingerprint(l) + '|' + (l.km ?? ''))).size, 1);
+});
+
 test('fingerprint: forskellige cykler holdes adskilt', () => {
   const a = { maerke: 'Yamaha', model: 'MT-07', aargang: 2020, km: 12400, pris_dkk: 64900, postnr: '8000' };
   const c = { ...a, aargang: 2021 };
