@@ -171,3 +171,45 @@ test('vores egne kort er urørte: ét internt link, ingen ny fane', () => {
   assert.equal(link.href, 'annonce.html?id=1021');
   assert.equal(link.target, undefined);
 });
+
+/* ---------- D-011: én rytme i listen ----------
+   De to korttyper i den samme liste var 118px fra hinanden ved 390px (579 mod
+   461), og størstedelen sad i specblokken: fire chips i et 2×2-gitter mod det
+   egne korts ene linje. Testene her låser DET, der ikke kan ses i en
+   CSS-fil — hvilke felter linjen bærer, og hvad der sker med de huller, der
+   er i data (163 af 332 mangler km). */
+
+test('speclinjen bærer de samme tre felter som vores eget kort', () => {
+  const html = externalCardHTML(eksternAnnonce(), 1);
+  const felter = [...html.matchAll(/<dt>([^<]+)<\/dt><dd>([^<]*)<\/dd>/g)].map(m => [m[1], m[2]]);
+  assert.deepEqual(felter, [['Årgang', '2024'], ['Kilometer', '8.100 km'], ['Kubik', '1.000 ccm']]);
+  /* Fire værdier kan ikke stå på én linje: den bredeste måler 266px, og
+     kortets krop er nede på 241px i drift. Effekt blev det felt, der gik —
+     kørekortchippen lige nedenunder ER udledt af den. */
+  assert.ok(!/<dt>Effekt<\/dt>/.test(html), 'hk hører ikke til på kortets speclinje');
+  assert.match(html, /card-koerekort/, 'kørekortkategorien skal blive — den er hk\'s konklusion');
+});
+
+test('manglende felter samles i ét led, der siger HVILKE', () => {
+  const kun = l => (l.match(/<div class="card-spec[^"]*">[\s\S]*?<\/div>/g) || []).join('');
+  // Ét hul.
+  let html = externalCardHTML(eksternAnnonce({ km: null }), 1);
+  assert.match(html, /<div class="card-spec spec-tom"><dt>Ikke oplyst af kilden<\/dt><dd>km<\/dd><\/div>/);
+  assert.ok(!/<dd>Ikke oplyst<\/dd>/.test(html), 'et bart "Ikke oplyst" siger ikke hvad der mangler');
+  // To huller — dansk opremsning med "og".
+  html = externalCardHTML(eksternAnnonce({ km: null, ccm: null }), 1);
+  assert.match(html, /<dd>km og kubik<\/dd>/);
+  // Ingen huller: intet led.
+  html = externalCardHTML(eksternAnnonce(), 1);
+  assert.ok(!/spec-tom/.test(html), 'uden huller skal der ikke stå noget om manglende felter');
+  assert.ok(kun(html).length > 0);
+});
+
+test('kilden nævnes stadig i bunden, nu på samme linje som stedet', () => {
+  /* Fodlinjen gik fra to rækker til én. Begge oplysninger skal blive:
+     stedet er det eneste geografiske på kortet, og domænet er det eneste,
+     køberen selv kan slå op, før han klikker. */
+  const html = externalCardHTML(eksternAnnonce(), 1);
+  assert.match(html, /class="card-sted"[\s\S]*?Rødding/);
+  assert.match(html, /class="card-kildelinje"[\s\S]*?Forhandler · mcsyd\.dk/);
+});

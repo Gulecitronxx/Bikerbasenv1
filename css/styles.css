@@ -962,32 +962,94 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* ---- Fire specchips + kørekort ----
    Tre ikoner på én linje ("2003 · 38.000 km · 750 ccm") tvang læseren til at
    afkode hvert ikon for at vide, hvad tallet var, og linjen brød på smalle
-   kort. Fire chips i et 2x2-gitter står altid samme sted på hvert eneste
-   kort: øjet lærer positionen én gang og bruger den resten af siden.
+   kort. Fire chips i et 2x2-gitter stod her og var to rækker á 28px plus 8px
+   imellem = 64px, hvor vores EGET kort skriver de samme oplysninger på én
+   20px-linje ("2021 · 9.100 km · 373 ccm").
 
-   Chip frem for ikon+tekst løser også tomrummet. 163 af 332 annoncer mangler
-   km, 109 mangler kubik. En chip med "Ukendt" ser stadig ud som et felt —
-   et ikon uden tal ser ud som en fejl. Feltnavnet står i et skjult <dt>, så
-   skærmlæseren hører "Kubik: Ukendt" og ikke bare "Ukendt, Ukendt". */
+   D-011: det var den enkelte største grund til, at de to korttyper i den
+   samme liste var 118px fra hinanden (målt 390px: 579 mod 461). En liste med
+   to rytmer er to lister.
+
+   Chipsene blev valgt, fordi et ikon uden tal ser ud som en fejl, og fordi
+   der ER huller i data (163 af 332 mangler km, 113 mangler hk). Den
+   indvending gjaldt ikon+tekst — der er ingen ikoner her — og hullerne er
+   løst i js/components.js' eksternSpecs() i stedet: de kendte værdier står
+   på linjen, og de manglende samles i ét led til sidst, der siger hvilke.
+   Se begrundelsen og tallene dér.
+
+   Højden er LÅST til 20px. Det er den samme regel som titlens 44px: skrider
+   ét felt, skrider hele kolonnen, og så kan en side med 24 kort ikke
+   skimmes. */
 .card-specblok{ display:flex; flex-direction:column; gap:8px; }
 .card-specs{
-  display:grid; grid-template-columns: repeat(2, minmax(0,1fr));
-  gap:8px; margin:0; padding:0;
+  display:flex; align-items:baseline; margin:0; padding:0;
+  min-width:0; height:20px; overflow:hidden;
+  font-size:13px; line-height:20px;
 }
-.card-spec{ min-width:0; }
-/* Feltnavnet er der for skærmlæseren; chippen viser kun værdien. */
+/* De kendte værdier fylder hvad de fylder; kun det manglende led må klippes,
+   for det er det eneste, man kan gætte resten af. */
+.card-spec{ display:flex; min-width:0; flex:0 0 auto; white-space:nowrap; }
+.card-spec.spec-tom{ flex:0 1 auto; }
+/* Separatoren hænger EFTER leddet og ikke før det næste. Det betyder noget,
+   når linjen bryder (se media-reglen nedenfor): en "·" i slutningen af
+   første række læses som "der kommer mere", en "·" i starten af anden række
+   læses som en fejl. */
+.card-spec:not(:last-child)::after{
+  content:"·"; margin:0 4px; color: var(--color-fg-muted); flex:0 0 auto;
+}
+
+/* Den smalle spalte: linjen bryder til to rækker frem for at klippe et tal.
+
+   Det HER er en container-forespørgsel og ikke en media-forespørgsel, og det
+   er ikke smag. Kortets bredde følger ikke vinduets: søgesiden har et
+   filterpanel ved siden af gitteret, forsiden og mærkesiderne har ikke, og
+   gitteret skifter spalteantal fire gange undervejs. Målt bliver den samme
+   spalte for smal ved viewport 320, 620, 1240 OG 1920 — fire vidt forskellige
+   vinduer — mens 360-1024 har plads. Et sæt breakpoints på vinduet ville
+   ramme forkert på mindst to af de fire.
+
+   Tallene, målt på 224 indekserede kort (soegning.html og maerke-honda.html):
+
+     bredeste linje UDEN manglende felt   244px  ("1997 · 36.000 km · 1.520 ccm")
+     bredeste linje MED manglende felt    266px  ("2025 · 1.000 ccm · km ikke oplyst")
+     smalleste krop i drift               241px  (viewport 320, én spalte)
+     næstsmalleste                        243px  (viewport 1240, tre spalter + filterpanel)
+
+   Grænsen står derfor på 270px: over den er der plads til det bredeste
+   tilfælde, under den brydes linjen. Alternativet — at lade den sidste værdi
+   få ellipsis — ville skrive "1.52…", og et forkortet tal er et FORKERT tal.
+   Skulle noget alligevel løbe over, er det KUN det manglende led, der kan
+   skrumpe (flex:0 1 auto); de kendte værdier står fast. */
+.card-external .card-body{ container-type: inline-size; }
+@container (max-width: 270px){
+  .card-specs{ flex-wrap:wrap; align-content:flex-start; height:40px; }
+}
+/* Feltnavnet er der for skærmlæseren; linjen viser kun værdien. */
 .card-spec dt{
   position:absolute; width:1px; height:1px; margin:0; padding:0;
   font-size:14px; overflow:hidden; clip-path: inset(50%); white-space:nowrap;
 }
+/* padding, background og border-radius står her med 0/none MED VILJE.
+   Værdien var en chip, og de tre egenskaber hørte til chippen. At fjerne dem
+   fra reglen er ikke nok: hele "Cards / listings grid"-sektionen indlejres af
+   scripts/inline-critical.js i dokumentet på fem sidetyper, og den
+   indlejrede kopi er den, der gælder, indtil det asynkrone ark lander — og
+   for en egenskab, det nye ark slet ikke nævner, gælder den gamle værdi
+   BAGEFTER også. Chippen ville altså overleve rettelsen på hver eneste side,
+   der ikke var bygget om. Det har kostet en fejlmåling i dette repo før
+   (D-007, opacity). Reglen siger derfor selv, hvad den vil have. */
 .card-spec dd{
-  margin:0; font-size:14px; font-weight:600; line-height:20px; padding:4px 8px;
-  border-radius:4px; background: var(--color-surface-2);
+  margin:0; font-weight:600;
+  padding:0; background:none; border-radius:0;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 /* Aldrig et tomt felt, aldrig en bar tankestreg — men heller ikke et tal, vi
-   ikke har. Chippen bliver stående og siger, at kilden ikke oplyste det. */
-.card-spec dd.spec-tom{ font-weight:500; color: var(--color-fg-muted); }
+   ikke har. Leddet bliver stående og siger, HVAD kilden ikke oplyste.
+   Ordene "ikke oplyst" står her og ikke i markuppen, fordi det skjulte <dt>
+   allerede bærer dem for skærmlæseren; stod de begge steder, blev de læst to
+   gange. */
+.card-spec.spec-tom dd{ font-weight:500; color: var(--color-fg-muted); }
+.card-spec.spec-tom dd::after{ content:" ikke oplyst"; }
 
 /* Kørekortkategorien er det eneste felt på kortet, der kan gøre hele
    annoncen irrelevant for læseren: må han køre den eller ej. Den står derfor
@@ -1013,20 +1075,28 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .card-external .card-koerekort::before{ content:none; }
 
 /* ---- Bunden: hvor står den, og hvem sælger den ----
-   To linjer, hver på sin egen række med fast højde. De kunne presses sammen,
-   men så ville de knække forskelligt fra kort til kort, og bundlinjen ville
-   stå i forskellig højde. Det er ikke 16px værd.
+   ÉN linje, ikke to. De stod på hver sin række med den begrundelse, at de
+   ellers ville knække forskelligt fra kort til kort — men begge har
+   text-overflow:ellipsis og knækker derfor slet ikke, og de 21px, den anden
+   række kostede, er en femtedel af hele D-011's højdeforskel.
+
+   Stedet står til venstre og sælgerlinjen til højre. Kun sælgerlinjen må
+   klippes: "Odense 5000" er kort og altid vores egen formatering, mens
+   "Forhandler · mcsyd.dk" bærer et domæne, vi ikke bestemmer længden af.
 
    Der var en tredje linje her: "Se annoncen hos <kilde>", et link direkte til
    kilden. Den er væk, og det er ikke en oprydning — det er kravet om, at
    vejen ud af sitet går GENNEM vores annonceside, ikke uden om den. Se
    externalCardHTML() i js/components.js. */
 .card-external .card-footer{
-  display:flex; flex-direction:column; align-items:stretch; gap:4px;
-  padding-top:12px; font-size:12px;
+  display:flex; flex-direction:row; align-items:center;
+  justify-content:space-between; gap:10px;
+  padding-top:12px; font-size:12px; min-width:0; height:28px;
 }
+.card-sted{ flex:0 0 auto; }
+.card-kildelinje{ flex:0 1 auto; }
 .card-sted, .card-kildelinje{
-  display:flex; align-items:center; gap:8px; min-width:0; line-height:16px;
+  display:flex; align-items:center; gap:6px; min-width:0; line-height:16px;
 }
 .card-sted svg, .card-kildelinje svg{
   width:14px; height:14px; flex:0 0 auto;

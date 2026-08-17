@@ -390,19 +390,56 @@ function eksternKoerekort(l){
    "Kilometer: Ikke oplyst" gør ikke. */
 const EKSTERN_UKENDT = 'Ikke oplyst';
 
-/* Fire faste specfelter: årgang, kilometer, ccm, hk — i den rækkefølge, på
-   hvert eneste kort, uanset hvad kilden havde med. Hver er en chip, ikke
-   ikon+tekst: en chip med "Ukendt" ser stadig ud som et felt, hvor et
-   ikon uden tal ser ud som en fejl. Rækken er 2×2 med fast højde, så pris,
-   specrække og sted står i samme lodrette position på alle kort. */
+/* Tre specfelter på ÉN linje: årgang, kilometer, kubik — nøjagtig de samme
+   tre, i samme rækkefølge, som vores eget kort skriver i .card-meta
+   ("2021 · 9.100 km · 373 ccm").
+
+   D-011. Felterne stod som fire chips i et 2×2-gitter: to rækker á 28px plus
+   8px imellem = 64px, mod det egne korts ene 20px-linje. Det var den enkelte
+   største grund til, at de to korttyper i den samme liste stod 118px fra
+   hinanden (målt 390px: 579 mod 461).
+
+   HVORFOR TRE OG IKKE FIRE. Effekt (hk) var det fjerde felt, og fire værdier
+   kan ikke være på én linje. Målt: den bredeste af de 20 linjer på side 1
+   krævede 341px, hvor kortets krop har 310px ved 390px vindue — og på
+   desktop, hvor filterpanelet står ved siden af, er spalten kun ~218px.
+   Enten fire værdier på to linjer (og så er vi tilbage ved to rytmer), eller
+   tre på én. Tre er valgt, fordi det er præcis det sæt, det egne kort har,
+   og fordi hk ikke forsvinder: kørekortchippen lige nedenunder ER udledt af
+   ccm og hk og siger konklusionen, listevisningen skriver "1.084 ccm · 87
+   hk" i sin Motor-celle, og annoncesiden viser tallet med sit regnestykke.
+
+   HULLERNE I DATA. Chipsene blev valgt, fordi et ikon uden tal ser ud som en
+   fejl, og fordi der ER huller. Målt på hele lageret, 332 annoncer:
+
+       årgang mangler        0
+       kilometer mangler   163  (49 %)
+       kubik mangler        12  (3,6 %)
+       annoncer med 0 / 1 / 2 manglende af de tre: 168 / 152 / 12
+
+   Den indvending gjaldt ikon+tekst, og der er ingen ikoner her. Men den
+   naive sammenlægning ("2024 · Ikke oplyst · Ikke oplyst") ville sætte to
+   tomme felter i samme linje, som ikke engang siger HVAD der mangler.
+
+   Derfor: de kendte værdier står som linjen, og de manglende samles i ÉT led
+   til sidst, der siger hvilke ("km og kubik ikke oplyst"). Ingen bar
+   tankestreg, intet tomt felt, intet tal vi ikke har — og det manglende
+   navngives nu også visuelt, hvor chippen kun sagde det til skærmlæseren. */
 function eksternSpecs(l){
-  const hk = Number(l.power) > 0 ? Number(l.power) : null;
-  return [
-    { navn: 'Årgang',    vaerdi: l.year == null ? '' : String(l.year) },
-    { navn: 'Kilometer', vaerdi: l.km == null ? '' : formatKm(l.km) },
-    { navn: 'Kubik',     vaerdi: l.ccm == null ? '' : formatCcm(l.ccm) },
-    { navn: 'Effekt',    vaerdi: hk == null ? '' : hk.toLocaleString('da-DK') + ' hk' },
+  const felter = [
+    // `kort` er ordet, der bruges i "… ikke oplyst" — derfor små bogstaver
+    // og den korte form, så linjen kan være der.
+    { navn: 'Årgang',    kort: 'årgang', vaerdi: l.year == null ? '' : String(l.year) },
+    { navn: 'Kilometer', kort: 'km',     vaerdi: l.km == null ? '' : formatKm(l.km) },
+    { navn: 'Kubik',     kort: 'kubik',  vaerdi: l.ccm == null ? '' : formatCcm(l.ccm) },
   ];
+  return { kendte: felter.filter(f => f.vaerdi), mangler: felter.filter(f => !f.vaerdi).map(f => f.kort) };
+}
+
+/* "km", "km og hk", "km, kubik og hk" — dansk opremsning med "og" til sidst. */
+function opremsDa(ord){
+  if (ord.length <= 1) return ord[0] || '';
+  return ord.slice(0, -1).join(', ') + ' og ' + ord[ord.length - 1];
 }
 
 /* De 22 uden pris mangler ikke en pris. normalize.js returnerer null, når
@@ -435,11 +472,17 @@ function externalCardHTML(l, i){
   const markHTML = mark.tekst
     ? `<span class="card-salgsmarkoerer" title="${escapeHTML(mark.alle.join(' · '))}">${escapeHTML(mark.tekst)}</span>`
     : '';
-  // <dl> med skjult <dt>: chippen viser kun værdien ("2003"), men
-  // skærmlæseren hører "Årgang: 2003" — og to nabofelter uden data læses som
-  // "Kubik: Ukendt. Effekt: Ukendt.", ikke "Ukendt, Ukendt".
-  const specs = eksternSpecs(l).map(s => `
-          <div class="card-spec"><dt>${s.navn}</dt><dd${s.vaerdi ? '' : ' class="spec-tom"'}>${s.vaerdi ? escapeHTML(s.vaerdi) : EKSTERN_UKENDT}</dd></div>`).join('');
+  /* <dl> med skjult <dt>: linjen viser kun værdien ("2003"), men
+     skærmlæseren hører "Årgang: 2003". Det manglende led får sit eget par,
+     så det læses som "Ikke oplyst af kilden: km og hk" og ikke som en løs
+     hale på det foregående tal. Ordet "ikke oplyst" står visuelt i CSS
+     (`.spec-tom dd::after`), fordi <dt> allerede bærer det for skærmlæseren
+     — ellers ville det blive læst to gange. */
+  const { kendte, mangler } = eksternSpecs(l);
+  const specs = kendte.map(s => `
+          <div class="card-spec"><dt>${s.navn}</dt><dd>${escapeHTML(s.vaerdi)}</dd></div>`).join('')
+    + (mangler.length ? `
+          <div class="card-spec spec-tom"><dt>${EKSTERN_UKENDT} af kilden</dt><dd>${escapeHTML(opremsDa(mangler))}</dd></div>` : '');
 
   const kk = eksternKoerekort(l);
   const kkTekst = kk ? kk.vaerdi : 'ukendt';
