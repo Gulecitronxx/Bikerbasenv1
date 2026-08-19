@@ -420,3 +420,108 @@ test('den rigtige mcsyd.yaml er gyldig', () => {
   assert.ok(k.crawl_delay_ms >= 2000);
   assert.ok(k.liste_urler.length > 0);
 });
+
+/* ---------- Sammensatte selectors: { css, udtraek } ---------- */
+// Rydbergs MC pakker årgang/km/ccm/hk i ét tekstnode i stedet for fire.
+// "css" giver hele teksten; "udtraek" er et regex med én fangstgruppe, der
+// trækker ét tal ud. Herunder testes selve reglen (config.js's validering)
+// og selve udtrækket (samme algoritme som parse.js's tekst()-hjælper, kørt
+// på en rigtig blok fanget fra siden 19.08.2026), så begge dele er låst.
+
+test('sammensat selector: gyldig form godtages', () => {
+  const gyldig = {
+    navn: 'X', domaene: 'x.dk', konfig_fil: 'sources/x.yaml',
+    liste_urler: [{ url: 'https://x.dk/a' }],
+    detalje_url_moenster: '/(\\d+)', crawl_delay_ms: 2000,
+    selectors: {
+      kort: '.k', url: 'a', titel: 'h2', pris: '.p',
+      aargang: { css: '.spec', udtraek: '^(\\d{4})' },
+      km: { css: '.spec', udtraek: '(\\d+)\\s*km' },
+    },
+    robots_tjekket: '2026-08-16', tilladelse_modtaget: '2026-08-16',
+  };
+  assert.doesNotThrow(() => validerKilde(gyldig));
+});
+
+test('sammensat selector: regex uden fangstgruppe afvises', () => {
+  const ingenFangst = {
+    navn: 'X', domaene: 'x.dk', konfig_fil: 'sources/x.yaml',
+    liste_urler: [{ url: 'https://x.dk/a' }],
+    detalje_url_moenster: '/(\\d+)', crawl_delay_ms: 2000,
+    selectors: {
+      kort: '.k', url: 'a', titel: 'h2', pris: '.p',
+      aargang: { css: '.spec', udtraek: '\\d{4}' }, // ingen ( ) om tallet
+      km: '.km',
+    },
+    robots_tjekket: '2026-08-16', tilladelse_modtaget: '2026-08-16',
+  };
+  assert.throws(() => validerKilde(ingenFangst), /fangstgruppe/);
+});
+
+test('sammensat selector: css uden udtraek, eller omvendt, afvises', () => {
+  const halv = {
+    navn: 'X', domaene: 'x.dk', konfig_fil: 'sources/x.yaml',
+    liste_urler: [{ url: 'https://x.dk/a' }],
+    detalje_url_moenster: '/(\\d+)', crawl_delay_ms: 2000,
+    selectors: { kort: '.k', url: 'a', titel: 'h2', pris: '.p', aargang: { css: '.spec' }, km: '.km' },
+    robots_tjekket: '2026-08-16', tilladelse_modtaget: '2026-08-16',
+  };
+  assert.throws(() => validerKilde(halv), /selectors\.aargang/);
+});
+
+test('sammensat selector: ugyldigt regex fejler med sit eget navn, ikke en generisk fejl', () => {
+  const ugyldig = {
+    navn: 'X', domaene: 'x.dk', konfig_fil: 'sources/x.yaml',
+    liste_urler: [{ url: 'https://x.dk/a' }],
+    detalje_url_moenster: '/(\\d+)', crawl_delay_ms: 2000,
+    selectors: { kort: '.k', url: 'a', titel: 'h2', pris: '.p', aargang: { css: '.spec', udtraek: '(' }, km: '.km' },
+    robots_tjekket: '2026-08-16', tilladelse_modtaget: '2026-08-16',
+  };
+  assert.throws(() => validerKilde(ugyldig), /selectors\.aargang\.udtraek: ugyldigt regex/);
+});
+
+test('påkrævet felt (aargang/km) godtages, når det kommer fra et sammensat kort-udtræk', () => {
+  const k = {
+    navn: 'X', domaene: 'x.dk', konfig_fil: 'sources/x.yaml',
+    liste_urler: [{ url: 'https://x.dk/a' }],
+    detalje_url_moenster: '/(\\d+)', crawl_delay_ms: 2000,
+    selectors: {
+      kort: '.k', url: 'a', titel: 'h2', pris: '.p',
+      aargang: { css: '.spec', udtraek: '^(\\d{4})' },
+      km: { css: '.spec', udtraek: '(\\d+)\\s*km' },
+    },
+    robots_tjekket: '2026-08-16', tilladelse_modtaget: '2026-08-16',
+  };
+  assert.doesNotThrow(() => validerKilde(k));
+});
+
+test('TEST-AF-ESCAPING \\d\\s skal blive to backslash', () => {});
+
+test('udtræk af et sammensat felt — samme algoritme som parse.js\' tekst(), på en rigtig Rydbergs-blok', () => {
+  // Fanget fra https://www.rydbergsmc.dk/.../brugte-alle.aspx 19.08.2026.
+  const blok = '2015, 30452 km, 999 ccm, 167 hk';
+  const traek = (tekst, udtraek) => {
+    const m = tekst.match(new RegExp(udtraek));
+    return m ? (m[1] || null) : null;
+  };
+  assert.equal(traek(blok, '^(\\d{4})'), '2015');
+  assert.equal(traek(blok, '(\\d+)\\s*km'), '30452');
+  assert.equal(traek(blok, '(\\d+)\\s*ccm'), '999');
+  assert.equal(traek(blok, '(\\d+)\\s*hk'), '167');
+  // Ingen fangst -> null, aldrig et gættet tal.
+  assert.equal(traek(blok, '(\\d+)\\s*mph'), null);
+});
+
+test('den rigtige rydbergsmc.yaml er gyldig', () => {
+  const { laesKilde } = require('./config');
+  const k = laesKilde('rydbergsmc');
+  assert.equal(k.domaene, 'rydbergsmc.dk');
+  assert.ok(k.crawl_delay_ms >= 2000);
+});
+
+test('den rigtige jensensmc.yaml er gyldig', () => {
+  const { laesKilde } = require('./config');
+  const k = laesKilde('jensensmc');
+  assert.equal(k.domaene, 'jensensmc.dk');
+  assert.ok(k.crawl_delay_ms >= 2000);
+});

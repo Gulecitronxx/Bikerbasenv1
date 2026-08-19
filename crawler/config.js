@@ -94,6 +94,46 @@ function validerKilde(k){
     kraev(`selectors.${s}`, typeof k.selectors?.[s] === 'string' && k.selectors[s].trim(), 'mangler');
   }
 
+  /* Felter UD OVER de fire påkrævede må godt være et sammensat udtræk:
+     { css: '<selector>', udtraek: '<regex med én fangstgruppe>' } — hele
+     elementets tekst læses via css, og udtraek trækker ét tal ud af den.
+
+     Grunden til at det her findes: Rydbergs MC pakker årgang, km, ccm og hk
+     i ÉT tekstnode ("2015, 30452 km, 999 ccm, 167 hk"), ikke i fire — der
+     er ingen detaljeside med separate felter at falde tilbage på, deres
+     "detalje" er den samme kortliste vist i et overlay. Uden det her ville
+     kilden slet ikke kunne bruges.
+
+     kort/url/titel/pris er med VILJE holdt uden for undtagelsen: url skal
+     blive ved med at være .href og ikke tekst (se udtraekKort i parse.js),
+     og at splitte titel eller pris ud af en blanding er en anden slags
+     risiko end at splitte ét tal ud af et andet tal — den skal vurderes
+     for sig, ikke glide med her.
+
+     Regex'en har INGEN (?flags)-præfiks, i modsætning til
+     detalje_url_moenster og stand_url_moenster — parse.js bygger den med
+     rent `new RegExp(...)`, fordi den kører inde i page.evaluate() og ikke
+     må lukke over noget fra Node (heller ikke byggeRegex herfra). Skriv
+     mønsteret store/små-bogstav-følsomt, som teksten faktisk står. */
+  for (const [felt, vaerdi] of Object.entries(k.selectors || {})){
+    if (PAAKRAEVEDE_SELECTORS.includes(felt)) continue;
+    if (typeof vaerdi === 'string' || vaerdi == null) continue;
+    const sammensatForm = vaerdi && typeof vaerdi === 'object'
+      && typeof vaerdi.css === 'string' && vaerdi.css.trim()
+      && typeof vaerdi.udtraek === 'string' && vaerdi.udtraek.trim();
+    kraev(`selectors.${felt}`, sammensatForm,
+      'skal enten være en CSS-selector-streng eller { css, udtraek } med et regex, der har præcis én fangstgruppe');
+    if (sammensatForm){
+      try {
+        const re = new RegExp(vaerdi.udtraek);
+        kraev(`selectors.${felt}.udtraek`, /\((?!\?)/.test(re.source),
+          'regex mangler en fangstgruppe — udtraek skal have (…) om det tal, der skal gemmes');
+      } catch (e){
+        fejl.push(`selectors.${felt}.udtraek: ugyldigt regex — ${e.message}`);
+      }
+    }
+  }
+
   /* ---- detalje: hent felter fra annoncens egen side ----
      Valgfrit blok. Er den der, skal den være komplet: en halvt udfyldt
      detalje-konfiguration henter en side pr. annonce og kaster resultatet
@@ -117,8 +157,12 @@ function validerKilde(k){
   }
 
   // Årgang og km: fra kortet ELLER fra detaljesiden, men de skal komme et sted fra.
+  // "Fra kortet" tæller også et sammensat udtræk ({ css, udtraek }) — se
+  // valideringen ovenfor, som allerede har afvist en ugyldig form.
   for (const felt of PAAKRAEVEDE_FELTER){
-    const fraKort = typeof k.selectors?.[felt] === 'string' && k.selectors[felt].trim();
+    const sv = k.selectors?.[felt];
+    const fraKort = (typeof sv === 'string' && sv.trim())
+      || (sv && typeof sv === 'object' && typeof sv.css === 'string' && sv.css.trim());
     const fraDetalje = k.detalje?.hent && typeof detaljeFelter[felt] === 'string' && detaljeFelter[felt].trim();
     kraev(felt, fraKort || fraDetalje,
       `mangler — sæt selectors.${felt} (kortet) eller detalje.felter.${felt} (annoncens egen side)`);

@@ -1,0 +1,167 @@
+# =====================================================================
+# Jensens Motorcykler — motorcykler
+# =====================================================================
+# Undersøgt i renderet DOM 19.08.2026. Danmarks største MC-forhandler,
+# ca. 700 motorcykler på lager ifølge egen hjemmeside.
+#
+# ---------------------------------------------------------------------
+# TILLADELSE
+# ---------------------------------------------------------------------
+# robots.txt (19.08.2026):
+#
+#     User-agent: *
+#     Crawl-delay: 30
+#     Allow: /
+#     Disallow: */optionssearch* */search* *order=* *sort=* */?option*
+#     Disallow: */?page* */index.php* *filter_category_id=* *.pdf* *.swf*
+#
+# Ejeren af Bikerbasen bekræftede aftalen med Jensens Motorcykler 19.08.2026,
+# og først derefter er de to felter herunder sat.
+tilladelse_modtaget: 2026-08-19
+tilladelse_dato: 2026-08-19
+robots_tjekket: 2026-08-19
+aktiv: true
+
+navn: Jensens Motorcykler
+domaene: jensensmc.dk
+
+# robots.txt's Crawl-delay: 30 er LÆNGERE end vores eget minimum (2000 ms),
+# og crawler/robots.js respekterer den regel: en længere Crawl-delay end
+# vores egen skal følges, en kortere ignoreres. 30 sekunder står derfor her
+# eksplicit — det er ikke et gæt, det er tallet fra deres egen fil.
+crawl_delay_ms: 30000
+kraever_browser: true
+
+# ---------------------------------------------------------------------
+# BEGRÆNSNING 1 — kun side 1, med vilje, ikke et forglemt hul
+# ---------------------------------------------------------------------
+# `Disallow: */?page*` gælder ALLE brugeragenter, og deres paginering går
+# udelukkende gennem ?page=2, ?page=3 osv. — bekræftet 19.08.2026: siden
+# rummer ikke uendelig rul (24 kort før og efter fem rul til bunds), kun
+# nummererede sider.
+#
+# Vi har ikke en aftale, der specifikt tillader os at omgå robots.txt, og
+# crawler/robots.js håndhæver filen ved HVER kørsel (C-013) — det gør vi
+# heller ikke her. Konsekvensen er reel og skal stå her, ikke gemmes: af de
+# ca. 700 annoncer, Jensens selv oplyser, når vi højst side 1 — omkring 24
+# stk. (typisk lidt færre, se BEGRÆNSNING 2). Det er stadig 24 rigtige
+# annoncer mere end nul, og starttilladelsen dækker netop dette omfang;
+# bliver Jensens en vigtigere kilde senere, er den rigtige løsning at bede
+# dem om et feed eller en sitemap med alle annoncer — ikke at konstruere
+# ?page=2-URL'er og håbe.
+liste_urler:
+  - url: https://www.jensensmc.dk/motorcykler-5892/nye-brugte-mc-
+    maerke: null
+
+# ---------------------------------------------------------------------
+# BEGRÆNSNING 2 — intet numerisk id i URL'en
+# ---------------------------------------------------------------------
+# MC Syd og Rydbergs har begge et tal i deres produkt-URL. Jensens har det
+# IKKE: "https://www.jensensmc.dk/motorcykler-/suzuki-/suzuki-gsx-1300-r-
+# hayabusa" — kun mærke- og modelslug, intet id. Billedfilnavnet indeholder
+# ganske vist et tal ("...mcimgs-2400_312235_..."), der ligner de rigtige
+# id'er hos Rydbergs/123mc — men detalje_url_moenster læses af parse.js på
+# raa.url (produktlinket), ikke på thumbnailet, og at bruge et billede som
+# nøgle ville være skørt: skifter de billedet, mister vi annoncen.
+#
+# kilde_annonce_id bliver derfor selve slug-stien. Konsekvensen, skrevet
+# ærligt: to fysiske motorcykler af PRÆCIS samme mærke og model på lager
+# samtidig ville dele samme id, og pipelinens upsert (onConflict:
+# kilde_id,kilde_annonce_id) ville lade den ene overskrive den anden —
+# ikke en fejl, ingen advarsel, bare én annonce for lidt. Det er et kendt,
+# accepteret hul i denne runde, ikke en overset fejl. Retter Jensens Motor-
+# cykler webstedet til at vise et id (data-attribut, url-parameter), skal
+# mønsteret her opdateres til at bruge det i stedet.
+detalje_url_moenster: '(?i)jensensmc\.dk/(.+)$'
+id_gruppe: 1
+
+# ---------------------------------------------------------------------
+# Kortet
+# ---------------------------------------------------------------------
+# Struktur (fanget 19.08.2026):
+#
+#   <div class="col-md-4 col-sm-6 wow-not fadeIn product-grid col-12">
+#     <div class="product-thumb">
+#       <div class="image"><a href="https://www.jensensmc.dk/motorcykler-/suzuki-/suzuki-gsx-1300-r-hayabusa">
+#         <img src="...mcimgs-2400_312235_..." class="img-fluid"></a></div>
+#       <div class="facts d-flex justify-content-between">
+#         <div><strong>1. reg.</strong> 2003</div>
+#         <div><strong>KM</strong> 56800</div>
+#         <div><strong>HK</strong> 175</div>
+#         <div><strong>CCM</strong> 1298</div>
+#       </div>
+#       <div class="caption">
+#         <div class="name">Suzuki GSX 1300 R Hayabusa</div>
+#         <p class="description">Åbent hver lørdag...</p>
+#         <div class="price">0,-</div>
+#       </div>
+#     </div>
+#   </div>
+#
+# .facts' fire felter har INGEN fælles klasse pr. felt — kun en fælles
+# etiket (<strong>) foran hver værdi, i fast rækkefølge. To måder at læse
+# det: positionsbestemt (nth-child) eller etiket-forankret (samme princip
+# som Gul og Gratis' dt/dd, men uden separate elementer). Positionsbestemt
+# knækker stille, hvis ÉT felt mangler på én annonce — rækkefølgen skifter,
+# og et andet tal lander i et forkert felt uden varsel. Etiket-forankret
+# fejler i stedet højt: mangler "HK", matcher regex'en ikke, og feltet
+# bliver null. Samme regel som resten af filen — vi gætter aldrig et tal,
+# vi ikke kan pege på i selve teksten.
+selectors:
+  kort: '.product-grid'
+  url: 'a[href]'
+  titel: '.name'
+  pris: '.price'
+  aargang: { css: '.facts', udtraek: '1\.\s*reg\.\s*(\d{4})' }
+  km: { css: '.facts', udtraek: 'KM\s*(\d+)' }
+  ccm: { css: '.facts', udtraek: 'CCM\s*(\d+)' }
+  hk: { css: '.facts', udtraek: 'HK\s*(\d+)' }
+  thumbnail: '.image img'
+
+# Titlerne er STORE BOGSTAVER ("SUZUKI GSX 1300 R HAYABUSA"), og
+# type_vokabular matches case-sensitivt i parse.js — se hvordan MC Syd og
+# Rydbergs' blandede-store/små titler allerede rammer. Ordene herunder er
+# skrevet i begge kasus, så et match ikke går tabt på Jensens' formatering
+# alene; normalize.js/parse.js afgør selv hvilken kasus der bruges i
+# output.
+type_vokabular:
+  - Sport
+  - Naked
+  - Touring
+  - Cruiser
+  - Adventure
+  - Enduro
+  - Offroader
+  - Classic
+  - Veteran
+  - Cross
+  - Scooter
+  - Street
+  - Motard
+  - Sportstouring
+  - Klassiker
+  - SPORT
+  - NAKED
+  - TOURING
+  - CRUISER
+  - ADVENTURE
+  - ENDURO
+  - OFFROADER
+  - CLASSIC
+  - VETERAN
+  - CROSS
+  - SCOOTER
+  - STREET
+  - MOTARD
+
+# Ét lager, én adresse — Kometvej 1, 8700 Horsens, hentet fra
+# jensensmc.dk/kontakt 19.08.2026 (ikke gættet — det FORRIGE udkast af
+# denne fil skrev "Jyllandsgade 12, 6280 Højer" uden at have slået det op;
+# det var forkert og er rettet, før filen nogensinde blev brugt til noget).
+# Alt salg er erhvervssalg.
+faste_felter:
+  saelgertype: forhandler
+  by: Horsens
+  postnr: '8700'
+
+tag_foerste_traef: false

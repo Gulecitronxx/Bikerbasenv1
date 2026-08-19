@@ -1,0 +1,132 @@
+# =====================================================================
+# Rydbergs MC — motorcykler
+# =====================================================================
+# Undersøgt i renderet DOM 19.08.2026.
+#
+# Tredje kilde. Én forhandler, ét lager — samme form som MC Syd, ikke som
+# Gul og Gratis' markedsplads. Adresse: Overgårdsvej 3, Aidt, 8881 Thorsø
+# (hentet fra kontakt.aspx, ikke gættet).
+#
+# ---------------------------------------------------------------------
+# TILLADELSE
+# ---------------------------------------------------------------------
+# robots.txt (19.08.2026) spærrer kun CMS-interne stier:
+#
+#     User-agent: *
+#     Disallow: /bin/ /CMS/ /Site/ /Helpers/ /Social/ /UserControls/
+#     Disallow: /CustomerData/Files/Attachments/
+#     Disallow: /includes/addons/ws/
+#     Disallow: /ws/*.swf$
+#     Sitemap: https://www.rydbergsmc.dk/sitemap.xml
+#
+# Listesiden herunder ligger ikke under nogen af disse stier. Ejeren af
+# Bikerbasen bekræftede aftalen med Rydbergs MC 19.08.2026, og først derefter
+# er de to felter herunder sat — samme rækkefølge som guloggratis.yaml, af
+# samme grund: feltet er en NEDSKRIVNING af, at aftalen findes, ikke en
+# indstilling der åbner en dør.
+tilladelse_modtaget: 2026-08-19
+tilladelse_dato: 2026-08-19
+robots_tjekket: 2026-08-19
+aktiv: true
+
+navn: Rydbergs MC
+domaene: rydbergsmc.dk
+crawl_delay_ms: 2000
+kraever_browser: true
+
+# ---------------------------------------------------------------------
+# Listesiden — IKKE landingssiden
+# ---------------------------------------------------------------------
+# /brugte-motorcykler.aspx er en landingsside med ét udvalgt kort og en
+# menu. Den RIGTIGE liste med hele det brugte lager ligger her:
+liste_urler:
+  - url: https://www.rydbergsmc.dk/nye-og-brugte-mc/brugte-motorcykler/brugte-alle.aspx
+    maerke: null
+
+# Siden er uendelig rul, ikke sideinddelt — 21 kort ved første maling,
+# 63 efter to rul, ingen "næste"-knap eller ?side=-parameter nogen steder.
+# crawler/hent.js's rulTilBunden() klarer det allerede for enhver kilde;
+# intet nyt var nødvendigt her ud over selectorne.
+
+# URL'en for hver annonce er listesidens EGEN url plus et ?surl=-parameter,
+# der åbner en overlay — der findes ingen separat detaljeside. Det
+# numeriske id sidder i halen af selve slug'en:
+#   ".../brugte-alle.aspx?surl=aprilia-tuono-v4-r-id-309766" -> 309766
+detalje_url_moenster: '(?i)surl=[^&]*-id-(\d+)'
+id_gruppe: 1
+
+# ---------------------------------------------------------------------
+# Kortet
+# ---------------------------------------------------------------------
+# Struktur (fanget 19.08.2026):
+#
+#   <div class="w3-third">
+#     <div class="col-item data123_linktodata_wrp">
+#       <a href="...?surl=aprilia-tuono-v4-r-id-309766" class="a-text-link" title="Aprilia Tuono V4 R">
+#         <div class="photo"><img src="https://www.123mc.dk/large-mcimgs-400_309766_..." class="w3-image"></div>
+#       </a>
+#       <div class="info">
+#         <div class="w3-row">
+#           <div class="modelprice a-text-link data123_linktodata_wrp">
+#             <a href="...samme url..." class="a-text-brand-link"><h5>Aprilia Tuono V4 R </h5></a>
+#             <div class="pull-left">2015, 30452 km, 999 ccm, 167 hk</div>
+#           </div>
+#         </div>
+#         <div class="w3-row"><div class="pull-right price-wrp-gallery text-right">Kr. 114.995</div></div>
+#       </div>
+#     </div>
+#   </div>
+#
+# Platformen er den samme som 123mc.dk (billedhosten er www.123mc.dk), og
+# formen går igen på tværs af forhandlere, der bruger den — så det er
+# strukturelle selectors, ikke gættede klassenavne.
+#
+# ÅRGANG, KM, CCM, HK står i ÉT tekstnode ("2015, 30452 km, 999 ccm, 167
+# hk"), ikke i fire adskilte felter. crawler/config.js og crawler/parse.js
+# fik 19.08.2026 en ny, testet mulighed for netop dette: et felt kan være
+# { css, udtraek } i stedet for en ren selector-streng — css finder
+# elementet, udtraek er et regex med én fangstgruppe, der plukker ét tal ud
+# af teksten. Se crawler/parse.test.js for beviset på, at det virker på
+# akkurat denne tekstblok. Ingen fangst -> ingen værdi; der gættes intet.
+selectors:
+  kort: 'div.w3-third'
+  url: 'a[href*="surl="]'
+  titel: 'h5'
+  pris: '.price-wrp-gallery'
+  aargang: { css: '.pull-left', udtraek: '^(\d{4})' }
+  km: { css: '.pull-left', udtraek: '(\d+)\s*km' }
+  ccm: { css: '.pull-left', udtraek: '(\d+)\s*ccm' }
+  hk: { css: '.pull-left', udtraek: '(\d+)\s*hk' }
+  thumbnail: 'img.w3-image'
+
+# Samme vokabular som de to andre kilder — se guloggratis.yaml for hvorfor
+# det står tomt for de fleste Rydbergs-titler (rene mærke+model-navne som
+# "Aprilia Tuono V4 R"): et ord som "Adventure" rammer kun, når det rent
+# faktisk står i titlen ("BMW R 1300 GS Adventure"), ellers står typen tom.
+type_vokabular:
+  - Sport
+  - Naked
+  - Touring
+  - Cruiser
+  - Adventure
+  - Enduro
+  - Offroader
+  - Classic
+  - Veteran
+  - Cross
+  - Scooter
+  - Street
+  - Motard
+  - Sportstouring
+  - Klassiker
+
+# Ét lager, én adresse, alt sammen erhvervssalg — samme situation som
+# MC Syd, ikke som Gul og Gratis' pr.-annonce-usikkerhed.
+faste_felter:
+  saelgertype: forhandler
+  by: Thorsø
+  postnr: '8881'
+
+# Titlen står ét sted pr. kort (h5 i "modelprice"-blokken); fotoets egen
+# a-text-link har intet tekstindhold at forveksle den med.
+tag_foerste_traef: false

@@ -27,10 +27,22 @@ async function udtraekKort(page, selectors){
   return page.evaluate((sel) => {
     const tekst = (rod, s) => {
       if (!s) return null;
-      const el = rod.querySelector(s);
+      // Et felt kan enten være en ren CSS-selector-streng (det normale),
+      // eller { css, udtraek }: hele elementets tekst læses via css, og et
+      // regex trækker ÉT tal ud af den. Se config.js for hvorfor — Rydbergs
+      // MC pakker årgang/km/ccm/hk i ét tekstnode, ikke i fire.
+      const css = typeof s === 'string' ? s : s.css;
+      const el = rod.querySelector(css);
       if (!el) return null;
       const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      return t || null;
+      if (!t) return null;
+      if (typeof s === 'object' && s.udtraek){
+        // Ingen fangst -> ingen værdi. Vi gætter aldrig et tal, vi ikke kan
+        // pege på i selve teksten — samme regel som resten af crawleren.
+        const m = t.match(new RegExp(s.udtraek));
+        return m ? (m[1] || null) : null;
+      }
+      return t;
     };
 
     return Array.from(document.querySelectorAll(sel.kort)).map(kort => ({
