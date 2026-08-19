@@ -107,12 +107,22 @@ selectors:
 #   <dl><dt>Kilometer</dt><dd>92.600</dd></dl>
 #   <dl><dt>Varens stand</dt><dd>God, men brugt</dd></dl>
 #
-# HESTEKRÆFTER er det vigtigste ord i hele filen. Det er feltet, MC Syd ikke
-# har på nogen af sine 332 annoncer, og derfor står 323 af dem uden
-# kørekortkategori: uden hk kan koerekortForListing() ikke skelne A2 fra A.
-# Gul og Gratis oplyser det. En annonce herfra kan altså svare på det
-# spørgsmål, en køber under 24 stiller først — og det kan ingen MC
-# Syd-annonce.
+# HESTEKRÆFTER er stadig det vigtigste felt her, men RETTET 19.08.2026 —
+# påstanden ovenfor var forkert, og den blev brugt til at begrunde kilden.
+#
+# Der stod, at MC Syd ikke har hk på NOGEN af sine 332 annoncer. Det passer
+# ikke, og det har det ikke gjort, siden mcsyd.yaml fik `hk:
+# '[data-key="HP"]'`: 219 af de 332 har hk (66 %), hvilket mcsyd.yaml selv
+# skriver på linje 155. Målt efter første kørsel her (19.08.2026):
+#
+#   MC Syd         332 annoncer — hk 219 (66 %), ccm 320 (96 %), foto 326 (98 %)
+#   Gul og Gratis   60 annoncer — hk  47 (78 %), ccm  55 (92 %), foto  60 (100 %)
+#
+# Kilden er altså bedre på hk, men ikke enestående. Det, den ER ene om, er
+# at være en markedsplads med PRIVATE sælgere: MC Syd er ét lager hos én
+# forhandler i Rødding, og så længe det var den eneste kilde med fotos, kom
+# hvert eneste billede på forsiden fra den samme butik. Dét er grunden til
+# at have kilden — ikke hestekræfterne alene.
 #
 # Prisen er ét sidekald pr. annonce. Det er en beslutning, ikke en detalje:
 # 60 annoncer koster 1 kald i dag og 61 med det her trin. Derfor
