@@ -184,7 +184,16 @@ function parseHk(raa){
    sorteringen ville hver eneste sportstourer blive til en sportscykel.
 
    Vi matcher på hele ord. Ellers ville "Street" i "Streetfighter" tælle med,
-   og — værre — enhver model med et bogstavsammenfald blive kategoriseret. */
+   og — værre — enhver model med et bogstavsammenfald blive kategoriseret.
+
+   RETURVÆRDIEN ER MED VILJE KILDENS EGET ORD, ikke vores.
+   Funktionen svarer på ét spørgsmål: "hvad kaldte kilden den?" Det svar
+   gemmes råt i kolonnen `type`, så vi altid kan se, hvad der stod hos dem —
+   og så en rettelse i vores taksonomi ikke kræver en ny crawl af 332
+   annoncer. Oversættelsen til vores otte kasser er det NÆSTE trin og ligger
+   i typeIdFraKildeord()/typeLabelFraKildeord() lige nedenunder. To trin,
+   fordi de kan gå galt hver for sig: et forkert træf i titlen er en
+   parserfejl, en forkert kasse er en taksonomifejl. */
 function normaliserType(raa, vokabular){
   if (!raa || !Array.isArray(vokabular) || !vokabular.length) return null;
   const t = String(raa);
@@ -295,17 +304,95 @@ const SALGSMARKOERER = [
   { udtryk: /\bsolgt\b/giu,                              maerkat: 'SOLGT' },
 ];
 
-/* Karrosseri-/brugstyper. Nøglen er ordet renset for alt andet end bogstaver,
-   værdien er den skrivemåde, vi viser. Samme tanke som MAERKE_ALIAS: kilden
-   må gerne råbe "SPORTSTOURING", kortet skal stadig sige "Sportstouring". */
-const KARROSSERITYPER = {
-  cruiser: 'Cruiser', sportstouring: 'Sportstouring', touring: 'Touring',
-  street: 'Street', adventure: 'Adventure', offroader: 'Offroader',
-  offroad: 'Offroader', klassiker: 'Klassiker', klassisk: 'Klassiker',
-  classic: 'Klassiker', veteran: 'Veteran', sport: 'Sport', naked: 'Naked',
-  scooter: 'Scooter', cross: 'Cross', enduro: 'Enduro', supermoto: 'Supermoto',
-  custom: 'Custom',
+/* ---------- Vores egen typetaksonomi ----------
+
+   HER STOD KILDENS ORDFORRÅD, OG DET VAR DET FORKERTE SVAR.
+
+   KARROSSERITYPER skrev tidligere kildens eget ord tilbage: "Street",
+   "Sportstouring", "Offroader", "Klassiker". Ordene er ikke opdigtede — MC
+   Syd bruger dem selv — men de findes ikke i vores Type-filter, og det er
+   filteret, køberen bruger. Målt på lageret stod ti af fireogtyve kort på
+   forsiden med en type, man ikke kunne klikke sig frem til, og et klik på
+   "Naked 64" gav en side fuld af kort mærket "Street". Etiket og filter
+   pegede altså på hver sin taksonomi.
+
+   Vores otte typer er dem i `TYPES` i js/data.js — de samme otte, der står
+   i filterpanelet og i img/type/. Kortet skal sige et af de otte ord eller
+   ingenting. Ingenting er et gyldigt svar: en type, vi ikke kan kortlægge,
+   er en oplysning, vi ikke har, og en påtvunget naboklasse ("Motard" →
+   Sport?) er et forkert mærkat, køberen ikke kan gennemskue.
+
+   BEMÆRK om de tre ord, der ER væk fra listen:
+     motard/supermoto  har ingen kasse hos os. Ordet bliver liggende i
+                       modelnavnet, hvor det kom fra, og der står ingen type.
+     custom            "Custom" er lige så tit en modelbetegnelse (XV 535
+                       Custom) som en kategori. Vi gætter ikke.
+     classic (engelsk) står i MC Syds 332 titler UDELUKKENDE som modelnavn —
+                       Softail Classic, Road King Classic, Electra Glide
+                       Ultra Classic. Alle er cruisere og tourere. Kildens
+                       eget ord for kategorien er det danske "Klassiker".
+                       Samme måling og samme konklusion som i
+                       js/backend-bridge.js, hvor "classic" af præcis den
+                       grund heller ikke står i MCSYD_KATEGORI. */
+const VORES_TYPER = {
+  sport: 'Sport',
+  touring: 'Touring',
+  cruiser: 'Cruiser',
+  naked: 'Naked',
+  adventure: 'Adventure/Enduro',
+  scooter: 'Scooter',
+  classic: 'Classic/Veteran',
+  cross: 'Cross/MX',
 };
+
+/* Kildens ord -> vores type-id. Nøglen er ordet renset for alt andet end
+   bogstaver, så kilden gerne må råbe "SPORTSTOURING" og skrive
+   "Classic Cruiser" med mellemrum. Samme tanke som MAERKE_ALIAS.
+
+   Oversættelserne er ikke smagsdomme:
+     street         den danske forhandlerbetegnelse for en naked bike
+     sportstouring  en sportstourer er en tourer med kåbe, ikke en supersport
+     offroader      MC Syds "Offroader" er CRF 300 L, V-Strom, Transalp
+     enduro         vores kasse hedder "Adventure/Enduro" — samme kasse
+     veteran        vores kasse hedder "Classic/Veteran" — samme kasse
+   De fire første er ordret de samme oversættelser som MCSYD_KATEGORI i
+   js/backend-bridge.js. Rettes den ene, skal den anden med. */
+const TYPE_ALIAS = {
+  cruiser: 'cruiser', classiccruiser: 'cruiser', chopper: 'cruiser',
+  street: 'naked', naked: 'naked', roadster: 'naked',
+  adventure: 'adventure', offroader: 'adventure', offroad: 'adventure',
+  enduro: 'adventure', trail: 'adventure',
+  touring: 'touring', sportstouring: 'touring', tourer: 'touring',
+  klassiker: 'classic', klassisk: 'classic', veteran: 'classic',
+  scooter: 'scooter', maxiscooter: 'scooter',
+  cross: 'cross', motocross: 'cross', mx: 'cross',
+  sport: 'sport', supersport: 'sport',
+};
+
+// Ordet, som det står i en titel, renset til en opslagsnøgle.
+function typeNoegle(raa){
+  return String(raa == null ? '' : raa).toLowerCase().replace(/[^\p{L}]/gu, '');
+}
+
+/* Kildens ord -> vores type-id, eller null. Null er svaret, når ordet ikke
+   findes i vores otte kasser — ikke den nærmeste nabo. */
+function typeIdFraKildeord(raa){
+  return TYPE_ALIAS[typeNoegle(raa)] || null;
+}
+
+/* Kildens ord -> den etiket, køberen ser og kan klikke på i filteret. */
+function typeLabelFraKildeord(raa){
+  const id = typeIdFraKildeord(raa);
+  return id ? VORES_TYPER[id] : null;
+}
+
+/* Opslagstabellen, delModelOgVariant() bruger til at kende et typeord i en
+   titel. Nøglerne er kildens ord, værdierne ER vores etiketter — så det, der
+   lander i `variant` og dermed på kortets anden linje, altid er et ord fra
+   vores eget filter. */
+const KARROSSERITYPER = Object.fromEntries(
+  Object.keys(TYPE_ALIAS).map(ord => [ord, VORES_TYPER[TYPE_ALIAS[ord]]])
+);
 
 function traekSalgsmarkoerer(raa){
   const original = String(raa == null ? '' : raa);
@@ -566,6 +653,10 @@ module.exports = {
   normaliserMaerke, normaliserSaelgertype, normaliserType, normaliserStand,
   uddrag, fjernPersonoplysninger, fingerprint,
   delModelOgVariant,
+  /* Oversættelsen fra kildens ordforråd til vores otte typer. Eksporteres,
+     så pipelinen kan gemme vores type-id ved siden af kildens ord — og så
+     der kun findes ÉN tabel at rette i, den dag en kilde bruger et nyt ord. */
+  typeIdFraKildeord, typeLabelFraKildeord, VORES_TYPER, TYPE_ALIAS,
   // Eksporteres, så crawleren kan GENKENDE et mærke i starten af en titel og
   // dele "Harley-Davidson XL883 Standard" op i mærke og model. Kun opslag —
   // parsningen bliver liggende her.

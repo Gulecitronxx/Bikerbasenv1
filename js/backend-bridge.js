@@ -13,6 +13,97 @@
 window.REMOTE_LISTINGS = [];
 window.EXTERNAL_LISTINGS = [];
 
+/* ============================================================
+   LÆSEVEJEN MÅ IKKE GÅ GENNEM EN TREDJEPART — D-013
+
+   HVAD DER VAR GALT, målt: den SAMME søge-URL svarede "383 annoncer
+   fundet" på nogle indlæsninger og "51 annoncer fundet" på andre, og
+   kildelinjen ("51 annoncer på Bikerbasen · 332 indekseret hos MC Syd")
+   fandtes kun i den første tilstand. Hvert eneste facettal flyttede med:
+   "A2 (mellem mc)" stod 39 i den ene tilstand og 15 i den anden, og
+   `?priceMax=60000&koerekort=A2` gav 28 mod 14.
+
+   Det var ikke en langsom efterindlæsning. Det var to forskellige svar, og
+   forskellen var ÉN ting: om `https://cdn.jsdelivr.net/npm/@supabase/
+   supabase-js@2` nåede at blive hentet og kørt.
+
+   Kæden, hele vejen ned:
+     jsDelivr fejler  →  `typeof supabase === 'undefined'`
+                      →  `init()` i js/supabase-api.js logger
+                         "Supabase-biblioteket blev ikke indlæst." og svarer null
+                      →  `db.enabled === false`
+                      →  `backendReady()` sprang HELE hentningen over og svarede
+                         `{ enabled: false }`
+                      →  REMOTE_LISTINGS = [] og EXTERNAL_LISTINGS = []
+                      →  `Store.getAllListings()` = kun demolageret (51 på
+                         localhost, 0 i drift)
+                      →  kildelinjen skjuler sig selv, fordi der ikke ER nogen
+                         indekserede annoncer i resultatet.
+   Ingen fejlbesked nogen steder på skærmen. Tallet blev bare mindre og pænere.
+
+   EFTERPRØVET: med `route('**cdn.jsdelivr.net**', abort)` i playwright rammer
+   siden nøjagtig den tilstand, kritikeren beskrev — 51 / ingen kildelinje /
+   A2 = 15, og 14 på den filtrerede URL. Uden blokeringen: 383 / kildelinje /
+   A2 = 39. Der er ikke andre tilstande.
+
+   RETTELSEN er ikke et gentagelsesforsøg og ikke en timeout — begge dele ville
+   bare gøre løgnen sjældnere. Annoncerne hentes nu med almindelig `fetch()`
+   direkte mod PostgREST, præcis som `scripts/inline-boot.js` allerede gør for
+   vores egne annoncer og `scripts/shared.js` for byggekæden. SDK'et er dermed
+   ude af den sti, der afgør HVILKE annoncer siden viser. Det bruges stadig til
+   det, det er nødvendigt til — session, tokenfornyelse, favoritter, skrivning —
+   og de dele fejler for sig uden at tage resultatsættet med sig.
+
+   OG: hvis hentningen alligevel fejler, siger siden det (se meldDataafbrud()).
+   Et mindre resultat uden en forklaring er den værste af de to fejl.
+   ============================================================ */
+
+/* 'ikke-hentet' → endnu ikke forsøgt. 'sprunget-over' → siden har ikke brug
+   for listen (se SIDER_UDEN_*). 'ok' → svaret er kommet. 'fejlet' → vi
+   spurgte, og vi fik ikke noget svar; tallene på siden dækker altså ikke
+   hele lageret, og det SKAL siges højt. */
+window.DATA_STATUS = { egne: 'ikke-hentet', eksterne: 'ikke-hentet' };
+
+function supabaseKonfigureret(){
+  return typeof SUPABASE_CONFIG !== 'undefined'
+    && typeof isSupabaseConfigured === 'function' && isSupabaseConfigured();
+}
+
+/* Ét sted at spørge PostgREST uden SDK'et.
+
+   Nøglen er den offentlige publishable-nøgle, der i forvejen står i
+   js/supabase-config.js og i den indlejrede boot-blok i hver side. Den er
+   ikke en hemmelighed — RLS bestemmer adgangen.
+
+   Svaret er `{ data, error }` som resten af datalaget, men `error` er her et
+   RIGTIGT nej: en HTTP-fejl bliver ikke til et tomt array. Det var netop den
+   forveksling, der gjorde "vi kunne ikke hente" til "der er ingen". */
+async function restHent(sti){
+  if (!supabaseKonfigureret()) return { data: null, error: new Error('Supabase er ikke konfigureret.') };
+  const n = SUPABASE_CONFIG.anonKey;
+  try {
+    const r = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/${sti}`,
+      { headers: { apikey: n, Authorization: 'Bearer ' + n } });
+    if (!r.ok) return { data: null, error: new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`) };
+    const data = await r.json();
+    if (!Array.isArray(data)) return { data: null, error: new Error('Uventet svar fra databasen.') };
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+}
+
+/* Den offentlige adresse på et uploadet foto.
+
+   Stod før som `db.photoUrl()`, altså inde i SDK'et — så et fotos adresse
+   afhang også af jsDelivr, og uden biblioteket blev hvert `photoUrls` tomt.
+   Adressen er en ren strengsammensætning; den behøver intet bibliotek.
+   Formen er den samme, som `scripts/shared.js` bygger i byggekæden. */
+function lagerUrl(sti){
+  if (!sti || !supabaseKonfigureret()) return null;
+  return `${SUPABASE_CONFIG.url}/storage/v1/object/public/listing-photos/${sti}`;
+}
+
 /* Oversætter en databaserække til den form, UI'et allerede forventer. */
 function normalizeRemoteListing(row){
   const photos = (row.photos || []).slice().sort((a, b) => a.position - b.position);
@@ -37,7 +128,7 @@ function normalizeRemoteListing(row){
     createdAt: row.created_at,
     isDealer: !!seller.is_dealer,
     isRemote: true,
-    photoUrls: photos.map(p => db.photoUrl(p.storage_path)).filter(Boolean),
+    photoUrls: photos.map(p => lagerUrl(p.storage_path)).filter(Boolean),
     // Id og sti følger med, så redigering kan fjerne ét enkelt billede
     // i stedet for at røre dem alle. `position` følger med, fordi
     // js/opret-annonce.js skal kende den HØJESTE position, der bliver
@@ -45,7 +136,7 @@ function normalizeRemoteListing(row){
     // samme position som et billede, der stadig er der (position 0 er
     // forsidebilledet). Antallet af rækker duer ikke som mål: efter en
     // sletning midt i rækken er der huller i positionerne.
-    photoRows: photos.map(p => ({ id: p.id, path: p.storage_path, position: p.position, url: db.photoUrl(p.storage_path) })),
+    photoRows: photos.map(p => ({ id: p.id, path: p.storage_path, position: p.position, url: lagerUrl(p.storage_path) })),
     photos: Math.max(3, photos.length || 4),
     seller: {
       id: row.seller_id,
@@ -95,20 +186,32 @@ async function syncSessionToStore(){
    forespørgslen af sted i sidens første HTML-chunk, længe før SDK'et er
    hentet. Vi samler den op her og sparer hele den serielle ventetid. Fejler
    den (offline, ændret skema, blokeret), henter vi som før via SDK'et. */
-async function loadRemoteListings(){
-  if (!db.enabled) return [];
+/* Kolonnerne er ORDRET dem, `scripts/inline-boot.js` beder om i den indlejrede
+   boot-blok. De to skal ændres i samme ombæring: falder boot-blokken på gulvet
+   (offline, 4xx), er det den her forespørgsel, siden ender med — og den skal
+   give det SAMME resultatsæt, ikke et lidt andet. */
+const EGNE_KOLONNER =
+  '*,seller:public_profiles!listings_seller_id_fkey(*),photos:listing_photos(id,storage_path,position)';
 
+async function loadRemoteListings(){
   let data = window.__bbListingsBoot ? await window.__bbListingsBoot : null;
+
+  /* Reservevejen går IKKE længere gennem `db.listListings()`. Se blokken
+     øverst i filen: SDK'et er en tredjepart på et cdn, og et manglende
+     bibliotek blev til "der er ingen annoncer". */
   if (!Array.isArray(data)){
-    const res = await db.listListings({ limit: 200 });
+    const res = await restHent(`listings?select=${encodeURIComponent(EGNE_KOLONNER)}`
+      + '&status=eq.active&order=created_at.desc&limit=200');
     if (res.error){
       console.warn('Kunne ikke hente annoncer fra databasen:', res.error.message);
+      window.DATA_STATUS.egne = 'fejlet';
       return [];
     }
     data = res.data;
   }
 
   window.REMOTE_LISTINGS = (data || []).map(normalizeRemoteListing);
+  window.DATA_STATUS.egne = 'ok';
   return window.REMOTE_LISTINGS;
 }
 
@@ -311,9 +414,42 @@ function normalizeExternalListing(row){
     postnr: row.postnr,
     city: row.by || '',
 
-    // Kildens stand (migration 015). Se ordlisten ovenfor: "brugt" oversættes,
-    // "ny" har endnu ingen plads i CONDITIONS og forbliver uoplyst.
+    // Kildens stand (migration 015) OVERSAT til vores ordliste. Se
+    // ordlisten ovenfor: "brugt" oversættes, "ny" har endnu ingen plads i
+    // CONDITIONS og bliver derfor null.
     condition: conditionFraStand(row.stand),
+
+    /* ---------- Kildens EGNE ord, ubearbejdet ----------
+
+       EN OVERSÆTTELSE MÅ IKKE VÆRE DEN ENESTE KOPI. `condition` ovenfor er
+       et opslag i VORES ordliste, og opslaget taber med vilje det, listen
+       ikke har et ord for: 162 af de 332 annoncer er FABRIKSNYE, og "ny"
+       har ingen plads i CONDITIONS, så de kom ud som null. Oplysningen
+       fandtes i databasen hele vejen — den forsvandt her, i broen.
+
+       Prisen for det stod i js/components.js: `eksternErNy()` måtte
+       rekonstruere ny/brugt ved at læse annoncens ADRESSE hos kilden
+       (/Produkter/Motorcykel/Ny/), fordi det var det eneste sted, ordet
+       stadig stod. Det er en omvej uden om det lag, der havde svaret.
+       Feltet er derfor båret med råt her, og omvejen kan sløjfes.
+
+       LÆREN, og den gælder bredere end det her felt: et felt, der stille
+       bliver til null i broen, er den samme slags fejl som et resultatsæt,
+       der stille bliver mindre (D-013) — ingen fejlmeddelelse, bare mindre
+       sandhed længere nede. Oversæt gerne, men behold originalen ved siden
+       af, så den næste kan se, hvad kilden faktisk sagde.
+
+       De to andre er fundet ved at gå kolonnelisten i EKSTERNE_KOLONNER
+       igennem felt for felt mod det, der kom ud i den anden ende:
+       `titel` blev kun brugt som nødudgang for et manglende modelnavn og
+       var ellers væk, og `sidst_set` blev slet ikke båret med, selv om det
+       er det eneste, vi ved om, hvor frisk annoncen er hos kilden
+       (`createdAt` er med vilje null — se blokken nedenfor).
+       `status` bæres IKKE med: forespørgslen filtrerer på status=aktiv, så
+       feltet er den samme værdi på hver eneste række. */
+    kildeStand: row.stand || null,
+    kildeTitel: row.titel || null,
+    sidstSet: row.sidst_set || null,
 
     /* Landsdel er et opslag på postnummeret, ikke et skøn. Alle 332 MC
        Syd-annoncer har postnr 6630 Rødding og hører altså til Syddanmark. */
@@ -389,16 +525,39 @@ function normalizeExternalListing(row){
   };
 }
 
+/* Kolonnelisten er den samme som `listExternalListings()` i
+   js/supabase-api.js og `EKSTERNE_KOLONNER` i scripts/shared.js, og den skal
+   udvides i SAMME ombæring som den migration, der tilføjer kolonnen — aldrig
+   før. Beder vi om en kolonne, der ikke findes, svarer PostgREST 42703, og så
+   forsvinder alle 332 annoncer på én gang. Nu forsvinder de i det mindste
+   HØJLYDT: statussen bliver 'fejlet', og siden skriver det (meldDataafbrud). */
+const EKSTERNE_KOLONNER =
+  'id, kilde_annonce_id, url, titel, maerke, model, variant, type, ' +
+  'aargang, km, ccm, hk, pris_dkk, stand, salgsmarkoerer, udledte_felter, ' +
+  'by, postnr, saelgertype, thumbnail_url, uddrag, status, foerst_set, sidst_set, ' +
+  'kilde:kilder(navn, domaene)';
+
+/* Rækkefølgen er `sidst_set` faldende — den SAMME som scripts/shared.js
+   bruger, når mærkesidernes kort forudtegnes. Målt over otte indlæsninger er
+   de 332 rækker kommet i samme orden hver gang, men Postgres lover det ikke
+   ved lige `sidst_set` (crawleren stempler hele kørslen ens). Et fast
+   brydeled — `,id.asc` — ville låse den helt; det skal bare lægges ind BEGGE
+   steder samtidig, ellers omrokerer mærkesiden i det øjeblik javascriptet
+   overtager fra den forudtegnede markup. Se noten i work/DECISIONS.md. */
 async function loadExternalListings(){
-  if (!db.enabled) return [];
-  const res = await db.listExternalListings({ limit: 500 });
+  const res = await restHent(`eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
+    + '&status=eq.aktiv&order=sidst_set.desc&limit=500');
   if (res.error){
     // En fejl her må ikke tage dine egne annoncer med sig. Søgningen skal
-    // stadig virke, bare uden forhandlerannoncerne.
+    // stadig virke, bare uden forhandlerannoncerne — OG køberen skal have det
+    // at vide, for ellers er hvert tal på siden en påstand om et lager, vi
+    // ikke har set.
     console.warn('Kunne ikke hente indekserede annoncer:', res.error.message);
+    window.DATA_STATUS.eksterne = 'fejlet';
     return [];
   }
   window.EXTERNAL_LISTINGS = (res.data || []).map(normalizeExternalListing);
+  window.DATA_STATUS.eksterne = 'ok';
   return window.EXTERNAL_LISTINGS;
 }
 
@@ -510,25 +669,93 @@ function harBrugForEksterne(){
   return isUuid(new URLSearchParams(location.search).get('id') || '');
 }
 
+/* ---------- Når lageret IKKE kunne hentes, skal siden sige det ----------
+
+   Kildelinjen over resultaterne ("51 annoncer på Bikerbasen · 332 indekseret
+   hos MC Syd") tegnes af js/search.js ud fra det resultat, den får. Den kan
+   derfor ikke fortælle om annoncer, der aldrig kom — den skjuler sig bare,
+   fordi der ikke er nogen indekserede tilbage at forklare. Præcis dét var
+   kritikerens hovedanke: sitets bedste tillidsfunktion fandtes kun i den
+   tilstand, hvor alt var gået godt.
+
+   Beskeden hører hjemme HER og ikke i den enkelte sides render: datalaget er
+   det eneste sted, der ved, om vi spurgte og ikke fik svar. Den skrives ind
+   øverst i <main> på hvilken som helst side, der bad om listen.
+
+   Vi skriver ikke, HVOR mange der mangler. Det ved vi ikke — det er hele
+   pointen med, at hentningen fejlede. Et gættet tal ville være den samme fejl
+   én gang til, bare med flere decimaler. */
+function meldDataafbrud(){
+  const fejlet = window.DATA_STATUS.eksterne === 'fejlet' || window.DATA_STATUS.egne === 'fejlet';
+  const vaert = document.getElementById('main-content') || document.querySelector('main');
+  const gammel = document.getElementById('data-afbrud');
+  if (!fejlet || !vaert){ gammel?.remove(); return; }
+  if (gammel) return;
+
+  const p = document.createElement('div');
+  p.id = 'data-afbrud';
+  p.className = 'data-afbrud';
+  p.setAttribute('role', 'status');
+  const hvad = window.DATA_STATUS.eksterne === 'fejlet' && window.DATA_STATUS.egne === 'fejlet'
+    ? 'Vi kunne ikke hente annoncerne fra databasen.'
+    : window.DATA_STATUS.eksterne === 'fejlet'
+      ? 'Vi kunne ikke hente de annoncer, Bikerbasen har indekseret hos andre forhandlere.'
+      : 'Vi kunne ikke hente de annoncer, Bikerbasen selv hoster.';
+  p.innerHTML = `<strong>${hvad}</strong> `
+    + 'Du ser derfor ikke hele lageret, og hverken antallet af annoncer eller '
+    + 'tallene ved filtrene dækker det, der faktisk er til salg. '
+    + '<button type="button" class="data-afbrud-igen">Prøv igen</button>';
+  p.querySelector('.data-afbrud-igen').addEventListener('click', () => location.reload());
+  vaert.prepend(p);
+}
+
 /* Kald denne før første render på sider der viser data. */
 let _bootPromise = null;
 function backendReady(){
   if (_bootPromise) return _bootPromise;
   _bootPromise = (async () => {
-    if (!db.enabled) return { enabled: false };
-    try {
-      await syncSessionToStore();
-      // Egne annoncer og indekserede hentes samtidig — de er uafhængige, og
-      // serielt ville de lægge en rundtur oven i sidens første render.
-      await Promise.all([
-        SIDER_UDEN_EGNE.has(sidensNavn()) ? Promise.resolve([]) : loadRemoteListings(),
-        harBrugForEksterne() ? loadExternalListings() : Promise.resolve([]),
-      ]);
-      await syncFavorites();
-    } catch (e) {
-      console.warn('Backend-opstart fejlede, fortsætter på lokale data:', e);
+    if (!supabaseKonfigureret()){
+      window.DATA_STATUS.egne = window.DATA_STATUS.eksterne = 'sprunget-over';
+      return { enabled: false };
     }
-    return { enabled: true };
+    const side = sidensNavn();
+    if (SIDER_UDEN_EGNE.has(side)) window.DATA_STATUS.egne = 'sprunget-over';
+    if (!harBrugForEksterne()) window.DATA_STATUS.eksterne = 'sprunget-over';
+
+    /* Sessionen kræver SDK'et (tokens, fornyelse) — annoncerne gør ikke
+       længere. Derfor står de tre i samme Promise.all i stedet for at have
+       sessionen som en rundtur FORAN annoncerne: det, køberen er kommet
+       efter, skal ikke stå i kø bag en login-kontrol, han måske ikke har
+       brug for. Fejler sessionen, fejler den for sig. */
+    const medSdk = db.enabled;
+
+    /* HVER kilde har sit eget net. backendReady() må ALDRIG afvise:
+       js/search.js' boot() gør `await backendReady()` som allerførste
+       handling, så en afvisning her stopper hele opstarten — ingen filtre,
+       ingen kort, og resultatlinjen står tilbage med den statiske "0
+       annoncer fundet", der er skrevet i soegning.html. Det er en tom side,
+       der ligner et tomt marked. Den gamle udgave havde ét stort try/catch
+       om det hele netop derfor; det er bevaret, men opdelt, så én kilde, der
+       falder, ikke river de andre med sig — OG så statussen bliver 'fejlet'
+       i stedet for bare at blive slugt. */
+    const gren = (navn, p, noegle) => Promise.resolve(p).catch(e => {
+      console.warn(`${navn} fejlede:`, e);
+      if (noegle) window.DATA_STATUS[noegle] = 'fejlet';
+      return null;
+    });
+
+    await Promise.all([
+      medSdk ? gren('Sessionen', syncSessionToStore()) : null,
+      SIDER_UDEN_EGNE.has(side) ? null : gren('Egne annoncer', loadRemoteListings(), 'egne'),
+      harBrugForEksterne() ? gren('Indekserede annoncer', loadExternalListings(), 'eksterne') : null,
+    ]);
+
+    // Favoritterne skal kende brugeren, så de kommer bagefter — og de kræver
+    // SDK'et, fordi de SKRIVER.
+    if (medSdk) await gren('Favoritterne', syncFavorites());
+
+    try { meldDataafbrud(); } catch (e) { console.warn('Afbrudsbeskeden kunne ikke tegnes:', e); }
+    return { enabled: true, sdk: medSdk };
   })();
   return _bootPromise;
 }

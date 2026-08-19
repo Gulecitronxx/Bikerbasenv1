@@ -30,7 +30,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const læs = f => fs.readFileSync(path.join(__dirname, f), 'utf8');
-const KILDER = ['icons.js', 'data.js', 'components.js', 'search.js'];
+// js/filtrering.js skal med og skal ligge FOER search.js: filterkaeden er
+// flyttet derind (ét filterhus for forsiden og soegesiden), og search.js
+// binder Filtrering.* paa topniveau. Uden den her linje falder hele filen
+// over 'Filtrering is not defined', foer den naar til det, den tester.
+const KILDER = ['icons.js', 'data.js', 'filtrering.js', 'components.js', 'search.js'];
 
 const STUB = `
 const noop = () => {};

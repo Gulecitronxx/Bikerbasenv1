@@ -13,6 +13,13 @@ GRØN:  LCP ≤ 2.500 ms   ·   CLS ≤ 0,10   ·   TBT ≤ 200 ms
 **Status efter runde 6 (builder "ydelse"): 10 af 16.**
 **Status efter runde 10 (måler, 17.08.2026, commit `4a33b41`): 9 af 14 på opgavens
 syv URL'er — og fortsat 10 af 16 på det historiske sæt, altså uændret antal.**
+**Status efter runde 11 (builder 3, 18.08.2026, commit `7297c07`): de tre målte
+sider består på desktop og IKKE på mobil — men mobilhullet er skrumpet:
+søgning 86/LCP 4.201 → 92/3.433, forside 93/3.186 → 96/2.784, annonce
+95/2.924 → 97/2.577. CLS og a11y uændrede (0,000–0,001 og 100). Årsagen er
+stadig alene mobil-LCP. Se afsnittet "Runde 11" nederst for hvad der blev
+målt, hvad der blev afvist, og hvad der præcist står i vejen.**
+
 Tilgængelighed er 100 på alle 18 målte celler, CLS er grøn på alle 18 (maks. 0,063),
 TBT er grøn på alle 18 medianer (0–56 ms). **Hver eneste resterende fejl er
 mobil-LCP.** De tre poster, der bærer dem, er de samme på hver side:
@@ -230,6 +237,18 @@ runde	dato	tid	server	side	bredde	ydelse	a11y	lcp_ms	cls	tbt_ms	fcp_ms	si_ms	kb	
 10	2026-08-17	17:38	gzip	annonce-tom	desktop	100	100	628	0.007	0	291	291	290	21	192	ja
 10	2026-08-17	17:38	gzip	forhandler-tom	mobil	97	100	2685	0.000	0	1057	1057	272	18	139	nej
 10	2026-08-17	17:39	gzip	forhandler-tom	desktop	100	100	581	0.007	0	289	319	272	18	139	ja
+11	2026-08-18	20:12	gzip	soegning	mobil	86	100	4201	0.000	0	1060	1060	637	27	1442	nej
+11	2026-08-18	20:14	gzip	forside	mobil	93	100	3186	0.000	0	1059	1188	455	32	1072	nej
+11	2026-08-18	20:16	gzip	annonce-1021	mobil	95	100	2924	0.001	24	1059	1059	299	20	496	nej
+11	2026-08-18	20:18	gzip	soegning	desktop	100	100	870	0.023	0	290	337	1413	40	1678	ja
+11	2026-08-18	20:19	gzip	forside	desktop	99	100	734	0.056	0	290	420	790	36	1072	ja
+11	2026-08-18	20:20	gzip	annonce-1021	desktop	100	100	660	0.008	0	291	391	299	20	496	ja
+11	2026-08-18	21:38	gzip-min	soegning	mobil	92	100	3433	0.000	0	911	911	537	27	1442	nej
+11	2026-08-18	21:41	gzip-min	forside	mobil	96	100	2784	0.000	0	912	1089	375	32	1072	nej
+11	2026-08-18	21:44	gzip-min	annonce-1021	mobil	97	100	2577	0.001	23	913	913	213	20	496	nej
+11	2026-08-18	21:46	gzip-min	soegning	desktop	100	100	790	0.023	0	249	326	1314	40	1678	ja
+11	2026-08-18	21:47	gzip-min	forside	desktop	99	100	673	0.056	0	253	413	709	36	1072	ja
+11	2026-08-18	21:48	gzip-min	annonce-1021	desktop	100	100	571	0.008	0	251	293	213	20	496	ja
 ```
 
 Runde 10-rækkerne er **medianer** pr. celle (3 mobilkørsler, 2 desktopkørsler).
@@ -911,3 +930,181 @@ hastighedsrettelse.** Den er nu målt to gange — 142 ms på ét par i runde 6,
 ± 299 på 20 par i runde 10. Der er stadig gode grunde til at flytte bundtet
 (SRI, fastlåst version, én fremmed vært mindre i `script-src`), men hastighed er
 ikke en af dem, og de grunde hører til sikkerhedsstykket, ikke ydelsesstykket.
+
+---
+
+## Runde 11 — BUILDER 3 (ydelse), 18.08.2026: minificering + den kritiske blok slået fra
+
+**Gulvet er STADIG ikke nået på mobil. Ingen af de tre sider består.** Det står
+først, fordi resten af afsnittet er fremgang, og fremgang uden den sætning
+læses som en beståelse.
+
+### Sådan er der målt
+
+| | |
+|---|---|
+| Værktøj | Lighthouse 12.8.2 CLI (`npx lighthouse --output=json`), Node v22.14.0 |
+| Browser | Chrome headless (`--headless=new --no-sandbox --disable-gpu`) |
+| Mobil | Lighthouse standardpreset: Moto G Power, **4x CPU-throttling**, langsom 4G (Lantern) |
+| Desktop | `--preset=desktop` |
+| Server | egen `gzserver.js` — gzip på html/css/js/svg, `Cache-Control: max-age=600`, `Server: GitHub.com`. Porte 61330 (før) og 61334 (efter) |
+| **Målt på** | **commit `7297c07`, udpakket to gange med `git archive HEAD`** — ikke arbejdstræet |
+| Arme | **A (før)** = `7297c07` som den er. **B (efter)** = `7297c07` + mine fire scripts, kørt gennem `inline-critical` + `inline-boot` + `udgiv`, og serveret fra `_site/` |
+| Gentagelser | 3 mobilkørsler pr. celle, 1–2 desktop. Medianer i tabellen |
+| Spredning, mobil | søgning 4.198–4.216 → 3.416–3.481 · forside 3.175–3.337 → 2.777–2.847 · annonce 2.899–2.959 → 2.536–2.588. Alle tre intervaller er adskilte |
+
+**Efter-armen er den UDGIVNE form.** Minificeringen findes kun i `_site/`, så en
+måling på arbejdstræet ville slet ikke vise den. De to arme er byte-identiske
+bortset fra mine ændringer.
+
+### Før → efter, alle seks celler
+
+| Side | Bredde | Ydelse (≥95) | A11y (=100) | FCP | LCP (≤2500) | TBT (≤200) | CLS (≤0,01) | KB | **Gulv** |
+|---|---|---|---|---|---|---|---|---|---|
+| `/soegning.html` | mobil | 86 → **92** ✗ | 100 → 100 ✓ | 1.060 → **911** | 4.201 → **3.433** ✗ | 0 → 0 ✓ | 0,000 → 0,000 ✓ | 637 → **537** | **NEJ** |
+| `/soegning.html` | desktop | 100 → 100 ✓ | 100 ✓ | 290 → 249 | 870 → 790 ✓ | 0 ✓ | 0,023 ✓ | 1.413 → 1.314 | JA |
+| `/` | mobil | 93 → **96** ✓ | 100 → 100 ✓ | 1.059 → **912** | 3.186 → **2.784** ✗ | 0 → 0 ✓ | 0,000 → 0,000 ✓ | 455 → **375** | **NEJ** |
+| `/` | desktop | 99 → 99 ✓ | 100 ✓ | 290 → 253 | 734 → 673 ✓ | 0 ✓ | 0,056 ✓ | 790 → 709 | JA |
+| `/annonce.html?id=1021` | mobil | 95 → **97** ✓ | 100 → 100 ✓ | 1.059 → **913** | 2.924 → **2.577** ✗ | 24 → 23 ✓ | 0,001 → 0,001 ✓ | 299 → **213** | **NEJ** |
+| `/annonce.html?id=1021` | desktop | 100 → 100 ✓ | 100 ✓ | 291 → 251 | 660 → 571 ✓ | 0 ✓ | 0,008 ✓ | 299 → 213 | JA |
+
+**Hvor langt fra gulvet, i point og millisekunder:**
+
+```
+soegning mobil   ydelse 92 (mangler 3)   LCP 3.433 (933 ms for meget)
+forside  mobil   ydelse 96 (bestaaet)    LCP 2.784 (284 ms for meget)
+annonce  mobil   ydelse 97 (bestaaet)    LCP 2.577 ( 77 ms for meget)
+```
+
+Alle tre desktopceller består. **Ingen mobilcelle består**, og årsagen er den
+samme alle tre steder: LCP. Det er samme dom som runde 10 — hele det resterende
+hul er mobil-LCP — men hullet er blevet mindre på alle tre sider.
+
+### Ingen regression: CLS og tilgængelighed
+
+Det var kravet, og det er efterprøvet på hver enkelt kørsel, ikke kun på
+medianen:
+
+* **CLS mobil: 0,000 / 0,000 / 0,001 før OG efter.** Ikke én af de ni
+  efter-kørsler afveg. Desktop ligeledes uændret (0,023 / 0,056 / 0,008).
+  At CLS holdt, selvom den indlejrede kritiske blok forsvandt, er ikke held:
+  med et render-blokerende ark er HELE stilarket til stede ved første maling,
+  så geometrien er rigtig fra første pixel. Den indlejrede blok var altid et
+  UDSNIT, og et udsnit er netop dét, der kan være uenigt med arket.
+* **Tilgængelighed: 100 på alle 12 celler**, før som efter.
+* **TBT: 0 / 0 / 23 ms.** Uændret. Hovedtråden er stadig ikke problemet.
+
+### Hvilke audits holdt op med at fejle
+
+| Audit | Før (søgning mobil) | Efter |
+|---|---|---|
+| `unminified-css` | 20 KiB | **væk på alle sider** |
+| `unminified-javascript` | 54 KiB (forside 41, annonce 45) | **væk** (3 KiB rest på `annonce.html` — det er et inline-`<script>` i selve siden, ikke en fil) |
+| `unused-css-rules` | 46 KiB | 17 KiB (forside 43 → 15) |
+| `lcp-lazy-loaded` | bestod allerede (score 1) | består |
+| `prioritize-lcp-image` | 614 ms | 488–635 ms — **fejler stadig** |
+| `modern-image-formats` | 116 KiB | 116 KiB — **uændret, og ingen af posterne er vores** |
+| `render-blocking-resources` | bestod | **220 ms — NY**, og den er bevidst betalt |
+
+`render-blocking-resources` er prisen for at slå den indlejrede kritiske CSS
+fra. Den står i regnskabet, fordi den er ægte: arket blokerer igen første
+maling. Nettoregnskabet er alligevel positivt på alle tre sider — og FCP blev
+149 ms HURTIGERE, ikke langsommere, fordi dokumentet skrumpede mere end arket
+kostede.
+
+### Hvad der flyttede tallet, hver for sig
+
+| Ændring | Målt på søgning mobil |
+|---|---|
+| Minificering af js+css i `_site/` | 86 / LCP 4.201 → **91 / 3.542** |
+| Den indlejrede kritiske blok slået fra | 91 / 3.542 → **92 / 3.432** |
+| `preconnect` til `images.danbase.dk` | **neutralt** (se nedenfor) |
+
+Bytes: `css/styles.css` 52.486 → **20.641 B gzip**. `js/search.js` 38.657 →
+17.950. `js/data.js` 30.406 → 13.912. `js/components.js` 15.177 → 7.198.
+Dokumentet `soegning.html` 18.447 → **9.778 B gzip**, fordi den indlejrede blok
+var 8.669 B af det. `_site` som helhed 4,0 → 3,0 MB, fordi det ubrugte
+`logo.png` (1.025.234 B) ikke længere udgives.
+
+### preconnect: ærligt neutralt, og hvorfor
+
+`<link rel="preconnect" href="https://images.danbase.dk" crossorigin>` er lagt
+ind (skrevet af `scripts/inline-boot.js` ud fra sidens egen `img-src`).
+Lighthouse scorer den **nul**. LCP-faserne viser hvorfor:
+
+```
+uden preconnect   TTFB 457 · Load Delay 1.938 · Load Time 1.049 · Render 98
+med  preconnect   TTFB 455 · Load Delay 2.264 · Load Time   717 · Render 129
+```
+
+De 332 ms opsætning forsvinder fra selve billedet — og dukker op igen i Load
+Delay. Lanterns model flytter dem, den fjerner dem ikke. Hintet bliver stående,
+fordi DNS + TCP + TLS til en fremmed vært er noget en rigtig browser laver i
+idle tid, før billedet skal bruges; men **det skal ikke tilskrives noget af
+fremgangen ovenfor.**
+
+### To hypoteser prøvet og AFVIST — brug ikke en runde på dem igen
+
+Begge er bygget på komplette kopier af arbejdstræet, egen server, tre kørsler
+pr. arm.
+
+1. **`eksterne_annoncer` prefetchet i boot-blokken** (plus én linje i
+   `js/backend-bridge.js`, der samler den op). Funktionelt korrekt. **LCP 3.464
+   median mod 3.433 uden. Load Delay 1.939–1.961 ms i BEGGE arme.**
+   Årsagen er, at Load Delay ikke er seriel ventetid men båndbredde: der skal
+   lande 250.168 B, før billedets forespørgsel begynder, og en tidligere
+   forespørgsel står i den samme kø.
+2. **Fontenes `preload` fjernet.** **LCP uændret (3.483 mod 3.433), FCP 911 →
+   1.511 ms.** Samme resultat som runde 6, men målt på den nye sidestruktur.
+   Hypotesen er nu afvist to gange.
+
+### Hvad der præcist står i vejen på `/soegning.html`
+
+Målt på efter-armen, kørsel 3:
+
+```
+LCP 3.416 ms = TTFB 455 + Load Delay 2.027 + Load Time 829 + Render Delay 104
+```
+
+**Load Delay: 250.168 B skal være landet, før billedets forespørgsel begynder.**
+De største poster:
+
+| Post | Overført | Prioritet | Vores? |
+|---|---|---|---|
+| `cdn.jsdelivr.net/npm/@supabase/supabase-js@2` | 55.119 B | Low | nej |
+| `fonts/ibmplexsans.woff2` | 45.912 B | High | ja — men prøvet fjernet, se ovenfor |
+| `rest/v1/eksterne_annoncer` | 30.895 B | High | ja — selve dataene |
+| `fonts/spacegrotesk.woff2` | 22.488 B | High | ja — samme |
+| `css/styles.css` | 20.878 B | VeryHigh | ja — allerede minificeret |
+| otte egne javascriptfiler | ~55.000 B | Low | ja — allerede minificeret |
+
+**Load Time: fire søsterfotos på 240.127 B hentes samtidig med LCP-fotoet.**
+De er `loading="lazy"`, men kort 2–5 ligger inden for Chromes doven-grænse på en
+823 px høj skærm, så de hentes alligevel. LCP-fotoet er 59.702 B og bruger
+829–1.049 ms på at komme ned — altså 57–72 B/ms, hvor røret kan cirka 200 B/ms.
+**Det er ikke prioritet, der mangler:** billedet HAR `fetchpriority="high"`, og
+`lcp-lazy-loaded` består. Det er, at der er fire andre billeder om pladsen.
+
+### Til den næste: de tre veje, der er tilbage, i rækkefølge
+
+1. **Færre fotos over folden på side 1.** Største enkeltpost. Den ligger i
+   `js/search.js` (`FIRST_CARDS`/`CARD_CHUNK`, og hvor mange kort der
+   overhovedet tegnes ved første maling) og i kortets højde. Hvert kort færre
+   inden for doven-grænsen er ~60 KB mindre konkurrence om røret, mens
+   LCP-fotoet hentes. **Det er en produktbeslutning lige så meget som en
+   ydelsesbeslutning** — læs kritikerens punkt 4 om, at første pris står ved
+   y=854 af 844, før nogen gør kortene lavere.
+2. **supabase-js må ikke ligge foran dataene.** 55.119 B tredjeparts-javascript
+   skal hentes, parses og initialiseres, FØR forespørgslen efter annoncerne kan
+   sendes. En rå `fetch` mod PostgREST — som boot-blokken allerede laver for
+   `listings` — har ingen af de bytes. Det er ikke et argument for at flytte
+   bundtet til egen origin; dét er målt til nul to gange (runde 6 og 10). Det er
+   et argument for, at annoncehentningen ikke skal gå igennem det.
+3. **`js/data.js` er 13.912 B gzip på hver side.** `SHOW_DEMO_DATA` er kun sandt
+   på localhost, så demolagerets 51 annoncer er bytes, ingen bruger i drift
+   nogensinde ser. Skilles demodataene fra funktionerne, forsvinder de fra den
+   kritiske sti på alle sider. Ikke rørt: `js/data.js` er ikke min.
+
+Det, der IKKE skal prøves igen: supabase-js på egen origin (afvist runde 6 og
+10), fontenes preload (afvist runde 6 og 11), prefetch af `eksterne_annoncer`
+(afvist runde 11).

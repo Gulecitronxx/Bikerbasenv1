@@ -133,11 +133,13 @@ test('typeordet bliver varianten — også når modelnavnet står FØR det', () 
   });
 });
 
-test('Diversion er modelnavn, Sportstouring er type', () => {
+test('Diversion er modelnavn, Sportstouring bliver til VORES Touring', () => {
   // "Yamaha XJ 900 S Sportstouring Diversion BYTTER GERNE"
+  // En sportstourer er en tourer med kaabe, ikke en supersport. Kildens ord
+  // staar ikke i vores filter, og varianten skal kunne klikkes paa.
   assert.deepEqual(delt('XJ 900 S Sportstouring Diversion BYTTER GERNE'), {
     model: 'XJ 900 S Diversion',
-    variant: 'Sportstouring',
+    variant: 'Touring',
     salgsmarkoerer: ['BYTTER GERNE'],
   });
 });
@@ -166,10 +168,10 @@ test('salgsmarkører midt i titlen splitter ikke modellen', () => {
   // "Suzuki GSX 750 ES ENGROS/UDEN KLARGØRING Klassiker" og
   // "Benelli Tre-K 1130 ENGROS/UDEN KLARGØRING Adventure".
   assert.deepEqual(delt('GSX 750 ES ENGROS/UDEN KLARGØRING Klassiker'), {
-    model: 'GSX 750 ES', variant: 'Klassiker', salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'],
+    model: 'GSX 750 ES', variant: 'Classic/Veteran', salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'],
   });
   assert.deepEqual(delt('Tre-K 1130 ENGROS/UDEN KLARGØRING Adventure'), {
-    model: 'Tre-K 1130', variant: 'Adventure', salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'],
+    model: 'Tre-K 1130', variant: 'Adventure/Enduro', salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'],
   });
 });
 
@@ -185,9 +187,11 @@ test('markørerne kommer i kildens rækkefølge, ikke listens', () => {
 
 test('resten af MC Syds mønstre', () => {
   assert.deepEqual(delt('CBR 1000 F Sportstouring'), {
-    model: 'CBR 1000 F', variant: 'Sportstouring', salgsmarkoerer: null });
+    model: 'CBR 1000 F', variant: 'Touring', salgsmarkoerer: null });
+  // "Street" er MC Syds ord for en naked bike. Fandtes ikke i vores filter,
+  // og et klik paa "Naked" gav derfor kort maerket "Street".
   assert.deepEqual(delt('ZR-7 Street'), {
-    model: 'ZR-7', variant: 'Street', salgsmarkoerer: null });
+    model: 'ZR-7', variant: 'Naked', salgsmarkoerer: null });
 });
 
 test('ingen type i titlen giver ingen variant — ikke et gæt', () => {
@@ -218,9 +222,79 @@ test('består titlen KUN af typeord, er der ingen model at beskytte', () => {
     model: null, variant: 'Touring', salgsmarkoerer: null });
 });
 
-test('kilden må råbe — kortet skriver typen pænt', () => {
-  assert.equal(delt('CBR 1000 SPORTSTOURING').variant, 'Sportstouring');
-  assert.equal(delt('CB 1100 classic').variant, 'Klassiker');
+test('kilden må råbe — kortet skriver VORES type', () => {
+  assert.equal(delt('CBR 1000 SPORTSTOURING').variant, 'Touring');
+  assert.equal(delt('KLASSIKER').variant, 'Classic/Veteran');
+});
+
+/* ---------- Kildens ordforråd -> vores otte typer ----------
+
+   Runde 2's kritiker talte ti af fireogtyve kort med en type, der ikke
+   findes i vores eget filter — Street (5), Sportstouring (2), Offroader,
+   Adventure Offroader, Klassiker — og fandt, at et klik paa "Naked 64" gav
+   en side fuld af kort maerket "Street". Etiketten og filteret brugte hver
+   sin taksonomi. Testene her laaser oversaettelsen, saa den ikke kan skride
+   tilbage uden at nogen ser det. */
+const OTTE = ['Sport','Touring','Cruiser','Naked','Adventure/Enduro','Scooter','Classic/Veteran','Cross/MX'];
+
+test('hvert ord i kildens ordforråd lander i én af VORES otte typer', () => {
+  // Ordforraadet er MC Syds egen liste fra sources/mcsyd.yaml.
+  const par = [
+    ['Street', 'Naked'], ['Sportstouring', 'Touring'], ['Offroader', 'Adventure/Enduro'],
+    ['Klassiker', 'Classic/Veteran'], ['Classic Cruiser', 'Cruiser'], ['Adventure', 'Adventure/Enduro'],
+    ['Touring', 'Touring'], ['Cruiser', 'Cruiser'], ['Scooter', 'Scooter'], ['Sport', 'Sport'],
+    ['Enduro', 'Adventure/Enduro'], ['Veteran', 'Classic/Veteran'], ['Cross', 'Cross/MX'],
+  ];
+  for (const [kilde, vores] of par){
+    assert.equal(n.typeLabelFraKildeord(kilde), vores, `${kilde} skal blive til ${vores}`);
+    assert.ok(OTTE.includes(n.typeLabelFraKildeord(kilde)), `${vores} er ikke en af vores otte`);
+  }
+});
+
+test('kildens ord maa raabe, staves med bindestreg og have mellemrum', () => {
+  assert.equal(n.typeIdFraKildeord('SPORTSTOURING'), 'touring');
+  assert.equal(n.typeIdFraKildeord('classic cruiser'), 'cruiser');
+  assert.equal(n.typeIdFraKildeord('  Offroader '), 'adventure');
+});
+
+test('et ord uden en kasse hos os giver null — ikke den naermeste nabo', () => {
+  // Det er hele reglen: en type, vi ikke kan kortlaegge, er en oplysning vi
+  // ikke har. Et forkert maerkat vejer tungere imod os end et manglende.
+  for (const ord of ['Motard', 'Supermoto', 'Custom', 'Trike', 'Quad', '', null, undefined, 'Virago']){
+    assert.equal(n.typeIdFraKildeord(ord), null, `${JSON.stringify(ord)} maa ikke faa en type`);
+    assert.equal(n.typeLabelFraKildeord(ord), null, `${JSON.stringify(ord)} maa ikke faa en etiket`);
+  }
+});
+
+test('et ukortlaegbart typeord bliver i modelnavnet frem for at blive en forkert etiket', () => {
+  // "Motard" har ingen kasse hos os. Foer stod der "Motard" paa kortets
+  // anden linje — et ord, ingen kunne klikke paa. Nu bliver ordet, hvor det
+  // kom fra, og der staar ingen type.
+  assert.deepEqual(delt('DR-Z 400 Motard'), {
+    model: 'DR-Z 400 Motard', variant: null, salgsmarkoerer: null });
+  assert.deepEqual(delt('XV 535 Custom'), {
+    model: 'XV 535 Custom', variant: null, salgsmarkoerer: null });
+});
+
+test('engelsk "Classic" er et modelnavn hos Harley, ikke en kategori', () => {
+  /* Maalt paa alle 332 MC Syd-titler i js/backend-bridge.js: "Classic"
+     optraeder UDELUKKENDE som modelnavn — Softail Classic, Road King
+     Classic, Electra Glide Ultra Classic. Alle er cruisere og tourere, ikke
+     veteraner. Kildens eget ord for kategorien er det danske "Klassiker".
+     Foer blev "Road King Classic Cruiser" til modellen "Road King" med
+     varianten "Klassiker Cruiser" — to typer paa én linje, og den forkerte
+     foerst. */
+  assert.deepEqual(delt('Road King Classic Cruiser'), {
+    model: 'Road King Classic', variant: 'Cruiser', salgsmarkoerer: null });
+  assert.deepEqual(delt('CB 1100 classic'), {
+    model: 'CB 1100 classic', variant: null, salgsmarkoerer: null });
+});
+
+test('to ord, samme kasse, én etiket', () => {
+  // "Adventure Offroader" stod ordret paa tre kort. Begge ord er vores
+  // 'adventure', saa etiketten skal staa én gang.
+  assert.equal(delt('Tiger 900 Adventure Offroader').variant, 'Adventure/Enduro');
+  assert.equal(delt('V-Strom 650 Offroader Adventure').variant, 'Adventure/Enduro');
 });
 
 test('samme type nævnt to gange står én gang', () => {

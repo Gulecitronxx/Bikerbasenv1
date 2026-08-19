@@ -861,10 +861,40 @@ function typeLabel(id){
    annoncerne ikke indeholder, og en mc kan være en *begrænset* udgave af en
    kraftigere model. Derfor er filteret en vejledning, ikke en garanti —
    det siger UI'et også eksplicit. */
+/* ETIKETTERNE ER EN DEL AF REGNESTYKKET — D-014.
+
+   Filteret svarer på ét spørgsmål: "hvilke annoncer må jeg køre med DETTE
+   kørekort?" Et højere kørekort dækker de lavere, så de tre mængder ligger
+   inden i hinanden: A1 ⊆ A2 ⊆ A. Målt på lageret: 15 ⊆ 39 ⊆ 383.
+
+   HVAD DER VAR GALT: chippen hed "A (stor mc)" og stod med tallet 383 ved
+   siden af "A1 (lille mc) 15" og "A2 (mellem mc) 39". Tre etiketter i samme
+   form læses som tre KATEGORIER, altså "383 store motorcykler" — og det er
+   en påstand, siden modsiger to steder på samme skærm: ét klik på A2 melder
+   "121 annoncer er ikke vist, fordi kørekortkategori ikke er oplyst på dem",
+   og de samme 121 annoncer står med "Kørekort: Ikke oplyst" på deres kort.
+   Vi kan ikke både vide og ikke vide, hvad de 121 kræver.
+
+   Tallet var aldrig forkert — facettallene og skjult-tælleren kommer fra
+   SAMME udregning (`koerekortSvar()` i js/search.js, som spørger
+   `passerKoerekort()` her i filen to gange: én gang som annoncen er, og én
+   gang med de manglende felter sat til den mindst tænkelige rigtige mc).
+   Efterprøvet, at de stemmer: facet A1/A2/A = 15/39/383, og resultatsiden
+   for `?koerekort=A1/A2/A` giver 15/39/383 med 12/121/0 skjulte.
+
+   Det var ETIKETTEN, der løj. "A (alle mc)" siger, hvad tallet er — hele
+   lageret, fordi A ikke har nogen effektgrænse — og den er nøjagtig lige så
+   lang som "A (stor mc)", så ingen chip skifter bredde. Hjælpeteksterne
+   siger nu også, at kategorierne dækker nedad; det var ellers uforklarligt,
+   at A2 talte 39, når kun 24 af dem faktisk ER A2-maskiner.
+
+   FÆLDE: fristes man til at lade A tælle "kun dem, der KRÆVER A", bliver
+   filteret ubrugeligt for den, det er skrevet til — en køber med A-kørekort
+   må køre alt og skal se alt. Regn ikke om; skriv rigtigt. */
 const KOEREKORT = [
   { id: 'A1', label: 'A1 (lille mc)',      hint: 'Maks. 125 cm³ og 15 hk' },
-  { id: 'A2', label: 'A2 (mellem mc)',     hint: 'Maks. 35 kW (47 hk)' },
-  { id: 'A',  label: 'A (stor mc)',        hint: 'Ingen effektgrænse' },
+  { id: 'A2', label: 'A2 (mellem mc)',     hint: 'Maks. 35 kW (47 hk). A2 dækker også A1-motorcykler, så de er talt med.' },
+  { id: 'A',  label: 'A (alle mc)',        hint: 'A har ingen effektgrænse og dækker hele lageret — også de annoncer, hvor effekten ikke er oplyst.' },
 ];
 
 const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 47;

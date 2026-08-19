@@ -1,0 +1,403 @@
+{
+ "390": {
+  "navngivne": [
+   {
+    "navn": "KTM RC 390",
+    "id": 1032,
+    "ccm": 373,
+    "hk": 44,
+    "type": "sport",
+    "ekstern": false,
+    "foer": {
+     "kk": "A2",
+     "variant": "(fallback)"
+    },
+    "efter": {
+     "variant": "(ingen)",
+     "kk": "A2",
+     "kkTitel": "Kan føres på A2-kørekort. Udledt af 373 ccm og 44 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.",
+     "ny": "(ingen)"
+    },
+    "filterA2": true,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "KTM RC 390",
+     "badge": [
+      "Kørekort A2"
+     ],
+     "panel": "(ingen)",
+     "raekker": [],
+     "fotoTitel": "Ingen fotos i denne annonce",
+     "fotoSaetning": "Sælgeren har ikke lagt billeder op. Vi viser ikke en tegning i stedet — bed sælgeren om fotos af netop den her motorcykel, før du kører efter den.",
+     "vandret": false
+    }
+   },
+   {
+    "navn": "Harley-Davidson Iron 883",
+    "id": 1036,
+    "ccm": 883,
+    "hk": 52,
+    "type": "cruiser",
+    "ekstern": false,
+    "foer": {
+     "kk": "A",
+     "variant": "(fallback)"
+    },
+    "efter": {
+     "variant": "(ingen)",
+     "kk": "A",
+     "kkTitel": "Kan føres på A-kørekort. Udledt af 883 ccm og 52 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.",
+     "ny": "(ingen)"
+    },
+    "filterA2": false,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "Harley-Davidson Iron 883",
+     "badge": [
+      "Kørekort A"
+     ],
+     "panel": "(ingen)",
+     "raekker": [],
+     "fotoTitel": "Ingen fotos i denne annonce",
+     "fotoSaetning": "Sælgeren har ikke lagt billeder op. Vi viser ikke en tegning i stedet — bed sælgeren om fotos af netop den her motorcykel, før du kører efter den.",
+     "vandret": false
+    }
+   },
+   {
+    "navn": "Husqvarna Svartpilen 401",
+    "id": 1041,
+    "ccm": 373,
+    "hk": 44,
+    "type": "naked",
+    "ekstern": false,
+    "foer": {
+     "kk": "A2",
+     "variant": "(fallback)"
+    },
+    "efter": {
+     "variant": "(ingen)",
+     "kk": "A2",
+     "kkTitel": "Kan føres på A2-kørekort. Udledt af 373 ccm og 44 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.",
+     "ny": "(ingen)"
+    },
+    "filterA2": true,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "Husqvarna Svartpilen 401",
+     "badge": [
+      "Kørekort A2"
+     ],
+     "panel": "(ingen)",
+     "raekker": [],
+     "fotoTitel": "Ingen fotos i denne annonce",
+     "fotoSaetning": "Sælgeren har ikke lagt billeder op. Vi viser ikke en tegning i stedet — bed sælgeren om fotos af netop den her motorcykel, før du kører efter den.",
+     "vandret": false
+    }
+   },
+   {
+    "navn": "Honda GL 1100",
+    "id": "4e85bb45-a9ee-45a8-8e4d-09788bf1f3ab",
+    "ccm": 1100,
+    "hk": null,
+    "type": "classic",
+    "ekstern": true,
+    "foer": {
+     "kk": "Kørekort mindst A2",
+     "variant": "Klassiker"
+    },
+    "efter": {
+     "variant": "Classic/Veteran",
+     "kk": "Kørekort ikke afgjort",
+     "kkTitel": "Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.",
+     "ny": "(ingen)"
+    },
+    "filterA2": false,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "Honda GL 1100 Gold Wing",
+     "badge": [],
+     "panel": "A2/A Vi kan ikke afgøre, hvilket kørekort der skal til Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2. Det, vi ved, er at A1 er udelukket — motorcyklen er over 125 cm³. Om du kan nøjes med A2 (maks. 47 hk) eller skal have A, afhænger af effekten. Spørg MC Syd, før du regner med A2.",
+     "raekker": [
+      "Type Classic/Veteran",
+      "Kørekort Kan ikke afgøres",
+      "Stand Brugt"
+     ],
+     "fotoTitel": null,
+     "fotoSaetning": null,
+     "vandret": false
+    }
+   },
+   {
+    "navn": "Harley-Davidson FXBR Breakout",
+    "id": "0c637624-8bb6-45f0-b08d-c436671cc270",
+    "ccm": 1868,
+    "hk": 94,
+    "type": null,
+    "ekstern": true,
+    "foer": {
+     "kk": "Kørekort A",
+     "variant": "(fallback)"
+    },
+    "efter": {
+     "variant": "(ingen)",
+     "kk": "Kørekort A",
+     "kkTitel": "Kan føres på A-kørekort. Udledt af 1.868 ccm og 94 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.",
+     "ny": "(ingen)"
+    },
+    "filterA2": false,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "Harley-Davidson FXBR Breakout",
+     "badge": [],
+     "panel": "A Du kan køre den på A-kørekort A har ingen effektgrænse og dækker hele lageret — også de annoncer, hvor effekten ikke er oplyst. Regnet ud fra 1.868 ccm og 94 hk og vejledende — en mc kan være en effektbegrænset udgave, så få det bekræftet hos MC Syd.",
+     "raekker": [
+      "Kørekort A (vejledende)",
+      "Stand Brugt"
+     ],
+     "fotoTitel": null,
+     "fotoSaetning": null,
+     "vandret": false
+    }
+   }
+  ],
+  "foerUenige": 99,
+  "efterUenige": 0,
+  "foerMindst": 99,
+  "efterMindst": 0,
+  "vokab": {
+   "foer": {
+    "Cruiser": 75,
+    "Offroader": 18,
+    "Sportstouring": 21,
+    "Sport": 19,
+    "Street": 55,
+    "Klassiker": 7,
+    "Touring": 29,
+    "Adventure": 41,
+    "Klassiker Cruiser": 12,
+    "Sport Sportstouring": 1,
+    "Adventure Offroader": 3,
+    "Street Cruiser": 2,
+    "Klassiker Touring": 2
+   },
+   "efter": {
+    "Cruiser": 89,
+    "Adventure/Enduro": 62,
+    "Touring": 53,
+    "Sport": 19,
+    "Naked": 55,
+    "Classic/Veteran": 6,
+    "(ingen)": 1
+   }
+  },
+  "ny": 162,
+  "brugt": 170,
+  "ialt": 383
+ },
+ "1440": {
+  "navngivne": [
+   {
+    "navn": "KTM RC 390",
+    "id": 1032,
+    "ccm": 373,
+    "hk": 44,
+    "type": "sport",
+    "ekstern": false,
+    "foer": {
+     "kk": "A2",
+     "variant": "(fallback)"
+    },
+    "efter": {
+     "variant": "(ingen)",
+     "kk": "A2",
+     "kkTitel": "Kan føres på A2-kørekort. Udledt af 373 ccm og 44 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.",
+     "ny": "(ingen)"
+    },
+    "filterA2": true,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "KTM RC 390",
+     "badge": [
+      "Kørekort A2"
+     ],
+     "panel": "(ingen)",
+     "raekker": [],
+     "fotoTitel": "Ingen fotos i denne annonce",
+     "fotoSaetning": "Sælgeren har ikke lagt billeder op. Vi viser ikke en tegning i stedet — bed sælgeren om fotos af netop den her motorcykel, før du kører efter den.",
+     "vandret": false
+    }
+   },
+   {
+    "navn": "Harley-Davidson Iron 883",
+    "id": 1036,
+    "ccm": 883,
+    "hk": 52,
+    "type": "cruiser",
+    "ekstern": false,
+    "foer": {
+     "kk": "A",
+     "variant": "(fallback)"
+    },
+    "efter": {
+     "variant": "(ingen)",
+     "kk": "A",
+     "kkTitel": "Kan føres på A-kørekort. Udledt af 883 ccm og 52 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.",
+     "ny": "(ingen)"
+    },
+    "filterA2": false,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "Harley-Davidson Iron 883",
+     "badge": [
+      "Kørekort A"
+     ],
+     "panel": "(ingen)",
+     "raekker": [],
+     "fotoTitel": "Ingen fotos i denne annonce",
+     "fotoSaetning": "Sælgeren har ikke lagt billeder op. Vi viser ikke en tegning i stedet — bed sælgeren om fotos af netop den her motorcykel, før du kører efter den.",
+     "vandret": false
+    }
+   },
+   {
+    "navn": "Husqvarna Svartpilen 401",
+    "id": 1041,
+    "ccm": 373,
+    "hk": 44,
+    "type": "naked",
+    "ekstern": false,
+    "foer": {
+     "kk": "A2",
+     "variant": "(fallback)"
+    },
+    "efter": {
+     "variant": "(ingen)",
+     "kk": "A2",
+     "kkTitel": "Kan føres på A2-kørekort. Udledt af 373 ccm og 44 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.",
+     "ny": "(ingen)"
+    },
+    "filterA2": true,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "Husqvarna Svartpilen 401",
+     "badge": [
+      "Kørekort A2"
+     ],
+     "panel": "(ingen)",
+     "raekker": [],
+     "fotoTitel": "Ingen fotos i denne annonce",
+     "fotoSaetning": "Sælgeren har ikke lagt billeder op. Vi viser ikke en tegning i stedet — bed sælgeren om fotos af netop den her motorcykel, før du kører efter den.",
+     "vandret": false
+    }
+   },
+   {
+    "navn": "Honda GL 1100",
+    "id": "4e85bb45-a9ee-45a8-8e4d-09788bf1f3ab",
+    "ccm": 1100,
+    "hk": null,
+    "type": "classic",
+    "ekstern": true,
+    "foer": {
+     "kk": "Kørekort mindst A2",
+     "variant": "Klassiker"
+    },
+    "efter": {
+     "variant": "Classic/Veteran",
+     "kk": "Kørekort ikke afgjort",
+     "kkTitel": "Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.",
+     "ny": "(ingen)"
+    },
+    "filterA2": false,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "Honda GL 1100 Gold Wing",
+     "badge": [],
+     "panel": "A2/A Vi kan ikke afgøre, hvilket kørekort der skal til Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2. Det, vi ved, er at A1 er udelukket — motorcyklen er over 125 cm³. Om du kan nøjes med A2 (maks. 47 hk) eller skal have A, afhænger af effekten. Spørg MC Syd, før du regner med A2.",
+     "raekker": [
+      "Type Classic/Veteran",
+      "Kørekort Kan ikke afgøres",
+      "Stand Brugt"
+     ],
+     "fotoTitel": null,
+     "fotoSaetning": null,
+     "vandret": false
+    }
+   },
+   {
+    "navn": "Harley-Davidson FXBR Breakout",
+    "id": "0c637624-8bb6-45f0-b08d-c436671cc270",
+    "ccm": 1868,
+    "hk": 94,
+    "type": null,
+    "ekstern": true,
+    "foer": {
+     "kk": "Kørekort A",
+     "variant": "(fallback)"
+    },
+    "efter": {
+     "variant": "(ingen)",
+     "kk": "Kørekort A",
+     "kkTitel": "Kan føres på A-kørekort. Udledt af 1.868 ccm og 94 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.",
+     "ny": "(ingen)"
+    },
+    "filterA2": false,
+    "filterA1": false,
+    "filterA": true,
+    "detalje": {
+     "h1": "Harley-Davidson FXBR Breakout",
+     "badge": [],
+     "panel": "A Du kan køre den på A-kørekort A har ingen effektgrænse og dækker hele lageret — også de annoncer, hvor effekten ikke er oplyst. Regnet ud fra 1.868 ccm og 94 hk og vejledende — en mc kan være en effektbegrænset udgave, så få det bekræftet hos MC Syd.",
+     "raekker": [
+      "Kørekort A (vejledende)",
+      "Stand Brugt"
+     ],
+     "fotoTitel": null,
+     "fotoSaetning": null,
+     "vandret": false
+    }
+   }
+  ],
+  "foerUenige": 99,
+  "efterUenige": 0,
+  "foerMindst": 99,
+  "efterMindst": 0,
+  "vokab": {
+   "foer": {
+    "Cruiser": 75,
+    "Offroader": 18,
+    "Sportstouring": 21,
+    "Sport": 19,
+    "Street": 55,
+    "Klassiker": 7,
+    "Touring": 29,
+    "Adventure": 41,
+    "Klassiker Cruiser": 12,
+    "Sport Sportstouring": 1,
+    "Adventure Offroader": 3,
+    "Street Cruiser": 2,
+    "Klassiker Touring": 2
+   },
+   "efter": {
+    "Cruiser": 89,
+    "Adventure/Enduro": 62,
+    "Touring": 53,
+    "Sport": 19,
+    "Naked": 55,
+    "Classic/Veteran": 6,
+    "(ingen)": 1
+   }
+  },
+  "ny": 162,
+  "brugt": 170,
+  "ialt": 383
+ },
+ "sidefejl": []
+}

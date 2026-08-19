@@ -135,145 +135,80 @@ async function buildForside(){
   let dataKlar = false;
 
   /* Live-tælling der reagerer på hero-filtrene, før man trykker søg.
-     Tallene SKAL stemme med det, søgesiden viser bagefter — et hero-tal på 15
-     og en resultatside med 12 er en løgn, køberen opdager med det samme.
-     Derfor de samme tre regler som js/search.js anvendFiltre():
-       - pris: en annonce UDEN pris matcher ikke et maks-prisfilter
-         (`null <= 60000` er sandt i JS — det var den gamle fejl her),
-       - type: ukendt type tælles ikke med,
-       - kørekort: passerKoerekort() er det ene sted, reglen bor.
-     Efterprøvet: hero'en og soegning.html?koerekort=A2 siger begge 15.
 
-     RUNDE 2, FUND 1: og de skal ikke bare vise samme ANTAL TRÆF — de skal
-     også være enige om, hvor mange annoncer der blev valgt fra, fordi vi
-     ikke kender svaret. Det var de ikke:
+     TALLET KOMMER NU FRA SØGESIDENS EGEN BEREGNING. Hele filterkæden er
+     flyttet til js/filtrering.js, og både forsiden og soegning.html kalder
+     `Filtrering.anvendFiltre()`. Det er runde 3's rettelse, og den er en
+     anden slags rettelse end runde 2's.
 
-       forsiden   (A2 + maks. 60.000 kr.):  "53 annoncer mangler den oplysning"
-       søgesiden  (samme klik):             "75 annoncer er ikke vist"
+     HVAD DER VAR GALT: der var to kæder. Forsiden havde sin egen
+     efterligning af `anvendFiltre()` — samme rækkefølge, samme prædikater,
+     skrevet af i hånden. Runde 1 fandt fejlen på TRÆF (`null <= 60000` er
+     sandt i JS, så annoncer uden pris slap gennem et maks-prisfilter).
+     Runde 2 fandt fejlen på FRAVALGTE (forsiden bogførte kun kørekortet og
+     skrev 53, hvor søgesiden skrev 75 for samme klik). Begge blev rettet
+     ved at skrive søgesidens kode af én gang til. Begge gange holdt tallene
+     bagefter — og begge gange stod muligheden for den tredje uenighed
+     tilbage, urørt.
 
-     Begge tal var rigtige svar — på hvert sit spørgsmål. 53 er de annoncer,
-     kørekortfilteret skjulte uden at kende hk. 75 er 53 + de 22 annoncer,
-     der slet ikke har en pris, og som prisfilteret derfor smed ud. Forsiden
-     talte KUN kørekortet; de 22 forsvandt her i linjen
-     `l.price != null && l.price <= maxPrice` uden at nogen sagde det.
-     Søgesiden bogfører hvert filter for sig (filtrerMedUoplyst) og lagde
-     dem sammen. Det rigtige tal er altså 75, og forsiden var den, der
-     underdrev — med præcis den slags tavse fravalg, hele ærlighedsreglen i
-     work/DECISIONS.md er skrevet imod.
+     HVORFOR DET HER ER ANDERLEDES: to kopier, der er enige i dag, er ikke
+     det samme som to sider, der ikke KAN være uenige. Nu er der én kæde.
+     Tilføjer nogen et filter til søgesiden, får forsiden det samme filter
+     med samme prædikat og samme feltnavn i regnskabet — eller også får den
+     det slet ikke. Der er ikke længere en tredje mulighed, hvor de to sider
+     tæller hver sin vej.
 
-     Nu bogfører hero'en på samme måde: ét regnskab over alle filtre, samme
-     feltnavne og samme rækkefølge som i js/search.js anvendFiltre(), så de
-     to sider kommer frem til samme tal ved konstruktion og ikke ved held.
-
-     BEMÆRK: en annonce fjernes ved det FØRSTE filter, der ikke kan svare
-     for den, og kan derfor kun tælles én gang — ligesom på søgesiden. Det
-     er dét, der gør, at tallene må lægges sammen. */
-  const heroListe = () => {
-    const q = document.getElementById('hs-query').value.trim().toLowerCase();
+     Forsiden sætter kun fire af felterne; resten falder tilbage til
+     `Filtrering.TOMT_FILTER`. Feltnavnene er søgesidens URL-navne (`types`
+     som liste, `priceMax`, `koerekort`), så det, hero'en regner på, er
+     bogstaveligt talt det samme objekt, som submit-handleren lige nedenfor
+     lægger i adressen. */
+  const heroFiltre = () => {
     const type = document.getElementById('hs-type').value;
     const maxPrice = Number(document.getElementById('hs-price').value) || null;
-    const kat = valgtKoerekort();
-    let list = Store.getAllListings();
-    // Samme form som js/search.js' `uoplystSkjult`: [{ felt, antal }].
-    const skjult = [];
-
-    /* Søgesidens filtrerMedUoplyst() i hero-udgave: tre svar i stedet for to.
-       `kendt` afgør, om annoncen overhovedet kan svare på spørgsmålet —
-       kan den ikke, tælles den og ryger ud, uden at prædikatet bliver spurgt. */
-    const medUoplyst = (felt, kendt, praedikat) => {
-      const beholdt = [];
-      let antal = 0;
-      for (const l of list){
-        if (!kendt(l)) { antal++; continue; }
-        if (praedikat(l)) beholdt.push(l);
-      }
-      if (antal) skjult.push({ felt, antal });
-      list = beholdt;
+    return {
+      q: document.getElementById('hs-query').value.trim(),
+      types: type ? [type] : [],
+      priceMax: maxPrice,
+      koerekort: valgtKoerekort(),
     };
-
-    // Mærke og model kender vi altid — de kommer med annoncen fra kilden.
-    if (q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
-    // Rækkefølgen er søgesidens: type før pris før kørekort.
-    if (type) medUoplyst('motorcykeltype', l => l.type != null, l => l.type === type);
-    if (maxPrice) medUoplyst('pris', l => l.price != null, l => l.price <= maxPrice);
-    if (kat){
-      /* Kørekortet kan ikke afgøres på ét felt — se skjultAfUvidenhed()
-         nedenfor. Derfor sin egen gren i stedet for `kendt`/`praedikat`. */
-      const beholdt = [];
-      let antal = 0;
-      for (const l of list){
-        if (passerKoerekort(l, kat)) beholdt.push(l);
-        else if (skjultAfUvidenhed(l, kat)) antal++;
-      }
-      if (antal) skjult.push({ felt: 'kørekortkategori', antal });
-      list = beholdt;
-    }
-    return { list, skjult, kat, harSøgt: !!(q || type || maxPrice || kat) };
   };
 
-  /* Sætningen om de fravalgte. Feltnavnene og opremsningen er ordret dem,
-     js/search.js renderUoplystNote() bruger, så de to sider siger det samme
-     om det samme klik. Kun slutningen er forsidens egen: her er der ikke
-     noget "vist" endnu, der er et tal, man kan tælle med i. */
+  const heroListe = () => {
+    const filtre = heroFiltre();
+    /* Samme form som js/search.js' `uoplystSkjult`: [{ felt, antal }].
+       En annonce fjernes ved det FØRSTE filter, der ikke kan svare for den,
+       og tælles derfor kun én gang — det er dét, der gør, at tallene må
+       lægges sammen. */
+    const skjult = [];
+    const list = Filtrering.anvendFiltre(Store.getAllListings(), filtre, null, skjult);
+    const harSøgt = !!(filtre.q || filtre.types.length || filtre.priceMax || filtre.koerekort);
+    return { list, skjult, kat: filtre.koerekort, harSøgt };
+  };
+
+  /* Sætningen om de fravalgte. Optællingen og opremsningen af feltnavne
+     kommer fra `Filtrering.uoplystOpgoerelse()` — det er samme funktion, som
+     søgesidens note skal bruge, så de to sider ikke kan komme til at nævne
+     forskellige felter for det samme klik. Kun slutningen er forsidens egen:
+     her er der ikke noget "vist" endnu, der er et tal, man kan tælle med i. */
   const uoplystTekst = (skjult) => {
-    const antal = skjult.reduce((sum, x) => sum + x.antal, 0);
+    const { antal, feltTekst } = Filtrering.uoplystOpgoerelse(skjult);
     if (!antal) return '';
-    // Samme felt kan skjule i to omgange — nævn det kun én gang.
-    const felter = [...new Set(skjult.map(x => x.felt))];
-    const feltTekst = felter.length === 1
-      ? felter[0]
-      : felter.slice(0, -1).join(', ') + ' og ' + felter[felter.length - 1];
     return antal === 1
       ? `1 annonce er ikke talt med, fordi ${feltTekst} ikke er oplyst på den. Den vises heller ikke i søgningen.`
       : `${daTal(antal)} annoncer er ikke talt med, fordi ${feltTekst} ikke er oplyst på dem. De vises heller ikke i søgningen.`;
   };
 
-  /* Hvor mange blev valgt fra, fordi vi ikke VED svaret?
+  /* skjultAfUvidenhed() STOD HER og er slettet.
 
-     passerKoerekort() kan kun sige ja eller nej, og et nej dækker over to vidt
-     forskellige ting: "motorcyklen er for kraftig" og "hk er ikke oplyst, så
-     vi nægter at gætte" (se kommentaren over passerKoerekort i js/data.js —
-     eksterne_annoncer har ingen hk-kolonne). For en 22-årig, der trykker A2 og
-     ser tallet falde fra 383 til 15, er forskellen alt: er markedspladsen tom,
-     eller mangler kilden bare et felt? Uden den oplysning ligner vores ene
-     strukturelle fordel en tom hylde.
-
-     Udledt uden at gentage en eneste grænse: vi spørger passerKoerekort() igen
-     med de manglende felter sat til den mindst tænkelige rigtige motorcykel
-     (1 hk, 1 cm³). Skifter svaret fra nej til ja, hang nejet på noget, vi ikke
-     ved. Flyttes A2-grænsen i js/data.js, følger tallet her med af sig selv.
-
-     Spørgsmålet er kategori for kategori — ikke "kender vi kategorien".
-     Et første forsøg brugte koerekortForListing() === null, og det var forkert
-     for A1: en 650 cm³ uden hk har ingen kendt kategori, men den er helt
-     sikkert ikke A1, for A1 HAR en ccm-grænse. Den blev talt med som "oplyser
-     ikke effekten", og linjen påstod 321, hvor det rigtige tal var 12.
-
-     Bemærk: 1 er ikke en grænse, men den gunstigste tænkelige værdi, og det
-     virker kun fordi ccm og hk begge er ØVRE grænser i A1/A2. Kommer der en
-     kategori med en nedre grænse, holder antagelsen ikke. Vagtposten er
-     js/koerekort.test.js — samme forudsætning er beskrevet ved
-     koerekortSvar() i js/search.js.
-
-     Og "A" dækker alt, så tallet dér altid bliver 0: A skjuler ingen, og så
-     skal linjen heller ikke påstå det.
-
-     DENNE FUNKTION ER EN TVILLING til koerekortSvar() i js/search.js, som er
-     den kanoniske udgave (og den, der har tests i js/koerekort.test.js).
-     Prøven er skrevet ordret som dens, så to sider ikke kan komme til at
-     svare forskelligt på samme spørgsmål: `!(Number(l.ccm) > 0)` og ikke
-     `!Number(l.ccm)`, og manglende hk afgøres af js/data.js' egen
-     hkEllerNull() — ukendt effekt staves null, "", "-" og 0, og `== null`
-     alene fanger kun de to første. De to bør slås sammen til én delt
-     funktion i js/data.js; se forslaget i work/DECISIONS.md. */
-  const skjultAfUvidenhed = (l, kat) => {
-    if (passerKoerekort(l, kat)) return false;
-    const proeve = { ...l };
-    let mangler = false;
-    if (hkEllerNull(l.power) == null){ proeve.power = 1; mangler = true; }
-    if (!(Number(l.ccm) > 0)){ proeve.ccm = 1; mangler = true; }
-    return mangler && passerKoerekort(proeve, kat);
-  };
+     Den var en ordret tvilling til `koerekortSvar()` i js/search.js: begge
+     spurgte `passerKoerekort()` en gang til med de manglende felter sat til
+     den mindst tænkelige rigtige motorcykel (1 hk, 1 cm³) for at skelne "for
+     kraftig" fra "vi ved det ikke". work/DECISIONS.md bar et forslag om at
+     slå dem sammen, med den begrundelse at den tavse regression, der udløste
+     testene i runde 1 (`proeve.power = 0`), kunne opstå netop fordi reglen
+     fandtes to steder. Den bor nu ét sted: `Filtrering.koerekortSvar()`, og
+     js/koerekort.test.js dækker dermed også forsiden. */
 
   /* Én opdatering for hele søgekortet: hjælpelinjen under kørekortvælgeren,
      antalslinjen i hero'en og tallet på knappen. De tre siger noget om samme
@@ -329,8 +264,27 @@ async function buildForside(){
          Et rundet tal ligner et skøn og køber os intet.
          Under 10 annoncer skriver vi det stadig ikke — så reklamerer vi for
          en tom markedsplads i stedet for at åbne en søgning. */
+      /* "i dag" ER FJERNET, OG DET ER IKKE KOSMETIK.
+
+         Ordet var en friskhedspåstand, vi ikke kan bakke op for 332 af de
+         383 annoncer: de er indekseret fra andre danske sider, og det eneste
+         datofelt, vi har på dem, er `indekseretFoerste` — hvornår VI så dem
+         første gang, ikke hvornår sælgeren satte dem til salg, og ikke at de
+         stadig er til salg netop i dag. (Crawleren markerer annoncer som
+         'borte', når de forsvinder hos kilden, men det sker ved næste
+         kørsel, ikke i dag.)
+
+         Kritikeren satte den mod sektionen to skærme længere nede: hero'en
+         sagde "383 motorcykler til salg i dag", og "Nyeste annoncer" viste
+         otte kort, hvor det nyeste var tre uger gammelt. To påstande om det
+         samme lager, hvor den ene modbeviser den anden på samme side.
+
+         Tallet bliver stående — det er præcist, det er vores, og det er
+         Bilbasens eget greb ("50.356 annoncer i dag"). Det er ordet, der
+         ikke havde dækning, og en påstand uden dækning er billigere at
+         undvære end at forsvare. */
       countHint.innerHTML = n >= 10
-        ? `<b>${daTal(n)}</b> motorcykler til salg i dag`
+        ? `<b>${daTal(n)}</b> motorcykler til salg`
         : '';
     }
     /* Knappen bærer tallet, ligesom Bilbasens "Vis 40.476 biler". Har man
@@ -350,15 +304,18 @@ async function buildForside(){
   // fra det øjeblik det kan ses (før lå det til allersidst).
   document.getElementById('hero-search-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const q = document.getElementById('hs-query').value.trim();
-    const type = document.getElementById('hs-type').value;
-    const maxPrice = document.getElementById('hs-price').value;
-    const kat = valgtKoerekort();
+    /* Adressen bygges af PRÆCIS det filtersæt, tallet på knappen blev
+       regnet af — samme heroFiltre(). Før læste submit-handleren de fire
+       felter op en gang til, og et felt, der blev læst to steder, kunne
+       læses forskelligt. Parameternavnene er søgesidens: ?type= i ental
+       (readStateFromURL oversætter den til state.types) og ?maxPrice=
+       (til state.priceMax). */
+    const f = heroFiltre();
     const params = new URLSearchParams();
-    if (q) params.set('q', q);
-    if (type) params.set('type', type);
-    if (maxPrice) params.set('maxPrice', maxPrice);
-    if (kat) params.set('koerekort', kat);
+    if (f.q) params.set('q', f.q);
+    if (f.types.length) params.set('type', f.types.join(','));
+    if (f.priceMax) params.set('maxPrice', String(f.priceMax));
+    if (f.koerekort) params.set('koerekort', f.koerekort);
     window.location.href = 'soegning.html' + (params.toString() ? '?' + params.toString() : '');
   });
 
@@ -381,11 +338,33 @@ async function buildForside(){
      alligevel, og på DPR 2 (350 px) og DPR 3 (525 px) ligeså. Otte ekstra
      filer, ingen af dem nogensinde valgt. Skal der spares her, er svaret at
      gøre 456w-filen mindre — ikke at lægge en kandidat ved siden af. */
+  /* ANTALLET PÅ FLISEN er tomt her og fyldes i bid 5, når lageret har svaret
+     (se fyldTypeAntal). Kritikeren i runde 2: "Søg efter type lover otte
+     typer, men kortene lige under bruger kildens ordforråd" — Street,
+     Offroader, Sportstouring, Klassiker. De ord kommer fra kildens
+     `variant`-felt og står som annoncekortets anden linje; de kan ikke
+     rettes herfra (crawler/normalize.js har en anden ejer — se
+     work/DECISIONS.md). Det, forsiden KAN gøre, er at holde op med at love
+     otte lige store døre: med tallet på flisen kan man se, at Cross har 3 og
+     Cruiser 93, FØR man klikker — og de otte tal kan holdes op mod totalen.
+
+     Tallet ligger absolut placeret oven på fotoet (`.tile-count`) og ikke i
+     etiketlinjen. To grunde: en tekst føjet til etiketten kan brække linjen
+     på 390 px og gøre flisen højere, og elementet er tomt indtil
+     backendReady() — et absolut placeret, tomt element fylder nul både før og
+     efter stilarket lander, så der er ingen CLS at forebygge.
+
+     I MARKUPPEN står det til gengæld SIDST, efter etiketten, selvom det
+     tegnes øverst til højre. Absolut placering er ligeglad med
+     dokumentrækkefølgen, men en skærmlæser er ikke: lå det først, blev
+     flisen læst op som "93 annoncer, Cruiser". Nu er den "Cruiser,
+     93 annoncer". */
   const tilesMount = document.getElementById('category-tiles');
   tilesMount.innerHTML = TYPES.map(t => `
     <a href="soegning.html?type=${t.id}" class="tile">
       <span class="tile-media"><img src="img/type/${t.id}.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
       <span class="tile-label">${t.label}<span class="tile-go" aria-hidden="true">${Icon.arrowRight}</span></span>
+      <span class="tile-count" data-type="${t.id}"></span>
     </a>`).join('');
 
   await yieldToMain();
@@ -468,11 +447,68 @@ async function buildForside(){
   dataKlar = true;                       // først NU må forsiden nævne et antal
   opdaterHero();                         // nu med de rigtige tal fra databasen
 
+  /* Antallet på hver kategoriflise — og på underrubrikken de annoncer, der
+     ikke hører til nogen af de otte.
+
+     Tallet regnes med `Filtrering.anvendFiltre()`, altså den samme kæde som
+     søgeknappen og soegning.html. Det er ikke pedanteri: flisen er et løfte
+     om, hvad der ligger bag klikket, og et løfte, der regnes et andet sted
+     end resultatet, er præcis den fejl, hele runde 3 handler om. Klikker man
+     "Cruiser 93", siger resultatsiden 93.
+
+     Underrubrikken siger de uoplyste højt. 48 af 383 annoncer har ingen type
+     hos kilden, og uden den sætning ser de otte tal ud til at skulle lægge
+     sammen til totalen — det gør de ikke, og en køber, der lægger sammen,
+     ville tro, vi tabte annoncer undervejs. Vi gætter ikke en type ud fra
+     modelnavnet; se typeFraTitel() i js/backend-bridge.js, der HOLDER OP,
+     når kildens kategoriord ikke er der. */
+  const fyldTypeAntal = () => {
+    let udenType = 0;
+    for (const l of ALLE) if (l.type == null) udenType++;
+    document.querySelectorAll('#category-tiles .tile-count').forEach(el => {
+      const id = el.getAttribute('data-type');
+      const n = Filtrering.anvendFiltre(ALLE, { types: [id] }, null, null).length;
+      el.textContent = daTal(n);
+      /* Skærmlæseren skal ikke bare høre "93" mellem billedet og etiketten.
+         Etiketten står i det samme <a>, så det fulde oplæste navn bliver
+         fx "93 annoncer Cruiser". */
+      el.setAttribute('aria-label', n === 1 ? '1 annonce' : `${daTal(n)} annoncer`);
+    });
+    const sub = document.getElementById('types-sub');
+    if (sub && udenType){
+      sub.textContent = `Find hurtigt den type, du leder efter. ${daTal(udenType)} af `
+        + `${daTal(ALLE.length)} annoncer har ingen type oplyst hos kilden og ligger `
+        + `derfor ikke bag nogen af de otte fliser — dem finder du i den fulde søgning.`;
+    }
+  };
+  fyldTypeAntal();
+
   await yieldToMain();
 
   /* ============ Bid 6: nyeste annoncer ============ */
   // newest listings (by date)
-  const newest = [...ALLE].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
+  /* KUN ANNONCER, DER HAR EN DATO. Før sorterede linjen hele lageret på
+     `new Date(l.createdAt)`, og for de 332 indekserede er createdAt `null`
+     med vilje (crawledatoen er ikke annoncedatoen — se
+     normalizeExternalListing i js/backend-bridge.js). `new Date(null)` er
+     ikke NaN, det er 1. januar 1970, så de datoløse blev ikke sorteret
+     bagest, de blev sorteret som ældst — og på localhost, hvor der er 51
+     annoncer med dato, faldt de tilfældigvis uden for de otte.
+
+     I DRIFT gør de ikke. Der er `SHOW_DEMO_DATA` falsk (js/data.js), så
+     lageret er 332 indekserede og NUL med dato — og så viste sektionen
+     "Nyeste annoncer" otte vilkårlige annoncer, hvis alder vi ikke kender,
+     under en overskrift, der lover det modsatte. Underrubrikken kunne ikke
+     engang skrive datoen (`newest[0]?.createdAt` var null), så den stod
+     tilbage som "De senest oprettede annoncer på Bikerbasen." uden ét tal at
+     bakke den op. Det er den dyreste slags fejl på det her site: en
+     friskhedspåstand uden dækning.
+
+     Filteret koster ingenting på localhost (samme otte kort som før) og
+     redder sektionen i drift, hvor den nu falder i den ærlige tomtilstand
+     nedenfor i stedet for at finde på en rækkefølge. */
+  const medDato = ALLE.filter(l => l.createdAt && !Number.isNaN(new Date(l.createdAt).getTime()));
+  const newest = medDato.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
 
   /* Underrubrikken skal sige det, kortene siger.
 
@@ -496,11 +532,18 @@ async function buildForside(){
      Rækkefølgen røres ikke: den er et løfte om dato, og et løfte om dato
      holdes ved at sortere efter dato. Se work/DECISIONS.md. */
   const nyesteSub = document.getElementById('newest-sub');
+  /* Ingen daterede annoncer = ingen underrubrik. Den statiske tekst ("De
+     senest oprettede annoncer på Bikerbasen.") stod ellers tilbage over en
+     tomtilstand, der siger det stik modsatte — at vi ikke kender datoen på
+     nogen af dem. Det er præcis situationen i drift i dag. Forklaringen står
+     i tomtilstanden; to steder ville bare give to formuleringer at holde i
+     sync. */
+  if (nyesteSub && !newest.length) nyesteSub.hidden = true;
   if (nyesteSub && newest[0]?.createdAt){
     // Samme datoformat som js/annonce.js og js/forhandler.js: "26. jul. 2026".
     const dato = new Date(newest[0].createdAt)
       .toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' });
-    const eksterne = ALLE.length - ALLE.filter(l => l.createdAt).length;
+    const eksterne = ALLE.length - medDato.length;
     nyesteSub.textContent = `De senest oprettede annoncer på Bikerbasen — den nyeste er fra ${dato}.`
       + (eksterne ? ` De ${daTal(eksterne)} indekserede annoncer er ikke med: vi kender ikke deres dato hos kilden.` : '');
   }
@@ -555,7 +598,22 @@ async function buildForside(){
   // Er databasen helt tom, tegnes tom-tilstanden med det samme: den er
   // billig, og den bestemmer sektionens højde.
   if (newest.length === 0){
-    newestMount.innerHTML = `
+    /* To forskellige tomme tilstande, fordi de har to forskellige årsager —
+       og en køber skal kunne se forskel på "der er ikke noget" og "der er
+       masser, vi bare ikke kender datoen på". Det andet tilfælde ER
+       situationen i drift i dag: 332 indekserede annoncer uden
+       oprettelsesdato. Den gamle tekst ("Der er ingen annoncer endnu") ville
+       dér modsige hero'ens eget tal to skærme længere oppe. */
+    newestMount.innerHTML = ALLE.length ? `
+      <div class="empty-state" style="grid-column:1/-1;">
+        ${Icon.bike}
+        <h3>Vi kender ikke datoen på nogen af annoncerne endnu</h3>
+        <p>Alle ${daTal(ALLE.length)} annoncer i lageret er indekseret fra andre danske
+           sider, og vi kender ikke deres oprettelsesdato hos kilden. Vi gætter den ikke,
+           og derfor kan vi ikke sætte dem i rækkefølge efter alder.
+           Annoncer oprettet her på Bikerbasen får en dato og lander i denne sektion.</p>
+        <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Se alle ${daTal(ALLE.length)} annoncer</a>
+      </div>` : `
       <div class="empty-state" style="grid-column:1/-1;">
         ${Icon.bike}
         <h3>Der er ingen annoncer endnu</h3>
@@ -602,26 +660,173 @@ async function buildForside(){
 
      Underrubrikken i index.html blev rettet samtidig: den lovede "fra hele
      landet", men udvalget vælges på pris og foto, ikke på geografi. */
-  const dyre = [...ALLE].filter(l => l.price > 60000);
   const harFoto = (l) => (l.photoUrls || []).length > 0;
+
+  /* EN ANNONCE UDEN MODELNAVN ER IKKE ET UDVALG, DET ER EN GÆTTELEG.
+     Kritikeren i runde 2 fandt et kort, der bare hed "Honda" — ingen model —
+     til 609.995 kr. Målt: der er seks sådanne annoncer i lageret (fem af dem
+     er den samme Honda til 609.995 kr., én er en BMW til 139.800 kr.), og
+     alle seks har foto, så de vandt let en plads i en række, der kun sorterer
+     på pris og billede. På et kort, VI har valgt, er "Honda til 609.995 kr."
+     ikke en oplysning, det er et spørgsmål. De er ikke skjult noget sted: de
+     tæller i totalen, i søgningen og i alle facetter. De skal bare ikke være
+     dem, forsiden peger på. */
+  const harModel = (l) => {
+    const m = String(l.model || '').trim();
+    return !!m && m.toLowerCase() !== String(l.brand || '').trim().toLowerCase();
+  };
+
+  /* "DE DYRERE MODELLER" SKAL VÆRE DE DYRERE MODELLER.
+     Grænsen var 60.000 kr., og med den stod der 62.200 kr. på det billigste
+     kort under rubrikken "de dyrere modeller" — mens sidens eget prisfacet
+     samtidig talte 131 annoncer over 150.000 kr. 60.000 var ikke "dyrere",
+     det var "over gennemsnitsprisen for en privat brugtannonce".
+
+     Grænsen er nu medianprisen i lageret, regnet på stedet. Så betyder
+     "dyrere" ordret den dyrere halvdel, tallet følger lageret uden at nogen
+     skal huske at flytte det, og underrubrikken kan skrive det ud, så
+     køberen kan efterprøve rubrikken på kortene. Annoncer uden pris er
+     ikke med i medianen — de sorterede før som 0 og trak den ned. */
+  const priser = ALLE.map(l => l.price).filter(x => x != null).sort((a,b) => a - b);
+  const median = priser.length ? priser[Math.floor(priser.length / 2)] : 0;
+
+  const kandidater = ALLE.filter(l => harFoto(l) && harModel(l) && l.price != null && l.price >= median);
   const rnd = seededRandom(7);
   const bland = (arr) => arr.map(l => ({ l, k: rnd() })).sort((a,b) => a.k - b.k).map(x => x.l);
-  const lag = [
-    dyre.filter(l => harFoto(l) && !l.isExternal),
-    dyre.filter(l => harFoto(l) && l.isExternal),
-    dyre.filter(l => !harFoto(l)),
+  /* ÉT KORT PR. MÆRKE. Uden reglen gav den seedede blanding fire Hondaer,
+     hvoraf to var den samme model (CRF 1100 L Africa Twin til 199.995 og
+     224.995 kr.). Målt på kandidaterne er 108 af 169 Honda og 36
+     Harley-Davidson, så en ren tilfældig blanding vil oftest vise ét mærke
+     og kalde det et udvalg — og to kort med samme model ved siden af
+     hinanden ligner en fejl i sig selv. Der er elleve mærker at tage af.
+
+     Reglen står i underrubrikken, så den kan efterprøves på kortene.
+     Skulle lageret en dag have færre mærker over medianen, end rækken har
+     plads til, fyldes der op fra resten (uden dubletter af samme model),
+     frem for at vise en halvtom række.
+
+     Vores egne før de indekserede — samme linje som Store.getAllListings():
+     en annonce, vi selv hoster, kan køberen handle på her. */
+  const raekkefoelge = [
+    ...bland(kandidater.filter(l => !l.isExternal)),
+    ...bland(kandidater.filter(l => l.isExternal)),
   ];
-  const featured = lag.flatMap(bland).slice(0, 4);
+  const vaelgEfter = (noegle, ud, brugt, antal) => {
+    for (const l of raekkefoelge){
+      if (ud.length >= antal) break;
+      const k = noegle(l);
+      if (brugt.has(k)) continue;
+      brugt.add(k); ud.push(l);
+    }
+  };
+  const vaelgFeatured = (antal) => {
+    const ud = [];
+    vaelgEfter(l => String(l.brand || ''), ud, new Set(), antal);
+    if (ud.length < antal){
+      const brugt = new Set(ud.map(l => `${l.brand} ${l.model}`));
+      vaelgEfter(l => `${l.brand} ${l.model}`, ud, brugt, antal);
+    }
+    return ud;
+  };
+
+  /* Underrubrikken skrives fra data, så rubrikken ikke kan komme ud af trit
+     med kortene igen. Tre ting står der, og alle tre kan efterprøves på
+     siden:
+
+       1. Hvor mange annoncer udvalget er taget fra, og hvad grænsen er.
+       2. At rækkefølgen er tilfældig. "Udvalgte annoncer" lød som en
+          redaktionel anbefaling; der er ingen redaktion, der er en
+          seedet blanding. Overskriften er samtidig ændret i index.html.
+       3. Hvor de kommer fra. MÅLT: alle 169 kandidater er fra samme
+          forhandler i Rødding — ikke fordi vi vælger sådan, men fordi det er
+          den eneste kilde i lageret, der leverer billeder med. Kritikeren
+          talte det som en fejl i udvalget. Det er en oplysning om lageret,
+          og så skal den stå der, ikke skjules bag en tilfældig omrøring. */
+  const featuredSub = document.getElementById('featured-sub');
+  const ANTALSORD = { 1: 'Én', 2: 'To', 3: 'Tre', 4: 'Fire', 5: 'Fem', 6: 'Seks' };
+  /* Underrubrikken skrives fra data, så rubrikken ikke kan komme ud af trit
+     med kortene igen. Tre ting står der, og alle tre kan efterprøves på
+     siden:
+
+       1. Hvor mange annoncer udvalget er taget fra, og hvad grænsen er.
+       2. At rækkefølgen er tilfældig. "Udvalgte annoncer" lød som en
+          redaktionel anbefaling; der er ingen redaktion, der er en seedet
+          blanding. Overskriften er ændret tilsvarende i index.html.
+       3. Hvor de kommer fra. MÅLT: alle 169 kandidater er fra samme
+          forhandler i Rødding — ikke fordi vi vælger sådan, men fordi det er
+          den eneste kilde i lageret, der leverer billeder med. Kritikeren
+          talte det som en fejl i udvalget. Det er en oplysning om lageret,
+          og så skal den stå der, ikke skjules bag en tilfældig omrøring. */
+  const skrivFeaturedSub = (antal) => {
+    if (!featuredSub || !antal) return;
+    const byer = [...new Set(kandidater.map(l => l.city).filter(Boolean))];
+    const kilder = [...new Set(kandidater.map(l => l.source?.navn).filter(Boolean))];
+    const enKilde = (kilder.length === 1 && byer.length === 1 && kandidater.every(l => l.isExternal))
+      ? ` Alle er indekseret hos ${kilder[0]} i ${byer[0]}, den eneste kilde i lageret, der sender billeder med.`
+      : '';
+    featuredSub.textContent =
+      `${ANTALSORD[antal] || daTal(antal)} tilfældige blandt de `
+      + `${daTal(kandidater.length)} annoncer til ${formatPrice(median)} eller derover, `
+      + `der har et foto — højst én pr. mærke.${enKilde}`
+      + ` Rækkefølgen er tilfældig, så det er ikke en anbefaling.`;
+  };
+
   // En overskrift uden indhold under ser i stykker ud — skjul hele sektionen.
   // Beslutningen tages NU (den er gratis), så sektionen ikke først står som et
   // tomt bånd og forsvinder, når man scroller ned til den.
   const featuredMount = document.getElementById('featured-listings');
   const featuredSection = featuredMount.closest('section');
-  if (featuredSection) featuredSection.hidden = featured.length === 0;
-  if (featured.length){
+  if (featuredSection) featuredSection.hidden = kandidater.length === 0;
+
+  /* ANTALLET AF KORT FØLGER ANTALLET AF SPALTER — ellers står der en enlig
+     efternøler.
+
+     Rækken var fast på fire. `.listings-grid` er et auto-fill-gitter, og de
+     eksterne kort er bredere end vores egne, så det målte antal spalter er
+     3 ved 1440 og 1100 px, 2 ved 768 og 1 ved 390. Fire kort i tre spalter
+     er tre kort og så ét alene på næste række med to tomme felter ved siden
+     af — på den mest almindelige desktopbredde, i en sektion hvor VI har
+     valgt indholdet. Det er ikke et lager, der slap op; det er et tal, ingen
+     havde holdt op mod gitteret.
+
+     Reglen fylder hele rækker: største multiplum af spalteantallet, der
+     ikke overstiger fire, dog mindst én række. 3 spalter → 3 kort,
+     2 → 4, 1 → 4. Samme fremgangsmåde som renderNewest() lige ovenfor, der
+     også måler gridTemplateColumns frem for at gætte på brudpunkter, og
+     samme rAF-dæmpede resize-lytter — et brudpunkt kan krydses ved en
+     rotation, og så skal både kortene og underrubrikkens antalsord følge med.
+
+     SPALTERNE KAN FØRST MÅLES, NÅR KORTENE ER DER. Reglen, der gør gitteret
+     tre spalter bredt mellem 1240 og 1559 px, er
+     `.listings-grid:has(> .card-external)` (css/styles.css) — den gælder
+     altså først, når der ligger et eksternt kort i gitteret. Måler man det
+     tomme gitter, svarer det 4, og så tegnede vi fire kort i et gitter, der
+     blev tre spalter i samme øjeblik kortene landede: tre kort og én
+     efternøler. Derfor tegnes rækken fuld (fire) og trimmes bagefter.
+     Det er gratis, fordi vaelgFeatured(n) altid er de n første af den samme
+     rækkefølge — de tre, der bliver stående, er de samme tre, en direkte
+     udregning ville have valgt. */
+  let featured = [];
+  const tegnFeatured = async () => {
+    featured = vaelgFeatured(4);
+    if (!featured.length){ featuredMount.replaceChildren(); skrivFeaturedSub(0); return; }
     await saetIndIPortioner(featuredMount, featured.map(kortHTML));
+    const cols = getComputedStyle(featuredMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+    const antal = Math.min(featured.length, Math.max(cols, Math.floor(4 / cols) * cols));
+    if (antal < featured.length){
+      [...featuredMount.children].slice(antal).forEach(el => el.remove());
+      featured = featured.slice(0, antal);
+    }
+    skrivFeaturedSub(featured.length);
     wireFavoriteButtons(featuredMount);
-  }
+  };
+  if (kandidater.length) await tegnFeatured();
+  let _featuredRAF;
+  window.addEventListener('resize', () => {
+    if (!featuredMount.querySelector('.card')) return;
+    cancelAnimationFrame(_featuredRAF);
+    _featuredRAF = requestAnimationFrame(tegnFeatured);
+  });
 
   // Senest sete — kun annoncer der stadig findes/er aktive; skjul sektionen
   // helt for nye brugere (og når intet er set endnu).

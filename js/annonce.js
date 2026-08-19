@@ -125,10 +125,26 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon })
      skriver hvem der har oplyst nummeret og lader køberen tjekke det selv.
      Feltet findes ikke i public_profiles, så på rigtige annoncer falder
      linjen bare væk — den må aldrig få en standardværdi. */
+  /* OG NUMMERET SKAL BESTÅ SIN EGEN KONTROL, FØR VI TILBYDER OPSLAGET.
+     Runde 2's kritiker regnede modulus 11 efter i hånden på demoforhandlerens
+     nummer (95854101 → sum 146, 146 mod 11 = 3) og fandt, at det ikke kunne
+     findes i registret. Sælgerprofilen fik kontrollen i runde 3; den her side
+     havde den ikke, og det var HER nummeret stod. Køberen fik altså tilbudt
+     et opslagslink, der aldrig kunne give et resultat, på den ene side hvor
+     han beslutter sig — og profilen sagde det modsatte ét klik senere.
+     Kontrollen bor nu i cvrKontrolOK() i js/components.js, som begge sider
+     indlæser. Består nummeret ikke, står det der stadig (vi skjuler ikke,
+     hvad sælgeren har skrevet), men uden linket og med grunden. */
+  const cvrOK = (erForhandler && s.cvr) ? cvrKontrolOK(s.cvr) : false;
   const cvrLinje = (erForhandler && s.cvr)
-    ? `<p class="seller-cvr">${Icon.info}<span>CVR oplyst af sælger: ${escapeHTML(s.cvr)} —
-         <a href="https://datacvr.virk.dk/soegeresultater?fritekst=${encodeURIComponent(s.cvr)}"
-            target="_blank" rel="noopener noreferrer">slå det op i CVR-registret</a></span></p>`
+    ? (cvrOK
+      ? `<p class="seller-cvr">${Icon.info}<span>CVR oplyst af sælger: ${escapeHTML(s.cvr)} —
+           <a href="https://datacvr.virk.dk/soegeresultater?fritekst=${encodeURIComponent(s.cvr)}"
+              target="_blank" rel="noopener noreferrer">slå det op i CVR-registret</a></span></p>`
+      : `<p class="seller-cvr seller-cvr-fejl">${Icon.alertTriangle}<span>CVR oplyst af sælger: ${escapeHTML(s.cvr)} —
+           <b>nummeret består ikke sin egen kontrol.</b> Et dansk CVR-nummer skal gå op i
+           modulus 11, og dette gør ikke, så det er enten tastet forkert eller fundet på.
+           Bed om nummeret igen, før du betaler noget.</span></p>`)
     : '';
 
   /* Kun de tal, vi har. Et "–" i feltet Bedømmelse ligner en dårlig karakter;
@@ -412,8 +428,20 @@ function renderExternalListing(listing){
      Felterne kommer fra normaliseringen, som en anden hånd ejer. Vi læser
      dem defensivt: er de der, vises de; er de der ikke, ser siden ud
      præcis som før. Ingen tomme rammer i mellemtiden. */
-  const variant = String(listing.variant ?? listing.trim ?? '').trim();
-  const fuldTitel = [listing.brand, listing.model, variant].filter(Boolean).join(' ');
+  /* `variant` fra basen ER kildens kategoriord — se delModelOgVariant() i
+     crawler/normalize.js, der netop flytter typeordene derover. De 332
+     indekserede rækker blev crawlet med kildens ordforråd, så feltet siger
+     stadig "Street", "Sportstouring", "Offroader", "Klassiker". Ingen af de
+     ord findes i vores Type-filter, og de stod i sidens H1 og <title>.
+     Vi skriver derfor VORES type, den samme værdi filteret sorterer på —
+     og intet, når typen ikke kan kortlægges. Samme regel som eksternTitel()
+     i js/components.js, så kortet og siden siger det samme. */
+  const variant = listing.type ? typeLabel(listing.type) : '';
+  /* Typen er IKKE længere en del af overskriften. Den stod før i både h1 og
+     <title> ("Honda GL 1100 Gold Wing Klassiker"), hvor den læses som en del
+     af modelnavnet — og et delt link i en MC-gruppe bar altså et ord, kilden
+     havde fundet på. En kategori hører i en kategorilinje. */
+  const fuldTitel = [listing.brand, listing.model].filter(Boolean).join(' ');
   /* Sitets mønster er "X — Bikerbasen", ét ophold. Forhandlerens navn står
      inde i første led, ikke som en ekstra tankestreg: et link delt i en
      MC-gruppe skal vise, hvem motorcyklen står hos, uden at titlen får to
@@ -443,20 +471,34 @@ function renderExternalListing(listing){
      køberen skal spørge kilden om resten. Derfor kommer det uvisse tilfælde
      før tomhedstjekket — ellers forsvandt netop den forklaring, der er
      grunden til at vi ikke gætter. */
+  const erNy = (typeof eksternErNy === 'function') ? eksternErNy(listing) : null;
   const hk  = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;
-  const kk  = koerekortForListing(listing);
-  const kkUvis = hk == null && ccm > A1_MAX_CCM;
+  const kkM = koerekortMaerkat(listing);   // ét sted for hele sitet, se js/components.js
+  const kk  = kkM.kode;
+  const kkUvis = !kk && ccm > A1_MAX_CCM;
   const kkMeta = KOEREKORT.find(k => k.id === kk);
 
+  /* HER STOD "MAKS. 48 HK", OG DET VAR EN HK FOR MEGET.
+     A2-loftet er 35 kW. 35 / 0,7355 = 47,59 hk, så 47 er grænsen — 48 hk er
+     35,30 kW og altså over. Tallet var rettet i js/data.js (A2_MAX_HK) og i
+     testene, men stod stadig skrevet ud i hånden her, på den ene side hvor
+     køberen læser sætningen i ro. Det skrives nu fra konstanten, så de to
+     ikke kan skride fra hinanden igen.
+
+     Og overskriften er ikke længere "Du skal mindst have A2". Den var sand
+     og blev læst som "A2 er nok" — præcis den forveksling, mærkatet
+     "Kørekort mindst A2" kostede os på kortene. Spørgsmålet, en køber
+     stiller, er "må JEG køre den?", og det svar har vi ikke her. */
   const koerekortPanel = kkUvis
     ? `<div class="external-detail-kk is-uvis">
          <span class="external-detail-kk-code">A2/A</span>
          <div>
-           <b>Du skal mindst have A2</b>
-           <p>Effekten står ikke i annoncen, og uden hk kan vi ikke se, om du kan
-              nøjes med A2 (maks. 48 hk) eller skal have A. Kun A1 er udelukket —
-              den er over ${A1_MAX_CCM} cm³. Spørg ${kilde}, før du regner med A2.</p>
+           <b>Vi kan ikke afgøre, hvilket kørekort der skal til</b>
+           <p>${escapeHTML(kkM.forklaring)} Det, vi ved, er at A1 er udelukket —
+              motorcyklen er over ${A1_MAX_CCM} cm³. Om du kan nøjes med A2
+              (maks. ${A2_MAX_HK} hk) eller skal have A, afhænger af effekten.
+              Spørg ${kilde}, før du regner med A2.</p>
          </div>
        </div>`
     : !kk ? ''   // hverken ccm eller hk: der er intet at sige, heller ikke uvist
@@ -464,7 +506,10 @@ function renderExternalListing(listing){
          <span class="external-detail-kk-code">${escapeHTML(kk)}</span>
          <div>
            <b>Du kan køre den på ${escapeHTML(kk)}-kørekort</b>
-           <p>${escapeHTML(kkMeta?.hint || '')}. Regnet ud fra
+           <!-- hint'en i KOEREKORT (js/data.js) sluttede paa et punktum,
+                og saetningen her satte et til: "... ikke oplyst.. Regnet ud
+                fra". Punktummet fjernes, saa de to kan skrives uafhaengigt. -->
+           <p>${escapeHTML(String(kkMeta?.hint || '').replace(/\.\s*$/, ''))}. Regnet ud fra
               ${ccm ? formatCcm(ccm) : 'effekten'}${hk ? ` og ${formatPower(hk)}` : ''} og
               vejledende — en mc kan være en effektbegrænset udgave, så få det bekræftet hos ${kilde}.</p>
          </div>
@@ -489,12 +534,24 @@ function renderExternalListing(listing){
   const detaljer = [
     raekke('Mærke', listing.brand && listing.brand !== 'Ukendt' ? brand : null),
     raekke('Model', model || null),
-    raekke('Variant', variant ? escapeHTML(variant) : null),
+    /* Rækken hed "Variant" og skrev kildens eget kategoriord ud — "Street",
+       "Sportstouring", "Klassiker". Det er en TYPE, ikke en variant, og
+       ingen af de ord findes i vores Type-filter. Rækken hedder nu Type og
+       viser typeLabel(listing.type), altså præcis den værdi, filteret
+       sorterer på. Kan typen ikke kortlægges, falder rækken væk. */
+    raekke('Type', listing.type ? escapeHTML(typeLabel(listing.type)) : null),
     raekke('Årgang', listing.year != null ? String(listing.year) : null),
     raekke('Kilometer', listing.km != null ? formatKm(listing.km) : null),
     raekke('Kubik', listing.ccm != null ? formatCcm(listing.ccm) : null),
     raekke('Effekt', hk ? formatPower(hk) : null),
-    raekke('Kørekort', kk ? (kkUvis ? 'A2 eller A (vejledende)' : `${escapeHTML(kk)} (vejledende)`) : null),
+    // "Kan ikke afgøres" er et svar; en manglende række ville lade køberen
+    // tro, at spørgsmålet ikke er stillet. Samme ord som sammenligningen.
+    raekke('Kørekort', kk ? `${escapeHTML(kk)} (vejledende)` : 'Kan ikke afgøres'),
+    /* 162 af de 332 indekserede er FABRIKSNYE. Stod der ikke ét sted, og
+       "Kilometer: Ikke oplyst" på en 2025-model læses som et hul i dataene i
+       stedet for som det, det er: en motorcykel, der ikke har kørt endnu.
+       Se eksternErNy() i js/components.js for hvor oplysningen kommer fra. */
+    raekke('Stand', erNy === true ? 'Fabriksny' : (erNy === false ? 'Brugt' : null)),
     raekke('Salgsvilkår', salgsmarkoerer.length ? salgsmarkoerer.map(escapeHTML).join(' · ') : null),
     raekke('Sælger', listing.isDealer ? `Forhandler · ${kilde}` : null),
     raekke('Sted', stedTekst ? escapeHTML(stedTekst) : null),
@@ -581,6 +638,7 @@ function renderExternalListing(listing){
       <header class="external-detail-head">
         <h2 class="external-detail-title">${brand} ${model}</h2>
         ${variant ? `<p class="external-detail-variant">${escapeHTML(variant)}</p>` : ''}
+        ${erNy === true ? `<p class="external-detail-ny">${Icon.info}<span><b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog over nye motorcykler, ikke blandt de brugte. Du køber med garanti frem for forbrugerkøbelovens reklamationsret, og kilometerstanden er derfor ikke oplyst.</span></p>` : ''}
         <p class="external-detail-sub">
           ${stedTekst ? `${Icon.mapPin}${escapeHTML(stedTekst)}` : ''}
           ${stedTekst && listing.isDealer ? '<span class="external-detail-dot">·</span>' : ''}
@@ -789,7 +847,16 @@ function renderListing(){
   const fav = Store.isFavorite(listing.id);
   const loggedIn = !!Store.getUser();
   const brand = escapeHTML(listing.brand), model = escapeHTML(listing.model);
-  const kk = (typeof koerekortForListing === 'function') ? koerekortForListing(listing) : null;
+  /* Kørekortmærkatet kommer fra koerekortMaerkat() i js/components.js — det
+     ene sted på sitet, hvor mærkatet bliver til, og det samme svar som
+     Kørekort-filteret giver. Før stod der `koerekortForListing()` her, i
+     js/components.js og i js/search.js, hver med sin egen indpakning: det
+     var netop tre indpakninger om den samme regel, der lod kortet sige
+     "Kørekort mindst A2" om annoncer, filteret sorterede fra. */
+  const kkM = (typeof koerekortMaerkat === 'function')
+    ? koerekortMaerkat(listing)
+    : { kode: null, tekst: 'Kørekort ukendt', forklaring: '' };
+  const kk = kkM.kode;
   // Number(undefined) er NaN, ikke null — og NaN sluppet igennem blev til
   // "NaN ★" i sælgerkortet. Falder tilbage på null, som betyder "ingen".
   const raaRating = Number(listing.seller.rating);
@@ -870,10 +937,17 @@ ${galleriHTML}
       ${sellerTypeNoteHTML(listing.isDealer)}
 
       ${(kk || listing.serviceHistorik === 'Fuld' || listing.kanNedsaettesA2) ? `<div class="detail-chip-row">
-        ${kk ? `<span class="badge badge-koerekort" title="Kan føres på ${kk}-kørekort">${Icon.shieldCheck}Kørekort ${kk}</span>` : ''}
+        ${kk ? `<span class="badge badge-koerekort" title="${escapeHTML(kkM.forklaring)}">${Icon.shieldCheck}Kørekort ${kk}</span>` : ''}
         ${(listing.kanNedsaettesA2 && kk === 'A') ? `<span class="badge badge-koerekort" title="Kan effektbegrænses til A2-kørekort">${Icon.shieldCheck}Kan nedsættes til A2</span>` : ''}
         ${listing.serviceHistorik === 'Fuld' ? `<span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span>` : ''}
       </div>` : ''}
+
+      <!-- Kan kategorien ikke udledes, forsvandt mærkatet før uden et ord.
+           Detaljesiden er dér, beslutningen om 80.000 kr. traeffes, og et
+           felt der bare mangler ligner et felt, ingen har stillet. Her staar
+           i stedet, hvad vi ved, og hvor hullet er. Samme sætning som
+           kortet baerer i sin titel — kkM.forklaring er den ene kilde. -->
+      ${!kk && kkM.forklaring ? `<p class="listing-kk-uvis">${Icon.info}<span><b>${escapeHTML(kkM.tekst)}.</b> ${escapeHTML(kkM.forklaring)}</span></p>` : ''}
 
       <div class="spec-grid" style="margin-top:var(--space-4);">
         <div class="spec-item"><span class="spec-icon">${Icon.bike} Mærke</span><b>${brand}</b></div>

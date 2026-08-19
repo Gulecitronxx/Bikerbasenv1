@@ -2756,7 +2756,12 @@ body.overlay-open .cookie-banner{ display:none; }
   /* .toolbar-actions er kun en beholder på mobil — lad børnene gå direkte
      ind i gitteret, så rækkerne kan blandes på tværs af den. */
   .toolbar-actions{ display: contents; }
-  #sort-select{ grid-area: 2 / 1 / 3 / 4; width:100%; min-width:0; }
+  /* RUNDE 3: gitterpladsen er flyttet fra #sort-select til .sort-felt, fordi
+     vælgeren nu har en synlig etiket ("Sortér:") og altså sidder i en
+     beholder. Reglerne står med ID for at slå den generede kritiske blok i
+     soegning.html, som stadig kender den gamle udgave, indtil nogen kører
+     scripts/inline-critical.js igen. */
+  #sort-select{ flex:1 1 auto; width:auto; min-width:0; }
   #save-search-btn{ grid-area: 3 / 1; }
   /* Scopet til .results-toolbar: .view-toggle bruges også på annonce.html og
      forhandler.html, og de har ingen værktøjslinje at ligge i. */
@@ -3040,6 +3045,79 @@ body.overlay-open .cookie-banner{ display:none; }
    del af filen (se work/DECISIONS.md). */
 #listing-detail .avatar{ color: var(--color-primary-hover); }
 
+
+/* ---------- Kørekortet, når det IKKE kan afgøres ----------
+
+   Mærkatet forsvandt før uden et ord, når koerekortForListing() svarede
+   null. På kortet er det rigtigt (der er ingen plads til en sætning), men på
+   detaljesiden er det dér, beslutningen træffes, og et felt der bare mangler
+   ligner et spørgsmål, ingen har stillet. Linjen har samme form som de andre
+   forbeholdslinjer på siden — ikon, dæmpet flade, ingen advarselsfarve:
+   det er ikke en advarsel mod motorcyklen, det er en oplysning, vi mangler. */
+.listing-kk-uvis{
+  display:flex; gap:10px; align-items:flex-start;
+  margin: var(--space-4) 0 0;
+  padding: 12px 14px;
+  border:1px solid var(--color-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-surface-2, var(--color-surface));
+  color: var(--color-fg-muted);
+  font-size:14px; line-height:1.5;
+}
+.listing-kk-uvis svg{ flex:0 0 auto; margin-top:2px; }
+.listing-kk-uvis b{ color: var(--color-fg); }
+
+/* ---------- Et CVR-nummer, der ikke består modulus 11 ----------
+   Nummeret bliver stående — vi skjuler ikke, hvad sælgeren har skrevet — men
+   uden opslagslinket, for det kan ikke give et resultat. Farven er sidens
+   fare-token, ikke en ny: det ER den ene ting på sælgerkortet, der peger på,
+   at noget kan være galt. */
+.seller-cvr-fejl{ color: var(--color-danger); }
+.seller-cvr-fejl b{ color: var(--color-danger); }
+
+/* ---------- "Ny" på et indekseret kort ----------
+   162 af 332 indekserede annoncer er fabriksnye. Chippen står i prislinjen
+   ved siden af forhandlerens salgsmarkører, fordi den forklarer det samme:
+   hvorfor prisen ser ud, som den gør. Den er tydeligere end en salgsmarkør,
+   fordi den også er et juridisk vilkår — derfor primærfarvens tint frem for
+   den neutrale flade. Ingen ny farve. */
+.card-ny{
+  flex:0 0 auto;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-tint, var(--color-surface-2));
+  color: var(--color-primary-hover);
+  border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  font-size:12px; font-weight:600; line-height:1.6;
+  white-space:nowrap;
+}
+
+/* Samme oplysning på detaljesiden, i sætningsform. */
+.external-detail-ny{
+  display:flex; gap:10px; align-items:flex-start;
+  margin: var(--space-3) 0 0;
+  padding: 12px 14px;
+  border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-primary-tint, var(--color-surface-2));
+  color: var(--color-fg-muted);
+  font-size:14px; line-height:1.5;
+}
+.external-detail-ny svg{ flex:0 0 auto; margin-top:2px; color: var(--color-primary-hover); }
+.external-detail-ny b{ color: var(--color-fg); }
+
+/* ---------- Det tomme fotofelt overflod skaermen paa telefon ----------
+   MAALT paa 390x844: `.external-detail-photo` faar negativ margin-inline paa
+   mobil (kant til kant), og `.external-detail-photo-tom` faar den positive
+   tilbage. Men feltet har ogsaa `width:100%` fra reglen, det deler med
+   <img>, og width:100% regner IKKE marginerne fra: 390 px bredt felt + 2x16
+   px margin = 422 px i et 390 px vindue. Dokumentet blev 406 px bredt, og
+   siden kunne scrolles vandret. Et foto rammes ikke — det har ingen margin.
+   `width:auto` lader marginerne bestemme bredden, som de skal. */
+@media (max-width:699px){
+  .external-detail-photo-tom{ width:auto; }
+}
+
 /* ===== søgning ===== */
 
 /* ---------- Facettal ved hvert filtervalg ----------
@@ -3224,6 +3302,153 @@ body.overlay-open .cookie-banner{ display:none; }
    stil gælder ved første maling.
 
    Skal en af højderne rettes, skal den rettes dér. */
+
+/* ---------- (i) ved kildelinjen: 22 px var under gulvet ----------
+
+   Knappen, der forklarer hvad "indekseret" betyder, er sidens vigtigste
+   oplysning — 332 af 383 annoncer bor hos en anden virksomhed — og den sad
+   bag det MINDSTE trykmål på hele siden: målt 22x22 px, under WCAG 2.2's
+   minimum på 24x24 (2.5.8, AA) og langt under de 44x44, resten af siden
+   holder.
+
+   Rettelsen udvider TRYKFLADEN og ikke tegnet. Ikonet skal blive 22 px:
+   knappen står midt inde i en brødtekstlinje ("332 indekseret hos MC Syd
+   (i)"), og et 44 px højt element dér ville skubbe linjen fra hinanden og
+   bryde netop den sammenhæng mellem tekst og knap, kritikeren roste. Et
+   ::after uden for flowet giver de 44x44 uden at røre linjens højde:
+   pseudoelementet ligger uden for elementets boks og deltager ikke i layout,
+   men det TÆLLER som trykflade, fordi det er knappens eget indhold og
+   modtager klikket.
+
+   Knappens EGEN boks bliver 22x22 og skal blive det: kildelinjen passer på
+   én linje på 390 px med 4 px til overs, og et par ekstra pixels i knappen
+   brækker den til to linjer — målt, det kostede 19 px over den første pris.
+   Trykfladen er ikke knappens boks, det er dét, der modtager klikket, og
+   ::after'en gør hele de 44x44 til knappen (efterprøvet med
+   document.elementFromPoint i alle fire hjørner). */
+.mix-info{ position:relative; }
+/* Luften omkring (i) og mellem de to led er strammet, så linjen har 4 px
+   luft i stedet for at ligge præcis på kanten. */
+@media (max-width:620px){
+  .results-mix{ column-gap:6px; }
+  .mix-tail{ gap:4px; }
+}
+.mix-info::after{
+  content:''; position:absolute; top:50%; left:50%;
+  width:44px; height:44px; transform:translate(-50%,-50%);
+}
+/* Fokusringen skal følge det, øjet ser (ikonet), ikke den usynlige flade. */
+.mix-info:focus-visible{ outline-offset:1px; }
+
+/* ---------- (i) ved rækkefølgen ----------
+   Samme knap, samme regel — den åbner hele sorteringsreglen, som ikke kan
+   stå på linjen uden at koste fire linjer over den første pris på en
+   telefon. Den står inline efter sætningen og har samme 44x44 trykflade. */
+.sortering-info{
+  position:relative; display:inline-flex; align-items:center; justify-content:center;
+  width:22px; height:22px; min-width:24px; min-height:24px;
+  margin-left:6px; padding:0; vertical-align:-5px;
+  background:none; border:none; border-radius:50%;
+  color: var(--color-fg-muted); cursor:pointer;
+}
+.sortering-info svg{ width:15px; height:15px; }
+.sortering-info:hover{ color: var(--color-primary); }
+/* Firkantet og ikke rund: en cirkel med diameter 44 rammer ikke sine egne
+   hjoerner — maalt med document.elementFromPoint faldt punktet (21,21)
+   uden for. WCAG maaler den flade, der modtager trykket, saa den skal
+   vaere hele kvadratet. Fladen er gennemsigtig, saa formen ses ikke. */
+.sortering-info::after{
+  content:''; position:absolute; top:50%; left:50%;
+  width:44px; height:44px; transform:translate(-50%,-50%);
+}
+
+/* ---------- Talfelterne har rigtige etiketter nu ----------
+
+   Ti talfelter i skinnen havde kun en pladsholder ("Min.", "Maks.", "Fra",
+   "Til"). Axe og Lighthouse accepterer en pladsholder som tilgængeligt navn,
+   så de 100 point stod der — men navnet forsvinder i samme sekund brugeren
+   taster det første ciffer, og så er der to identiske kasser tilbage.
+   Etiketterne står i markuppen (soegning.html); her er kun målene.
+
+   Grundmålene ligger OGSÅ i <style id="soeg-perf"> i soegning.html, fordi
+   Pris-gruppen står åben i sidebaren fra 960px og altså males, før dette
+   stilark er hentet. De to steder skal sige det samme. */
+.range-felt{ display:flex; flex-direction:column; gap:3px; flex:1 1 0; min-width:0; }
+.range-felt > label{
+  font-size:11px; font-weight:600; letter-spacing:.02em;
+  color: var(--color-fg-muted);
+}
+.range-row{ align-items:flex-end; }
+.range-sep{ padding-bottom:11px; color: var(--color-fg-muted); }
+/* Kilometer og antal ejere står alene i deres gruppe — ingen søskende at
+   dele bredden med, så feltet skal fylde hele kroppen. */
+.filter-body > .range-felt{ flex:0 0 auto; }
+
+/* ---------- Sorteringen hedder "Sortér:" ----------
+   Vælgeren stod bar med teksten "Blandet udbud". Etiketten er et rigtigt
+   <label for> i markuppen; her er kun formen. */
+.sort-felt{ display:inline-flex; align-items:center; gap:8px; }
+.sort-felt > label{
+  font-size:13px; font-weight:600; color: var(--color-fg-muted); white-space:nowrap;
+}
+
+/* ---------- Det tomme fotofelt bærer nu tre oplysninger ----------
+
+   284x378 px gråt felt pr. billedløs annonce, og de tre felter, der faktisk
+   afgør et mc-køb — effekt, type og stand — lå klar i data og blev kun vist
+   på detaljesiden. Nu står de i feltet. Det er ikke pynt oven på et hul: det
+   er de eneste oplysninger på kortet, som fotoet ellers ville have skjult,
+   og de gør et kort uden foto til noget, man kan sortere fra eller klikke
+   på i stedet for et gråt spring i listen.
+
+   Kun oplyste felter tegnes (js/components.js) — der står aldrig "Ikke
+   oplyst" her. Feltet skal kunne læses som en oplysning, ikke som en liste
+   over det, vi ikke ved; dét svarer resten af kortet allerede på. */
+.foto-tom-fakta{
+  display:flex; flex-wrap:wrap; justify-content:center; gap:6px;
+  margin-top:2px; max-width:100%;
+}
+.foto-tom-fakta span{
+  display:inline-block; padding:3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border:1px solid var(--color-border);
+  font-size:11.5px; font-weight:600; line-height:1.3;
+  color: var(--color-fg);
+}
+/* Listevisningens miniature er 136x102 px og swipe-kortet har sit eget
+   faktafelt lige nedenunder. Begge steder ville chipsene kun være støj. */
+.row-media .foto-tom-fakta,
+.swipe-card-media .foto-tom-fakta{ display:none; }
+
+/* ---------- 390 px: over folden ----------
+
+   Højderne over det første kort ligger i <style id="soeg-perf"> i
+   soegning.html — de skal gælde ved FØRSTE maling, og dette ark hentes med
+   rel=preload. Reglerne her er dem, der ikke flytter noget:
+   en tom pillebeholder, der ikke må koste en margen, står begge steder,
+   fordi den ellers ville give et skred, når arket lander. */
+@media (max-width:620px){
+  .active-filters:empty{ display:none; }
+  .breadcrumb{ padding-top:8px; font-size:12.5px; }
+  .search-heading{ font-size:20px; margin-bottom:8px; }
+  .search-layout{ padding-top:4px; }
+  .srp-search{ margin-bottom:12px; }
+  #filter-q{ height:48px; }
+  .results-toolbar{ row-gap:8px; margin-bottom:10px; }
+  .results-mix{ margin-top:2px; line-height:1.35; }
+  /* Sorteringen er nu et par (etiket + vælger). Den overtager den
+     gitterplads, #sort-select havde alene. */
+  .sort-felt{ grid-area: 2 / 1 / 3 / 4; display:flex; min-width:0; }
+  .sort-felt > select{ flex:1 1 auto; min-width:0; width:auto; }
+  .sortering-note{ margin:0 0 10px; font-size:12px; line-height:1.4; }
+  /* 4:3 paa et fuldbredde-kort er 356x267 px foto paa en 390 px skaerm.
+     16:10 giver 222 px — samme foto, 45 px mindre luft foran prisen.
+     Scopet til .srp: forsiden viser ét kort ad gangen i synsfeltet og
+     har intet at vinde. Staar OGSAA i soeg-perf i soegning.html, fordi
+     kortenes hoejde skal vaere den samme foer og efter dette ark. */
+  .srp .listings-grid .card-media{ aspect-ratio:16 / 10; }
+}
 
 /* ===== sælgerprofil =====
 
@@ -3426,3 +3651,71 @@ body.overlay-open .cookie-banner{ display:none; }
   line-height: 1.45;
 }
 .hero-uoplyst[hidden]{ display:none; }
+
+/* ===== data =====
+   Beskeden, der står, når lageret IKKE kunne hentes.
+
+   Den findes, fordi kildelinjen over resultaterne ("51 annoncer på
+   Bikerbasen · 332 indekseret hos MC Syd") kun kan beskrive de annoncer,
+   der ER kommet. Kom de ikke, forsvandt linjen lydløst, og siden meldte et
+   mindre og pænere tal uden ét ord om, at den ikke havde set hele lageret.
+   Se blokken øverst i js/backend-bridge.js.
+
+   Farverne er --color-danger-tint/--color-danger, altså sitets egne
+   fejltokens — ikke en ny farve. Den står øverst i <main>, fordi hvert tal
+   under den er upålideligt, så længe den er der. Ingen pladsreservation:
+   elementet findes slet ikke i den normale tilstand, og en reserveret
+   højde ville koste luft på hver eneste indlæsning for en tilstand, der
+   efter D-013 skal være sjælden. */
+.data-afbrud{
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-fg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.data-afbrud strong{ display:block; }
+.data-afbrud-igen{
+  margin-top: var(--space-2);
+  padding: 6px var(--space-3);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-fg);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.data-afbrud-igen:hover{ background: var(--color-surface); }
+
+/* Antallet på kategoriflisen ("93" oven på Cruiser-fotoet).
+
+   ABSOLUT PLACERET MED VILJE. Elementet er tomt indtil js/home.js har fået
+   svar fra lageret (fyldTypeAntal), og et absolut placeret element er taget
+   ud af flowet: det kan hverken gøre flisen højere, når tallet lander, eller
+   brække etiketlinjen på 390 px, hvor "Adventure/Enduro" allerede fylder
+   bredden. Havde tallet stået inde i .tile-label, ville de otte fliser
+   skifte højde i det øjeblik databasen svarede — og det er en CLS på en
+   sektion, der ligger lige under folden.
+
+   Farverne er tokens: mørk flade + hvid tekst, samme aflæsning som
+   .tile-label's gradient nedenunder, så tallet læses som en del af fotoet og
+   ikke som en badge, siden har fundet på. `color-mix` på --color-dark er
+   samme greb som .tile-media::after lige ovenfor. */
+.tile .tile-count{
+  position: absolute; top: 8px; right: 8px; z-index: 1;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-dark) 72%, transparent);
+  color: #fff;
+  font-size: 12px; font-weight: 600; line-height: 1.5;
+  font-family: var(--font-display); letter-spacing: -0.01em;
+  backdrop-filter: blur(2px);
+}
+/* Tomt = usynligt. Uden reglen står der en 24x21 px mørk plet på hvert foto,
+   indtil tallet ankommer — og på en side uden data (fx en fejlet
+   backendReady) ville pletten blive stående for evigt. */
+.tile .tile-count:empty{ display: none; }

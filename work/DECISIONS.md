@@ -1082,3 +1082,824 @@ blev sælgeren sendt videre efter ét sekund til en annonce uden billeder — ud
 at vide hvad der gik galt, og uden at vide at billederne kan lægges på igen.
 Beskeden skal kunne læses, før siden skifter.
 HVOR: `js/opret-annonce.js` — `publishListing()`
+
+### Kørekortmærkatet regnes ÉT sted, og det er filterets sted — builder 5, 18.08.2026
+HVAD: `koerekortMaerkat(l)` i `js/components.js` er nu den eneste funktion på
+sitet, der laver et kørekortmærkat. Den kalder `koerekortForListing()` og
+kontrollerer svaret mod `passerKoerekort()`, begge i `js/data.js`. Kaldstederne
+er `externalCardHTML()`, `listingCardHTML()`, sammenligningstabellen og
+`js/annonce.js` (både den native og den eksterne detaljeside).
+Fire tilstande, og kun den første nævner en kategori:
+  1. kategori udledt OG filteret enigt → "Kørekort A1/A2/A"
+  2. hk og ccm modsiger hinanden (> 0,4 hk/cm³) → "Kørekort ikke afgjort"
+  3. over 125 ccm uden hk → "Kørekort ikke afgjort" + den lange ærlige sætning
+  4. hverken ccm eller hk → "Kørekort ukendt"
+HVORFOR: `eksternKoerekort()` skrev "Kørekort mindst A2" på alt over 125 ccm
+uden oplyst effekt, mens `passerKoerekort(l,'A2')` svarede FALSE på nøjagtig de
+samme annoncer. MÅLT FØR: **99 kort bar "mindst A2", og alle 99 var filtreret
+UD under Kørekort A2.** Mærkat og filter var altså uenige om 99 motorcykler, og
+mærkatet var det, der lovede mest. "Mindst A2" er isoleret set sandt — over 125
+ccm kræver mindst A2 — men det læses som "A2 er nok", og A2 har ingen
+slagvolumengrænse: uden hk kan A2 og A ikke skelnes. En Honda GL 1100 Gold Wing
+(1.100 ccm, effekt ikke oplyst) bar mærkatet. Det er den påstand, der kan koste
+en tyveårig kørekortet.
+MÅLT EFTER: uenige = **0**, "mindst A2" = **0**, på hele lageret (383 annoncer),
+tegnet gennem den rigtige `listingCardHTML()` i browseren.
+Den lange sætning, kritikeren fremhævede, er URØRT og er nu den ene kilde til
+teksten begge steder: "Over 125 ccm kræver mindst A2. Effekten står ikke i
+annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2."
+FÆLDE FOR DEN NÆSTE: `js/search.js` kalder stadig `koerekortForListing()`
+direkte tre steder (`rowSpecsHTML`, `swipeCardHTML`, `OPLYSTHED`). De er ikke
+forkerte — de viser kun kategorien, når den ER udledt — men de er en fjerde
+indpakning om den samme regel, og det var netop antallet af indpakninger, der
+lod de 99 opstå. Søgesidens ejer må gerne kalde `koerekortMaerkat()` i stedet.
+HVOR: `js/components.js` — `koerekortMaerkat()`, `HK_PR_CCM_LOFT`,
+`KK_OVER_125_EKSTERN`/`KK_OVER_125_EGEN`; `js/annonce.js` — `kkM` begge steder
+
+### "Maks. 48 hk" stod stadig skrevet i hånden på detaljesiden — builder 5, 18.08.2026
+HVAD: Kørekortpanelet på den eksterne detaljeside skrev "maks. 48 hk" som ren
+tekst. Det er nu `${A2_MAX_HK}` fra `js/data.js`. Overskriften "Du skal mindst
+have A2" er samtidig blevet til "Vi kan ikke afgøre, hvilket kørekort der skal
+til".
+HVORFOR: A2-loftet er 35 kW = 47,59 hk, altså 47. Tallet var rettet i
+`js/data.js` og i testene i en tidligere runde, men den ene side, hvor køberen
+læser sætningen i ro, sagde stadig 48 — og 48 hk er 35,30 kW, over loftet. To
+kilder til det samme tal skrider fra hinanden; nu er der én. Overskriften var
+sand og blev læst som "A2 er nok", præcis den forveksling, mærkatet kostede os.
+HVOR: `js/annonce.js` — `koerekortPanel`
+
+### Kildens typeord bliver til VORES otte typer — builder 5, 18.08.2026
+HVAD: `crawler/normalize.js` har nu `VORES_TYPER` (de otte id'er/etiketter fra
+`TYPES` i `js/data.js`) og `TYPE_ALIAS` (kildens ord → vores id), plus
+`typeIdFraKildeord()` og `typeLabelFraKildeord()`, som eksporteres.
+`KARROSSERITYPER` bygges af de to, så `delModelOgVariant()` skriver VORES
+etiket i `variant`. Street → Naked, Sportstouring → Touring, Offroader →
+Adventure/Enduro, Klassiker/Veteran → Classic/Veteran, Classic Cruiser →
+Cruiser. `js/components.js` `eksternTitel()` skifter desuden den variant, der
+allerede ligger i basen, ud med `typeLabel(l.type)` — altså præcis den værdi,
+Type-filteret sorterer på.
+IKKE KORTLAGT MED VILJE: motard, supermoto, custom og engelsk "classic".
+De tre første har ingen kasse hos os; "Classic" står i alle 332 MC Syd-titler
+UDELUKKENDE som modelnavn (Softail Classic, Road King Classic, Electra Glide
+Ultra Classic — cruisere og tourere), samme måling som `MCSYD_KATEGORI` i
+`js/backend-bridge.js` bygger på. Et ukortlægbart ord bliver i modelnavnet, og
+der står ingen type. Honest silence, ikke nærmeste nabo.
+HVORFOR: Ti af fireogtyve kort viste en type, der ikke findes i vores eget
+filter, og et klik på "Naked 64" gav kort mærket "Street". Etiket og filter
+brugte hver sin taksonomi.
+MÅLT FØR → EFTER på de indekserede kort med variant fra basen:
+  Cruiser 75, Street 55, Adventure 41, Touring 29, Sportstouring 21,
+  Sport 19, Offroader 18, Klassiker Cruiser 12, Klassiker 7,
+  Adventure Offroader 3, Street Cruiser 2, Klassiker Touring 2,
+  Sport Sportstouring 1
+  →
+  Cruiser 89, Adventure/Enduro 62, Naked 55, Touring 53, Sport 19,
+  Classic/Veteran 6, ingen etiket 1
+Præcis ét kort mistede sin etiket (typen kunne ikke kortlægges). Ingen kort fik
+en forkert.
+BEMÆRK: `normaliserType()` returnerer stadig KILDENS eget ord og gemmes råt i
+kolonnen `type` — `crawler/parse.test.js` låser det, og det er den rigtige
+kontrakt: den funktion svarer på "hvad kaldte kilden den?". Oversættelsen er
+næste trin. `js/backend-bridge.js` `typeFraKategoriord()` oversætter allerede
+kildens ord til vores id'er; de fire fælles oversættelser står ordret ens begge
+steder. **Til builder 1 og 4: `l.type` og kortets anden linje er nu garanteret
+det samme ord, og det er altid ét af de otte i `TYPES`.**
+HVOR: `crawler/normalize.js`; `crawler/normalize.test.js` (7 nye tests);
+`js/components.js` — `eksternTitel()`; `js/annonce.js` — `variant`, Type-rækken
+
+### De 162 fabriksnye bliver MÆRKET, ikke sorteret fra — builder 5, 18.08.2026
+HVAD: `eksternErNy(l)` i `js/components.js` læser `ny`/`brugt` ud af annoncens
+adresse hos kilden. Er den ny, står der en chip "Ny" i prislinjen på kortet, en
+sætning i toppen af detaljesiden ("Det her er en fabriksny motorcykel …") og en
+række "Stand: Fabriksny". Kan segmentet ikke læses (fx Gul og Gratis), svarer
+funktionen null, og der står ingenting.
+MÅLT: 162 af de 332 indekserede får "Ny", 170 får ingen markør. Efterprøvet på
+den rigtige søgeside (`?sort=price-desc`, side 1): 17 af 24 kort bærer chippen.
+HVORFOR MÆRKE OG IKKE EKSKLUDERE: en fabriksny motorcykel hos en forhandler er
+en rigtig motorcykel til salg, og en køber, der leder efter en MT-07, vil se
+begge dele. At skjule halvdelen af lageret for at få en overskrift til at passe
+koster ham udbuddet. Det er overskriften "brugte motorcykler", der er for snæver
+— ikke annoncerne, der er forkerte. Og forskellen er ikke kosmetisk: den afgør
+garanti kontra reklamationsret og forklarer, hvorfor "Kilometer: Ikke oplyst"
+står på en 2025-model. Uden markøren læses det som et hul i dataene.
+HVORFOR URL'EN OG IKKE ET FELT — OG HVAD DER MANGLER: crawleren læser allerede
+oplysningen (`stand_url_moenster` i `sources/mcsyd.yaml`) og gemmer den i
+kolonnen `stand`. Men `js/backend-bridge.js` oversætter den til `condition`, og
+"ny" har ingen plads i `CONDITIONS`, så værdien bliver til null og går tabt på
+vejen til browseren. **Til den, der ejer `js/backend-bridge.js`: bær `stand`
+med som sit eget felt i `normalizeRemoteListing()` — ét additivt felt, ligesom
+`position` blev det — så kan URL-aflæsningen i `eksternErNy()` ryge ud.**
+HVOR: `js/components.js` — `eksternErNy()`, prislinjen i `externalCardHTML()`;
+`js/annonce.js` — `erNy`, `.external-detail-ny`, Stand-rækken;
+`css/styles.css` — `/* ===== annoncedetalje ===== */`
+
+### CVR-kontrollen flyttet til js/components.js — annoncesiden havde den ikke — builder 5, 18.08.2026
+HVAD: `cvrKontrolOK()` er flyttet fra `js/forhandler.js` til
+`js/components.js`, som BEGGE sider indlæser. `js/annonce.js` kalder den nu,
+før sælgerkortet tilbyder et opslag i CVR-registret. Består nummeret ikke, står
+det der stadig (vi skjuler ikke, hvad sælgeren har skrevet), men uden linket og
+med grunden skrevet ud.
+HVORFOR: Runde 2's kritiker regnede modulus 11 efter i hånden på 95854101 og
+fandt, at det fejlede (sum 146, 146 mod 11 = 3), mens siden roligt tilbød at slå
+det op. Sælgerprofilen fik kontrollen; annoncesiden fik den ikke — og det var
+DER, nummeret stod, på den ene side hvor køberen beslutter sig. Samme nummer,
+to sider, to svar. En regel, der kun findes på den ene af to sider, er ikke en
+regel.
+BEMÆRK: `js/data.js` fjernede i samme runde CVR fra demolageret helt (med god
+begrundelse, se noten dér), så grenen udløses ikke af demodata i dag. Den er
+den kontrol, der skal køre den dag et cvr-felt kommer ind ad formularen eller
+fra databasen — nu på begge sider. Noten i `js/data.js`, der henviser til
+`cvrKontrolOK()` i `js/forhandler.js`, peger efter flytningen det forkerte sted.
+HVOR: `js/components.js` — `cvrKontrolOK()`; `js/annonce.js` — `cvrLinje`;
+`js/forhandler.js` — kun kommentaren tilbage
+
+### Det tomme fotofelt gav vandret scroll på 390 — builder 5, 18.08.2026
+HVAD: `.external-detail-photo-tom{ width:auto }` under `@media (max-width:699px)`.
+HVORFOR: `.external-detail-photo` får negativ `margin-inline` på mobil (kant til
+kant), og feltet får den positive tilbage — men det arver også `width:100%` fra
+reglen, det deler med `<img>`, og `width:100%` regner ikke marginerne fra.
+MÅLT FØR: dokumentet 406 px bredt i et 390 px vindue, altså vandret scroll på
+hver eneste indekseret annonce uden foto. MÅLT EFTER: 406 → 390, ingen
+overløbende element. Et foto rammes ikke — det har ingen margin.
+HVOR: `css/styles.css` — `/* ===== annoncedetalje ===== */`
+
+### Fotoløftet er URØRT — efterprøvet, ikke ændret — builder 5, 18.08.2026
+HVAD: Ingen kodeændring. Sætningen står ordret på detaljesiden ved både 1440 og
+390 på alle tre navngivne egne annoncer: "Sælgeren har ikke lagt billeder op.
+Vi viser ikke en tegning i stedet — bed sælgeren om fotos af netop den her
+motorcykel, før du kører efter den." Overskriften "Ingen fotos i denne annonce"
+er også uændret, og der tegnes ingen illustration noget sted.
+HVORFOR DET STÅR HER: jeg rørte `js/annonce.js`' galleriblok og
+`js/components.js`' kortmarkup i den her runde. Kritikeren kaldte sætningen den
+stærkeste enkeltsætning på sitet, så den skal kunne efterprøves, at den overlevede
+— ikke bare antages.
+HVOR: `js/annonce.js` — `galleriHTML`; efterprøvet i `work/b5-endelig.json`
+
+### scripts/build.js er IKKE kørt — builder 5, 18.08.2026
+HVAD: Jeg har ikke kørt `node scripts/build.js` eller `inline-critical.js`.
+HVORFOR: Ingen af mine ændringer konsumeres af byggekæden. JS'en indlæses af
+browseren som den er; de fem nye CSS-regler (`.listing-kk-uvis`, `.card-ny`,
+`.external-detail-ny`, `.seller-cvr-fejl`, `.external-detail-photo-tom{width}`)
+rammer alle elementer, som JS'en skriver EFTER første maling, så de kan ikke
+bidrage til CLS hverken før eller efter. Efterprøvet: ingen af de fem
+selektorer findes i den inlinede blok i `annonce.html` i dag — heller ikke
+grundreglerne — så der er ingen uenighed mellem de to kopier at rette op.
+Og fire andre buildere har ubyggede ændringer i træet lige nu; `inline-critical.js`
+skriver til ALLE 14 sider og ville rulle deres arbejde ud (advarslen længere oppe
+i filen). Kør den, når kun én arbejder i CSS'en.
+HVOR: intet ændret
+
+### Kørekortmærkatet har nu tests — js/koerekort.test.js, builder 5, 18.08.2026
+HVAD: Ti nye tests i den eksisterende fil. Testantallet går fra 249 til 259.
+De dækker de fem motorcykler, kritikeren navngav — GL 1100, Iron 883 ved både
+48 og 47 hk, RC 390 mod Svartpilen 401 på samme motor, FXBR Breakout — plus den
+egentlige regel som et krydsprodukt: for HVER kombination af de slagvolumener og
+effekter, lageret indeholder, gælder at nævner mærkatet en kategori, SKAL
+`passerKoerekort()` lukke annoncen ind under netop den. Dertil to vagthunde:
+mærkatet må aldrig sige "mindst", og det må aldrig nævne en kategori, når
+effekten mangler. Til sidst modulus 11 og ny/brugt-aflæsningen.
+HVORFOR: Et forkert kørekortmærkat giver ingen fejlmeddelelse — kun et bogstav,
+der ser rigtigt ud. Efterprøvet ved at genindsætte den gamle regel i
+hukommelsen: krydsproduktet fejler med 99 uenigheder.
+BEMÆRK om de tal, kritikeren skrev: RC 390 med 56 hk og Iron 883 med 48 hk
+findes ikke i lageret længere — `js/data.js` blev rettet til 44 og 52 hk i en
+tidligere runde. Testene bruger derfor kritikerens tal EKSPLICIT som input, så
+de stadig fanger fejlen, hvis fixturen skrider tilbage.
+HVOR: `js/koerekort.test.js` nederst
+
+### Ét filterhus: js/filtrering.js — forside, 18.08.2026
+HVAD: Filterkæden er flyttet ud af `js/search.js` og ind i en ny delt fil,
+`js/filtrering.js`. Den udstiller ét globalt objekt `Filtrering` med
+`UOPLYST`, `TOMT_FILTER`, `filtrerMedUoplyst()`, `koerekortSvar()`,
+`anvendFiltre(alle, filtre, spring, opsamler)` og `uoplystOpgoerelse(skjult)`.
+`js/home.js` bruger den nu til BÅDE knappens tal og "ikke talt med"-linjen;
+`heroListe()` er tolv linjer i stedet for firs, og forsidens egen
+`skjultAfUvidenhed()` er slettet.
+Vanilla, klassisk `<script>`, alt pakket i en IIFE — netop for at filen kan
+loades på en side, der allerede har `js/search.js`' topniveau-navne, uden en
+redeklarationsfejl. Loades i `index.html` EFTER `js/data.js` (den bruger
+`passerKoerekort`/`hkEllerNull`) og FØR `js/home.js`.
+HVORFOR: Kritikeren i runde 2 satte det som største hul: "lad knappen og
+statuslinjen kalde præcis samme filterberegning som soegning.html". Det var
+ikke bare tallene, der var forkerte — det var, at der fandtes to kæder.
+Runde 1 rettede træffene (`null <= 60000` er sandt i JS), runde 2 rettede de
+fravalgte (53 mod 75), begge gange ved at skrive søgesidens kode af én gang
+til. To kopier, der er enige i dag, er ikke to sider, der ikke KAN være
+uenige — og fejlen kom igen to runder i træk. Nu er der én kæde, og et nyt
+filter på søgesiden rammer forsiden med samme prædikat og samme feltnavn,
+eller også rammer det den slet ikke.
+MÅLT: 40 filterkombinationer kørt ende til ende i browseren (sæt filtrene på
+forsiden, læs knap + hint, klik, læs "annoncer fundet" + "ikke vist"):
+**0 uenige**, både på træf og på fravalgte. Kritikerens egen sag,
+Type=Scooter + maks. 30.000 kr., går fra "Vis 383 motorcykler" -> "6 fundet /
+48 ikke vist" til **"Vis 4 motorcykler" -> "4 annoncer fundet / 48 ikke vist"**
+begge steder. Harnessen ligger i `work/forside-vs-soegning.mjs` og kan køres
+igen; den slutter med exit 1, hvis to sider nogensinde er uenige.
+TIL SØGESIDENS EJER — det halve arbejde mangler: `js/search.js` har STADIG
+sine egne `UOPLYST`, `filtrerMedUoplyst()`, `koerekortSvar()` og
+`anvendFiltre()`. Jeg har ikke rørt filen (den er ikke min, og en anden
+builder skrev i den, mens jeg målte). Kæden i `js/filtrering.js` er ordret
+kopieret derfra — samme rækkefølge, samme prædikater, samme feltnavne — så
+vejen ind er at slette de fire ting i `js/search.js`, loade
+`js/filtrering.js` i `soegning.html` og lade `anvendFiltre(alle, state,
+spring, opsamler)` tage `state` som argument. Først dér er dobbeltheden
+faktisk væk; indtil da er den bare målt til at være enig.
+FÆLDE: rækkefølgen i kæden er en del af svaret. En annonce fjernes ved det
+FØRSTE filter, der ikke kan svare for den, og tælles derfor kun én gang — det
+er dét, der gør, at tallene i `opsamler` må lægges sammen. Byt om på to led,
+og totalen holder, men fordelingen på feltnavne skifter — og feltnavnene er
+præcis det, begge siders forklaringslinje skriver ud.
+HVOR: `js/filtrering.js` (ny), `js/home.js` (`heroFiltre`, `heroListe`,
+`uoplystTekst`), `index.html` (`<script defer src="js/filtrering.js">`),
+`work/forside-vs-soegning.mjs`
+
+### "Udvalgte annoncer" hed noget, den ikke var — nu "Dyrere modeller" — forside, 18.08.2026
+HVAD: Sektionen har nyt navn, ny udvælgelse og en underrubrik, der skrives fra
+data. Fire ændringer i udvælgelsen:
+1. Prisgrænsen er lagerets MEDIAN (målt 114.995 kr.) i stedet for 60.000 kr.
+2. Annoncer uden modelnavn er ude.
+3. Højst ét kort pr. mærke.
+4. Antallet af kort fylder hele rækker: 3 kort ved 3 spalter, 4 ved 2 og ved 1.
+HVORFOR: Kritikeren målte rubrikken mod indholdet. "Et udpluk af de dyrere
+modeller" stod over et billigste kort på 62.200 kr., mens sidens eget
+prisfacet talte 131 annoncer over 150.000 kr. — 60.000 var ikke "dyrere", det
+var omtrent medianen for en privat brugtannonce. Ét kort hed bare "Honda" til
+609.995 kr.; der er seks annoncer i lageret uden modelnavn (fem af dem den
+samme Honda), alle med foto, så de vandt let en plads i en række, der kun
+sorterede på pris og billede. Og "Udvalgte" lovede en redaktion, der ikke
+findes: rækken er en seedet blanding.
+MÅLT FØR -> EFTER (localhost, 383 annoncer):
+  før:   62.200 / 139.800 / 144.995 / 609.995 kr. — 3 af 4 Honda, ét uden model
+  efter: 114.995 / 289.800 / 154.800 kr. — Honda, Harley-Davidson, KTM
+Kandidatfeltet gik fra 256 til 169 annoncer. Underrubrikken skriver nu tallet,
+grænsen, mærkereglen og kilden ud, så rubrikken kan efterprøves på kortene.
+DET, JEG IKKE KUNNE FJERNE, ER SAGT HØJT I STEDET: alle 169 kandidater er fra
+MC Syd i Rødding. Det er ikke et valg — det er den eneste kilde i lageret, der
+sender billeder med (326 af 383 annoncer har foto, og ingen af vores egne 51
+har et). Kritikeren talte "alle fire fra samme forhandler" som en fejl i
+udvalget; det er en oplysning om lageret, og så skal den stå der.
+DET FABRIKSNYE: kortene bærer allerede mærkatet "Ny" fra `js/components.js`,
+så en 2024-model udgiver sig ikke for at være brugt. `<title>` siger stadig
+"brugte motorcykler", og 160 af 383 annoncer er fra 2024 eller nyere — se
+"Efterladt med vilje" nederst.
+FÆLDE (kostede en omgang): `.listings-grid:has(> .card-external)` gør gitteret
+tre spalter bredt mellem 1240 og 1559 px, og `:has()` gælder først, NÅR der
+ligger et eksternt kort i gitteret. Måler man det tomme gitter, svarer det 4.
+Derfor tegnes rækken fuld og trimmes bagefter — `vaelgFeatured(n)` er altid de
+n første af den samme rækkefølge, så de tre, der bliver stående, er de samme
+tre, en direkte udregning ville have valgt.
+HVOR: `js/home.js` bid 7 (`harModel`, `median`, `vaelgFeatured`,
+`tegnFeatured`, `skrivFeaturedSub`); `index.html` — `<h2>Dyrere modeller</h2>`,
+`#featured-sub`
+
+### "Nyeste annoncer" viste i DRIFT otte annoncer uden dato — forside, 18.08.2026
+HVAD: Sektionen må kun indeholde annoncer, der HAR en `createdAt`. Har ingen
+det, tegnes en tomtilstand, der siger hvorfor, og underrubrikken skjules.
+Hero'ens antalslinje siger "383 motorcykler til salg" i stedet for "… i dag".
+HVORFOR: Sorteringen var `new Date(b.createdAt) - new Date(a.createdAt)` over
+HELE lageret. `new Date(null)` er ikke NaN, det er 1. januar 1970 — de datoløse
+blev altså ikke sorteret bagest, de blev sorteret som ældst. På localhost er
+der 51 annoncer med dato, så de faldt tilfældigvis uden for de otte. I DRIFT
+er `SHOW_DEMO_DATA` falsk: lageret er 332 indekserede og NUL med dato, og så
+stod "Nyeste annoncer" med otte vilkårlige annoncer, hvis alder vi ikke
+kender, under en overskrift der lover det modsatte — og med en underrubrik,
+der ikke engang kunne skrive en dato (`newest[0]?.createdAt` var null).
+"i dag" var den samme slags påstand: vi har intet felt, der siger, at de 332
+stadig er til salg netop i dag (`indekseretFoerste` er hvornår VI så dem
+første gang). Kritikeren satte hero'ens "i dag" op mod sektionen to skærme
+længere nede, hvor det nyeste kort var tre uger gammelt. Tallet bliver
+stående — det er ordet, der manglede dækning.
+MÅLT (drift simuleret ved at slå `SHOW_DEMO_DATA` fra i serverens svar,
+repoet urørt): 332 annoncer, 0 med dato.
+  før:   otte kort + "De senest oprettede annoncer på Bikerbasen."
+  efter: "Vi kender ikke datoen på nogen af annoncerne endnu" + forklaringen
+         + knappen "Se alle 332 annoncer", underrubrik skjult.
+På localhost er sektionen uændret: samme otte kort, samme rækkefølge, samme
+underrubrik med "den nyeste er fra 26. jul. 2026".
+HVOR: `js/home.js` bid 6 (`medDato`, `newest`, tomtilstanden, `nyesteSub`) og
+`opdaterHero()` (hero-linjen)
+
+### Kategorifliserne bærer nu et antal — og det er søgesidens eget — forside, 18.08.2026
+HVAD: Hver af de otte fliser i "Søg efter type" har et tal øverst til højre
+(Sport 27, Touring 55, Cruiser 93, Naked 64, Adventure/Enduro 71, Scooter 8,
+Classic/Veteran 14, Cross/MX 3). Tallet regnes med `Filtrering.anvendFiltre()`
+— altså den samme kæde som knappen og soegning.html. Underrubrikken siger, at
+48 af 383 annoncer ingen type har hos kilden og derfor ikke ligger bag nogen
+af fliserne.
+HVORFOR: Kritikeren: "Søg efter type lover otte typer". Otte lige store døre,
+hvor den ene har 3 annoncer bag sig og den anden 93, er et løfte, der brister
+efter klikket. Med tallet kan man se det før. Og de otte tal lægger IKKE
+sammen til totalen — uden sætningen om de 48 ville en køber, der lægger
+sammen, tro, vi taber annoncer undervejs.
+MÅLT: alle otte fliser mod `soegning.html?type=<id>`: 8 af 8 enige.
+DEN ANDEN HALVDEL AF KRITIKKEN ER LUKKET AF EN ANDEN BUILDER: kildens
+ordforråd ("Street", "Offroader", "Sportstouring", "Klassiker") stod som
+annoncekortets anden linje. `eksternTitel()` i `js/components.js` skifter det
+nu ud med `typeLabel(l.type)`. EFTERPRØVET på forsiden i dag: de eneste ord,
+der optræder som korttitlens anden linje, er Naked, Cruiser, Adventure/Enduro
+og Touring — nul fremmede ord. Rå-feltet `listing.variant` bærer stadig
+kildens ord (Street 55, Sportstouring 21, Offroader 18, Klassiker 7 af de
+332); det er kun visningen, der er oversat. Crawlerens ejer må gerne
+normalisere feltet ved roden.
+FÆLDE: elementet står SIDST i flisens markup, selvom det tegnes øverst til
+højre. Absolut placering er ligeglad med dokumentrækkefølgen, men en
+skærmlæser er ikke — lå det først, blev flisen læst op som "93 annoncer,
+Cruiser" i stedet for "Cruiser, 93 annoncer".
+HVOR: `js/home.js` bid 2 + `fyldTypeAntal()`; `index.html` — `#types-sub`;
+`css/styles.css` — `.tile .tile-count` i `/* ===== forside ===== */`
+
+### Efterladt med vilje af forsidens builder — forside, 18.08.2026
+HVAD: Tre ting er IKKE gjort, og det er et valg, ikke en forglemmelse.
+1. **`js/search.js` beholder sin egen kopi af filterkæden.** Se "Ét filterhus".
+   Filen er en anden builders, og der blev skrevet i den, mens jeg målte.
+2. **`<title>` siger stadig "Køb og sælg brugte motorcykler"**, mens 160 af
+   383 annoncer er fra 2024 eller nyere. Titlen spejles i den GENEREREDE
+   meta-blok (`scripts/build-meta.js` skriver og:title og twitter:title), så
+   en rettelse kræver et byggegennemløb over alle 14 sider midt i en runde,
+   hvor flere buildere har ubyggede ændringer — og "brugte motorcykler" er
+   samtidig sidens stærkeste søgeord. Kortene siger allerede "Ny" på de
+   fabriksnye, så påstanden modsiges ikke uimodsagt på selve siden. Tag den i
+   en runde, hvor kun én rører HTML'en.
+3. **`node scripts/build.js` er ikke kørt.** Intet af mit rører det, builden
+   forbruger: `.tile-count` behøver ikke at være kritisk CSS (elementet er
+   tomt og absolut placeret ved første maling), og `/* ===== forside ===== */`
+   er stadig med vilje ude af `scripts/inline-critical.js` — se blokken om det
+   længere oppe. At køre den ville rulle andres ubyggede CSS ud i 14 sider.
+MÅLT TIL SIDST, så ingen tror det er gættet: `npm test` 259/259 grønne.
+CLS 0,0004 på 390x844 og 0,0426 på 1440x900 — sidstnævnte er uændret med og
+uden mit nye element (målt begge veje) og består af headerens hydrering
+(`main-nav`, `header-actions`) plus 0,0002 fra søgeknappens egen tekst.
+Mobilfolden er urørt: CTA'ens underkant 684 af 844 px ved indlæsning og 707
+med A2 + maks. 60.000 kr. valgt, chip-rækken slutter 744, og de to
+tryghedspunkter ligger inden for 837. Ingen vandret scroll (390 = 390,
+1440 = 1440). Ingen sidefejl på nogen af målingerne.
+HVOR: —
+
+### Foerste pris over folden paa 390px — soegning, 18.08.2026
+HVAD: Ni smaa nedskaeringer over det foerste kort, ingen af dem paa
+oplysninger. MAALT paa 390x844, cookievaeg klikket vaek, forrest fane:
+
+  foerste kort   456 px -> 402 px
+  foerste PRIS   773 px -> 674 px af 844   (kritikeren maalte 854 i runde 2)
+  synligt paa foerste skaerm: pris, model, variant og fire specifikationschips
+
+Hvor de 99 px kom fra: en TOM `.active-filters` tog 16 px margen (nu
+`:empty{display:none}`), broedkrummen 9, h1 8, soegefeltet 8, raekkeafstanden i
+vaerktoejslinjen 4 — og fotoet paa resultatkortet gik fra 4:3 til 16:10 paa
+telefon (356x267 -> 356x223), hvilket alene er 45 px. Sorteringsforklaringen
+faldt fra tre-fire linjer til to, fordi den halve saetning, der ikke var sand,
+er skaaret vaek (se naeste blok).
+HVORFOR 16:10 KUN HER: paa 390 px er kortet fuld bredde, saa 4:3 bliver en
+267 px hoej billedflade, og saa er der ét kort pr. skaerm. Reglen er scopet
+`.srp` + `max-width:620px`; forsiden og profilen viser ét kort ad gangen i
+synsfeltet og har intet at vinde.
+FAELDE, som kostede mig en time: hoejder over folden SKAL staa i
+`<style id="soeg-perf">` i soegning.html, ikke kun i css/styles.css. Arket
+hentes med rel=preload og lander efter foerste maling; en hoejde, der kun
+staar dér, gaelder ikke i det oejeblik, siden males. Og selektorerne dér skal
+have `.srp` foran: den genererede kritiske blok staar EFTER soeg-perf i head
+og kender de samme selektorer med de gamle vaerdier.
+ADVARSEL TIL DEN NAESTE: skriv aldrig markoeren for den kritiske blok
+(style-taggen med id'et critical) ordret i en kommentar i en HTML-fil.
+`scripts/inline-critical.js` finder blokken med en regex; en anden builder
+koerte scriptet, mens jeg arbejdede, og min kopi af markoeren inde i en
+CSS-kommentar fik den til at slette alt fra kommentaren og ned gennem hele
+blokken — stylesheet-linket inklusive. Filen er genskabt fra HEAD.
+HVOR: `soegning.html` `<style id="soeg-perf">`; `css/styles.css`
+`/* ===== soegning ===== */`
+
+### Sorteringen siger nu kun det, man kan taelle efter — soegning, 18.08.2026
+HVAD: Linjen under vaerktoejslinjen lyder "Blandet udbud: de 57 annoncer uden
+foto er fordelt jaevnt ud over listen i stedet for at ligge samlet — 4 af de
+24 paa denne side." Halvsaetningen "annoncerne med flest oplyste felter staar
+foerst" er VAEK fra linjen og staar i stedet i en (i)-knap ved siden af,
+sammen med forbeholdet om, at rangeringen sjaeldent kan ses paa side 1.
+HVORFOR: Kritikeren maalte de to led som selvmodsigende, og det var de:
+kort nr. 4 er uden foto OG uden hk, saa det kan ikke samtidig vaere "flest
+oplyste felter foerst". Fejlen var ikke udregningen — oplystheden rangerer
+INDEN FOR hver af de to grupper (med og uden foto), ikke paa tvaers — men
+saetningen sagde det ikke, og saa var den forkert som skrevet. Fordelingen er
+den eneste af de to regler, en laeser kan efterproeve paa skaermen, og den er
+nu den eneste, der staar der. MAALT efter: de billedloese ligger stadig paa
+plads 4, 11, 17 og 24.
+HVOR: `js/search.js` `renderSorteringsNote()`, `forklarSortering()`;
+`soegning.html` `#sortering-note`
+
+### "Sortér:" staar som synlig etiket — soegning, 18.08.2026
+HVAD: Vaelgeren har faaet et rigtigt `<label for="sort-select">Sortér:</label>`
+i en `.sort-felt`, og `aria-label`'en er fjernet.
+HVORFOR: Vaelgeren stod bar med teksten "Blandet udbud", og en dansk koeber
+kan ikke se paa tre ord, om det er en sortering eller et filter — Bilbasen
+skriver "Sortér: Standard" af samme grund. To navne paa samme kontrol (synlig
+tekst + aria-label) er ét for meget; nu faar oejet og skaermlaeseren det samme.
+BEMAERK: gitterpladsen paa mobil er flyttet fra `#sort-select` til
+`.sort-felt`. Den gamle regel `#sort-select{grid-area:...;width:100%}` staar
+ogsaa i den genererede kritiske blok i soegning.html, og den er rettet i
+haanden dér, saa foerste maling ikke faar en anden bredde end den faerdige
+side. Koerer nogen `scripts/inline-critical.js`, skriver den samme vaerdi.
+HVOR: `soegning.html` `.sort-felt`; `css/styles.css`
+
+### "Nyeste foerst" var en blindgyde — nu en oplysning — soegning, 18.08.2026
+HVAD: To ting. 1) De annoncer, der HAR en dato, staar stadig foerst i
+datoraekkefoelge — det er dét, valget hedder — men resten ordnes nu af
+`blandetRaekkefoelge()` i stedet for at ligge i lagerets vilkaarlige orden.
+2) Linjen over resultatet skriver, hvor mange der overhovedet har en dato:
+"Nyeste foerst: kun 51 af 383 annoncer har en oprettelsesdato. De staar
+oeverst; de oevrige 332 er indekseret hos en forhandler, hvor vi ikke kender
+datoen, og staar derfor efter i blandet raekkefoelge."
+HVORFOR: Kritikeren: side 1 var 24 af 24 graa "Ingen fotos"-felter, mens
+overskriften sagde 383 fundet. Aarsagen er ikke sorteringen, det er lageret:
+de 51 annoncer med dato er praecis de 51, ingen har uploadet foto til. Datoen
+er et loefte, saa raekkefoelgen maa ikke pyntes — men brugeren skal kunne se,
+hvorfor siden ser ud som den goer, og resten af listen skal vaere brugbar.
+MAALT: side 1 er stadig 24 uden foto (og kan ikke vaere andet), men hvert kort
+baerer nu effekt, type og stand i billedfeltet, og side 3 er 21 af 24 med foto
+mod tidligere en tilfaeldig blanding.
+HVOR: `js/search.js` `getFilteredListings()` (date-desc-grenen),
+`renderSorteringsNote()`
+
+### Det tomme fotofelt bruger pladsen — DELT FIL js/components.js, 18.08.2026
+HVAD: `listingMediaHTML()` kalder en ny `fotoTomFaktaHTML(l)`, der laegger
+effekt, type og stand ind i `.foto-tom` som smaa chips. Kun oplyste felter
+tegnes; er ingen af de tre oplyst, er feltet praecis som foer. Effekt springes
+over paa indekserede annoncer, fordi `externalCardHTML()` allerede viser
+"Effekt" i sin spec-liste. Saetningen "Ingen fotos i denne annonce" er UROERT.
+HVORFOR: Kritikeren maalte 284x378 px graat felt pr. billedloes annonce brugt
+til ingenting, mens EFFEKT/TYPE/STAND laa klar i de samme data og blev vist
+paa detaljesiden ét klik senere. De tre er valgt, fordi kortet ikke viser dem
+i forvejen (kortet har pris, aargang, km, kubik). Ingen vaerdi opfindes.
+MAALT: 24 af 24 kort under "Nyeste foerst" baerer nu fakta ("44 hk · Sport ·
+God stand"), 4 af 24 under standardsorteringen. Ingen vandret rulning ved
+390, 360 eller 320 px. Feltet er absolut positioneret (inset:0), saa kortets
+hoejde er uaendret — CLS maalt 0,0001.
+HVOR: `js/components.js` `listingMediaHTML()`, `fotoTomFaktaHTML()`;
+`css/styles.css` `.foto-tom-fakta`
+
+### Ti talfelter fik rigtige etiketter — og de 100 var ikke loegn, men heller ikke fortjent
+HVAD: `filter-price-min/max`, `-year-min/max`, `-km-max`, `-ccm-min/max`,
+`-hk-min/max` og `-ejere-max` har faaet synlige `<label for>`: "Pris fra",
+"Pris til", "Aargang fra", "Kilometer hoejst", "Ccm fra", "Hk til",
+"Antal ejere hoejst" osv. Pladsholderne er nu eksempler ("fx 30000"), ikke
+navne.
+HVORFOR, OG EN RETTELSE AF KRITIKERENS FORKLARING: kritikeren skrev, at de
+100 point i tilgaengelighed var vundet ved at gemme kontrollerne i lukkede
+`<details>`, hvor axe ikke kan se dem. Det er ikke aarsagen — axe accepterer
+en pladsholder som tilgaengeligt navn (`non-empty-placeholder` staar i
+`label`-reglens any-of-liste), saa felterne bestod ogsaa med grupperne aabne.
+KONKLUSIONEN var alligevel rigtig: en pladsholder forsvinder i samme sekund
+brugeren taster det foerste ciffer, og saa staar der to identiske tomme
+kasser. Etiketten siger baade feltets ende og dets enhed, saa navnet ogsaa
+giver mening laest alene.
+MAALT MED GRUPPERNE AABNE: axe-core 4.13, wcag2a+2aa+21a+21aa+22aa, alle
+filtergrupper `open` paa 1440 OG mobilarket aabent paa 390 — 0 fejl begge
+steder. `label`-reglen bestaar paa 38 knuder, `target-size` paa 154.
+HVOR: `soegning.html` `.range-felt`; `css/styles.css`
+
+### (i)-knappens trykflade er 44x44, men dens BOKS er stadig 22 px — soegning
+HVAD: `.mix-info` og den nye `.sortering-info` har faaet et gennemsigtigt
+`::after` paa 44x44 px, centreret. Selve knappen bliver 22 px.
+HVORFOR: Knappen sad inde i en broedtekstlinje ("332 indekseret hos MC Syd
+(i)"), og et 44 px hoejt element dér ville braekke linjen fra hinanden og
+oedelaegge netop den sammenhaeng mellem tekst og knap, kritikeren roste.
+Pseudoelementet ligger uden for flowet, men modtager klikket.
+TO MAALINGER, der begge er en del af svaret:
+1. Kildelinjen passer paa én linje paa 390 px med fire pixels til overs. En
+   foerste udgave satte `min-width:24px` paa selve knappen; det braekkede
+   linjen til to og kostede 19 px over den foerste pris. Rullet tilbage.
+2. Fladen skal vaere FIRKANTET. Med `border-radius:50%` er den en cirkel med
+   diameter 44, og `document.elementFromPoint` viste, at hjoernerne (21,21)
+   faldt uden for. Uden radius rammer alle otte proevepunkter knappen.
+HVOR: `css/styles.css` `.mix-info::after`, `.sortering-info::after`
+
+### Tre bilfelter er FJERNET, ikke skjult — soegning, 18.08.2026
+HVAD: Filtergrupperne Braendstof, Traektype og Cylindre er ude af
+soegning.html, og `fuels`, `drives` og `cylinders` er ude af `EMPTY_STATE`,
+URL-parametrene, filterkaeden, pillerne og opkoblingen i js/search.js.
+De fire tilbagevaerende betingede grupper (Servicehistorik, Ejere & syn,
+Udstyr, Farve) staar stadig bag `data-krav` og vises, den dag lageret oplyser
+feltet.
+HVORFOR: Kritikeren laeste de tre som personbilsformularen, der skinner
+igennem, og de er oplyst paa NUL af 383 annoncer — kilden sender dem ikke, og
+felterne findes kun i vores egen oprettelsesformular, som endnu ikke har
+produceret en annonce. En gruppe, der aldrig kan andet end at vaere tom,
+hoerer ikke bag en gate; den hoerer ingen steder. Felterne findes stadig i
+opret-annonce.html og paa detaljesiden — det er kun filteret, der er vaek.
+GATEN ER HAERDET, for kritikeren SAA de syv tomme overskrifter, selv om koden
+skjulte dem: `gruppe.hidden = true` alene kan slaas af en hvilken som helst
+display-regel i ét af sidens tre stilark. `skjulGruppe()` saetter nu baade
+attributten og `style.display`, `visGruppeHvisIndhold()` spoerger DOM'en, om
+der overhovedet STAAR en kontrol i gruppen, og `synkroniserKravGrupper()`
+koeres igen i render-etape 2, fordi lageret hentes i to omgange.
+MAALT: 11 synlige grupper paa 1440 og 11 i mobilarket, alle med kontroller;
+0 tomme overskrifter begge steder, ogsaa med alle grupper tvunget `open`.
+HVOR: `soegning.html`; `js/search.js` `skjulGruppe()`, `visGruppe()`,
+`visGruppeHvisIndhold()`, `synkroniserKravGrupper()`, `KRAV_BYGGERE`
+
+### Maerkelisten viser hvert maerke ÉN gang — soegning, 18.08.2026
+HVAD: Raekken med "populaere" maerke-chips er fjernet. Tilbage er én
+alfabetisk liste med facettal paa hver raekke, et soegefelt over den og
+"Vis alle N maerker" under.
+HVORFOR: Seks maerker (BMW, Ducati, Harley-Davidson, Honda, Kawasaki, KTM)
+stod to gange i samme filtergruppe med hvert sit facettal. To knapper, der
+goer noejagtig det samme, er ikke en genvej — det er et spoergsmaal om,
+hvorfor der er to. Listen koster ikke genvejen: hver raekke har sit tal, og
+soegefeltet staar lige over den.
+NUL-TALS-MAERKER: de er slaaet fra i forvejen (`saetFacet()` saetter
+`disabled` + `.facet-empty`), og det er nu maalt paa en filtreret side:
+`?koerekort=A1` giver 19 maerker med tallet 0, og alle 19 er baade nedtonede
+og `disabled`. Det valg, brugeren staar PAA, faar aldrig klassen — ellers
+kunne man ikke komme ud igen.
+BEMAERK: `.brand-popular` i css/styles.css har ingen brugere tilbage. Den er
+IKKE slettet, af samme grund som `.profile-tabs` laengere oppe i denne fil:
+reglen staar ogsaa i den inlinede kritiske CSS i hver HTML-side, saa en
+sletning ét sted rydder ikke op, den skaber uenighed mellem to kopier.
+HVOR: `js/search.js` `populateFilterUI()`, `renderFacetCounts()`,
+`reflectFilterPanel()`, `wireFilterControls()`
+
+### "A (alle mc) 383" forklares nu i synlig tekst — soegning, 18.08.2026
+HVAD: Hjaelpelinjen under koerekort-chipsene siger: "Tallet ved A er hele
+lageret: A har ingen effektgraense, saa den daekker ogsaa de annoncer, hvor
+effekten ikke er oplyst. Det er derfor A1 og A2 kan vaere smaa tal, uden at
+der mangler motorcykler."
+HVORFOR: Kritikeren laeste "A 383" og "121 mangler koerekortoplysning" som to
+tal, der ikke kan vaere rigtige samtidig. De KAN: A har ingen graense, saa
+ingen manglende oplysning kan udelukke den. Forklaringen fandtes i forvejen —
+men kun som `title` paa chippen, altsaa usynlig paa en telefon. En sandhed,
+der kun kan naas med en mus, er ikke fortalt.
+HVOR: `soegning.html` `.field-hint` under `#filter-koerekort`
+
+### Koerekortreglen kaldes ÉT sted ogsaa fra soegesiden — soegning, 18.08.2026
+HVAD: De tre steder i js/search.js, der kaldte `koerekortForListing()`
+direkte (listevisningens celle, swipe-kortet og oplystheden i sorteringen),
+gaar nu gennem `koerekortMaerkat()`.
+HVORFOR: Builder 5 fandt aarsagen til 99 forkerte maerkater — en anden,
+selvstaendig udgave af reglen i `eksternKoerekort()`. Mine tre kald var ikke
+forkerte, men de var en fjerde indpakning om den samme regel, og en fjerde
+indpakning er praecis maaden, de 99 opstod paa. `koerekortMaerkat()`
+kontrollerer sit eget svar mod `passerKoerekort()`, foer det navngiver en
+kategori, saa listen og filteret ikke kan komme til at sige hver sit.
+MAALT: standardsorteringens fordeling er uaendret (billedloese paa plads 4,
+11, 17, 24) efter at oplystheden skiftede kilde.
+HVOR: `js/search.js` `rowSpecsHTML()`, `swipeCardHTML()`, `OPLYSTHED`
+
+### Filterkaeden er SLETTET i js/search.js — den bor i js/filtrering.js
+HVAD: `UOPLYST`, `filtrerMedUoplyst()`, `koerekortSvar()` og `anvendFiltre()`
+(ca. 190 linjer) er vaek fra js/search.js. Siden loader nu
+`js/filtrering.js` efter js/data.js og foer js/search.js, og kalder
+`Filtrering.anvendFiltre(alle, state, spring, opsamler)`. Regnskabet over de
+fravalgte kommer fra `Filtrering.uoplystOpgoerelse()`, saa forsiden og
+soegesiden ikke kan naevne de samme skjulte annoncer med hver sine feltnavne.
+Den halvdel, builder 1 lod staa, er dermed gjort faerdig.
+HVORFOR: Uden det her var reglen skrevet ned to steder igen — praecis den
+sygdom, der gav 99 forkerte koerekortmaerkater og tre runders uenighed mellem
+forsidens knap og soegesidens overskrift.
+MAALT EFTER SWAPPET: `work/forside-vs-soegning.mjs` koert mod min server:
+**40 kombinationer, 0 uenige, exit 0**. Facettallene er uaendrede (Sport 27,
+Touring 55, Cruiser 93, Naked 64, Adventure/Enduro 71, Scooter 8,
+Classic/Veteran 14, Cross/MX 3 = 335 + 48 uden type = 383), fordelingen af
+billedloese er uaendret (4, 11, 17, 24), og `npm test` er groen.
+TO TESTFILER FULGTE MED, fordi funktionen skiftede fil:
+- `js/koerekort.test.js` laeser nu `koerekortSvar`/`UOPLYST` fra
+  `js/filtrering.js` i stedet for fra `js/search.js`. Testene er uaendrede;
+  de daekker nu begge sider i stedet for én.
+- `js/eksternt-kort.test.js` har faaet `filtrering.js` ind i `KILDER` FOER
+  `search.js`. Uden den falder hele filen over "Filtrering is not defined",
+  foer den naar det, den tester.
+HVOR: `js/search.js` (blokken "Filtreringen bor i js/filtrering.js"),
+`soegning.html` (script-taggen), `js/koerekort.test.js`,
+`js/eksternt-kort.test.js`
+
+### LCP paa soegesiden: builder 3's rute er MAALT OG AFVIST — soegning, 18.08.2026
+HVAD: Builder 3 pegede paa "faerre fotos over folden paa side 1" som den
+sidste store LCP-rute. Jeg har ikke gjort det, og her er hvorfor, med
+vandfaldet fra en rigtig maaling (390x844, 4x CPU, 1,6 Mbit/s, 150 ms RTT):
+
+  487–729 ms    forsidens boot-fetch af VORES annoncer (inline i head)
+  527–2129 ms   css/styles.css
+  2232 ms       FCP
+  2224–4444 ms  de seks js-filer hentes (usminificerede)
+  4470–4796 ms  fetch af de 332 INDEKSEREDE annoncer — starter foerst her,
+                fordi den venter paa js/backend-bridge.js
+  4865 ms       foerste kortfoto begynder
+  6463 ms       det er faerdigt  ->  LCP 6472 ms
+
+75 % af LCP er gaaet, FOER billedet overhovedet er opdaget. Soeskendefotoene
+starter 4919–5053 ms, altsaa EFTER LCP-billedet, og de kan derfor ikke have
+sultet det: fjerner man dem, flytter man i bedste fald 0–300 ms af 6472.
+Efterproevet: `fetchpriority="low"` paa alle andre end det foerste kort gav
+median 6488 -> 6520 ms over 5 koersler pr. maaling — inden for stoejen.
+Attributten er blevet staaende, fordi den er rigtig og gratis, men den er
+ikke en rettelse, og den skal ikke taelles som en.
+DEN RIGTIGE RUTE ligger i filer, jeg ikke ejer, og den er stor: der findes
+allerede en `<script id="boot-listings">` i head, som henter VORES annoncer
+ved 487 ms. De 332 indekserede — dem MED fotos — har ingen tilsvarende, og
+deres hentning venter derfor 4,5 sekunder paa et script. Flyttes den fetch op
+i den inlinede boot, kan det foerste foto begynde omkring 2,3 s i stedet for
+4,9 s. Det er `scripts/inline-boot.js` + `js/backend-bridge.js`.
+Nummer to er minificering af js (2,2 s ren download).
+PRISEN VED MIT EGET ARBEJDE, med det forbehold der hoerer til:
+`js/filtrering.js` er én fil mere paa den kritiske sti (15 KB uminificeret,
+og js/search.js blev omvendt 190 linjer mindre — netto ca. +7 KB). Maalt
+back-to-back mod HEAD blev LCP-fotoet faerdigt 5.910 ms mod 6.723 ms, altsaa
+ca. 800 ms senere. DET TAL SKAL IKKE TROS SOM PRODUKTIONSTAL: dev-serveren
+(scripts/dev-server.py) svarer HTTP/1.0 UDEN keep-alive, saa hver eneste fil
+koster en ny TCP-forbindelse — ved 150 ms emuleret RTT er det ~300 ms pr. fil,
+og en fil mere kan skubbe hele koeen en runde. bikerbasen.dk ligger paa GitHub
+Pages med HTTP/2, hvor de samme 7 KB er ét multiplekset svar paa en aaben
+forbindelse. Byttehandelen er rigtig — ét filterhus frem for to kopier — men
+den understreger, at minificering er den naeste ydelsesopgave.
+OM TALLENE I DET HELE TAGET: mine 6.472 ms og builder 3's 3.433 ms maaler
+ikke det samme. Builder 3 brugte Lighthouse (simuleret Lantern-throttling),
+jeg brugte rigtig netvaerksemulering over CDP mod en HTTP/1.0-server. Kun
+FORSKELLE inden for den samme opstilling betyder noget her; de absolutte tal
+kan ikke sammenlignes paa tvaers.
+CLS er uaendret: maalt 0,0001 paa 390x844 gennem hele arbejdet.
+HVOR: maalescripts laa i work/_b4-*.mjs (slettet); tallene staar her
+
+### Efterladt til den naeste — soegning, 18.08.2026
+HVAD: Tre ting, jeg har set og ikke rettet.
+1. Ved 320 px vinduesbredde er dokumentet 333 px bredt. Skyldigheden er
+   headerens `.mobile-menu-btn`, ikke soegesiden — den er 390 og 360 ren.
+   Det er delt chrome i css/styles.css og hoerer til den, der ejer headeren.
+2. `.brand-popular` og `#brand-popular` er doed CSS efter at chipsene
+   forsvandt. Se noten i maerkeliste-blokken om hvorfor de ikke er slettet.
+3. `js/filtrering.js` indeholder stadig filtergrenene for `fuels`, `drives`
+   og `cylinders`. De er harmloese (state har ikke felterne, og
+   `TOMT_FILTER` giver dem tomme lister), men de er tre doede led i en kaede,
+   der er nem at laese forkert. De boer ud, naeste gang nogen roerer filen.
+
+### D-013: Læsevejen gik gennem et cdn — derfor svarede én URL to ting — data, 18.08.2026
+HVAD: `js/backend-bridge.js` henter nu annoncerne med almindelig `fetch()`
+direkte mod PostgREST (`restHent()`), ikke gennem Supabase-SDK'et. SDK'et
+bruges stadig til session, tokenfornyelse, favoritter og skrivning — men ikke
+til at afgøre, HVILKE annoncer siden viser. `db.photoUrl()` er erstattet af
+`lagerUrl()`, en ren strengsammensætning, så et fotos adresse heller ikke
+afhænger af biblioteket.
+HVORFOR: Kritikeren målte, at den samme søge-URL svarede "383 annoncer fundet"
+med kildelinjen "51 annoncer på Bikerbasen · 332 indekseret hos MC Syd" på
+nogle indlæsninger og "51 annoncer fundet" HELT uden kildelinje på andre.
+Kæden, hele vejen ned: `https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2`
+fejler → `typeof supabase === 'undefined'` → `init()` svarer null →
+`db.enabled === false` → `backendReady()` sprang HELE hentningen over →
+`Store.getAllListings()` faldt tilbage til demolageret. Ingen fejlbesked nogen
+steder. Tallet blev bare mindre og pænere.
+EFTERPRØVET, og det er beviset: med `route('**cdn.jsdelivr.net**', abort)` i
+playwright rammer HEAD nøjagtig den tilstand, kritikeren beskrev. Der findes
+ikke andre tilstande — det er ikke en langsom efterindlæsning, det er et
+bibliotek, der enten er der eller ikke er der.
+
+  FØR (HEAD, cdn'et falder ind og ud hver anden indlæsning, 20 indlæsninger):
+    /soegning.html            10x  383 · facet 15/39/383 · kildelinje
+                              10x   51 · facet  4/15/51  · INGEN kildelinje
+    ?priceMax=60000&koerekort=A2
+                              10x   28 · facet 14/28/74 · kildelinje · 47 skjult
+                              10x   14 · facet  4/14/21 · INGEN kildelinje · 4 skjult
+
+  EFTER (samme mål, 20 indlæsninger pr. tilstand — 120 indlæsninger i alt):
+    cdn levende / cdn flakser / cdn HELT dødt — alle tre:
+    /soegning.html            20x  383 · facet 15/39/383 · kildelinje  (1 svar)
+    ?priceMax=60000&koerekort=A2
+                              20x   28 · facet 14/28/74 · kildelinje · 47 skjult  (1 svar)
+
+De 28 er dét, kritikeren fik ved at KLIKKE sig frem. Nu giver adressen det
+samme, uanset hvordan man kom til den.
+FÆLDE: rettelsen er hverken et gentagelsesforsøg eller en timeout. Begge dele
+ville have gjort løgnen sjældnere og dermed sværere at opdage. Vagthunden
+`js/lager-determinisme.test.js` fejler, hvis `db.` kommer tilbage i
+`loadRemoteListings()`/`loadExternalListings()`, eller hvis `backendReady()`
+igen gater hentningen på `db.enabled`.
+HVOR: `js/backend-bridge.js` — `restHent()`, `lagerUrl()`, `EGNE_KOLONNER`,
+`EKSTERNE_KOLONNER`, `loadRemoteListings()`, `loadExternalListings()`,
+`backendReady()`; `js/lager-determinisme.test.js`
+
+### D-013b: Kildelinjen kan ikke stå ubetinget — så siden siger det i stedet — data, 18.08.2026
+HVAD: `window.DATA_STATUS` ('ikke-hentet' | 'sprunget-over' | 'ok' | 'fejlet')
+sættes pr. kilde i broen og læses via `Store.dataStatus()` /
+`Store.harHeleLageret()`. Fejler en hentning, skriver `meldDataafbrud()` en
+besked øverst i `<main>`: "Vi kunne ikke hente de annoncer, Bikerbasen har
+indekseret hos andre forhandlere. Du ser derfor ikke hele lageret, og hverken
+antallet af annoncer eller tallene ved filtrene dækker det, der faktisk er til
+salg." + knappen "Prøv igen".
+HVORFOR: Kildelinjen over resultaterne tegnes af `renderResultsCount()` ud fra
+det resultat, den får — den KAN ikke fortælle om annoncer, der aldrig kom, den
+skjuler sig bare (`if (!eksterne){ mix.hidden = true }`). At gøre den ubetinget
+ville kræve, at den påstod noget om et lager, siden ikke har set. Beskeden
+hører derfor hjemme i datalaget: det er det eneste sted, der ved, om vi spurgte
+og ikke fik svar. Vi skriver med vilje IKKE, hvor mange der mangler — det ved
+vi ikke, og et gættet tal ville være den samme fejl én gang til.
+EFTERPRØVET: med `eksterne_annoncer` blokeret giver 8 af 8 indlæsninger 51
+annoncer, ingen kildelinje OG beskeden — i stedet for 51 og tavshed.
+HVOR: `js/backend-bridge.js` — `meldDataafbrud()`, `window.DATA_STATUS`;
+`js/store.js` — `dataStatus()`, `harHeleLageret()`;
+`css/styles.css` — `/* ===== data ===== */`, `.data-afbrud`
+
+### D-013c: backendReady() må aldrig afvise — data, 18.08.2026
+HVAD: Hver kilde har sit eget net (`gren()`), og `meldDataafbrud()` står i
+try/catch. Funktionen svarer altid.
+HVORFOR: `js/search.js`' `boot()` gør `await backendReady()` som allerførste
+handling. Afviser den, stopper hele opstarten: ingen filtre bygges, `render()`
+kaldes aldrig, og resultatlinjen står tilbage med den STATISKE "0 annoncer
+fundet", der er skrevet i `soegning.html:496`. Set i praksis under en
+overbelastet dev-server, hvor et script blev serveret halvt: siden så ud som et
+tomt marked frem for som en fejl. Den gamle udgave havde ét stort try/catch om
+det hele netop derfor; det er bevaret, men delt op, så én kilde, der falder,
+ikke river de andre med sig — og så statussen bliver 'fejlet' i stedet for at
+blive slugt.
+HVOR: `js/backend-bridge.js` — `gren()` i `backendReady()`
+
+### D-014: "A (stor mc) 383" var en etiket, ikke et forkert tal — data, 18.08.2026
+HVAD: Chippen hedder nu "A (alle mc)". Hjælpeteksterne siger, at kategorierne
+dækker nedad. Ingen udregning er rørt.
+HVORFOR: Kritikeren skrev, at "A (stor mc) 383" og "121 annoncer mangler
+kørekortoplysning" ikke kan være rigtige samtidig. Tallene KOM allerede fra
+samme udregning — `koerekortSvar()` (nu i `js/filtrering.js`) spørger
+`passerKoerekort()` to gange, og facettallet er `=== true`, mens
+skjult-tælleren er `=== UOPLYST`. Efterprøvet i browseren: facet A1/A2/A =
+15/39/383, og `?koerekort=A1/A2/A` giver 15/39/383 fundet med 12/121/0 skjulte.
+Tallene går op for hver kategori, og mængderne ligger inden i hinanden
+(A1 ⊆ A2 ⊆ A).
+Det, der løj, var ETIKETTEN. Tre etiketter i samme form ("lille/mellem/stor")
+læses som tre kategorier, altså "383 store motorcykler" — og det modsiger både
+A2-linjen og de 121 kort, der selv skriver "Kørekort: Ikke oplyst". "A (alle
+mc)" er nøjagtig lige så lang som "A (stor mc)" (målt 117 px mod 117 px), så
+ingen chip skifter bredde.
+FÆLDE: fristes man til at lade A tælle "kun dem, der KRÆVER A", bliver filteret
+ubrugeligt for den, det er skrevet til — en køber med A-kørekort må køre alt og
+skal se alt. Tre tests låser det: tallene skal gå op, stigen skal ligge inden i
+sig selv, og A-etiketten må ikke påstå en størrelse.
+HVOR: `js/data.js` — `KOEREKORT`; `js/lager-determinisme.test.js`
+
+### D-015: En oversættelse må ikke være den eneste kopi — data, 18.08.2026
+HVAD: `normalizeExternalListing()` bærer nu `kildeStand`, `kildeTitel` og
+`sidstSet` med råt ved siden af de oversatte felter. `eksternErNy()` i
+`js/components.js` læser `kildeStand` først og beholder URL-aflæsningen som
+nødudgang.
+HVORFOR: Builder 5 måtte rekonstruere ny/brugt ved at læse annoncens ADRESSE
+hos kilden (`/Produkter/Motorcykel/Ny/`), fordi `stand` blev oversat til
+`condition` — og "ny" har ingen plads i CONDITIONS, så 162 af 332 annoncer kom
+ud som null. Oplysningen lå i databasen hele tiden; den forsvandt i broen.
+Det er den SAMME slags fejl som D-013: ingen fejlmeddelelse, bare mindre
+sandhed længere nede. Målt efter: `kildeStand` = 170 brugt / 162 ny på de 332,
+og `kildeTitel`/`sidstSet` er sat på alle 332.
+Fundet ved at gå `EKSTERNE_KOLONNER` igennem felt for felt mod det, der kom ud
+i den anden ende. `status` bæres bevidst IKKE med: forespørgslen filtrerer på
+`status=eq.aktiv`, så feltet er den samme værdi på hver eneste række.
+HVOR: `js/backend-bridge.js` — `normalizeExternalListing()`;
+`js/components.js` — `eksternErNy()`
+
+### D-016: Rækkefølgen af de indekserede er STABIL, men ikke garanteret — data, 18.08.2026
+HVAD: `loadExternalListings()` beder om `order=sidst_set.desc` — ordret det
+samme som `scripts/shared.js` bruger, når mærkesidernes kort forudtegnes. Der
+er IKKE lagt et brydeled på.
+HVORFOR: Crawleren stempler hele kørslen med samme `sidst_set`, så Postgres
+lover ingen bestemt orden mellem de 332 rækker. Målt over otte indlæsninger kom
+de i samme orden hver gang, og resultatrækkefølgen på siden var identisk — så
+det er ikke en fejl i dag. Et brydeled (`,id.asc`) ville låse det helt, men det
+skal lægges ind BEGGE steder i samme ombæring: gør man det kun i klienten,
+omrokerer mærkesiden i det øjeblik javascriptet overtager fra den forudtegnede
+markup. `scripts/shared.js` er ikke min fil.
+HVOR: `js/backend-bridge.js` — kommentaren over `loadExternalListings()`
+
+### D-017: SDK'et ude af læsevejen gav IKKE LCP — det gav robusthed — data, 18.08.2026
+HVAD: Målt, ikke gættet. Sammenligning af den nuværende kode mod nøjagtig den
+samme kode med KUN `js/backend-bridge.js` rullet tilbage til SDK-vejen, begge
+på 390x844 med Lighthouse' mobilprofil (1,6 Mbit, 150 ms RTT, 4x CPU), median
+af 5:
+    SDK-vejen:  eksterne_annoncer starter 4.076 ms · LCP 6.364 ms
+    REST-vejen: eksterne_annoncer starter 4.142 ms · LCP 6.444 ms
+Altså 66 ms senere og 80 ms dårligere — inden for støjen, og i hvert fald ikke
+en gevinst.
+HVORFOR det ikke virkede, og hvad der SKAL til: `<script defer
+src="cdn.jsdelivr.net/...">` står stadig i `soegning.html`. Deferrede scripts
+kører i dokumentets orden, så de 55 KB er hentet OG parset, før
+`js/backend-bridge.js` overhovedet begynder. At fjerne biblioteket fra
+læse-LOGIKKEN fjerner ikke DOWNLOADEN. Gevinsten ligger i at tage script-tagget
+af siden — og DET er nu sikkert for annoncerne: søgesidens resultatsæt bruger
+ikke SDK'et længere. Session, favoritter og skrivning gør, så tagget skal ikke
+slettes, det skal hentes DOVENT (fx efter første maling, eller først når nogen
+trykker log ind). Det er en ændring i `soegning.html`, og den fil er ikke min.
+ADVARSEL til den, der måler efter: en sammenligning mod `HEAD` er IKKE en
+sammenligning mod min ændring. Runde 3's arbejdstræ har bl.a. en ekstra
+scriptanmodning (`js/filtrering.js`), og HEAD mod arbejdstræet gav 5.624 mod
+6.480 ms LCP — 856 ms, som intet havde med det her at gøre. Isolér ved at
+udskifte ÉN fil.
+HVOR: `js/backend-bridge.js`; forslaget hører til `soegning.html`
+
+### D-018: Demolageret ligger STADIG i js/data.js i produktion — ikke gjort — data, 18.08.2026
+HVAD: Builder 3 bad om, at det localhost-only demolager (`DEMO_LAGER`,
+`DEMO_SAELGERE`, `buildListings()`, `SEED_REVIEWS`) blev taget ud af
+produktionens `js/data.js`. Det er IKKE gjort.
+HVORFOR IKKE: `SHOW_DEMO_DATA` er kun sand på localhost, men filen er statisk —
+indholdet leveres uanset flaget, og `const LISTINGS = ...` evalueres synkront,
+før noget kan nå at hente en anden fil. De tre veje ud er alle uden for min
+hånd eller uden for reglerne: (1) en ekstra `<script>`-linje i 14 HTML-sider,
+(2) et byggetrin i `scripts/udgiv.js`, der klipper blokken væk på vej til
+`_site/`, (3) at gøre `LISTINGS` asynkron, hvilket rører hver eneste kalder af
+`Store.getAllListings()` — netop den kodesti, D-013 lige har stabiliseret, og
+en ændring dér uden en ny 120-indlæsningsmåling ville være at bytte en bevist
+rettelse for en ubevist besparelse.
+ANBEFALING: tag (2). Byggescriptet ejer allerede forskellen mellem repoet og
+det, der ryger i luften, og en `/* demo:start */ … /* demo:slut */`-markør i
+`js/data.js` gør klipningen triviel og synlig. Størrelsen er 13.912 B gzip af
+en side, hvor 250.168 B skal ned, før LCP-billedet overhovedet bliver bedt om.
+HVOR: `js/data.js` (urørt), `scripts/udgiv.js` (forslaget)

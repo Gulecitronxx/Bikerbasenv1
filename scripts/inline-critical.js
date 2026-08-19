@@ -2,6 +2,45 @@
    styles.css ikke-render-blokerende. Kører sidst i byggekæden (efter
    stamp-version), så den arbejder på den friske ?v=.
 
+   ============================================================
+   LÆS FØRST: INDLEJRINGEN ER SLÅET FRA — OG DET ER MÅLT
+   ============================================================
+   `IKKE_UDSKUDT` nedenfor matcher ALLE sider, så ingen side får en indlejret
+   kritisk blok i dag. Maskineriet er ikke slettet, fordi forudsætningen kan
+   ændre sig igen; her er den, og her er tallene.
+
+   Forudsætningen var, at `css/styles.css` var dyr at vente på: 52.486 B
+   gzip, render-blokerende, VeryHigh. Med `scripts/udgiv.js`' minificering af
+   `_site/` (17.08.2026) er den **20.641 B gzip**. Samtidig kostede den
+   indlejrede blok bytes i HVER eneste sideindlæsning, og de bytes ligger
+   allerforrest i køen — foran css, fonte, javascript og datahentningen:
+
+     soegning.html   18.447 B gzip med blokken  ->   9.778 B uden  (-8.669)
+     index.html      12.023 B                   ->   7.310 B       (-4.713)
+     annonce.html    12.572 B                   ->   5.694 B       (-6.878)
+
+   Altså betalte hver side for det samme CSS to gange. Målt (Lighthouse
+   12.8.2, mobil, 4x CPU, gzip-server, minificeret _site, 3 kørsler pr. celle):
+
+     soegning  91 / LCP 3.542  ->  92 / LCP 3.432
+     forside   93 / LCP 3.186  ->  95 / LCP 2.727-3.145
+     annonce   95 / LCP 2.924  ->  97 / LCP 2.516-2.628
+
+   CLS blev 0,000 / 0,000 / 0,001 begge veje. Det er ikke en tilfældighed:
+   med et render-blokerende ark er HELE stilarket til stede ved første
+   maling, så geometrien er rigtig fra første pixel. Den indlejrede blok var
+   altid et UDSNIT, og hvert udsnit er et sted, hvor to kopier kan blive
+   uenige — se de to fælder i work/DECISIONS.md ("Ny sektion i styles.css
+   skal registreres i scripts/inline-critical.js" og noten om forsidens
+   egen sektion, der IKKE var registreret). Den faelde findes ikke laengere.
+
+   HVORNÅR SKAL DEN SLÅS TIL IGEN? Når `_site/css/styles.css` gzip nærmer
+   sig 40 KB igen. Mål det, sæt `IKKE_UDSKUDT = []` og mål igen — begge veje,
+   på mindst tre kørsler, og med CLS i tabellen.
+
+   Historikken herunder står, fordi den forklarer HVORFOR listerne ser ud som
+   de gør, hvis nogen tænder for det igen.
+
    Hvorfor: styles.css er 110KB og render-blokerende. Forsiden fik det fikset
    i runde 3-4 (LCP 3.5s → 2.1s); søgesiden ventede stadig ~1.4s på hele arket
    før første maling. Nu får alle sider samme behandling.
@@ -81,15 +120,16 @@ const PAGES = [
   [/^(vilkaar|privatlivspolitik|sikkerhed|404)\.html$/, ['Utility', 'Legal / static content', 'Trust & safety']],
 ];
 
-/* Sider hvor det kritiske udsnit ikke er bevist at give SAMME geometri som
-   det fulde ark over folden. De beholder det render-blokerende <link>: en
-   langsommere første maling er bedre end et layouthop (CLS).
+/* Sider der beholder det render-blokerende <link> og IKKE får en indlejret
+   kritisk blok.
 
-   Listen er tom nu — alle 14 sider er målt stabile ved 390px bredde. Kommer
-   der en ny side (eller en ny sektion i styles.css), så mål den samme vej:
-   sammenlign hvert elements top/højde med og uden det asynkrone ark, og sæt
-   siden herind, indtil forskellen over folden er 0. */
-const IKKE_UDSKUDT = [];
+   Den var oprindelig en undtagelsesliste for sider, hvor udsnittet ikke var
+   bevist at give samme geometri som det fulde ark. I dag står den på ALLE
+   sider, og grunden er ikke geometri men bytes — se den lange forklaring
+   øverst i filen, hvor tallene står. Skal indlejringen tændes igen, er det
+   HER, det sker: `[]` giver alle sider en kritisk blok, og en enkelt regex
+   giver den til alle undtagen dem, der matcher. */
+const IKKE_UDSKUDT = [/.*/];
 
 /* ---- 2b. Ekstra regler der KUN hører hjemme i den kritiske blok ----
    Til rene ydelsesregler bundet til én sides dokumentstruktur — altså noget,
@@ -178,7 +218,7 @@ for (const file of files){
       .replace(/<style id="critical">[\s\S]*?<\/style>\n?/, '');
     if (html !== før){
       fs.writeFileSync(htmlPath, html);
-      console.log(`  ${file.padEnd(46)} render-blokerende (ikke bevist stabil)`);
+      console.log(`  ${file.padEnd(46)} render-blokerende, ingen indlejret blok`);
     }
     continue;
   }

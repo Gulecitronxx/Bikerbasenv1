@@ -10,9 +10,13 @@ const EMPTY_STATE = {
   q: '', types: [], brands: [], models: [], priceMin: null, priceMax: null,
   yearMin: null, yearMax: null, kmMax: null, ccmMin: null, ccmMax: null,
   hkMin: null, hkMax: null,
-  regions: [], conditions: [], equipment: [], fuels: [], drives: [],
+  /* fuels, drives og cylinders er FJERNET i runde 3 sammen med deres tre
+     filtergrupper. De var personbilsformularens felter, og ingen af de 383
+     annoncer i lageret oplyser dem — hverken kilden eller vores egne. Se
+     kommentaren i soegning.html, hvor grupperne stod. */
+  regions: [], conditions: [], equipment: [],
   service: [],
-  cylinders: [], colors: [], maxAgeDays: null, photosOnly: false,
+  colors: [], maxAgeDays: null, photosOnly: false,
   ejereMax: null, nysynet: false, vinterklar: false,
   dealerOnly: false, koerekort: '', sort: 'blandet', page: 1,
 };
@@ -33,7 +37,7 @@ let state = { ...EMPTY_STATE };
    tilføjes ét sted for at kunne deles, bogmærkes og gemmes som søgeagent. */
 const LIST_PARAMS = {
   types: 'types', brands: 'brands', models: 'model', regions: 'regions', conditions: 'conditions',
-  equipment: 'udstyr', fuels: 'braendstof', drives: 'traek', colors: 'farve',
+  equipment: 'udstyr', colors: 'farve',
   service: 'service',
 };
 const NUM_PARAMS = {
@@ -53,7 +57,6 @@ function readStateFromURL(){
   if (p.get('type')) state.types = p.get('type').split(',').filter(Boolean);
   for (const [key, param] of Object.entries(NUM_PARAMS)) state[key] = numOrNull(p.get(param));
   if (p.get('maxPrice')) state.priceMax = numOrNull(p.get('maxPrice'));
-  state.cylinders = (p.get('cyl') || '').split(',').filter(Boolean).map(Number);
   state.photosOnly = p.get('billeder') === '1';
   state.dealerOnly = p.get('dealer') === '1';
   state.nysynet = p.get('nysynet') === '1';
@@ -76,7 +79,6 @@ function currentQueryString(includeSort = false){
   for (const [key, param] of Object.entries(NUM_PARAMS)){
     if (state[key] != null) p.set(param, state[key]);
   }
-  if (state.cylinders.length) p.set('cyl', state.cylinders.join(','));
   if (state.photosOnly) p.set('billeder', '1');
   if (state.dealerOnly) p.set('dealer', '1');
   if (state.nysynet) p.set('nysynet', '1');
@@ -201,9 +203,6 @@ function feltDaekning(){
     // equipment: [] betyder "spurgt, intet ekstraudstyr" — det er ikke noget
     // at filtrere på. Kun en udfyldt liste tæller som dækning.
     equipment:       har(l => Array.isArray(l.equipment) && l.equipment.length > 0),
-    fuel:            har(l => l.fuel != null),
-    drive:           har(l => l.drive != null),
-    cylinders:       har(l => l.cylinders != null),
     color:           har(l => l.color != null),
   };
 }
@@ -215,6 +214,75 @@ function feltDaekning(){
    som er synlig fra 960px og opefter. */
 const FACET_SLOT = '<span class="facet-n" aria-hidden="true"></span>';
 
+/* ---------- At skjule en filtergruppe skal VIRKE ----------
+
+   `gruppe.hidden = true` alene er ikke nok, og det er ikke teori: en
+   kritiker målte syv tomme overskrifter i panelet på en side, hvor koden
+   nedenfor allerede satte hidden. Attributten hidden er browserens egen
+   regel `[hidden]{display:none}`, og den kan slås af en hvilken som helst
+   regel i et af de tre stilark siden har (den indlejrede kritiske blok,
+   soeg-perf og styles.css), der giver .filter-group en display-værdi.
+   `style.display` er den eneste, ingen af dem kan overtrumfe.
+
+   Begge sættes: attributten er den, der fortæller skærmlæsere og
+   :not([hidden])-selektorer sandheden, og inline-stilen er den, der
+   garanterer, at øjet ser det samme som skærmlæseren. */
+function skjulGruppe(gruppe){
+  gruppe.hidden = true;
+  gruppe.style.display = 'none';
+  gruppe.open = false;
+}
+function visGruppe(gruppe){
+  gruppe.hidden = false;
+  gruppe.style.removeProperty('display');
+}
+/* Vis kun, hvis der faktisk står en kontrol i gruppen. */
+function visGruppeHvisIndhold(gruppe){
+  const kontroller = gruppe.querySelectorAll('input, select, .chip, button[data-cylinder]').length;
+  if (kontroller) visGruppe(gruppe); else skjulGruppe(gruppe);
+}
+
+/* Indholdet i de dækningsbetingede grupper. Ligger på modulniveau og ikke
+   inde i populateFilterUI(), fordi gruppen skal kunne bygges SENERE end
+   panelet — se synkroniserKravGrupper(). `ejereSyn` har ingen bygger: dens
+   tre felter står i den statiske markup. */
+const KRAV_BYGGERE = {
+  serviceHistorik: () => { document.getElementById('filter-service').innerHTML = SERVICE_HISTORIK_OPTIONS.map(s =>
+    `<label class="checkbox-row"><input type="checkbox" data-service="${s}"><span>${s}</span></label>`).join(''); },
+  equipment: () => { document.getElementById('filter-equipment').innerHTML = EQUIPMENT_GROUPS.map(g => `
+    <div class="filter-subgroup">
+      <p class="filter-subgroup-title">${g.group}</p>
+      ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}"><span>${i.label}</span></label>`).join('')}
+    </div>`).join(''); },
+  color: () => { document.getElementById('filter-colors').innerHTML = COLORS.map(c =>
+    `<label class="checkbox-row"><input type="checkbox" data-color="${c}"><span>${c}</span></label>`).join(''); },
+};
+
+/* Lageret kan vokse EFTER panelet er bygget (backend-broen henter i to
+   omgange, og en anden builder arbejder netop nu på at gøre resultatsættet
+   deterministisk). Bygges panelet på et halvt lager, låses gaten fast på et
+   svar, der var rigtigt i et halvt sekund — og en gruppe, der HAR fået
+   dækning imens, ville stå tom. Den her kaldes derfor igen fra render-etape
+   2; den koster tre gennemløb af lageret med tidligt stop, og den bygger
+   gruppens indhold, hvis den ikke er bygget endnu.
+
+   Sidste ord har KONTROLLERNE, ikke dækningen: en kritiker talte syv tomme
+   overskrifter i panelet, mens gaten var på plads i koden. Prøven i
+   visGruppeHvisIndhold() spørger DOM'en, om der faktisk står en kontrol i
+   gruppen, og kan derfor ikke tage fejl af det. */
+function synkroniserKravGrupper(kendtDaekning){
+  if (!filtersBuilt) return;
+  const daekning = kendtDaekning || feltDaekning();
+  document.querySelectorAll('.filter-group[data-krav]').forEach(gruppe => {
+    const felt = gruppe.dataset.krav;
+    if (!daekning[felt]){ skjulGruppe(gruppe); return; }
+    const bygger = KRAV_BYGGERE[felt];
+    const krop = gruppe.querySelector('.filter-body');
+    if (bygger && krop && !krop.children.length) bygger();
+    visGruppeHvisIndhold(gruppe);
+  });
+}
+
 function populateFilterUI(){
   const daekning = feltDaekning();
   const alle = Store.getAllListings();
@@ -225,10 +293,20 @@ function populateFilterUI(){
   document.getElementById('filter-price-quick').innerHTML = PRIS_INTERVALLER.map(p =>
     `<button type="button" class="chip" data-pris="${p.id}">${p.label}${FACET_SLOT}</button>`).join('');
 
-  // Populære mærker først som chips, derefter den fulde, søgbare liste i et
-  // højde-begrænset felt. Begge dele bygges af lageret: et mærke, der ikke er
-  // til salg, er ikke et filter.
-  const POPULAR_BRANDS = ['Yamaha','Honda','BMW','Suzuki','Kawasaki','Harley-Davidson','Ducati','KTM'];
+  /* ÉN liste, og hvert mærke står i den éN gang.
+
+     Her lå først en række "populære" chips (Yamaha, Honda, BMW, Suzuki,
+     Kawasaki, Harley-Davidson, Ducati, KTM) og DEREFTER hele det alfabetiske
+     katalog. Seks af de otte står også i lageret, og en kritiker talte dem:
+     BMW, Ducati, Harley-Davidson, Honda, Kawasaki og KTM optrådte to gange i
+     samme filtergruppe, med hvert sit facettal ved siden af. To knapper, der
+     gør nøjagtig det samme, er ikke en genvej — det er et spørgsmål om,
+     hvorfor der er to.
+
+     Chipsene er væk, og listen er den ene vej ind. Den koster ikke en genvej:
+     hver række har sit eget facettal, søgefeltet står lige over den, og
+     "Vis alle N mærker" folder resten ud med ét tryk. Det, der forsvandt, er
+     dubletten. */
   const iLager = new Set(alle.map(l => l.brand).filter(Boolean));
   // Et mærke valgt via URL bliver stående, selv om det ikke er i lageret —
   // ellers kunne pillen ikke fjernes fra det sted, den blev sat.
@@ -237,8 +315,6 @@ function populateFilterUI(){
   const brandRows = maerker.map(b =>
     `<label class="checkbox-row" data-brand-row="${escapeHTML(b.toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(b)}"><span>${escapeHTML(b)}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `
-    <div class="brand-popular" id="brand-popular">${POPULAR_BRANDS.filter(b=>iLager.has(b)).map(b =>
-      `<button type="button" class="chip" data-brand-chip="${escapeHTML(b)}">${escapeHTML(b)}${FACET_SLOT}</button>`).join('')}</div>
     <div class="filter-search"><input type="text" id="brand-search" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
     <div class="checkbox-list" id="brand-list">${brandRows}
       <p class="brand-noresult" id="brand-noresult" hidden>Ingen mærker matcher.</p>
@@ -261,30 +337,7 @@ function populateFilterUI(){
   /* Grupperne med data-krav bygges KUN, hvis lageret kan svare på feltet.
      Det sparer samtidig ~470 DOM-knuder ved opstart — udstyrslisten alene er
      33 checkbokse i seks undergrupper. */
-  const byg = {
-    serviceHistorik: () => { document.getElementById('filter-service').innerHTML = SERVICE_HISTORIK_OPTIONS.map(s =>
-      `<label class="checkbox-row"><input type="checkbox" data-service="${s}"><span>${s}</span></label>`).join(''); },
-    ejereSyn: () => {},   // felterne står i den statiske markup
-    equipment: () => { document.getElementById('filter-equipment').innerHTML = EQUIPMENT_GROUPS.map(g => `
-      <div class="filter-subgroup">
-        <p class="filter-subgroup-title">${g.group}</p>
-        ${g.items.map(i => `<label class="checkbox-row"><input type="checkbox" data-equipment="${i.id}"><span>${i.label}</span></label>`).join('')}
-      </div>`).join(''); },
-    fuel: () => { document.getElementById('filter-fuels').innerHTML = FUELS.map(f =>
-      `<label class="checkbox-row"><input type="checkbox" data-fuel="${f}"><span>${f}</span></label>`).join(''); },
-    drive: () => { document.getElementById('filter-drives').innerHTML = DRIVES.map(d =>
-      `<label class="checkbox-row"><input type="checkbox" data-drive="${d}"><span>${d}</span></label>`).join(''); },
-    cylinders: () => { document.getElementById('filter-cylinders').innerHTML = CYLINDERS.map(c =>
-      `<button type="button" class="chip" data-cylinder="${c}">${c}</button>`).join(''); },
-    color: () => { document.getElementById('filter-colors').innerHTML = COLORS.map(c =>
-      `<label class="checkbox-row"><input type="checkbox" data-color="${c}"><span>${c}</span></label>`).join(''); },
-  };
-  document.querySelectorAll('.filter-group[data-krav]').forEach(gruppe => {
-    const felt = gruppe.dataset.krav;
-    if (!daekning[felt]){ gruppe.hidden = true; return; }
-    gruppe.hidden = false;
-    byg[felt]?.();
-  });
+  synkroniserKravGrupper(daekning);
 
   // Ikonerne der bor inde i panelet — hører til her, ikke i populateChrome.
   document.querySelectorAll('.filter-group summary .chev').forEach(c => c.innerHTML = Icon.chevronDown);
@@ -377,8 +430,6 @@ function renderFacetCounts(){
     saetFacet(c, f.pris.get(c.dataset.pris) || 0, erAktivtPrisinterval(c.dataset.pris)));
   document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb =>
     saetFacet(cb.closest('.checkbox-row'), f.brands.get(cb.dataset.brand) || 0, state.brands.includes(cb.dataset.brand)));
-  document.querySelectorAll('#brand-popular .chip').forEach(c =>
-    saetFacet(c, f.brands.get(c.dataset.brandChip) || 0, state.brands.includes(c.dataset.brandChip)));
   document.querySelectorAll('#filter-regions input[data-region]').forEach(cb =>
     saetFacet(cb.closest('.checkbox-row'), f.regions.get(cb.dataset.region) || 0, state.regions.includes(cb.dataset.region)));
   document.querySelectorAll('#filter-conditions input[data-condition]').forEach(cb =>
@@ -622,8 +673,20 @@ function deltTitel(l){
    gang til — to rettelser af samme fejl, der ikke kunne se hinanden. */
 const UOPLYST_CELLE = '<span class="row-unknown">Ikke oplyst</span>';
 
+/* Kategorien kommer fra koerekortMaerkat() og ikke fra
+   koerekortForListing() direkte.
+
+   Builder 5 fandt aarsagen til 99 forkerte maerkater: eksternKoerekort()
+   i js/components.js var en ANDEN, selvstaendig udgave af koerekortreglen,
+   og den skrev "mindst A2" paa annoncer, filteret afviste for A2.
+   koerekortMaerkat() er nu det ene sted, et maerkat bliver til: den
+   spoerger koerekortForListing() og kontrollerer DEREFTER svaret mod
+   passerKoerekort(), saa listen og filteret ikke kan sige hver sit.
+   Kaldene her var ikke forkerte — men de var en fjerde indpakning om
+   den samme regel, og en fjerde indpakning er praecis maaden, de 99
+   opstod paa. */
 function rowSpecsHTML(l){
-  const kk = koerekortForListing(l);
+  const kk = koerekortMaerkat(l).kode;
   const motor = l.ccm == null
     ? UOPLYST_CELLE
     : escapeHTML(formatCcm(l.ccm)) + (l.power ? ` <span class="row-hk">· ${escapeHTML(formatPower(l.power))}</span>` : '');
@@ -804,7 +867,7 @@ let swipeIndex = 0;
 function swipeCardHTML(l, stackPos){
   const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
   const loc = escapeHTML(l.city || l.region || '');
-  const k = koerekortForListing(l);
+  const k = koerekortMaerkat(l).kode;
   return `
   <article class="swipe-card" data-stack="${stackPos}" style="--stack:${stackPos}">
     <div class="swipe-card-media">
@@ -910,9 +973,6 @@ function reflectFilterPanel(){
   });
   // Skal stå EFTER afkrydsningen: et valgt mærke må ikke være foldet væk.
   opdaterMaerkeliste();
-  document.querySelectorAll('#brand-popular .chip').forEach(ch => {
-    ch.classList.toggle('active', state.brands.includes(ch.dataset.brandChip));
-  });
   renderModelFilter();
   document.querySelectorAll('#filter-regions input').forEach(cb => {
     cb.checked = state.regions.includes(cb.dataset.region);
@@ -926,17 +986,8 @@ function reflectFilterPanel(){
   document.querySelectorAll('#filter-equipment input').forEach(cb => {
     cb.checked = state.equipment.includes(cb.dataset.equipment);
   });
-  document.querySelectorAll('#filter-fuels input').forEach(cb => {
-    cb.checked = state.fuels.includes(cb.dataset.fuel);
-  });
-  document.querySelectorAll('#filter-drives input').forEach(cb => {
-    cb.checked = state.drives.includes(cb.dataset.drive);
-  });
   document.querySelectorAll('#filter-colors input').forEach(cb => {
     cb.checked = state.colors.includes(cb.dataset.color);
-  });
-  document.querySelectorAll('#filter-cylinders .chip').forEach(ch => {
-    ch.classList.toggle('active', state.cylinders.includes(Number(ch.dataset.cylinder)));
   });
 }
 
@@ -968,241 +1019,44 @@ function reflectStateToUI(){
   document.getElementById('sort-select').value = state.sort;
 }
 
-/* ================= Filtrering med tre svar =================
+/* ================= Filtreringen bor i js/filtrering.js =================
 
-   Et filter blev før stillet et ja/nej-spørgsmål. Men en annonce kan svare
-   tre ting: JA, NEJ og VED IKKE — og de 332 indekserede annoncer fra MC Syd
-   svarer VED IKKE på næsten alt. Kilden fortæller mærke, model, årgang, km,
-   ccm, pris, postnummer. Den fortæller ikke stand, udstyr, antal ejere, syn
-   eller vinterklargøring, fordi de felter ikke findes hos den.
+   HER stod `UOPLYST`, `filtrerMedUoplyst()`, `koerekortSvar()` og
+   `anvendFiltre()` — cirka 190 linjer. De er IKKE slettet: builder 1
+   flyttede dem ordret ud i `js/filtrering.js`, saa forsidens soegekort og
+   denne side kan stille det samme spoergsmaal til det samme lager og faa
+   det samme svar. Hele begrundelsen, og de tre gange fejlen kom igen,
+   staar i filens hoved og i work/DECISIONS.md under "Ét filterhus".
 
-   Med kun ja/nej blev VED IKKE tvunget om til ét af de to, og begge udfald
-   var forkerte på hver sin måde. Målt på siden før denne rettelse:
+   Indtil nu havde de to sider hver sin kopi. De var ENIGE — builder 1
+   maalte 40 filterkombinationer uden én uenighed — men to kopier, der er
+   enige i dag, er ikke to sider, der ikke KAN vaere uenige. Det er samme
+   sygdom som de 99 forkerte koerekortmaerkater, builder 5 lige har lukket:
+   én regel, skrevet ned to steder.
 
-     Tvunget til NEJ  — ét klik på landsdel, type, stand, udstyr, brændstof,
-       træk, farve, cylindre eller service, og alle 332 forsvandt lydløst.
-       Brugeren så et resultattal falde og troede, der ikke var flere
-       motorcykler. Intet sagde, at der lå 332 tilbage bag filteret.
+   `state` er nu et ARGUMENT i stedet for en modulvariabel — det er den
+   eneste forskel paa signaturen:
+     Filtrering.anvendFiltre(alle, state, spring, opsamler)
 
-     Tvunget til JA   — værre, og det var der ingen der havde set. `l.km <=
-       10.000` med km = null blev til `null <= 10000`, altså sandt: 163
-       annoncer uden kilometertal påstod at have under 10.000 km. "Maks. 50
-       hk" gav alle 332, Gold Wings inklusive. Og "Kørekort A2" gav ALLE 332
-       — en 20-årig med A2-kort fik en 1800 ccm Harley vist som lovlig.
-       (Kørekortdelen er siden rettet ved roden i js/data.js, commit e29c381;
-       de øvrige "maks."-filtre rettes her.)
+   RAEKKEFOELGEN I KAEDEN ER EN DEL AF SVARET. En annonce fjernes ved det
+   FOERSTE filter, der ikke kan svare for den, og taelles derfor kun én
+   gang — det er dét, der goer, at tallene i `opsamler` maa laegges sammen.
+   Skal et nyt filter tilfoejes, hoerer det til i js/filtrering.js, ikke
+   her, og saa virker det begge steder med det samme feltnavn.
 
-   Nu svarer et prædikat UOPLYST, når annoncen ikke kender feltet.
-
-   VALGET: uoplyst tæller som NEJ — annoncen vises ikke — men den tælles, og
-   brugeren får det at vide over resultaterne.
-
-   Begrundelse. Et filter er et løfte. Sætter man "Brugt", er løftet "alt
-   herunder er brugt". En annonce uden stand kan ikke holde det løfte, så
-   den hører ikke med i resultatet — at tage den med ville gøre løftet
-   værdiløst for alle de andre træf, og på kørekortfilteret ville det være
-   direkte farligt. Men at fjerne den UDEN at sige det er den fejl, vi kom
-   fra: brugeren kan ikke se forskel på "der findes ikke flere" og "der er
-   flere, vi bare ikke ved nok om". Derfor det tredje svar: udeluk, og sig
-   det højt. Så kan brugeren selv slå filteret fra og se dem.
-
-   Og vi gætter ikke. Stand kunne sættes til "Brugt", for det er et
-   brugtmarked, og så ville de 332 overleve standsfilteret. Det er en
-   påstand, vi selv har fundet på, som ville stå på kortet som en oplysning
-   fra sælgeren. Et tal, der mangler, er bedre end et tal, der lyver. */
-const UOPLYST = Symbol('uoplyst');
+   `js/filtrering.js` loades i soegning.html EFTER js/data.js (den bruger
+   passerKoerekort og hkEllerNull) og FOER js/search.js. */
 
 /* Hvor mange annoncer det enkelte filter har skjult, fordi oplysningen
-   manglede. Nulstilles ved hver kørsel af getFilteredListings(). En annonce
-   fjernes ved det FØRSTE filter, der skjuler den, og kan derfor kun tælles
-   én gang — tallene kan lægges sammen uden dobbelttælling. */
+   manglede. Nulstilles ved hver koersel af getFilteredListings(). */
 let uoplystSkjult = [];
 
-/* opsamler: hvor de skjulte skal bogføres, eller null. Facettællingen længere
-   nede kører den samme filterkæde seks gange for at finde ud af, hvor mange
-   træf hvert enkelt valg ville give — de kørsler må ikke lægge deres tal oven
-   i brugerens. Uden parameteren stod der pludselig "2.298 annoncer er ikke
-   vist" under et filter, der havde skjult 383. */
-function filtrerMedUoplyst(list, felt, praedikat, opsamler){
-  const beholdt = [];
-  let skjult = 0;
-  for (const l of list){
-    const svar = praedikat(l);
-    if (svar === UOPLYST) skjult++;
-    else if (svar) beholdt.push(l);
-  }
-  if (skjult && opsamler) opsamler.push({ felt, antal: skjult });
-  return beholdt;
-}
-
-/* Kørekort med tre svar — UDEN at gentage reglerne.
-
-   passerKoerekort() i js/data.js er og bliver det ene sted, der afgør, hvad
-   A1 og A2 betyder. Her spørger vi den bare to gange.
-
-   Den kan kun svare ja eller nej, og et nej dækker over to forskellige ting:
-   "motorcyklen er for kraftig" og "vi mangler den oplysning, der skulle
-   afgøre det". Søgesiden har brug for at skelne — ikke for at kende
-   grænserne. Så vi spørger igen med de manglende felter sat til den
-   gunstigst mulige værdi. Skifter svaret fra nej til ja, afhang nejet af
-   noget, vi ikke ved, og det rigtige svar er UOPLYST.
-
-   Det er med vilje ikke en kopi af reglerne. Flyttes A2-grænsen fra 48 til
-   50 hk i js/data.js, følger denne funktion med af sig selv. En førsteudgave
-   herinde gentog grænserne, og så havde vi to steder, der bestemte hvad A2
-   betød — præcis den slags dobbelthed, der lod den oprindelige fejl opstå,
-   hvor kommentaren i js/data.js sagde ét og koden noget andet.
-
-   Forudsætning: for A1 og A2 er både ccm og hk ØVRE grænser, så lavest
-   muligt er altid det gunstigste. Kommer der en kategori med en nedre
-   grænse, holder den antagelse ikke, og prøven skal skrives om. */
-function koerekortSvar(l, kat){
-  if (passerKoerekort(l, kat)) return true;
-
-  /* 1 og ikke 0 — begge steder, og det er ikke pedanteri.
-
-     hkEllerNull() i js/data.js læser 0 som UKENDT, ikke som nul hestekræfter
-     (`v > 0 ? v : null`). Den regel kom ind for at lukke et falsk A2-stempel
-     på 1200-kubiks maskiner uden oplyst effekt, og den er rigtig. Men den
-     gjorde `proeve.power = 0` selvmodsigende: prøven skulle netop sætte en
-     KENDT, gunstigst mulig værdi ind, og 0 blev læst som "stadig ukendt".
-     A2-grenen svarer false på ukendt effekt, prøven fejlede, og
-     koerekortSvar() svarede false i stedet for UOPLYST.
-
-     Konsekvensen ramte præcis dét, funktionen blev skrevet for at forhindre:
-     ét klik på A2 skjulte 332 annoncer og rapporterede 0 skjulte. Linjen
-     "X annoncer er ikke vist, fordi kørekortkategori ikke er oplyst" — hele
-     ærligheden i filteret — forsvandt lydløst.
-
-     1 hk og 1 ccm er den mindste værdi, der stadig tæller som oplyst.
-     Forenkler nogen dem til 0, fordi "det er jo det laveste", er fejlen
-     tilbage — og den er tavs. Testene står nederst i js/koerekort.test.js.
-
-     Og "mangler" afgøres med js/data.js' egen læsning og ikke med `== null`.
-     Ukendt effekt har mange stavemåder — databasen skriver null, en tom
-     formular "", MC Syd "-", og en kilde, der ikke kan finde tallet, kan
-     finde på at skrive 0. hkEllerNull() kalder dem alle ukendt; `== null`
-     fangede kun de to første. Resten faldt igennem til `return false` og
-     blev skjult uden at blive talt — samme tavshed, anden dør. */
-  const proeve = { ...l };
-  let manglerNoget = false;
-  if (hkEllerNull(l.power) == null){ proeve.power = 1; manglerNoget = true; }
-  if (!(Number(l.ccm) > 0)){ proeve.ccm = 1; manglerNoget = true; }
-  if (manglerNoget && passerKoerekort(proeve, kat)) return UOPLYST;
-
-  return false;
-}
-
-/* Filterkæden, kørt som ÉN funktion med to skruer på:
-
-     spring     navnet på ét filter, der skal springes over
-     opsamler   hvor de uoplyste bogføres (null = tæl ikke med)
-
-   `spring` er det, der gør facettællingen mulig og rigtig. Tallet ved siden
-   af "Yamaha" skal svare på: hvor mange træf får jeg, hvis jeg vælger Yamaha
-   HER, med alt det andet, jeg allerede har sat, i behold. Så skal mærkefilteret
-   selv være slået fra i den udregning — ellers tæller man kun inden for det
-   mærke, der allerede er valgt, og alle andre mærker viser nul.
-
-   Kæden lå før direkte i getFilteredListings(). Rækkefølge og prædikater er
-   uændrede; det eneste nye er `brug()` foran hver blok. */
+/* Kaldes 8-10 gange pr. maling (facettaellingen alene koerer kaeden seks
+   gange), saa den korte form er her frem for i hvert kaldested. */
 function anvendFiltre(alle, spring, opsamler){
-  let list = alle;
-  const brug = (navn) => navn !== spring;
-
-  const q = state.q.trim().toLowerCase();
-  if (brug('q') && q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
-
-  // Mærke, model og titel kender vi altid — de kommer med annoncen fra kilden.
-  if (brug('brands') && state.brands.length) list = list.filter(l => state.brands.includes(l.brand));
-  if (brug('models') && state.models.length) list = list.filter(l => state.models.includes(l.model));
-
-  // Kategorifiltre: værdien er enten oplyst, eller også er den det ikke.
-  if (brug('types') && state.types.length)
-    list = filtrerMedUoplyst(list, 'motorcykeltype', l => l.type == null ? UOPLYST : state.types.includes(l.type), opsamler);
-  if (brug('regions') && state.regions.length)
-    list = filtrerMedUoplyst(list, 'landsdel', l => l.region == null ? UOPLYST : state.regions.includes(l.region), opsamler);
-  if (brug('conditions') && state.conditions.length)
-    list = filtrerMedUoplyst(list, 'stand', l => l.condition == null ? UOPLYST : state.conditions.includes(l.condition), opsamler);
-  if (state.service.length)
-    list = filtrerMedUoplyst(list, 'servicehistorik', l => l.serviceHistorik == null ? UOPLYST : state.service.includes(l.serviceHistorik), opsamler);
-
-  /* Talfiltre. Bemærk at BEGGE ender skal spørge om værdien overhovedet er
-     kendt. Før gjorde kun den nedre ende det — ved et tilfælde, fordi
-     `null >= 5000` er falsk, mens `null <= 5000` er sandt. Den asymmetri var
-     hele grunden til, at "maks."-filtrene løj, mens "min."-filtrene bare
-     skjulte. */
-  if (brug('price') && state.priceMin != null)
-    list = filtrerMedUoplyst(list, 'pris', l => l.price == null ? UOPLYST : l.price >= state.priceMin, opsamler);
-  if (brug('price') && state.priceMax != null)
-    list = filtrerMedUoplyst(list, 'pris', l => l.price == null ? UOPLYST : l.price <= state.priceMax, opsamler);
-  if (state.yearMin != null)
-    list = filtrerMedUoplyst(list, 'årgang', l => l.year == null ? UOPLYST : l.year >= state.yearMin, opsamler);
-  if (state.yearMax != null)
-    list = filtrerMedUoplyst(list, 'årgang', l => l.year == null ? UOPLYST : l.year <= state.yearMax, opsamler);
-  if (state.kmMax != null)
-    list = filtrerMedUoplyst(list, 'kilometertal', l => l.km == null ? UOPLYST : l.km <= state.kmMax, opsamler);
-  if (state.ccmMin != null)
-    list = filtrerMedUoplyst(list, 'ccm', l => l.ccm == null ? UOPLYST : l.ccm >= state.ccmMin, opsamler);
-  if (state.ccmMax != null)
-    list = filtrerMedUoplyst(list, 'ccm', l => l.ccm == null ? UOPLYST : l.ccm <= state.ccmMax, opsamler);
-  if (state.hkMin != null)
-    list = filtrerMedUoplyst(list, 'hestekræfter', l => l.power == null ? UOPLYST : l.power >= state.hkMin, opsamler);
-  if (state.hkMax != null)
-    list = filtrerMedUoplyst(list, 'hestekræfter', l => l.power == null ? UOPLYST : l.power <= state.hkMax, opsamler);
-
-  /* Udstyr er et OG-filter: vælger man ABS og varmehåndtag, vil man have
-     begge dele. Brændstof, træktype, farve og cylindre er ELLER inden for
-     hver gruppe — dér leder man efter én af flere acceptable værdier.
-
-     equipment: null betyder "ikke oplyst"; equipment: [] betyder "vi har
-     spurgt sælgeren, og der er intet ekstraudstyr". De to skal ikke
-     behandles ens — den tomme liste er et rigtigt nej. */
-  if (state.equipment.length){
-    list = filtrerMedUoplyst(list, 'udstyr', l =>
-      l.equipment == null ? UOPLYST : state.equipment.every(e => l.equipment.includes(e)), opsamler);
-  }
-  if (state.fuels.length)
-    list = filtrerMedUoplyst(list, 'brændstof', l => l.fuel == null ? UOPLYST : state.fuels.includes(l.fuel), opsamler);
-  if (state.drives.length)
-    list = filtrerMedUoplyst(list, 'træktype', l => l.drive == null ? UOPLYST : state.drives.includes(l.drive), opsamler);
-  if (state.colors.length)
-    list = filtrerMedUoplyst(list, 'farve', l => l.color == null ? UOPLYST : state.colors.includes(l.color), opsamler);
-  if (state.cylinders.length)
-    list = filtrerMedUoplyst(list, 'cylinderantal', l => l.cylinders == null ? UOPLYST : state.cylinders.includes(Number(l.cylinders)), opsamler);
-
-  /* "Oprettet inden for" spørger til annoncens alder. De indekserede har med
-     vilje ingen createdAt (se normalizeExternalListing i js/backend-bridge.js:
-     crawledatoen er ikke annoncedatoen). Det er også et uoplyst felt. */
-  if (state.maxAgeDays != null){
-    const cutoff = Date.now() - state.maxAgeDays * 86400000;
-    list = filtrerMedUoplyst(list, 'oprettelsesdato', l => {
-      if (!l.createdAt) return UOPLYST;
-      const t = new Date(l.createdAt).getTime();
-      return Number.isNaN(t) ? UOPLYST : t >= cutoff;
-    }, opsamler);
-  }
-
-  /* Billeder og sælgertype er IKKE uoplyste. Vi kan selv se, om der fulgte
-     et billede med, og kilden oplyser sælgertypen. Her er et nej et rigtigt
-     nej, og filtrene bliver stående som de var. */
-  if (state.photosOnly) list = list.filter(l => (l.photoUrls || []).length > 0);
-  if (state.dealerOnly) list = list.filter(l => l.isDealer);
-
-  if (state.ejereMax != null)
-    list = filtrerMedUoplyst(list, 'antal ejere', l => l.antalEjere == null ? UOPLYST : l.antalEjere <= state.ejereMax, opsamler);
-  if (state.nysynet){
-    const y = new Date().getFullYear();
-    list = filtrerMedUoplyst(list, 'seneste syn', l => l.sidsteSyn == null ? UOPLYST : l.sidsteSyn >= y - 1, opsamler);
-  }
-  if (state.vinterklar)
-    list = filtrerMedUoplyst(list, 'vinterklargøring', l => l.vinterklar == null ? UOPLYST : !!l.vinterklar, opsamler);
-  if (brug('koerekort') && state.koerekort)
-    list = filtrerMedUoplyst(list, 'kørekortkategori', l => koerekortSvar(l, state.koerekort), opsamler);
-
-  return list;
+  return Filtrering.anvendFiltre(alle, state, spring, opsamler);
 }
-
+const koerekortSvar = Filtrering.koerekortSvar;
 /* ============ Standardsorteringen: "Blandet udbud" ============
 
    NAVNET ER LAVET OM I RUNDE 2, OG DET ER RETTELSEN.
@@ -1267,7 +1121,10 @@ const harFoto = l => !!(l.photoUrls && l.photoUrls[0]);
 const OPLYSTHED = [
   [l => l.price != null, 2],
   [l => l.km != null, 2],
-  [l => koerekortForListing(l) != null, 2],
+  // Samme ene udregning som maerkatet paa kortet: kan koerekortMaerkat()
+  // ikke navngive en kategori, har annoncen ikke svaret paa spoergsmaalet,
+  // og saa maa den heller ikke faa point for det.
+  [l => koerekortMaerkat(l).kode != null, 2],
   [l => l.year != null, 1],
   [l => l.ccm != null, 1],
   [l => l.power != null, 1],
@@ -1339,21 +1196,74 @@ function blandetRaekkefoelge(list){
 
    Tallene er talt på det resultat, der står på skærmen. Ingen af dem er
    skrevet i hånden: skifter lageret sammensætning, skifter sætningen med. */
+/* Hele reglen, med begge led og med forbeholdet. Den står i en (i) og ikke
+   på linjen, fordi linjen skal kunne læses på en telefon uden at koste fire
+   linjer over den første pris — men den skal FINDES, ellers er navnet på
+   sorteringen igen et løfte, man ikke kan efterprøve. */
+function forklarSortering(){
+  openInfoModal('Sådan er rækkefølgen sat', `
+    <p><b>Blandet udbud</b> deler resultatet i to: annoncer med foto og
+    annoncer uden. De uden foto fordeles jævnt ud over listen, så deres andel
+    af hver side svarer til deres andel af hele resultatet. Alternativet ville
+    være en første side med enten kun fotos eller kun grå felter — og ingen af
+    delene ligner det lager, siden påstår at vise.</p>
+    <p style="margin-top:12px;">Inden for <i>hver af de to grupper</i> står de
+    annoncer først, der svarer på flest af dine spørgsmål: pris, kilometertal
+    og kørekortkategori vejer tungest, derefter årgang, kubik, hk, stand og en
+    rigtig beskrivelse. Der gives kun point for felter, kilden faktisk har
+    oplyst — aldrig for et gæt.</p>
+    <p style="margin-top:12px;">Vær opmærksom på, at det andet led sjældent
+    kan ses på side 1: de fleste annoncer fra samme forhandler har præcis det
+    samme sæt oplyste felter. Forskellen viser sig længere nede i listen,
+    hvor "Ikke oplyst" begynder at optræde. Rækkefølgen mellem to annoncer med
+    lige mange oplyste felter afgøres af datoen og derefter af annoncens id,
+    så det samme link altid giver den samme liste.</p>`);
+}
+
+/* Sætningen over resultaterne. Runde 2 skrev BEGGE regler her, og de to
+   modsagde hinanden på skærmen: kort nr. 4 var uden foto og manglede hk, og
+   kunne altså ikke være et af dem med "flest oplyste felter". Det var ikke
+   udregningen, der var gal — det var sætningen, der udelod, at oplystheden
+   kun rangerer INDEN FOR hver af de to grupper. Linjen siger nu kun det, man
+   kan tælle efter på skærmen; resten står i (i). */
 function renderSorteringsNote(sideItems, heleResultatet){
   const el = document.getElementById('sortering-note');
   if (!el) return;
 
   const udenIAlt = heleResultatet.filter(l => !harFoto(l)).length;
   const udenPaaSiden = sideItems.filter(l => !harFoto(l)).length;
+  const infoKnap = `<button type="button" class="sortering-info" id="sortering-info-btn"`
+    + ` title="Sådan er rækkefølgen sat"`
+    + ` aria-label="Sådan er rækkefølgen sat">${Icon.info}</button>`;
+
+  /* "Nyeste først" er den anden sortering, der har brug for en linje — og
+     det er den vigtigste af de to. 332 af 383 annoncer har ingen
+     oprettelsesdato (de indekserede; vi kender ikke datoen hos kilden og
+     gætter den ikke), så valget lægger de 51 med dato øverst og alle de
+     andre bagefter. Uden linjen ser side 1 ud som en fejl: overskriften
+     siger 383, og hvert eneste kort er en annonce uden foto. Med linjen er
+     det en oplysning om lageret. */
+  if (state.sort === 'date-desc'){
+    const medDato = heleResultatet.filter(l => l.createdAt).length;
+    if (!medDato || medDato === heleResultatet.length){ el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = `Nyeste først: kun ${medDato} af ${heleResultatet.length} annoncer `
+      + `har en oprettelsesdato. De står øverst; de øvrige `
+      + `${heleResultatet.length - medDato} er indekseret hos en forhandler, hvor `
+      + `vi ikke kender datoen, og står derfor efter i blandet rækkefølge.${infoKnap}`;
+    el.querySelector('#sortering-info-btn').addEventListener('click', forklarSortering);
+    return;
+  }
+
   const blandes = state.sort === 'blandet'
     && udenIAlt > 0 && udenIAlt < heleResultatet.length;
   if (!blandes){ el.hidden = true; return; }
 
   el.hidden = false;
-  el.textContent = `Blandet udbud: annoncerne med flest oplyste felter står `
-    + `først, og de ${udenIAlt} uden foto er fordelt jævnt i stedet for at `
-    + `ligge samlet — ${udenPaaSiden} af de ${sideItems.length} på denne side, `
-    + `samme andel som i hele resultatet.`;
+  el.innerHTML = `Blandet udbud: de ${udenIAlt} annoncer uden foto er fordelt `
+    + `jævnt ud over listen i stedet for at ligge samlet — `
+    + `${udenPaaSiden} af de ${sideItems.length} på denne side.${infoKnap}`;
+  el.querySelector('#sortering-info-btn').addEventListener('click', forklarSortering);
 }
 
 function getFilteredListings(){
@@ -1392,6 +1302,29 @@ function getFilteredListings(){
      uden foto er en handling på HELE listen — så den kan ikke ligge i
      `sorters`. */
   if (state.sort === 'blandet') return blandetRaekkefoelge(list);
+
+  /* "Nyeste først" var en fælde, og det er målt: valget lagde de 51 annoncer
+     MED dato øverst og de 332 uden bagefter — og de 51 er præcis dem, der
+     ikke har fået uploadet et foto. Side 1 blev derfor 24 grå felter, mens
+     overskriften sagde "383 annoncer fundet". Det næst-mest oplagte
+     sorteringsvalg på en markedsplads gav en side, der lignede en fejl.
+
+     Datoen er stadig et løfte, og de daterede står stadig først i
+     datorækkefølge — det er dét, valget hedder. Rettelsen er, hvad der sker
+     med RESTEN: de blev før liggende i lagerets vilkårlige rækkefølge, og nu
+     ordnes de af blandetRaekkefoelge(), altså bedst oplyste først med de
+     billedløse fordelt jævnt. Det gør side 3 og frem til en brugbar liste i
+     stedet for et restlager, og det koster ikke ét gran af datoløftet:
+     ingen annonce uden dato kan komme foran en med.
+
+     Den anden halvdel af rettelsen står i renderSorteringsNote(), som
+     skriver hvor mange af annoncerne der overhovedet har en dato. */
+  if (state.sort === 'date-desc'){
+    const medDato = list.filter(l => l.createdAt).sort(sorters['date-desc']);
+    const udenDato = list.filter(l => !l.createdAt);
+    return medDato.concat(blandetRaekkefoelge(udenDato));
+  }
+
   list.sort(sorters[state.sort] || sorters['date-desc']);
   return list;
 }
@@ -1428,14 +1361,12 @@ function renderUoplystNote(){
     anker.after(el);
   }
 
-  const antal = uoplystSkjult.reduce((sum, x) => sum + x.antal, 0);
+  /* Opgoerelsen — hvor mange, og hvilke feltnavne i hvilken opremsning —
+     kommer fra js/filtrering.js, saa forsiden og denne side ikke kan naevne
+     de samme fravalgte annoncer med hver sine ord. Kun slutningen paa
+     saetningen er sidens egen ("Fjern filteret for at se dem"). */
+  const { antal, felter, feltTekst } = Filtrering.uoplystOpgoerelse(uoplystSkjult);
   if (!antal){ el.hidden = true; el.textContent = ''; return; }
-
-  // Samme felt kan skjule i to omgange (fx både pris-min og pris-maks).
-  const felter = [...new Set(uoplystSkjult.map(x => x.felt))];
-  const feltTekst = felter.length === 1
-    ? felter[0]
-    : felter.slice(0, -1).join(', ') + ' og ' + felter[felter.length - 1];
 
   const dem = antal === 1 ? 'den' : 'dem';
   const udvej = felter.length === 1
@@ -1481,10 +1412,7 @@ function activeFilterPills(){
   state.conditions.forEach(c => pills.push({ label: c, clear: () => state.conditions = state.conditions.filter(x=>x!==c) }));
   state.service.forEach(s => pills.push({ label: 'Service: ' + s, clear: () => state.service = state.service.filter(x=>x!==s) }));
   state.equipment.forEach(e => pills.push({ label: equipmentLabel(e), clear: () => state.equipment = state.equipment.filter(x=>x!==e) }));
-  state.fuels.forEach(f => pills.push({ label: f, clear: () => state.fuels = state.fuels.filter(x=>x!==f) }));
-  state.drives.forEach(d => pills.push({ label: d, clear: () => state.drives = state.drives.filter(x=>x!==d) }));
   state.colors.forEach(c => pills.push({ label: c, clear: () => state.colors = state.colors.filter(x=>x!==c) }));
-  state.cylinders.forEach(c => pills.push({ label: `${c} cylindre`, clear: () => state.cylinders = state.cylinders.filter(x=>x!==c) }));
   return pills;
 }
 
@@ -1792,6 +1720,9 @@ function renderSecondary(pills, pageItems, heading, total, totalPages){
      og ingen venter på dem — panelet står allerede med de foregående tal, og
      de skifter kun med et ciffer i en boks med fast bredde. */
   renderFacetCounts();
+  /* Samme etape, samme grund: dækningen kan have ændret sig, siden panelet
+     blev bygget, fordi lageret hentes i to omgange. */
+  synkroniserKravGrupper();
 
   // Få-resultater-panel: gør et tyndt resultat til en konvertering i stedet for
   // et dødt hjørne (kun når brugeren faktisk har filtreret).
@@ -1907,10 +1838,17 @@ function renderModelFilter(){
   const models = [...availableModels()]
     .filter(m => (antal.get(m) || 0) > 0 || state.models.includes(m))
     .sort((a, b) => a.localeCompare(b, 'da'));
+  /* skjulGruppe/visGruppe og ikke `group.hidden` alene: se kommentaren over
+     skjulGruppe(). Model-gruppen var en af de syv tomme overskrifter, en
+     kritiker talte i panelet. */
   if (!state.brands.length || !models.length){
-    group.hidden = true; mount.innerHTML = ''; return;
+    skjulGruppe(group); mount.innerHTML = ''; return;
   }
-  group.hidden = false;
+  // Kommer gruppen frem efter at have været skjult, skal den være foldet ud
+  // — den dukkede op, fordi brugeren lige valgte et mærke.
+  const varSkjult = group.hidden;
+  visGruppe(group);
+  if (varSkjult) group.open = true;
   // .checkbox-list og ikke .checkbox-scroll: samme grund som mærkelisten —
   // et rullefelt inde i arket inde i siden. Modellisten er kort (kun modeller,
   // der findes i lageret), så den kan bare flyde.
@@ -1997,14 +1935,6 @@ function wireFilterControls(){
       pruneModels(); state.page = 1; render();
     });
   });
-  // Populære mærker som hurtig-chips (samme state som checkboksene).
-  document.querySelectorAll('#brand-popular .chip').forEach(ch => {
-    ch.addEventListener('click', () => {
-      const b = ch.dataset.brandChip;
-      state.brands = state.brands.includes(b) ? state.brands.filter(x=>x!==b) : [...state.brands, b];
-      pruneModels(); state.page = 1; render();
-    });
-  });
   // Model-checkbokse (delegeret — de gen-renderes når mærkevalget ændrer sig).
   document.getElementById('filter-models')?.addEventListener('change', (e) => {
     const cb = e.target.closest('input[data-model]'); if (!cb) return;
@@ -2036,37 +1966,26 @@ function wireFilterControls(){
       state.page = 1; render();
     });
   });
-  document.querySelectorAll('#filter-service input').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const s = cb.dataset.service;
-      state.service = cb.checked ? [...state.service, s] : state.service.filter(x=>x!==s);
-      state.page = 1; render();
-    });
-  });
-
-  /* De nye checkbox-grupper opfører sig ens: slå værdien til eller fra i
-     den tilsvarende liste i state. */
+  /* Service, udstyr og farve lyttes DELEGERET på beholderen, ikke på hver
+     checkboks. Grunden er ny i runde 3: de tre grupper bygges først, når
+     lageret oplyser feltet, og det kan ske EFTER panelet er koblet op (se
+     synkroniserKravGrupper). En lytter sat på en checkboks, der ikke fandtes
+     endnu, findes heller ikke — gruppen ville stå der og se ud til at virke.
+     Beholderen står i markuppen fra første maling og forsvinder aldrig. */
   const checkboxGroup = (containerId, dataKey, stateKey) => {
-    document.querySelectorAll(`#${containerId} input`).forEach(cb => {
-      cb.addEventListener('change', () => {
-        const v = cb.dataset[dataKey];
-        state[stateKey] = cb.checked ? [...state[stateKey], v] : state[stateKey].filter(x => x !== v);
-        state.page = 1; render();
-      });
+    const boks = document.getElementById(containerId);
+    if (!boks) return;
+    boks.addEventListener('change', (e) => {
+      const cb = e.target.closest(`input[data-${dataKey}]`);
+      if (!cb) return;
+      const v = cb.dataset[dataKey];
+      state[stateKey] = cb.checked ? [...state[stateKey], v] : state[stateKey].filter(x => x !== v);
+      state.page = 1; render();
     });
   };
+  checkboxGroup('filter-service', 'service', 'service');
   checkboxGroup('filter-equipment', 'equipment', 'equipment');
-  checkboxGroup('filter-fuels', 'fuel', 'fuels');
-  checkboxGroup('filter-drives', 'drive', 'drives');
   checkboxGroup('filter-colors', 'color', 'colors');
-
-  document.querySelectorAll('#filter-cylinders .chip').forEach(ch => {
-    ch.addEventListener('click', () => {
-      const c = Number(ch.dataset.cylinder);
-      state.cylinders = state.cylinders.includes(c) ? state.cylinders.filter(x=>x!==c) : [...state.cylinders, c];
-      state.page = 1; render();
-    });
-  });
 }
 
 /* Kontroller der står i den statiske HTML og skal virke fra første sekund:
@@ -2133,7 +2052,7 @@ function wireCoreControls(){
 
   document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 
-  const resetAll = () => { state = { ...EMPTY_STATE, types: [], brands: [], models: [], regions: [], conditions: [], service: [], equipment: [], fuels: [], drives: [], cylinders: [], colors: [] }; render(); };
+  const resetAll = () => { state = { ...EMPTY_STATE, types: [], brands: [], models: [], regions: [], conditions: [], service: [], equipment: [], colors: [] }; render(); };
   document.getElementById('clear-filters').addEventListener('click', resetAll);
   document.getElementById('clear-filters-mobile').addEventListener('click', resetAll);
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);

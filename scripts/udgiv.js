@@ -34,6 +34,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
+const { minifyJS, minifyCSS } = require('./shared');
 
 const ROOT = path.join(__dirname, '..');
 const UD = path.join(ROOT, '_site');
@@ -61,7 +63,16 @@ const RODMOENSTRE = [
   /^sitemap\.xml$/,
   /^favicon\.(png|svg|ico)$/,
   /^apple-touch-icon\.png$/,
-  /^logo\.png$/, /^logo-mark\.png$/,
+  /* `logo.png` (1.025.234 B) STOD her og er taget ud igen. Ingen side, intet
+     stilark og intet script refererer den — kun `logo-mark.png` (4.292 B)
+     bruges i headeren, og `og-image.png` er den, delingskortene peger på.
+     Den lå altså som 1 MB på handelsdomænet uden en eneste læser: fem gange
+     supabase-bundtet, dobbelt så meget som hele img/-mappen. Filen bliver
+     liggende i repoet — den er kilden, logo-mark er skåret ud af.
+     Sikkerhedsnettet er trin 3 nedenfor: begynder en side at referere den,
+     AFBRYDER udgivelsen med filnavnet i beskeden. Der er altså ingen måde,
+     det her kan blive et stille 404. */
+  /^logo-mark\.png$/,
   /^og-image\.png$/,               // kun refereret som absolut URL i <meta>
 ];
 
@@ -72,6 +83,43 @@ const FORBUDTE_TYPER = /\.(sql|ya?ml|md|env|pem|key)$/i;
 
 function ryd(dir){
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+}
+
+/* ---- Minificering på vej ud ----
+
+   Filnavnene er MED VILJE uændrede: `_site/css/styles.css` er den samme
+   adresse som `css/styles.css`, bare uden kommentarer og indrykning. Det er
+   hele pointen. Peger siderne i stedet på et `styles.min.css`, holder
+   `css/styles.css` op med at være det, browseren henter — og så er de fire
+   buildere, der redigerer filen samtidig, pludselig afhængige af et byg, de
+   ikke ved findes. Dertil matcher alle fire regex'er i
+   `scripts/inline-critical.js` `css/styles.css` bogstaveligt; et nyt filnavn
+   får den til at springe alle 14 sider over UDEN at fejle.
+
+   Regnskabet føres, fordi det er tallet, hele øvelsen handler om: hver
+   sparet byte foran datahentningen er tid, søgesidens LCP-billede ikke skal
+   stå i kø for (målt: 58 % af dens LCP var "Load Delay", altså ren kø). */
+const skrump = { js: [0, 0], css: [0, 0] };
+const syntaksfejl = [];
+
+function skrumpFil(navn, kilde){
+  const raa = fs.readFileSync(kilde, 'utf8');
+  if (/\.js$/.test(navn)){
+    const ud = minifyJS(raa);
+    // Et minificeret javascript, der ikke kan parses, er en hvid side i
+    // drift — og det ville først blive opdaget af en bruger. Derfor
+    // syntakstjekkes hver eneste fil her, og udgivelsen AFBRYDER nedenfor.
+    try { new vm.Script(ud, { filename: navn }); }
+    catch (e){ syntaksfejl.push(`${navn}: ${e.message}`); return raa; }
+    skrump.js[0] += raa.length; skrump.js[1] += ud.length;
+    return ud;
+  }
+  if (/\.css$/.test(navn)){
+    const ud = minifyCSS(raa);
+    skrump.css[0] += raa.length; skrump.css[1] += ud.length;
+    return ud;
+  }
+  return null;
 }
 
 function kopierMappe(fra, til, regler){
@@ -85,7 +133,9 @@ function kopierMappe(fra, til, regler){
     if (regler.tillad && !regler.tillad.test(post.name)) continue;
     if (regler.undtag && regler.undtag.test(post.name)) continue;
     fs.mkdirSync(til, { recursive: true });
-    fs.copyFileSync(kilde, maal);
+    const skrumpet = skrumpFil(post.name, kilde);
+    if (skrumpet === null) fs.copyFileSync(kilde, maal);
+    else fs.writeFileSync(maal, skrumpet);
     filer.push(path.relative(UD, maal).replace(/\\/g, '/'));
   }
   return filer;
@@ -176,6 +226,17 @@ for (const f of udgivet){
   efterMappe[nøgle] = (efterMappe[nøgle] || 0) + 1;
 }
 for (const k of Object.keys(efterMappe).sort()) console.log(`  ${k.padEnd(10)} ${efterMappe[k]}`);
+
+const kb = b => (b / 1024).toFixed(1) + ' KB';
+if (skrump.js[0]) console.log(`  js  minificeret  ${kb(skrump.js[0])} -> ${kb(skrump.js[1])}`);
+if (skrump.css[0]) console.log(`  css minificeret  ${kb(skrump.css[0])} -> ${kb(skrump.css[1])}`);
+
+if (syntaksfejl.length){
+  console.error('\nAFBRUDT: minificeringen gav javascript, der ikke kan parses.');
+  console.error('Kilden er URØRT — fejlen sidder i minifyJS() i scripts/shared.js.');
+  syntaksfejl.forEach(f => console.error('  ' + f));
+  process.exit(1);
+}
 
 if (forbudte.length){
   console.error('\nAFBRUDT: filtyper, der ikke maa udgives, er havnet i _site:');

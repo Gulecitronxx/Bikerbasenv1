@@ -183,16 +183,70 @@ function isOwnListing(l){
    tegnes. Målet står derfor på elementet og ikke kun i stilarket. */
 function listingMediaHTML(l, alt, eager){
   const url = l.photoUrls && l.photoUrls[0];
+  /* fetchpriority="low" paa alt andet end det foerste kort.
+
+     Builder 3 pegede paa, at fire soeskendefotos til 240 kB hentes
+     samtidig med LCP-billedet: de baerer loading="lazy", men kort 2-5
+     ligger inden for Chromes egen lazy-taerskel og hentes alligevel.
+
+     AERLIGT OM VIRKNINGEN: jeg maalte den, og den er nul. Median-LCP paa
+     /soegning.html (390x844, 4x CPU, 1,6 Mbit/s, 5 koersler) var 6488 ms
+     foer og 6520 ms efter — inden for stoejen. Grunden staar i vandfaldet:
+     LCP-billedet starter 4.865 ms inde og soeskendene 4.919-5.053 ms, altsaa
+     EFTER det. Der var ingen konkurrence at fjerne. Attributten bliver
+     staaende, fordi den er rigtig (et billede under folden skal ikke
+     konkurrere med et over den) og gratis — men den er ikke en rettelse,
+     og den skal ikke taelles som en.
+
+     Det, der FAKTISK holder LCP nede, ligger ikke i denne fil: fotoet kan
+     ikke begynde foer de 332 indekserede annoncer er hentet, og den
+     hentning starter foerst 4.470 ms inde, fordi den venter paa at
+     js/backend-bridge.js er hentet og fortolket. Se blokken i
+     work/DECISIONS.md. */
   const loadAttrs = eager
     ? 'loading="eager" fetchpriority="high" decoding="async"'
-    : 'loading="lazy" decoding="async"';
+    : 'loading="lazy" fetchpriority="low" decoding="async"';
   if (url){
     return `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" ${loadAttrs} class="card-photo">`;
   }
   return `<div class="foto-tom">`
     + `<span class="foto-tom-ikon" style="width:26px;height:26px;display:block">${Icon.camera}</span>`
     + `<p class="foto-tom-titel">Ingen fotos i denne annonce</p>`
+    + fotoTomFaktaHTML(l)
     + `</div>`;
+}
+
+/* ---------- Feltet uden foto må gerne bære oplysninger ----------
+
+   Målt af en kritiker: 284x378 px gråt felt pr. billedløs annonce, brugt til
+   ingenting — mens EFFEKT, TYPE og STAND lå klar i de samme data og blev
+   vist på annoncens detaljeside ét klik senere. Det er ikke manglende data,
+   det er spildt plads, og det er den plads, fotoet ellers ville have brugt.
+
+   De tre felter er valgt, fordi de er dem, kortet IKKE viser i forvejen:
+   kortet har pris, årgang, kilometer og kubik. Effekt, type og stand er
+   præcis dem, en mc-køber bruger til at sortere med, og de tre er samtidig
+   dem, kilden oftest udelader — så feltet siger noget forskelligt fra kort
+   til kort i stedet for at være 24 ens grå felter.
+
+   ÆRLIGHEDEN ER UÆNDRET: kun oplyste felter tegnes. Der står aldrig "Ikke
+   oplyst" her, og der opfindes ingen værdi — mangler alle tre, står feltet
+   som før med sætningen alene. Sætningen bliver stående uanset hvad; det er
+   den, der er løftet ("Vi viser ikke en tegning i stedet", annoncesiden).
+
+   Effekt springes over på indekserede annoncer: externalCardHTML() viser
+   allerede "Effekt" i sin spec-liste, og det samme tal to gange på ét kort
+   ligner en fejl. */
+function fotoTomFaktaHTML(l){
+  const fakta = [];
+  const hk = Number(l && l.power) > 0 ? Number(l.power) : null;
+  if (hk && !l.isExternal) fakta.push(formatPower(hk));
+  if (l && l.type) fakta.push(typeLabel(l.type));
+  if (l && l.condition) fakta.push(l.condition);
+  if (!fakta.length) return '';
+  return `<p class="foto-tom-fakta">`
+    + fakta.map(f => `<span>${escapeHTML(String(f))}</span>`).join('')
+    + `</p>`;
 }
 
 /* Hvem sælger den?
@@ -314,6 +368,26 @@ function delModelOgVariant(model){
   return [base.join(' '), ord.slice(base.length).join(' ')];
 }
 
+/* Kortets anden linje SKAL være et ord fra vores eget filter.
+
+   `variant` fra crawleren er pr. konstruktion kun karrosserityper — se
+   delModelOgVariant() i crawler/normalize.js, som netop flytter de kendte
+   typeord derover og lader alt andet blive i modelnavnet. Men de 332 rækker
+   i basen blev crawlet med kildens ordforråd, så de bærer stadig "Street",
+   "Sportstouring", "Offroader", "Klassiker" og "Klassiker Cruiser" — ord,
+   der ikke findes i Type-filteret. Kritikeren målte ti af fireogtyve kort
+   med sådan et ord, og et klik på "Naked 64" gav en side fuld af kort mærket
+   "Street".
+
+   Rettelsen læser ikke ordet om; den skifter det ud med `typeLabel(l.type)`,
+   altså PRÆCIS den værdi, filteret sorterer på. Så kan etiket og filter ikke
+   blive uenige, uanset hvad der står i basen. Kan typen ikke kortlægges
+   (`l.type` er null — fx MC Syds "Motard"), falder linjen helt væk: et ord,
+   ingen kan klikke på, er ikke en oplysning.
+
+   Kun DB-varianten skiftes ud. Fallbacken nedenunder graver modelnavnets
+   hale ud af en streng ("Gold Wing", "Magna", "Bandit") — det er ikke
+   typeord, og de skal blive stående. */
 function eksternTitel(l){
   const brand = String(l.brand || '').trim();
   let model = String(l.model || '').trim();
@@ -323,6 +397,7 @@ function eksternTitel(l){
     const m = model.toLowerCase(), v = variant.toLowerCase();
     if (m === v) model = '';
     else if (m.endsWith(' ' + v)) model = model.slice(0, model.length - variant.length).trim();
+    variant = l.type ? typeLabel(l.type) : '';
   } else {
     [model, variant] = delModelOgVariant(model);
   }
@@ -352,26 +427,107 @@ function eksternSalgsmarkoerer(l){
   return { tekst: alle[0] + (alle.length > 1 ? ` +${alle.length - 1}` : ''), alle };
 }
 
-/* Kørekortkategorien er det felt, der afgør om køberen overhovedet må køre
-   motorcyklen — og derfor det felt, man ikke må gætte forkert på.
+/* ============ CVR: modulus 11 ============
 
-   koerekortForListing() læser hk som 0 når effekten er ukendt, og svarer så
-   "A2" på alt over 125 ccm. På vores egne annoncer er hk altid udfyldt, så
-   det holder. På de indekserede er hk ikke i skemaet endnu: hver eneste
-   Kawasaki Z750 (~106 hk, kræver A) ville stå som A2. Det er ikke en
-   skønhedsfejl — det er en køber, der møder op med det forkerte kørekort.
+   Cifrene vægtes 2,7,6,5,4,3,2,1, og summen skal gå op i 11. Sidste ciffer
+   ER kontrolcifferet. Det er ren aritmetik på strengen: den siger intet om,
+   hvorvidt virksomheden findes, og må aldrig skrives som en verificering.
+   Men den afslører et nummer, der er tastet forkert eller fundet på — og et
+   opdigtet CVR-nummer er den billigste svindel, der findes på en
+   markedsplads.
 
-   Så: kender vi hk, bruger vi den fælles regel. Kender vi den ikke, siger vi
-   kun det, slagvolumen alene kan bære — 125 ccm og derunder er A1, alt
-   derover kræver mindst A2. Dagen hk står i basen, bliver det til "A2"
-   eller "A" af sig selv. */
-function eksternKoerekort(l){
-  const hk = Number(l.power) || 0;
+   Funktionen lå i js/forhandler.js alene, og annoncesidens sælgerkort tilbød
+   derfor stadig at slå et nummer op, som profilsiden ét klik senere
+   afviste. To sider, samme nummer, to svar. Reglen bor her, fordi det er den
+   fil, begge sider indlæser. */
+function cvrKontrolOK(nr){
+  const s = String(nr || '').replace(/\D/g, '');
+  if (s.length !== 8) return false;
+  const vaegte = [2, 7, 6, 5, 4, 3, 2, 1];
+  let sum = 0;
+  for (let i = 0; i < 8; i++) sum += Number(s[i]) * vaegte[i];
+  return sum % 11 === 0;
+}
+
+/* ============ Kørekortmærkatet — ÉT sted, og det samme som filteret ============
+
+   Kørekortkategorien er det felt, der afgør om køberen overhovedet må køre
+   motorcyklen. Et forkert svar her koster ham kørekortet og motorcyklen, og
+   det er derfor det ene felt på sitet, hvor tavshed er billigere end en
+   påstand.
+
+   HER STOD eksternKoerekort(), OG DEN VAR UENIG MED FILTERET.
+   Over 125 ccm uden oplyst effekt skrev den mærkatet "Kørekort mindst A2".
+   Samtidig svarede passerKoerekort(l, 'A2') FALSE på de samme annoncer, så
+   Kørekort A2-filteret sorterede dem fra. Målt på lageret: 99 kort bar
+   "mindst A2", og alle 99 var filtreret ud under A2. En Honda GL 1100 Gold
+   Wing på 1.100 ccm med ukendt effekt stod med mærkatet.
+
+   "Mindst A2" er isoleret set sandt — over 125 ccm kræver mindst A2 — men
+   det læses som "A2 er nok", og det ved vi ikke. A2 har INGEN
+   slagvolumengrænse: uden hk kan A2 og A ikke skelnes. Så mærkatet lovede
+   en tyveårig noget, filteret nægtede at love, og af de to var filteret det
+   rigtige.
+
+   Reglen nu: mærkatet nævner en kategori, KUN når koerekortForListing()
+   kan udlede den, og kun når passerKoerekort() er enig. Ellers står der
+   ingen kategori — men den sætning, der forklarer hvorfor, står der stadig.
+   Ingen ny færdselslov i denne fil: begge funktioner bor i js/data.js. */
+
+/* Højeste specifikke effekt på en serie-motorcykel, med luft.
+   Kawasaki H2R er 998 cm³ og 310 hk = 0,31 hk/cm³ og er kompressorladet;
+   en Ducati Panigale V4 ligger på 0,20. Loftet her er 0,4, altså langt over
+   alt, der findes — det fanger ikke en kraftig motorcykel, det fanger et
+   sammenløbet felt hos kilden (fx ccm læst ind i hk-feltet). Er parret
+   umuligt, ved vi ikke hvilket af de to tal der er forkert, og så kan
+   kategorien ikke udledes af nogen af dem. */
+const HK_PR_CCM_LOFT = 0.4;
+
+const KK_UAFGJORT = 'Kørekort ikke afgjort';
+const KK_UKENDT   = 'Kørekort ukendt';
+
+/* Sætningen, der bliver stående. Den siger BÅDE hvad vi ved (over 125 ccm
+   kræver mindst A2) og hvad vi ikke ved (om A2 er nok) — og den siger hvor
+   hullet er: hos kilden, ikke hos os. */
+const KK_OVER_125_EKSTERN = 'Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.';
+const KK_OVER_125_EGEN    = 'Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen, så vi kan ikke afgøre, om den også kan køres på A2.';
+
+function koerekortMaerkat(l){
+  const hk  = hkEllerNull(l.power);
   const ccm = Number(l.ccm) || 0;
-  if (hk > 0 && ccm > 0) return { vaerdi: koerekortForListing(l), praecis: true };
-  if (ccm > 0 && ccm <= A1_MAX_CCM) return { vaerdi: 'A1', praecis: true };
-  if (ccm > A1_MAX_CCM) return { vaerdi: 'mindst A2', praecis: false };
-  return null;   // hverken ccm eller hk: kortet siger "Kørekort ukendt"
+
+  // 1. Selvmodsigende tal. Vi retter dem ikke og vælger ikke side.
+  if (hk != null && ccm > 0 && hk / ccm > HK_PR_CCM_LOFT){
+    return { kode: null, tekst: KK_UAFGJORT, forklaring:
+      `Annoncen oplyser ${hk} hk på ${formatCcm(ccm)}. De to tal kan ikke passe sammen på en motorcykel, så mindst det ene er læst forkert — og så kan kørekortkategorien ikke udledes af nogen af dem. Spørg sælgeren om den rigtige effekt.` };
+  }
+
+  const kode = koerekortForListing(l);
+
+  /* 2. Vagthund. Mærkat og filter SKAL svare det samme; gør de ikke det,
+        er én af de to funktioner blevet ændret uden den anden, og så er det
+        mærkatet, der holder mund. Den her gren skal aldrig kunne ses — men
+        det skulle "mindst A2" heller ikke. */
+  if (kode && !passerKoerekort(l, kode)){
+    return { kode: null, tekst: KK_UAFGJORT, forklaring:
+      'Vores to udregninger af kørekortkategorien er uenige om den her annonce, og så viser vi ingen kategori. Spørg sælgeren.' };
+  }
+
+  if (kode){
+    const grundlag = [ccm ? formatCcm(ccm) : null, hk != null ? formatPower(hk) : null].filter(Boolean).join(' og ');
+    return { kode, tekst: `Kørekort ${kode}`, forklaring:
+      `Kan føres på ${kode}-kørekort. Udledt af ${grundlag} — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.` };
+  }
+
+  // 3. Over 125 ccm uden effekt: den ene ting vi ved, og den ene vi ikke gør.
+  if (ccm > A1_MAX_CCM){
+    return { kode: null, tekst: KK_UAFGJORT,
+      forklaring: l.isExternal ? KK_OVER_125_EKSTERN : KK_OVER_125_EGEN };
+  }
+
+  // 4. Hverken kubik eller effekt: der er intet at sige, heller ikke uvist.
+  return { kode: null, tekst: KK_UKENDT, forklaring:
+    'Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.' };
 }
 
 /* Ét ord for "det ved vi ikke", ét sted.
@@ -413,6 +569,47 @@ function eksternPrisTekst(price){
   return price == null ? 'Pris ved henvendelse' : formatPrice(price);
 }
 
+/* ---------- Ny eller brugt ----------
+
+   162 af de 332 indekserede annoncer er FABRIKSNYE motorcykler. De ligger
+   under mcsyd.dk/Produkter/Motorcykel/Ny/, har "Kilometer: Ikke oplyst" og
+   årgange 2023-2026 — og de stod uden ét ord om det, under overskrifter der
+   siger "brugte motorcykler til salg". Forskellen er ikke kosmetisk: den
+   afgør garanti, reklamationsret og hvad et bud overhovedet er værd.
+
+   VI MARKERER DEM I STEDET FOR AT SORTERE DEM FRA. En fabriksny motorcykel
+   hos en forhandler er en rigtig motorcykel til salg, og en køber, der leder
+   efter en MT-07, vil gerne se begge dele — at skjule halvdelen af lageret
+   for at få overskriften til at passe ville koste ham udbuddet. Det er
+   overskriften, der er for snæver, ikke annoncerne, der er forkerte.
+
+   FELTET ER NU BAARET MED (D-015): js/backend-bridge.js bærer kildens eget
+   ord videre som `kildeStand`, og DET vinder nu. Adressen er tilbage som
+   nødudgang for rækker, der endnu ikke er crawlet igen — samme mønster som
+   `type` i broen: kildens eget felt slår altid en aflæsning. Bliver
+   nødudgangen aldrig brugt, kan den fjernes.
+
+   HVAD DER VAR GALT, og som ikke skal genopstå: crawleren læser præcis den
+   her sti-oplysning (stand_url_moenster i sources/mcsyd.yaml) og gemmer den
+   i kolonnen `stand`. Broen OVERSATTE den kun til `condition`, og "ny" har
+   ingen plads i CONDITIONS — så oplysningen blev til null og forsvandt i
+   mellemregningen, selv om den lå i databasen hele tiden. En oversættelse
+   må ikke være den eneste kopi: behold originalen ved siden af.
+
+   Vi opfinder ingenting. Kan hverken feltet eller adressen læses, svarer
+   funktionen null, og der står ingenting. Se work/DECISIONS.md. */
+function eksternErNy(l){
+  const kildensOrd = String(l.kildeStand || '').toLowerCase().trim();
+  if (kildensOrd === 'ny' || kildensOrd === 'new') return true;
+  if (kildensOrd === 'brugt' || kildensOrd === 'used') return false;
+
+  const url = String(l.externalUrl || '');
+  if (!url) return null;
+  const m = url.match(/\/(ny|brugt)\//i);
+  if (!m) return null;
+  return m[1].toLowerCase() === 'ny';
+}
+
 function externalCardHTML(l, i){
   const kilde = escapeHTML(l.source?.navn || 'ekstern kilde');
   /* Uden en brugbar URL er kortet et blindt link. Så vises annoncen ikke.
@@ -431,6 +628,14 @@ function externalCardHTML(l, i){
   // linket. Her siger vi i stedet, hvad slags sælger det er, og domænet —
   // det eneste på kortet, køberen selv kan slå op, før han klikker.
   const saelger = [l.isDealer ? 'Forhandler' : 'Privat sælger', domaene].filter(Boolean).join(' · ');
+  /* "Ny" står FØRST i prislinjen, foran forhandlerens salgsmarkører: den
+     forklarer prisen på samme måde som "UDEN KLARGØRING" gør, men den er
+     også et juridisk vilkår (garanti frem for reklamationsret), og den skal
+     læses før tallet giver mening. */
+  const erNy = eksternErNy(l);
+  const nyHTML = erNy
+    ? `<span class="card-ny" title="Annoncen ligger i ${escapeHTML(l.source?.navn || 'kilden')}s katalog over NYE motorcykler. Den er ikke brugt: du køber med garanti frem for reklamationsret, og kilometerstanden er derfor ikke oplyst.">Ny</span>`
+    : '';
   const mark = eksternSalgsmarkoerer(l);
   const markHTML = mark.tekst
     ? `<span class="card-salgsmarkoerer" title="${escapeHTML(mark.alle.join(' · '))}">${escapeHTML(mark.tekst)}</span>`
@@ -441,13 +646,7 @@ function externalCardHTML(l, i){
   const specs = eksternSpecs(l).map(s => `
           <div class="card-spec"><dt>${s.navn}</dt><dd${s.vaerdi ? '' : ' class="spec-tom"'}>${s.vaerdi ? escapeHTML(s.vaerdi) : EKSTERN_UKENDT}</dd></div>`).join('');
 
-  const kk = eksternKoerekort(l);
-  const kkTekst = kk ? kk.vaerdi : 'ukendt';
-  const kkTitel = kk
-    ? (kk.praecis
-        ? `Kan føres på ${kk.vaerdi}-kørekort`
-        : 'Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den kræver A.')
-    : 'Kilden oplyser hverken kubik eller hk, så kategorien kan ikke udledes.';
+  const kk = koerekortMaerkat(l);
 
   return `
   <article class="card card-external" data-listing-id="${l.id}" data-external="1">
@@ -459,6 +658,7 @@ function externalCardHTML(l, i){
     <div class="card-body">
       <div class="card-prisrække">
         <span class="card-price${l.price == null ? ' pris-mangler' : ''}">${pris}</span>
+        ${nyHTML}
         ${markHTML}
       </div>
       <h3 class="card-title">
@@ -468,7 +668,7 @@ function externalCardHTML(l, i){
       <div class="card-specblok">
         <dl class="card-specs">${specs}
         </dl>
-        <span class="card-koerekort${kk ? '' : ' kk-ukendt'}" title="${escapeHTML(kkTitel)}">Kørekort ${escapeHTML(kkTekst)}</span>
+        <span class="card-koerekort${kk.kode ? '' : ' kk-ukendt'}" title="${escapeHTML(kk.forklaring)}" aria-label="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}</span>
       </div>
       <div class="card-footer">
         <span class="card-sted">${Icon.mapPin}<span>${escapeHTML(eksternStedTekst(l))}</span></span>
@@ -508,7 +708,15 @@ function listingCardHTML(l, i){
         ${suspicious ? `<span class="badge badge-warning" title="${escapeHTML(prisTitel)}">${Icon.alertTriangle}Under markedspris</span>` : ''}
       </div>
       ${isOwnListing(l) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
-      ${(() => { const k = koerekortForListing(l); return k ? `<span class="card-koerekort" title="Kan føres på ${k}-kørekort" aria-label="Kan føres på ${k}-kørekort">${k}</span>` : ''; })()}
+      ${(() => {
+        /* Samme udregning som på det indekserede kort og som i filteret —
+           koerekortMaerkat() er det ene sted, mærkatet bliver til. Kortet
+           her er en lille brik oven på fotoet, så den viser kun koden; kan
+           kategorien ikke afgøres, står der ingenting frem for en lang
+           sætning hen over billedet. Forklaringen følger med som titel. */
+        const k = koerekortMaerkat(l);
+        return k.kode ? `<span class="card-koerekort" title="${escapeHTML(k.forklaring)}" aria-label="${escapeHTML(k.forklaring)}">${k.kode}</span>` : '';
+      })()}
       <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
     </div>
     <div class="card-body">
@@ -766,7 +974,8 @@ function wireFavoriteButtons(root){
            Kørekort er dog UDLEDT, ikke oplyst: kan reglen ikke afgøre
            kategorien, er svaret "Kan ikke afgøres", ikke "Ikke oplyst" —
            samme skel som kørekortmærkatet på kortene i js/components.js. */
-        ['Kørekort', b => koerekortForListing(b) || 'Kan ikke afgøres'],
+        // Samme ene udregning som kortene og filteret, jf. koerekortMaerkat().
+        ['Kørekort', b => koerekortMaerkat(b).kode || 'Kan ikke afgøres'],
         ['Type', b => typeLabel(b.type)],
         ['Drivlinje', b => b.drive || 'Ikke oplyst'],
         ['Stand', b => b.condition || 'Ikke oplyst'],

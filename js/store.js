@@ -117,6 +117,27 @@ const Store = {
     const eksterne = window.EXTERNAL_LISTINGS || [];
     return [...remote, ...this.getLocalListings(), ...LISTINGS, ...eksterne];
   },
+
+  /* Hvor meget af lageret ligger der bag det tal, siden lige har skrevet?
+
+     `getAllListings()` kan ikke selv svare på det. Den returnerer det, der
+     ER hentet, og en tom liste ser præcis ud som "der findes ingen" — dét
+     var hele fejlen i D-013: samme URL svarede 383 eller 51, og den mindre
+     tilstand så ud som en sandhed. Statussen sættes ét sted (backend-broen)
+     og læses her, så en side kan skelne "hele lageret" fra "det, vi nåede
+     at få fat i".
+
+     Værdier pr. kilde: 'ikke-hentet' | 'sprunget-over' | 'ok' | 'fejlet'.
+     `sprunget-over` er ikke en fejl: nogle sider beder med vilje ikke om de
+     indekserede annoncer (se SIDER_UDEN_EKSTERNE i js/backend-bridge.js). */
+  dataStatus(){
+    return window.DATA_STATUS || { egne: 'ikke-hentet', eksterne: 'ikke-hentet' };
+  },
+  /* True kun når hver kilde, siden faktisk bad om, har svaret. */
+  harHeleLageret(){
+    const s = this.dataStatus();
+    return [s.egne, s.eksterne].every(v => v === 'ok' || v === 'sprunget-over');
+  },
   getListingById(id){
     return this.getAllListings().find(l => String(l.id) === String(id));
   },

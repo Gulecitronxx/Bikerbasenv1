@@ -487,15 +487,13 @@ function renderIdentitet(seller, listings, skjultNavn){
 
    Runde 2's kritiker regnede kontrollen efter i hånden på demoforhandlerens
    nummer og fandt, at den fejlede, mens siden roligt tilbød at slå det op.
-   Vi lader ikke længere køberen om at opdage det. */
-function cvrKontrolOK(nr){
-  const s = String(nr || '').replace(/\D/g, '');
-  if (s.length !== 8) return false;
-  const vaegte = [2, 7, 6, 5, 4, 3, 2, 1];
-  let sum = 0;
-  for (let i = 0; i < 8; i++) sum += Number(s[i]) * vaegte[i];
-  return sum % 11 === 0;
-}
+   Vi lader ikke længere køberen om at opdage det.
+
+   FLYTTET: selve regnestykket bor nu i js/components.js, som BEGGE sider
+   indlæser. Annoncesidens sælgerkort tilbød stadig at slå et nummer op, som
+   den her side ét klik senere afviste — samme nummer, to svar. En regel, der
+   kun findes på den ene af to sider, er ikke en regel. */
+
 
 /* ---------- "Efterprøv ham selv" ----------
 
