@@ -55,7 +55,10 @@ function anvendAuthKontekst(){
 
 let pendingUser = null;
 
-function authError(msg){
+/* resendEmail: valgfri. Er den sat, får fejlboksen en "Send igen"-knap under
+   teksten — brugt til "email not confirmed", den ene fejl her, man ikke kan
+   rette ved selv at prøve igen (se resendConfirmation nedenfor). */
+function authError(msg, resendEmail){
   let el = document.getElementById('auth-error');
   if (!el){
     el = document.createElement('div');
@@ -66,16 +69,44 @@ function authError(msg){
   }
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
+
+  if (msg && resendEmail){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'link-btn';
+    btn.style.cssText = 'display:block; margin-top:8px;';
+    btn.textContent = 'Send bekræftelsesmailen igen';
+    btn.addEventListener('click', () => resendConfirmation(resendEmail, btn));
+    el.appendChild(btn);
+  }
 }
 
-/* Supabase-fejl er på engelsk; oversæt de almindelige. */
+/* Beskyttet mod dobbeltklik: resend() rammer den samme timelige mailgrænse
+   som selve signUp(), og to kald i træk giver kun en forvirrende fejl. */
+let resendUnderway = false;
+async function resendConfirmation(email, btn){
+  if (resendUnderway || !email) return;
+  resendUnderway = true;
+  btn.disabled = true;
+  btn.textContent = 'Sender…';
+  const { error } = await db.resend({ email });
+  resendUnderway = false;
+  if (error){ authError(daError(error.message)); return; }
+  authError('Bekræftelsesmailen er sendt igen. Tjek indbakken — og spamfilteret, hvis den ikke er der inden et kvarter.');
+}
+
+/* Supabase-fejl er på engelsk; oversæt de almindelige. Koderne er dem
+   Supabase Auth selv dokumenterer (supabase.com/docs/guides/auth/debugging/
+   error-codes) — efterprøvet der i august 2026, ikke gættet. */
 function daError(message){
   const m = (message || '').toLowerCase();
   if (m.includes('invalid login credentials')) return 'Forkert e-mail eller adgangskode.';
   if (m.includes('email not confirmed')) return 'Din e-mail er ikke bekræftet endnu. Tjek din indbakke for bekræftelseslinket.';
-  if (m.includes('user already registered')) return 'Der findes allerede en profil med den e-mail. Prøv at logge ind i stedet.';
+  if (m.includes('user already registered') || m.includes('already registered') || m.includes('already exists'))
+    return 'Der findes allerede en profil med den e-mail. Prøv at logge ind i stedet.';
   if (m.includes('password should be at least')) return 'Adgangskoden skal være mindst 6 tegn.';
-  if (m.includes('unable to validate email')) return 'E-mailadressen ser ikke gyldig ud.';
+  if (m.includes('unable to validate email') || m.includes('test domains') || (m.includes('invalid') && m.includes('email')))
+    return 'E-mailadressen ser ikke gyldig ud.';
   /* Mailgrænsen og forsøgsgrænsen er ikke det samme, og forskellen betyder
      noget for brugeren. Supabases indbyggede mailtjeneste sender som
      standard kun 2 bekræftelsesmails i timen; bliver man bedt om at "vente
@@ -88,6 +119,18 @@ function daError(message){
          + 'Er din profil allerede oprettet, så prøv at logge ind i stedet — ellers vent op til en time.';
   if (m.includes('for security purposes') || m.includes('rate limit') || m.includes('too many'))
     return 'For mange forsøg på kort tid. Vent et par minutter, og prøv igen.';
+  /* Supabases indbyggede mailtjeneste sender KUN til adresser i projektets
+     Team-liste, når der ikke er sat en rigtig SMTP-udbyder op (se
+     dashboardtjeklisten i work/DECISIONS.md). signUp()/resend() fejler ikke
+     nødvendigvis her — kontoen kan sagtens være oprettet — men mailen
+     forsvinder tavst. Sig det, i stedet for at lade brugeren tro fejlen er hans. */
+  if (m.includes('not authorized') || m.includes('error sending') || m.includes('sending confirmation') || m.includes('sending recovery'))
+    return 'Mailen kunne ikke sendes lige nu. Prøv "Send igen" om lidt, eller skriv til os, hvis det gentager sig.';
+  if (m.includes('sign') && (m.includes('disabled') || m.includes('not allowed')))
+    return 'Den funktion er lukket for nye brugere lige nu. Prøv igen senere.';
+  /* Fanger fx et styrkekrav ("weak_password"), som ikke nævner "at least" og
+     derfor springer reglen ovenfor over. */
+  if (m.includes('password')) return 'Adgangskoden blev afvist. Prøv en længere eller mere sammensat adgangskode.';
   return message || 'Noget gik galt. Prøv igen.';
 }
 
@@ -96,7 +139,30 @@ function setLoading(btn, loading, label){
   btn.textContent = loading ? 'Vent…' : label;
 }
 
+/* Viser trin 2 af "glemt kode": brugeren klikkede linket i mailen og er
+   landet her igen med en midlertidig "recovery"-session. Alt andet på siden
+   lukkes, så det eneste, man kan gøre, er at sætte en ny adgangskode. */
+function showNewPasswordStep(){
+  authError('');
+  document.querySelector('.auth-tabs').style.display = 'none';
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('register-form').style.display = 'none';
+  document.getElementById('verify-step').style.display = 'none';
+  document.getElementById('forgot-step').style.display = 'none';
+  document.getElementById('auth-primary-extras').style.display = 'none';
+  document.getElementById('new-password-step').style.display = '';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+  /* SKAL kobles på FØR backendReady() rører klienten. Supabase læser
+     recovery-tokenet fra adressen og sender PASSWORD_RECOVERY som en
+     almindelig auth-hændelse, i det øjeblik klienten oprettes — en lytter,
+     der kommer for sent på banen, overhører den, og brugeren lander bare på
+     en helt almindelig login-side uden at ane, at trin 2 fandtes. */
+  db.raw?.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') showNewPasswordStep();
+  });
+
   renderHeader(null);
   document.getElementById('google-icon').innerHTML = Icon.google;
   document.getElementById('verify-info-icon').innerHTML = Icon.info;
@@ -108,7 +174,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     el.innerHTML = benefitIcons[el.dataset.benefit] || '';
   });
 
-  // Er man allerede logget ind, så videre med det samme.
+  // Er man allerede logget ind, så videre med det samme. En PASSWORD_RECOVERY-
+  // session rammer ikke denne gren: backend-bridge.js' globale lytter
+  // synkroniserer kun Store ved SIGNED_IN/TOKEN_REFRESHED, ikke ved recovery,
+  // så showNewPasswordStep() ovenfor bliver stående uden at blive omgjort her.
   await backendReady();
   if (db.enabled && Store.getUser()?.remote) { redirectAfterAuth(); return; }
 
@@ -130,8 +199,77 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('login-form').style.display = btn.dataset.authTab === 'login' ? '' : 'none';
       document.getElementById('register-form').style.display = btn.dataset.authTab === 'register' ? '' : 'none';
       document.getElementById('verify-step').style.display = 'none';
+      document.getElementById('forgot-step').style.display = 'none';
       document.getElementById('auth-primary-extras').style.display = '';
     });
+  });
+
+  /* ---------- Glemt adgangskode (trin 1: bed om linket) ---------- */
+  document.getElementById('forgot-password-btn').addEventListener('click', () => {
+    authError('');
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('register-form').style.display = 'none';
+    document.getElementById('verify-step').style.display = 'none';
+    document.getElementById('auth-primary-extras').style.display = 'none';
+    document.getElementById('forgot-step').style.display = '';
+    // Genbrug e-mailen, hvis den allerede er skrevet i login-feltet.
+    const email = document.getElementById('login-email').value.trim();
+    if (email) document.getElementById('forgot-email').value = email;
+    // Nulstil UI'et, hvis trinnet blev vist én gang før i denne session.
+    document.getElementById('forgot-intro').textContent =
+      'Skriv din e-mail, så sender vi et link til at vælge en ny adgangskode.';
+    document.getElementById('forgot-fields').style.display = '';
+    document.getElementById('forgot-submit').style.display = '';
+  });
+
+  document.getElementById('forgot-cancel').addEventListener('click', () => {
+    document.querySelector('[data-auth-tab="login"]').click();
+  });
+
+  document.getElementById('forgot-submit').addEventListener('click', async () => {
+    authError('');
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email){ authError('Skriv din e-mail.'); return; }
+    if (!db.enabled){
+      authError('Backend er ikke konfigureret — nulstilling af adgangskode kræver rigtig backend.');
+      return;
+    }
+    const btn = document.getElementById('forgot-submit');
+    setLoading(btn, true, 'Send nulstillingslink');
+    // redirectTo peger tilbage på DENNE side (ikke en ny) — se markeringen i
+    // login.html ved #forgot-step. Adressen skal stå i projektets
+    // Auth → URL Configuration → Redirect URLs, ellers afviser Supabase linket.
+    const redirectTo = location.origin + location.pathname;
+    const { error } = await db.resetPasswordForEmail(email, redirectTo);
+    setLoading(btn, false, 'Send nulstillingslink');
+    if (error){ authError(daError(error.message)); return; }
+
+    // Supabase svarer succes uanset om e-mailen findes i systemet — det
+    // gentager vi her i stedet for at modsige det med en anden besked, for
+    // ellers kunne formularen bruges til at afsløre, hvem der har en profil.
+    document.getElementById('forgot-intro').textContent =
+      'Har vi en profil med den e-mail, er der nu sendt et link til at vælge en ny adgangskode. '
+      + 'Tjek indbakken — og spamfilteret, hvis den ikke er der inden et kvarter.';
+    document.getElementById('forgot-fields').style.display = 'none';
+    document.getElementById('forgot-submit').style.display = 'none';
+  });
+
+  /* ---------- Glemt adgangskode (trin 2: den nye adgangskode) ----------
+     Feltet vises kun af showNewPasswordStep(), som venter på PASSWORD_
+     RECOVERY-hændelsen registreret øverst i denne funktion. */
+  document.getElementById('new-password-submit').addEventListener('click', async () => {
+    authError('');
+    const password = document.getElementById('new-password').value;
+    if (!password || password.length < 6){ authError('Adgangskoden skal være mindst 6 tegn.'); return; }
+    const btn = document.getElementById('new-password-submit');
+    setLoading(btn, true, 'Gem ny adgangskode');
+    const { error } = await db.updatePassword(password);
+    setLoading(btn, false, 'Gem ny adgangskode');
+    if (error){ authError(daError(error.message)); return; }
+
+    await syncSessionToStore();
+    toast('Din adgangskode er ændret');
+    setTimeout(redirectAfterAuth, 400);
   });
 
   // Efter fanerne er koblet på — anvendAuthKontekst kan klikke på "Opret
@@ -161,7 +299,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     setLoading(btn, true, 'Log ind');
     const { error } = await db.signIn({ email, password });
     setLoading(btn, false, 'Log ind');
-    if (error){ authError(daError(error.message)); return; }
+    if (error){
+      // Den eneste af de her fejl, brugeren ikke selv kan rette ved at prøve
+      // igen. Uden knappen her kunne man hverken logge ind (ubekræftet) eller
+      // oprette på ny (e-mailen findes allerede) — kun sidde fast, hvis
+      // linket i mailen aldrig blev klikket, eller mailen aldrig kom frem.
+      const ubekraeftet = (error.message || '').toLowerCase().includes('email not confirmed');
+      authError(daError(error.message), ubekraeftet ? email : null);
+      return;
+    }
 
     await syncSessionToStore();
     toast('Du er nu logget ind');
@@ -184,8 +330,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isDealer){
       cvr = document.getElementById('reg-cvr').value.trim();
       company = document.getElementById('reg-company').value.trim();
-      if (!/^\d{8}$/.test(cvr) || !company){
-        authError('Udfyld virksomhedsnavn og et gyldigt 8-cifret CVR-nummer.');
+      if (!company){ authError('Udfyld virksomhedsnavn.'); return; }
+      if (!/^\d{8}$/.test(cvr)){ authError('CVR-nummeret skal være 8 cifre, uden mellemrum eller bindestreg.'); return; }
+      /* cvrKontrolOK() (js/components.js) er den samme modulus-11-kontrol,
+         sælgerprofilen og annoncesiden allerede bruger på det SAMME
+         CVR-felt. Uden den her accepterede formularen ethvert 8-cifret tal —
+         Runde 2's kritiker regnede 95854101 efter i hånden og fandt, at det
+         ikke bestod. Otte cifre er ikke det samme som et gyldigt CVR-nummer. */
+      if (!cvrKontrolOK(cvr)){
+        authError('CVR-nummeret ser forkert ud — kontrolcifferet stemmer ikke. Tjek de otte cifre.');
         return;
       }
     }
@@ -217,15 +370,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('verify-step').style.display = '';
     const intro = document.getElementById('verify-intro');
     const finish = document.getElementById('finish-registration');
+    const resendBtn = document.getElementById('verify-resend');
     if (needsConfirm){
       intro.textContent = 'Vi har sendt dig en bekræftelsesmail. Klik på linket i mailen, og log derefter ind. '
         + 'Kommer den ikke inden for et kvarter, så tjek dit spamfilter.';
       finish.textContent = 'Gå til log ind';
+      resendBtn.style.display = '';
+      resendBtn.disabled = false;
+      resendBtn.textContent = 'Send bekræftelsesmailen igen';
     } else {
       intro.textContent = 'Du er logget ind og klar til at bruge Bikerbasen.';
       finish.textContent = 'Fortsæt';
+      resendBtn.style.display = 'none';
     }
   }
+
+  // Ét klik virker for begge de mulige pendingUser'er (lige oprettet, ikke
+  // bekræftet endnu) — den anden vej ind (login-fejlen) har sin egen knap i
+  // authError(), fordi den ikke deler pendingUser med registreringen.
+  document.getElementById('verify-resend').addEventListener('click', function(){
+    resendConfirmation(pendingUser?.email, this);
+  });
 
   /* ---------- Verificeringstrin ---------- */
   document.getElementById('finish-registration').addEventListener('click', async () => {

@@ -38,7 +38,17 @@ function jsonLd(l, url){
   const billeder = (l.photoUrls || []).length ? l.photoUrls : [`${BASE}/og-image.png`];
   const vehicle = {
     '@context': 'https://schema.org',
-    '@type': 'Motorcycle',
+    /* Google lukkede sit eget "Vehicle listing"-rige resultat i september
+       2025 og henviser nu til almindelig Product-struktureret data (se
+       work/DECISIONS.md, samme begrundelse som js/seo.js seoListingPage()).
+       Ren "Product" mangler domæne for kilometertal, motor og årgangsdato
+       (de hører til Vehicle/Motorcycle), så typen er BEGGE dele — gyldigt,
+       fordi schema.org tillader en liste af typer, og fordi Motorcycle
+       alligevel nedarver fra Product (Thing > Product > Vehicle >
+       Motorcycle). Skal matche js/seo.js's egen kopi af samme objekt,
+       ellers hydrerer runtime-udgaven serversidens JSON-LD væk med en
+       anden type. */
+    '@type': ['Product', 'Motorcycle'],
     name: navn,
     brand: { '@type': 'Brand', name: l.brand },
     model: l.model,
@@ -53,7 +63,12 @@ function jsonLd(l, url){
       '@type': 'EngineSpecification',
       engineDisplacement: { '@type': 'QuantitativeValue', value: l.ccm, unitCode: 'CMQ' },
     },
-    offers: {
+  };
+  // Samme regel som js/seo.js: "price": null er en ugyldig Offer, ikke en
+  // tavs oplysning, og en egen annonce har prisen som obligatorisk felt i
+  // opret-annonce.js — men skulle den alligevel mangle, gætter vi den ikke.
+  if (l.price != null){
+    vehicle.offers = {
       '@type': 'Offer',
       price: l.price,
       priceCurrency: 'DKK',
@@ -69,8 +84,8 @@ function jsonLd(l, url){
             address: { '@type': 'PostalAddress', addressLocality: l.city, postalCode: l.postnr, addressCountry: 'DK' } }
         : { '@type': 'Person',
             address: { '@type': 'PostalAddress', addressLocality: l.city, addressCountry: 'DK' } },
-    },
-  };
+    };
+  }
   if (l.power) vehicle.vehicleEngine.enginePower = { '@type': 'QuantitativeValue', value: l.power, unitText: 'hk' };
   if (l.fuel) vehicle.fuelType = l.fuel;
   if (l.color) vehicle.color = l.color;

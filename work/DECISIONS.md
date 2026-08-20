@@ -1903,3 +1903,327 @@ det, der ryger i luften, og en `/* demo:start */ … /* demo:slut */`-markør i
 `js/data.js` gør klipningen triviel og synlig. Størrelsen er 13.912 B gzip af
 en side, hvor 250.168 B skal ned, før LCP-billedet overhovedet bliver bedt om.
 HVOR: `js/data.js` (urørt), `scripts/udgiv.js` (forslaget)
+
+### Canonical uden ".html" — den ADRESSE, folk lander på, ikke filstien — SEO builder B, 20.08.2026
+HVAD: Forsiden kanonicaliserer nu til den bare rod (`https://bikerbasen.dk`,
+uden efterfølgende skråstreg — samme streng som bilbasen.dk's egen). Alle
+andre statiske sider (soegning, maerker, maerke-*, opret-annonce, sikkerhed,
+vilkaar, privatlivspolitik, forhandler, annonce, samt de tre noindex-sider)
+mister kun ".html". Ingen fil er omdøbt eller flyttet — kun hvad
+`<link rel="canonical">` og `og:url` PEGER på.
+HVORFOR: Efterprøvet direkte mod produktion FØR jeg rørte noget: GitHub Pages
+løser selv en udvidelsesfri sti om til den tilsvarende .html-fil.
+`curl https://bikerbasen.dk/soegning` → 200, samme `<title>` som
+`.../soegning.html`; en sti der IKKE findes svarer stadig 404
+(`this-does-not-exist-xyz123` → 404). Det er ægte GitHub Pages-adfærd for
+HELE sitet, ikke en gætning — testet på soegning, maerker, maerke-bmw,
+opret-annonce, sikkerhed, vilkaar, privatlivspolitik, forhandler, annonce,
+dashboard, mine-annoncer, login: alle 200 uden ".html". En canonical, der
+pegede på filstien, pegede altså aldrig på den adresse, en bruger eller
+Google rent faktisk ser — og bilbasen.dk's forside kanonicaliserer netop til
+den bare rod, ikke til en filsti.
+Rettelsen ligger ÉT sted for de fleste sider: `cleanUrl()` i
+`scripts/build-meta.js`'s `metaBlock()` (køres sidst i kæden, så den er den
+reelle kilde til canonical/og:url på alle ikke-annonce-*.html-sider) plus en
+duplikeret tre-linjers udgave i `scripts/build-brand-pages.js` (samme regel,
+men filen skal ikke røre `scripts/shared.js` denne runde). Annonce- og
+forhandlersiders EGEN canonical (sat af `js/seo.js`, som jeg ikke rører) er
+UÆNDRET — den beholder ".html" (+ evt. "?id="), fordi den fil ejes af en
+anden beslutning denne runde (se posten om ekstern canonical nedenfor, fundet
+allerede i arbejdstræet, ikke skrevet af mig).
+HVOR: `scripts/build-meta.js` — `cleanUrl()`, `metaBlock()`;
+`scripts/build-brand-pages.js` — `cleanUrl()`, canonical-linjen,
+`breadcrumbLd()`; `index.html`, `soegning.html`, `maerker.html`,
+`maerke-*.html` (genereret)
+
+### Sitemappet matcher nu sidens EGEN canonical — og to mærkenavne stoppede med at overskrive hinanden — SEO builder B, 20.08.2026
+HVAD: To rettelser i `scripts/build-brand-pages.js`:
+1. Sitemap-adresserne for statiske sider og mærkesider bruger samme
+   `cleanUrl()` som deres egen canonical (ingen ".html", forsiden er den
+   bare rod). Annonce- og forhandler-URL'er i sitemappet BEHOLDER ".html"
+   (+ "?id="), fordi DERES canonical (sat af `js/seo.js`, urørt) stadig gør.
+   Et sitemap, der er "pænere" end den side, det peger på, er den samme
+   fejlklasse som C-015 (en påstand, siden ikke bakker op).
+2. Mærker samles nu PÅ SLUG før noget bygges eller tælles, ikke på det
+   raa navn. "Royal Enfield" og "Royal-enfield" (to kilder, samme mærke, to
+   stavemåder) gav begge slug'et "royal-enfield" — det ene byggeri
+   overskrev tavst det andets fil, sitemappet fik SAMME adresse to gange,
+   og maerker.html's beskrivelse påstod "21 mærker", hvor der reelt kun lå
+   20 filer på disk. Efterprøvet FØR/EFTER på HEAD's data (392 indekserede
+   annoncer): "Built 21 brand pages" men `ls maerke-*.html` = 20 filer og
+   sitemap.xml havde `maerke-royal-enfield.html` to gange → EFTER: "Built 20
+   brand pages", 20 filer, 20 unikke sitemap-URL'er, ingen annoncer tabt
+   (Royal Enfield-siden viser nu 4, summen af begge staveformers annoncer).
+   Samme fejlklasse som D-010's versalfælde i `maerkerUdenLager()` ovenfor
+   — bare på filnavnet i stedet for på søgefiltret.
+HVORFOR (opgavens punkt 2 — egne annoncer i sitemappet): den logik fandtes
+allerede i filen (`harEgenSide()`, `listingUrls`, `dealerUrls`) fra en
+tidligere runde og er urørt — den udelukker allerede eksterne (noindex)
+annoncer korrekt og vil tage egne `annonce-<slug>.html`-sider med, den dag
+`listings`-tabellen får rækker (0 i dag, derfor 0 annoncesider i sitemappet
+lige nu — ikke en fejl, en tom kilde).
+KOORDINERING MED BUILDER A: fandt undervejs (i arbejdstræet, ikke skrevet
+her endnu af dem) at `js/seo.js` nu sætter en indekseret annonces canonical
+til KILDENS egen URL (`sikkerUrl(listing.externalUrl)`), ikke til
+bikerbasen.dk, med noindex bevaret. Det bekræfter at `harEgenSide()`s
+udelukkelse af eksterne annoncer fra sitemappet er den rigtige side af
+beslutningen — en side, hvis canonical peger væk fra sitet, har ingen plads
+i vores eget sitemap.
+Efterprøvet: alle canonical-mål er hentet direkte mod PRODUKTION (curl) —
+200 for forside, soegning, maerker, maerke-bmw, maerke-honda, maerke-yamaha,
+opret-annonce, sikkerhed, vilkaar, privatlivspolitik. maerke-royal-enfield
+er IKKE deployet endnu (404 på produktion i dag) — det er et NYT mærke fra
+den seneste crawl (Rydbergs MC/Gul og Gratis-runden), ikke en fejl i
+ordningen; den rene adresse virker for enhver side, der faktisk ligger i
+`_site`/roden. `npm test`: 278/278 grønne efter begge rettelser.
+HVOR: `scripts/build-brand-pages.js` — `cleanUrl()`, `byg()` (byBrandRaw →
+slugGrupper → byBrand), sitemap-blokken (`entries`)
+
+### Indekserede annoncer: canonical til KILDEN, ikke selv-canonical — SEO builder A, 20.08.2026
+HVAD: `annonce.html?id=<n>` for en MC Syd- eller Gul og Gratis-annonce forbliver
+`noindex, follow` (uændret fra tidligere runde) — men får nu OGSÅ et rigtigt
+canonical, sat til KILDENS egen annonce-URL (`sikkerUrl(listing.externalUrl)`),
+i stedet for slet ikke at blive sat. Før stod alle 392 sider tilbage med
+byggeriets generiske `/annonce.html`-canonical (`build-meta.js`s statiske
+blok), fordi ingen kørende kode nogensinde overskrev den for lige netop de
+sider. Det var runde 3-dommens punkt 9: "392 af 392 sider, samme kanoniske
+URL" — og det var IKKE fordi nogen gættede forkert, men fordi ingen svarede.
+HVORFOR (den egentlige afvejning — to reelle svar fandtes):
+  A) Selv-canonical (`/annonce.html?id=<n>`) + index. Behandl siden som
+     original.
+  B) noindex (uændret) + canonical til kildens egen URL. VALGT.
+Argumentet for A er reelt: siden LÆGGER noget til kildens annonce —
+kørekortsudledningen (A1/A2/A regnet ud fra ccm+hk, med eksplicit "kan ikke
+afgøres" når data mangler), "vi gætter aldrig"-linjen ingen andre steder
+skriver, og fem tydelige kildeangivelser før første klik (runde 3-dommen
+roser alt det, se punkt 4). Det er ikke ingenting.
+Men to ting vejer tungere:
+1. **Indholdet er stadig overvejende kildens.** Prisen, fotoet og
+   beskrivelsens første linje ER MC Syds eller Gul og Gratis' egne ord —
+   citeret, ikke omskrevet (se "Beskrivelse"-sektionen i
+   `renderExternalListing()`: "Begyndelsen af {kilde}s egen tekst"). 392
+   sider, der i det store hele gengiver en andens vareliste under
+   Bikerbasens eget navn, er den definition af "thin/aggregator content",
+   Googles kvalitetsvejledning specifikt advarer mod at bede om indeksering
+   af — og en dømt kvalitetsvurdering rammer HELE domænet, ikke kun de 392
+   sider. Med et domæne, der er 9 dage gammelt og har nul oparbejdet
+   autoritet (se opgavens præmis), er det den forkerte risiko at tage FØRST.
+2. **Vi kan ikke garantere friskheden.** Siden siger det selv: "Pris og
+   udstyr kan være ændret, siden vi hentede annoncen." Et selv-canonical,
+   der beder Google indeksere og rangere en kopi, som kan være forældet i
+   morgen (motorcyklen solgt, prisen ændret), er et løfte, vi ikke kan
+   holde. Kildens egen side ER altid frisk; vores er en øjebliksstat.
+Hvorfor IKKE bare lade canonical stå tomt (den tredje, ikke-eksplicitte
+mulighed): en noindex-side uden canonical overlader gætteriet til Google, og
+gætteriet var netop den fælles `/annonce.html`, som er præcis den fejl,
+dommen fandt. Et udfyldt canonical til kilden er et STÆRKERE og mere ærligt
+signal end et fraværende — det siger "det her ER en kopi, originalen står
+der", i stedet for at lade et tomt felt sige ingenting. Det er samme mønster,
+Google selv anbefaler til spejlede/syndikerede sider, og det står ikke i
+konflikt med noindex: begge signaler peger samme vej (væk fra indeksering af
+DENNE url), ingen af dem beder om at blive indekseret her. Se koordineringen
+fra SEO builder B ovenfor (`harEgenSide()` i `build-brand-pages.js` udelukker
+allerede eksterne annoncer fra sitemappet af samme grund).
+Delesiden (Facebook, Messenger, en delt MC-gruppe-tråd) er en ANDEN
+beslutning end Googles indeksering — noindex styrer kun søgemaskinen. Titel,
+description og og:-billede er derfor STADIG annoncespecifikke (mærke, model,
+pris, kilde), uanset canonical-retningen.
+HVOR: `js/seo.js` — ny funktion `seoExternalListingPage()`; `js/annonce.js`
+— `renderExternalListing()` kalder den nu i stedet for kun at sætte
+`document.title` i hånden.
+
+### Google lukkede sit "Vehicle listing"-rige resultat i september 2025 — struktureret data er nu Product + Motorcycle, ikke Motorcycle alene — SEO builder A, 20.08.2026
+HVAD: Al JSON-LD på annoncesider (egne OG indekserede) har fået `@type`
+ændret fra `"Motorcycle"` alene til `["Product", "Motorcycle"]`.
+HVORFOR: Efterprøvet mod Googles egen dokumentation og Search Central-
+ændringslog (WebFetch/WebSearch, august 2026): Googles dedikerede
+"Vehicle listing"-rige resultat er FJERNET — det står ikke længere i
+Search Centrals galleri over struktureret-data-features (efterprøvet:
+galleriet lister "Product", "Product snippet", "Merchant listing" under
+Shopping; "Vehicle listing" er væk). Google fjernede selve
+dokumentationssiden fra Search Central i september 2025 og henviser nu til
+almindelig Product-struktureret data. Koden her byggede altså rige
+resultater til en funktion, der ikke findes længere.
+Ren `"@type": "Product"` alene er ikke løsningen: `mileageFromOdometer`,
+`vehicleEngine` og `vehicleModelDate` hører til Vehicle/Motorcycle i
+schema.orgs egen egenskabsdomæne (domainIncludes), ikke til Product — en
+streng validator ville flage dem som uventede på en ren Product, og opgaven
+bad eksplicit om at tjekke ægte gyldighed, ikke bare tilstedeværelse.
+Løsningen er en TYPE-LISTE: `["Product", "Motorcycle"]`. Det er gyldig
+JSON-LD (schema.org tillader flere typer på samme objekt), og det er ikke en
+omgåelse — Motorcycle nedarver alligevel fra Product
+(Thing > Product > Vehicle > Motorcycle), så kombinationen gør præcis ét:
+hver eneste egenskab i objektet hører nu retmæssigt under mindst én af de to
+erklærede typer, og intet Google-specifikt "krav" findes længere at
+overholde eller bryde (funktionen er væk, ikke bare ændret).
+Sidegevinst — en reel valideringsfejl rettet i samme ombæring: `offers.price`
+kunne før blive `null` (en INVALID Offer, price skal være tal/tekst), når
+prisen ikke er kendt — det ramte kun de indekserede annoncer (egne har prisen
+som obligatorisk felt), men koden byggede `offers` ubetinget uanset. `offers`
+udelades nu HELT, når `listing.price == null`, i stedet for at skrive en
+ugyldig blok. Efterprøvet direkte i browseren mod en rigtig MC Syd-annonce
+uden pris (id `4c8b5adb-…`, "Honda VT 700"): JSON-LD'et har nu intet
+`offers`-felt overhovedet, og intet `product:price:amount`-tag — en annonce
+uden kendt pris er ikke berettiget til et pris-rigt resultat, og det er den
+rigtige pris at betale for en pris, vi ikke har (samme linje som "vi gætter
+aldrig").
+HVOR: `js/seo.js` — `seoListingPage()` og `seoExternalListingPage()`;
+`scripts/build-listing-pages.js` — `jsonLd()` (samme type, samme
+price-guard, skal blive ved med at matche js/seo.js's kopi af objektet).
+
+### Titeldublet fundet og rettet under efterprøvning: "1971 1971" — SEO builder A, 20.08.2026
+HVAD: `seoExternalListingPage()` tilføjede før altid `listing.year` til
+titlen efter mærke+model. På en rigtig Gul og Gratis-annonce
+(id `689aab1f-…`, "Triumph Daytona T100R 1971") står årstallet allerede
+INDE I kildens eget model-felt ("Daytona T100R 1971"), så titlen blev
+"Triumph Daytona T100R 1971 1971 hos Gul og Gratis — …" — samme tal to gange
+på række. Årstallet lægges nu KUN til, når navnet ikke allerede slutter på
+det (`aarAlleredeINavn`). Samme regel bruges i description-linjens
+"Årgang …"-led.
+HVORFOR: Fundet ved efterprøvning i browseren (opgavens "VERIFY, DON'T
+CLAIM"-krav), ikke ved kodelæsning — det er præcis den slags fejl, der kun
+viser sig på rigtige, rodede kildedata. Modellens tekst rettes IKKE (den er
+kildens, ordret, som resten af sitens "Tallene står, som {kilde} har skrevet
+dem"-princip) — kun vores EGEN tilføjelse af et andet-steds-kendt tal
+undertrykkes, når det ville gentage noget, kilden allerede har skrevet.
+Beslægtet, IKKE rettet her (uden for opgavens filer): samme annonce har
+`itemCondition: NewCondition` ("Stand: Fabriksny") på en motorcykel fra 1971
+— det er `eksternErNy()` i `js/components.js`, der læser kildens eget
+"stand"-felt uden at stille spørgsmål ved det (samme sted, samme regel, som
+allerede viser "Det her er en fabriksny motorcykel" på selve siden). JSON-LD
+et er derfor KONSEKVENT med det, siden allerede påstår — det er ikke en ny
+løgn, jeg har tilføjet, men det er heller ikke rettet. Værd at kende for
+crawler-teamet, hvis det ser mistænkeligt ud i en fremtidig dom.
+HVOR: `js/seo.js` — `seoExternalListingPage()`
+
+### Egne annoncers canonical beholder ".html" — rørt IKKE af mig, af en anden grund end SEO builder B's — SEO builder A, 20.08.2026
+HVAD: `listingPageUrl()` i `js/seo.js` og `listingSlug()`/canonical-linjen i
+`scripts/build-listing-pages.js` er UÆNDREDE — de peger stadig på
+`…/annonce-<slug>-<id>.html`, MED ".html". Jeg har bevidst IKKE anvendt SEO
+builder B's `cleanUrl()`-mønster her.
+HVORFOR: To grunde, ikke én. (1) `js/seo-adresser.test.js` låser den
+nøjagtige streng `'https://bikerbasen.dk/annonce-ktm-rc-390-2021-1032.html'`
+med ".html" — at fjerne endelsen uden at rette testen ville være en tavs
+adfærdsændring af en fil, testen eksplicit vogter, og at rette testen hører
+til en beslutning, der skal tages med vilje, ikke som en bivirkning af en
+anden opgave. (2) SEO builder B skrev selv i deres note ovenfor at de bevidst
+lod annonce- og forhandlersiders EGEN canonical urørt, fordi den "ejes af en
+anden beslutning denne runde" — altså mig. At ændre den nu ville modsige
+deres allerede-dokumenterede afgrænsning. Der er ingen praktisk hindring i at
+gøre det samme skridt her (GitHub Pages-adfærden, B efterprøvede, er
+sandsynligvis filnavns-uafhængig) — men det er en beslutning for en fremtidig
+builder at tage MED VILJE, ikke en jeg tager i forbifarten på en opgave om
+canonical-RETNING, ikke -FORMAT. og:url for de INDEKSEREDE annoncer (min
+egen, nye kode) bruger derimod allerede B's mønster (`/annonce?id=…`, uden
+".html") — det er en frisk streng, jeg selv skrev, ikke en, der bryder en
+låst test.
+HVOR: `js/seo.js` — `listingPageUrl()` (urørt); `scripts/build-listing-pages.js`
+— `listingSlug()`-brugen (urørt)
+
+### Opret profil-flowet: bekræftelsesmail virker, "glemt kode" fandtes slet ikke — auth-audit, 20.08.2026
+HVAD: Bredt gennemsyn af opret profil / log ind (`login.html`, `js/login.js`,
+`js/supabase-api.js`, `supabase/schema.sql` + alle migrationer), bestilt
+efter et rigtigt fund fra mennesket: bekræftelsesmailen ved oprettelse
+ANKOMMER (bekræftet ved en rigtig test mod produktion), men "glemt kode"
+gjorde INTET (bekræftet samme vej). Det ene var derfor allerede i orden;
+det andet krævede kode, der ikke fandtes.
+
+DEN STØRSTE FEJL — "glemt kode" var ikke en fejl i et kald, det var FRAVÆR
+af kald: `git grep -i "glemt|forgot|reset|nulstil"` i `login.html`,
+`js/login.js` og `js/supabase-api.js`, på tværs af ALLE grene og HELE
+historikken (inkl. `main`, `seo-og-udstyrsfiltre`, alle `claude/*`- og
+`worktree-agent-*`-grene), gav nul træf. Ingen knap, intet felt, intet kald
+til Supabase — funktionen har aldrig eksisteret i dette repo. Et klik på et
+"glemt kode"-link i produktion kunne derfor umuligt have sendt en mail,
+uanset dashboard-opsætning. Det er nu bygget (se nedenfor), i de samme tre
+filer opgaven i forvejen var afgrænset til — ingen ny side.
+
+FUNDET, MEN IKKE EN FEJL — profilrækken oprettes altid ved signup:
+`handle_new_user()` (schema.sql:98-118) er en `after insert on auth.users`-
+trigger, `security definer`, som indsætter i `public.profiles` med
+`on conflict (id) do nothing`. Ingen orphaned auth-bruger uden profilrække er
+mulig via den normale vej. `012_email_verified_synk.sql` retter desuden en
+ægte tidligere fejl (email_verified blev sat ud fra `email_confirmed_at` i
+SAMME transaktion som insert, hvor feltet altid er null) med en ekstra
+`after update of email_confirmed_at`-trigger. Begge er efterprøvet ved
+læsning, ikke rørt — ingen ny migration var nødvendig her.
+
+FUNDET OG RETTET — CVR-feltet i formularen tjekkede kun `/^\d{8}$/`, altså
+"otte cifre", ikke "et gyldigt CVR-nummer". `js/components.js` har allerede
+`cvrKontrolOK()` (modulus-11), bygget efter Runde 2's kritiker regnede
+95854101 efter i hånden og fandt at siden roligt tilbød at slå et ugyldigt
+nummer op. Den funktion blev aldrig koblet på FORMULAREN, hvor nummeret
+først tastes — kun på visningerne bagefter. Samme nummer, nu tre steder,
+ét svar. `js/login.js` register-form-handleren kalder nu `cvrKontrolOK()`
+(components.js er allerede indlæst på login.html) og skelner mellem "forkert
+antal cifre" og "kontrolcifferet stemmer ikke" i fejlteksten.
+
+FUNDET OG RETTET — to felthints i registreringsformularen påstod ting,
+koden ikke gør: reg-phone sagde "Bruges til SMS-bekræftelse af din konto"
+(der sendes ingen SMS nogen steder i koden), reg-cvr sagde "Bruges til
+KYC-verificering af forhandlerkonti" (der slås ikke op i noget register —
+`verify-step`'s egen tekst siger det modsatte tre linjer nedenunder: "Ingen
+profiler på Bikerbasen er identitetsverificerede"). Samme fejl som dem der
+allerede blev fjernet fra verify-step i en tidligere runde (attrap-knapper
+for SMS/MitID/CVR), bare glemt i hints-teksten ved siden af. Begge omskrevet
+til at sige, hvad felterne faktisk bruges til i dag.
+
+FUNDET OG RETTET — ingen vej ud af "ubekræftet e-mail, aldrig klikket
+linket". Lukker man fanen efter `signUp()` (eller mailen aldrig når frem —
+Supabases indbyggede afsender sender kun 2/time), var brugeren låst: kan
+ikke logge ind (email_not_confirmed), kan ikke oprette på ny (mailen findes
+allerede). Ingen kaldte Supabases `auth.resend({type:'signup'})`. Tilføjet:
+`db.resend({email})` i `js/supabase-api.js`; en "Send bekræftelsesmailen
+igen"-knap i selve verify-trinnet (synlig kun når `needsConfirm`); og
+`authError()` tager nu et valgfrit andet argument, der lægger samme knap ind
+UNDER login-fejlen, når fejlen er netop `email_not_confirmed` — det er den
+vej, en bruger der er gået OG ER KOMMET TILBAGE dagen efter rent faktisk
+rammer (pendingUser lever kun i hukommelsen og er væk efter et genbesøg).
+
+FUNDET OG RETTET — `daError()` dækkede reelt kun fem af Supabase Auth's
+dokumenterede fejlkoder (supabase.com/docs/guides/auth/debugging/error-codes,
+efterprøvet august 2026). Tilføjet uden at ændre de eksisterende: bredere
+"allerede oprettet"-genkendelse (`already exists`, ikke kun den gamle
+ordlyd), `email_address_invalid` ("test domains..."), en generel
+adgangskode-fjeder for `weak_password` (rammer ikke reglen om "at least"),
+`signup_disabled`, og — den der peger direkte tilbage på selve
+mail-spørgsmålet — en genkendelse af "error sending confirmation email" /
+"not authorized", som er den fejl, Supabases STANDARD-afsender giver, når
+modtageren ikke står i projektets Team-liste (se dashboardtjeklisten
+nedenfor). Kontoen kan være oprettet korrekt, selvom denne fejl vises.
+
+BYGGET FRA BUNDEN — "glemt kode": knap under login-adgangskodefeltet →
+trin 1 (`#forgot-step`, e-mail → `db.resetPasswordForEmail()`, neutral
+kvittering uanset om e-mailen findes, for ikke at afsløre hvem der har en
+profil) → trin 2 (`#new-password-step`, kun synlig når `js/login.js`
+opfanger Supabases `PASSWORD_RECOVERY`-hændelse via `onAuthStateChange`,
+registreret FØR `backendReady()` rører klienten, fordi Supabase læser
+recovery-tokenet af adressen i samme øjeblik klienten oprettes). `redirectTo`
+peger tilbage på DENNE side (`location.origin + location.pathname`) i stedet
+for en ny — ingen ny fil, ingen ny route, samme filafgrænsning som resten af
+opgaven. To nye db-metoder i `js/supabase-api.js`: `resetPasswordForEmail()`,
+`updatePassword()`.
+IKKE EFTERPRØVET MOD PRODUKTION MED VILJE: at klikke "Send nulstillingslink"
+ville sende en rigtig mail til en rigtig adresse. Client-side-stien er
+efterprøvet i browseren (knap → trin skifter, ingen netværkskald før
+"Send"-knappen, jf. netværkslog); selve turen igennem Supabase og tilbage
+kan kun bekræftes af et menneske. redirectTo SKAL stå i projektets
+Auth → URL Configuration → Redirect URLs, ellers afviser Supabase linket
+tavst — se dashboardtjeklisten.
+HVOR: `js/login.js` (`daError`, `authError`, `resendConfirmation`,
+`showNewPasswordStep`, hele "glemt kode"-blokken, CVR-tjekket i
+register-form-handleren, `showVerifyStep`); `js/supabase-api.js` (`resend`,
+`resetPasswordForEmail`, `updatePassword`); `login.html` (`#forgot-step`,
+`#new-password-step`, `#verify-resend`, `#forgot-password-btn`, de to
+felthints).
+
+### Dashboardtjekliste — mennesket skal bekræfte dette manuelt, kan ikke ses fra kode
+Se den fulde tjekliste i agent-rapporten til orkestratoren (den samme tekst,
+gengivet her så den ikke går tabt): "glemt kode"-linket sender kun en mail,
+hvis redirectTo `https://bikerbasen.dk/login.html` (og `http://127.0.0.1:*/
+login.html` til lokal test) står i Authentication → URL Configuration →
+Redirect URLs. Uden den linje afviser Supabase kaldet, og symptomet er
+PRÆCIS det, mennesket målte: ingen fejl, ingen mail. Dette er den mest
+sandsynlige rodårsag, nu hvor koden selv findes — men kan kun bekræftes i
+dashboardet, ikke herfra.
+HVOR: Supabase-dashboardet, ikke en fil i repoet.

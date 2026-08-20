@@ -99,6 +99,33 @@ const db = (function(){
       const c = init(); if (!c) return { error: null };
       return c.auth.signOut();
     },
+
+    /* Sender bekræftelsesmailen igen. Findes, fordi der IKKE var nogen vej
+       herfra før: en bruger der lukkede fanen efter signUp() (eller hvis mail
+       aldrig kom frem) kunne hverken logge ind (ubekræftet) eller oprette på
+       ny (e-mailen findes allerede) — kun sidde fast. Se js/login.js. */
+    async resend({ email }){
+      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
+      return c.auth.resend({ type: 'signup', email });
+    },
+
+    /* Sender et link til at vælge en ny adgangskode. Supabase svarer succes
+       uanset om e-mailen findes i systemet — ellers kunne formularen bruges
+       til at afsløre, hvem der har en profil, og det skal js/login.js IKKE
+       modsige med sin egen fejlbesked. redirectTo skal stå i projektets
+       Auth → URL Configuration → Redirect URLs, ellers afvises linket. */
+    async resetPasswordForEmail(email, redirectTo){
+      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
+      return c.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined);
+    },
+
+    /* Sætter den nye adgangskode. Kræver en "recovery"-session, som Supabase
+       selv opretter, når brugeren lander her via linket fra resetPasswordForEmail. */
+    async updatePassword(password){
+      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
+      return c.auth.updateUser({ password });
+    },
+
     async currentUser(){
       const c = init(); if (!c) return null;
       const { data } = await c.auth.getUser();

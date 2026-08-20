@@ -8,14 +8,14 @@
 <title>Log ind — Bikerbasen</title>
 <meta name="description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
 <!-- meta:start (genereret af scripts/build-meta.js) -->
-<link rel="canonical" href="https://bikerbasen.dk/login.html">
+<link rel="canonical" href="https://bikerbasen.dk/login">
 <meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#C6420E" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F0D0A" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Bikerbasen">
 <meta property="og:locale" content="da_DK">
-<meta property="og:url" content="https://bikerbasen.dk/login.html">
+<meta property="og:url" content="https://bikerbasen.dk/login">
 <meta property="og:title" content="Log ind — Bikerbasen">
 <meta property="og:description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
 <meta property="og:image" content="https://bikerbasen.dk/og-image.png">
@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Log ind — Bikerbasen">
 <meta name="twitter:description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
@@ -88,7 +88,7 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=2d6ed691">
+<link rel="stylesheet" href="css/styles.css?v=785ea3b1">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -164,10 +164,46 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
           <div class="field field-full">
             <label for="login-password">Adgangskode</label>
             <input class="input" id="login-password" type="password" required autocomplete="current-password">
+            <button type="button" class="link-btn" id="forgot-password-btn" style="margin-top:8px; font-size:13px;">Glemt din adgangskode?</button>
           </div>
         </div>
         <button type="submit" class="btn btn-primary btn-block" style="margin-top:20px;">Log ind</button>
       </form>
+
+      <!-- Nulstil adgangskode. Fandtes ikke før i koden — hverken knap, felt
+           eller kald til Supabase — så et klik på et "Glemt kode"-link kunne
+           aldrig have sendt en mail. Begge trin ligger her, ikke på en ny
+           side: redirectTo peger tilbage på DENNE side, og Supabase sætter en
+           midlertidig "recovery"-session, som js/login.js lytter efter
+           (onAuthStateChange, PASSWORD_RECOVERY) og skifter til trin 2 med. -->
+      <div id="forgot-step" style="display:none;">
+        <h2 style="font-size:18px; margin-bottom:4px;">Nulstil din adgangskode</h2>
+        <p style="color:var(--color-fg-muted); font-size:13px; margin-bottom:16px;" id="forgot-intro">
+          Skriv din e-mail, så sender vi et link til at vælge en ny adgangskode.
+        </p>
+        <div class="form-grid" id="forgot-fields">
+          <div class="field field-full">
+            <label for="forgot-email">E-mail</label>
+            <input class="input" id="forgot-email" type="email" required autocomplete="email">
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-block" id="forgot-submit" style="margin-top:16px;">Send nulstillingslink</button>
+        <button type="button" class="link-btn" id="forgot-cancel" style="display:block; margin:14px auto 0;">Tilbage til log ind</button>
+      </div>
+
+      <div id="new-password-step" style="display:none;">
+        <h2 style="font-size:18px; margin-bottom:4px;">Vælg en ny adgangskode</h2>
+        <p style="color:var(--color-fg-muted); font-size:13px; margin-bottom:16px;">
+          Du kom hertil via linket i mailen. Skriv en ny adgangskode nedenfor.
+        </p>
+        <div class="form-grid">
+          <div class="field field-full">
+            <label for="new-password">Ny adgangskode</label>
+            <input class="input" id="new-password" type="password" required minlength="6" autocomplete="new-password">
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-block" id="new-password-submit" style="margin-top:16px;">Gem ny adgangskode</button>
+      </div>
 
       <form id="register-form" style="display:none;">
         <div class="form-grid">
@@ -182,7 +218,7 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
           <div class="field field-full">
             <label for="reg-phone">Telefonnummer <span class="required-mark">*</span></label>
             <input class="input" id="reg-phone" type="tel" required autocomplete="tel" placeholder="12 34 56 78">
-            <span class="field-hint">Bruges til SMS-bekræftelse af din konto.</span>
+            <span class="field-hint">Ikke SMS-bekræftet (den funktion er ikke sat op endnu) — bruges til at kontakte dig om dine annoncer.</span>
           </div>
           <div class="field field-full">
             <label for="reg-password">Adgangskode <span class="required-mark">*</span></label>
@@ -200,7 +236,7 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
               <div class="field">
                 <label for="reg-cvr">CVR-nummer <span class="required-mark">*</span></label>
                 <input class="input" id="reg-cvr" placeholder="8 cifre" maxlength="8" inputmode="numeric">
-                <span class="field-hint">Bruges til KYC-verificering af forhandlerkonti.</span>
+                <span class="field-hint">Kontrolleres kun aritmetisk (kontrolciffer) — vi slår ikke op i CVR-registret.</span>
               </div>
             </div>
           </div>
@@ -222,6 +258,10 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
         <p style="color:var(--color-fg-muted); font-size:13px; margin-bottom:16px;" id="verify-intro">
           Vi har sendt dig en bekræftelsesmail. Klik på linket i mailen, og log derefter ind.
         </p>
+        <!-- Kun synlig når needsConfirm er sand (js/login.js — showVerifyStep).
+             Lukker en fælde uden den: mailen kan være væk i spam, og uden en
+             vej herfra må man vente eller give op. -->
+        <button type="button" class="link-btn" id="verify-resend" style="display:none; margin-bottom:16px;">Send bekræftelsesmailen igen</button>
         <div class="safety-tip" style="margin-bottom:4px;">
           <span id="verify-info-icon"></span>
           <span>Identitetskontrol med MitID og SMS er ikke sat op endnu. Ingen profiler på Bikerbasen er identitetsverificerede — vurder altid sælgeren selv, og følg vores <a href="sikkerhed.html">gode råd</a>.</span>
@@ -285,20 +325,20 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
   </div>
 </footer>
 
-<script defer src="js/security.js?v=2d6ed691"></script>
+<script defer src="js/security.js?v=785ea3b1"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=2d6ed691"></script>
-<script defer src="js/supabase-api.js?v=2d6ed691"></script>
-<script defer src="js/icons.js?v=2d6ed691"></script>
+<script defer src="js/supabase-config.js?v=785ea3b1"></script>
+<script defer src="js/supabase-api.js?v=785ea3b1"></script>
+<script defer src="js/icons.js?v=785ea3b1"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk. findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og login/opret-profil har
      intet postnummerfelt (det ligger på opret-annonce.html:256). Den lå i
      samme download-kø som fontene og css'en og forsinkede første maling. -->
-<script defer src="js/data.js?v=2d6ed691"></script>
-<script defer src="js/store.js?v=2d6ed691"></script>
-<script defer src="js/backend-bridge.js?v=2d6ed691"></script>
-<script defer src="js/components.js?v=2d6ed691"></script>
-<script defer src="js/login.js?v=2d6ed691"></script>
+<script defer src="js/data.js?v=785ea3b1"></script>
+<script defer src="js/store.js?v=785ea3b1"></script>
+<script defer src="js/backend-bridge.js?v=785ea3b1"></script>
+<script defer src="js/components.js?v=785ea3b1"></script>
+<script defer src="js/login.js?v=785ea3b1"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

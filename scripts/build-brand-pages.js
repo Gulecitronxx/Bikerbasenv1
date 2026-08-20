@@ -77,6 +77,18 @@ function slugify(name){
 }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+/* Den rene adresse, en side kanonicaliserer til — samme regel som
+   scripts/build-meta.js's cleanUrl(). Duplikeret med vilje i stedet for
+   trukket ind i scripts/shared.js: den fil er ikke min at røre i denne runde,
+   og reglen er tre linjer. GitHub Pages løser selv en udvidelsesfri sti om
+   til den tilsvarende .html-fil (efterprøvet mod produktion: bikerbasen.dk/
+   maerke-bmw svarer 200, samme <title> som med ".html"), så en mærkeside kan
+   trygt kanonicalisere uden filendelsen — ligesom bilbasen.dk's forside
+   kanonicaliserer til den bare rod, ikke en filsti. */
+function cleanUrl(file){
+  return file === 'index.html' ? BASE : `${BASE}/${file.replace(/\.html$/, '')}`;
+}
+
 /* De mærker, vi KENDER, men ikke har på lager lige nu.
 
    BRANDS_BY_MODEL i js/data.js er en redaktionel liste over 60 mærker, og
@@ -118,7 +130,7 @@ function breadcrumbLd(items){
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: items.map((it, i) => ({
-      '@type': 'ListItem', position: i + 1, name: it.name, item: `${BASE}/${it.path}`,
+      '@type': 'ListItem', position: i + 1, name: it.name, item: cleanUrl(it.path),
     })),
   };
 }
@@ -275,13 +287,41 @@ function noscriptLinje(l){
 }
 
 function byg(){
-const byBrand = {};
 /* "Ukendt" er ikke et mærke, man søger på — normalizeExternalListing sætter
    det, når kilden ikke oplyser mærket. En maerke-ukendt.html ville være en
    side uden søgeord og uden mening. I dag er der 0 af dem; spærren er der,
    fordi den næste kilde kan have nogle. */
+const byBrandRaw = {};
 LISTINGS.filter(l => l.brand && l.brand !== 'Ukendt')
-  .forEach(l => { (byBrand[l.brand] = byBrand[l.brand] || []).push(l); });
+  .forEach(l => { (byBrandRaw[l.brand] = byBrandRaw[l.brand] || []).push(l); });
+
+/* To mærkenavne kan give SAMME slug uden at være det samme tegn for tegn —
+   "Royal Enfield" og "Royal-enfield" bliver begge maerke-royal-enfield.html.
+   To kilder (MC Syd, den nye Gul og Gratis-crawler) skriver mærket lidt
+   forskelligt, og slugify() ser kun bogstaver og tal.
+
+   Ubemærket overskrev den ene byggeriets fil, den andens 9 annoncer forsvandt
+   tavst fra siden og grid'en, OG sitemappet fik den samme adresse to gange —
+   efterprøvet på HEAD: "Built 21 brand pages" men kun 20 filer på disk, samme
+   URL to gange i sitemap.xml, og maerker.html's beskrivelse påstod "21
+   mærker" hvor der reelt kun er 20 sider. Samme fejlklasse som D-010's
+   versalfælde (maerkerUdenLager ovenfor), bare på filnavnet i stedet for på
+   søgefiltret.
+
+   Løsningen er at slå navnene sammen PÅ SLUG, før noget bygges eller tælles.
+   Det navn med flest annoncer bliver sidens overskrift; ingen annoncer
+   forsvinder, de lægges sammen i én liste. */
+const slugGrupper = {};
+for (const navn of Object.keys(byBrandRaw)){
+  const slug = slugify(navn);
+  (slugGrupper[slug] = slugGrupper[slug] || []).push(navn);
+}
+const byBrand = {};
+for (const slug in slugGrupper){
+  const navne = slugGrupper[slug].sort((a, b) => byBrandRaw[b].length - byBrandRaw[a].length);
+  byBrand[navne[0]] = navne.flatMap(n => byBrandRaw[n]);
+}
+
 const brands = Object.keys(byBrand)
   .filter(b => byBrand[b].length > 0)   // en tom mærkeside er en blindgyde, ikke en landingsside
   .sort((a, b) => a.localeCompare(b, 'da'));
@@ -342,8 +382,11 @@ ${csp}
 <!-- Canonical staar HER, ikke kun i det blok scripts/build-meta.js skriver
      bagefter. En ny side skal aldrig kunne naa produktionen uden: soegesidens
      facetter samler sig allerede paa soegning.html, og en maerkeside uden
-     canonical ville vaere den naeste kilde til duplicate content. -->
-<link rel="canonical" href="${BASE}/maerke-${slug}.html">
+     canonical ville vaere den naeste kilde til duplicate content.
+     Uden filendelse (cleanUrl) — SEO-runde 3, builder B: GitHub Pages loeser
+     "maerke-${slug}" om til "maerke-${slug}.html" af sig selv, saa den rene
+     adresse er den, en bruger og Google rent faktisk lander paa. -->
+<link rel="canonical" href="${cleanUrl(`maerke-${slug}.html`)}">
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
@@ -582,18 +625,29 @@ const dealerUrls = [...dealerLastmod.entries()].map(([id, lastmod]) => ({
   lastmod,
 }));
 
+/* Sitemappets adresser skal matche siden EGEN canonical, ellers peger vi
+   Google mod en URL, siden selv siger ikke er den rigtige — SEO-runde 3,
+   builder B.
+
+   Statiske sider og mærkesider bruger cleanUrl(): deres canonical (denne fil
+   og scripts/build-meta.js) er nu den udvidelsesfri adresse.
+   Annonce- og forhandlerlinks beholder ".html" (+ evt. "?id="): deres
+   canonical sættes af js/seo.js, som ikke røres i denne runde, og som stadig
+   skriver filstien. At "rense" dem her uden at rense kilden ville give et
+   sitemap, der er PÆNERE end den side, det peger på — samme fejlklasse som
+   findingen C-015 (en påstand sitemappet ikke kan bakke op). */
 const today = new Date().toISOString().slice(0,10);
 const entries = [
-  ...[...staticPages, ...brands.map(b => `maerke-${slugify(b)}.html`)]
-    .map(u => ({ loc: u, lastmod: today })),
-  ...listingUrls,
-  ...dealerUrls,
+  ...staticPages.map(u => ({ loc: cleanUrl(u), lastmod: today })),
+  ...brands.map(b => ({ loc: cleanUrl(`maerke-${slugify(b)}.html`), lastmod: today })),
+  ...listingUrls.map(e => ({ loc: `${base}/${e.loc}`, lastmod: e.lastmod })),
+  ...dealerUrls.map(e => ({ loc: `${base}/${e.loc}`, lastmod: e.lastmod })),
 ];
 const urls = entries;
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'),
 `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${entries.map(e => `  <url><loc>${base}/${esc(e.loc)}</loc><lastmod>${e.lastmod || today}</lastmod></url>`).join('\n')}
+${entries.map(e => `  <url><loc>${esc(e.loc)}</loc><lastmod>${e.lastmod || today}</lastmod></url>`).join('\n')}
 </urlset>
 `, 'utf8');
 

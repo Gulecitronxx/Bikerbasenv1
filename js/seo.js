@@ -198,12 +198,28 @@ function seoListingPage(listing, photoUrls){
     image: delebillede,
     type: 'product',
   });
-  Seo.setMeta('meta[property="product:price:amount"]', 'property', 'product:price:amount', String(listing.price));
-  Seo.setMeta('meta[property="product:price:currency"]', 'property', 'product:price:currency', 'DKK');
+  // Samme regel som for offers herunder: intet "product:price:amount"-tag,
+  // når vi ikke kender prisen — et tomt tal er stadig et opdigtet tal.
+  if (listing.price != null){
+    Seo.setMeta('meta[property="product:price:amount"]', 'property', 'product:price:amount', String(listing.price));
+    Seo.setMeta('meta[property="product:price:currency"]', 'property', 'product:price:currency', 'DKK');
+  }
 
   const vehicle = {
     '@context': 'https://schema.org',
-    '@type': 'Motorcycle',
+    /* Google lukkede sit eget "Vehicle listing"-rige resultat i september
+       2025 (Search Central-galleriet lister det ikke længere; kun
+       "Product"/"Product snippet"/"Merchant listing" står tilbage under
+       Shopping). Ren "Product" har til gengæld intet felt for kilometertal,
+       motorstørrelse eller årgangsdato — mileageFromOdometer, vehicleEngine
+       og vehicleModelDate hører til Vehicle/Motorcycle, ikke til Product,
+       og et validator ville flage dem som "unexpected property" på en ren
+       Product. Løsningen er IKKE at vælge — schema.org tillader en LISTE af
+       typer, og Motorcycle nedarver alligevel fra Product (Thing > Product >
+       Vehicle > Motorcycle), så kombinationen er hverken overflødig eller
+       ugyldig: hver egenskab herunder hører rent faktisk under en af de to
+       erklærede typer. Se work/DECISIONS.md for kilderne bag beslutningen. */
+    '@type': ['Product', 'Motorcycle'],
     name: navn,
     brand: { '@type': 'Brand', name: listing.brand },
     model: listing.model,
@@ -217,7 +233,18 @@ function seoListingPage(listing, photoUrls){
       '@type': 'EngineSpecification',
       engineDisplacement: { '@type': 'QuantitativeValue', value: listing.ccm, unitCode: 'CMQ' },
     },
-    offers: {
+  };
+  // image kun når der ER et foto af netop denne motorcykel. Se begrundelsen
+  // ovenfor; feltet må ikke falde tilbage på delingsbilledet.
+  if (fotos.length) vehicle.image = fotos;
+  /* offers udelades helt, når prisen ikke er kendt. "price": null er ikke
+     bare en tavs oplysning — det er en INVALID Offer (price skal være et
+     tal eller en tekst, jf. schema.org), og en opdigtet pris ville være
+     præcis den slags gæt, sitet ellers nægter at lave. Uden offers mister
+     annoncen sin ret til et Product-rigt resultat, og det er den rigtige
+     pris at betale for en pris, vi ikke har. */
+  if (listing.price != null){
+    vehicle.offers = {
       '@type': 'Offer',
       price: listing.price,
       priceCurrency: 'DKK',
@@ -236,11 +263,8 @@ function seoListingPage(listing, photoUrls){
             address: { '@type': 'PostalAddress', addressLocality: listing.city, postalCode: listing.postnr, addressCountry: 'DK' } }
         : { '@type': 'Person',
             address: { '@type': 'PostalAddress', addressLocality: listing.city, addressCountry: 'DK' } },
-    },
-  };
-  // image kun når der ER et foto af netop denne motorcykel. Se begrundelsen
-  // ovenfor; feltet må ikke falde tilbage på delingsbilledet.
-  if (fotos.length) vehicle.image = fotos;
+    };
+  }
   if (listing.power) {
     vehicle.vehicleEngine.enginePower = { '@type': 'QuantitativeValue', value: listing.power, unitText: 'hk' };
   }
@@ -253,6 +277,169 @@ function seoListingPage(listing, photoUrls){
     { name: typeLabel(listing.type), path: `soegning.html?type=${listing.type}` },
     { name: navn, path: listingPageUrl(listing).replace(SITE_URL + '/', '') },
   ]));
+}
+
+/* Indekseret annonce (MC Syd, Gul og Gratis m.fl.) — annonce.html?id=<n>,
+   ingen forrenderet side.
+
+   Findbarheden af de her annoncer er en runde 3-dom for sig (392 af 392
+   annoncer i drift havde SAMME kanoniske URL: den blanke /annonce.html —
+   canonical blev aldrig sat for dem, kun robots). To rigtige svar fandtes:
+
+     A) selv-canonical (/annonce.html?id=<n>) og index — behandl siden som
+        vores egen originale.
+     B) noindex (uændret siden runde 2) OG canonical til KILDENS egen
+        annonce-URL.
+
+   VALGT: B. `js/annonce.js` sætter allerede noindex med begrundelsen "vi
+   ejer ikke indholdet" — den linje er rigtig, den var bare ikke fulgt helt
+   igennem. Prisen, fotoet og beskrivelsens første linje ER kildens, ikke
+   vores; domænet er ni dage gammelt og har ingen autoritet at sætte over
+   styr; og at bede Google indeksere 392 sider, der i det store hele
+   gengiver en andens annoncetekst under Bikerbasens navn, er præcis den
+   "thin/aggregator content"-profil, Googles kvalitetsvejledning advarer
+   imod — risikoen rammer HELE sitets vurdering, ikke kun den ene side.
+   Vores tilføjede værdi (kørekortsudledning, "vi gætter aldrig",
+   kildeangivelse fem gange før første klik) er reel, men den gør siden til
+   et godt SUPPLEMENT til kildens annonce — ikke til en original, der bør
+   konkurrere med den i søgeresultatet.
+
+   Canonical peger derfor PÅ KILDEN i stedet for at stå tom eller pege på
+   den blanke /annonce.html (fejlen, dommen fandt). Det er ikke kun en
+   oprydning: et udfyldt canonical til en anden side er et STÆRKERE og
+   mere ærligt signal end et fraværende ét — det siger "det her ER en kopi,
+   originalen står der" i stedet for at lade Google gætte selv (og gættet
+   var netop den fælles blanke URL). Det er samme mønster, Google selv
+   anbefaler til spejlede/syndikerede sider, og det er ikke i konflikt med
+   noindex: begge peger samme vej, ingen af dem beder om at blive
+   indekseret her.
+
+   Delesiden (Facebook, Messenger, en MC-gruppe) er en ANDEN beslutning end
+   Googles indeksering. noindex styrer kun søgemaskinen — det styrer ikke,
+   hvad et delt link viser. Titel, description og og:-billede bliver derfor
+   stadig annoncespecifikke, ligesom på en egen annonce, bare med kilden
+   nævnt. */
+function seoExternalListingPage(listing, photoUrls){
+  const navn = `${listing.brand || ''} ${listing.model || ''}`.trim() || 'Motorcykel';
+  const kildeNavn = listing.source?.navn || 'kilden';
+  /* Kildens model-felt har årgangen skrevet ind i sig selv nogle gange
+     ("Daytona T100R 1971" — set på en rigtig Gul og Gratis-annonce). Sat
+     sammen med listing.year ukritisk gav det "Triumph Daytona T100R 1971
+     1971" i titlen — samme tal to gange på række, hvor køberen læser en
+     fejl, ikke to oplysninger. Vi retter ikke modellens tekst (den er
+     kildens, ordret, som resten af siden), men vi undlader at GENTAGE
+     årstallet, når det allerede står sidst i navnet. */
+  const aarAlleredeINavn = listing.year != null && navn.trim().endsWith(String(listing.year));
+  // Egen side — den, der faktisk deles og vises i browseren — bruges til
+  // og:url. Den er IKKE det samme som canonical: canonical siger hvor
+  // originalen er, og:url siger hvilken side det er, der bliver delt.
+  // Uden ".html": SEO builder B fandt (og skrev i work/DECISIONS.md), at
+  // GitHub Pages selv løser en udvidelsesfri sti om til .html-filen —
+  // efterprøvet i produktion for bl.a. "annonce" — så og:url skal pege på
+  // den adresse, en bruger rent faktisk lander på, ikke på filstien.
+  const ownUrl = `${SITE_URL}/annonce?id=${encodeURIComponent(listing.id)}`;
+
+  const dele = [
+    (listing.year != null && !aarAlleredeINavn) ? `Årgang ${listing.year}` : null,
+    formatKm(listing.km),
+    formatCcm(listing.ccm),
+    listing.condition,
+  ].filter(Boolean);
+
+  const prisTekst = listing.price != null ? formatPrice(listing.price) : 'Ikke oplyst';
+  const titel = `${navn}${(listing.year != null && !aarAlleredeINavn) ? ' ' + listing.year : ''} hos ${kildeNavn} — ${prisTekst} — ${SITE_NAME}`;
+  const beskrivelse = `${navn}${dele.length ? ', ' + dele.join(', ') : ''}. Hos ${kildeNavn}`
+    + `${listing.city ? ' i ' + listing.city : ''} — set på ${SITE_NAME}.`;
+
+  const fotos = (photoUrls || []).filter(Boolean);
+  const delebillede = fotos[0] || `${SITE_URL}/og-image.png`;
+
+  document.title = titel;
+  Seo.setMeta('meta[name="description"]', 'name', 'description', beskrivelse);
+  Seo.setMeta('meta[property="og:title"]', 'property', 'og:title', titel);
+  Seo.setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', titel);
+  Seo.setMeta('meta[property="og:description"]', 'property', 'og:description', beskrivelse);
+  Seo.setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', beskrivelse);
+  Seo.setMeta('meta[property="og:url"]', 'property', 'og:url', ownUrl);
+  Seo.setMeta('meta[property="og:type"]', 'property', 'og:type', 'product');
+  Seo.setMeta('meta[property="og:image"]', 'property', 'og:image', delebillede);
+  Seo.setMeta('meta[name="twitter:image"]', 'name', 'twitter:image', delebillede);
+  // Samme fælde som C-016 på de egne annoncer: bredde/højde passer kun på
+  // standardbilledet. Uden oprydning ville et strakt kildefoto stå med
+  // 1200×630 skrevet ved siden af sig.
+  document.head.querySelectorAll('meta[property="og:image:width"], meta[property="og:image:height"]')
+    .forEach(el => el.remove());
+
+  // Canonical: se begrundelsen ovenfor. sikkerUrl() (js/data.js) afviser
+  // alt, der ikke er et rigtigt http(s)-link, så et ødelagt kildelink
+  // efterlader canonical urørt i stedet for at pege på et gæt.
+  const kildeUrl = typeof sikkerUrl === 'function' ? sikkerUrl(listing.externalUrl) : null;
+  if (kildeUrl) Seo.setLink('canonical', kildeUrl);
+
+  if (listing.price != null){
+    Seo.setMeta('meta[property="product:price:amount"]', 'property', 'product:price:amount', String(listing.price));
+    Seo.setMeta('meta[property="product:price:currency"]', 'property', 'product:price:currency', 'DKK');
+  }
+
+  /* Struktureret data. Samme type-kombination og samme begrundelse som
+     seoListingPage() ovenfor (Product + Motorcycle — Google har lukket sit
+     Vehicle-rige resultat, og ren Product mangler domæne for kilometertal
+     og motor). Forskellen fra en egen annonce: `url` peger på KILDENS side,
+     ikke på vores egen — en Offer, der påstår "det her er varen, og den
+     står på DENNE url", skal pege på den url, hvor varen faktisk kan
+     købes. Peger den på vores egen noindex-side, er påstanden usand for et
+     system, der følger den. */
+  const vehicle = {
+    '@context': 'https://schema.org',
+    '@type': ['Product', 'Motorcycle'],
+    name: navn,
+    description: listing.description || undefined,
+  };
+  if (listing.brand && listing.brand !== 'Ukendt') vehicle.brand = { '@type': 'Brand', name: listing.brand };
+  if (listing.model) vehicle.model = listing.model;
+  if (listing.year != null){
+    vehicle.vehicleModelDate = String(listing.year);
+    vehicle.productionDate = String(listing.year);
+  }
+  if (listing.km != null){
+    vehicle.mileageFromOdometer = { '@type': 'QuantitativeValue', value: listing.km, unitCode: 'KMT' };
+  }
+  if (listing.ccm != null || listing.power){
+    vehicle.vehicleEngine = { '@type': 'EngineSpecification' };
+    if (listing.ccm != null) vehicle.vehicleEngine.engineDisplacement = { '@type': 'QuantitativeValue', value: listing.ccm, unitCode: 'CMQ' };
+    if (listing.power) vehicle.vehicleEngine.enginePower = { '@type': 'QuantitativeValue', value: listing.power, unitText: 'hk' };
+  }
+  if (listing.fuel) vehicle.fuelType = listing.fuel;
+  if (listing.color) vehicle.color = listing.color;
+  if (fotos.length) vehicle.image = fotos;
+  // itemCondition: kun når kilden faktisk har markeret den som fabriksny
+  // eller brugt (eksternErNy() i js/components.js). Ingen af delene gættes.
+  if (typeof eksternErNy === 'function'){
+    const ny = eksternErNy(listing);
+    if (ny === true) vehicle.itemCondition = 'https://schema.org/NewCondition';
+    if (ny === false) vehicle.itemCondition = 'https://schema.org/UsedCondition';
+  }
+  if (listing.price != null){
+    vehicle.offers = {
+      '@type': 'Offer',
+      price: listing.price,
+      priceCurrency: 'DKK',
+      availability: 'https://schema.org/InStock',
+      // url udelades, hvis kildens eget link er itu (sikkerUrl gav null) —
+      // en Offer uden en gyldig købs-URL er stadig sand information, en
+      // Offer med en ødelagt en er ikke.
+      url: kildeUrl || undefined,
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+      areaServed: { '@type': 'Country', name: 'Danmark' },
+      seller: listing.isDealer
+        ? { '@type': 'AutoDealer', name: kildeNavn,
+            address: listing.city ? { '@type': 'PostalAddress', addressLocality: listing.city, addressCountry: 'DK' } : undefined }
+        : { '@type': 'Person',
+            address: listing.city ? { '@type': 'PostalAddress', addressLocality: listing.city, addressCountry: 'DK' } : undefined },
+    };
+    if (vehicle.itemCondition) vehicle.offers.itemCondition = vehicle.itemCondition;
+  }
+  Seo.setJsonLd('vehicle', vehicle);
 }
 
 /* Søgeresultater: ItemList over de annoncer på siden, der HAR en adresse.

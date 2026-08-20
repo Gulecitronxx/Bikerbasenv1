@@ -29,8 +29,26 @@ function attr(s){
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
+/* Den rene adresse, en side kanonicaliserer til — SEO-runde 3, builder B.
+
+   Canonical pegede før på filstien (".../index.html", ".../soegning.html"),
+   ikke på den adresse nogen rent faktisk lander på. GitHub Pages løser selv
+   en udvidelsesfri sti om til den tilsvarende .html-fil — efterprøvet direkte
+   mod produktion: bikerbasen.dk/soegning svarer 200 med samme <title> som
+   bikerbasen.dk/soegning.html, mens en sti der IKKE findes (heller ikke som
+   .html) stadig svarer 404. Det er ægte GitHub Pages-adfærd, ikke en tilfældig
+   fallback. bilbasen.dk's egen forside kanonicaliserer til den bare rod
+   (https://www.bilbasen.dk, uden sti) — det er sammenligningspunktet.
+
+   index.html får derfor BASE uden filnavn; alle andre sider mister kun
+   endelsen. Ingen side skifter FIL — kun hvad <link rel="canonical"> og
+   og:url peger på. */
+function cleanUrl(file){
+  return file === 'index.html' ? BASE : `${BASE}/${file.replace(/\.html$/, '')}`;
+}
+
 function metaBlock(file, title, description){
-  const url = `${BASE}/${file}`;
+  const url = cleanUrl(file);
   const lines = [
     START,
     `<link rel="canonical" href="${url}">`,

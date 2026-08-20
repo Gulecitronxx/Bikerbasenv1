@@ -349,6 +349,12 @@ function renderExternalListing(listing){
   // konkurrere med originalen i Google.
   Seo.setMeta('meta[name="robots"]', 'name', 'robots', 'noindex, follow');
 
+  /* Titel, description, og:-billede, canonical (til KILDEN — se
+     work/DECISIONS.md) og struktureret data i ét kald. Fotos sanitizeres
+     med sikkerUrl(), samme funktion som fotoet i galleriet nedenfor bruger
+     — de kommer fra en forhandlers DOM, ikke fra os selv. */
+  seoExternalListingPage(listing, (listing.photoUrls || []).map(sikkerUrl).filter(Boolean));
+
   /* Brødkrummen følger Bilbasens: Mærke › Model. Mellemleddet pegede på en
      tom søgning; nu er det mærket, og det er den vej, en køber faktisk vil
      tilbage ad. "Ukendt" er ikke et mærke, man kan søge på, så dér bliver
@@ -442,11 +448,10 @@ function renderExternalListing(listing){
      af modelnavnet — og et delt link i en MC-gruppe bar altså et ord, kilden
      havde fundet på. En kategori hører i en kategorilinje. */
   const fuldTitel = [listing.brand, listing.model].filter(Boolean).join(' ');
-  /* Sitets mønster er "X — Bikerbasen", ét ophold. Forhandlerens navn står
-     inde i første led, ikke som en ekstra tankestreg: et link delt i en
-     MC-gruppe skal vise, hvem motorcyklen står hos, uden at titlen får to
-     brud i sig. */
-  document.title = `${fuldTitel} hos ${kildeNavn} — Bikerbasen`;
+  /* <title> sættes nu af seoExternalListingPage() ovenfor — mærke, model,
+     kilde OG pris ("X hos Y — 45.000 kr. — Bikerbasen"), hvor det før kun
+     var mærke og model uden pris. h1'en er en separat, kortere ting: den
+     skal ikke bære prisen, som allerede står sit eget sted på siden. */
   const h1 = document.getElementById('listing-h1');
   if (h1) h1.textContent = fuldTitel;
 
