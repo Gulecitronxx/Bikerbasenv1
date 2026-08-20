@@ -29,6 +29,15 @@ const admin = createClient(
 );
 
 // Saet planen ud fra abonnementets tilstand.
+//
+// RETTET (supabase/019_dealer_ved_betaling.sql): denne funktion satte foer
+// KUN plan = 'dealer', aldrig is_dealer. dashboard.html laaser adgang paa
+// is_dealer, saa en bruger, der betalte via Stripe, fik ubegraensede
+// annoncer men blev stadig mødt af "Dashboardet er for forhandlere" — den
+// side, betalingen skulle laase op for. is_dealer saettes derfor ogsaa her,
+// naar abonnementet bliver aktivt. Vi RYDDER den ikke ved opsigelse: at vaere
+// en virksomhed er en kendsgerning om kontoen, ikke et abonnementsflag (samme
+// begrundelse som i migrationen).
 async function opdaterPlan(customerId: string, opts: { userId?: string; status?: string; periodEnd?: number | null }) {
   const aktiv = opts.status === 'active' || opts.status === 'trialing';
   const patch: Record<string, unknown> = {
@@ -37,6 +46,7 @@ async function opdaterPlan(customerId: string, opts: { userId?: string; status?:
     subscription_period_end: opts.periodEnd ? new Date(opts.periodEnd * 1000).toISOString() : null,
     stripe_customer_id: customerId,
   };
+  if (aktiv) patch.is_dealer = true;
   // Find profilen enten paa user-id (foerste betaling) eller paa kunde-id.
   const q = admin.from('profiles').update(patch);
   if (opts.userId) await q.eq('id', opts.userId);

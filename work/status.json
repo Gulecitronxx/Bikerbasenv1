@@ -98,6 +98,17 @@
       "bar": [],
       "os": [],
       "sidsteHul": "Ingen reference: Bilbasen har intet betalingsflow (GAPS.md gap 2). Dømmes på vores flow + gulvet."
+    },
+    {
+      "id": "forhandler-vaerktoej",
+      "navn": "Forhandler-onboarding og dashboard",
+      "kategori": "Tillid",
+      "runde": 1,
+      "status": "bygger",
+      "note": "Dækker 'betaling' (afventer ovenfor) plus dashboard.html. Ingen reference: Bilbasen er login-spærret på præcis dette stykke (bar/GAPS.md, punkt 4). Dømmes på vores flow + gulvet, blindt sammenlignet med Stripe Dashboard/Shopify Admin som standarden for et forretningsværktøj til en lille virksomhed.",
+      "bar": [],
+      "os": [],
+      "sidsteHul": "FUNDET OG RETTET: dashboard.html laaser adgang paa profiles.is_dealer, men hverken stripe-webhook eller dev_set_plan() satte nogensinde det felt — de satte kun plan='dealer'. En forhandler, der betalte for abonnementet via 'Mine annoncer -> Konto -> Bliv forhandler', fik ubegraensede annoncer men blev stadig moedt af 'Dashboardet er for forhandlere', naar han klikkede paa netop det, han betalte for. Rettet i supabase/019_dealer_ved_betaling.sql og supabase/functions/stripe-webhook/index.ts. Tilbagestaaende hul: krav-godkendelse er manuel (supabase/KRAV_GODKENDELSE.md) — ingen admin-UI endnu, og der findes ingen editerings-UI for company/CVR efter oprettelse."
     }
   ],
   "advisors": {

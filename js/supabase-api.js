@@ -349,6 +349,77 @@ const db = (function(){
       return c.rpc('my_listing_saves');
     },
 
+    /* ---------- Krav på eksterne annoncer (supabase/014_aggregator.sql) ----------
+
+       En forhandler, hvis annoncer allerede findes indekseret fra en anden
+       side (eksterne_annoncer), kan gøre krav på dem i stedet for at oprette
+       dem forfra. Der er tre "metoder" i skemaet ('domaene', 'kode', 'manuel'),
+       men kun én er bygget her: 'manuel', hvor forhandleren selv skriver, hvem
+       han er. Godkendelsen sker manuelt af Bikerbasens ejer i SQL-editoren
+       (supabase/KRAV_GODKENDELSE.md) — der er ingen admin-UI i dette repo, og
+       et automatisk "godkend dig selv"-flow ville være en åben dør for at
+       stjæle en andens annonce. */
+
+    /* Eksterne annoncer, ingen (endnu) har gjort krav på. Fritekstsøgning på
+       titel/mærke/model/by, så en forhandler med mange annoncer hos samme
+       kilde kan finde sine egne uden at bladre alle 548 igennem. */
+    async searchUnclaimedExternal({ q = '', limit = 40 } = {}){
+      const c = init(); if (!c) return { data: [], error: null };
+      let query = c.from('eksterne_annoncer')
+        .select('id, titel, maerke, model, aargang, km, pris_dkk, by, thumbnail_url, url, sidst_set, kilde:kilder(navn, domaene)')
+        .eq('status', 'aktiv')
+        .is('ejet_af', null);
+      const trimmed = q.trim();
+      if (trimmed) query = query.or(`titel.ilike.%${trimmed}%,maerke.ilike.%${trimmed}%,model.ilike.%${trimmed}%,by.ilike.%${trimmed}%`);
+      query = query.order('sidst_set', { ascending: false }).limit(limit);
+      return query;
+    },
+
+    /* Egne krav — afventende, godkendte og afviste. RLS ("krav: laes eget")
+       lader kun brugeren se sine egne, så der filtreres ikke i klienten. */
+    async myKrav(){
+      const c = init(); if (!c) return { data: [], error: null };
+      return c.from('krav')
+        .select('id, annonce_id, status, dokumentation, oprettet, behandlet, annonce:eksterne_annoncer(titel, maerke, model, url, thumbnail_url)')
+        .order('oprettet', { ascending: false });
+    },
+
+    /* Indsender et krav. RLS ("krav: opret eget") kræver bruger_id = auth.uid(),
+       og unique(annonce_id, bruger_id) forhindrer et dobbelt krav på samme
+       annonce — fejlen fanges og oversættes i dashboard.js. */
+    async submitKrav(annonceId, dokumentation){
+      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
+      const user = await this.currentUser();
+      if (!user) return { error: { message: 'Du skal være logget ind.' } };
+      return c.from('krav').insert({
+        annonce_id: annonceId, bruger_id: user.id,
+        metode: 'manuel', dokumentation: dokumentation || null,
+      }).select().single();
+    },
+
+    /* Eksterne annoncer, brugeren allerede EJER (et krav er godkendt, og
+       ejet_af peger på ham). Samme offentlige læsepolitik som søgesiden
+       bruger — der findes ingen "kun mine" RLS-politik på eksterne_annoncer,
+       så filtreringen sker her i klienten på et felt, kun rigtige ejere kan
+       matche (ejet_af sættes udelukkende af den manuelle godkendelse). */
+    async myClaimedExternal(){
+      const c = init(); if (!c) return { data: [], error: null };
+      const user = await this.currentUser();
+      if (!user) return { data: [], error: null };
+      return c.from('eksterne_annoncer')
+        .select('id, titel, maerke, model, aargang, km, pris_dkk, by, thumbnail_url, url, status, sidst_set, kilde:kilder(navn, domaene)')
+        .eq('ejet_af', user.id)
+        .order('sidst_set', { ascending: false });
+    },
+
+    /* Retter ét felt på en ekstern annonce, forhandleren ejer. Ombygger
+       public.ret_ekstern_annonce() (014_aggregator.sql), som selv tjekker
+       ejet_af = auth.uid() server-side — klienten kan ikke omgå det. */
+    async retExternalField(annonceId, felt, vaerdi){
+      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
+      return c.rpc('ret_ekstern_annonce', { p_annonce: annonceId, p_felt: felt, p_vaerdi: String(vaerdi) });
+    },
+
     /* ---------- Billeder ---------- */
     async uploadListingPhoto(listingId, file, position = 0){
       const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };

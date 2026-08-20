@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Forhandler-dashboard — Bikerbasen">
 <meta name="twitter:description" content="Overblik over dine annoncer, visninger, henvendelser og bedømmelser som forhandler på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
@@ -61,7 +61,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=785ea3b1">
+<link rel="stylesheet" href="css/styles.css?v=da2e1e5a">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -108,8 +108,8 @@ try{
       <div class="empty-state" style="padding-top:var(--space-9);">
         <div id="gate-icon"></div>
         <h3>Dashboardet er for forhandlere</h3>
-        <p style="max-width:420px; margin:0 auto var(--space-4);">Din profil er registreret som privat sælger. Opgrader til en forhandlerkonto for at få adgang til salgsoverblik, statistik og annoncestyring.</p>
-        <a href="mine-annoncer.html" class="btn btn-primary">Gå til mine annoncer</a>
+        <p style="max-width:420px; margin:0 auto var(--space-4);">Din profil er registreret som privat sælger. Bliv forhandler for at få adgang til salgsoverblik, statistik, annoncestyring og krav på dine egne indekserede annoncer.</p>
+        <a href="mine-annoncer.html?tab=konto" class="btn btn-primary">Bliv forhandler</a>
       </div>
     </div>
 
@@ -124,7 +124,11 @@ try{
         </div>
       </div>
 
-      <p class="demo-note"><span data-icon="info"></span>Visninger tælles én gang pr. besøgende pr. session. Henvendelser er antallet af gange nogen har fået vist dit telefonnummer.</p>
+      <div id="dash-plan-strip"></div>
+
+      <div id="dash-kickoff" style="display:none;"></div>
+
+      <p class="demo-note"><span data-icon="info"></span>Visninger tælles én gang pr. besøgende pr. session. Henvendelser er antallet af gange nogen har fået vist dit telefonnummer. Begge dele findes kun for annoncer, du har oprettet direkte på Bikerbasen — ikke for indekserede annoncer, du har gjort krav på (se nedenfor).</p>
 
       <section aria-labelledby="kpi-heading">
         <h2 id="kpi-heading" class="visually-hidden">Nøgletal</h2>
@@ -186,9 +190,84 @@ try{
           <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
         </div>
       </section>
+
+      <section class="panel" id="ekstern-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Annoncer du har gjort krav på</h2>
+            <p id="ekstern-summary"></p>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table" id="ekstern-table">
+            <thead>
+              <tr>
+                <th scope="col">Annonce</th>
+                <th scope="col" class="num">Pris</th>
+                <th scope="col">Kilde</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="visually-hidden">Handlinger</span></th>
+              </tr>
+            </thead>
+            <tbody id="ekstern-tbody"></tbody>
+          </table>
+        </div>
+        <div id="ekstern-empty" class="empty-state" style="display:none;">
+          <h3>Ingen godkendte krav endnu</h3>
+          <p>Har din forretning allerede annoncer indekseret fra en anden side, kan du gøre krav på dem herunder i stedet for at oprette dem forfra.</p>
+        </div>
+      </section>
+
+      <section class="panel" id="krav-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Gør krav på dine annoncer</h2>
+            <p>Bikerbasen har indekseret annoncer fra andre danske MC-sider. Er en af dem din, kan du gøre krav på den og selv rette prisen, statussen og andre felter.</p>
+          </div>
+        </div>
+        <form id="krav-search-form" class="krav-search-form">
+          <label class="visually-hidden" for="krav-search-input">Søg efter mærke, model eller by</label>
+          <input class="input" id="krav-search-input" type="search" placeholder="Søg efter mærke, model eller by, fx “Honda” eller “Kolding”" autocomplete="off">
+          <button type="submit" class="btn btn-outline"><span data-icon="search"></span>Søg</button>
+        </form>
+        <div id="krav-search-hint" class="krav-search-hint"></div>
+        <div id="krav-results" class="krav-results"></div>
+
+        <div id="krav-status-wrap" style="display:none;">
+          <h3 class="krav-status-heading">Dine indsendte krav</h3>
+          <div id="krav-status-list" class="krav-status-list"></div>
+        </div>
+      </section>
     </div>
   </div>
 </main>
+
+<!-- Krav-formular: hvorfor et element uden for tabellen, ikke en inline-form
+     pr. række? Formularen skal kunne åbnes fra ekstern-tabellen ELLER fra
+     søgeresultaterne, og ét delt panel er lettere at holde tilgængeligt
+     (fokus, Escape) end N kopier af samme formular. Genbruger
+     .modal-overlay/.modal-box fra js/components.js' anmeld-modal — samme
+     mønster, ikke en ny dialogkomponent for én formular. -->
+<div class="modal-overlay" id="krav-dialog">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Gør krav på denne annonce</h2>
+      <button type="button" class="icon-btn" id="krav-dialog-close" aria-label="Luk"><span data-icon="close"></span></button>
+    </div>
+    <p id="krav-dialog-annonce" style="color:var(--color-fg-muted); font-size:14px; margin-bottom:16px;"></p>
+    <form id="krav-dialog-form">
+      <div class="field field-full">
+        <label for="krav-dialog-doku">Hvordan ved vi, at det er din annonce?</label>
+        <textarea class="input" id="krav-dialog-doku" rows="3" placeholder="F.eks. dit firmanavn, telefonnummer eller CVR — samme oplysninger som på annoncen hos kilden." required></textarea>
+        <span class="field-hint">Vi godkender krav manuelt, så skriv nok til at vi kan se, at det passer. Du får besked (som statusskift her i dashboardet), når det er behandlet.</span>
+      </div>
+      <div class="form-actions" style="justify-content:flex-end;">
+        <button type="button" class="btn btn-outline" id="krav-dialog-cancel">Annullér</button>
+        <button type="submit" class="btn btn-primary" id="krav-dialog-submit">Send krav</button>
+      </div>
+    </form>
+  </div>
+</div>
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
@@ -230,17 +309,17 @@ try{
     </div>
   </div>
 </footer>
-<script defer src="js/security.js?v=785ea3b1"></script>
+<script defer src="js/security.js?v=da2e1e5a"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=785ea3b1"></script>
-<script defer src="js/supabase-api.js?v=785ea3b1"></script>
-<script defer src="js/icons.js?v=785ea3b1"></script>
-<script defer src="js/postnumre.js?v=785ea3b1"></script>
-<script defer src="js/data.js?v=785ea3b1"></script>
-<script defer src="js/store.js?v=785ea3b1"></script>
-<script defer src="js/backend-bridge.js?v=785ea3b1"></script>
-<script defer src="js/components.js?v=785ea3b1"></script>
-<script defer src="js/dashboard.js?v=785ea3b1"></script>
+<script defer src="js/supabase-config.js?v=da2e1e5a"></script>
+<script defer src="js/supabase-api.js?v=da2e1e5a"></script>
+<script defer src="js/icons.js?v=da2e1e5a"></script>
+<script defer src="js/postnumre.js?v=da2e1e5a"></script>
+<script defer src="js/data.js?v=da2e1e5a"></script>
+<script defer src="js/store.js?v=da2e1e5a"></script>
+<script defer src="js/backend-bridge.js?v=da2e1e5a"></script>
+<script defer src="js/components.js?v=da2e1e5a"></script>
+<script defer src="js/dashboard.js?v=da2e1e5a"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

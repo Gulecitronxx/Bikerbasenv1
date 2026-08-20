@@ -10,6 +10,13 @@ const DASH_DAYS = 30;
 let STATS_BY_LISTING = new Map();
 let SAVES_BY_LISTING = new Map();
 
+/* Eksterne annoncer (krav-flowet, supabase/014_aggregator.sql). Adskilt fra
+   STATS_BY_LISTING/SAVES_BY_LISTING med vilje: de har ingen visningstal, og
+   at blande dem ind i samme kort ville lade et hul i dataen ligne et nul. */
+let EKSTERN_EJET = [];   // eksterne_annoncer, ejet_af = mig (krav godkendt)
+let MINE_KRAV = [];      // alle mine krav, uanset status
+let KRAV_SOEG_RESULTAT = [];
+
 /* Dagene i rækkefølge, ældst først — samme akse for alle serier. */
 function dashDays(){
   const ud = [];
@@ -36,6 +43,17 @@ async function hentStatistik(){
   });
   // my_listing_saves kalder udgangskolonnen "listing", ikke "listing_id".
   (gemte || []).forEach(r => SAVES_BY_LISTING.set(r.listing, Number(r.saves) || 0));
+}
+
+async function hentEkstern(){
+  EKSTERN_EJET = []; MINE_KRAV = [];
+  if (!db.enabled) return;
+  const [{ data: ejet }, { data: krav }] = await Promise.all([
+    db.myClaimedExternal(),
+    db.myKrav(),
+  ]);
+  EKSTERN_EJET = ejet || [];
+  MINE_KRAV = krav || [];
 }
 
 function statsForListing(listing){
@@ -203,6 +221,293 @@ function kpiTile(label, value, opts){
   </div>`;
 }
 
+/* ---------- Kontostatus-strimlen ----------
+
+   Stripe- og Shopify-dashboards viser altid kontoens plan/status øverst,
+   uden at man skal grave i en indstillingsside for at finde ud af, om man
+   betaler for noget. Vi genbruger samme kort som "Mine annoncer -> Konto",
+   men kompakt og med ét link derhen — ikke to steder, der kan sige hver sit
+   om samme abonnement. */
+function renderPlanStrip(user){
+  const mount = document.getElementById('dash-plan-strip');
+  if (!mount) return;
+
+  if (typeof FRI_ADGANG !== 'undefined' && FRI_ADGANG){
+    mount.innerHTML = `
+      <div class="plan-strip">
+        <span class="plan-strip-badge">${Icon.checkCircle}Ubegrænset · gratis</span>
+        <span class="plan-strip-note">Bikerbasen er gratis for alle i øjeblikket — også forhandlere.</span>
+      </div>`;
+    return;
+  }
+
+  const erAktiv = user.plan === 'dealer';
+  mount.innerHTML = `
+    <div class="plan-strip">
+      <span class="plan-strip-badge ${erAktiv ? '' : 'is-free'}">${erAktiv ? Icon.shieldCheck : Icon.info}${erAktiv ? 'Forhandler · aktivt' : 'Gratis konto'}</span>
+      <span class="plan-strip-note">${erAktiv ? 'Ubegrænsede annoncer og forhandler-shop.' : 'Opgradér for ubegrænsede annoncer.'}</span>
+      <a href="mine-annoncer.html?tab=konto" class="plan-strip-link">${erAktiv ? 'Administrér abonnement' : 'Bliv forhandler'}${Icon.arrowRight}</a>
+    </div>`;
+}
+
+/* ---------- Kom-godt-i-gang ----------
+
+   Vises KUN når kontoen reelt er tom — hverken egne annoncer eller
+   godkendte krav på eksterne. En forhandler, der lige er blevet oprettet,
+   ser ellers et dashboard fyldt med nuller og grafer uden en linje, uden at
+   vide hvad næste skridt er. Stripe og Shopify løser det samme problem med
+   en tjekliste med konkrete handlinger — ikke bare en tom tabel. */
+function renderKickoff(harAndetEndTomt){
+  const mount = document.getElementById('dash-kickoff');
+  if (!mount) return;
+  if (harAndetEndTomt){ mount.style.display = 'none'; mount.innerHTML = ''; return; }
+
+  mount.style.display = '';
+  mount.innerHTML = `
+    <div class="kickoff-card">
+      <h2>Kom godt i gang</h2>
+      <p>Din konto er klar, men der er ikke noget at vise endnu. To veje til at få gang i butikken:</p>
+      <div class="kickoff-steps">
+        <div class="kickoff-step">
+          <span class="kickoff-step-num">1</span>
+          <div>
+            <h3>Gør krav på annoncer, der allerede findes</h3>
+            <p>Bikerbasen har indekseret hundredvis af annoncer fra andre danske MC-sider. Er nogle af dem dine, kan du overtage dem i stedet for at oprette dem forfra.</p>
+            <a href="#krav-panel" class="btn btn-outline btn-sm">Søg dine annoncer</a>
+          </div>
+        </div>
+        <div class="kickoff-step">
+          <span class="kickoff-step-num">2</span>
+          <div>
+            <h3>Opret en ny annonce</h3>
+            <p>Har du en motorcykel, der ikke findes på nogen anden side endnu, opretter du den direkte.</p>
+            <a href="opret-annonce.html" class="btn btn-outline btn-sm">Opret annonce</a>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------- Eksterne annoncer, du ejer via et godkendt krav ---------- */
+function eksternKildeNavn(row){
+  return row.kilde?.navn || row.kilde?.domaene || 'ekstern kilde';
+}
+
+function renderEksternTable(){
+  const tableEl = document.getElementById('ekstern-table');
+  const emptyEl = document.getElementById('ekstern-empty');
+  const summaryEl = document.getElementById('ekstern-summary');
+  const tbody = document.getElementById('ekstern-tbody');
+
+  if (!EKSTERN_EJET.length){
+    tableEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    summaryEl.textContent = 'Ingen endnu.';
+    return;
+  }
+  tableEl.style.display = '';
+  emptyEl.style.display = 'none';
+  summaryEl.textContent = `${EKSTERN_EJET.length} ${EKSTERN_EJET.length === 1 ? 'annonce' : 'annoncer'} · felter du retter her, overskrives ikke af næste indeksering`;
+
+  tbody.innerHTML = EKSTERN_EJET.map(row => `
+    <tr data-ekstern-row="${row.id}">
+      <td>
+        <a href="${escapeHTML(row.url)}" class="table-title" target="_blank" rel="noopener noreferrer">${escapeHTML(row.titel)}</a>
+        <span class="table-sub">${row.aargang ? row.aargang + ' · ' : ''}${row.km != null ? formatKm(row.km) : ''}</span>
+      </td>
+      <td class="num" data-ekstern-pris>${row.pris_dkk != null ? formatPrice(row.pris_dkk) : 'Ikke oplyst'}</td>
+      <td><span class="ekstern-kilde-badge">${escapeHTML(eksternKildeNavn(row))}</span></td>
+      <td data-ekstern-status><span class="status-pill ${row.status === 'solgt' ? 'is-active' : 'is-new'}">${row.status === 'solgt' ? 'Solgt' : 'Aktiv'}</span></td>
+      <td class="row-actions"><button type="button" class="btn btn-outline btn-sm" data-ekstern-rediger="${row.id}">Rediger</button></td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('[data-ekstern-rediger]').forEach(btn => {
+    btn.addEventListener('click', () => aabnEksternRedigering(btn.dataset.eksternRediger));
+  });
+}
+
+/* Retter pris og status inline i tabellen — de to felter, en forhandler
+   oftest skal ajourføre, uden at bygge en hel redigeringsside for et felt-
+   sæt, klienten allerede kun har uddrag af (uddrag er hårdt begrænset til
+   200 tegn i databasen, jf. 014_aggregator.sql — det er ikke en fuld
+   annoncetekst, vi kan lade forhandleren redigere som var det vores egen). */
+function aabnEksternRedigering(id){
+  const row = document.querySelector(`tr[data-ekstern-row="${id}"]`);
+  const data = EKSTERN_EJET.find(r => r.id === id);
+  if (!row || !data) return;
+
+  const prisCelle = row.querySelector('[data-ekstern-pris]');
+  const statusCelle = row.querySelector('[data-ekstern-status]');
+  const actionsCelle = row.querySelector('.row-actions');
+
+  prisCelle.innerHTML = `<input class="input input-sm" type="number" min="0" step="1000" value="${data.pris_dkk ?? ''}" id="ekstern-edit-pris-${id}" aria-label="Pris i kr.">`;
+  statusCelle.innerHTML = `
+    <select class="input input-sm" id="ekstern-edit-status-${id}" aria-label="Status">
+      <option value="aktiv" ${data.status !== 'solgt' ? 'selected' : ''}>Aktiv</option>
+      <option value="solgt" ${data.status === 'solgt' ? 'selected' : ''}>Solgt</option>
+    </select>`;
+  actionsCelle.innerHTML = `
+    <button type="button" class="btn btn-primary btn-sm" data-ekstern-gem="${id}">Gem</button>
+    <button type="button" class="btn btn-outline btn-sm" data-ekstern-fortryd="${id}">Annullér</button>`;
+
+  actionsCelle.querySelector('[data-ekstern-fortryd]').addEventListener('click', () => renderEksternTable());
+  actionsCelle.querySelector('[data-ekstern-gem]').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true; btn.textContent = 'Gemmer…';
+    const nyPris = document.getElementById(`ekstern-edit-pris-${id}`).value;
+    const nyStatus = document.getElementById(`ekstern-edit-status-${id}`).value;
+
+    const kald = [];
+    if (String(nyPris) !== String(data.pris_dkk ?? '')) kald.push(db.retExternalField(id, 'pris_dkk', nyPris));
+    if (nyStatus !== data.status) kald.push(db.retExternalField(id, 'status', nyStatus));
+
+    const svar = await Promise.all(kald);
+    const fejl = svar.find(s => s?.error);
+    if (fejl){
+      toast('Kunne ikke gemme ændringen: ' + fejl.error.message, { type: 'error' });
+      btn.disabled = false; btn.textContent = 'Gem';
+      return;
+    }
+    data.pris_dkk = nyPris === '' ? null : Number(nyPris);
+    data.status = nyStatus;
+    toast('Annoncen er opdateret');
+    renderEksternTable();
+  });
+}
+
+/* ---------- Gør krav ---------- */
+function kravStatusLabel(status){
+  if (status === 'godkendt') return { tekst: 'Godkendt', klasse: 'is-new' };
+  if (status === 'afvist') return { tekst: 'Afvist', klasse: 'is-afvist' };
+  return { tekst: 'Afventer godkendelse', klasse: 'is-afventer' };
+}
+
+function renderKravStatusList(){
+  const wrap = document.getElementById('krav-status-wrap');
+  const list = document.getElementById('krav-status-list');
+  if (!MINE_KRAV.length){ wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  list.innerHTML = MINE_KRAV.map(k => {
+    const s = kravStatusLabel(k.status);
+    const titel = k.annonce ? `${k.annonce.maerke || ''} ${k.annonce.model || ''}`.trim() || k.annonce.titel : 'Annoncen findes ikke længere';
+    return `
+      <div class="krav-status-row">
+        <div>
+          <p class="krav-status-titel">${escapeHTML(titel || 'Ukendt annonce')}</p>
+          <p class="krav-status-dato">Indsendt ${datoKortDash(k.oprettet)}${k.behandlet ? ' · behandlet ' + datoKortDash(k.behandlet) : ''}</p>
+        </div>
+        <span class="status-pill ${s.klasse}">${s.tekst}</span>
+      </div>`;
+  }).join('');
+}
+
+function datoKortDash(iso){
+  const t = new Date(iso || '').getTime();
+  if (!t) return '';
+  return new Date(t).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderKravResults(rows, soegt){
+  const mount = document.getElementById('krav-results');
+  const hint = document.getElementById('krav-search-hint');
+
+  if (!soegt){
+    hint.textContent = '';
+    mount.innerHTML = '';
+    return;
+  }
+  if (!rows.length){
+    hint.textContent = '';
+    mount.innerHTML = `<p class="chart-empty">Ingen ledige annoncer matcher søgningen. Prøv et andet mærke, en model eller en by.</p>`;
+    return;
+  }
+
+  const kravAlleredeSat = new Set(MINE_KRAV.map(k => k.annonce_id));
+  hint.textContent = `${rows.length} ${rows.length === 1 ? 'annonce fundet' : 'annoncer fundet'}, ingen har gjort krav på dem endnu.`;
+  mount.innerHTML = rows.map(row => {
+    const harKrav = kravAlleredeSat.has(row.id);
+    return `
+    <div class="krav-result-row">
+      <div class="krav-result-thumb">${row.thumbnail_url ? `<img src="${escapeHTML(row.thumbnail_url)}" alt="" loading="lazy" width="64" height="48">` : `<span class="krav-result-nophoto">${Icon.camera}</span>`}</div>
+      <div class="krav-result-info">
+        <p class="krav-result-titel">${escapeHTML(row.titel)}</p>
+        <p class="krav-result-sub">${row.aargang ? row.aargang + ' · ' : ''}${row.pris_dkk != null ? formatPrice(row.pris_dkk) : 'Pris ikke oplyst'}${row.by ? ' · ' + escapeHTML(row.by) : ''} · ${escapeHTML(eksternKildeNavn(row))}</p>
+      </div>
+      ${harKrav
+        ? `<span class="status-pill is-afventer">Krav indsendt</span>`
+        : `<button type="button" class="btn btn-primary btn-sm" data-krav-aabn="${row.id}">Gør krav</button>`}
+    </div>`;
+  }).join('');
+
+  mount.querySelectorAll('[data-krav-aabn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = rows.find(r => r.id === btn.dataset.kravAabn);
+      if (row) aabnKravDialog(row);
+    });
+  });
+}
+
+let AKTUEL_KRAV_ANNONCE = null;
+
+function aabnKravDialog(row){
+  AKTUEL_KRAV_ANNONCE = row;
+  document.getElementById('krav-dialog-annonce').textContent =
+    `${row.titel}${row.by ? ' · ' + row.by : ''} · ${eksternKildeNavn(row)}`;
+  document.getElementById('krav-dialog-doku').value = '';
+  document.getElementById('krav-dialog').classList.add('open');
+  document.getElementById('krav-dialog-doku').focus();
+}
+
+function lukKravDialog(){
+  document.getElementById('krav-dialog').classList.remove('open');
+  AKTUEL_KRAV_ANNONCE = null;
+}
+
+function wireKravUI(){
+  document.getElementById('krav-search-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const q = document.getElementById('krav-search-input').value;
+    const hint = document.getElementById('krav-search-hint');
+    hint.textContent = 'Søger…';
+    const { data, error } = await db.searchUnclaimedExternal({ q });
+    if (error){ hint.textContent = 'Søgningen fejlede. Prøv igen.'; return; }
+    KRAV_SOEG_RESULTAT = data || [];
+    renderKravResults(KRAV_SOEG_RESULTAT, true);
+  });
+
+  const dialog = document.getElementById('krav-dialog');
+  document.getElementById('krav-dialog-close').addEventListener('click', lukKravDialog);
+  document.getElementById('krav-dialog-cancel').addEventListener('click', lukKravDialog);
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) lukKravDialog(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && dialog.classList.contains('open')) lukKravDialog();
+  });
+
+  document.getElementById('krav-dialog-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!AKTUEL_KRAV_ANNONCE) return;
+    const btn = document.getElementById('krav-dialog-submit');
+    const doku = document.getElementById('krav-dialog-doku').value.trim();
+    btn.disabled = true; btn.textContent = 'Sender…';
+
+    const { error } = await db.submitKrav(AKTUEL_KRAV_ANNONCE.id, doku);
+    btn.disabled = false; btn.textContent = 'Send krav';
+
+    if (error){
+      const m = error.message || '';
+      if (m.includes('duplicate key')) toast('Du har allerede sendt et krav på denne annonce.');
+      else toast('Kravet kunne ikke sendes: ' + m, { type: 'error' });
+      return;
+    }
+
+    lukKravDialog();
+    toast('Krav sendt. Vi godkender det manuelt og opdaterer status her.');
+    await hentEkstern();
+    renderKravResults(KRAV_SOEG_RESULTAT, true);
+    renderKravStatusList();
+  });
+}
+
 /* ---------- Main ---------- */
 function renderDashboard(user){
   const mine = Store.getMyListings().filter(l => l.isDealer);
@@ -219,11 +524,15 @@ function renderDashboard(user){
   const avgRating = Store.getAverageRating(user.name, null);
   const reviewCount = Store.getReviews(user.name).length;
 
+  const kravAktive = EKSTERN_EJET.filter(r => r.status !== 'solgt').length;
+  const totalAktive = mine.length + kravAktive;
+
   document.getElementById('dash-subtitle').textContent =
-    `${user.company || user.name} · ${mine.length} ${mine.length === 1 ? 'aktiv annonce' : 'aktive annoncer'}`;
+    `${user.company || user.name} · ${totalAktive} ${totalAktive === 1 ? 'aktiv annonce' : 'aktive annoncer'}` +
+    (kravAktive ? ` (${mine.length} oprettet her, ${kravAktive} via krav)` : '');
 
   document.getElementById('kpi-row').innerHTML = [
-    kpiTile('Aktive annoncer', mine.length),
+    kpiTile('Aktive annoncer', totalAktive, kravAktive ? { sub: `${mine.length} oprettet · ${kravAktive} via krav` } : undefined),
     kpiTile('Visninger (30 dage)', compactNumber(totalViews), { delta: viewsDelta, spark: totalSeries }),
     kpiTile('Henvendelser (30 dage)', compactNumber(totalInquiries)),
     kpiTile('Gemt af købere', compactNumber(totalSaves)),
@@ -319,6 +628,11 @@ function renderDashboard(user){
       btn.textContent = showTable ? 'Vis graf' : 'Vis tabel';
     });
   });
+
+  renderPlanStrip(user);
+  renderKickoff(mine.length > 0 || EKSTERN_EJET.length > 0);
+  renderEksternTable();
+  renderKravStatusList();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -338,5 +652,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   document.getElementById('dash-content').style.display = '';
   await hentStatistik();
+  await hentEkstern();
+  wireKravUI();
   renderDashboard(user);
 });

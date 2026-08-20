@@ -666,6 +666,33 @@ function renderAnnoncer(seller, listings){
   wireFavoriteButtons(grid);
 }
 
+/* ---------- Ejerens egen visning ----------
+
+   Før var forhandler.html udelukkende den offentlige profil, en køber ser —
+   ingen gren nogen steder tjekkede, om den besøgende VAR sælgeren selv.
+   Loggede en forhandler ind og klikkede "Se din profil", fik han nøjagtig
+   den samme side som en fremmed køber, uden en vej til det værktøj (dashboard,
+   redigering af annoncer, statistik), han faktisk har brug for her.
+
+   Banneret ændrer IKKE noget af den offentlige visning under det — det
+   ligger oven på, kun for forhandleren selv, og linker videre til de
+   redskaber, dashboard.html allerede har (statistik, krav-flow, annoncer).
+   Det er additivt med vilje: den offentlige sælgerprofil er lige
+   færdigredesignet af en anden builder og skal ikke røres. */
+function renderEjerBanner(seller){
+  const mount = document.getElementById('profil-ejer-banner');
+  if (!mount) return;
+  mount.innerHTML = '';
+  const bruger = Store.getUser();
+  if (!bruger || !bruger.id || !seller.id || bruger.id !== seller.id) return;
+
+  mount.innerHTML = `
+    <div class="profil-ejer-banner">
+      <p><strong>Dette er sådan købere ser din profil.</strong>Rediger dine annoncer, se statistik og gør krav på indekserede annoncer i dit dashboard.</p>
+      <a href="dashboard.html" class="btn btn-primary btn-sm">${Icon.gauge || Icon.chart}Gå til dashboard</a>
+    </div>`;
+}
+
 async function renderProfile(){
   const sellerId = new URLSearchParams(window.location.search).get('id');
   if (!sellerId){ renderProfileNotFound(); return; }
@@ -679,6 +706,7 @@ async function renderProfile(){
   if (!seller){ renderProfileNotFound(); return; }
 
   currentSeller = seller;
+  renderEjerBanner(seller);
 
   // Tredje argument giver en rigtig ItemList i strukturerede data i stedet
   // for en tom stub. Se seoDealerPage() i js/seo.js.
