@@ -11,8 +11,9 @@ const { browserModules, fetchExternalListings, listingSlug } = require('./shared
 const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing } = browserModules();
 const BASE = require('./site-url')(ROOT);
 const src = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
-eval(src + '\nglobal.__L = LISTINGS; global.__B = BRANDS_BY_MODEL; global.__T = TYPES;');
+eval(src + '\nglobal.__L = LISTINGS; global.__B = BRANDS_BY_MODEL; global.__T = TYPES; global.__A2 = A2_MAX_HK;');
 const BRANDS_BY_MODEL = global.__B;
+const A2_MAX_HK = global.__A2; // 47 hk / 35 kW — samme tal som js/data.js' eget KOEREKORT-hint, hentet derfra i stedet for gentastet
 
 /* Mærkesider skal afspejle de annoncer, der faktisk er til salg. Demodataene
    er slået fra, så listen hentes fra databasen. Falder tilbage på hvad data.js
@@ -269,6 +270,280 @@ function introFor(brand, items){
   return dele.join('');
 }
 
+/* ============ SEO content builder 3 — mærkesidens tekstpakke ============
+
+   Alt herunder er ekstra tekst OVEN PÅ den eksisterende introFor() —
+   introFor() selv er urørt (den er testet i scripts/maerkeside.test.js, og
+   den fil hører ikke til denne runde). Reglen er: et mærke skal have mindst
+   MIN_LISTINGS_FULD_TEKST rigtige annoncer, før det får den fulde pakke
+   (titel-mønster, FAQ, bundindhold). Under grænsen bliver siden stående —
+   den bærer rigtigt lager, og at slette den ville slette et rigtigt fund —
+   men den påstår ikke at være en landingsside for mærket: den får ingen
+   arvesætning, ingen FAQ, intet bundindhold, og bliver noindex. */
+const MIN_LISTINGS_FULD_TEKST = 5;
+
+/* Almindeligt kendt, IKKE tal-baseret viden om hvert mærke — hvad det er
+   kendt for. Ingen tal her: hvert tal i sidens tekst kommer fra den rigtige
+   forespørgsel nedenfor, aldrig herfra. Kun de mærker, der rent faktisk KAN
+   nå MIN_LISTINGS_FULD_TEKST i dag, er med. Vokser et mærke, der IKKE står
+   her, over grænsen i en senere crawl, får det den datadrevne tekst UDEN
+   arvesætningen — se heritageFor() — i stedet for en opfundet påstand. */
+const BRAND_ARV = {
+  'Honda': 'Honda er verdens største motorcykelproducent og kendt for driftssikkerhed og et usædvanligt bredt program — fra små citymodeller til CBR-sportscykler, Africa Twin-adventure og Gold Wing-tourere.',
+  'Harley-Davidson': 'Harley-Davidson er den amerikanske cruisertradition: tunge V-twin-motorer, lav sadelhøjde og en udbredt custom-kultur, hvor mange ejere bygger om undervejs.',
+  'Yamaha': 'Yamaha spænder fra MT-seriens nakede gadecykler og R-seriens sportscykler til klassiske cruisere og tourere — et bredt japansk program med et solidt ry for holdbarhed.',
+  'Suzuki': 'Suzuki er kendt for GSX-R-sportscyklerne og alsidige mellemklassemodeller som Bandit og V-Strom — japansk teknik med et langt ry for at holde.',
+  'Triumph': 'Triumph bærer den britiske motorcykeltradition videre: Bonneville- og Speed Twin-linjen holder den klassiske stil i live, mens Tiger og Speed Triple dækker adventure og naked.',
+  'Kawasaki': 'Kawasaki er kendt for Ninja-sportscyklerne og de kraftfulde Z-nakede modeller — et mærke med et udpræget performance-ry.',
+  'BMW': 'BMW er tæt knyttet til GS-seriens adventure-touring og den karakteristiske boxermotor — historisk et mærke for lange distancer og solidt udstyr.',
+  'KTM': 'KTM har rødder i offroad- og enduroracing, og det mærkes på gadecyklerne: lette, aggressive chassiser i den karakteristiske orange farve.',
+  'Royal Enfield': 'Royal Enfield bygger enkle, klassisk stilede motorcykler med lav vægt og moderat effekt — ofte valgt som en overkommelig førstemotorcykel eller til A2-kørekortet.',
+  'Aprilia': 'Aprilia er det italienske racingmærke: RSV-sportscyklerne bygger på Grand Prix-teknologi, og Tuono er den nakede udgave af samme arv.',
+};
+
+/* Hvad der er værd at tjekke på en brugt mc, sat efter hvilken TYPE der rent
+   faktisk dominerer mærkets udvalg lige nu — ikke en påstand om mærket, men
+   almindelig, mærkeuafhængig købsviden knyttet til den kategori, tallene
+   viser mest af. Typer uden en dominerende kategori (eller en type, der ikke
+   findes her) får TYPE_TJEK_STANDARD i stedet for at stå uden noget. */
+const TYPE_TJEK = {
+  cruiser: 'Tjek krom og udstødning for rust, slitage på primærkæde eller -rem, og om sadelhøjden passer dig — en tung cruiser er svær at rejse op alene, hvis den vælter på stativet.',
+  adventure: 'Tjek styrtbøjler og fodhviler for tegn på et tidligere fald, kæde- og dækslitage (mange har kørt offroad), og om det oprindelige udstyr — bagagesystem, styrtsikring — følger med.',
+  touring: 'Tjek elektronik og komfortudstyr (varme greb, kabine, lydanlæg) grundigt, og spørg ind til servicehistorikken — tourere har typisk kørt langt, og det er der, sliddet gemmer sig.',
+  sport: 'Tjek for styrtskader — revnet kåbe, ridser på bremseskiver og styr — samt dæk- og kædeslitage, og spørg om den har kørt på bane. Det siger mere om standen end kilometertallet.',
+  naked: 'Tjek dæk og kæde eller rem for slitage, og se grundigt efter buler og ridser — uden kåbe er der intet, der skjuler sporene efter et tidligere fald.',
+  classic: 'Tjek for rust, om de elektriske dele stadig er originale, og om reservedele overhovedet kan skaffes — en ældre årgang kræver typisk mere kærlighed end en nyere.',
+  scooter: 'Tjek rem eller variator for slitage, og om den har kørt kort i by eller langt på landevej — en scooter med mange bykilometer har sluppet lettere end en med motorvejskørsel.',
+  cross: 'Tjek stel og fjedring for spor efter styrt, og spørg om den har kørt konkurrence — en crosser bliver typisk brugt hårdere end en gademotorcykel.',
+};
+const TYPE_TJEK_STANDARD = 'Tjek altid synsrapport, servicehistorik og antal ejere, uanset mærke og model — det siger mere om den faktiske stand end kilometertallet alene.';
+
+/* Kørekortkategorien pr. annonce, talt op ét sted — samme funktion
+   (koerekortForListing, fra js/data.js, indlæst for neden via eval) som
+   resten af sitet bruger til det samme spørgsmål. Intet gættes: en annonce
+   uden hk tælles som "ukendt", aldrig som en kategori. */
+function licensOpsummering(items){
+  const ud = { A1: 0, A2: 0, A: 0, ukendt: 0 };
+  for (const l of items){
+    const k = koerekortForListing(l);
+    if (k === 'A1') ud.A1++;
+    else if (k === 'A2') ud.A2++;
+    else if (k === 'A') ud.A++;
+    else ud.ukendt++;
+  }
+  return ud;
+}
+
+function median(sortedNums){
+  if (!sortedNums.length) return null;
+  const mid = Math.floor(sortedNums.length / 2);
+  return sortedNums.length % 2
+    ? sortedNums[mid]
+    : Math.round((sortedNums[mid - 1] + sortedNums[mid]) / 2);
+}
+
+/* Prisbilledet for mærkets annoncer — én forespørgsel, genbrugt af titel,
+   meta description, bundindhold og FAQ, så de fire aldrig kan komme i
+   modstrid med hinanden om det samme tal. */
+function prisStatistik(items){
+  const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0).sort((a, b) => a - b);
+  return {
+    antal: priser.length,
+    min: priser.length ? priser[0] : null,
+    max: priser.length ? priser[priser.length - 1] : null,
+    median: median(priser),
+    udenPris: items.length - priser.length,
+  };
+}
+
+function dominerendeType(items){
+  const antal = new Map();
+  for (const l of items){ if (l.type) antal.set(l.type, (antal.get(l.type) || 0) + 1); }
+  if (!antal.size) return null;
+  const sorteret = [...antal.entries()].sort((a, b) => b[1] - a[1]);
+  const [id, count] = sorteret[0];
+  const label = ((global.__T || []).find(t => t.id === id) || {}).label || id;
+  return { id, label, count };
+}
+
+function topModeller(items, n){
+  const antal = new Map();
+  for (const l of items){
+    const m = String(l.model || '').trim();
+    if (m) antal.set(m, (antal.get(m) || 0) + 1);
+  }
+  return [...antal.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'da')).slice(0, n);
+}
+
+/* TITLE — "{Brand} brugt – X til salg | Bikerbasen", maks 60 tegn. Kun
+   kaldt for mærker med fuld tekst; se MIN_LISTINGS_FULD_TEKST. */
+function titelFor(brand, n){
+  return `${brand} brugt – ${n} til salg | Bikerbasen`;
+}
+
+/* META DESCRIPTION — 140-155 tegn, rigtigt antal, rigtigt prisspænd, én
+   differentiator. "Ingen kommission af salget" er sitets eget løfte
+   (index.html, sektionen "Gratis annonce — set af hele Danmark") — ikke
+   opfundet her. Sætningerne vælges i prioriteret rækkefølge, indtil
+   længden lander i vinduet; det holder teksten sand for både et mærke med
+   ét kort prisord (Royal Enfield) og et med et langt (Harley-Davidson). */
+function metaBeskrivelseFor(brand, n, stats){
+  const prisled = stats.min == null
+    ? ''
+    : stats.min === stats.max
+      ? ` til ${dkk(stats.min)}`
+      : ` fra ${dkk(stats.min)} til ${dkk(stats.max)}`;
+  const kandidater = [
+    `Se ${n} brugte ${brand}${prisled} på Bikerbasen. Ingen kommission af salget.`
+      + ' Sammenlign pris, årgang og km i hele Danmark.',
+    `Se ${n} brugte ${brand}${prisled} på Bikerbasen. Ingen kommission af salget.`
+      + ' Sammenlign pris og årgang i hele Danmark.',
+    `Se ${n} brugte ${brand} til salg${prisled} på Bikerbasen — ingen kommission af salget,`
+      + ' sammenlign pris og årgang i hele Danmark.',
+    `${n} brugte ${brand}${prisled}. Ingen kommission af salget. Sammenlign hos Bikerbasen.`,
+  ];
+  // Den første, der lander i [140,155], vinder. Rammer ingen af dem
+  // vinduet (meget korte eller meget lange mærkenavne), bruges den, der
+  // ligger tættest på — aldrig en tekst, der er skåret midt i et ord.
+  let bedst = kandidater[0], bedstAfstand = Infinity;
+  for (const k of kandidater){
+    if (k.length >= 140 && k.length <= 155) return k;
+    const afstand = k.length < 140 ? 140 - k.length : k.length - 155;
+    if (afstand < bedstAfstand){ bedst = k; bedstAfstand = afstand; }
+  }
+  return bedst;
+}
+
+function faqLd(faqs){
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  };
+}
+
+/* De tre spørgsmål — samme tre emner (pris, kørekort, modeller), men
+   svarene er beregnet af DETTE mærkes tal, aldrig en skabelon med
+   mærkenavnet skiftet ud. */
+function faqFor(brand, items, stats, kk){
+  const n = items.length;
+  const spg = [];
+
+  let prisSvar;
+  if (!stats.antal){
+    prisSvar = `Ingen af de ${n} ${brand}-annoncer på Bikerbasen har en opgivet pris lige nu — alle sælgere skriver "ring for pris" i stedet. Kontakt sælgeren gennem annoncen for at høre prisen, eller søg videre blandt andre mærker, mens du venter på svar.`;
+  } else {
+    const enkelt = stats.antal === n;
+    // BEMÆRK: dkk() slutter selv på "kr." — der må ALDRIG stå et ekstra
+    // punktum lige efter et dkk()-kald ("kr..", fundet og rettet under
+    // efterprøvning). Sætningen fortsætter derfor altid med et mellemrum,
+    // aldrig med et punktum, umiddelbart efter et dkk()-udtryk.
+    prisSvar = (enkelt
+      ? `Alle ${n} ${brand}-annoncer på Bikerbasen har opgivet en pris. `
+      : `${stats.antal} af de ${n} ${brand}-annoncer på Bikerbasen har opgivet en pris. `)
+      + `Den spænder fra ${dkk(stats.min)} til ${dkk(stats.max)}, og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på ${dkk(stats.median)}`
+      + (stats.udenPris
+        ? ` De resterende ${stats.udenPris} ${stats.udenPris === 1 ? 'annonce' : 'annoncer'} oplyser i stedet pris ved henvendelse.`
+        : ', hvilket giver et hurtigt billede af, hvad der er normalt at betale for mærket lige nu.');
+  }
+  spg.push({ q: `Hvad koster en brugt ${brand}-motorcykel?`, a: prisSvar });
+
+  const kendtKK = kk.A1 + kk.A2 + kk.A;
+  let kkSvar;
+  if (!kendtKK){
+    kkSvar = `Det kan vi ikke se ud fra dataene i dag — ingen af de ${n} ${brand}-annoncer oplyser den effekt i hk, der afgør kørekortkategorien. Kilden til de indekserede annoncer sender ikke tallet med, og Bikerbasen gætter aldrig på den slags — vi viser hellere ingen kategori end en forkert.`;
+  } else if (!(kk.A1 + kk.A2)){
+    kkSvar = `Nej, ikke blandt de annoncer, vi kan afgøre — ${kk.A} af ${kendtKK} ${brand}-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de ${A2_MAX_HK} hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle.`
+      + (kk.ukendt ? ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen og vises derfor uden kategori.` : '');
+  } else {
+    kkSvar = `Ja, til dels — ${kk.A1 + kk.A2} af ${kendtKK} ${brand}-annoncer med kendt effekt holder sig under A2-loftet på ${A2_MAX_HK} hk${kk.A1 ? ` (heraf ${kk.A1} også inden for A1-grænsen)` : ''}, mens ${kk.A} kræver stort kørekort. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så du kun ser dem, du faktisk må køre.`
+      + (kk.ukendt ? ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen hos kilden.` : '');
+  }
+  spg.push({ q: `Kan man køre ${brand} på A2-kørekort?`, a: kkSvar });
+
+  const top = topModeller(items, 3);
+  let modelSvar;
+  if (!top.length){
+    modelSvar = `Lige nu er der ${n} ${brand}-annoncer på Bikerbasen, men ingen af dem har et modelnavn, vi kan liste her. Søg i hele udvalget for at se dem alle, eller brug prisfiltret til at snævre det ind selv.`;
+  } else {
+    const navne = top.map(([m, c]) => `${m} (${c} stk.)`);
+    modelSvar = `Blandt de ${n} ${brand}-annoncer går ${navne.join(', ')} igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle ${brand}-annoncer for at se præcis, hvad der er til salg i dag.`;
+  }
+  spg.push({ q: `Hvilke ${brand}-modeller kan jeg finde brugt på Bikerbasen?`, a: modelSvar });
+
+  return spg;
+}
+
+/* Bundindholdet — 2-3 H2'er under gitteret. Alt tal-baseret er beregnet
+   ovenfor; "andetBrand" er det qua-median nærmeste andet mærke MED fuld
+   tekst, så krydslinket er en rigtig sammenligning, ikke et tilfældigt
+   link. */
+function bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand){
+  const n = items.length;
+  const dele = [];
+
+  dele.push(`<h2 class="brand-sub">Prisniveau for brugte ${esc(brand)}</h2>`);
+  if (stats.antal){
+    const spaend = stats.max / stats.min;
+    let p = `De ${stats.antal} ${esc(brand)}-annoncer med opgivet pris ligger mellem ${dkk(stats.min)} og ${dkk(stats.max)}, med en median på ${dkk(stats.median)}`;
+    if (spaend >= 3){
+      const gange = spaend >= 10 ? String(Math.round(spaend)) : spaend.toFixed(1).replace('.', ',');
+      p += ` — den dyreste annonce koster ${gange} gange så meget som den billigste, så udvalget dækker både billige startmotorcykler og dyrere modeller.`;
+    } else {
+      p += ' — udvalget ligger forholdsvis samlet i pris, uden langt fra den billigste til den dyreste annonce lige nu.';
+    }
+    if (stats.udenPris){
+      p += ` ${stats.udenPris} ${stats.udenPris === 1 ? 'annonce' : 'annoncer'} har ingen opgivet pris og skal kontaktes for at få den.`;
+    }
+    if (andetBrand){
+      p += ` Ligger prisniveauet uden for budgettet, ligger <a href="maerke-${slugify(andetBrand)}.html">brugte ${esc(andetBrand)}</a> typisk i samme leje.`;
+    }
+    dele.push(`<p>${p}</p>`);
+  } else {
+    dele.push(`<p>Ingen af de ${n} ${esc(brand)}-annoncer har en opgivet pris lige nu — alle sælgere skriver "ring for pris" i stedet, så du skal spørge direkte for at få et tal.</p>`);
+  }
+
+  dele.push(`<h2 class="brand-sub">Kørekort til brugt ${esc(brand)}</h2>`);
+  const kendtKK = kk.A1 + kk.A2 + kk.A;
+  if (!kendtKK){
+    dele.push(`<p>Ingen af de ${n} ${esc(brand)}-annoncer oplyser den effekt (hk), der afgør kørekortkategorien — kilderne til de indekserede annoncer sender ikke tallet med. Vi viser derfor ingen kategori i stedet for at gætte.</p>`);
+  } else {
+    const a1a2 = kk.A1 + kk.A2;
+    let p = `Ud af ${n} annoncer kan vi afgøre kørekortkategorien på ${kendtKK}: ${kk.A} kræver stort kørekort (kategori A), altså over de ${A2_MAX_HK} hk (35 kW), A2 tillader`
+      + (a1a2 ? `, og ${a1a2} holder sig inden for A2-loftet${kk.A1 ? ` (heraf ${kk.A1} også inden for det lille A1-kørekort)` : ''}.` : '.');
+    if (kk.ukendt){
+      p += ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen hos kilden og vises uden kategori.`;
+    }
+    if (a1a2){
+      p += ` <a href="soegning.html?brands=${encodeURIComponent(brand)}&amp;koerekort=A2">Se de ${a1a2} ${esc(brand)}, der kan køres på A1 eller A2</a>.`;
+    }
+    dele.push(`<p>${p}</p>`);
+    /* Krydslink til de faktiske A1/A2-facetsider (koerekort-a1.html,
+       koerekort-a2.html) — bygget i samme runde, men mærkesiderne linkede
+       kun ind i soegning.html's søgefilter, aldrig ud til de nye statiske,
+       indekserbare sider. Fundet af runde 3's SEO-kritiker. */
+    const facetLinks = [];
+    if (kk.A1) facetLinks.push('<a href="koerekort-a1.html">Se alle motorcykler på A1-kørekort</a>');
+    if (a1a2) facetLinks.push('<a href="koerekort-a2.html">Se alle motorcykler på A2-kørekort</a>');
+    if (facetLinks.length) dele.push(`<p>${facetLinks.join(' · ')}</p>`);
+  }
+
+  dele.push(`<h2 class="brand-sub">Hvad du skal tjekke, når du køber en brugt ${esc(brand)}</h2>`);
+  const tjek = TYPE_TJEK[domType?.id] || TYPE_TJEK_STANDARD;
+  let checkP = tjek;
+  if (domType && domType.count < n){
+    checkP += ` (Rådet gælder mest for ${domType.label.toLowerCase()}, som ${domType.count} af de ${n} annoncer er — se selve annoncen for resten.)`;
+  }
+  checkP += ` Bikerbasen har ikke selv efterset motorcyklerne — se <a href="sikkerhed.html">rådene om tryg handel</a> før du kører af sted for at se en.`;
+  dele.push(`<p>${checkP}</p>`);
+
+  return dele.join('\n      ');
+}
+
 /* Linjen i <noscript>-listen. Hvert led er betinget af samme grund som i
    introFor(): 163 af 332 annoncer har ingen kilometerstand, og den gamle
    udgave kaldte l.km.toLocaleString() ubetinget. Det ville ikke have givet et
@@ -326,6 +601,26 @@ const brands = Object.keys(byBrand)
   .filter(b => byBrand[b].length > 0)   // en tom mærkeside er en blindgyde, ikke en landingsside
   .sort((a, b) => a.localeCompare(b, 'da'));
 
+/* Medianprisen for hvert mærke, der FÅR den fulde tekstpakke — beregnet én
+   gang før løkken, så "sammenlign med"-linket i bundIndholdFor() kan finde
+   det qua-median nærmeste andet mærke uden at gense hele lageret pr. mærke. */
+const medianOversigt = {};
+for (const b of brands){
+  if (byBrand[b].length < MIN_LISTINGS_FULD_TEKST) continue;
+  const m = prisStatistik(byBrand[b]).median;
+  if (m != null) medianOversigt[b] = m;
+}
+function naermesteMedianBrand(brand, brandMedian){
+  if (brandMedian == null) return null;
+  let bedst = null, bedstAfstand = Infinity;
+  for (const [b, m] of Object.entries(medianOversigt)){
+    if (b === brand) continue;
+    const afstand = Math.abs(m - brandMedian);
+    if (afstand < bedstAfstand){ bedst = b; bedstAfstand = afstand; }
+  }
+  return bedst;
+}
+
 /* Ryd forældede mærkesider. Uden dette bliver en side liggende med gammelt
    indhold, når det sidste eksemplar af et mærke er solgt — og den ville
    stadig kunne findes via Google. */
@@ -370,6 +665,29 @@ for (const brand of brands){
     + `${items.length === 1 ? 'motorcykel' : 'motorcykler'} til salg i Danmark. `
     + 'Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.';
 
+  /* ---- SEO content builder 3: den fulde tekstpakke, kun for mærker med
+     mindst MIN_LISTINGS_FULD_TEKST rigtige annoncer ---- */
+  const kvalificeret = items.length >= MIN_LISTINGS_FULD_TEKST;
+  const stats = prisStatistik(items);
+  const kk = licensOpsummering(items);
+  const domType = dominerendeType(items);
+  const andetBrand = kvalificeret ? naermesteMedianBrand(brand, stats.median) : null;
+
+  const titelRaa = kvalificeret ? titelFor(brand, items.length)
+    : `Brugte ${brand} motorcykler til salg — Bikerbasen`;
+  const metaDescRaa = kvalificeret ? metaBeskrivelseFor(brand, items.length, stats) : beskrivelse;
+  const arvSaetning = kvalificeret ? BRAND_ARV[brand] : null;
+  const introTekst = arvSaetning ? `${arvSaetning} ${introFor(brand, items)}` : introFor(brand, items);
+  const faqs = kvalificeret ? faqFor(brand, items, stats, kk) : null;
+  const bundHtml = kvalificeret ? bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand) : '';
+
+  /* Under grænsen bliver siden IKKE slettet (den bærer rigtigt lager — se
+     MIN_LISTINGS_FULD_TEKST ovenfor), men den skal ikke konkurrere om at
+     blive indekseret som en landingsside for mærket, når den kun har 1-4
+     annoncer og ingen af den fulde teksts afsnit. Samme mønster som
+     login.html (build-meta.js) og de indekserede annoncer (js/seo.js). */
+  const noindexMeta = kvalificeret ? '' : '<meta name="robots" content="noindex, follow">\n';
+
   const html = `<!doctype html>
 <html lang="da">
 <head>
@@ -377,9 +695,9 @@ for (const brand of brands){
 <meta name="viewport" content="width=device-width, initial-scale=1">
 ${csp}
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Brugte ${esc(brand)} motorcykler til salg — Bikerbasen</title>
-<meta name="description" content="${esc(beskrivelse)}">
-<!-- Canonical staar HER, ikke kun i det blok scripts/build-meta.js skriver
+<title>${esc(titelRaa)}</title>
+<meta name="description" content="${esc(metaDescRaa)}">
+${noindexMeta}<!-- Canonical staar HER, ikke kun i det blok scripts/build-meta.js skriver
      bagefter. En ny side skal aldrig kunne naa produktionen uden: soegesidens
      facetter samler sig allerede paa soegning.html, og en maerkeside uden
      canonical ville vaere den naeste kilde til duplicate content.
@@ -407,6 +725,7 @@ ${jsonLdBlock([
     { name: brand, path: `maerke-${slug}.html` },
   ]),
   brandItemListLd(brand, items),
+  faqs ? faqLd(faqs) : null,
 ])}
 </head>
 <body>
@@ -421,8 +740,8 @@ ${header}
     </nav>
 
     <div class="brand-hero">
-      <h1>Brugte ${esc(brand)} motorcykler</h1>
-      <p class="brand-intro">${introFor(brand, items)}</p>
+      <h1>Brugte ${esc(brand)}-motorcykler i Danmark</h1>
+      <p class="brand-intro">${introTekst}</p>
       <div class="brand-actions">
         <a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Søg i alle ${esc(brand)}</a>
         <a href="opret-annonce.html" class="btn btn-outline">Sælg din ${esc(brand)}</a>
@@ -449,6 +768,18 @@ ${header}
         </ul>
       </noscript>
     </section>
+
+    ${kvalificeret ? `<section class="section" style="padding-top:0;">
+      ${bundHtml}
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <h2 class="brand-sub">Ofte stillede spørgsmål om brugte ${esc(brand)}</h2>
+      ${faqs.map(f => `<details class="brand-faq-item">
+        <summary>${esc(f.q)}</summary>
+        <p class="brand-intro">${esc(f.a)}</p>
+      </details>`).join('\n      ')}
+    </section>` : ''}
 
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre mærker</h2>

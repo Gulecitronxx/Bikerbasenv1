@@ -399,6 +399,23 @@ function movePhoto(from, to){
 
 let _photoDragIdx = null;
 
+/* Rigtig, beskrivende alt-tekst — bygget af de felter, sælgeren FAKTISK har
+   udfyldt i trin 1, ikke "billede af motorcykel". Ingen vinkel gættes:
+   formularen fanger ikke, om billedet er taget forfra eller bagfra, så det
+   feltet findes ikke her — jf. "vi gætter aldrig" (DECISIONS.md).
+
+   Gælder kun gitteret i DENNE formular. Den udgivne annonces eget galleri
+   (js/annonce.js) og listing_photos-tabellen har intet alt-tekst-felt at
+   sende den videre til — se DECISIONS.md-noten for builder 4 om den
+   udestående ledning. */
+function fotoAltTekst(indeksBlandtAlle){
+  const brand = document.getElementById('f-brand')?.value || '';
+  const model = document.getElementById('f-model')?.value || '';
+  const year  = document.getElementById('f-year')?.value || '';
+  const navn = [brand, model, year].filter(Boolean).join(' ') || 'Motorcyklen';
+  return indeksBlandtAlle === 0 ? `${navn} — forsidebillede` : `${navn} — billede ${indeksBlandtAlle + 1}`;
+}
+
 function renderPhotoGrid(){
   const grid = document.getElementById('photo-grid');
 
@@ -407,7 +424,7 @@ function renderPhotoGrid(){
   // der var ingen måde at fjerne ét enkelt på.
   const eksisterende = existingPhotos.map((p, i) => `
     <div class="photo-thumb">
-      <img src="${p.url}" alt="Billede ${i + 1} på annoncen">
+      <img src="${p.url}" alt="${escapeHTML(fotoAltTekst(i))}">
       ${i === 0 ? '<span class="cover-tag">Forside</span>' : ''}
       <button type="button" class="remove-photo" data-remove-existing="${p.id}" aria-label="Fjern dette billede fra annoncen">${Icon.close}</button>
     </div>`).join('');
@@ -418,7 +435,7 @@ function renderPhotoGrid(){
   const star  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg>`;
   const nye = uploadedPhotos.map((p, i) => `
     <div class="photo-thumb" draggable="true" data-idx="${i}">
-      <img src="${p.url}" alt="${escapeHTML(p.name)}" draggable="false">
+      <img src="${p.url}" alt="${escapeHTML(fotoAltTekst(existingPhotos.length + i))}" draggable="false">
       ${isCover(i) ? '<span class="cover-tag">Forside</span>' : '<span class="cover-tag new">Ny</span>'}
       <div class="photo-actions">
         <button type="button" class="photo-move" data-move="${i}" data-dir="-1" aria-label="Flyt tidligere"${i === 0 ? ' disabled' : ''}>${chevL}</button>
@@ -524,6 +541,235 @@ function sellerFromUser(user){
   };
 }
 
+/* ============ SEO- og udgivelsesassistent (builder 4, 20.08.2026) ============
+
+   Gælder UDELUKKENDE sælgerens EGEN annonce, mens den skrives her — ikke de
+   392 indekserede annoncer fra MC Syd/Gul og Gratis, som js/annonce.js viser
+   med kildeangivelse og aldrig omskriver (se DECISIONS.md, "vi gætter
+   aldrig" — en fremmed annonces tekst er ikke vores at redigere).
+
+   Ingen funktion herunder opfinder et ord. Hver linje kommer enten fra et
+   formularfelt, sælgeren selv har tastet eller sat kryds ved, fra en liste
+   sitet allerede har (TYPES, EQUIPMENT_LABELS, koerekortMaerkat), eller er
+   hendes egen frie tekst gengivet ORDRET. Et opdigtet felt på en annonce er
+   et retligt problem, ikke kun et SEO-problem — samme linje som
+   licensbadge-arbejdet i DECISIONS.md.
+
+   Stakken har ingen backend at kalde et sprogmodel på (se "Stakken er den,
+   der er" i DECISIONS.md — statisk HTML + vanilla JS, ingen server, ingen
+   build). "Strukturér min beskrivelse" er derfor IKKE en AI-omskrivning:
+   det er en deterministisk skabelon, der flytter sælgerens egne ord og tal
+   rundt. Det er en ærlig grænse for hvad stakken kan i dag, ikke noget der
+   er forsøgt skjult. */
+
+/* Samme prisintervaller som #filter-price-quick i js/search.js
+   (PRIS_INTERVALLER). js/search.js loades ikke på denne side, så tallene er
+   duplikeret her i stedet for delt — ret begge steder, hvis grænserne
+   ændres, eller flyt dem til js/data.js, som begge sider allerede loader. */
+const SEO_PRISBAAND = [
+  { max: 30000,    label: 'Under 30.000 kr.' },
+  { max: 60000,    label: '30–60.000 kr.' },
+  { max: 100000,   label: '60–100.000 kr.' },
+  { max: 150000,   label: '100–150.000 kr.' },
+  { max: Infinity, label: 'Over 150.000 kr.' },
+];
+function prisbaandForPris(pris){
+  if (!pris) return null;
+  return (SEO_PRISBAAND.find(b => pris <= b.max) || {}).label || null;
+}
+
+/* Genskaber (BEVIDST — se noten nedenfor) samme opskrift som js/seo.js'
+   seoListingPage() og scripts/build-listing-pages.js' jsonLd()-nabofunktion:
+   "{mærke model} {år} — {pris} — Bikerbasen" og "{mærke model}, Årgang X,
+   Y km, Z ccm, stand. Til salg i by på Bikerbasen." De to filer ejes af en
+   anden builder denne runde og må ikke røres herfra (se opgavens filliste).
+   Formålet her er IKKE at generere de rigtige meta-tags — det gør de filer,
+   uden om denne formular — men at vise sælgeren, hvad hendes EGNE tal
+   bliver til, mens hun stadig kan rette dem (fx skrive et kortere
+   modelnavn, så titlen ikke bliver skåret af).
+   FÆLDE FOR DEN NÆSTE: ændres formlen i js/seo.js, driver forhåndsvisningen
+   her fra virkeligheden. Samme risiko som er dokumenteret andre steder i
+   DECISIONS.md ved duplikeret logik ("Bedømmelsen regnes ét sted..."). Bedre
+   løsning: flyt formlen til en delt funktion i js/data.js. Ikke gjort her,
+   fordi js/data.js er en delt fil og ikke min at omlægge midt i en runde. */
+function serpTitel(data){
+  const navn = [data.brand, data.model].filter(Boolean).join(' ');
+  if (!navn) return null;
+  const pris = data.price ? formatPrice(data.price) : null;
+  return [navn, data.year, pris ? `— ${pris}` : null, '— Bikerbasen'].filter(Boolean).join(' ');
+}
+function serpBeskrivelse(data){
+  const navn = [data.brand, data.model].filter(Boolean).join(' ');
+  if (!navn) return null;
+  const dele = [
+    data.year ? `Årgang ${data.year}` : null,
+    data.km ? formatKm(data.km) : null,
+    data.ccm ? formatCcm(data.ccm) : null,
+    data.condition || null,
+  ].filter(Boolean);
+  const hale = data.city ? ` Til salg i ${data.city} på Bikerbasen.` : ' Til salg på Bikerbasen.';
+  return `${navn}${dele.length ? ', ' + dele.join(', ') : ''}.${hale}`;
+}
+
+/* Det virkeligt oplyste, der typisk giver mest tillid FØRST — men kun når
+   feltet rent faktisk er udfyldt. Bruges ikke til at skrive noget selv; kun
+   til at pege sælgeren mod, hvad hun med fordel selv kan nævne i
+   beskrivelsen, hvis det ikke allerede står der (se manglerListe()). */
+function staerkesteFaktum(data){
+  const nu = new Date().getFullYear();
+  if (data.antalEjere === 1) return '1 ejer';
+  if (data.serviceHistorik === 'Fuld') return 'fuld servicehistorik';
+  if (data.sidsteSyn && data.sidsteSyn >= nu - 1) return `synet ${data.sidsteSyn}`;
+  if (data.daekAar && data.daekAar >= nu - 1) return 'nye dæk';
+  if (data.vinterklar) return 'vinterklargjort';
+  if ((data.equipment || []).length) return equipmentLabel(data.equipment[0]);
+  return null;
+}
+
+/* Det, der reelt mangler lige nu — beregnet af det, formularen FAKTISK
+   indeholder, ikke af en fast skabelon. Hvert punkt tjekker ét felt eller en
+   nøgtern tekstsøgning i sælgerens egen beskrivelse, så vi ikke beder om
+   noget, hun allerede har skrevet et andet sted. Vist i trin 4 ("Gennemse &
+   udgiv") — FØR udgivelse, ikke som en fejlbesked bagefter. */
+function manglerListe(data){
+  const antalFotos = existingPhotos.length + uploadedPhotos.length;
+  const beskrivelse = (data.description || '').trim();
+  const punkter = [];
+
+  if (antalFotos === 0) punkter.push('Du har ingen billeder endnu — annoncer uden billeder bliver næsten aldrig klikket på.');
+  else if (antalFotos < 5) punkter.push(`Du har ${antalFotos} billede${antalFotos === 1 ? '' : 'r'} — annoncer med mindst 5 billeder får typisk flere henvendelser.`);
+
+  if (!data.power) punkter.push('Effekt (hk) er ikke udfyldt — uden den kan vi ikke vise, om motorcyklen kan køres på et A2-kørekort.');
+  if (!data.sidsteSyn && !/\bsyn(et)?\b/i.test(beskrivelse)) punkter.push('Sidste syn er ikke oplyst — det er tit et af de første spørgsmål, en køber stiller.');
+  if (!data.antalEjere && !/\bejer/i.test(beskrivelse)) punkter.push('Antal ejere er ikke udfyldt — mange købere lægger vægt på ejerhistorik.');
+  if (!data.serviceHistorik && !/service/i.test(beskrivelse)) punkter.push('Servicehistorik er ikke valgt.');
+  if (beskrivelse.length < 40) punkter.push('Beskrivelsen er meget kort — uddyb gerne stand, historik og evt. hvorfor du sælger.');
+  if (!(data.equipment || []).length) punkter.push('Du har ikke sat kryds ved noget udstyr — selv basalt som ABS er noget mange filtrerer på.');
+
+  const faktum = staerkesteFaktum(data);
+  if (faktum && !beskrivelse.toLowerCase().includes(faktum.toLowerCase())){
+    punkter.push(`"${faktum}" står i oplysningerne, men ikke i selve beskrivelsen — nævn den gerne der, det er noget mange købere leder efter.`);
+  }
+
+  return punkter;
+}
+
+/* Trin 4: mærkater sælgeren kan forvente at annoncen får. Bruger det, sitet
+   allerede regner med — IKKE en ny udregning. koerekortMaerkat() (i
+   js/components.js) er den ene kilde til kørekortkategorien på hele sitet
+   (se "Kørekortmærkatet regnes ÉT sted" i DECISIONS.md); den kalder selv
+   koerekortForListing() og passerKoerekort() fra js/data.js og håndterer
+   både selvmodsigende tal og vagthunden. At kalde den her frem for at
+   genopfinde A1/A2/A-logikken er præcis den regel, opgaven bad om at følge. */
+function foreslaaedeMaerkater(data){
+  const kk = koerekortMaerkat({ ...data, isExternal: false });
+  return {
+    kk,
+    chips: [typeLabel(data.type), kk.kode ? `Kørekort ${kk.kode}` : null, prisbaandForPris(data.price)].filter(Boolean),
+  };
+}
+
+/* Strukturerer sælgerens EGEN beskrivelse — tilføjer aldrig et ord, hun ikke
+   selv har skrevet eller tastet ind et andet sted i formularen.
+
+   1. Fakta-linjen kommer UDELUKKENDE fra formularfelter (årgang, km,
+      service, ejere, syn, dæk, udstyr) — tal og valg, hun selv har tastet
+      eller sat kryds ved.
+   2. Sætningerne under "Fra din egen beskrivelse" er hendes rå tekst,
+      splittet ved punktum/linjeskift og trimmet — ORDRET, ingen
+      omskrivning. Et ord som "velholdt" optræder her, kun hvis hun selv
+      skrev det — for så er det jo netop hendes egen sætning, ikke en
+      påstand vi har lagt oveni. Ingen backend-sprogmodel findes i denne
+      stak (se sektionsheaderen ovenfor) — det her er en skabelon, ikke en
+      omskrivning, og den kaldes aldrig af sig selv. */
+function strukturerBeskrivelse(data){
+  const navn = [data.brand, data.model].filter(Boolean).join(' ') || 'Motorcyklen';
+  const linje1 = data.year ? `${navn} årgang ${data.year}, ${formatKm(data.km)}.` : `${navn}, ${formatKm(data.km)}.`;
+
+  const raa = (data.description || '').trim();
+  const saetninger = raa.split(/(?<=[.!?])\s+|\n+/).map(s => s.trim()).filter(Boolean);
+  const linje2 = saetninger[0] || '';
+  const resten = saetninger.slice(1);
+
+  const fakta = [];
+  if (data.serviceHistorik) fakta.push(`Servicehistorik: ${data.serviceHistorik}`);
+  if (data.antalEjere) fakta.push(`Antal ejere: ${data.antalEjere}`);
+  if (data.sidsteSyn) fakta.push(`Sidst synet: ${data.sidsteSyn}`);
+  if (data.daekAar) fakta.push(`Dæk skiftet: ${data.daekAar}`);
+  if (data.vinterklar) fakta.push('Vinterklargjort');
+  if (data.kanNedsaettesA2) fakta.push('Kan nedsættes til A2');
+  const udstyr = (data.equipment || []).map(equipmentLabel);
+  if (udstyr.length) fakta.push(`Udstyr: ${udstyr.join(', ')}`);
+
+  const dele = [linje1];
+  if (linje2) dele.push(linje2);
+  if (fakta.length) dele.push(fakta.map(f => `• ${f}`).join('\n'));
+  if (resten.length) dele.push('Fra din egen beskrivelse:\n' + resten.map(s => `• ${s}`).join('\n'));
+  dele.push('Skriv gerne, hvis du har spørgsmål eller vil aftale en fremvisning.');
+  return dele.join('\n\n');
+}
+
+/* Tegner hele assistentpanelet i trin 4. Kaldes fra renderPreview(), som
+   allerede sætter `formData` og kører hver gang sælgeren når "Gennemse". */
+function renderSeoAssistent(data){
+  const mount = document.getElementById('seo-assist-panel');
+  if (!mount) return;
+
+  const gaps = manglerListe(data);
+  const gapsHTML = gaps.length
+    ? `<div class="detail-section" style="margin-top:20px;">
+         <h2 style="font-size:16px;">Før du udgiver</h2>
+         <ul class="equipment-list" style="grid-template-columns:1fr;">
+           ${gaps.map(g => `<li><span style="color:var(--color-danger); display:inline-flex;">${Icon.alertTriangle}</span>${escapeHTML(g)}</li>`).join('')}
+         </ul>
+       </div>`
+    : `<div class="preview-note" style="margin-top:20px;">${Icon.checkCircle}<span>Ingen flere forslag herfra — annoncen dækker det, købere typisk spørger om.</span></div>`;
+
+  const { kk, chips } = foreslaaedeMaerkater(data);
+  const chipsHTML = chips.length
+    ? `<div class="detail-section" style="margin-top:20px;">
+         <h2 style="font-size:16px;">Sådan bliver annoncen mærket</h2>
+         <div class="chip-group">${chips.map(c => `<span class="chip active" style="cursor:default;">${escapeHTML(c)}</span>`).join('')}</div>
+         ${!kk.kode ? `<p class="field-hint" style="margin-top:8px;">${escapeHTML(kk.forklaring)}</p>` : ''}
+       </div>`
+    : '';
+
+  const titel = serpTitel(data);
+  const besk = serpBeskrivelse(data);
+  const serpHTML = titel
+    ? `<div class="detail-section" style="margin-top:20px;">
+         <h2 style="font-size:16px;">Titel og søgetekst</h2>
+         <p class="field-hint" style="margin-bottom:10px;">Bikerbasen sammensætter automatisk titel og søgetekst af dine egne tal (mærke, model, årgang, pris, km, ccm, stand, by). Her er de, som de bliver ud fra det, du har udfyldt nu.</p>
+         <div style="border:1px solid var(--color-border); border-radius:var(--radius-sm); padding:12px 14px;">
+           <p style="font-weight:600; margin:0 0 4px;">${escapeHTML(titel)}</p>
+           <p class="field-hint" style="margin:0;">${escapeHTML(besk)}</p>
+         </div>
+         <p class="field-hint" style="margin-top:6px;">Titel: ${titel.length} tegn${titel.length > 65 ? ' (Google forkorter typisk over ca. 65)' : ''}. Søgetekst: ${besk.length} tegn.</p>
+       </div>`
+    : '';
+
+  mount.innerHTML = gapsHTML + chipsHTML + serpHTML;
+}
+
+/* Knapperne omkring "Strukturér min beskrivelse" (opret-annonce.html trin 2).
+   Forslaget skriver ALDRIG ind i #f-desc af sig selv — kun når sælgeren selv
+   trykker "Brug denne tekst". */
+function wireSeoAssist(){
+  document.getElementById('btn-strukturer')?.addEventListener('click', () => {
+    const data = collectFormData();
+    document.getElementById('beskrivelse-forslag-tekst').textContent = strukturerBeskrivelse(data);
+    document.getElementById('beskrivelse-forslag-boks').hidden = false;
+  });
+  document.getElementById('btn-brug-forslag')?.addEventListener('click', () => {
+    document.getElementById('f-desc').value = document.getElementById('beskrivelse-forslag-tekst').textContent;
+    document.getElementById('beskrivelse-forslag-boks').hidden = true;
+    toast('Beskrivelsen er opdateret — læs den gerne igennem, før du fortsætter.');
+  });
+  document.getElementById('btn-luk-forslag')?.addEventListener('click', () => {
+    document.getElementById('beskrivelse-forslag-boks').hidden = true;
+  });
+}
+
 function renderPreview(){
   formData = collectFormData();
   const user = Store.getUser() || { name: 'Dig', isDealer: false };
@@ -552,6 +798,7 @@ function renderPreview(){
     </div>
     ${formData.description ? `<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="white-space:pre-wrap;">${escapeHTML(formData.description)}</p></div>` : '<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="color:var(--color-fg-muted);">Du har ikke skrevet en beskrivelse endnu — en god beskrivelse giver flere henvendelser.</p></div>'}
     ${eqLabels.length ? `<div class="detail-section" style="margin-top:24px;"><h2>Udstyr (${eqLabels.length})</h2><ul class="equipment-list">${eqLabels.map(l => `<li>${Icon.checkCircle}${escapeHTML(l)}</li>`).join('')}</ul></div>` : ''}`;
+  renderSeoAssistent(formData);
 }
 
 function showUploadProgress(done, total){
@@ -794,6 +1041,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderPhotoGrid();
   wireDocUpload();
   renderDocGrid();
+  wireSeoAssist();
 
   const redigerId = new URLSearchParams(window.location.search).get('rediger');
   if (redigerId){

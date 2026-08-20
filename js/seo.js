@@ -80,6 +80,19 @@ const Seo = (function(){
     document.head.appendChild(el);
   }
 
+  /* it.path er den RENE sti — uden ".html", ligesom cleanUrl() i
+     scripts/build-meta.js og scripts/build-brand-pages.js allerede skriver
+     canonical og sitemap. Et tomt path (forsiden) giver SITE_URL uden en
+     efterfølgende skråstreg, samme streng som forsidens egen canonical
+     (`https://bikerbasen.dk`) — IKKE `${SITE_URL}/`, som ville være en
+     anden adresse end den, siden selv hævder at være.
+
+     Fundet af SEO-runde 3's kritiker (work/SEO-dom-runde3.md, afsnit 9):
+     kaldstederne skrev stadig 'index.html' og 'soegning.html?type=…' som
+     path, mens builder B allerede havde luget ".html" ud af canonical og
+     og:url overalt andre steder. En BreadcrumbList, hvor midterste led
+     peger på en adresse siden selv har opgivet, er en selvmodsigelse i
+     sitets EGEN strukturerede data — ikke en ekstern uenighed. */
   function breadcrumb(items){
     return {
       '@context': 'https://schema.org',
@@ -88,7 +101,7 @@ const Seo = (function(){
         '@type': 'ListItem',
         position: i + 1,
         name: it.name,
-        item: `${SITE_URL}/${it.path}`,
+        item: it.path ? `${SITE_URL}/${it.path}` : SITE_URL,
       })),
     };
   }
@@ -272,9 +285,15 @@ function seoListingPage(listing, photoUrls){
   if (listing.color) vehicle.color = listing.color;
 
   Seo.setJsonLd('vehicle', vehicle);
+  /* Forside og søgefacet uden ".html" — se begrundelsen i breadcrumb() selv.
+     Det tredje led ('annonce-<slug>-<id>.html') beholder derimod endelsen
+     MED VILJE: det er listingPageUrl()'s egen, uændrede adresse (SEO builder
+     A's beslutning, work/DECISIONS.md "Egne annoncers canonical beholder
+     '.html'") — den ER den kanoniske adresse for netop DEN side, så
+     brødkrummen skal blive ved med at pege på den, ikke på en anden. */
   Seo.setJsonLd('breadcrumb', Seo.breadcrumb([
-    { name: 'Forside', path: 'index.html' },
-    { name: typeLabel(listing.type), path: `soegning.html?type=${listing.type}` },
+    { name: 'Forside', path: '' },
+    { name: typeLabel(listing.type), path: `soegning?type=${listing.type}` },
     { name: navn, path: listingPageUrl(listing).replace(SITE_URL + '/', '') },
   ]));
 }

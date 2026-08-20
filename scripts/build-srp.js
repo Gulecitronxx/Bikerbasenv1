@@ -66,9 +66,10 @@ const PRERENDER_COUNT = 12;
   const firstPhoto = (page[0] && page[0].photoUrls && page[0].photoUrls[0]) || null;
   const preload = firstPhoto
     ? `<link rel="preload" as="image" href="${firstPhoto}" fetchpriority="high" id="srp-lcp-preload">`
-    : '';
-  html = /<link[^>]*id="srp-lcp-preload">/.test(html)
-    ? html.replace(/<link[^>]*id="srp-lcp-preload">/, preload)
+    : '<!-- id="srp-lcp-preload" (ingen foto at preloade) -->';
+  const preloadRe = /<link[^>]*id="srp-lcp-preload">|<!-- id="srp-lcp-preload"[^>]*-->/;
+  html = preloadRe.test(html)
+    ? html.replace(preloadRe, preload)
     : html.replace('</head>', preload + '\n</head>');
 
   fs.writeFileSync(htmlPath, html);

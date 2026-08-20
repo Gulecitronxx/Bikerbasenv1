@@ -3335,7 +3335,7 @@ body.overlay-open .cookie-banner{ display:none; }
 }
 .mix-info::after{
   content:''; position:absolute; top:50%; left:50%;
-  width:44px; height:44px; transform:translate(-50%,-50%);
+  width:44px; height:44px; transform:translate(-50%,-50%);
 }
 /* Fokusringen skal følge det, øjet ser (ikonet), ikke den usynlige flade. */
 .mix-info:focus-visible{ outline-offset:1px; }
@@ -3359,7 +3359,7 @@ body.overlay-open .cookie-banner{ display:none; }
    vaere hele kvadratet. Fladen er gennemsigtig, saa formen ses ikke. */
 .sortering-info::after{
   content:''; position:absolute; top:50%; left:50%;
-  width:44px; height:44px; transform:translate(-50%,-50%);
+  width:44px; height:44px; transform:translate(-50%,-50%);
 }
 
 /* ---------- Talfelterne har rigtige etiketter nu ----------
@@ -3719,3 +3719,130 @@ body.overlay-open .cookie-banner{ display:none; }
    indtil tallet ankommer — og på en side uden data (fx en fejlet
    backendReady) ville pletten blive stående for evigt. */
 .tile .tile-count:empty{ display: none; }
+
+/* ===== forhandler-vaerktoej ===== */
+/* dashboard.html/js/dashboard.js: kontostatus, kom-godt-i-gang, og
+   krav-flowet (gør krav på egne annoncer blandt de indekserede). Plus én
+   linje på forhandler.html for ejerens egen-profil-banner (nederst). */
+
+/* Kontostatus-strimlen øverst på dashboardet. Samme information som
+   "Mine annoncer -> Konto"s plan-card, bare kompakt og med ét link derhen —
+   Stripe/Shopify-mønster: man skal aldrig lede efter, om man betaler. */
+.plan-strip{
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.plan-strip-badge{
+  display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 700; font-size: 14px;
+  color: var(--color-success);
+}
+.plan-strip-badge svg{ width: 17px; height: 17px; }
+.plan-strip-badge.is-free{ color: var(--color-fg-muted); }
+.plan-strip-note{ color: var(--color-fg-muted); font-size: 13px; flex: 1 1 220px; }
+.plan-strip-link{
+  display: inline-flex; align-items: center; gap: 4px;
+  font-weight: 600; font-size: 14px; color: var(--color-primary);
+  white-space: nowrap;
+}
+.plan-strip-link svg{ width: 15px; height: 15px; }
+.plan-strip-link:hover{ text-decoration: underline; }
+
+/* Kom-godt-i-gang-kortet. Vises kun når kontoen reelt er tom (ingen egne
+   annoncer, ingen godkendte krav) — se renderKickoff() i js/dashboard.js. */
+.kickoff-card{
+  padding: var(--space-5);
+  margin-bottom: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.kickoff-card h2{ font-size: 20px; margin-bottom: 4px; }
+.kickoff-card > p{ color: var(--color-fg-muted); font-size: 14px; margin-bottom: var(--space-4); }
+.kickoff-steps{
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+.kickoff-step{ display: flex; gap: var(--space-3); align-items: flex-start; }
+.kickoff-step-num{
+  flex: none; display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--color-dark); color: #fff;
+  font-family: var(--font-display); font-weight: 700; font-size: 14px;
+}
+.kickoff-step h3{ font-size: 15px; margin-bottom: 3px; }
+.kickoff-step p{ color: var(--color-fg-muted); font-size: 13px; margin-bottom: var(--space-3); line-height: 1.5; }
+
+/* Eksterne annoncer, du ejer via et godkendt krav — badge med kildenavn i
+   tabellen, så det aldrig kan forveksles med en annonce, vi selv hoster. */
+.ekstern-kilde-badge{
+  display: inline-block; padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-2);
+  color: var(--color-fg-muted);
+  font-size: 12px; font-weight: 600;
+}
+.input-sm{ padding: 6px 10px; font-size: 13px; height: auto; }
+
+/* Krav-status-farver ud over de to, .status-pill allerede har
+   (.is-new/.is-active — se css-sektionen for dashboardets annoncetabel). */
+.status-pill.is-afventer{ background: var(--color-primary-tint); color: var(--color-primary-hover); }
+.status-pill.is-afvist{ background: var(--color-danger-tint); color: var(--color-danger); }
+
+/* Søgefelt til krav-flowet */
+.krav-search-form{
+  display: flex; gap: var(--space-2);
+  margin-top: var(--space-2); margin-bottom: var(--space-3);
+  max-width: 480px;
+}
+.krav-search-form .input{ flex: 1; }
+.krav-search-hint{ color: var(--color-fg-muted); font-size: 13px; margin-bottom: var(--space-2); min-height: 1.4em; }
+
+.krav-results{ display: flex; flex-direction: column; gap: var(--space-2); }
+.krav-result-row{
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.krav-result-thumb{
+  flex: none; width: 64px; height: 48px; border-radius: 6px; overflow: hidden;
+  background: var(--color-surface-2);
+  display: flex; align-items: center; justify-content: center;
+}
+.krav-result-thumb img{ width: 100%; height: 100%; object-fit: cover; }
+.krav-result-nophoto{ color: var(--color-fg-muted); opacity: .6; }
+.krav-result-nophoto svg{ width: 20px; height: 20px; }
+.krav-result-info{ flex: 1; min-width: 0; }
+.krav-result-titel{ font-weight: 600; font-size: 14px; }
+.krav-result-sub{ color: var(--color-fg-muted); font-size: 12.5px; margin-top: 2px; }
+
+.krav-status-heading{ font-size: 15px; margin: var(--space-5) 0 var(--space-2); }
+.krav-status-list{ display: flex; flex-direction: column; gap: var(--space-2); }
+.krav-status-row{
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.krav-status-titel{ font-weight: 600; font-size: 14px; }
+.krav-status-dato{ color: var(--color-fg-muted); font-size: 12.5px; margin-top: 2px; }
+
+/* Ejerens egen-profil-banner på forhandler.html (js/forhandler.js,
+   renderEjerBanner()). Sidder OVEN PÅ den offentlige profil uden at ændre
+   noget af den — kun forhandleren selv ser den (bruger.id === seller.id). */
+.profil-ejer-banner{
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-dark);
+  color: #fff;
+}
+.profil-ejer-banner p{ font-size: 14px; margin: 0; }
+.profil-ejer-banner p strong{ display: block; font-size: 15px; margin-bottom: 2px; }
+.profil-ejer-banner .btn{ flex: none; }

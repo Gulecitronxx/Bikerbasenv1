@@ -90,12 +90,20 @@ function jsonLd(l, url){
   if (l.fuel) vehicle.fuelType = l.fuel;
   if (l.color) vehicle.color = l.color;
 
+  /* Forside og søgefacet uden ".html" — samme rettelse som js/seo.js's
+     breadcrumb() (SEO-runde 3's kritiker, work/SEO-dom-runde3.md afsnit 9):
+     canonical for index.html og soegning.html mistede endelsen i en
+     tidligere runde (scripts/build-meta.js's cleanUrl()), men denne fils
+     BreadcrumbList blev ikke rettet med. En brødkrumme, der peger på en
+     adresse siden selv har opgivet som sin kanoniske, er en selvmodsigelse
+     i sitets EGEN strukturerede data. Tredje led (`url`, annoncens egen
+     side) beholder ".html" med vilje — det ER dens rigtige adresse. */
   const brød = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Forside', item: `${BASE}/index.html` },
-      { '@type': 'ListItem', position: 2, name: typeLabel(l.type), item: `${BASE}/soegning.html?type=${l.type}` },
+      { '@type': 'ListItem', position: 1, name: 'Forside', item: `${BASE}` },
+      { '@type': 'ListItem', position: 2, name: typeLabel(l.type), item: `${BASE}/soegning?type=${l.type}` },
       { '@type': 'ListItem', position: 3, name: navn, item: url },
     ],
   };

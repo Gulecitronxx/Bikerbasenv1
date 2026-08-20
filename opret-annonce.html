@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Opret annonce — Bikerbasen">
 <meta name="twitter:description" content="Opret en annonce for din motorcykel på Bikerbasen på under 5 minutter — gratis for private sælgere.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -73,7 +73,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=785ea3b1">
+<link rel="stylesheet" href="css/styles.css?v=da2e1e5a">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -272,6 +272,21 @@ try{
             <textarea class="input" id="f-desc" required placeholder="Beskriv stand, historik, evt. ekstraudstyr og servicehistorik..."></textarea>
             <span class="field-hint">Vær ærlig om stand og eventuelle mangler — det skaber tillid hos køber.</span>
           </div>
+          <!-- Strukturerer sælgerens EGEN tekst — tilføjer intet, hun ikke selv har
+               skrevet eller tastet ind et andet sted i formularen. Se
+               js/opret-annonce.js strukturerBeskrivelse(). -->
+          <div class="field field-full" id="beskrivelse-assist">
+            <button type="button" class="btn btn-outline btn-sm" id="btn-strukturer">Strukturér min beskrivelse</button>
+            <span class="field-hint" style="display:block; margin-top:6px;">Laver to linjer og en punktliste ud fra det, du selv har skrevet og udfyldt ovenfor — intet digtes med.</span>
+            <div id="beskrivelse-forslag-boks" hidden style="margin-top:12px; border:1px solid var(--color-border); border-radius:var(--radius-sm); padding:16px;">
+              <p class="field-hint" style="margin-bottom:8px;">Forslag — udelukkende det, du selv har skrevet og udfyldt:</p>
+              <pre id="beskrivelse-forslag-tekst" style="white-space:pre-wrap; font-family:inherit; font-size:14px; margin:0 0 12px;"></pre>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary btn-sm" id="btn-brug-forslag">Brug denne tekst</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="btn-luk-forslag">Behold min egen</button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -312,6 +327,10 @@ try{
       <section class="form-step" data-step="4" hidden>
         <h2 style="margin-bottom:16px;">Gennemse & udgiv</h2>
         <div class="preview-note" id="preview-note"></div>
+        <!-- Sælgerens egen SEO- og udgivelsesassistent — se js/opret-annonce.js
+             renderSeoAssistent(). Gælder kun egne annoncer; se scoping-noten
+             øverst i filen. -->
+        <div id="seo-assist-panel"></div>
         <div class="preview-card-wrap">
           <div class="listings-grid" id="preview-card-mount" style="grid-template-columns:1fr;"></div>
         </div>
@@ -379,17 +398,17 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=785ea3b1"></script>
+<script defer src="js/security.js?v=da2e1e5a"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=785ea3b1"></script>
-<script defer src="js/supabase-api.js?v=785ea3b1"></script>
-<script defer src="js/icons.js?v=785ea3b1"></script>
-<script defer src="js/postnumre.js?v=785ea3b1"></script>
-<script defer src="js/data.js?v=785ea3b1"></script>
-<script defer src="js/store.js?v=785ea3b1"></script>
-<script defer src="js/backend-bridge.js?v=785ea3b1"></script>
-<script defer src="js/components.js?v=785ea3b1"></script>
-<script defer src="js/opret-annonce.js?v=785ea3b1"></script>
+<script defer src="js/supabase-config.js?v=da2e1e5a"></script>
+<script defer src="js/supabase-api.js?v=da2e1e5a"></script>
+<script defer src="js/icons.js?v=da2e1e5a"></script>
+<script defer src="js/postnumre.js?v=da2e1e5a"></script>
+<script defer src="js/data.js?v=da2e1e5a"></script>
+<script defer src="js/store.js?v=da2e1e5a"></script>
+<script defer src="js/backend-bridge.js?v=da2e1e5a"></script>
+<script defer src="js/components.js?v=da2e1e5a"></script>
+<script defer src="js/opret-annonce.js?v=da2e1e5a"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

@@ -3,29 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Alle motorcykelmærker — Bikerbasen</title>
-<meta name="description" content="Find brugte motorcykler efter mærke. Se udvalget fra 26 mærker med annoncer til salg i Danmark på Bikerbasen.">
+<title>Cross/MX-motorcykler — Bikerbasen</title>
+<meta name="description" content="1 annonce lige nu — se hele udvalget af brugte motorcykler på Bikerbasen i stedet.">
 <!-- meta:start (genereret af scripts/build-meta.js) -->
-<link rel="canonical" href="https://bikerbasen.dk/maerker">
+<link rel="canonical" href="https://bikerbasen.dk/type-cross">
 <meta name="theme-color" content="#C6420E" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F0D0A" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Bikerbasen">
 <meta property="og:locale" content="da_DK">
-<meta property="og:url" content="https://bikerbasen.dk/maerker">
-<meta property="og:title" content="Alle motorcykelmærker — Bikerbasen">
-<meta property="og:description" content="Find brugte motorcykler efter mærke. Se udvalget fra 26 mærker med annoncer til salg i Danmark på Bikerbasen.">
+<meta property="og:url" content="https://bikerbasen.dk/type-cross">
+<meta property="og:title" content="Cross/MX-motorcykler — Bikerbasen">
+<meta property="og:description" content="1 annonce lige nu — se hele udvalget af brugte motorcykler på Bikerbasen i stedet.">
 <meta property="og:image" content="https://bikerbasen.dk/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Bikerbasen — køb og sælg brugte motorcykler i Danmark">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Alle motorcykelmærker — Bikerbasen">
-<meta name="twitter:description" content="Find brugte motorcykler efter mærke. Se udvalget fra 26 mærker med annoncer til salg i Danmark på Bikerbasen.">
+<meta name="twitter:title" content="Cross/MX-motorcykler — Bikerbasen">
+<meta name="twitter:description" content="1 annonce lige nu — se hele udvalget af brugte motorcykler på Bikerbasen i stedet.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
 <!-- meta:end -->
+<!-- Canonical staar HER, foer scripts/build-meta.js koerer (samme moenster
+     som maerke-*.html — SEO-runde 3, builder B/facet-runde). Uden filendelse:
+     GitHub Pages loeser "type-cross" om til "type-cross.html" af sig
+     selv (efterproevet paa maerke-*.html i forrige runde). -->
+<meta name="robots" content="noindex, follow">
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
@@ -47,19 +52,17 @@ try{
   if(c&&c.level==="all")window.bbStartAnalytics();
 }catch(e){}
 </script>
-<!-- Ingen preconnect: maerkeoversigten viser ingen annoncer og henter
-     hverken data fra Supabase eller supabase-js fra jsDelivr (se
-     scriptlisten nederst). En preconnect til en vaert, der aldrig
-     kontaktes, koster DNS + TLS for ingenting — og de to haandtryk laa
-     paa den kritiske sti foran fontene. -->
+<link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <style>
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
+<link rel="preload" as="image" href="https://assets.guloggratis.dk/images/99ad6933-8e16-4e0c-b8f7-287eefe7a852/99ad6933-8e16-4e0c-b8f7-287eefe7a852-320x240.webp" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css?v=da2e1e5a">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Type","item":"https://bikerbasen.dk/soegning"},{"@type":"ListItem","position":3,"name":"Cross/MX-motorcykler","item":"https://bikerbasen.dk/type-cross"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -103,135 +106,92 @@ try{
 <main id="main-content">
   <div class="container">
     <nav class="breadcrumb" aria-label="Brødkrumme">
-      <a href="index.html">Forside</a><span class="bc-sep"></span><span>Mærker</span>
+      <a href="index.html">Forside</a><span class="bc-sep"></span>
+      <a href="soegning.html">Søgning</a><span class="bc-sep"></span>
+      <span>Cross/MX-motorcykler</span>
     </nav>
 
     <div class="brand-hero">
-      <h1>Motorcykler efter mærke</h1>
-      <p class="brand-intro">Gennemse brugte motorcykler efter mærke. Øverst dem, der er til salg lige nu — nederst dem, vi kender, men ikke har på lager i øjeblikket.</p>
+      <h1>Cross/MX-motorcykler</h1>
+      <p class="brand-intro">Der er lige nu <strong>1</strong> brugt Cross/MX-motorcykel til salg på Bikerbasen — til 58.400 kr. Annoncen er indekseret fra Gul og Gratis, og handlen sker hos kilden.</p>
+      <div class="brand-actions">
+        <a href="soegning.html?type=cross" class="btn btn-primary">Søg i alle cross/mx-motorcykler</a>
+        <a href="opret-annonce.html" class="btn btn-outline">Sælg din motorcykel</a>
+      </div>
     </div>
 
     <section class="section" style="padding-top:0;">
-      <div class="section-head"><div>
-        <h2>Mærker med annoncer nu</h2>
-        <p>Spring direkte til udvalget hos de mærker, der er til salg lige nu.</p>
-      </div></div>
-      <div class="brand-grid">
-        <a class="brand-card" href="maerke-andet-maerke.html">
-          <span class="brand-card-name">Andet Mærke</span>
-          <span class="brand-card-count">2 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-aprilia.html">
-          <span class="brand-card-name">Aprilia</span>
-          <span class="brand-card-count">7 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-benelli.html">
-          <span class="brand-card-name">Benelli</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-bmw.html">
-          <span class="brand-card-name">BMW</span>
-          <span class="brand-card-count">26 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-bsa.html">
-          <span class="brand-card-name">Bsa</span>
-          <span class="brand-card-count">3 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-cagiva.html">
-          <span class="brand-card-name">Cagiva</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-ducati.html">
-          <span class="brand-card-name">Ducati</span>
-          <span class="brand-card-count">3 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-fb-mondial.html">
-          <span class="brand-card-name">Fb Mondial</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-harley-davidson.html">
-          <span class="brand-card-name">Harley-Davidson</span>
-          <span class="brand-card-count">72 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-honda.html">
-          <span class="brand-card-name">Honda</span>
-          <span class="brand-card-count">262 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-husqvarna.html">
-          <span class="brand-card-name">Husqvarna</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-hyosung.html">
-          <span class="brand-card-name">Hyosung</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-indian.html">
-          <span class="brand-card-name">Indian</span>
-          <span class="brand-card-count">2 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-kawasaki.html">
-          <span class="brand-card-name">Kawasaki</span>
-          <span class="brand-card-count">26 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-ktm.html">
-          <span class="brand-card-name">KTM</span>
-          <span class="brand-card-count">13 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-kymco.html">
-          <span class="brand-card-name">Kymco</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-lauge.html">
-          <span class="brand-card-name">Lauge</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-moto-guzzi.html">
-          <span class="brand-card-name">Moto Guzzi</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-mv-agusta.html">
-          <span class="brand-card-name">MV Agusta</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-rewaco.html">
-          <span class="brand-card-name">Rewaco</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-royal-enfield.html">
-          <span class="brand-card-name">Royal Enfield</span>
-          <span class="brand-card-count">7 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-suzuki.html">
-          <span class="brand-card-name">Suzuki</span>
-          <span class="brand-card-count">42 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-sym.html">
-          <span class="brand-card-name">Sym</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-triumph.html">
-          <span class="brand-card-name">Triumph</span>
-          <span class="brand-card-count">27 annoncer</span>
-        </a>
-        <a class="brand-card" href="maerke-victory.html">
-          <span class="brand-card-name">Victory</span>
-          <span class="brand-card-count">1 annonce</span>
-        </a>
-        <a class="brand-card" href="maerke-yamaha.html">
-          <span class="brand-card-name">Yamaha</span>
-          <span class="brand-card-count">44 annoncer</span>
-        </a>
+      <!-- Samme regel som maerke-*.html's modelchips: kun maerker der reelt
+           er repraesenteret her, aldrig en kurateret liste (D-010). -->
+      <h2 class="brand-sub">Se cross/mx-motorcykler efter mærke</h2>
+      <div class="popular-row">
+        <a class="popular-chip" href="soegning.html?type=cross&brands=Andet+M%C3%A6rke">Andet Mærke</a>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top:var(--space-6);">
+      <h2 class="brand-sub">1 annonce lige nu</h2>
+      <div class="listings-grid" id="facet-listings" data-facet-kind="type" data-facet-id="cross">
+  <article class="card card-external" data-listing-id="21e800db-1959-46a4-84dc-6c12be735652" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos Gul og Gratis. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra Gul og Gratis</span></div>
+    <div class="card-media">
+      <img src="https://assets.guloggratis.dk/images/99ad6933-8e16-4e0c-b8f7-287eefe7a852/99ad6933-8e16-4e0c-b8f7-287eefe7a852-320x240.webp" alt="Andet Mærke Fantic moto maskine" loading="eager" fetchpriority="high" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="21e800db-1959-46a4-84dc-6c12be735652" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">58.400 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Andet Mærke Fantic moto maskine</span>
+        <span class="card-title-variant" title="Cross/MX">Cross/MX</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd class="spec-tom">Ikke oplyst</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd class="spec-tom">Ikke oplyst</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd class="spec-tom">Ikke oplyst</dd></div>
+          <div class="card-spec"><dt>Effekt</dt><dd class="spec-tom">Ikke oplyst</dd></div>
+        </dl>
+        <span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Herning, Midtjylland</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Privat sælger · guloggratis.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=21e800db-1959-46a4-84dc-6c12be735652"
+       class="card-link"
+       aria-label="Se annonce: Andet Mærke Fantic moto maskine Cross/MX, 58.400 kr. — hos Gul og Gratis"></a>
+  </article></div>
+      <noscript>
+        <ul class="brand-noscript">
+          <li>Andet Mærke Fantic moto maskine — 58.400 kr. (Herning)</li>
+        </ul>
+      </noscript>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+      <h2 class="brand-sub">Andre typer</h2>
+      <div class="popular-row">
+        <a class="popular-chip" href="type-sport.html">Sport</a>
+        <a class="popular-chip" href="type-touring.html">Touring</a>
+        <a class="popular-chip" href="type-cruiser.html">Cruiser</a>
+        <a class="popular-chip" href="type-naked.html">Naked</a>
+        <a class="popular-chip" href="type-adventure.html">Adventure/Enduro</a>
+        <a class="popular-chip" href="type-scooter.html">Scooter</a>
+        <a class="popular-chip" href="type-classic.html">Classic/Veteran</a>
       </div>
     </section>
 
     <section class="section" style="padding-top:0;">
-      <div class="section-head"><div>
-        <h2>Mærker uden annoncer lige nu (38)</h2>
-        <p>Dem kender vi godt — der er bare ingen til salg i øjeblikket. Vi linker dem, når der er noget at vise.</p>
-      </div></div>
-      <p class="brand-intro">Bajaj, Beta, Bimota, Brixton, Buell, Can-Am, CFMOTO, Daelim, Energica, Fantic, GasGas, Gilera, Hero MotoCorp, Jawa, Keeway, Kove, Lambretta, Lexmoto, Mash, MZ, Nimbus, Norton, Peugeot, Piaggio, QJ Motor, Rieju, Sachs, Sherco, Super Soco, SWM, TM Racing, TVS, Ural, Vespa, Voge, Yezdi, Zero Motorcycles, Zontes.</p>
-      <div class="brand-actions">
-        <a href="soegning.html" class="btn btn-outline">Søg blandt alle 548 annoncer</a>
+      <h2 class="brand-sub">Kørekortkategorier</h2>
+      <div class="popular-row">
+        <a class="popular-chip" href="koerekort-a1.html">Kørekort A1</a>
+        <a class="popular-chip" href="koerekort-a2.html">Kørekort A2</a>
+        <a class="popular-chip" href="soegning.html">Alle motorcykler</a>
       </div>
     </section>
   </div>
@@ -279,23 +239,42 @@ try{
   </div>
 </footer>
 
-<!-- Mærkeoversigten er ren statisk markup: alle mærkelinks står i HTML'en,
-     og sidens JS er renderHeader() plus brødkrummepilen. Der er intet kald
-     til backendReady(), ingen annoncekort og nul formularfelter — derfor er
-     hele Supabase-stakken (supabase-js fra jsDelivr 55.453 B, config, api,
-     backend-bridge) og js/postnumre.js (40.050 B rå) taget ud. Se den
-     længere begrundelse i sikkerhed.html; det er samme rettelse.
-     RØR IKKE listen uden at rette den tilsvarende i maerker.html — den her
-     er kilden, siden genereres af scripts/build-brand-pages.js. -->
 <script defer src="js/security.js?v=da2e1e5a"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="js/supabase-config.js?v=da2e1e5a"></script>
+<script defer src="js/supabase-api.js?v=da2e1e5a"></script>
 <script defer src="js/icons.js?v=da2e1e5a"></script>
 <script defer src="js/bike-art.js?v=da2e1e5a"></script>
 <script defer src="js/data.js?v=da2e1e5a"></script>
 <script defer src="js/store.js?v=da2e1e5a"></script>
+<script defer src="js/backend-bridge.js?v=da2e1e5a"></script>
 <script defer src="js/components.js?v=da2e1e5a"></script>
-<script>document.addEventListener('DOMContentLoaded', () => {
-  renderHeader('maerker.html');
+<!-- Ingen separat js/facet.js: opgavens filliste omfatter ikke nye
+     js/*.js-filer, og siden hydrerer sig selv med samme fem linjer som
+     js/maerke.js bruger til maerke-*.html, bare filtreret paa type/koerekort
+     i stedet for maerke. Samme moenster som maerker.html's eget indlejrede
+     script (den har heller ingen separat fil). koerekortForListing/
+     passerKoerekort kommer fra js/data.js, som allerede er indlaest ovenfor. -->
+<script>document.addEventListener('DOMContentLoaded', async () => {
+  await backendReady();
+  renderHeader(null);
   document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
+  const mount = document.getElementById('facet-listings');
+  if (!mount) return;
+  const kind = mount.dataset.facetKind, id = mount.dataset.facetId;
+  const alle = Store.getAllListings();
+  const items = (kind === 'type' ? alle.filter(l => l.type === id) : alle.filter(l => passerKoerekort(l, id)))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if (!items.length){
+    mount.className = 'empty-state';
+    mount.innerHTML = '<h3>Ingen til salg lige nu</h3>'
+      + '<p>Vi har ingen annoncer, der matcher denne kategori i øjeblikket. Adressen bliver stående — kig forbi igen, eller søg i hele udvalget.</p>'
+      + '<a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg alle motorcykler</a>';
+    return;
+  }
+  mount.className = 'listings-grid';
+  mount.innerHTML = items.map(listingCardHTML).join('');
+  wireFavoriteButtons(mount);
 });</script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>

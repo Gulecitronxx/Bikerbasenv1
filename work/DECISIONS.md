@@ -2227,3 +2227,743 @@ PRÆCIS det, mennesket målte: ingen fejl, ingen mail. Dette er den mest
 sandsynlige rodårsag, nu hvor koden selv findes — men kan kun bekræftes i
 dashboardet, ikke herfra.
 HVOR: Supabase-dashboardet, ikke en fil i repoet.
+
+### Jensens Motorcykler og Rydbergs MC er nu AKTIVE kilder — crawl, 20.08.2026
+HVAD: `node crawler/run.js --source=jensensmc` og `--source=rydbergsmc` er
+kørt for rigtigt (ikke tørløb). Begge YAML-filer havde allerede en
+menneske-bekræftet tilladelsesdato (19.08.2026, "Ejeren af Bikerbasen
+bekræftede aftalen med [kilde] 19.08.2026") fra en tidligere session. Denne
+sessions bruger gav eksplicit besked om at crawle flere annoncer fra andre
+MC-forhandlere, hvilket er læst som den fornyede bekræftelse, Prompt 3 i
+`docs/naeste-prompts.md` selv kræver før en kørsel — robots.txt blev
+desuden slået op live ved selve kørslen (crawler/robots.js, kører altid) og
+tillod begge, uændret siden 19.08.2026.
+Resultat: Jensens 24 nye annoncer, Rydbergs 74 nye. Gul og Gratis blev
+desuden genkørt samme session (brugerens eget ønske — "de gule sider"
+viste sig ved opfølgning at betyde netop denne, allerede aktive kilde):
+58 nye annoncer, 2 opdaterede, ingen borte — markedspladsen har simpelthen
+fået flere annoncer siden 16.08. Databasen har nu **548 aktive annoncer**
+fra fire kilder (332 MC Syd + 118 Gul og Gratis + 24 Jensens + 74
+Rydbergs), op fra 392. `npm test` er 278/278 grøn efter alle kørsler.
+HVORFOR: Det var den næste, klar-til-brug udvidelse af udbuddet — begge
+kilder var allerede konfigureret og godkendt, kun ikke koblet på endnu
+(`docs/discovery.md` afsnit 4, hul 4; `docs/naeste-prompts.md` Prompt 3).
+FÆLDE for den næste: `sources/rydbergsmc.yaml`'s thumbnails peger på
+`www.123mc.dk` (deres billedplatform) — det er IKKE det samme som at crawle
+123mc.dk's eget marked, kun at Rydbergs bruger 123mc's CDN til billeder.
+Kilden er stadig kun rydbergsmc.dk.
+HVOR: `sources/jensensmc.yaml`, `sources/rydbergsmc.yaml`, produktions-
+databasen (`eksterne_annoncer`, `kilder`, `crawl_koersler`).
+
+### "De gule sider" var Gul og Gratis — afklaret, ikke gættet — crawl, 20.08.2026
+HVAD: Brugerens "de gule sider" viste sig ved opfølgende spørgsmål (AskUser-
+Question) at betyde den allerede aktive kilde Gul og Gratis (guloggratis.dk),
+ikke det danske erhvervskatalog degulesider.dk. Brugeren bekræftede desuden
+eksplicit "ingen nye kilder denne gang" — kun genkørsel af den eksisterende.
+Der er derfor IKKE skrevet nogen ny `sources/*.yaml`, og der er ikke skrevet
+nogen konfiguration for endnu-ubekræftede kilder.
+HVORFOR: `crawler/config.js`s `validerKilde()` kræver en menneske-bekræftet
+tilladelsesdato pr. kilde — det gælder lige så meget en uklar instruktion i
+chatten som en linje i en YAML-fil, og "de gule sider" var reelt tvetydig
+(kunne læses som degulesider.dk ELLER som ordspillet i "Gul og Gratis").
+Spurgt fremfor gættet.
+HVOR: (ingen fil — se `sources/` for mønsteret, hvis en ny kilde med
+bekræftet tilladelse dukker op i en senere session).
+
+### Brødkrummens ".html"-selvmodsigelse rettet — SEO content builder 2, 20.08.2026
+HVAD: `js/seo.js`s `breadcrumb()` og `seoListingPage()` samt
+`scripts/build-listing-pages.js`s `jsonLd()` byggede stadig BreadcrumbList-
+led til `${SITE_URL}/index.html` og `${SITE_URL}/soegning.html?type=…` —
+MED ".html". Det er nu `SITE_URL` (bar rod, uden efterfølgende skråstreg,
+når `it.path` er tom) og `${SITE_URL}/soegning?type=…` (uden ".html"),
+samme mønster som `scripts/build-meta.js`s `cleanUrl()` allerede skriver i
+canonical/og:url for netop de to sider. Det tredje led (annoncens EGEN side,
+`annonce-<slug>-<id>.html`) er URØRT — den beholder ".html" med vilje, fordi
+det ER dens rigtige, låste adresse (`js/seo-adresser.test.js` linje 121,
+SEO builder A's beslutning).
+HVORFOR: Fundet af SEO-runde 3's uafhængige kritiker
+(`work/SEO-dom-runde3.md`, afsnit 9): "ingen af builderne" havde fulgt
+".html"-oprydningen op i brødkrummen, og en BreadcrumbList, hvor midterste
+led peger på en adresse, siden selv har opgivet som sin kanoniske, er en
+selvmodsigelse i sitets EGEN strukturerede data — ikke en ekstern uenighed
+med Google, men noget sitet siger to forskellige ting om samtidig. Kritikeren
+kaldte det "ikke en akut fejl (0 påvirkede sider i dag)" fordi der er 0 egne
+annoncer i produktion lige nu — men fejlen ville have ramt den allerførste
+rigtige annonce, en sælger opretter.
+EFTERPRØVET: egen dev-server (port 8541), browserkørsel (JS udført) på to
+egne demo-annoncer (`?id=1017`, `?id=1021`) — begge har nu
+`"item":"https://bikerbasen.dk"` og
+`"item":"https://bikerbasen.dk/soegning?type=sport"` (hhv. `adventure`) i
+stedet for ".html"-udgaverne. `npm test`: 278/278 grønne (ingen test låste
+den gamle streng). `node scripts/build-listing-pages.js` kørt isoleret
+(byggede 0 sider — 0 egne annoncer i produktion i dag, ingen fejl).
+HVOR: `js/seo.js` — `Seo.breadcrumb()`, `seoListingPage()`;
+`scripts/build-listing-pages.js` — `jsonLd()`
+
+### Struktureret data-audit — det meste var allerede der, én reel svaghed fundet — SEO content builder 2, 20.08.2026
+HVAD: Fuld gennemgang af Product/Motorcycle+Offer (annoncesider),
+ItemList (mærkesider, søgeresultater), BreadcrumbList (annonce-, mærke- og
+mærkeindekssider) og Organization+WebSite+SearchAction (forsiden), krydset
+mod schema.orgs egne definitioner (WebFetch mod schema.org/WebSite,
+/SearchAction, /ItemList, /BreadcrumbList — ikke hukommelse).
+FUND: opgavens formodning om, at ItemList og Organization/WebSite
+"sandsynligvis mangler", holdt IKKE ved efterprøvning — begge findes
+allerede, bygget af tidligere runders SEO builder A/B og af
+`scripts/build-meta.js`/`scripts/build-brand-pages.js` (ingen af dem mine
+filer denne runde). Efterprøvet levende i browseren (JSON-LD hentet, ikke
+beskrevet):
+  - Forsiden: Organization+WebSite+SearchAction, til stede i RÅ HTML (ingen
+    JS krævet) — bekræftet med `curl` mod egen server.
+  - 2 egne annoncer (`?id=1017`, `?id=1021`): Product+Motorcycle+Offer,
+    fuldt udfyldt, korrekt udeladt `offers` når prisen mangler (her var
+    prisen kendt på begge, så feltet er med).
+  - 2 indekserede annoncer (samme id'er som forrige dom brugte:
+    `4c8b5adb-…`, Honda VT 700 uden pris — intet `offers`-felt, korrekt;
+    `689aab1f-…`, Triumph Daytona MED pris — fuldt `offers`).
+  - 1 mærkeside (`maerke-honda.html`): BreadcrumbList til stede
+    (rene URL'er), ItemList FRAVÆRENDE — korrekt, fordi Hondas 220 annoncer
+    alle er indekserede (0 med egen forrenderet side), og
+    `brandItemListLd()` udelader med vilje en tom liste. Gælder alle 26
+    mærkesider lige nu: ItemList-koden virker, men har intet at vise, fordi
+    produktions-`listings`-tabellen har 0 rækker.
+  - `soegning.html`: ItemList-koden (`seoSearchResults()`) virker og gav 24
+    poster i en lokal kørsel MED demodata — i produktion er den tom af
+    samme grund som ovenfor.
+DEN ENE REELLE SVAGHED: Google FJERNEDE "Sitelinks search box"-funktionen
+(rig-resultat-typen, `SearchAction` er bygget til) i november 2024 —
+bekræftet direkte fra Googles egen ændringslog (samme WebFetch-metode som
+forrige runde brugte til at finde, at "Vehicle listing" var lukket).
+Markup'en er stadig gyldig schema.org og skader intet ved at blive stående,
+men udløser ikke længere nogen synlig Google-funktion. `scripts/build-meta.js`
+er ikke min fil denne runde — fundet er dokumenteret her, ikke rettet.
+IKKE TILFØJET: ingen ny JSON-LD er skrevet nogen steder, fordi der ikke var
+noget REELT hul at fylde — at duplikere en allerede-fungerende ItemList
+eller Organization-blok ville have givet to sæt struktureret data for
+samme ting, præcis den fejlklasse `Seo.setJsonLd()`s idempotente id-mønster
+er bygget til at undgå.
+HVOR: ingen filer ændret i dette fund (kun læst/efterprøvet) — se den
+separate brødkrumme-rettelse ovenfor for de faktiske kodeændringer.
+
+### Non-JS-crawler-hullet: undersøgt grundigt, IKKE rettet — for stor en arkitekturændring til denne runde — SEO content builder 2, 20.08.2026
+HVAD: Bekræftet reproduceret på egen server (port 8541): en rå, ikke-JS-
+eksekverende `curl` mod `annonce.html?id=<ekstern-uuid>` viser 0
+`<meta name="robots">`, 0 JSON-LD-blokke og en generisk, selv-refererende
+canonical (`https://bikerbasen.dk/annonce`) — for hver eneste af de 548
+indekserede annoncer. Alt det rigtige (kilde-canonical, noindex, Product+
+Motorcycle-JSON-LD) sættes udelukkende af `js/seo.js`, EFTER at browseren
+har kørt JavaScript.
+UNDERSØGT: er server-/build-time-injektion mulig i denne arkitektur?
+  1. GitHub Pages (sitets vært) er REN statisk filservering — ingen
+     edge-funktion, ingen query-string-bevidst rewrite, ingen `_redirects`-
+     mekanisme. Den kan IKKE inspicere `?id=` og returnere forskelligt
+     `<head>`-indhold for samme fil. Det er ikke en begrænsning i MIN
+     filadgang — det er en egenskab ved værten, dokumenteret ved at
+     GitHub Pages allerede (jf. SEO builder B's fund) løser stier om til
+     `.html`-filer, men aldrig forgrener på en query-string.
+  2. Mønsteret, der ville løse det, findes ALLEREDE i repoet:
+     `scripts/build-listing-pages.js` forrenderer netop dette — ét
+     statisk, indekserbart `<head>` pr. EGEN annonce, fordi hver har sin
+     EGEN fil (`annonce-<slug>-<id>.html`). Den samme opskrift KUNNE i
+     princippet udvides til de 548 indekserede annoncer (data er allerede
+     tilgængelig ved build-tid, samme kilde som
+     `scripts/build-brand-pages.js` allerede henter fra).
+  3. MEN: at gøre det kræver, at hver indekseret annonce får sin EGEN fil
+     — den kan ikke blive ved med at dele `annonce.html?id=`, for det er
+     netop delingen af ÉN fil, der gør server-side-injektion umulig på en
+     ren statisk vært. Det betyder at ÆNDRE URL-skemaet for alle 548
+     annoncer, og hver eneste plads i koden, der linker til dem i dag
+     (`js/search.js`, `js/components.js`, `js/maerke.js`, `js/forhandler.js`,
+     `scripts/build-brand-pages.js`s `internAdresse()`) skal opdateres til
+     den nye adresse — det er IKKE en lokal rettelse i én fil, det er en
+     site-wide URL-migrering. Flere af de filer er eksplicit uden for min
+     filliste denne runde (`js/annonce.js` er direkte forbudt).
+  4. Det ANDET reelle svar — en edge-funktion, der injicerer meta ved
+     request-tid (Cloudflare Workers, Vercel Edge, Netlify Functions) —
+     kræver at flytte VÆRTEN væk fra ren GitHub Pages. Det er en
+     infrastrukturbeslutning, ingen kodefil kan tage.
+KONKLUSION, ÆRLIGT: IKKE rettet, og ikke rettbart inden for denne rundes
+filscope. De to reelle veje (URL-migrering af 548 annoncer, eller
+hosting-skifte til en platform med request-time-logik) er BEGGE større
+end "en fil eller to" — det er præcis den slags forskel, opgaven bad om at
+sige højt i stedet for at pynte på. Risikoen er, som forrige doms kritiker
+allerede fastslog, reel for ikke-JS-delingsbots (Facebook/Meta, X-kort,
+Discord/Slack-unfurl — de får en generisk "Annonce — Bikerbasen"-forhåndsvisning
+for hver af de 548 links, for evigt, indtil en af de to veje tages) og
+mindre, men ikke nul, for Google selv (Googles egen dokumentation:
+"rendering is not guaranteed" — bekræftet direkte i denne runde, se
+afsnittet om struktureret data-audit for metoden).
+HVOR: intet ændret — se den ærlige begrundelse ovenfor for hvorfor.
+
+### Skrive-assistenten er en skabelon, ikke en AI — SEO content builder 4, 20.08.2026
+HVAD: `opret-annonce.html`/`js/opret-annonce.js` har fået en sælgerside
+skrive-assistent, scopet UDELUKKENDE til egne annoncer (bekræftet ved at
+læse `js/opret-annonce.js` og `js/annonce.js` først — de 392 indekserede
+annoncer fra MC Syd/Gul og Gratis vises med kildeangivelse i `js/annonce.js`
+og røres ikke her, jf. "vi gætter aldrig"). Seks dele:
+1. **Titel/søgetekst-forhåndsvisning** (trin 4). `serpTitel()`/
+   `serpBeskrivelse()` genskaber BEVIDST samme formel som `js/seo.js`
+   `seoListingPage()`: "{mærke model} {år} — {pris} — Bikerbasen" og
+   "{mærke model}, Årgang X, Y km, Z ccm, stand. Til salg i by på
+   Bikerbasen." Der findes INGEN egen, redigerbar titel noget sted på
+   sitet — H1 er altid `${brand} ${model}` (`js/annonce.js:846`), og den
+   SEO-titel, der rent faktisk udgives, bygges af `js/seo.js`/
+   `scripts/build-listing-pages.js`, begge uden for min filscope. Denne
+   forhåndsvisning ÆNDRER intet — den viser sælgeren, hvad hendes tal
+   bliver til, mens hun endnu kan gøre modelnavnet kortere. FÆLDE FOR DEN
+   NÆSTE: duplikeret logik — ændres formlen i `js/seo.js`, driver
+   forhåndsvisningen her. Burde flyttes til en delt funktion i `js/data.js`.
+2. **Foreslåede mærkater** (trin 4): type, kørekortkategori, prisbånd.
+   Kørekortkategorien kommer fra `koerekortMaerkat()` i `js/components.js`
+   — DEN, ikke en ny udregning (jf. "Kørekortmærkatet regnes ÉT sted"
+   ovenfor). Prisbåndene i `SEO_PRISBAAND` er en bevidst duplikering af
+   `PRIS_INTERVALLER` i `js/search.js` (den fil loades ikke på denne side).
+3. **"Strukturér min beskrivelse"** (trin 2, `strukturerBeskrivelse()`):
+   to åbningslinjer (mærke/model/årgang/km + sælgerens egen første sætning),
+   en punktliste med UDELUKKENDE formularfelter (service, ejere, syn, dæk,
+   udstyr — tal og valg sælgeren selv har tastet/sat kryds ved), sælgerens
+   RESTERENDE sætninger ordret under "Fra din egen beskrivelse", og en
+   generisk afsluttende opfordring. Intet ord som "velholdt" tilføjes —
+   findes det, er det fordi sælgeren selv skrev det, og det står så i hendes
+   egen ordrette sætning. Kun indsat i `#f-desc`, når sælgeren selv trykker
+   "Brug denne tekst" (`wireSeoAssist()`).
+4. **"Før du udgiver"** (trin 4, `manglerListe()`): billedantal, manglende
+   effekt/syn/ejere/service, kort beskrivelse, intet udstyr, og — hvis et
+   stærkt faktum findes i felterne men ikke i selve beskrivelsesteksten —
+   et forslag om at nævne det. Vist FØR "Udgiv annonce", ikke som fejl
+   bagefter.
+5. **Alt-tekst** (`fotoAltTekst()`): "{mærke model år} — forsidebillede /
+   billede N" i stedet for filnavn/"Billede N på annoncen". Ingen vinkel
+   påstås (front/side/bagfra) — formularen fanger den ikke, så feltet
+   findes ikke i teksten.
+6. **JSON-LD** (kun undersøgt, ikke ændret — `scripts/build-listing-pages.js`
+   er eksplicit uden for min filscope): `mileageFromOdometer`, `ccm`, `hk`,
+   `fuel`, `color`, `price` flyder allerede ind. `condition` gør IKKE —
+   `itemCondition` er hardcodet til `UsedCondition` uanset om sælgeren har
+   valgt "Som ny" eller "Defekt/Projekt" (schema.org har et
+   `DamagedCondition`, som "Defekt/Projekt" kunne mappes til). `antal_ejere`,
+   `sidste_syn`, `daek_aar`, `service_historik`, `equipment`, `vinterklar`,
+   `kan_nedsaettes_a2` bliver ALLE gemt i databasen (se `kolonner` i
+   `publishListing()`) og er derfor tilgængelige på `l` i
+   `scripts/build-listing-pages.js`s `jsonLd()` — men bruges der ikke i dag.
+   Overladt til den fils ejer, ikke ændret herfra.
+
+HVORFOR (den ærlige afgrænsning fra opgaven): stakken har ingen backend at
+kalde et sprogmodel på (statisk HTML + vanilla JS, ingen server — se
+"Stakken er den, der er"). "Strukturér min beskrivelse" er derfor en
+DETERMINISTISK skabelon, ikke en AI-omskrivning — den flytter sælgerens
+egne ord og tal rundt, tilføjer aldrig et nyt. Det er den ærlige grænse for
+hvad denne stak kan bygge i dag, ikke noget forsøgt skjult.
+
+EFTERPRØVET: `npm test` grøn (278/278, uændret). Login-gaten på
+`opret-annonce.html` kræver en ægte Supabase-session (`syncSessionToStore()`
+logger enhver lokalt fabrikeret bruger ud igen, se `js/backend-bridge.js:160`
+— at fabrikere en session mod PRODUKTIONS-Supabase for en engangstest hører
+til under "opret ikke konti" og blev ikke gjort). De rene funktioner
+(`serpTitel`, `serpBeskrivelse`, `manglerListe`, `strukturerBeskrivelse`,
+`foreslaaedeMaerkater`) blev derfor efterprøvet direkte i Node — samme
+evalueringsmønster som `scripts/shared.js` `browserModules()` allerede
+bruger til at teste browserkode uden en browser — med tre realistiske,
+rodede sælgertekster:
+- **Yamaha MT-07** ("saelger min mt07 fordi jeg skal have noget stoerre...
+  kom endelig med bud", ingen syn/ejere/service udfyldt): gav korrekt titel
+  "Yamaha MT-07 2019 — 62.000 kr. — Bikerbasen" (43 tegn), mærkaterne
+  `['Naked','Kørekort A','60–100.000 kr.']`, fem punkter under "Før du
+  udgiver" (billeder, syn, ejere, service, "ABS-bremser" ikke nævnt i
+  teksten), og den strukturerede beskrivelse gengav sælgerens fire sætninger
+  ORDRET under "Fra din egen beskrivelse" — ingen af dem sagt om "velholdt"
+  eller lignende, fordi sælgeren ikke skrev det.
+- **Honda CB750** (lang, uredigeret tekst om arv, renovering,
+  oliesivning — "den taber maaske en draabe"): alle syv strukturerede felter
+  kom med i punktlisten, sælgerens sætninger om oliesivningen blev bevaret
+  ORDRET (ingen udjævning til "velholdt"), og "1 ejer" blev korrekt flagget
+  som ikke nævnt i selve teksten.
+- **Suzuki GSX-R600** (næsten intet udfyldt, "kører fint sælges bud
+  modtages"): ingen kørekortmærkat vist (effekt ikke oplyst — `koerekortMaerkat()`
+  svarer `kode:null` og forklarer hvorfor, præcis den ærlighedsregel
+  `koerekortForListing()` allerede håndhæver), og syv punkter under "Før du
+  udgiver", inklusive at kørekortkategorien ikke kan vises uden hk.
+Titellængde-advarslen blev testet separat med "Harley-Davidson Street Glide
+Special CVO Limited 2019 — 385.000 kr. — Bikerbasen" (80 tegn) — korrekt
+over 65-tegns-grænsen.
+DOKUMENTERET GAB (ikke overclaimet som løst): alt-teksten gælder kun
+skrivefladens EGET billedgitter — hverken `listing_photos`-tabellen (ingen
+`alt_text`-kolonne) eller `js/annonce.js`s publicerede galleri (uden for min
+filscope) modtager den endnu. JSON-LD-fundene ovenfor er overleveret, ikke
+rettet, af samme grund.
+HVOR: `js/opret-annonce.js` — nyt afsnit "SEO- og udgivelsesassistent" (før
+`renderPreview()`), `renderPhotoGrid()` (alt-tekst), `renderPreview()`
+(kalder `renderSeoAssistent()`), `wireSeoAssist()` (kaldt fra
+`DOMContentLoaded`); `opret-annonce.html` — nyt felt under beskrivelsen i
+trin 2, nyt `#seo-assist-panel` i trin 4.
+
+### Dashboardet var uopnaaeligt for den, der betalte for det — forhandler-vaerktoej, 20.08.2026
+HVAD: `dashboard.html` laaser adgang paa `profiles.is_dealer` ("Dashboardet
+er for forhandlere" naar den er falsk). Men hverken `stripe-webhook`
+(`supabase/functions/stripe-webhook/index.ts`) eller `dev_set_plan()`
+(`006_forhandler_abonnement.sql`) satte NOGENSINDE `is_dealer` — kun
+`profiles.plan`. En privat bruger, der betalte for forhandlerabonnementet via
+"Mine annoncer -> Konto -> Bliv forhandler" (den flow, `STRIPE_OPSAETNING.md`
+selv beskriver), fik ubegraensede annoncer, men blev stadig moedt af netop
+den spaerring, betalingen skulle laase op for.
+HVORFOR: To felter for én beslutning ("er denne konto en forhandler?"), og
+kun det ene blev sat af betalingsvejen. Fundet ved at laese hele kæden
+(dashboard-gaten, Stripe-webhooken, `dev_set_plan()`) sammen, ikke ved at
+teste — der er ingen rigtig Stripe-konto at teste igennem i denne opgave,
+og credential-oprettelse er uden for hvad en agent maa goere selv.
+RETTELSE: `dev_set_plan('dealer')` og webhookens `opdaterPlan()` sætter nu
+ogsaa `is_dealer = true`, naar abonnementet bliver aktivt. Nedgradering
+(`plan` -> `'free'`) RYDDER IKKE `is_dealer` igen — at være en virksomhed er
+en kendsgerning om kontoen, ikke et abonnementsflag (samme "Ærlighed slår
+fuldstændighed"-logik som resten af filen).
+HVOR: `supabase/019_dealer_ved_betaling.sql` (ny migration, koer EFTER 006);
+`supabase/functions/stripe-webhook/index.ts` — `opdaterPlan()`.
+
+### Krav-flowet (gør krav på egne aggregerede annoncer) fandtes slet ikke — forhandler-vaerktoej, 20.08.2026
+HVAD: `public.krav` og `ret_ekstern_annonce()` (`014_aggregator.sql`) har
+eksisteret siden aggregator-runden, men INTET UI nogen steder lod en
+forhandler søge sine egne annoncer blandt de 548 indekserede, indsende et
+krav, eller se dets status. Bygget nu: `dashboard.html`/`js/dashboard.js`
+har en søgesektion (`db.searchUnclaimedExternal`), en krav-dialog
+(`db.submitKrav`), en statusliste for egne krav (`db.myKrav`), og en tabel
+over allerede godkendte, ejede eksterne annoncer (`db.myClaimedExternal`)
+med inline-redigering af pris/status (`db.retExternalField`, wrapper om
+`ret_ekstern_annonce`).
+HVORFOR: `docs/discovery.md` afsnit 4, hul 5 og `docs/naeste-prompts.md`
+Prompt 8 navngiver præcis dette hul. Godkendelsen er bevidst MANUEL (ingen
+admin-UI bygget) — et selvbetjent "godkend dig selv" ville lade enhver
+logget ind bruger overtage en fremmed forhandlers annoncer. Se
+`supabase/KRAV_GODKENDELSE.md` for runbooken, ejeren af Bikerbasen skal
+følge.
+HVOR: `js/supabase-api.js` (`searchUnclaimedExternal`, `myKrav`,
+`submitKrav`, `myClaimedExternal`, `retExternalField`); `dashboard.html`
+(`#krav-panel`, `#ekstern-panel`, `#krav-dialog` — genbruger
+`.modal-overlay`/`.modal-box` fra `js/components.js`s anmeld-modal, ikke en
+ny dialogkomponent); `js/dashboard.js` (alt fra `hentEkstern()` til
+`wireKravUI()`); `css/styles.css` — ny sektion `/* ===== forhandler-vaerktoej
+===== */` nederst.
+
+### Dashboardets "kom godt i gang" og kontostatus, plus én linje på den offentlige profil for ejeren selv — forhandler-vaerktoej, 20.08.2026
+HVAD: Et nyt kort øverst på dashboardet (`#dash-kickoff`, vist KUN når en
+forhandler hverken har egne annoncer eller godkendte krav) med to konkrete
+næste skridt, plus en kompakt kontostatus-strimmel (`#dash-plan-strip`,
+samme information som "Mine annoncer -> Konto"s plan-card, ét link derhen).
+På `forhandler.html` — den offentlige sælgerprofil, en KØBER ser — er der nu
+også en ekstra bannerlinje, men KUN når den, der kigger, er logget ind som
+netop denne sælger (`bruger.id === seller.id`, se `renderEjerBanner()` i
+`js/forhandler.js`): "Dette er sådan købere ser din profil" + link til
+dashboardet. Den offentlige visning for alle andre er UÆNDRET.
+HVORFOR: `forhandler.html` havde ingen gren nogen steder, der tjekkede, om
+den besøgende VAR sælgeren selv — en forhandler, der klikkede "Se din
+profil", fik nøjagtig samme side som en fremmed køber, uden en vej til det
+værktøj, han rent faktisk har brug for her. Kickoff-kortet og
+kontostatus-strimlen er samme mønster som Stripe Dashboard/Shopify Admin
+(altid konkret næste skridt, altid synlig betalingsstatus) — den blinde
+sammenligning, denne piece er dømt på, jf. `bar/GAPS.md` punkt 4 (Bilbasen er
+login-spærret for sælgerprofil/dashboard).
+HVOR: `dashboard.html` (`#dash-plan-strip`, `#dash-kickoff`, opdateret
+gate-CTA fra "Gå til mine annoncer" til "Bliv forhandler" ->
+`mine-annoncer.html?tab=konto`); `js/dashboard.js` (`renderPlanStrip()`,
+`renderKickoff()`); `forhandler.html` (`#profil-ejer-banner`);
+`js/forhandler.js` (`renderEjerBanner()`); `css/styles.css` —
+`.plan-strip*`, `.kickoff-*`, `.profil-ejer-banner` i samme nye sektion.
+
+### Mærkesidernes fulde tekstpakke — kun for mærker med rigtigt lager — SEO content builder 3, 20.08.2026
+HVAD: `scripts/build-brand-pages.js` bygger nu titel, meta description, en
+udvidet indledning, tre H2'er bundindhold og en FAQ (synlig + FAQPage
+JSON-LD) for hvert mærke — men KUN når mærket har mindst
+`MIN_LISTINGS_FULD_TEKST = 5` rigtige annoncer. Målt ved build-tid mod
+produktionsdata (548 indekserede, 0 egne): 26 mærker i alt, **10 kvalificerer**
+(Honda 262, Harley-Davidson 72, Yamaha 44, Suzuki 42, Triumph 27, Kawasaki 26,
+BMW 26, KTM 13, Royal Enfield 7, Aprilia 7), **16 får IKKE den fulde pakke**
+og er mærket `noindex, follow` i stedet (Ducati 3, Bsa 3, Andet Mærke 2 —
+selve ordet "Andet Mærke" er en placeholder-værdi fra kildedata, ikke et
+rigtigt mærke, værd at vide for crawler-teamet — Indian 2, og ti mærker med
+kun 1: Husqvarna, Hyosung, Kymco, Lauge, Fb Mondial, Sym, Benelli, Cagiva,
+Moto Guzzi, MV Agusta, Victory, Rewaco). Grænsen sidder på ANTALLET efter
+slug-dedup (SEO builder B's `byBrand`), ikke på det rå kildenavn.
+
+DE SYV DELE, ALLE DATADREVNE VED BUILD-TID:
+1. TITLE: `"{Brand} brugt – N til salg | Bikerbasen"` (`titelFor()`), målt
+   36-48 tegn på alle ti — under 60-grænsen med god margin, selv for
+   "Harley-Davidson".
+2. META DESCRIPTION (`metaBeskrivelseFor()`): rigtigt antal + rigtigt
+   prisspænd + "Ingen kommission af salget" (citeret fra index.html's eget
+   løfte, IKKE opfundet her — se sektionen "Gratis annonce — set af hele
+   Danmark"). Fire kandidatsætninger, valgt efter hvilken der lander i
+   [140,155] tegn — nødvendigt, fordi "7" og "609.995 kr." har meget
+   forskellig længde. Målt: alle ti i intervallet (102-148 reelt 140-148 for
+   de kvalificerede, se build-loggen).
+3. INDLEDNING: `introFor()` (URØRT — testet af `scripts/maerkeside.test.js`,
+   som IKKE er min fil denne runde) får et kort, ikke-tal-baseret
+   arve-sætning sat FORAN, KUN for de ti kvalificerede mærker
+   (`BRAND_ARV`-ordbogen). Målt ordantal 60-83 for alle ti — i vinduet
+   60-90. Sætningerne er almindeligt kendte, ikke-opfundne fakta (Honda =
+   størst + bredt program, Harley-Davidson = amerikansk V-twin-cruiser-
+   tradition, KTM = offroad-arv, Royal Enfield = let, klassisk, ofte
+   førstemotorcykel/A2 osv.) — INGEN tal i dem. Et mærke, der senere vokser
+   over grænsen uden at stå i `BRAND_ARV`, får indledningen UDEN
+   arvesætning i stedet for en opfundet påstand — testet ved at fjerne
+   "Honda" fra ordbogen midlertidigt og bygge: ingen fejl, bare kortere tekst.
+4. BUNDINDHOLD (`bundIndholdFor()`, tre `<h2>` under gitteret, 150-213 ord
+   målt på alle ti): "Prisniveau" (median + spænd + hvor mange der mangler
+   pris + et krydslink til det mærke, hvis MEDIAN ligger tættest på — reelt
+   beregnet, ikke gættet), "Kørekort til brugt X" (bruger SAMME
+   `koerekortForListing()` som resten af sitet, hentet fra `js/data.js` via
+   det eksisterende eval-mønster i filens top — ALDRIG en ny udregning) og
+   "Hvad du skal tjekke" (typeinformeret, mærkeuafhængig købsviden efter
+   hvilken TYPE der faktisk dominerer mærkets udvalg — `TYPE_TJEK`).
+5. FAQ (`faqFor()`, tre spørgsmål, 40-60 ord pr. svar, matchende
+   `FAQPage`-JSON-LD OG synlig `<details>/<summary>`-markup — ingen CSS
+   krævet, browserens indbyggede visning): pris (median forklaret i almindeligt
+   sprog), A2-kørekort (rigtig fordeling A1/A2/A/ukendt), og hvilke MODELLER
+   der rent faktisk er på lager (`topModeller()`, ægte modelnavne+antal, ikke
+   en kurateret liste).
+6. INTERNE LINKS: udover de eksisterende (søg-i-mærket, sælg-din, model-
+   chips, andre mærker) tilføjet to nye, kontekstuelle: et krydslink i
+   prisafsnittet til det prismæssigt nærmeste andet kvalificerede mærke, og
+   et link fra kørekortafsnittet til `soegning.html?brands=X&koerekort=A2`
+   (kun når der faktisk ER A1/A2-annoncer at vise — en tom filtrering ville
+   være en påstand, siden ikke kan bakke op) samt et link til
+   `sikkerhed.html` (eksisterende side).
+7. BREADCRUMB: urørt (allerede rigtig: Forside → Mærker → mærket).
+
+TRE FEJL FUNDET OG RETTET UNDER EGEN EFTERPRØVNING (ikke ved kodelæsning):
+- **"kr.." (dobbelt punktum)**: `dkk()` slutter selv på "kr." — et eksplicit
+  punktum lige efter et `dkk()`-udtryk giver "kr..". Ramte FAQ'ens prissvar
+  på alle ti mærker. Rettet ved aldrig at sætte et punktum direkte efter et
+  `dkk()`-kald; sætningen fortsætter i stedet med mellemrum.
+- **"5.6 gange" i stedet for "5,6 gange"**: `toFixed(1)` giver engelsk
+  decimalpunktum. Rettet med `.replace('.', ',')` — dansk, skrevet ikke
+  oversat.
+- **"1 annoncer" (talkongruens)**: `${n} annoncer` uden ental/flertal-tjek gav
+  "1 annoncer mangler" på KTM og andre mærker med præcis én manglende
+  oplysning. Rettet alle tre steder (FAQ pris, FAQ kørekort, bundindhold
+  kørekort) til `${n} ${n===1?'annonce':'annoncer'}`.
+Alle tre fanget af et Node-script, der læste de FAKTISK byggede filer og
+lette efter dobbeltpunktum, engelske decimaler og ordantal uden for
+grænserne — ikke ved at læse min egen kode og tro på den.
+
+EFTERPRØVET: `npm test` 278/278 grønne (introFor()/noscriptLinje()/
+brandItemListLd()/harEgenSide()/internAdresse()/maerkerUdenLager() alle
+urørte i signatur og adfærd — testene i `scripts/maerkeside.test.js` bruger
+2-element-lister, som altid rammer den IKKE-kvalificerede gren, så de
+tester nøjagtig den kode, der eksisterede før). `node scripts/build-brand-
+pages.js` kørt flere gange, sidst mod 548 rigtige annoncer. Egen dev-server
+(port 8549, ny indgang `bikerbasen-seo3` i `.claude/launch.json` — den
+delte `bikerbasen`-indgang på 8532 er urørt). Browserkørsel (JS udført) på
+`maerke-honda.html`, `maerke-bmw.html`, `maerke-royal-enfield.html`,
+`maerke-ktm.html`, `maerke-ducati.html`: titel, meta, H1, indledning,
+bundindhold, FAQ-JSON-LD og synlig FAQ alle læst direkte fra DOM'en, ikke
+fra kildekoden. `sitemap.xml` stadig gyldig XML, `maerker.html` siger
+korrekt "26 mærker".
+
+IKKE GJORT, MED VILJE: `type-*.html`/`koerekort-*.html` og
+`scripts/build-facet-pages.js` dukkede op som utrackede filer i arbejdstræet
+MIDT i denne session (en anden, samtidig agent) — ingen DECISIONS.md-post
+beskrev dem, da jeg byggede mine interne links. Opgaven bad eksplicit om
+IKKE at opfinde URL'er, jeg ikke kan koordinere om, så mærkesiderne linker
+IKKE til dem. Den, der ejer dem, kan tilføje linket, når det er dokumenteret
+her — det er en oplagt tilføjelse til `bundIndholdFor()`s kørekortafsnit.
+HVOR: `scripts/build-brand-pages.js` (hele filen — nye funktioner:
+`licensOpsummering()`, `median()`, `prisStatistik()`, `dominerendeType()`,
+`topModeller()`, `titelFor()`, `metaBeskrivelseFor()`, `faqLd()`, `faqFor()`,
+`bundIndholdFor()`, `naermesteMedianBrand()`; nye konstanter:
+`MIN_LISTINGS_FULD_TEKST`, `BRAND_ARV`, `TYPE_TJEK`, `TYPE_TJEK_STANDARD`,
+`A2_MAX_HK` (hentet fra `js/data.js` via det eksisterende eval, ikke
+gentastet)); `.claude/launch.json` (ny indgang `bikerbasen-seo3`, port 8549).
+
+### type-*.html og koerekort-*.html — nu dokumenteret (svar til SEO builder 3's note ovenfor) — SEO content builder 1, 20.08.2026
+HVAD: De ti filer (`type-sport.html`, `type-touring.html`, `type-cruiser.html`,
+`type-naked.html`, `type-adventure.html`, `type-scooter.html`,
+`type-classic.html`, `type-cross.html`, `koerekort-a1.html`,
+`koerekort-a2.html`) er bygget af en NY `scripts/build-facet-pages.js`, kaldt
+fra `scripts/build.js` som trin 3 (efter build-brand-pages.js, før build-meta.js).
+De lukker opgavens navngivne arkitekturhul: der fandtes INGEN statisk,
+indekserbar side for type eller kørekortkategori før nu — kun
+`soegning.html?type=`/`?koerekort=`, som er `noindex` og client-side.
+BUNDINDHOLDFOR()'S KØREKORTLINK KAN NU SKRIVES: `koerekort-a1.html` og
+`koerekort-a2.html` findes og er indekserbare (se tal nedenfor) — begge egner
+sig til det link, builder 3's note pegede på.
+
+TÆRSKEL: 10 annoncer, målt mod PRODUKTIONSDATA (548 indekserede, 0 egne,
+`fetchListings()`+`fetchExternalListings()`, 20.08.2026). Typefeltet er
+eksakt match på `l.type` (samme felt `soegning.html?type=` filtrerer på);
+kørekort er `passerKoerekort()` — SAMME funktion `soegning.html?koerekort=`
+og `js/home.js`'s hero bruger, altså den KUMULATIVE "kan køres på licens X",
+ikke kun koerekortForListing()'s "mindste påkrævede kategori" (de to er
+IKKE samme tal — se næste afsnit).
+
+MÅLT:
+- Type: cruiser 89 · adventure 67 · naked 60 · touring 53 · sport 20 ·
+  classic 6 · cross 1 · scooter 0 (252 annoncer har slet ingen type —
+  normalizeExternalListing kunne ikke udlede den, og de optræder derfor på
+  INGEN typeside, hverken som ja eller nej — samme "ærlighed slår
+  fuldstændighed"-linje som resten af sitet).
+- Kørekort (kumulativt): A1 15 · A2 47 · A 548.
+
+5 af 8 typer og begge kørekortkategorier klarer tærsklen på 10 — og med
+komfortabel margin: de fem typer der klarer den ligger alle over 20, de tre
+der ikke gør ligger alle under 6. Der er intet mellem 7 og 19, så tærsklens
+PRÆCISE værdi (10 fremfor 8 eller 15) afgør ikke et eneste grænsetilfælde —
+det er den tærskel værd at sætte.
+
+"A" (kørekort) er MED VILJE IKKE bygget, selvom 548 ≥ 10: `passerKoerekort(l,
+'A')` er altid sand ("A dækker alt", `js/data.js`), så en A-side ville vise
+ALLE 548 annoncer — ikke en tynd side, men en FULDSTÆNDIG DUBLET af
+soegning.html/index.html uden filter. Nul differentiering, ren duplicate-
+content-risiko. A1 og A2 er reelle, afgrænsede spørgsmål; "A" er "vis mig
+alt", som allerede har en side.
+
+MÆRKE+TYPE / MÆRKE+KØREKORT: overvejet, IKKE bygget. Kun 8 af 45 reelle
+mærke+type-kombinationer har ≥10 annoncer (Honda/adventure 52,
+Honda/cruiser 39, Honda/naked 38, Honda/touring 31,
+Harley-Davidson/cruiser 31, Honda/sport 10, Suzuki/cruiser 8, BMW/touring 8
+— de to sidste er faktisk UNDER tærsklen), og de seks der er over, overlapper
+allerede fuldt ud med både `maerke-honda.html`/`maerke-harley-davidson.html`
+(builder 3's tekstpakke gør dem allerede tunge) OG `type-cruiser.html`/
+`type-adventure.html`. En kombinationsside ville være en tredje vej ind til
+de samme annoncer uden ny tekst. Kandidat til en senere runde, HVIS en
+søgekonsol (findes ikke i dag — domænet er ni dage gammelt) viser reel
+forespørgselsvolumen adskilt fra mærket og typen hver for sig.
+
+ALDRIG 404 — bevidst FORSKELLIG regel fra maerke-*.html: TYPES (8) og
+kørekortkategorierne er en LUKKET, redaktionel liste (samme liste som
+filterpanelet altid har vist) — ikke noget der opdages fra data. Derfor
+skrives ALLE 10 filer ved HVERT byg, uanset antal. Falder en facets antal
+til 0, forsvinder filen ALDRIG og adressen svarer ALDRIG 404 — den skifter i
+stedet til en ærlig tom-tilstand (noindex, "X annoncer lige nu — se hele
+udvalget i stedet", ingen sitemap-linje). `maerke-*.html` gør det MODSATTE
+(en mærkeside der falder til 0 bliver slettet, jf. `forventede`/`slettet`-
+blokken i `build-brand-pages.js`) — det er bevidst, ikke en inkonsekvens:
+mærker er en ÅBEN mængde (dukker op og forsvinder med kilderne), type/
+kørekort er lukket og har altid eksisteret på sitet. Værd at genoverveje for
+maerke-*.html i en senere runde, nu hvor forskellen står skrevet et sted.
+
+SITEMAP: `build-facet-pages.js` kører EFTER `build-brand-pages.js` og UDVIDER
+det `sitemap.xml`, den lige skrev (læser filen, indsætter `<url>`-linjer før
+`</urlset>`, fejler højlydt hvis filen ikke findes — samme "byg stopper frem
+for at skrive noget ufuldstændigt"-linje som resten af kæden). Kun de 7
+INDEKSERBARE facetsider kommer med; de 3 under tærsklen er bevidst udeladt
+(samme regel som `login.html` allerede følger i `build-brand-pages.js`: en
+noindex-side i sitemappet er et modsat signal).
+
+EFTERPRØVET: `node scripts/build.js` kørt komplet flere gange (senest efter
+builder 3's ændringer landede i `build-brand-pages.js` — kørt igen for at
+bekræfte min sitemap-udvidelse stadig virker mod DERES output, ikke kun
+mit eget). `npm test`: 278/278 grønne, uændret testantal (jeg har ikke rørt
+nogen testfil). Egen dev-server (genbrugt `bikerbasen`-indgangen, port 8532
+— ikke builder 3's `bikerbasen-seo3` på 8549, for ikke at kollidere).
+Browserkørsel (JS udført, ikke kun kildelæsning) på `type-cruiser.html`
+(89 annoncer, rigtige kort, rigtige priser/km/ccm/kørekort), `type-scooter.html`
+og `type-cross.html` (noindex, ærlig tom/tynd-tekst, robots-meta bekræftet i
+DOM'en), `koerekort-a1.html`/`koerekort-a2.html` (rigtige tal, ærlig
+"X annoncer mangler oplyst hk/ccm og vises derfor ikke"-linje).
+
+TO FEJL FUNDET OG RETTET UNDER EGEN EFTERPRØVNING (samme disciplin som
+builder 3 beskriver ovenfor — fanget i browseren, ikke ved kodelæsning):
+1. "1 brugte Cross/MX-motorcykel" (talkongruens) — rettet til "1 brugt …".
+2. "58.400 kr.." (dobbelt punktum) — samme fejlklasse som builder 3 fandt og
+   rettede i FAQ'ens prissvar. `dkk()` slutter selv på "kr."; et ekstra
+   punktum lige efter giver "kr..". Rettet i MIN kopi (`introForType()` i
+   `build-facet-pages.js`) — se PUNKT 3 i det tekniske efterslæb nedenfor:
+   `build-brand-pages.js`s EGEN `introFor()` (linje ~246-251, IKKE FAQ-delen
+   builder 3 rettede) har STADIG denne fejl og rammer enhver mærkeside, hvor
+   alle annoncer har pris, men ingen har årgang. Ikke fundet på nuværende
+   data, men koden er identisk med fejlen jeg selv ramte — samme etparts-
+   guard (`else if (!priser.length)` i stedet for ubetinget `else`) løser
+   den. Ikke rettet af mig: filen er ikke min at ændre struktur i denne runde
+   ud over sitemap-koblingen ovenfor.
+
+---
+
+## SEO content builder 1 — teknisk efterslæb (prioriteret revisionsliste)
+
+Ingen af de fem punkter er rørt af mig — alle ligger uden for min filliste
+denne runde. Skrevet her, så en fremtidig builder kan gå direkte til fundet
+i stedet for at genopdage det.
+
+**1. CSP'ens `img-src` mangler de to nyeste crawlkilders billedværter —
+   FUNDET LIVE, IKKE GÆTTET.** Hvad: `index.html`s
+   Content-Security-Policy-meta (samme streng, alle genererede sider læser
+   den herfra: `build-brand-pages.js`, `build-listing-pages.js`, MIN
+   `build-facet-pages.js`) tillader kun `images.danbase.dk` (MC Syd) og
+   `assets.guloggratis.dk` (Gul og Gratis) i `img-src`. Jensens Motorcykler
+   og Rydbergs MC blev koblet på SAMME dag (se crawl-posten ovenfor,
+   20.08.2026) og bruger `www.jensensmc.dk`/`www.123mc.dk`. Hvordan
+   efterprøvet: åbnede `type-adventure.html` i den rigtige browser
+   (Claude_Browser, port 8532) og læste konsollen — gentagne, reelle
+   CSP-blokeringer (`Loading the image '…123mc.dk…' violates … img-src`),
+   ikke en formodning. Hvorfor det betyder noget: et blokeret billede ser
+   VÆRRE ud end "Intet foto" — det ligner en fejl i stedet for en ærlig
+   mangel, og det rammer nu enhver genereret side (mærke- ELLER facetside),
+   der viser en Jensens/Rydbergs-annonce, ikke kun mine nye sider. Rettelse:
+   tilføj `https://www.jensensmc.dk https://www.123mc.dk` til `img-src` i
+   `index.html`s CSP-meta — ÉT sted retter det for hele sitet, fordi alle
+   byggescripts læser CSP'en derfra. Ikke gjort af mig: `index.html` er
+   udtrykkeligt forbudt filliste for mig denne runde.
+
+**2. Facet-siderne mangler `inline-boot.js`s LCP-prefetch, som maerke-*.html
+   HAR.** Hvad: `scripts/inline-boot.js`s `ANNONCER_OVER_FOLDEN`-liste
+   matcher `soegning.html`, `annonce(-.+)?.html`, `maerke(r|-.+)?.html`,
+   `mine-annoncer.html` — ikke `type-*.html`/`koerekort-*.html`, selvom de
+   har PRÆCIS samme situation (en annoncegitter above-the-fold på en side
+   uden egen relevans for `SIDER_UDEN_EGNE`). Hvordan: læste filen, matchede
+   regex'erne manuelt mod mine egne filnavne — ingen matcher. Hvorfor det
+   betyder noget: `work/YDELSE-dom-runde3.md` målte denne optimering til at
+   flytte reel LCP-tid på netop denne sidetype (grid-tunge, forudtegnede
+   sider) — mine ti nye sider er den sidetype, optimeringen er lavet til, og
+   mangler den ikke af et bevidst valg, men fordi filen ikke er min at røre.
+   Rettelse: tilføj `/^type-.+\.html$/` og `/^koerekort-.+\.html$/` til
+   `ANNONCER_OVER_FOLDEN` i `scripts/inline-boot.js` — to regex-linjer.
+
+**3. `build-brand-pages.js`s `introFor()` har den samme "kr.."-fejl, jeg
+   rettede i min egen kopi** — se posten lige ovenfor. Ikke fundet på
+   nuværende data (kræver et mærke hvor ALLE annoncer har pris og INGEN har
+   årgang), men koden er identisk med den fejl, jeg selv ramte og rettede.
+   Rettelse: samme étlinjes guard, i `introFor()`s `else`-gren
+   (linje ~249-251).
+
+**4. Facet-siderne er i dag kun nåelige via sitemap.xml og hinanden — INGEN
+   indgående links fra soegning.html, index.html eller maerke-*.html.** Hvad:
+   grep'et `soegning.html`, `index.html` og alle `maerke-*.html` for
+   `type-`/`koerekort-` — nul træf ud over det, MIN egen fil selv skriver
+   (krydslinks mellem facetsider). Hvorfor det betyder noget: en side, der
+   kun nås via sitemappet, er andenrangs i Googles crawl-prioritering — intern
+   PageRank-flow kommer fra sider, Google ALLEREDE stoler på (soegning.html,
+   index.html), ikke fra en sitemap-linje alene. Rettelse (to dele, begge
+   uden for min filliste denne runde): (a) `soegning.html`s type-/
+   kørekort-chips kunne bære en rigtig `<a href="type-cruiser.html">` ved
+   siden af deres nuværende onclick-filter (progressiv forbedring — linket
+   virker uden JS, JS'en griber ind for den client-side filtrerede
+   oplevelse); (b) builder 3's `bundIndholdFor()`-kørekortafsnit i
+   `maerke-*.html` kan nu linke til `koerekort-a1.html`/`koerekort-a2.html`
+   (se svarposten ovenfor — begge findes og er indekserbare).
+
+**5. XML-sitemapsegmentering: IKKE nødvendig endnu, men værd at genmåle
+   senere.** Hvad: talte den samlede sitemap.xml efter mit byg: 40 URL'er
+   (26 mærkesider + 7 facetsider + resten statiske/kerne-sider — 0
+   annoncesider, `listings` har 0 rækker). Googles praktiske grænse for at
+   have BRUG for et sitemap-index (flere filer) ligger ved 50.000 URL'er
+   eller 50 MB pr. fil — vi er tre størrelsesordener under. Hvorfor det
+   alligevel er værd at skrive ned: den dag `listings` får rigtige rækker
+   OG mærke-/facetsider vokser (flere kilder, flere typer der klarer
+   tærsklen), er det værd at splitte i `sitemap-maerker.xml`/
+   `sitemap-facetter.xml`/`sitemap-annoncer.xml` refereret fra et
+   `sitemap_index.xml` — IKKE for Google (som er ligeglad under grænsen),
+   men for Search Console, hvor et opdelt sitemap lader dig se
+   indekseringsraten PR. SIDETYPE i stedet for én sammenblandet procent.
+   Ingen handling nu; genmål ved ~500-1.000 samlede URL'er.
+
+---
+
+## Den forældede-annonce-problemstilling (opgavens punkt 2) — forward-looking, IKKE akut
+
+Sitet har 0 rigtige egne annoncer i dag (`listings`-tabellen er tom ved
+hvert byg — bekræftet af `Hentede 0 annoncer fra databasen` i alle mine
+build-kørsler). Dette er derfor infrastruktur til en FREMTIDIG runde, ikke
+en akut fejl, og jeg siger det ærligt fremfor at opfinde en krise.
+
+HVAD `scripts/build-listing-pages.js` GØR I DAG (læst, ikke rørt — den er på
+min forbudsliste): scriptet henter de aktive annoncer, beregner
+`forventede = new Set(listings.map(listingSlug))`, og sletter derefter
+ENHVER `annonce-*.html`-fil på disk, der IKKE er i den mængde
+(`fs.unlinkSync`, linje ~284-291). Der er INGEN mellemtilstand: en annonce,
+der forsvinder fra databasen mellem to byg (solgt, fjernet, statusskiftet
+væk fra "active"), får sin statiske side HÅRDT SLETTET ved næste
+`node scripts/build.js` — ikke efterladt forældet, men fysisk fjernet fra
+`_site`. Næste deploy svarer altså 404 på en adresse, der kan have
+opbygget backlinks, delinger på Facebook/en MC-gruppe (se `annonce.html`s
+egen delefunktion) eller Google-indeksering. Det er PRÆCIS den fejlklasse,
+opgaven bad mig undgå for facetsiderne — bare i den modsatte fil.
+
+ANBEFALET POLITIK (ikke implementeret — kræver ændring af en fil uden for
+min liste denne runde): behold URL'en, skift INDHOLDET. Når en tidligere
+aktiv annonce forsvinder fra det hentede sæt, skal `annonce-<slug>.html`
+IKKE slettes — den skal omskrives til en "ikke længere til salg"-udgave:
+samme spec-tabel og fotos (historisk værdi som prisreference — "hvad solgte
+en brugt Yamaha MT-07 fra 2019 for" er et reelt søgespørgsmål, som en 410
+eller en sletning ikke kan svare på), et tydeligt banner ("Denne annonce er
+ikke længere til salg"), kontakt-/CTA-knapperne fjernet (intet at
+kontakte sælger OM), og canonical uændret (selv-refererende — den ER
+stadig den rigtige adresse for oplysningen). Sitemap-linjen fjernes (ikke
+længere noget at PROMOVERE), men filen og dens indhold bliver stående.
+410 Gone blev overvejet og fravalgt: en 410 er korrekt for indhold, der er
+væk for altid og ikke skal huskes — men prisdata på en solgt motorcykel ER
+værd at huske, præcis som Boligsidens/DBA's "solgt"-visninger gør for
+boliger/biler. En blind omdirigering til mærke- eller typesiden blev også
+overvejet og fravalgt: den flytter besøgeren væk fra det, han faktisk søgte
+efter (denne specifikke motorcykels pris), til en generisk liste — mindre
+ærligt end at sige "her var den, her er hvad den kostede, den er væk nu".
+
+HVORFOR IKKE IMPLEMENTERET NU: (1) `scripts/build-listing-pages.js` er
+udtrykkeligt på min forbudsliste denne runde. (2) Med 0 rigtige annoncer er
+der intet at teste politikken imod — en implementering uden en rigtig
+"annoncen forsvandt mellem to byg"-hændelse at afprøve mod ville være
+gættet kode, og "vi gætter aldrig" gælder også byggescripts. (3) Politikken
+kræver at scriptet HUSKER hvilke slugs det har set før på tværs af byg (i
+dag er det statsløst — det kender kun den ene liste, det lige har hentet),
+hvilket er en reel, ikke-triviel ændring: enten en lille persisteret manifest
+(`.tidligere-slugs.json`, git-sporet så historikken ikke går tabt ved et
+nyt miljø) eller en `status`-kolonne i selve `listings`, der skelner
+"solgt" fra "slettet af en fejl" (kun den første skal bevares — en
+fejlindtastet annonce, der trækkes tilbage samme dag, skal nok bare væk).
+Det sidste spørgsmål — skelner databasen allerede mellem de to årsager? —
+er værd at afklare FØR nogen bygger dette, for retten til at blive glemt
+(en sælger der fortryder og sletter) og retten til en prishistorik
+(en købers research) trækker i hver sin retning, og kun kildedataene kan
+sige, hvilken af de to der er tilfældet for en given forsvunden række.
+
+---
+
+### Facet-siderne var orphan pages — nu er der interne links, DERIVED af samme tærskel — facet-runde, 20.08.2026
+HVAD: `soegning.html` og `index.html` har hver fået en lille linksektion
+("Søg efter type" / "Se hele udvalget efter type", og "…efter kørekort")
+med `.popular-chip`-links til de facet-sider, `scripts/build-facet-pages.js`
+bygger. KUN de facetter, hvis `qualifies` (samme boolean som afgør sidens
+egen noindex-status, tærsklen på 10 annoncer) er sand, får et link — lige nu
+5 typer (adventure, cruiser, naked, touring, sport) og begge kørekort (A1,
+A2). scooter/classic/cross er under tærsklen og optræder IKKE, samme regel
+som D-010: et link er en påstand om, at der er noget for enden af det.
+HVORFOR: en uafhængig kritiker fandt de 10 facet-sider (bygget tidligere i
+denne runde) ægte og deterministiske, men reelt uopdagelige — intet på
+sitet linkede til dem, kun `sitemap.xml`. En side, kun en crawler kan finde,
+konkurrerer aldrig mod `soegning.html?type=`, som brugerne rent faktisk
+lander på via filterpanelet, og underminerer dermed hele formålet med at
+bygge dem. Linksektionen skrives af en ny funktion (`facetLinksBlock` +
+`skrivFacetLinks` i build-facet-pages.js) mellem faste HTML-kommentar-
+markører i selve `soegning.html`/`index.html` (samme mønster som
+build-meta.js's `meta:start`/`meta:end`) — DERIVED af de samme tal som
+selve tærsklen, ikke en fastfrosset liste. Falder en type under 10 annoncer
+i morgen, forsvinder dens link automatisk ved næste byg; stiger en anden
+over, dukker dens link op — uden at nogen skal huske at rette en liste i
+hånden.
+KOLLISION FUNDET OG RETTET UNDERVEJS: index.html har allerede en H2
+"Søg efter type" (kategoriflisernes egen sektion, `#category-tiles`,
+længere oppe på siden — linker til `soegning.html?type=X`, ikke til
+facet-siden). Samme ordlyd to gange på én side er en ægte dublet, ikke
+kun pynt. `facetLinksBlock(resultater, variant)` skifter DERFOR
+overskrifterne (ikke facetterne) mellem `'soegning'` og `'index'` — kun
+soegning.html beholder den ordlyd, opgaven selv foreslog ("Søg efter
+type"/"Søg efter kørekort"); index.html får "Se hele udvalget efter
+type"/"…efter kørekort" i stedet. Efterprøvet i browseren: alle 15 H2'er
+på index.html og alle 7 på soegning.html er nu unikke tekster.
+EFTERPRØVET: `node scripts/build.js` kørt 4 gange i træk — selve
+facet-linksblokken (mellem markørerne) er byte-for-byte identisk hver gang
+i begge filer (diff tomt). `npm test` 278/278 grønt både før og efter.
+Klikket igennem `type-cruiser.html` og `koerekort-a2.html` fra
+soegning.html i browseren (localhost) — begge lander med korrekt <title>,
+ingen 404. Ingen vandret overflow på 1440×900 eller 390×844 (målt
+`body.scrollWidth` mod `window.innerWidth`, begge steder lige).
+BEMÆRK (ikke rettet, uden for opgaven): `scripts/build-srp.js` har en
+selvstændig, allerede eksisterende non-determinisme — når `firstPhoto`
+er null (0 rækker i `listings`-tabellen lige nu), erstatter den ubetinget
+`</head>` med `\n</head>` (linje ~70-72), fordi den tomme streng aldrig
+efterlader en `id="srp-lcp-preload">`-markør at genkende næste gang. Hvert
+byg uden en første-korts-foto lægger derfor én ekstra tom linje foran
+`</head>` i soegning.html oveni de forrige. Det er kosmetisk (whitespace
+i `<head>`, ingen synlig eller funktionel effekt, rørte ikke facet-
+linkblokken) og upåvirket af denne rettelse — men skal findes af nogen,
+den dag filen skal være helt idempotent.
+HVOR: `scripts/build-facet-pages.js` (facetLinksBlock, skrivFacetLinks,
+kaldt fra IIFE'en i bunden), `soegning.html` og `index.html` (markørerne
+`<!-- facet-links:start -->`/`<!-- facet-links:end -->`).
