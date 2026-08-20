@@ -1,0 +1,43 @@
+-- Bikerbasen migration 020: fjern dev_set_plan() — betalingsomgaaelsen, der
+-- aldrig blev fjernet.
+-- Koer hele filen i Supabase SQL Editor. Kan koeres igen uden skade.
+--
+-- ============================================================
+-- HULLET
+-- ============================================================
+-- 006_forhandler_abonnement.sql oprettede dev_set_plan(text) til at teste
+-- forhandler-gating, foer Stripe var koblet paa — og skrev det tydeligt i sin
+-- egen kommentar: "FJERN denne funktion foer lancering ved at koere:
+-- drop function public.dev_set_plan(text)". Det skete aldrig. 019 rettede
+-- endda funktionens INDHOLD (den saetter nu ogsaa is_dealer, ikke kun plan)
+-- uden at fjerne den — sikkerhedsfunktionen blev vedligeholdt, ikke lukket.
+--
+-- Funktionen er "security definer" og "grant execute ... to authenticated",
+-- og goer det den lover: enhver logget ind bruger kan kalde
+--   dev_set_plan('dealer')
+-- paa sig selv og faa is_dealer = true, plan = 'dealer',
+-- subscription_status = 'active' — permanent, gratis, uden om Stripe.
+-- Ifoelge 019's egen begrundelse ("Aerlighed slaar fuldstaendighed") er
+-- is_dealer en KENDSGERNING om kontoen, der ikke ryddes ved nedgradering —
+-- saa et enkelt kald giver ikke bare gratis adgang nu, men en persistent
+-- forhandlerstatus, der overlever selv et forsoeg paa oprydning.
+--
+-- Den synlige "Downgrade"-knap i mine-annoncer.js, der kaldte den, er
+-- allerede fjernet fra markuppen (ingen #plan-downgrade findes laengere i
+-- de rå HTML-skabeloner) — men js/supabase-api.js's devSetPlan()-wrapper og
+-- selve databasefunktionen stod tilbage. Et wrapper-kald er synligt for
+-- enhver, der aabner udviklerkonsollen eller laeser den offentlige
+-- JS-bundle (som js/supabase-api.js er) og kalder db.devSetPlan('dealer')
+-- direkte — ingen knap er noedvendig for at udnytte det.
+--
+-- Forretningsmodellen ("Indtjening kommer senere fra forhandlerabonnement")
+-- staar og falder med, at forhandlerstatus rent faktisk koster noget.
+--
+-- ============================================================
+-- LUKNINGEN
+-- ============================================================
+revoke execute on function public.dev_set_plan(text) from authenticated;
+drop function if exists public.dev_set_plan(text);
+
+-- Tjek bagefter (skal give 0 raekker — funktionen maa ikke findes):
+--   select proname from pg_proc where proname = 'dev_set_plan';

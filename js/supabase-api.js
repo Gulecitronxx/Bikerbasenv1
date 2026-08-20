@@ -285,13 +285,6 @@ const db = (function(){
       return c.functions.invoke('create-portal', { body: {} });
     },
 
-    /* DEV: skift egen plan uden betaling. Kun til test indtil Stripe er koblet
-       på — funktionen fjernes fra databasen før lancering. */
-    async devSetPlan(plan){
-      const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
-      return c.rpc('dev_set_plan', { p_plan: plan });
-    },
-
     async updateListing(id, patch){
       const c = init(); if (!c) return { error: { message: 'Backend er ikke konfigureret.' } };
       // Ingen ejer-tjek nødvendig i klienten — RLS afviser fremmede rækker.

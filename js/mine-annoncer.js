@@ -273,14 +273,7 @@ function renderPlanCard(){
   };
 
   // Opsigelse haandteres i Stripes kundeportal, ikke her — for nu vises kun
-  // status. (Downgrade-knappen er dev-only og fjernes med dev_set_plan.)
-  const devSkift = async (plan) => {
-    const { error } = await db.devSetPlan(plan);
-    if (error){ toast('Kunne ikke skifte plan: ' + error.message); return; }
-    await syncSessionToStore();
-    renderPlanCard();
-    toast(plan === 'dealer' ? 'Du er nu forhandler (test)' : 'Skiftet til privat konto');
-  };
+  // status.
   // Åbn Stripes kundeportal, hvor forhandleren selv styrer abonnementet.
   const åbnPortal = async (btn) => {
     btn.disabled = true; btn.textContent = 'Åbner…';
@@ -295,7 +288,6 @@ function renderPlanCard(){
 
   document.getElementById('plan-upgrade')?.addEventListener('click', (e) => opgrader(e.currentTarget));
   document.getElementById('plan-portal')?.addEventListener('click', (e) => åbnPortal(e.currentTarget));
-  document.getElementById('plan-downgrade')?.addEventListener('click', () => devSkift('free'));
 }
 
 function renderAccountTab(){
