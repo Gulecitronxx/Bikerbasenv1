@@ -691,7 +691,22 @@ async function buildForside(){
   const median = priser.length ? priser[Math.floor(priser.length / 2)] : 0;
 
   const kandidater = ALLE.filter(l => harFoto(l) && harModel(l) && l.price != null && l.price >= median);
-  const rnd = seededRandom(7);
+  /* RÆKKEFØLGEN SKAL VÆRE TILFÆLDIG — IKKE BARE SE SÅDAN UD.
+     Stod her før: `seededRandom(7)`. Et FAST tal er ikke et frø, der gør
+     blandingen reproducerbar til test — det er en blanding, der ALDRIG
+     ændrer sig, fordi den regnes ens hver gang siden indlæses. Kritikeren i
+     runde 3 målte det direkte: 18 indlæsninger — 12 i samme fane, 6 i friske
+     browserkontekster med tomt localStorage/sessionStorage — gav de samme
+     tre kort i den samme rækkefølge hver eneste gang. Sætningen lige
+     nedenfor, "Rækkefølgen er tilfældig, så det er ikke en anbefaling", var
+     derfor en påstand, koden aldrig kunne indfri.
+     Frøet trækkes nu fra Math.random() ved hvert kald af renderFeatured(),
+     altså ét nyt, ægte tilfældigt frø pr. sideindlæsning — så blandingen
+     rent faktisk skifter fra besøg til besøg, sådan som teksten lover.
+     Selve algoritmen (ét kort pr. mærke, egne annoncer før indekserede) er
+     urørt: det var aldrig DEN, der var fejlen — det var at frøet stod
+     skrevet som et bogstaveligt tal i kildekoden. */
+  const rnd = seededRandom(1 + Math.floor(Math.random() * 2147483646));
   const bland = (arr) => arr.map(l => ({ l, k: rnd() })).sort((a,b) => a.k - b.k).map(x => x.l);
   /* ÉT KORT PR. MÆRKE. Uden reglen gav den seedede blanding fire Hondaer,
      hvoraf to var den samme model (CRF 1100 L Africa Twin til 199.995 og
@@ -736,27 +751,19 @@ async function buildForside(){
        1. Hvor mange annoncer udvalget er taget fra, og hvad grænsen er.
        2. At rækkefølgen er tilfældig. "Udvalgte annoncer" lød som en
           redaktionel anbefaling; der er ingen redaktion, der er en
-          seedet blanding. Overskriften er samtidig ændret i index.html.
-       3. Hvor de kommer fra. MÅLT: alle 169 kandidater er fra samme
-          forhandler i Rødding — ikke fordi vi vælger sådan, men fordi det er
-          den eneste kilde i lageret, der leverer billeder med. Kritikeren
+          blanding — og siden runde 4 en, der rent faktisk trækker et nyt
+          frø ved hvert besøg (se noten ved `rnd` ovenfor). Overskriften er
+          samtidig ændret i index.html.
+       3. Hvor de kommer fra. MÅLT: alle kandidater er fra samme forhandler
+          i Rødding — ikke fordi vi vælger sådan, men fordi det er den
+          eneste kilde i lageret, der leverer billeder med. Kritikeren
           talte det som en fejl i udvalget. Det er en oplysning om lageret,
-          og så skal den stå der, ikke skjules bag en tilfældig omrøring. */
+          og så skal den stå der, ikke skjules bag en tilfældig omrøring.
+     (Blokken stod tidligere dubleret to gange i træk — samme tekst ordret.
+     Fjernet, fordi to identiske kommentarer er lige så forvirrende som en
+     forkert.) */
   const featuredSub = document.getElementById('featured-sub');
   const ANTALSORD = { 1: 'Én', 2: 'To', 3: 'Tre', 4: 'Fire', 5: 'Fem', 6: 'Seks' };
-  /* Underrubrikken skrives fra data, så rubrikken ikke kan komme ud af trit
-     med kortene igen. Tre ting står der, og alle tre kan efterprøves på
-     siden:
-
-       1. Hvor mange annoncer udvalget er taget fra, og hvad grænsen er.
-       2. At rækkefølgen er tilfældig. "Udvalgte annoncer" lød som en
-          redaktionel anbefaling; der er ingen redaktion, der er en seedet
-          blanding. Overskriften er ændret tilsvarende i index.html.
-       3. Hvor de kommer fra. MÅLT: alle 169 kandidater er fra samme
-          forhandler i Rødding — ikke fordi vi vælger sådan, men fordi det er
-          den eneste kilde i lageret, der leverer billeder med. Kritikeren
-          talte det som en fejl i udvalget. Det er en oplysning om lageret,
-          og så skal den stå der, ikke skjules bag en tilfældig omrøring. */
   const skrivFeaturedSub = (antal) => {
     if (!featuredSub || !antal) return;
     const byer = [...new Set(kandidater.map(l => l.city).filter(Boolean))];

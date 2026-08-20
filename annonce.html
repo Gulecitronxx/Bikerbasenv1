@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Annonce — Bikerbasen">
 <meta name="twitter:description" content="Se billeder, specifikationer og kontaktoplysninger for denne brugte motorcykel til salg på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
@@ -64,7 +64,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=da2e1e5a">
+<link rel="stylesheet" href="css/styles.css?v=a4ac24d2">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -255,18 +255,72 @@ try{
   </div>
 </div>
 
-<script defer src="js/security.js?v=da2e1e5a"></script>
+<script defer src="js/security.js?v=a4ac24d2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=da2e1e5a"></script>
-<script defer src="js/supabase-api.js?v=da2e1e5a"></script>
-<script defer src="js/icons.js?v=da2e1e5a"></script>
-<script defer src="js/postnumre.js?v=da2e1e5a"></script>
-<script defer src="js/data.js?v=da2e1e5a"></script>
-<script defer src="js/store.js?v=da2e1e5a"></script>
-<script defer src="js/backend-bridge.js?v=da2e1e5a"></script>
-<script defer src="js/components.js?v=da2e1e5a"></script>
-<script defer src="js/seo.js?v=da2e1e5a"></script>
-<script defer src="js/annonce.js?v=da2e1e5a"></script>
+<script defer src="js/supabase-config.js?v=a4ac24d2"></script>
+<script defer src="js/supabase-api.js?v=a4ac24d2"></script>
+<script defer src="js/icons.js?v=a4ac24d2"></script>
+<script defer src="js/postnumre.js?v=a4ac24d2"></script>
+<script defer src="js/data.js?v=a4ac24d2"></script>
+<script defer src="js/store.js?v=a4ac24d2"></script>
+<script defer src="js/backend-bridge.js?v=a4ac24d2"></script>
+<script defer src="js/components.js?v=a4ac24d2"></script>
+<script defer src="js/seo.js?v=a4ac24d2"></script>
+<script defer src="js/annonce.js?v=a4ac24d2"></script>
+<!-- Sticky CTA for indekserede annoncer (annonce cta, runde 4).
+
+     js/annonce.js's renderExternalListing() fjerner #listing-actionbar helt
+     for MC Syd/Gul og Gratis/Rydbergs/Jensens-annoncer (den bjælke var bygget
+     til "Skriv til sælger", som ingen indekseret annonce har) — og bygger
+     ikke en erstatning. Eneste CTA blev dermed "Se annoncen hos <kilde>"
+     nede i sidebjælken, som på mobil ligger for enden af hele siden: målt
+     på en rigtig MC Syd-annonce ved 390 px bredde stod knappen 2.716 px nede
+     af 6.227 px — ingen sticky bjælke, samme mangel egne annoncer havde,
+     før .listing-actionbar blev indført til dem.
+
+     js/annonce.js er en anden builders fil denne runde, så løsningen bor
+     her i stedet: et lille script, der venter på at #listing-detail er
+     fyldt (MutationObserver — ingen antagelse om hvornår backendReady()
+     er færdig), og hvis siden viste sig at være en indekseret annonce MED
+     et virkende link, bygger en bjælke med præcis den samme klasse,
+     .listing-actionbar, som egne annoncer bruger. Al styling (fast bund,
+     kun under 960px, plads under cookiebanneret) kommer derfor gratis fra
+     css/styles.css uden en eneste ny regel. Er linket i stykker
+     (.external-detail-broken — kilden svarer ikke), bygges der ingen
+     bjælke; kortet i sidebjælken forklarer allerede hvorfor, og der er
+     ingen handling at tilbyde. Egne annoncer og "annoncen findes ikke"
+     rammer aldrig .external-detail-source, så der sker intet for dem. -->
+<script defer>
+(function(){
+  function byggBjaelke(link){
+    var bar = document.createElement('div');
+    bar.className = 'listing-actionbar';
+    bar.id = 'ekstern-actionbar';
+    var knap = document.createElement('a');
+    knap.href = link.href;
+    knap.target = '_blank';
+    knap.rel = 'noopener noreferrer nofollow';
+    knap.className = 'btn btn-primary';
+    knap.innerHTML = link.innerHTML; // samme tekst + eksternt-link-ikon som kortet i sidebjælken
+    bar.appendChild(knap);
+    document.body.appendChild(bar);
+    document.body.classList.add('har-actionbar');
+  }
+  function forsoeg(){
+    var boks = document.getElementById('listing-detail');
+    // :empty i css/styles.css reserverer pladsen indtil boksen er fyldt —
+    // her bruges samme signal til at vide, om renderListing() er færdig.
+    if (!boks || !boks.firstElementChild) return false;
+    var link = document.querySelector('.external-detail-source a.btn');
+    if (link) byggBjaelke(link);
+    return true; // uanset udfald: siden er færdigrendret, stop med at lytte
+  }
+  if (forsoeg()) return;
+  var obs = new MutationObserver(function(){ if (forsoeg()) obs.disconnect(); });
+  var maal = document.getElementById('listing-detail');
+  if (maal) obs.observe(maal, { childList: true });
+})();
+</script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

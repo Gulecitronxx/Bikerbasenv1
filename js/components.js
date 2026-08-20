@@ -492,6 +492,19 @@ const KK_UKENDT   = 'Kørekort ukendt';
 const KK_OVER_125_EKSTERN = 'Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.';
 const KK_OVER_125_EGEN    = 'Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen, så vi kan ikke afgøre, om den også kan køres på A2.';
 
+/* RETTET runde 4: den her sætning fandtes ikke. ccm ≤ 125 uden oplyst
+   effekt faldt før ned i koerekortForListing()'s A1-gren, som læste
+   "effekt ikke oplyst" som "opfylder A1-loftet" — samme fejlklasse som
+   eksternKoerekort() lavede for A2 (se noten ovenfor). To Honda MSX 125
+   fra MC Syd (125 ccm, hk ikke oplyst) fik mærkatet "Kørekort A1".
+   A1 kræver BÅDE ≤125 ccm OG ≤15 hk; her kender vi kun det første. Det er
+   samme situation som KK_OVER_125_* ovenfor — kubik uden effekt — bare med
+   den anden udfaldsrække: over 125 ccm udelukker A1 og efterlader A2/A;
+   her kan ccm'en ISOLERET SET stadig blive til A1, A2 eller A, alt efter
+   den effekt, vi ikke har. */
+const KK_UNDER_125_EKSTERN = 'Motorcyklen er højst 125 ccm, men effekten står ikke i annoncen hos kilden. A1 kræver både højst 125 ccm og højst 15 hk, så uden effekten kan vi ikke afgøre, om den kan køres på A1 — eller om den kræver A2 eller A.';
+const KK_UNDER_125_EGEN    = 'Motorcyklen er højst 125 ccm, men effekten står ikke i annoncen. A1 kræver både højst 125 ccm og højst 15 hk, så uden effekten kan vi ikke afgøre, om den kan køres på A1 — eller om den kræver A2 eller A.';
+
 function koerekortMaerkat(l){
   const hk  = hkEllerNull(l.power);
   const ccm = Number(l.ccm) || 0;
@@ -519,13 +532,19 @@ function koerekortMaerkat(l){
       `Kan føres på ${kode}-kørekort. Udledt af ${grundlag} — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.` };
   }
 
-  // 3. Over 125 ccm uden effekt: den ene ting vi ved, og den ene vi ikke gør.
+  // 3. Ccm ≤ 125, men effekten ikke oplyst: A1 kræver begge, vi har kun det ene.
+  if (ccm > 0 && ccm <= A1_MAX_CCM && hk == null){
+    return { kode: null, tekst: KK_UAFGJORT,
+      forklaring: l.isExternal ? KK_UNDER_125_EKSTERN : KK_UNDER_125_EGEN };
+  }
+
+  // 4. Over 125 ccm uden effekt: den ene ting vi ved, og den ene vi ikke gør.
   if (ccm > A1_MAX_CCM){
     return { kode: null, tekst: KK_UAFGJORT,
       forklaring: l.isExternal ? KK_OVER_125_EKSTERN : KK_OVER_125_EGEN };
   }
 
-  // 4. Hverken kubik eller effekt: der er intet at sige, heller ikke uvist.
+  // 5. Hverken kubik eller effekt: der er intet at sige, heller ikke uvist.
   return { kode: null, tekst: KK_UKENDT, forklaring:
     'Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.' };
 }

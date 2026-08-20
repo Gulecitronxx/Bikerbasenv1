@@ -937,9 +937,18 @@ function passerKoerekort(listing, kat){
   const hk = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;
 
-  // A1 KAN afgøres uden effekt, fordi den har en ccm-grænse: er slagvolumen
-  // over 125, er svaret nej uanset hvor mange hk der står.
-  if (kat === 'A1') return ccm > 0 && ccm <= A1_MAX_CCM && (hk == null || hk <= A1_MAX_HK);
+  /* RETTET runde 4: `(hk == null || hk <= A1_MAX_HK)` stod her — en
+     manglende effekt talte altså som "opfylder A1-loftet". Det er den
+     samme fejlklasse, builder 5 lukkede for A2/A i runde 3
+     (se work/DECISIONS.md): "vi ved det ikke" blev læst som "ja".
+
+     A1 har GANSKE VIST en ccm-grænse, der alene kan afvise en for stor
+     motorcykel uden hjælp fra hk — men den kan ikke BEKRÆFTE A1 uden hk,
+     for A1 kræver BÅDE ≤125 ccm OG ≤15 hk (11 kW), og en lille
+     slagvolumen er ingen garanti for lav effekt. Uden hk kan vi kun sige
+     "ikke A1, fordi ccm er for høj" — aldrig "ja, A1". Derfor kræver
+     grenen nu et KENDT hk, ligesom A2-grenen nedenfor allerede gør. */
+  if (kat === 'A1') return ccm > 0 && ccm <= A1_MAX_CCM && hk != null && hk <= A1_MAX_HK;
 
   if (kat === 'A2'){
     // En stærkere mc tæller også med, hvis den kan effektbegrænses.
@@ -960,8 +969,20 @@ function koerekortForListing(listing){
   const ccm = Number(listing.ccm) || 0;
   if (hk == null && !ccm) return null;
 
-  if (ccm > 0 && ccm <= A1_MAX_CCM && (hk == null || hk <= A1_MAX_HK)) return 'A1';
-  if (hk == null) return null;   // over 125 ccm og uden hk: A2 eller A, vi ved det ikke
+  /* RETTET runde 4: linjen herunder lød `(hk == null || hk <= A1_MAX_HK)` —
+     samme fejl som i passerKoerekort() ovenfor, og de to funktioner delte
+     den, fordi de er skrevet ordret ens. Det er DERFOR
+     koerekortMaerkat()'s vagthund i js/components.js (som ringer
+     passerKoerekort() op igen for at kontrollere sig selv) ikke fangede
+     den: den stillede den forkerte funktion det samme forkerte spørgsmål
+     og fik et konsekvent, forkert svar. To rørte MC Syd-annoncer af typen
+     Honda MSX 125 (125 ccm, hk ikke oplyst) fik mærkatet "Kørekort A1" af
+     den — en lovende påstand om netop den ting, en 16-årig skal kunne
+     stole på.
+     Nu kræver A1 et kendt hk, ligesom A2 gør nedenfor: kender vi kun ccm,
+     er svaret null — "kan ikke afgøres", ikke et gæt. */
+  if (ccm > 0 && ccm <= A1_MAX_CCM && hk != null && hk <= A1_MAX_HK) return 'A1';
+  if (hk == null) return null;   // hk ukendt — ccm alene rækker ikke, hverken ≤125 eller derover
   if (hk <= A2_MAX_HK) return 'A2';
   return 'A';
 }

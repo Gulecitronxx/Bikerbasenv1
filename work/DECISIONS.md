@@ -2967,3 +2967,569 @@ den dag filen skal være helt idempotent.
 HVOR: `scripts/build-facet-pages.js` (facetLinksBlock, skrivFacetLinks,
 kaldt fra IIFE'en i bunden), `soegning.html` og `index.html` (markørerne
 `<!-- facet-links:start -->`/`<!-- facet-links:end -->`).
+
+### 155 af 548 er ikke en fejl — det er MC Syds ægte nylager — crawler, runde 4 builder 2, 20.08.2026
+HVAD: Undersøgt fra bunden mod DRIFTEN (anon-nøgle, offentlig læsning af
+`eksterne_annoncer`, ingen skrivning): 548 aktive annoncer, 43 grupper deler
+mærke+model+årgang+km, 155 rækker involveret (28,3 % — samme tal som
+opgaven angav). DIAGNOSE: ikke en crawler-bug. Beviser:
+1. **40 af 43 grupper er ÉN kilde (MC Syd), og i ALLE 43 grupper har hver
+   række sit eget, forskellige `kilde_annonce_id`.** Det unikke indeks
+   `(kilde_id, kilde_annonce_id)` fra 014_aggregator.sql er intakt — ingen
+   genindsættelse af samme annonce er sket. `skrivAnnoncer()` i
+   `crawler/db.js` bruger `upsert(..., {onConflict:'kilde_id,kilde_annonce_id'})`,
+   og opslaget før upserten (`kendte`) matcher korrekt på samme nøgle.
+2. **Hentet to af de "duplikerede" MC Syd-sider live** (samme mærke, model,
+   årgang, pris — "Honda CMX 1100 D Rebel Cruiser", 184.995 kr., id 102674 og
+   101727): 1099 af 1140 linjer HTML er forskellige mellem dem. Den ene siger
+   "kun 2 i første sending", den anden "OGSÅ DENNE SOM DEMO CYKEL" — to
+   forskellige, ægte fysiske motorcykler, ikke to kopier af samme side. MC Syd
+   er "Danmarks største udvalg i nye Honda motorcykler" og har derfor typisk
+   flere identiske nye enheder på lager til samme listepris — hver med sit
+   eget lagernummer hos kilden, men uden stelnummer i vores skema til at
+   skelne dem visuelt. `km` er `null` for 128 af de "duplikerede" rækker,
+   fordi de er nye (0 km betyder ikke "ingen km-oplysning", men her er km
+   simpelthen ikke sat) — det er netop derfor km ikke kan bruges til at
+   skelne dem.
+3. **Kun 3 af 43 grupper krydser kilder** (Gul og Gratis vs. MC Syd, én gang
+   Rydbergs vs. MC Syd). Alle tre er plausible ægte krydsposteringer eller
+   tilfælde — fx en Honda XL 750 Transalp 2026 til nøjagtig samme pris
+   (149.995 kr.) på både MC Syds egen side og Gul og Gratis, hvor MC Syd-
+   annoncen selv siger "BYTTER GERNE" (en forhandler, der cross-poster eget
+   lager til en markedsplads, er normal praksis — Bilbasen gør det samme).
+   Rydbergs/MC Syd-parret (Harley-Davidson FXD Dyna 2002, 44.000 km) har
+   FORSKELLIGE priser (149.900 vs. 139.800 kr.) — enten to uafhængige, ægte
+   brugte motorcykler med en tilfældigt rund kilometerstand, eller samme
+   motorcykel videresolgt mellem forhandlere; ingen af mulighederne er en
+   dataintegritetsfejl, og der er intet felt i vores skema, der kan afgøre
+   hvilken. Ingen krydsning viste tegn på 123mc-platformsdeling mellem
+   Rydbergs og Jensens — Jensens optræder slet ikke i nogen af de 43 grupper.
+4. **Dette ER allerede diagnosticeret én gang før**, af en tidligere runde:
+   `docs/review/DECISIONS.md` C-010 (17.08.2026, målt på 332 rækker fra kun
+   MC Syd, samme konklusion — "syv ens Honda CMX 500 Rebel 2024 til 84.995
+   kr., syv forskellige motorcykler med hver sit stelnummer"). `crawler/
+   normalize.js`s `fingerprint()`-kommentar og `crawler/normalize.test.js`s
+   test "fingerprint kan IKKE skelne ens nyt lager" dokumenterer samme fund.
+   Målingen her (548 rækker, fire kilder, 20.08.2026) bekræfter, at
+   diagnosen stadig holder efter tre nye kilder er tilføjet.
+HVORFOR INGEN MIGRATION: en sammenlægning på mærke+model+årgang(+km) ville
+skjule ægte lager (en forhandler med 13 fysiske Honda CMX 1100 D Rebel til
+salg ville fremstå med én). "Ærlighed slår fuldstændighed" (linje 54 i denne
+fil) gælder her: at skjule en rigtig annonce vejer tungere imod os end at
+vise to ens. Der findes intet felt hos nogen kilde (stelnummer,
+registreringsnummer, billedmatch), der kan bevise identitet frem for
+lighed — uden det er enhver dedupe et gæt på en forhandlers vegne.
+HVAD DER ER LAVET I STEDET: `crawler/db.test.js` (ny, 4 tests, tilføjet til
+`npm test` i `package.json`) låser præcis den adfærd, mistanken handlede om:
+(1) en genkørsel med samme `kilde_annonce_id` OPDATERER den eksisterende
+række og opretter ikke en ny, (2) to ægte forskellige `kilde_annonce_id` med
+samme mærke/model/årgang giver to rækker — også efter en tredje kørsel af de
+samme to id'er, (3) upsertens `onConflict` er nøjagtig
+`kilde_id,kilde_annonce_id`, (4) et manuelt rettet felt overlever en
+genkørsel. Alle fire var grønne allerede FØR denne runde (ingen fejl i
+`crawler/db.js` — ingen ændring i selve filen), men stod uden en test, der
+ville have fanget en regression. `crawler/db.js` og `crawler/pipeline.js` er
+IKKE ændret — der var intet at rette.
+FEJLET FOR SIG SELV: `npm test` viste undervejs 3 fejl i
+`js/koerekort.test.js`, som ikke er mine — filen samt `js/data.js` og
+`js/components.js` ændrede sig live under kørslen (en anden builders
+igangværende arbejde i samme mappe, uden for min opgaves filliste). Isoleret
+kørsel af kun crawler-testene (`node --test crawler/*.test.js`, 185 tests)
+er 100 % grøn.
+HVOR: `crawler/db.test.js` (ny), `package.json` (test-scriptet, én linje).
+
+### A1 gættede "ja" på ukendt effekt — samme fejlklasse som A2/A-fejlen fra runde 3 — builder 1, 20.08.2026
+HVAD: `passerKoerekort()` og `koerekortForListing()` i `js/data.js` havde
+begge linjen `ccm > 0 && ccm <= A1_MAX_CCM && (hk == null || hk <= A1_MAX_HK)`
+for A1. Når hk var ukendt, gjorde `hk == null` HELE udtrykket sandt — en
+manglende effekt talte altså som "opfylder A1-loftet". Begge funktioner er
+rettet til at kræve et KENDT hk for at bekræfte A1: ccm-grænsen kan stadig
+AFVISE alene (over 125 ccm udelukker A1 uanset hk, urørt), men den kan ikke
+BEKRÆFTE alene. `koerekortMaerkat()` i `js/components.js` har fået en femte
+gren (var fjerde): ccm ≤ 125 med ukendt hk giver nu "Kørekort ikke afgjort"
+med en ny, ærlig sætning (`KK_UNDER_125_EKSTERN`/`KK_UNDER_125_EGEN`) i
+stedet for enten en forkert kategori eller den generiske "hverken kubik
+eller effekt" — for ccm ER kendt her, det er kun effekten, der mangler.
+HVORFOR: Ordret samme fejlklasse som builder 5 lukkede for A2/A i runde 3
+(se "Kørekortmærkatet regnes ÉT sted" ovenfor i denne fil): "vi ved det
+ikke" blev læst som "ja". Og af samme grund som dengang undgik den
+`koerekortMaerkat()`s egen vagthund (linje "2. Vagthund" i funktionen) —
+vagthunden ringer `passerKoerekort()` op igen for at kontrollere
+`koerekortForListing()`s svar, men begge funktioner delte den samme forkerte
+antagelse, ordret, fordi de er skrevet ens. Den stillede den forkerte
+funktion det samme forkerte spørgsmål og fik et konsekvent forkert svar —
+akkurat den fælde, vagthunden findes for at fange.
+VERIFICERET PÅ RIGTIGE DATA (548 aktive rækker via anon-nøglen, samme vej
+browseren læser, 20.08.2026): 16 aktive annoncer har ccm ≤ 125. Af dem har
+netop 2 hk=null — begge "Honda MSX 125" hos MC Syd (samme model, to
+forskellige annonce-id'er/stelnumre, 40.995 kr., annonce-id 124206 og
+176253). FØR rettelsen: begge stod med badge "A1", overskrift "Du kan køre
+den på A1-kørekort" og specifikationslinjen "Kørekort A1 (vejledende)" —
+både på søgekortet og på detaljesiden. EFTER: begge viser "Kørekort ikke
+afgjort" på kortet og "Kan ikke afgøres" i specifikationstabellen på
+detaljesiden. Den oprindelige opgavebeskrivelse gik ud fra, at "flere"
+annoncer var ramt, og at både Gul og Gratis og MC Syd havde huller — målt
+holder kun halvdelen: Gul og Gratis' fem ≤125-ccm-annoncer har ALLE hk
+oplyst, kun MC Syd har hullet, og der er præcis 2 rækker, ikke flere. Talt
+efter rettelsen med `npm test`: alle 286 tests grønne (var 278 — otte nye,
+ingen fjernet). A2/A-grænsen (builder 5's fund fra runde 3) er IKKE rørt og
+efterprøvet uændret på rigtige rækker: Honda CL 500 A (47 hk) giver stadig
+"A2", Honda CMX 500 Rebel (48 hk) giver stadig "A" — samme to koder som før,
+på annoncesiden, i browseren.
+FÆLDE FOR DEN NÆSTE, IKKE RETTET HER (uden for min filliste denne runde):
+1. `js/annonce.js` linje ~484 (`kkUvis = !kk && ccm > A1_MAX_CCM`) viser kun
+   den lange, ærlige forklaringsboks ("Vi kan ikke afgøre...") når `kk` er
+   null OG ccm > 125. For den nye sag (ccm ≤ 125, hk ukendt) er `kk` også
+   null, men `ccm > A1_MAX_CCM` er falsk, så koden falder i grenen
+   `: !kk ? ''` — INGEN boks vises overhovedet, kun specifikationslinjen
+   "Kan ikke afgøres". Det er IKKE en ny fejl (før viste den samme kode et
+   forkert "A1"-badge her, hvilket var værre — "Ærlighed slår fuldstændighed"
+   betyder et manglende felt vejer mindre end et forkert), men det er en
+   forspildt mulighed: `koerekortMaerkat(l).forklaring` indeholder allerede
+   den nye, ærlige sætning (`KK_UNDER_125_EKSTERN`), den bliver bare aldrig
+   læst ud, fordi `kkUvis` kun tjekker den ene af de to "ikke afgjort"-grene.
+   Verificeret live på begge MSX 125-annoncer: ingen forklaringsboks, kun
+   spec-linjen. Rettelsen er formentlig at udvide `kkUvis` til at dække
+   begge "ikke afgjort"-grene (fx sammenligne `kkM.tekst` mod den
+   eksporterede `KK_UAFGJORT`-tekst i stedet for at genberegne ccm > 125),
+   men det rører en fil, jeg ikke ejer denne runde.
+2. `scripts/build-facet-pages.js` bygger `koerekort-a1.html` ved at kalde
+   `passerKoerekort()` fra `js/data.js` direkte (ingen egen kopi af reglen —
+   det er allerede rigtigt indrettet), men den forudtegnede HTML i
+   `koerekort-a1.html` er en statisk øjebliksbillede fra sidste kørsel og er
+   IKKE genkørt her (uden for min filliste, og en genkørsel skriver til
+   mange sider på én gang, jf. noten om `scripts/build-srp.js` andetsteds i
+   denne fil). Siden rettelsen kun ÆNDRER, hvilke annoncer der tælles med
+   under A1 (fjerner 2 forkerte, føjer 0 nye til), er skaden af den forældede
+   side lille — men builderen, der ejer facetsiderne, bør køre
+   `node scripts/build-facet-pages.js` igen i sin egen runde.
+HVOR: `js/data.js` — `passerKoerekort()`, `koerekortForListing()`;
+`js/components.js` — `koerekortMaerkat()`, `KK_UNDER_125_EKSTERN`,
+`KK_UNDER_125_EGEN`; `js/koerekort.test.js` — otte nye/omskrevne tests
+(A1-grenene i alle tre lag: `koerekortForListing`, `passerKoerekort`,
+`koerekortSvar` i `js/filtrering.js`, og `koerekortMaerkat`).
+
+### Fire kritikerfund efterprøvet mod 551 annoncer — forside/annonce, runde 4 builder 3, 20.08.2026
+
+Frisk gennemgang af de fire fund i `work/DOM-forside-runde3.md` og
+`work/DOM-annonce-runde3.md` mod DRIFTENDATA på egen server (`PORT=8931`),
+551 annoncer i dag (284 MC Syd + 118 Gul og Gratis + resten egne/andre
+kilder — lageret er vokset siden runde 3's 443). To af fire var stadig
+ægte fejl, to var allerede rettet af tidligere runders arbejde (nedskrevet
+her, så ingen genopfinder dem).
+
+**1. "Tre/fire tilfældige" var IKKE tilfældige — STADIG EKTE, RETTET.**
+`vaelgFeatured()` i `js/home.js` (sektionen "Dyrere modeller") brugte
+`seededRandom(7)` — et FAST tal. Kritikerens 18 indlæsninger med samme
+resultat var altså ikke en tilfældighed i målingen, det var koden: samme
+frø giver matematisk samme blanding for evigt, ikke kun i det ene døgn
+kritikeren målte i. Genskabt selv: 4 reloads efter min server startede gav
+4× de samme 4 kort i samme rækkefølge (Honda NT 1100 A / Victory Highball /
+Suzuki GSX 1300 R Hayabusa / Bsa Lightning, hver gang). RETTET: frøet
+trækkes nu fra `Math.random()` ved hvert kald (`1 + Math.floor(Math.random()
+* 2147483646)`), så det er et NYT ægte tilfældigt frø pr. sideindlæsning —
+algoritmen (ét kort pr. mærke, egne før indekserede) er urørt, kun frøet er
+ikke længere et bogstaveligt tal. EFTERPRØVET EFTER: 4 reloads, 4 helt
+forskellige sæt af 4 kort (Suzuki/Harley/Triumph/Honda →
+Honda/Harley/Yamaha/Suzuki → Harley/Bsa/Honda/Triumph →
+Honda/Yamaha/Harley/MV Agusta). `js/lager-determinisme.test.js` og
+`npm test` rører intet ved denne sektion (grep bekræftet: ingen test
+navngiver `vaelgFeatured`, `featured` eller `seededRandom(7)`), så
+rettelsen er ikke i konflikt med noget testet determinisme-krav.
+HVOR: `js/home.js` — `rnd` i bid 7 (kommentaren over `const rnd =` linjen).
+
+**2. "202 mod 217" — STALE, allerede rettet af "Dyrere modeller"-omlægningen
+(18.08.2026, se ovenfor i filen).** Kritikerens fund var mod DEN GAMLE
+"Udvalgte annoncer"-sektion, som havde sin egen, statiske optælling.
+Sektionen er siden erstattet ("Dyrere modeller"), og underrubrikkens tal
+regnes nu LIVE fra `Store.getAllListings()` ved hvert render — der er ikke
+længere to kopier af logikken, der kan skride fra hinanden. EFTERPRØVET på
+551 annoncer i dag: siden viser "245 annoncer til 99.995 kr. eller derover,
+der har et foto". Uafhængigt regnet i konsollen med nøjagtig samme
+prædikat (`harFoto && harModel && price >= median`): **245.** Og krydstjekket
+mod søgesiden (`soegning.html?priceMin=99995`, ren prisfilter uden foto/
+model-krav): **256** fundet → **246** med foto → **245** med foto OG model —
+tre uafhængige veje til samme tal. Ingen kodeændring nødvendig; nedskrevet
+som bevis på, at fundet er dødt, så ingen fremtidig kritiker eller builder
+bruger tid på det igen.
+
+**3. "Garanti frem for reklamationsret" på Gul og Gratis — STADIG EKTE,
+RETTET.** `renderExternalListing()` i `js/annonce.js` viste sætningen "Du
+køber med garanti frem for forbrugerkøbelovens reklamationsret" for ENHVER
+annonce med `erNy === true` — uanset om `listing.isDealer` var sand eller
+falsk. Reklamationsret/garanti er en forhandler-vs-forbruger-sondring; den
+findes slet ikke mellem to private, uanset varens alder. EFTERPRØVET FØR
+(id `328dc95d…`, Royal Enfield Classic 650, Terndrup, Gul og Gratis,
+`isDealer:false`, `kildeStand:"ny"` — samme annonce runde 3-kritikeren
+navngav): siden sagde ordret "Du køber med garanti frem for
+forbrugerkøbelovens reklamationsret". Talt i data: **10 af 118** Gul og
+Gratis-annoncer har `kildeStand === 'ny'` i dag og var alle ramt. Samme
+runde fandt kritikeren desuden, at INGEN af 16 stikprøvede Gul og
+Gratis-sider viste privat-advarslen ("Forbrugerkøbelovens reklamationsret
+gælder ikke mellem private…") — årsagen var samme linje kode: den var
+betinget af `listing.isDealer`, så en privat sælger fik hverken
+garanti-påstanden slukket rigtigt ELLER privat-advarslen tændt. RETTET to
+steder: (a) `fabriksnyNote` (ny, lige efter `erNy`-beregningen) skriver nu
+garanti-sætningen KUN når `listing.isDealer` er sand; er sælgeren privat,
+forklarer teksten i stedet ærligt hvorfor km ikke er oplyst og henviser til
+privatsalgs-noten. (b) `sellerTypeNoteHTML(listing.isDealer)` kaldes nu
+ubetinget for eksterne annoncer (var før kun `sellerTypeNoteHTML(true)` og
+kun for forhandlere) — `VIS_REKLAMATIONSRET`-flaget (kill switch for
+DEALER-påstanden om en tredjepart) gælder fortsat kun forhandlergrenen,
+fordi privat-advarslen ikke er en påstand om nogen tredjepart, den er
+dansk rets almindelige regel. EFTERPRØVET EFTER, alle fire kombinationer
+levende på egen server:
+  - Privat + fabriksny (Gul og Gratis, `328dc95d…`): "Sælgeren er privat —
+    reklamationsret gælder ikke mellem private, heller ikke når
+    motorcyklen er ny" + nedenfor "Privat annonce. Forbrugerkøbelovens
+    reklamationsret gælder ikke mellem private…". Ingen garanti-ord tilbage.
+  - Privat + brugt (Gul og Gratis, `2aa889f2…`): ingen fabriksny-note,
+    privat-advarslen vises.
+  - Forhandler + fabriksny (MC Syd, `d80b700f…`): garanti-sætningen står
+    uændret ("Du køber med garanti frem for forbrugerkøbelovens
+    reklamationsret") + "Forhandlerannonce. Du har som privatperson
+    reklamationsret i op til 24 måneder…" — den korrekte, uberørte sag.
+  - Forhandler + brugt (MC Syd, `42410d86…`): ingen fabriksny-note,
+    forhandlernoten vises.
+HVOR: `js/annonce.js` — `fabriksnyNote` (ny, lige efter `const erNy = …`),
+sellerkort-blokken i `renderExternalListing()` (linjen med
+`sellerTypeNoteHTML`), kommentaren ved `VIS_REKLAMATIONSRET`.
+
+**4. "Seks annoncer over 500.000 kr. uden modelnavn" — STALE, data har
+ændret sig siden runde 3.** Dengang: 6 annoncer uden modelnavn (5× samme
+Honda til 609.995 kr. + 1× BMW til 139.800 kr.), mindst én langt over
+500.000 kr. I DAG (551 annoncer): kun **1** annonce uden modelnavn tilbage
+(BMW, MC Syd, 139.800 kr. — under 500.000-grænsen, og under de kun **2**
+annoncer i hele lageret over 500.000 kr. i dag, og INGEN af dem mangler
+model). Dubletterne er tydeligvis ryddet op undervejs (se andre builderes
+crawler/dedupe-noter i denne fil). Kontrolleret at det ENE tilbageværende
+tilfælde (`c242f563…`) IKKE er et visningsbug: detaljesiden viser hverken
+"Model: Ikke oplyst" eller andet gættet — `raekke('Model', model || null)`
+udelader rækken helt, når feltet er tomt, præcis efter reglen "Ærlighed
+slår fuldstændighed". Titel og h1 bliver ærligt "BMW" uden model, fordi
+kilden (MC Syd) ikke har skrevet et modelnavn i den annonce. INGEN
+kodeændring — det er en ægte, men nu meget lille, crawler-datakløft, ikke
+en visningsfejl, og derfor uden for min opgave. TIL CRAWLER-EJEREN: hvis
+det er værd at lukke det sidste hul, er annonce-id'et hos MC Syd `173367`
+(`https://mcsyd.dk/Produkter/Motorcykel/Brugt/BMW/173367`) — modellen
+mangler i kildens eget markup, ikke i vores parsing af det (uverificeret
+uden at have set MC Syds sidekilde selv).
+
+BEMÆRK, IKKE RETTET (uden for opgavens fire punkter, men fundet undervejs):
+`js/annonce.js`s markedsplads-tekst skriver stadig "Gul og Gratiss
+kontaktoplysninger og åbningstider står på deres egen side" — en
+markedsplads har ingen åbningstider, det er forhandler-teksten genbrugt
+(samme fund som runde 3-kritikeren gjorde, linje ~700-tallet i filen,
+`hvemHandlerDuMed`/salgsvilkårs-afsnittet). Rørte den ikke, fordi den ikke
+var en af de fire punkter, og en rettelse midt i en anden rettelse af
+samme paragraf let kan komme til at ændre mere end tilsigtet.
+
+TESTET: `npm test` — 286/286 grønne (uændret testantal; ingen af de to
+rettelser krævede eller fik nye tests, da ingen eksisterende test rører
+`vaelgFeatured`, `fabriksnyNote` eller `sellerTypeNoteHTML`s eksterne
+gren). Egen server `PORT=8931`, udlogget, browserverificeret for alle fire
+punkter som beskrevet ovenfor.
+HVOR: `js/home.js`, `js/annonce.js` — se linjenoterne under hvert punkt.
+
+### Vilkårene lovede badges og eskrow, der ikke findes — runde 4 builder 5, 20.08.2026
+HVAD: `vilkaar.html` §2 og §8 beskrev to funktioner i nutid, som ikke findes:
+et "Verificeret sælger"/"Verificeret forhandler"-badge efter MitID/CVR, og et
+"sikker betaling"-eskrowflow med "en ekstern, PCI-certificeret betalingspartner".
+`sikkerhed.html` sagde det modsatte om badget ("der findes derfor heller ikke
+et 'Verificeret'-mærkat nogen steder på siden") — men gentog SELV eskrow-
+løftet i sin egen betalingsliste. Alle tre steder er rettet:
+- §2: badge-løftet er fjernet. Ny tekst siger, at der i dag ikke findes
+  identitetsverificering, og at vilkårene opdateres FØR et badge vises, hvis
+  MitID/CVR-verificering nogensinde bygges (den er reelt under opsejling —
+  se `supabase/VERIFICERING.md`: CVR-funktionen er kodet og mangler kun en
+  nøgle, MitID kræver en godkendt broker). Formuleringen "ikke sat op endnu"
+  er allerede brugt i `login.html`/`opret-annonce.html`s verificeringstrin —
+  §2 følger nu samme linje i stedet for at modsige den.
+- §8 og `sikkerhed.html`s betalingsafsnit: eskrow-løftet er fjernet helt, IKKE
+  udskudt til "kommer snart" — der findes intet spor af en plan for det noget
+  sted i repoet (ingen migration, ingen Edge Function, intet i
+  `docs/naeste-prompts.md`), i modsætning til verificeringen. Stripe i
+  `supabase/functions/` er forhandlerens ABONNEMENT (`006_forhandler_abonnement.sql`,
+  `STRIPE_OPSAETNING.md`), ikke en køber/sælger-betaling. `sikkerhed.html`s
+  sætning er vendt til en advarsel i stedet for en tavshed: "henviser en
+  sælger til 'Bikerbasens sikre betaling', er det et advarselstegn — den
+  tjeneste findes ikke". Det styrker afsnittet, det ikke bare lapper det.
+IKKE RØRT (uden for mine filer, men samme fund): `privatlivspolitik.html:144`
+har PRÆCIS samme eskrow-sætning ("Ved brug af 'sikker betaling' deles
+nødvendige oplysninger med vores PCI-certificerede betalingspartner") og
+`js/annonce.js`s betalingsmodal (`open-payment-modal`, ~linje 1110) har den
+også. Jeg rettede sidstnævnte først, men rullede den tilbage: `js/annonce.js`
+ejes en anden builder denne runde (den ER ikke i min filliste — kun
+`annonce.html` er), og en anden builder redigerede filen samtidig, mens jeg
+sad i den. Til den, der ejer disse to: samme rettelse som §8 herover.
+FØR/EFTER er verificeret i browseren (egen server, se nedenfor) — teksten i
+`<h2 id="konto">`s og `<h2 id="betaling">`s efterfølgende `<p>` matcher nu
+ordret det, jeg skrev ovenfor, og `sikkerhed.html`s betalingsliste har ikke
+længere ordet "sikker betaling" som et løfte, kun som en advarsel.
+HVOR: `vilkaar.html` §2 og §8, `sikkerhed.html` (betalingsafsnittet under
+"Sådan handler du trygt som køber")
+
+### Kontaktinfo-løftet var sælgerstyret på forsiden, login-styret alle andre steder — runde 4 builder 5, 20.08.2026
+HVAD: Fire steder i `index.html` sagde, at SÆLGEREN vælger, hvornår
+kontaktoplysninger deles ("indtil du selv deler den", "når du selv er klar",
+"du bestemmer selv, hvornår", "skjult til du er klar"). Det er ikke
+mekanismen i koden: `saelgerKortHTML()` i `js/annonce.js` har ingen
+"del nu"-handling for sælgeren. Gaten er ÉN ting — er køberen logget ind —
+og teksten på annoncesiden og loginsiden siger det allerede korrekt
+("Kontaktoplysninger er kun synlige for indloggede brugere", `js/login.js`
+`AUTH_ANNONCE`: "Log ind for at se sælgerens navn og kontaktoplysninger").
+`index.html` er rettet til at matche DEN mekanisme i stedet for at opfinde
+sin egen: hero-chippen ("Kontaktinfo skjult for udloggede"), købstrinnet
+("Log ind, og skriv til sælger... kun synlige for indloggede brugere"), og
+de to sælgervendte løfter i "Sælg din motorcykel"/CTA-båndet (samme
+formulering: skjult for udloggede/søgemaskiner/robotter, ikke et sælgervalg).
+`login.html`/`js/login.js` er IKKE ændret — den tekst var allerede korrekt,
+og at ændre den ville have været den forkerte fil at rette i (`js/login.js`
+er heller ikke i min filliste, kun `login.html`, som slet ikke indeholder
+denne tekst — den bygges af `js/login.js`s `AUTH_ANNONCE`).
+IKKE RØRT: `js/home.js:419` har samme forkerte løfte ("Dit telefonnummer og
+din e-mail deles først, når du selv vælger det") i en JS-bygget
+tillidsblok på forsiden. `js/home.js` ejes en anden builder denne runde og
+står uden for min filliste. Til den, der ejer den: samme rettelse som
+ovenfor — gaten er login, ikke et sælgervalg.
+FØR (fire steder, ordret): "Skriv til sælger direkte i Bikerbasen. Dine
+oplysninger deles først, når du selv er klar." / "Din kontaktinfo er skjult,
+indtil du selv deler den" / "Du bestemmer selv, hvornår din kontaktinfo
+deles." / "Kontaktinfo skjult til du er klar". Verificeret rettet i browseren
+(egen server): alle fire læser nu "kun synlige for indloggede brugere" /
+"skjult for udloggede besøgende, søgemaskiner og robotter" — samme sprog som
+annoncesidens og loginsidens eksisterende, korrekte tekst.
+HVOR: `index.html` — hero-trust-listen (linje ~196), købstrin 2 (~239),
+sælgerpunkt i "Sælg din motorcykel" (~262), CTA-båndet i bunden (~443)
+
+### Sticky CTA manglede på indekserede annoncer — tilføjet i annonce.html, ikke i js/annonce.js — runde 4 builder 5, 20.08.2026
+HVAD: `renderExternalListing()` i `js/annonce.js` fjerner `#listing-actionbar`
+helt for enhver indekseret annonce (MC Syd/Gul og Gratis/Rydbergs/Jensens),
+fordi bjælken var bygget til "Skriv til sælger", som ingen af dem har — men
+byggede aldrig en erstatning. Målt FØR på en rigtig MC Syd-annonce
+(`annonce.html?id=ba88b463-95ca-4620-99e8-f3804d49631e`) ved 390×844: eneste
+CTA er "Se annoncen hos MC Syd" i sidebjælken, målt til y=2716 px af 6227 px
+dokumenthøjde — 3,2 folder nede, ingen sticky bjælke. Reproducerer kritikerens
+fund fra `work/DOM-saelgerprofil-runde3.md` (dengang "roughly 1900px", nu
+dybere fordi siden har fået mere indhold siden).
+LØSNING LAGT I `annonce.html`, IKKE `js/annonce.js`: `js/annonce.js` er en
+anden builders fil denne runde (kun `annonce.html` står i min filliste), og
+den builder redigerede filen samtidig med mig — jeg forsøgte først at rette
+det direkte i `renderExternalListing()`, men rullede det tilbage, da jeg så
+`git diff` vise andre buildere ændringer i samme fil. Løsningen er i stedet et
+lille `<script defer>` i `annonce.html`, indsat lige efter
+`js/annonce.js?v=...`: en `MutationObserver` på `#listing-detail` venter til
+boksen er fyldt (samme signal som `:empty`-reservationen bruger), og hvis
+resultatet er en indekseret annonce MED et virkende link
+(`.external-detail-source a.btn` findes), bygger den en bjælke med klassen
+`.listing-actionbar` — SAMME klasse som egne annoncer bruger, ikke en ny
+komponent. Al styling (fast bund, kun <960px, plads under cookiebanneret,
+`body.har-actionbar`-paddingen) kommer derfor gratis fra `css/styles.css`
+uden en eneste ny regel — `css/styles.css` er derfor IKKE rørt af mig i denne
+runde. Er linket i stykker (`.external-detail-broken`, kilden svarer ikke),
+bygges ingen bjælke — der er ingen handling at tilbyde, og kortet i
+sidebjælken forklarer allerede hvorfor. Egne annoncer og "annoncen findes
+ikke" rammer aldrig `.external-detail-source`, så scriptet rører intet der
+(verificeret: egen annonce id=1003 viser fortsat kun sin egen
+`#listing-actionbar`, og den nye bjælke bygges ikke).
+MÅLT EFTER (samme annonce, 390×844): `#ekstern-actionbar` er
+`position:fixed`, `bottom:0`, synlig med det samme ved indlæsning
+(`top:580px`, `bottom:649px` af 844 px viewport) — ingen scroll krævet.
+Testet også på Gul og Gratis (`id=49be9f51-3ef2-477d-ab91-3d347fb8fc1c`,
+privat sælger, `isDealer:false`): bjælken siger "Se annoncen hos Gul og
+Gratis" og linker korrekt til `guloggratis.dk`. Skjult ved ≥960px
+(`display:none`, samme medieforespørgsel som `.listing-actionbar` allerede
+har). Ingen konsolfejl på nogen af de fem testede tilstande (egen annonce,
+to eksterne, "findes ikke", desktop).
+HVOR: `annonce.html` — nyt `<script defer>` mellem `js/annonce.js` og
+cookiebanneret
+
+### Test og verifikationsspor — runde 4 builder 5, 20.08.2026
+HVAD: `npm test` — 286/286 grønne, uændret testantal (ingen af mine tre
+punkter rører kodesti, eksisterende tests dækker — de er alle
+tekstrettelser eller ny DOM-opbygning i en HTML-fil, ingen af delene testes
+i dag af `package.json`s testliste). Egen dev-server tilføjet i
+`.claude/launch.json` som `bikerbasen-runde4b5` på port 8591 (autoPort).
+Alle tre punkter browserverificeret udlogget på både 390×844 og 1440×900,
+inklusive konsolfejl-tjek (ingen).
+HVOR: `.claude/launch.json`
+
+---
+
+### Fire fund fra work/DOM-soegning-runde3.md — søgning, runde 4 builder 4, 20.08.2026
+
+Kritikeren målte mod 443 annoncer (demokataloget slået til). Lageret er nu
+548. Alt herunder er reproduceret og efterprøvet FRISK mod de 548, egen
+dev-server på port 8931. Ingen af de fire fund var stopper af de 548 —
+tallene ændrer sig, mekanikken der var i stykker, er den samme.
+
+**1) Prisbånd/kørekort er enkeltvalg, men så ud som Type-gruppens flervalg.**
+Reproduceret først: `?koerekort=A2` (62 træf) → klik "Under 30.000" → 10
+træf → klik "30–60.000" → 26 træf, de 10 billigste væk uden et ord — præcis
+kritikerens fund, kun tallene er andre (var 31→24 med 443 i lageret).
+VALG: behold enkeltvalgs-ADFÆRDEN (den er reelt rigtig — prisbånd er en
+partition af én akse, ikke uafhængige egenskaber), og gør UI'et ærligt om
+det i stedet for at gøre det til flervalg. To dele:
+  a) Struktur: `#filter-koerekort` og `#filter-price-quick` fik
+     `role="radiogroup"` + `aria-label`; hver chip `role="radio"
+     aria-checked="…"` med roving tabindex (kun den valgte, eller nr. 1 hvis
+     ingen er valgt, har `tabindex=0`). `#filter-types` blev `role="group"`
+     med almindelige `aria-pressed`-knapper — det ER flervalg, og beholder
+     den semantik.
+  b) Synligt: ny linje øverst i hver af de to enkeltvalgsgrupper — "Kun ét
+     kørekort ad gangen: det seneste klik erstatter det forrige. Klik den
+     valgte kategori igen for at fjerne den." (tilsvarende for pris). Ingen
+     ny CSS-klasse — genbruger `.field-hint`, som allerede stod i
+     kørekortgruppen.
+  c) Pil-tasterne i hver radiogruppe flytter fokus OG vælger (ligesom en
+     rigtig HTML-radioknap) — `wireRadioGroupNavigation()` i js/search.js,
+     ArrowLeft/Right/Up/Down + Home/End, med wrap. Klik er separat: et klik
+     på den ALLEREDE valgte rydder filteret (radioknapper kan ikke det, men
+     vores kan — det er en bevidst afvigelse, dokumenteret i koden, fordi
+     det er sådan grupperne opførte sig i forvejen, og retten til at rydde
+     et enkeltvalgsfilter uden at åbne en anden gruppe er værd at beholde).
+  EFTERPRØVET: `aria-checked` skifter korrekt ved klik OG ved pil-navigation
+  (ArrowRight fra A1 → fokus og valg flytter til A2, `?koerekort=A2`).
+  Klik på valgt chip rydder (`aria-checked` true→false, URL mister
+  parameteren). Roving tabindex korrekt: kun ét `tabindex=0` pr. gruppe.
+
+**2) Ingen `aria-pressed` på filterchips.** Egen axe-kørsel (axe-core
+4.9.1, hentet til `_axe_tmp/` og injiceret via `<script src>` — CSP-safe,
+same-origin, mappen slettet igen efter brug) FØR mine ændringer, mobilarket
+åbent, alle 11 synlige grupper tvangsåbnet, ét filter sat: **0
+violations** — samme som kritikeren fandt. axe kan strukturelt ikke se
+forskel på en `<button>` med og uden `aria-pressed`; det var netop derfor
+opgaven bad om manuel afprøvning. Manuel FØR-måling (HEAD): `getAttribute
+('aria-pressed'|'aria-checked'|'role')` på alle 16 chips → alle `null`,
+matcher kritikerens tabel ord for ord. EFTER: hver kørekort/pris-chip har
+`role="radio"` + korrekt `aria-checked`; hver type-chip har korrekt
+`aria-pressed`. Sat i `reflectFilterPanel()`/`syncRadioChips()`, som kører
+ved hver `render()` — tilstanden kan derfor ikke gå ud af trit med `state`.
+
+**3) Mobilarket var ingen rigtig dialog.** FØR (HEAD, målt): `role`,
+`aria-modal`, `aria-label` på selve dialogen manglede alle tre (kun det
+STATISKE `aria-label="Filtrer annoncer"`, uændret om arket var åbent eller
+ej); `aria-expanded`/`aria-controls` på "Filtre"-knappen manglede;
+fokus blev stående på knappen efter åbning; `document.body`s
+`overflow` var `visible`; pagineringen bag arket var stadig i tab-rækken.
+EFTER, ny funktion `wireMobileFilterDialog()`:
+  - `role="dialog"` + `aria-modal="true"` sættes KUN når arket rent faktisk
+    er en skuffe (`<960px` — samme grænse som CSS'). Fælde undervejs: panelet
+    var oprindeligt et `<aside>`, og axe fangede (efter min egen første
+    rettelse) at `role="dialog"` ikke er en tilladt rolle på `<aside>` —
+    dens medfødte "complementary"-landemærke kan ikke skiftes TIL dialog.
+    Rettet ved at gøre elementet til et `<div role="complementary">`
+    statisk (samme landemærke som `<aside>` gav gratis, nu eksplicit), som
+    LOVLIGT kan skifte rolle til `dialog` og tilbage igen ved lukning.
+  - Fokus flytter til "Luk filtre"-knappen ved åbning, og tilbage til
+    "Filtre"-knappen ved lukning (verificeret: `document.activeElement`).
+  - Tab/Shift+Tab fanget i en fælde: testet ved at fokusere første
+    fokuserbare element og sende Shift+Tab → fokus hopper til SIDSTE
+    (`apply-filters-btn`); fra sidste og Tab → hopper til FØRSTE
+    (`clear-filters`). 59 fokuserbare elementer i panelet ved alle grupper
+    åbne.
+  - Escape lukker arket, fjerner dialog-attributterne, giver fokus tilbage.
+  - Baggrunden får `inert` (ikke `aria-hidden` — `inert` dækker fokus OG
+    pointer-events i ét hug, og er understøttet i alle browsere, denne
+    kodebase målretter). Implementeret generisk: går fra
+    `#filters-overlay` og op til `<body>`, lægger `inert` på hver søskende
+    undervejs — rammer header, brødkrumme, H1, resultatkolonnen
+    (pagineringen inklusive) og footeren uden at kende dem ved navn.
+    Verificeret: `header`, `footer` og pagineringens container har alle
+    `inert` sat, mens arket er åbent; ingen af dem efter lukning.
+  - `body.overlay-open{ overflow:hidden }` tilføjet (kritikerens eget fund,
+    "body scroll-låst: nej") — scoped til `@media (max-width:959px)` i min
+    egen CSS-sektion.
+  - `aria-expanded` på "Filtre"-knappen reflekterer nu den reelle
+    tilstand (`true`/`false`), plus `aria-controls="filters-panel"`.
+  - Sikkerhedsnet: en `matchMedia('(min-width:960px)')`-lytter rydder
+    dialog-attributter og inert op, hvis vinduet vokser forbi 960px MENS
+    arket står åbent (fx en foldbar telefon), så desktop aldrig arver en
+    fastlåst baggrund.
+  AXE FØR/EFTER (mobil, arket åbent, alle grupper tvangsåbnet, ét filter
+  sat): FØR (HEAD) = **0** violations, EFTER (mine ændringer, endelig
+  version efter aside→div-rettelsen) = **0** violations. Tallet er ens,
+  fordi axe strukturelt ikke kan dømme et manglende `role="dialog"` på et
+  element, der allerede ER synligt og har en `aria-label` — hele pointen
+  med opgavens krav om MANUEL tastaturprøvning. Undervejs fangede axe
+  derimod en regression, JEG introducerede (aside+dialog), og den blev
+  rettet før aflevering — se ovenfor.
+
+**4) Tilbage var ikke fortryd.** Reproduceret FØR (HEAD): 3 diskrete
+filterklik (A2, "Under 30.000", "30–60.000") → **0** nye
+`history`-punkter (kun `replaceState` kaldt hver gang) → ét tryk på
+Tilbage → `soegning.html` uden filtre. Matcher kritikerens fund ordret.
+RETTELSE, i to dele:
+  a) `pushFilterState()` sætter et flag, `writeStateToURL()` læser: DISKRETE
+     filterændringer (chip-klik, afkrydsningsfelter, "Nulstil", en pille
+     fjernet, rullemenuen "Oprettet") kalder den i stedet for `render()`
+     direkte, og får dermed et RIGTIGT `pushState`-punkt. Fritekstfeltets
+     debounce, talfelternes debounce, dual-range-skyderne, sortering og
+     paginering er BEVIDST urørt (stadig `replaceState`) — kritikeren roste
+     selv, at fritekst ikke spammer historikken ("Det gode: at taste i
+     søgefeltet spammer ikke historikken"), og samme regel gælder alt, der
+     kan trigge mange gange på kort tid.
+  b) En `popstate`-lytter (ny — der var ingen før) kalder
+     `readStateFromURL()` + `render()`, så DOM'en rent faktisk følger med,
+     når adressen skifter under Tilbage/Frem.
+  EFTERPRØVET (samme tre klik): 3 pushState-punkter. Tilbage × 1 → URL og
+  DOM enige om `?priceMax=30000&koerekort=A2` (10 træf, matcher trin 1
+  ovenfor). Tilbage × 2 → `?koerekort=A2` (62 træf, matcher udgangspunktet).
+  Filtret fortrydes ét ad gangen, som opgaven bad om.
+
+  **FÆLDE FUNDET OG RETTET UNDERVEJS — vigtig for den næste, der rører
+  history her:** min første `popstate`-lytter kaldte `render()`
+  UBETINGET. Det virkede for filter-Tilbage, men ØDELAGDE
+  scroll-genskabelsen fra en TIDLIGERE runde (den, der ruller tilbage til
+  nøjagtig samme pixel efter at have besøgt en annonce og trykket Tilbage).
+  Årsag, fundet med midlertidig logning (fjernet igen før aflevering):
+  Chromium fyrer `popstate` OGSÅ ved en cross-document Tilbage fra
+  annonce.html og IND IGEN i soegning.html — selv om DENNE sides adresse
+  slet ikke ændrer sig (`?page=3` begge veje). Min ubetingede `render()`
+  kaldte `paintCards()` forfra, LIGE EFTER at `pageshow`-lytteren allerede
+  havde rullet til den gemte position — den ny-tegnede grid nulstillede
+  scrollen til 0. MÅLT FØR RETTELSEN: scrollY 1884 før klik ind, **0**
+  efter Tilbage (sessionStorage-punktet var korrekt forbrugt — genskabelsen
+  HAVDE ramt rigtigt, lige før den blev overskrevet af mit eget re-render).
+  RETTELSE: `popstate`-lytteren render'er kun, hvis adressen rent faktisk
+  ER en anden end den, den NUVÆRENDE `state` selv ville have skrevet
+  (`beregnURL()`, samme funktion som `writeStateToURL()` bruger til at
+  afgøre om der er noget nyt at skrive). Er de ens, er det en fremmed sides
+  popstate, der susede forbi, og vi rører hverken DOM eller scroll.
+  MÅLT EFTER RETTELSEN, fuld kæde gentaget tre gange med god margin til
+  `backendReady()` (som kan tage 7-8 sekunder i denne sandkasse — intet af
+  det er min performance-fejl, det er netværkskaldet, andre bygger på):
+  scrollY **1884 → 1884** (Δ 0 px), `Side 3 af 23` bevaret, kortets egen
+  `is-set`-markering sat, kortets `getBoundingClientRect().top` 178px efter
+  mod 179px før klik (samme kort, samme position, alt inden for
+  sub-pixel-afrunding). Stabil ved 50/300/1000 ms efter (ingen sen
+  clobbering). Testet BÅDE med `history.back()` og med browserens egen
+  "back"-navigation.
+  Kontrolforsøg: samme scenarie kørt på uændret HEAD (midlertidigt
+  gendannet fra git, testet, min egen version gendannet igen) gav SAMME
+  symptom ved for kort ventetid — bekræfter at "for hurtig måling" var en
+  reel faldgrube i selve testmetoden (backendReady() er langsom), ikke en
+  regression i HVERKEN den gamle eller den nye kode, når der måles med nok
+  margin.
+
+**npm test**: 286/286 grønt, både før og efter (ingen af de fire punkter
+rammer en fil, testene dækker — testene er i `js/koerekort.test.js` m.fl.,
+ingen af dem rører filterchips, historik eller dialogen).
+
+**Ikke rørt / ude af scope**: prisbåndenes inklusive grænser og
+dobbelttælling (kritikerens punkt 4, "≤ er ikke dansk for Under") og
+selvmodsigelsen mellem A1/A2's "ukendt kategori"-tal — ingen af delene stod
+på min liste over fire fund, og begge kræver at røre `js/filtrering.js`/
+`js/data.js`, som ikke er mine denne runde.
+**Flagget, ikke rettet**: to nye dealerkilders billeder (jensensmc.dk,
+123mc.dk) er blokeret af CSP'ens `img-src`-liste — opdaget i konsollen
+under denne afprøvning, uden sammenhæng med mine fire punkter. Sendt som en
+baggrundsopgave (spawn_task) til den, der ejer crawler-kilderne/CSP'en.
+
+HVOR: `js/search.js` (`pushFilterState()`, `beregnURL()`, `writeStateToURL()`,
+`syncRadioChips()`, `vaelgKoerekort()`/`vaelgPrisinterval()`,
+`wireRadioGroupNavigation()`, `wireMobileFilterDialog()`, popstate-lytter i
+`wirePositionHukommelse()`); `soegning.html` (`#filter-koerekort`/
+`#filter-price-quick`/`#filter-types` roller og hints, `filters-panel`
+div, `open-filters-btn` aria-expanded/aria-controls); `css/styles.css`
+`/* ===== soegning a11y ===== */`

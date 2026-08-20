@@ -333,7 +333,15 @@ const FORHANDLERAFTALER = {
    Vurderingen bag `true`: teksten siger, hvad loven siger om
    erhvervsmæssigt salg — den lover ikke noget PÅ MC Syds vegne, og den
    vises kun, når kilden selv har markeret annoncen som forhandlersalg.
-   Skal den væk, er det ét ord her, ikke en oprydning i markup. */
+   Skal den væk, er det ét ord her, ikke en oprydning i markup.
+
+   RUNDE 4: flaget gælder KUN denne ene påstand (og den tilsvarende
+   "garanti"-sætning i fabriksnyNote ovenfor) — begge er en påstand om MC
+   Syd som tredjepart. Privat-advarslen (sellerTypeNoteHTML(false)) er ikke
+   en påstand om en tredjepart, den er dansk rets almindelige regel, og den
+   vises derfor altid for en annonce, hvor kilden IKKE har markeret
+   forhandlersalg — uafhængigt af dette flag. Se sellerkort-blokken i
+   renderExternalListing(). */
 const VIS_REKLAMATIONSRET = true;
 
 function renderExternalListing(listing){
@@ -477,6 +485,37 @@ function renderExternalListing(listing){
      før tomhedstjekket — ellers forsvandt netop den forklaring, der er
      grunden til at vi ikke gætter. */
   const erNy = (typeof eksternErNy === 'function') ? eksternErNy(listing) : null;
+
+  /* "GARANTI FREM FOR REKLAMATIONSRET" GJALDT FOR FABRIKSNY — IKKE FOR PRIVAT.
+     Sætningen stod her uden at spørge, hvem sælgeren var: enhver annonce med
+     erNy === true fik "Du køber med garanti frem for forbrugerkøbelovens
+     reklamationsret", uanset om aftalen (`FORHANDLERAFTALER`) sagde
+     markedsplads eller forhandler. Runde 3-kritikeren fandt den på 6 af 16
+     stikprøvede Gul og Gratis-annoncer (≈37 %, fx `328dc95d…`, Royal Enfield
+     Classic 650, Terndrup) — og Gul og Gratis er en markedsplads for
+     PRIVATPERSONER. Mellem to private findes hverken reklamationsret eller
+     en lovbestemt garanti, uanset hvor ny motorcyklen er; skellet ligger i
+     SÆLGERTYPEN, ikke i om varen er fabriksny. Den samme kritiker fandt
+     forhandlerens sætning (MC Syd, 10/10) korrekt.
+     Garanti-linjen kræver derfor nu BÅDE erNy===true OG listing.isDealer
+     (og respekterer VIS_REKLAMATIONSRET, samme kill switch som
+     sellerTypeNoteHTML(true) nedenfor bruger, fordi det er samme juridiske
+     påstand om samme tredjepart). Er sælgeren privat, forklarer teksten i
+     stedet at motorcyklen er fabriksny AF DEN GRUND km ikke er oplyst, og
+     henviser til privatsalgs-noten længere nede — den var før slet ikke
+     med for eksterne annoncer (se noten ved sellerTypeNoteHTML nedenfor). */
+  const fabriksnyNote = erNy === true
+    ? (listing.isDealer
+        ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
+          + `over nye motorcykler, ikke blandt de brugte.`
+          + `${VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret,' : ','}`
+          + ` og kilometerstanden er derfor ikke oplyst.`
+        : `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
+          + `over nye motorcykler, ikke blandt de brugte, og kilometerstanden er derfor `
+          + `ikke oplyst. Sælgeren er privat — reklamationsret gælder ikke mellem private, `
+          + `heller ikke når motorcyklen er ny (se nedenfor).`)
+    : null;
+
   const hk  = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;
   const kkM = koerekortMaerkat(listing);   // ét sted for hele sitet, se js/components.js
@@ -643,7 +682,7 @@ function renderExternalListing(listing){
       <header class="external-detail-head">
         <h2 class="external-detail-title">${brand} ${model}</h2>
         ${variant ? `<p class="external-detail-variant">${escapeHTML(variant)}</p>` : ''}
-        ${erNy === true ? `<p class="external-detail-ny">${Icon.info}<span><b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog over nye motorcykler, ikke blandt de brugte. Du køber med garanti frem for forbrugerkøbelovens reklamationsret, og kilometerstanden er derfor ikke oplyst.</span></p>` : ''}
+        ${fabriksnyNote ? `<p class="external-detail-ny">${Icon.info}<span>${fabriksnyNote}</span></p>` : ''}
         <p class="external-detail-sub">
           ${stedTekst ? `${Icon.mapPin}${escapeHTML(stedTekst)}` : ''}
           ${stedTekst && listing.isDealer ? '<span class="external-detail-dot">·</span>' : ''}
@@ -696,7 +735,22 @@ function renderExternalListing(listing){
              </p>`}
       </section>
 
-      ${(VIS_REKLAMATIONSRET && listing.isDealer) ? sellerTypeNoteHTML(true) : ''}
+      <!-- PRIVAT-ADVARSLEN MANGLEDE HELT PÅ EKSTERNE ANNONCER — RETTET, runde 4.
+           Betingelsen stod før som "vis kun noten, når sælgeren ER forhandler",
+           så en Gul og Gratis-annonce (isDealer === false) fik hverken
+           reklamationsret-linjen ELLER advarslen om, at den ikke gælder —
+           bare tavshed om et spørgsmål, sellerTypeNoteHTML() allerede vidste
+           svaret på (samme funktion bruges korrekt på egne annoncer, linje
+           ~985). Kritikeren målte det på 16 Gul og Gratis-stikprøver: 0/16
+           havde privat-advarslen. VIS_REKLAMATIONSRET er en tredjeparts-
+           kildekontrol (er crawlerens isDealer-læsning til at stole på?) og
+           skal derfor kun kunne slukke DEALER-påstanden om MC Syd —
+           privat-advarslen er ikke en påstand om en tredjepart, den er en
+           oplysning om dansk ret, og den er den forsigtige retning at tage
+           fejl i (frem for at love en reklamationsret, der ikke findes). -->
+      ${listing.isDealer
+        ? (VIS_REKLAMATIONSRET ? sellerTypeNoteHTML(true) : '')
+        : sellerTypeNoteHTML(false)}
 
       <section class="external-detail-section">
         <h2>Før du kører derhen</h2>

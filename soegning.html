@@ -180,7 +180,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=da2e1e5a">
+<link rel="stylesheet" href="css/styles.css?v=a4ac24d2">
 
 
 
@@ -283,7 +283,16 @@ try{
     <div class="search-layout">
       <div class="filters-overlay" id="filters-overlay">
         <div class="filters-scrim" data-close-filters></div>
-        <aside class="filters-panel" id="filters-panel" aria-label="Filtrer annoncer">
+        <!-- <div>, ikke <aside>: axe (kørt runde 4) fangede at role="dialog"
+             ikke er tilladt på <aside> — dens medfødte "complementary"-
+             landmarkrolle kan ikke skiftes til dialog, kun til en håndfuld
+             andre roller. Et <div> har ingen medfødt rolle at være uenig med
+             sig selv om, så skiftet mellem "complementary" (desktop-
+             sidebaren) og "dialog" (mobilarket) i wireMobileFilterDialog()
+             (js/search.js) er lovligt begge veje. role="complementary" her
+             er den EKSPLICITTE udgave af det, <aside> gav gratis — desktop-
+             landemærket er uændret, kun elementnavnet er. -->
+        <div class="filters-panel" id="filters-panel" role="complementary" aria-label="Filtrer annoncer">
           <div class="filters-head">
             <h2>Filtre</h2>
             <div style="display:flex; gap:8px; align-items:center;">
@@ -300,7 +309,14 @@ try{
             <details class="filter-group" open>
               <summary>Kørekort<span class="chev"></span></summary>
               <div class="filter-body">
-                <div class="chip-group" id="filter-koerekort"></div>
+                <!-- Kun ÉT kørekort ad gangen (state.koerekort er ét felt, ikke
+                     en liste) — sagt højt her, fordi runde 3's kritiker fandt
+                     denne gruppe og Pris-gruppen visuelt identiske med
+                     Type-gruppen, som ER flervalg, og et klik på nummer to
+                     tavst annullerede det første. role="radiogroup" nedenfor
+                     giver skærmlæseren det samme svar. -->
+                <p class="field-hint">Kun ét kørekort ad gangen: det seneste klik erstatter det forrige. Klik den valgte kategori igen for at fjerne den.</p>
+                <div class="chip-group" id="filter-koerekort" role="radiogroup" aria-label="Kørekort — vælg én kategori"></div>
                 <p class="field-hint">Vejledende: filtrerer på effekt. Tjek altid registreringsattesten — A2 kræver også maks. 0,2 kW/kg, og nogle mc'er sælges i begrænset udgave. Tallet ved <b>A</b> er hele lageret: A har ingen effektgrænse, så den dækker også de annoncer, hvor effekten ikke er oplyst. Det er derfor A1 og A2 kan være små tal, uden at der mangler motorcykler.</p>
               </div>
             </details>
@@ -308,7 +324,7 @@ try{
             <details class="filter-group" open>
               <summary>Type<span class="chev"></span></summary>
               <div class="filter-body">
-                <div class="chip-group" id="filter-types"></div>
+                <div class="chip-group" id="filter-types" role="group" aria-label="Type — vælg én eller flere"></div>
               </div>
             </details>
 
@@ -320,7 +336,13 @@ try{
             <details class="filter-group" open>
               <summary>Pris (DKK)<span class="chev"></span></summary>
               <div class="filter-body">
-                <div class="chip-group" id="filter-price-quick"></div>
+                <!-- Samme fund som Kørekort ovenfor, målt konkret af runde 3's
+                     kritiker: klik "Under 30.000", klik "30–60.000" — de 7
+                     billigste forsvandt uden et ord, fordi båndene er
+                     gensidigt udelukkende (state.priceMin/Max er ÉT interval),
+                     men så ud som Type-gruppens fravalgs-chips. -->
+                <p class="field-hint">Kun ét prisinterval ad gangen: det seneste klik erstatter det forrige, det lægger sig ikke oveni. Klik det valgte igen for at fjerne det.</p>
+                <div class="chip-group" id="filter-price-quick" role="radiogroup" aria-label="Prisinterval — vælg ét"></div>
                 <div class="dual-range" id="range-price" data-floor="0" data-ceil="300000" data-step="1000">
                   <span class="dual-range-rail"></span>
                   <span class="dual-range-fill" data-fill></span>
@@ -509,7 +531,7 @@ try{
                  man lukke skuffen for at opdage, at resultatet er tomt. -->
             <button type="button" class="btn btn-primary btn-block" id="apply-filters-btn" data-close-filters>Vis resultater</button>
           </div>
-        </aside>
+        </div>
       </div>
 
       <div>
@@ -545,7 +567,7 @@ try{
               <button type="button" id="view-list" aria-pressed="false" aria-label="Listevisning"></button>
               <button type="button" id="view-swipe" aria-pressed="false" aria-label="Swipe-visning"></button>
             </div>
-            <button type="button" class="btn btn-outline mobile-filter-btn" id="open-filters-btn"><span id="filter-icon-mount"></span>Filtre<span class="filter-badge" id="filter-badge" hidden>0</span></button>
+            <button type="button" class="btn btn-outline mobile-filter-btn" id="open-filters-btn" aria-expanded="false" aria-controls="filters-panel"><span id="filter-icon-mount"></span>Filtre<span class="filter-badge" id="filter-badge" hidden>0</span></button>
             <!-- "Blandet udbud" er standard, og "Nyeste først" står lige
                  under den. HVORFOR: 332 af 383 annoncer har ingen oprettelses-
                  dato (vi kender den ikke hos kilden og gætter den ikke), så
@@ -696,27 +718,27 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=da2e1e5a"></script>
+<script defer src="js/security.js?v=a4ac24d2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=da2e1e5a"></script>
-<script defer src="js/supabase-api.js?v=da2e1e5a"></script>
-<script defer src="js/icons.js?v=da2e1e5a"></script>
+<script defer src="js/supabase-config.js?v=a4ac24d2"></script>
+<script defer src="js/supabase-api.js?v=a4ac24d2"></script>
+<script defer src="js/icons.js?v=a4ac24d2"></script>
 <!-- js/postnumre.js (40 KB, 1089 rækker) lå her, men ingen af søgesidens
      scripts slår et postnummer op — POSTNUMRE bruges kun ved oprettelse og
      redigering af annoncer. Filen blev altså hentet, parset og evalueret på
      hovedtråden uden at blive brugt. Fjernet herfra; de sider der faktisk
      bruger den (opret-annonce, dashboard, mine-annoncer …) loader den stadig. -->
-<script defer src="js/data.js?v=da2e1e5a"></script>
-<script defer src="js/store.js?v=da2e1e5a"></script>
+<script defer src="js/data.js?v=a4ac24d2"></script>
+<script defer src="js/store.js?v=a4ac24d2"></script>
 <!-- js/filtrering.js: ÉT sted, hvor et filter afgør, hvad der er et træf.
      Skal loades EFTER js/data.js (den bruger passerKoerekort og
      hkEllerNull) og FØR js/search.js, som kalder Filtrering.* på
      topniveau i sin filterkæde. Se work/DECISIONS.md, "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=da2e1e5a"></script>
-<script defer src="js/backend-bridge.js?v=da2e1e5a"></script>
-<script defer src="js/components.js?v=da2e1e5a"></script>
-<script defer src="js/seo.js?v=da2e1e5a"></script>
-<script defer src="js/search.js?v=da2e1e5a"></script>
+<script defer src="js/filtrering.js?v=a4ac24d2"></script>
+<script defer src="js/backend-bridge.js?v=a4ac24d2"></script>
+<script defer src="js/components.js?v=a4ac24d2"></script>
+<script defer src="js/seo.js?v=a4ac24d2"></script>
+<script defer src="js/search.js?v=a4ac24d2"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

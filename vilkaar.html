@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Vilkår og betingelser — Bikerbasen">
 <meta name="twitter:description" content="Læs Bikerbasens vilkår og betingelser, herunder regler for annoncer, forhandlere og betaling mellem brugere.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -61,7 +61,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=da2e1e5a">
+<link rel="stylesheet" href="css/styles.css?v=a4ac24d2">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -128,7 +128,17 @@ try{
       <p>Bikerbasen er en formidlingsplatform. Vi er ikke part i den handel, der indgås mellem køber og sælger, og vi kontrollerer ikke motorcyklernes fysiske stand.</p>
 
       <h2 id="konto">2. Din konto og verificering</h2>
-      <p>For at oprette en annonce eller skrive til en sælger skal du oprette en profil med gyldig e-mail og telefonnummer. Du kan frivilligt bekræfte din identitet med MitID for at få badget "Verificeret sælger". Kommercielle konti (forhandlere) skal gennemgå en udvidet verificering (CVR-nummer og virksomhedsoplysninger), før de kan opnå badget "Verificeret forhandler".</p>
+      <!-- Her stod "Du kan frivilligt bekræfte din identitet med MitID for
+           at få badget 'Verificeret sælger'", og en tilsvarende sætning om
+           et "Verificeret forhandler"-badge efter CVR-verificering. Begge
+           badges findes ikke: verifiedBadgeHTML() i js/components.js
+           returnerer tom streng, og sikkerhed.html siger direkte, at der
+           ikke findes noget "Verificeret"-mærkat nogen steder på siden.
+           Vilkårene modsagde altså vores egen sikkerhedsside om det
+           spørgsmål, en køber læser profilen for at få svar på. Se
+           supabase/VERIFICERING.md: CVR-opslaget er kodet, men mangler en
+           nøgle, og MitID kræver en godkendt broker, der ikke er sat op. -->
+      <p>For at oprette en annonce eller skrive til en sælger skal du oprette en profil med gyldig e-mail og telefonnummer, og bekræfte e-mailadressen via linket, du modtager. Bikerbasen tilbyder i dag <strong>ingen identitetsverificering</strong>: vi slår hverken MitID eller CVR-nummer op, og der findes derfor ikke noget "Verificeret sælger"- eller "Verificeret forhandler"-mærkat nogen steder på platformen. Et CVR-nummer på en profil er sælgerens egen oplysning — ikke en kontrol, vi har foretaget. Indfører vi MitID- eller CVR-verificering senere, opdateres disse vilkår, før et mærkat vises noget sted.</p>
       <p>Du er ansvarlig for at holde dine loginoplysninger fortrolige og for al aktivitet på din konto.</p>
 
       <h2 id="annoncer">3. Annoncer</h2>
@@ -157,7 +167,18 @@ try{
       <p>Alle annoncer og profiler kan anmeldes via knappen "Anmeld annonce" / "Anmeld profil". Bikerbasen gennemgår anmeldelser og kan fjerne indhold eller spærre konti, der overtræder disse vilkår eller loven, i overensstemmelse med EU's forordning om digitale tjenester (Digital Services Act). Du kan se status på egne anmeldelser ved at kontakte support.</p>
 
       <h2 id="betaling">8. Betaling mellem brugere</h2>
-      <p>Betaling for en motorcykel sker direkte mellem køber og sælger — typisk via MobilePay eller bankoverførsel. Bikerbasen håndterer ikke selv betalingen, med undtagelse af det valgfrie "sikker betaling"-flow, hvor en ekstern, PCI-certificeret betalingspartner holder beløbet, indtil køber har bekræftet modtagelsen af motorcyklen. Bikerbasen opbevarer aldrig dine kortoplysninger.</p>
+      <!-- Her stod et "sikker betaling"-flow beskrevet som et rigtigt
+           produkt: "en ekstern, PCI-certificeret betalingspartner holder
+           beløbet, indtil køber har bekræftet modtagelsen". Det findes
+           ikke — der er ingen betalingsflade, intet escrow, og Stripe-
+           integrationen i supabase/functions/ er forhandlerens eget
+           ABONNEMENT, ikke en køber/sælger-betaling (se
+           supabase/STRIPE_OPSAETNING.md). I modsætning til verificeringen i
+           §2 er der ingen plan for funktionen noget sted i repoet, så den
+           er fjernet i stedet for udskudt til "kommer snart". Samme
+           rettelse er lavet i sikkerhed.html og i betalingsmodalen i
+           js/annonce.js, så de tre flader siger det samme. -->
+      <p>Betaling for en motorcykel sker direkte mellem køber og sælger — typisk via MobilePay eller bankoverførsel. Bikerbasen er ikke part i betalingen og håndterer, formidler eller opbevarer ikke penge eller kortoplysninger mellem køber og sælger. Der findes i dag intet "sikker betaling"- eller escrowflow hos Bikerbasen. Henviser en sælger til en betalingstjeneste "fra Bikerbasen", er det ikke os — se vores <a href="sikkerhed.html">sikkerhedsråd</a> om kun at betale, når du selv har set og godkendt motorcyklen.</p>
 
       <h2 id="ansvar">9. Ansvarsbegrænsning</h2>
       <p>Bikerbasen er en formidlingsplatform og kan ikke drages til ansvar for tvister, mangler eller skader, der opstår i forbindelse med en handel mellem køber og sælger. Vi anbefaler altid at følge vores <a href="sikkerhed.html">sikkerhedsråd</a> før en handel indgås.</p>
@@ -216,16 +237,16 @@ try{
     </div>
   </div>
 </footer>
-<script defer src="js/security.js?v=da2e1e5a"></script>
+<script defer src="js/security.js?v=a4ac24d2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=da2e1e5a"></script>
-<script defer src="js/supabase-api.js?v=da2e1e5a"></script>
-<script defer src="js/icons.js?v=da2e1e5a"></script>
-<script defer src="js/postnumre.js?v=da2e1e5a"></script>
-<script defer src="js/data.js?v=da2e1e5a"></script>
-<script defer src="js/store.js?v=da2e1e5a"></script>
-<script defer src="js/backend-bridge.js?v=da2e1e5a"></script>
-<script defer src="js/components.js?v=da2e1e5a"></script>
+<script defer src="js/supabase-config.js?v=a4ac24d2"></script>
+<script defer src="js/supabase-api.js?v=a4ac24d2"></script>
+<script defer src="js/icons.js?v=a4ac24d2"></script>
+<script defer src="js/postnumre.js?v=a4ac24d2"></script>
+<script defer src="js/data.js?v=a4ac24d2"></script>
+<script defer src="js/store.js?v=a4ac24d2"></script>
+<script defer src="js/backend-bridge.js?v=a4ac24d2"></script>
+<script defer src="js/components.js?v=a4ac24d2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => { renderHeader('vilkaar.html'); });
 </script>

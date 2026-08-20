@@ -60,7 +60,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=da2e1e5a">
+<link rel="stylesheet" href="css/styles.css?v=a4ac24d2">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -193,7 +193,10 @@ try{
 
       <ul class="hero-trust">
         <li class="hero-trust-item">Gratis annonce for private</li>
-        <li class="hero-trust-item">Kontaktinfo skjult til du er klar</li>
+        <!-- "Kontaktinfo skjult til du er klar" var samme løfte som de tre
+             andre steder på siden (se noterne nedenfor): at SÆLGEREN vælger
+             hvornår. Gaten er login — se saelgerKortHTML() i js/annonce.js. -->
+        <li class="hero-trust-item">Kontaktinfo skjult for udloggede</li>
         <li class="hero-trust-item">Registreringsstatus på hver annonce</li>
       </ul>
     </div>
@@ -236,7 +239,19 @@ try{
           <span class="step-num">2</span>
           <div class="step-body">
             <h3>Tag kontakt trygt</h3>
-            <p>Skriv til sælger direkte i Bikerbasen. Dine oplysninger deles først, når du selv er klar.</p>
+            <!-- Her stod "Dine oplysninger deles først, når du selv er
+                 klar" — en løsere formulering af det samme løfte, som stod
+                 forkert i "Sælg din motorcykel"-sektionen (se linje ~262
+                 og ~443): at DET ER SÆLGEREN, der bestemmer, hvornår
+                 kontaktinfo deles. Det passer ikke med koden. Gaten er
+                 login, ikke et valg sælgeren træffer pr. henvendelse — se
+                 saelgerKortHTML() i js/annonce.js: udlogget er sælgerens
+                 navn og telefonnummer skjult; logger man ind, kan man se
+                 dem og skrive med det samme. Samme forklaring som
+                 annoncesidens egen tekst ("Kontaktoplysninger er kun
+                 synlige for indloggede brugere"), så de to sider ikke
+                 længere beskriver to forskellige mekanismer. -->
+            <p>Log ind, og skriv til sælger direkte i Bikerbasen. Sælgerens navn og kontaktoplysninger er kun synlige for indloggede brugere — det holder dem væk fra robotter og reklamehenvendelser.</p>
           </div>
         </li>
         <li class="step">
@@ -259,7 +274,15 @@ try{
           <p>Opret på under 5 minutter, og kom i kontakt med købere i hele landet. Ingen kommission, ingen skjulte gebyrer.</p>
           <ul class="sell-points">
             <li><span class="sell-check" aria-hidden="true"></span>Helt gratis for private sælgere</li>
-            <li><span class="sell-check" aria-hidden="true"></span>Din kontaktinfo er skjult, indtil du selv deler den</li>
+            <!-- "Din kontaktinfo er skjult, indtil du selv deler den" lovede
+                 sælgeren en aktiv handling — et valg pr. henvendelse. Det
+                 findes ikke i koden: der er ingen "del nu"-knap for
+                 sælgeren, kun login-muren, som enhver oprettet bruger kan
+                 gå igennem (se js/annonce.js, saelgerKortHTML()). Rettelsen
+                 lover det, systemet faktisk gør: skjuler nummeret for
+                 udloggede, søgemaskiner og robotter — ikke at sælgeren
+                 styrer det i realtid. -->
+            <li><span class="sell-check" aria-hidden="true"></span>Din kontaktinfo er skjult for udloggede besøgende, søgemaskiner og robotter</li>
             <li><span class="sell-check" aria-hidden="true"></span>Nå entusiaster, der leder efter netop din model</li>
           </ul>
           <div class="sell-band-actions">
@@ -440,7 +463,10 @@ try{
       <div class="cta-band">
         <div class="cta-band-copy">
           <h2>Din motorcykel fortjener den rette køber</h2>
-          <p>Opret annoncen på under 5 minutter, og behold hele salgssummen. Du bestemmer selv, hvornår din kontaktinfo deles.</p>
+          <!-- Samme rettelse som de to andre steder på siden: "du bestemmer
+               selv, hvornår" er en sælgerhandling, der ikke findes. Login
+               er gaten, ikke et valg pr. besøgende. -->
+          <p>Opret annoncen på under 5 minutter, og behold hele salgssummen. Din kontaktinfo vises kun for indloggede brugere — ikke for robotter, søgemaskiner eller udloggede besøgende.</p>
         </div>
         <a href="opret-annonce.html" class="btn btn-lg cta-band-btn">Opret gratis annonce</a>
       </div>
@@ -491,20 +517,20 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=da2e1e5a"></script>
+<script defer src="js/security.js?v=a4ac24d2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=da2e1e5a"></script>
-<script defer src="js/supabase-api.js?v=da2e1e5a"></script>
-<script defer src="js/icons.js?v=da2e1e5a"></script>
-<script defer src="js/data.js?v=da2e1e5a"></script>
+<script defer src="js/supabase-config.js?v=a4ac24d2"></script>
+<script defer src="js/supabase-api.js?v=a4ac24d2"></script>
+<script defer src="js/icons.js?v=a4ac24d2"></script>
+<script defer src="js/data.js?v=a4ac24d2"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=da2e1e5a"></script>
-<script defer src="js/store.js?v=da2e1e5a"></script>
-<script defer src="js/backend-bridge.js?v=da2e1e5a"></script>
-<script defer src="js/components.js?v=da2e1e5a"></script>
-<script defer src="js/home.js?v=da2e1e5a"></script>
+<script defer src="js/filtrering.js?v=a4ac24d2"></script>
+<script defer src="js/store.js?v=a4ac24d2"></script>
+<script defer src="js/backend-bridge.js?v=a4ac24d2"></script>
+<script defer src="js/components.js?v=a4ac24d2"></script>
+<script defer src="js/home.js?v=a4ac24d2"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

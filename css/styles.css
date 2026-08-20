@@ -3846,3 +3846,39 @@ body.overlay-open .cookie-banner{ display:none; }
 .profil-ejer-banner p{ font-size: 14px; margin: 0; }
 .profil-ejer-banner p strong{ display: block; font-size: 15px; margin-bottom: 2px; }
 .profil-ejer-banner .btn{ flex: none; }
+
+/* ===== soegning a11y ===== */
+/* Runde 4, builder 4 — fire fund fra work/DOM-soegning-runde3.md:
+   1) Kørekort- og Pris-chippene er reelt en radioknap-gruppe (kun ét valg
+      ad gangen), men var visuelt IDENTISKE med Type-chippene, som er
+      flervalg. Fixet er hovedsageligt strukturelt (role="radiogroup" +
+      role="radio" + aria-checked, sat i js/search.js) og tekstligt (ny
+      .field-hint-linje i soegning.html, "Kun ét … ad gangen"), men de to
+      linjer herunder giver ØJET den samme forskel, skærmlæseren allerede
+      fik: en lille prik ved en radioknap, et lille flueben ved en
+      flervalgs-chip. Ingen ny farve — kun currentColor, som allerede er
+      sat af .chip/.chip.active.
+   2) aria-pressed/aria-checked er selve fixet og kræver ingen CSS — de er
+      usynlige for øjet med vilje.
+   3) Mobilarkets dialog-rolle, fokusfælde og inert-baggrund er alle JS
+      (wireMobileFilterDialog() i js/search.js). Kun scroll-låsen på <body>
+      hører til her: kritikeren målte `overflow: visible` bag det åbne ark,
+      så pagineringen kunne rulles til og tabbes til på samme tid. */
+.chip[role="radio"]::before,
+.chip[aria-pressed]::before{
+  content: ''; display: inline-block; vertical-align: -1px; margin-right: 6px;
+  width: 8px; height: 8px; border: 1.5px solid currentColor; opacity: .55;
+}
+.chip[role="radio"]::before{ border-radius: 50%; }               /* radio: rund */
+.chip[aria-pressed]::before{ border-radius: 2px; }                /* flervalg: firkantet */
+.chip[role="radio"][aria-checked="true"]::before,
+.chip[aria-pressed="true"]::before{
+  background: currentColor; opacity: 1;
+}
+
+@media (max-width: 959px){
+  /* Uden den her kunne siden BAG det åbne filterark rulles med to fingre,
+     mens arket selv stod stille — kritikerens mål: `overflow: visible`. En
+     rigtig dialog låser det, den ligger oven på. */
+  body.overlay-open{ overflow: hidden; }
+}

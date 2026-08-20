@@ -38,14 +38,43 @@ test('ukendt effekt over 125 ccm giver intet svar — ikke A2', () => {
   }
 });
 
-test('ukendt effekt til og med 125 ccm er stadig A1', () => {
-  // A1 har en ccm-grænse, og derfor kan den afgøres uden effekt: over 125
-  // er A1 udelukket uanset hk, og på 125 findes der ikke en maskine med
-  // over 15 hk i fri handel.
+/* RETTET runde 4. Testen hed før "ukendt effekt til og med 125 ccm er
+   stadig A1" og påstod det modsatte af det, den her version tester — den
+   var selve regressionen, skrevet ned som en forventning.
+
+   Begrundelsen dengang var: "på 125 findes der ikke en maskine med over
+   15 hk i fri handel". Det er en antagelse om MARKEDET, ikke en regel fra
+   loven, og den holder ikke i praksis — Triumph Bonneville T120 (som ligger
+   i lageret i dag) er 120 ccm og 52 hk. A1 kræver BÅDE ≤125 ccm OG ≤15 hk;
+   ccm-grænsen kan kun AFVISE (er ccm over 125, er A1 udelukket uanset hk),
+   den kan ikke BEKRÆFTE uden hk. To rigtige annoncer ramte hullet: Honda
+   MSX 125 (125 ccm, hk ikke oplyst) hos MC Syd, som fik mærkatet
+   "Kørekort A1" af den gamle kode. */
+test('ukendt effekt til og med 125 ccm giver INTET svar — ccm alene er ikke nok til A1', () => {
   for (const hk of UKENDT_HK){
-    assert.equal(koerekortForListing({ power: hk, ccm: 125 }), 'A1',
-      `power=${JSON.stringify(hk)} på 125 ccm skal give A1`);
+    assert.equal(koerekortForListing({ power: hk, ccm: 125 }), null,
+      `power=${JSON.stringify(hk)} på 125 ccm skal give null, ikke A1`);
   }
+});
+
+test('kendt lav hk på ≤125 ccm er stadig A1 — rettelsen skal kun ramme UKENDT hk', () => {
+  // Vagthund mod at rette for hårdt: en rigtig, oplyst, lav effekt på en
+  // lille motorcykel skal stadig give A1 — det er ikke effekten, der var
+  // problemet, det var GÆTTET på den, når den manglede.
+  assert.equal(koerekortForListing({ power: 9, ccm: 125 }), 'A1');
+  assert.equal(koerekortForListing({ power: 15, ccm: 125 }), 'A1');
+});
+
+/* Den virkelige fejl, målt på det live lager (548 indekserede annoncer,
+   20.08.2026): to Honda MSX 125 hos MC Syd, begge 125 ccm og hk=null (de er
+   to forskellige annoncer af samme model, ikke én dublet). Begge fik
+   "Kørekort A1" af den gamle kode. En tredje MSX 125 i samme parti HAR hk
+   oplyst (9) og skal fortsat give A1 — se testen ovenfor. Gul og Gratis'
+   fem ≤125-ccm-annoncer havde alle hk oplyst; kun MC Syd havde hullet. */
+test('Honda MSX 125 (MC Syd, ccm=125, hk ikke oplyst) — den rigtige annonce, der udløste rettelsen', () => {
+  const msx125UdenHk = { brand: 'Honda', model: 'MSX 125', ccm: 125, power: null, isExternal: true };
+  assert.equal(koerekortForListing(msx125UdenHk), null);
+  assert.equal(passerKoerekort(msx125UdenHk, 'A1'), false);
 });
 
 /* GRÆNSEN ER SKREVET I KILOWATT, IKKE I HESTEKRÆFTER.
@@ -109,12 +138,19 @@ test('A2-filteret tager mc, der kan effektbegrænses, med', () => {
   assert.equal(passerKoerekort({ power: 95, ccm: 900, kanNedsaettesA2: true }, 'A2'), true);
 });
 
-test('A1-filteret kan afgøres uden effekt, fordi A1 har en ccm-grænse', () => {
+/* RETTET runde 4. Testen hed før "A1-filteret kan afgøres uden effekt,
+   fordi A1 har en ccm-grænse" og påstod `true` for ukendt hk på 125 ccm —
+   det var selve fejlen, skrevet ned som forventet adfærd. ccm-grænsen kan
+   AFVISE uden hk (over 125 er A1 udelukket, det tester anden halvdel af
+   testen stadig), men kan ikke BEKRÆFTE uden hk: A1 kræver også ≤15 hk, og
+   det ved vi ikke, når hk mangler. Et filter er et løfte — "vises den
+   under A1, kan den køres på A1" — og uden hk kan vi ikke holde det. */
+test('A1-filteret kræver et KENDT hk — ccm alene kan kun afvise, aldrig bekræfte', () => {
   for (const hk of UKENDT_HK){
-    assert.equal(passerKoerekort({ power: hk, ccm: 125 }, 'A1'), true,
-      `power=${JSON.stringify(hk)} på 125 ccm skal passere A1-filteret`);
+    assert.equal(passerKoerekort({ power: hk, ccm: 125 }, 'A1'), false,
+      `power=${JSON.stringify(hk)} på 125 ccm må ikke passere A1-filteret — hk er ukendt`);
     assert.equal(passerKoerekort({ power: hk, ccm: 600 }, 'A1'), false,
-      `power=${JSON.stringify(hk)} på 600 ccm må ikke passere A1-filteret`);
+      `power=${JSON.stringify(hk)} på 600 ccm må ikke passere A1-filteret — ccm alene udelukker den`);
   }
   assert.equal(passerKoerekort({ power: 14, ccm: 125 }, 'A1'), true);
   assert.equal(passerKoerekort({ power: 20, ccm: 125 }, 'A1'), false);
@@ -172,13 +208,22 @@ test('A2 uden oplyst effekt svarer UOPLYST — ikke false', () => {
   }
 });
 
-test('A1 uden oplyst effekt kan stadig afgøres på slagvolumen alene', () => {
-  // A1 HAR en ccm-grænse, så her er svaret kendt uden hk — og et kendt
-  // svar må aldrig blive til UOPLYST, for så ville filteret skjule annoncer,
-  // det udmærket kunne bedømme.
+/* RETTET runde 4. Testen hed før "A1 uden oplyst effekt kan stadig afgøres
+   på slagvolumen alene" og forventede `true` for ukendt hk på 125 ccm — det
+   var samme fejl som i js/data.js, testet herfra. A1 kræver BÅDE ≤125 ccm
+   OG ≤15 hk; ccm alene kan ikke bekræfte den anden halvdel. Det rigtige
+   svar er UOPLYST — annoncen vises IKKE under A1-filteret (vi kan jo ikke
+   love den), men den TÆLLES med i "X annoncer er ikke vist, fordi
+   kørekortkategori ikke er oplyst", i stedet for at forsvinde i tavshed. */
+test('A1 uden oplyst effekt svarer UOPLYST — ccm alene kan ikke bekræfte den', () => {
   for (const hk of UKENDT_HK){
-    assert.equal(koerekortSvar({ power: hk, ccm: 125 }, 'A1'), true,
-      `power=${JSON.stringify(hk)} på 125 ccm skal passere A1`);
+    assert.equal(koerekortSvar({ power: hk, ccm: 125 }, 'A1'), UOPLYST,
+      `power=${JSON.stringify(hk)} på 125 ccm skal give UOPLYST for A1`);
+  }
+  // Men er ccm i sig selv over grænsen, er det et rigtigt nej — det kræver
+  // ingen effekt at afgøre, og prøveværdien (gunstigst mulige hk) ændrer
+  // ikke på det.
+  for (const hk of UKENDT_HK){
     assert.equal(koerekortSvar({ power: hk, ccm: 600 }, 'A1'), false,
       `power=${JSON.stringify(hk)} på 600 ccm skal være et rigtigt nej for A1`);
   }
@@ -264,6 +309,33 @@ test('Gold Wing: mærkatet nævner ingen kategori, når effekten mangler', () =>
      tør lade være med at gætte — og kritikeren fremhævede den. */
   assert.equal(m.forklaring,
     'Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.');
+});
+
+/* RETTET runde 4. Modstykket til Gold Wing-testen ovenfor, men på den
+   ANDEN side af 125 ccm-grænsen. Gold Wing viser "over 125 uden hk" —
+   udelukker A1, men A2/A står åbent. MSX 125 viser "til og med 125 uden
+   hk" — her er A1 ISOLERET SET stadig muligt, hvis effekten viser sig at
+   være lav nok, men vi ved det ikke, og A2/A står også åbent (en lille
+   motor kan sagtens have en effekt, der kræver A2 eller A). Før rettelsen
+   sagde koerekortMaerkat() "Kørekort A1" her — den samme fejlklasse som
+   Gold Wing-fejlen, bare i den modsatte gren af koerekortForListing(). */
+const MSX125 = { brand:'Honda', model:'MSX 125', ccm:125, power:null, isExternal:true };
+
+test('Honda MSX 125 (MC Syd): mærkatet nævner ingen kategori, når effekten mangler', () => {
+  const m = koerekortMaerkat(MSX125);
+  assert.equal(m.kode, null, 'en 125 ccm uden hk må ikke automatisk få A1');
+  assert.equal(m.tekst, 'Kørekort ikke afgjort');
+  assert.ok(!/A1|A2/.test(m.tekst), `mærkatet må ikke nævne en kategori: "${m.tekst}"`);
+  // Sætningen skal sige BÅDE hvad vi ved (ccm ≤ 125) og hvad vi ikke gør
+  // (effekten), og hvor hullet er (hos kilden, for isExternal:true).
+  assert.equal(m.forklaring,
+    'Motorcyklen er højst 125 ccm, men effekten står ikke i annoncen hos kilden. A1 kræver både højst 125 ccm og højst 15 hk, så uden effekten kan vi ikke afgøre, om den kan køres på A1 — eller om den kræver A2 eller A.');
+});
+
+test('Honda MSX 125: egen annonce (ikke ekstern) får den anden ordlyd', () => {
+  const m = koerekortMaerkat({ ...MSX125, isExternal: false });
+  assert.equal(m.kode, null);
+  assert.ok(!/hos kilden/.test(m.forklaring), 'egen annonce må ikke sige "hos kilden"');
 });
 
 test('Iron 883: 48 hk er over A2-loftet, 47 er under', () => {

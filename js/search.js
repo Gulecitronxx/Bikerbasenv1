@@ -88,11 +88,53 @@ function currentQueryString(includeSort = false){
   return p.toString();
 }
 
-function writeStateToURL(){
+/* ============ Tilbage skal kunne fortryde ét filter ad gangen ============
+
+   Runde 3's kritiker: hver filterændring kaldte replaceState, så et klik på
+   Tilbage efter tre filterklik ikke fortrød det sidste — den sprang FORBI
+   alle tre og landede der, brugeren var, FØR søgningen overhovedet startede
+   (ofte forsiden). Årsagen var, at søgesiden kun nogensinde havde ÉT
+   historik-punkt: hvert filter overskrev det forrige i stedet for at lægge
+   sig oveni.
+
+   Løsningen er ikke "brug altid pushState" — det blev prøvet i tanken og
+   forkastet, fordi fritekstfeltet allerede (med vilje, se D-funktionen
+   currentQueryString) IKKE spammer historikken ved hvert tastetryk, og det
+   samme gælder tal-felterne og skyderne. Kun DISKRETE valg — en chip, en
+   afkrydsning, en rullemenu, "Nulstil" — er de punkter, en bruger faktisk
+   tænker på som "ét filter", og som Tilbage derfor skal kunne fortryde ét
+   ad gangen. Sortering og paginering er heller ikke filtre; de er urørt.
+
+   `pushFilterState()` sætter et éngangs-flag, som `writeStateToURL()` læser:
+   sandt giver pushState (nyt punkt), usandt (standarden) giver replaceState
+   som hidtil. Uden ændring i selve prædikatet — kun i hvor mange punkter
+   browserens historik får at fortryde. */
+let pendingHistoryPush = false;
+function pushFilterState(){
+  pendingHistoryPush = true;
+  render();
+}
+
+// Den URL, den nuværende `state` selv ville skrive. Brugt af BÅDE
+// writeStateToURL() (til at afgøre om der overhovedet er noget nyt at
+// skrive) og popstate-lytteren i wirePositionHukommelse() (til at afgøre om
+// en popstate er ÆGTE — se fælden dér).
+function beregnURL(){
   const p = new URLSearchParams(currentQueryString(true));
   if (state.page > 1) p.set('page', state.page);
   const qs = p.toString();
-  history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
+  return window.location.pathname + (qs ? '?' + qs : '');
+}
+
+function writeStateToURL(){
+  const url = beregnURL();
+  // Skriv aldrig et punkt, der er identisk med det, vi allerede står på —
+  // ellers laver et klik, der ikke ændrer noget (fx samme prisbånd valgt to
+  // gange i to forskellige klik), et dødt historik-tryk.
+  const uaendret = url === (window.location.pathname + window.location.search);
+  if (pendingHistoryPush && !uaendret) history.pushState(null, '', url);
+  else history.replaceState(null, '', url);
+  pendingHistoryPush = false;
 }
 
 /* ============ Opstart: hvad skal bygges hvornår ============
@@ -287,11 +329,20 @@ function populateFilterUI(){
   const daekning = feltDaekning();
   const alle = Store.getAllListings();
 
+  /* Type er FLERVALG (state.types er et array, chipsene lægger sig oveni
+     hinanden) — knappen er derfor en rigtig toggle-knap, og dens tilstand
+     hedder aria-pressed. Kørekort og pris er derimod ENKELTVALG (state har
+     kun ét koerekort og ét pris-interval ad gangen, se wireFilterControls
+     nedenfor) — samme visuelle `.chip`, men de er reelt en radioknap-gruppe,
+     og WCAG 4.1.2 kræver, at det NAVN, den ROLLE og den VÆRDI stemmer med
+     det. Se D-011 i work/DECISIONS.md for hele fundet: to identiske
+     chip-rækker, hvoraf kun den ene var flervalg, og intet i markuppen eller
+     i skærmlæseren sagde det. */
   document.getElementById('filter-types').innerHTML = TYPES.map(t =>
-    `<button type="button" class="chip" data-type="${t.id}">${t.label}${FACET_SLOT}</button>`).join('');
+    `<button type="button" class="chip" data-type="${t.id}" aria-pressed="false">${t.label}${FACET_SLOT}</button>`).join('');
 
   document.getElementById('filter-price-quick').innerHTML = PRIS_INTERVALLER.map(p =>
-    `<button type="button" class="chip" data-pris="${p.id}">${p.label}${FACET_SLOT}</button>`).join('');
+    `<button type="button" class="chip" data-pris="${p.id}" role="radio" aria-checked="false" tabindex="-1">${p.label}${FACET_SLOT}</button>`).join('');
 
   /* ÉN liste, og hvert mærke står i den éN gang.
 
@@ -322,7 +373,7 @@ function populateFilterUI(){
     <button type="button" class="brand-more" id="brand-more" aria-controls="brand-list" aria-expanded="false" hidden></button>`;
 
   document.getElementById('filter-koerekort').innerHTML = KOEREKORT.map(k =>
-    `<button type="button" class="chip" data-koerekort="${k.id}" title="${k.hint}">${k.label}${FACET_SLOT}</button>`).join('');
+    `<button type="button" class="chip" data-koerekort="${k.id}" title="${k.hint}" role="radio" aria-checked="false" tabindex="-1">${k.label}${FACET_SLOT}</button>`).join('');
 
   document.getElementById('filter-regions').innerHTML = REGIONS.map(r =>
     `<label class="checkbox-row"><input type="checkbox" data-region="${r}"><span>${r}</span>${FACET_SLOT}</label>`).join('');
@@ -957,17 +1008,41 @@ function wireSwipeGestures(){
   top.addEventListener('pointercancel', end);
 }
 
+/* Kørekort og pris opfører sig som en radioknap-gruppe (kun én ad gangen),
+   men er implementeret som knapper, der kan sættes til INTET valgt (i
+   modsætning til en rigtig HTML-radioknap, der ikke selv kan slås fra) —
+   se wireFilterControls: et klik på den allerede valgte rydder filteret.
+   Roving tabindex følger samme regel som en rigtig radiogruppe: den valgte
+   chip (eller nummer ét, hvis ingen er valgt) er den ENESTE, Tab stopper
+   ved. Pil-tasterne (wireRadioGroupNavigation) flytter både fokus OG valg
+   mellem resten, ligesom en browsers indbyggede radioknapper gør. */
+function syncRadioChips(chips, erValgt){
+  const liste = Array.from(chips);
+  const nogenValgt = liste.some(erValgt);
+  liste.forEach((ch, i) => {
+    const valgt = erValgt(ch);
+    ch.classList.toggle('active', valgt);
+    ch.setAttribute('aria-checked', String(valgt));
+    ch.tabIndex = valgt ? 0 : (!nogenValgt && i === 0 ? 0 : -1);
+  });
+}
+
 /* Spejler state ned i de kontroller der først findes, når panelet er bygget. */
 function reflectFilterPanel(){
   document.querySelectorAll('#filter-types .chip').forEach(chip => {
-    chip.classList.toggle('active', state.types.includes(chip.dataset.type));
+    const valgt = state.types.includes(chip.dataset.type);
+    chip.classList.toggle('active', valgt);
+    chip.setAttribute('aria-pressed', String(valgt));
   });
-  document.querySelectorAll('#filter-koerekort .chip').forEach(ch => {
-    ch.classList.toggle('active', state.koerekort === ch.dataset.koerekort);
-  });
-  document.querySelectorAll('#filter-price-quick .chip').forEach(ch => {
-    ch.classList.toggle('active', erAktivtPrisinterval(ch.dataset.pris));
-  });
+  // Kørekort og pris er radioknap-grupper (se kommentaren i
+  // populateFilterUI): aria-checked erstatter aria-pressed, og roving
+  // tabindex sikrer, at Tab kun stopper ÉT sted i hver gruppe (den valgte,
+  // eller den første, hvis ingen er valgt) — pilene flytter resten, se
+  // wireRadioGroupNavigation().
+  syncRadioChips(document.querySelectorAll('#filter-koerekort .chip'),
+    ch => state.koerekort === ch.dataset.koerekort);
+  syncRadioChips(document.querySelectorAll('#filter-price-quick .chip'),
+    ch => erAktivtPrisinterval(ch.dataset.pris));
   document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb => {
     cb.checked = state.brands.includes(cb.dataset.brand);
   });
@@ -1547,6 +1622,41 @@ function wirePositionHukommelse(){
   // Se blokkommentaren over SRP_POSITION: browserens egen genskabelse rammer
   // et dokument, der endnu ikke har nogen kort i sig, og giver op.
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  /* Filterknappernes pushState (se pushFilterState() foroven) laver historik-
+     punkter, brugeren kan bladre FREM OG TILBAGE i UDEN at forlade siden —
+     det er nyt i denne runde. Uden en popstate-lytter ændrede browseren kun
+     adresselinjen ved Tilbage; DOM'en (kortene, chipsenes tilstand, tallene)
+     blev stående ved det SIDSTE filter, fordi intet kaldte readStateFromURL()
+     igen. Renderer vi ikke her, ser Tilbage ud til at virke (URL'en skifter)
+     og virker alligevel ikke (skærmen gør ikke).
+
+     FÆLDEN, MÅLT I BROWSEREN: jeg antog først, at popstate kun fyrer ved
+     SAMME dokument (vores egne pushState-punkter) — en Tilbage fra
+     annonce.html og IND IGEN i soegning.html er jo et andet dokument, tænkte
+     jeg, og skulle derfor kun ramme pageshow(persisted). Forkert: Chromium
+     fyrer popstate OGSÅ på den vej, selv om adressen for denne side slet
+     ikke har ændret sig (?page=3 begge veje). Rendrer man ubetinget her,
+     kalder render() paintCards() FORFRA, og det sker EFTER at
+     genskabPosition() (via pageshow ovenfor) allerede har rullet til den
+     gemte position — den ny-tegnede grid nulstiller den. Målt: scrollY 1884
+     før klik på et kort, 0 efter Tilbage, med sessionStorage-punktet korrekt
+     forbrugt (så genskabPosition() FAKTISK havde ramt rigtigt, lige før den
+     blev overskrevet).
+
+     Rettelsen: render kun, hvis adressen rent faktisk ER en anden end den,
+     vores EGEN state ville have skrevet — beregnURL() er den samme funktion,
+     writeStateToURL() bruger til at afgøre det samme spørgsmål den anden
+     vej. Er de ens, er intet filter ændret (det var kun et fremmed dokuments
+     popstate, der susede forbi), og vi rører hverken DOM eller scroll. Er de
+     forskellige, er det en ægte Tilbage/Frem mellem to af VORES egne
+     historik-punkter, og så SKAL vi synkronisere. Efterprøvet: scrollY 1884
+     → 1884 (Δ 0 px) efter rettelsen, se work/DECISIONS.md. */
+  window.addEventListener('popstate', () => {
+    if (beregnURL() === window.location.pathname + window.location.search) return;
+    readStateFromURL();
+    render();
+  });
 }
 
 /* ============ Render i to etaper ============
@@ -1582,7 +1692,7 @@ function render(){
   filterBar.innerHTML = pills.map((p, i) =>
     `<span class="active-filter-pill">${escapeHTML(p.label)}<button type="button" data-pill-clear="${i}" aria-label="Fjern filter: ${escapeHTML(p.label)}">${Icon.close}</button></span>`).join('');
   filterBar.querySelectorAll('[data-pill-clear]').forEach(btn => {
-    btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; render(); });
+    btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; pushFilterState(); });
   });
   const badge = document.getElementById('filter-badge');
   badge.textContent = pills.length;
@@ -1899,40 +2009,76 @@ function wireDualRange(rangeId, minFieldId, maxFieldId, minKey, maxKey){
   el._sync();
 }
 
+/* Vælger ÉN kørekortkategori — aldrig et toggle. Pil-tasterne i en
+   radiogruppe SKIFTER valget, de rydder det ikke (en rigtig radioknap kan
+   heller ikke slås fra ved at pile hen over den igen); kun et KLIK på den
+   allerede valgte rydder filteret (se klik-lytteren nedenfor). To adskilte
+   funktioner, fordi mus og tastatur forventer hver sin opførsel her. */
+function vaelgKoerekort(id){
+  state.koerekort = id; state.page = 1; pushFilterState();
+}
+function vaelgPrisinterval(id){
+  const p = PRIS_INTERVALLER.find(x => x.id === id);
+  if (!p) return;
+  state.priceMin = p.min; state.priceMax = p.max; state.page = 1; pushFilterState();
+}
+
+/* Radioknap-gruppens tastatur: venstre/højre (og op/ned, for chips der
+   ombryder i flere rækker) flytter fokus OG vælger med det samme — det er
+   sådan native <input type="radio"> opfører sig, og det er derfor
+   syncRadioChips() sætter roving tabindex frem for aria-pressed. Klik
+   bruger sin egen håndtering (se ovenfor), fordi klik SKAL kunne rydde
+   valget igen, og det skal piletasterne ikke. */
+function wireRadioGroupNavigation(containerId, vaelg){
+  const box = document.getElementById(containerId);
+  if (!box) return;
+  box.addEventListener('keydown', (e) => {
+    const RETNING = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+    if (!(e.key in RETNING) && e.key !== 'Home' && e.key !== 'End') return;
+    const chips = Array.from(box.querySelectorAll('.chip'));
+    const i = chips.indexOf(document.activeElement);
+    if (i === -1) return;
+    e.preventDefault();
+    const naeste = e.key === 'Home' ? chips[0]
+      : e.key === 'End' ? chips[chips.length - 1]
+      : chips[(i + RETNING[e.key] + chips.length) % chips.length];
+    naeste.focus();
+    vaelg(naeste.dataset.koerekort ?? naeste.dataset.pris);
+  });
+}
+
 /* Kontroller der lever inde i filterpanelet — kobles på når panelet bygges. */
 function wireFilterControls(){
   document.querySelectorAll('#filter-types .chip').forEach(chip => {
     chip.addEventListener('click', () => {
       const id = chip.dataset.type;
       state.types = state.types.includes(id) ? state.types.filter(x=>x!==id) : [...state.types, id];
-      state.page = 1; render();
+      state.page = 1; pushFilterState();
     });
   });
   document.querySelectorAll('#filter-koerekort .chip').forEach(ch => {
     ch.addEventListener('click', () => {
-      state.koerekort = state.koerekort === ch.dataset.koerekort ? '' : ch.dataset.koerekort;
-      state.page = 1; render();
+      vaelgKoerekort(state.koerekort === ch.dataset.koerekort ? '' : ch.dataset.koerekort);
     });
   });
+  wireRadioGroupNavigation('filter-koerekort', vaelgKoerekort);
   // Prisintervallerne sætter begge ender på én gang og rydder dem igen ved
   // andet klik. Skyderen og talfelterne følger med gennem reflectStateToUI.
   document.querySelectorAll('#filter-price-quick .chip').forEach(ch => {
     ch.addEventListener('click', () => {
-      const p = PRIS_INTERVALLER.find(x => x.id === ch.dataset.pris);
-      if (!p) return;
-      const alleredeValgt = erAktivtPrisinterval(p.id);
-      state.priceMin = alleredeValgt ? null : p.min;
-      state.priceMax = alleredeValgt ? null : p.max;
-      state.page = 1; render();
+      const alleredeValgt = erAktivtPrisinterval(ch.dataset.pris);
+      if (alleredeValgt){ state.priceMin = null; state.priceMax = null; state.page = 1; pushFilterState(); }
+      else vaelgPrisinterval(ch.dataset.pris);
     });
   });
+  wireRadioGroupNavigation('filter-price-quick', vaelgPrisinterval);
   // Når mærker ændres, fjern modeller der ikke længere hører til et valgt mærke.
   const pruneModels = () => { const avail = availableModels(); state.models = state.models.filter(m => avail.has(m)); };
   document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb => {
     cb.addEventListener('change', () => {
       const b = cb.dataset.brand;
       state.brands = cb.checked ? [...state.brands, b] : state.brands.filter(x=>x!==b);
-      pruneModels(); state.page = 1; render();
+      pruneModels(); state.page = 1; pushFilterState();
     });
   });
   // Model-checkbokse (delegeret — de gen-renderes når mærkevalget ændrer sig).
@@ -1940,7 +2086,7 @@ function wireFilterControls(){
     const cb = e.target.closest('input[data-model]'); if (!cb) return;
     const m = cb.dataset.model;
     state.models = cb.checked ? [...state.models, m] : state.models.filter(x => x !== m);
-    state.page = 1; render();
+    state.page = 1; pushFilterState();
   });
   const brandSearch = document.getElementById('brand-search');
   if (brandSearch) brandSearch.addEventListener('input', opdaterMaerkeliste);
@@ -1956,14 +2102,14 @@ function wireFilterControls(){
     cb.addEventListener('change', () => {
       const r = cb.dataset.region;
       state.regions = cb.checked ? [...state.regions, r] : state.regions.filter(x=>x!==r);
-      state.page = 1; render();
+      state.page = 1; pushFilterState();
     });
   });
   document.querySelectorAll('#filter-conditions input').forEach(cb => {
     cb.addEventListener('change', () => {
       const c = cb.dataset.condition;
       state.conditions = cb.checked ? [...state.conditions, c] : state.conditions.filter(x=>x!==c);
-      state.page = 1; render();
+      state.page = 1; pushFilterState();
     });
   });
   /* Service, udstyr og farve lyttes DELEGERET på beholderen, ikke på hver
@@ -1980,7 +2126,7 @@ function wireFilterControls(){
       if (!cb) return;
       const v = cb.dataset[dataKey];
       state[stateKey] = cb.checked ? [...state[stateKey], v] : state[stateKey].filter(x => x !== v);
-      state.page = 1; render();
+      state.page = 1; pushFilterState();
     });
   };
   checkboxGroup('filter-service', 'service', 'service');
@@ -1994,23 +2140,31 @@ function wireFilterControls(){
 function wireCoreControls(){
   document.getElementById('filter-age').addEventListener('change', (e) => {
     state.maxAgeDays = numOrNull(e.target.value);
-    state.page = 1; render();
+    state.page = 1; pushFilterState();
   });
   document.getElementById('filter-photos-only').addEventListener('change', (e) => {
-    state.photosOnly = e.target.checked; state.page = 1; render();
+    state.photosOnly = e.target.checked; state.page = 1; pushFilterState();
   });
   document.getElementById('filter-dealer-only').addEventListener('change', (e) => {
-    state.dealerOnly = e.target.checked; state.page = 1; render();
+    state.dealerOnly = e.target.checked; state.page = 1; pushFilterState();
   });
   document.getElementById('filter-nysynet').addEventListener('change', (e) => {
-    state.nysynet = e.target.checked; state.page = 1; render();
+    state.nysynet = e.target.checked; state.page = 1; pushFilterState();
   });
   document.getElementById('filter-vinter').addEventListener('change', (e) => {
-    state.vinterklar = e.target.checked; state.page = 1; render();
+    state.vinterklar = e.target.checked; state.page = 1; pushFilterState();
   });
 
   // Fritekst-søgning på resultatsiden (Bilbasen/Idealista-standard). state.q
   // filtrerede allerede — men der var intet felt at skrive i.
+  //
+  // BEVIDST replaceState (render(), ikke pushFilterState()) her: at skrive
+  // "Hornet" er seks-syv separate ændringer af state.q, og hver af dem ville
+  // være ét historik-punkt, hvis feltet fulgte samme regel som en chip.
+  // Runde 3's kritiker MÅLTE netop, at fritekstfeltet IKKE spammer historikken
+  // ("Det gode: at taste i søgefeltet spammer ikke historikken"), og det er en
+  // ros, ikke en fejl der skal rettes. Ryd-knappen ER et diskret klik og får
+  // derfor sit eget historik-punkt, ligesom "Nulstil".
   const qInput = document.getElementById('filter-q');
   if (qInput){
     let qTimer;
@@ -2019,7 +2173,7 @@ function wireCoreControls(){
       qTimer = setTimeout(() => { state.q = qInput.value.trim(); state.page = 1; render(); }, 250);
     });
     document.getElementById('filter-q-clear')?.addEventListener('click', () => {
-      qInput.value = ''; state.q = ''; state.page = 1; render(); qInput.focus();
+      qInput.value = ''; state.q = ''; state.page = 1; pushFilterState(); qInput.focus();
     });
   }
 
@@ -2052,7 +2206,7 @@ function wireCoreControls(){
 
   document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
 
-  const resetAll = () => { state = { ...EMPTY_STATE, types: [], brands: [], models: [], regions: [], conditions: [], service: [], equipment: [], colors: [] }; render(); };
+  const resetAll = () => { state = { ...EMPTY_STATE, types: [], brands: [], models: [], regions: [], conditions: [], service: [], equipment: [], colors: [] }; pushFilterState(); };
   document.getElementById('clear-filters').addEventListener('click', resetAll);
   document.getElementById('clear-filters-mobile').addEventListener('click', resetAll);
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);
@@ -2102,19 +2256,122 @@ function wireCoreControls(){
     refreshSaveSearchButton();
   });
 
+  wireMobileFilterDialog();
+}
+
+/* ============ Filterskuffen på mobil er en RIGTIG dialog ============
+
+   Runde 3's kritiker: `#filters-panel` er den SAMME DOM-knude på
+   desktop (fast sidebar, altid synlig, aria-label="Filtrer annoncer") og på
+   mobil (skuffe, der lægger sig over resten af skærmen). Den kan derfor
+   ikke have role="dialog"/aria-modal statisk i markuppen — på desktop ville
+   det være løgn (intet er "modalt", sidebaren ligger side om side med
+   resultaterne, og skærmlæseren ville fortælle brugeren, at resten af siden
+   er blokeret, når den ikke er det). Attributterne sættes derfor kun, når
+   skuffen RENT FAKTISK åbnes som en skuffe (< 960px, samme grænse som CSS'
+   `@media (max-width:959px)`), og fjernes igen ved lukning.
+
+   Fem ting manglede, alle mål af kritikeren:
+     1. role="dialog" + aria-modal="true"          — kun i skuffe-tilstand
+     2. fokus flyttes IND i skuffen ved åbning       — til luk-knappen
+     3. Tab/Shift+Tab fanges i skuffen, mens den er åben (fælde nedenfor)
+     4. baggrunden bliver util-tabbar (inert)        — se setBackgroundInert
+     5. "Filtre"-knappen bærer aria-expanded          — reflekterer den reelle
+        tilstand, ikke en gættet
+   Escape lukker også — det stod ikke på kritikerens liste, men enhver, der
+   kan tabbe sig ind i en dialog, forventer at kunne Escape sig ud igen. */
+function wireMobileFilterDialog(){
   const overlay = document.getElementById('filters-overlay');
+  const panel = document.getElementById('filters-panel');
+  const openBtn = document.getElementById('open-filters-btn');
+  const erSkuffeBredde = () => window.matchMedia('(max-width:959px)').matches;
+
+  /* Gør alt, der IKKE er på vejen til overlay'et, util-tabbart. Går ÉN
+     forælder op ad gangen fra overlay til <body> og lægger `inert` på hver
+     søskende undervejs — dermed rammes header, brødkrumme, H1,
+     resultatkolonnen (med pagineringen, som kritikeren netop fandt stadig
+     kunne tabbes til under det åbne ark) og footeren, uden at nogen af dem
+     skal kendes ved navn her. Strukturen i soegning.html kan ændre sig; denne
+     funktion behøver ikke vide hvordan. */
+  function setBackgroundInert(on){
+    let node = overlay;
+    while (node && node !== document.body){
+      const forael = node.parentElement;
+      if (forael){
+        Array.from(forael.children).forEach(sib => {
+          if (sib === node) return;
+          if (on) sib.setAttribute('inert', ''); else sib.removeAttribute('inert');
+        });
+      }
+      node = forael;
+    }
+  }
+
+  function fokuserbareI(el){
+    return Array.from(el.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(n => n.offsetParent !== null);
+  }
+
   const setOverlay = (open) => {
     overlay.classList.toggle('open', open);
     // Skjuler cookiebanneret, så det ikke dækker skuffens knapper.
     document.body.classList.toggle('overlay-open', open);
+    openBtn.setAttribute('aria-expanded', String(open));
+    if (!erSkuffeBredde()) return; // ≥960px: det er sidebaren, ikke en dialog
+    if (open){
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-modal', 'true');
+      setBackgroundInert(true);
+      (panel.querySelector('.filters-close') || panel).focus();
+    } else {
+      // 'complementary', ikke fjernet: panelet er et <div>, uden rollen
+      // ville det stå uden noget landemærke som desktop-sidebar (se
+      // blokkommentaren — <aside> kunne ikke skifte TIL dialog, men et
+      // rolleløst <div> ville heller ikke give landemærket TILBAGE).
+      panel.setAttribute('role', 'complementary');
+      panel.removeAttribute('aria-modal');
+      setBackgroundInert(false);
+      openBtn.focus(); // fokus tilbage der, hvor brugeren åbnede fra
+    }
   };
+
   // Skuffen bygges færdig i samme klik som den åbnes — brugeren har allerede
   // ventet på sit tryk, og panelet er tegnet inden overgangen er kørt.
-  document.getElementById('open-filters-btn').addEventListener('click', () => {
+  openBtn.addEventListener('click', () => {
     ensureFiltersBuilt();
     setOverlay(true);
   });
   overlay.querySelectorAll('[data-close-filters]').forEach(el => el.addEventListener('click', () => setOverlay(false)));
+
+  // Tab-fælde + Escape. ÉN permanent lytter frem for at sætte/fjerne en ved
+  // hvert åbn/luk — den tjekker selv, om skuffen rent faktisk er åben som
+  // dialog lige nu, så den koster intet, når den ikke er.
+  document.addEventListener('keydown', (e) => {
+    if (!overlay.classList.contains('open') || !erSkuffeBredde()) return;
+    if (e.key === 'Escape'){ setOverlay(false); return; }
+    if (e.key !== 'Tab') return;
+    const f = fokuserbareI(panel);
+    if (!f.length) return;
+    const foerste = f[0], sidste = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === foerste){ e.preventDefault(); sidste.focus(); }
+    else if (!e.shiftKey && document.activeElement === sidste){ e.preventDefault(); foerste.focus(); }
+  });
+
+  // Sikkerhedsnet: vokser vinduet forbi 960px, MENS skuffen står åben (en
+  // bruger, der drejer en foldbar telefon, eller en, der zoomer ud), bliver
+  // panelet til sidebaren uden et klik på nogen luk-knap. Uden oprydningen
+  // her ville role="dialog", aria-modal og inert på resten af siden hænge
+  // fast på en desktopvisning, der ikke er en dialog — og så kunne INGEN
+  // taste sig til pagineringen, heller ikke på desktop.
+  window.matchMedia('(min-width:960px)').addEventListener('change', (e) => {
+    if (e.matches && overlay.classList.contains('open')){
+      panel.setAttribute('role', 'complementary'); panel.removeAttribute('aria-modal');
+      setBackgroundInert(false);
+      document.body.classList.remove('overlay-open');
+      openBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
 }
 
 /* Giver hovedtråden en pause, så browseren kan male og reagere på input
