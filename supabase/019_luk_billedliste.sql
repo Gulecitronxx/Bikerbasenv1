@@ -1,0 +1,95 @@
+-- Bikerbasen migration 019: luk enumerering af listing-photos, uden at
+-- bryde de offentlige thumbnails.
+-- Koer hele filen i Supabase SQL Editor. Kan koeres igen uden skade.
+--
+-- Finding: Supabase Security Advisor, "Public Bucket Allows Listing" paa
+-- storage.listing-photos. Undersoegt 21.08.2026 -- se
+-- docs/review/security-advisor-listing-photos.md for hele udredningen.
+--
+-- ============================================================
+-- HVAD DER ER GALT, PRAECIST
+-- ============================================================
+-- schema.sql:193-195 (uaendret siden bucket'en blev oprettet):
+--
+--   create policy "billedfil: offentlig laesning" on storage.objects
+--     for select using (bucket_id = 'listing-photos');
+--
+-- Politikken har intet "to"-led, saa den gaelder rollen PUBLIC -- altsaa
+-- BAADE anon og authenticated, dvs. enhver med den offentlige anon-noegle,
+-- som ligger i klartekst i js/supabase-config.js.
+--
+-- Supabase Storage bruger IKKE denne politik ens til alt. select-RLS paa
+-- storage.objects styrer to forskellige API-kald:
+--   a) GET af én kendt fil via /storage/v1/object/public/... -- konsulterer
+--      slet ikke RLS, naar bucket.public = true. Bekraeftet i Supabase' egen
+--      dokumentation ("Accessing public URLs does not require specific RLS
+--      policy permissions on the buckets or objects tables.").
+--   b) list() / /storage/v1/object/list/... -- enumererer objekter i
+--      bucket'en og KRAEVER select-rettighed paa storage.objects. Det er
+--      denne vej, politikken ovenfor giver adgang til, uden at nogen bad om
+--      det.
+--
+-- ============================================================
+-- EFTERPROEVET FOER RETTELSEN, 21.08.2026
+-- ============================================================
+-- 1. Bucket'en er public: `select id, public from storage.buckets where
+--    id = 'listing-photos'` gav public = true (efterproevet mod produktion
+--    17.08.2026, jf. work/DECISIONS.md "UPLOADVEJEN VIRKER"-noten). Al
+--    billedvisning i koden bygger derfor sin URL som
+--    /storage/v1/object/public/listing-photos/<sti> (scripts/shared.js:59,
+--    js/supabase-api.js:376 via getPublicUrl) -- en vej der IKKE laeser
+--    denne politik. Politikken bidrager intet til, at thumbnails vises.
+-- 2. Stierne indeholder bruger- og annonce-id: det ene rigtige uploadede
+--    foto i produktion ligger under `<bruger-uuid>/<annonce-uuid>/<uuid>.jpg`
+--    (samme note). En list() blotlaegger derfor hvem der har uploadet, hvor
+--    mange billeder, og tidsstempler -- ogsaa for slettede annoncer, hvis en
+--    fil-fjernelse fejlede undervejs (deleteListingPhoto/deleteListing
+--    logger og fortsaetter ved fejl, se js/supabase-api.js:297).
+-- 3. Ingen kode i repoet kalder list() paa denne bucket, og ingen kode
+--    rammer /object/authenticated/ eller /object/sign/ -- efterproevet med
+--    grep over js/, crawler/ og scripts/, nul traeff. Appen bruger
+--    udelukkende den offentlige URL-vej. Enumerering er altsaa reachable i
+--    dag kun for nogen, der selv bygger et Storage-API-kald med anon-
+--    noeglen -- ikke noget appen selv udstiller.
+-- 4. `listings` og `listing_photos` har 0 raekker i produktion i dag (samme
+--    note), saa den praktiske skade lige nu er begraenset til ét
+--    foraeldreloest foto fra en slettet bruger. Det aendrer ikke paa, at
+--    hullet skal lukkes -- det betyder blot, at det ikke haster paa samme
+--    maade som runde 1-fundene i 016/018.
+--
+-- ============================================================
+-- RETTELSEN
+-- ============================================================
+-- Bucket'ens public-flag daekker allerede hele appens laesebehov (GET ved
+-- kendt sti). select-politikken paa storage.objects giver derfor ingen
+-- funktion i dag -- dens eneste virkning er at tillade list() for anon og
+-- authenticated. Den fjernes helt, i stedet for at blive erstattet af en
+-- indskraenket version: ingen kode i huset beder om
+-- /object/authenticated/-adgang, saa der er intet at bevare. Skal den
+-- vej bruges senere, skrives en ny, navngivet politik til det -- samme
+-- princip som 018: en rettighed skal bedes om, ikke arves.
+drop policy if exists "billedfil: offentlig læsning" on storage.objects;
+
+-- ============================================================
+-- EFTERPROEVNING EFTER KOERSLEN
+-- ============================================================
+-- 1. Thumbnails maa IKKE braekke: aabn en side med et rigtigt uploadet
+--    foto og tjek, at /storage/v1/object/public/listing-photos/<sti>
+--    stadig svarer 200. Den vej laeser bucket.public, ikke denne politik,
+--    saa den skal vaere upaavirket -- men det er den paastand, der skal
+--    efterproeves, ikke antages.
+-- 2. list() skal naegtes for anon: fra en klient med kun anon-noeglen,
+--       supabase.storage.from('listing-photos').list()
+--    skal give en tom liste eller en fejl, ikke bucket'ens indhold.
+-- 3. Upload, opdatering og sletning af egne billeder (insert/update/delete-
+--    politikkerne fra schema.sql:197-216) er urørte af denne fil og skal
+--    stadig virke uaendret.
+--
+--   select policyname, cmd, roles from pg_policies
+--     where schemaname = 'storage' and tablename = 'objects'
+--       and policyname like 'billedfil%';
+-- -> kun de tre skrivepolitikker (insert/update/delete) staar tilbage.
+
+-- PostgREST cacher rettigheder. Uden det her slaar aendringen foerst
+-- igennem ved naeste genstart af API'et.
+notify pgrst, 'reload schema';
