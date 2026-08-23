@@ -5,8 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-Js4Mp8/IDJ3p3l0wX6kElnTtV9M0Df9WcgsP+1jjEHw=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Søg motorcykler — Bikerbasen</title>
-<meta name="description" content="Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.">
+<!-- Titel og beskrivelse er DE SAMME, som js/seo.js seoSearchResults() saetter
+     for den ufiltrerede standardsoegning (overskriften "Brugte motorcykler til
+     salg" + SITE_NAME), saa en crawler uden javascript ser det samme som en
+     browser med (B4). Facetter skriver deres egen titel ovenpaa ved
+     indlaesning; ved nul traef falder seo.js tilbage til de her. -->
+<title>Brugte motorcykler til salg — Bikerbasen</title>
+<meta name="description" content="Brugte motorcykler til salg på Bikerbasen. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.">
 <!-- meta:start (genereret af scripts/build-meta.js) -->
 <link rel="canonical" href="https://bikerbasen.dk/soegning">
 <meta name="theme-color" content="#C6420E" media="(prefers-color-scheme: light)">
@@ -15,15 +20,15 @@
 <meta property="og:site_name" content="Bikerbasen">
 <meta property="og:locale" content="da_DK">
 <meta property="og:url" content="https://bikerbasen.dk/soegning">
-<meta property="og:title" content="Søg motorcykler — Bikerbasen">
-<meta property="og:description" content="Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.">
+<meta property="og:title" content="Brugte motorcykler til salg — Bikerbasen">
+<meta property="og:description" content="Brugte motorcykler til salg på Bikerbasen. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.">
 <meta property="og:image" content="https://bikerbasen.dk/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Bikerbasen — køb og sælg brugte motorcykler i Danmark">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Søg motorcykler — Bikerbasen">
-<meta name="twitter:description" content="Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.">
+<meta name="twitter:title" content="Brugte motorcykler til salg — Bikerbasen">
+<meta name="twitter:description" content="Brugte motorcykler til salg på Bikerbasen. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
 <!-- meta:end -->
 
@@ -180,7 +185,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=06d01c3d">
+<link rel="stylesheet" href="css/styles.css?v=434fa0f7">
 
 
 
@@ -222,7 +227,7 @@ try{
 
 
 
-<!-- id="srp-lcp-preload" (ingen foto at preloade) -->
+<link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/180898/Honda_CB_1000_0_2.jpg?v=2" fetchpriority="high" id="srp-lcp-preload">
 </head>
 <!-- class="srp": søgesidens egne regler i css/styles.css hænger på den.
      Pladsholderen for "intet foto" er en DELT komponent (js/components.js
@@ -557,7 +562,7 @@ try{
                første </div>. #results-mix fyldes kun af js/search.js — ved
                første maling ved vi ikke, hvor annoncerne kommer fra. -->
           <div class="results-headline" role="status" aria-live="polite" aria-atomic="true">
-            <div class="results-count" id="results-count">0 <span>annoncer fundet</span></div>
+            <div class="results-count" id="results-count">548 <span>annoncer fundet</span></div>
             <p class="results-mix" id="results-mix" hidden></p>
           </div>
           <div class="toolbar-actions">
@@ -627,7 +632,414 @@ try{
         <!-- Kortenes <h3> hang tidligere direkte under <h1>: filtrenes <h2>
              er skjult på mobil, så overskriftsrækken sprang et niveau over. -->
         <h2 class="visually-hidden">Søgeresultater</h2>
-        <div id="results-grid" class="listings-grid"><!--srp:start--><!--srp:end--></div>
+        <div id="results-grid" class="listings-grid"><!--srp:start-->
+  <article class="card card-external" data-listing-id="0098fee2-be9d-49aa-8956-4a732ed50bf3" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/180898/Honda_CB_1000_0_2.jpg?v=2" alt="Honda CB 1000 Hornet" loading="eager" fetchpriority="high" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="0098fee2-be9d-49aa-8956-4a732ed50bf3" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">124.800 kr.</span>
+        
+        <span class="card-salgsmarkoerer" title="BYTTER GERNE">BYTTER GERNE</span>
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda CB 1000 Hornet</span>
+        <span class="card-title-variant" title="Naked">Naked</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2025</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>5.500 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.000 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 1.000 ccm og 152 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.000 ccm og 152 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=0098fee2-be9d-49aa-8956-4a732ed50bf3"
+       class="card-link"
+       aria-label="Se annonce: Honda CB 1000 Hornet Naked, 124.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="028653e2-985c-4210-9153-5337cf20ed3d" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/176252/Honda_F6_Valkyrie_0_2.jpg?v=1" alt="Honda F6 Valkyrie" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="028653e2-985c-4210-9153-5337cf20ed3d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">99.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda F6 Valkyrie</span>
+        <span class="card-title-variant" title="Cruiser">Cruiser</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>1997</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>36.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.520 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 1.520 ccm og 98 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.520 ccm og 98 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=028653e2-985c-4210-9153-5337cf20ed3d"
+       class="card-link"
+       aria-label="Se annonce: Honda F6 Valkyrie Cruiser, 99.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="03178f5a-e8b0-40af-a6fc-1eb566975860" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/140597/Kawasaki_ZR-7_0_2.jpg?v=1" alt="Kawasaki ZR-7" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="03178f5a-e8b0-40af-a6fc-1eb566975860" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">34.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Kawasaki ZR-7</span>
+        <span class="card-title-variant" title="Naked">Naked</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2000</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>41.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>739 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 739 ccm og 76 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 739 ccm og 76 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=03178f5a-e8b0-40af-a6fc-1eb566975860"
+       class="card-link"
+       aria-label="Se annonce: Kawasaki ZR-7 Naked, 34.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="037f14e6-c2a7-4256-984b-2a289d32a1ff" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/49851/Aprilia_RSV_1000_0_2.jpg?v=1" alt="Aprilia RSV 1000" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="037f14e6-c2a7-4256-984b-2a289d32a1ff" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">84.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Aprilia RSV 1000</span>
+        <span class="card-title-variant" title="Sport">Sport</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2006</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>31.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>998 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 998 ccm og 130 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 998 ccm og 130 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=037f14e6-c2a7-4256-984b-2a289d32a1ff"
+       class="card-link"
+       aria-label="Se annonce: Aprilia RSV 1000 Sport, 84.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="03817804-ada6-4e2f-9950-ae787e91b0c9" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/168561/BMW_K_1200_S_0_2.jpg?v=1" alt="BMW K 1200 S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="03817804-ada6-4e2f-9950-ae787e91b0c9" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">69.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">BMW K 1200 S</span>
+        <span class="card-title-variant" title="Touring">Touring</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2006</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>71.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.157 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 1.157 ccm og 167 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.157 ccm og 167 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=03817804-ada6-4e2f-9950-ae787e91b0c9"
+       class="card-link"
+       aria-label="Se annonce: BMW K 1200 S Touring, 69.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="04217c68-57e4-4487-b48a-a1eefdcd85b8" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/49046/Triumph_Speed_Triple_0_2.jpg?v=1" alt="Triumph Speed Triple" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="04217c68-57e4-4487-b48a-a1eefdcd85b8" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">74.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Triumph Speed Triple</span>
+        <span class="card-title-variant" title="Naked">Naked</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2005</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>23.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.050 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 1.050 ccm og 130 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.050 ccm og 130 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=04217c68-57e4-4487-b48a-a1eefdcd85b8"
+       class="card-link"
+       aria-label="Se annonce: Triumph Speed Triple Naked, 74.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="053178da-3a43-4913-b49f-b586c10dc1c5" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/153040/Triumph_Tiger_1050_0_2.jpg?v=1" alt="Triumph Tiger 1050" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="053178da-3a43-4913-b49f-b586c10dc1c5" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">99.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Triumph Tiger 1050</span>
+        <span class="card-title-variant" title="Adventure/Enduro">Adventure/Enduro</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2013</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>60.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.050 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 1.050 ccm og 114 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.050 ccm og 114 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=053178da-3a43-4913-b49f-b586c10dc1c5"
+       class="card-link"
+       aria-label="Se annonce: Triumph Tiger 1050 Adventure/Enduro, 99.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="05999335-7845-4f99-884b-017d4a66e63d" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/180896/BMW_K_1600_0_2.jpg?v=1" alt="BMW K 1600" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="05999335-7845-4f99-884b-017d4a66e63d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">204.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">BMW K 1600</span>
+        <span class="card-title-variant" title="Touring">Touring</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2016</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>61.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.649 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 1.649 ccm og 160 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.649 ccm og 160 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=05999335-7845-4f99-884b-017d4a66e63d"
+       class="card-link"
+       aria-label="Se annonce: BMW K 1600 Touring, 204.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="0616a1ef-79b8-46b7-9727-1d46e76cd276" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/139337/Suzuki_VLR_1800_0_2.jpg?v=1" alt="Suzuki VLR 1800" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="0616a1ef-79b8-46b7-9727-1d46e76cd276" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">139.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Suzuki VLR 1800</span>
+        <span class="card-title-variant" title="Cruiser">Cruiser</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2009</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>47.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.783 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 1.783 ccm og 114 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.783 ccm og 114 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=0616a1ef-79b8-46b7-9727-1d46e76cd276"
+       class="card-link"
+       aria-label="Se annonce: Suzuki VLR 1800 Cruiser, 139.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="07def4c0-aeb3-47c7-8a7e-5d3b76023ecf" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos Gul og Gratis. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra Gul og Gratis</span></div>
+    <div class="card-media">
+      <img src="https://assets.guloggratis.dk/images/cdb87917-51be-4777-8cff-a7c5f06497f2/cdb87917-51be-4777-8cff-a7c5f06497f2-320x240.webp" alt="Honda CX 650 E (Eurosport)" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="07def4c0-aeb3-47c7-8a7e-5d3b76023ecf" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">20.000 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda CX 650 E</span>
+        <span class="card-title-variant" title="(Eurosport)">(Eurosport)</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>1983</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>74.250 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>650 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 650 ccm og 64 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 650 ccm og 64 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Svendborg, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Privat sælger · guloggratis.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=07def4c0-aeb3-47c7-8a7e-5d3b76023ecf"
+       class="card-link"
+       aria-label="Se annonce: Honda CX 650 E (Eurosport), 20.000 kr. — hos Gul og Gratis"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="0884700d-bfee-4fb5-a491-383e65c0ab9d" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/172833/Ducati_Scrambler_0_2.jpg?v=1" alt="Ducati Scrambler" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="0884700d-bfee-4fb5-a491-383e65c0ab9d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">94.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Ducati Scrambler</span>
+        <span class="card-title-variant" title="Naked">Naked</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2021</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>10.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>803 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 803 ccm og 73 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 803 ccm og 73 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=0884700d-bfee-4fb5-a491-383e65c0ab9d"
+       class="card-link"
+       aria-label="Se annonce: Ducati Scrambler Naked, 94.800 kr. — hos MC Syd"></a>
+  </article>
+
+  <article class="card card-external" data-listing-id="0a72f9c3-a044-4377-958a-574021090a5f" data-external="1">
+    <div class="card-kilde" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Annonce fra MC Syd</span></div>
+    <div class="card-media">
+      <img src="https://images.danbase.dk/Content/Resellers/321/183074/Honda_NT_1100_A_0_2.jpg?v=1" alt="Honda NT 1100 A" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="0a72f9c3-a044-4377-958a-574021090a5f" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">149.800 kr.</span>
+        
+        <span class="card-salgsmarkoerer" title="BYTTER GERNE">BYTTER GERNE</span>
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda NT 1100 A</span>
+        <span class="card-title-variant" title="Touring">Touring</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2025</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>600 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.084 ccm</dd></div>
+        </dl>
+        <span class="card-koerekort" title="Kan føres på A-kørekort. Udledt af 1.084 ccm og 101 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.084 ccm og 101 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding, Syddanmark</span></span>
+        <span class="card-kildelinje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5h17M4.5 9.5V20h15V9.5M3.5 9.5 5.4 4.4h13.2l1.9 5.1M9.5 20v-5.2h5V20"/></svg><span>Forhandler · mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=0a72f9c3-a044-4377-958a-574021090a5f"
+       class="card-link"
+       aria-label="Se annonce: Honda NT 1100 A Touring, 149.800 kr. — hos MC Syd"></a>
+  </article><!--srp:end--></div>
 <script>if(location.search)document.getElementById("results-grid").style.visibility="hidden";</script>
         <div id="swipe-deck" class="swipe-deck" hidden></div>
         <div id="thin-result-panel" class="thin-panel" hidden></div>
@@ -718,27 +1130,31 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=06d01c3d"></script>
-<script defer src="js/vendor/supabase.js?v=06d01c3d"></script>
-<script defer src="js/supabase-config.js?v=06d01c3d"></script>
-<script defer src="js/supabase-api.js?v=06d01c3d"></script>
-<script defer src="js/icons.js?v=06d01c3d"></script>
+<script defer src="js/security.js?v=434fa0f7"></script>
+<script defer src="js/vendor/supabase.js?v=434fa0f7"></script>
+<script defer src="js/supabase-config.js?v=434fa0f7"></script>
+<script defer src="js/supabase-api.js?v=434fa0f7"></script>
+<script defer src="js/icons.js?v=434fa0f7"></script>
 <!-- js/postnumre.js (40 KB, 1089 rækker) lå her, men ingen af søgesidens
      scripts slår et postnummer op — POSTNUMRE bruges kun ved oprettelse og
      redigering af annoncer. Filen blev altså hentet, parset og evalueret på
      hovedtråden uden at blive brugt. Fjernet herfra; de sider der faktisk
      bruger den (opret-annonce, dashboard, mine-annoncer …) loader den stadig. -->
-<script defer src="js/data.js?v=06d01c3d"></script>
-<script defer src="js/store.js?v=06d01c3d"></script>
+<script defer src="js/data.js?v=434fa0f7"></script>
+<script defer src="js/store.js?v=434fa0f7"></script>
 <!-- js/filtrering.js: ÉT sted, hvor et filter afgør, hvad der er et træf.
      Skal loades EFTER js/data.js (den bruger passerKoerekort og
      hkEllerNull) og FØR js/search.js, som kalder Filtrering.* på
      topniveau i sin filterkæde. Se work/DECISIONS.md, "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=06d01c3d"></script>
-<script defer src="js/backend-bridge.js?v=06d01c3d"></script>
-<script defer src="js/components.js?v=06d01c3d"></script>
-<script defer src="js/seo.js?v=06d01c3d"></script>
-<script defer src="js/search.js?v=06d01c3d"></script>
+<script defer src="js/filtrering.js?v=434fa0f7"></script>
+<script defer src="js/backend-bridge.js?v=434fa0f7"></script>
+<script defer src="js/components.js?v=434fa0f7"></script>
+<!-- Sortering EFTER components.js (bruger koerekortMaerkat), FØR search.js
+     (som læser Sortering ved indlæsning). Samme rækkefølge som
+     browserModules() i scripts/shared.js — se js/sortering.js. -->
+<script defer src="js/sortering.js?v=434fa0f7"></script>
+<script defer src="js/seo.js?v=434fa0f7"></script>
+<script defer src="js/search.js?v=434fa0f7"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

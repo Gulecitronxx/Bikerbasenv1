@@ -171,6 +171,61 @@ lade som om det er en ny kilde. Se `crawler/db.js`, `bortemarkeringVurdering()`.
 
 ## Afvist
 
+### B4 delvist afvist — 23.08.2026
+FINDING (audit 23.08.2026, B4): "Server-side filtering + pagination (PostgREST
+range/RPC over a search view), card-only columns, pre-render first 24 cards +
+ItemList into soegning.html at build." Begrundelsen var LCP 4,9 s på søgesiden
+(2,2 s "load delay": billedet kunne først opdages efter REST-kald + javascript)
+og skalering: alt filtreres i browseren over HELE lageret.
+
+GENNEMFØRT:
+- Forudtegning af første side fra HELE lageret (egne + indekserede) i sidens
+  faktiske standardrækkefølge. Sorteringen er flyttet til `js/sortering.js`,
+  så `scripts/build-srp.js` og `js/search.js` kører samme funktion. Første
+  korts foto preloades med fetchpriority=high. Før: "build-srp: 0 kort" i
+  produktion (trinnet hentede kun egne annoncer, 0 i drift, og sorterede
+  "nyeste først", som ikke er standard). Efterprøvet under produktionsvilkår
+  (hostnavn ≠ localhost, demolager slået fra): de 12 forudtegnede kort er
+  identiske med de 12 første efter hydrering; `?brands=Honda` skjuler
+  gitteret indtil filtreret, som før.
+- Titel og beskrivelse i soegning.html er nu standardsøgningens (samme strenge
+  som js/seo.js sætter), så HTML uden javascript siger det samme som browseren.
+- Loftet på 500 rækker er væk: `loadExternalListings()` hentede med `limit=500`,
+  databasen havde 548 aktive. 48 annoncer fandtes derfor ingen steder i
+  browseren — søgning, facettal, "500 motorcykler til salg" — mens byggekæden
+  hentede alle 548 til sitemap og mærkesider. Nu henter begge sider 1000 ad
+  gangen (PostgREST Range) til listen er tom, med `order=sidst_set.desc,id.asc`
+  som stabilt brydeled BEGGE steder (noten i js/backend-bridge.js efterlyste
+  netop det). Første indlæsning viser nu 548.
+- ItemList: IKKE bagt ind. js/seo.js udelader med vilje ItemList, når ingen af
+  annoncerne har en adresse, Google kan følge (C-015: 332 af 332 URL'er svarede
+  404). I drift er 548 af 548 indekserede → intet ItemList at bage. Det ændrer
+  sig den dag egne annoncer får sider (build-listing-pages.js).
+
+IKKE GENNEMFØRT — server-side filtrering/paginering (RPC over et søgeindeks):
+HVORFOR: (1) Den kræver en migration (view + RPC med facettælling og "blandet"
+som positionel fordeling) mod produktionsdatabasen, og migrationer køres ikke
+herfra — hele backend-deployet (006–020, fem Edge Functions) venter på et
+access token (supabase/DEPLOY.md). En RPC, der er skrevet men hverken kørt
+eller målt, og en klientsti, der slår til, den dag nogen kører den, er præcis
+den slags "ser rigtig ud, er ikke efterprøvet", der ikke må i main.
+(2) Tallene bærer det ikke endnu: 548 rækker = 388 KB rå / 53 KB gzip /
+0,20–0,25 s for hele lageret (målt mod produktion). Det giver ~106 B/række
+gzip; først ved ~2.000 rækker (≈210 KB, ≈1 s på 4G) er hentningen dyrere end
+et filtreret kald. (3) Filterlogikken (js/filtrering.js, passerKoerekort i
+js/data.js, Sortering.blandetRaekkefoelge) er testlåst i Node; en SQL-kopi af
+den kan kun holdes ærlig med en test, der kører begge og sammenligner — og den
+test kræver en database at køre mod.
+HVORNÅR: når (a) backend-deployet virker (A1), og (b) lageret nærmer sig 2.000
+rækker, eller forsidens/søgesidens hentning måles over 0,5 s. Så: migration
+`soegeindeks` (union af listings + eksterne_annoncer i kortform) + RPC
+`soeg_annoncer(filtre jsonb, side, pr_side, sortering)` der svarer {total,
+kort[], facetter}; klienten beholder js/filtrering.js som sandhed og
+sammenligner i en test mod RPC'en på samme datasæt, før den kobles til.
+BEVIS: målingerne ovenfor er curl mod produktions-REST 23.08.2026; hydrerings-
+testen er playwright mod dev-serveren under hostnavnet srp.test; "500 mod 548"
+er Content-Range fra PostgREST mod klientens egen `limit=500`.
+
 <!-- dev skriver herunder -->
 
 ### C-004 delvist afvist — 17.08.2026

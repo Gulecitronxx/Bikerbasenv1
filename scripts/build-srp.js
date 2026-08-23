@@ -5,9 +5,23 @@
    fra 0 til fuld højde længe efter første maling, og kortets foto blev først
    opdaget dér. En crawler så et tomt <div id="results-grid">.
 
-   Nu står den ufiltrerede første side (12 nyeste) i markuppen. js/search.js
-   tegner nøjagtig det samme oven i, når data er hentet — samme funktion,
-   samme data, samme rækkefølge — så der er ingen omrokering at se.
+   Nu står den ufiltrerede første side i markuppen. js/search.js tegner
+   nøjagtig det samme oven i, når data er hentet — samme funktion, samme
+   data, samme rækkefølge — så der er ingen omrokering at se.
+
+   B4 (23.08.2026): før hentede trinnet KUN vores egne annoncer (0 i drift)
+   og sorterede dem "nyeste først" — altså den rækkefølge, søgesiden IKKE
+   længere bruger som standard. Resultat i produktion: "build-srp: 0 kort",
+   et tomt gitter i HTML'en, og LCP'en var et hotlinket foto, der først
+   kunne opdages efter REST-kald + javascript (Lighthouse: 4,9 s, heraf
+   2,2 s ren "load delay"). Nu:
+     - hele lageret: egne annoncer (listings) + indekserede (eksterne_annoncer),
+       gennem de SAMME oversættere som browseren (normalizeRemoteListing /
+       normalizeExternalListing i js/backend-bridge.js);
+     - sidens faktiske standardsortering, "blandet", fra js/sortering.js —
+       flyttet derud fra js/search.js netop for at kunne køre her;
+     - første korts foto preloades med fetchpriority=high, så LCP-billedet
+       hentes, før et eneste script er kørt.
 
    Kortene bygges med SIDENS EGEN listingCardHTML fra js/components.js, som
    evalueres her med små stubbe for browser-globalerne. Duplikeres markuppen
@@ -17,7 +31,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { ROOT, fetchListings, browserModules } = require('./shared');
+const { ROOT, fetchListings, fetchExternalListings, browserModules } = require('./shared');
 
 /* Hvor mange kort der forudtegnes i markuppen — IKKE sidestørrelsen.
    js/search.js viser 24 pr. side; de første 12 er dem, der kan nå at være
@@ -28,14 +42,19 @@ const { ROOT, fetchListings, browserModules } = require('./shared');
 const PRERENDER_COUNT = 12;
 
 (async () => {
-  const { listingCardHTML, normalizeRemoteListing } = browserModules();
+  const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering } = browserModules();
 
-  // Rækkerne skal gennem sidens egen oversætter, ellers mangler kortene
-  // forhandler-badge og servicehistorik i forhold til det, klienten tegner.
-  const listings = (await fetchListings([]))
+  // Rækkerne skal gennem sidens egne oversættere, ellers mangler kortene
+  // forhandler-badge, variant, kilde osv. i forhold til det, klienten tegner.
+  const egne = (await fetchListings([]))
     .map(l => l.created_at ? normalizeRemoteListing(l) : l);
-  // Samme rækkefølge som search.js' standard: 'date-desc'.
-  const sorted = listings.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const eksterne = (await fetchExternalListings()).map(normalizeExternalListing);
+  const alle = egne.concat(eksterne);
+
+  // Samme rækkefølge som search.js' standard ('blandet'): js/sortering.js,
+  // som også er den, browseren kører. Determinismen er låst af
+  // js/lager-determinisme.test.js og af brydeleddet ,id.asc i hentningen.
+  const sorted = Sortering.sorter(alle.slice(), 'blandet');
   const page = sorted.slice(0, PRERENDER_COUNT);
   const cards = page.map((l, i) => listingCardHTML(l, i)).join('\n');
 
@@ -62,7 +81,10 @@ const PRERENDER_COUNT = 12;
   );
 
   // Første korts foto er sidens LCP — bed browseren hente det med det samme,
-  // i stedet for at vente på at billedet opdages nede i markuppen.
+  // i stedet for at vente på at billedet opdages nede i markuppen. For en
+  // indekseret annonce er det kildens eget miniaturebillede (img-src i
+  // CSP'en tillader kildernes billedværter); for en egen annonce er det
+  // Supabase Storage. Begge er lige rigtige at preloade.
   const firstPhoto = (page[0] && page[0].photoUrls && page[0].photoUrls[0]) || null;
   const preload = firstPhoto
     ? `<link rel="preload" as="image" href="${firstPhoto}" fetchpriority="high" id="srp-lcp-preload">`
@@ -73,5 +95,8 @@ const PRERENDER_COUNT = 12;
     : html.replace('</head>', preload + '\n</head>');
 
   fs.writeFileSync(htmlPath, html);
-  console.log(`build-srp: ${page.length} kort (af ${total}) skrevet ind i soegning.html.`);
-})();
+  const udenFoto = page.filter(l => !Sortering.harFoto(l)).length;
+  console.log(`build-srp: ${page.length} kort (af ${total}: ${egne.length} egne + ${eksterne.length} indekserede) `
+    + `skrevet ind i soegning.html i blandet rækkefølge — ${udenFoto} af dem uden foto`
+    + (firstPhoto ? `, LCP-foto preloadet.` : `, intet foto at preloade.`));
+})().catch(e => { console.error('build-srp AFBRUDT:', e.message); process.exit(1); });

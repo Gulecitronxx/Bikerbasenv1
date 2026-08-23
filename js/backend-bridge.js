@@ -81,12 +81,12 @@ function supabaseKonfigureret(){
    Svaret er `{ data, error }` som resten af datalaget, men `error` er her et
    RIGTIGT nej: en HTTP-fejl bliver ikke til et tomt array. Det var netop den
    forveksling, der gjorde "vi kunne ikke hente" til "der er ingen". */
-async function restHent(sti){
+async function restHent(sti, ekstraHeaders){
   if (!supabaseKonfigureret()) return { data: null, error: new Error('Supabase er ikke konfigureret.') };
   const n = SUPABASE_CONFIG.anonKey;
   try {
     const r = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/${sti}`,
-      { headers: { apikey: n, Authorization: 'Bearer ' + n } });
+      { headers: { apikey: n, Authorization: 'Bearer ' + n, ...(ekstraHeaders || {}) } });
     if (!r.ok) return { data: null, error: new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`) };
     const data = await r.json();
     if (!Array.isArray(data)) return { data: null, error: new Error('Uventet svar fra databasen.') };
@@ -94,6 +94,29 @@ async function restHent(sti){
   } catch (e) {
     return { data: null, error: e };
   }
+}
+
+/* Henter ALLE raekker bag en forespoergsel, 1000 ad gangen (PostgREST's
+   Range-header), i stedet for ét kald med `limit=`.
+
+   Hvorfor (B4, 23.08.2026): loadExternalListings() stod med `&limit=500`,
+   og databasen havde 548 aktive indekserede annoncer. De sidste 48 fandtes
+   ingen steder paa sitet — ikke i soegningen, ikke i facettallene, ikke i
+   forsidens "500 motorcykler til salg" — mens byggekaeden (scripts/shared.js)
+   hentede uden graense og skrev 548 i sitemap og maerkesider. To tal for
+   samme lager, og ingen fejlbesked: praecis den slags stille mindre sandhed,
+   D-013 handler om. En side, der ikke er fuld, er den sidste; saa stopper
+   loekken. `sti` SKAL have en stabil `order=` (fx `sidst_set.desc,id.asc`),
+   ellers kan samme raekke komme to gange og en anden slet ikke. */
+async function restHentAlle(sti, sideStoerrelse = 1000){
+  const alle = [];
+  for (let fra = 0; ; fra += sideStoerrelse){
+    const res = await restHent(sti, { Range: `${fra}-${fra + sideStoerrelse - 1}` });
+    if (res.error) return res;
+    alle.push(...res.data);
+    if (res.data.length < sideStoerrelse) break;
+  }
+  return { data: alle, error: null };
 }
 
 /* Den offentlige adresse på et uploadet foto.
@@ -548,8 +571,12 @@ const EKSTERNE_KOLONNER =
    steder samtidig, ellers omrokerer mærkesiden i det øjeblik javascriptet
    overtager fra den forudtegnede markup. Se noten i work/DECISIONS.md. */
 async function loadExternalListings(){
-  const res = await restHent(`eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
-    + '&status=eq.aktiv&order=sidst_set.desc&limit=500');
+  // `,id.asc` er brydeleddet, noten ovenfor efterlyste — lagt ind HER og i
+  // scripts/shared.js fetchExternalListings() i samme commit (B4), saa de
+  // forudtegnede kort og de hentede staar i samme orden. Ingen `limit=`:
+  // restHentAlle() henter alt, se dens hoved.
+  const res = await restHentAlle(`eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
+    + '&status=eq.aktiv&order=sidst_set.desc,id.asc');
   if (res.error){
     // En fejl her må ikke tage dine egne annoncer med sig. Søgningen skal
     // stadig virke, bare uden forhandlerannoncerne — OG køberen skal have det

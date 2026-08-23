@@ -99,18 +99,29 @@ async function fetchExternalListings(){
     throw new Error('Ingen Supabase-konfiguration — de indekserede annoncer kan ikke hentes, '
       + 'og et maerkeindeks bygget uden dem ville vaere tomt. Build afbrudt.');
   }
-  // Samme raekkefoelge som klienten (js/supabase-api.js): sidst_set faldende.
-  // Maerkesidens forudtegnede kort skal staa i samme orden som js/maerke.js
-  // tegner dem bagefter, ellers omrokerer siden naar javascriptet overtager.
-  const r = await fetch(
-    `${url}/rest/v1/eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
-    + '&status=eq.aktiv&order=sidst_set.desc',
-    { headers: { apikey: key } });
-  if (!r.ok){
-    throw new Error(`Kunne ikke hente eksterne_annoncer (HTTP ${r.status}: ${await r.text()}). `
-      + 'Build afbrudt frem for at skrive et sitemap uden annoncer.');
+  // Samme raekkefoelge som klienten (js/backend-bridge.js loadExternalListings):
+  // sidst_set faldende MED `,id.asc` som brydeled (B4) — Postgres lover ikke
+  // raekkefoelgen ved lige sidst_set, og crawleren stempler hele koerslen ens.
+  // De forudtegnede kort skal staa i samme orden som javascriptet tegner dem
+  // bagefter, ellers omrokerer siden naar det overtager.
+  // Hentes 1000 ad gangen (PostgREST Range) — samme loekke som klientens
+  // restHentAlle(), saa byggekaeden og browseren aldrig ser to forskellige
+  // lagre. Uden det stoppede PostgREST stille ved sin max-rows.
+  const SIDE = 1000;
+  const rows = [];
+  for (let fra = 0; ; fra += SIDE){
+    const r = await fetch(
+      `${url}/rest/v1/eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
+      + '&status=eq.aktiv&order=sidst_set.desc,id.asc',
+      { headers: { apikey: key, Range: `${fra}-${fra + SIDE - 1}` } });
+    if (!r.ok){
+      throw new Error(`Kunne ikke hente eksterne_annoncer (HTTP ${r.status}: ${await r.text()}). `
+        + 'Build afbrudt frem for at skrive et sitemap uden annoncer.');
+    }
+    const side = await r.json();
+    rows.push(...side);
+    if (side.length < SIDE) break;
   }
-  const rows = await r.json();
   console.log(`Hentede ${rows.length} indekserede annoncer fra databasen.`);
   return rows;
 }
@@ -382,11 +393,13 @@ function browserModules(){
     photoUrl: p => p ? `${url}/storage/v1/object/public/listing-photos/${p}` : null,
   };
 
-  const src = ['js/data.js', 'js/icons.js', 'js/bike-art.js', 'js/components.js', 'js/backend-bridge.js']
+  // js/sortering.js EFTER js/components.js (den bruger koerekortMaerkat) —
+  // samme raekkefoelge som <script>-taggene i soegning.html.
+  const src = ['js/data.js', 'js/icons.js', 'js/bike-art.js', 'js/components.js', 'js/sortering.js', 'js/backend-bridge.js']
     .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n;\n');
 
   return new Function('document', 'Store', 'window', 'db',
-    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing };')(doc, store, {}, db);
+    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering };')(doc, store, {}, db);
 }
 
 module.exports = { ROOT, siteUrl, slugify, listingSlug, fetchListings, fetchExternalListings,

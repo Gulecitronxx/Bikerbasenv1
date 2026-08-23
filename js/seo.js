@@ -481,10 +481,14 @@ let soegesidensEgneTags = null;
 function egneTags(){
   if (soegesidensEgneTags) return soegesidensEgneTags;
   const desc = document.head.querySelector('meta[name="description"]');
+  // B4 (23.08.2026): soegning.html's egne tags ER nu standardsøgningens
+  // ("Brugte motorcykler til salg — Bikerbasen"), så HTML uden javascript
+  // siger det samme som browseren. Ved nul træf på en facet falder siden
+  // altså tilbage til sitets generelle sidenavn — ikke til facettens påstand.
   soegesidensEgneTags = {
-    titel: document.title || `Søg motorcykler — ${SITE_NAME}`,
+    titel: document.title || `Brugte motorcykler til salg — ${SITE_NAME}`,
     beskrivelse: (desc && desc.getAttribute('content'))
-      || 'Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.',
+      || `Brugte motorcykler til salg på ${SITE_NAME}. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.`,
   };
   return soegesidensEgneTags;
 }

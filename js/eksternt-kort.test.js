@@ -34,7 +34,8 @@ const læs = f => fs.readFileSync(path.join(__dirname, f), 'utf8');
 // flyttet derind (ét filterhus for forsiden og soegesiden), og search.js
 // binder Filtrering.* paa topniveau. Uden den her linje falder hele filen
 // over 'Filtrering is not defined', foer den naar til det, den tester.
-const KILDER = ['icons.js', 'data.js', 'filtrering.js', 'components.js', 'search.js'];
+// sortering.js EFTER components.js og FØR search.js — samme rækkefølge som soegning.html (B4).
+const KILDER = ['icons.js', 'data.js', 'filtrering.js', 'components.js', 'sortering.js', 'search.js'];
 
 const STUB = `
 const noop = () => {};

@@ -205,9 +205,12 @@ test('nul træf giver sidens egne, neutrale tags tilbage', () => {
   assert.equal(doc.title, 'Brugte Yamaha til salg — Bikerbasen');
 
   seoSearchResults([], 'Brugte Harley-Davidson til salg');
-  assert.equal(doc.title, 'Søg motorcykler — Bikerbasen');
+  // Sidens egne tags er siden B4 standardsøgningens ("Brugte motorcykler til
+  // salg"), ikke "Søg motorcykler": det er sitets generelle sidenavn, ikke
+  // facettens påstand — og stadig ikke "Harley-Davidson".
+  assert.equal(doc.title, 'Brugte motorcykler til salg — Bikerbasen');
   assert.equal(metaVærdi(doc, 'name', 'description'),
-    'Søg og filtrer blandt brugte motorcykler til salg i Danmark på Bikerbasen.');
+    'Brugte motorcykler til salg på Bikerbasen. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.');
 });
 
 test('canonical og og:url røres ikke — facetterne samles stadig ét sted', () => {
