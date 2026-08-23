@@ -117,7 +117,7 @@ const PAGES = [
   [/^opret-annonce\.html$/, ['Utility', 'Forms', 'Stepper']],
   [/^mine-annoncer\.html$/, ['Utility', 'Cards / listings grid', 'Bike art', 'Mine annoncer']],
   [/^dashboard\.html$/, ['Utility', 'Forms', 'Dealer dashboard']],
-  [/^(vilkaar|privatlivspolitik|sikkerhed|404)\.html$/, ['Utility', 'Legal / static content', 'Trust & safety']],
+  [/^(vilkaar|privatlivspolitik|sikkerhed|om-indeksering|404)\.html$/, ['Utility', 'Legal / static content', 'Trust & safety']],
 ];
 
 /* Sider der beholder det render-blokerende <link> og IKKE får en indlejret

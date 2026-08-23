@@ -21,7 +21,7 @@ const DETALJE_TIMEOUT_MS = 15_000;
 // se, at det er os, og kunne finde en adresse at skrive til.
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) ' +
-  'Chrome/131.0.0.0 Safari/537.36 Bikerbasen-indeksering/1.0 (+https://bikerbasen.dk/om-indeksering)';
+  'Chrome/131.0.0.0 Safari/537.36 Bikerbasen-indeksering/1.0 (+https://bikerbasen.dk/om-indeksering.html)';
 
 /* Statuskoden skal MED ud af kastet (C-012).
 

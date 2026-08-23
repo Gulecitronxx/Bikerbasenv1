@@ -918,7 +918,7 @@ fs.writeFileSync(path.join(ROOT, 'maerker.html'), indexHtml, 'utf8');
 const base = BASE;
 /* login.html er sat til noindex af build-meta.js. En noindex-side i
    sitemappet er et modsat signal, så den hører ikke med her. */
-const staticPages = ['index.html','soegning.html','maerker.html','opret-annonce.html','sikkerhed.html','vilkaar.html','privatlivspolitik.html','om-bikerbasen.html'];
+const staticPages = ['index.html','soegning.html','maerker.html','opret-annonce.html','sikkerhed.html','vilkaar.html','privatlivspolitik.html','om-bikerbasen.html','om-indeksering.html'];
 
 /* Annoncerne er sidens egentlige long-tail — uden dem i sitemappet skal
    Google selv gætte sig frem via søgesiden, og den er JavaScript-drevet.
