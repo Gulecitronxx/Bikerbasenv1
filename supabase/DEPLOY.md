@@ -36,7 +36,8 @@ Scriptet:
 1. slår projektet op (token virker?),
 2. læser tilstanden direkte i databasen (`profiles.plan`? `enforce_listing_limit`? `dev_set_plan`? pladsholdere i 013?),
 3. kører **kun** de migrationer, tilstanden beviser mangler, i rækkefølgen
-   `006 → 007 → 019 → 020` (i dag: alle fire),
+   `006 → 007 → 019 → 020 → 021` (i dag: alle fem; 021 er kolonnegulvet på
+   `kilder` — anon læser kun id/navn/domæne/aktiv, se filens hoved),
 4. udfylder `<<PROJEKT_URL>>`/`<<HEMMELIGHED>>` i 013's trigger, hvis `NOTIFY_SECRET` er sat,
 5. deployer de fem funktioner via `npx supabase@2 functions deploy` —
    `stripe-webhook` og `notify-saved-searches` **uden JWT-tjek** (de kaldes af
@@ -66,8 +67,9 @@ Webhooken i Stripe skal pege på
 node scripts/tjek-backend.js
 ```
 
-Alle 16 linjer skal stå `OK`: kolonnerne fra 006 findes, `dev_set_plan` findes
-ikke, og ingen funktion svarer 404. En funktion, der svarer 401 uden login, er
+Alle 18 linjer skal stå `OK`: kolonnerne fra 006 findes, `dev_set_plan` findes
+ikke, `kilder.crawl_delay_ms` er lukket for anon (021) mens navn/domæne stadig
+kan læses, og ingen funktion svarer 404. En funktion, der svarer 401 uden login, er
 **deployet og beskyttet** — det er rigtigt.
 
 ## Hvorfor ikke `supabase db push`?

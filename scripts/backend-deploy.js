@@ -85,7 +85,8 @@ async function tilstand(){
                 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
                 where n.nspname='public' and p.proname='notify_saved_searches' limit 1), false) as notify_placeholder,
       exists (select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-              where n.nspname='public' and p.proname='notify_saved_searches') as notify_fn
+              where n.nspname='public' and p.proname='notify_saved_searches') as notify_fn,
+      has_column_privilege('anon', 'public.kilder', 'crawl_delay_ms', 'select') as kilder_aaben
   `, 'tilstand');
   return rows[0];
 }
@@ -95,7 +96,8 @@ async function tilstand(){
    007: slaar annoncegraensen fra (dropper triggeren) — gratis adgang indtil videre
    019: dev_set_plan saetter ogsaa is_dealer (samme rettelse som i stripe-webhook)
    020: dropper dev_set_plan — betalingsomgaaelsen maa ikke findes i produktion
-   Alle fire er skrevet til at kunne koeres igen uden skade; de springes kun over,
+   021: kolonnegulv paa kilder — anon/authenticated laeser kun id, navn, domaene, aktiv (D3)
+   Alle er skrevet til at kunne koeres igen uden skade; de springes kun over,
    naar tilstanden beviser, at de allerede er koert. */
 function migrationsplan(t){
   const plan = [];
@@ -103,6 +105,7 @@ function migrationsplan(t){
   if (t.limit_trigger || plan.includes('006_forhandler_abonnement.sql')) plan.push('007_fri_adgang.sql');
   if (plan.length) plan.push('019_dealer_ved_betaling.sql'); // kun meningsfuld foer 020
   if (t.dev_set_plan || plan.length) plan.push('020_fjern_dev_set_plan.sql');
+  if (t.kilder_aaben) plan.push('021_kilder_kolonnegulv.sql');
   return plan;
 }
 

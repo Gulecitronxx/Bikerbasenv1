@@ -1,0 +1,51 @@
+-- Bikerbasen migration 021: kilder er offentligt laesbar, men kun de tre
+-- kolonner, sitet viser.
+-- Koer i Supabase SQL Editor (eller scripts/backend-deploy.js). Ren ASCII.
+-- Kan koeres igen uden skade.
+--
+-- FUNDET (audit 23.08.2026, D3): anon kunne laese HELE kilder — id, navn,
+-- domaene, aktiv, robots_hentet, crawl_delay_ms, konfig_fil, oprettet.
+-- Ingen af dem er hemmelige i dag, og 014/018 har allerede taget insert/
+-- update/delete/truncate/references/trigger fra anon og authenticated. Men
+-- "kan laeses af alle" er den forkerte standard for en tabel, der beskriver
+-- VORES crawler (hvor ofte, hvilken konfigfil, om en kilde er slaaet fra):
+-- den dag nogen tilfoejer en kolonne med en API-noegle, et login til en
+-- kildes partnerflade eller en note om en aftale, er den offentlig i samme
+-- oejeblik, uden at nogen har besluttet det.
+--
+-- RETTELSE: kolonnegulv. SELECT paa tabellen tages fra begge klientroller
+-- og gives tilbage KUN paa id, navn, domaene og aktiv — det, sitet laeser:
+--   js/backend-bridge.js, js/supabase-api.js, scripts/shared.js:
+--     eksterne_annoncer?select=...,kilde:kilder(navn, domaene)
+-- `id` er med, fordi PostgREST's indlejring joiner paa kilder.id =
+-- eksterne_annoncer.kilde_id, og Postgres kraever SELECT paa kolonner, der
+-- indgaar i join-betingelsen. `aktiv` er med, fordi RLS-politikken "kilde:
+-- offentlig laesning" (014) er `using (aktiv)`; kolonnen er i forvejen
+-- offentlig viden (om-indeksering.html: opt-out respekteres), og at have
+-- den i gulvet fjerner enhver tvivl om, hvorvidt politikken kan evalueres
+-- for en rolle uden privilegium paa kolonnen. Crawleren (crawler/db.js,
+-- crawler/tjek.js) skriver og laeser med service_role og rammes ikke.
+--
+-- RLS-politikken "kilde: offentlig laesning" (014) bliver staaende: den
+-- afgoer hvilke RAEKKER, gulvet her afgoer hvilke KOLONNER. Et
+-- `select=*` fra anon svarer herefter 42501 (permission denied) — det er
+-- meningen; ingen side beder om det.
+--
+-- REGLEN FREMAD (det, "split crawl config into a private table" betyder):
+-- hemmeligheder om en kilde — noegler, logins, aftaletekst, kontaktperson
+-- — hoerer IKKE i kilder, heller ikke bag det her gulv. De skal i en
+-- separat tabel (fx kilde_hemmeligheder, 1:1 paa kilde_id) UDEN grants til
+-- anon/authenticated, saa service_role er den eneste vej ind. Tabellen
+-- oprettes den dag, der er noget at laegge i den — ikke foer (en tom,
+-- privat tabel er bare en tabel, ingen kan se, at nogen har glemt).
+
+revoke select on public.kilder from anon, authenticated;
+grant  select (id, navn, domaene, aktiv) on public.kilder to anon, authenticated;
+
+-- Tjek bagefter (fra SQL Editor; forventet: id/navn/domaene/aktiv true, resten false):
+--   select column_name,
+--          has_column_privilege('anon', 'public.kilder', column_name, 'select') as anon_select
+--     from information_schema.columns
+--    where table_schema = 'public' and table_name = 'kilder'
+--    order by ordinal_position;
+-- Og fra nettet: node scripts/tjek-backend.js (punktet "migration 021").

@@ -52,6 +52,17 @@ async function tjekKolonne(mig, tabel, kolonne){
   noter(findes, `migration ${mig}: ${tabel}.${kolonne}`, findes ? 'findes' : `mangler (${r.status} ${tekst.slice(0, 60)})`);
 }
 
+/* 021: kolonnegulv paa kilder. navn/domaene skal stadig kunne laeses (det
+   er det, kortene viser); crawl_delay_ms maa IKKE (42501 = permission denied). */
+async function tjekKilderGulv(){
+  const ok = await fetch(`${URL_}/rest/v1/kilder?select=navn,domaene&limit=1`, { headers: H });
+  noter(ok.status === 200, 'migration 021: kilder.navn/domaene laesbar for anon', ok.status === 200 ? 'ja (kortene kan vise kilden)' : `NEJ (${ok.status}) — kortene mister kildenavnet`);
+  const r = await fetch(`${URL_}/rest/v1/kilder?select=crawl_delay_ms&limit=1`, { headers: H });
+  const tekst = await r.text();
+  const lukket = r.status !== 200 && /42501|permission denied/.test(tekst);
+  noter(lukket, 'migration 021: kilder.crawl_delay_ms IKKE laesbar for anon', lukket ? 'lukket (42501)' : `aaben (${r.status}) — hele crawlerkonfigurationen er offentlig`);
+}
+
 async function tjekDevSetPlanVaek(){
   // Navngivet parameter, saa PostgREST finder funktionen HVIS den findes.
   const r = await fetch(`${URL_}/rest/v1/rpc/dev_set_plan`, { method: 'POST', headers: H, body: JSON.stringify({ p_plan: 'free' }) });
@@ -71,6 +82,7 @@ async function tjekFunktion(navn){
   console.log(`Roegtest mod ${URL_}\n`);
   for (const [m, t, k] of KOLONNER) await tjekKolonne(m, t, k);
   await tjekDevSetPlanVaek();
+  await tjekKilderGulv();
   for (const f of FUNKTIONER) await tjekFunktion(f);
 
   const bredde = Math.max(...resultater.map(r => r.hvad.length));
