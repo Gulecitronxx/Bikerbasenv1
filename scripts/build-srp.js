@@ -42,13 +42,13 @@ const { ROOT, fetchListings, fetchExternalListings, browserModules } = require('
 const PRERENDER_COUNT = 12;
 
 (async () => {
-  const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering } = browserModules();
+  const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, markerTvaerkildeDubletter } = browserModules();
 
   // Rækkerne skal gennem sidens egne oversættere, ellers mangler kortene
   // forhandler-badge, variant, kilde osv. i forhold til det, klienten tegner.
   const egne = (await fetchListings([]))
     .map(l => l.created_at ? normalizeRemoteListing(l) : l);
-  const eksterne = (await fetchExternalListings()).map(normalizeExternalListing);
+  const eksterne = markerTvaerkildeDubletter((await fetchExternalListings()).map(normalizeExternalListing)).beholdt;   // Runde 7 (D7-F2)
   const alle = egne.concat(eksterne);
 
   // Samme rækkefølge som search.js' standard ('blandet'): js/sortering.js,

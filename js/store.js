@@ -139,7 +139,10 @@ const Store = {
     return [s.egne, s.eksterne].every(v => v === 'ok' || v === 'sprunget-over');
   },
   getListingById(id){
-    return this.getAllListings().find(l => String(l.id) === String(id));
+    return this.getAllListings().find(l => String(l.id) === String(id))
+      // Runde 7 (D7-F2): en markedspladskopi af en forhandlerannonce er ude af
+      // lageret, men en direkte adresse til den skal stadig virke.
+      || (window.EXTERNAL_DUBLETTER || []).find(l => String(l.id) === String(id));
   },
 
   getTheme(){ return localStorage.getItem(this.KEYS.theme); },

@@ -399,7 +399,7 @@ function browserModules(){
     .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n;\n');
 
   return new Function('document', 'Store', 'window', 'db',
-    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy };')(doc, store, {}, db);
+    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter };')(doc, store, {}, db);
 }
 
 module.exports = { ROOT, siteUrl, slugify, listingSlug, fetchListings, fetchExternalListings,

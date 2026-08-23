@@ -691,6 +691,7 @@ function renderExternalListing(listing){
            et andet sted paa siden ("Pris og udstyr kan vaere aendret" staar
            allerede under "Foer du koerer derhen"). -->
       ${hentetLinje ? `<p class="external-detail-source-meta external-detail-hentet">${Icon.clock}${hentetLinje}</p>` : ''}
+      ${(listing.ogsaaHos || []).length ? `<p class="external-detail-source-meta external-detail-ogsaa">${Icon.externalLink}Samme annonce ligger også hos ${listing.ogsaaHos.map(o => o.url ? `<a href="${escapeHTML(o.url)}" target="_blank" rel="noopener noreferrer nofollow">${escapeHTML(o.navn || o.domaene || 'en anden kilde')}</a>` : escapeHTML(o.navn || o.domaene || 'en anden kilde')).join(' og ')} — vi viser den én gang.</p>` : ''}
       <p class="external-detail-source-body">
         ${hvorStaarDen}
         ${hvemHandlerDuMed}

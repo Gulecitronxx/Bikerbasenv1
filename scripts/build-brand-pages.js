@@ -8,7 +8,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy } = browserModules();
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter } = browserModules();
 
 /* Runde 7 (D7-M1): "Brugte Honda" — 165 af 262 Honda er fabriksnye (sidens egen
    eksternErNy()). Ordet "brugte" bruges kun, naar ALLE annoncer er brugte;
@@ -65,7 +65,8 @@ async function hentAnnoncer(){
 
 /* De indekserede annoncer, oversat med sidens EGEN normalisering. */
 async function hentEksterne(){
-  return (await fetchExternalListings()).map(normalizeExternalListing);
+  // Runde 7 (D7-F2): samme afdublettering som klienten (js/backend-bridge.js).
+  return markerTvaerkildeDubletter((await fetchExternalListings()).map(normalizeExternalListing)).beholdt;
 }
 
 let LISTINGS = [];

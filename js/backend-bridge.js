@@ -514,6 +514,42 @@ function rensModelStoej(model){
   return m || null;
 }
 
+
+/* ---------- Runde 7 (D7-F2): samme motorcykel hos to kilder ----------
+   MC Syd laegger sine egne annoncer paa Gul og Gratis. Maalt 23.08.2026:
+   7 grupper (29 raekker af 548), hvor maerke + aargang + pris + postnr er ens
+   paa tvaers af kilder — alle med MC Syd (forhandler) paa den ene side og en
+   Gul og Gratis-annonce uden saelgertype paa den anden. Hero'en sagde "548
+   motorcykler"; det er 548 annoncer og faerre motorcykler.
+
+   Reglen er bevidst smal: gruppen skal have en FORHANDLER-annonce og en
+   annonce fra en anden kilde UDEN oplyst saelgertype (markedspladsen). Saa er
+   markedspladskopien dubletten: den fjernes fra lageret, tallet taeller den
+   ikke, og forhandlerens annonce faar `ogsaaHos` (navn, domaene, url), saa
+   annoncesiden kan vise "Ogsaa hos Gul og Gratis →". Intet slettes i
+   databasen; en direkte adresse til kopien virker stadig (EXTERNAL_DUBLETTER).
+   To private annoncer med samme tal roeres ikke — de kan vaere to maskiner. */
+function markerTvaerkildeDubletter(liste){
+  const noegle = l => (l.year && l.price && l.postnr)
+    ? [String(l.brand || '').toLowerCase(), l.year, l.price, l.postnr].join('|') : null;
+  const grupper = new Map();
+  for (const l of liste){ const k = noegle(l); if (!k) continue; if (!grupper.has(k)) grupper.set(k, []); grupper.get(k).push(l); }
+  const vaek = new Set();
+  for (const ls of grupper.values()){
+    const kilder = new Set(ls.map(l => l.source && l.source.domaene));
+    if (kilder.size < 2) continue;
+    const forhandlere = ls.filter(l => l.isDealer).sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const kopier = ls.filter(l => !l.isDealer && l.saelgertype == null && !(forhandlere[0] && forhandlere[0].source && l.source && l.source.domaene === forhandlere[0].source.domaene));
+    if (!forhandlere.length || !kopier.length) continue;
+    for (const k of kopier){
+      vaek.add(k);
+      const vaert = forhandlere[0];
+      (vaert.ogsaaHos = vaert.ogsaaHos || []).push({ navn: k.source && k.source.navn, domaene: k.source && k.source.domaene, url: k.externalUrl, id: k.id });
+    }
+  }
+  return { beholdt: liste.filter(l => !vaek.has(l)), dubletter: liste.filter(l => vaek.has(l)) };
+}
+
 function normalizeExternalListing(row){
   const kilde = row.kilde || {};
   return {
@@ -737,7 +773,9 @@ async function loadExternalListings(){
     window.DATA_STATUS.eksterne = 'fejlet';
     return [];
   }
-  window.EXTERNAL_LISTINGS = (res.data || []).map(normalizeExternalListing);
+  const { beholdt, dubletter } = markerTvaerkildeDubletter((res.data || []).map(normalizeExternalListing));
+  window.EXTERNAL_LISTINGS = beholdt;
+  window.EXTERNAL_DUBLETTER = dubletter;   // kun til opslag paa id (annonce.html?id=…)
   window.DATA_STATUS.eksterne = 'ok';
   return window.EXTERNAL_LISTINGS;
 }

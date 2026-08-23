@@ -210,6 +210,24 @@ efter) og står i dag som "åben"; funktionerne 404 i dag. Enhedstests for
 klientens fald-tilbage i js/skrivevej.test.js. Ikke kørt mod produktion herfra
 (A1-blokeringen: access token).
 
+### D7-F2 gennemført — tværkilde-dubletter vises én gang — 23.08.2026
+HVAD: `markerTvaerkildeDubletter()` i js/backend-bridge.js (og via
+browserModules i build-srp/brand/facet): er mærke + årgang + pris + postnr ens
+på tværs af to kilder, og gruppen har en FORHANDLER-annonce og en annonce fra
+en anden kilde UDEN oplyst sælgertype (markedspladsen), fjernes
+markedspladskopien fra lageret; forhandlerens annonce får `ogsaaHos`, og
+annoncesiden skriver "Samme annonce ligger også hos Gul og Gratis — vi viser
+den én gang" med link. Intet slettes i databasen; en direkte adresse til
+kopien virker stadig (Store.getListingById falder tilbage til
+EXTERNAL_DUBLETTER).
+HVORFOR: MC Syd lægger egne annoncer på Gul og Gratis; hero'en sagde "548
+motorcykler". Reglen er smal med vilje: to private annoncer med samme tal kan
+være to maskiner og røres ikke.
+MÅLT: 7 grupper / 29 rækker af 548 (alle MC Syd ↔ Gul og Gratis, postnr
+6630): lageret 548 → 541 annoncer overalt (hero, SRP, mærkesider, facetter).
+HVOR: js/backend-bridge.js, js/store.js, js/annonce.js, scripts/shared.js,
+scripts/build-{srp,brand-pages,facet-pages}.js.
+
 ### D7-A5 afvist — mærkatet "Kørekort ikke afgjort" bliver — 23.08.2026
 FINDING: kritikeren foreslog "A · A2 uvist" i stedet for "Kørekort ikke
 afgjort" på kort, hvor effekten mangler, fordi annoncesidens A-boks samtidig

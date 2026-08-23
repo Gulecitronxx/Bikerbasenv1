@@ -96,7 +96,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { siteUrl, fetchListings, fetchExternalListings, siteParts, esc, browserModules, listingSlug } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing } = browserModules();
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, markerTvaerkildeDubletter } = browserModules();
 const BASE = siteUrl();
 
 // data.js giver koerekortForListing, passerKoerekort, hkEllerNull, TYPES,
@@ -864,7 +864,7 @@ function udvidSitemap(resultater){
    klientscriptet overtager. */
 async function hentAlt(){
   const egne = (await fetchListings(global.__L)).map(normalizeRemoteListing);
-  const eksterne = (await fetchExternalListings()).map(normalizeExternalListing);
+  const eksterne = markerTvaerkildeDubletter((await fetchExternalListings()).map(normalizeExternalListing)).beholdt;   // Runde 7 (D7-F2)
   if (!egne.length && !eksterne.length){
     throw new Error('build-facet-pages: nul annoncer i alt. Build afbrudt — se samme vagt i '
       + 'build-brand-pages.js (findingen C-014).');
