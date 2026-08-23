@@ -36,7 +36,16 @@
 -- ============================================================
 -- LUKNINGEN
 -- ============================================================
-revoke execute on function public.dev_set_plan(text) from authenticated;
+-- RETTET (verificeret direkte mod produktion 20.08.2026): den oprindelige
+-- udgave havde en separat "revoke execute ... from authenticated" foer drop.
+-- REVOKE paa en funktion, der ikke findes, fejler i Postgres — der er intet
+-- IF EXISTS for REVOKE paa en funktionsreference. Paa netop dette projekt
+-- eksisterer funktionen slet ikke endnu (006 og 019, som opretter den, er
+-- aldrig koert her — bekraeftet ved at profiles mangler plan/subscription_*-
+-- kolonnerne, og at ingen edge functions er deployet). Filens eget loefte
+-- ("kan koeres igen uden skade") holdt altsaa ikke i det tomme tilfaelde.
+-- DROP FUNCTION IF EXISTS daekker begge tilfaelde alene og fjerner samtidig
+-- enhver grant funktionen maatte have — en separat REVOKE tilfoejer intet.
 drop function if exists public.dev_set_plan(text);
 
 -- Tjek bagefter (skal give 0 raekker — funktionen maa ikke findes):

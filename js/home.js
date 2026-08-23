@@ -406,17 +406,20 @@ async function buildForside(){
   await yieldToMain();
 
   /* ============ Bid 4: tryghedsbåndet ============
-     Rækkefølge efter køberens faktiske behov på en privatsælger-markedsplads:
-     registrering/gennemsigtighed først, så skjult kontakt, så forhandler-
-     verificering. Ingen opdigtede tal/anmeldelser. */
+     Rækkefølge efter køberens faktiske behov: først hvor annoncen kommer fra
+     (i dag er hele lageret indekseret fra forhandlere og markedspladser, og
+     handlen sker hos kilden), så skjult kontakt på egne annoncer, så
+     "ingen gættede felter". Her stod før "Registreringsstatus på hver
+     annonce" — det findes ikke for indekserede annoncer, altså ikke for én
+     eneste annonce på sitet i dag. Ingen opdigtede tal/anmeldelser. */
   document.getElementById('trust-strip').innerHTML = `
     <div class="trust-card">
       <span class="trust-icon">${Icon.checkCircle}</span>
-      <div><h3>Registreringsstatus på hver annonce</h3><p>Se om motorcyklen er indregistreret og afgiftsberigtiget, sammen med ærlige specifikationer — så du ved, hvad du køber, før du handler.</p></div>
+      <div><h3>Kilden står på hver annonce</h3><p>Er annoncen indekseret fra en forhandler eller markedsplads, står det på kortet, og handlen sker hos kilden. Vi hoster ikke deres annoncer og kopierer ikke deres tekst — vi viser dig vej.</p></div>
     </div>
     <div class="trust-card">
       <span class="trust-icon">${Icon.mail}</span>
-      <div><h3>Din kontaktinfo er skjult</h3><p>Skriv til sælger direkte på Bikerbasen. Dit telefonnummer og din e-mail deles først, når du selv vælger det.</p></div>
+      <div><h3>Din kontaktinfo er skjult for udloggede</h3><p>Opretter du en annonce på Bikerbasen, er dit navn og telefonnummer kun synlige for indloggede brugere — ikke for robotter, søgemaskiner eller udloggede besøgende.</p></div>
     </div>
     <!-- Her stod "Verificerede forhandlere — Forhandlere godkendes med CVR og
          MitID". Det passede ikke. verifiedBadgeHTML() i js/components.js

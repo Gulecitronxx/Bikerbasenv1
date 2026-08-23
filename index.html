@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Bikerbasen — Køb og sælg brugte motorcykler i Danmark</title>
-<meta name="description" content="Bikerbasen er Danmarks mødested for køb og salg af brugte motorcykler. Søg blandt hundredvis af annoncer fra private og forhandlere.">
+<meta name="description" content="Bikerbasen samler brugte motorcykler til salg i hele Danmark ét sted — fra forhandlere, markedspladser og egne annoncer. Søg på mærke, type, pris og kørekort.">
 <!-- meta:start (genereret af scripts/build-meta.js) -->
 <link rel="canonical" href="https://bikerbasen.dk">
 <meta name="theme-color" content="#C6420E" media="(prefers-color-scheme: light)">
@@ -16,16 +16,17 @@
 <meta property="og:locale" content="da_DK">
 <meta property="og:url" content="https://bikerbasen.dk">
 <meta property="og:title" content="Bikerbasen — Køb og sælg brugte motorcykler i Danmark">
-<meta property="og:description" content="Bikerbasen er Danmarks mødested for køb og salg af brugte motorcykler. Søg blandt hundredvis af annoncer fra private og forhandlere.">
+<meta property="og:description" content="Bikerbasen samler brugte motorcykler til salg i hele Danmark ét sted — fra forhandlere, markedspladser og egne annoncer. Søg på mærke, type, pris og kørekort.">
 <meta property="og:image" content="https://bikerbasen.dk/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Bikerbasen — køb og sælg brugte motorcykler i Danmark">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Bikerbasen — Køb og sælg brugte motorcykler i Danmark">
-<meta name="twitter:description" content="Bikerbasen er Danmarks mødested for køb og salg af brugte motorcykler. Søg blandt hundredvis af annoncer fra private og forhandlere.">
+<meta name="twitter:description" content="Bikerbasen samler brugte motorcykler til salg i hele Danmark ét sted — fra forhandlere, markedspladser og egne annoncer. Søg på mærke, type, pris og kørekort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
 <!-- meta:end -->
+
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
@@ -60,7 +61,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=a1b38470">
+<link rel="stylesheet" href="css/styles.css?v=d874e086">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -126,7 +127,13 @@ try{
              brødtekststørrelse, hvor ingen så det. Højden er reserveret i CSS,
              så tallet kan komme fra databasen uden at flytte noget. -->
         <p class="hero-count" id="hero-count-hint"></p>
-        <p class="lead">Private sælgere og forhandlere i hele landet — og du kan filtrere på det kørekort, du faktisk har.</p>
+        <!-- Her stod "Private sælgere og forhandlere i hele landet". Lageret er i
+             dag 100 % indekseret fra forhandlere og markedspladser (0 egne
+             annoncer, se docs/naeste-prompts.md, Prompt 1), og kortene siger
+             selv "Annonce fra <kilde>". Linjen skal være sand uanset
+             blandingen af egne og indekserede annoncer — derfor hverken tal
+             eller "private". -->
+        <p class="lead">Motorcykler til salg fra forhandlere og markedspladser i hele landet — samlet ét sted, og du kan filtrere på det kørekort, du faktisk har.</p>
       </div>
 
       <form class="search-panel" id="hero-search-form" aria-label="Søg motorcykler">
@@ -197,7 +204,11 @@ try{
              andre steder på siden (se noterne nedenfor): at SÆLGEREN vælger
              hvornår. Gaten er login — se saelgerKortHTML() i js/annonce.js. -->
         <li class="hero-trust-item">Kontaktinfo skjult for udloggede</li>
-        <li class="hero-trust-item">Registreringsstatus på hver annonce</li>
+        <!-- "Registreringsstatus på hver annonce" passede ikke: de indekserede
+             annoncer (i dag alle) har ingen registreringsstatus hos os. Det her
+             løfte holder for hvert eneste kort — se tryghedsbåndets tredje
+             kort i js/home.js. -->
+        <li class="hero-trust-item">Mangler et tal, står der "Ikke oplyst"</li>
       </ul>
     </div>
   </section>
@@ -251,14 +262,18 @@ try{
                  annoncesidens egen tekst ("Kontaktoplysninger er kun
                  synlige for indloggede brugere"), så de to sider ikke
                  længere beskriver to forskellige mekanismer. -->
-            <p>Log ind, og skriv til sælger direkte i Bikerbasen. Sælgerens navn og kontaktoplysninger er kun synlige for indloggede brugere — det holder dem væk fra robotter og reklamehenvendelser.</p>
+            <!-- Skal være sand for begge slags annoncer: de indekserede (handlen
+                 sker hos kilden, vi har ingen kontaktoplysninger — se
+                 om-indeksering.html) og de egne (kontakt på Bikerbasen, bag
+                 login — se saelgerKortHTML() i js/annonce.js). -->
+            <p>Er annoncen indekseret fra en forhandler eller markedsplads, sender vi dig direkte videre til sælgeren dér. Er den oprettet på Bikerbasen, kan du skrive til sælgeren her, når du er logget ind — kontaktoplysningerne er kun synlige for indloggede brugere.</p>
           </div>
         </li>
         <li class="step">
           <span class="step-num">3</span>
           <div class="step-body">
             <h3>Aftal og hent</h3>
-            <p>Se registreringsstatus og ærlige specifikationer, aftal fremvisning, og handl med ro i maven.</p>
+            <p>Tjek specifikationerne — og hvad der står "Ikke oplyst" — aftal fremvisning, og handl med ro i maven.</p>
           </div>
         </li>
       </ol>
@@ -517,20 +532,20 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=a1b38470"></script>
+<script defer src="js/security.js?v=d874e086"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=a1b38470"></script>
-<script defer src="js/supabase-api.js?v=a1b38470"></script>
-<script defer src="js/icons.js?v=a1b38470"></script>
-<script defer src="js/data.js?v=a1b38470"></script>
+<script defer src="js/supabase-config.js?v=d874e086"></script>
+<script defer src="js/supabase-api.js?v=d874e086"></script>
+<script defer src="js/icons.js?v=d874e086"></script>
+<script defer src="js/data.js?v=d874e086"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=a1b38470"></script>
-<script defer src="js/store.js?v=a1b38470"></script>
-<script defer src="js/backend-bridge.js?v=a1b38470"></script>
-<script defer src="js/components.js?v=a1b38470"></script>
-<script defer src="js/home.js?v=a1b38470"></script>
+<script defer src="js/filtrering.js?v=d874e086"></script>
+<script defer src="js/store.js?v=d874e086"></script>
+<script defer src="js/backend-bridge.js?v=d874e086"></script>
+<script defer src="js/components.js?v=d874e086"></script>
+<script defer src="js/home.js?v=d874e086"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

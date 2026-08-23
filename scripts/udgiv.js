@@ -197,9 +197,20 @@ function referencer(html){
 const mangler = [];
 const htmlFiler = fs.readdirSync(UD).filter(f => f.endsWith('.html'));
 
+/* En reference er daekket, naar filen findes — ELLER naar den er
+   udvidelsesfri og `<ref>.html` findes. Det sidste er den rene adresse,
+   canonical og og:url peger paa siden SEO-runde 3 (scripts/build-meta.js,
+   cleanUrl): GitHub Pages svarer 200 paa /soegning med soegning.html's
+   indhold (efterproevet mod produktion). Uden undtagelsen afbroed dette
+   tjek udgivelsen paa 51 canonical-links, som alle pegede rigtigt. */
+function daekket(ref){
+  if (fs.existsSync(path.join(UD, ref))) return true;
+  return !path.extname(ref) && fs.existsSync(path.join(UD, `${ref}.html`));
+}
+
 for (const fil of htmlFiler){
   for (const ref of referencer(fs.readFileSync(path.join(UD, fil), 'utf8'))){
-    if (!fs.existsSync(path.join(UD, ref))) mangler.push(`${fil} → ${ref}`);
+    if (!daekket(ref)) mangler.push(`${fil} → ${ref}`);
   }
 }
 
