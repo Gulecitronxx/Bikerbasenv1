@@ -1,5 +1,18 @@
 # Deploy af backenden (migrationer + Edge Functions)
 
+> **STATUS 23.08.2026: DEPLOYET.** Migrationerne 006, 007, 020, 021 og 022 er
+> koert mod produktionen via Supabase MCP (019 sprunget over: den genskaber kun
+> `dev_set_plan`, som 020 dropper — 006 blev koert UDEN dev_set_plan, saa
+> betalingsomgaaelsen har aldrig eksisteret i produktionen). Alle syv Edge
+> Functions er deployet (indberet/haendelse/stripe-webhook/notify uden JWT som
+> planlagt, resten med). `node scripts/tjek-backend.js`: **22/22 OK**.
+> `enforce_listing_limit()` er desuden lukket for RPC-kald fra klientroller
+> (advisor 0028). MANGLER stadig (kraever konti/noegler — kun mennesket):
+> Stripe-secrets (STRIPE_SECRET_KEY/PRICE_ID/WEBHOOK_SECRET + webhook-URL i
+> Stripe), RESEND_API_KEY + NOTIFY_SECRET (mails), CVR_API_TOKEN (valgfri),
+> TAELLER_SALT (anbefalet), SITE_URL. Saet dem som i afsnit 3 nedenfor —
+> funktionerne svarer aerligt 4xx/503, indtil de er sat.
+
 Én kommando deployer det, der mangler i produktionen, og efterprøver det
 bagefter. Skrevet efter audit 23.08.2026, hvor alle fem Edge Functions svarede
 404 og `profiles.plan` ikke fandtes — koden og produktionen var to systemer.

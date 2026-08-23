@@ -169,9 +169,7 @@ Deno.serve(async (req) => {
           from: 'Bikerbasen <noreply@bikerbasen.dk>',
           to: [email],
           // Emnelinjen taaler ikke markup, men et linjeskift kan injicere headere.
-          subject: `${String(l.brand ?? '').replace(/[
-]/g, ' ')} ${String(l.model ?? '').replace(/[
-]/g, ' ')} — ${tal(l.price)} kr.`,
+          subject: `${String(l.brand ?? '').replace(/[\r\n]+/g, ' ')} ${String(l.model ?? '').replace(/[\r\n]+/g, ' ')} — ${tal(l.price)} kr.`,
           html: mailHtml(l, sti, afmeld),
         }),
       });
