@@ -34,6 +34,10 @@ storage-bucket til billeder, og — vigtigst — **Row Level Security-politikker
 
 ### Migrationer
 
+> **Genvej (anbefalet):** `node scripts/backend-deploy.js` kører de migrationer,
+> produktionen mangler, og deployer Edge Functions i ét hug — se `DEPLOY.md`.
+> Tabellen herunder er stadig den manuelle vej.
+
 Kør derefter migrationsfilerne i nummerorden i samme SQL-editor. De kan køres
 oven på et eksisterende skema uden at røre data, du allerede har:
 

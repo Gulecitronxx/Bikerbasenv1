@@ -1,0 +1,23 @@
+# Supabase CLI-konfiguration — kun det, deployet af Edge Functions har brug for.
+# Migrationerne ligger som nummererede filer i supabase/ (ikke supabase/migrations/)
+# og koeres af scripts/backend-deploy.js via Management API. Brug IKKE
+# `supabase db push` her: den kender ikke den rækkefoelge, produktionen har faaet
+# filerne i, og ville forsoege at koere dem alle forfra.
+project_id = "hkcjrwglwurdjnobewzb"
+
+# Kaldes af Stripe med signatur i stedet for bruger-JWT (se functions/stripe-webhook/index.ts).
+[functions.stripe-webhook]
+verify_jwt = false
+
+# Kaldes af databasen (pg_net, migration 013) med x-bb-secret i stedet for bruger-JWT.
+[functions.notify-saved-searches]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = true
+
+[functions.create-portal]
+verify_jwt = true
+
+[functions.verify-profile]
+verify_jwt = true
