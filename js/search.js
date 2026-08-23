@@ -18,7 +18,7 @@ const EMPTY_STATE = {
   service: [],
   colors: [], maxAgeDays: null, photosOnly: false,
   ejereMax: null, nysynet: false, vinterklar: false,
-  dealerOnly: false, koerekort: '', sort: 'blandet', page: 1,
+  dealerOnly: false, koerekort: '', kilde: '', sort: 'blandet', page: 1,
 };
 
 /* Sorteringerne, som de står i #sort-select. Listen bruges også til at
@@ -62,6 +62,7 @@ function readStateFromURL(){
   state.nysynet = p.get('nysynet') === '1';
   state.vinterklar = p.get('vinter') === '1';
   state.koerekort = p.get('koerekort') || '';
+  state.kilde = p.get('kilde') || '';
   const sort = SORT_ALIAS[p.get('sort')] || p.get('sort') || '';
   state.sort = SORTERINGER.includes(sort) ? sort : 'blandet';
   state.page = numOrNull(p.get('page')) || 1;
@@ -84,6 +85,7 @@ function currentQueryString(includeSort = false){
   if (state.nysynet) p.set('nysynet', '1');
   if (state.vinterklar) p.set('vinter', '1');
   if (state.koerekort) p.set('koerekort', state.koerekort);
+  if (state.kilde) p.set('kilde', state.kilde);
   if (includeSort && state.sort !== 'blandet') p.set('sort', state.sort);
   return p.toString();
 }
@@ -878,7 +880,7 @@ function forklarIndekseret(){
 function renderResultsCount(list){
   const total = list.length;
   document.getElementById('results-count').innerHTML =
-    `${total} <span>${total === 1 ? 'annonce fundet' : 'annoncer fundet'}</span>`;
+    `${total} <span>${total === 1 ? 'annonce' : 'annoncer'}<span class="results-count-fundet"> fundet</span></span>`;
 
   const mix = document.getElementById('results-mix');
   if (!mix) return;
@@ -889,9 +891,13 @@ function renderResultsCount(list){
   if (!eksterne){ mix.hidden = true; mix.innerHTML = ''; return; }
 
   const sorteret = [...kilder.entries()].sort((a, b) => b[1] - a[1]);
-  const kildeTekst = sorteret.slice(0, 2)
-    .map(([navn, n]) => `${n} indekseret hos ${escapeHTML(navn)}`).join(' · ');
-  const flere = sorteret.length > 2 ? ` · +${sorteret.length - 2} kilder` : '';
+  /* Runde 6 (D6-S5): "indekseret: 332 hos MC Syd · 118 hos Gul og Gratis · 98
+     hos 2 andre" — ordet én gang, og resten som et tal, der kan taelles efter
+     (548 − 332 − 118). Foer ombroed "+2 kilder" til sin egen linje. */
+  const restN = sorteret.slice(2).reduce((a, [, n]) => a + n, 0);
+  const kildeTekst = 'indekseret: ' + sorteret.slice(0, 2)
+    .map(([navn, n]) => `${n} hos ${escapeHTML(navn)}`).join(' · ');
+  const flere = sorteret.length > 2 ? ` · ${restN} hos ${sorteret.length - 2} ${sorteret.length - 2 === 1 ? 'anden' : 'andre'}` : '';
   const egneTekst = egne
     ? `<span class="mix-part mix-egne">${egne} ${egne === 1 ? 'annonce' : 'annoncer'} på Bikerbasen</span>`
     : '';
@@ -909,9 +915,11 @@ function renderResultsCount(list){
   // paa desktop, den korte ("fra 4 kilder") paa mobil. Begge er sande og kan
   // taelles efter; (i) aabner fordelingen begge steder.
   const antalKilder = sorteret.length;
-  const kort = `indekseret fra ${antalKilder} ${antalKilder === 1 ? 'kilde' : 'kilder'}`;
+  // Runde 6 (D6-S2): paa mobil staar den korte udgave paa SAMME linje som
+  // "548 annoncer" — derfor uden tallet: "· fra 4 kilder (i)".
+  const kort = `fra ${antalKilder} ${antalKilder === 1 ? 'kilde' : 'kilder'}`;
   mix.innerHTML = `${egneTekst}<span class="mix-tail">` +
-    `<span class="mix-part mix-ekstern"><span class="mix-lang">${kildeTekst}${flere}</span><span class="mix-kort">${eksterne} ${kort}</span></span>` +
+    `<span class="mix-part mix-ekstern"><span class="mix-lang">${kildeTekst}${flere}</span><span class="mix-kort">· ${kort}</span></span>` +
     `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>` +
     `</span>`;
   mix.querySelector('#mix-info-btn').addEventListener('click', forklarIndekseret);
@@ -1318,6 +1326,7 @@ function activeFilterPills(){
     pills.push({ label: `${state.hkMin||0} – ${state.hkMax||'∞'} hk`, clear: () => { state.hkMin=null; state.hkMax=null; } });
   }
   if (state.dealerOnly) pills.push({ label: 'Kun forhandlere', clear: () => state.dealerOnly = false });
+  if (state.kilde) pills.push({ label: `Hos ${state.kilde}`, clear: () => state.kilde = '' });
   if (state.photosOnly) pills.push({ label: 'Kun med billeder', clear: () => state.photosOnly = false });
   if (state.ejereMax != null) pills.push({ label: `Maks. ${state.ejereMax} ejer${state.ejereMax===1?'':'e'}`, clear: () => state.ejereMax = null });
   if (state.nysynet) pills.push({ label: 'Nysynet', clear: () => state.nysynet = false });

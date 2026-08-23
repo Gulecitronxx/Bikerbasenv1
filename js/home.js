@@ -97,7 +97,9 @@ async function buildForside(){
     { label: 'Under 50.000 kr.', icon: 'medal', params: { maxPrice: 50000 } },
     { label: 'Adventure', icon: 'mapPin', params: { type: 'adventure' } },
     { label: 'Cruiser', icon: 'mapPin', params: { type: 'cruiser' } },
-    { label: 'Under 10.000 km', icon: 'gauge', params: { kmMax: 10000 } },
+    /* Runde 6 (D6-F9): "Under 10.000 km" fjernet — fem chips ombroed til 4 + 1
+       paa desktop (+44 px i hero'en), og 162 af 548 er fabriksnye uden km, saa
+       chippen favoriserede ét lager. */
   ];
   // Egne seneste søgninger først (Bilbasen-mønster), derefter de kuraterede.
   const recent = Store.getRecentSearches().slice(0, 2).map(r =>
@@ -405,7 +407,7 @@ async function buildForside(){
     if (ul) ul.innerHTML = links.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('');
   };
   // seo-brands fyldes i bid 5 af tegnMaerker() — samme liste som maerkeskyen.
-  fillSeoCol('seo-types', TYPES.map(t => ({ label: t.label, href: `soegning.html?type=${t.id}` })));
+  // seo-types fyldes i bid 5 af fyldTypeAntal() — kun typer med annoncer (D6-F3).
   fillSeoCol('seo-regions', (typeof REGIONS !== 'undefined' ? REGIONS : []).map(r => ({ label: r, href: `soegning.html?regions=${encodeURIComponent(r)}` })));
   fillSeoCol('seo-price', [
     { label: 'Under 30.000 kr.', href: 'soegning.html?maxPrice=30000' },
@@ -529,6 +531,12 @@ async function buildForside(){
        raekken 664 px til hoejre. Tilbage til start, naar ordenen er sat. */
     const raekke = document.getElementById('category-tiles');
     if (raekke && raekke.scrollLeft) raekke.scrollLeft = 0;
+    /* Runde 6 (D6-F3): SEO-kolonnen "Motorcykeltyper" listede Scooter (0) som
+       link til nul traef — samme blindgyde, D5-F3 lukkede paa flisen. Samme
+       liste, samme filter, tallet i parentes som maerkerne. */
+    const typerMedTal = TYPES.map(t => ({ t, n: Filtrering.anvendFiltre(ALLE, { types: [t.id] }, null, null).length }))
+      .filter(x => x.n > 0).sort((a, b) => b.n - a.n);
+    fillSeoCol('seo-types', typerMedTal.map(x => ({ label: `${x.t.label} (${daTal(x.n)})`, href: `soegning.html?type=${x.t.id}` })));
     const sub = document.getElementById('types-sub');
     if (sub && udenType){
       sub.textContent = `Find hurtigt den type, du leder efter. ${daTal(udenType)} af `
@@ -935,9 +943,20 @@ async function buildForside(){
        8 paa fire — altid hele raekker. Bilbasen viser ≈30 kort; 4 paa mobil er
        ≈1 670 px, og resten af lageret er ét tryk vaek ("Se alle annoncer"). */
     const cols = getComputedStyle(featuredMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-    const maks = cols >= 4 ? 8 : cols === 3 ? 6 : 4;
+    /* Runde 6 (D6-F4): paa mobil er gitteret to spalter med kompakte kort (css
+       #featured-listings paa ≤620) — 8 kort paa ≈1 000 px, hvor 4 fuldbredde-
+       kort var 1 880. Bilbasen: 14 kort i to spalter. */
+    const kompakt = cols === 2 && window.matchMedia('(max-width:620px)').matches;
+    const maks = cols >= 4 ? 8 : cols === 3 ? 6 : kompakt ? 8 : 4;
     featured = featured.slice(0, Math.min(featured.length, maks));
     await saetIndIPortioner(featuredMount, featured.map(kortHTML));
+    /* Runde 6 (D6-F1): foerste raekke ligger nu 170–235 px under folden, og
+       fuldsideoptagelser viste graa, utegnede fotofelter dér tre runder i
+       traek. Foerste raekke hentes derfor med det samme (lazy → eager udloeser
+       hentningen); prioriteten er stadig lav, hero-fotoet er LCP. */
+    featuredMount.querySelectorAll('.card').forEach((c, i) => {
+      if (i < cols){ const img = c.querySelector('img.card-photo'); if (img){ img.loading = 'eager'; } }
+    });
     skrivFeaturedSub(featured.length);
     wireFavoriteButtons(featuredMount);
   };

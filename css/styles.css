@@ -435,7 +435,14 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* Runde 5 (D5-F7): paa mobil er headerens to naaelige pladser profil + menu
    (Bilbasen: profil · hjerte · menu). Temaskiftet er en indstilling og bor i
    skuffen; paa desktop staar den i headeren som foer. */
+/* Runde 6 (D6-F5): temaskiftet er ude af headeren paa alle bredder — det bor i
+   skuffen (mobil) og i footerens "Om Bikerbasen" (desktop). */
 .header-actions .theme-toggle{ display:none; }
+.footer-theme{
+  display:inline-flex; align-items:center; gap:8px; background:transparent; border:0; padding:0;
+  color:inherit; font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:3px;
+}
+.footer-theme svg{ width:16px; height:16px; }
 .mobile-profile{ display:inline-flex; }
 .mobile-profile.is-logged-in{ color: var(--color-primary); }
 .drawer-theme{
@@ -455,7 +462,6 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   .header-actions .btn-outline{ display:inline-flex; }
   .header-cta{ display:inline-flex; }
   .mobile-menu-btn{ display:none; }
-  .header-actions .theme-toggle{ display:inline-flex; }
   .mobile-profile{ display:none; }
 }
 
@@ -524,7 +530,9 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   color:#fff;
   padding: var(--space-8) 0 var(--space-7);
 }
-@media (min-width:768px){ .hero{ padding: var(--space-9) 0 var(--space-8); } }
+/* Runde 6 (D6-F6): hero-bunden −40 px og "Til salg lige nu" −24 px paa desktop,
+   saa overskrift + underrubrik staar over folden ved 850 px. */
+@media (min-width:768px){ .hero{ padding: var(--space-9) 0 var(--space-5); } #featured-section{ padding-top: var(--space-6); } }
 
 /* Fuldflade-foto: motorcyklen står i højre side, vej og hav løber mod venstre,
    hvor overskrift og søgekort ligger. Rigtige billeder — Bilbasens forside er
@@ -825,6 +833,27 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    orddeling) må aldrig kunne skubbe hele gitteret bredere end sin spalte. */
 .listings-grid{ display:grid; grid-template-columns: repeat(1,minmax(0,1fr)); gap: var(--space-4); }
 @media (min-width:560px){ .listings-grid{ grid-template-columns: repeat(2,minmax(0,1fr)); } }
+/* Runde 6 (D6-F4): forsidens "Til salg lige nu" paa mobil — to spalter,
+   kompakte kort (foto 4:3, pris 16 px, titel én linje, smaa chips, kun
+   kildelinjen i foden). Samme sande felter, ingen ny paastand. Soegesidens
+   kort roeres ikke (dens 16:10-regel er maalt og laast). */
+@media (max-width:620px){
+  #featured-listings{ grid-template-columns: repeat(2,minmax(0,1fr)); gap:10px; }
+  #featured-listings .card-external .card-body{ padding:10px; gap:6px; }
+  #featured-listings .card-external .card-price{ font-size:16px; line-height:22px; }
+  #featured-listings .card-external .card-ny,
+  #featured-listings .card-external .card-salgsmarkoerer,
+  #featured-listings .card-external .card-title-variant,
+  #featured-listings .card-external .card-sted,
+  #featured-listings .card-external .card-compare{ display:none; }
+  #featured-listings .card-external .card-title{ font-size:14px; line-height:1.3; }
+  #featured-listings .card-external .card-title-main{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #featured-listings .card-external .card-specs{ height:auto; max-height:46px; flex-wrap:wrap; gap:4px; }
+  #featured-listings .card-external .card-spec dd{ font-size:11px; padding:2px 6px; line-height:16px; }
+  #featured-listings .card-external .card-koerekort{ font-size:11px; padding:1px 6px; }
+  #featured-listings .card-external .card-footer{ padding-top:6px; font-size:11px; }
+  #featured-listings .card-external .card-kildelinje{ max-width:100%; }
+}
 @media (min-width:900px){ .listings-grid{ grid-template-columns: repeat(3,minmax(0,1fr)); } }
 @media (min-width:1240px){ .listings-grid{ grid-template-columns: repeat(4,minmax(0,1fr)); } }
 
@@ -1089,6 +1118,12 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 @container (max-width: 320px){
   .card-specs{ flex-wrap:wrap; align-content:flex-start; height:54px; }
 }
+/* Runde 6 (D6-S6): "2025 · 1.000 ccm · km ikke oplyst · Koerekort ikke afgjort"
+   klippede km-chippen til "km i…" i én raekke. Samme faste hoejde-idé (D-011),
+   bare en anden fast hoejde for den kortklasse, der har brug for to raekker. */
+@media (max-width:620px){
+  .card-specs:has(.spec-tom):has(.kk-ukendt){ flex-wrap:wrap; align-content:flex-start; height:54px; }
+}
 /* Feltnavnet er der for skærmlæseren; linjen viser kun værdien. */
 .card-spec dt{
   position:absolute; width:1px; height:1px; margin:0; padding:0;
@@ -1138,8 +1173,11 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 }
 .card-external .card-koerekort.kk-a1, .card-external .card-koerekort.kk-a2{ background: var(--color-primary); color: var(--color-on-primary); border-color:transparent; }
 .card-external .card-price{ font-size:22px; letter-spacing:-0.01em; }
-/* Runde 5 (D5-S7): domaenet vinder pladskampen i fodlinjen; stedet viger. */
-.card-external .card-footer .card-sted{ flex:0 1 auto; max-width:45%; }
+/* Runde 5 (D5-S7): domaenet vinder pladskampen i fodlinjen; stedet viger.
+   Runde 6 (D6-S3): 40 %, og i spalter under 300 px falder saelgertypen vaek,
+   saa domaenet staar helt ("Svendborg" + "guloggratis.dk" = 197 px < 248). */
+.card-external .card-footer .card-sted{ flex:0 1 auto; max-width:40%; }
+@container (max-width: 300px){ .card-external .card-saelgertype{ display:none; } }
 .card-external .card-footer .card-kildelinje{ flex:1 1 auto; min-width:0; justify-content:flex-end; }
 /* Accentfarven er et udsagn: "sådan her er reglen". Kan vi ikke udlede
    kategorien, må chippen ikke lyde lige så sikker — den bliver stående, men
@@ -1409,6 +1447,8 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 
 .toolbar-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
 #sort-select{ width:auto; min-width:168px; }
+/* Runde 6 (D6-S1): gulv, saa "Blandet" aldrig klippes paa 360–390 px. */
+@media (max-width:620px){ .sort-felt > select, #sort-select{ min-width:96px; } }
 
 /* Fritekst-søgefelt øverst i resultatkolonnen */
 /* Runde 5 (D5-S1): soegefelt + gem + Filtre i én raekke paa alle bredder. */
@@ -1731,6 +1771,10 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
 }
 /* Runde 5 (D5-A4): handlingsrækken under titlen — stille, som Bilbasens
    "Sammenlign · Print · Anmeld". */
+/* Runde 6 (D6-A1): primaer knap under prisen paa <960 px. */
+.external-detail-cta{ margin-top:12px; }
+.external-detail-cta svg{ width:16px; height:16px; }
+@media (min-width:960px){ .external-detail-cta{ display:none; } }
 .external-detail-actions{ display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
 .external-detail-actions .btn{ color: var(--color-fg-muted); }
 .external-detail-actions .btn svg{ width:16px; height:16px; }
@@ -1783,7 +1827,16 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
   .external-detail-photo-tom{ margin-inline: var(--space-4); }
 }
 
-.external-detail-head{ margin: var(--space-5) 0 0; }
+.external-detail-head{ margin: var(--space-5) 0 0; position:relative; }
+/* Runde 6 (D6-A3): paa desktop staar handlingsraekken (Sammenlign · Del · Meld
+   fejl) oeverst til hoejre paa titlens linje — Bilbasens "Sammenlign · Print ·
+   Anmeld" — og noegletallene rykker ≈50 px op, saa raekken med koerekort/aargang/
+   km/kubik/effekt begynder over folden ved 850. Titlen faar plads til hoejre. */
+@media (min-width:960px){
+  .external-detail-actions{ position:absolute; top:-4px; right:0; margin:0; }
+  .external-detail-title{ padding-right:280px; }
+  .external-detail-stats{ margin-top: var(--space-3); }
+}
 .external-detail-title{
   font-family: var(--font-display); font-weight:700; line-height:1.1;
   font-size: clamp(26px,3.6vw,36px); margin:0;
@@ -1861,7 +1914,9 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
 /* Nøgletallene: årgang, km, ccm, hk. Kun dem vi har — auto-fit gør, at to
    felter fylder rækken lige så pænt som fire. */
 .external-detail-stats{
-  display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:1px;
+  /* Runde 6 (D6-A4): 120 px-minimum → fem celler paa én raekke i 703 px
+     (foer: fire + "Effekt" alene med tre graa felter). */
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap:1px;
   margin-top: var(--space-5);
   background: var(--color-border); border:1px solid var(--color-border);
   border-radius: var(--radius-md); overflow:hidden;
@@ -1882,6 +1937,8 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
   .external-detail-stats{ grid-template-columns: repeat(2,1fr); }
   .external-detail-stat:last-child:nth-child(odd){ grid-column: 1 / -1; }
 }
+/* Runde 6 (D6-A4): 6. celle alene paa en raekke af fem → hele raekken. */
+@media (min-width:700px){ .external-detail-stat:last-child:nth-child(5n+1){ grid-column: 1 / -1; } }
 
 .external-detail-section{ margin-top: var(--space-7); padding-top: var(--space-6); border-top:1px solid var(--color-border); }
 .external-detail-section h2{ font-size:20px; margin-bottom: var(--space-3); }
@@ -1950,9 +2007,13 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
 .external-detail-next h2{ font-size:15px; margin:0 0 var(--space-3); }
 .external-detail-next ul{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
 .external-detail-next a{
-  display:block; padding:8px 0; font-size:14px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:9px 0; font-size:14px; color: var(--color-primary); font-weight:500;
   border-bottom:1px solid var(--color-border);
 }
+.external-detail-next-n{ display:inline-flex; align-items:center; gap:4px; color: var(--color-fg-muted); font-weight:600; font-size:13px; font-variant-numeric: tabular-nums; }
+.external-detail-next-n svg{ width:14px; height:14px; }
+.external-detail-hentet{ border-top:0; padding-top:0; margin-top: var(--space-3); }
 .external-detail-next li:last-child a{ border-bottom:0; }
 
 /* ============ Forms ============ */

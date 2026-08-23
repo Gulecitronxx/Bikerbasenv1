@@ -30,7 +30,7 @@
 <meta name="twitter:title" content="Brugte motorcykler til salg — Bikerbasen">
 <meta name="twitter:description" content="Brugte motorcykler til salg på Bikerbasen. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -101,6 +101,13 @@ try{
    fra. Da den blev vist, voksede vaerktoejslinjen 22px og skubbede hele
    resultatgitteret ned. */
 .results-headline{min-height:49px}
+@media (max-width:620px){
+  /* Runde 6 (D6-S2): én linje — "548 annoncer · fra 4 kilder (i)". */
+  .srp .results-headline{min-height:24px;display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap}
+  .srp .results-count-fundet{display:none}
+  .srp .results-mix{margin-top:0;white-space:nowrap;flex-wrap:nowrap;min-width:0;overflow:hidden}
+  .srp .mix-ekstern::before{display:none}
+}
 /* Sorteringslinjen staar i markuppen fra foerste maling (se <p id="sortering-note">).
    Uden maalene her ville den blive malet som broedtekst i 16px og derefter
    skrumpe til 12,5px, naar styles.css lander — et skred paa hoejde med en
@@ -190,7 +197,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=5834f35a">
+<link rel="stylesheet" href="css/styles.css?v=afcd7592">
 
 
 
@@ -343,13 +350,9 @@ try{
               </div>
             </details>
 
-            <details class="filter-group" open>
-              <summary>Type<span class="chev"></span></summary>
-              <div class="filter-body">
-                <div class="chip-group" id="filter-types" role="group" aria-label="Type — vælg én eller flere"></div>
-              </div>
-            </details>
-
+            <!-- Runde 6 (D6-S7): Pris staar FOER Type — det filter, koeberen oftest
+                 roerer efter maerke; Type er syv chips i to spalter og kan staa
+                 under folden paa desktop. -->
             <!-- Pris står åben og med færdige intervaller øverst. "En A2'er
                  til under 60.000" skal kunne klikkes, ikke tastes: før
                  krævede det at folde gruppen ud og enten trække i en skyder
@@ -393,6 +396,13 @@ try{
                     <input type="number" class="input" id="filter-price-max" placeholder="Ingen grænse" inputmode="numeric">
                   </div>
                 </div>
+              </div>
+            </details>
+
+            <details class="filter-group" open>
+              <summary>Type<span class="chev"></span></summary>
+              <div class="filter-body">
+                <div class="chip-group" id="filter-types" role="group" aria-label="Type — vælg én eller flere"></div>
               </div>
             </details>
 
@@ -564,7 +574,7 @@ try{
         <div class="srp-bar">
         <form class="srp-search" id="srp-search" role="search">
           <span class="srp-search-icon" id="srp-search-icon" aria-hidden="true"></span>
-          <input type="search" id="filter-q" placeholder="Søg efter mærke eller model" autocomplete="off" aria-label="Søg mærke eller model">
+          <input type="search" id="filter-q" placeholder="Mærke eller model" autocomplete="off" aria-label="Søg mærke eller model">
           <button type="button" class="srp-search-clear" id="filter-q-clear" aria-label="Ryd søgning" hidden></button>
         </form>
           <button type="button" class="btn btn-outline btn-sm" id="save-search-btn"><span id="save-search-icon"></span><span id="save-search-label">Gem søgning</span></button>
@@ -587,7 +597,7 @@ try{
                første </div>. #results-mix fyldes kun af js/search.js — ved
                første maling ved vi ikke, hvor annoncerne kommer fra. -->
           <div class="results-headline" role="status" aria-live="polite" aria-atomic="true">
-            <div class="results-count" id="results-count">548 <span>annoncer fundet</span></div>
+            <div class="results-count" id="results-count">548 <span>annoncer<span class="results-count-fundet"> fundet</span></span></div>
             <p class="results-mix" id="results-mix" hidden></p>
           </div>
           <div class="toolbar-actions">
@@ -623,12 +633,15 @@ try{
                    noget at efterprøve på siden (0 kort uden foto). -->
               <button type="button" class="sortering-info" id="sortering-info-btn" title="Sådan er rækkefølgen sat" aria-label="Sådan er rækkefølgen sat" hidden></button>
               <select class="input" id="sort-select" style="min-height:40px; padding:8px 32px 8px 12px;">
-              <option value="blandet">Blandet udbud</option>
+              <!-- Runde 6 (D6-S1): korte tekster — vaelgeren er ≈115 px paa 390 px og
+                   klippede "Blandet udbud" til "Blandet udb". js/search.js laeser
+                   value, ikke tekst. -->
+              <option value="blandet">Blandet</option>
               <option value="date-desc">Nyeste først</option>
-              <option value="price-asc">Pris: Lav til høj</option>
-              <option value="price-desc">Pris: Høj til lav</option>
-              <option value="year-desc">Årgang: Nyest først</option>
-              <option value="km-asc">Kilometertal: Lavest først</option>
+              <option value="price-asc">Pris: lav → høj</option>
+              <option value="price-desc">Pris: høj → lav</option>
+              <option value="year-desc">Årgang: nyeste</option>
+              <option value="km-asc">Km: laveste</option>
               </select>
             </div>
           </div>
@@ -685,7 +698,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=0098fee2-be9d-49aa-8956-4a732ed50bf3"
@@ -718,7 +731,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=028653e2-985c-4210-9153-5337cf20ed3d"
@@ -751,7 +764,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=03178f5a-e8b0-40af-a6fc-1eb566975860"
@@ -784,7 +797,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=037f14e6-c2a7-4256-984b-2a289d32a1ff"
@@ -817,7 +830,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=03817804-ada6-4e2f-9950-ae787e91b0c9"
@@ -850,7 +863,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=04217c68-57e4-4487-b48a-a1eefdcd85b8"
@@ -883,7 +896,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=053178da-3a43-4913-b49f-b586c10dc1c5"
@@ -916,7 +929,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=05999335-7845-4f99-884b-017d4a66e63d"
@@ -949,7 +962,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=0616a1ef-79b8-46b7-9727-1d46e76cd276"
@@ -982,7 +995,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Svendborg, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Svendborg</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Privat sælger · guloggratis.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=07def4c0-aeb3-47c7-8a7e-5d3b76023ecf"
@@ -1015,7 +1028,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=0884700d-bfee-4fb5-a491-383e65c0ab9d"
@@ -1048,7 +1061,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd. Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>Forhandler · mcsyd.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=0a72f9c3-a044-4377-958a-574021090a5f"
@@ -1148,6 +1161,7 @@ try{
           <li><a href="sikkerhed.html">Sikkerhed & gode råd</a></li>
           <li><a href="vilkaar.html">Vilkår og betingelser</a></li>
           <li><a href="privatlivspolitik.html">Privatlivspolitik</a></li>
+          <li><button type="button" class="theme-toggle footer-theme" aria-label="Skift mellem lys og mørk tilstand"><span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span><span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>Lys / mørk tilstand</button></li>
         </ul>
       </div>
     </div>
@@ -1158,31 +1172,31 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=5834f35a"></script>
-<script defer src="js/supabase-config.js?v=5834f35a"></script>
-<script defer src="js/supabase-api.js?v=5834f35a"></script>
-<script defer src="js/icons.js?v=5834f35a"></script>
+<script defer src="js/security.js?v=afcd7592"></script>
+<script defer src="js/supabase-config.js?v=afcd7592"></script>
+<script defer src="js/supabase-api.js?v=afcd7592"></script>
+<script defer src="js/icons.js?v=afcd7592"></script>
 <!-- js/postnumre.js (40 KB, 1089 rækker) lå her, men ingen af søgesidens
      scripts slår et postnummer op — POSTNUMRE bruges kun ved oprettelse og
      redigering af annoncer. Filen blev altså hentet, parset og evalueret på
      hovedtråden uden at blive brugt. Fjernet herfra; de sider der faktisk
      bruger den (opret-annonce, dashboard, mine-annoncer …) loader den stadig. -->
-<script defer src="js/data.js?v=5834f35a"></script>
-<script defer src="js/store.js?v=5834f35a"></script>
-<script defer src="js/maaling.js?v=5834f35a"></script>
+<script defer src="js/data.js?v=afcd7592"></script>
+<script defer src="js/store.js?v=afcd7592"></script>
+<script defer src="js/maaling.js?v=afcd7592"></script>
 <!-- js/filtrering.js: ÉT sted, hvor et filter afgør, hvad der er et træf.
      Skal loades EFTER js/data.js (den bruger passerKoerekort og
      hkEllerNull) og FØR js/search.js, som kalder Filtrering.* på
      topniveau i sin filterkæde. Se work/DECISIONS.md, "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=5834f35a"></script>
-<script defer src="js/backend-bridge.js?v=5834f35a"></script>
-<script defer src="js/components.js?v=5834f35a"></script>
+<script defer src="js/filtrering.js?v=afcd7592"></script>
+<script defer src="js/backend-bridge.js?v=afcd7592"></script>
+<script defer src="js/components.js?v=afcd7592"></script>
 <!-- Sortering EFTER components.js (bruger koerekortMaerkat), FØR search.js
      (som læser Sortering ved indlæsning). Samme rækkefølge som
      browserModules() i scripts/shared.js — se js/sortering.js. -->
-<script defer src="js/sortering.js?v=5834f35a"></script>
-<script defer src="js/seo.js?v=5834f35a"></script>
-<script defer src="js/search.js?v=5834f35a"></script>
+<script defer src="js/sortering.js?v=afcd7592"></script>
+<script defer src="js/seo.js?v=afcd7592"></script>
+<script defer src="js/search.js?v=afcd7592"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

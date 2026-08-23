@@ -275,6 +275,7 @@ ${contactModal}
 <script defer src="js/bike-art.js${v}"></script>
 <script defer src="js/postnumre.js${v}"></script>
 <script defer src="js/data.js${v}"></script>
+<script defer src="js/filtrering.js${v}"></script>
 <script defer src="js/store.js${v}"></script>
 <script defer src="js/maaling.js${v}"></script>
 <script defer src="js/backend-bridge.js${v}"></script>

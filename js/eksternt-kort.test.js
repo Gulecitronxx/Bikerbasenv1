@@ -219,7 +219,10 @@ test('kilden nævnes stadig i bunden, nu på samme linje som stedet', () => {
      køberen selv kan slå op, før han klikker. */
   const html = externalCardHTML(eksternAnnonce(), 1);
   assert.match(html, /class="card-sted"[\s\S]*?Rødding/);
-  assert.match(html, /class="card-kildelinje"[\s\S]*?Forhandler · mcsyd\.dk/);
+  // Runde 6 (D6-S3): sælgertypen i sit eget span (skjules i spalter < 300 px),
+  // domænet altid helt synligt. Uden tags læses linjen stadig "Forhandler · mcsyd.dk".
+  const fod = (html.match(/class="card-kildelinje"[\s\S]*?<\/span><\/span>/) || [''])[0].replace(/<[^>]+>/g, '');
+  assert.match(fod, /Forhandler · mcsyd\.dk/);
   // Runde 5 (D5-S7): byen alene i linjen, regionen i title — domænet skal have pladsen.
   assert.match(html, /class="card-sted" title="Rødding, Syddanmark"/);
   // Runde 5 (D5-S3/S4): kørekortchippen står i spec-rækken, med kode-klasse.

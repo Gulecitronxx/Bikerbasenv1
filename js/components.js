@@ -795,7 +795,15 @@ function externalCardHTML(l, i){
   // "Forhandler · mcsyd.dk": kildens navn står allerede i mærkatet og i
   // linket. Her siger vi i stedet, hvad slags sælger det er, og domænet —
   // det eneste på kortet, køberen selv kan slå op, før han klikker.
-  const saelger = [l.isDealer ? 'Forhandler' : 'Privat sælger', domaene].filter(Boolean).join(' · ');
+  /* Runde 6 (D6-S3): "Privat sælger · guloggratis.dk" (31 tegn) klippede BEGGE
+     led i 280 px-spalten. "Privat" er ikke mindre aerligt ved siden af et
+     domaene; i smalle spalter skjuler css saelgertypen og lader domaenet —
+     det eneste, koeberen kan slaa op — staa helt. Typen bliver i title. */
+  const saelgerType = l.isDealer ? 'Forhandler' : 'Privat';
+  const saelger = [saelgerType, domaene].filter(Boolean).join(' · ');
+  const saelgerHTML = domaene
+    ? `<span class="card-saelgertype">${saelgerType} · </span>${escapeHTML(domaene)}`
+    : saelgerType;
   /* "Ny" står FØRST i prislinjen, foran forhandlerens salgsmarkører: den
      forklarer prisen på samme måde som "UDEN KLARGØRING" gør, men den er
      også et juridisk vilkår (garanti frem for reklamationsret), og den skal
@@ -860,7 +868,7 @@ function externalCardHTML(l, i){
       </div>
       <div class="card-footer">
         <span class="card-sted" title="${escapeHTML(stedTitle)}">${Icon.mapPin}<span>${escapeHTML(sted)}</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos ${kilde}. Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}<span>${escapeHTML(saelger)}</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos ${kilde} (${escapeHTML(saelger)}). Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}<span>${saelgerHTML}</span></span>
       </div>
     </div>
     <a href="annonce.html?id=${l.id}"

@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Bikerbasen — Køb og sælg brugte motorcykler i Danmark">
 <meta name="twitter:description" content="Bikerbasen samler brugte motorcykler til salg i hele Danmark ét sted — fra forhandlere, markedspladser og egne annoncer. Søg på mærke, type, pris og kørekort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -60,7 +60,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=5834f35a">
+<link rel="stylesheet" href="css/styles.css?v=afcd7592">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -412,8 +412,14 @@ try{
       <div class="sell-band">
         <div class="sell-band-copy">
           <span class="sell-band-eyebrow">Sælg din motorcykel</span>
-          <h2>Gratis annonce — set af hele Danmark</h2>
-          <p>Opret på under 5 minutter, og kom i kontakt med købere i hele landet. Ingen kommission, ingen skjulte gebyrer.</p>
+          <!-- Runde 6 (D6-F2): "set af hele Danmark", "koebere i hele landet",
+               "under 5 minutter" og "entusiaster, der leder efter netop din model"
+               var raekkevidde- og tidspaastande uden én maaling bag — paa et site
+               med 0 egne annoncer. Samme slaegt som Bilbasens "700.000 potentielle
+               koebere", som runde 5 satte paa "kopiér ikke"-listen. Nu kun det,
+               koden goer. -->
+          <h2>Gratis annonce for private</h2>
+          <p>Ingen kommission, ingen skjulte gebyrer. Din annonce står i søgningen side om side med de indekserede, og din kontaktinfo vises kun for indloggede.</p>
           <ul class="sell-points">
             <li><span class="sell-check" aria-hidden="true"></span>Helt gratis for private sælgere</li>
             <!-- "Din kontaktinfo er skjult, indtil du selv deler den" lovede
@@ -425,7 +431,7 @@ try{
                  udloggede, søgemaskiner og robotter — ikke at sælgeren
                  styrer det i realtid. -->
             <li><span class="sell-check" aria-hidden="true"></span>Din kontaktinfo er skjult for udloggede besøgende, søgemaskiner og robotter</li>
-            <li><span class="sell-check" aria-hidden="true"></span>Nå entusiaster, der leder efter netop din model</li>
+            <li><span class="sell-check" aria-hidden="true"></span>Kørekortkategori, pris og specifikationer vises på samme måde som for alle andre annoncer</li>
           </ul>
           <div class="sell-band-actions">
             <a href="opret-annonce.html" class="btn btn-primary btn-lg">Opret annonce</a>
@@ -482,6 +488,7 @@ try{
           <li><a href="sikkerhed.html">Sikkerhed & gode råd</a></li>
           <li><a href="vilkaar.html">Vilkår og betingelser</a></li>
           <li><a href="privatlivspolitik.html">Privatlivspolitik</a></li>
+          <li><button type="button" class="theme-toggle footer-theme" aria-label="Skift mellem lys og mørk tilstand"><span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span><span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>Lys / mørk tilstand</button></li>
         </ul>
       </div>
     </div>
@@ -492,24 +499,24 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=5834f35a"></script>
-<script defer src="js/supabase-config.js?v=5834f35a"></script>
-<script defer src="js/supabase-api.js?v=5834f35a"></script>
-<script defer src="js/icons.js?v=5834f35a"></script>
-<script defer src="js/data.js?v=5834f35a"></script>
+<script defer src="js/security.js?v=afcd7592"></script>
+<script defer src="js/supabase-config.js?v=afcd7592"></script>
+<script defer src="js/supabase-api.js?v=afcd7592"></script>
+<script defer src="js/icons.js?v=afcd7592"></script>
+<script defer src="js/data.js?v=afcd7592"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=5834f35a"></script>
+<script defer src="js/filtrering.js?v=afcd7592"></script>
 <!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
      (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
      orden. Samme fil som soegning.html og scripts/build-srp.js. -->
-<script defer src="js/sortering.js?v=5834f35a"></script>
-<script defer src="js/store.js?v=5834f35a"></script>
-<script defer src="js/maaling.js?v=5834f35a"></script>
-<script defer src="js/backend-bridge.js?v=5834f35a"></script>
-<script defer src="js/components.js?v=5834f35a"></script>
-<script defer src="js/home.js?v=5834f35a"></script>
+<script defer src="js/sortering.js?v=afcd7592"></script>
+<script defer src="js/store.js?v=afcd7592"></script>
+<script defer src="js/maaling.js?v=afcd7592"></script>
+<script defer src="js/backend-bridge.js?v=afcd7592"></script>
+<script defer src="js/components.js?v=afcd7592"></script>
+<script defer src="js/home.js?v=afcd7592"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

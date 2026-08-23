@@ -279,6 +279,38 @@ side om side med bilbasen.dk (screenshots i `work/runde5/`, rapporter i
 
 ---
 
+## Runde 6 — blind kritik af runde 5's resultat (23.08.2026)
+
+Kritikerens rapport: [runde-6-kritik.md](runde-6-kritik.md) (blinddom pr.
+side/skærm, runde 5's findings efterprøvet: 15 lukket, 4 delvist, 1 ikke
+lukket). Målinger efter rettelserne: [rounds/round-6.md](rounds/round-6.md).
+
+| ID | rolle | akse | sev | fil | problem | status |
+|---|---|---|---|---|---|---|
+| D6-A1 | critic | funktionalitet | **P1** | `js/annonce.js`, `annonce.html`, `css/styles.css` | Ingen primær knap på første skærm (390): bjælken skjult, mens prisblokken var i view; kildekortets knap ved ≈2 770 | **rettet** — "Se annoncen hos X" under prisen (<960), bjælken følger den knap. CTA 739 px |
+| D6-F2 | critic | funktionalitet | **P1** | `index.html` `.sell-band` | "Set af hele Danmark", "købere i hele landet", "under 5 minutter", "entusiaster …" — påstande uden måling | **rettet** — "Gratis annonce for private" + kun det, koden gør |
+| D6-F3 | critic | funktionalitet | **P1** | `js/home.js` | SEO-kolonnen listede Scooter (0) som link | **rettet** — bygget af tællingen, kun n > 0, tal i parentes |
+| D6-F1 | critic | design | **P2** | `js/home.js` tegnFeatured | Første række grå (lazy) i optagelser | **rettet** — første række `loading=eager` |
+| D6-F4 | critic | design | **P2** | `css/styles.css`, `js/home.js` | 4 fuldbredde-kort = 1 880 px; Bilbasen 14 i to spalter | **rettet** — 2-spaltet kompakt gitter, 8 kort, sektion 2 185 → 1 583 px |
+| D6-S1 | critic | design | **P2** | `soegning.html`, `css/styles.css` | "Søg efter mæ…" og "Blandet udb" klippet på 390 | **rettet** — "Mærke eller model", "Blandet", gulv 96 px |
+| D6-S2 | critic | design | **P2** | `js/search.js`, `soegning.html`, `scripts/build-srp.js` | Overskrift to linjer på mobil | **rettet** — "548 annoncer · fra 4 kilder (i)", første kort 303 → 279 (Bilbasen 284) |
+| D6-S3 | critic | design | **P2** | `js/components.js`, `css/styles.css` | Fodlinje klippede begge led i 280 px | **rettet** — "Privat · domæne", sælgertype skjult < 300 px container |
+| D6-S4 | critic | design | **P2** | `js/sortering.js` | Side 1 = 24 × MC Syd (kilde-rundgang foreslået) | **åben — kræver menneskets ja** (ændrer den målte standardsortering; se runde-6-kritik.md) |
+| D6-A2 | critic | design | **P2** | `js/annonce.js`, `js/filtrering.js`, `js/search.js` | "Søg videre" uden tal; højre spalte tom | **rettet** — links med tal (samme filterkæde som søgesiden), "Alle annoncer fra MC Syd · 332" via nyt `?kilde=` filter, "Hentet … — for 7 dage siden" |
+| D6-A3 | critic | design | **P2** | `css/styles.css` | Nøgletal under folden på desktop | **rettet** — handlinger på titlens linje, stats 868 → 824 (værdier ved 892) |
+| D6-A4 | critic | design | **P3** | `css/styles.css` | 5 celler i 4 spalter, tre grå felter | **rettet** — `minmax(120px)`, 5 spalter |
+| D6-A6 | critic | design | **P3** | `js/annonce.js` | "650 ccm–1.350 ccm"; to ens modeller i striben | **rettet** |
+| D6-F5 | critic | design | **P3** | alle sider, css | Måne-ikon i desktop-header | **rettet** — temaskift i footer ("Om Bikerbasen") + skuffe, ude af headeren |
+| D6-F6 | critic | design | **P3** | css | Hero-bund + sektionsluft på desktop | **rettet** — første kort 1 017 → 891 |
+| D6-F7 | critic | kodefejl | **P3** | `js/backend-bridge.js`, `crawler/normalize.js` | "Bsa" | **rettet** — akronymopslag (BSA, AJS, GasGas …) |
+| D6-F9 | critic | design | **P3** | `js/home.js` | Fem chips ombrød på desktop | **rettet** — fire chips ("Under 10.000 km" ud) |
+| D6-S5 | critic | design | **P3** | `js/search.js` | "+2 kilder" alene på linje 2 | **rettet** — "indekseret: 332 hos MC Syd · 118 hos Gul og Gratis · 98 hos 2 andre" |
+| D6-S6 / D6-A5 | critic | design | **P3** | css | "km i…" klippet ved spec-tom + kk-ukendt | **rettet** — to rækker (54 px) for den kortklasse |
+| D6-S7 | critic | design | **P3** | `soegning.html` | Pris-gruppen på folden | **rettet** — Pris før Type (511 px) |
+| D6-F8 | critic | — | **P3** | — | 494 px under footeren i optagelsen | **måleartefakt** — fuldsidebilledet tages før `hidden` sættes; ikke reproduceret i browseren |
+
+---
+
 ## Lukket
 
 <!-- Verificerede findings flyttes herned med rundenummer, så tabellen ovenfor

@@ -245,6 +245,8 @@ const MAERKE_ALIAS = {
   'ducati': 'Ducati', 'triumph': 'Triumph', 'aprilia': 'Aprilia', 'husqvarna': 'Husqvarna',
   'vespa': 'Vespa', 'piaggio': 'Piaggio', 'indian': 'Indian', 'benelli': 'Benelli',
   'nimbus': 'Nimbus', 'mz': 'MZ', 'jawa': 'Jawa', 'cf moto': 'CFMoto', 'cfmoto': 'CFMoto',
+  // Runde 6 (D6-F7): akronymer, der ellers fik "stort forbogstav" ("Bsa").
+  'bsa': 'BSA', 'ajs': 'AJS', 'gas gas': 'GasGas', 'gasgas': 'GasGas',
 };
 
 function normaliserMaerke(raa){

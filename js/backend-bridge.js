@@ -475,11 +475,20 @@ function erKildensPladsholder(url){
   return !!u && PLADSHOLDER_MOENSTRE.some(re => re.test(u));
 }
 
+const MAERKE_AKRONYM = { bsa: 'BSA', ajs: 'AJS', mz: 'MZ', ktm: 'KTM', bmw: 'BMW', gasgas: 'GasGas', 'gas gas': 'GasGas', cfmoto: 'CFMoto', 'cf moto': 'CFMoto', 'mv agusta': 'MV Agusta' };
+function maerkeAkronym(m){
+  if (!m) return m;
+  const k = String(m).trim().toLowerCase();
+  return MAERKE_AKRONYM[k] || m;
+}
 function normalizeExternalListing(row){
   const kilde = row.kilde || {};
   return {
     id: row.id,
-    brand: row.maerke || 'Ukendt',
+    /* Runde 6 (D6-F7): akronymer, kilden skrev med smaa bogstaver og crawleren
+       gav stort forbogstav ("Bsa"). Rammer de raekker, der allerede ligger;
+       crawler/normalize.js har samme opslag for nye. */
+    brand: maerkeAkronym(row.maerke) || 'Ukendt',
     /* Falder tilbage på titlen, når kilden ikke har en model — MEN ikke når
        titlen bare ER mærket. Seks af MC Syds annoncer har kun "Honda" eller
        "BMW" som titel (deres egen URL-slug siger det samme, så det er ikke

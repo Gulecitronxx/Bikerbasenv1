@@ -74,6 +74,7 @@ const Filtrering = (() => {
     cylinders: [], colors: [], maxAgeDays: null, photosOnly: false,
     ejereMax: null, nysynet: false, vinterklar: false,
     dealerOnly: false, koerekort: '',
+    kilde: '',   // Runde 6 (D6-A2): kildens domæne, fx "mcsyd.dk" — fra annoncesidens "Alle annoncer fra MC Syd · 332"
   };
 
   /* opsamler: hvor de skjulte bogføres, eller null. Facettællingen på
@@ -233,6 +234,9 @@ const Filtrering = (() => {
        rigtigt nej. */
     if (state.photosOnly) list = list.filter(l => (l.photoUrls || []).length > 0);
     if (state.dealerOnly) list = list.filter(l => l.isDealer);
+    /* Kilden er ikke uoplyst: enhver indekseret annonce bærer sit domæne, og
+       egne annoncer har ingen — de falder fra med et rigtigt nej. */
+    if (brug('kilde') && state.kilde) list = list.filter(l => (l.source && l.source.domaene) === state.kilde);
 
     if (state.ejereMax != null)
       list = filtrerMedUoplyst(list, 'antal ejere', l => l.antalEjere == null ? UOPLYST : l.antalEjere <= state.ejereMax, opsamler);

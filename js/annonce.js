@@ -620,6 +620,41 @@ function renderExternalListing(listing){
      to skrivemåder for samme dato på samme sidetype. datoKort() er det ene
      sted, begge går igennem nu. */
   const fundet = datoKort(listing.indekseretFoerste);
+  /* Runde 6 (D6-A2): "Hentet 16. aug. — for 7 dage siden". Alderen er
+     regnet af indekseretFoerste (hvornaar VI saa den foerste gang — ikke
+     annoncens alder hos kilden, og det staar der heller ikke). */
+  let hentetLinje = '';
+  if (fundet){
+    const t = new Date(listing.indekseretFoerste).getTime();
+    const dage = Number.isNaN(t) ? null : Math.max(0, Math.floor((Date.now() - t) / 86400000));
+    const siden = dage == null ? '' : dage === 0 ? ' — i dag' : dage === 1 ? ' — i går' : ` — for ${dage} dage siden`;
+    hentetLinje = `Hentet hos ${kilde} ${escapeHTML(fundet)}${siden}`;
+  }
+
+  /* Runde 6 (D6-A2): links med tal. Tallene regnes med soegesidens egen
+     filterkaede (Filtrering.anvendFiltre), saa tallet paa linket er det,
+     resultatsiden viser. Et link uden traef tegnes ikke. */
+  const lagerAlle = (typeof Store !== 'undefined' && Store.getAllListings) ? Store.getAllListings() : [];
+  const taelFilter = (f) => (typeof Filtrering !== 'undefined' && Filtrering.anvendFiltre) ? Filtrering.anvendFiltre(lagerAlle, f, null, null).length : null;
+  const kildeDomaene = listing.source?.domaene || null;
+  const videreLinks = [];
+  if (kildeDomaene){
+    const n = lagerAlle.filter(l => l.source?.domaene === kildeDomaene).length;
+    if (n > 1) videreLinks.push({ href: `soegning.html?kilde=${encodeURIComponent(kildeDomaene)}`, tekst: `Alle annoncer fra ${kilde}`, n });
+  }
+  if (listing.brand && listing.brand !== 'Ukendt'){
+    const n = taelFilter({ brands: [listing.brand] });
+    if (n == null || n > 0) videreLinks.push({ href: `soegning.html?brands=${encodeURIComponent(listing.brand)}`, tekst: `Alle ${brand} til salg`, n });
+  }
+  if (kk && !kkUvis){
+    const n = taelFilter({ koerekort: kk });
+    if (n == null || n > 0) videreLinks.push({ href: `soegning.html?koerekort=${encodeURIComponent(kk)}`, tekst: `Motorcykler til ${escapeHTML(kk)}-kørekort`, n });
+  }
+  if (opslag?.region){
+    const n = taelFilter({ regions: [opslag.region] });
+    if (n == null || n > 0) videreLinks.push({ href: `soegning.html?regions=${encodeURIComponent(opslag.region)}`, tekst: `Motorcykler i ${escapeHTML(opslag.region)}`, n });
+  }
+  videreLinks.push({ href: 'soegning.html', tekst: 'Alle motorcykler', n: lagerAlle.length || null });
 
   const kildeKort = `
     <aside class="external-detail-source" aria-labelledby="kilde-titel">
@@ -636,23 +671,27 @@ function renderExternalListing(listing){
               data-listing-id="${escapeHTML(String(listing.id))}"
               class="btn btn-primary btn-block">Se annoncen hos ${kilde}${Icon.externalLink}</a>`
         : `<p class="external-detail-broken">${Icon.alertTriangle}Annoncen kan ikke åbnes lige nu. Prøv igen senere${domaene ? `, eller find den på ${domaene}` : ''}.</p>`}
+      <!-- Runde 6 (D6-A2 / D5-A3): datoen op under knappen som én linje ("Hentet
+           16. aug. — for 7 dage siden"), kroppen kortet til det, der ikke staar
+           et andet sted paa siden ("Pris og udstyr kan vaere aendret" staar
+           allerede under "Foer du koerer derhen"). -->
+      ${hentetLinje ? `<p class="external-detail-source-meta external-detail-hentet">${Icon.clock}${hentetLinje}</p>` : ''}
       <p class="external-detail-source-body">
         ${hvorStaarDen}
         ${hvemHandlerDuMed}
-        Pris og udstyr kan være ændret, siden vi hentede annoncen, så tjek det hos dem.
       </p>
-      ${fundet ? `<p class="external-detail-source-meta">${Icon.clock}Annoncen blev hentet hos ${kilde} ${escapeHTML(fundet)}</p>` : ''}
       <p class="external-detail-source-meta">${Icon.info}${kilde}s kontaktoplysninger og åbningstider står på deres egen side.</p>
     </aside>
 
+    <!-- Runde 6 (D6-A2): Bilbasens "Se forhandlerens 46 annoncer" — handlinger med
+         tal, vi HAR: kildens antal i lageret (samme tal som soegesidens
+         kildelinje), maerkets, koerekortets, regionens. Tallene regnes af
+         Store.getAllListings() med Filtrering.anvendFiltre — samme kaede som
+         soegesiden, saa tallet paa linket er tallet paa resultatsiden. -->
     <aside class="external-detail-next" aria-labelledby="videre-titel">
       <h2 id="videre-titel">Søg videre på Bikerbasen</h2>
       <ul>
-        ${listing.brand && listing.brand !== 'Ukendt'
-          ? `<li><a href="soegning.html?brands=${encodeURIComponent(listing.brand)}">Alle ${brand} til salg</a></li>` : ''}
-        ${kk && !kkUvis ? `<li><a href="soegning.html?koerekort=${encodeURIComponent(kk)}">Motorcykler til ${escapeHTML(kk)}-kørekort</a></li>` : ''}
-        ${opslag?.region ? `<li><a href="soegning.html?regions=${encodeURIComponent(opslag.region)}">Motorcykler i ${escapeHTML(opslag.region)}</a></li>` : ''}
-        <li><a href="soegning.html">Alle motorcykler</a></li>
+        ${videreLinks.map(v => `<li><a href="${v.href}"><span>${v.tekst}</span><span class="external-detail-next-n">${v.n != null ? v.n.toLocaleString('da-DK') : ''}${Icon.chevronRight || Icon.arrowRight}</span></a></li>`).join('')}
       </ul>
     </aside>`;
 
@@ -715,6 +754,16 @@ function renderExternalListing(listing){
           </p>
           <p class="external-detail-vilkaar-note">Salgsvilkår oplyst i annoncen hos ${kilde} — de er en del af prisen. Få dem bekræftet dér.</p>` : ''}
         </div>
+        <!-- Runde 6 (D6-A1): paa <960 px havde foerste skaerm INGEN primaer knap —
+             bjaelken var skjult, mens prisblokken var i view (D5-A7), og
+             kildekortets knap stod foerst ved ≈2 770 px. Bilbasen: "Book en
+             proevetur" ved 77 px. Knappen her er den samme (href, rel, target,
+             data-listing-id → C3-maalingen) som kildekortets; annonce.html lader
+             bjaelken foelge DENNE knap, saa der altid er praecis én synlig.
+             ≥960 skjules den (css) — hoejre spalte har knappen 20 px derfra. -->
+        ${href ? `<a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
+              data-listing-id="${escapeHTML(String(listing.id))}"
+              class="btn btn-primary btn-block external-detail-cta">Se annoncen hos ${kilde}${Icon.externalLink}</a>` : ''}
         <!-- Runde 5 (D5-A4): handlingsrække som Bilbasens "Sammenlign · Print ·
              Anmeld" — kun handlinger, der findes for en indekseret annonce:
              sammenlign (lokal, D-008), del, meld fejl (reports.target_id er
@@ -820,15 +869,19 @@ function renderExternalListing(listing){
   // Tre ens kort (samme model, samme pris — en forhandlers lagerstykker) ligner
   // en fejl; tag den bedste af hver (model, pris), og fyld op med de naeste.
   const rangeret = andre.map(l => [score(l), l]).filter(([s]) => s >= 4).sort((a, b) => b[0] - a[0]);
+  /* Runde 6 (D6-A6): er der kandidater nok (≥3 med score ≥4), dedupleres paa
+     maerke|model, saa striben ikke viser to fabriksnye af samme model side
+     om side (aerligt, men laeses som en dublet); ellers paa maerke|model|pris. */
+  const noegleFn = rangeret.length >= 3 ? (l => `${l.brand}|${l.model}`) : (l => `${l.brand}|${l.model}|${l.price}`);
   const set2 = new Set(); const lignende = [];
-  for (const [, l] of rangeret){ const n = `${l.brand}|${l.model}|${l.price}`; if (set2.has(n)) continue; set2.add(n); lignende.push(l); if (lignende.length === 3) break; }
+  for (const [, l] of rangeret){ const n = noegleFn(l); if (set2.has(n)) continue; set2.add(n); lignende.push(l); if (lignende.length === 3) break; }
   if (lignende.length < 3) for (const [, l] of rangeret){ if (!lignende.includes(l)) lignende.push(l); if (lignende.length === 3) break; }
   void sammeMaerke; void naerKubik; void set;
   if (stribe && mount && lignende.length){
     const overskrift = stribe.querySelector('h2');
     if (overskrift){
       const dele = [listing.brand !== 'Ukendt' ? listing.brand : null,
-        ccm ? `${formatCcm(Math.round(ccm * 0.65))}–${formatCcm(Math.round(ccm * 1.35))}` : null,
+        ccm ? `${formatCcm(Math.round(ccm * 0.65)).replace(/\s*ccm$/, '')}–${formatCcm(Math.round(ccm * 1.35))}` : null,
         listing.price > 0 ? `${Math.round(listing.price * 0.6 / 1000)}–${Math.round(listing.price * 1.4 / 1000)} t.kr.` : null].filter(Boolean);
       overskrift.textContent = dele.length ? `Lignende: ${dele.join(' · ')}` : 'Lignende motorcykler på Bikerbasen';
     }

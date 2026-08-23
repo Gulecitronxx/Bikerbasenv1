@@ -59,7 +59,8 @@ const PRERENDER_COUNT = 12;
   const cards = page.map((l, i) => listingCardHTML(l, i)).join('\n');
 
   const total = sorted.length;
-  const count = `${total} <span>${total === 1 ? 'annonce fundet' : 'annoncer fundet'}</span>`;
+  // Runde 6 (D6-S2): "fundet" i eget span — skjules paa mobil, saa overskriften er én linje.
+  const count = `${total} <span>${total === 1 ? 'annonce' : 'annoncer'}<span class="results-count-fundet"> fundet</span></span>`;
 
   const htmlPath = path.join(ROOT, 'soegning.html');
   let html = fs.readFileSync(htmlPath, 'utf8');
