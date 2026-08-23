@@ -2779,6 +2779,26 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-intro strong{ color: var(--color-fg); }
 .brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
 .brand-sub{ font-size:19px; margin-bottom: var(--space-4); }
+/* O3-6: kvitteringsbanner efter udgivelse. */
+.udgivet-banner{
+  display:flex; align-items:center; gap:10px; margin:0 0 var(--space-4);
+  padding:12px 14px; border:1px solid var(--color-border); border-left:3px solid var(--color-success, #2e7d32);
+  border-radius: var(--radius-sm); background: var(--color-surface); font-size:14px;
+}
+.udgivet-banner > svg{ width:20px; height:20px; color: var(--color-success, #2e7d32); flex:0 0 auto; }
+.udgivet-banner span{ flex:1 1 auto; }
+.udgivet-banner .icon-btn{ width:32px; height:32px; flex:0 0 auto; }
+/* O3-3 */
+.page-title-note{ font-size:13.5px; color: var(--color-fg-muted); margin-top:6px; }
+/* O3-8: typefliserne kostede ≈1 300 px af trin 1 paa mobil — mindre foto, samme valg. */
+@media (max-width:480px){
+  #type-radio-group .radio-card-media{ aspect-ratio:2/1; }
+}
+
+/* O1-12: feltnaer fejltekst i opret-flowet. */
+.felt-fejl{ margin:6px 0 0; font-size:12.5px; color: var(--color-danger); }
+.field.has-error .felt-fejl{ display:block; }
+
 /* O2-1: statistiklinjen paa egne annoncer. */
 .lr-statistik{ display:flex; align-items:center; gap:6px; margin:6px 0 0; font-size:13px; color: var(--color-fg); font-weight:600; }
 .lr-statistik svg{ width:15px; height:15px; color: var(--color-fg-muted); }

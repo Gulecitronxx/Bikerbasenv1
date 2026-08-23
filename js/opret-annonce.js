@@ -88,11 +88,25 @@ function updateEqCounts(){
 /* aria-invalid saettes ogsaa: den roede ramme er farve alene, og farve alene
    er ikke et signal for alle. Uden den ved en skaermlaeserbruger ikke, at
    det felt fokus lige hoppede til, er dét der mangler. */
-function markFieldError(el, refs){
+function markFieldError(el, refs, besked){
   const field = el.closest('.field') || el.closest('.checkbox-inline');
   if (field) field.classList.add('has-error');
   if (el && el.style) el.style.borderColor = 'var(--color-danger)';
   if (el && el.setAttribute) el.setAttribute('aria-invalid', 'true');
+  /* O1-12: fejlen skal staa VED feltet, ikke kun i en toast der forsvinder.
+     Teksten kobles med aria-describedby, saa en skaermlaeser hoerer den ved
+     fokus. Fjernes igen i input-lytteren (has-error ryddes af validateStep). */
+  if (field && el && el.id){
+    let fejl = field.querySelector('.felt-fejl');
+    if (!fejl){
+      fejl = document.createElement('p');
+      fejl.className = 'felt-fejl';
+      fejl.id = el.id + '-fejl';
+      field.appendChild(fejl);
+    }
+    fejl.textContent = besked || 'Feltet skal udfyldes.';
+    el.setAttribute('aria-describedby', fejl.id);
+  }
   if (refs && !refs.first) refs.first = el;
 }
 
@@ -115,14 +129,14 @@ function validateStep(n){
     const field = el.closest('.field') || el.closest('.checkbox-inline');
     const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
     if (!ok){ valid = false; markFieldError(el, refs); }
-    else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); }
+    else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); field?.querySelector('.felt-fejl')?.remove(); el.removeAttribute('aria-describedby'); }
   });
   // Grænseværdier — feltet er tomt-tjekket ovenfor; her fanger vi urealistiske tal
   // (formularen er novalidate, så min/max i HTML håndhæves ikke af sig selv).
   const bound = (id, ok, m) => {
     const el = document.getElementById(id);
     if (!el || el.value.trim() === '') return;
-    if (!ok(Number(el.value))){ valid = false; markFieldError(el, refs); msg = m; }
+    if (!ok(Number(el.value))){ valid = false; markFieldError(el, refs, m); msg = m; }
   };
   if (n === 1){
     if (!document.querySelector('input[name="bike-type"]:checked')){ valid = false; msg = msg || 'Vælg venligst en motorcykeltype'; }
@@ -501,7 +515,7 @@ function collectFormData(){
     model: document.getElementById('f-model').value,
     year: Number(document.getElementById('f-year').value) || null,
     km: document.getElementById('f-km').value.trim() === '' ? null : Number(document.getElementById('f-km').value) || 0,
-    ccm: Number(document.getElementById('f-ccm').value) || 0,
+    ccm: document.getElementById('f-ccm').value.trim() === '' ? null : Number(document.getElementById('f-ccm').value) || 0,   // O3-5
     power: Number(document.getElementById('f-power').value) || null,
     registration: document.getElementById('f-registration').value,
     afgift: document.getElementById('f-afgift').value,
@@ -634,7 +648,9 @@ function manglerListe(data){
   else if (antalFotos < 5) punkter.push(`Du har ${antalFotos} billede${antalFotos === 1 ? '' : 'r'} — der er plads til ${MAX_FOTOS}.`);
 
   if (!data.power) punkter.push('Effekt (hk) er ikke udfyldt — uden den kan vi ikke vise, om motorcyklen kan køres på et A2-kørekort.');
-  if (!data.sidsteSyn && !/\bsyn(et)?\b/i.test(beskrivelse)) punkter.push('Sidste syn er ikke oplyst — det er tit et af de første spørgsmål, en køber stiller.');
+  // O3-4: "nysynet" har ingen ordgraense foer "syn" — kraevede man den, stod
+  // punktet direkte under en beskrivelse, der allerede sagde det.
+  if (!data.sidsteSyn && !/syn/i.test(beskrivelse)) punkter.push('Sidste syn er ikke oplyst — det er tit et af de første spørgsmål, en køber stiller.');
   if (!data.antalEjere && !/\bejer/i.test(beskrivelse)) punkter.push('Antal ejere er ikke udfyldt — så står der "Ikke oplyst" på annoncen.');
   if (!data.serviceHistorik && !/service/i.test(beskrivelse)) punkter.push('Servicehistorik er ikke valgt.');
   if (beskrivelse.length < 40) punkter.push('Beskrivelsen er meget kort — uddyb gerne stand, historik og evt. hvorfor du sælger.');
@@ -841,7 +857,7 @@ async function publishListing(){
     Store.addMyListing(newListing);
     Store.clearDraft();
     toast('Din annonce er udgivet (gemt lokalt)');
-    setTimeout(() => { window.location.href = `annonce.html?id=${newListing.id}`; }, 900);
+    setTimeout(() => { window.location.href = `annonce.html?id=${newListing.id}&udgivet=1`; }, 900);   // O3-6
     return;
   }
 
@@ -944,7 +960,9 @@ async function publishListing(){
   }
   toast(editingId ? 'Ændringerne er gemt!' : 'Din annonce er udgivet!');
   if (typeof Maaling !== 'undefined') Maaling.opretAnnonce(created, !!editingId);
-  setTimeout(() => { window.location.href = `annonce.html?id=${created.id}`; }, 1000);
+  // O3-6: toasten naar ikke at blive laest paa 1 sekund — annoncesiden viser
+  // et lukbart banner ved ?udgivet=1, i det oejeblik saelgeren er mest modtagelig.
+  setTimeout(() => { window.location.href = `annonce.html?id=${created.id}${editingId ? '' : '&udgivet=1'}`; }, 1000);
 }
 
 /* Fylder formularen med data i samme form som collectFormData returnerer.

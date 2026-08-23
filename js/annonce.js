@@ -988,6 +988,22 @@ function videreKortHTML(listing, kk){
       </div>`;
 }
 
+/* O3-6: kvitteringsbanner efter udgivelse — kun paa egen annonce, kun med
+   ?udgivet=1, og lukbart. Siger dét, saelgeren skal vide i det oejeblik:
+   hvor tallene kommer til at staa. */
+function visUdgivetBanner(listing){
+  if (new URLSearchParams(window.location.search).get('udgivet') !== '1') return;
+  if (!isOwnListing(listing)) return;
+  const mount = document.getElementById('listing-detail');
+  if (!mount || document.getElementById('udgivet-banner')) return;
+  const el = document.createElement('div');
+  el.className = 'udgivet-banner';
+  el.id = 'udgivet-banner';
+  el.innerHTML = `${Icon.checkCircle}<span><b>Annoncen er udgivet.</b> Følg visninger og henvendelser under <a href="mine-annoncer.html">Mine annoncer</a>.</span><button type="button" class="icon-btn" aria-label="Luk">${Icon.close}</button>`;
+  el.querySelector('button').addEventListener('click', () => el.remove());
+  mount.prepend(el);
+}
+
 function renderListing(){
   const id = getIdFromURL();
   const listing = Store.getListingById(id);
@@ -1229,6 +1245,7 @@ ${galleriHTML}
   renderGallery();
 
   wireFavoriteButtons(document);
+  visUdgivetBanner(listing);   // O3-6: kvittering paa EGEN annonce efter Udgiv
 
   // Anmeld hører til annoncen, ikke til sælgeren, og er tilgængelig uanset login.
   document.getElementById('report-listing-btn').addEventListener('click', () => {
