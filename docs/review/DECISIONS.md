@@ -171,6 +171,58 @@ lade som om det er en ny kilde. Se `crawler/db.js`, `bortemarkeringVurdering()`.
 
 ## Afvist
 
+### B3 afvist (proxy + silhuet) / gennemført (fejlfelt + pladsholder) — 23.08.2026
+FINDING (audit 23.08.2026, B3): "Proxy + resize thumbnails through an image
+worker you control (Cloudflare Images/Workers or Supabase Storage transform)
+and serve AVIF/WebP at card size … render the existing bike-art.js silhouette
+per type as the placeholder." Begrundelse: LCP paa soegesiden var et
+tredjeparts-JPEG, "grey cards hurt trust", og hotlinks kan blokeres.
+
+HVORFOR AFVIST — proxy/resizer: om-indeksering.html lover kilderne ordret
+"Vi viser ét miniaturebillede fra din egen server og kopierer intet", og
+"Kilden ejer sine billeder" staar som laast valg ovenfor. En proxy henter,
+omformer og (paa edge) cacher kildens billede paa VORES infrastruktur — det
+er at kopiere, uanset hvor kort cachen lever. CLAUDE.md kalder de regler
+juridiske, ikke tekniske, og de aendres ikke uden mennesket. Findingen var
+skrevet uden at kende det loefte. Skal det aendres, er vejen: skriftlig
+tilladelse fra hver kilde til at cache/resize miniaturen, og saa aendres
+loeftet paa om-indeksering.html FOER koden.
+
+HVORFOR AFVIST — silhuet: js/components.js listingMediaHTML() har siden
+runde 1 ("Uden foto tegner vi INGENTING", maalt: 14 ens graa piktogrammer
+uden én oplysning) vist et aerligt "Ingen fotos i denne annonce"-felt i
+stedet for en tegning, og annoncesiden siger "Vi viser ikke en tegning i
+stedet". En silhuet ville vende den beslutning og saette de to sider op mod
+hinanden igen.
+
+RETTELSE AF FINDINGENS PRAEMIS: "grey placeholders where hotlinked
+thumbnails fail" var en fejllaesning — de graa felter i auditens
+helsidesskaermbillede var loading="lazy"-billeder under folden, som et
+helsidesskud aldrig ruller hen til. Stikproeve 23.08.2026 (25 thumbnails,
+alle fem billedvaerter, 2 s mellem kald pr. vaert, identificerende UA):
+25 af 25 svarede 200 med image/*. Der ER ingen knaekkede hotlinks i dag.
+Kilderne har heller ingen mindre udgave at bede om: Danbase _0_2 (58 KB
+JPEG, 596 px) er deres mindste (_0_3 = 404, ?width= ignoreres, .webp = 404);
+Jensens serverer kun cropresize-768x540 (155 KB); Gul og Gratis er allerede
+320x240 WebP (8–16 KB).
+
+GENNEMFØRT I STEDET (inden for reglerne):
+- Fejlfelt: svarer kilden ikke (blokeret hotlink, slettet, nedetid), skiftes
+  <img> til samme aerlige felt som "Ingen fotos" med saetningen "Fotoet kunne
+  ikke hentes hos kilden" — ingen tegning. Capture-fase error-listener paa
+  document (CSP tillader ingen onerror=) + tjek af billeder, der fejlede
+  foer scriptet koerte. Maalt med blokerede billedvaerter: 12 af 12 hentede
+  kort skiftede, kassehøjden er uaendret (223 px) — ingen CLS.
+- Kildens egen pladsholdergrafik er ikke et foto: Gul og Gratis'
+  default-listing.<hash>.svg laa som thumbnail_url paa en annonce og blev
+  vist som annoncens foto. erKildensPladsholder() i crawler/normalize.js
+  (det der gemmes) og js/backend-bridge.js (det der allerede ligger) goer
+  det til "intet foto". 1 af 500 raekker i dag.
+BEVIS: stikproeven og variantproberne er curl/node mod kilderne 23.08.2026;
+fejlfeltet er efterproevet i playwright med route-abort paa
+images.danbase.dk og assets.guloggratis.dk; tests i js/eksternt-kort.test.js
+og crawler/normalize.test.js.
+
 ### B4 delvist afvist — 23.08.2026
 FINDING (audit 23.08.2026, B4): "Server-side filtering + pagination (PostgREST
 range/RPC over a search view), card-only columns, pre-render first 24 cards +

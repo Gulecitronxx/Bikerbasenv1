@@ -384,6 +384,20 @@ function conditionFraStand(stand){
    op med kildens navn, begynder resten af UI'et at behandle den som en
    Bikerbasen-sælger med profil, anmeldelser og kontaktknap, og så er
    skellet væk igen. */
+/* Spejl af crawler/normalize.js erKildensPladsholder() — browseren kan ikke
+   require() crawleren. Holdes i sync i SAMME commit, ellers gemmer crawleren
+   ét og viser broen noget andet. Fundet 23.08.2026: Gul og Gratis'
+   /assets/files/default-listing.<hash>.svg stod som thumbnail paa en annonce. */
+const PLADSHOLDER_MOENSTRE = [
+  /\/default-listing[^/]*\.svg(\?|$)/i,
+  /\/(?:no|missing|default)[-_]?(?:image|photo|foto|billede)[^/]*\.(?:svg|png|gif|jpe?g|webp)(\?|$)/i,
+  /\.svg(\?|$)/i,
+];
+function erKildensPladsholder(url){
+  const u = String(url || '').trim();
+  return !!u && PLADSHOLDER_MOENSTRE.some(re => re.test(u));
+}
+
 function normalizeExternalListing(row){
   const kilde = row.kilde || {};
   return {
@@ -513,7 +527,11 @@ function normalizeExternalListing(row){
     sourceListingId: row.kilde_annonce_id,
 
     // Kun miniaturen. Vi kopierer ikke gallerier — billederne er kildens.
-    photoUrls: row.thumbnail_url ? [row.thumbnail_url] : [],
+    /* Kildens egen "intet foto"-grafik er ikke et foto af motorcyklen — se
+       erKildensPladsholder() i crawler/normalize.js (samme regel, dér for det
+       der GEMMES, her for det der allerede ligger i databasen fra foer
+       rettelsen). Uden foto faar kortet det aerlige "Ingen fotos"-felt. */
+    photoUrls: row.thumbnail_url && !erKildensPladsholder(row.thumbnail_url) ? [row.thumbnail_url] : [],
     photoRows: [],
     photos: row.thumbnail_url ? 1 : 0,
 

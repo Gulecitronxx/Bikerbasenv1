@@ -242,6 +242,56 @@ function listingMediaHTML(l, alt, eager){
     + `</div>`;
 }
 
+/* ---------- Et foto, kilden ikke leverer, må ikke stå som et hul ----------
+
+   B3 (23.08.2026). Kortets foto hentes direkte hos kilden (vi kopierer det
+   ikke — "Kilden ejer sine billeder", og om-indeksering.html lover det).
+   Svarer kilden ikke — blokeret hotlink, slettet annonce hos dem, nedetid —
+   stod kortet med browserens knækkede ikon og alt-teksten i 4:3-kassen: det
+   ligner en fejl hos OS, og det siger ikke, hvad der skete. Nu skiftes
+   billedet til det samme aerlige felt som "Ingen fotos", med den sande
+   saetning. Ingen tegning, ingen pressefoto — se beslutningen ovenfor.
+
+   Målt 23.08.2026: 25 af 25 stikprøvede thumbnails svarede 200 hos kilden,
+   saa i dag rammes ingen. Feltet er en forsikring mod den dag, en kilde
+   begynder at afvise hotlinks — og den dag skal siden sige det, ikke gætte.
+
+   Ingen onerror= paa <img>: CSP'en tillader ingen inline-handlere (scripts/
+   csp-hashes.js). Fejl-events bobler ikke, men de kan fanges i capture-fasen
+   paa document — ogsaa for kort, der tegnes af javascript senere. Billeder,
+   der naaede at fejle FOER scriptet koerte, fanges af tjekFejledeFotos():
+   complete=true + naturalWidth=0 + et src er praecis "hentet, men
+   mislykkedes" (lazy-billeder, der ikke er begyndt, har complete=false). */
+function fotoFejlHTML(){
+  return `<div class="foto-tom foto-fejl" role="img" aria-label="Fotoet kunne ikke hentes hos kilden">`
+    + `<span class="foto-tom-ikon" style="width:26px;height:26px;display:block">${Icon.camera}</span>`
+    + `<p class="foto-tom-titel">Fotoet kunne ikke hentes hos kilden</p>`
+    + `</div>`;
+}
+function markerFotoFejl(img){
+  if (!img || img.tagName !== 'IMG' || !img.classList.contains('card-photo')) return false;
+  if (img.dataset.fotoFejl) return false;
+  const media = img.closest('.card-media');
+  if (!media) return false;
+  img.dataset.fotoFejl = '1';
+  img.insertAdjacentHTML('afterend', fotoFejlHTML());
+  img.remove();
+  return true;
+}
+function tjekFejledeFotos(rod){
+  const r = rod || document;
+  let n = 0;
+  r.querySelectorAll('img.card-photo').forEach(img => {
+    if (img.complete && img.naturalWidth === 0 && img.getAttribute('src')) n += markerFotoFejl(img) ? 1 : 0;
+  });
+  return n;
+}
+if (typeof document !== 'undefined' && document.addEventListener){
+  document.addEventListener('error', e => { markerFotoFejl(e.target); }, true);
+  const klar = () => tjekFejledeFotos();
+  document.readyState !== 'loading' ? klar() : document.addEventListener('DOMContentLoaded', klar);
+}
+
 /* ---------- Feltet uden foto må gerne bære oplysninger ----------
 
    Målt af en kritiker: 284x378 px gråt felt pr. billedløs annonce, brugt til

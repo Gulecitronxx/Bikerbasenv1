@@ -60,9 +60,9 @@ const sessionStorage = { getItem:()=>null, setItem:noop, removeItem:noop };
 const Store = { isComparing:()=>false, isFavorite:()=>false, getUser:()=>null };
 `;
 
-const { externalCardHTML, externalRowHTML, listingCardHTML } = new Function(
+const { externalCardHTML, externalRowHTML, listingCardHTML, markerFotoFejl, tjekFejledeFotos, fotoFejlHTML } = new Function(
   STUB + KILDER.map(læs).join('\n') +
-  '\nreturn { externalCardHTML, externalRowHTML, listingCardHTML };')();
+  '\nreturn { externalCardHTML, externalRowHTML, listingCardHTML, markerFotoFejl, tjekFejledeFotos, fotoFejlHTML };')();
 
 const KILDE_URL = 'https://mcsyd.dk/Produkter/Motorcykel/Brugt/Honda?p=180898&m=1489';
 
@@ -243,4 +243,52 @@ test('det indekserede kort har intet gem-hjerte — og vores eget har ét', () =
 
 test('rækken følger kortet: heller ikke dér et hjerte', () => {
   assert.ok(!/fav-btn|data-fav-toggle/.test(externalRowHTML(eksternAnnonce(), 1)));
+});
+
+/* ---------- B3: et foto, kilden ikke leverer, bliver til det aerlige felt ---------- */
+function fakeImg({ src = 'https://kilde.test/x.jpg', complete = true, naturalWidth = 0, klasse = 'card-photo', iMedia = true } = {}){
+  const media = { children: [] };
+  const img = {
+    tagName: 'IMG', dataset: {}, _src: src, _removed: false, _indsat: null,
+    complete, naturalWidth,
+    classList: { contains: c => c === klasse },
+    getAttribute: n => (n === 'src' ? img._src : null),
+    closest: sel => (sel === '.card-media' && iMedia ? media : null),
+    insertAdjacentHTML: (_pos, html) => { img._indsat = html; },
+    remove: () => { img._removed = true; },
+  };
+  return img;
+}
+
+test('markerFotoFejl: et fejlet kortfoto skiftes til feltet "Fotoet kunne ikke hentes hos kilden" — uden tegning', () => {
+  const img = fakeImg();
+  assert.equal(markerFotoFejl(img), true);
+  assert.equal(img._removed, true);
+  assert.match(img._indsat, /foto-tom foto-fejl/);
+  assert.match(img._indsat, /Fotoet kunne ikke hentes hos kilden/);
+  assert.doesNotMatch(img._indsat, /<svg[^>]*class="bike-art/, 'ingen silhuet — beslutningen "Uden foto tegner vi INGENTING" staar');
+  assert.equal(markerFotoFejl(img), false, 'idempotent: samme billede markeres kun én gang');
+});
+
+test('markerFotoFejl: roerer kun kortfotos i .card-media — ikke logoer, ikke galleriet', () => {
+  assert.equal(markerFotoFejl(fakeImg({ klasse: 'brand-logo' })), false);
+  assert.equal(markerFotoFejl(fakeImg({ iMedia: false })), false);
+  assert.equal(markerFotoFejl(null), false);
+});
+
+test('tjekFejledeFotos: kun billeder, der ER hentet og mislykkedes — ikke lazy-billeder, der ikke er begyndt', () => {
+  const fejlet = fakeImg({ complete: true, naturalWidth: 0 });
+  const lazy   = fakeImg({ complete: false, naturalWidth: 0 });
+  const ok     = fakeImg({ complete: true, naturalWidth: 596 });
+  const rod = { querySelectorAll: () => [fejlet, lazy, ok] };
+  assert.equal(tjekFejledeFotos(rod), 1);
+  assert.equal(fejlet._removed, true);
+  assert.equal(lazy._removed, false);
+  assert.equal(ok._removed, false);
+});
+
+test('fotoFejlHTML: samme felt som "Ingen fotos" (foto-tom), saa de to tilstande ikke ligner hinanden forskelligt', () => {
+  const html = fotoFejlHTML();
+  assert.match(html, /class="foto-tom foto-fejl"/);
+  assert.match(html, /foto-tom-titel/);
 });

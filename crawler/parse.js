@@ -299,7 +299,9 @@ function tilAnnonce(raa, kilde, listeMaerke = null){
     by: reniStednavn(raa.by) || faste.by || null,
     postnr: n.parsePostnr(raa.postnr ?? faste.postnr),
     saelgertype: n.normaliserSaelgertype(faste.saelgertype),
-    thumbnail_url: raa.thumbnail || null,
+    // Kildens egen pladsholdergrafik gemmes IKKE som foto — se
+    // erKildensPladsholder() i normalize.js.
+    thumbnail_url: raa.thumbnail && !n.erKildensPladsholder(raa.thumbnail) ? raa.thumbnail : null,
     // Kortene i gitteret har ingen beskrivelse, og vi henter ikke detaljesiden
     // for at få én. Vi gemmer med vilje kun det, der skal til for at finde og
     // videresende — resten hører hjemme hos kilden.

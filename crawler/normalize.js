@@ -647,8 +647,33 @@ function fingerprint({ maerke, model, aargang, km, pris_dkk, postnr }){
   return crypto.createHash('sha1').update(dele.join('|')).digest('hex');
 }
 
+/* Kildens EGET "intet foto"-grafik er ikke et foto af motorcyklen.
+
+   Fundet 23.08.2026 (B3): Gul og Gratis leverer
+   /assets/files/default-listing.<hash>.svg som <figure img>, naar saelgeren
+   ikke har lagt et billede op. Crawleren gemte det som thumbnail_url, og
+   kortet viste saa kildens pladsholder, som om det var annoncens foto — det
+   er praecis det, "Kilden ejer sine billeder" forbyder: vi viser ikke en
+   tegning som om den var annoncens. Uden thumbnail faar kortet i stedet det
+   aerlige "Ingen fotos i denne annonce"-felt (js/components.js).
+
+   Moenstrene er bevidst snaevre: et filnavn, der SIGER at det er en
+   standardgrafik, og SVG i en thumbnail-position (ingen kilde leverer
+   fotos som SVG). Et rigtigt foto i JPEG/WebP rammes aldrig. */
+const PLADSHOLDER_MOENSTRE = [
+  /\/default-listing[^/]*\.svg(\?|$)/i,   // Gul og Gratis
+  /\/(?:no|missing|default)[-_]?(?:image|photo|foto|billede)[^/]*\.(?:svg|png|gif|jpe?g|webp)(\?|$)/i,
+  /\.svg(\?|$)/i,
+];
+function erKildensPladsholder(url){
+  const u = String(url || '').trim();
+  if (!u) return false;
+  return PLADSHOLDER_MOENSTRE.some(re => re.test(u));
+}
+
 module.exports = {
   parsePris, parseKm, parseAargang, parseCcm, parsePostnr, parseHk,
+  erKildensPladsholder,
   udledCcmFraModel, MINDSTE_UDLEDTE_CCM,
   normaliserMaerke, normaliserSaelgertype, normaliserType, normaliserStand,
   uddrag, fjernPersonoplysninger, fingerprint,

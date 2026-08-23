@@ -431,3 +431,15 @@ test('uddrag() renser FØR den klipper', () => {
   const u = n.uddrag(lang);
   assert.ok(!/\d{2}\s\d{2}\s\d{2}\s\d{2}/.test(u), 'nummeret slap igennem uddrag()');
 });
+
+test('erKildensPladsholder: kildens egen "intet foto"-grafik er ikke et foto af motorcyklen (B3)', () => {
+  assert.equal(n.erKildensPladsholder('https://www.guloggratis.dk/assets/files/default-listing.JA5KSJHG.svg'), true);
+  assert.equal(n.erKildensPladsholder('https://kilde.test/img/no-image.png'), true);
+  assert.equal(n.erKildensPladsholder('https://kilde.test/static/missing_photo.jpg?v=3'), true);
+  // rigtige fotos rammes aldrig
+  assert.equal(n.erKildensPladsholder('https://images.danbase.dk/Content/Resellers/321/180898/Honda_CB_1000_0_2.jpg?v=2'), false);
+  assert.equal(n.erKildensPladsholder('https://assets.guloggratis.dk/images/2ba2f5f5/2ba2f5f5-320x240.webp'), false);
+  assert.equal(n.erKildensPladsholder('https://www.jensensmc.dk/image/cachewebp/catalog/x-cropresize-768x540.webp'), false);
+  assert.equal(n.erKildensPladsholder(''), false);
+  assert.equal(n.erKildensPladsholder(null), false);
+});
