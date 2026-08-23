@@ -109,9 +109,10 @@ const BASE = siteUrl();
 // grund til at LISTINGS/TYPES i build-brand-pages.js hentes via global.__X
 // i stedet for at læses direkte efter eval-kaldet.
 const dataSrc = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
-eval(dataSrc + '\nglobal.__L = LISTINGS; global.__T = TYPES; '
+eval(dataSrc + '\nglobal.__L = LISTINGS; global.__T = TYPES; global.__R = REGIONS; '
   + 'global.__A1CCM = A1_MAX_CCM; global.__A1HK = A1_MAX_HK; global.__A2HK = A2_MAX_HK;');
 const TYPES = global.__T;
+const REGIONS = global.__R;
 const A1_MAX_CCM = global.__A1CCM, A1_MAX_HK = global.__A1HK, A2_MAX_HK = global.__A2HK;
 
 /* Samme cleanUrl() som build-meta.js og build-brand-pages.js: canonical uden
@@ -191,7 +192,74 @@ const KOEREKORT_FACETS = [
   },
 ];
 
-function buildFacetList(){
+/* ---------- D1 (23.08.2026): landsdele og modeller ----------
+   To facetter mere paa samme maskine, samme taerskel, samme noindex-regel.
+
+   LANDSDELE: de fem fra REGIONS i js/data.js — altid alle fem bygget, som
+   typerne (en adresse, der har vaeret indekseret, maa aldrig blive 404; under
+   taersklen bliver den noindex). Region udledes af postnummeret (regionFraPostnr
+   i js/backend-bridge.js), saa en annonce uden postnummer taeller ikke med, og
+   siden siger det.
+
+   MODELLER: (maerke, model) med mindst THRESHOLD annoncer. Her bygges IKKE en
+   side pr. kombination "for en sikkerheds skyld" — det ville vaere praecis den
+   skov af tomme noindex-sider, D-010 handler om (ca. 300 kombinationer i
+   dag). I stedet: kun dem, der kvalificerer NU, plus dem, der allerede
+   findes som model-*.html paa disken (committet fra et tidligere build). En
+   model, der falder under taersklen, bliver saa noindex i stedet for 404;
+   forsvinder den helt, staar den tomme side med "ingen lige nu". Filerne
+   er i git, saa CI's friske checkout ser dem ogsaa.
+
+   Modelnoeglen er maerke + model praecis som kortet viser dem (samme
+   felter, som js/filtrering.js matcher `?model=` paa), trimmet og med
+   dobbelte mellemrum slaaet sammen — ingen anden normalisering, for saa
+   ville siden og soegningen kunne vaere uenige om, hvad der er "samme
+   model". Slug: model-<maerke>-<model>. */
+function modelNoegle(l){
+  const b = String(l.brand || '').trim().replace(/\s+/g, ' ');
+  const m = String(l.model || '').trim().replace(/\s+/g, ' ');
+  if (!b || b === 'Ukendt' || !m) return null;
+  return `${b}\u0000${m}`;
+}
+const slugify = s => String(s).toLowerCase()
+  .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function modelSlug(brand, model){ return `model-${slugify(brand)}-${slugify(model)}`; }
+/* Eksisterende model-sider paa disken: { slug -> { brand, model } } laest ud
+   af sidens egne data-attributter, saa noeglen er den samme som ved bygning. */
+function eksisterendeModelSider(){
+  const ud = new Map();
+  for (const f of fs.readdirSync(ROOT)){
+    if (!/^model-.*\.html$/.test(f)) continue;
+    const html = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    const b = (html.match(/data-facet-brand="([^"]*)"/) || [])[1];
+    const m = (html.match(/data-facet-model="([^"]*)"/) || [])[1];
+    if (b && m) ud.set(f.replace(/\.html$/, ''), { brand: afEsc(b), model: afEsc(m) });
+  }
+  return ud;
+}
+function afEsc(s){
+  return String(s).replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+}
+function modelFacets(alle){
+  const antal = new Map(), navne = new Map();
+  for (const l of alle){
+    const k = modelNoegle(l);
+    if (!k) continue;
+    antal.set(k, (antal.get(k) || 0) + 1);
+    if (!navne.has(k)){ const [brand, model] = k.split('\u0000'); navne.set(k, { brand, model }); }
+  }
+  const valgte = new Map(); // slug -> { brand, model }
+  for (const [k, n] of antal) if (n >= THRESHOLD){ const { brand, model } = navne.get(k); valgte.set(modelSlug(brand, model), { brand, model }); }
+  for (const [slug, bm] of eksisterendeModelSider()) if (!valgte.has(slug)) valgte.set(slug, bm);
+  return [...valgte.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([slug, { brand, model }]) => ({
+    kind: 'model', id: `${brand} ${model}`, slug, label: `${brand} ${model}`, brand, model,
+    titel: `${brand} ${model}`,
+    match: l => modelNoegle(l) === `${brand}\u0000${model}`,
+  }));
+}
+
+function buildFacetList(alle){
   const typeFacets = TYPES.map(t => ({
     kind: 'type', id: t.id, slug: `type-${t.id}`, label: t.label,
     titel: `${t.label}-motorcykler`,
@@ -202,14 +270,22 @@ function buildFacetList(){
     titel: k.titel, frase: k.frase, forklaring: k.forklaring,
     match: l => passerKoerekort(l, k.id),
   }));
-  return [...typeFacets, ...kkFacets];
+  const regionFacets = REGIONS.map(r => ({
+    kind: 'region', id: r, slug: `region-${slugify(r)}`, label: r,
+    titel: `Motorcykler til salg i ${r}`,
+    match: l => l.region === r,
+  }));
+  return [...typeFacets, ...kkFacets, ...regionFacets, ...modelFacets(alle || global.ALLE_LISTINGS || [])];
 }
 
 /* Den småt-skrevne udgave af facettens navn, brugt midt i en sætning
    ("Søg i alle …"). Type-labels ("cruiser-motorcykler") tåler small caps
    fint; kørekortkoder ("A2") gør ikke — de har deres egen "frase" derfor. */
 function frase(facet){
-  return facet.kind === 'koerekort' ? facet.frase : esc(facet.titel).toLowerCase();
+  if (facet.kind === 'koerekort') return facet.frase;
+  if (facet.kind === 'region') return `motorcykler i ${esc(facet.id)}`;
+  if (facet.kind === 'model') return esc(facet.titel); // et modelnavn lower-cases ikke ("CB 1000 Hornet")
+  return esc(facet.titel).toLowerCase();
 }
 
 /* Antal annoncer, der IKKE kan afgøres for denne facet, fordi et felt
@@ -253,6 +329,74 @@ function introForType(facet, items){
     dele.push(` ${hvem} indekseret fra ${kilder.map(esc).join(' og ')}, og handlen sker hos kilden.`);
   }
   return dele.join('');
+}
+
+/* Prisspaend, aargange, kilder — samme skabelon som typerne. Kun tal, der
+   kan taelles efter paa siden; "vi gaetter aldrig". */
+function prisOgAargang(items){
+  const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0).sort((a, b) => a - b);
+  const aar = items.map(l => tilTal(l.year)).filter(y => y !== null && y > 0);
+  const dele = [];
+  if (priser.length > 1 && priser[0] !== priser[priser.length - 1]) dele.push(` — fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}`);
+  else if (priser.length) dele.push(` — til ${dkk(priser[0])}`);
+  if (aar.length){ const lav = Math.min(...aar), hoej = Math.max(...aar); dele.push(lav === hoej ? `, årgang ${lav}.` : `, med årgange mellem ${lav} og ${hoej}.`); }
+  else if (!priser.length) dele.push('.');
+  return { tekst: dele.join(''), priser, aar };
+}
+function kildeSaetning(items){
+  const eksterne = items.filter(l => l.isExternal);
+  const kilder = [...new Set(eksterne.map(l => l.source?.navn).filter(Boolean))];
+  if (!eksterne.length || !kilder.length) return '';
+  const en = items.length === 1;
+  const hvem = eksterne.length === items.length ? (en ? 'Annoncen er' : 'Annoncerne er') : `${eksterne.length} af annoncerne er`;
+  return ` ${hvem} indekseret fra ${kilder.map(esc).join(' og ')}, og handlen sker hos kilden.`;
+}
+function introForRegion(facet, items, alle){
+  const en = items.length === 1;
+  const udenRegion = alle.filter(l => !l.region).length;
+  const byer = new Map();
+  for (const l of items){ const b = String(l.city || '').trim(); if (b) byer.set(b, (byer.get(b) || 0) + 1); }
+  const top = [...byer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const { tekst } = prisOgAargang(items);
+  let s = `Der er lige nu <strong>${items.length}</strong> ${en ? 'motorcykel' : 'motorcykler'} til salg i ${esc(facet.id)} på Bikerbasen${tekst}`;
+  if (top.length){
+    // Aerligt om fordelingen: 96 % af Syddanmark er én by (Roedding, MC Syd).
+    // Det skal staa, ellers lover overskriften en landsdel og leverer én gade.
+    const spredt = top[0][1] === 1; // ingen by har mere end én — "flest" ville lyve
+    s += ` ${top.length === 1 ? 'Alle står i' : spredt ? 'De står bl.a. i' : 'Flest står i'} ${top.map(([b, n]) => spredt ? esc(b) : `${esc(b)} (${n})`).join(', ')}.`;
+  }
+  s += kildeSaetning(items);
+  if (udenRegion) s += ` ${udenRegion} ${udenRegion === 1 ? 'annonce' : 'annoncer'} i hele lageret har intet postnummer og kan ikke placeres i en landsdel.`;
+  return s;
+}
+function introForModel(facet, items){
+  const en = items.length === 1;
+  const { tekst } = prisOgAargang(items);
+  const km = items.map(l => tilTal(l.km)).filter(k => k !== null && k >= 0).sort((a, b) => a - b);
+  let s = `Der er lige nu <strong>${items.length}</strong> ${esc(facet.brand)} ${esc(facet.model)} til salg på Bikerbasen${tekst}`;
+  if (km.length > 1 && km[0] !== km[km.length - 1]) s += ` Kilometertal fra ${tal(km[0])} til ${tal(km[km.length - 1])} km${km.length < items.length ? ` (${items.length - km.length} uden oplyst km)` : ''}.`;
+  const nye = items.filter(l => l.condition === 'ny' || l.kildeStand === 'ny').length;
+  if (nye) s += ` ${nye === items.length ? (en ? 'Den' : 'Alle') : nye} ${nye === items.length ? 'sælges som ny' : `af dem sælges som nye`}.`;
+  s += kildeSaetning(items);
+  return s;
+}
+/* FAQ med de tal, siden selv viser — en "prisguide", der er sand, fordi den
+   er talt og ikke skoennet. Kun paa sider, der kvalificerer. */
+function faqLdForModel(facet, items){
+  const { priser } = prisOgAargang(items);
+  const qa = [];
+  if (priser.length >= 3){
+    qa.push({ q: `Hvad koster en brugt ${facet.brand} ${facet.model}?`,
+      a: `Lige nu ligger ${priser.length} ${facet.brand} ${facet.model} til salg på Bikerbasen til mellem ${dkk(priser[0])} og ${dkk(priser[priser.length - 1])}. Prisen afhænger af årgang, kilometertal og stand — tallene opdateres, hver gang lageret indekseres.` });
+  }
+  const kk = [...new Set(items.map(l => koerekortForListing(l)).filter(Boolean))];
+  if (kk.length === 1){
+    qa.push({ q: `Hvilket kørekort kræver en ${facet.brand} ${facet.model}?`,
+      a: `De ${items.length} annoncer, vi har, kan alle køres på kørekort ${kk[0]} ud fra den oplyste effekt og slagvolumen. Tjek altid registreringsattesten på den konkrete motorcykel.` });
+  }
+  if (!qa.length) return null;
+  return { '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: qa.map(x => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a } })) };
 }
 
 function introForKoerekort(facet, items, uoplyst){
@@ -307,7 +451,10 @@ function maerkeChips(facet, items){
 }
 function facetSearchUrl(facet, extra){
   const p = new URLSearchParams();
-  if (facet.kind === 'type') p.set('type', facet.id); else p.set('koerekort', facet.id);
+  if (facet.kind === 'type') p.set('type', facet.id);
+  else if (facet.kind === 'region') p.set('regions', facet.id);
+  else if (facet.kind === 'model'){ p.set('brands', facet.brand); p.set('model', facet.model); }
+  else p.set('koerekort', facet.id);
   if (extra) p.set('brands', extra);
   return `soegning.html?${p.toString()}`;
 }
@@ -321,12 +468,31 @@ function side(facet, alle){
   const kort = items.map((l, i) => listingCardHTML(l, i)).join('\n      ');
   const foersteFoto = (items[0] && items[0].photoUrls && items[0].photoUrls[0]) || null;
 
-  const intro = facet.kind === 'type' ? introForType(facet, items) : introForKoerekort(facet, items, uoplyst);
+  const intro = facet.kind === 'type' ? introForType(facet, items)
+    : facet.kind === 'region' ? introForRegion(facet, items, alle)
+    : facet.kind === 'model' ? introForModel(facet, items)
+    : introForKoerekort(facet, items, uoplyst);
+  const hvad = facet.kind === 'type' ? `brugte ${esc(facet.label)}-motorcykler til salg i Danmark`
+    : facet.kind === 'region' ? `motorcykler til salg i ${esc(facet.id)}`
+    : facet.kind === 'model' ? `${esc(facet.brand)} ${esc(facet.model)} til salg i Danmark`
+    : `brugte motorcykler til ${esc(facet.id)}-kørekort til salg i Danmark`;
   const beskrivelse = qualifies
-    ? `Se ${items.length} brugte ${facet.kind === 'type' ? esc(facet.label) + '-motorcykler' : `motorcykler til ${esc(facet.id)}-kørekort`} `
-      + `til salg i Danmark. Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.`
+    ? `Se ${items.length} ${hvad}. Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.`
     : `${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} lige nu — se hele udvalget af `
       + `brugte motorcykler på Bikerbasen i stedet.`;
+  const sideTitel = !qualifies ? esc(facet.titel)
+    : facet.kind === 'type' ? `Brugte ${esc(facet.titel)} til salg`
+    : facet.kind === 'region' ? `Motorcykler til salg i ${esc(facet.id)}`
+    : facet.kind === 'model' ? `Brugte ${esc(facet.brand)} ${esc(facet.model)} til salg`
+    : `Brugte motorcykler til ${esc(facet.id)}-kørekort`;
+  const andreRegioner = REGIONS.filter(r => r !== facet.id)
+    .map(r => `<a class="popular-chip" href="region-${slugify(r)}.html">${esc(r)}</a>`).join('\n        ');
+  const brandFil = facet.kind === 'model' ? `maerke-${slugify(facet.brand)}.html` : null;
+  const brandFindes = brandFil && fs.existsSync(path.join(ROOT, brandFil));
+  const andreModeller = facet.kind === 'model'
+    ? (global.__MODELFACETTER || []).filter(f => f.brand === facet.brand && f.slug !== facet.slug && f.qualifies)
+        .map(f => `<a class="popular-chip" href="${f.slug}.html">${esc(f.model)}</a>`).join('\n        ')
+    : '';
 
   const andreTyper = TYPES.filter(t => `type-${t.id}` !== facet.slug)
     .map(t => `<a class="popular-chip" href="type-${t.id}.html">${esc(t.label)}</a>`).join('\n        ');
@@ -342,9 +508,7 @@ function side(facet, alle){
 <meta name="viewport" content="width=device-width, initial-scale=1">
 ${csp}
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>${qualifies
-  ? (facet.kind === 'type' ? `Brugte ${esc(facet.titel)} til salg` : `Brugte motorcykler til ${esc(facet.id)}-kørekort`)
-  : esc(facet.titel)} — Bikerbasen</title>
+<title>${sideTitel} — Bikerbasen</title>
 <meta name="description" content="${esc(beskrivelse)}">
 <!-- Canonical staar HER, foer scripts/build-meta.js koerer (samme moenster
      som maerke-*.html — SEO-runde 3, builder B/facet-runde). Uden filendelse:
@@ -364,12 +528,14 @@ ${qualifies ? '' : '<meta name="robots" content="noindex, follow">\n'}<link rel=
 ${foersteFoto ? `<link rel="preload" as="image" href="${foersteFoto}" fetchpriority="high">
 ` : ''}<link rel="stylesheet" href="css/styles.css">
 ${jsonLdBlock([
-  breadcrumbLd([
-    { name: 'Forside', path: 'index.html' },
-    { name: facet.kind === 'type' ? 'Type' : 'Kørekort', path: facet.kind === 'type' ? 'soegning.html' : 'soegning.html' },
-    { name: facet.titel, path: fil },
-  ]),
+  breadcrumbLd(
+    facet.kind === 'model' && brandFindes
+      ? [{ name: 'Forside', path: 'index.html' }, { name: 'Mærker', path: 'maerker.html' }, { name: facet.brand, path: brandFil }, { name: facet.model, path: fil }]
+      : [{ name: 'Forside', path: 'index.html' },
+         { name: facet.kind === 'type' ? 'Type' : facet.kind === 'region' ? 'Landsdel' : facet.kind === 'model' ? 'Modeller' : 'Kørekort', path: 'soegning.html' },
+         { name: facet.titel, path: fil }]),
   itemListLd(`${facet.titel} — Bikerbasen`, items),
+  facet.kind === 'model' && qualifies ? faqLdForModel(facet, items) : null,
 ])}
 </head>
 <body>
@@ -379,8 +545,9 @@ ${header}
   <div class="container">
     <nav class="breadcrumb" aria-label="Brødkrumme">
       <a href="index.html">Forside</a><span class="bc-sep"></span>
-      <a href="soegning.html">Søgning</a><span class="bc-sep"></span>
-      <span>${esc(facet.titel)}</span>
+      ${facet.kind === 'model' && brandFindes
+        ? `<a href="maerker.html">Mærker</a><span class="bc-sep"></span><a href="${brandFil}">${esc(facet.brand)}</a><span class="bc-sep"></span><span>${esc(facet.model)}</span>`
+        : `<a href="soegning.html">Søgning</a><span class="bc-sep"></span><span>${esc(facet.titel)}</span>`}
     </nav>
 
     <div class="brand-hero">
@@ -403,12 +570,12 @@ ${header}
 
     <section class="section" style="padding-top:var(--space-6);">
       <h2 class="brand-sub">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} lige nu</h2>
-      ${items.length ? `<div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}">${kort}</div>
+      ${items.length ? `<div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>${kort}</div>
       <noscript>
         <ul class="brand-noscript">
           ${items.map(l => `<li>${harEgenSide(l) ? `<a href="${esc(listingSlug(l))}">${noscriptLinje(l)}</a>` : noscriptLinje(l)}</li>`).join('\n          ')}
         </ul>
-      </noscript>` : `<div class="empty-state" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}">
+      </noscript>` : `<div class="empty-state" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>
         <h3>Ingen ${frase(facet)} til salg lige nu</h3>
         <p>Vi har ingen annoncer, der matcher denne kategori i øjeblikket. Adressen bliver stående —
            kig forbi igen, eller søg i hele udvalget.</p>
@@ -416,7 +583,21 @@ ${header}
       </div>`}
     </section>
 
-    <section class="section" style="padding-top:0;">
+    ${facet.kind === 'model' ? `${andreModeller ? `<section class="section" style="padding-top:0;">
+      <h2 class="brand-sub">Andre ${esc(facet.brand)}-modeller</h2>
+      <div class="popular-row">
+        ${andreModeller}
+        ${brandFindes ? `<a class="popular-chip" href="${brandFil}">Alle ${esc(facet.brand)}</a>` : ''}
+      </div>
+    </section>` : brandFindes ? `<section class="section" style="padding-top:0;">
+      <div class="popular-row"><a class="popular-chip" href="${brandFil}">Alle ${esc(facet.brand)}</a></div>
+    </section>` : ''}` : facet.kind === 'region' ? `<section class="section" style="padding-top:0;">
+      <h2 class="brand-sub">Andre landsdele</h2>
+      <div class="popular-row">
+        ${andreRegioner}
+        <a class="popular-chip" href="soegning.html">Hele landet</a>
+      </div>
+    </section>` : `<section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre typer</h2>
       <div class="popular-row">
         ${andreTyper}
@@ -429,7 +610,7 @@ ${header}
         ${andreKk}
         <a class="popular-chip" href="soegning.html">Alle motorcykler</a>
       </div>
-    </section>
+    </section>`}
   </div>
 </main>
 
@@ -459,7 +640,12 @@ ${footer}
   if (!mount) return;
   const kind = mount.dataset.facetKind, id = mount.dataset.facetId;
   const alle = Store.getAllListings();
-  const items = (kind === 'type' ? alle.filter(l => l.type === id) : alle.filter(l => passerKoerekort(l, id)))
+  // Samme noegle som scripts/build-facet-pages.js modelNoegle(): trim + ét mellemrum.
+  const norm = s => String(s || '').trim().replace(/\\s+/g, ' ');
+  const items = (kind === 'type' ? alle.filter(l => l.type === id)
+    : kind === 'region' ? alle.filter(l => l.region === id)
+    : kind === 'model' ? alle.filter(l => norm(l.brand) === norm(mount.dataset.facetBrand) && norm(l.model) === norm(mount.dataset.facetModel))
+    : alle.filter(l => passerKoerekort(l, id)))
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   if (!items.length){
     mount.className = 'empty-state';
@@ -502,7 +688,8 @@ ${footer}
 function facetLinksBlock(resultater, variant){
   const typer = resultater.filter(r => r.qualifies && r.facet.kind === 'type');
   const koerekort = resultater.filter(r => r.qualifies && r.facet.kind === 'koerekort');
-  if (!typer.length && !koerekort.length) return '';
+  const regioner = resultater.filter(r => r.qualifies && r.facet.kind === 'region');
+  if (!typer.length && !koerekort.length && !regioner.length) return '';
 
   const tekst = variant === 'index'
     ? {
@@ -536,6 +723,18 @@ function facetLinksBlock(resultater, variant){
       </div></div>
       <div class="popular-row">
         ${koerekort.map(chip).join('\n        ')}
+      </div>
+    </section>`);
+  }
+  if (regioner.length){
+    // D1: landsdelssider. Chip-teksten er landsdelens navn, ikke hele titlen.
+    dele.push(`<section class="section" style="padding-top:0;">
+      <div class="section-head"><div>
+        <h2>${variant === 'index' ? 'Se hele udvalget efter landsdel' : 'Søg efter landsdel'}</h2>
+        <p>${variant === 'index' ? 'Faste sider med det, der står til salg i din del af landet.' : 'Kun de motorcykler, der står i din landsdel.'}</p>
+      </div></div>
+      <div class="popular-row">
+        ${regioner.map(r => `<a class="popular-chip" href="${r.facet.slug}.html">${esc(r.facet.id)}</a>`).join('\n        ')}
       </div>
     </section>`);
   }
@@ -579,9 +778,36 @@ function skrivFacetLinks(resultater){
     + `${antalTyper} type-links, ${antalKk} kørekort-links (kun de indekserbare, >= tærsklen på ${THRESHOLD}).`);
 }
 
+/* ---------- D1: maerkesidernes modelchips peger paa modelsiden, naar den findes ----------
+   build-brand-pages.js (trin 2) skriver chips som soegning.html?brands=X&q=Y.
+   Findes model-x-y.html og kvalificerer den, er DEN det bedre maal — ellers
+   er modelsiden en orphan (D-010 igen). Kun kvalificerende sider; en
+   noindex-side skal ikke have interne links. Maerkesiden skrives her, fordi
+   trin 2 loeber FOER taersklen er regnet. */
+function relinkMaerkesider(modelFacetter){
+  let sider = 0, links = 0;
+  const pr = new Map();
+  for (const f of modelFacetter){ if (!f.qualifies) continue; if (!pr.has(f.brand)) pr.set(f.brand, []); pr.get(f.brand).push(f); }
+  for (const [brand, facets] of pr){
+    const fil = path.join(ROOT, `maerke-${slugify(brand)}.html`);
+    if (!fs.existsSync(fil)) continue;
+    let html = fs.readFileSync(fil, 'utf8'), foer = html;
+    for (const f of facets){
+      const gammel = `href="soegning.html?brands=${encodeURIComponent(brand)}&amp;q=${encodeURIComponent(f.model)}"`;
+      const ny = `href="${f.slug}.html"`;
+      html = html.split(gammel).join(ny);
+      if (html !== foer){ links++; foer = html; }
+    }
+    if (html !== fs.readFileSync(fil, 'utf8')){ fs.writeFileSync(fil, html, 'utf8'); sider++; }
+  }
+  if (sider) console.log(`Maerkesider: ${links} modelchips peger nu paa modelsider (${sider} sider).`);
+}
+
 function byg(){
   const alle = global.ALLE_LISTINGS;
-  const facets = buildFacetList();
+  const facets = buildFacetList(alle);
+  // Modelfacetterne skal kende hinandens status (chips "Andre X-modeller").
+  global.__MODELFACETTER = facets.filter(f => f.kind === 'model').map(f => Object.assign(f, { qualifies: alle.filter(f.match).length >= THRESHOLD }));
   const resultater = [];
   for (const facet of facets){
     const items = alle.filter(facet.match);
@@ -589,6 +815,7 @@ function byg(){
     fs.writeFileSync(path.join(ROOT, `${facet.slug}.html`), side(facet, alle), 'utf8');
     resultater.push({ facet, antal: items.length, qualifies });
   }
+  relinkMaerkesider(global.__MODELFACETTER);
 
   console.log(`Byggede ${resultater.length} facet-sider (${resultater.filter(r => r.qualifies).length} indekserbare, `
     + `${resultater.filter(r => !r.qualifies).length} noindex under tærsklen på ${THRESHOLD}).`);

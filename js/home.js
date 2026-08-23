@@ -820,13 +820,19 @@ async function buildForside(){
   const tegnFeatured = async () => {
     featured = vaelgFeatured(4);
     if (!featured.length){ featuredMount.replaceChildren(); skrivFeaturedSub(0); return; }
-    await saetIndIPortioner(featuredMount, featured.map(kortHTML));
+    /* D2 (23.08.2026): kolonnetallet laeses FOER kortene saettes ind. Foer stod
+       laesningen lige efter indsaetningen — en skrivning fulgt af en laesning
+       af layout i samme opgave tvinger browseren til at layoute midt i det
+       hele (Lighthouse: "forced reflow" paa forsiden). Gitteret har faste
+       kolonner pr. brudpunkt (repeat(N,…) i css), saa tallet er det samme
+       tomt som fyldt.
+       Paa én kolonne (telefon) vises 2 i stedet for 4: fire fuldbredde-kort
+       var 2.429 px af en 10.812 px hoej forside (maalt 390x844) — den
+       laengste sektion paa siden, og resten af lageret er ét tryk vaek. */
     const cols = getComputedStyle(featuredMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-    const antal = Math.min(featured.length, Math.max(cols, Math.floor(4 / cols) * cols));
-    if (antal < featured.length){
-      [...featuredMount.children].slice(antal).forEach(el => el.remove());
-      featured = featured.slice(0, antal);
-    }
+    const maks = cols === 1 ? 2 : Math.max(cols, Math.floor(4 / cols) * cols);
+    featured = featured.slice(0, Math.min(featured.length, maks));
+    await saetIndIPortioner(featuredMount, featured.map(kortHTML));
     skrivFeaturedSub(featured.length);
     wireFavoriteButtons(featuredMount);
   };

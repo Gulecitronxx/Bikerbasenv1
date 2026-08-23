@@ -335,7 +335,9 @@ main#main-content{ min-height: calc(100vh - var(--header-h)); }
 .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-4); margin-bottom: var(--space-5); flex-wrap:wrap; }
 .section-head h2{ font-size: clamp(22px,3vw,30px); }
 .section-head p{ color:var(--color-fg-muted); margin-top:4px; }
-.section-link{ font-weight:600; color:var(--color-primary-hover); display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.section-link{ font-weight:600; color:var(--color-primary-hover); display:inline-flex; align-items:center; gap:4px; white-space:nowrap; position:relative; }
+/* D2: 24 px hoej tekst, 44 px ramme (::before), uaendret udseende. */
+.section-link::before{ content:''; position:absolute; inset:-10px 0; }
 .section-link svg{ width:16px; height:16px; }
 
 /* ============ Header ============ */
@@ -2667,7 +2669,8 @@ body.overlay-open .cookie-banner{ display:none; }
 .seo-col ul{ display:flex; flex-direction:column; gap:8px; }
 .seo-col a{ display:inline-flex; align-items:center; min-height:32px; font-size:14px; color: var(--color-fg); transition: color .15s var(--ease-out); }
 .seo-col a:hover{ color: var(--color-primary); text-decoration:underline; text-underline-offset:3px; }
-@media (pointer:coarse){ .seo-col a{ min-height:40px; } .seo-col li + li{ margin-top:2px; } }
+/* D2 (23.08.2026): 44 px paa beroeringsskaerme (WCAG 2.5.5 / Apple HIG); 40 var taet paa, ikke paa. */
+@media (pointer:coarse){ .seo-col a{ min-height:44px; } .seo-col li + li{ margin-top:0; } }
 
 /* ============ Forside: pris-kort i sælg-båndet ============ */
 /* Gør "gratis" til et rigtigt pris-øjeblik: tallet er helten. Erstatter den
@@ -2894,6 +2897,9 @@ body.overlay-open .cookie-banner{ display:none; }
 }
 .card-compare svg{ width:17px; height:17px; }
 .card-compare:hover{ transform: scale(1.08); }
+/* D2 (23.08.2026): knappen tegnes 34x34, men rammer 44x44 — ::before er et
+   usynligt, klikbart felt rundt om den. Visuelt uaendret. */
+.card-compare::before{ content:''; position:absolute; inset:-5px; border-radius:50%; }
 .card-compare.active{ background: var(--color-primary); color: var(--color-on-primary); }
 :root[data-theme="dark"] .card-compare{ background: rgba(31,28,23,.92); }
 
