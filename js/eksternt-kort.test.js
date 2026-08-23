@@ -119,10 +119,13 @@ test('kortet har ingen vej ud af sitet — hverken CTA eller anden ekstern URL',
 /* Kilden skal stadig NÆVNES. Det er ikke pynt: en køber, der lander på en
    annonceside, som sender ham videre til en forhandler, må kunne se det på
    kortet først. Det er kun det klikbare link ud, der skulle væk. */
-test('kilden nævnes stadig på kortet — stribe, sælgerlinje og navn i kortlinket', () => {
+test('kilden nævnes stadig på kortet — fodlinje (med forklaring i title) og navn i kortlinket', () => {
+  /* Runde 5 (D5-S2): striben øverst er væk — 34 px identisk tekst på 24 af 24
+     kort. Kilden bor nu ÉT sted: fodlinjen, med domænet, det eksterne-link-
+     ikon og stribens forklaring som title. Og stadig i kortlinkets navn. */
   const html = externalCardHTML(eksternAnnonce(), 1);
-  assert.match(html, /class="card-kilde"[^>]*>[\s\S]*?Annonce fra MC Syd/);
-  assert.match(html, /class="card-kildelinje"[\s\S]*?mcsyd\.dk/);
+  assert.doesNotMatch(html, /class="card-kilde"/);
+  assert.match(html, /class="card-kildelinje" title="Annoncen ligger hos MC Syd[^"]*"[\s\S]*?mcsyd\.dk/);
   assert.match(attrFor(html, 'card-link')['aria-label'], /hos MC Syd/);
 });
 
@@ -217,6 +220,10 @@ test('kilden nævnes stadig i bunden, nu på samme linje som stedet', () => {
   const html = externalCardHTML(eksternAnnonce(), 1);
   assert.match(html, /class="card-sted"[\s\S]*?Rødding/);
   assert.match(html, /class="card-kildelinje"[\s\S]*?Forhandler · mcsyd\.dk/);
+  // Runde 5 (D5-S7): byen alene i linjen, regionen i title — domænet skal have pladsen.
+  assert.match(html, /class="card-sted" title="Rødding, Syddanmark"/);
+  // Runde 5 (D5-S3/S4): kørekortchippen står i spec-rækken, med kode-klasse.
+  assert.match(html, /class="card-spec card-spec-kk"[\s\S]*?class="card-koerekort kk-[a-z0-9]+"/);
 });
 
 /* ---------- D-008: favoritten, der ikke kan gemmes ----------

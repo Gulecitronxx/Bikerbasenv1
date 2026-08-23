@@ -564,7 +564,14 @@ function renderExternalListing(listing){
      rækkefølge — men kun de tal, vi faktisk har. Et felt med "–" i er
      støj, der får resten af tabellen til at se upålidelig ud; et felt, der
      ikke er der, er bare et felt, der ikke er der. */
+  /* Runde 5 (D5-A2): kørekortet er vores ene strukturelle fordel over
+     Bilbasen og stod som et 120 px forklaringspanel UNDER folden — på 390 px
+     begravet under vores egen faste bjælke. Nu er det første celle i
+     nøgletalsgitteret, som flyttes op lige under prisen; panelet med
+     regnestykket bliver stående nedenunder som forklaring, ikke overskrift. */
   const noegletal = [
+    kk ? [Icon.checkCircle, 'Kørekort', `${escapeHTML(kk)} <small>vejl.</small>`]
+       : (kkUvis ? [Icon.checkCircle, 'Kørekort', 'A2/A — uvist'] : null),
     listing.year != null ? [Icon.calendar, 'Årgang', String(listing.year)] : null,
     listing.km   != null ? [Icon.gauge,    'Kilometer', formatKm(listing.km)] : null,
     listing.ccm  != null ? [Icon.engine,   'Kubik', formatCcm(listing.ccm)] : null,
@@ -599,7 +606,10 @@ function renderExternalListing(listing){
     raekke('Salgsvilkår', salgsmarkoerer.length ? salgsmarkoerer.map(escapeHTML).join(' · ') : null),
     raekke('Sælger', listing.isDealer ? `Forhandler · ${kilde}` : null),
     raekke('Sted', stedTekst ? escapeHTML(stedTekst) : null),
-    raekke(`Annonce-id hos ${kilde}`, listing.sourceListingId ? escapeHTML(listing.sourceListingId) : null),
+    /* Runde 5 (D5-A6): et 36 tegns uuid ombrød til fire linjer etiket + to
+       linjer værdi på 390 px. Kun korte id'er (MC Syds "137963") er noget, en
+       køber kan citere i telefonen; resten står som ref. i kildekortet. */
+    raekke(`Annonce-id hos ${kilde}`, listing.sourceListingId && String(listing.sourceListingId).length <= 12 ? escapeHTML(listing.sourceListingId) : null),
   ].join('');
 
   /* Datoen er den dag, VI fandt annoncen — ikke den dag, den blev oprettet
@@ -648,17 +658,17 @@ function renderExternalListing(listing){
 
   document.getElementById('listing-detail').innerHTML = `
     <div class="external-detail">
+      <!-- Runde 5 (D5-A1): flaget var 112 px på 390 px og sagde det samme som
+           kildekortet tre gange til. Én linje: hvem, og hvem man køber af. På
+           ≥960 px skjules det (css) — højre spalte siger det 20 px derfra. -->
       <p class="external-detail-flag">
-        ${Icon.store}<span><b>${markedsplads
-          ? `Annoncen ligger på ${kilde}${domaene ? `, ${domaene}` : ''}.`
-          : `Motorcyklen står hos ${kilde}${domaene ? `, ${domaene}` : ''}.`}</b>
-        ${hvemKoeberDuAf}</span>
+        ${Icon.store}<span>Annonce hos <b>${kilde}</b>${markedsplads ? ' — du køber af sælgeren bag den' : ' — det er dem, du køber af'}</span>
       </p>
 
       <figure class="external-detail-photo">
         ${foto
           ? `<img src="${escapeHTML(foto)}" alt="${brand} ${model}" loading="eager" decoding="async">
-             <figcaption>${Icon.info}Foto: ${kilde}. Flere billeder af netop denne motorcykel finder du i deres annonce.</figcaption>`
+             <figcaption>${Icon.info}Foto: ${kilde} — flere billeder i deres annonce</figcaption>`
           /* Her stod "Billederne af den her motorcykel ligger i <kilde>s
              annonce". Det var et løfte, vi ikke kunne holde: vi mangler
              fotoet, fordi kilden ikke har sat et på annoncen. MC Syd
@@ -690,22 +700,31 @@ function renderExternalListing(listing){
           ${listing.isDealer ? `${Icon.store}Forhandlerannonce` : ''}
         </p>
         <div class="external-detail-price-block">
-          <p class="external-detail-price-label">Pris hos ${kilde}</p>
           <!-- "Pris ikke oplyst" sat i sidens største skrift råber en
                ikke-oplysning ud som var den nyheden. Mangler prisen, træder
-               tallet tilbage og bliver til en henvisning. -->
+               tallet tilbage og bliver til en henvisning.
+               Runde 5 (D5-A2): etiketten står på LINJE med tallet ("164.995 kr.
+               hos Gul og Gratis"), som Bilbasens "Kontantpris · 44.900 kr.",
+               i stedet for som versallinje over det — 18 px sparet på mobil. -->
           ${listing.price == null
             ? `<p class="external-detail-price is-tom">Ikke oplyst — spørg ${kilde}</p>`
-            : `<p class="external-detail-price">${formatPrice(listing.price)}</p>`}
+            : `<p class="external-detail-price">${formatPrice(listing.price)} <span class="external-detail-price-label">hos ${kilde}</span></p>`}
           ${salgsmarkoerer.length ? `
           <p class="external-detail-vilkaar">
             ${salgsmarkoerer.map(m => `<span class="external-detail-vilkaar-chip">${escapeHTML(m)}</span>`).join('')}
           </p>
           <p class="external-detail-vilkaar-note">Salgsvilkår oplyst i annoncen hos ${kilde} — de er en del af prisen. Få dem bekræftet dér.</p>` : ''}
         </div>
+        <!-- Runde 5 (D5-A4): handlingsrække som Bilbasens "Sammenlign · Print ·
+             Anmeld" — kun handlinger, der findes for en indekseret annonce:
+             sammenlign (lokal, D-008), del, meld fejl (reports.target_id er
+             text). Ingen favorit (afvist, D-008). Bjælken forbliver én handling. -->
+        <div class="external-detail-actions">
+          <button type="button" class="btn btn-ghost btn-sm" data-compare-toggle="${escapeHTML(String(listing.id))}" aria-pressed="${typeof Store !== 'undefined' && Store.isComparing && Store.isComparing(listing.id) ? 'true' : 'false'}">${Icon.chart || ''}Sammenlign</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="share-listing-btn">${Icon.share || ''}Del</button>
+          <button type="button" class="btn btn-ghost btn-sm report-link" id="report-listing-btn">${Icon.flag || ''}Meld fejl</button>
+        </div>
       </header>
-
-      ${koerekortPanel}
 
       ${noegletal.length ? `
       <div class="external-detail-stats">
@@ -715,6 +734,7 @@ function renderExternalListing(listing){
             <b>${vaerdi}</b>
           </div>`).join('')}
       </div>` : ''}
+      ${koerekortPanel}
 
       <section class="external-detail-section">
         <h2>Detaljer</h2>
@@ -782,13 +802,36 @@ function renderExternalListing(listing){
     ? andre.filter(l => l.ccm && Math.abs(l.ccm - ccm) <= ccm * 0.35)
     : [];
   const set = new Set();
-  const lignende = [...sammeMaerke, ...naerKubik]
-    .filter(l => !set.has(l.id) && set.add(l.id))
-    .slice(0, 3);
-
+  /* Runde 5 (D5-A5): mærket vandt over alt — til en 2023 NT 1100 A til
+     164.995 kr. stod en 1983 CX 650 til 20.000 og en Gold Wing til 575.000.
+     Bilbasen går model → segment → prisbånd. Samme idé som point, kun med
+     felter vi har; kræv en minimumsscore, ellers skjules striben — tom er
+     ærligere end 1983 mod 2023. */
+  const score = (l) => {
+    let s = 0;
+    if (listing.model && l.model && l.model.toLowerCase() === String(listing.model).toLowerCase()) s += 3;
+    if (l.brand === listing.brand) s += 2;
+    if (listing.price > 0 && l.price > 0 && Math.abs(l.price - listing.price) / listing.price <= 0.4) s += 3;
+    if (ccm > 0 && Number(l.ccm) > 0 && Math.abs(Number(l.ccm) - ccm) / ccm <= 0.35) s += 2;
+    if (listing.year && l.year && Math.abs(Number(l.year) - Number(listing.year)) <= 6) s += 1;
+    if (listing.type && l.type === listing.type) s += 2;
+    return s;
+  };
+  // Tre ens kort (samme model, samme pris — en forhandlers lagerstykker) ligner
+  // en fejl; tag den bedste af hver (model, pris), og fyld op med de naeste.
+  const rangeret = andre.map(l => [score(l), l]).filter(([s]) => s >= 4).sort((a, b) => b[0] - a[0]);
+  const set2 = new Set(); const lignende = [];
+  for (const [, l] of rangeret){ const n = `${l.brand}|${l.model}|${l.price}`; if (set2.has(n)) continue; set2.add(n); lignende.push(l); if (lignende.length === 3) break; }
+  if (lignende.length < 3) for (const [, l] of rangeret){ if (!lignende.includes(l)) lignende.push(l); if (lignende.length === 3) break; }
+  void sammeMaerke; void naerKubik; void set;
   if (stribe && mount && lignende.length){
     const overskrift = stribe.querySelector('h2');
-    if (overskrift) overskrift.textContent = 'Lignende motorcykler på Bikerbasen';
+    if (overskrift){
+      const dele = [listing.brand !== 'Ukendt' ? listing.brand : null,
+        ccm ? `${formatCcm(Math.round(ccm * 0.65))}–${formatCcm(Math.round(ccm * 1.35))}` : null,
+        listing.price > 0 ? `${Math.round(listing.price * 0.6 / 1000)}–${Math.round(listing.price * 1.4 / 1000)} t.kr.` : null].filter(Boolean);
+      overskrift.textContent = dele.length ? `Lignende: ${dele.join(' · ')}` : 'Lignende motorcykler på Bikerbasen';
+    }
     mount.innerHTML = lignende.map((l, i) => listingCardHTML(l, i)).join('');
     wireFavoriteButtons(mount);
   } else if (stribe){
@@ -805,6 +848,20 @@ function renderExternalListing(listing){
      og stod tilbage med "Skriv til sælger" på en annonce uden sælger. */
   document.getElementById('contact-modal')?.remove();
   document.getElementById('listing-actionbar')?.remove();
+  // Runde 5 (D5-A4): del + meld fejl — samme adfærd som på egne annoncer.
+  document.getElementById('share-listing-btn')?.addEventListener('click', async () => {
+    const url = location.href;
+    const title = `${listing.brand} ${listing.model}${listing.price ? ` — ${formatPrice(listing.price)}` : ''}`;
+    if (navigator.share){
+      try { await navigator.share({ title, url }); return; }
+      catch (e) { if (e.name === 'AbortError') return; }
+    }
+    try { await navigator.clipboard.writeText(url); toast('Link kopieret til udklipsholderen'); }
+    catch (e) { prompt('Kopiér linket:', url); }
+  });
+  document.getElementById('report-listing-btn')?.addEventListener('click', () => {
+    openReportModal('listing', fuldTitel, listing.id);
+  });
   document.body.classList.remove('har-actionbar');
 }
 

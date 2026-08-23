@@ -812,10 +812,24 @@ function externalCardHTML(l, i){
           <div class="card-spec spec-tom"><dt>${EKSTERN_UKENDT} af kilden</dt><dd>${escapeHTML(opremsDa(mangler))}</dd></div>` : '');
 
   const kk = koerekortMaerkat(l);
-
+  /* Runde 5 (D5-S2/S3/S4/S7, maalt mod Bilbasens kort):
+     - Kildestriben oeverst (34 px, identisk tekst paa 24 af 24 kort) er vaek;
+       kilden bor ÉT sted paa kortet — fodlinjen, med det eksterne-link-ikon
+       striben havde, domaenet og striben's forklaring som title. Fotoet
+       rykker 34 px op, 24 kort = 816 px kortere side.
+     - Koerekortet er en chip i SAMME raekke som aar/km/ccm (én 24 px-raekke
+       som Bilbasens fire graa fakta-chips), kontur som standard og fyldt kun
+       for A1/A2 — de kategorier, der faktisk udelukker noget (13 + 47 af 548)
+       — saa prisen igen er kortets tungeste element. Chippen staar ALTID.
+     - Fodlinjen: byen alene, naar den er kendt (regionen i title); domaenet
+       vinder pladskampen i stedet for at blive klippet foerst. */
+  const kkKlasse = kk.kode ? ` kk-${String(kk.kode).toLowerCase()}` : ' kk-ukendt';
+  const by = String(l.city || '').trim();
+  const region = l.region || regionFraPostnr(l.postnr);
+  const sted = by || region || (l.postnr ? String(l.postnr) : 'Sted ikke oplyst');
+  const stedTitle = by && region ? `${by}, ${region}` : sted;
   return `
   <article class="card card-external" data-listing-id="${l.id}" data-external="1">
-    <div class="card-kilde" title="Annoncen ligger hos ${kilde}. Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}<span>Annonce fra ${kilde}</span></div>
     <div class="card-media">
       ${listingMediaHTML(l, altTekst, i === 0)}
       <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
@@ -832,12 +846,12 @@ function externalCardHTML(l, i){
       </h3>
       <div class="card-specblok">
         <dl class="card-specs">${specs}
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort${kkKlasse}" title="${escapeHTML(kk.forklaring)}" aria-label="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}</span></dd></div>
         </dl>
-        <span class="card-koerekort${kk.kode ? '' : ' kk-ukendt'}" title="${escapeHTML(kk.forklaring)}" aria-label="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}</span>
       </div>
       <div class="card-footer">
-        <span class="card-sted">${Icon.mapPin}<span>${escapeHTML(eksternStedTekst(l))}</span></span>
-        <span class="card-kildelinje">${Icon.store}<span>${escapeHTML(saelger)}</span></span>
+        <span class="card-sted" title="${escapeHTML(stedTitle)}">${Icon.mapPin}<span>${escapeHTML(sted)}</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos ${kilde}. Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}<span>${escapeHTML(saelger)}</span></span>
       </div>
     </div>
     <a href="annonce.html?id=${l.id}"

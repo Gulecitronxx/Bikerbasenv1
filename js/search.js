@@ -904,8 +904,14 @@ function renderResultsCount(list){
      Bundet sammen wrapper leddet og knappen som ét, så (i) altid står ved
      "332 indekseret hos MC Syd", som er dét, den åbner forklaringen på. */
   mix.hidden = false;
+  // Runde 5 (D5-S1): to udgaver i markuppen, css vaelger pr. bredde — den
+  // lange ("332 indekseret hos MC Syd · 118 hos Gul og Gratis · +2 kilder")
+  // paa desktop, den korte ("fra 4 kilder") paa mobil. Begge er sande og kan
+  // taelles efter; (i) aabner fordelingen begge steder.
+  const antalKilder = sorteret.length;
+  const kort = `indekseret fra ${antalKilder} ${antalKilder === 1 ? 'kilde' : 'kilder'}`;
   mix.innerHTML = `${egneTekst}<span class="mix-tail">` +
-    `<span class="mix-part mix-ekstern">${kildeTekst}${flere}</span>` +
+    `<span class="mix-part mix-ekstern"><span class="mix-lang">${kildeTekst}${flere}</span><span class="mix-kort">${eksterne} ${kort}</span></span>` +
     `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>` +
     `</span>`;
   mix.querySelector('#mix-info-btn').addEventListener('click', forklarIndekseret);
@@ -1189,9 +1195,13 @@ function renderSorteringsNote(sideItems, heleResultatet){
 
   const udenIAlt = heleResultatet.filter(l => !harFoto(l)).length;
   const udenPaaSiden = sideItems.filter(l => !harFoto(l)).length;
-  const infoKnap = `<button type="button" class="sortering-info" id="sortering-info-btn"`
-    + ` title="Sådan er rækkefølgen sat"`
-    + ` aria-label="Sådan er rækkefølgen sat">${Icon.info}</button>`;
+  /* Runde 5 (D5-S6): (i) staar fast i .sort-felt (soegning.html) og ikke
+     laengere inde i notelinjen — saa forklaringen er der, ogsaa naar linjen er
+     skjult. Den vises, naar der er noget at forklare (blandet/date-desc). */
+  const fastInfo = document.getElementById('sortering-info-btn');
+  if (fastInfo && !fastInfo.dataset.klar){ fastInfo.dataset.klar = '1'; fastInfo.innerHTML = Icon.info; fastInfo.addEventListener('click', forklarSortering); }
+  if (fastInfo) fastInfo.hidden = !(state.sort === 'blandet' || state.sort === 'date-desc');
+  const infoKnap = '';
 
   /* "Nyeste først" er den anden sortering, der har brug for en linje — og
      det er den vigtigste af de to. 332 af 383 annoncer har ingen
@@ -1210,7 +1220,6 @@ function renderSorteringsNote(sideItems, heleResultatet){
        HVORFOR de udaterede staar bagest, staar i (i), hvor det hoerer til. */
     el.innerHTML = `Nyeste først: ${medDato} af ${heleResultatet.length} har en dato og står øverst — `
       + `resten uden dato bagefter.${infoKnap}`;
-    el.querySelector('#sortering-info-btn').addEventListener('click', forklarSortering);
     return;
   }
 
@@ -1218,13 +1227,16 @@ function renderSorteringsNote(sideItems, heleResultatet){
     && udenIAlt > 0 && udenIAlt < heleResultatet.length;
   if (!blandes){ el.hidden = true; return; }
 
+  /* Runde 5 (D5-S6): linjen begrunder sig selv med, at fordelingen er den ene
+     regel, man kan EFTERPROEVE paa skaermen — paa en side med 0 kort uden foto
+     kan den ikke. Saa skjules den dér; (i) i .sort-felt har stadig reglen. */
+  if (udenPaaSiden === 0){ el.hidden = true; return; }
   el.hidden = false;
   /* C5 (23.08.2026): én linje paa en telefon (maalt 390 px: 41 px -> ~17 px
      over det foerste kort). Begge tal kan stadig taelles efter paa skaermen;
      reglen i sin helhed staar i (i) — se forklarSortering(). */
   el.innerHTML = `Blandet udbud: ${udenIAlt} uden foto fordelt jævnt — `
     + `${udenPaaSiden} på denne side.${infoKnap}`;
-  el.querySelector('#sortering-info-btn').addEventListener('click', forklarSortering);
 }
 
 function getFilteredListings(){

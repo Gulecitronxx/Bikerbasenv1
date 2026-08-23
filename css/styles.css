@@ -983,10 +983,15 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    ét felt, skrider hele kolonnen, og så kan en side med 24 kort ikke
    skimmes. */
 .card-specblok{ display:flex; flex-direction:column; gap:8px; }
+/* Runde 5 (D5-S4): fakta som chips i ÉN 24 px-raekke (Bilbasen: "7/2025 ·
+   7.000 km · 566 km raekkevidde · El" som fire graa chips). Chips kan
+   skannes lodret ned gennem listen — km sidder i samme kolonne paa hvert kort.
+   D-011 afviste chips, fordi de var et 2x2-gitter paa 64 px; det var
+   gitteret, der var galt, ikke chippen. */
 .card-specs{
-  display:flex; align-items:baseline; margin:0; padding:0;
-  min-width:0; height:20px; overflow:hidden;
-  font-size:13px; line-height:20px;
+  display:flex; align-items:center; gap:6px; margin:0; padding:0;
+  min-width:0; height:24px; overflow:hidden;
+  font-size:12.5px; line-height:18px;
 }
 /* De kendte værdier fylder hvad de fylder; kun det manglende led må klippes,
    for det er det eneste, man kan gætte resten af. */
@@ -996,9 +1001,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    når linjen bryder (se media-reglen nedenfor): en "·" i slutningen af
    første række læses som "der kommer mere", en "·" i starten af anden række
    læses som en fejl. */
-.card-spec:not(:last-child)::after{
-  content:"·"; margin:0 4px; color: var(--color-fg-muted); flex:0 0 auto;
-}
+/* Separator-prikken er vaek: chipsene baerer adskillelsen selv (D5-S4). */
 
 /* Den smalle spalte: linjen bryder til to rækker frem for at klippe et tal.
 
@@ -1023,8 +1026,11 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    Skulle noget alligevel løbe over, er det KUN det manglende led, der kan
    skrumpe (flex:0 1 auto); de kendte værdier står fast. */
 .card-external .card-body{ container-type: inline-size; }
-@container (max-width: 270px){
-  .card-specs{ flex-wrap:wrap; align-content:flex-start; height:40px; }
+/* Runde 5: bredeste kendte tilfaelde som chips ("1997 · 36.000 km · 1.520 ccm ·
+   Koerekort A") = ca. 315 px; kroppen er 324 px ved 390. Under 320 px bryder
+   raekken til to, som foer. */
+@container (max-width: 320px){
+  .card-specs{ flex-wrap:wrap; align-content:flex-start; height:54px; }
 }
 /* Feltnavnet er der for skærmlæseren; linjen viser kun værdien. */
 .card-spec dt{
@@ -1042,9 +1048,11 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    (D-007, opacity). Reglen siger derfor selv, hvad den vil have. */
 .card-spec dd{
   margin:0; font-weight:600;
-  padding:0; background:none; border-radius:0;
+  padding:2px 8px; background: var(--color-surface-2); border-radius:4px;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
+.card-spec.spec-tom dd{ background:transparent; padding-inline:0; font-weight:500; }
+.card-spec-kk dd{ padding:0; background:transparent; }
 /* Aldrig et tomt felt, aldrig en bar tankestreg — men heller ikke et tal, vi
    ikke har. Leddet bliver stående og siger, HVAD kilden ikke oplyste.
    Ordene "ikke oplyst" står her og ikke i markuppen, fordi det skjulte <dt>
@@ -1058,14 +1066,24 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    alene, i fuld bredde, i sitets accentfarve — og den forsvinder ALDRIG.
    Kan den ikke udledes, står der "Kørekort ukendt", for et manglende felt
    dér ville læses som "ingen krav". */
+/* Runde 5 (D5-S3): "Koerekort A" staar paa 548 af 548 annoncer (A udelukker
+   ingen) og var den ENESTE fyldte accentfarve paa siden — 24 gange det samme
+   ord, hoejere end prisen. Kontur som standard; fyldt kun for A1/A2, hvor
+   chippen baerer en oplysning, Bilbasen ikke har (13 + 47 annoncer, en
+   19-aarig kan koebe). Altid synlig, stadig fed, stadig "Koerekort A". */
 .card-external .card-koerekort{
   position:static; display:inline-block; align-self:flex-start; max-width:100%;
-  font-family: var(--font-display); font-size:14px; font-weight:700;
-  line-height:20px; padding:4px 8px; letter-spacing:0;
+  font-family: var(--font-display); font-size:12.5px; font-weight:700;
+  line-height:18px; padding:2px 8px; letter-spacing:0;
   border-radius:4px; box-shadow:none;
-  background: var(--color-primary); color: var(--color-on-primary);
+  background:transparent; color: var(--color-fg); border:1.5px solid var(--color-border);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
+.card-external .card-koerekort.kk-a1, .card-external .card-koerekort.kk-a2{ background: var(--color-primary); color: var(--color-on-primary); border-color:transparent; }
+.card-external .card-price{ font-size:22px; letter-spacing:-0.01em; }
+/* Runde 5 (D5-S7): domaenet vinder pladskampen i fodlinjen; stedet viger. */
+.card-external .card-footer .card-sted{ flex:0 1 auto; max-width:45%; }
+.card-external .card-footer .card-kildelinje{ flex:1 1 auto; min-width:0; justify-content:flex-end; }
 /* Accentfarven er et udsagn: "sådan her er reglen". Kan vi ikke udlede
    kategorien, må chippen ikke lyde lige så sikker — den bliver stående, men
    dæmpet, så farven fortsætter med at betyde "her står svaret". */
@@ -1336,6 +1354,10 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 #sort-select{ width:auto; min-width:168px; }
 
 /* Fritekst-søgefelt øverst i resultatkolonnen */
+/* Runde 5 (D5-S1): soegefelt + gem + Filtre i én raekke paa alle bredder. */
+.srp-bar{ display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; margin-bottom: var(--space-4); }
+.srp-bar .srp-search{ margin:0; }
+.srp-bar #save-search-btn{ white-space:nowrap; }
 .srp-search{ position:relative; margin-bottom: var(--space-4); }
 .srp-search-icon{ position:absolute; left:16px; top:50%; transform:translateY(-50%); width:20px; height:20px; color: var(--color-fg-muted); pointer-events:none; }
 .srp-search-icon svg{ width:20px; height:20px; }
@@ -1632,12 +1654,37 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
 /* Flaget står øverst, før foto og titel. Det er det første, øjet rammer,
    og det eneste sted på siden, hvor afsenderen kan misforstås. */
 .external-detail-flag{
-  display:flex; align-items:flex-start; gap:10px;
+  display:flex; align-items:center; gap:8px;
   border:1.5px dashed var(--color-border); border-radius: var(--radius-md);
   background: var(--color-surface-2); color: var(--color-fg-muted);
-  padding: var(--space-3) var(--space-4); font-size:14px; line-height:1.5;
-  margin-bottom: var(--space-5);
+  padding: 8px var(--space-3); font-size:13px; line-height:1.35;
+  margin-bottom: var(--space-3);
 }
+/* Runde 5 (D5-A1): én linje på mobil; på desktop siger højre spalte det samme
+   20 px derfra, så flaget er væk dér. */
+.external-detail-flag span{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.external-detail-flag b{ color: var(--color-fg); }
+@media (min-width:960px){
+  .external-detail-flag{ display:none; }
+  /* Runde 5 (D5-A2, desktop): fotoet var 440 px hoejt (703 px bredt, 16:10) og
+     skubbede pris til ~700 og noegletal UNDER folden ved 850. Bilbasens foto
+     er 484 px paa en 646 px spalte, men deres titel/pris ligger ogsaa under
+     folden — det vil vi ikke. 400 px foto = pris ~650, noegletal ~760. */
+  .external-detail-photo img{ max-height:400px; width:100%; object-fit:cover; }
+}
+/* Runde 5 (D5-A4): handlingsrækken under titlen — stille, som Bilbasens
+   "Sammenlign · Print · Anmeld". */
+.external-detail-actions{ display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+.external-detail-actions .btn{ color: var(--color-fg-muted); }
+.external-detail-actions .btn svg{ width:16px; height:16px; }
+.external-detail-actions .btn[aria-pressed="true"]{ color: var(--color-primary); }
+/* Runde 5 (D5-A2): pris-etiketten står på linje med tallet. */
+.external-detail-price .external-detail-price-label{ display:inline; font-size:13px; font-weight:500; letter-spacing:0; text-transform:none; color: var(--color-fg-muted); margin:0 0 0 4px; }
+.external-detail-stat small{ font-size:11px; font-weight:500; color: var(--color-fg-muted); }
+/* Runde 5 (D5-A7): bjælken bærer prisen med ned gennem siden. */
+.listing-actionbar-pris{ font-weight:700; font-size:16px; white-space:nowrap; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.listing-actionbar-pris small{ font-weight:400; color: var(--color-fg-muted); font-size:12px; }
+.listing-actionbar[hidden]{ display:none; }
 .external-detail-flag b{ color: var(--color-fg); }
 .external-detail-flag svg{ width:18px; height:18px; flex:0 0 auto; margin-top:2px; }
 
@@ -2813,10 +2860,14 @@ body.overlay-open .cookie-banner{ display:none; }
    Tre rækker frem for to, men MÅLT LAVERE end den to-rækkede: 173px mod
    175px, og første kort rykkede fra 494px til 492px. En række koster ingen
    højde, når indholdet til gengæld slipper for at brække. */
+/* Runde 5 (D5-S1): gem + Filtre bor nu i .srp-bar over vaerktoejslinjen (én
+   raekke med soegefeltet, som Bilbasen). Tilbage er to raekker: overskriften
+   og "Sortér: … ▾" + visningsskifter paa ÉN linje (Bilbasen: "Sortér: Standard"
+   + ikoner, 188–205 px). Fra otte raekker oven paa listen til fem. */
 @media (max-width: 620px){
   .results-toolbar{
-    display:grid; grid-template-columns: auto auto 1fr; align-items:center;
-    gap: 8px; row-gap: 10px;
+    display:grid; grid-template-columns: 1fr auto; align-items:center;
+    gap: 8px; row-gap: 8px;
   }
   /* Rækker og kolonner sættes eksplicit. Med automatisk placering havner
      Filtre og Sortér på hver sin række, fordi markup-rækkefølgen (Filtre
@@ -2824,7 +2875,7 @@ body.overlay-open .cookie-banner{ display:none; }
   /* Overskriften er BEGGE linjer (antal + sammensætning) i ét element, og
      det element er aria-live-området. Det må derfor ikke splittes over to
      gitterceller — så bliver oplæsningen to beskeder i stedet for én. */
-  .results-headline{ width:auto; min-width:0; grid-area: 1 / 1 / 2 / 4; }
+  .results-headline{ width:auto; min-width:0; grid-area: 1 / 1 / 2 / 3; }
   .results-mix{ font-size:12px; gap:2px 8px; }
   /* .toolbar-actions er kun en beholder på mobil — lad børnene gå direkte
      ind i gitteret, så rækkerne kan blandes på tværs af den. */
@@ -2835,16 +2886,25 @@ body.overlay-open .cookie-banner{ display:none; }
      soegning.html, som stadig kender den gamle udgave, indtil nogen kører
      scripts/inline-critical.js igen. */
   #sort-select{ flex:1 1 auto; width:auto; min-width:0; }
-  #save-search-btn{ grid-area: 3 / 1; }
   /* Scopet til .results-toolbar: .view-toggle bruges også på annonce.html og
      forhandler.html, og de har ingen værktøjslinje at ligge i. */
-  .results-toolbar .view-toggle{ grid-area: 3 / 2; }
-  /* Filtre yderst til højre — den eneste knap i rækken, der åbner noget, og
-     tommelfingeren er dér. justify-self, fordi 1fr-kolonnen ellers strækker
-     knappen bredere end de to andre. */
-  #open-filters-btn{ grid-area: 3 / 3; justify-self: end; }
+  .results-toolbar .view-toggle{ grid-area: 2 / 2; justify-self:end; }
   #save-search-label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
   #save-search-btn{ padding-inline: 12px; }
+  /* Runde 5 (D5-S1): kildelinjen ombroed til to linjer, da der kom to
+     navngivne kilder + "+2 kilder" (kommentaren i soegning.html forudsagde
+     det). Paa mobil skrives den kompakt af renderResultsCount(): "fra 4
+     kilder (i)" — fordelingen staar i (i) og paa desktop. */
+  .results-mix .mix-part.mix-ekstern .mix-lang{ display:none; }
+}
+@media (min-width: 621px){
+  .results-mix .mix-kort{ display:none; }
+  /* Runde 5 (D5-S1, desktop): overskriften (antal + kildelinje) fik lov at
+     vokse til 448 px og skubbede sortering/visning ned paa en anden raekke
+     (101 px i alt). Overskriften viger, handlingerne staar fast — én raekke. */
+  .results-toolbar{ flex-wrap:nowrap; }
+  .results-headline{ flex:1 1 auto; min-width:0; }
+  .toolbar-actions{ flex:0 0 auto; }
 }
 
 /* ============ Touch-mål (Apple HIG / Material: min. 44px) ============
@@ -3464,6 +3524,16 @@ body.overlay-open .cookie-banner{ display:none; }
    Vælgeren stod bar med teksten "Blandet udbud". Etiketten er et rigtigt
    <label for> i markuppen; her er kun formen. */
 .sort-felt{ display:inline-flex; align-items:center; gap:8px; }
+/* Runde 5 (D5-S5/S6) */
+.field-hint-fold{ margin-top:6px; }
+.field-hint-fold summary{ font-size:12px; color: var(--color-fg-muted); cursor:pointer; list-style:none; display:inline-flex; align-items:center; gap:4px; }
+.field-hint-fold summary::-webkit-details-marker{ display:none; }
+.field-hint-fold summary::before{ content:'▸'; font-size:10px; }
+.field-hint-fold[open] summary::before{ content:'▾'; }
+.field-hint-fold .field-hint{ margin-top:6px; }
+.sort-felt .sortering-info{ order:3; }
+.sort-felt .sortering-info[hidden]{ display:none; }
+.filters-panel{ padding:12px 16px; }
 .sort-felt > label{
   font-size:13px; font-weight:600; color: var(--color-fg-muted); white-space:nowrap;
 }
@@ -3515,7 +3585,7 @@ body.overlay-open .cookie-banner{ display:none; }
   .results-mix{ margin-top:2px; line-height:1.35; }
   /* Sorteringen er nu et par (etiket + vælger). Den overtager den
      gitterplads, #sort-select havde alene. */
-  .sort-felt{ grid-area: 2 / 1 / 3 / 4; display:flex; min-width:0; }
+  .sort-felt{ grid-area: 2 / 1; display:flex; min-width:0; }
   .sort-felt > select{ flex:1 1 auto; min-width:0; width:auto; }
   .sortering-note{ margin:0 0 10px; font-size:12px; line-height:1.4; }
   /* 4:3 paa et fuldbredde-kort er 356x267 px foto paa en 390 px skaerm.

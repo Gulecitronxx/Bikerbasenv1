@@ -94,6 +94,13 @@ const PRERENDER_COUNT = 12;
     ? html.replace(preloadRe, preload)
     : html.replace('</head>', preload + '\n</head>');
 
+  // Runde 5 (D5-S6): er der ingen kort uden foto paa side 1 (24 kort), skjuler
+  // js/search.js notelinjen — skriv det i markuppen, saa den aldrig staar og
+  // forsvinder efter hydrering (CLS).
+  const udenFotoSide1 = sorted.slice(0, 24).filter(l => !Sortering.harFoto(l)).length;
+  html = html.replace(/<p class="sortering-note" id="sortering-note"( hidden)?>/,
+    `<p class="sortering-note" id="sortering-note"${udenFotoSide1 === 0 ? ' hidden' : ''}>`);
+
   fs.writeFileSync(htmlPath, html);
   const udenFoto = page.filter(l => !Sortering.harFoto(l)).length;
   console.log(`build-srp: ${page.length} kort (af ${total}: ${egne.length} egne + ${eksterne.length} indekserede) `
