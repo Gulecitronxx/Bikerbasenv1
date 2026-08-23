@@ -1,34 +1,4 @@
-# Vagthund mod binære kildefiler (C-009).
-#
-# js/opret-annonce.js indeholdt to RÅ NUL-bytes, fordi separatoren i
-# `nuvaerende.join('\0')` var skrevet som selve 0x00-tegnet og ikke som
-# escape-sekvensen. Koden virkede, og `node --check` var tilfreds — men git
-# klassificerede filen som binær, og så viste `git diff` kun
-# "Bin 37806 -> 42392 bytes". En 42 kB fil, der ejer annonceoprettelsen,
-# kunne dermed ikke gennemgås i en diff, og `grep` svarede "Binary file
-# matches" i stedet for linjen. En fil, ingen kan review'e i en diff, er den
-# fil, en fejl gemmer sig i.
-#
-# `text` siger til git, at det HER er tekst: gemmes med LF i repoet og
-# checkes ud med platformens linjeskift. `diff` er det, der gør arbejdet mod
-# netop denne fejl — uden den falder git tilbage på sin indholdsheuristik og
-# viser "Binary files differ", så snart ÉN af de to versioner har en NUL-byte
-# i sig. Med `diff` bliver samme ændring til én læsbar linje. Afprøvet på
-# rettelsen her: `Bin 42392 -> 42394 bytes` blev til `1 insertion, 1
-# deletion`. Sniger en NUL-byte sig ind igen, er den dermed synlig i en diff
-# frem for at gøre hele filen usynlig.
-#
-# Det svarer til den opsætning, repoet allerede kører med
-# (core.autocrlf=true), så indholdet i indekset ændrer sig ikke — reglen
-# flytter bare aftalen fra den enkelte maskines konfiguration ind i repoet,
-# hvor den gælder for alle.
-#
-# HTML, CSS og SQL står med vilje IKKE her. Flere af de byggede HTML-sider
-# har så lange indlejrede linjer, at git allerede klassificerer dem som
-# binære, og et `text` på dem ville renormalisere filer, ingen har bedt om
-# at få rørt. Skal de med, er det en oprydning for sig.
-*.js      text diff
-*.json    text
-*.yaml    text
-*.yml     text
-*.md      text
+# Tredjepartskode skal ligge byte for byte som udgiveren skrev den — ingen
+# CRLF-konvertering paa Windows, saa sha256 i js/vendor/README.md kan
+# efterproeves i enhver arbejdskopi.
+js/vendor/** -text
