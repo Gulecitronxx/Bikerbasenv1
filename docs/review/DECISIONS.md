@@ -210,6 +210,35 @@ efter) og står i dag som "åben"; funktionerne 404 i dag. Enhedstests for
 klientens fald-tilbage i js/skrivevej.test.js. Ikke kørt mod produktion herfra
 (A1-blokeringen: access token).
 
+### D6-S4 gennemført — kilde-rundgang i standardsorteringen — 23.08.2026
+GODKENDT AF MENNESKET ("ja kør D6-S4 og mål det").
+HVAD: `blandetRaekkefoelge()` i js/sortering.js skifter nu mellem kilderne
+inden for hver oplysthedsklasse (samme pointtal): én fra hver forhandler/
+markedsplads efter tur, så længe kilden har annoncer tilbage i klassen.
+Oplystheden rangerer stadig først; fordelingen af de billedløse
+(midtpunktsudtagningen) er urørt; rækkefølgen er deterministisk (turordenen
+er kildernes første optræden i den sorterede klasse — låst i
+js/sortering.test.js). (i)-forklaringen på søgesiden er skrevet om.
+HVORFOR: den blinde kritiker (runde 6) læste side 1 som ét forhandlerkatalog:
+21 af 24 kort fra MC Syd (i screenshot 24 af 24 synlige), mens overskriften
+sagde "548 annoncer fra 4 kilder". Begge dele var sande; rækkefølgen skjulte
+den ene. Ændringen rører den målte standardsortering fra 16.08.2026
+(work/DECISIONS.md "Standardsorteringen er MÅLT"), og derfor blev den ikke
+lavet uden et ja.
+MÅLT (548 annoncer: MC Syd 332, Gul og Gratis 118, Rydbergs 74, Jensens 24):
+  side 1:  før MC Syd 21 · GG 3      → efter MC Syd 12 · GG 12   (foto 24/24 begge)
+  side 2:  før 21 · 3                → efter 23 · 1              (foto 23/24 begge)
+  side 3:  før 21 · 3                → efter 24 · 0              (GG's 6-pointere er brugt)
+  side 10: før MC 15 · Ryd 6 · GG 2 · J 1 → efter MC 13 · Ryd 7 · GG 3 · J 1
+  side 23: uændret (MC 9 · GG 10 · J 1)
+  de billedløses pladser (39, 117, 195, 274, 352, 430, …): identiske før/efter.
+Rydbergs og Jensens optræder først fra side ~10, fordi deres annoncer ligger
+i lavere oplysthedsklasser (færre oplyste felter) — det er reglen, ikke en
+fejl, og det kan efterprøves på kortene ("Ikke oplyst").
+HVOR: js/sortering.js (kildeRundgang), js/sortering.test.js, js/search.js
+(forklarSortering). Forsidens "Til salg lige nu" følger samme rækkefølge og
+veksler nu også mellem kilderne.
+
 ### D5-F1 ændrer to ældre beslutninger på forsiden — 23.08.2026
 HVAD: "Dyrere modeller" (kun over medianprisen, tilfældig rækkefølge med nyt
 frø pr. besøg, runde 3/4) hedder nu "Til salg lige nu": alle annoncer MED foto

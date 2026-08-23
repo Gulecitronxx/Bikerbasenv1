@@ -26,8 +26,8 @@ Rettet i denne runde og målt igen (srp.test:8532, 548 annoncer):
 | VDP: kildekort | "Annoncen blev hentet … 16. aug. 2026" som fodnote | "Hentet hos MC Syd 16. aug. 2026 — for 7 dage siden" under knappen |
 | VDP 1366: nøgletalsgitter | 4 + 1 (tre grå felter) | 5 på én række |
 
-Ikke gjort: D6-S4 (kilde-rundgang i standardsorteringen) — ændrer den målte
-og låste standardsortering (work/DECISIONS "Standardsorteringen er MÅLT") og
-kræver menneskets ja. Forslaget står i runde-6-kritik.md med målekrav.
+D6-S4 (kilde-rundgang i standardsorteringen): først udsat, derefter godkendt
+af mennesket og gennemført samme dag — målingen står i DECISIONS.md ("D6-S4
+gennemført"): side 1 MC Syd 21 · GG 3 → 12 · 12, billedløse pladser identiske.
 
 Gate: node --check, 324 tests, build, udgiv — grønt. 0 sidefejl på de tre sider.

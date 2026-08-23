@@ -295,7 +295,7 @@ lukket). Målinger efter rettelserne: [rounds/round-6.md](rounds/round-6.md).
 | D6-S1 | critic | design | **P2** | `soegning.html`, `css/styles.css` | "Søg efter mæ…" og "Blandet udb" klippet på 390 | **rettet** — "Mærke eller model", "Blandet", gulv 96 px |
 | D6-S2 | critic | design | **P2** | `js/search.js`, `soegning.html`, `scripts/build-srp.js` | Overskrift to linjer på mobil | **rettet** — "548 annoncer · fra 4 kilder (i)", første kort 303 → 279 (Bilbasen 284) |
 | D6-S3 | critic | design | **P2** | `js/components.js`, `css/styles.css` | Fodlinje klippede begge led i 280 px | **rettet** — "Privat · domæne", sælgertype skjult < 300 px container |
-| D6-S4 | critic | design | **P2** | `js/sortering.js` | Side 1 = 24 × MC Syd (kilde-rundgang foreslået) | **åben — kræver menneskets ja** (ændrer den målte standardsortering; se runde-6-kritik.md) |
+| D6-S4 | critic | design | **P2** | `js/sortering.js` | Side 1 = 21–24 × MC Syd (kilde-rundgang foreslået) | **rettet** (godkendt af mennesket) — rundgang mellem kilder inden for hver oplysthedsklasse; side 1 nu MC Syd 12 · Gul og Gratis 12, billedløse pladser uændrede. Måling i DECISIONS.md |
 | D6-A2 | critic | design | **P2** | `js/annonce.js`, `js/filtrering.js`, `js/search.js` | "Søg videre" uden tal; højre spalte tom | **rettet** — links med tal (samme filterkæde som søgesiden), "Alle annoncer fra MC Syd · 332" via nyt `?kilde=` filter, "Hentet … — for 7 dage siden" |
 | D6-A3 | critic | design | **P2** | `css/styles.css` | Nøgletal under folden på desktop | **rettet** — handlinger på titlens linje, stats 868 → 824 (værdier ved 892) |
 | D6-A4 | critic | design | **P3** | `css/styles.css` | 5 celler i 4 spalter, tre grå felter | **rettet** — `minmax(120px)`, 5 spalter |

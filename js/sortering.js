@@ -118,8 +118,46 @@ const Sortering = (function(){
       return String(a.id).localeCompare(String(b.id));
     };
 
-    const medFoto = list.filter(harFoto).sort(bedstFoerst);
-    const udenFoto = list.filter(l => !harFoto(l)).sort(bedstFoerst);
+    /* KILDE-RUNDGANG (D6-S4, 23.08.2026, godkendt af mennesket).
+
+       Maalt foer: side 1 var 24 af 24 kort fra MC Syd — alle 6-pointere, alle
+       med foto, og inden for klassen afgjorde id'et raekkefoelgen. En blind
+       dommer laeste side 1 som ét forhandlerkatalog, mens overskriften sagde
+       "548 annoncer fra 4 kilder". Begge dele var sande; det var
+       raekkefoelgen, der skjulte den ene.
+
+       Reglen: inden for HVER oplysthedsklasse (samme pointtal) skiftes der
+       mellem kilderne — én fra hver kilde efter tur, saa laenge kilden har
+       annoncer tilbage i klassen. Oplystheden er stadig det, der rangerer:
+       ingen 4-pointer kommer foran en 6-pointer, fordi den er fra en anden
+       kilde. Inden for kildens egen kø er raekkefoelgen uaendret (dato, id).
+       Kildernes tur-orden er deres foerste optraeden i den sorterede klasse —
+       altsaa ogsaa deterministisk (js/sortering.test.js laaser det).
+       Fordelingen af de billedloese (midtpunktsudtagningen nedenfor) roeres
+       ikke: den virker paa gruppernes laengder, ikke deres indhold. */
+    const kildeNoegle = l => l.isExternal ? String((l.source && (l.source.domaene || l.source.navn)) || 'ekstern') : 'bikerbasen';
+    const kildeRundgang = (sorteret) => {
+      const ud = [];
+      let i = 0;
+      while (i < sorteret.length){
+        const p = annonceOplysthed(sorteret[i]);
+        let j = i;
+        while (j < sorteret.length && annonceOplysthed(sorteret[j]) === p) j++;
+        const klasse = sorteret.slice(i, j);
+        const koeer = new Map();
+        for (const l of klasse){ const k = kildeNoegle(l); if (!koeer.has(k)) koeer.set(k, []); koeer.get(k).push(l); }
+        const kilder = [...koeer.keys()];
+        let tilbage = klasse.length;
+        while (tilbage > 0){
+          for (const k of kilder){ const q = koeer.get(k); if (q.length){ ud.push(q.shift()); tilbage--; } }
+        }
+        i = j;
+      }
+      return ud;
+    };
+
+    const medFoto = kildeRundgang(list.filter(harFoto).sort(bedstFoerst));
+    const udenFoto = kildeRundgang(list.filter(l => !harFoto(l)).sort(bedstFoerst));
     if (!medFoto.length || !udenFoto.length) return medFoto.concat(udenFoto);
 
     /* Fordelingen: hver annonce uden foto lander MIDT i sin egen luns.

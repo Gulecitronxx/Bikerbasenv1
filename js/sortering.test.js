@@ -49,6 +49,23 @@ test('blandet: inden for gruppen står den mest oplyste først, ellers id', () =
   assert.ok(Sortering.annonceOplysthed(a) > Sortering.annonceOplysthed(b));
 });
 
+test('blandet: kilde-rundgang inden for samme oplysthedsklasse — oplystheden vinder stadig (D6-S4)', () => {
+  const mc = (id, extra) => fuld(id, Object.assign({ isExternal: true, source: { navn: 'MC Syd', domaene: 'mcsyd.dk' } }, extra));
+  const gg = (id, extra) => fuld(id, Object.assign({ isExternal: true, source: { navn: 'Gul og Gratis', domaene: 'guloggratis.dk' } }, extra));
+  // 6 MC Syd + 2 Gul og Gratis, alle fuldt oplyste og med foto. Klassen sorteres
+  // først på id ('g1' < 'm1'), så turordenen er GG, MC → GG, MC, GG, MC, MC, MC, MC, MC.
+  const liste = [mc('m1'), mc('m2'), mc('m3'), mc('m4'), mc('m5'), mc('m6'), gg('g1'), gg('g2')];
+  const ud = Sortering.sorter(liste.slice(), 'blandet').map(l => l.id);
+  assert.deepEqual(ud, ['g1', 'm1', 'g2', 'm2', 'm3', 'm4', 'm5', 'm6']);
+  // Samme input i anden rækkefølge → samme output (turordenen følger den sorterede klasse, ikke inputtet).
+  assert.deepEqual(Sortering.sorter(liste.slice().reverse(), 'blandet').map(l => l.id), ud);
+  // En mindre oplyst annonce fra en anden kilde kommer IKKE foran klassen over den.
+  const j = fuld('j1', { isExternal: true, source: { navn: 'Jensens', domaene: 'jensensmc.dk' }, km: null, power: null });
+  const ud2 = Sortering.sorter(liste.concat([j]), 'blandet').map(l => l.id);
+  assert.equal(ud2[ud2.length - 1], 'j1');
+  assert.deepEqual(ud2.slice(0, 8), ud);
+});
+
 test('price-asc / km-asc: ukendt værdi bagest — det ukendte vinder aldrig en sortering', () => {
   const liste = [fuld('dyr', { price: 90000 }), fuld('ukendt', { price: null }), fuld('billig', { price: 1000 })];
   assert.deepEqual(Sortering.sorter(liste.slice(), 'price-asc').map(l => l.id), ['billig', 'dyr', 'ukendt']);

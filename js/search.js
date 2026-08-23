@@ -1183,12 +1183,12 @@ function forklarSortering(){
     og kørekortkategori vejer tungest, derefter årgang, kubik, hk, stand og en
     rigtig beskrivelse. Der gives kun point for felter, kilden faktisk har
     oplyst — aldrig for et gæt.</p>
-    <p style="margin-top:12px;">Vær opmærksom på, at det andet led sjældent
-    kan ses på side 1: de fleste annoncer fra samme forhandler har præcis det
-    samme sæt oplyste felter. Forskellen viser sig længere nede i listen,
-    hvor "Ikke oplyst" begynder at optræde. Rækkefølgen mellem to annoncer med
-    lige mange oplyste felter afgøres af datoen og derefter af annoncens id,
-    så det samme link altid giver den samme liste.</p>`);
+    <p style="margin-top:12px;">Blandt annoncer med <i>lige mange</i> oplyste
+    felter skiftes der mellem kilderne — én fra hver forhandler eller
+    markedsplads efter tur, så længe kilden har flere i den klasse. Så ligner
+    side 1 hele lageret og ikke den største kildes katalog. Inden for kildens
+    egen kø afgør datoen og derefter annoncens id rækkefølgen, så det samme
+    link altid giver den samme liste.</p>`);
 }
 
 /* Sætningen over resultaterne. Runde 2 skrev BEGGE regler her, og de to
