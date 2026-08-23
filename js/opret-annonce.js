@@ -96,6 +96,16 @@ function markFieldError(el, refs){
   if (refs && !refs.first) refs.first = el;
 }
 
+/* O2-3: tavs kontrol — er trinnets paakraevede felter udfyldt? Ingen toasts,
+   ingen roede rammer; bruges kun ved gendannelsen efter login-omvejen. */
+function trinUdfyldt(n){
+  const section = document.querySelector(`.form-step[data-step="${n}"]`);
+  if (!section) return false;
+  if (n === 1 && !document.querySelector('input[name="bike-type"]:checked')) return false;
+  return [...section.querySelectorAll('[required]')].every(el =>
+    el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '');
+}
+
 function validateStep(n){
   const section = document.querySelector(`.form-step[data-step="${n}"]`);
   let valid = true;
@@ -477,15 +487,20 @@ function renderPhotoGrid(){
 }
 
 function collectFormData(){
-  const type = (document.querySelector('input[name="bike-type"]:checked') || {}).value || 'naked';
+  /* O2-4: ingen fallback-vaerdier her. "Gem kladde" paa en halv formular gemte
+     year: 2020, type: 'naked', km: 0 — og fillForm() skrev dem TILBAGE som var
+     de saelgerens egne. Et gaet i en kladde er stadig et gaet. Demo-udgivelsens
+     behov for udfyldte felter daekkes af valideringen (alle felter er required
+     foer Udgiv). */
+  const type = (document.querySelector('input[name="bike-type"]:checked') || {}).value || null;
   // By/region kommer fra det bekræftede valg i vælgeren, ikke fra rå indtastning.
   const postnr = (document.getElementById('f-postnr').value.trim().split(' ')[0]) || '';
   return {
     type,
     brand: document.getElementById('f-brand').value,
     model: document.getElementById('f-model').value,
-    year: Number(document.getElementById('f-year').value) || 2020,
-    km: Number(document.getElementById('f-km').value) || 0,
+    year: Number(document.getElementById('f-year').value) || null,
+    km: document.getElementById('f-km').value.trim() === '' ? null : Number(document.getElementById('f-km').value) || 0,
     ccm: Number(document.getElementById('f-ccm').value) || 0,
     power: Number(document.getElementById('f-power').value) || null,
     registration: document.getElementById('f-registration').value,
@@ -501,7 +516,7 @@ function collectFormData(){
     vinterklar: document.getElementById('f-vinter').checked,
     kanNedsaettesA2: document.getElementById('f-a2nedsat').checked,
     equipment: [...document.querySelectorAll('#equipment-groups input:checked')].map(cb => cb.dataset.equipment),
-    price: Number(document.getElementById('f-price').value) || 0,
+    price: document.getElementById('f-price').value.trim() === '' ? null : Number(document.getElementById('f-price').value) || 0,
     condition: document.getElementById('f-condition').value,
     postnr,
     city: document.getElementById('f-city').value,
@@ -515,7 +530,8 @@ function sellerFromUser(user){
     name: user.name || 'Dig', isDealer: !!user.isDealer,
     verified: !!user.verified, emailVerified: !!user.emailVerified, phoneVerified: !!user.phoneVerified,
     mitIdVerified: !!user.mitIdVerified, cvr: user.cvr || null,
-    phone: user.phone || '+45 00 00 00 00', memberSince: 2026, rating: '5.0', reviews: 0, city: formData.city,
+    // O2-9: intet fabrikeret nummer og ingen ratingtal uden anmeldelser.
+    phone: user.phone || null, memberSince: 2026, rating: null, reviews: 0, city: formData.city,
   };
 }
 
@@ -683,7 +699,10 @@ function strukturerBeskrivelse(data){
   if (linje2) dele.push(linje2);
   if (fakta.length) dele.push(fakta.map(f => `• ${f}`).join('\n'));
   if (resten.length) dele.push('Fra din egen beskrivelse:\n' + resten.map(s => `• ${s}`).join('\n'));
-  dele.push('Skriv gerne, hvis du har spørgsmål eller vil aftale en fremvisning.');
+  /* O2-2: her stod en paaduttet slutlinje ("Skriv gerne, hvis du har
+     spoergsmaal …") — en saetning, saelgeren aldrig har skrevet, under en knap
+     der lover "intet digtes med". Og den inviterede til beskeder, sitet ikke
+     videresender. Assistenten slutter nu dér, hvor saelgerens egne ord goer. */
   return dele.join('\n\n');
 }
 
@@ -708,7 +727,7 @@ function renderSeoAssistent(data){
     ? `<div class="detail-section" style="margin-top:20px;">
          <h2 style="font-size:16px;">Sådan bliver annoncen mærket</h2>
          <div class="chip-group">${chips.map(c => `<span class="chip active" style="cursor:default;">${escapeHTML(c)}</span>`).join('')}</div>
-         ${!kk.kode ? `<p class="field-hint" style="margin-top:8px;">${escapeHTML(kk.forklaring)}</p>` : ''}
+         ${!kk.kode && data.power ? `<p class="field-hint" style="margin-top:8px;">${escapeHTML(kk.forklaring)}</p>` : ''}
        </div>`
     : '';
 
@@ -1027,6 +1046,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderPhotoGrid();
   wireSeoAssist();
 
+  let startTrin = 1;
   const redigerId = new URLSearchParams(window.location.search).get('rediger');
   if (redigerId){
     if (!startEditing(redigerId)){
@@ -1035,15 +1055,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } else if (restoreDraft()){
     toast('Din kladde er hentet frem — billeder skal vælges igen.');
+    /* O2-3: kom man over login for at "fortsaette med billederne", skal man
+       lande dér — men kun hvis trin 1 og 2 stadig er komplette (tavs kontrol,
+       ingen roede rammer ved indlaesning). */
+    const videre = Number(Store.getDraft()?.form?.videreTilTrin) || 0;
+    if (videre === 3 && Store.getUser()?.remote && trinUdfyldt(1) && trinUdfyldt(2)){
+      startTrin = 3;
+    }
   }
-  goToStep(1);
+  goToStep(startTrin);
 
   document.getElementById('step-next').addEventListener('click', () => {
     if (!validateStep(currentStep)) return;
     /* O1-1: login-gaten ligger HER — efter at motorcyklen og prisen er skrevet,
        foer billederne. Kladden gemmes foerst, saa intet gaar tabt. */
     if (currentStep === 2 && kraeverLogin()){
-      Store.saveDraft('form', collectFormData());
+      // O2-3: toasten lover "fortsaetter med billederne" — saa skal kladden
+      // huske trinnet, ellers lander man paa trin 1 efter login.
+      Store.saveDraft('form', Object.assign(collectFormData(), { videreTilTrin: 3 }));
       toast('Din kladde er gemt på denne enhed — log ind, så fortsætter du med billederne.');
       setTimeout(() => { window.location.href = 'login.html?redirect=' + encodeURIComponent('opret-annonce.html'); }, 1400);
       return;
@@ -1054,7 +1083,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('step-back').addEventListener('click', () => {
     if (currentStep > 1) goToStep(currentStep - 1);
   });
-  document.getElementById('save-draft').addEventListener('click', () => {
+  /* O2-7: i redigeringstilstand skjules knappen — ellers skrev en eksisterende
+     annonces data sig ind i ny-annonce-kladden, og naeste "Udgiv" blev en dublet. */
+  const kladdeKnap = document.getElementById('save-draft');
+  if (editingId){ kladdeKnap.hidden = true; }
+  kladdeKnap.addEventListener('click', () => {
+    if (editingId) return;
     Store.saveDraft('form', collectFormData());
     // O1-9: sig HVOR den er gemt — det er en lokal kladde, ikke konto-synk, og billeder er ikke med.
     toast('Kladde gemt på denne enhed (uden billeder). Den hentes frem, næste gang du åbner siden.');

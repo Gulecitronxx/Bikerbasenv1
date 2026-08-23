@@ -2779,6 +2779,11 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-intro strong{ color: var(--color-fg); }
 .brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
 .brand-sub{ font-size:19px; margin-bottom: var(--space-4); }
+/* O2-1: statistiklinjen paa egne annoncer. */
+.lr-statistik{ display:flex; align-items:center; gap:6px; margin:6px 0 0; font-size:13px; color: var(--color-fg); font-weight:600; }
+.lr-statistik svg{ width:15px; height:15px; color: var(--color-fg-muted); }
+.lr-statistik span{ color: var(--color-fg-muted); font-weight:400; }
+
 /* O1 (opret-annonce, runde 1) */
 .valgfri-fold{ margin-top:28px; border:1px solid var(--color-border); border-radius: var(--radius-md); padding:0 16px 4px; }
 .valgfri-fold > summary{ cursor:pointer; padding:14px 0; font-weight:600; font-size:15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; list-style:none; }

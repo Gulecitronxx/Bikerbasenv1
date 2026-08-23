@@ -19,7 +19,7 @@ function redirectAfterAuth(){
 const AUTH_KONTEKST = {
   'opret-annonce.html': {
     titel: 'Sælg din motorcykel',
-    tekst: 'Opret en profil eller log ind, så gemmer vi din annonce undervejs. Det er gratis for private.',
+    tekst: 'Opret en profil eller log ind for at lægge billeder på og udgive. Din kladde er gemt på denne enhed. Gratis for private.',
     fane: 'register',
   },
   'mine-annoncer.html': {
@@ -31,13 +31,15 @@ const AUTH_KONTEKST = {
     tekst: 'Log ind for at se visninger, henvendelser og status på dine annoncer.',
   },
   'forhandler.html': {
-    titel: 'Se sælgerens kontaktoplysninger',
-    tekst: 'Telefonnummer og profil er kun synlige for indloggede brugere. Det beskytter både køber og sælger.',
+    titel: 'Se forhandlerens profil',
+    tekst: 'Forhandlerens profil er kun synlig for indloggede brugere. Det beskytter både køber og sælger.',
   },
 };
+/* O2-6: "kontaktoplysninger" var et loefte, ingen indlogget nogensinde fik
+   indfriet (phone er null paa alt fra databasen). Kun det, der sker. */
 const AUTH_ANNONCE = {
   titel: 'Kontakt sælgeren',
-  tekst: 'Log ind for at se sælgerens navn og kontaktoplysninger. Det beskytter både køber og sælger.',
+  tekst: 'Log ind for at se sælgerens navn og markere, at du vil i kontakt. Det beskytter både køber og sælger.',
 };
 
 function anvendAuthKontekst(){

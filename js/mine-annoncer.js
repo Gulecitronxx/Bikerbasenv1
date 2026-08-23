@@ -35,6 +35,32 @@ function listingRowHTML(l, { owned } = {}){
   </article>`;
 }
 
+/* O2-1: "du ser antallet under Mine annoncer" stod i opret-flowets
+   "Saadan naar koebere dig" — men tallet fandtes kun i det forhandler-gatede
+   dashboard. Nu staar det HER, for alle egne annoncer: "X visninger · Y
+   henvendelser (30 dage)". Dataene ligger i listing_stats med ejer-RLS
+   ("statistik: kun egen annonce"), saa db.myListingStats() giver kun ens
+   egne. Fejler kaldet, staar der ingenting — aldrig et gaettet nul. */
+async function visAnnonceStatistik(grid){
+  if (typeof db === 'undefined' || !db.enabled || !Store.getUser()?.remote) return;
+  const { data, error } = await db.myListingStats(30);
+  if (error || !data) return;
+  const sum = new Map();
+  for (const r of data){
+    const s = sum.get(r.listing_id) || { views: 0, contacts: 0 };
+    s.views += r.views || 0; s.contacts += r.contacts || 0;
+    sum.set(r.listing_id, s);
+  }
+  grid.querySelectorAll('.listing-row[data-listing-id]').forEach(row => {
+    const s = sum.get(row.dataset.listingId);
+    if (!s) return;
+    const linje = document.createElement('p');
+    linje.className = 'lr-statistik';
+    linje.innerHTML = `${Icon.eye || ''}${s.views} ${s.views === 1 ? 'visning' : 'visninger'} · ${s.contacts} ${s.contacts === 1 ? 'henvendelse' : 'henvendelser'} <span>(30 dage)</span>`;
+    row.querySelector('.lr-actions')?.before(linje);
+  });
+}
+
 /* Sorterer efter valget i værktøjslinjen. */
 function sortListings(list, mode){
   const arr = list.slice();
@@ -65,6 +91,7 @@ function renderMine(){
   grid.style.display = '';
   empty.style.display = 'none';
   grid.innerHTML = mine.map(l => listingRowHTML(l, { owned: true })).join('');
+  visAnnonceStatistik(grid);
   grid.querySelectorAll('[data-delete-listing]').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm('Er du sikker på, at du vil slette denne annonce? Det kan ikke fortrydes.')) return;
@@ -322,7 +349,7 @@ function renderAside(tab){
       <a href="${href}" class="btn btn-outline btn-block">${linkTekst}</a>
     </div>`;
   const map = {
-    mine: kort('Sælg hurtigere', 'Annoncer med billeder og fuldt udfyldt udstyr bliver set markant oftere. Gennemgå dine annoncer og gør dem færdige.', 'Opret ny annonce', 'opret-annonce.html'),
+    mine: kort('Gør annoncen færdig', 'Uden foto står din annonce som "Ingen fotos i denne annonce" i søgningen, og hvert tomt felt bliver til "Ikke oplyst". Gennemgå dine annoncer og gør dem færdige.', 'Opret ny annonce', 'opret-annonce.html'),
     favoritter: kort('Bikerbasen hjælper dig', 'Vil du finde flere favoritter? Søg blandt alle motorcykler og gem dem, du er interesseret i, med hjertet.', 'Søg motorcykler', 'soegning.html'),
     agenter: kort('Gå aldrig glip af en handel', 'En søgeagent holder øje for dig. Sæt dine filtre på søgesiden og gem søgningen, så tæller vi de nye annoncer der dukker op.', 'Opret en søgeagent', 'soegning.html'),
     /* Her stod "Verificerede profiler får et badge, som købere kan se".

@@ -218,7 +218,7 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon })
           ${erForhandler ? profilKnapHTML : `<a href="login.html?redirect=${redirect}" class="btn btn-outline btn-block">${Icon.user}Opret gratis profil</a>`}
         </div>
         <!-- Siger hvad login giver, og hvorfor — ikke bare at der er en mur. -->
-        <p class="seller-locked-note">${Icon.lock}<span>Kontaktoplysninger${erForhandler ? '' : ' og sælgerens navn'} er kun synlige for indloggede brugere. Det holder telefonnumre væk fra robotter og reklamehenvendelser.</span></p>
+        <p class="seller-locked-note">${Icon.lock}<span>${erForhandler ? 'Forhandlerens profil er' : 'Sælgerens navn og profil er'} kun synlige for indloggede brugere. Det holder sælgerne fri af robotter og reklamehenvendelser.</span></p>
         ${raad}
       </div>`;
   }
@@ -1397,8 +1397,8 @@ ${galleriHTML}
 
       if (krop){
         krop.textContent = telefon
-          ? 'Sælgeren kan se på sin annonce, at du har henvendt dig. Vi videresender ikke selve teksten endnu, så vil du have svar i dag, er telefonen den hurtigste vej.'
-          : 'Sælgeren kan se på sin annonce, at du har henvendt dig. Vi videresender ikke selve teksten endnu, og sælgeren har ikke oplyst et telefonnummer — gem annoncen, så du kan finde den igen.';
+          ? 'Sælgeren kan se antallet af henvendelser under Mine annoncer. Vi videresender ikke selve teksten endnu, så vil du have svar i dag, er telefonen den hurtigste vej.'
+          : 'Sælgeren kan se antallet af henvendelser under Mine annoncer. Vi videresender ikke selve teksten endnu — gem annoncen, så du kan finde den igen.';
       }
 
       /* Det, køberen krydsede af, skrevet tilbage til ham. Listen bygges kun,
