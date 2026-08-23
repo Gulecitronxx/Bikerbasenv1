@@ -432,6 +432,18 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .fav-count[data-count="0"]{ display:none; }
 
 .mobile-menu-btn{ display:inline-flex; }
+/* Runde 5 (D5-F7): paa mobil er headerens to naaelige pladser profil + menu
+   (Bilbasen: profil · hjerte · menu). Temaskiftet er en indstilling og bor i
+   skuffen; paa desktop staar den i headeren som foer. */
+.header-actions .theme-toggle{ display:none; }
+.mobile-profile{ display:inline-flex; }
+.mobile-profile.is-logged-in{ color: var(--color-primary); }
+.drawer-theme{
+  display:flex; align-items:center; gap:10px; width:100%; background:transparent; border:0;
+  color: var(--color-fg); font: inherit; font-size:16px; font-weight:500; cursor:pointer;
+  padding: 12px 0; text-align:left;
+}
+.drawer-theme svg{ width:22px; height:22px; }
 
 @media (min-width: 1024px){
   /* Nav'en flyttes til højre, ved siden af handlingerne: margin-left:auto på
@@ -443,6 +455,8 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   .header-actions .btn-outline{ display:inline-flex; }
   .header-cta{ display:inline-flex; }
   .mobile-menu-btn{ display:none; }
+  .header-actions .theme-toggle{ display:inline-flex; }
+  .mobile-profile{ display:none; }
 }
 
 .theme-toggle .icon-sun{ display:none; }
@@ -627,6 +641,14 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   min-height: 1.35em; margin-bottom: var(--space-4);
 }
 .hero-count b{ color:#fff; font-weight:700; }
+/* Runde 5 (D5-F4): "… hos 4 danske forhandlere og markedspladser" vises kun,
+   hvor .lead er skjult (≤760 px) — ellers staar det to gange. Linjen bliver
+   to linjer paa 390 px; hoejden er reserveret, saa intet hopper. */
+.hero-count-kilder{ display:none; }
+@media (max-width:760px){
+  .hero-count-kilder{ display:inline; }
+  .hero-count{ min-height: 2.7em; }
+}
 /* Grupperer anden sætningshalvdel, så tankestregen ikke hænger midt i en linje. */
 /* Accentlinjen stod paa 60% hvid over et foto med luminans ~105 — den
    naaede omkring 2.5:1 og laa i praksis og floed. 82% hvid holder den
@@ -647,7 +669,14 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    Knappen flyttede hertil fra første række, da kørekortvælgeren kom ind —
    fire felter på én linje gjorde hvert felt for smalt til at læse. */
 .search-row-2{ display:flex; gap: var(--space-3); align-items:flex-end; justify-content:space-between; }
-.search-row-2 > .btn{ flex:0 0 auto; }
+.search-row-2 > .btn, .search-row-2 > .search-actions{ flex:0 0 auto; }
+/* Runde 5 (D5-F6): "Nulstil" ved siden af soegeknappen (under den paa mobil). */
+.search-actions{ display:flex; align-items:center; gap:14px; }
+.hero-reset{
+  background:transparent; border:0; padding:6px 2px; font: inherit; font-size:14px; font-weight:500;
+  color: var(--color-fg-muted); cursor:pointer; text-decoration:underline; text-underline-offset:3px;
+}
+.hero-reset:hover{ color: var(--color-fg); }
 
 /* Kørekortvælgeren — vores ene strukturelle fordel, i selve søgekortet.
    Rigtige radioknapper, så piletaster, formularnulstilling og skærmlæser
@@ -687,6 +716,9 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 @media (max-width:699px){
   .search-row-2{ flex-direction:column; align-items:stretch; }
   .search-row-2 > .btn{ width:100%; }
+  .search-actions{ flex-direction:column-reverse; align-items:stretch; gap:4px; }
+  .search-actions .btn{ width:100%; }
+  .hero-reset{ align-self:center; }
   /* flex-basis følger flex-direction. Rækken er `row` på desktop, hvor
      `flex:1 1 300px` betyder "start 300 px BRED" — men her vender rækken om
      til `column`, og så betyder de 300 px "start 300 px HØJ". Feltet blev
@@ -708,6 +740,31 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* ============ Category tiles ============ */
 .tiles-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
 @media (min-width:640px){ .tiles-grid{ grid-template-columns: repeat(4,1fr); } }
+/* Runde 5 (D5-F3): paa mobil var otte fliser i to spalter ≈800 px — den
+   foerste sektion under folden. Bilbasens "Populaere soegninger" er én
+   vandret rulleliste (≈190 px). Samme greb: én raekke, rul til siden,
+   snap pr. flise. Fliser med 0 annoncer er [hidden] (js/home.js), og
+   raekkefoelgen er antal, flest foerst (style.order). */
+@media (max-width:639px){
+  .tiles-grid{
+    grid-template-columns:none; grid-auto-flow:column; grid-auto-columns:minmax(150px, 44vw);
+    overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    margin-inline: calc(-1 * var(--space-4)); padding-inline: var(--space-4); padding-bottom:8px;
+    scrollbar-width:thin;
+    /* Raekkefoelgen saettes med style.order, naar tallene er hentet. Uden denne
+       fulgte browserens scroll-forankring DOM-foerste flise (Sport) hen til
+       dens nye plads, og raekken stod rullet 664 px til hoejre. */
+    overflow-anchor:none; scroll-padding-inline-start: var(--space-4);
+  }
+  .tiles-grid .tile{ scroll-snap-align:start; }
+  /* Runde 5 (D5-F2): "Harley-Davidson"/"Royal Enfield" broed til to linjer paa
+     173 px brede chips; uden pilen (kun synlig ved hover) og med 15 px er der
+     plads. */
+  .brand-cloud .brand-chip{ padding:13px 12px; }
+  .brand-cloud .brand-chip-name{ font-size:15px; }
+  .brand-cloud .brand-chip-go{ display:none; }
+  .tiles-grid:empty{ min-height:172px; }
+}
 /* Foto-kort pr. type. Studieoptagelser med ens taupe-baggrund giver et roligt,
    sammenhængende sæt — og rigtige billeder frem for line-art matcher Bilbasen. */
 .tile{
@@ -2678,6 +2735,11 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-chip:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
 .brand-chip:hover .brand-chip-name{ color: var(--color-primary); }
 .brand-chip-name{ font-family: var(--font-display); font-weight:700; font-size:16px; letter-spacing:-0.01em; transition: color .18s var(--ease-out); }
+/* Runde 5 (D5-F2): antallet paa chippen — samme .facet-n-idé som soegesiden. */
+.brand-chip-n{
+  margin-left:auto; font-size:12px; font-weight:600; line-height:1; padding:4px 8px; border-radius:999px;
+  background: var(--color-surface-2); color: var(--color-fg-muted); font-variant-numeric: tabular-nums;
+}
 .brand-chip-go{ color: var(--color-fg-muted); display:inline-flex; opacity:0; transform: translateX(-4px); transition: opacity .18s var(--ease-out), transform .18s var(--ease-out), color .18s var(--ease-out); }
 .brand-chip-go svg{ width:16px; height:16px; }
 .brand-chip:hover .brand-chip-go{ opacity:1; transform: translateX(0); color: var(--color-primary); }
@@ -2706,6 +2768,8 @@ body.overlay-open .cookie-banner{ display:none; }
 .sell-band-actions{ display:flex; flex-wrap:wrap; gap: var(--space-3); }
 /* Pris-kortet vises nu på alle skærme (også mobil) — det bærer "gratis"-pointen. */
 .sell-band-art{ position:relative; display:flex; align-items:center; justify-content:center; }
+/* Runde 5 (D5-F5): priskortet (≈300 px) siger "0 kr." to gange — kun paa desktop. */
+@media (max-width:819px){ .sell-band-art{ display:none; } }
 
 /* ============ Forside: SEO-browse-bånd ============ */
 .seo-browse{ border-top:1px solid var(--color-border); }

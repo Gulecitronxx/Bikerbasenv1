@@ -121,6 +121,12 @@ async function buildForside(){
   const kkHint = document.getElementById('hs-kk-hint');
   const uoplystHint = document.getElementById('hs-uoplyst-hint');
   const submitBtn = document.getElementById('hs-submit');
+  const resetBtn = document.getElementById('hs-reset');
+  /* Runde 5 (D5-F4): antal kilder (forhandlere/markedspladser) og egne
+     annoncer i lageret — saettes i bid 5, naar data er klar, og skrives ind i
+     hero'ens antalslinje, saa den sandhed, der foer kun stod i .lead (skjult
+     paa mobil), staar i den linje, der ER synlig. */
+  let antalKilder = 0, antalEgne = 0;
 
   /* Har lageret svaret? Indtil da er der ikke noget at udtale sig om.
 
@@ -283,10 +289,20 @@ async function buildForside(){
          Bilbasens eget greb ("50.356 annoncer i dag"). Det er ordet, der
          ikke havde dækning, og en påstand uden dækning er billigere at
          undvære end at forsvare. */
+      /* Runde 5 (D5-F4): "… hos 4 danske forhandlere og markedspladser" — tallet
+         er antallet af kilder i lageret, regnet i bid 5. Paa desktop staar
+         .lead lige under med samme budskab, saa halen vises kun paa mobil
+         (css .hero-count-kilder). */
+      const kilderHale = antalKilder
+        ? `<span class="hero-count-kilder"> hos <b>${daTal(antalKilder)}</b> danske `
+          + `${antalKilder === 1 ? 'forhandler eller markedsplads' : 'forhandlere og markedspladser'}`
+          + `${antalEgne ? ' — og her på Bikerbasen' : ''}</span>`
+        : '';
       countHint.innerHTML = n >= 10
-        ? `<b>${daTal(n)}</b> motorcykler til salg`
+        ? `<b>${daTal(n)}</b> motorcykler til salg${kilderHale}`
         : '';
     }
+    if (resetBtn) resetBtn.hidden = !harSøgt;
     /* Knappen bærer tallet, ligesom Bilbasens "Vis 40.476 biler". Har man
        filtreret, vises tallet altid — også et lille, for man har selv bedt om
        det. Uden filtre kun når totalen er stærk nok (≥10) til at være et
@@ -298,6 +314,9 @@ async function buildForside(){
     document.getElementById(id).addEventListener('input', opdaterHero));
   document.querySelectorAll('input[name="koerekort"]').forEach(r =>
     r.addEventListener('change', opdaterHero));
+  /* Runde 5 (D5-F6): "Nulstil" — reset-haendelsen affyres FOER felterne er
+     tomme, saa taellingen koeres i naeste tick. */
+  document.getElementById('hero-search-form').addEventListener('reset', () => setTimeout(opdaterHero, 0));
   opdaterHero();
 
   // hero search submit — bundet her, i første bid, så søgekortet virker
@@ -370,20 +389,14 @@ async function buildForside(){
   await yieldToMain();
 
   /* ============ Bid 3: mærkeskyen + SEO-linkbåndet ============ */
-  // Populære mærker — rigtige links til filtrerede søgninger (Bilbasens
-  // vigtigste scent/SEO-aktiv). Ingen opdigtede annoncetal.
-  const POPULAR_BRANDS = ['Yamaha','Honda','Suzuki','Kawasaki','BMW','Ducati','KTM','Triumph','Aprilia','Husqvarna','Vespa','Indian'];
-  // Kun mærker der faktisk findes i mærkeuniverset (undgå døde links).
-  const KNOWN = new Set(Object.keys(BRANDS_BY_MODEL));
-  const brands = POPULAR_BRANDS.filter(b => KNOWN.has(b));
+  /* Runde 5 (D5-F2): maerkeskyen bygges af LAGERET i bid 5 (tegnMaerker), naar
+     data er klar — ikke af en fast liste. Den faste liste (Yamaha, Honda, …,
+     Vespa, Indian) var filtreret mod BRANDS_BY_MODEL (kendte maerker), ikke
+     mod lageret: Vespa havde 0 annoncer, Husqvarna 1, Indian 2 — og
+     Harley-Davidson (72, lagerets nr. 2) var ikke med. Samme blindgyde som
+     D-009/D-010 lukkede paa maerker.html. Indtil data er klar er skyen tom;
+     .brand-cloud:empty reserverer hoejden. */
   const brandCloud = document.getElementById('brand-cloud');
-  if (brandCloud){
-    brandCloud.innerHTML = brands.map(b =>
-      `<a class="brand-chip" href="soegning.html?brands=${encodeURIComponent(b)}">
-         <span class="brand-chip-name">${b}</span>
-         <span class="brand-chip-go" aria-hidden="true">${Icon.arrowRight}</span>
-       </a>`).join('');
-  }
 
   // SEO-browse-bånd over footeren — rigtige søge-URL'er, ligesom Bilbasens
   // linkfarm. God for organisk trafik og udfylder siden meningsfuldt.
@@ -391,7 +404,7 @@ async function buildForside(){
     const ul = document.querySelector('#' + id + ' ul');
     if (ul) ul.innerHTML = links.map(l => `<li><a href="${l.href}">${l.label}</a></li>`).join('');
   };
-  fillSeoCol('seo-brands', brands.slice(0, 8).map(b => ({ label: b, href: `soegning.html?brands=${encodeURIComponent(b)}` })));
+  // seo-brands fyldes i bid 5 af tegnMaerker() — samme liste som maerkeskyen.
   fillSeoCol('seo-types', TYPES.map(t => ({ label: t.label, href: `soegning.html?type=${t.id}` })));
   fillSeoCol('seo-regions', (typeof REGIONS !== 'undefined' ? REGIONS : []).map(r => ({ label: r, href: `soegning.html?regions=${encodeURIComponent(r)}` })));
   fillSeoCol('seo-price', [
@@ -448,7 +461,36 @@ async function buildForside(){
 
   const ALLE = Store.getAllListings();   // databasen (+ demodata hvis slået til)
   dataKlar = true;                       // først NU må forsiden nævne et antal
+  /* Runde 5 (D5-F4): kilder og egne annoncer i lageret — til hero-linjen. */
+  antalKilder = new Set(ALLE.filter(l => l.isExternal).map(l => l.source?.navn).filter(Boolean)).size;
+  antalEgne = ALLE.filter(l => !l.isExternal).length;
   opdaterHero();                         // nu med de rigtige tal fra databasen
+
+  /* Foto og modelnavn — bruges af forslagslisten her og af "Til salg lige nu"
+     i bid 7. En annonce uden modelnavn ("Honda" til 609.995 kr.) er ikke et
+     forslag, det er et spoergsmaal. */
+  const harFoto = (l) => (l.photoUrls || []).length > 0;
+  const harModel = (l) => {
+    const m = String(l.model || '').trim();
+    return !!m && m.toLowerCase() !== String(l.brand || '').trim().toLowerCase();
+  };
+
+  /* Runde 5 (D5-F6): forslag i fritekstfeltet — distinct maerke og
+     maerke+model fra LAGERET (mindst én annonce bag hvert). Ingen statisk
+     liste: BRANDS_BY_MODEL kender hverken "Nightster" eller "XV 1900", og en
+     liste med nul-traef-forslag er praecis det, D-009 forbyder. */
+  const forslag = document.getElementById('hs-suggest');
+  if (forslag){
+    const set = new Map();
+    for (const l of ALLE){
+      const b = String(l.brand || '').trim();
+      if (!b || b === 'Ukendt') continue;
+      set.set(b.toLowerCase(), b);
+      if (harModel(l)){ const bm = `${b} ${String(l.model).trim()}`; set.set(bm.toLowerCase(), bm); }
+    }
+    forslag.innerHTML = [...set.values()].sort((a, b) => a.localeCompare(b, 'da'))
+      .map(v => `<option value="${escapeHTML(v)}"></option>`).join('');
+  }
 
   /* Antallet på hver kategoriflise — og på underrubrikken de annoncer, der
      ikke hører til nogen af de otte.
@@ -476,15 +518,61 @@ async function buildForside(){
          Etiketten står i det samme <a>, så det fulde oplæste navn bliver
          fx "93 annoncer Cruiser". */
       el.setAttribute('aria-label', n === 1 ? '1 annonce' : `${daTal(n)} annoncer`);
+      /* Runde 5 (D5-F3): en flise med 0 er et link til nul traef — den tegnes
+         ikke. Resten ordnes efter antal, flest foerst (css order), saa
+         Cruiser 89 staar foerst og Cross 1 sidst. Ingen type gaettes. */
+      const flise = el.closest('.tile');
+      if (flise){ flise.hidden = n === 0; flise.style.order = String(-n); }
     });
+    /* Paa mobil er raekken en vandret rulleliste med snap. Chrome bevarer
+       snap-maalet (DOM-foerste flise, Sport) hen over omordningen og rullede
+       raekken 664 px til hoejre. Tilbage til start, naar ordenen er sat. */
+    const raekke = document.getElementById('category-tiles');
+    if (raekke && raekke.scrollLeft) raekke.scrollLeft = 0;
     const sub = document.getElementById('types-sub');
     if (sub && udenType){
       sub.textContent = `Find hurtigt den type, du leder efter. ${daTal(udenType)} af `
         + `${daTal(ALLE.length)} annoncer har ingen type oplyst hos kilden og ligger `
-        + `derfor ikke bag nogen af de otte fliser — dem finder du i den fulde søgning.`;
+        + `derfor ikke bag nogen af fliserne — dem finder du i den fulde søgning.`;
     }
   };
   fyldTypeAntal();
+
+  /* Runde 5 (D5-F2): "Maerker med flest annoncer" — bygget af lageret.
+     Maerkerne laegges sammen paa slug, praecis som scripts/build-brand-pages.js
+     goer ("Royal Enfield"/"Royal-enfield" er ét maerke), saa tallet paa
+     chippen er det samme som paa maerkesiden. De 12 stoerste med mindst 2
+     annoncer; linket gaar til maerkesiden, hvor den findes (data-maerkesider
+     skrives af byggetrinnet), ellers til soegningen. Nul-chips tegnes aldrig. */
+  const slugify = (name) => String(name).toLowerCase()
+    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const tegnMaerker = () => {
+    const pr = new Map();
+    for (const l of ALLE){
+      const b = String(l.brand || '').trim();
+      if (!b || b === 'Ukendt') continue;
+      const s = slugify(b); if (!s) continue;
+      let e = pr.get(s); if (!e){ e = { slug: s, n: 0, navne: new Map() }; pr.set(s, e); }
+      e.n++; e.navne.set(b, (e.navne.get(b) || 0) + 1);
+    }
+    const top = [...pr.values()].filter(e => e.n >= 2)
+      .sort((a, b) => b.n - a.n || a.slug.localeCompare(b.slug)).slice(0, 12)
+      .map(e => ({ slug: e.slug, n: e.n, navn: [...e.navne.entries()].sort((a, b) => b[1] - a[1])[0][0] }));
+    const sider = new Set(((brandCloud && brandCloud.dataset.maerkesider) || '').split(',').filter(Boolean));
+    const href = (m) => sider.has(m.slug) ? `maerke-${m.slug}.html` : `soegning.html?brands=${encodeURIComponent(m.navn)}`;
+    if (brandCloud){
+      brandCloud.innerHTML = top.map(m =>
+        `<a class="brand-chip" href="${href(m)}" aria-label="${escapeHTML(m.navn)}, ${daTal(m.n)} annoncer">
+           <span class="brand-chip-name">${escapeHTML(m.navn)}</span>
+           <span class="brand-chip-n" aria-hidden="true">${daTal(m.n)}</span>
+           <span class="brand-chip-go" aria-hidden="true">${Icon.arrowRight}</span>
+         </a>`).join('');
+      const sec = brandCloud.closest('section'); if (sec) sec.hidden = top.length === 0;
+    }
+    fillSeoCol('seo-brands', top.slice(0, 8).map(m => ({ label: `${m.navn} (${daTal(m.n)})`, href: href(m) })));
+  };
+  tegnMaerker();
 
   await yieldToMain();
 
@@ -558,6 +646,14 @@ async function buildForside(){
   // fylder vi resten af rækken med ÉT roligt, intentionelt CTA-kort, der spænder
   // over de ledige kolonner. Læses som "her lander nye annoncer" — ikke "tomt".
   const newestMount = document.getElementById('newest-listings');
+  /* Runde 5 (D5-F1a): er der annoncer, men ingen med dato (drift: 548 af 548
+     indekserede), skjules HELE sektionen. Tomtilstanden brugte ≈670 px paa
+     forsidens dyreste plads til at forklare, at den var tom; forklaringen
+     hoerer til paa soegesiden ("Nyeste foerst"-noten). Ingen dato opfindes —
+     sektionen vender selv tilbage, den dag en annonce har createdAt. Er
+     lageret HELT tomt, vises sektionen med "Der er ingen annoncer endnu". */
+  const newestSection = document.getElementById('newest-section');
+  if (newestSection) newestSection.hidden = ALLE.length > 0 && newest.length === 0;
   /* Indeks forskudt med 1 — med vilje.
 
      listingCardHTML() giver kort nr. 0 loading="eager" fetchpriority="high",
@@ -663,7 +759,7 @@ async function buildForside(){
 
      Underrubrikken i index.html blev rettet samtidig: den lovede "fra hele
      landet", men udvalget vælges på pris og foto, ikke på geografi. */
-  const harFoto = (l) => (l.photoUrls || []).length > 0;
+  /* harFoto/harModel er defineret i bid 5 (bruges ogsaa af forslagslisten). */
 
   /* EN ANNONCE UDEN MODELNAVN ER IKKE ET UDVALG, DET ER EN GÆTTELEG.
      Kritikeren i runde 2 fandt et kort, der bare hed "Honda" — ingen model —
@@ -674,11 +770,6 @@ async function buildForside(){
      ikke en oplysning, det er et spørgsmål. De er ikke skjult noget sted: de
      tæller i totalen, i søgningen og i alle facetter. De skal bare ikke være
      dem, forsiden peger på. */
-  const harModel = (l) => {
-    const m = String(l.model || '').trim();
-    return !!m && m.toLowerCase() !== String(l.brand || '').trim().toLowerCase();
-  };
-
   /* "DE DYRERE MODELLER" SKAL VÆRE DE DYRERE MODELLER.
      Grænsen var 60.000 kr., og med den stod der 62.200 kr. på det billigste
      kort under rubrikken "de dyrere modeller" — mens sidens eget prisfacet
@@ -690,10 +781,17 @@ async function buildForside(){
      skal huske at flytte det, og underrubrikken kan skrive det ud, så
      køberen kan efterprøve rubrikken på kortene. Annoncer uden pris er
      ikke med i medianen — de sorterede før som 0 og trak den ned. */
-  const priser = ALLE.map(l => l.price).filter(x => x != null).sort((a,b) => a - b);
-  const median = priser.length ? priser[Math.floor(priser.length / 2)] : 0;
-
-  const kandidater = ALLE.filter(l => harFoto(l) && harModel(l) && l.price != null && l.price >= median);
+  /* Runde 5 (D5-F1b): RUBRIKKEN ER "TIL SALG LIGE NU", OG GRAENSEN ER VAEK.
+     "Dyrere modeller" (kun over medianen, 119.800 kr.) viste 2 kort af 548
+     paa mobil, 4 300 px nede. Nu er kandidaterne alle annoncer MED foto og
+     modelnavn, i SAMME raekkefoelge som soegesidens standard
+     (Sortering 'blandet' — bedst oplyste foerst, derefter dato, derefter id;
+     de billedloese fordeles ikke, for de er frasorteret her). Saa staar der
+     paa forsiden det, man ogsaa moeder oeverst i soegningen, og
+     underrubrikken kan sige det ordret. Det tilfaeldige froe fra runde 4 er
+     vaek — en fast, efterproevelig raekkefoelge slaar "tilfaeldig, saa det er
+     ikke en anbefaling". Medianen regnes ikke laengere. */
+  const kandidater = Sortering.sorter(ALLE.filter(l => harFoto(l) && harModel(l)), 'blandet');
   /* RÆKKEFØLGEN SKAL VÆRE TILFÆLDIG — IKKE BARE SE SÅDAN UD.
      Stod her før: `seededRandom(7)`. Et FAST tal er ikke et frø, der gør
      blandingen reproducerbar til test — det er en blanding, der ALDRIG
@@ -709,8 +807,7 @@ async function buildForside(){
      Selve algoritmen (ét kort pr. mærke, egne annoncer før indekserede) er
      urørt: det var aldrig DEN, der var fejlen — det var at frøet stod
      skrevet som et bogstaveligt tal i kildekoden. */
-  const rnd = seededRandom(1 + Math.floor(Math.random() * 2147483646));
-  const bland = (arr) => arr.map(l => ({ l, k: rnd() })).sort((a,b) => a.k - b.k).map(x => x.l);
+  /* (Runde 5: ingen blanding — se noten ved `kandidater`.) */
   /* ÉT KORT PR. MÆRKE. Uden reglen gav den seedede blanding fire Hondaer,
      hvoraf to var den samme model (CRF 1100 L Africa Twin til 199.995 og
      224.995 kr.). Målt på kandidaterne er 108 af 169 Honda og 36
@@ -726,8 +823,8 @@ async function buildForside(){
      Vores egne før de indekserede — samme linje som Store.getAllListings():
      en annonce, vi selv hoster, kan køberen handle på her. */
   const raekkefoelge = [
-    ...bland(kandidater.filter(l => !l.isExternal)),
-    ...bland(kandidater.filter(l => l.isExternal)),
+    ...kandidater.filter(l => !l.isExternal),
+    ...kandidater.filter(l => l.isExternal),
   ];
   const vaelgEfter = (noegle, ud, brugt, antal) => {
     for (const l of raekkefoelge){
@@ -737,9 +834,11 @@ async function buildForside(){
       brugt.add(k); ud.push(l);
     }
   };
+  let enPrMaerkeHoldt = true;   // kunne raekken fyldes med ét kort pr. maerke?
   const vaelgFeatured = (antal) => {
     const ud = [];
     vaelgEfter(l => String(l.brand || ''), ud, new Set(), antal);
+    enPrMaerkeHoldt = ud.length >= antal;
     if (ud.length < antal){
       const brugt = new Set(ud.map(l => `${l.brand} ${l.model}`));
       vaelgEfter(l => `${l.brand} ${l.model}`, ud, brugt, antal);
@@ -774,11 +873,14 @@ async function buildForside(){
     const enKilde = (kilder.length === 1 && byer.length === 1 && kandidater.every(l => l.isExternal))
       ? ` Alle er indekseret hos ${kilder[0]} i ${byer[0]}, den eneste kilde i lageret, der sender billeder med.`
       : '';
+    /* Runde 5 (D5-F1b): tre ting, der kan efterproeves paa kortene og paa
+       soegesiden: hvor mange der er at tage af, at raekkefoelgen er
+       soegningens, og reglen om ét kort pr. maerke (eller pr. model, naar
+       der ikke er maerker nok). */
     featuredSub.textContent =
-      `${ANTALSORD[antal] || daTal(antal)} tilfældige blandt de `
-      + `${daTal(kandidater.length)} annoncer til ${formatPrice(median)} eller derover, `
-      + `der har et foto — højst én pr. mærke.${enKilde}`
-      + ` Rækkefølgen er tilfældig, så det er ikke en anbefaling.`;
+      `${ANTALSORD[antal] || daTal(antal)} af de ${daTal(kandidater.length)} annoncer med foto og modelnavn — `
+      + `samme rækkefølge som i søgningen, ${enPrMaerkeHoldt ? 'højst én pr. mærke' : 'højst én pr. model'}.`
+      + enKilde;
   };
 
   // En overskrift uden indhold under ser i stykker ud — skjul hele sektionen.
@@ -818,7 +920,7 @@ async function buildForside(){
      udregning ville have valgt. */
   let featured = [];
   const tegnFeatured = async () => {
-    featured = vaelgFeatured(4);
+    featured = vaelgFeatured(8);
     if (!featured.length){ featuredMount.replaceChildren(); skrivFeaturedSub(0); return; }
     /* D2 (23.08.2026): kolonnetallet laeses FOER kortene saettes ind. Foer stod
        laesningen lige efter indsaetningen — en skrivning fulgt af en laesning
@@ -829,8 +931,11 @@ async function buildForside(){
        Paa én kolonne (telefon) vises 2 i stedet for 4: fire fuldbredde-kort
        var 2.429 px af en 10.812 px hoej forside (maalt 390x844) — den
        laengste sektion paa siden, og resten af lageret er ét tryk vaek. */
+    /* Runde 5 (D5-F1b): 4 paa én og to spalter (mobil/tablet), 6 paa tre,
+       8 paa fire — altid hele raekker. Bilbasen viser ≈30 kort; 4 paa mobil er
+       ≈1 670 px, og resten af lageret er ét tryk vaek ("Se alle annoncer"). */
     const cols = getComputedStyle(featuredMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-    const maks = cols === 1 ? 2 : Math.max(cols, Math.floor(4 / cols) * cols);
+    const maks = cols >= 4 ? 8 : cols === 3 ? 6 : 4;
     featured = featured.slice(0, Math.min(featured.length, maks));
     await saetIndIPortioner(featuredMount, featured.map(kortHTML));
     skrivFeaturedSub(featured.length);

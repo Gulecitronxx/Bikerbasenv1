@@ -210,6 +210,34 @@ efter) og står i dag som "åben"; funktionerne 404 i dag. Enhedstests for
 klientens fald-tilbage i js/skrivevej.test.js. Ikke kørt mod produktion herfra
 (A1-blokeringen: access token).
 
+### D5-F1 ændrer to ældre beslutninger på forsiden — 23.08.2026
+HVAD: "Dyrere modeller" (kun over medianprisen, tilfældig rækkefølge med nyt
+frø pr. besøg, runde 3/4) hedder nu "Til salg lige nu": alle annoncer MED foto
+og modelnavn, i SAMME rækkefølge som søgesidens standard
+(`Sortering.sorter(…, 'blandet')`), højst én pr. mærke, 4/6/8 kort, og
+sektionen står lige under hero'en. "Nyeste annoncer" skjules helt, når ingen
+annonce har en dato (drift: 548 af 548).
+HVORFOR: den blinde sammenligning mod bilbasen.dk blev tabt på én ting —
+Bilbasen viser ≈30 annoncekort under hero'en, vi viste 2 (mobil) 4 300 px
+nede. Medianen og det tilfældige frø var svar på en rubrik ("Udvalgte",
+"Dyrere"), der ikke længere findes. "Samme rækkefølge som i søgningen" er en
+regel, køberen kan efterprøve ved ét klik; "tilfældig, så det er ikke en
+anbefaling" kunne kun efterprøves ved at genindlæse 18 gange.
+HVAD DER IKKE ÆNDRES: ingen dato opfindes (D-005 står), foto og modelnavn er
+stadig kriterier, ingen annonce skjules i søgningen.
+MÅLT (srp.test:8532, 548 annoncer): første kort 4 340 → 1 154 (390 px),
+2 840 → 1 017 (1 366 px). Sidehøjde 9 754 → 8 114 / 6 843 → 6 029.
+
+### D5-F6 delvist udsat (Mærke→Model-selects) — 23.08.2026
+HVAD: `<datalist>` fra lageret (340 forslag: mærke og mærke+model med ≥1
+annonce) og "Nulstil" er bygget. Bilbasens cascade (Mærke → Model som
+selects) er IKKE bygget.
+HVORFOR: en model-select skal bygges af lagerets `model`-strenge med tal i
+option-teksten for ikke at skabe nul-træf-kombinationer (D-009). Det er
+muligt, men på mobil koster det ≈120 px i en hero, der allerede er 925 px, og
+`<datalist>` giver det samme svar (hvad findes der?) for 0 px. Tages op ved
+≈2 000 annoncer, hvor fritekst ikke længere rækker.
+
 ### B3 afvist (proxy + silhuet) / gennemført (fejlfelt + pladsholder) — 23.08.2026
 FINDING (audit 23.08.2026, B3): "Proxy + resize thumbnails through an image
 worker you control (Cloudflare Images/Workers or Supabase Storage transform)

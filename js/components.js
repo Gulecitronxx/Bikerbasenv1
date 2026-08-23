@@ -108,6 +108,15 @@ function updateAuthSlot(){
     slot.innerHTML = `${Icon.user}${escapeHTML(String(user.name || '').split(' ')[0])} · Log ud`;
     slot.addEventListener('click', onLogout);
   }
+  /* Runde 5 (D5-F7): profilikonet i mobilheaderen. Logget ind peger det paa
+     "Mine annoncer" — IKKE paa log-ud: et ikon, der logger én ud ved et tryk,
+     er en faelde. Log ud ligger i skuffen som foer. */
+  const slotIcon = document.querySelector('[data-auth-slot-icon]');
+  if (slotIcon){
+    slotIcon.setAttribute('href', 'mine-annoncer.html');
+    slotIcon.setAttribute('aria-label', `Min profil (${String(user.name || '').split(' ')[0] || 'logget ind'})`);
+    slotIcon.classList.add('is-logged-in');
+  }
   const slotMobile = document.querySelector('[data-auth-slot-mobile]');
   if (slotMobile){
     slotMobile.setAttribute('href', '#');
@@ -131,8 +140,8 @@ function wireHeader(){
     openBtn.addEventListener('click', () => setDrawer(true));
     drawer.querySelectorAll('[data-drawer-close]').forEach(el => el.addEventListener('click', () => setDrawer(false)));
   }
-  const themeBtn = document.querySelector('.theme-toggle');
-  if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+  // Runde 5 (D5-F7): to knapper — headerens (desktop) og skuffens (mobil).
+  document.querySelectorAll('.theme-toggle').forEach(b => b.addEventListener('click', toggleTheme));
   document.addEventListener('bb:favorites-changed', updateFavCount);
 }
 

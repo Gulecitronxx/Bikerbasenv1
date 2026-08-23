@@ -255,6 +255,30 @@ scripts/build.js`, `node scripts/udgiv.js` (78 filer, 32 HTML).
 
 ---
 
+## Runde 5 — aim-loop mod bilbasen.dk (23.08.2026)
+
+Tre blinde designer-kritikere sammenlignede forside, søgeside og annonceside
+side om side med bilbasen.dk (screenshots i `work/runde5/`, rapporter i
+[runde-5-forside.md](runde-5-forside.md), [runde-5-soegning.md](runde-5-soegning.md),
+[runde-5-annonce.md](runde-5-annonce.md)). Målingerne før/efter står i
+[rounds/round-5.md](rounds/round-5.md).
+
+| ID | rolle | akse | sev | fil | problem | status |
+|---|---|---|---|---|---|---|
+| D5-F1 | designer | design | **P1** | `index.html`, `js/home.js` bid 6+7 | Forsiden viste 2 (mobil)/3 (desktop) annoncer af 548, første kort y≈4 340/≈2 840; "Nyeste" brugte 670 px på en tomtilstand | **rettet** — "Til salg lige nu" lige under hero'en (4/6/8 kort i søgningens rækkefølge), tom "Nyeste" skjult. Første kort 1 154 / 1 017 |
+| D5-F2 | designer | funktionalitet | **P1** | `js/home.js` bid 3→5 | "Populære mærker" bygget mod BRANDS_BY_MODEL: Vespa 0, Harley-Davidson (72) manglede, "søger mest" uden data | **rettet** — bygget af lageret (top 12 med ≥2, tal på chippen, link til mærkesiden hvor den findes) |
+| D5-F3 | designer | design | **P1** | `js/home.js` fyldTypeAntal, `css/styles.css` .tiles-grid | 8 fliser ≈800 px på mobil; "Scooter 0" klikbar blindgyde | **rettet** — 0-fliser skjules, orden efter antal, én vandret rulle-række på mobil (121 px) |
+| D5-F4 | designer | funktionalitet | **P2** | `index.html` hero, `js/home.js` opdaterHero | Sandheden om kilderne (.lead) skjult på mobil; hero-trust var sælgertale | **rettet** — "548 motorcykler til salg hos 4 danske forhandlere og markedspladser" + tre køberfakta |
+| D5-F5 | designer | design | **P2** | `index.html` | ≈2 100 px prosa (trin, sælgerbånd, CTA-bånd); trin 1 lovede "Gem favoritter" | **rettet** — trin flyttet til sikkerhed.html, ét sælgerbånd nederst, priskort skjult <820 px. Side 9 754 → 8 114 px (mobil), 6 843 → 6 029 (desktop) |
+| D5-F6 | designer | funktionalitet | **P2** | `index.html`, `js/home.js` | Fritekst uden forslag; ingen "Nulstil" | **delvist rettet** — `<datalist>` fra lageret (340 forslag) + Nulstil. Mærke→Model-selects ≥700 px ikke bygget (se DECISIONS) |
+| D5-F7 | designer | design | **P3** | alle sider, `css/styles.css`, `js/components.js` | Temaskift optog en af to mobilpladser; ingen kontoindgang i mobilheaderen | **rettet** — profilikon i mobilheader (logget ind → Mine annoncer), temaskift i skuffen på mobil |
+| D5-S1 | designer | design | **P1** | `soegning.html`, `css/styles.css` | Otte rækker oven på listen på mobil; Filtre grå kontur | **rettet** — .srp-bar (søg+gem+Filtre), toolbar 2 rækker mobil / 1 desktop. Første kort 394 → 303 (mobil), 398 → 335 (desktop) |
+| D5-S2–S4, S7 | designer | design | **P2** | `js/components.js`, `css/styles.css` | Kort: kildestribe, specs som linjer, kørekort-chip tung, pris lille | **rettet** — chips (24 px), kørekort i specs, kildelinje i foden, pris 22 px. Korthøjde 481 → 417 |
+| D5-S5/S6 | designer | design | **P2** | `soegning.html`, `js/search.js`, `scripts/build-srp.js` | Sidebar-hints ≈190 px; sorteringsnote uden noget at efterprøve | **rettet** — `<details>`, note skjult ved 0 uden foto, (i) fast i .sort-felt. Type-filter 672 → 511 |
+| D5-A1–A7 | designer | design | **P1/P2** | `js/annonce.js`, `annonce.html`, `css/styles.css` | Pris/nøgletal under folden, flag 112 px, "Lignende" tilfældig | **rettet** — kørekort først, flag 38 px, foto maks 400 px desktop, handlinger i header, sticky bar skjult ved prisblok, "Lignende" rangeret. Pris 722 → 615 (mobil), 835 → 662 (desktop) |
+
+---
+
 ## Lukket
 
 <!-- Verificerede findings flyttes herned med rundenummer, så tabellen ovenfor

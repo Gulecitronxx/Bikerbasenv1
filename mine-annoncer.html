@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Mine annoncer — Bikerbasen">
 <meta name="twitter:description" content="Se overblik over dine egne motorcykelannoncer og dine gemte annoncer på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -63,7 +63,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=8d6ae9a5">
+<link rel="stylesheet" href="css/styles.css?v=5834f35a">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -86,6 +86,9 @@ try{
       </button>
       <a href="login.html" class="btn btn-outline" data-auth-slot><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind</a>
       <a href="opret-annonce.html" class="btn btn-primary header-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Opret annonce</a>
+      <!-- Runde 5 (D5-F7): kontoindgang i mobilheaderen (Bilbasen: profil + hjerte + menu).
+           Temaskiftet er flyttet ned i skuffen paa mobil — en indstilling, ikke en opgave. -->
+      <a href="login.html" class="icon-btn mobile-profile" data-auth-slot-icon aria-label="Log ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg></a>
       <button type="button" class="icon-btn mobile-menu-btn" aria-label="Åbn menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     </div>
   </div>
@@ -99,6 +102,7 @@ try{
     <a href="opret-annonce.html">Opret annonce</a>
     <a href="mine-annoncer.html">Mine annoncer</a>
     <div class="drawer-divider"></div>
+    <button type="button" class="theme-toggle drawer-theme" aria-label="Skift mellem lys og mørk tilstand"><span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span><span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>Lys / mørk tilstand</button>
     <a href="login.html" data-auth-slot-mobile><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind / Opret profil</a>
     <a href="mine-annoncer.html?tab=favoritter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>Gemte annoncer (<span data-fav-count-mobile>0</span>)</a>
   </div>
@@ -258,18 +262,18 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=8d6ae9a5"></script>
-<script defer src="js/vendor/supabase.js?v=8d6ae9a5"></script>
-<script defer src="js/supabase-config.js?v=8d6ae9a5"></script>
-<script defer src="js/supabase-api.js?v=8d6ae9a5"></script>
-<script defer src="js/icons.js?v=8d6ae9a5"></script>
-<script defer src="js/postnumre.js?v=8d6ae9a5"></script>
-<script defer src="js/data.js?v=8d6ae9a5"></script>
-<script defer src="js/store.js?v=8d6ae9a5"></script>
-<script defer src="js/maaling.js?v=8d6ae9a5"></script>
-<script defer src="js/backend-bridge.js?v=8d6ae9a5"></script>
-<script defer src="js/components.js?v=8d6ae9a5"></script>
-<script defer src="js/mine-annoncer.js?v=8d6ae9a5"></script>
+<script defer src="js/security.js?v=5834f35a"></script>
+<script defer src="js/vendor/supabase.js?v=5834f35a"></script>
+<script defer src="js/supabase-config.js?v=5834f35a"></script>
+<script defer src="js/supabase-api.js?v=5834f35a"></script>
+<script defer src="js/icons.js?v=5834f35a"></script>
+<script defer src="js/postnumre.js?v=5834f35a"></script>
+<script defer src="js/data.js?v=5834f35a"></script>
+<script defer src="js/store.js?v=5834f35a"></script>
+<script defer src="js/maaling.js?v=5834f35a"></script>
+<script defer src="js/backend-bridge.js?v=5834f35a"></script>
+<script defer src="js/components.js?v=5834f35a"></script>
+<script defer src="js/mine-annoncer.js?v=5834f35a"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

@@ -987,6 +987,19 @@ Allow: /
 Sitemap: ${base}/sitemap.xml
 `, 'utf8');
 
+/* Runde 5 (D5-F2): forsidens maerkesky linker til maerke-<slug>.html, men kun
+   hvor siden FINDES. Lageret kan have faaet et nyt maerke siden sidste byg —
+   saa listen over byggede slugs skrives ind i index.html, og js/home.js falder
+   tilbage til soegning.html?brands= for alt andet. Ingen 404 bag en chip. */
+{
+  const indexPath = path.join(ROOT, 'index.html');
+  let ih = fs.readFileSync(indexPath, 'utf8');
+  const attr = `<div class="brand-cloud" id="brand-cloud" data-maerkesider="${brands.map(slugify).join(',')}">`;
+  const re = /<div class="brand-cloud" id="brand-cloud"[^>]*>/;
+  if (re.test(ih)){ fs.writeFileSync(indexPath, ih.replace(re, attr)); }
+  else console.warn('build-brand-pages: fandt ikke #brand-cloud i index.html — maerkeskyen falder tilbage til soegning.html?brands=');
+}
+
 console.log(`Built ${built} brand pages + maerker.html + sitemap.xml (${urls.length} urls) + robots.txt`);
 console.log(`  heraf ${listingUrls.length} annoncesider og ${brands.length} maerkesider. `
   + `${LISTINGS.length - LISTINGS.filter(harEgenSide).length} indekserede annoncer er MED VILJE ude af sitemappet (noindex).`);

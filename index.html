@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Bikerbasen — Køb og sælg brugte motorcykler i Danmark">
 <meta name="twitter:description" content="Bikerbasen samler brugte motorcykler til salg i hele Danmark ét sted — fra forhandlere, markedspladser og egne annoncer. Søg på mærke, type, pris og kørekort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -60,7 +60,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=8d6ae9a5">
+<link rel="stylesheet" href="css/styles.css?v=5834f35a">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -90,6 +90,9 @@ try{
       </button>
       <a href="login.html" class="btn btn-outline" data-auth-slot><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind</a>
       <a href="opret-annonce.html" class="btn btn-primary header-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Opret annonce</a>
+      <!-- Runde 5 (D5-F7): kontoindgang i mobilheaderen (Bilbasen: profil + hjerte + menu).
+           Temaskiftet er flyttet ned i skuffen paa mobil — en indstilling, ikke en opgave. -->
+      <a href="login.html" class="icon-btn mobile-profile" data-auth-slot-icon aria-label="Log ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg></a>
       <button type="button" class="icon-btn mobile-menu-btn" aria-label="Åbn menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     </div>
   </div>
@@ -103,6 +106,7 @@ try{
     <a href="opret-annonce.html">Opret annonce</a>
     <a href="mine-annoncer.html">Mine annoncer</a>
     <div class="drawer-divider"></div>
+    <button type="button" class="theme-toggle drawer-theme" aria-label="Skift mellem lys og mørk tilstand"><span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span><span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>Lys / mørk tilstand</button>
     <a href="login.html" data-auth-slot-mobile><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind / Opret profil</a>
     <a href="mine-annoncer.html?tab=favoritter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>Gemte annoncer (<span data-fav-count-mobile>0</span>)</a>
   </div>
@@ -140,7 +144,11 @@ try{
           <div class="field">
             <label for="hs-query">Mærke eller model</label>
             <div class="input-icon-wrap" id="hs-query-wrap">
-              <input class="input" type="text" id="hs-query" name="q" placeholder="f.eks. Yamaha MT-07">
+              <!-- Runde 5 (D5-F6): forslag fra LAGERET (maerke og maerke+model med mindst én
+                   annonce), fyldt af js/home.js bid 5 naar data er klar. Ingen statisk
+                   liste — den ville kunne foreslaa noget, der giver nul traef. -->
+              <input class="input" type="text" id="hs-query" name="q" placeholder="Skriv mærke eller model" list="hs-suggest" autocomplete="off">
+              <datalist id="hs-suggest"></datalist>
             </div>
           </div>
           <div class="field">
@@ -180,7 +188,12 @@ try{
             </div>
             <p class="kk-hint" id="hs-kk-hint">Vi gætter aldrig: er effekten ikke oplyst, siger vi det.</p>
           </fieldset>
-          <button type="submit" class="btn btn-primary btn-lg" id="hs-submit">Søg motorcykler</button>
+          <div class="search-actions">
+            <!-- Runde 5 (D5-F6): "Nulstil" — koerekortsegmentet havde ingen anden vej
+                 tilbage end at klikke "Alle". Skjult indtil et filter er sat. -->
+            <button type="reset" class="hero-reset" id="hs-reset" hidden>Nulstil</button>
+            <button type="submit" class="btn btn-primary btn-lg" id="hs-submit">Søg motorcykler</button>
+          </div>
         </div>
         <!-- Regnskabet over de annoncer, hero'ens filtre har valgt fra, fordi
              oplysningen mangler. Samme tal og samme feltnavne som linjen på
@@ -197,18 +210,38 @@ try{
         <div class="popular-row" id="popular-searches" aria-label="Populære søgninger"></div>
       </form>
 
+      <!-- Runde 5 (D5-F4): tre koeberfakta, der gaelder HVER annonce i lageret —
+           ikke saelgertale over folden paa en koeberside. "Gratis annonce for
+           private" staar i saelgerbaandet nederst, hvor den hoerer til. -->
       <ul class="hero-trust">
-        <li class="hero-trust-item">Gratis annonce for private</li>
-        <!-- "Kontaktinfo skjult til du er klar" var samme løfte som de tre
-             andre steder på siden (se noterne nedenfor): at SÆLGEREN vælger
-             hvornår. Gaten er login — se saelgerKortHTML() i js/annonce.js. -->
-        <li class="hero-trust-item">Kontaktinfo skjult for udloggede</li>
-        <!-- "Registreringsstatus på hver annonce" passede ikke: de indekserede
-             annoncer (i dag alle) har ingen registreringsstatus hos os. Det her
-             løfte holder for hvert eneste kort — se tryghedsbåndets tredje
-             kort i js/home.js. -->
+        <li class="hero-trust-item">Kilden står på hvert kort</li>
+        <li class="hero-trust-item">Kørekort A1/A2/A ud fra hk og ccm — aldrig gættet</li>
         <li class="hero-trust-item">Mangler et tal, står der "Ikke oplyst"</li>
       </ul>
+    </div>
+  </section>
+
+  <!-- Runde 5 (D5-F1, maalt mod Bilbasens forside): LAGERET STAAR LIGE UNDER
+       HERO'EN. Bilbasen viser ~30 annoncekort i tre gitre foer noget andet;
+       vi viste 2 (mobil) / 3 (desktop) ved y≈4 340 / ≈2 840 — efter otte
+       typefliser, tre koebetrin, et saelgerbaand og en maerkesky.
+
+       Sektionen hed "Dyrere modeller" (kun over medianprisen, tilfaeldig
+       raekkefoelge). Nu: de foerste annoncer MED foto og modelnavn i SAMME
+       raekkefoelge som soegesidens standard (Sortering 'blandet'), hoejst én
+       pr. maerke — 4 paa mobil, 6 paa tre spalter, 8 paa fire. Rubrikken
+       lover kun "til salg lige nu", og underrubrikken skrives fra data af
+       js/home.js (bid 7), saa den kan efterproeves paa kortene. -->
+  <section class="section" id="featured-section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Til salg lige nu</h2>
+          <p id="featured-sub">Et udsnit af lageret — samme rækkefølge som i søgningen.</p>
+        </div>
+        <a class="section-link" href="soegning.html">Se alle annoncer<span aria-hidden="true"></span></a>
+      </div>
+      <div class="listings-grid" id="featured-listings"></div>
     </div>
   </section>
 
@@ -229,150 +262,34 @@ try{
     </div>
   </section>
 
-  <section class="section" style="padding-top:0;">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2>Sådan køber du trygt</h2>
-          <p>Fra søgning til nøgler i hånden — tre enkle trin.</p>
-        </div>
-      </div>
-      <ol class="steps" id="steps">
-        <li class="step">
-          <span class="step-num">1</span>
-          <div class="step-body">
-            <h3>Find den rette</h3>
-            <p>Søg på mærke, type, budget og kørekort. Gem favoritter og sammenlign specs side om side.</p>
-          </div>
-        </li>
-        <li class="step">
-          <span class="step-num">2</span>
-          <div class="step-body">
-            <h3>Tag kontakt trygt</h3>
-            <!-- Her stod "Dine oplysninger deles først, når du selv er
-                 klar" — en løsere formulering af det samme løfte, som stod
-                 forkert i "Sælg din motorcykel"-sektionen (se linje ~262
-                 og ~443): at DET ER SÆLGEREN, der bestemmer, hvornår
-                 kontaktinfo deles. Det passer ikke med koden. Gaten er
-                 login, ikke et valg sælgeren træffer pr. henvendelse — se
-                 saelgerKortHTML() i js/annonce.js: udlogget er sælgerens
-                 navn og telefonnummer skjult; logger man ind, kan man se
-                 dem og skrive med det samme. Samme forklaring som
-                 annoncesidens egen tekst ("Kontaktoplysninger er kun
-                 synlige for indloggede brugere"), så de to sider ikke
-                 længere beskriver to forskellige mekanismer. -->
-            <!-- Skal være sand for begge slags annoncer: de indekserede (handlen
-                 sker hos kilden, vi har ingen kontaktoplysninger — se
-                 om-indeksering.html) og de egne (kontakt på Bikerbasen, bag
-                 login — se saelgerKortHTML() i js/annonce.js). -->
-            <p>Er annoncen indekseret fra en forhandler eller markedsplads, sender vi dig direkte videre til sælgeren dér. Er den oprettet på Bikerbasen, kan du skrive til sælgeren her, når du er logget ind — kontaktoplysningerne er kun synlige for indloggede brugere.</p>
-          </div>
-        </li>
-        <li class="step">
-          <span class="step-num">3</span>
-          <div class="step-body">
-            <h3>Aftal og hent</h3>
-            <p>Tjek specifikationerne — og hvad der står "Ikke oplyst" — aftal fremvisning, og handl med ro i maven.</p>
-          </div>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <section class="section" style="padding-top:0;">
-    <div class="container">
-      <div class="sell-band">
-        <div class="sell-band-copy">
-          <span class="sell-band-eyebrow">Sælg din motorcykel</span>
-          <h2>Gratis annonce — set af hele Danmark</h2>
-          <p>Opret på under 5 minutter, og kom i kontakt med købere i hele landet. Ingen kommission, ingen skjulte gebyrer.</p>
-          <ul class="sell-points">
-            <li><span class="sell-check" aria-hidden="true"></span>Helt gratis for private sælgere</li>
-            <!-- "Din kontaktinfo er skjult, indtil du selv deler den" lovede
-                 sælgeren en aktiv handling — et valg pr. henvendelse. Det
-                 findes ikke i koden: der er ingen "del nu"-knap for
-                 sælgeren, kun login-muren, som enhver oprettet bruger kan
-                 gå igennem (se js/annonce.js, saelgerKortHTML()). Rettelsen
-                 lover det, systemet faktisk gør: skjuler nummeret for
-                 udloggede, søgemaskiner og robotter — ikke at sælgeren
-                 styrer det i realtid. -->
-            <li><span class="sell-check" aria-hidden="true"></span>Din kontaktinfo er skjult for udloggede besøgende, søgemaskiner og robotter</li>
-            <li><span class="sell-check" aria-hidden="true"></span>Nå entusiaster, der leder efter netop din model</li>
-          </ul>
-          <div class="sell-band-actions">
-            <a href="opret-annonce.html" class="btn btn-primary btn-lg">Opret annonce</a>
-            <a href="sikkerhed.html" class="btn btn-outline btn-lg">Sådan sælger du trygt</a>
-          </div>
-        </div>
-        <div class="sell-band-art">
-          <div class="price-card">
-            <span class="price-card-label">Din pris som privat</span>
-            <div class="price-card-amount">0 kr.</div>
-            <span class="price-card-sub">Gratis annonce · ingen binding</span>
-            <ul class="price-card-list">
-              <li>Ingen kommission af salget</li>
-              <li>Ingen skjulte gebyrer</li>
-              <li>Behold 100% af salgssummen</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- Runde 5 (D5-F5): "Saadan koeber du trygt" (tre trin, ≈860 px paa mobil)
+       er flyttet til sikkerhed.html, hvor koebeguiden i forvejen staar.
+       Trin 1 lovede "Gem favoritter" — det kan ingen af de indekserede
+       annoncer (D-008). Forsiden beholder #trust-strip, som siger det samme
+       kortere og kun det, der gaelder hvert kort. -->
 
   <section class="section" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
         <div>
-          <h2>Populære mærker</h2>
-          <p>Spring direkte til annoncer fra de mærker, danske bikere søger mest.</p>
+          <!-- Runde 5 (D5-F2): listen bygges af LAGERET (js/home.js bid 5): de 12
+               maerker med flest annoncer (mindst 2), tallet staar paa chippen, og
+               linket gaar til maerkesiden. Foer: en fast liste filtreret mod
+               BRANDS_BY_MODEL — Vespa (0 annoncer) var med, Harley-Davidson (72)
+               var ikke, og "soeger mest" byggede paa ingen data. -->
+          <h2>Mærker med flest annoncer</h2>
+          <p>Tallet er antallet til salg lige nu.</p>
         </div>
         <a class="section-link" href="maerker.html">Alle mærker<span aria-hidden="true"></span></a>
       </div>
-      <div class="brand-cloud" id="brand-cloud"></div>
+      <div class="brand-cloud" id="brand-cloud" data-maerkesider="andet-maerke,aprilia,benelli,bmw,bsa,cagiva,ducati,fb-mondial,harley-davidson,honda,husqvarna,hyosung,indian,kawasaki,ktm,kymco,lauge,moto-guzzi,mv-agusta,rewaco,royal-enfield,suzuki,sym,triumph,victory,yamaha"></div>
     </div>
   </section>
 
-  <!-- "Udvalgte" står FØR "Nyeste" — byttet om i runde 2.
-
-       "Nyeste" er sorteret efter dato, og det løfte må ikke pyntes: kun de
-       51 annoncer, vi selv hoster, har en oprettelsesdato, og ingen af dem
-       har fået uploadet et foto. Sektionen bliver derfor otte tegnede
-       pladsholdere, og den stod som det første, en køber mødte under folden.
-       Vi kan ikke opfinde fotos, og vi vil ikke blande fremmede annoncer ind
-       i en datorækkefølge for at pynte den. Men rækkefølgen af SEKTIONER er
-       ikke et løfte om noget som helst — så den scanbare sektion, hvor vi
-       selv har valgt kortene (og hvor foto er et kriterium), kommer først.
-       Ingen annonce er skjult, intet tal er ændret. -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <!-- OVERSKRIFTEN ER RETTET TO GANGE, OG DET ER DEN SAMME FEJL BEGGE
-               GANGE: en rubrik, kortene lige nedenunder modbeviser.
-
-               Runde 1: "Kuraterede fund fra hele landet" — udvalget vælges på
-               pris og foto, ikke på geografi.
-               Runde 2: "Udvalgte annoncer / Et udpluk af de dyrere modeller"
-               — men grænsen var 60.000 kr., så det billigste kort stod på
-               62.200 kr., mens sidens eget prisfacet talte 131 annoncer over
-               150.000 kr. Og "Udvalgte" lovede en redaktion, der ikke findes:
-               rækken er en seedet blanding.
-
-               Nu hedder sektionen det, den er, og underrubrikken skrives fra
-               data af js/home.js (bid 7), så den ikke kan blive forældet
-               igen: hvor mange annoncer udvalget er taget fra, hvad
-               prisgrænsen er (medianen i lageret), hvor de kommer fra, og at
-               rækkefølgen er tilfældig. -->
-          <h2>Dyrere modeller</h2>
-          <p id="featured-sub">De dyrere halvdel af lageret — de annoncer, der har et foto.</p>
-        </div>
-      </div>
-      <div class="listings-grid" id="featured-listings"></div>
-    </div>
-  </section>
-
-  <section class="section" style="background:var(--color-surface-2); padding-top:var(--space-8); padding-bottom:var(--space-8);">
+  <!-- Runde 5 (D5-F1a): hele sektionen skjules af js/home.js, naar ingen annonce
+       har en dato (drift: 548 af 548 er indekserede uden createdAt). Ingen dato
+       opfindes; sektionen vender selv tilbage, den dag en annonce har en. -->
+  <section class="section" id="newest-section" style="background:var(--color-surface-2); padding-top:var(--space-8); padding-bottom:var(--space-8);">
     <div class="container">
       <div class="section-head">
         <div>
@@ -424,7 +341,7 @@ try{
       <h2 id="seo-browse-title" class="seo-browse-title">Find brugte motorcykler i hele Danmark</h2>
       <div class="seo-cols">
         <div class="seo-col" id="seo-brands">
-          <h3>Populære mærker</h3>
+          <h3>Mærker med flest annoncer</h3>
           <ul></ul>
         </div>
         <div class="seo-col" id="seo-types">
@@ -485,17 +402,48 @@ try{
   <!-- facet-links:end -->
   </div>
 
-  <section class="section" style="padding-top:0;">
+  <!-- Runde 5 (D5-F5): ÉT saelgerbaand nederst i stedet for to (saelgerbaand
+       midt paa siden + CTA-baand i bunden). 0 af 548 annoncer er oprettet af
+       saelgere hos os — saelgertalen skal ikke staa mellem koeberen og lageret.
+       Priskortet (.sell-band-art) skjules under 820 px: ≈300 px for at sige
+       "0 kr." to gange. -->
+  <section class="section" id="sell-section" style="padding-top:0;">
     <div class="container">
-      <div class="cta-band">
-        <div class="cta-band-copy">
-          <h2>Din motorcykel fortjener den rette køber</h2>
-          <!-- Samme rettelse som de to andre steder på siden: "du bestemmer
-               selv, hvornår" er en sælgerhandling, der ikke findes. Login
-               er gaten, ikke et valg pr. besøgende. -->
-          <p>Opret annoncen på under 5 minutter, og behold hele salgssummen. Din kontaktinfo vises kun for indloggede brugere — ikke for robotter, søgemaskiner eller udloggede besøgende.</p>
+      <div class="sell-band">
+        <div class="sell-band-copy">
+          <span class="sell-band-eyebrow">Sælg din motorcykel</span>
+          <h2>Gratis annonce — set af hele Danmark</h2>
+          <p>Opret på under 5 minutter, og kom i kontakt med købere i hele landet. Ingen kommission, ingen skjulte gebyrer.</p>
+          <ul class="sell-points">
+            <li><span class="sell-check" aria-hidden="true"></span>Helt gratis for private sælgere</li>
+            <!-- "Din kontaktinfo er skjult, indtil du selv deler den" lovede
+                 sælgeren en aktiv handling — et valg pr. henvendelse. Det
+                 findes ikke i koden: der er ingen "del nu"-knap for
+                 sælgeren, kun login-muren, som enhver oprettet bruger kan
+                 gå igennem (se js/annonce.js, saelgerKortHTML()). Rettelsen
+                 lover det, systemet faktisk gør: skjuler nummeret for
+                 udloggede, søgemaskiner og robotter — ikke at sælgeren
+                 styrer det i realtid. -->
+            <li><span class="sell-check" aria-hidden="true"></span>Din kontaktinfo er skjult for udloggede besøgende, søgemaskiner og robotter</li>
+            <li><span class="sell-check" aria-hidden="true"></span>Nå entusiaster, der leder efter netop din model</li>
+          </ul>
+          <div class="sell-band-actions">
+            <a href="opret-annonce.html" class="btn btn-primary btn-lg">Opret annonce</a>
+            <a href="sikkerhed.html" class="btn btn-outline btn-lg">Sådan sælger du trygt</a>
+          </div>
         </div>
-        <a href="opret-annonce.html" class="btn btn-lg cta-band-btn">Opret gratis annonce</a>
+        <div class="sell-band-art">
+          <div class="price-card">
+            <span class="price-card-label">Din pris som privat</span>
+            <div class="price-card-amount">0 kr.</div>
+            <span class="price-card-sub">Gratis annonce · ingen binding</span>
+            <ul class="price-card-list">
+              <li>Ingen kommission af salget</li>
+              <li>Ingen skjulte gebyrer</li>
+              <li>Behold 100% af salgssummen</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -544,20 +492,24 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=8d6ae9a5"></script>
-<script defer src="js/supabase-config.js?v=8d6ae9a5"></script>
-<script defer src="js/supabase-api.js?v=8d6ae9a5"></script>
-<script defer src="js/icons.js?v=8d6ae9a5"></script>
-<script defer src="js/data.js?v=8d6ae9a5"></script>
+<script defer src="js/security.js?v=5834f35a"></script>
+<script defer src="js/supabase-config.js?v=5834f35a"></script>
+<script defer src="js/supabase-api.js?v=5834f35a"></script>
+<script defer src="js/icons.js?v=5834f35a"></script>
+<script defer src="js/data.js?v=5834f35a"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=8d6ae9a5"></script>
-<script defer src="js/store.js?v=8d6ae9a5"></script>
-<script defer src="js/maaling.js?v=8d6ae9a5"></script>
-<script defer src="js/backend-bridge.js?v=8d6ae9a5"></script>
-<script defer src="js/components.js?v=8d6ae9a5"></script>
-<script defer src="js/home.js?v=8d6ae9a5"></script>
+<script defer src="js/filtrering.js?v=5834f35a"></script>
+<!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
+     (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
+     orden. Samme fil som soegning.html og scripts/build-srp.js. -->
+<script defer src="js/sortering.js?v=5834f35a"></script>
+<script defer src="js/store.js?v=5834f35a"></script>
+<script defer src="js/maaling.js?v=5834f35a"></script>
+<script defer src="js/backend-bridge.js?v=5834f35a"></script>
+<script defer src="js/components.js?v=5834f35a"></script>
+<script defer src="js/home.js?v=5834f35a"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

@@ -64,7 +64,7 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="https://assets.guloggratis.dk/images/03e4d2ea-8108-424f-8f06-83a7c9bd1f31/03e4d2ea-8108-424f-8f06-83a7c9bd1f31-320x240.webp" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=8d6ae9a5">
+<link rel="stylesheet" href="css/styles.css?v=5834f35a">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Harley-Davidson","item":"https://bikerbasen.dk/maerke-harley-davidson"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en brugt Harley-Davidson-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"70 af de 72 Harley-Davidson-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 99.400 kr. til 559.900 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 249.645 kr. De resterende 2 annoncer oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre Harley-Davidson på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"Nej, ikke blandt de annoncer, vi kan afgøre — 54 af 54 Harley-Davidson-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de 47 hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle. De resterende 18 annoncer mangler effektoplysningen og vises derfor uden kategori."}},{"@type":"Question","name":"Hvilke Harley-Davidson-modeller kan jeg finde brugt på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 72 Harley-Davidson-annoncer går FLSTC Heritage Softail (5 stk.), FLHTCUSE CVO Electra Glide Ultra (3 stk.), FLTRXS Road Glide Special (3 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Harley-Davidson-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
 </head>
@@ -89,6 +89,9 @@ try{
       </button>
       <a href="login.html" class="btn btn-outline" data-auth-slot><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind</a>
       <a href="opret-annonce.html" class="btn btn-primary header-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Opret annonce</a>
+      <!-- Runde 5 (D5-F7): kontoindgang i mobilheaderen (Bilbasen: profil + hjerte + menu).
+           Temaskiftet er flyttet ned i skuffen paa mobil — en indstilling, ikke en opgave. -->
+      <a href="login.html" class="icon-btn mobile-profile" data-auth-slot-icon aria-label="Log ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg></a>
       <button type="button" class="icon-btn mobile-menu-btn" aria-label="Åbn menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     </div>
   </div>
@@ -102,6 +105,7 @@ try{
     <a href="opret-annonce.html">Opret annonce</a>
     <a href="mine-annoncer.html">Mine annoncer</a>
     <div class="drawer-divider"></div>
+    <button type="button" class="theme-toggle drawer-theme" aria-label="Skift mellem lys og mørk tilstand"><span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span><span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>Lys / mørk tilstand</button>
     <a href="login.html" data-auth-slot-mobile><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind / Opret profil</a>
     <a href="mine-annoncer.html?tab=favoritter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>Gemte annoncer (<span data-fav-count-mobile>0</span>)</a>
   </div>
@@ -2684,21 +2688,21 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=8d6ae9a5"></script>
-<script defer src="js/supabase-config.js?v=8d6ae9a5"></script>
-<script defer src="js/supabase-api.js?v=8d6ae9a5"></script>
-<script defer src="js/icons.js?v=8d6ae9a5"></script>
-<script defer src="js/bike-art.js?v=8d6ae9a5"></script>
+<script defer src="js/security.js?v=5834f35a"></script>
+<script defer src="js/supabase-config.js?v=5834f35a"></script>
+<script defer src="js/supabase-api.js?v=5834f35a"></script>
+<script defer src="js/icons.js?v=5834f35a"></script>
+<script defer src="js/bike-art.js?v=5834f35a"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=8d6ae9a5"></script>
-<script defer src="js/store.js?v=8d6ae9a5"></script>
-<script defer src="js/maaling.js?v=8d6ae9a5"></script>
-<script defer src="js/backend-bridge.js?v=8d6ae9a5"></script>
-<script defer src="js/components.js?v=8d6ae9a5"></script>
-<script defer src="js/maerke.js?v=8d6ae9a5"></script>
+<script defer src="js/data.js?v=5834f35a"></script>
+<script defer src="js/store.js?v=5834f35a"></script>
+<script defer src="js/maaling.js?v=5834f35a"></script>
+<script defer src="js/backend-bridge.js?v=5834f35a"></script>
+<script defer src="js/components.js?v=5834f35a"></script>
+<script defer src="js/maerke.js?v=5834f35a"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">
