@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const password = document.getElementById('reg-password').value;
     const btn = e.target.querySelector('button[type="submit"]');
 
-    if (!phone){ authError('Udfyld venligst telefonnummer.'); return; }
+    // O1-5: telefonnummer er valgfrit — det vises ikke for nogen endnu.
     let cvr = '', company = '';
     if (isDealer){
       cvr = document.getElementById('reg-cvr').value.trim();

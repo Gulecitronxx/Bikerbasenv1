@@ -2776,6 +2776,20 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-intro strong{ color: var(--color-fg); }
 .brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
 .brand-sub{ font-size:19px; margin-bottom: var(--space-4); }
+/* O1 (opret-annonce, runde 1) */
+.valgfri-fold{ margin-top:28px; border:1px solid var(--color-border); border-radius: var(--radius-md); padding:0 16px 4px; }
+.valgfri-fold > summary{ cursor:pointer; padding:14px 0; font-weight:600; font-size:15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; list-style:none; }
+.valgfri-fold > summary::-webkit-details-marker{ display:none; }
+.valgfri-fold > summary::before{ content:'▸'; color: var(--color-fg-muted); }
+.valgfri-fold[open] > summary::before{ content:'▾'; }
+.valgfri-tag{ font-size:12px; font-weight:500; color: var(--color-fg-muted); background: var(--color-surface-2); border-radius:999px; padding:3px 10px; }
+.naa-koebere{ margin-top:20px; border:1px solid var(--color-border); border-left:3px solid var(--color-primary); border-radius: var(--radius-sm); padding:14px 16px; background: var(--color-surface); }
+.naa-koebere h3{ font-size:15px; margin:0 0 8px; }
+.naa-koebere ul{ margin:0; padding-left:18px; font-size:14px; color: var(--color-fg-muted); line-height:1.6; }
+/* O1-13: bekraeftelsen i trin 4 er en bekraeftelse, ikke en fodnote. */
+.checkbox-inline input{ width:20px; height:20px; }
+.checkbox-inline label{ font-size:14px; color: var(--color-fg); }
+
 /* Runde 7 (D7-M3/M4): fold paa indledningen, luft over h2'er, "se alle"-knap. */
 .brand-intro-mere{ margin-top:8px; }
 .brand-intro-mere summary{ cursor:pointer; color: var(--color-primary); font-weight:500; font-size:14px; }

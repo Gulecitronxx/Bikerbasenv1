@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Log ind — Bikerbasen">
 <meta name="twitter:description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -88,7 +88,7 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=a53f54ac">
+<link rel="stylesheet" href="css/styles.css?v=5ab8e7d0">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -142,8 +142,10 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
       <p class="auth-hero-lead">Opret en gratis profil, og få adgang til hele Bikerbasen.</p>
       <ul class="auth-hero-benefits" id="auth-hero-benefits">
         <li><span data-benefit="heart"></span>Gem dine favoritannoncer ét sted</li>
-        <li><span data-benefit="bell"></span>Få besked når nye annoncer matcher din søgning</li>
-        <li><span data-benefit="mail"></span>Skriv direkte til sælgere</li>
+        <!-- O1-3: to loefter holdt ikke: mails sendes ikke for indekserede annoncer
+             (D7-S1), og der findes ingen beskedlevering. Kun det, der sker. -->
+        <li><span data-benefit="bell"></span>Gem en søgning, og se hvor mange nye annoncer der er kommet</li>
+        <li><span data-benefit="mail"></span>Se sælgerens navn, og markér at du vil i kontakt</li>
         <li><span data-benefit="plus"></span>Opret dine egne annoncer — gratis for private</li>
       </ul>
     </aside>
@@ -151,7 +153,7 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
     <div class="auth-card">
       <div style="text-align:center; margin-bottom:20px;">
         <h1 style="font-size:22px;" id="auth-title">Velkommen til Bikerbasen</h1>
-        <p style="color:var(--color-fg-muted); font-size:14px; margin-top:6px;" id="auth-subtitle">Log ind for at gemme annoncer, sende beskeder og oprette dine egne annoncer.</p>
+        <p style="color:var(--color-fg-muted); font-size:14px; margin-top:6px;" id="auth-subtitle">Log ind for at gemme annoncer og oprette dine egne annoncer.</p>
       </div>
 
       <div class="auth-tabs">
@@ -220,9 +222,12 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
             <input class="input" id="reg-email" type="email" required autocomplete="email">
           </div>
           <div class="field field-full">
-            <label for="reg-phone">Telefonnummer <span class="required-mark">*</span></label>
-            <input class="input" id="reg-phone" type="tel" required autocomplete="tel" placeholder="12 34 56 78">
-            <span class="field-hint">Ikke SMS-bekræftet (den funktion er ikke sat op endnu) — bruges til at kontakte dig om dine annoncer.</span>
+            <!-- O1-5: nummeret var PAAKRAEVET, men public_profiles udstiller det
+                 ikke — ingen koeber, ingen support har nogensinde brugt det.
+                 En obligatorisk personoplysning uden et formaal, den opfylder. -->
+            <label for="reg-phone">Telefonnummer</label>
+            <input class="input" id="reg-phone" type="tel" autocomplete="tel" placeholder="12 34 56 78">
+            <span class="field-hint">Valgfrit. Vises ikke for købere endnu — vil du kontaktes på telefon, så skriv det i annoncens beskrivelse.</span>
           </div>
           <div class="field field-full">
             <label for="reg-password">Adgangskode <span class="required-mark">*</span></label>
@@ -244,9 +249,7 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
               </div>
             </div>
           </div>
-          <div class="field field-full">
-            <label class="checkbox-row" style="min-height:auto;"><input type="checkbox" id="reg-captcha" required>Jeg er ikke en robot</label>
-          </div>
+          <!-- O1-8: "Jeg er ikke en robot"-checkboxen er fjernet — den stoppede ingen robot. -->
         </div>
         <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">Fortsæt</button>
       </form>
@@ -330,21 +333,21 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
   </div>
 </footer>
 
-<script defer src="js/security.js?v=a53f54ac"></script>
-<script defer src="js/vendor/supabase.js?v=a53f54ac"></script>
-<script defer src="js/supabase-config.js?v=a53f54ac"></script>
-<script defer src="js/supabase-api.js?v=a53f54ac"></script>
-<script defer src="js/icons.js?v=a53f54ac"></script>
+<script defer src="js/security.js?v=5ab8e7d0"></script>
+<script defer src="js/vendor/supabase.js?v=5ab8e7d0"></script>
+<script defer src="js/supabase-config.js?v=5ab8e7d0"></script>
+<script defer src="js/supabase-api.js?v=5ab8e7d0"></script>
+<script defer src="js/icons.js?v=5ab8e7d0"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk. findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og login/opret-profil har
      intet postnummerfelt (det ligger på opret-annonce.html:256). Den lå i
      samme download-kø som fontene og css'en og forsinkede første maling. -->
-<script defer src="js/data.js?v=a53f54ac"></script>
-<script defer src="js/store.js?v=a53f54ac"></script>
-<script defer src="js/maaling.js?v=a53f54ac"></script>
-<script defer src="js/backend-bridge.js?v=a53f54ac"></script>
-<script defer src="js/components.js?v=a53f54ac"></script>
-<script defer src="js/login.js?v=a53f54ac"></script>
+<script defer src="js/data.js?v=5ab8e7d0"></script>
+<script defer src="js/store.js?v=5ab8e7d0"></script>
+<script defer src="js/maaling.js?v=5ab8e7d0"></script>
+<script defer src="js/backend-bridge.js?v=5ab8e7d0"></script>
+<script defer src="js/components.js?v=5ab8e7d0"></script>
+<script defer src="js/login.js?v=5ab8e7d0"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

@@ -1,7 +1,7 @@
 const STEP_LABELS = ['Type & specs', 'Pris & beskrivelse', 'Billeder', 'Gennemse'];
 let currentStep = 1;
 let uploadedPhotos = []; // { url, name }
-let uploadedDocs = []; // { url, name }
+/* O1-4: dokumentupload fjernet — filerne blev aldrig uploadet eller vist. */
 let formData = {};
 /* Sat når siden åbnes som ?rediger=<id>. Så gemmer formularen oven i den
    eksisterende annonce i stedet for at oprette en ny. */
@@ -45,7 +45,7 @@ function renderStepper(){
     const n = i + 1;
     const cls = n === currentStep ? 'active' : (n < currentStep ? 'done' : '');
     return `
-    <div class="step-item ${cls}">
+    <div class="step-item ${cls}" title="Trin ${n}: ${label}" aria-label="Trin ${n}: ${label}${n === currentStep ? ' (nuværende)' : ''}">
       <span class="step-dot">${n < currentStep ? '' : n}</span>
       <span class="step-label">${label}</span>
     </div>
@@ -55,6 +55,13 @@ function renderStepper(){
 }
 
 function goToStep(n){
+  /* O1-9: kladden gemmes ved HVERT trinskift, ikke kun naar man selv trykker
+     "Gem kladde" — det er trinskiftet, folk mister arbejde paa. Kun fremad/
+     tilbage efter foerste tegning (ellers overskrives en gendannet kladde af
+     en tom formular ved init). */
+  if (typeof collectFormData === 'function' && currentStep !== n && !editingId){
+    try { Store.saveDraft('form', collectFormData()); } catch (e) { /* aldrig blokere et trinskift */ }
+  }
   currentStep = n;
   document.querySelectorAll('.form-step').forEach(s => s.hidden = Number(s.dataset.step) !== n);
   renderStepper();
@@ -63,6 +70,10 @@ function goToStep(n){
     n === STEP_LABELS.length ? (editingId ? 'Gem ændringer' : 'Udgiv annonce') : 'Fortsæt';
   if (n === STEP_LABELS.length) renderPreview();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  /* O1-12: fokus paa trinnets overskrift — ellers staar en skaermlaeser stadig
+     paa "Fortsaet" uden at faa at vide, at siden skiftede. */
+  const h2 = document.querySelector(`.form-step[data-step="${n}"] h2`);
+  if (h2){ h2.setAttribute('tabindex', '-1'); setTimeout(() => { try { h2.focus({ preventScroll: true }); } catch (e) {} }, 250); }
 }
 
 function updateEqCounts(){
@@ -115,11 +126,8 @@ function validateStep(n){
      dér: man havde lige skrevet hele annoncen færdig og fik at vide, at man
      skulle udfylde noget. Sig hvad der mangler. */
   if (n === 4){
-    const vilkaar = document.getElementById('f-terms');
-    const robot = document.getElementById('f-captcha');
-    if (!vilkaar.checked && !robot.checked) msg = 'Accepter vilkårene og bekræft, at du ikke er en robot';
-    else if (!vilkaar.checked) msg = 'Du skal acceptere vilkårene for annoncering';
-    else if (!robot.checked) msg = 'Bekræft, at du ikke er en robot';
+    // O1-8: robot-checkboxen er fjernet — den var en kontrol af udseende, ikke af noget.
+    if (!document.getElementById('f-terms').checked) msg = 'Du skal acceptere vilkårene for annoncering';
   }
   if (n === 2){
     bound('f-price', v => v > 0 && v <= 2000000, 'Angiv en realistisk pris');
@@ -207,7 +215,6 @@ function populateStaticFields(){
   });
 
   document.getElementById('upload-icon-mount').innerHTML = Icon.upload;
-  document.getElementById('doc-upload-icon-mount').innerHTML = Icon.upload;
   document.getElementById('back-icon').innerHTML = Icon.chevronLeft;
 }
 
@@ -333,9 +340,20 @@ function handleFiles(files){
   const medtaget = billeder.slice(0, plads);
   const forMange = billeder.length - medtaget.length;
 
+  /* O1-11: HEIC (og andet, browseren ikke kan afkode) fejlede foerst EFTER
+     "Udgiv" — annoncen var oprettet og fotoloes, foer saelgeren fik det at
+     vide. Nu proeves afkodningen ved valget: det, der ikke kan laeses her,
+     kan heller ikke uploades, og saa skal det siges NU, hvor det kan rettes. */
   medtaget.forEach(file => {
-    // Selve File-objektet gemmes, så det kan uploades ved udgivelse.
-    uploadedPhotos.push({ url: URL.createObjectURL(file), name: file.name, file });
+    const post = { url: URL.createObjectURL(file), name: file.name, file };
+    uploadedPhotos.push(post);
+    if (window.createImageBitmap){
+      createImageBitmap(file).then(b => b.close()).catch(() => {
+        const i = uploadedPhotos.indexOf(post);
+        if (i !== -1){ uploadedPhotos.splice(i, 1); renderPhotoGrid(); }
+        toast(`"${file.name}" kan ikke læses af din browser (HEIC fra iPhone virker ikke alle steder). Gem billedet som JPEG, og prøv igen.`, { type: 'error' });
+      });
+    }
   });
   renderPhotoGrid();
 
@@ -345,49 +363,8 @@ function handleFiles(files){
   if (dele.length) toast(dele.join('. ') + '.', { type: 'error' });
 }
 
-function wireDocUpload(){
-  const zone = document.getElementById('doc-upload-zone');
-  const input = document.getElementById('doc-input');
-  zone.addEventListener('click', () => input.click());
-  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-  zone.addEventListener('drop', (e) => {
-    e.preventDefault(); zone.classList.remove('dragover');
-    handleDocFiles(e.dataTransfer.files);
-  });
-  input.addEventListener('change', () => handleDocFiles(input.files));
-}
+/* O1-4: wireDocUpload/handleDocFiles/renderDocGrid er fjernet sammen med feltet. */
 
-/* Samme regel som for billederne: det, der ikke kom med, skal siges.
-   Her afvises ingen filtyper — feltet tager både billeder og PDF — så det
-   eneste, der kan falde på gulvet, er antallet. */
-function handleDocFiles(files){
-  const valgte = Array.from(files);
-  const plads = Math.max(0, MAX_DOKUMENTER - uploadedDocs.length);
-  const medtaget = valgte.slice(0, plads);
-  const forMange = valgte.length - medtaget.length;
-
-  medtaget.forEach(file => {
-    uploadedDocs.push({ url: erBilledfil(file) ? URL.createObjectURL(file) : null, name: file.name });
-  });
-  renderDocGrid();
-
-  if (forMange){
-    toast(`${forMange} fil${forMange === 1 ? '' : 'er'} kom ikke med — der er plads til ${MAX_DOKUMENTER} dokumenter i alt.`, { type: 'error' });
-  }
-}
-
-function renderDocGrid(){
-  const grid = document.getElementById('doc-grid');
-  grid.innerHTML = uploadedDocs.map((d, i) => `
-    <div class="photo-thumb" style="${d.url ? '' : 'display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px; padding:8px;'}">
-      ${d.url ? `<img src="${d.url}" alt="${escapeHTML(d.name)}">` : `${Icon.info}<span style="font-size:11px; text-align:center; word-break:break-all; color:var(--color-fg-muted);">${escapeHTML(d.name)}</span>`}
-      <button type="button" class="remove-photo" data-remove-doc="${i}" aria-label="Fjern dokument">${Icon.close}</button>
-    </div>`).join('');
-  grid.querySelectorAll('[data-remove-doc]').forEach(btn => {
-    btn.addEventListener('click', () => { uploadedDocs.splice(Number(btn.dataset.removeDoc), 1); renderDocGrid(); });
-  });
-}
 
 /* Flyt et uploadet billede i rækkefølgen (bestemmer forsidebilledet). */
 function movePhoto(from, to){
@@ -485,9 +462,11 @@ function renderPhotoGrid(){
   const ialt = existingPhotos.length + uploadedPhotos.length;
   const hint = document.getElementById('photo-hint');
   if (!ialt){
+    /* O1-7: "bliver set markant oftere" var en adfaerdspaastand uden egne data
+       (0 egne annoncer i drift). Sig det, saelgeren selv kan efterproeve. */
     hint.textContent = editingId
-      ? 'Annoncen har ingen billeder. Annoncer med billeder bliver set markant oftere.'
-      : 'Ingen billeder valgt endnu — annoncer med billeder bliver set markant oftere.';
+      ? 'Annoncen har ingen billeder — dit kort står som "Ingen fotos i denne annonce" i søgningen.'
+      : 'Ingen billeder valgt endnu — uden foto står dit kort som "Ingen fotos i denne annonce" i søgningen.';
   } else {
     const dele = [];
     if (existingPhotos.length) dele.push(`${existingPhotos.length} på annoncen`);
@@ -528,7 +507,6 @@ function collectFormData(){
     city: document.getElementById('f-city').value,
     region: document.getElementById('f-region').value,
     description: document.getElementById('f-desc').value,
-    hasDocumentation: uploadedDocs.length > 0,
   };
 }
 
@@ -636,12 +614,12 @@ function manglerListe(data){
   const beskrivelse = (data.description || '').trim();
   const punkter = [];
 
-  if (antalFotos === 0) punkter.push('Du har ingen billeder endnu — annoncer uden billeder bliver næsten aldrig klikket på.');
-  else if (antalFotos < 5) punkter.push(`Du har ${antalFotos} billede${antalFotos === 1 ? '' : 'r'} — annoncer med mindst 5 billeder får typisk flere henvendelser.`);
+  if (antalFotos === 0) punkter.push('Du har ingen billeder endnu — dit kort står som "Ingen fotos i denne annonce" i søgningen.');
+  else if (antalFotos < 5) punkter.push(`Du har ${antalFotos} billede${antalFotos === 1 ? '' : 'r'} — der er plads til ${MAX_FOTOS}.`);
 
   if (!data.power) punkter.push('Effekt (hk) er ikke udfyldt — uden den kan vi ikke vise, om motorcyklen kan køres på et A2-kørekort.');
   if (!data.sidsteSyn && !/\bsyn(et)?\b/i.test(beskrivelse)) punkter.push('Sidste syn er ikke oplyst — det er tit et af de første spørgsmål, en køber stiller.');
-  if (!data.antalEjere && !/\bejer/i.test(beskrivelse)) punkter.push('Antal ejere er ikke udfyldt — mange købere lægger vægt på ejerhistorik.');
+  if (!data.antalEjere && !/\bejer/i.test(beskrivelse)) punkter.push('Antal ejere er ikke udfyldt — så står der "Ikke oplyst" på annoncen.');
   if (!data.serviceHistorik && !/service/i.test(beskrivelse)) punkter.push('Servicehistorik er ikke valgt.');
   if (beskrivelse.length < 40) punkter.push('Beskrivelsen er meget kort — uddyb gerne stand, historik og evt. hvorfor du sælger.');
   if (!(data.equipment || []).length) punkter.push('Du har ikke sat kryds ved noget udstyr — selv basalt som ABS er noget mange filtrerer på.');
@@ -826,8 +804,8 @@ function visForhandlerGraense(antal){
 }
 
 async function publishListing(){
-  if (!document.getElementById('f-terms').checked || !document.getElementById('f-captcha').checked){
-    toast('Bekræft venligst vilkår og robot-tjek for at udgive annoncen');
+  if (!document.getElementById('f-terms').checked){
+    toast('Du skal acceptere vilkårene for at udgive annoncen');
     return;
   }
   const nextBtn = document.getElementById('step-next');
@@ -851,7 +829,8 @@ async function publishListing(){
   /* ---- Med backend: skriv til databasen ---- */
   const user = await db.currentUser();
   if (!user){
-    toast('Du skal være logget ind for at udgive en annonce');
+    Store.saveDraft('form', collectFormData());   // O1-1/O1-9: intet maa gaa tabt paa vejen over login
+    toast('Log ind for at udgive — din kladde er gemt på denne enhed.');
     setTimeout(() => { window.location.href = 'login.html?redirect=opret-annonce.html'; }, 1200);
     return;
   }
@@ -860,7 +839,7 @@ async function publishListing(){
   // (trigger), men vi tjekker først for at give en venlig besked frem for en
   // rå databasefejl. Gælder kun nye annoncer, ikke redigering.
   // Springes over, mens FRI_ADGANG er slået til.
-  if (!FRI_ADGANG && !editingId && (Store.getUser()?.plan || 'free') !== 'dealer'){
+  if (!FRI_ADGANG && !editingId && Store.getUser()?.remote && (Store.getUser()?.plan || 'free') !== 'dealer'){
     const antal = await db.myActiveListingCount();
     if (antal >= 3){
       visForhandlerGraense(antal);
@@ -1028,9 +1007,15 @@ function startEditing(id){
 document.addEventListener('DOMContentLoaded', async () => {
   await backendReady();
 
-  // Med rigtig backend skal annoncen knyttes til en bruger.
-  if (db.enabled && !Store.getUser()?.remote){
-    // Tag ?rediger= med over login, ellers lander man på en tom ny annonce.
+  /* O1-1: login-muren ved indlaesning er VAEK. Bilbasen moeder saelgeren med en
+     landingsside og ét felt; vi moedte ham med fire registreringsfelter foer
+     det foerste motorcykelfelt. Trin 1–2 er aabne for alle (intet skrives foer
+     "Udgiv"); kladden autosaves lokalt ved hvert trinskift, og login kraeves
+     foerst ved overgangen til billederne (trin 3) — kladden overlever
+     omvejen, billeder kan ikke (blob-URL'er). ?rediger= kraever stadig login
+     med det samme: man kan ikke redigere en annonce, man ikke ejer. */
+  const kraeverLogin = () => db.enabled && !Store.getUser()?.remote;
+  if (kraeverLogin() && new URLSearchParams(window.location.search).get('rediger')){
     const tilbage = 'opret-annonce.html' + window.location.search;
     window.location.replace('login.html?redirect=' + encodeURIComponent(tilbage));
     return;
@@ -1040,8 +1025,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   populateStaticFields();
   wirePhotoUpload();
   renderPhotoGrid();
-  wireDocUpload();
-  renderDocGrid();
   wireSeoAssist();
 
   const redigerId = new URLSearchParams(window.location.search).get('rediger');
@@ -1051,12 +1034,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
   } else if (restoreDraft()){
-    toast('Din gemte kladde er hentet frem');
+    toast('Din kladde er hentet frem — billeder skal vælges igen.');
   }
   goToStep(1);
 
   document.getElementById('step-next').addEventListener('click', () => {
     if (!validateStep(currentStep)) return;
+    /* O1-1: login-gaten ligger HER — efter at motorcyklen og prisen er skrevet,
+       foer billederne. Kladden gemmes foerst, saa intet gaar tabt. */
+    if (currentStep === 2 && kraeverLogin()){
+      Store.saveDraft('form', collectFormData());
+      toast('Din kladde er gemt på denne enhed — log ind, så fortsætter du med billederne.');
+      setTimeout(() => { window.location.href = 'login.html?redirect=' + encodeURIComponent('opret-annonce.html'); }, 1400);
+      return;
+    }
     if (currentStep < STEP_LABELS.length) goToStep(currentStep + 1);
     else publishListing();
   });
@@ -1065,6 +1056,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('save-draft').addEventListener('click', () => {
     Store.saveDraft('form', collectFormData());
-    toast('Kladde gemt');
+    // O1-9: sig HVOR den er gemt — det er en lokal kladde, ikke konto-synk, og billeder er ikke med.
+    toast('Kladde gemt på denne enhed (uden billeder). Den hentes frem, næste gang du åbner siden.');
   });
 });

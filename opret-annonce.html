@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>Opret annonce — Bikerbasen</title>
-<meta name="description" content="Opret en annonce for din motorcykel på Bikerbasen på under 5 minutter — gratis for private sælgere.">
+<title>Sælg din motorcykel — gratis annonce for private — Bikerbasen</title>
+<meta name="description" content="Opret en annonce for din motorcykel på Bikerbasen — gratis for private. Fire trin, kladde undervejs, og kontaktoplysninger vises kun for indloggede.">
 <!-- meta:start (genereret af scripts/build-meta.js) -->
 <link rel="canonical" href="https://bikerbasen.dk/opret-annonce">
 <meta name="theme-color" content="#C6420E" media="(prefers-color-scheme: light)">
@@ -15,17 +15,17 @@
 <meta property="og:site_name" content="Bikerbasen">
 <meta property="og:locale" content="da_DK">
 <meta property="og:url" content="https://bikerbasen.dk/opret-annonce">
-<meta property="og:title" content="Opret annonce — Bikerbasen">
-<meta property="og:description" content="Opret en annonce for din motorcykel på Bikerbasen på under 5 minutter — gratis for private sælgere.">
+<meta property="og:title" content="Sælg din motorcykel — gratis annonce for private — Bikerbasen">
+<meta property="og:description" content="Opret en annonce for din motorcykel på Bikerbasen — gratis for private. Fire trin, kladde undervejs, og kontaktoplysninger vises kun for indloggede.">
 <meta property="og:image" content="https://bikerbasen.dk/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Bikerbasen — køb og sælg brugte motorcykler i Danmark">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Opret annonce — Bikerbasen">
-<meta name="twitter:description" content="Opret en annonce for din motorcykel på Bikerbasen på under 5 minutter — gratis for private sælgere.">
+<meta name="twitter:title" content="Sælg din motorcykel — gratis annonce for private — Bikerbasen">
+<meta name="twitter:description" content="Opret en annonce for din motorcykel på Bikerbasen — gratis for private. Fire trin, kladde undervejs, og kontaktoplysninger vises kun for indloggede.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -73,7 +73,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=a53f54ac">
+<link rel="stylesheet" href="css/styles.css?v=5ab8e7d0">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -122,7 +122,9 @@ try{
   <div class="container" style="max-width:760px;">
     <div class="page-title-bar">
       <h1>Opret annonce</h1>
-      <p>Udfyld oplysningerne om din motorcykel — det tager under 5 minutter.</p>
+      <!-- O1-2: "det tager under 5 minutter" var en tidspaastand uden maaling —
+           samme fejl som D6-F2 fjernede fra forsiden. Sig hvad flowet ER. -->
+      <p>Fire trin: motorcyklen, pris og beskrivelse, billeder, gennemse. Gratis for private — og du kan gemme en kladde undervejs.</p>
     </div>
 
     <div class="stepper" id="stepper"></div>
@@ -206,7 +208,12 @@ try{
           </div>
         </div>
 
-        <h2 style="margin:28px 0 4px;">Historik</h2>
+        <!-- O1-10: trin 1 var 4 160 px paa mobil, og de 1 800 px VALGFRI felter
+             laa mellem de obligatoriske og "Fortsaet". Historik + udstyr bor nu
+             bag én fold — stadig samme felter, samme navne, intet fjernet. -->
+        <details class="valgfri-fold" id="valgfri-fold">
+          <summary>Flere oplysninger — historik og udstyr <span class="valgfri-tag">valgfrit, men godt for køberen</span></summary>
+        <h2 style="margin:16px 0 4px;">Historik</h2>
         <p class="field-hint" style="margin-bottom:16px;">Historik er det, seriøse købere kigger efter. Udfyld det, du kan stå inde for.</p>
         <div class="form-grid cols-3">
           <div class="field">
@@ -243,6 +250,7 @@ try{
         <h2 style="margin:28px 0 4px;">Udstyr</h2>
         <p class="field-hint" style="margin-bottom:16px;">Sæt kryds ved det motorcyklen har. Købere filtrerer på det her — jo flere du udfylder, jo flere søgninger dukker din annonce op i.</p>
         <div id="equipment-groups"></div>
+        </details>
       </section>
 
       <!-- Step 2: Price, condition, location, description -->
@@ -314,17 +322,14 @@ try{
              hele sitet, og en annonce uden foto står nu med "Ingen fotos i
              denne annonce". Løftet fjernede desuden sælgerens eneste grund
              til at uploade. -->
-        <p class="field-hint" id="photo-hint" style="margin-top:12px;">Ingen billeder valgt endnu — annoncer med billeder bliver set markant oftere.</p>
+        <p class="field-hint" id="photo-hint" style="margin-top:12px;">Ingen billeder valgt endnu — uden foto står dit kort som "Ingen fotos i denne annonce" i søgningen.</p>
         <p class="field-hint" style="margin-top:6px;">Tip: Undgå billeder hvor nummerplade eller husnummer er tydeligt, hvis du vil beskytte din lokation.</p>
 
-        <h2 style="margin:32px 0 16px;">Servicehistorik & dokumentation (valgfrit)</h2>
-        <div class="upload-zone" id="doc-upload-zone">
-          <input type="file" id="doc-input" accept="image/*,.pdf" multiple hidden>
-          <div id="doc-upload-icon-mount"></div>
-          <h3>Upload servicehæfte, fakturaer eller synsrapport</h3>
-          <p>Billeder eller PDF — giver købere mere tillid til annoncen.</p>
-        </div>
-        <div class="photo-grid" id="doc-grid"></div>
+        <!-- O1-4: dokumentupload er FJERNET — filerne blev vist i et gitter og
+             derefter smidt vaek ved "Udgiv" (ingen kolonne, ingen upload, ingen
+             visning). En funktion, der lover tillid og leverer et hul. Kommer
+             der en bucket + tabel + visning, kommer feltet igen. -->
+        <p class="field-hint" style="margin-top:24px;">Har du servicehæfte, fakturaer eller synsrapport, så nævn det i beskrivelsen — købere spørger efter det, og du kan vise papirerne ved fremvisningen.</p>
       </section>
 
       <!-- Step 4: Preview -->
@@ -339,14 +344,24 @@ try{
           <div class="listings-grid" id="preview-card-mount" style="grid-template-columns:1fr;"></div>
         </div>
         <div id="preview-details"></div>
+        <!-- O1-6: flowet sagde aldrig, hvordan en koeber naar saelgeren. Sig det
+             SANDE foer udgivelsen — ikke bagefter, naar en koeber ikke kom igennem. -->
+        <div class="naa-koebere" id="naa-koebere">
+          <h3>Sådan når købere dig</h3>
+          <ul>
+            <li>Din annonce står i søgningen sammen med alle indekserede annoncer.</li>
+            <li>Indloggede købere kan se dit navn og markere, at de vil i kontakt — du ser antallet under Mine annoncer.</li>
+            <li>Vi videresender ikke beskeder eller viser dit telefonnummer endnu — skriv derfor gerne i beskrivelsen, hvordan du vil kontaktes (f.eks. "ring mellem 16 og 20").</li>
+          </ul>
+        </div>
         <div class="checkbox-inline" style="margin-top:16px;">
           <input type="checkbox" id="f-terms" required>
           <label for="f-terms">Jeg bekræfter, at oplysningerne og billederne er retvisende, og at jeg accepterer Bikerbasens <a href="vilkaar.html" target="_blank">vilkår</a> for annoncering.</label>
         </div>
-        <div class="checkbox-inline" style="margin-top:10px;">
-          <input type="checkbox" id="f-captcha" required>
-          <label for="f-captcha">Jeg er ikke en robot</label>
-        </div>
+        <!-- O1-8: "Jeg er ikke en robot" var en almindelig checkbox — ingen
+             udfordring, intet token. Den lignede en kontrol uden at vaere én
+             (samme fejl som et badge uden verificering) og kostede hvert salg
+             et klik. En RIGTIG kontrol (Turnstile, A3) kan komme ind her. -->
       </section>
 
       <div class="form-actions">
@@ -403,18 +418,18 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=a53f54ac"></script>
-<script defer src="js/vendor/supabase.js?v=a53f54ac"></script>
-<script defer src="js/supabase-config.js?v=a53f54ac"></script>
-<script defer src="js/supabase-api.js?v=a53f54ac"></script>
-<script defer src="js/icons.js?v=a53f54ac"></script>
-<script defer src="js/postnumre.js?v=a53f54ac"></script>
-<script defer src="js/data.js?v=a53f54ac"></script>
-<script defer src="js/store.js?v=a53f54ac"></script>
-<script defer src="js/maaling.js?v=a53f54ac"></script>
-<script defer src="js/backend-bridge.js?v=a53f54ac"></script>
-<script defer src="js/components.js?v=a53f54ac"></script>
-<script defer src="js/opret-annonce.js?v=a53f54ac"></script>
+<script defer src="js/security.js?v=5ab8e7d0"></script>
+<script defer src="js/vendor/supabase.js?v=5ab8e7d0"></script>
+<script defer src="js/supabase-config.js?v=5ab8e7d0"></script>
+<script defer src="js/supabase-api.js?v=5ab8e7d0"></script>
+<script defer src="js/icons.js?v=5ab8e7d0"></script>
+<script defer src="js/postnumre.js?v=5ab8e7d0"></script>
+<script defer src="js/data.js?v=5ab8e7d0"></script>
+<script defer src="js/store.js?v=5ab8e7d0"></script>
+<script defer src="js/maaling.js?v=5ab8e7d0"></script>
+<script defer src="js/backend-bridge.js?v=5ab8e7d0"></script>
+<script defer src="js/components.js?v=5ab8e7d0"></script>
+<script defer src="js/opret-annonce.js?v=5ab8e7d0"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">
