@@ -395,11 +395,11 @@ function browserModules(){
 
   // js/sortering.js EFTER js/components.js (den bruger koerekortMaerkat) —
   // samme raekkefoelge som <script>-taggene i soegning.html.
-  const src = ['js/data.js', 'js/icons.js', 'js/bike-art.js', 'js/components.js', 'js/sortering.js', 'js/backend-bridge.js']
+  const src = ['js/data.js', 'js/icons.js', 'js/bike-art.js', 'js/components.js', 'js/sortering.js', 'js/filtrering.js', 'js/backend-bridge.js']
     .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n;\n');
 
   return new Function('document', 'Store', 'window', 'db',
-    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter };')(doc, store, {}, db);
+    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering };')(doc, store, {}, db);
 }
 
 module.exports = { ROOT, siteUrl, slugify, listingSlug, fetchListings, fetchExternalListings,

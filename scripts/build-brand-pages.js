@@ -8,7 +8,44 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter } = browserModules();
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering } = browserModules();
+
+/* Runde 8 (D8-M3): maerkesiden tabte blinddommen paa FUNKTION — "Honda paa A2
+   under 60.000" var to klik og et sideskift; hos Bilbasen nul. Uden at bygge
+   sidebjaelken om: statiske, crawlbare facetlinks med tal OVER gitteret.
+   Tallene regnes med soegesidens egen filterkaede (Filtrering.anvendFiltre),
+   saa tallet paa linket ER tallet paa resultatsiden. Links med 0 tegnes ikke
+   (D-009/D-010: et link er en paastand om, at der er noget for enden). */
+function facetLinksFor(brand, items){
+  const q = (ekstra) => `soegning.html?brands=${encodeURIComponent(brand)}&amp;${ekstra}`;
+  const tael = (filtre) => Filtrering.anvendFiltre(items, filtre, null, null).length;
+  const raekker = [];
+
+  const kk = ['A1', 'A2', 'A'].map(k => ({ k, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
+  if (kk.length > 1) raekker.push({ navn: 'Kørekort', links: kk.map(x => ({ tekst: `${x.k} · ${x.n}`, href: q(`koerekort=${x.k}`) })) });
+
+  const pris = [[30000, 'Under 30.000 kr.'], [60000, 'Under 60.000 kr.'], [100000, 'Under 100.000 kr.']]
+    .map(([max, tekst]) => ({ tekst, max, n: tael({ priceMax: max }) })).filter(x => x.n > 0);
+  if (pris.length) raekker.push({ navn: 'Pris', links: pris.map(x => ({ tekst: `${x.tekst.replace(' kr.', '')} · ${x.n}`, href: q(`maxPrice=${x.max}`) })) });
+
+  const typer = [...new Set(items.map(l => l.type).filter(Boolean))]
+    .map(t => ({ t, label: ((global.__T || []).find(x => x.id === t) || {}).label || t, n: tael({ types: [t] }) }))
+    .filter(x => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 6);
+  if (typer.length > 1) raekker.push({ navn: 'Type', links: typer.map(x => ({ tekst: `${esc(x.label)} · ${x.n}`, href: q(`type=${x.t}`) })) });
+
+  // Sortering som links — ingen inline-JS (CSP), og en crawler kan foelge dem.
+  raekker.push({ navn: 'Sortér', links: [
+    { tekst: 'Pris: lav → høj', href: q('sort=price-asc') },
+    { tekst: 'Pris: høj → lav', href: q('sort=price-desc') },
+    { tekst: 'Årgang: nyeste', href: q('sort=year-desc') },
+  ] });
+
+  if (!raekker.length) return '';
+  return `
+      <div class="brand-facetter">
+        ${raekker.map(r => `<div class="brand-facet-raekke"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}">${l.tekst}</a>`).join('\n          ')}</div>`).join('\n        ')}
+      </div>`;
+}
 
 /* Runde 7 (D7-M1): "Brugte Honda" — 165 af 262 Honda er fabriksnye (sidens egen
    eksternErNy()). Ordet "brugte" bruges kun, naar ALLE annoncer er brugte;
@@ -805,6 +842,7 @@ ${header}
         <div><h2 class="brand-sub" id="brand-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} til salg nu${items.length > MAERKE_KORT ? ` — de første ${MAERKE_KORT} her` : ''}</h2></div>
         <a class="section-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Alle ${items.length} i søgningen<span aria-hidden="true"></span></a>
       </div>
+      ${facetLinksFor(brand, items)}
       <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}" data-viste="${MAERKE_KORT}">${kort}</div>
       ${items.length > MAERKE_KORT ? `<p class="brand-mere"><a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Se alle ${items.length} ${esc(brand)} i søgningen</a></p>` : ''}
       <div class="brand-actions">
