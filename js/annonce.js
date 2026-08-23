@@ -823,16 +823,15 @@ function renderExternalListing(listing){
         </p>
       </section>
 
+      <!-- Runde 8 (D8-A3): en h2 "Beskrivelse" over et fravaer lovede en tekst,
+           vi (med rette, regel 2) ikke har. Uden beskrivelse: én linje i
+           "Foer du koerer derhen" i stedet for en tom sektion. -->
+      ${listing.description ? `
       <section class="external-detail-section">
         <h2>Beskrivelse</h2>
-        ${listing.description
-          ? `<blockquote class="external-detail-quote">${escapeHTML(listing.description)}</blockquote>
-             <p class="external-detail-note">Begyndelsen af ${kilde}s egen tekst. Resten står i deres annonce.</p>`
-          : `<p class="external-detail-note">
-               Beskrivelsen, udstyrslisten og de øvrige billeder står i ${kilde}s egen annonce.
-               Teksten er deres, og vi gemmer den ikke her.
-             </p>`}
-      </section>
+        <blockquote class="external-detail-quote">${escapeHTML(listing.description)}</blockquote>
+        <p class="external-detail-note">Begyndelsen af ${kilde}s egen tekst. Resten står i deres annonce.</p>
+      </section>` : ''}
 
       <!-- PRIVAT-ADVARSLEN MANGLEDE HELT PÅ EKSTERNE ANNONCER — RETTET, runde 4.
            Betingelsen stod før som "vis kun noten, når sælgeren ER forhandler",
@@ -861,6 +860,7 @@ function renderExternalListing(listing){
           <li>${Icon.shieldCheck}Tjek pris og oplysninger hos ${kilde}, før du kører — de kan være ændret, siden vi hentede annoncen.</li>
           <li>${Icon.shieldCheck}Se motorcyklen fysisk, og få stelnummeret, før du betaler noget som helst.</li>
           <li>${Icon.shieldCheck}Kørekortkategorien her er vejledende. Er du i tvivl, så få den bekræftet i registreringsattesten.</li>
+          ${listing.description ? '' : `<li>${Icon.info}Beskrivelse, udstyrsliste og flere billeder står i ${kilde}s egen annonce — teksten er deres, og vi gemmer den ikke her.</li>`}
         </ul>
         <p class="external-detail-note"><a href="sikkerhed.html">Læs Bikerbasens sikkerhedsguide</a></p>
       </section>

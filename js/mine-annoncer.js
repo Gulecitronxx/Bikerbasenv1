@@ -183,11 +183,16 @@ function renderAgents(){
   list.innerHTML = agents.map(a => {
     const matches = matchesForSavedSearch(a);
     const since = new Date(a.createdAt).getTime();
-    const fresh = matches.filter(l => new Date(l.createdAt).getTime() > since).length;
+    /* Runde 8 (D8-S3): createdAt er med vilje null paa alle indekserede — saa
+       taltes "nye" aldrig. Det, vi VED, er foerst_set: hvornaar VI saa
+       annoncen foerste gang. Det er praecis det, en gemt soegning skal taelle
+       fra. Etiketten siger det (title). */
+    const setFoerste = l => new Date(l.indekseretFoerste || l.createdAt || 0).getTime();
+    const fresh = matches.filter(l => setFoerste(l) > since).length;
     return `
     <div class="agent-item">
       <div class="agent-info">
-        <div class="agent-label">${escapeHTML(a.label)}${fresh ? `<span class="agent-new">${fresh} ny${fresh === 1 ? '' : 'e'}</span>` : ''}</div>
+        <div class="agent-label">${escapeHTML(a.label)}${fresh ? `<span class="agent-new" title="Set hos kilderne første gang, efter du gemte søgningen">${fresh} ny${fresh === 1 ? '' : 'e'}</span>` : ''}</div>
         <!-- "matches" er engelsk, og søgeagenten tæller præcis det, søgesiden
              tæller — dér hedder det "29 annoncer fundet" (js/search.js).
              Datoen stod desuden som 16.08.2026, mens annoncesiden og

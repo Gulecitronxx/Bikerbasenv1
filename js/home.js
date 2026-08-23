@@ -941,7 +941,17 @@ async function buildForside(){
      udregning ville have valgt. */
   let featured = [];
   const tegnFeatured = async () => {
-    featured = vaelgFeatured(8);
+    /* Runde 8 (D8-F1): loftet "hoejst halvdelen fra samme kilde" blev regnet
+       paa 8 og skaaret til 6 bagefter — paa desktop (3 spalter) blev det 4 af
+       6 fra MC Syd, og underrubrikken var falsk. Antallet regnes nu FOER
+       udvalget, saa loftet gaelder det, der faktisk vises. */
+    const maal = () => {
+      const cols = getComputedStyle(featuredMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+      const kompakt = cols === 2 && window.matchMedia('(max-width:620px)').matches;
+      return { cols, antal: cols >= 4 ? 8 : cols === 3 ? 6 : kompakt ? 8 : 4 };
+    };
+    let { cols, antal } = maal();
+    featured = vaelgFeatured(antal);
     if (!featured.length){ featuredMount.replaceChildren(); skrivFeaturedSub(0); return; }
     /* D2 (23.08.2026): kolonnetallet laeses FOER kortene saettes ind. Foer stod
        laesningen lige efter indsaetningen — en skrivning fulgt af en laesning
@@ -955,14 +965,19 @@ async function buildForside(){
     /* Runde 5 (D5-F1b): 4 paa én og to spalter (mobil/tablet), 6 paa tre,
        8 paa fire — altid hele raekker. Bilbasen viser ≈30 kort; 4 paa mobil er
        ≈1 670 px, og resten af lageret er ét tryk vaek ("Se alle annoncer"). */
-    const cols = getComputedStyle(featuredMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
-    /* Runde 6 (D6-F4): paa mobil er gitteret to spalter med kompakte kort (css
-       #featured-listings paa ≤620) — 8 kort paa ≈1 000 px, hvor 4 fuldbredde-
-       kort var 1 880. Bilbasen: 14 kort i to spalter. */
-    const kompakt = cols === 2 && window.matchMedia('(max-width:620px)').matches;
-    const maks = cols >= 4 ? 8 : cols === 3 ? 6 : kompakt ? 8 : 4;
-    featured = featured.slice(0, Math.min(featured.length, maks));
+    /* (D8-F1: antallet er allerede regnet ovenfor — ingen efterfoelgende trim.) */
     await saetIndIPortioner(featuredMount, featured.map(kortHTML));
+    /* Spalterne kan foerst maales rigtigt, naar kortene ER der: reglen
+       `.listings-grid:has(> .card-external)` (3 spalter ved 1240–1559) gaelder
+       foerst med et eksternt kort i gitteret. Har indsaettelsen aendret
+       spaltetallet, vaelges og tegnes der om én gang — med loftet regnet paa
+       det RIGTIGE antal (det var D8-F1). */
+    const efter = maal();
+    if (efter.antal !== antal){
+      cols = efter.cols; antal = efter.antal;
+      featured = vaelgFeatured(antal);
+      await saetIndIPortioner(featuredMount, featured.map(kortHTML));
+    }
     /* Runde 6 (D6-F1): foerste raekke ligger nu 170–235 px under folden, og
        fuldsideoptagelser viste graa, utegnede fotofelter dér tre runder i
        traek. Foerste raekke hentes derfor med det samme (lazy → eager udloeser
@@ -970,6 +985,7 @@ async function buildForside(){
     featuredMount.querySelectorAll('.card').forEach((c, i) => {
       if (i < cols){ const img = c.querySelector('img.card-photo'); if (img){ img.loading = 'eager'; } }
     });
+    void cols;
     skrivFeaturedSub(featured.length);
     wireFavoriteButtons(featuredMount);
   };

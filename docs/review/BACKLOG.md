@@ -341,6 +341,30 @@ Bikerbasen; mærkeside m+d → Bilbasen klart. Målinger efter:
 
 ---
 
+## Runde 8 — blind kritik efter runde 7 (23.08.2026)
+
+Rapport: [runde-8-kritik.md](runde-8-kritik.md). Blinddom 6–2 til Bikerbasen
+(VDP-mobil op til "klart"; mærkesiden taber stadig). D7: 14 lukket, 5 delvist,
+2 ikke lukket, 1 afvist-accepteret.
+
+| ID | sev | problem | status |
+|---|---|---|---|
+| D8-F1 | **P1** | "Højst halvdelen fra samme kilde" falsk på desktop (loft regnet på 8, skåret til 6) | **rettet** — antal regnes før udvalget + genmåling efter indsættelse (`:has`-fælden). Målt: 4/8 (390), 3/6 (1366) |
+| D8-F2 | **P1** | "Lige nu"-påstande på 3–7 dage gamle data; ingen planlagt crawl | **delvist** — "lige nu" fjernet fra forside/mærkesider/intro; `.github/workflows/crawl.yml` (nat-cron) klar. **Kræver mennesket:** repo-secret `SUPABASE_SERVICE_ROLE_KEY`, så kører den selv |
+| D8-S1 | **P1** | SRP h1/title "Brugte" over ≈172 fabriksnye | **rettet** — "Motorcykler til salg i Danmark", title/description/og uden "brugte", dynamisk overskrift uden "Brugte" |
+| D8-S3 | **P1** | Søgeagenten "tæller nye" talte aldrig (createdAt null) | **rettet** — tæller fra `indekseretFoerste` (først set hos kilderne), etiket forklarer |
+| D8-S2 | **P2** | Sideskift = knapper + replaceState; Tilbage forlod siden | **rettet** — rigtige `<a href>` med filtre i adressen + pushFilterState; åbn-i-ny-fane virker |
+| D8-A1 | **P2** | Delte links lovede "billeder og kontaktoplysninger" | **rettet** — statiske tags, der er sande for alle 541 |
+| D8-M1 | **P2** | Mærkesiden rullede vandret på 390 (knap 422 px) | **rettet** — kortere tekst + wrap; scrollWidth = 390 |
+| D8-F6 | **P3** | "Brugte" i forsidens title/tagline; footer uden om-links | **rettet** — title/tagline omskrevet; "Om Bikerbasen" + "Om indekseringen" i footer på alle 61 sider |
+| D8-F3/F4 | **P3** | Kompakt titel klippet uden ellipse; "Harley-Da…" i chips | **rettet** — to rigtige linjer; minmax(205px) ≥1200 |
+| D8-A3 | **P3** | h2 "Beskrivelse" over et fravær | **rettet** — kun med beskrivelse; ellers linje i "Før du kører derhen" |
+| D8-M5 / D8-S7 | **P3** | Modelchips uden tal; footer-pladsholder 1014 px | **rettet** — "GL 1800 Gold Wing · 18"; 860 px |
+| D8-F5 | **P3** | 454 px flade under footeren (cookie-var i baggrundsfane) | **åben** — kræver sticky-refaktor af banneret; D7-F6's lyttere hjalp ikke i optagelsen |
+| D8-S4/S5, D8-A2, D8-M2/M3/M4 | P2/P3 | Undertitel-slot, model-rest (årstal/cc/småt), kilden ×5 på VDP-mobil, mærkesidens luft + facetlinks med tal | **åbne** — næste runde på mærkesiden er D8-M3 (facetlinks med tal + sortér-select) |
+
+---
+
 ## Lukket
 
 <!-- Verificerede findings flyttes herned med rundenummer, så tabellen ovenfor

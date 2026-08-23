@@ -250,11 +250,13 @@ function introFor(brand, items){
 
   const en = items.length === 1;
   const nye = nyeAf(items);
+  /* Runde 8 (D8-F2/M4): "lige nu" (friskhed, vi ikke kan love) og "til salg
+     paa Bikerbasen" (de er til salg hos kilderne — vi hoster ingen) er ude. */
   const dele = nye
-    ? [`Der er lige nu <strong>${items.length}</strong> ${esc(brand)} ${en ? 'motorcykel' : 'motorcykler'} til salg på Bikerbasen `
+    ? [`Der er <strong>${items.length}</strong> ${esc(brand)} ${en ? 'motorcykel' : 'motorcykler'} til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen `
       + `— <strong>${items.length - nye}</strong> ${items.length - nye === 1 ? 'brugt' : 'brugte'} og <strong>${nye}</strong> ${nye === 1 ? 'fabriksny' : 'fabriksnye'}`]
-    : [`Der er lige nu <strong>${items.length}</strong> ${en ? 'brugt' : 'brugte'} ${esc(brand)} `
-      + `${en ? 'motorcykel' : 'motorcykler'} til salg på Bikerbasen`];
+    : [`Der er <strong>${items.length}</strong> ${en ? 'brugt' : 'brugte'} ${esc(brand)} `
+      + `${en ? 'motorcykel' : 'motorcykler'} til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen`];
 
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
     dele.push(` — fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}`);
@@ -687,9 +689,11 @@ for (const brand of brands){
     const m = String(l.model || '').trim();
     if (m) modelAntal.set(m, (modelAntal.get(m) || 0) + 1);
   }
+  /* Runde 8 (D8-M5): tallet med paa chippen — forsiden og "Andre maerker" har
+     det, og det er forskellen paa et link og en paastand. */
   const allModels = [...modelAntal.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'da'))
-    .slice(0, 12).map(([m]) => m);
+    .slice(0, 12);
 
   const beskrivelse = `Se ${items.length} ${brugtOrd(items)}${brand} `
     + `${items.length === 1 ? 'motorcykel' : 'motorcykler'} til salg i Danmark. `
@@ -792,7 +796,7 @@ ${header}
            fuldstaendighed, den ikke har. Den er en navigationsetiket. -->
       <h2 class="brand-sub">Se ${esc(brand)} efter model</h2>
       <div class="popular-row">
-        ${allModels.map(m => `<a class="popular-chip" href="soegning.html?brands=${encodeURIComponent(brand)}&amp;q=${encodeURIComponent(m)}">${esc(m)}</a>`).join('\n        ')}
+        ${allModels.map(([m, antalM]) => `<a class="popular-chip" href="soegning.html?brands=${encodeURIComponent(brand)}&amp;q=${encodeURIComponent(m)}">${esc(m)} · ${antalM}</a>`).join('\n        ')}
       </div>
     </section>` : ''}
 
@@ -802,7 +806,7 @@ ${header}
         <a class="section-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Alle ${items.length} i søgningen<span aria-hidden="true"></span></a>
       </div>
       <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}" data-viste="${MAERKE_KORT}">${kort}</div>
-      ${items.length > MAERKE_KORT ? `<p class="brand-mere"><a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Se alle ${items.length} ${esc(brand)} i søgningen — med filtre og sortering</a></p>` : ''}
+      ${items.length > MAERKE_KORT ? `<p class="brand-mere"><a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Se alle ${items.length} ${esc(brand)} i søgningen</a></p>` : ''}
       <div class="brand-actions">
         <a href="opret-annonce.html" class="btn btn-outline">Sælg din ${esc(brand)}</a>
       </div>

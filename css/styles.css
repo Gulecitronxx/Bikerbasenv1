@@ -847,8 +847,11 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   #featured-listings .card-external .card-sted,
   #featured-listings .card-external .card-compare{ display:none; }
   #featured-listings .card-external .card-title{ font-size:14px; line-height:1.3; }
-  /* Runde 7 (D7-F4): to linjer — modellen er det, koeberen leder efter. */
-  #featured-listings .card-external .card-title-main{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:normal; }
+  /* Runde 7 (D7-F4) + Runde 8 (D8-F3): to RIGTIGE linjer — hoejden fulgte den
+     gamle enlinjes-regel (24 px), saa klippet skete uden ellipse og med en tom
+     linje under. */
+  #featured-listings .card-external .card-title-main{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:normal; height:auto; max-height:36px; line-height:18px; }
+  #featured-listings .card-external .card-title{ height:auto; min-height:36px; }
   #featured-listings .card-external .card-specs{ height:auto; max-height:46px; flex-wrap:wrap; gap:4px; }
   #featured-listings .card-external .card-spec dd{ font-size:11px; padding:2px 6px; line-height:16px; }
   #featured-listings .card-external .card-koerekort{ font-size:11px; padding:1px 6px; }
@@ -2797,6 +2800,9 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-sub:not(:first-child){ margin-top: var(--space-6); }
 .section-head .brand-sub{ margin-top:0; }
 .brand-mere{ margin: var(--space-5) 0 0; }
+/* Runde 8 (D8-M1): knappen var 422 px bred paa en 390 px skaerm — hele siden
+   kunne trækkes sidelaens. Teksten er kortet i byggetrinnet; det her er baeltet. */
+.brand-mere .btn{ white-space:normal; text-align:center; max-width:100%; line-height:1.35; }
 .brand-hero .brand-intro{ max-width:60ch; }
 
 .brand-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
@@ -2821,6 +2827,9 @@ body.overlay-open .cookie-banner{ display:none; }
    én linje, og spalterne er brede nok til det (auto-fill). */
 .brand-cloud{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: var(--space-3); }
 @media (min-width:1024px){ .brand-cloud{ grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); } }
+/* Runde 8 (D8-F4): "Harley-Da…" ved 1366 — spalterne skal kunne baere det
+   laengste navn + tallet uden ellipse. 205 px giver 5 spalter ved 1366. */
+@media (min-width:1200px){ .brand-cloud{ grid-template-columns: repeat(auto-fill, minmax(205px,1fr)); } }
 @media (min-width:640px){ .brand-chip-name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } }
 /* Rene type-piller — mærkenavnet i display-fonten bærer kortet. Ingen
    bogstav-i-cirkel (som gav K = KTM/Kawasaki og en template-fornemmelse). */

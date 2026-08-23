@@ -1603,9 +1603,10 @@ function render(){
 
   // Dynamisk H1 fra aktive mærker/regioner — scannability + SEO (konkurrenter
   // scorer på "Brugte Yamaha til salg i København").
+  // Runde 8 (D8-S1): "Brugte" droppet — ≈172 af annoncerne er fabriksnye.
   let heading = state.brands.length
-    ? `Brugte ${state.brands.slice(0,3).join(', ')} til salg`
-    : 'Brugte motorcykler til salg';
+    ? `${state.brands.slice(0,3).join(', ')} til salg`
+    : 'Motorcykler til salg i Danmark';
   if (state.regions.length === 1) heading += ` i ${state.regions[0]}`;
   const headingEl = document.querySelector('.search-heading');
   if (headingEl.textContent !== heading) headingEl.textContent = heading;
@@ -1780,14 +1781,25 @@ function renderPagination(totalPages){
   if (!pag) return;
   if (totalPages <= 1){ pag.innerHTML = ''; return; }
 
+  /* Runde 8 (D8-S2): sideskift var <button> + replaceState — Tilbage-knappen
+     forlod soegesiden, "aabn i ny fane" fandtes ikke, og en crawler havde
+     ingen sti til side 2–23. Nu rigtige <a href> (med filtrene i adressen);
+     klikket afbrydes og gaar gennem pushFilterState(), saa Tilbage gaar én
+     side tilbage med filtrene i behold. */
+  const sideHref = (side) => {
+    const p = new URLSearchParams(currentQueryString());
+    if (side > 1) p.set('page', String(side)); else p.delete('page');
+    const qs = p.toString();
+    return 'soegning.html' + (qs ? '?' + qs : '');
+  };
   const pil = (side, label, tegn) => side < 1 || side > totalPages
     ? `<button type="button" class="pag-arrow" disabled aria-label="${label}">${tegn}</button>`
-    : `<button type="button" class="pag-arrow" data-page="${side}" aria-label="${label}">${tegn}</button>`;
+    : `<a class="pag-arrow" href="${escapeHTML(sideHref(side))}" data-page="${side}" aria-label="${label}">${tegn}</a>`;
 
   const midt = sideNumre(state.page, totalPages).map(n => n === '…'
     ? `<span class="pag-gap" aria-hidden="true">…</span>`
-    : `<button type="button" class="${n === state.page ? 'active' : ''}" data-page="${n}"` +
-      `${n === state.page ? ' aria-current="page"' : ''} aria-label="Side ${n}${n === state.page ? ' (nuværende)' : ''}">${n}</button>`
+    : `<a class="${n === state.page ? 'active' : ''}" href="${escapeHTML(sideHref(n))}" data-page="${n}"` +
+      `${n === state.page ? ' aria-current="page"' : ''} aria-label="Side ${n}${n === state.page ? ' (nuværende)' : ''}">${n}</a>`
   ).join('');
 
   pag.innerHTML = pil(state.page - 1, 'Forrige side', Icon.chevronLeft) + midt +
@@ -1795,7 +1807,13 @@ function renderPagination(totalPages){
     `<span class="pag-status">Side ${state.page} af ${totalPages}</span>`;
 
   pag.querySelectorAll('[data-page]').forEach(btn => {
-    btn.addEventListener('click', () => { state.page = Number(btn.dataset.page); render(); window.scrollTo({top:0, behavior:'smooth'}); });
+    btn.addEventListener('click', (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;   // ny fane: lad linket virke
+      e.preventDefault();
+      state.page = Number(btn.dataset.page);
+      pushFilterState();
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
   });
 }
 
