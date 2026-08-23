@@ -8,7 +8,20 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing } = browserModules();
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy } = browserModules();
+
+/* Runde 7 (D7-M1): "Brugte Honda" — 165 af 262 Honda er fabriksnye (sidens egen
+   eksternErNy()). Ordet "brugte" bruges kun, naar ALLE annoncer er brugte;
+   ellers hedder det "Honda-motorcykler til salg", og tallene skrives ud hver
+   for sig ("97 brugte og 165 fabriksnye"). */
+function nyeAf(items){ return items.filter(l => eksternErNy(l) === true).length; }
+function brugtOrd(items){ return nyeAf(items) ? '' : 'brugte '; }
+/* Runde 7 (D7-M4): "Gul og Gratis, Rydbergs MC, Jensens Motorcykler og MC Syd". */
+function listeJoin(navne){
+  const n = navne.map(esc);
+  if (n.length <= 1) return n.join('');
+  return n.slice(0, -1).join(', ') + ' og ' + n[n.length - 1];
+}
 const BASE = require('./site-url')(ROOT);
 const src = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
 eval(src + '\nglobal.__L = LISTINGS; global.__B = BRANDS_BY_MODEL; global.__T = TYPES; global.__A2 = A2_MAX_HK;');
@@ -235,8 +248,12 @@ function introFor(brand, items){
   const kilder = [...new Set(eksterne.map(l => l.source?.navn).filter(Boolean))];
 
   const en = items.length === 1;
-  const dele = [`Der er lige nu <strong>${items.length}</strong> ${en ? 'brugt' : 'brugte'} ${esc(brand)} `
-    + `${en ? 'motorcykel' : 'motorcykler'} til salg på Bikerbasen`];
+  const nye = nyeAf(items);
+  const dele = nye
+    ? [`Der er lige nu <strong>${items.length}</strong> ${esc(brand)} ${en ? 'motorcykel' : 'motorcykler'} til salg på Bikerbasen `
+      + `— <strong>${items.length - nye}</strong> ${items.length - nye === 1 ? 'brugt' : 'brugte'} og <strong>${nye}</strong> ${nye === 1 ? 'fabriksny' : 'fabriksnye'}`]
+    : [`Der er lige nu <strong>${items.length}</strong> ${en ? 'brugt' : 'brugte'} ${esc(brand)} `
+      + `${en ? 'motorcykel' : 'motorcykler'} til salg på Bikerbasen`];
 
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
     dele.push(` — fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}`);
@@ -261,7 +278,7 @@ function introFor(brand, items){
     const hvem = eksterne.length === items.length
       ? (en ? 'Annoncen er' : 'Annoncerne er')
       : `${eksterne.length} af annoncerne er`;
-    dele.push(` ${hvem} indekseret fra ${kilder.map(esc).join(' og ')}, og handlen sker hos kilden.`);
+    dele.push(` ${hvem} indekseret fra ${listeJoin(kilder)}, og handlen sker hos kilden.`);
   }
   if (eksterne.length < items.length){
     dele.push(' Alle annoncer er mærket som enten privat sælger eller forhandler,'
@@ -281,6 +298,8 @@ function introFor(brand, items){
    men den påstår ikke at være en landingsside for mærket: den får ingen
    arvesætning, ingen FAQ, intet bundindhold, og bliver noindex. */
 const MIN_LISTINGS_FULD_TEKST = 5;
+/* Runde 7 (D7-M2): antal kort i maerkesidens gitter = soegesidens sidestoerrelse. */
+const MAERKE_KORT = 24;
 
 /* Almindeligt kendt, IKKE tal-baseret viden om hvert mærke — hvad det er
    kendt for. Ingen tal her: hvert tal i sidens tekst kommer fra den rigtige
@@ -377,8 +396,8 @@ function topModeller(items, n){
 
 /* TITLE — "{Brand} brugt – X til salg | Bikerbasen", maks 60 tegn. Kun
    kaldt for mærker med fuld tekst; se MIN_LISTINGS_FULD_TEKST. */
-function titelFor(brand, n){
-  return `${brand} brugt – ${n} til salg | Bikerbasen`;
+function titelFor(brand, n, nye){
+  return nye ? `${brand} – ${n} til salg, nye og brugte | Bikerbasen` : `${brand} brugt – ${n} til salg | Bikerbasen`;
 }
 
 /* META DESCRIPTION — 140-155 tegn, rigtigt antal, rigtigt prisspænd, én
@@ -387,20 +406,22 @@ function titelFor(brand, n){
    opfundet her. Sætningerne vælges i prioriteret rækkefølge, indtil
    længden lander i vinduet; det holder teksten sand for både et mærke med
    ét kort prisord (Royal Enfield) og et med et langt (Harley-Davidson). */
-function metaBeskrivelseFor(brand, n, stats){
+function metaBeskrivelseFor(brand, n, stats, nye){
+  // Runde 7 (D7-M1): "brugte" kun naar alle er brugte.
+  const b = nye ? '' : 'brugte ';
   const prisled = stats.min == null
     ? ''
     : stats.min === stats.max
       ? ` til ${dkk(stats.min)}`
       : ` fra ${dkk(stats.min)} til ${dkk(stats.max)}`;
   const kandidater = [
-    `Se ${n} brugte ${brand}${prisled} på Bikerbasen. Ingen kommission af salget.`
+    `Se ${n} ${b}${brand}${prisled} på Bikerbasen${nye ? ` — ${nye} fabriksnye og ${n - nye} brugte` : ''}. Ingen kommission af salget.`
       + ' Sammenlign pris, årgang og km i hele Danmark.',
-    `Se ${n} brugte ${brand}${prisled} på Bikerbasen. Ingen kommission af salget.`
+    `Se ${n} ${b}${brand}${prisled} på Bikerbasen. Ingen kommission af salget.`
       + ' Sammenlign pris og årgang i hele Danmark.',
-    `Se ${n} brugte ${brand} til salg${prisled} på Bikerbasen — ingen kommission af salget,`
+    `Se ${n} ${b}${brand} til salg${prisled} på Bikerbasen — ingen kommission af salget,`
       + ' sammenlign pris og årgang i hele Danmark.',
-    `${n} brugte ${brand}${prisled}. Ingen kommission af salget. Sammenlign hos Bikerbasen.`,
+    `${n} ${b}${brand}${prisled}. Ingen kommission af salget. Sammenlign hos Bikerbasen.`,
   ];
   // Den første, der lander i [140,155], vinder. Rammer ingen af dem
   // vinduet (meget korte eller meget lange mærkenavne), bruges den, der
@@ -450,7 +471,7 @@ function faqFor(brand, items, stats, kk){
         ? ` De resterende ${stats.udenPris} ${stats.udenPris === 1 ? 'annonce' : 'annoncer'} oplyser i stedet pris ved henvendelse.`
         : ', hvilket giver et hurtigt billede af, hvad der er normalt at betale for mærket lige nu.');
   }
-  spg.push({ q: `Hvad koster en brugt ${brand}-motorcykel?`, a: prisSvar });
+  spg.push({ q: `Hvad koster en ${brugtOrd(items).trim() ? 'brugt ' : ''}${brand}-motorcykel?`, a: prisSvar });
 
   const kendtKK = kk.A1 + kk.A2 + kk.A;
   let kkSvar;
@@ -473,7 +494,7 @@ function faqFor(brand, items, stats, kk){
     const navne = top.map(([m, c]) => `${m} (${c} stk.)`);
     modelSvar = `Blandt de ${n} ${brand}-annoncer går ${navne.join(', ')} igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle ${brand}-annoncer for at se præcis, hvad der er til salg i dag.`;
   }
-  spg.push({ q: `Hvilke ${brand}-modeller kan jeg finde brugt på Bikerbasen?`, a: modelSvar });
+  spg.push({ q: `Hvilke ${brand}-modeller kan jeg finde på Bikerbasen?`, a: modelSvar });
 
   return spg;
 }
@@ -486,7 +507,7 @@ function bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand){
   const n = items.length;
   const dele = [];
 
-  dele.push(`<h2 class="brand-sub">Prisniveau for brugte ${esc(brand)}</h2>`);
+  dele.push(`<h2 class="brand-sub">Prisniveau for ${brugtOrd(items)}${esc(brand)}</h2>`);
   if (stats.antal){
     const spaend = stats.max / stats.min;
     let p = `De ${stats.antal} ${esc(brand)}-annoncer med opgivet pris ligger mellem ${dkk(stats.min)} og ${dkk(stats.max)}, med en median på ${dkk(stats.median)}`;
@@ -500,14 +521,16 @@ function bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand){
       p += ` ${stats.udenPris} ${stats.udenPris === 1 ? 'annonce' : 'annoncer'} har ingen opgivet pris og skal kontaktes for at få den.`;
     }
     if (andetBrand){
-      p += ` Ligger prisniveauet uden for budgettet, ligger <a href="maerke-${slugify(andetBrand)}.html">brugte ${esc(andetBrand)}</a> typisk i samme leje.`;
+      /* Runde 7 (D7-M4): naermesteMedianBrand finder det NAERMESTE maerke — saa
+         saetningen maa ikke love "billigere". */
+      p += ` <a href="maerke-${slugify(andetBrand)}.html">${esc(andetBrand)}</a> ligger typisk i samme prisleje — se dem, hvis udvalget her er for lille.`;
     }
     dele.push(`<p>${p}</p>`);
   } else {
     dele.push(`<p>Ingen af de ${n} ${esc(brand)}-annoncer har en opgivet pris lige nu — alle sælgere skriver "ring for pris" i stedet, så du skal spørge direkte for at få et tal.</p>`);
   }
 
-  dele.push(`<h2 class="brand-sub">Kørekort til brugt ${esc(brand)}</h2>`);
+  dele.push(`<h2 class="brand-sub">Kørekort til ${esc(brand)}</h2>`);
   const kendtKK = kk.A1 + kk.A2 + kk.A;
   if (!kendtKK){
     dele.push(`<p>Ingen af de ${n} ${esc(brand)}-annoncer oplyser den effekt (hk), der afgør kørekortkategorien — kilderne til de indekserede annoncer sender ikke tallet med. Vi viser derfor ingen kategori i stedet for at gætte.</p>`);
@@ -532,7 +555,7 @@ function bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand){
     if (facetLinks.length) dele.push(`<p>${facetLinks.join(' · ')}</p>`);
   }
 
-  dele.push(`<h2 class="brand-sub">Hvad du skal tjekke, når du køber en brugt ${esc(brand)}</h2>`);
+  dele.push(`<h2 class="brand-sub">Hvad du skal tjekke, når du køber en ${brugtOrd(items).trim() ? 'brugt ' : ''}${esc(brand)}</h2>`);
   const tjek = TYPE_TJEK[domType?.id] || TYPE_TJEK_STANDARD;
   let checkP = tjek;
   if (domType && domType.count < n){
@@ -636,9 +659,15 @@ if (slettet) console.log(`Fjernede ${slettet} forældede mærkesider.`);
 
 let built = 0;
 for (const brand of brands){
-  // Samme raekkefoelge som js/maerke.js: nyeste foerst.
-  const items = byBrand[brand].slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const kort = items.map((l, i) => listingCardHTML(l, i)).join('\n      ');
+  /* Runde 7 (D7-M2): soegesidens raekkefoelge (Sortering 'blandet' — samme
+     funktion som soegning.html, forsiden og js/maerke.js), og kun de foerste
+     MAERKE_KORT kort i markuppen. Foer stod alle 262 Honda (130 000 px paa
+     390) sorteret paa createdAt, som er null paa 548 af 548. Resten er ét klik
+     vaek i soegningen — med filtre, sortering og sideinddeling. <noscript>-
+     listen baerer stadig alle (SEO). */
+  const items = Sortering.sorter(byBrand[brand].slice(), 'blandet');
+  const visteKort = items.slice(0, MAERKE_KORT);
+  const kort = visteKort.map((l, i) => listingCardHTML(l, i)).join('\n      ');
   const foersteFoto = (items[0] && items[0].photoUrls && items[0].photoUrls[0]) || null;
   const slug = slugify(brand);
 
@@ -661,7 +690,7 @@ for (const brand of brands){
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'da'))
     .slice(0, 12).map(([m]) => m);
 
-  const beskrivelse = `Se ${items.length} brugte ${brand} `
+  const beskrivelse = `Se ${items.length} ${brugtOrd(items)}${brand} `
     + `${items.length === 1 ? 'motorcykel' : 'motorcykler'} til salg i Danmark. `
     + 'Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.';
 
@@ -673,11 +702,18 @@ for (const brand of brands){
   const domType = dominerendeType(items);
   const andetBrand = kvalificeret ? naermesteMedianBrand(brand, stats.median) : null;
 
-  const titelRaa = kvalificeret ? titelFor(brand, items.length)
-    : `Brugte ${brand} motorcykler til salg — Bikerbasen`;
-  const metaDescRaa = kvalificeret ? metaBeskrivelseFor(brand, items.length, stats) : beskrivelse;
+  const nye = nyeAf(items);
+  const titelRaa = kvalificeret ? titelFor(brand, items.length, nye)
+    : `${nye ? '' : 'Brugte '}${brand} motorcykler til salg — Bikerbasen`;
+  const metaDescRaa = kvalificeret ? metaBeskrivelseFor(brand, items.length, stats, nye) : beskrivelse;
   const arvSaetning = kvalificeret ? BRAND_ARV[brand] : null;
   const introTekst = arvSaetning ? `${arvSaetning} ${introFor(brand, items)}` : introFor(brand, items);
+  /* Runde 7 (D7-M3): tallet ("Der er lige nu …") foerst og synligt; arven og
+     resten bag en fold. */
+  const introTal = introFor(brand, items);
+  const foerstePunktum = introTal.search(/\.\s/);
+  const introFoerste = foerstePunktum > 0 ? introTal.slice(0, foerstePunktum + 1) : introTal;
+  const introRest = [arvSaetning, foerstePunktum > 0 ? introTal.slice(foerstePunktum + 1).trim() : ''].filter(Boolean).join(' ');
   const faqs = kvalificeret ? faqFor(brand, items, stats, kk) : null;
   const bundHtml = kvalificeret ? bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand) : '';
 
@@ -738,13 +774,14 @@ ${header}
       <span>${esc(brand)}</span>
     </nav>
 
+    <!-- Runde 7 (D7-M3): foerste kort stod ved 873 px (390) / 728 (1 366) —
+         12 linjer indledning foer lageret. Nu: h1 + den foerste saetning
+         (tallet) synligt, resten af indledningen bag <details>, modelchips
+         (navigation) foer knapperne, og gitteret lige under. -->
     <div class="brand-hero">
-      <h1>Brugte ${esc(brand)}-motorcykler i Danmark</h1>
-      <p class="brand-intro">${introTekst}</p>
-      <div class="brand-actions">
-        <a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Søg i alle ${esc(brand)}</a>
-        <a href="opret-annonce.html" class="btn btn-outline">Sælg din ${esc(brand)}</a>
-      </div>
+      <h1>${nye ? '' : 'Brugte '}${esc(brand)}-motorcykler til salg i Danmark</h1>
+      <p class="brand-intro">${introFoerste}</p>
+      ${introRest ? `<details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
     </div>
 
     ${allModels.length ? `<section class="section" style="padding-top:0;">
@@ -758,9 +795,16 @@ ${header}
       </div>
     </section>` : ''}
 
-    <section class="section" style="padding-top:var(--space-6);">
-      <h2 class="brand-sub">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} til salg nu</h2>
-      <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}">${kort}</div>
+    <section class="section" style="padding-top:var(--space-4);">
+      <div class="section-head">
+        <div><h2 class="brand-sub" id="brand-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} til salg nu${items.length > MAERKE_KORT ? ` — de første ${MAERKE_KORT} her` : ''}</h2></div>
+        <a class="section-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Alle ${items.length} i søgningen<span aria-hidden="true"></span></a>
+      </div>
+      <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}" data-viste="${MAERKE_KORT}">${kort}</div>
+      ${items.length > MAERKE_KORT ? `<p class="brand-mere"><a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Se alle ${items.length} ${esc(brand)} i søgningen — med filtre og sortering</a></p>` : ''}
+      <div class="brand-actions">
+        <a href="opret-annonce.html" class="btn btn-outline">Sælg din ${esc(brand)}</a>
+      </div>
       <noscript>
         <ul class="brand-noscript">
           ${items.map(l => `<li><a href="${esc(internAdresse(l))}">${noscriptLinje(l)}</a></li>`).join('\n          ')}
@@ -773,7 +817,7 @@ ${header}
     </section>
 
     <section class="section" style="padding-top:0;">
-      <h2 class="brand-sub">Ofte stillede spørgsmål om brugte ${esc(brand)}</h2>
+      <h2 class="brand-sub">Ofte stillede spørgsmål om ${brugtOrd(items)}${esc(brand)}</h2>
       ${faqs.map(f => `<details class="brand-faq-item">
         <summary>${esc(f.q)}</summary>
         <p class="brand-intro">${esc(f.a)}</p>
@@ -783,7 +827,9 @@ ${header}
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre mærker</h2>
       <div class="popular-row">
-        ${brands.filter(b => b !== brand).slice(0, 10).map(b => `<a class="popular-chip" href="maerke-${slugify(b)}.html">${esc(b)}</a>`).join('\n        ')}
+        ${brands.filter(b => b !== brand && slugify(b) !== 'andet-maerke')
+          .sort((a, b) => byBrand[b].length - byBrand[a].length || a.localeCompare(b, 'da')).slice(0, 10)
+          .map(b => `<a class="popular-chip" href="maerke-${slugify(b)}.html">${esc(b)} · ${byBrand[b].length}</a>`).join('\n        ')}
         <a class="popular-chip" href="maerker.html">Alle mærker</a>
       </div>
     </section>
@@ -806,6 +852,8 @@ ${footer}
 <script defer src="js/maaling.js"></script>
 <script defer src="js/backend-bridge.js"></script>
 <script defer src="js/components.js"></script>
+<!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
+<script defer src="js/sortering.js"></script>
 <script defer src="js/maerke.js"></script>
 </body>
 </html>

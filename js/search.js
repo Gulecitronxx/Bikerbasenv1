@@ -364,7 +364,12 @@ function populateFilterUI(){
   // Et mærke valgt via URL bliver stående, selv om det ikke er i lageret —
   // ellers kunne pillen ikke fjernes fra det sted, den blev sat.
   state.brands.forEach(b => iLager.add(b));
-  const maerker = [...iLager].sort((a,b) => a.localeCompare(b,'da'));
+  /* Runde 7 (D7-S3): flest annoncer foerst (Honda 262, Harley 72, …), saa de
+     seks synlige foer folden er dem, nogen leder efter — ikke Andet Maerke,
+     Aprilia, Benelli, BMW, BSA, Cagiva. Alfabetisk ved lige antal. */
+  const antalPrMaerke = new Map();
+  for (const l of alle) if (l.brand) antalPrMaerke.set(l.brand, (antalPrMaerke.get(l.brand) || 0) + 1);
+  const maerker = [...iLager].sort((a,b) => (antalPrMaerke.get(b) || 0) - (antalPrMaerke.get(a) || 0) || a.localeCompare(b,'da'));
   const brandRows = maerker.map(b =>
     `<label class="checkbox-row" data-brand-row="${escapeHTML(b.toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(b)}"><span>${escapeHTML(b)}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `
@@ -509,7 +514,7 @@ function renderFacetCounts(){
    ikke har. Og et mærke, der allerede er krydset af (fx sat fra en delt
    URL), står altid, uanset hvor i alfabetet det ligger: ellers kunne
    filteret ikke fjernes det sted, det blev sat. */
-const MAERKER_FOER_UDFOLD = 12;
+const MAERKER_FOER_UDFOLD = 6;   // Runde 7 (D7-S3): 12 → 6, gruppen ≈300 px
 let maerkerUdfoldet = false;
 
 function opdaterMaerkeliste(){
@@ -1628,7 +1633,7 @@ function render(){
       ? 'Der er ingen annoncer endnu'
       : 'Ingen annoncer matcher dine filtre';
     document.getElementById('empty-text').textContent = intetLager
-      ? 'Bikerbasen er helt nyt. Bliv den første til at sætte en motorcykel til salg — eller få besked, så snart der kommer en.'
+      ? 'Bikerbasen er helt nyt. Bliv den første til at sætte en motorcykel til salg — eller gem søgningen og kig forbi igen.'
       : tomtilstandsRaad(pills);
 
     // Nulstil-knappen giver kun mening, når der ER noget at nulstille.
@@ -1716,11 +1721,11 @@ function renderSecondary(pills, pageItems, heading, total, totalPages){
         <div class="thin-panel-inner">
           <div class="thin-panel-copy">
             <p class="thin-panel-title">${total === 1 ? 'Kun 1 match' : 'Kun ' + total + ' resultater'} — udvid din søgning</p>
-            <p class="thin-panel-text">Bikerbasen er nyt, og lageret vokser hver uge. Fjern et filter, eller få besked når der lander flere.</p>
+            <p class="thin-panel-text">Fjern et filter, eller gem søgningen — så tæller den nye annoncer, næste gang du kigger.</p>
           </div>
           <div class="thin-panel-actions">
             <button type="button" class="btn btn-outline btn-sm" data-thin-reset>Nulstil filtre</button>
-            <button type="button" class="btn btn-primary btn-sm" data-thin-agent>Få besked når der kommer flere</button>
+            <button type="button" class="btn btn-primary btn-sm" data-thin-agent>Gem søgningen</button>
           </div>
         </div>`;
       thin.querySelector('[data-thin-reset]').addEventListener('click', () => document.getElementById('clear-filters').click());
@@ -2091,6 +2096,15 @@ function wireCoreControls(){
     document.getElementById('save-search-btn').click();
   });
 
+  /* Runde 7 (D7-S2, koerer ved start — filterpanelet bygges foerst ved klik paa mobil): "Maerke eller model" (≈165 px) klippede stadig i et
+     ≈150 px felt paa 390. Kort tekst under 421 px; css saetter ellipse som
+     bagstopper, saa det aldrig klipper midt i et ord igen. */
+  const qFelt = document.getElementById('filter-q');
+  if (qFelt){
+    const mq = window.matchMedia('(max-width:420px)');
+    const saetPh = () => { qFelt.placeholder = mq.matches ? 'Mærke/model' : 'Mærke eller model'; };
+    saetPh(); if (mq.addEventListener) mq.addEventListener('change', saetPh);
+  }
   document.getElementById('save-search-btn').addEventListener('click', async () => {
     const qs = currentQueryString();
     const existing = Store.getSavedSearches().find(s => s.query === qs);
@@ -2113,16 +2127,22 @@ function wireCoreControls(){
 
       if (db.enabled && Store.getUser()?.remote){
         const { data, error } = await db.addSavedSearch(qs, label);
+        /* Runde 7 (D7-S1): INGEN mail loves. Udloeseren (migration 013) sidder
+           kun paa `listings` (egne annoncer, 0 i drift), og funktionen slaar
+           kun op dér — en indekseret annonce, der dukker op i morgen, udloeser
+           ingenting. Teksten siger nu det, der sker: soegningen er gemt og
+           taeller nye annoncer under Mine annoncer. Mails er en egen opgave
+           (trigger paa eksterne_annoncer + funktion) og staar i BACKLOG. */
         if (error){
-          toast('Søgeagenten er gemt her på enheden, men vi kunne ikke slå beskeder til. Prøv igen senere.', { type: 'error' });
+          toast('Søgningen er gemt her på enheden, men ikke på din konto. Prøv igen senere.', { type: 'error' });
         } else {
           // Bind den lokale post til rækken i databasen, så en senere
           // fjernelse rammer begge steder.
           Store.setSavedSearchRemoteId(all[0].id, data.id);
-          toast('Søgeagent oprettet — du får en mail, når der kommer en der matcher');
+          toast('Søgningen er gemt — find den under Mine annoncer › Søgeagenter, hvor den tæller nye annoncer.');
         }
       } else {
-        toast('Søgeagent gemt her på enheden. Log ind for at få besked på mail.');
+        toast('Søgningen er gemt her på enheden — find den under Mine annoncer › Søgeagenter.');
       }
     }
     refreshSaveSearchButton();

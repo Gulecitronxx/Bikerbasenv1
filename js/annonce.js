@@ -510,10 +510,16 @@ function renderExternalListing(listing){
           + `over nye motorcykler, ikke blandt de brugte.`
           + `${VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret,' : ','}`
           + ` og kilometerstanden er derfor ikke oplyst.`
-        : `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-          + `over nye motorcykler, ikke blandt de brugte, og kilometerstanden er derfor `
-          + `ikke oplyst. Sælgeren er privat — reklamationsret gælder ikke mellem private, `
-          + `heller ikke når motorcyklen er ny (se nedenfor).`)
+        : listing.saelgertype === 'privat'
+          ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
+            + `over nye motorcykler, ikke blandt de brugte, og kilometerstanden er derfor `
+            + `ikke oplyst. Sælgeren er privat — reklamationsret gælder ikke mellem private, `
+            + `heller ikke når motorcyklen er ny (se nedenfor).`
+          /* Runde 7 (D7-A1): saelgertypen er ikke oplyst af kilden — ingen paastand
+             om reklamationsret den ene eller anden vej. */
+          : `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
+            + `over nye motorcykler, ikke blandt de brugte, og kilometerstanden er derfor `
+            + `ikke oplyst. Spørg sælgeren om garanti- og reklamationsvilkår (se nedenfor).`)
     : null;
 
   const hk  = hkEllerNull(listing.power);
@@ -623,12 +629,21 @@ function renderExternalListing(listing){
   /* Runde 6 (D6-A2): "Hentet 16. aug. — for 7 dage siden". Alderen er
      regnet af indekseretFoerste (hvornaar VI saa den foerste gang — ikke
      annoncens alder hos kilden, og det staar der heller ikke). */
+  /* Runde 7 (D7-A3): to tal, begge sande — hvornaar VI saa annoncen foerste
+     gang (foerst_set), og hvornaar den sidst stod aktiv hos kilden
+     (sidst_set). Foer stod kun den foerste, og "for 7 dage siden" laestes som
+     oplysningernes alder, mens de (typisk) var bekraeftet i gaar. */
+  const relativ = (iso) => {
+    const t = iso ? new Date(iso).getTime() : NaN;
+    if (Number.isNaN(t)) return '';
+    const dage = Math.max(0, Math.floor((Date.now() - t) / 86400000));
+    return dage === 0 ? 'i dag' : dage === 1 ? 'i går' : `for ${dage} dage siden`;
+  };
   let hentetLinje = '';
   if (fundet){
-    const t = new Date(listing.indekseretFoerste).getTime();
-    const dage = Number.isNaN(t) ? null : Math.max(0, Math.floor((Date.now() - t) / 86400000));
-    const siden = dage == null ? '' : dage === 0 ? ' — i dag' : dage === 1 ? ' — i går' : ` — for ${dage} dage siden`;
-    hentetLinje = `Hentet hos ${kilde} ${escapeHTML(fundet)}${siden}`;
+    const bekraeftet = listing.sidstSet ? relativ(listing.sidstSet) : '';
+    hentetLinje = `Set hos ${kilde} første gang ${escapeHTML(fundet)}`
+      + (bekraeftet ? ` · sidst bekræftet ${bekraeftet}` : ` — ${relativ(listing.indekseretFoerste)}`);
   }
 
   /* Runde 6 (D6-A2): links med tal. Tallene regnes med soegesidens egen
@@ -694,6 +709,19 @@ function renderExternalListing(listing){
         ${videreLinks.map(v => `<li><a href="${v.href}"><span>${v.tekst}</span><span class="external-detail-next-n">${v.n != null ? v.n.toLocaleString('da-DK') : ''}${Icon.chevronRight || Icon.arrowRight}</span></a></li>`).join('')}
       </ul>
     </aside>`;
+
+  /* Runde 7 (D7-A2): paa <960 px flyttes handlingsraekken (Sammenlign · Del ·
+     Meld fejl) ned UNDER noegletallene efter tegningen, saa koerekort/aargang/
+     km staar paa foerste skaerm (gitteret begyndte ved 863 paa 844 hoej skaerm).
+     Samme knapper, samme id'er — kun placeringen. Paa desktop staar raekken paa
+     titlens linje (css). */
+  const flytHandlinger = () => {
+    if (!window.matchMedia('(max-width:959px)').matches) return;
+    const stats = document.querySelector('#listing-detail .external-detail-stats');
+    const handlinger = document.querySelector('#listing-detail .external-detail-actions');
+    if (stats && handlinger) stats.after(handlinger);
+  };
+  setTimeout(flytHandlinger, 0);
 
   document.getElementById('listing-detail').innerHTML = `
     <div class="external-detail">
@@ -818,9 +846,13 @@ function renderExternalListing(listing){
            privat-advarslen er ikke en påstand om en tredjepart, den er en
            oplysning om dansk ret, og den er den forsigtige retning at tage
            fejl i (frem for at love en reklamationsret, der ikke findes). -->
+      <!-- Runde 7 (D7-A1): tre grene — kildens svar, ikke vores gaet. Gul og
+           Gratis oplyser ingen saelgertype (saelgertype === null), og dér stod
+           foer "Privat annonce … reklamationsret gaelder ikke" — ogsaa paa
+           forhandlerannoncer (MC Syd/Aalborg MC paa GG). -->
       ${listing.isDealer
         ? (VIS_REKLAMATIONSRET ? sellerTypeNoteHTML(true) : '')
-        : sellerTypeNoteHTML(false)}
+        : (listing.saelgertype === 'privat' ? sellerTypeNoteHTML(false) : sellerTypeNoteHTML(null))}
 
       <section class="external-detail-section">
         <h2>Før du kører derhen</h2>

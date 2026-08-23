@@ -210,6 +210,20 @@ efter) og står i dag som "åben"; funktionerne 404 i dag. Enhedstests for
 klientens fald-tilbage i js/skrivevej.test.js. Ikke kørt mod produktion herfra
 (A1-blokeringen: access token).
 
+### D7-A5 afvist — mærkatet "Kørekort ikke afgjort" bliver — 23.08.2026
+FINDING: kritikeren foreslog "A · A2 uvist" i stedet for "Kørekort ikke
+afgjort" på kort, hvor effekten mangler, fordi annoncesidens A-boks samtidig
+siger "A dækker hele lageret".
+HVORFOR AFVIST: `js/koerekort.test.js` ("Gold Wing: mærkatet nævner ingen
+kategori, når effekten mangler") låser, at mærkatet IKKE må nævne en kategori
+— heller ikke A — når kategorien ikke kan udledes. Reglen er, at et mærkat er
+et svar på "må jeg køre den?", og "A" er ikke et svar, det er en tautologi
+(A har ingen effektgrænse). Forskellen mellem A-boksen (en forklaring af
+reglen) og mærkatet (et svar pr. annonce) er tilsigtet.
+HVAD DER GØRES I STEDET: intet i denne runde. Bliver dobbeltheden målt som
+et problem for rigtige købere, er rettelsen at omformulere A-boksen, ikke
+mærkatet.
+
 ### D6-S4 gennemført — kilde-rundgang i standardsorteringen — 23.08.2026
 GODKENDT AF MENNESKET ("ja kør D6-S4 og mål det").
 HVAD: `blandetRaekkefoelge()` i js/sortering.js skifter nu mellem kilderne

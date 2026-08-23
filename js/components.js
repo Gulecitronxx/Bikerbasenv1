@@ -799,11 +799,14 @@ function externalCardHTML(l, i){
      led i 280 px-spalten. "Privat" er ikke mindre aerligt ved siden af et
      domaene; i smalle spalter skjuler css saelgertypen og lader domaenet —
      det eneste, koeberen kan slaa op — staa helt. Typen bliver i title. */
-  const saelgerType = l.isDealer ? 'Forhandler' : 'Privat';
-  const saelger = [saelgerType, domaene].filter(Boolean).join(' · ');
+  /* Runde 7 (D7-F1): kun det, kilden har oplyst. Ved null (Gul og Gratis) staar
+     domaenet alene — ingen "Privat", der var et gaet. */
+  const saelgerType = l.saelgertype === 'forhandler' || (l.saelgertype === undefined && l.isDealer) ? 'Forhandler'
+    : l.saelgertype === 'privat' ? 'Privat' : null;
+  const saelger = [saelgerType, domaene].filter(Boolean).join(' · ') || (l.source && l.source.navn) || 'ekstern kilde';
   const saelgerHTML = domaene
-    ? `<span class="card-saelgertype">${saelgerType} · </span>${escapeHTML(domaene)}`
-    : saelgerType;
+    ? `${saelgerType ? `<span class="card-saelgertype">${saelgerType} · </span>` : ''}${escapeHTML(domaene)}`
+    : (saelgerType || kilde);
   /* "Ny" står FØRST i prislinjen, foran forhandlerens salgsmarkører: den
      forklarer prisen på samme måde som "UDEN KLARGØRING" gør, men den er
      også et juridisk vilkår (garanti frem for reklamationsret), og den skal
@@ -950,7 +953,13 @@ function verifiedBadgeHTML(seller){
   return '';
 }
 
+/* Runde 7 (D7-A1): tre grene. null = kilden har ikke oplyst saelgertypen — saa
+   skriver vi hverken "forhandler" eller "privat", for begge er en
+   retsoplysning, og et gaet er dyrt lige dér. */
 function sellerTypeNoteHTML(isDealer){
+  if (isDealer == null){
+    return `<div class="seller-type-note"><b>Kilden oplyser ikke, om sælgeren er forhandler eller privat.</b> Spørg, før du handler: er det en forhandler, har du som privatperson reklamationsret i op til 24 måneder — er det en privat sælger, gælder den ikke.</div>`;
+  }
   return isDealer
     ? `<div class="seller-type-note"><b>Forhandlerannonce.</b> Du har som privatperson reklamationsret i op til 24 måneder efter købelovens regler for erhvervsmæssigt salg.</div>`
     : `<div class="seller-type-note"><b>Privat annonce.</b> Forbrugerkøbelovens reklamationsret gælder ikke mellem private. Aftal et grundigt eftersyn og prøvetur, før du køber.</div>`;
@@ -1098,6 +1107,11 @@ function initCookieConsent(){
   const maalHoejde = () => document.documentElement.style.setProperty('--cookie-h', banner.offsetHeight + 'px');
   maalHoejde();
   if (window.ResizeObserver) new ResizeObserver(maalHoejde).observe(banner);
+  /* Runde 7 (D7-F6): indlaeses siden i en skjult fane, maales 226 px ved foerste
+     maling mod bannerets 80 — og tallet fryser, fordi intet aendrer stoerrelse.
+     Maal igen, naar fanen bliver synlig, og efter load. */
+  document.addEventListener('visibilitychange', maalHoejde);
+  window.addEventListener('load', () => requestAnimationFrame(maalHoejde), { once: true });
 
   const svar = level => () => {
     Store.setCookieConsent(level);
@@ -1180,8 +1194,17 @@ function wireFavoriteButtons(root){
         ['Antal ejere', b => b.antalEjere || 'Ikke oplyst'],
         ['Sidste syn', b => b.sidsteSyn || 'Ikke oplyst'],
       ];
-      return rows.map(([label, fn]) =>
-        `<tr><th scope="row">${label}</th>${bikes.map(b => `<td>${escapeHTML(String(fn(b)))}</td>`).join('')}</tr>`).join('');
+      /* Runde 7 (D7-S6): Drivlinje, Stand, Servicehistorik, Antal ejere og
+         Sidste syn indekserer vi ikke (CLAUDE.md regel 2). "Ikke oplyst" ville
+         vaere en paastand om saelgeren; kilden KAN have oplyst dem. Er alle
+         annoncer indekserede, falder raekkerne vaek og én linje siger hvorfor;
+         i blandede saet staar "Se hos kilden" i de eksterne celler. */
+      const alleEksterne = bikes.every(b => b.isExternal);
+      const kunEgne = new Set(['Drivlinje', 'Stand', 'Servicehistorik', 'Antal ejere', 'Sidste syn']);
+      const synlige = alleEksterne ? rows.filter(([label]) => !kunEgne.has(label)) : rows;
+      return synlige.map(([label, fn]) =>
+        `<tr><th scope="row">${label}</th>${bikes.map(b => `<td>${(b.isExternal && kunEgne.has(label)) ? 'Se hos kilden' : escapeHTML(String(fn(b)))}</td>`).join('')}</tr>`).join('')
+        + (alleEksterne ? `<tr><td colspan="${bikes.length + 1}" class="compare-note">Udstyr, stand, ejere og syn står i annoncen hos kilden — Bikerbasen indekserer dem ikke.</td></tr>` : '');
     }
     function openModal(){
       const bikes = Store.getCompare().map(id => Store.getListingById(id)).filter(Boolean);

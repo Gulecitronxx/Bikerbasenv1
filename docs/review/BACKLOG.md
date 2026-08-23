@@ -311,6 +311,36 @@ lukket). Målinger efter rettelserne: [rounds/round-6.md](rounds/round-6.md).
 
 ---
 
+## Runde 7 — blind kritik efter runde 6 (+ mærkeside) (23.08.2026)
+
+Rapport: [runde-7-kritik.md](runde-7-kritik.md). Blinddom før rettelserne:
+forside m/d → Bikerbasen; SRP m/d → Bikerbasen; VDP m snævert / d klart →
+Bikerbasen; mærkeside m+d → Bilbasen klart. Målinger efter:
+[rounds/round-7.md](rounds/round-7.md).
+
+| ID | rolle | akse | sev | fil | problem | status |
+|---|---|---|---|---|---|---|
+| D7-F1 / D7-A1 | critic | funktionalitet | **P1** | `js/backend-bridge.js`, `js/components.js`, `js/annonce.js` | "Privat" var et gæt på 118/118 Gul og Gratis-annoncer (kilden oplyser ingen sælgertype); annoncesiden skrev "reklamationsret gælder ikke mellem private" om forhandlerbiler | **rettet** — tri-state `saelgertype` (forhandler/privat/null); null → kun domænet på kortet og en neutral retsnote ("Kilden oplyser ikke …"). Crawler-selector for GG's "Erhverv"-badge er fortsat ikke læsbar robust (sources/guloggratis.yaml) — feltet forbliver null |
+| D7-S1 | critic | funktionalitet | **P1** | `js/search.js`, `soegning.html` | Søgeagenten lovede mail; udløseren sidder kun på `listings` (0 egne) | **rettet (tekst)** — ingen mail loves; "Søgningen er gemt … tæller nye annoncer". Mail for indekserede = egen opgave (trigger på `eksterne_annoncer` + funktion) — **åben** |
+| D7-M1 | critic | funktionalitet | **P1** | `scripts/build-brand-pages.js` | "Brugte Honda … 262 brugte" — 165 af 262 er fabriksnye | **rettet** — h1 "Honda-motorcykler til salg i Danmark", "262 … 97 brugte og 165 fabriksnye", title/meta/FAQ/overskrifter uden "brugte", når lageret er blandet |
+| D7-F2 | critic | funktionalitet | **P2** | `js/home.js` | "548 motorcykler" — samme mc hos to kilder (≥7 dubletter) | **delvist** — "548 annoncer med motorcykler til salg" / "Vis 548 annoncer". Tværkilde-afdublettering: **åben** (kræver måling og DECISIONS) |
+| D7-F3 | critic | design | **P2** | `js/home.js` vaelgFeatured | "Til salg lige nu" = 8/8 MC Syd | **rettet** — højst halvdelen fra samme kilde (mcsyd, GG, mcsyd, mcsyd, mcsyd, GG, GG, rydbergs); underrubrik skrevet om |
+| D7-F4 / F5 / F6 | critic | design | **P3** | css, `js/components.js` | Titel klippet i kompakte kort; chips ombrød; `--cookie-h` frøs i baggrundsfane | **rettet** — to linjer titel, auto-fill-gitter + nowrap ≥640, måles igen ved visibilitychange/load |
+| D7-S2 | critic | design | **P2** | `js/search.js`, css | Placeholder "Mærke eller m" klippet på 390 | **rettet** — "Mærke/model" ≤420 px + `::placeholder{text-overflow:ellipsis}` |
+| D7-S3 | critic | design | **P2** | `soegning.html`, `js/search.js`, css | Mærke-filteret ved 1 105 px i et 748 px panel | **rettet** — Mærke først (60 px), sorteret efter antal, folder efter 6; Kørekort 476, Pris 741; pris-hint én linje, prischips i to kolonner |
+| D7-S4 | critic | kodefejl | **P2** | `crawler/normalize.js`, `js/backend-bridge.js` | Modelfelt med salgsstøj ("CBR 650 R MC-SYD", "sælges bud modtages", "Motorcykel med meget udstyr") | **rettet** — `rensModelStoej()` i begge lag, test `crawler/model-stoej.test.js` (6 eksempler + 7 rigtige modelnavne urørt) |
+| D7-S5 | critic | design | **P2** | css | D6-S6 var en media-query; kortet er en container | **rettet** — `@container (max-width:420px)` |
+| D7-S6 | critic | funktionalitet | **P3** | `js/components.js` specRows | Sammenlign skrev "Ikke oplyst" i fem felter, vi ikke indekserer | **rettet** — rækkerne væk for rent eksterne sæt + forklaring; "Se hos kilden" i blandede sæt |
+| D7-A2 | critic | design | **P2** | `js/annonce.js`, css | Nøgletal under folden på mobil (863) og desktop (878) | **rettet** — handlingsrække flyttet under gitteret på <960, vilkårsnote skjult på mobil, foto 360 px på desktop. Mobil: CTA 695, gitter 768–836 (<844); desktop: værdier 852 |
+| D7-A3 | critic | funktionalitet | **P2** | `js/annonce.js` | "Hentet … for 7 dage siden" brugte foerst_set | **rettet** — "Set hos MC Syd første gang 16. aug. · sidst bekræftet …" (sidst_set) |
+| D7-A4 | critic | design | **P2** | css | Højre spalte fulgte ikke med (sticky uden align-self) | **rettet** — `align-self:start` |
+| D7-A5 | critic | design | **P3** | `js/components.js` KK_UAFGJORT | "Kørekort ikke afgjort" vs. A-boksen | **afvist** — `js/koerekort.test.js` låser, at mærkatet ikke må nævne en kategori (heller ikke A/A2), når effekten mangler; se DECISIONS.md |
+| D7-M2 | critic | design | **P2** | `scripts/build-brand-pages.js`, `js/maerke.js` | 262 kort, ingen sideinddeling, ikke søgningens rækkefølge; tegnet to gange | **rettet** — 24 kort i 'blandet'-orden, "Se alle 262 i søgningen", DOM røres kun ved ændring. Side 130 358 → 14 717 px (390) |
+| D7-M3 | critic | design | **P2** | `scripts/build-brand-pages.js`, css | Første kort ved 873/728 | **rettet** — første sætning synlig, resten i `<details>`; første kort 630 (390) / 589 (1 366) |
+| D7-M4 / M5 | critic | design | **P3** | `scripts/build-brand-pages.js` | "samme leje"-sætning, "og … og", "Andre mærker" alfabetisk med Andet Mærke | **rettet** — listeJoin, sætning uden løfte, andre mærker efter antal med tal, Andet Mærke udeladt |
+
+---
+
 ## Lukket
 
 <!-- Verificerede findings flyttes herned med rundenummer, så tabellen ovenfor

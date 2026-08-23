@@ -30,7 +30,7 @@
 <meta name="twitter:title" content="Brugte motorcykler til salg — Bikerbasen">
 <meta name="twitter:description" content="Brugte motorcykler til salg på Bikerbasen. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -197,7 +197,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=1bbc169f">
+<link rel="stylesheet" href="css/styles.css?v=9813248f">
 
 
 
@@ -327,6 +327,20 @@ try{
                  ene spørgsmål en bilside ikke kan besvare, og det første en
                  køber under 24 stiller. Lå det som nummer to, scrollede
                  halvdelen forbi det på en telefon. -->
+            <!-- Runde 7 (D7-S3): Maerke foerst — Bilbasens 2. felt, og det filter,
+                 koeberen oftest roerer. Listen er sorteret efter antal (js/search.js)
+                 og folder efter 6, saa gruppen er ≈300 px; foer stod Maerke ved
+                 1 105 px i et panel paa 748 — usynlig uden indre rul. -->
+            <details class="filter-group" open>
+              <summary>Mærke<span class="chev"></span></summary>
+              <div class="filter-body" id="filter-brands"></div>
+            </details>
+
+            <details class="filter-group" id="model-group" open hidden>
+              <summary>Model<span class="chev"></span></summary>
+              <div class="filter-body" id="filter-models"></div>
+            </details>
+
             <details class="filter-group" open>
               <summary>Kørekort<span class="chev"></span></summary>
               <div class="filter-body">
@@ -366,7 +380,7 @@ try{
                      billigste forsvandt uden et ord, fordi båndene er
                      gensidigt udelukkende (state.priceMin/Max er ÉT interval),
                      men så ud som Type-gruppens fravalgs-chips. -->
-                <p class="field-hint">Kun ét prisinterval ad gangen: det seneste klik erstatter det forrige, det lægger sig ikke oveni. Klik det valgte igen for at fjerne det.</p>
+                <p class="field-hint">Ét interval ad gangen — klik det valgte igen for at fjerne det.</p>
                 <div class="chip-group" id="filter-price-quick" role="radiogroup" aria-label="Prisinterval — vælg ét"></div>
                 <div class="dual-range" id="range-price" data-floor="0" data-ceil="300000" data-step="1000">
                   <span class="dual-range-rail"></span>
@@ -404,16 +418,6 @@ try{
               <div class="filter-body">
                 <div class="chip-group" id="filter-types" role="group" aria-label="Type — vælg én eller flere"></div>
               </div>
-            </details>
-
-            <details class="filter-group" open>
-              <summary>Mærke<span class="chev"></span></summary>
-              <div class="filter-body" id="filter-brands"></div>
-            </details>
-
-            <details class="filter-group" id="model-group" open hidden>
-              <summary>Model<span class="chev"></span></summary>
-              <div class="filter-body" id="filter-models"></div>
             </details>
 
             <details class="filter-group">
@@ -731,7 +735,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Svendborg, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Svendborg</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=07def4c0-aeb3-47c7-8a7e-5d3b76023ecf"
@@ -774,7 +778,7 @@ try{
 
   <article class="card card-external" data-listing-id="177253b4-d0b3-4d5c-894f-dede65565a17" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/c73303ca-ce20-47a7-9e01-ebd963c8c7d6/c73303ca-ce20-47a7-9e01-ebd963c8c7d6-320x240.webp" alt="Suzuki Motorcykel med meget udstyr" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/c73303ca-ce20-47a7-9e01-ebd963c8c7d6/c73303ca-ce20-47a7-9e01-ebd963c8c7d6-320x240.webp" alt="Suzuki" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       <button type="button" class="card-compare " data-compare-toggle="177253b4-d0b3-4d5c-894f-dede65565a17" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
     </div>
     <div class="card-body">
@@ -784,7 +788,7 @@ try{
         
       </div>
       <h3 class="card-title">
-        <span class="card-title-main">Suzuki Motorcykel med meget udstyr</span>
+        <span class="card-title-main">Suzuki</span>
         <span class="card-title-variant"></span>
       </h3>
       <div class="card-specblok">
@@ -797,12 +801,12 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Hedensted, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Hedensted</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=177253b4-d0b3-4d5c-894f-dede65565a17"
        class="card-link"
-       aria-label="Se annonce: Suzuki Motorcykel med meget udstyr, 30.000 kr. — hos Gul og Gratis"></a>
+       aria-label="Se annonce: Suzuki, 30.000 kr. — hos Gul og Gratis"></a>
   </article>
 
   <article class="card card-external" data-listing-id="03178f5a-e8b0-40af-a6fc-1eb566975860" data-external="1">
@@ -863,7 +867,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Thisted, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thisted</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=1b56a4ee-fa0a-41ad-87d7-8ad5b4130d5a"
@@ -929,7 +933,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Låsby, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Låsby</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=4d439521-fe9d-49e1-aa36-db3a8bec272d"
@@ -995,7 +999,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Esbjerg, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Esbjerg</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=598066ab-5b9d-4e9d-9eea-8474fb92c60f"
@@ -1061,7 +1065,7 @@ try{
       </div>
       <div class="card-footer">
         <span class="card-sted" title="Frederikshavn, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Frederikshavn</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
     <a href="annonce.html?id=64beec12-7e0a-41d7-95cc-b0115776408c"
@@ -1079,7 +1083,8 @@ try{
             <button type="button" class="btn btn-primary" id="empty-clear-btn" hidden>Nulstil filtre</button>
             <a href="opret-annonce.html" class="btn btn-primary" id="empty-sell-btn">Sælg din motorcykel</a>
           </div>
-          <p class="empty-agent-hint">Vil du have besked, når der kommer en? <button type="button" class="link-btn" id="empty-agent-btn">Gem søgningen som søgeagent</button>.</p>
+          <!-- Runde 7 (D7-S1): ingen "besked" loves — mails sendes ikke for indekserede annoncer. -->
+          <p class="empty-agent-hint"><button type="button" class="link-btn" id="empty-agent-btn">Gem søgningen</button>, så du hurtigt kan komme tilbage og se, om der er kommet nye til.</p>
         </div>
         <div class="pagination" id="pagination"></div>
       </div>
@@ -1172,31 +1177,31 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=1bbc169f"></script>
-<script defer src="js/supabase-config.js?v=1bbc169f"></script>
-<script defer src="js/supabase-api.js?v=1bbc169f"></script>
-<script defer src="js/icons.js?v=1bbc169f"></script>
+<script defer src="js/security.js?v=9813248f"></script>
+<script defer src="js/supabase-config.js?v=9813248f"></script>
+<script defer src="js/supabase-api.js?v=9813248f"></script>
+<script defer src="js/icons.js?v=9813248f"></script>
 <!-- js/postnumre.js (40 KB, 1089 rækker) lå her, men ingen af søgesidens
      scripts slår et postnummer op — POSTNUMRE bruges kun ved oprettelse og
      redigering af annoncer. Filen blev altså hentet, parset og evalueret på
      hovedtråden uden at blive brugt. Fjernet herfra; de sider der faktisk
      bruger den (opret-annonce, dashboard, mine-annoncer …) loader den stadig. -->
-<script defer src="js/data.js?v=1bbc169f"></script>
-<script defer src="js/store.js?v=1bbc169f"></script>
-<script defer src="js/maaling.js?v=1bbc169f"></script>
+<script defer src="js/data.js?v=9813248f"></script>
+<script defer src="js/store.js?v=9813248f"></script>
+<script defer src="js/maaling.js?v=9813248f"></script>
 <!-- js/filtrering.js: ÉT sted, hvor et filter afgør, hvad der er et træf.
      Skal loades EFTER js/data.js (den bruger passerKoerekort og
      hkEllerNull) og FØR js/search.js, som kalder Filtrering.* på
      topniveau i sin filterkæde. Se work/DECISIONS.md, "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=1bbc169f"></script>
-<script defer src="js/backend-bridge.js?v=1bbc169f"></script>
-<script defer src="js/components.js?v=1bbc169f"></script>
+<script defer src="js/filtrering.js?v=9813248f"></script>
+<script defer src="js/backend-bridge.js?v=9813248f"></script>
+<script defer src="js/components.js?v=9813248f"></script>
 <!-- Sortering EFTER components.js (bruger koerekortMaerkat), FØR search.js
      (som læser Sortering ved indlæsning). Samme rækkefølge som
      browserModules() i scripts/shared.js — se js/sortering.js. -->
-<script defer src="js/sortering.js?v=1bbc169f"></script>
-<script defer src="js/seo.js?v=1bbc169f"></script>
-<script defer src="js/search.js?v=1bbc169f"></script>
+<script defer src="js/sortering.js?v=9813248f"></script>
+<script defer src="js/seo.js?v=9813248f"></script>
+<script defer src="js/search.js?v=9813248f"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

@@ -63,10 +63,10 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="preload" as="image" href="https://assets.guloggratis.dk/images/03e4d2ea-8108-424f-8f06-83a7c9bd1f31/03e4d2ea-8108-424f-8f06-83a7c9bd1f31-320x240.webp" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=1bbc169f">
+<link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/179186/Harley-Davidson_FXBRS_Breakout_0_2.jpg?v=1" fetchpriority="high">
+<link rel="stylesheet" href="css/styles.css?v=9813248f">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Harley-Davidson","item":"https://bikerbasen.dk/maerke-harley-davidson"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en brugt Harley-Davidson-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"70 af de 72 Harley-Davidson-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 99.400 kr. til 559.900 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 249.645 kr. De resterende 2 annoncer oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre Harley-Davidson på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"Nej, ikke blandt de annoncer, vi kan afgøre — 54 af 54 Harley-Davidson-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de 47 hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle. De resterende 18 annoncer mangler effektoplysningen og vises derfor uden kategori."}},{"@type":"Question","name":"Hvilke Harley-Davidson-modeller kan jeg finde brugt på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 72 Harley-Davidson-annoncer går FLSTC Heritage Softail (5 stk.), FLHTCUSE CVO Electra Glide Ultra (3 stk.), FLTRXS Road Glide Special (3 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Harley-Davidson-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en brugt Harley-Davidson-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"70 af de 72 Harley-Davidson-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 99.400 kr. til 559.900 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 249.645 kr. De resterende 2 annoncer oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre Harley-Davidson på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"Nej, ikke blandt de annoncer, vi kan afgøre — 54 af 54 Harley-Davidson-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de 47 hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle. De resterende 18 annoncer mangler effektoplysningen og vises derfor uden kategori."}},{"@type":"Question","name":"Hvilke Harley-Davidson-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 72 Harley-Davidson-annoncer går FLSTC Heritage Softail (5 stk.), FLHTCUSE CVO Electra Glide Ultra (3 stk.), FLTRXS Road Glide Special (3 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Harley-Davidson-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -119,13 +119,14 @@ try{
       <span>Harley-Davidson</span>
     </nav>
 
+    <!-- Runde 7 (D7-M3): foerste kort stod ved 873 px (390) / 728 (1 366) —
+         12 linjer indledning foer lageret. Nu: h1 + den foerste saetning
+         (tallet) synligt, resten af indledningen bag <details>, modelchips
+         (navigation) foer knapperne, og gitteret lige under. -->
     <div class="brand-hero">
-      <h1>Brugte Harley-Davidson-motorcykler i Danmark</h1>
-      <p class="brand-intro">Harley-Davidson er den amerikanske cruisertradition: tunge V-twin-motorer, lav sadelhøjde og en udbredt custom-kultur, hvor mange ejere bygger om undervejs. Der er lige nu <strong>72</strong> brugte Harley-Davidson motorcykler til salg på Bikerbasen — fra 99.400 kr. til 559.900 kr., med årgange mellem 1976 og 2026. Udvalget dækker Naked, Sport, Cruiser m.fl. 2 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra Gul og Gratis og Rydbergs MC og Jensens Motorcykler og MC Syd, og handlen sker hos kilden.</p>
-      <div class="brand-actions">
-        <a href="soegning.html?brands=Harley-Davidson" class="btn btn-primary">Søg i alle Harley-Davidson</a>
-        <a href="opret-annonce.html" class="btn btn-outline">Sælg din Harley-Davidson</a>
-      </div>
+      <h1>Brugte Harley-Davidson-motorcykler til salg i Danmark</h1>
+      <p class="brand-intro">Der er lige nu <strong>72</strong> brugte Harley-Davidson motorcykler til salg på Bikerbasen — fra 99.400 kr.</p>
+      <details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Harley-Davidson er den amerikanske cruisertradition: tunge V-twin-motorer, lav sadelhøjde og en udbredt custom-kultur, hvor mange ejere bygger om undervejs. til 559.900 kr., med årgange mellem 1976 og 2026. Udvalget dækker Sport, Cruiser, Touring m.fl. 2 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Rydbergs MC, Jensens Motorcykler og Gul og Gratis, og handlen sker hos kilden.</p></details>
     </div>
 
     <section class="section" style="padding-top:0;">
@@ -150,1130 +151,15 @@ try{
       </div>
     </section>
 
-    <section class="section" style="padding-top:var(--space-6);">
-      <h2 class="brand-sub">72 annoncer til salg nu</h2>
-      <div class="listings-grid" id="brand-listings" data-brand="Harley-Davidson">
-  <article class="card card-external" data-listing-id="315b512d-9483-4162-a6e1-783933843ed5" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/03e4d2ea-8108-424f-8f06-83a7c9bd1f31/03e4d2ea-8108-424f-8f06-83a7c9bd1f31-320x240.webp" alt="Harley-Davidson FLHX Glide" loading="eager" fetchpriority="high" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="315b512d-9483-4162-a6e1-783933843ed5" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">219.400 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHX Glide</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2007</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km og kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 78 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 78 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Tylstrup, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Tylstrup</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=315b512d-9483-4162-a6e1-783933843ed5"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHX Glide, 219.400 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="95c815c8-abc8-44f7-9e1b-64adb9b21a8d" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/8c426598-1990-4633-8c43-7d5e082f8df6/8c426598-1990-4633-8c43-7d5e082f8df6-320x240.webp" alt="Harley-Davidson FXE Super Glide" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="95c815c8-abc8-44f7-9e1b-64adb9b21a8d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">99.400 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXE Super Glide</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>1980</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km og kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 66 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 66 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Tylstrup, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Tylstrup</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=95c815c8-abc8-44f7-9e1b-64adb9b21a8d"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXE Super Glide, 99.400 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="ad8159a6-d1d7-42f7-a228-afb2f255d479" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/f5fe1397-940d-4035-9670-7fe5d4b290f0/f5fe1397-940d-4035-9670-7fe5d4b290f0-320x240.webp" alt="Harley-Davidson FXBB Bob 107&amp;quot;" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="ad8159a6-d1d7-42f7-a228-afb2f255d479" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">299.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXBB Bob 107&quot;</span>
-        <span class="card-title-variant" title="Naked">Naked</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Kilometer</dt><dd>29.500 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.745 ccm</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>årgang</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2." aria-label="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.">Kørekort ikke afgjort</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Tylstrup, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Tylstrup</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=ad8159a6-d1d7-42f7-a228-afb2f255d479"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXBB Bob 107&quot; Naked, 299.900 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="00c5342b-3219-4f49-9cdb-160d12d181de" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_286820_LD23_1747222454.jpeg" alt="Harley-Davidson FLHTCUI Electra Glide Ultra Classic" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="00c5342b-3219-4f49-9cdb-160d12d181de" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">199.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHTCUI Electra Glide Ultra</span>
-        <span class="card-title-variant" title="Classic">Classic</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2005</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>88.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.449 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.449 ccm og 71 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.449 ccm og 71 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=00c5342b-3219-4f49-9cdb-160d12d181de"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHTCUI Electra Glide Ultra Classic, 199.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="02485845-7c25-4542-956a-9c73f9f8321a" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_305915_BJ76_1778226700.jpeg" alt="Harley-Davidson FLS Softail Slim" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="02485845-7c25-4542-956a-9c73f9f8321a" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">259.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLS Softail Slim</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2012</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>36.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.690 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.690 ccm og 76 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.690 ccm og 76 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=02485845-7c25-4542-956a-9c73f9f8321a"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLS Softail Slim, 259.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="09e13fa8-0445-4a5c-9366-b1695c74fb0c" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_293418_2DD6_1754490419.jpeg" alt="Harley-Davidson FLHRXS Road King Special" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="09e13fa8-0445-4a5c-9366-b1695c74fb0c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">329.990 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHRXS Road King Special</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2019</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>78.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.868 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.868 ccm og 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.868 ccm og 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=09e13fa8-0445-4a5c-9366-b1695c74fb0c"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHRXS Road King Special, 329.990 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="0d6a5bb1-4ea1-4c49-ba84-2909b7fe6f4c" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_280142_A0CJ_1731510433.jpeg" alt="Harley-Davidson FLHC Heritage Classic" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="0d6a5bb1-4ea1-4c49-ba84-2909b7fe6f4c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">339.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHC Heritage Classic</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2018</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>24.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.745 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.745 ccm og 87 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.745 ccm og 87 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=0d6a5bb1-4ea1-4c49-ba84-2909b7fe6f4c"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHC Heritage Classic, 339.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="1ee29836-9555-4ea3-83eb-fabf3bc9b42d" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_253752_0YXY_1685621895.jpeg" alt="Harley-Davidson VRSCAW V-Rod" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="1ee29836-9555-4ea3-83eb-fabf3bc9b42d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">169.990 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson VRSCAW V-Rod</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2006</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>44.554 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.131 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.131 ccm og 121 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.131 ccm og 121 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=1ee29836-9555-4ea3-83eb-fabf3bc9b42d"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson VRSCAW V-Rod, 169.990 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="3d07a809-7b59-45ba-9057-88a95fc24592" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_309673_3QSF_1783086648.jpeg" alt="Harley-Davidson FLHTCI Electra Glide Classic" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="3d07a809-7b59-45ba-9057-88a95fc24592" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">229.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHTCI Electra Glide Classic</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2006</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>9.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.449 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.449 ccm og 71 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.449 ccm og 71 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=3d07a809-7b59-45ba-9057-88a95fc24592"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHTCI Electra Glide Classic, 229.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="3ff2b658-2d66-4851-84ea-a3f12937b5d2" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_311420_ADOD_1785673108.jpeg" alt="Harley-Davidson FXLRS Low Rider S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="3ff2b658-2d66-4851-84ea-a3f12937b5d2" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">335.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXLRS Low Rider S</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2023</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>3.200 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.923 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.923 ccm og 105 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.923 ccm og 105 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=3ff2b658-2d66-4851-84ea-a3f12937b5d2"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXLRS Low Rider S, 335.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="48110640-b91b-4b8f-b15c-d48b6730e146" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_305988_Q93A_1778254484.jpeg" alt="Harley-Davidson FLHX Glide" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="48110640-b91b-4b8f-b15c-d48b6730e146" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">559.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHX Glide</span>
-        <span class="card-title-variant" title="Naked">Naked</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2025</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>11.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.923 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.923 ccm og 94 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.923 ccm og 94 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=48110640-b91b-4b8f-b15c-d48b6730e146"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHX Glide Naked, 559.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="506a239e-7d53-44f5-9dfc-a08e573b36ad" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_303076_G67U_1775039020.jpeg" alt="Harley-Davidson FLTRXS Road Glide Special" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="506a239e-7d53-44f5-9dfc-a08e573b36ad" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">469.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLTRXS Road Glide Special</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2022</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>36.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.868 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.868 ccm og 89 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.868 ccm og 89 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=506a239e-7d53-44f5-9dfc-a08e573b36ad"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLTRXS Road Glide Special, 469.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="57a188b4-56a4-4ea6-9fed-88853a6ac217" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_284042_M4B6_1741620221.jpeg" alt="Harley-Davidson FLHC Heritage Classic" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="57a188b4-56a4-4ea6-9fed-88853a6ac217" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">349.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHC Heritage Classic</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2021</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>23.660 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.745 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.745 ccm og 87 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.745 ccm og 87 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=57a188b4-56a4-4ea6-9fed-88853a6ac217"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHC Heritage Classic, 349.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="66952f71-c260-4762-a3a7-72767b7cb254" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_292088_L8SI_1763800761.jpeg" alt="Harley-Davidson FLHRC Road King Classic" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="66952f71-c260-4762-a3a7-72767b7cb254" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">239.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHRC Road King Classic</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2012</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>127.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.690 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.690 ccm og 84 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.690 ccm og 84 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=66952f71-c260-4762-a3a7-72767b7cb254"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHRC Road King Classic, 239.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="6f735990-3607-43bd-90b7-7ba2b21f5f0a" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_311062_P96A_1785159513.jpeg" alt="Harley-Davidson XL883N Iron 883" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="6f735990-3607-43bd-90b7-7ba2b21f5f0a" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">124.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson XL883N</span>
-        <span class="card-title-variant" title="Iron 883">Iron 883</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2009</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>39.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>883 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 883 ccm og 53 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 883 ccm og 53 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=6f735990-3607-43bd-90b7-7ba2b21f5f0a"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson XL883N Iron 883, 124.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="7f9dbc11-2f71-420f-b8be-3b5d0ed118c0" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_295161_5J3I_1757057964.jpeg" alt="Harley-Davidson XL1200N Nightster" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="7f9dbc11-2f71-420f-b8be-3b5d0ed118c0" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">142.990 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson XL1200N</span>
-        <span class="card-title-variant" title="Nightster">Nightster</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2010</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>24.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.202 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.202 ccm og 67 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.202 ccm og 67 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=7f9dbc11-2f71-420f-b8be-3b5d0ed118c0"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson XL1200N Nightster, 142.990 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="83510b36-eb60-47fe-8e0d-0e89ef2394ff" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_299607_YOI9_1768999942.jpeg" alt="Harley-Davidson FLFBS Fat Boy" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="83510b36-eb60-47fe-8e0d-0e89ef2394ff" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">359.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLFBS Fat Boy</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2018</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>19.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.868 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.868 ccm og 94 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.868 ccm og 94 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=83510b36-eb60-47fe-8e0d-0e89ef2394ff"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLFBS Fat Boy, 359.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="8872524d-f2dc-43e2-a345-4e7762f15beb" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_304721_EU70_1776867799.jpeg" alt="Harley-Davidson FXST Softail Standard" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="8872524d-f2dc-43e2-a345-4e7762f15beb" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">229.990 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXST Softail Standard</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2021</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>13.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.745 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.745 ccm og 86 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.745 ccm og 86 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=8872524d-f2dc-43e2-a345-4e7762f15beb"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXST Softail Standard, 229.990 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="907b8eb9-f34f-4c10-972a-d70f456fa7b6" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_306490_BI8Z_1778923617.jpeg" alt="Harley-Davidson FXD Dyna Super Glide" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="907b8eb9-f34f-4c10-972a-d70f456fa7b6" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">149.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXD Dyna Super Glide</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2002</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>44.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.450 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.450 ccm og 68 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.450 ccm og 68 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=907b8eb9-f34f-4c10-972a-d70f456fa7b6"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXD Dyna Super Glide, 149.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="98f2192f-accc-44a7-a66e-b482cc7f43fb" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_285888_T6S0_1744015742.jpeg" alt="Harley-Davidson FLHXS Glide Special" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="98f2192f-accc-44a7-a66e-b482cc7f43fb" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">439.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHXS Glide Special</span>
-        <span class="card-title-variant" title="Naked">Naked</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2020</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>39.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.868 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.868 ccm og 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.868 ccm og 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=98f2192f-accc-44a7-a66e-b482cc7f43fb"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHXS Glide Special Naked, 439.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="a4f92880-7431-4fa0-8794-0daae1d64005" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_302154_CQVM_1773932021.jpeg" alt="Harley-Davidson FXSTI Softail Standard" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="a4f92880-7431-4fa0-8794-0daae1d64005" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">159.999 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXSTI Softail Standard</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2005</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>51.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.450 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.450 ccm og 75 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.450 ccm og 75 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=a4f92880-7431-4fa0-8794-0daae1d64005"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXSTI Softail Standard, 159.999 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="b48b1407-b467-456f-90b0-84a0703cc2ee" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_290586_ZHVR_1750177111.jpeg" alt="Harley-Davidson FXST Softail Standard" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="b48b1407-b467-456f-90b0-84a0703cc2ee" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">229.995 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXST Softail Standard</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2021</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>26.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.745 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.745 ccm og 86 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.745 ccm og 86 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=b48b1407-b467-456f-90b0-84a0703cc2ee"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXST Softail Standard, 229.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="bf48382c-8fad-49b0-afa9-b4f05da266bf" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_290576_PG8L_1750175134.jpeg" alt="Harley-Davidson FXLRST Low Rider ST" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="bf48382c-8fad-49b0-afa9-b4f05da266bf" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">359.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXLRST Low Rider ST</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2022</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>20.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.923 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.923 ccm og 105 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.923 ccm og 105 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=bf48382c-8fad-49b0-afa9-b4f05da266bf"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXLRST Low Rider ST, 359.800 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="c6722045-05c0-454e-9f21-81772096cee4" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_311657_09XZ_1785990862.jpeg" alt="Harley-Davidson FLTRXS Road Glide Special" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="c6722045-05c0-454e-9f21-81772096cee4" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">469.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLTRXS Road Glide Special</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2020</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>17.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.868 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.868 ccm og 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.868 ccm og 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=c6722045-05c0-454e-9f21-81772096cee4"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLTRXS Road Glide Special, 469.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="c7122b70-44cf-4928-8989-b8bb4b0bc4e4" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_294716_JIS6_1756373598.jpeg" alt="Harley-Davidson FLHXS Glide Special" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="c7122b70-44cf-4928-8989-b8bb4b0bc4e4" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">324.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHXS Glide Special</span>
-        <span class="card-title-variant" title="Naked">Naked</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2018</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>97.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.745 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.745 ccm og 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.745 ccm og 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=c7122b70-44cf-4928-8989-b8bb4b0bc4e4"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHXS Glide Special Naked, 324.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="cd8b71f9-f685-4fee-904b-e8ed9e8b6320" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_299270_VCJR_1768561485.jpeg" alt="Harley-Davidson FXSTBI Night Train" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="cd8b71f9-f685-4fee-904b-e8ed9e8b6320" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price pris-mangler">Pris ved henvendelse</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXSTBI Night Train</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2004</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>26.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.449 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.449 ccm og 64 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.449 ccm og 64 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=cd8b71f9-f685-4fee-904b-e8ed9e8b6320"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXSTBI Night Train, Pris ved henvendelse — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="e0f35eaf-b6cc-4427-9ca1-9eb988566e91" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_309416_0QVS_1782553622.jpeg" alt="Harley-Davidson FXSTB Night Train" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="e0f35eaf-b6cc-4427-9ca1-9eb988566e91" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">199.990 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXSTB Night Train</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2000</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>13.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.449 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.449 ccm og 63 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.449 ccm og 63 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=e0f35eaf-b6cc-4427-9ca1-9eb988566e91"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXSTB Night Train, 199.990 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="eacf74ce-fa8b-4360-a7a8-0dda1430e31b" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_292377_ZKDT_1777379282.jpeg" alt="Harley-Davidson FXLRS Low Rider S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="eacf74ce-fa8b-4360-a7a8-0dda1430e31b" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">369.995 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXLRS Low Rider S</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2025</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>8.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.923 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.923 ccm og 105 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.923 ccm og 105 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=eacf74ce-fa8b-4360-a7a8-0dda1430e31b"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXLRS Low Rider S, 369.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="f5491b56-bc65-4cd8-a501-6f404bdcc6e4" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_299252_HWFD_1768485510.jpeg" alt="Harley-Davidson FLSTSCI Springer Classic" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="f5491b56-bc65-4cd8-a501-6f404bdcc6e4" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">259.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLSTSCI Springer Classic</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2005</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>48.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.550 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2." aria-label="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.">Kørekort ikke afgjort</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=f5491b56-bc65-4cd8-a501-6f404bdcc6e4"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLSTSCI Springer Classic, 259.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="f56bc643-82a3-4463-9dc8-c14fb5d1b8d7" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_311610_0HXB_1785932391.jpeg" alt="Harley-Davidson FXLRS Low Rider S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="f56bc643-82a3-4463-9dc8-c14fb5d1b8d7" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">339.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXLRS Low Rider S</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2025</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>2.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.923 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.923 ccm og 105 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.923 ccm og 105 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=f56bc643-82a3-4463-9dc8-c14fb5d1b8d7"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXLRS Low Rider S, 339.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="73338281-1480-4ed0-ab29-205651cc85cd" data-external="1">
-    <div class="card-media">
-      <img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_311916_IALF_1786372765-cropresize-768x540.webp" alt="Harley-Davidson VRSCDX Night R..." loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="73338281-1480-4ed0-ab29-205651cc85cd" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">249.490 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson VRSCDX Night R...</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2017</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>11.700 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.247 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.247 ccm og 122 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.247 ccm og 122 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Horsens, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Horsens</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Jensens Motorcykler (Forhandler · jensensmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>jensensmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=73338281-1480-4ed0-ab29-205651cc85cd"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson VRSCDX Night R..., 249.490 kr. — hos Jensens Motorcykler"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="18b437ee-e89b-4757-a954-3bd996f6a165" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/662936e1-1cd9-43db-bd8e-3976941b6c9d/662936e1-1cd9-43db-bd8e-3976941b6c9d-320x240.webp" alt="Harley-Davidson FXD Dyna Super Glide" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="18b437ee-e89b-4757-a954-3bd996f6a165" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">134.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXD Dyna Super Glide</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2000</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km og kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Varde, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Varde</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=18b437ee-e89b-4757-a954-3bd996f6a165"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXD Dyna Super Glide, 134.900 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="46331708-b8d1-4144-b493-4c8fdd17f9ac" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/96f5466c-60ef-4909-a524-d3c2d66801cb/96f5466c-60ef-4909-a524-d3c2d66801cb-320x240.webp" alt="Harley-Davidson FLTRXS Road Glide Special" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="46331708-b8d1-4144-b493-4c8fdd17f9ac" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">349.400 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLTRXS Road Glide Special</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2017</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km og kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 90 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Tylstrup, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Tylstrup</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=46331708-b8d1-4144-b493-4c8fdd17f9ac"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLTRXS Road Glide Special, 349.400 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="49be9f51-3ef2-477d-ab91-3d347fb8fc1c" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/8a18418b-5b0f-42a5-977d-61539c8637af/8a18418b-5b0f-42a5-977d-61539c8637af-320x240.webp" alt="Harley-Davidson XL 1200 X Forty Eight" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="49be9f51-3ef2-477d-ab91-3d347fb8fc1c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">159.900 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson XL 1200 X</span>
-        <span class="card-title-variant" title="Forty Eight">Forty Eight</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Kilometer</dt><dd>23.900 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.200 ccm</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>årgang</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2." aria-label="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.">Kørekort ikke afgjort</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Tylstrup, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Tylstrup</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (Privat · guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Privat · </span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=49be9f51-3ef2-477d-ab91-3d347fb8fc1c"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson XL 1200 X Forty Eight, 159.900 kr. — hos Gul og Gratis"></a>
-  </article>
-      
+    <section class="section" style="padding-top:var(--space-4);">
+      <div class="section-head">
+        <div><h2 class="brand-sub" id="brand-antal">72 annoncer til salg nu — de første 24 her</h2></div>
+        <a class="section-link" href="soegning.html?brands=Harley-Davidson">Alle 72 i søgningen<span aria-hidden="true"></span></a>
+      </div>
+      <div class="listings-grid" id="brand-listings" data-brand="Harley-Davidson" data-viste="24">
   <article class="card card-external" data-listing-id="0c637624-8bb6-45f0-b08d-c436671cc270" data-external="1">
     <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/179186/Harley-Davidson_FXBRS_Breakout_0_2.jpg?v=1" alt="Harley-Davidson FXBR Breakout" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://images.danbase.dk/Content/Resellers/321/179186/Harley-Davidson_FXBRS_Breakout_0_2.jpg?v=1" alt="Harley-Davidson FXBR Breakout" loading="eager" fetchpriority="high" decoding="async" class="card-photo">
       <button type="button" class="card-compare " data-compare-toggle="0c637624-8bb6-45f0-b08d-c436671cc270" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
     </div>
     <div class="card-body">
@@ -1403,39 +289,6 @@ try{
        aria-label="Se annonce: Harley-Davidson FXST Softail Cruiser, 224.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-external" data-listing-id="1ffc4a17-2790-4c49-93f3-4e889d416113" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/93804/Harley-Davidson_FLSTF_Fat_Boy_0_2.jpg?v=1" alt="Harley-Davidson FLSTF Fat Boy" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="1ffc4a17-2790-4c49-93f3-4e889d416113" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">299.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLSTF Fat Boy</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2004</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.338 ccm</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.338 ccm og 63 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.338 ccm og 63 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=1ffc4a17-2790-4c49-93f3-4e889d416113"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLSTF Fat Boy Cruiser, 299.800 kr. — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="273dd67e-390d-4e44-b668-1141d204bc2a" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/49078/Harley-Davidson_FLSTC_Heritage_Softail_Classic_0_2.jpg?v=1" alt="Harley-Davidson FLSTC Heritage Softail" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -1502,105 +355,6 @@ try{
        aria-label="Se annonce: Harley-Davidson Custom Bike Cruiser, 160.000 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-external" data-listing-id="3dd82018-ba38-4697-81f3-c88654f19085" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/50440/Harley-Davidson_FLHTCUSE_CVO_Electra_Glide_Ultra_Classic_0_2.jpg?v=1" alt="Harley-Davidson CVO Electra Glide Ultra FLHTCUSE CVO Black" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="3dd82018-ba38-4697-81f3-c88654f19085" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">419.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson CVO Electra Glide Ultra FLHTCUSE CVO Black</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2011</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>27.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=3dd82018-ba38-4697-81f3-c88654f19085"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson CVO Electra Glide Ultra FLHTCUSE CVO Black, 419.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="3e0b502f-3a01-4e68-9d11-15155d55aa73" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/95372/Harley-Davidson_FLHRI_Road_King_0_2.jpg?v=1" alt="Harley-Davidson FLHRI Road King" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="3e0b502f-3a01-4e68-9d11-15155d55aa73" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">269.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHRI Road King</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2008</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>24.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=3e0b502f-3a01-4e68-9d11-15155d55aa73"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHRI Road King Cruiser, 269.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="4e274add-78e4-4ae1-bade-bfd9a9d3c02d" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/181721/Harley-Davidson_FLHRCI_Road_King_Classic_0_2.jpg?v=1" alt="Harley-Davidson FLHRCI Road King" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="4e274add-78e4-4ae1-bade-bfd9a9d3c02d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">209.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHRCI Road King</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2007</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>25.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.584 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2." aria-label="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.">Kørekort ikke afgjort</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=4e274add-78e4-4ae1-bade-bfd9a9d3c02d"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHRCI Road King Cruiser, 209.800 kr. — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="55c3eba3-1258-417b-affd-4086b56385af" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/141427/Harley-Davidson_FLSTN_Softail_Deluxe_0_2.jpg?v=1" alt="Harley-Davidson FLSTN Softail Deluxe" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -1632,39 +386,6 @@ try{
     <a href="annonce.html?id=55c3eba3-1258-417b-affd-4086b56385af"
        class="card-link"
        aria-label="Se annonce: Harley-Davidson FLSTN Softail Deluxe Cruiser, 254.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="6f4d7679-e307-43be-a605-58f89e0404ae" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/110797/Harley-Davidson_FLHTCU_Electra_Glide_Ultra_Classic_0_2.jpg?v=1" alt="Harley-Davidson FLHTCU Electra Glide Ultra" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="6f4d7679-e307-43be-a605-58f89e0404ae" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">329.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHTCU Electra Glide Ultra</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2014</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>16.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=6f4d7679-e307-43be-a605-58f89e0404ae"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHTCU Electra Glide Ultra Cruiser, 329.800 kr. — hos MC Syd"></a>
   </article>
       
   <article class="card card-external" data-listing-id="74bef628-6d21-4e40-b97c-16e3012a8428" data-external="1">
@@ -1700,39 +421,6 @@ try{
        aria-label="Se annonce: Harley-Davidson FXBB Bob Cruiser, 194.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-external" data-listing-id="846a365b-d40f-462b-8101-7f8725c9168a" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/154654/Harley-Davidson_FXSBSE_CVO_Breakout_0_2.jpg?v=1" alt="Harley-Davidson FXSBSE CVO Breakout" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="846a365b-d40f-462b-8101-7f8725c9168a" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">389.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXSBSE CVO Breakout</span>
-        <span class="card-title-variant"></span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2013</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>3.400 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.802 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2." aria-label="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.">Kørekort ikke afgjort</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=846a365b-d40f-462b-8101-7f8725c9168a"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXSBSE CVO Breakout, 389.800 kr. — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="8788719e-90ee-4eda-8f27-eed84ac71abd" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/172175/Harley-Davidson_FLHTCUSE_CVO_Electra_Glide_Ultra_Classic_0_2.jpg?v=1" alt="Harley-Davidson FLHTCUSE CVO Electra Glide Ultra" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -1764,39 +452,6 @@ try{
     <a href="annonce.html?id=8788719e-90ee-4eda-8f27-eed84ac71abd"
        class="card-link"
        aria-label="Se annonce: Harley-Davidson FLHTCUSE CVO Electra Glide Ultra Touring, 319.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="8ea6f1bb-3632-45b6-b6ef-4b045e996b7f" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/63903/Harley-Davidson_FLSTC_Heritage_Softail_Classic_0_2.jpg?v=1" alt="Harley-Davidson FLSTC Heritage Softail" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="8ea6f1bb-3632-45b6-b6ef-4b045e996b7f" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">209.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLSTC Heritage Softail</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2010</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>91.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=8ea6f1bb-3632-45b6-b6ef-4b045e996b7f"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLSTC Heritage Softail Cruiser, 209.800 kr. — hos MC Syd"></a>
   </article>
       
   <article class="card card-external" data-listing-id="91ad460a-1980-42b7-beb4-121f24cb17b5" data-external="1">
@@ -1931,39 +586,6 @@ try{
        aria-label="Se annonce: Harley-Davidson FLSTC Heritage Softail Cruiser, 189.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-external" data-listing-id="9f7a9c63-b3d1-4a6c-ad75-b1aa0e0bc8bf" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/179184/Harley-Davidson_FLHTK_Electra_Glide_Ultra_Limited_0_2.jpg?v=1" alt="Harley-Davidson FLHTK Electra Glide Ultra Limited" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="9f7a9c63-b3d1-4a6c-ad75-b1aa0e0bc8bf" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">364.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHTK Electra Glide Ultra Limited</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2016</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>17.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=9f7a9c63-b3d1-4a6c-ad75-b1aa0e0bc8bf"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHTK Electra Glide Ultra Limited Cruiser, 364.800 kr. — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="a2407b41-a10f-4d87-b1d3-0d32500abf48" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/166520/Harley-Davidson_FXLRST_Low_Rider_ST_0_2.jpg?v=1" alt="Harley-Davidson FXLRS ST Low Rider ST" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -1995,39 +617,6 @@ try{
     <a href="annonce.html?id=a2407b41-a10f-4d87-b1d3-0d32500abf48"
        class="card-link"
        aria-label="Se annonce: Harley-Davidson FXLRS ST Low Rider ST, 359.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="a38d1c3d-0fb6-4c10-8778-0d577ba5a2ca" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/160814/Harley-Davidson_FLSTC_Heritage_Softail_Classic_0_2.jpg?v=1" alt="Harley-Davidson FLSTC Heritage Softail" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="a38d1c3d-0fb6-4c10-8778-0d577ba5a2ca" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">199.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLSTC Heritage Softail</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2006</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>41.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=a38d1c3d-0fb6-4c10-8778-0d577ba5a2ca"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLSTC Heritage Softail Cruiser, 199.800 kr. — hos MC Syd"></a>
   </article>
       
   <article class="card card-external" data-listing-id="a970805c-fa63-4f31-9899-b03929c40388" data-external="1">
@@ -2096,39 +685,6 @@ try{
        aria-label="Se annonce: Harley-Davidson FLHTCUSE CVO Electra Glide Ultra Cruiser, 319.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-external" data-listing-id="b14e8321-a5cf-4af3-8c14-f799c637c78e" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/162842/Harley-Davidson_FLHTP_Electra_Glide_Police_0_2.jpg?v=1" alt="Harley-Davidson FLHTP Electra Glide Police" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="b14e8321-a5cf-4af3-8c14-f799c637c78e" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">449.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHTP Electra Glide Police</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2023</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>19.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=b14e8321-a5cf-4af3-8c14-f799c637c78e"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHTP Electra Glide Police Cruiser, 449.800 kr. — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="bcd3311f-c47c-4ec8-a56d-c00dc078b071" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/178201/Harley-Davidson_XL883_Standard_0_2.jpg?v=1" alt="Harley-Davidson XL883 Standard" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -2160,72 +716,6 @@ try{
     <a href="annonce.html?id=bcd3311f-c47c-4ec8-a56d-c00dc078b071"
        class="card-link"
        aria-label="Se annonce: Harley-Davidson XL883 Standard Cruiser, 99.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="c9c344bc-9769-4f6c-a682-4ca90117bf76" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/160443/Harley-Davidson_FLHRC_Road_King_Classic_0_2.jpg?v=1" alt="Harley-Davidson FLHRC Road King" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="c9c344bc-9769-4f6c-a682-4ca90117bf76" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">289.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHRC Road King</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2013</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>37.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=c9c344bc-9769-4f6c-a682-4ca90117bf76"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHRC Road King Cruiser, 289.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="d26004ec-7480-456b-83f4-06e37e99367b" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/161161/Harley-Davidson_FLHTCUSE_CVO_Electra_Glide_Ultra_Classic_0_2.jpg?v=1" alt="Harley-Davidson FLHTCUSE CVO Electra Glide Ultra" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="d26004ec-7480-456b-83f4-06e37e99367b" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">389.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FLHTCUSE CVO Electra Glide Ultra</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2011</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>27.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=d26004ec-7480-456b-83f4-06e37e99367b"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FLHTCUSE CVO Electra Glide Ultra Cruiser, 389.800 kr. — hos MC Syd"></a>
   </article>
       
   <article class="card card-external" data-listing-id="dadd2ec6-bb03-4c75-bad0-adff1c024768" data-external="1">
@@ -2261,39 +751,6 @@ try{
        aria-label="Se annonce: Harley-Davidson FLSTC Heritage Softail Cruiser, 199.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-external" data-listing-id="dc60247b-3ff8-444c-bf42-f8158ed6b318" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/178757/Harley-Davidson_FXST_Softail_0_2.jpg?v=1" alt="Harley-Davidson Softail FXST" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="dc60247b-3ff8-444c-bf42-f8158ed6b318" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">159.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson Softail FXST</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2003</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>48.000 km</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>kubik</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes." aria-label="Annoncen oplyser hverken kubik eller effekt, så kørekortkategorien kan ikke udledes.">Kørekort ukendt</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=dc60247b-3ff8-444c-bf42-f8158ed6b318"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson Softail FXST Cruiser, 159.800 kr. — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="e5cd5be5-8dfa-4613-a2fb-377a3b78a639" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/161116/Harley-Davidson_FLHR_Road_King_0_2.jpg?v=1" alt="Harley-Davidson FLHR Road King" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -2325,39 +782,6 @@ try{
     <a href="annonce.html?id=e5cd5be5-8dfa-4613-a2fb-377a3b78a639"
        class="card-link"
        aria-label="Se annonce: Harley-Davidson FLHR Road King Cruiser, 249.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-external" data-listing-id="e8547309-af82-44ae-9b1b-afc3fba329e6" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/181128/Harley-Davidson_FXD_Dyna_Super_Glide_0_2.jpg?v=1" alt="Harley-Davidson FXD Dyna Super Glide" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="e8547309-af82-44ae-9b1b-afc3fba329e6" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">139.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXD Dyna Super Glide</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2002</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>44.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.449 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2." aria-label="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.">Kørekort ikke afgjort</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=e8547309-af82-44ae-9b1b-afc3fba329e6"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXD Dyna Super Glide Cruiser, 139.800 kr. — hos MC Syd"></a>
   </article>
       
   <article class="card card-external" data-listing-id="ea38ccc5-1c75-45cc-a947-24548c6012ca" data-external="1">
@@ -2393,39 +817,6 @@ try{
        aria-label="Se annonce: Harley-Davidson FLD Switchback Cruiser, 229.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-external" data-listing-id="ed3eddfc-7385-4e68-ae53-43081e6c50e5" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/183031/Harley-Davidson_FXBB_Street_Bob_0_2.jpg?v=1" alt="Harley-Davidson FXBB Bob" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="ed3eddfc-7385-4e68-ae53-43081e6c50e5" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price pris-mangler">Pris ved henvendelse</span>
-        
-        <span class="card-salgsmarkoerer" title="BYTTER GERNE">BYTTER GERNE</span>
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson FXBB Bob</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2019</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>19.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>1.745 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.745 ccm og 87 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.745 ccm og 87 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=ed3eddfc-7385-4e68-ae53-43081e6c50e5"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson FXBB Bob Cruiser, Pris ved henvendelse — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="f2f726ce-c043-4521-abf9-752f4c99ddd8" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/153353/Harley-Davidson_XL1200N_Nightster_0_2.jpg?v=1" alt="Harley-Davidson XL1200N Nightster" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -2459,39 +850,6 @@ try{
        aria-label="Se annonce: Harley-Davidson XL1200N Nightster Cruiser, 149.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-external" data-listing-id="f3fdec78-571d-461a-9eed-3b69a3a8fca0" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/180712/Harley-Davidson_RH975_Nightster_0_2.jpg?v=1" alt="Harley-Davidson RH975 Nightster" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="f3fdec78-571d-461a-9eed-3b69a3a8fca0" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">149.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">Harley-Davidson RH975 Nightster</span>
-        <span class="card-title-variant" title="Cruiser">Cruiser</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2026</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>975 ccm</dd></div>
-          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2." aria-label="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.">Kørekort ikke afgjort</span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=f3fdec78-571d-461a-9eed-3b69a3a8fca0"
-       class="card-link"
-       aria-label="Se annonce: Harley-Davidson RH975 Nightster Cruiser, 149.800 kr. — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="fa5bd7b4-e8f4-466e-ab49-32fe44a4cafb" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/141429/Harley-Davidson_FXDF_Dyna_Fat_Bob_0_2.jpg?v=3" alt="Harley-Davidson FXDF Dyna Fat Bob" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -2523,13 +881,103 @@ try{
     <a href="annonce.html?id=fa5bd7b4-e8f4-466e-ab49-32fe44a4cafb"
        class="card-link"
        aria-label="Se annonce: Harley-Davidson FXDF Dyna Fat Bob Cruiser, 214.800 kr. — hos MC Syd"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="00c5342b-3219-4f49-9cdb-160d12d181de" data-external="1">
+    <div class="card-media">
+      <img src="https://www.123mc.dk/large-mcimgs-400_286820_LD23_1747222454.jpeg" alt="Harley-Davidson FLHTCUI Electra Glide Ultra Classic" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="00c5342b-3219-4f49-9cdb-160d12d181de" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">199.900 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Harley-Davidson FLHTCUI Electra Glide Ultra</span>
+        <span class="card-title-variant" title="Classic">Classic</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2005</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>88.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.449 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.449 ccm og 71 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.449 ccm og 71 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Rydbergs MC (Forhandler · rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=00c5342b-3219-4f49-9cdb-160d12d181de"
+       class="card-link"
+       aria-label="Se annonce: Harley-Davidson FLHTCUI Electra Glide Ultra Classic, 199.900 kr. — hos Rydbergs MC"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="73338281-1480-4ed0-ab29-205651cc85cd" data-external="1">
+    <div class="card-media">
+      <img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_311916_IALF_1786372765-cropresize-768x540.webp" alt="Harley-Davidson VRSCDX Night R..." loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="73338281-1480-4ed0-ab29-205651cc85cd" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">249.490 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Harley-Davidson VRSCDX Night R...</span>
+        <span class="card-title-variant"></span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2017</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>11.700 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.247 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kan føres på A-kørekort. Udledt af 1.247 ccm og 122 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser." aria-label="Kan føres på A-kørekort. Udledt af 1.247 ccm og 122 hk — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.">Kørekort A</span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Horsens, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Horsens</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Jensens Motorcykler (Forhandler · jensensmc.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>jensensmc.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=73338281-1480-4ed0-ab29-205651cc85cd"
+       class="card-link"
+       aria-label="Se annonce: Harley-Davidson VRSCDX Night R..., 249.490 kr. — hos Jensens Motorcykler"></a>
   </article></div>
+      <p class="brand-mere"><a href="soegning.html?brands=Harley-Davidson" class="btn btn-primary">Se alle 72 Harley-Davidson i søgningen — med filtre og sortering</a></p>
+      <div class="brand-actions">
+        <a href="opret-annonce.html" class="btn btn-outline">Sælg din Harley-Davidson</a>
+      </div>
       <noscript>
         <ul class="brand-noscript">
-          <li><a href="annonce.html?id=315b512d-9483-4162-a6e1-783933843ed5">Harley-Davidson FLHX Glide — 2007, 219.400 kr. (Tylstrup)</a></li>
-          <li><a href="annonce.html?id=95c815c8-abc8-44f7-9e1b-64adb9b21a8d">Harley-Davidson FXE Super Glide — 1980, 99.400 kr. (Tylstrup)</a></li>
-          <li><a href="annonce.html?id=ad8159a6-d1d7-42f7-a228-afb2f255d479">Harley-Davidson FXBB Bob 107&quot; — 299.900 kr., 29.500 km (Tylstrup)</a></li>
+          <li><a href="annonce.html?id=0c637624-8bb6-45f0-b08d-c436671cc270">Harley-Davidson FXBR Breakout — 2020, 374.800 kr., 13.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=1456cf73-b544-471f-8857-ed3fcd540a4b">Harley-Davidson FLSB Glide — 2019, 249.800 kr., 47.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=189f2b8c-740a-47ad-867d-fc1433086cbc">Harley-Davidson FXS Softail Blackline — 2011, 199.800 kr., 45.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=1bb547a1-dd88-4688-aa4b-53c6ae6ad2d6">Harley-Davidson FXST Softail — 2021, 224.800 kr., 17.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=273dd67e-390d-4e44-b668-1141d204bc2a">Harley-Davidson FLSTC Heritage Softail — 2006, 199.800 kr., 46.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=29f6dcbc-74db-4469-acab-0d4fb9d226ee">Harley-Davidson Custom Bike — 1976, 160.000 kr., 5.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=55c3eba3-1258-417b-affd-4086b56385af">Harley-Davidson FLSTN Softail Deluxe — 2013, 254.800 kr., 54.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=74bef628-6d21-4e40-b97c-16e3012a8428">Harley-Davidson FXBB Bob — 2013, 194.800 kr., 14.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=8788719e-90ee-4eda-8f27-eed84ac71abd">Harley-Davidson FLHTCUSE CVO Electra Glide Ultra — 2015, 319.800 kr., 80.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=91ad460a-1980-42b7-beb4-121f24cb17b5">Harley-Davidson XL883L — 2019, 144.800 kr., 13.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=9a881d01-aff5-48c7-8231-9d37e8c0a4f8">Harley-Davidson FLHRC Road King — 2008, 234.800 kr., 43.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=9b6e3223-35d2-4a68-be56-02f3dc24e3ae">Harley-Davidson FLTRI Road Glide — 2008, 284.800 kr., 70.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=9ec34a18-5e73-43ee-bea0-781f76966561">Harley-Davidson FLSTC Heritage Softail — 2006, 189.800 kr., 69.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=a2407b41-a10f-4d87-b1d3-0d32500abf48">Harley-Davidson FXLRS ST Low Rider ST — 2022, 359.800 kr., 18.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=a970805c-fa63-4f31-9899-b03929c40388">Harley-Davidson FLHTCI Electra Glide — 2012, 274.800 kr., 51.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=ada8f954-ec5c-447e-9d9e-3d76d80a8242">Harley-Davidson FLHTCUSE CVO Electra Glide Ultra — 2009, 319.800 kr., 70.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=bcd3311f-c47c-4ec8-a56d-c00dc078b071">Harley-Davidson XL883 Standard — 2007, 99.800 kr., 31.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=dadd2ec6-bb03-4c75-bad0-adff1c024768">Harley-Davidson FLSTC Heritage Softail — 2010, 199.800 kr., 91.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=e5cd5be5-8dfa-4613-a2fb-377a3b78a639">Harley-Davidson FLHR Road King — 2008, 249.800 kr., 24.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=ea38ccc5-1c75-45cc-a947-24548c6012ca">Harley-Davidson FLD Switchback — 2011, 229.800 kr., 29.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=f2f726ce-c043-4521-abf9-752f4c99ddd8">Harley-Davidson XL1200N Nightster — 2010, 149.800 kr., 21.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=fa5bd7b4-e8f4-466e-ab49-32fe44a4cafb">Harley-Davidson FXDF Dyna Fat Bob — 2014, 214.800 kr., 28.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=00c5342b-3219-4f49-9cdb-160d12d181de">Harley-Davidson FLHTCUI Electra Glide Ultra Classic — 2005, 199.900 kr., 88.000 km (Thorsø)</a></li>
+          <li><a href="annonce.html?id=73338281-1480-4ed0-ab29-205651cc85cd">Harley-Davidson VRSCDX Night R... — 2017, 249.490 kr., 11.700 km (Horsens)</a></li>
           <li><a href="annonce.html?id=02485845-7c25-4542-956a-9c73f9f8321a">Harley-Davidson FLS Softail Slim — 2012, 259.900 kr., 36.000 km (Thorsø)</a></li>
           <li><a href="annonce.html?id=09e13fa8-0445-4a5c-9366-b1695c74fb0c">Harley-Davidson FLHRXS Road King Special — 2019, 329.990 kr., 78.000 km (Thorsø)</a></li>
           <li><a href="annonce.html?id=0d6a5bb1-4ea1-4c49-ba84-2909b7fe6f4c">Harley-Davidson FLHC Heritage Classic — 2018, 339.900 kr., 24.000 km (Thorsø)</a></li>
@@ -2551,61 +999,41 @@ try{
           <li><a href="annonce.html?id=bf48382c-8fad-49b0-afa9-b4f05da266bf">Harley-Davidson FXLRST Low Rider ST — 2022, 359.800 kr., 20.000 km (Thorsø)</a></li>
           <li><a href="annonce.html?id=c6722045-05c0-454e-9f21-81772096cee4">Harley-Davidson FLTRXS Road Glide Special — 2020, 469.900 kr., 17.000 km (Thorsø)</a></li>
           <li><a href="annonce.html?id=c7122b70-44cf-4928-8989-b8bb4b0bc4e4">Harley-Davidson FLHXS Glide Special — 2018, 324.900 kr., 97.000 km (Thorsø)</a></li>
-          <li><a href="annonce.html?id=cd8b71f9-f685-4fee-904b-e8ed9e8b6320">Harley-Davidson FXSTBI Night Train — 2004, pris ved henvendelse, 26.000 km (Thorsø)</a></li>
           <li><a href="annonce.html?id=e0f35eaf-b6cc-4427-9ca1-9eb988566e91">Harley-Davidson FXSTB Night Train — 2000, 199.990 kr., 13.000 km (Thorsø)</a></li>
           <li><a href="annonce.html?id=eacf74ce-fa8b-4360-a7a8-0dda1430e31b">Harley-Davidson FXLRS Low Rider S — 2025, 369.995 kr., 8.000 km (Thorsø)</a></li>
-          <li><a href="annonce.html?id=f5491b56-bc65-4cd8-a501-6f404bdcc6e4">Harley-Davidson FLSTSCI Springer Classic — 2005, 259.900 kr., 48.000 km (Thorsø)</a></li>
           <li><a href="annonce.html?id=f56bc643-82a3-4463-9dc8-c14fb5d1b8d7">Harley-Davidson FXLRS Low Rider S — 2025, 339.900 kr., 2.000 km (Thorsø)</a></li>
-          <li><a href="annonce.html?id=73338281-1480-4ed0-ab29-205651cc85cd">Harley-Davidson VRSCDX Night R... — 2017, 249.490 kr., 11.700 km (Horsens)</a></li>
-          <li><a href="annonce.html?id=18b437ee-e89b-4757-a954-3bd996f6a165">Harley-Davidson FXD Dyna Super Glide — 2000, 134.900 kr. (Varde)</a></li>
-          <li><a href="annonce.html?id=46331708-b8d1-4144-b493-4c8fdd17f9ac">Harley-Davidson FLTRXS Road Glide Special — 2017, 349.400 kr. (Tylstrup)</a></li>
-          <li><a href="annonce.html?id=49be9f51-3ef2-477d-ab91-3d347fb8fc1c">Harley-Davidson XL 1200 X Forty Eight — 159.900 kr., 23.900 km (Tylstrup)</a></li>
-          <li><a href="annonce.html?id=0c637624-8bb6-45f0-b08d-c436671cc270">Harley-Davidson FXBR Breakout — 2020, 374.800 kr., 13.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=1456cf73-b544-471f-8857-ed3fcd540a4b">Harley-Davidson FLSB Glide — 2019, 249.800 kr., 47.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=189f2b8c-740a-47ad-867d-fc1433086cbc">Harley-Davidson FXS Softail Blackline — 2011, 199.800 kr., 45.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=1bb547a1-dd88-4688-aa4b-53c6ae6ad2d6">Harley-Davidson FXST Softail — 2021, 224.800 kr., 17.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=1ffc4a17-2790-4c49-93f3-4e889d416113">Harley-Davidson FLSTF Fat Boy — 2004, 299.800 kr. (Rødding)</a></li>
-          <li><a href="annonce.html?id=273dd67e-390d-4e44-b668-1141d204bc2a">Harley-Davidson FLSTC Heritage Softail — 2006, 199.800 kr., 46.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=29f6dcbc-74db-4469-acab-0d4fb9d226ee">Harley-Davidson Custom Bike — 1976, 160.000 kr., 5.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=3dd82018-ba38-4697-81f3-c88654f19085">Harley-Davidson CVO Electra Glide Ultra FLHTCUSE CVO Black — 2011, 419.800 kr., 27.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=3e0b502f-3a01-4e68-9d11-15155d55aa73">Harley-Davidson FLHRI Road King — 2008, 269.800 kr., 24.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=ed3eddfc-7385-4e68-ae53-43081e6c50e5">Harley-Davidson FXBB Bob — 2019, pris ved henvendelse, 19.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=4e274add-78e4-4ae1-bade-bfd9a9d3c02d">Harley-Davidson FLHRCI Road King — 2007, 209.800 kr., 25.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=55c3eba3-1258-417b-affd-4086b56385af">Harley-Davidson FLSTN Softail Deluxe — 2013, 254.800 kr., 54.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=6f4d7679-e307-43be-a605-58f89e0404ae">Harley-Davidson FLHTCU Electra Glide Ultra — 2014, 329.800 kr., 16.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=74bef628-6d21-4e40-b97c-16e3012a8428">Harley-Davidson FXBB Bob — 2013, 194.800 kr., 14.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=cd8b71f9-f685-4fee-904b-e8ed9e8b6320">Harley-Davidson FXSTBI Night Train — 2004, pris ved henvendelse, 26.000 km (Thorsø)</a></li>
           <li><a href="annonce.html?id=846a365b-d40f-462b-8101-7f8725c9168a">Harley-Davidson FXSBSE CVO Breakout — 2013, 389.800 kr., 3.400 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=8788719e-90ee-4eda-8f27-eed84ac71abd">Harley-Davidson FLHTCUSE CVO Electra Glide Ultra — 2015, 319.800 kr., 80.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=e8547309-af82-44ae-9b1b-afc3fba329e6">Harley-Davidson FXD Dyna Super Glide — 2002, 139.800 kr., 44.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=315b512d-9483-4162-a6e1-783933843ed5">Harley-Davidson FLHX Glide — 2007, 219.400 kr. (Tylstrup)</a></li>
+          <li><a href="annonce.html?id=3dd82018-ba38-4697-81f3-c88654f19085">Harley-Davidson CVO Electra Glide Ultra — 2011, 419.800 kr., 27.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=f5491b56-bc65-4cd8-a501-6f404bdcc6e4">Harley-Davidson FLSTSCI Springer Classic — 2005, 259.900 kr., 48.000 km (Thorsø)</a></li>
+          <li><a href="annonce.html?id=46331708-b8d1-4144-b493-4c8fdd17f9ac">Harley-Davidson FLTRXS Road Glide Special — 2017, 349.400 kr. (Tylstrup)</a></li>
+          <li><a href="annonce.html?id=3e0b502f-3a01-4e68-9d11-15155d55aa73">Harley-Davidson FLHRI Road King — 2008, 269.800 kr., 24.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=95c815c8-abc8-44f7-9e1b-64adb9b21a8d">Harley-Davidson FXE Super Glide — 1980, 99.400 kr. (Tylstrup)</a></li>
+          <li><a href="annonce.html?id=6f4d7679-e307-43be-a605-58f89e0404ae">Harley-Davidson FLHTCU Electra Glide Ultra — 2014, 329.800 kr., 16.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=8ea6f1bb-3632-45b6-b6ef-4b045e996b7f">Harley-Davidson FLSTC Heritage Softail — 2010, 209.800 kr., 91.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=91ad460a-1980-42b7-beb4-121f24cb17b5">Harley-Davidson XL883L — 2019, 144.800 kr., 13.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=9a881d01-aff5-48c7-8231-9d37e8c0a4f8">Harley-Davidson FLHRC Road King — 2008, 234.800 kr., 43.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=9b6e3223-35d2-4a68-be56-02f3dc24e3ae">Harley-Davidson FLTRI Road Glide — 2008, 284.800 kr., 70.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=9ec34a18-5e73-43ee-bea0-781f76966561">Harley-Davidson FLSTC Heritage Softail — 2006, 189.800 kr., 69.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=9f7a9c63-b3d1-4a6c-ad75-b1aa0e0bc8bf">Harley-Davidson FLHTK Electra Glide Ultra Limited — 2016, 364.800 kr., 17.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=a2407b41-a10f-4d87-b1d3-0d32500abf48">Harley-Davidson FXLRS ST Low Rider ST — 2022, 359.800 kr., 18.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=a38d1c3d-0fb6-4c10-8778-0d577ba5a2ca">Harley-Davidson FLSTC Heritage Softail — 2006, 199.800 kr., 41.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=a970805c-fa63-4f31-9899-b03929c40388">Harley-Davidson FLHTCI Electra Glide — 2012, 274.800 kr., 51.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=ada8f954-ec5c-447e-9d9e-3d76d80a8242">Harley-Davidson FLHTCUSE CVO Electra Glide Ultra — 2009, 319.800 kr., 70.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=b14e8321-a5cf-4af3-8c14-f799c637c78e">Harley-Davidson FLHTP Electra Glide Police — 2023, 449.800 kr., 19.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=bcd3311f-c47c-4ec8-a56d-c00dc078b071">Harley-Davidson XL883 Standard — 2007, 99.800 kr., 31.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=c9c344bc-9769-4f6c-a682-4ca90117bf76">Harley-Davidson FLHRC Road King — 2013, 289.800 kr., 37.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=d26004ec-7480-456b-83f4-06e37e99367b">Harley-Davidson FLHTCUSE CVO Electra Glide Ultra — 2011, 389.800 kr., 27.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=dadd2ec6-bb03-4c75-bad0-adff1c024768">Harley-Davidson FLSTC Heritage Softail — 2010, 199.800 kr., 91.000 km (Rødding)</a></li>
           <li><a href="annonce.html?id=dc60247b-3ff8-444c-bf42-f8158ed6b318">Harley-Davidson Softail FXST — 2003, 159.800 kr., 48.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=e5cd5be5-8dfa-4613-a2fb-377a3b78a639">Harley-Davidson FLHR Road King — 2008, 249.800 kr., 24.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=e8547309-af82-44ae-9b1b-afc3fba329e6">Harley-Davidson FXD Dyna Super Glide — 2002, 139.800 kr., 44.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=ea38ccc5-1c75-45cc-a947-24548c6012ca">Harley-Davidson FLD Switchback — 2011, 229.800 kr., 29.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=ed3eddfc-7385-4e68-ae53-43081e6c50e5">Harley-Davidson FXBB Bob — 2019, pris ved henvendelse, 19.000 km (Rødding)</a></li>
-          <li><a href="annonce.html?id=f2f726ce-c043-4521-abf9-752f4c99ddd8">Harley-Davidson XL1200N Nightster — 2010, 149.800 kr., 21.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=49be9f51-3ef2-477d-ab91-3d347fb8fc1c">Harley-Davidson XL 1200 X Forty Eight — 159.900 kr., 23.900 km (Tylstrup)</a></li>
           <li><a href="annonce.html?id=f3fdec78-571d-461a-9eed-3b69a3a8fca0">Harley-Davidson RH975 Nightster — 2026, 149.800 kr. (Rødding)</a></li>
-          <li><a href="annonce.html?id=fa5bd7b4-e8f4-466e-ab49-32fe44a4cafb">Harley-Davidson FXDF Dyna Fat Bob — 2014, 214.800 kr., 28.000 km (Rødding)</a></li>
+          <li><a href="annonce.html?id=ad8159a6-d1d7-42f7-a228-afb2f255d479">Harley-Davidson FXBB Bob 107&quot; — 299.900 kr., 29.500 km (Tylstrup)</a></li>
+          <li><a href="annonce.html?id=18b437ee-e89b-4757-a954-3bd996f6a165">Harley-Davidson FXD Dyna Super Glide — 2000, 134.900 kr. (Varde)</a></li>
         </ul>
       </noscript>
     </section>
 
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Prisniveau for brugte Harley-Davidson</h2>
-      <p>De 70 Harley-Davidson-annoncer med opgivet pris ligger mellem 99.400 kr. og 559.900 kr., med en median på 249.645 kr. — den dyreste annonce koster 5,6 gange så meget som den billigste, så udvalget dækker både billige startmotorcykler og dyrere modeller. 2 annoncer har ingen opgivet pris og skal kontaktes for at få den. Ligger prisniveauet uden for budgettet, ligger <a href="maerke-ktm.html">brugte KTM</a> typisk i samme leje.</p>
-      <h2 class="brand-sub">Kørekort til brugt Harley-Davidson</h2>
+      <p>De 70 Harley-Davidson-annoncer med opgivet pris ligger mellem 99.400 kr. og 559.900 kr., med en median på 249.645 kr. — den dyreste annonce koster 5,6 gange så meget som den billigste, så udvalget dækker både billige startmotorcykler og dyrere modeller. 2 annoncer har ingen opgivet pris og skal kontaktes for at få den. <a href="maerke-ktm.html">KTM</a> ligger typisk i samme prisleje — se dem, hvis udvalget her er for lille.</p>
+      <h2 class="brand-sub">Kørekort til Harley-Davidson</h2>
       <p>Ud af 72 annoncer kan vi afgøre kørekortkategorien på 54: 54 kræver stort kørekort (kategori A), altså over de 47 hk (35 kW), A2 tillader. De resterende 18 annoncer mangler effektoplysningen hos kilden og vises uden kategori.</p>
       <h2 class="brand-sub">Hvad du skal tjekke, når du køber en brugt Harley-Davidson</h2>
       <p>Tjek krom og udstødning for rust, slitage på primærkæde eller -rem, og om sadelhøjden passer dig — en tung cruiser er svær at rejse op alene, hvis den vælter på stativet. (Rådet gælder mest for cruiser, som 31 af de 72 annoncer er — se selve annoncen for resten.) Bikerbasen har ikke selv efterset motorcyklerne — se <a href="sikkerhed.html">rådene om tryg handel</a> før du kører af sted for at se en.</p>
@@ -2622,7 +1050,7 @@ try{
         <p class="brand-intro">Nej, ikke blandt de annoncer, vi kan afgøre — 54 af 54 Harley-Davidson-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de 47 hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle. De resterende 18 annoncer mangler effektoplysningen og vises derfor uden kategori.</p>
       </details>
       <details class="brand-faq-item">
-        <summary>Hvilke Harley-Davidson-modeller kan jeg finde brugt på Bikerbasen?</summary>
+        <summary>Hvilke Harley-Davidson-modeller kan jeg finde på Bikerbasen?</summary>
         <p class="brand-intro">Blandt de 72 Harley-Davidson-annoncer går FLSTC Heritage Softail (5 stk.), FLHTCUSE CVO Electra Glide Ultra (3 stk.), FLTRXS Road Glide Special (3 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Harley-Davidson-annoncer for at se præcis, hvad der er til salg i dag.</p>
       </details>
     </section>
@@ -2630,16 +1058,16 @@ try{
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre mærker</h2>
       <div class="popular-row">
-        <a class="popular-chip" href="maerke-andet-maerke.html">Andet Mærke</a>
-        <a class="popular-chip" href="maerke-aprilia.html">Aprilia</a>
-        <a class="popular-chip" href="maerke-benelli.html">Benelli</a>
-        <a class="popular-chip" href="maerke-bmw.html">BMW</a>
-        <a class="popular-chip" href="maerke-bsa.html">BSA</a>
-        <a class="popular-chip" href="maerke-cagiva.html">Cagiva</a>
-        <a class="popular-chip" href="maerke-ducati.html">Ducati</a>
-        <a class="popular-chip" href="maerke-fb-mondial.html">Fb Mondial</a>
-        <a class="popular-chip" href="maerke-honda.html">Honda</a>
-        <a class="popular-chip" href="maerke-husqvarna.html">Husqvarna</a>
+        <a class="popular-chip" href="maerke-honda.html">Honda · 262</a>
+        <a class="popular-chip" href="maerke-yamaha.html">Yamaha · 44</a>
+        <a class="popular-chip" href="maerke-suzuki.html">Suzuki · 42</a>
+        <a class="popular-chip" href="maerke-triumph.html">Triumph · 27</a>
+        <a class="popular-chip" href="maerke-bmw.html">BMW · 26</a>
+        <a class="popular-chip" href="maerke-kawasaki.html">Kawasaki · 26</a>
+        <a class="popular-chip" href="maerke-ktm.html">KTM · 13</a>
+        <a class="popular-chip" href="maerke-aprilia.html">Aprilia · 7</a>
+        <a class="popular-chip" href="maerke-royal-enfield.html">Royal Enfield · 7</a>
+        <a class="popular-chip" href="maerke-bsa.html">BSA · 3</a>
         <a class="popular-chip" href="maerker.html">Alle mærker</a>
       </div>
     </section>
@@ -2689,21 +1117,23 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=1bbc169f"></script>
-<script defer src="js/supabase-config.js?v=1bbc169f"></script>
-<script defer src="js/supabase-api.js?v=1bbc169f"></script>
-<script defer src="js/icons.js?v=1bbc169f"></script>
-<script defer src="js/bike-art.js?v=1bbc169f"></script>
+<script defer src="js/security.js?v=9813248f"></script>
+<script defer src="js/supabase-config.js?v=9813248f"></script>
+<script defer src="js/supabase-api.js?v=9813248f"></script>
+<script defer src="js/icons.js?v=9813248f"></script>
+<script defer src="js/bike-art.js?v=9813248f"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=1bbc169f"></script>
-<script defer src="js/store.js?v=1bbc169f"></script>
-<script defer src="js/maaling.js?v=1bbc169f"></script>
-<script defer src="js/backend-bridge.js?v=1bbc169f"></script>
-<script defer src="js/components.js?v=1bbc169f"></script>
-<script defer src="js/maerke.js?v=1bbc169f"></script>
+<script defer src="js/data.js?v=9813248f"></script>
+<script defer src="js/store.js?v=9813248f"></script>
+<script defer src="js/maaling.js?v=9813248f"></script>
+<script defer src="js/backend-bridge.js?v=9813248f"></script>
+<script defer src="js/components.js?v=9813248f"></script>
+<!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
+<script defer src="js/sortering.js?v=9813248f"></script>
+<script defer src="js/maerke.js?v=9813248f"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

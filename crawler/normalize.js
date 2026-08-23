@@ -420,6 +420,39 @@ function traekSalgsmarkoerer(raa){
   return { ord, salgsmarkoerer: fundne.length ? fundne.map(f => f.maerkat) : null };
 }
 
+
+/* ---------- Runde 7 (D7-S4): salgsstoej i modelfeltet ----------
+   Kildernes titler baerer reklame efter modelnavnet: "CBR 650 R MC-SYD",
+   "GL 1800 Gold Wing MC-SYD 5 AARS GARANTI", "ZZR600 saelges eller byttes",
+   "Gsf 650 bandit 2008 saelges bud modtages", "Daytona 660 ALUMINIUM
+   SILVER/SAPPHIRE BLACK". Modellen er kortets titel, annoncesidens h1,
+   <title>, "Lignende"-noegle og maerkesidens modelchips — saa stoejen gaar
+   igen overalt. Reglen klipper ved det foerste stoejord/kildenavn og ved to
+   VERSAL-ord i traek efter et modelord (farver/udstyr). Resten smides vaek:
+   det er reklame, ikke data. Ingen ny oplysning opfindes. */
+const MODEL_STOEJ = /\b(s[aæ]lges|byttes|bud|garanti|bytter|nysynet|velholdt|flot|pæn|fabriks|modtages|kan\s+leveres|tilbud|nedsat|kampagne|leasing|mc[-\s]?syd|aalborg\s+mc|\d+\s*(?:års|aars|år)\b)/i;
+function rensModelStoej(model){
+  if (!model) return model;
+  let m = String(model).replace(/\s+/g, ' ').trim();
+  const hit = m.search(MODEL_STOEJ);
+  if (hit > 0) m = m.slice(0, hit);
+  else if (hit === 0) return null;
+  // "med meget udstyr", "med masser af" — reklame fra det ord og frem.
+  m = m.replace(/\s+\bmed\s+(meget|masser|lidt|alt|fuld)\b.*$/i, '');
+  // To versal-ord (>= 3 bogstaver) i traek efter et modelord: farve/udstyr.
+  const ord = m.split(' ');
+  for (let i = 1; i < ord.length - 1; i++){
+    const a = ord[i], b = ord[i + 1];
+    const versal = s => /^[A-ZÆØÅ][A-ZÆØÅ\/\-]{2,}$/.test(s);
+    if (versal(a) && versal(b)){ ord.length = i; break; }
+  }
+  m = ord.join(' ').replace(/[\s,\-–·]+$/, '').trim();
+  // "Motorcykel", "MC", "Scooter" alene er ikke et modelnavn — det er kildens
+  // kategoriord. Hellere kun maerket paa kortet end en model, der ikke er én.
+  if (/^(motorcykel|motorcykler|mc|scooter|knallert|bike|moto)$/i.test(m)) return null;
+  return m || null;
+}
+
 function delModelOgVariant(raa){
   const { ord, salgsmarkoerer } = traekSalgsmarkoerer(raa);
   // Seks MC Syd-annoncer har kun mærket som titel. Der er ingen model at
@@ -449,7 +482,7 @@ function delModelOgVariant(raa){
   });
 
   return {
-    model: modelOrd.join(' ') || null,
+    model: rensModelStoej(modelOrd.join(' ')) || null,
     variant: variantOrd.join(' ') || null,
     salgsmarkoerer,
   };
@@ -688,4 +721,5 @@ module.exports = {
   // dele "Harley-Davidson XL883 Standard" op i mærke og model. Kun opslag —
   // parsningen bliver liggende her.
   MAERKE_ALIAS,
+  rensModelStoej,
 };

@@ -224,7 +224,11 @@ async function buildForside(){
   const opdaterHero = () => {
     const { list, skjult, kat, harSøgt } = heroListe();
     const n = list.length;
-    const mc = n === 1 ? 'motorcykel' : 'motorcykler';
+    /* Runde 7 (D7-F2): tallet er ANNONCER. Samme motorcykel kan ligge hos to
+       kilder (MC Syd laegger egne annoncer paa Gul og Gratis — 7 fundet paa
+       maerke+aargang+pris+postnr), saa "548 motorcykler" er for meget, mens
+       "548 annoncer" er praecist. Bilbasen skriver ogsaa "annoncer i dag". */
+    const mc = n === 1 ? 'annonce' : 'annoncer';
 
     /* Hjælpelinjen under kørekortvælgeren. Grænserne hentes fra KOEREKORT i
        js/data.js — de må kun stå ét sted, ellers driver de fra hinanden.
@@ -301,7 +305,7 @@ async function buildForside(){
           + `${antalEgne ? ' — og her på Bikerbasen' : ''}</span>`
         : '';
       countHint.innerHTML = n >= 10
-        ? `<b>${daTal(n)}</b> motorcykler til salg${kilderHale}`
+        ? `<b>${daTal(n)}</b> annoncer med motorcykler til salg${kilderHale}`
         : '';
     }
     if (resetBtn) resetBtn.hidden = !harSøgt;
@@ -834,22 +838,31 @@ async function buildForside(){
     ...kandidater.filter(l => !l.isExternal),
     ...kandidater.filter(l => l.isExternal),
   ];
-  const vaelgEfter = (noegle, ud, brugt, antal) => {
-    for (const l of raekkefoelge){
-      if (ud.length >= antal) break;
-      const k = noegle(l);
-      if (brugt.has(k)) continue;
-      brugt.add(k); ud.push(l);
+  /* Runde 7 (D7-F3): hoejst halvdelen af raekken fra samme kilde, saa laenge
+     en anden kilde har et kort tilbage — ellers blev "Til salg lige nu" én
+     kildes vaeg (8 af 8 MC Syd), fordi reglen "én pr. maerke" favoriserer den
+     kilde med flest maerker. Foerste gennemloeb respekterer loftet; er raekken
+     ikke fuld derefter, fyldes den op uden loft. */
+  const kildeAf = (l) => l.isExternal ? String((l.source && (l.source.domaene || l.source.navn)) || 'ekstern') : 'bikerbasen';
+  const vaelgEfter = (noegle, ud, brugt, antal, kildeLoft) => {
+    for (const pas of (kildeLoft ? [true, false] : [false])){
+      for (const l of raekkefoelge){
+        if (ud.length >= antal) break;
+        const k = noegle(l);
+        if (brugt.has(k)) continue;
+        if (pas && ud.filter(x => kildeAf(x) === kildeAf(l)).length >= Math.ceil(antal / 2)) continue;
+        brugt.add(k); ud.push(l);
+      }
     }
   };
   let enPrMaerkeHoldt = true;   // kunne raekken fyldes med ét kort pr. maerke?
   const vaelgFeatured = (antal) => {
     const ud = [];
-    vaelgEfter(l => String(l.brand || ''), ud, new Set(), antal);
+    vaelgEfter(l => String(l.brand || ''), ud, new Set(), antal, true);
     enPrMaerkeHoldt = ud.length >= antal;
     if (ud.length < antal){
       const brugt = new Set(ud.map(l => `${l.brand} ${l.model}`));
-      vaelgEfter(l => `${l.brand} ${l.model}`, ud, brugt, antal);
+      vaelgEfter(l => `${l.brand} ${l.model}`, ud, brugt, antal, true);
     }
     return ud;
   };
@@ -887,7 +900,7 @@ async function buildForside(){
        der ikke er maerker nok). */
     featuredSub.textContent =
       `${ANTALSORD[antal] || daTal(antal)} af de ${daTal(kandidater.length)} annoncer med foto og modelnavn — `
-      + `samme rækkefølge som i søgningen, ${enPrMaerkeHoldt ? 'højst én pr. mærke' : 'højst én pr. model'}.`
+      + `samme rækkefølge som i søgningen, ${enPrMaerkeHoldt ? 'højst én pr. mærke' : 'højst én pr. model'} og højst halvdelen fra samme kilde.`
       + enKilde;
   };
 

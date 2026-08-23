@@ -481,6 +481,39 @@ function maerkeAkronym(m){
   const k = String(m).trim().toLowerCase();
   return MAERKE_AKRONYM[k] || m;
 }
+
+/* ---------- Runde 7 (D7-S4): salgsstoej i modelfeltet ----------
+   Kildernes titler baerer reklame efter modelnavnet: "CBR 650 R MC-SYD",
+   "GL 1800 Gold Wing MC-SYD 5 AARS GARANTI", "ZZR600 saelges eller byttes",
+   "Gsf 650 bandit 2008 saelges bud modtages", "Daytona 660 ALUMINIUM
+   SILVER/SAPPHIRE BLACK". Modellen er kortets titel, annoncesidens h1,
+   <title>, "Lignende"-noegle og maerkesidens modelchips — saa stoejen gaar
+   igen overalt. Reglen klipper ved det foerste stoejord/kildenavn og ved to
+   VERSAL-ord i traek efter et modelord (farver/udstyr). Resten smides vaek:
+   det er reklame, ikke data. Ingen ny oplysning opfindes. */
+const MODEL_STOEJ = /\b(s[aæ]lges|byttes|bud|garanti|bytter|nysynet|velholdt|flot|pæn|fabriks|modtages|kan\s+leveres|tilbud|nedsat|kampagne|leasing|mc[-\s]?syd|aalborg\s+mc|\d+\s*(?:års|aars|år)\b)/i;
+function rensModelStoej(model){
+  if (!model) return model;
+  let m = String(model).replace(/\s+/g, ' ').trim();
+  const hit = m.search(MODEL_STOEJ);
+  if (hit > 0) m = m.slice(0, hit);
+  else if (hit === 0) return null;
+  // "med meget udstyr", "med masser af" — reklame fra det ord og frem.
+  m = m.replace(/\s+\bmed\s+(meget|masser|lidt|alt|fuld)\b.*$/i, '');
+  // To versal-ord (>= 3 bogstaver) i traek efter et modelord: farve/udstyr.
+  const ord = m.split(' ');
+  for (let i = 1; i < ord.length - 1; i++){
+    const a = ord[i], b = ord[i + 1];
+    const versal = s => /^[A-ZÆØÅ][A-ZÆØÅ\/\-]{2,}$/.test(s);
+    if (versal(a) && versal(b)){ ord.length = i; break; }
+  }
+  m = ord.join(' ').replace(/[\s,\-–·]+$/, '').trim();
+  // "Motorcykel", "MC", "Scooter" alene er ikke et modelnavn — det er kildens
+  // kategoriord. Hellere kun maerket paa kortet end en model, der ikke er én.
+  if (/^(motorcykel|motorcykler|mc|scooter|knallert|bike|moto)$/i.test(m)) return null;
+  return m || null;
+}
+
 function normalizeExternalListing(row){
   const kilde = row.kilde || {};
   return {
@@ -497,9 +530,11 @@ function normalizeExternalListing(row){
        Er der intet modelnavn, står der kun mærket. Det er sandt, og det er
        kildens hul — ikke noget vi skal fylde ud. */
     model: (() => {
-      if (row.model) return row.model;
+      // Runde 7 (D7-S4): stoej klippes ogsaa af de raekker, der ligger.
+      if (row.model) return rensModelStoej(row.model) || '';
       const t = String(row.titel || '').trim();
-      return t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() ? t : '';
+      const ren = t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() ? t : '';
+      return rensModelStoej(ren) || '';
     })(),
 
     /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og
@@ -605,6 +640,14 @@ function normalizeExternalListing(row){
     indekseretFoerste: row.foerst_set,   // kun til fejlfinding og statistik
 
     isDealer: row.saelgertype === 'forhandler',
+    /* Runde 7 (D7-F1/A1): tri-state. Gul og Gratis oplyser INGEN saelgertype til
+       os (sources/guloggratis.yaml), og isDealer:false blev laest som "Privat"
+       paa kort og annonceside — et gaet paa 118 af 118 annoncer, og mindst 8
+       af dem er forhandlere (MC Syd laegger sine egne annoncer derover). Nu
+       baerer annoncen kildens svar, som det er: 'forhandler', 'privat' eller
+       null (= ikke oplyst). isDealer bliver staaende til filteret "Kun
+       forhandlere", hvor et nej til ukendt er rigtigt. */
+    saelgertype: row.saelgertype === 'forhandler' ? 'forhandler' : row.saelgertype === 'privat' ? 'privat' : null,
 
     // Det, der gør den ekstern.
     isExternal: true,

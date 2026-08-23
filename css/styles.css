@@ -847,7 +847,8 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   #featured-listings .card-external .card-sted,
   #featured-listings .card-external .card-compare{ display:none; }
   #featured-listings .card-external .card-title{ font-size:14px; line-height:1.3; }
-  #featured-listings .card-external .card-title-main{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* Runde 7 (D7-F4): to linjer — modellen er det, koeberen leder efter. */
+  #featured-listings .card-external .card-title-main{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; white-space:normal; }
   #featured-listings .card-external .card-specs{ height:auto; max-height:46px; flex-wrap:wrap; gap:4px; }
   #featured-listings .card-external .card-spec dd{ font-size:11px; padding:2px 6px; line-height:16px; }
   #featured-listings .card-external .card-koerekort{ font-size:11px; padding:1px 6px; }
@@ -1121,7 +1122,9 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* Runde 6 (D6-S6): "2025 · 1.000 ccm · km ikke oplyst · Koerekort ikke afgjort"
    klippede km-chippen til "km i…" i én raekke. Samme faste hoejde-idé (D-011),
    bare en anden fast hoejde for den kortklasse, der har brug for to raekker. */
-@media (max-width:620px){
+/* Runde 7 (D7-S5): kortets krop er en container — reglen skal foelge kortets
+   bredde, ikke skaermens (maerkesidens 3 spalter ved 1 366 klippede igen). */
+@container (max-width: 420px){
   .card-specs:has(.spec-tom):has(.kk-ukendt){ flex-wrap:wrap; align-content:flex-start; height:54px; }
 }
 /* Feltnavnet er der for skærmlæseren; linjen viser kun værdien. */
@@ -1447,6 +1450,10 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 
 .toolbar-actions{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
 #sort-select{ width:auto; min-width:168px; }
+/* Runde 7 (D7-S2/S3) */
+#filter-q::placeholder{ text-overflow:ellipsis; }
+#filter-price-quick{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+#filter-price-quick .chip{ justify-content:center; }
 /* Runde 6 (D6-S1): gulv, saa "Blandet" aldrig klippes paa 360–390 px. */
 @media (max-width:620px){ .sort-felt > select, #sort-select{ min-width:96px; } }
 
@@ -1767,7 +1774,8 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
      skubbede pris til ~700 og noegletal UNDER folden ved 850. Bilbasens foto
      er 484 px paa en 646 px spalte, men deres titel/pris ligger ogsaa under
      folden — det vil vi ikke. 400 px foto = pris ~650, noegletal ~760. */
-  .external-detail-photo img{ max-height:400px; width:100%; object-fit:cover; }
+  /* Runde 7 (D7-A2): 400 → 360 px, saa noegletallenes vaerdier staar over 850. */
+  .external-detail-photo img{ max-height:360px; width:100%; object-fit:cover; }
 }
 /* Runde 5 (D5-A4): handlingsrækken under titlen — stille, som Bilbasens
    "Sammenlign · Print · Anmeld". */
@@ -1882,6 +1890,9 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
   font-size:12px; font-weight:600; padding:4px 11px;
 }
 .external-detail-vilkaar-note{ margin:8px 0 0; font-size:12px; color: var(--color-fg-muted); line-height:1.5; }
+/* Runde 7 (D7-A2): paa mobil staar saetningen ogsaa under "Foer du koerer derhen";
+   her koster den 36 px over noegletallene. */
+@media (max-width:959px){ .external-detail-vilkaar-note{ display:none; } .external-detail-actions{ margin-top:12px; } }
 
 /* ---------- Kørekortpanelet ----------
    Sidens vigtigste enkeltoplysning for en dansk køber, og derfor det
@@ -1977,7 +1988,9 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
    den ene knap fører ud af sitet. */
 .external-detail-aside{ display:flex; flex-direction:column; gap: var(--space-4); }
 @media (min-width:960px){
-  .external-detail-aside{ position:sticky; top: calc(var(--header-h) + var(--space-4)); }
+  /* Runde 7 (D7-A4): sticky virkede ikke — gitteret straekker spalten til fuld
+     hoejde (align-items:stretch), saa der var intet at klaebe i. */
+  .external-detail-aside{ position:sticky; top: calc(var(--header-h) + var(--space-4)); align-self:start; }
 }
 .external-detail-source,
 .external-detail-next{
@@ -2763,6 +2776,14 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-intro strong{ color: var(--color-fg); }
 .brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
 .brand-sub{ font-size:19px; margin-bottom: var(--space-4); }
+/* Runde 7 (D7-M3/M4): fold paa indledningen, luft over h2'er, "se alle"-knap. */
+.brand-intro-mere{ margin-top:8px; }
+.brand-intro-mere summary{ cursor:pointer; color: var(--color-primary); font-weight:500; font-size:14px; }
+.brand-intro-mere > .brand-intro{ margin-top:8px; }
+.brand-sub:not(:first-child){ margin-top: var(--space-6); }
+.section-head .brand-sub{ margin-top:0; }
+.brand-mere{ margin: var(--space-5) 0 0; }
+.brand-hero .brand-intro{ max-width:60ch; }
 
 .brand-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
 @media (min-width:640px){ .brand-grid{ grid-template-columns: repeat(3,1fr); } }
@@ -2782,9 +2803,11 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-noscript li{ list-style:disc; margin-bottom:6px; color: var(--color-fg-muted); }
 
 /* ============ Forside: Populære mærker (brand cloud) ============ */
-.brand-cloud{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
-@media (min-width:640px){ .brand-cloud{ grid-template-columns: repeat(3,1fr); } }
-@media (min-width:1024px){ .brand-cloud{ grid-template-columns: repeat(6,1fr); } }
+/* Runde 7 (D7-F5): "Harley-Davidson"/"Royal Enfield" ombroed; navnet staar paa
+   én linje, og spalterne er brede nok til det (auto-fill). */
+.brand-cloud{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: var(--space-3); }
+@media (min-width:1024px){ .brand-cloud{ grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); } }
+@media (min-width:640px){ .brand-chip-name{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } }
 /* Rene type-piller — mærkenavnet i display-fonten bærer kortet. Ingen
    bogstav-i-cirkel (som gav K = KTM/Kawasaki og en template-fornemmelse). */
 .brand-chip{
@@ -3113,6 +3136,7 @@ body.overlay-open .cookie-banner{ display:none; }
 .compare-table-wrap{ overflow:auto; }
 .compare-table{ width:100%; border-collapse:collapse; font-size:14px; }
 .compare-table th, .compare-table td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--color-border); vertical-align:top; }
+.compare-table .compare-note{ font-size:12.5px; color: var(--color-fg-muted); border-bottom:0; }
 .compare-table thead th{ position:sticky; top:0; background: var(--color-surface); font-family:var(--font-display); z-index:1; }
 .compare-table thead th a{ color: var(--color-primary); }
 .compare-table tbody th{ color: var(--color-fg-muted); font-weight:600; white-space:nowrap; }
