@@ -945,6 +945,7 @@ async function publishListing(){
     return;
   }
   toast(editingId ? 'Ændringerne er gemt!' : 'Din annonce er udgivet!');
+  if (typeof Maaling !== 'undefined') Maaling.opretAnnonce(created, !!editingId);
   setTimeout(() => { window.location.href = `annonce.html?id=${created.id}`; }, 1000);
 }
 

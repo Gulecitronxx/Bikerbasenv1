@@ -804,6 +804,7 @@ ${footer}
      første maling uden at nogen på siden spurgte efter den. -->
 <script defer src="js/data.js"></script>
 <script defer src="js/store.js"></script>
+<script defer src="js/maaling.js"></script>
 <script defer src="js/backend-bridge.js"></script>
 <script defer src="js/components.js"></script>
 <script defer src="js/maerke.js"></script>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-ZsroY/ayE2sDnLaEil6ELyz4k3AXjZ3YOZ12G+Qf0kU=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-8bEP4k0VfCbv9/IJiq3PGFVB6RXC43CftjFNEqXreHk=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title id="page-title">Annonce — Bikerbasen</title>
 <meta name="description" content="Se billeder, specifikationer og kontaktoplysninger for denne brugte motorcykel til salg på Bikerbasen.">
@@ -64,7 +64,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=64267f0d">
+<link rel="stylesheet" href="css/styles.css?v=e99a31df">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -255,18 +255,19 @@ try{
   </div>
 </div>
 
-<script defer src="js/security.js?v=64267f0d"></script>
-<script defer src="js/vendor/supabase.js?v=64267f0d"></script>
-<script defer src="js/supabase-config.js?v=64267f0d"></script>
-<script defer src="js/supabase-api.js?v=64267f0d"></script>
-<script defer src="js/icons.js?v=64267f0d"></script>
-<script defer src="js/postnumre.js?v=64267f0d"></script>
-<script defer src="js/data.js?v=64267f0d"></script>
-<script defer src="js/store.js?v=64267f0d"></script>
-<script defer src="js/backend-bridge.js?v=64267f0d"></script>
-<script defer src="js/components.js?v=64267f0d"></script>
-<script defer src="js/seo.js?v=64267f0d"></script>
-<script defer src="js/annonce.js?v=64267f0d"></script>
+<script defer src="js/security.js?v=e99a31df"></script>
+<script defer src="js/vendor/supabase.js?v=e99a31df"></script>
+<script defer src="js/supabase-config.js?v=e99a31df"></script>
+<script defer src="js/supabase-api.js?v=e99a31df"></script>
+<script defer src="js/icons.js?v=e99a31df"></script>
+<script defer src="js/postnumre.js?v=e99a31df"></script>
+<script defer src="js/data.js?v=e99a31df"></script>
+<script defer src="js/store.js?v=e99a31df"></script>
+<script defer src="js/maaling.js?v=e99a31df"></script>
+<script defer src="js/backend-bridge.js?v=e99a31df"></script>
+<script defer src="js/components.js?v=e99a31df"></script>
+<script defer src="js/seo.js?v=e99a31df"></script>
+<script defer src="js/annonce.js?v=e99a31df"></script>
 <!-- Sticky CTA for indekserede annoncer (annonce cta, runde 4).
 
      js/annonce.js's renderExternalListing() fjerner #listing-actionbar helt
@@ -302,6 +303,7 @@ try{
     knap.rel = 'noopener noreferrer nofollow';
     knap.className = 'btn btn-primary';
     knap.innerHTML = link.innerHTML; // samme tekst + eksternt-link-ikon som kortet i sidebjælken
+    if (link.dataset.listingId) knap.dataset.listingId = link.dataset.listingId; // C3: kilde_klik kender annoncen
     bar.appendChild(knap);
     document.body.appendChild(bar);
     document.body.classList.add('har-actionbar');

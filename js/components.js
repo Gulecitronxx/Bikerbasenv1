@@ -242,6 +242,26 @@ function listingMediaHTML(l, alt, eager){
     + `</div>`;
 }
 
+/* ---------- C3: klik videre til kilden måles ét sted ----------
+   Det er tragtens vigtigste udgang for indekserede annoncer: handlen sker
+   hos kilden. Én delegeret lytter paa document, saa annoncesidens knap, den
+   faste bjælke (annonce.html) og fremtidige links alle taelles ens. Kun
+   links til et ANDET vaertsnavn; annoncen findes via data-listing-id paa
+   linket eller naermeste kort, ellers via ?id= paa siden. Bag samtykke. */
+if (typeof document !== 'undefined' && document.addEventListener){
+  document.addEventListener('click', e => {
+    if (typeof Maaling === 'undefined') return;
+    const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a || !/^https?:/i.test(a.href)) return;
+    let host = ''; try { host = new URL(a.href).hostname; } catch (err) { return; }
+    if (!host || host === location.hostname) return;
+    const baerer = a.dataset.listingId ? a : a.closest('[data-listing-id]');
+    const id = (baerer && baerer.dataset.listingId) || new URLSearchParams(location.search).get('id');
+    const l = id && typeof Store !== 'undefined' && Store.getListingById ? Store.getListingById(id) : null;
+    Maaling.kildeKlik(l, a.href);
+  }, true);
+}
+
 /* ---------- Et foto, kilden ikke leverer, må ikke stå som et hul ----------
 
    B3 (23.08.2026). Kortets foto hentes direkte hos kilden (vi kopierer det
@@ -1071,6 +1091,7 @@ function wireFavoriteButtons(root){
       const raw = btn.getAttribute('data-fav-toggle');
       const id = /^\d+$/.test(raw) ? Number(raw) : raw;
       const active = Store.toggleFavorite(id);
+      if (typeof Maaling !== 'undefined') Maaling.favorit(Store.getListingById ? Store.getListingById(id) : null, active);
       btn.classList.toggle('active', active);
       btn.setAttribute('aria-pressed', active);
       toast(active ? 'Tilføjet til gemte annoncer' : 'Fjernet fra gemte annoncer');

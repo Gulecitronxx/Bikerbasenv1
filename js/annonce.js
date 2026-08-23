@@ -623,6 +623,7 @@ function renderExternalListing(listing){
       </div>
       ${href
         ? `<a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
+              data-listing-id="${escapeHTML(String(listing.id))}"
               class="btn btn-primary btn-block">Se annoncen hos ${kilde}${Icon.externalLink}</a>`
         : `<p class="external-detail-broken">${Icon.alertTriangle}Annoncen kan ikke åbnes lige nu. Prøv igen senere${domaene ? `, eller find den på ${domaene}` : ''}.</p>`}
       <p class="external-detail-source-body">
@@ -880,6 +881,9 @@ function renderListing(){
 
      Vi viser stadig annoncen — et delt link skal ikke ende i en blindgyde —
      men uden kontaktflade og med kilden som eneste vej videre. */
+  // C3: view_item for begge slags annoncer — målt FØR grenen, én gang.
+  if (typeof Maaling !== 'undefined') Maaling.visAnnonce(listing);
+
   if (listing.isExternal){
     renderExternalListing(listing);
     return;
@@ -1236,6 +1240,8 @@ ${galleriHTML}
          har det med, når han ringer. Det er det eneste sted, de kan gøre
          gavn, før der findes en beskedlevering at sende dem med. */
       const hensigter = [...modal.querySelectorAll('.contact-intents input:checked')].map(cb => cb.value);
+      // C3: generate_lead — kun at det skete, aldrig hvad der stod i beskeden.
+      if (typeof Maaling !== 'undefined') Maaling.kontakt(currentListing);
 
       // Det ene, vi faktisk kan: tælle henvendelsen på annoncen.
       db.recordListingEvent?.(listing.id, 'contact');

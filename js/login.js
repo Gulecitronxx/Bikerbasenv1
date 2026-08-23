@@ -299,6 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setLoading(btn, true, 'Log ind');
     const { error } = await db.signIn({ email, password });
     setLoading(btn, false, 'Log ind');
+    if (!error && typeof Maaling !== 'undefined') Maaling.login('email');
     if (error){
       // Den eneste af de her fejl, brugeren ikke selv kan rette ved at prøve
       // igen. Uden knappen her kunne man hverken logge ind (ubekræftet) eller
@@ -354,6 +355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data, error } = await db.signUp({ email, password, name, phone, isDealer, company, cvr });
     setLoading(btn, false, 'Fortsæt');
     if (error){ authError(daError(error.message)); return; }
+    if (typeof Maaling !== 'undefined') Maaling.oprettet('email', isDealer);
 
     // Med e-mailbekræftelse slået til findes brugeren, men har ingen session endnu.
     const needsConfirm = !data.session;

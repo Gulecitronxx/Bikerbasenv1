@@ -1204,10 +1204,12 @@ function renderSorteringsNote(sideItems, heleResultatet){
     const medDato = heleResultatet.filter(l => l.createdAt).length;
     if (!medDato || medDato === heleResultatet.length){ el.hidden = true; return; }
     el.hidden = false;
-    el.innerHTML = `Nyeste først: kun ${medDato} af ${heleResultatet.length} annoncer `
-      + `har en oprettelsesdato. De står øverst; de øvrige `
-      + `${heleResultatet.length - medDato} er indekseret hos en forhandler, hvor `
-      + `vi ikke kender datoen, og står derfor efter i blandet rækkefølge.${infoKnap}`;
+    /* C5 (23.08.2026): én linje paa en telefon. Maalt paa 390 px: den gamle
+       sætning brugte tre linjer (ca. 55 px) mellem sorteringsvælgeren og det
+       foerste kort. Tallene staar stadig — de kan taelles paa skaermen — og
+       HVORFOR de udaterede staar bagest, staar i (i), hvor det hoerer til. */
+    el.innerHTML = `Nyeste først: ${medDato} af ${heleResultatet.length} har en dato og står øverst — `
+      + `resten uden dato bagefter.${infoKnap}`;
     el.querySelector('#sortering-info-btn').addEventListener('click', forklarSortering);
     return;
   }
@@ -1217,9 +1219,11 @@ function renderSorteringsNote(sideItems, heleResultatet){
   if (!blandes){ el.hidden = true; return; }
 
   el.hidden = false;
-  el.innerHTML = `Blandet udbud: de ${udenIAlt} annoncer uden foto er fordelt `
-    + `jævnt ud over listen i stedet for at ligge samlet — `
-    + `${udenPaaSiden} af de ${sideItems.length} på denne side.${infoKnap}`;
+  /* C5 (23.08.2026): én linje paa en telefon (maalt 390 px: 41 px -> ~17 px
+     over det foerste kort). Begge tal kan stadig taelles efter paa skaermen;
+     reglen i sin helhed staar i (i) — se forklarSortering(). */
+  el.innerHTML = `Blandet udbud: ${udenIAlt} uden foto fordelt jævnt — `
+    + `${udenPaaSiden} på denne side.${infoKnap}`;
   el.querySelector('#sortering-info-btn').addEventListener('click', forklarSortering);
 }
 
@@ -1502,6 +1506,23 @@ function wirePositionHukommelse(){
    etape 2, så der aldrig tegnes noget forældet. */
 let secondaryHandle = 0;
 
+/* C3 (23.08.2026): én 'search'-hændelse pr. FÆRDIGT filtersæt — ikke pr.
+   tastetryk og ikke pr. maling. 800 ms ro efter sidste ændring, og kun hvis
+   forespørgslen faktisk er en anden end den sidst målte. Bag samtykke;
+   Maaling smider den væk uden gtag. */
+let sidsteMaaltSoegning = null;
+let maalSoegningTimer = null;
+function maalSoegning(antal){
+  if (typeof Maaling === 'undefined') return;
+  clearTimeout(maalSoegningTimer);
+  maalSoegningTimer = setTimeout(() => {
+    const qs = currentQueryString(true);
+    if (qs === sidsteMaaltSoegning) return;
+    sidsteMaaltSoegning = qs;
+    Maaling.soegning(state, antal);
+  }, 800);
+}
+
 function render(){
   writeStateToURL();
   reflectStateToUI();
@@ -1528,6 +1549,7 @@ function render(){
   refreshSaveSearchButton();
 
   const filtered = getFilteredListings();
+  maalSoegning(filtered.length);
   // Skal stå EFTER getFilteredListings(), som er den der tæller de skjulte.
   renderUoplystNote();
   const total = filtered.length;
@@ -2066,6 +2088,7 @@ function wireCoreControls(){
       toast('Søgeagent fjernet');
     } else {
       const { all } = Store.addSavedSearch({ query: qs, label, count: getFilteredListings().length });
+      if (typeof Maaling !== 'undefined') Maaling.gemSoegning(state, getFilteredListings().length);
 
       if (db.enabled && Store.getUser()?.remote){
         const { data, error } = await db.addSavedSearch(qs, label);

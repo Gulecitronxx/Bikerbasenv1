@@ -443,6 +443,7 @@ ${footer}
 <script defer src="js/bike-art.js"></script>
 <script defer src="js/data.js"></script>
 <script defer src="js/store.js"></script>
+<script defer src="js/maaling.js"></script>
 <script defer src="js/backend-bridge.js"></script>
 <script defer src="js/components.js"></script>
 <!-- Ingen separat js/facet.js: opgavens filliste omfatter ikke nye
