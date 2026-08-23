@@ -61,7 +61,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=e99a31df">
+<link rel="stylesheet" href="css/styles.css?v=cb8caa0d">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -104,7 +104,7 @@ try{
   <div class="container">
     <div class="legal-content">
       <h1>Privatlivspolitik</h1>
-      <p class="legal-updated">Sidst opdateret: 26. juli 2026 · Databehandling i overensstemmelse med databeskyttelsesforordningen (GDPR)</p>
+      <p class="legal-updated">Sidst opdateret: 23. august 2026 · Databehandling i overensstemmelse med databeskyttelsesforordningen (GDPR)</p>
 
       <div class="legal-toc">
         <h2>Indhold</h2>
@@ -127,30 +127,55 @@ try{
       <h2 id="data">2. Hvilke data vi behandler</h2>
       <ul>
         <li><strong>Kontooplysninger:</strong> navn, e-mail, telefonnummer, og for forhandlere: CVR-nummer og virksomhedsnavn.</li>
-        <li><strong>Verificeringsdata:</strong> status for e-mail-, sms- og MitID-bekræftelse (vi opbevarer ikke selve MitID-legitimationen).</li>
+        <!-- 23.08.2026 (C4): her stod "e-mail-, sms- og MitID-bekræftelse". Kun
+             e-mailbekræftelsen findes (login.html: "Ingen profiler på Bikerbasen
+             er identitetsverificerede"). "Beskeder sendt via kontaktformularen"
+             stod også her — men teksten sendes og gemmes ikke endnu (js/annonce.js:
+             "Vi videresender ikke selve teksten endnu"); vi tæller kun henvendelsen.
+             Punkterne om indekserede annoncer og statistik manglede helt. -->
+        <li><strong>Verificeringsdata:</strong> om din e-mailadresse er bekræftet. Vi tilbyder ikke sms- eller MitID-verificering, og ingen profiler er identitetsverificerede.</li>
         <li><strong>Annoncedata:</strong> oplysninger om motorcykler du opretter til salg, herunder billeder.</li>
-        <li><strong>Kommunikation:</strong> beskeder sendt via kontaktformularen på en annonce.</li>
-        <li><strong>Anmeldelser og bedømmelser:</strong> tekst og vurderinger du skriver om andre brugere.</li>
-        <li><strong>Teknisk data:</strong> cookies og lokal lagring i din browser, brugt til funktioner som favoritter og login-status.</li>
+        <li><strong>Henvendelser:</strong> bruger du kontaktformularen på en annonce, registrerer vi, at annoncen har fået en henvendelse (et tal, sælgeren kan se). Selve din besked sendes og gemmes ikke — du får sælgerens telefonnummer at ringe på i stedet.</li>
+        <li><strong>Anmeldelser og bedømmelser:</strong> tekst og vurderinger du skriver om sælgere.</li>
+        <li><strong>Indekserede annoncer fra andre sider:</strong> Bikerbasen viser også annoncer, vi indekserer hos forhandlere og markedspladser. Om dem gemmer vi kun titel, mærke/model, årgang, km, kubik, effekt, pris, postnummer/by, om sælgeren er privat eller forhandler, et link til annoncen og et link til ét miniaturebillede hos kilden. Telefonnumre, e-mailadresser og adresser fjernes automatisk, før noget gemmes. Hvordan og hvor ofte står på <a href="om-indeksering.html">Om vores indeksering</a> — dér står også, hvordan en annonce fjernes.</li>
+        <li><strong>Statistik (kun med dit samtykke):</strong> vælger du "Accepter alle" i cookiebanneret, måler Google Analytics 4 hvilke sider der besøges, hvad der søges efter (mærke, type, pris, kørekort) og hvilke annoncer der åbnes — aldrig hvem du er, og aldrig det, du skriver til en sælger.</li>
+        <li><strong>Teknisk data:</strong> lokal lagring i din browser til favoritter, søgeagenter, valgt tema, cookievalg og din login-session.</li>
       </ul>
 
       <h2 id="grundlag">3. Formål og retsgrundlag</h2>
-      <p>Vi behandler dine data for at kunne levere platformens funktioner: oprette og vise annoncer, formidle kontakt mellem købere og sælgere, verificere identitet, og forebygge svindel. Retsgrundlaget er opfyldelse af kontrakt (aftalen om at bruge platformen) samt legitim interesse i at holde platformen sikker og troværdig.</p>
+      <p>Vi behandler dine data for at kunne levere platformens funktioner: oprette og vise annoncer, formidle kontakt mellem købere og sælgere, bekræfte e-mailadresser og forebygge svindel. Retsgrundlaget er opfyldelse af kontrakt (aftalen om at bruge platformen) samt legitim interesse i at holde platformen sikker og troværdig. Statistik behandles alene på grundlag af dit samtykke, som du kan trække tilbage når som helst.</p>
 
       <h2 id="cookies">4. Cookies</h2>
-      <p>Vi bruger nødvendige cookies/lokal lagring for at platformen kan fungere (f.eks. login-status og favoritter), samt valgfrie cookies til statistik. Du kan til enhver tid ændre dit samtykke via cookiebanneret, der vises ved dit første besøg.</p>
+      <p>Vi bruger nødvendig lokal lagring for at platformen kan fungere (login-status, favoritter, søgeagenter, tema og dit cookievalg). Statistik kræver dit samtykke: vælger du "Kun nødvendige", indlæses Google overhovedet ikke; vælger du "Accepter alle", indlæses Google Analytics 4 (Google Ireland Ltd.), som sætter cookies til at tælle besøg. Du kan til enhver tid ændre dit valg ved at rydde sidens data i din browser — så vises banneret igen.</p>
 
       <h2 id="deling">5. Deling af data</h2>
-      <p>Dine kontaktoplysninger deles kun med en anden bruger, når du selv vælger at dele dem (f.eks. ved at "vise telefonnummer" eller sende en besked). Vi deler ikke dine data med tredjeparter til markedsføring. Ved brug af "sikker betaling" deles nødvendige oplysninger med vores PCI-certificerede betalingspartner alene for at gennemføre transaktionen.</p>
+      <!-- 23.08.2026 (C4): her stod "Ved brug af 'sikker betaling' deles nødvendige
+           oplysninger med vores PCI-certificerede betalingspartner". Der findes intet
+           betalingsflow (se vilkaar.html §8 og sikkerhed.html, rettet samme sted), så
+           sætningen er fjernet. Databehandlerne manglede helt; de står her nu. -->
+      <p>Dit navn og telefonnummer på en annonce vises kun for indloggede brugere — ikke for udloggede besøgende, søgemaskiner eller robotter. Vi sælger eller deler ikke dine data med tredjeparter til markedsføring, og Bikerbasen håndterer ingen betalinger mellem købere og sælgere.</p>
+      <h3>Databehandlere</h3>
+      <p>Følgende leverandører behandler data på vores vegne og efter vores instruks:</p>
+      <ul>
+        <li><strong>Supabase</strong> (Supabase Inc., USA) — database, login og billedlagring. Vores projekt ligger i Supabases EU-region (Irland), så dine oplysninger opbevares i EU. Supabase er tilsluttet EU-U.S. Data Privacy Framework, og databehandleraftalen indeholder EU's standardkontraktbestemmelser for den support, der kan ske uden for EU.</li>
+        <li><strong>GitHub Pages</strong> (GitHub Inc., USA) med <strong>Fastly</strong> som CDN — leverer selve hjemmesidens filer. Der gemmes ingen personoplysninger her; som ved enhver webserver ser leverandøren din IP-adresse, når siderne hentes. GitHub er tilsluttet EU-U.S. Data Privacy Framework.</li>
+        <li><strong>Google Analytics 4</strong> (Google Ireland Ltd.) — statistik, kun med dit samtykke (se punkt 4).</li>
+      </ul>
+      <p>Planlagt, men ikke i brug endnu: betaling af forhandlerabonnement via Stripe og mails om søgeagenter via Resend. Vi opdaterer dette punkt, før de tages i brug.</p>
 
       <h2 id="opbevaring">6. Opbevaringsperiode (dataminimering)</h2>
       <p>Vi opbevarer kun data, så længe det er nødvendigt for at levere platformens funktioner, eller så længe loven kræver det (f.eks. bogføringsregler for forhandlere). Slettede annoncer og konti fjernes fra vores systemer inden for rimelig tid, jf. dataminimeringsprincippet i GDPR.</p>
 
       <h2 id="rettigheder">7. Dine rettigheder</h2>
-      <p>Du har efter GDPR ret til at få indsigt i, rette, begrænse eller slette dine data, samt ret til dataportabilitet. Du kan til enhver tid slette din konto og alle tilknyttede data selv via <a href="mine-annoncer.html?tab=konto">kontoindstillinger</a>, hvor et enkelt klik fjerner dine annoncer, favoritter, beskeder og profil permanent.</p>
+      <!-- 23.08.2026 (C4): her stod, at ét klik i kontoindstillingerne "fjerner dine
+           annoncer, favoritter, beskeder og profil permanent". Knappen rydder kun det,
+           der ligger i browseren (Store.deleteAllData() i js/store.js) — kontoen og
+           annoncerne i databasen bliver stående. Indtil sletningen er bygget på
+           serveren, sker den ved henvendelse, og det skal stå her. -->
+      <p>Du har efter GDPR ret til at få indsigt i, rette, begrænse eller slette dine data, samt ret til dataportabilitet. Dine annoncer kan du selv rette og slette under <a href="mine-annoncer.html">Mine annoncer</a>. Skriv til <a href="mailto:kontakt@bikerbasen.dk">kontakt@bikerbasen.dk</a> for at få din konto og alle tilknyttede oplysninger slettet eller udleveret — vi svarer inden for en måned, som loven kræver. Knappen "Ryd mine data i denne browser" under <a href="mine-annoncer.html?tab=konto">kontoindstillinger</a> fjerner favoritter, søgeagenter og login-session fra din browser, men ikke kontoen i databasen.</p>
 
       <h2 id="sikkerhed">8. Datasikkerhed</h2>
-      <p>Vi anvender tekniske og organisatoriske sikkerhedsforanstaltninger for at beskytte dine data, herunder kryptering af forbindelsen (HTTPS), adgangsbegrænsning og løbende overvågning for uautoriseret adgang. Billeder du uploader renses for EXIF-/GPS-metadata, så din lokation ikke utilsigtet deles via et billede.</p>
+      <p>Forbindelsen er krypteret (HTTPS). Adgangen til databasen er styret pr. række, så du kun kan læse og rette dine egne oplysninger, og dit telefonnummer vises kun for indloggede brugere. Billeder du uploader renses for EXIF-/GPS-metadata i din browser, før de sendes, så din lokation ikke utilsigtet deles via et billede. Den offentlige nøgle, hjemmesiden bruger mod databasen, giver ingen adgang ud over det, disse regler tillader.</p>
 
       <h2 id="kontakt">9. Kontakt</h2>
       <p>Har du spørgsmål til vores behandling af dine data, eller ønsker du at gøre brug af dine rettigheder, er du velkommen til at kontakte os p&aring; <a href="mailto:kontakt@bikerbasen.dk">kontakt@bikerbasen.dk</a>. Du kan også indgive en klage til Datatilsynet.</p>
@@ -198,17 +223,16 @@ try{
     </div>
   </div>
 </footer>
-<script defer src="js/security.js?v=e99a31df"></script>
-<script defer src="js/vendor/supabase.js?v=e99a31df"></script>
-<script defer src="js/supabase-config.js?v=e99a31df"></script>
-<script defer src="js/supabase-api.js?v=e99a31df"></script>
-<script defer src="js/icons.js?v=e99a31df"></script>
-<script defer src="js/postnumre.js?v=e99a31df"></script>
-<script defer src="js/data.js?v=e99a31df"></script>
-<script defer src="js/store.js?v=e99a31df"></script>
-<script defer src="js/maaling.js?v=e99a31df"></script>
-<script defer src="js/backend-bridge.js?v=e99a31df"></script>
-<script defer src="js/components.js?v=e99a31df"></script>
+<!-- C1 (23.08.2026): siden er ren tekst og bruger kun header/footer. Samme
+     scriptsaet som sikkerhed.html — uden supabase-js (52 KB gzip), supabase-api,
+     postnumre og backend-bridge, som ingenting her kaldte. Login-status i
+     headeren laeses fra browserens lager som paa sikkerhed.html. -->
+<script defer src="js/security.js?v=cb8caa0d"></script>
+<script defer src="js/icons.js?v=cb8caa0d"></script>
+<script defer src="js/data.js?v=cb8caa0d"></script>
+<script defer src="js/store.js?v=cb8caa0d"></script>
+<script defer src="js/maaling.js?v=cb8caa0d"></script>
+<script defer src="js/components.js?v=cb8caa0d"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => { renderHeader('privatlivspolitik.html'); });
 </script>

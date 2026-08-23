@@ -11,11 +11,15 @@
 const db = (function(){
   let client = null;
 
+  let sdkMeldt = false;
   function init(){
     if (client) return client;
     if (!isSupabaseConfigured()) return null;
     if (typeof supabase === 'undefined' || !supabase.createClient){
-      console.warn('Supabase-biblioteket blev ikke indlæst.');
+      // C1 (23.08.2026): SDK'et hentes kun ved behov (js/backend-bridge.js
+      // bbSikrSdk), saa "ikke indlaest" er normaltilstanden for en udlogget
+      // paa en laeseside — ikke en advarsel. Én debug-linje, ikke én pr. kald.
+      if (!sdkMeldt){ sdkMeldt = true; console.debug('Supabase-biblioteket er ikke indlæst (hentes kun ved behov).'); }
       return null;
     }
     client = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);

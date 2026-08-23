@@ -72,6 +72,78 @@ function supabaseKonfigureret(){
     && typeof isSupabaseConfigured === 'function' && isSupabaseConfigured();
 }
 
+/* ============ SDK'et hentes kun, naar der er brug for det (C1, 23.08.2026) ============
+
+   js/vendor/supabase.js er 52 KB gzip — den tungeste fil paa sitet — og den
+   bruges KUN til session, tokenfornyelse, favoritsynk og skrivning. Laesevejen
+   (annoncerne) gaar med vilje uden om den (D-013 ovenfor). Alligevel laa den
+   som <script> paa 49 af 52 sider, ogsaa paa de 36 SEO-landingssider og
+   soegesiden, hvor langt de fleste besoegende er udloggede og aldrig roerer
+   noget, den er til.
+
+   Nu afgoer siden selv ved opstart, om den skal hentes:
+     - der ligger en session i localStorage (sb-<ref>-auth-token) — saa skal
+       den fornys og favoritterne synkes, praecis som foer, ELLER
+     - siden skriver (login, opret, mine annoncer, dashboard, forhandler,
+       annonce) — de beholder <script>-tagget i HTML'en og rammes slet ikke
+       her, ELLER
+     - nogen kalder bbSikrSdk({ tving: true }) fordi en handling kraever den.
+   Ellers hentes den ikke. En udlogget paa maerke-honda.html sparer 52 KB
+   gzip og parsningen af 212 KB javascript — og mister ingenting, for der er
+   ingen session at forny og ingen favoritter i databasen at synke.
+
+   Versionen (?v=) laeses af dette scripts eget src, saa den lazy-hentede
+   SDK rammer samme cachepost som stamp-version.js skrev. CSP: script-src
+   'self' — same-origin, dynamisk indsat, tilladt. */
+const SDK_VERSION = (() => {
+  try {
+    const s = typeof document !== 'undefined' && document.currentScript && document.currentScript.src;
+    return (s && (s.match(/[?&]v=([a-z0-9]+)/) || [])[1]) || '';
+  } catch (e) { return ''; }
+})();
+const SDK_STI = 'js/vendor/supabase.js';
+
+/* Er der en gemt session? supabase-js v2 gemmer den under
+   `sb-<projekt-ref>-auth-token`. Vi kigger kun efter NOEGLEN — aldrig i den. */
+function sessionGemt(){
+  try {
+    if (!supabaseKonfigureret()) return false;
+    const ref = (SUPABASE_CONFIG.url.match(/https:\/\/([a-z0-9]+)\.supabase\.co/) || [])[1];
+    return !!ref && localStorage.getItem(`sb-${ref}-auth-token`) != null;
+  } catch (e) { return false; }
+}
+
+let _sdkPromise = null;
+/* Henter SDK'et, hvis det mangler og skal bruges. Svarer true, naar
+   `supabase.createClient` findes bagefter. { tving: true } henter uanset. */
+function bbSikrSdk({ tving = false } = {}){
+  if (typeof supabase !== 'undefined' && supabase.createClient) return Promise.resolve(true);
+  if (!tving && !sessionGemt()) return Promise.resolve(false);
+  if (_sdkPromise) return _sdkPromise;
+  _sdkPromise = new Promise(res => {
+    const s = document.createElement('script');
+    s.src = SDK_STI + (SDK_VERSION ? `?v=${SDK_VERSION}` : '');
+    s.onload = () => res(typeof supabase !== 'undefined' && !!supabase.createClient);
+    s.onerror = () => { console.warn('Supabase-biblioteket kunne ikke hentes.'); res(false); };
+    document.head.appendChild(s);
+  });
+  return _sdkPromise;
+}
+if (typeof window !== 'undefined') window.bbSikrSdk = bbSikrSdk;
+
+/* Lytteren paa login/ud-logning. Foer laa den i DOMContentLoaded og sprang
+   over, hvis SDK'et ikke var der ENDNU — nu saettes den, naar SDK'et er
+   klar, uanset om det kom med HTML'en eller blev hentet undervejs. */
+let _authLytterSat = false;
+function saetAuthLytter(){
+  if (_authLytterSat || !db.enabled || !db.raw) return;
+  _authLytterSat = true;
+  db.raw.auth.onAuthStateChange(async (event) => {
+    if (event === 'SIGNED_OUT') Store.logout();
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') await syncSessionToStore();
+  });
+}
+
 /* Ét sted at spørge PostgREST uden SDK'et.
 
    Nøglen er den offentlige publishable-nøgle, der i forvejen står i
@@ -779,7 +851,10 @@ function backendReady(){
        sessionen som en rundtur FORAN annoncerne: det, køberen er kommet
        efter, skal ikke stå i kø bag en login-kontrol, han måske ikke har
        brug for. Fejler sessionen, fejler den for sig. */
+    // SDK'et hentes kun, naar der er en session at forny — se bbSikrSdk().
+    await bbSikrSdk();
     const medSdk = db.enabled;
+    if (medSdk) saetAuthLytter();
 
     /* HVER kilde har sit eget net. backendReady() må ALDRIG afvise:
        js/search.js' boot() gør `await backendReady()` som allerførste
@@ -813,10 +888,4 @@ function backendReady(){
 }
 
 /* Supabase gemmer sessionen selv; vi holder Store i sync ved skift. */
-document.addEventListener('DOMContentLoaded', () => {
-  if (!db.enabled) return;
-  db.raw?.auth.onAuthStateChange(async (event) => {
-    if (event === 'SIGNED_OUT') Store.logout();
-    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') await syncSessionToStore();
-  });
-});
+document.addEventListener('DOMContentLoaded', () => { saetAuthLytter(); });

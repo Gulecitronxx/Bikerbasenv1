@@ -793,7 +793,6 @@ ${header}
 ${footer}
 
 <script defer src="js/security.js"></script>
-<script defer src="js/vendor/supabase.js"></script>
 <script defer src="js/supabase-config.js"></script>
 <script defer src="js/supabase-api.js"></script>
 <script defer src="js/icons.js"></script>

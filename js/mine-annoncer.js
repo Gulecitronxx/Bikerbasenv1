@@ -375,7 +375,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('bb:favorites-changed', renderFavorites);
 
   document.getElementById('delete-account-btn').addEventListener('click', () => {
-    if (!confirm('Er du sikker? Din konto, dine annoncer, favoritter og bedømmelser bliver slettet permanent og kan ikke gendannes.')) return;
+    // C4 (23.08.2026): teksten lovede 'din konto og dine annoncer slettes permanent',
+    // men Store.deleteAllData() rydder kun localStorage. Nu siger den, hvad der sker.
+    if (!confirm('Rydder favoritter, søgeagenter, senest sete og din login-session fra denne browser. Din konto og dine annoncer i databasen bliver stående — skriv til kontakt@bikerbasen.dk for at få dem slettet. Fortsæt?')) return;
     Store.deleteAllData();
     window.location.href = 'index.html';
   });

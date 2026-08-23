@@ -63,7 +63,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=e99a31df">
+<link rel="stylesheet" href="css/styles.css?v=cb8caa0d">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -196,9 +196,13 @@ try{
           <h3 style="margin-bottom:6px;">Dine data (GDPR)</h3>
           <p style="color:var(--color-fg-muted); font-size:14px; margin-bottom:14px;">Du kan til enhver tid få indsigt i eller slette alle dine data. Læs mere i vores <a href="privatlivspolitik.html" style="color:var(--color-primary);">privatlivspolitik</a>.</p>
           <div class="danger-zone">
-            <h3>Slet min konto og mine data</h3>
-            <p>Dette fjerner permanent din profil, dine annoncer, favoritter, beskeder og bedømmelser fra denne browser. Handlingen kan ikke fortrydes.</p>
-            <button type="button" class="btn btn-danger-outline" id="delete-account-btn">Slet min konto</button>
+            <!-- 23.08.2026 (C4): knappen hed "Slet min konto", men rydder kun browseren
+                 (Store.deleteAllData()). Kontoen og annoncerne i databasen slettes ved
+                 henvendelse, indtil sletningen er bygget på serveren. Navnet siger nu,
+                 hvad knappen gør. -->
+            <h3>Ryd mine data i denne browser</h3>
+            <p>Fjerner favoritter, søgeagenter, senest sete og din login-session fra denne browser. Din konto og dine annoncer i databasen slettes ikke her — skriv til <a href="mailto:kontakt@bikerbasen.dk">kontakt@bikerbasen.dk</a>, så sletter vi dem.</p>
+            <button type="button" class="btn btn-danger-outline" id="delete-account-btn">Ryd mine data i denne browser</button>
           </div>
         </div>
       </div>
@@ -254,18 +258,18 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=e99a31df"></script>
-<script defer src="js/vendor/supabase.js?v=e99a31df"></script>
-<script defer src="js/supabase-config.js?v=e99a31df"></script>
-<script defer src="js/supabase-api.js?v=e99a31df"></script>
-<script defer src="js/icons.js?v=e99a31df"></script>
-<script defer src="js/postnumre.js?v=e99a31df"></script>
-<script defer src="js/data.js?v=e99a31df"></script>
-<script defer src="js/store.js?v=e99a31df"></script>
-<script defer src="js/maaling.js?v=e99a31df"></script>
-<script defer src="js/backend-bridge.js?v=e99a31df"></script>
-<script defer src="js/components.js?v=e99a31df"></script>
-<script defer src="js/mine-annoncer.js?v=e99a31df"></script>
+<script defer src="js/security.js?v=cb8caa0d"></script>
+<script defer src="js/vendor/supabase.js?v=cb8caa0d"></script>
+<script defer src="js/supabase-config.js?v=cb8caa0d"></script>
+<script defer src="js/supabase-api.js?v=cb8caa0d"></script>
+<script defer src="js/icons.js?v=cb8caa0d"></script>
+<script defer src="js/postnumre.js?v=cb8caa0d"></script>
+<script defer src="js/data.js?v=cb8caa0d"></script>
+<script defer src="js/store.js?v=cb8caa0d"></script>
+<script defer src="js/maaling.js?v=cb8caa0d"></script>
+<script defer src="js/backend-bridge.js?v=cb8caa0d"></script>
+<script defer src="js/components.js?v=cb8caa0d"></script>
+<script defer src="js/mine-annoncer.js?v=cb8caa0d"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

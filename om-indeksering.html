@@ -63,7 +63,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=e99a31df">
+<link rel="stylesheet" href="css/styles.css?v=cb8caa0d">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -213,17 +213,16 @@ try{
     </div>
   </div>
 </footer>
-<script defer src="js/security.js?v=e99a31df"></script>
-<script defer src="js/vendor/supabase.js?v=e99a31df"></script>
-<script defer src="js/supabase-config.js?v=e99a31df"></script>
-<script defer src="js/supabase-api.js?v=e99a31df"></script>
-<script defer src="js/icons.js?v=e99a31df"></script>
-<script defer src="js/postnumre.js?v=e99a31df"></script>
-<script defer src="js/data.js?v=e99a31df"></script>
-<script defer src="js/store.js?v=e99a31df"></script>
-<script defer src="js/maaling.js?v=e99a31df"></script>
-<script defer src="js/backend-bridge.js?v=e99a31df"></script>
-<script defer src="js/components.js?v=e99a31df"></script>
+<!-- C1 (23.08.2026): siden er ren tekst og bruger kun header/footer. Samme
+     scriptsaet som sikkerhed.html — uden supabase-js (52 KB gzip), supabase-api,
+     postnumre og backend-bridge, som ingenting her kaldte. Login-status i
+     headeren laeses fra browserens lager som paa sikkerhed.html. -->
+<script defer src="js/security.js?v=cb8caa0d"></script>
+<script defer src="js/icons.js?v=cb8caa0d"></script>
+<script defer src="js/data.js?v=cb8caa0d"></script>
+<script defer src="js/store.js?v=cb8caa0d"></script>
+<script defer src="js/maaling.js?v=cb8caa0d"></script>
+<script defer src="js/components.js?v=cb8caa0d"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => { renderHeader('vilkaar.html'); });
 </script>
