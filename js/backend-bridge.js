@@ -25,7 +25,10 @@ window.EXTERNAL_LISTINGS = [];
 
    Det var ikke en langsom efterindlæsning. Det var to forskellige svar, og
    forskellen var ÉN ting: om `https://cdn.jsdelivr.net/npm/@supabase/
-   supabase-js@2` nåede at blive hentet og kørt.
+   supabase-js@2` nåede at blive hentet og kørt. (SDK'et serveres siden
+   23.08.2026 fra vores egen origin som js/vendor/supabase.js — se
+   scripts/vendor-supabase.js — så den fremmede vært er væk, men kæden
+   nedenfor gælder stadig, hvis filen af en anden grund ikke når frem.)
 
    Kæden, hele vejen ned:
      jsDelivr fejler  →  `typeof supabase === 'undefined'`

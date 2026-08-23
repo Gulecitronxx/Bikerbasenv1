@@ -103,6 +103,10 @@ const skrump = { js: [0, 0], css: [0, 0] };
 const syntaksfejl = [];
 
 function skrumpFil(navn, kilde){
+  // js/vendor/ kopieres UROERT: det er tredjepartskode (supabase-js, allerede
+  // minificeret af udgiveren), og vores egen minifier er skrevet til vores egen
+  // kode. sha256 i js/vendor/README.md skal kunne efterproeves mod npm.
+  if (/[\\/]vendor[\\/]/.test(kilde)) return null;
   const raa = fs.readFileSync(kilde, 'utf8');
   if (/\.js$/.test(navn)){
     const ud = minifyJS(raa);

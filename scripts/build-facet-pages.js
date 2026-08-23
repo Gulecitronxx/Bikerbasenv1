@@ -355,7 +355,6 @@ ${qualifies ? '' : '<meta name="robots" content="noindex, follow">\n'}<link rel=
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <style>
@@ -437,7 +436,7 @@ ${header}
 ${footer}
 
 <script defer src="js/security.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="js/vendor/supabase.js"></script>
 <script defer src="js/supabase-config.js"></script>
 <script defer src="js/supabase-api.js"></script>
 <script defer src="js/icons.js"></script>

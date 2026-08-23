@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-YtJEBXvGTqKFRFjnuExED09xsaHLWtXEOP5H740fGmg=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Log ind — Bikerbasen</title>
 <meta name="description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
@@ -26,7 +26,8 @@
 <meta name="twitter:title" content="Log ind — Bikerbasen">
 <meta name="twitter:description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
+
 
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
@@ -78,7 +79,6 @@ html[data-authtab="register"] #register-form{ display:block !important; }
 html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; color:var(--color-fg-muted); }
 </style>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <style>
@@ -88,7 +88,7 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=d874e086">
+<link rel="stylesheet" href="css/styles.css?v=06d01c3d">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -325,20 +325,20 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
   </div>
 </footer>
 
-<script defer src="js/security.js?v=d874e086"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=d874e086"></script>
-<script defer src="js/supabase-api.js?v=d874e086"></script>
-<script defer src="js/icons.js?v=d874e086"></script>
+<script defer src="js/security.js?v=06d01c3d"></script>
+<script defer src="js/vendor/supabase.js?v=06d01c3d"></script>
+<script defer src="js/supabase-config.js?v=06d01c3d"></script>
+<script defer src="js/supabase-api.js?v=06d01c3d"></script>
+<script defer src="js/icons.js?v=06d01c3d"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk. findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og login/opret-profil har
      intet postnummerfelt (det ligger på opret-annonce.html:256). Den lå i
      samme download-kø som fontene og css'en og forsinkede første maling. -->
-<script defer src="js/data.js?v=d874e086"></script>
-<script defer src="js/store.js?v=d874e086"></script>
-<script defer src="js/backend-bridge.js?v=d874e086"></script>
-<script defer src="js/components.js?v=d874e086"></script>
-<script defer src="js/login.js?v=d874e086"></script>
+<script defer src="js/data.js?v=06d01c3d"></script>
+<script defer src="js/store.js?v=06d01c3d"></script>
+<script defer src="js/backend-bridge.js?v=06d01c3d"></script>
+<script defer src="js/components.js?v=06d01c3d"></script>
+<script defer src="js/login.js?v=06d01c3d"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

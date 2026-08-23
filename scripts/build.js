@@ -30,7 +30,11 @@
                               annoncen.
      5. stamp-version        stempler den aktuelle css/js-version på ALLE
                               HTML-filer, inklusive dem trin 1-4 lige skrev.
-                              Skal være sidst.
+     6. inline-*             lægger bootstrap/cookie/analytics/kritisk CSS ind
+                              som inline-scripts og -styles.
+     7. csp-hashes           SIDST: hasher hver sides inline-scripts ind i
+                              script-src i stedet for 'unsafe-inline'. Alt,
+                              der rører et inline-script, skal køre FØR.
 
    Kør efter enhver ændring i css/, js/, eller data i Supabase:
      node scripts/build.js */
@@ -38,7 +42,7 @@
 const { execFileSync } = require('child_process');
 const path = require('path');
 
-const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js'];
+const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
 
 for (const script of trin){
   console.log(`\n--- ${script} ---`);

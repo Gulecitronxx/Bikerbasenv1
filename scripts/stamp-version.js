@@ -13,9 +13,13 @@ const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..');
 
-// Hash af alt indhold i js/ og css/ — ændrer sig kun når koden ændrer sig.
+// Hash af alt indhold i js/, js/vendor/ og css/ — ændrer sig kun når koden
+// ændrer sig. js/vendor/ er med, så en opgradering af supabase-js
+// (scripts/vendor-supabase.js) også giver nyt ?v= — ellers ville browsere
+// køre den gamle SDK mod den nye app-kode i op til et år (Cloudflare-cachen
+// sætter immutable på ?v=-stemplede filer).
 const files = [];
-for (const dir of ['js', 'css']){
+for (const dir of ['js', 'js/vendor', 'css']){
   const p = path.join(ROOT, dir);
   if (!fs.existsSync(p)) continue;
   for (const f of fs.readdirSync(p).sort()){
@@ -33,9 +37,9 @@ for (const file of fs.readdirSync(ROOT)){
   let html = fs.readFileSync(full, 'utf8');
   const before = html;
 
-  // src="js/x.js"  /  href="css/x.css"  (med eller uden eksisterende ?v=)
+  // src="js/x.js"  /  src="js/vendor/x.js"  /  href="css/x.css"  (med eller uden eksisterende ?v=)
   html = html.replace(
-    /(src|href)="((?:js|css)\/[a-zA-Z0-9._-]+\.(?:js|css))(\?v=[a-z0-9]+)?"/g,
+    /(src|href)="((?:js|css)\/(?:vendor\/)?[a-zA-Z0-9._-]+\.(?:js|css))(\?v=[a-z0-9]+)?"/g,
     (_m, attr, p) => `${attr}="${p}?v=${version}"`
   );
 

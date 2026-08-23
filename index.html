@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Bikerbasen — Køb og sælg brugte motorcykler i Danmark</title>
 <meta name="description" content="Bikerbasen samler brugte motorcykler til salg i hele Danmark ét sted — fra forhandlere, markedspladser og egne annoncer. Søg på mærke, type, pris og kørekort.">
@@ -49,7 +49,6 @@ try{
 }catch(e){}
 </script>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" as="image" href="img/hero-800.webp" imagesrcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" imagesizes="100vw" fetchpriority="high">
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
@@ -61,7 +60,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=d874e086">
+<link rel="stylesheet" href="css/styles.css?v=06d01c3d">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -532,20 +531,20 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=d874e086"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script defer src="js/supabase-config.js?v=d874e086"></script>
-<script defer src="js/supabase-api.js?v=d874e086"></script>
-<script defer src="js/icons.js?v=d874e086"></script>
-<script defer src="js/data.js?v=d874e086"></script>
+<script defer src="js/security.js?v=06d01c3d"></script>
+<script defer src="js/vendor/supabase.js?v=06d01c3d"></script>
+<script defer src="js/supabase-config.js?v=06d01c3d"></script>
+<script defer src="js/supabase-api.js?v=06d01c3d"></script>
+<script defer src="js/icons.js?v=06d01c3d"></script>
+<script defer src="js/data.js?v=06d01c3d"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=d874e086"></script>
-<script defer src="js/store.js?v=d874e086"></script>
-<script defer src="js/backend-bridge.js?v=d874e086"></script>
-<script defer src="js/components.js?v=d874e086"></script>
-<script defer src="js/home.js?v=d874e086"></script>
+<script defer src="js/filtrering.js?v=06d01c3d"></script>
+<script defer src="js/store.js?v=06d01c3d"></script>
+<script defer src="js/backend-bridge.js?v=06d01c3d"></script>
+<script defer src="js/components.js?v=06d01c3d"></script>
+<script defer src="js/home.js?v=06d01c3d"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">
