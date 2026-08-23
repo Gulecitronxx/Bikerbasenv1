@@ -159,8 +159,22 @@ document.addEventListener('DOMContentLoaded', async () => {
      almindelig auth-hændelse, i det øjeblik klienten oprettes — en lytter,
      der kommer for sent på banen, overhører den, og brugeren lander bare på
      en helt almindelig login-side uden at ane, at trin 2 fandtes. */
+  /* 23.08.2026: to huller i nulstillingen lukket.
+     1) Linket fra mailen giver en RIGTIG session, naar SDK'et laeser tokenet
+        fra adressen. backendReady() synkroniserer den til Store, og grenen
+        "er man allerede logget ind, saa videre" nedenfor sendte brugeren
+        vaek fra siden — trin 2 blev vist og forsvandt igen. Nu husker vi, at
+        vi er i nulstilling (hash med type=recovery foer SDK'et fjerner den,
+        hændelsen PASSWORD_RECOVERY, eller ?nulstil=1), og springer den gren
+        over.
+     2) Staar login.html ikke paa Supabases Redirect URLs-liste, lander
+        linket paa forsiden. js/backend-bridge.js sender derfor en
+        PASSWORD_RECOVERY paa enhver anden side herhen med ?nulstil=1 —
+        sessionen er allerede gemt, saa trin 2 virker. */
+  let nulstilling = /type=recovery/.test(location.hash)
+    || new URLSearchParams(location.search).get('nulstil') === '1';
   db.raw?.auth.onAuthStateChange((event) => {
-    if (event === 'PASSWORD_RECOVERY') showNewPasswordStep();
+    if (event === 'PASSWORD_RECOVERY'){ nulstilling = true; showNewPasswordStep(); }
   });
 
   renderHeader(null);
@@ -179,7 +193,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // synkroniserer kun Store ved SIGNED_IN/TOKEN_REFRESHED, ikke ved recovery,
   // så showNewPasswordStep() ovenfor bliver stående uden at blive omgjort her.
   await backendReady();
-  if (db.enabled && Store.getUser()?.remote) { redirectAfterAuth(); return; }
+  if (nulstilling){
+    showNewPasswordStep();
+    if (!(db.enabled && Store.getUser()?.remote)){
+      authError('Linket er udløbet eller allerede brugt. Bed om et nyt under "Glemt din adgangskode?".');
+    }
+  } else if (db.enabled && Store.getUser()?.remote) { redirectAfterAuth(); return; }
 
   // Uden backend er login stadig en attrap — sig det ærligt frem for at lade som om.
   if (!db.enabled){

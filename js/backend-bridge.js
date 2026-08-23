@@ -141,6 +141,11 @@ function saetAuthLytter(){
   db.raw.auth.onAuthStateChange(async (event) => {
     if (event === 'SIGNED_OUT') Store.logout();
     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') await syncSessionToStore();
+    // Nulstillingslink landet paa en anden side end login.html (sker, hvis
+    // login.html ikke staar paa Supabases Redirect URLs-liste): sessionen er
+    // gemt, saa send videre til trin 2 i stedet for at lade brugeren staa
+    // logget ind paa forsiden uden at vide hvorfor. js/login.js laeser ?nulstil=1.
+    if (event === 'PASSWORD_RECOVERY' && !/\/login(\.html)?$/.test(location.pathname)) location.replace('login.html?nulstil=1');
   });
 }
 
