@@ -97,7 +97,11 @@ async function restHent(sti, ekstraHeaders){
 }
 
 /* Henter ALLE raekker bag en forespoergsel, 1000 ad gangen (PostgREST's
-   Range-header), i stedet for ét kald med `limit=`.
+   `limit=`/`offset=` i selve adressen), i stedet for ét kald med `limit=`.
+   Ikke Range-headeren: `Range: 0-999` er ikke CORS-safelisted (kun
+   `bytes=`-former er), saa browseren ville sende en OPTIONS-preflight foer
+   HVER side — en ekstra tur/retur foran den hentning, LCP'en venter paa.
+   Query-parametrene giver samme svar uden preflight.
 
    Hvorfor (B4, 23.08.2026): loadExternalListings() stod med `&limit=500`,
    og databasen havde 548 aktive indekserede annoncer. De sidste 48 fandtes
@@ -111,7 +115,7 @@ async function restHent(sti, ekstraHeaders){
 async function restHentAlle(sti, sideStoerrelse = 1000){
   const alle = [];
   for (let fra = 0; ; fra += sideStoerrelse){
-    const res = await restHent(sti, { Range: `${fra}-${fra + sideStoerrelse - 1}` });
+    const res = await restHent(`${sti}&limit=${sideStoerrelse}&offset=${fra}`);
     if (res.error) return res;
     alle.push(...res.data);
     if (res.data.length < sideStoerrelse) break;

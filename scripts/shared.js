@@ -104,7 +104,7 @@ async function fetchExternalListings(){
   // raekkefoelgen ved lige sidst_set, og crawleren stempler hele koerslen ens.
   // De forudtegnede kort skal staa i samme orden som javascriptet tegner dem
   // bagefter, ellers omrokerer siden naar det overtager.
-  // Hentes 1000 ad gangen (PostgREST Range) — samme loekke som klientens
+  // Hentes 1000 ad gangen (limit/offset) — samme loekke som klientens
   // restHentAlle(), saa byggekaeden og browseren aldrig ser to forskellige
   // lagre. Uden det stoppede PostgREST stille ved sin max-rows.
   const SIDE = 1000;
@@ -112,8 +112,8 @@ async function fetchExternalListings(){
   for (let fra = 0; ; fra += SIDE){
     const r = await fetch(
       `${url}/rest/v1/eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
-      + '&status=eq.aktiv&order=sidst_set.desc,id.asc',
-      { headers: { apikey: key, Range: `${fra}-${fra + SIDE - 1}` } });
+      + `&status=eq.aktiv&order=sidst_set.desc,id.asc&limit=${SIDE}&offset=${fra}`,
+      { headers: { apikey: key } });
     if (!r.ok){
       throw new Error(`Kunne ikke hente eksterne_annoncer (HTTP ${r.status}: ${await r.text()}). `
         + 'Build afbrudt frem for at skrive et sitemap uden annoncer.');
