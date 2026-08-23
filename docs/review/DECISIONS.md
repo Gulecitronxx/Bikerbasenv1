@@ -171,6 +171,45 @@ lade som om det er en ny kilde. Se `crawler/db.js`, `bortemarkeringVurdering()`.
 
 ## Afvist
 
+### C2 gennemført i kanten, som C-004 foreskrev — 23.08.2026
+FINDING (audit 23.08.2026, C2): "Rate-limit anonymous writes (reports,
+record_listing_event) via edge function + Turnstile / per-day unique."
+C-004 (17.08.2026, ovenfor) afviste rate limiting I DATABASEN med tre grunde
+og pegede på kanten. Det her er den løsning, den pegede på — ikke en omgørelse.
+
+HVAD DER ER LAVET:
+- Migration 022_anonym_skrivegulv.sql: tabel skrive_taeller (nøgle, dag, antal;
+  ingen grants, RLS uden politikker) + taeller_tik(nøgle, grænse) security
+  definer, EXECUTE kun for service_role. anon mister INSERT på reports og
+  EXECUTE på record_listing_event. Indloggede beholder deres direkte vej.
+- Edge Functions indberet og haendelse (supabase/functions/): læser IP'en
+  fra gatewayens x-forwarded-for/cf-connecting-ip — observeret af Supabases
+  proxy, ikke oplyst af afsenderen; det var præcis C-004's indvending mod at
+  gøre det i SQL, hvor request.headers er det, klienten sendte. Hasher IP +
+  dato + salt (sha256) — ingen rå IP gemmes, og hashen kan ikke slås op på
+  tværs af dage. Grænser: én visning/kontakt pr. IP pr. annonce pr. dag
+  (per-day unique); 10 indberetninger pr. IP pr. dag, og kun DEN IP rammes.
+  Fejler tælleren, fejler funktionerne ÅBENT — en notice-and-action-kanal må
+  ikke lukke, fordi et hjælpebord er nede (C-004's "afvis ved travlhed"-
+  indvending, vendt til design).
+- Klienten (js/supabase-api.js): funktion først, fald tilbage til den direkte
+  vej, så længe funktionen svarer 404 — så kan 022 og funktionerne deployes
+  i vilkårlig rækkefølge uden et vindue, hvor udloggede ikke kan indberette.
+  Plain fetch, så visninger også tælles på sider uden SDK (C1).
+- Turnstile er IKKE sat på: det kræver Cloudflare-kontoen (A3) og en
+  CSP-udvidelse til challenges.cloudflare.com. IP-grænsen alene er det,
+  findingen kaldte "per-day unique", og den er nok til det målte problem
+  (et curl-loop). Turnstile kan lægges ovenpå i indberet den dag A3 er kørt.
+
+HVAD DET IKKE LØSER: en angriber med mange IP'er. Det er kantens/Cloudflares
+opgave (A3: WAF/rate limiting pr. sti), ikke en funktions.
+
+BEVIS: smoke-testens to 022-prøver skriver intet (INSERT med ugyldig reason →
+23514 før, 42501 efter; RPC med ikke-eksisterende uuid → 204 før, 42501
+efter) og står i dag som "åben"; funktionerne 404 i dag. Enhedstests for
+klientens fald-tilbage i js/skrivevej.test.js. Ikke kørt mod produktion herfra
+(A1-blokeringen: access token).
+
 ### B3 afvist (proxy + silhuet) / gennemført (fejlfelt + pladsholder) — 23.08.2026
 FINDING (audit 23.08.2026, B3): "Proxy + resize thumbnails through an image
 worker you control (Cloudflare Images/Workers or Supabase Storage transform)

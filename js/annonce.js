@@ -897,7 +897,10 @@ function renderListing(){
   // Titel, delingsbillede og struktureret data følger annoncen, så et link
   // delt i en MC-gruppe viser mærke, årgang og pris frem for bare "Annonce".
   seoListingPage(listing, listing.photoUrls || []);
-  tælVisning(listing.id);
+  // C2: visningen taelles via Edge Function haendelse (service_role), saa
+  // record_listing_event's 'ikke saelgerens egne visninger'-regel (auth.uid())
+  // kan ikke laengere ses derinde — derfor springes egne annoncer over HER.
+  if (!(typeof isOwnListing === 'function' && isOwnListing(listing))) tælVisning(listing.id);
   // Én h1 pr. side: den statiske i markup opdateres, så også crawlere
   // uden JavaScript ser en overskrift.
   const h1 = document.getElementById('listing-h1');

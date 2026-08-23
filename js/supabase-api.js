@@ -83,6 +83,52 @@ const db = (function(){
     return null;
   }
 
+  /* ---------- Anonyme skrivninger gaar gennem Edge Functions ----------
+     (supabase/022_anonym_skrivegulv.sql, audit C2 + DECISIONS.md C-004)
+
+     Funktion FOERST: de to ting en udlogget kan skrive — en indberetning og
+     en visnings-/kontakttaelling — havde ingen graense. C-004 afviste en
+     rate limit i databasen (ingen identitet at taelle paa; en global taeller
+     lukker kanalen for den aerlige) og pegede paa KANTEN: der er afsenderens
+     IP observeret, ikke oplyst. Edge Functions 'indberet' og 'haendelse'
+     hasher IP'en med dagens salt og taeller pr. IP pr. dag, foer de skriver
+     med service_role.
+
+     Fald tilbage paa 404: funktionerne og 022 kan deployes i vilkaarlig
+     raekkefoelge. Er funktionen ikke deployet endnu, svarer gatewayen 404
+     ("NOT_FOUND" / "Requested function was not found"), og saa bruger vi
+     praecis den direkte vej, vi altid har brugt (SDK rpc / SDK insert). Naar
+     022 er koert, er den direkte anonyme vej lukket — men da er funktionen
+     ogsaa deployet, og tilbagefaldet rammes aldrig. Netvaerksfejl behandles
+     som 404: hellere et forsoeg paa den gamle vej end et tabt kald.
+
+     Ren fetch, ikke SDK'et: SDK'et hentes kun ved behov
+     (js/backend-bridge.js), saa paa en laeseside for en udlogget er det
+     typisk IKKE indlaest (init() svarer null). En visning skal taelles
+     alligevel, og en indberetning skal kunne sendes uden at traekke hele
+     SDK'et ind foerst. Kaldet er uden bruger-JWT med vilje — funktionen ser
+     paa IP'en, ikke paa hvem du er. Kaster aldrig. */
+  async function kaldFunktion(navn, body){
+    if (typeof SUPABASE_CONFIG === 'undefined' || !SUPABASE_CONFIG?.url || typeof fetch !== 'function'){
+      return { status: 0, data: null, ikkeDeployet: true, error: { message: 'Backend er ikke konfigureret.' } };
+    }
+    try {
+      const res = await fetch(`${SUPABASE_CONFIG.url}/functions/v1/${navn}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_CONFIG.anonKey },
+        body: JSON.stringify(body || {}),
+      });
+      const tekst = await res.text().catch(() => '');
+      let data = null;
+      try { data = tekst ? JSON.parse(tekst) : null; } catch { data = null; }
+      const ikkeDeployet = res.status === 404 && /NOT_FOUND|Requested function was not found/i.test(tekst);
+      const error = res.ok ? null : { message: (data && data.error) || `Funktionen svarede ${res.status}.` };
+      return { status: res.status, data, ikkeDeployet, error };
+    } catch (e) {
+      return { status: 0, data: null, ikkeDeployet: true, error: { message: e?.message || 'Netvaerksfejl.' } };
+    }
+  }
+
   return {
     get enabled(){ return Boolean(init()); },
     get raw(){ return init(); },
@@ -326,11 +372,26 @@ const db = (function(){
     /* ---------- Statistik ---------- */
 
     /* Tæller en visning eller en kontaktafsløring. Fejl sluges bevidst:
-       et statistikkald må aldrig ødelægge siden for den besøgende. */
+       et statistikkald må aldrig ødelægge siden for den besøgende.
+
+       Funktionen 'haendelse' foerst (IP-taelling ved kanten, se kaldFunktion);
+       svarer den 404, er den ikke deployet endnu, og den direkte RPC bruges
+       som foer — men kun hvis SDK'et er indlaest. Svaret { talt } ignoreres:
+       om visningen blev talt eller var dagens gentagelse, rager ikke siden. */
     async recordListingEvent(listingId, kind){
-      const c = init(); if (!c || !isUuid(listingId)) return;
-      const { error } = await c.rpc('record_listing_event', { p_listing: listingId, p_kind: kind });
-      if (error) console.debug('Statistik ikke registreret:', error.message);
+      try {
+        if (!isUuid(listingId)) return;
+        const svar = await kaldFunktion('haendelse', { listing_id: listingId, kind });
+        if (!svar.ikkeDeployet){
+          if (svar.error) console.debug('Statistik ikke registreret:', svar.error.message);
+          return;
+        }
+        const c = init(); if (!c) return;
+        const { error } = await c.rpc('record_listing_event', { p_listing: listingId, p_kind: kind });
+        if (error) console.debug('Statistik ikke registreret:', error.message);
+      } catch (e) {
+        console.debug('Statistik ikke registreret:', e?.message);
+      }
     },
 
     /* Dagstotaler for brugerens egne annoncer. RLS sørger for, at man kun
@@ -553,15 +614,42 @@ const db = (function(){
       return c.from('saved_searches').update({ notify }).eq('id', id);
     },
 
-    /* ---------- Indberetninger ---------- */
+    /* ---------- Indberetninger ----------
+       Indlogget: direkte insert som altid (reporter_id = auth.uid(), RLS).
+       Udlogget: gennem funktionen 'indberet', som taeller pr. IP pr. dag og
+       skriver med service_role — 022 lukker anons direkte INSERT. Svarer
+       funktionen 404 (ikke deployet endnu), bruges den gamle direkte vej med
+       reporter_id null, saa laenge den stadig er aaben. Returformen er
+       { data?, error } som foer — js/components.js ser kun paa error. */
     async addReport({ targetType, targetId, reason, comment }){
-      const c = init(); if (!c) return { error: { message: 'Backend mangler.' } };
-      const user = await this.currentUser();
-      return c.from('reports').insert({
-        reporter_id: user ? user.id : null,
+      const c = init();
+      const user = c ? await this.currentUser() : null;
+      if (user){
+        return c.from('reports').insert({
+          reporter_id: user.id,
+          target_type: targetType, target_id: String(targetId), reason, comment: comment || '',
+        });
+      }
+
+      const svar = await kaldFunktion('indberet', {
         target_type: targetType, target_id: String(targetId), reason, comment: comment || '',
       });
+      if (svar.ikkeDeployet){
+        if (!c) return { error: { message: 'Backend mangler.' } };
+        return c.from('reports').insert({
+          reporter_id: null,
+          target_type: targetType, target_id: String(targetId), reason, comment: comment || '',
+        });
+      }
+      if (svar.status === 429){
+        return { error: { message: svar.data?.error || 'For mange indberetninger i dag.', throttled: true } };
+      }
+      if (svar.status === 201 || svar.status === 200) return { data: { ok: true }, error: null };
+      return { error: { message: svar.data?.error || 'Indberetningen kunne ikke sendes.' } };
     },
+
+    // Intern: udstillet kun for at kunne enhedstestes (js/skrivevej.test.js).
+    _kaldFunktion: kaldFunktion,
 
   };
 })();

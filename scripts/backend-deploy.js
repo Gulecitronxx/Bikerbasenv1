@@ -86,7 +86,10 @@ async function tilstand(){
                 where n.nspname='public' and p.proname='notify_saved_searches' limit 1), false) as notify_placeholder,
       exists (select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
               where n.nspname='public' and p.proname='notify_saved_searches') as notify_fn,
-      has_column_privilege('anon', 'public.kilder', 'crawl_delay_ms', 'select') as kilder_aaben
+      has_column_privilege('anon', 'public.kilder', 'crawl_delay_ms', 'select') as kilder_aaben,
+      has_table_privilege('anon', 'public.reports', 'insert') as reports_anon_insert,
+      not exists (select 1 from information_schema.tables
+                  where table_schema='public' and table_name='skrive_taeller') as taeller_mangler
   `, 'tilstand');
   return rows[0];
 }
@@ -97,6 +100,10 @@ async function tilstand(){
    019: dev_set_plan saetter ogsaa is_dealer (samme rettelse som i stripe-webhook)
    020: dropper dev_set_plan — betalingsomgaaelsen maa ikke findes i produktion
    021: kolonnegulv paa kilder — anon/authenticated laeser kun id, navn, domaene, aktiv (D3)
+   022: anonymt skrivegulv — taeller til Edge Functions, anon mister direkte
+        INSERT i reports og EXECUTE paa record_listing_event (C2). Funktionerne
+        indberet/haendelse deployes i samme koersel; klienten falder tilbage,
+        saa laenge de svarer 404, saa raekkefoelgen er ufarlig.
    Alle er skrevet til at kunne koeres igen uden skade; de springes kun over,
    naar tilstanden beviser, at de allerede er koert. */
 function migrationsplan(t){
@@ -106,6 +113,7 @@ function migrationsplan(t){
   if (plan.length) plan.push('019_dealer_ved_betaling.sql'); // kun meningsfuld foer 020
   if (t.dev_set_plan || plan.length) plan.push('020_fjern_dev_set_plan.sql');
   if (t.kilder_aaben) plan.push('021_kilder_kolonnegulv.sql');
+  if (t.taeller_mangler || t.reports_anon_insert) plan.push('022_anonym_skrivegulv.sql');
   return plan;
 }
 
@@ -147,6 +155,9 @@ const FUNKTIONER = [
   { navn: 'verify-profile',        verifyJwt: true  },
   { navn: 'stripe-webhook',        verifyJwt: false },
   { navn: 'notify-saved-searches', verifyJwt: false },
+  // C2: anonyme kaldere (udloggede maa indberette; visninger taelles for alle).
+  { navn: 'indberet',              verifyJwt: false },
+  { navn: 'haendelse',             verifyJwt: false },
 ];
 const SECRETS_KRAEVET = {
   'create-checkout':       ['STRIPE_SECRET_KEY', 'STRIPE_PRICE_ID', 'SITE_URL'],
@@ -154,6 +165,8 @@ const SECRETS_KRAEVET = {
   'stripe-webhook':        ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'],
   'verify-profile':        ['SITE_URL'],                 // CVR_API_TOKEN er valgfri (se VERIFICERING.md)
   'notify-saved-searches': ['NOTIFY_SECRET', 'RESEND_API_KEY', 'SITE_URL'],
+  'indberet':              ['SITE_URL'],   // TAELLER_SALT er valgfri (standard i koden)
+  'haendelse':             ['SITE_URL'],
 };
 
 function cli(args){

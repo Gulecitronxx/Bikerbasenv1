@@ -25,7 +25,7 @@ const H = { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'applic
 /* Funktioner og om de er beskyttet af JWT-tjek i gatewayen. Uden JWT svarer
    en beskyttet funktion 401 — det er et TEGN PAA LIV, ikke en fejl. 404 fra
    gatewayen ({"code":"NOT_FOUND"}) betyder "ikke deployet". */
-const FUNKTIONER = ['create-checkout', 'create-portal', 'stripe-webhook', 'verify-profile', 'notify-saved-searches'];
+const FUNKTIONER = ['create-checkout', 'create-portal', 'stripe-webhook', 'verify-profile', 'notify-saved-searches', 'indberet', 'haendelse'];
 
 /* Kolonner, der beviser at en migration er koert. Et SELECT paa en kolonne,
    der ikke findes, giver 42703 — uanset RLS. Findes den, giver anon [] (200). */
@@ -63,6 +63,25 @@ async function tjekKilderGulv(){
   noter(lukket, 'migration 021: kilder.crawl_delay_ms IKKE laesbar for anon', lukket ? 'lukket (42501)' : `aaben (${r.status}) — hele crawlerkonfigurationen er offentlig`);
 }
 
+/* 022: de direkte anonyme skriveveje er lukket. Proeverne SKRIVER INTET:
+   INSERT'et er med en reason, CHECK-constrainten afviser (23514) — foer 022
+   svarer databasen 400 paa constrainten (doeren er aaben), efter 022 svarer
+   den 42501 (doeren er lukket), og ingen raekke skrives i nogen af tilfaeldene.
+   RPC'en kaldes med et uuid, der ikke findes — foer 022 svarer den 204 (og
+   goer ingenting, fordi annoncen ikke findes), efter 022 42501. */
+async function tjekAnonymSkrivegulv(){
+  const r1 = await fetch(`${URL_}/rest/v1/reports`, { method: 'POST', headers: { ...H, Prefer: 'return=minimal' },
+    body: JSON.stringify({ target_type: 'listing', target_id: 'roegtest', reason: 'ikke-en-gyldig-grund', comment: '' }) });
+  const t1 = await r1.text();
+  const lukket1 = /42501|permission denied/.test(t1);
+  noter(lukket1, 'migration 022: anon kan IKKE skrive direkte i reports', lukket1 ? 'lukket (42501) — kun via indberet' : `aaben (${r1.status}: ${t1.slice(0, 50)})`);
+  const r2 = await fetch(`${URL_}/rest/v1/rpc/record_listing_event`, { method: 'POST', headers: H,
+    body: JSON.stringify({ p_listing: '00000000-0000-4000-8000-000000000000', p_kind: 'view' }) });
+  const t2 = await r2.text();
+  const lukket2 = /42501|permission denied/.test(t2);
+  noter(lukket2, 'migration 022: anon kan IKKE kalde record_listing_event direkte', lukket2 ? 'lukket (42501) — kun via haendelse' : `aaben (${r2.status})`);
+}
+
 async function tjekDevSetPlanVaek(){
   // Navngivet parameter, saa PostgREST finder funktionen HVIS den findes.
   const r = await fetch(`${URL_}/rest/v1/rpc/dev_set_plan`, { method: 'POST', headers: H, body: JSON.stringify({ p_plan: 'free' }) });
@@ -83,6 +102,7 @@ async function tjekFunktion(navn){
   for (const [m, t, k] of KOLONNER) await tjekKolonne(m, t, k);
   await tjekDevSetPlanVaek();
   await tjekKilderGulv();
+  await tjekAnonymSkrivegulv();
   for (const f of FUNKTIONER) await tjekFunktion(f);
 
   const bredde = Math.max(...resultater.map(r => r.hvad.length));

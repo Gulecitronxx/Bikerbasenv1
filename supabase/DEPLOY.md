@@ -19,6 +19,7 @@ node scripts/backend-deploy.js      # deploy det, der mangler (kræver token)
 | `NOTIFY_SECRET` | en lang tilfældig streng, du selv laver | Delt hemmelighed mellem databasens trigger (013) og `notify-saved-searches`. |
 | `SITE_URL` | `https://bikerbasen.dk` | Tilbage-links i mails og Stripe-flows. |
 | `CVR_API_TOKEN` (valgfri) | se `VERIFICERING.md` | `verify-profile` — uden den springes CVR-opslaget over. |
+| `TAELLER_SALT` (valgfri) | en tilfældig streng | `indberet`/`haendelse` salter IP-hashen med den (standard i koden, hvis den mangler). Skift den, og alle tællere starter forfra næste dag. |
 
 ## 2. Kør deployet
 
@@ -36,12 +37,14 @@ Scriptet:
 1. slår projektet op (token virker?),
 2. læser tilstanden direkte i databasen (`profiles.plan`? `enforce_listing_limit`? `dev_set_plan`? pladsholdere i 013?),
 3. kører **kun** de migrationer, tilstanden beviser mangler, i rækkefølgen
-   `006 → 007 → 019 → 020 → 021` (i dag: alle fem; 021 er kolonnegulvet på
-   `kilder` — anon læser kun id/navn/domæne/aktiv, se filens hoved),
+   `006 → 007 → 019 → 020 → 021 → 022` (i dag: alle seks; 021 er kolonnegulvet
+   på `kilder`, 022 er det anonyme skrivegulv — taeller + lukkede direkte veje,
+   se filernes hoveder),
 4. udfylder `<<PROJEKT_URL>>`/`<<HEMMELIGHED>>` i 013's trigger, hvis `NOTIFY_SECRET` er sat,
-5. deployer de fem funktioner via `npx supabase@2 functions deploy` —
-   `stripe-webhook` og `notify-saved-searches` **uden JWT-tjek** (de kaldes af
-   Stripe hhv. pg_net, ikke af en bruger; `config.toml` siger det samme),
+5. deployer de syv funktioner via `npx supabase@2 functions deploy` —
+   `stripe-webhook`, `notify-saved-searches`, `indberet` og `haendelse` **uden
+   JWT-tjek** (de kaldes af Stripe, pg_net hhv. udloggede browsere; graensen i
+   de to sidste er IP-baseret inde i funktionen; `config.toml` siger det samme),
 6. lister hvilke secrets der mangler (kun navne),
 7. kører `scripts/tjek-backend.js` og afslutter med fejlkode, hvis noget stadig mangler.
 
@@ -67,9 +70,10 @@ Webhooken i Stripe skal pege på
 node scripts/tjek-backend.js
 ```
 
-Alle 18 linjer skal stå `OK`: kolonnerne fra 006 findes, `dev_set_plan` findes
+Alle 22 linjer skal stå `OK`: kolonnerne fra 006 findes, `dev_set_plan` findes
 ikke, `kilder.crawl_delay_ms` er lukket for anon (021) mens navn/domæne stadig
-kan læses, og ingen funktion svarer 404. En funktion, der svarer 401 uden login, er
+kan læses, de direkte anonyme skriveveje er lukket (022) mens `indberet` og
+`haendelse` svarer, og ingen funktion svarer 404. En funktion, der svarer 401 uden login, er
 **deployet og beskyttet** — det er rigtigt.
 
 ## Hvorfor ikke `supabase db push`?

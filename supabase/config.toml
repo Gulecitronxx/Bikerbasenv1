@@ -13,6 +13,14 @@ verify_jwt = false
 [functions.notify-saved-searches]
 verify_jwt = false
 
+# C2: anonyme kaldere — udloggede skal kunne indberette, og visninger taelles
+# for alle. Graensen er IP-baseret inde i funktionen (taeller_tik, migration 022).
+[functions.indberet]
+verify_jwt = false
+
+[functions.haendelse]
+verify_jwt = false
+
 [functions.create-checkout]
 verify_jwt = true
 
