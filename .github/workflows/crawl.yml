@@ -10,10 +10,12 @@
 # ikke paa dem, kun paa hvor tit de efterleves.
 name: Crawl kilder
 
+# KUN MANUEL KOERSEL — menneskets beslutning 24.08.2026: ingen cron.
+# Crawleren koerer udelukkende, naar der trykkes "Run workflow" i Actions-fanen.
+# (Konsekvens: "Senest bekraeftet hos kilderne"-datoerne bliver kun friske,
+# naar der koeres manuelt.)
 on:
-  schedule:
-    - cron: '0 3 * * *'   # hver nat kl. 03 UTC (05 dansk sommertid)
-  workflow_dispatch: {}    # og manuelt fra Actions-fanen
+  workflow_dispatch: {}
 
 permissions:
   contents: read
