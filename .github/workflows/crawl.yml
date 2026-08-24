@@ -38,15 +38,15 @@ jobs:
         run: |
           if [ -z "$NOEGLE" ]; then
             echo "SUPABASE_SERVICE_ROLE_KEY er ikke sat som repository secret - crawleren springes over." >> "$GITHUB_STEP_SUMMARY"
-            echo "kør=nej" >> "$GITHUB_OUTPUT"
+            echo "koer=nej" >> "$GITHUB_OUTPUT"
           else
-            echo "kør=ja" >> "$GITHUB_OUTPUT"
+            echo "koer=ja" >> "$GITHUB_OUTPUT"
           fi
       - name: Installer afhaengigheder
-        if: steps.gate.outputs.kør == 'ja'
+        if: steps.gate.outputs.koer == 'ja'
         run: npm ci --omit=dev || npm install --omit=dev
       - name: Koer crawleren
-        if: steps.gate.outputs.kør == 'ja'
+        if: steps.gate.outputs.koer == 'ja'
         env:
           SUPABASE_URL: https://hkcjrwglwurdjnobewzb.supabase.co
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
