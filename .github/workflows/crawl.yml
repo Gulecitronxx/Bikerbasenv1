@@ -53,4 +53,7 @@ jobs:
         env:
           SUPABASE_URL: https://hkcjrwglwurdjnobewzb.supabase.co
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npm run crawl
+        # Uden --alle printer run.js kun hjaelpeteksten og exit(2) — det var
+        # tredje koersels fejl. node kaldes direkte (npm's '--'-videresendelse
+        # er en kendt faelde, se filhovedet i crawler/run.js).
+        run: node crawler/run.js --alle
