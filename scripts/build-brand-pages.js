@@ -46,10 +46,18 @@ function facetLinksFor(brand, items){
   ] });
 
   if (!raekker.length) return '';
+  /* Runde 10 (D9-M1-rest): paa mobil kostede raekkerne stadig ≈160 px over det
+     foerste kort. Nu ligger de i en <details>, som js/maerke.js klapper sammen
+     paa ≤620 px — funktionen er ét tryk vaek (som Bilbasens eget filterlag),
+     og uden JS er folden aaben, saa intet gemmes for en crawler. Paa desktop
+     er den altid aaben, og summary er skjult (css). */
   return `
-      <div class="brand-facetter">
+      <details class="brand-facet-fold" open>
+        <summary>Filtrér og sortér ${esc(brand)}<span class="chev"></span></summary>
+        <div class="brand-facetter">
         ${raekker.map(r => `<div class="brand-facet-raekke${r.klasse || ''}"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}">${l.tekst}</a>`).join('\n          ')}</div>`).join('\n        ')}
-      </div>${typeNote}`;
+        </div>${typeNote}
+      </details>`;
 }
 
 /* Runde 7 (D7-M1): "Brugte Honda" — 165 af 262 Honda er fabriksnye (sidens egen

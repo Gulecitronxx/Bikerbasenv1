@@ -395,6 +395,29 @@ dage gammel, og VDP'en skriver det selv), (2) Resend (søgeagent-mails),
 
 ---
 
+## Runde 10 — statusrunde (24.08.2026): STOP for blind-loopet
+
+Rapport: [runde-10-status.md](runde-10-status.md). Blinddom **7–1, alle syv
+vundne nu "klart"**; kun mærkeside-mobil tabes (snævert, på fold-tallet).
+Friskheden efterprøvet uafhængigt: alle 4 kilder `sidst_set` 24.08, 602 viste
+af 616 rå (14 dubletter, kildelinjen stemmer). D9: 11 lukket, 1 delvist (M1 —
+lukket EFTER optagelsen: facetfold på mobil, første kort 860 → **712**),
+1 måleartefakt. D8-S4 lukket i `478cf3e`.
+
+**Statusdom: aftagende udbytte — ingen P1, ingen falske påstande tilbage.**
+Referencens restfordele er ting, reglerne forbyder at kopiere (galleri, fuld
+tekst, annoncer). Det, der giver reel værdi nu (prioriteret):
+1. Crawl-kadence — nøglen virker; kørslen er MANUEL efter menneskets valg
+   (`affe043`). Menneskets tryk = frisk data.
+2. ~~D9-M1-resten~~ lukket (712 ≤ mål ~700).
+3. Flere kilder — kræver tilladelsesaftaler (juridisk regel: `tilladelse_modtaget`).
+4. Claim-verifikation (krav-flowet) — delvist bygget, mangler verifikationsvejene.
+5. Søgeagent-mail — kræver Resend-nøgle + trigger på eksterne_annoncer.
+Anbefalet målestok fremover: rigtige købere (fx fem med A2-kørekort), ikke
+flere screenshot-domme.
+
+---
+
 ## Lukket
 
 <!-- Verificerede findings flyttes herned med rundenummer, så tabellen ovenfor

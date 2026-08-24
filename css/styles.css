@@ -2834,12 +2834,23 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-intro-mere > .brand-intro{ margin-top:8px; }
 .brand-sub:not(:first-child){ margin-top: var(--space-6); }
 .section-head .brand-sub{ margin-top:0; }
+/* Runde 10 (D9-M1-rest): facetfolden. Summary skjules paa desktop (altid aaben). */
+.brand-facet-fold{ margin:0 0 var(--space-4); }
+.brand-facet-fold > summary{ list-style:none; cursor:pointer; display:none; align-items:center; gap:8px; font-weight:600; font-size:14px; padding:10px 14px; border:1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); }
+.brand-facet-fold > summary::-webkit-details-marker{ display:none; }
+.brand-facet-fold > summary .chev{ margin-left:auto; }
+.brand-facet-fold > summary .chev::before{ content:'▾'; color: var(--color-fg-muted); }
+.brand-facet-fold[open] > summary .chev::before{ content:'▴'; }
+@media (max-width:620px){
+  .brand-facet-fold > summary{ display:flex; }
+  .brand-facet-fold[open] > summary{ margin-bottom:10px; }
+}
 /* Runde 8 (D8-M3): facetlinks med tal over maerkesidens gitter.
    Runde 9 (D9-M1): raekkerne kostede ≈260 px og skubbede foerste kort til
    ≈890/835. Nu: to kolonner paa desktop, tættere chips paa mobil — funktionen
    er den samme, prisen ≈halveret. D9-M4: synlig tynd scrollbar som affordance
    for rullelisterne (foer var eneste hint en klippet chip). */
-.brand-facetter{ display:grid; gap:6px; margin: 0 0 var(--space-4); }
+.brand-facetter{ display:grid; gap:6px; }
 @media (min-width:900px){ .brand-facetter{ grid-template-columns:1fr 1fr; column-gap:24px; } }
 .brand-facet-raekke{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
 .brand-facet-navn{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color: var(--color-fg-muted); flex:0 0 auto; }

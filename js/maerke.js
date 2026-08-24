@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const brand = mount && mount.dataset.brand;
 
   renderHeader(null);
+  /* Runde 10 (D9-M1-rest): facetfolden klappes sammen paa mobil — aaben i
+     markuppen, saa indholdet er der uden JS og for crawlere. */
+  const fold = document.querySelector('.brand-facet-fold');
+  if (fold && window.matchMedia('(max-width:620px)').matches) fold.open = false;
   document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
   if (!brand) return;
 
