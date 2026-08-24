@@ -108,7 +108,7 @@ function talDa(n){
                     annoncen), navnet gør ikke.
    Telefonnummer og kontaktflade er stadig bag login for begge — det er DÉR
    skrabning og uønskede henvendelser kommer fra, ikke fra sælgertypen. */
-function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon }){
+function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig }){
   const s = listing.seller || {};
   const erForhandler = !!s.isDealer;
   const visNavn = erForhandler || loggedIn;
@@ -233,11 +233,11 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon })
         ${identitet}
         <div class="contact-actions">
           <button type="button" class="btn btn-primary btn-block" id="open-contact-modal">${Icon.mail}Skriv til sælger</button>
-          ${telefon ? `<button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
+          ${telefon || telefonMulig ? `<button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
           <button type="button" class="btn btn-outline btn-block" id="open-payment-modal">${Icon.lock}Betal sikkert (MobilePay)</button>
           <button type="button" class="btn btn-outline btn-block" id="share-listing-btn">${Icon.share}Del annonce</button>
         </div>
-        ${telefon ? '' : `<p class="seller-locked-note">${Icon.info}<span>Sælgeren har ikke oplyst et telefonnummer. Skriv i stedet — så får du svaret på skrift.</span></p>`}
+        ${telefon || telefonMulig ? '' : `<p class="seller-locked-note">${Icon.info}<span>Sælgeren har ikke oplyst et telefonnummer. Skriv i stedet — så får du svaret på skrift.</span></p>`}
         ${raad}
       </div>
 
@@ -1088,6 +1088,11 @@ function renderListing(){
   const avgRating = Store.getAverageRating(listing.seller.name, Number.isFinite(raaRating) ? raaRating : null);
   const reviewCount = Store.getReviews(listing.seller.name).length;
   const telefon = String(listing.seller.phone || '').trim();
+  /* O3-1b: for databaseannoncer ligger nummeret ALDRIG i payloaden
+     (public_profiles udstiller det ikke). Om det findes og maa vises, ved kun
+     RPC'en hent_saelger_telefon — saa knappen tegnes, og svaret hentes ved
+     klik. For demoannoncer er `telefon` stadig vaerdien i objektet. */
+  const telefonMulig = !telefon && isUuid(String(listing.id)) && typeof db !== 'undefined' && db.enabled;
   const suspicious = isSuspiciouslyCheap(listing);
   // "Er annoncen fra i år, eller har den ligget her siden 2023?" Bilbasen
   // svarer slet ikke på det på annoncesiden. Vi har datoen — den skal stå,
@@ -1228,7 +1233,7 @@ ${galleriHTML}
          (se .listing-aside i css/styles.css). -->
     <div class="listing-aside">
       <div class="listing-aside-inner">
-        ${saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon })}
+        ${saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig })}
         ${videreKortHTML(listing, kk)}
       </div>
     </div>
@@ -1288,7 +1293,7 @@ ${galleriHTML}
        [hidden] i css/styles.css. */
     const barPhone = document.getElementById('bar-phone');
     if (barPhone){
-      if (loggedIn && !telefon){
+      if (loggedIn && !telefon && !telefonMulig){
         barPhone.hidden = true;
       } else {
         barPhone.addEventListener('click', () => spring('reveal-phone-btn', true));
@@ -1304,12 +1309,26 @@ ${galleriHTML}
        opsætningen, og alt nedenfor — deling, betaling, kontaktformular —
        blev aldrig koblet på. */
     const revealBtn = document.getElementById('reveal-phone-btn');
-    revealBtn?.addEventListener('click', () => {
-      // telefon er den trimmede værdi fra renderListing, ikke råfeltet.
-      revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(telefon)}</span>`;
+    const visNummer = (nr) => {
+      revealBtn.innerHTML = `${Icon.phone}<span class="phone-reveal">${escapeHTML(nr)}</span>`;
       revealBtn.disabled = true;
       // Tælles som en henvendelse i sælgerens dashboard.
       db.recordListingEvent?.(listing.id, 'contact');
+    };
+    revealBtn?.addEventListener('click', async () => {
+      if (telefon){ visNummer(telefon); return; }
+      /* O3-1b: svaret findes kun hos RPC'en. null betyder "vises ikke" —
+         uanset om det er manglende samtykke eller manglende nummer, og det
+         er med vilje: forskellen er saelgerens privatsag. */
+      revealBtn.disabled = true;
+      revealBtn.innerHTML = `${Icon.phone}Henter…`;
+      const { data, error } = await db.hentSaelgerTelefon(listing.id);
+      const nr = String(data || '').trim();
+      if (!error && nr){ visNummer(nr); return; }
+      const note = document.createElement('p');
+      note.className = 'seller-locked-note';
+      note.innerHTML = `${Icon.info}<span>Sælgeren viser ikke sit telefonnummer her. Skriv i stedet — så får du svaret på skrift.</span>`;
+      revealBtn.replaceWith(note);
     });
 
     document.getElementById('share-listing-btn').addEventListener('click', async () => {

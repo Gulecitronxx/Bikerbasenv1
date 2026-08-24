@@ -1,5 +1,8 @@
 # Deploy af backenden (migrationer + Edge Functions)
 
+> **24.08.2026:** migration 023 (telefon-samtykke + hent_saelger_telefon-RPC)
+> er ogsaa koert — se filens hoved og DECISIONS.md ("O3-1b gennemfoert").
+>
 > **STATUS 23.08.2026: DEPLOYET.** Migrationerne 006, 007, 020, 021 og 022 er
 > koert mod produktionen via Supabase MCP (019 sprunget over: den genskaber kun
 > `dev_set_plan`, som 020 dropper — 006 blev koert UDEN dev_set_plan, saa

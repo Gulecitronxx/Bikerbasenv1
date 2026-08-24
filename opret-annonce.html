@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Sælg din motorcykel — gratis annonce for private — Bikerbasen">
 <meta name="twitter:description" content="Opret en annonce for din motorcykel på Bikerbasen — gratis for private. Fire trin, kladde undervejs, og dit navn vises kun for indloggede.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -73,7 +73,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=3ffadd2d">
+<link rel="stylesheet" href="css/styles.css?v=c4161c87">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -354,12 +354,15 @@ try{
           <ul>
             <li>Din annonce står i søgningen sammen med alle indekserede annoncer.</li>
             <li>Indloggede købere kan se dit navn og markere, at de vil i kontakt — du ser antallet under Mine annoncer.</li>
-            <!-- O2-5: raadet "skriv i beskrivelsen, hvordan du vil kontaktes" bad
-                 saelgeren om selv at laegge sin kontaktvej i en OFFENTLIG fritekst —
-                 stik imod sitets eget loefte "kontaktinfo kun for indloggede".
-                 O2-1: antallet staar nu faktisk paa Mine annoncer. -->
-            <li>Vi videresender ikke beskeder og viser ikke dit telefonnummer — antallet af visninger og henvendelser står ved hver annonce under Mine annoncer.</li>
+            <!-- O3-1b: telefonen er nu en RIGTIG kanal — men kun med samtykket
+                 nedenfor, kun for indloggede, og aldrig i sidens markup
+                 (RPC'en hent_saelger_telefon svarer ved klik). -->
+            <li>Vi videresender ikke beskeder. Slår du telefonvisning til nedenfor, kan indloggede købere se dit nummer med ét klik — ellers ser de kun antallet af henvendelser, som står under Mine annoncer.</li>
           </ul>
+        </div>
+        <div class="checkbox-inline" id="vis-telefon-felt" style="margin-top:16px;" hidden>
+          <input type="checkbox" id="f-vis-telefon">
+          <label for="f-vis-telefon">Vis mit telefonnummer for indloggede købere. <span class="field-hint-inline" id="vis-telefon-hint"></span></label>
         </div>
         <div class="checkbox-inline" style="margin-top:16px;">
           <input type="checkbox" id="f-terms" required>
@@ -427,18 +430,18 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=3ffadd2d"></script>
-<script defer src="js/vendor/supabase.js?v=3ffadd2d"></script>
-<script defer src="js/supabase-config.js?v=3ffadd2d"></script>
-<script defer src="js/supabase-api.js?v=3ffadd2d"></script>
-<script defer src="js/icons.js?v=3ffadd2d"></script>
-<script defer src="js/postnumre.js?v=3ffadd2d"></script>
-<script defer src="js/data.js?v=3ffadd2d"></script>
-<script defer src="js/store.js?v=3ffadd2d"></script>
-<script defer src="js/maaling.js?v=3ffadd2d"></script>
-<script defer src="js/backend-bridge.js?v=3ffadd2d"></script>
-<script defer src="js/components.js?v=3ffadd2d"></script>
-<script defer src="js/opret-annonce.js?v=3ffadd2d"></script>
+<script defer src="js/security.js?v=c4161c87"></script>
+<script defer src="js/vendor/supabase.js?v=c4161c87"></script>
+<script defer src="js/supabase-config.js?v=c4161c87"></script>
+<script defer src="js/supabase-api.js?v=c4161c87"></script>
+<script defer src="js/icons.js?v=c4161c87"></script>
+<script defer src="js/postnumre.js?v=c4161c87"></script>
+<script defer src="js/data.js?v=c4161c87"></script>
+<script defer src="js/store.js?v=c4161c87"></script>
+<script defer src="js/maaling.js?v=c4161c87"></script>
+<script defer src="js/backend-bridge.js?v=c4161c87"></script>
+<script defer src="js/components.js?v=c4161c87"></script>
+<script defer src="js/opret-annonce.js?v=c4161c87"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

@@ -210,6 +210,28 @@ efter) og står i dag som "åben"; funktionerne 404 i dag. Enhedstests for
 klientens fald-tilbage i js/skrivevej.test.js. Ikke kørt mod produktion herfra
 (A1-blokeringen: access token).
 
+### O3-1b gennemført — telefon-RPC med sælgersamtykke — 24.08.2026
+GODKENDT AF MENNESKET ("ja byg telefon-RPC'en").
+HVAD: migration 023 (`profiles.vis_telefon` default FALSE + RPC
+`hent_saelger_telefon(listing)`) er kørt mod produktionen. Nummeret udleveres
+KUN når: kalderen er indlogget, annoncen er aktiv, sælgeren har slået
+`vis_telefon` til, og nummeret ikke er tomt — alt andet giver null, uden at
+afsløre hvorfor (forskellen er sælgerens privatsag). `public_profiles` er
+urørt: nummeret ligger aldrig i en payload, kun i RPC-svaret ved klik.
+Klienten: "Vis telefonnummer"-knappen på egne annoncer går gennem RPC'en
+(db.hentSaelgerTelefon); samtykket sættes i opret-flowets trin 4
+(checkbox, forudfyldt fra profilen, gemmes ved Udgiv via db.saetVisTelefon —
+en fejl her vælter aldrig udgivelsen). Forsidens sælgerbånd og trin 4-kassen
+er skrevet om til den nye sandhed: "telefonvisning er dit eget valg, kun for
+indloggede".
+EFTERPRØVET: anon-kald af RPC'en → 42501 (401); demo-tilstand: samtykkefeltet
+skjult, kendt demo-nummer virker som før; ekstern annonce: ingen reveal-knap.
+Gate grøn (329 tests).
+HVORFOR: O3-1 (P1) — flowet konverterede en sælger til en annonce, men
+annoncen kunne ikke konvertere en køber til en handel. Telefon-med-samtykke
+er den mindste rigtige leveringsvej; beskedtabel + mailrelæ kan komme oveni,
+når Resend-nøglen findes.
+
 ### D7-F2 gennemført — tværkilde-dubletter vises én gang — 23.08.2026
 HVAD: `markerTvaerkildeDubletter()` i js/backend-bridge.js (og via
 browserModules i build-srp/brand/facet): er mærke + årgang + pris + postnr ens

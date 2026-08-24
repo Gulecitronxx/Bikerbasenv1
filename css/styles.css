@@ -2779,6 +2779,9 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-intro strong{ color: var(--color-fg); }
 .brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
 .brand-sub{ font-size:19px; margin-bottom: var(--space-4); }
+/* O3-1b: samtykke-hint i telefonfeltet. */
+.field-hint-inline{ display:block; font-size:12.5px; color: var(--color-fg-muted); font-weight:400; margin-top:2px; }
+
 /* O3-6: kvitteringsbanner efter udgivelse. */
 .udgivet-banner{
   display:flex; align-items:center; gap:10px; margin:0 0 var(--space-4);

@@ -958,6 +958,13 @@ async function publishListing(){
     setTimeout(() => { window.location.href = `annonce.html?id=${created.id}`; }, 4500);
     return;
   }
+  /* O3-1b: samtykket gemmes sammen med udgivelsen — kun hvis feltet var
+     synligt (ellers ved vi ikke, hvad brugeren mente). Fejl her maa aldrig
+     vaelte udgivelsen; naeste besoeg viser profilens faktiske vaerdi. */
+  const visFelt = document.getElementById('vis-telefon-felt');
+  if (visFelt && !visFelt.hidden){
+    db.saetVisTelefon(document.getElementById('f-vis-telefon').checked).catch?.(() => {});
+  }
   toast(editingId ? 'Ændringerne er gemt!' : 'Din annonce er udgivet!');
   if (typeof Maaling !== 'undefined') Maaling.opretAnnonce(created, !!editingId);
   // O3-6: toasten naar ikke at blive laest paa 1 sekund — annoncesiden viser
@@ -1060,6 +1067,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderHeader('opret-annonce.html');
   populateStaticFields();
+
+  /* O3-1b: samtykkefeltet i trin 4. Vises kun med backend og login (samtykket
+     bor paa profilen). Forudfyldes med profilens nuvaerende valg, og hinten
+     siger aerligt, om der overhovedet ER et nummer at vise. */
+  if (db.enabled && Store.getUser()?.remote){
+    db.currentProfile().then(profil => {
+      const felt = document.getElementById('vis-telefon-felt');
+      const boks = document.getElementById('f-vis-telefon');
+      const hint = document.getElementById('vis-telefon-hint');
+      if (!felt || !boks) return;
+      felt.hidden = false;
+      boks.checked = !!profil?.vis_telefon;
+      if (hint){
+        hint.textContent = String(profil?.phone || '').trim()
+          ? 'Kun for indloggede — aldrig for søgemaskiner eller udloggede.'
+          : 'Du har ikke oplyst et nummer på din profil, så der er intet at vise endnu.';
+      }
+    }).catch(() => {});
+  }
   wirePhotoUpload();
   renderPhotoGrid();
   wireSeoAssist();

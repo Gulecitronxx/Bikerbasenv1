@@ -402,6 +402,25 @@ const db = (function(){
       return c.from('listing_stats').select('*').gte('stat_day', fra).order('stat_day', { ascending: true });
     },
 
+    /* O3-1b (migration 023): saelgerens telefonnummer — kun for indloggede,
+       kun med saelgerens samtykke (vis_telefon), kun paa aktive annoncer.
+       Svarer null i alle andre tilfaelde; klienten maa aldrig kunne se
+       HVORFOR der ikke kom et nummer. */
+    async hentSaelgerTelefon(listingId){
+      const c = init(); if (!c) return { data: null, error: null };
+      return c.rpc('hent_saelger_telefon', { p_listing: listingId });
+    },
+
+    /* Saelgerens eget samtykke til at vise nummeret (kolonnen er i
+       kolonne-grant'en fra 023, saa RLS/grants haandhaever "kun egen raekke"
+       sammen med eq(id)). */
+    async saetVisTelefon(vis){
+      const c = init(); if (!c) return { error: null };
+      const user = await this.currentUser();
+      if (!user) return { error: { message: 'Ikke logget ind' } };
+      return c.from('profiles').update({ vis_telefon: !!vis }).eq('id', user.id);
+    },
+
     async myListingSaves(){
       const c = init(); if (!c) return { data: [], error: null };
       return c.rpc('my_listing_saves');
