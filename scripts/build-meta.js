@@ -64,7 +64,7 @@ function metaBlock(file, title, description){
     `<meta property="og:image" content="${OG_IMAGE}">`,
     '<meta property="og:image:width" content="1200">',
     '<meta property="og:image:height" content="630">',
-    '<meta property="og:image:alt" content="Bikerbasen — køb og sælg brugte motorcykler i Danmark">',
+    '<meta property="og:image:alt" content="Bikerbasen — motorcykler til salg i Danmark, samlet fra danske forhandlere og markedspladser">',
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:title" content="${attr(title)}">`,
     `<meta name="twitter:description" content="${attr(description)}">`,
@@ -90,7 +90,9 @@ function siteJsonLd(){
         url: `${BASE}/`,
         name: 'Bikerbasen',
         inLanguage: 'da-DK',
-        description: 'Danmarks mødested for køb og salg af brugte motorcykler.',
+        // Runde 9 (D9-F1): 172 af 548 er fabriksnye, og der er 0 egne annoncer —
+        // "brugte" og "moedested" havde ingen daekning i de maskinlaesbare felter.
+        description: 'Motorcykler til salg fra danske forhandlere og markedspladser — nye og brugte, samlet ét sted. Kilden står på hvert kort.',
         publisher: { '@id': `${BASE}/#org` },
         potentialAction: {
           '@type': 'SearchAction',

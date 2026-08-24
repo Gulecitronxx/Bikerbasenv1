@@ -566,6 +566,8 @@ function refreshSaveSearchButton(){
   const tekst = saved ? 'Søgning gemt' : 'Gem søgning';
   document.getElementById('save-search-icon').innerHTML = saved ? Icon.checkCircle : Icon.bell;
   document.getElementById('save-search-label').textContent = tekst;
+  const kortEl = document.getElementById('save-search-kort');
+  if (kortEl) kortEl.textContent = saved ? 'Gemt' : 'Gem';
   // På mobil vises kun klokken (teksten er skjult for øjet, men ikke for
   // skærmlæsere) — title giver den seende bruger det samme svar ved tryk-hold.
   btn.title = tekst;
@@ -884,8 +886,13 @@ function forklarIndekseret(){
 
 function renderResultsCount(list){
   const total = list.length;
+  /* Runde 9 (D9-S2): en delt ?page=7 skal sige, hvor man staar — over folden,
+     ikke kun ved sideinddelingen i bunden. */
+  const totalSider = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const sideLed = state.page > 1 ? ` <span class="results-side">· side ${state.page} af ${totalSider}</span>` : '';
   document.getElementById('results-count').innerHTML =
-    `${total} <span>${total === 1 ? 'annonce' : 'annoncer'}<span class="results-count-fundet"> fundet</span></span>`;
+    `${total} <span>${total === 1 ? 'annonce' : 'annoncer'}<span class="results-count-fundet"> fundet</span>${sideLed}</span>`;
+  // (Sidetallet i document.title saettes i js/seo.js, som ejer titlen.)
 
   const mix = document.getElementById('results-mix');
   if (!mix) return;

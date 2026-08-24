@@ -367,6 +367,33 @@ Rapport: [runde-8-kritik.md](runde-8-kritik.md). Blinddom 6–2 til Bikerbasen
 
 ---
 
+## Runde 9 — blind kritik (24.08.2026): 7–1 til Bikerbasen, ingen P1
+
+Rapport: [runde-9-kritik.md](runde-9-kritik.md). Mærkesiden på desktop er
+VENDT (D8-M3's facetlinks); forside- og SRP-mobil op til "klart". Kun
+mærkeside-mobil tabes, nu snævert. D8: 12 lukket, 4 delvist, 4 små åbne
+(S5/A2 blev lukket i `ca0cd26` efter optagelsen), 1 ikke reproduceret (F5).
+
+| ID | sev | problem | status |
+|---|---|---|---|
+| D9-F1 | **P2** | Meta/og/JSON-LD sagde stadig "brugte … og egne annoncer" / "mødested" | **rettet** — samme sandhed som footeren i alle maskinlæsbare felter (index + build-meta + og:image:alt begge steder) |
+| D9-M1 | **P2** | Facetrækkerne kostede ≈260 px (første kort 890/835) | **rettet** — 2 kolonner på desktop, tættere chips, Sortér-rækken (dublet af søgningen) skjult på mobil: første kort 855 (390) / 812 (1366) |
+| D9-S2 | P3 | ?page=2 sagde intet over folden | **rettet** — "· side 2 af 23" i tallinjen + "· side 2" i titlen (sat i js/seo.js, som ejer titlen) |
+| D9-S3 | P3 | Klokke uden etiket | **rettet** — "Gem"/"Gemt" synligt på mobil |
+| D9-A2 | P3 | Fem specs stod to gange på annoncesiden | **rettet** — Detaljer-tabellen viser kun det, gitteret ikke har |
+| D9-M2/M3 | P3 | "til salg nu" uden dato; de 84 typeløse unævnt | **rettet** — "Senest bekræftet hos kilderne 20. aug. 2026" (max sidst_set ved bygget) + typeløs-note med link |
+| D9-F2/M4 | P3 | Rullerækker uden affordance (skjult scrollbar) | **rettet** — tynd synlig scrollbar |
+| D9-F3 | P3 | Kompaktkortets fod uden by | **rettet** — "Rødding · mcsyd.dk" |
+| D9-A3 | P3 | Flaget på VDP-mobil | **allerede lukket** i `ca0cd26` (fjernet helt) |
+| D9-S1 | P3 | Pris/Type manglede i desktop-fuldsideoptagelsen | **måleartefakt** — målt i browser: Mærke@60, Kørekort@476, Pris@741, Type@1146, alle til stede |
+
+**Kritikerens samlede anbefaling:** næste runde er MENNESKETS NØGLER, ikke
+kode — (1) repo-secret `SUPABASE_SERVICE_ROLE_KEY` → nat-crawl (MC Syd er 8
+dage gammel, og VDP'en skriver det selv), (2) Resend (søgeagent-mails),
+(3) Stripe (forhandlerbetaling), (4) Cloudflare (A3/Turnstile).
+
+---
+
 ## Lukket
 
 <!-- Verificerede findings flyttes herned med rundenummer, så tabellen ovenfor

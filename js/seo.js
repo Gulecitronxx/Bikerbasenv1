@@ -513,7 +513,10 @@ function egneTags(){
 function seoSearchResults(listings, heading){
   const egne = egneTags();
   const harTræf = (listings || []).length > 0;
-  const titel = (harTræf && heading) ? `${heading} — ${SITE_NAME}` : egne.titel;
+  /* Runde 9 (D9-S2): en delt ?page=7 skal ogsaa hedde side 7 i titlen. */
+  const side = Number(new URLSearchParams(location.search).get('page')) || 1;
+  const sideLed = side > 1 ? ` · side ${side}` : '';
+  const titel = ((harTræf && heading) ? `${heading}${sideLed} — ${SITE_NAME}` : egne.titel + sideLed);
   const beskrivelse = (harTræf && heading)
     ? `${heading} på ${SITE_NAME}. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.`
     : egne.beskrivelse;

@@ -32,9 +32,14 @@ function facetLinksFor(brand, items){
     .map(t => ({ t, label: ((global.__T || []).find(x => x.id === t) || {}).label || t, n: tael({ types: [t] }) }))
     .filter(x => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 6);
   if (typer.length > 1) raekker.push({ navn: 'Type', links: typer.map(x => ({ tekst: `${esc(x.label)} · ${x.n}`, href: q(`type=${x.t}`) })) });
+  /* Runde 9 (D9-M3): de typeloese skal naevnes — forsiden goer det, maerkesiden
+     gjorde ikke. */
+  const udenType = items.filter(l => !l.type).length;
+  const typeNote = (typer.length > 1 && udenType)
+    ? `<p class="brand-facet-note">${udenType} uden oplyst type — dem finder du i <a href="soegning.html?brands=${encodeURIComponent(brand)}">den fulde søgning</a>.</p>` : '';
 
   // Sortering som links — ingen inline-JS (CSP), og en crawler kan foelge dem.
-  raekker.push({ navn: 'Sortér', links: [
+  raekker.push({ navn: 'Sortér', klasse: ' brand-facet-sorter', links: [
     { tekst: 'Pris: lav → høj', href: q('sort=price-asc') },
     { tekst: 'Pris: høj → lav', href: q('sort=price-desc') },
     { tekst: 'Årgang: nyeste', href: q('sort=year-desc') },
@@ -43,8 +48,8 @@ function facetLinksFor(brand, items){
   if (!raekker.length) return '';
   return `
       <div class="brand-facetter">
-        ${raekker.map(r => `<div class="brand-facet-raekke"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}">${l.tekst}</a>`).join('\n          ')}</div>`).join('\n        ')}
-      </div>`;
+        ${raekker.map(r => `<div class="brand-facet-raekke${r.klasse || ''}"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}">${l.tekst}</a>`).join('\n          ')}</div>`).join('\n        ')}
+      </div>${typeNote}`;
 }
 
 /* Runde 7 (D7-M1): "Brugte Honda" — 165 af 262 Honda er fabriksnye (sidens egen
@@ -708,6 +713,11 @@ for (const brand of brands){
   const items = Sortering.sorter(byBrand[brand].slice(), 'blandet');
   const visteKort = items.slice(0, MAERKE_KORT);
   const kort = visteKort.map((l, i) => listingCardHTML(l, i)).join('\n      ');
+  /* Runde 9 (D9-M2): stoerste sidst_set = hvornaar lageret sidst er bekraeftet. */
+  const senestOpdateret = (() => {
+    const t = Math.max(0, ...items.map(l => l.sidstSet ? new Date(l.sidstSet).getTime() : 0));
+    return t ? new Date(t).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' }) : null;
+  })();
   const foersteFoto = (items[0] && items[0].photoUrls && items[0].photoUrls[0]) || null;
   const slug = slugify(brand);
 
@@ -839,7 +849,9 @@ ${header}
 
     <section class="section" style="padding-top:var(--space-4);">
       <div class="section-head">
-        <div><h2 class="brand-sub" id="brand-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} til salg nu${items.length > MAERKE_KORT ? ` — de første ${MAERKE_KORT} her` : ''}</h2></div>
+        <!-- Runde 9 (D9-M2): "nu" uden dato bag sig er D8-F2's fejl — datoen er
+             stoerste sidst_set i lageret, skrevet ved bygget. -->
+        <div><h2 class="brand-sub" id="brand-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}${items.length > MAERKE_KORT ? ` — de første ${MAERKE_KORT} her` : ''}</h2>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div>
         <a class="section-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Alle ${items.length} i søgningen<span aria-hidden="true"></span></a>
       </div>
       ${facetLinksFor(brand, items)}

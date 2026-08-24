@@ -597,13 +597,17 @@ function renderExternalListing(listing){
        viser typeLabel(listing.type), altså præcis den værdi, filteret
        sorterer på. Kan typen ikke kortlægges, falder rækken væk. */
     raekke('Type', listing.type ? escapeHTML(typeLabel(listing.type)) : null),
-    raekke('Årgang', listing.year != null ? String(listing.year) : null),
-    raekke('Kilometer', listing.km != null ? formatKm(listing.km) : null),
-    raekke('Kubik', listing.ccm != null ? formatCcm(listing.ccm) : null),
-    raekke('Effekt', hk ? formatPower(hk) : null),
+    /* Runde 9 (D9-A2): Aargang/Kilometer/Kubik/Effekt/Koerekort staar allerede
+       i noegletalsgitteret 400 px hoejere oppe — her vises de KUN, naar
+       gitteret ikke har dem (dvs. naar feltet mangler og gitteret sprang
+       cellen over: saa er "Kan ikke afgoeres"-svaret stadig et svar). */
+    listing.year != null ? '' : raekke('Årgang', null),
+    listing.km != null ? '' : raekke('Kilometer', null),
+    listing.ccm != null ? '' : raekke('Kubik', null),
+    hk ? '' : raekke('Effekt', null),
     // "Kan ikke afgøres" er et svar; en manglende række ville lade køberen
     // tro, at spørgsmålet ikke er stillet. Samme ord som sammenligningen.
-    raekke('Kørekort', kk ? `${escapeHTML(kk)} (vejledende)` : 'Kan ikke afgøres'),
+    (kk || kkUvis) ? '' : raekke('Kørekort', 'Kan ikke afgøres'),
     /* 162 af de 332 indekserede er FABRIKSNYE. Stod der ikke ét sted, og
        "Kilometer: Ikke oplyst" på en 2025-model læses som et hul i dataene i
        stedet for som det, det er: en motorcykel, der ikke har kørt endnu.

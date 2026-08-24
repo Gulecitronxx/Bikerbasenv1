@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   const antal = document.getElementById('brand-antal');
   if (antal && alle.length){
-    antal.textContent = `${alle.length} ${alle.length === 1 ? 'annonce' : 'annoncer'} til salg nu${alle.length > viste ? ` — de første ${viste} her` : ''}`;
+    antal.textContent = `${alle.length} ${alle.length === 1 ? 'annonce' : 'annoncer'}${alle.length > viste ? ` — de første ${viste} her` : ''}`;
   }
   wireFavoriteButtons(mount);
 });
