@@ -726,12 +726,11 @@ function renderExternalListing(listing){
 
   document.getElementById('listing-detail').innerHTML = `
     <div class="external-detail">
-      <!-- Runde 5 (D5-A1): flaget var 112 px på 390 px og sagde det samme som
-           kildekortet tre gange til. Én linje: hvem, og hvem man køber af. På
-           ≥960 px skjules det (css) — højre spalte siger det 20 px derfra. -->
-      <p class="external-detail-flag">
-        ${Icon.store}<span>Annonce hos <b>${kilde}</b>${markedsplads ? ' — du køber af sælgeren bag den' : ' — det er dem, du køber af'}</span>
-      </p>
+      <!-- Runde 8 (D8-A2): flaget er HELT vaek. Paa mobilens foerste skaerm stod
+           kilden fem gange (flag, fototekst, "hos X" ved prisen,
+           "Forhandlerannonce", CTA) — flaget var gentagelse nr. 5 og kostede
+           ≈50 px over noegletallene. "Hvem koeber jeg af" staar stadig tre
+           steder paa foerste skaerm og i kildekortet. -->
 
       <figure class="external-detail-photo">
         ${foto

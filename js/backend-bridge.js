@@ -492,7 +492,7 @@ function maerkeAkronym(m){
    VERSAL-ord i traek efter et modelord (farver/udstyr). Resten smides vaek:
    det er reklame, ikke data. Ingen ny oplysning opfindes. */
 const MODEL_STOEJ = /\b(s[aæ]lges|byttes|bud|garanti|bytter|nysynet|velholdt|flot|pæn|fabriks|modtages|kan\s+leveres|tilbud|nedsat|kampagne|leasing|mc[-\s]?syd|aalborg\s+mc|\d+\s*(?:års|aars|år)\b)/i;
-function rensModelStoej(model){
+function rensModelStoej(model, p_aargang){
   if (!model) return model;
   let m = String(model).replace(/\s+/g, ' ').trim();
   const hit = m.search(MODEL_STOEJ);
@@ -508,6 +508,18 @@ function rensModelStoej(model){
     if (versal(a) && versal(b)){ ord.length = i; break; }
   }
   m = ord.join(' ').replace(/[\s,\-–·]+$/, '').trim();
+  // Runde 8 (D8-S5): rest efter D7-S4 — aarstal i halen ("ER6 2007",
+  // "Thruxton 1200 fra 2017", "GPZ 500S aarg 1992"), "650 cc" og modeller
+  // skrevet helt med smaat ("vf750f"). Aarstallet klippes KUN naar det er
+  // annoncens egen aargang (p_aargang) — "CB 500" beholder sit 500.
+  if (p_aargang){
+    // (\b virker ikke foran "å" — ikke-ASCII er ikke \w i JS. Skilletegnet
+    // foran er derfor kravet: et aarstal klistret direkte paa modellen roeres ikke.)
+    m = m.replace(new RegExp('[\\s,\\-–]+(?:fra\\s+|[aå]rg\\.?\\s*)?' + p_aargang + '\\b\\s*$', 'i'), '').trim();
+  }
+  m = m.replace(/\s*\b\d{2,4}\s?cc\.?\b\s*$/i, '').trim();
+  if (/^[a-zæøå]/.test(m)) m = m.charAt(0).toUpperCase() + m.slice(1);
+
   // "Motorcykel", "MC", "Scooter" alene er ikke et modelnavn — det er kildens
   // kategoriord. Hellere kun maerket paa kortet end en model, der ikke er én.
   if (/^(motorcykel|motorcykler|mc|scooter|knallert|bike|moto)$/i.test(m)) return null;
@@ -567,10 +579,10 @@ function normalizeExternalListing(row){
        kildens hul — ikke noget vi skal fylde ud. */
     model: (() => {
       // Runde 7 (D7-S4): stoej klippes ogsaa af de raekker, der ligger.
-      if (row.model) return rensModelStoej(row.model) || '';
+      if (row.model) return rensModelStoej(row.model, row.aargang) || '';
       const t = String(row.titel || '').trim();
       const ren = t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() ? t : '';
-      return rensModelStoej(ren) || '';
+      return rensModelStoej(ren, row.aargang) || '';
     })(),
 
     /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og

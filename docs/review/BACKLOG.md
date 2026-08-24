@@ -362,7 +362,8 @@ Rapport: [runde-8-kritik.md](runde-8-kritik.md). Blinddom 6–2 til Bikerbasen
 | D8-M5 / D8-S7 | **P3** | Modelchips uden tal; footer-pladsholder 1014 px | **rettet** — "GL 1800 Gold Wing · 18"; 860 px |
 | D8-F5 | **P3** | 454 px flade under footeren (cookie-var i baggrundsfane) | **åben** — kræver sticky-refaktor af banneret; D7-F6's lyttere hjalp ikke i optagelsen |
 | D8-M3 | **P2** | Mærkesiden uden søgningens håndtag | **rettet** — facetlinks med tal (Kørekort/Pris/Type, kun med træf, søgesidens filterkæde) + sorteringslinks på alle 26 sider; "A1 · 10" lander på "10 annoncer fundet" |
-| D8-S4/S5, D8-A2, D8-M2/M4 | P2/P3 | Undertitel-slot, model-rest (årstal/cc/småt), kilden ×5 på VDP-mobil, mærkesidens luft over gitteret | **åbne** |
+| D8-S5 / D8-A2 | P3 | Model-rest (årstal/cc/småt); kilden ×5 på VDP-mobil | **rettet** (24.08) — årstal klippes kun når = annoncens årgang, cc-hale og småt begyndelsesbogstav rettes (test); flaget fjernet: VDP-mobil CTA 645, nøgletal 718–786 (helt over folden) |
+| D8-S4, D8-M2/M4-rest, D8-F5 | P3 | Undertitel-slot, mærkesidens luft, cookie-sticky | **åbne** |
 
 ---
 
