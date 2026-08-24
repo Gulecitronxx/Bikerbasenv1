@@ -513,8 +513,11 @@ function egneTags(){
 function seoSearchResults(listings, heading){
   const egne = egneTags();
   const harTræf = (listings || []).length > 0;
-  /* Runde 9 (D9-S2): en delt ?page=7 skal ogsaa hedde side 7 i titlen. */
-  const side = Number(new URLSearchParams(location.search).get('page')) || 1;
+  /* Runde 9 (D9-S2): en delt ?page=7 skal ogsaa hedde side 7 i titlen.
+     (typeof-vagten: filen koeres ogsaa i Node af js/seo-adresser.test.js,
+     hvor location ikke findes.) */
+  const side = typeof location !== 'undefined'
+    ? (Number(new URLSearchParams(location.search).get('page')) || 1) : 1;
   const sideLed = side > 1 ? ` · side ${side}` : '';
   const titel = ((harTræf && heading) ? `${heading}${sideLed} — ${SITE_NAME}` : egne.titel + sideLed);
   const beskrivelse = (harTræf && heading)
