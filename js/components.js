@@ -461,24 +461,9 @@ function eksternStedTekst(l){
    Kilden leverer ingen variant; vi har kun `model` som én streng. Får
    objektet på et tidspunkt en rigtig `variant`, bruges den, og gætteriet
    herunder rører den ikke. */
-function delModelOgVariant(model){
-  const ord = String(model || '').split(/\s+/).filter(Boolean);
-  if (ord.length < 2) return [ord.join(' '), ''];
-  // Modelnavnet er typisk bogstaver + tal ("XV 750", "R 1200 GS", "MT-07").
-  // Første rigtige ORD efter et tal — "Cruiser", "Adventure", "ENGROS/UDEN"
-  // — er hvor modellen holder op og sælgerens tilføjelser begynder.
-  const base = [];
-  let setTal = false;
-  for (const o of ord){
-    const harTal = /\d/.test(o);
-    const bogstaver = o.replace(/[^A-Za-zÆØÅÄÖÜæøåäöü]/g, '').length;
-    if (base.length && setTal && !harTal && bogstaver >= 4) break;
-    if (base.length >= 4) break;
-    base.push(o);
-    if (harTal) setTal = true;
-  }
-  return [base.join(' '), ord.slice(base.length).join(' ')];
-}
+/* delModelOgVariant() (klient-gaetteriet, der delte modelstrengen ved foerste
+   "rigtige ord efter et tal") er FJERNET med D8-S4: undertitel-slotten er nu
+   altid typen, og crawlerens rensModelStoej ejer oprydningen af modellen. */
 
 /* Kortets anden linje SKAL være et ord fra vores eget filter.
 
@@ -503,19 +488,22 @@ function delModelOgVariant(model){
 function eksternTitel(l){
   const brand = String(l.brand || '').trim();
   let model = String(l.model || '').trim();
-  let variant = typeof l.variant === 'string' ? l.variant.trim() : '';
+  const variant = typeof l.variant === 'string' ? l.variant.trim() : '';
   if (variant){
     // Hvis model stadig indeholder varianten, står den ikke to gange.
     const m = model.toLowerCase(), v = variant.toLowerCase();
     if (m === v) model = '';
     else if (m.endsWith(' ' + v)) model = model.slice(0, model.length - variant.length).trim();
-    variant = l.type ? typeLabel(l.type) : '';
-  } else {
-    [model, variant] = delModelOgVariant(model);
   }
+  /* Runde 8 (D8-S4): undertitlens slot skiftede betydning fra kort til kort —
+     "Naked" (type) paa ét, "(Eurosport)" (variantrest) paa det naeste,
+     "Aspencade" paa et tredje. Nu ÉN regel: slot 2 = TYPEN (eller tom), og
+     hele modelstrengen bliver i titlen. delModelOgVariant()-gaetteriet paa
+     klienten er vaek — crawlerens rensModelStoej har allerede fjernet
+     salgsstoejen fra modellen. */
   return {
     primaer: [brand, model].filter(Boolean).join(' ').trim() || 'Motorcykel',
-    variant,
+    variant: l.type ? typeLabel(l.type) : '',
   };
 }
 
