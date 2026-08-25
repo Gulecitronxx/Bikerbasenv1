@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Bikerbasen — motorcykler til salg i Danmark, nye og brugte">
 <meta name="twitter:description" content="Motorcykler til salg fra danske forhandlere og markedspladser — nye og brugte, samlet ét sted. Kilden står på hvert kort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -186,7 +186,7 @@ try{
               <input type="radio" name="koerekort" id="hs-kk-A" value="A">
               <label for="hs-kk-A">A</label>
             </div>
-            <p class="kk-hint" id="hs-kk-hint">Vi gætter aldrig: er effekten ikke oplyst, siger vi det.</p>
+            <p class="kk-hint" id="hs-kk-hint">Vi gætter aldrig: er effekten ikke oplyst, siger vi det. A2 afhænger også af vægt og afledningsregel — filteret frasorterer kun det, der er udelukket på effekt og ccm.</p>
           </fieldset>
           <div class="search-actions">
             <!-- Runde 5 (D5-F6): "Nulstil" — koerekortsegmentet havde ingen anden vej
@@ -212,10 +212,16 @@ try{
 
       <!-- Runde 5 (D5-F4): tre koeberfakta, der gaelder HVER annonce i lageret —
            ikke saelgertale over folden paa en koeberside. "Gratis annonce for
-           private" staar i saelgerbaandet nederst, hvor den hoerer til. -->
+           private" staar i saelgerbaandet nederst, hvor den hoerer til.
+
+           "Aldrig gaettet" stod tidligere som loefte om koerekortKLASSEN, men
+           filteret kender kun effekt og ccm — A2 kraever ogsaa kW/kg og
+           afledningsreglen (js/data.js, linje ~852), som ingen annonce oplyser.
+           Linjen maa derfor kun love det, filteret goer: at grundlaget er
+           oplyste tal, ikke gaet. -->
       <ul class="hero-trust">
         <li class="hero-trust-item">Kilden står på hvert kort</li>
-        <li class="hero-trust-item">Kørekort A1/A2/A ud fra hk og ccm — aldrig gættet</li>
+        <li class="hero-trust-item">Kørekortfilteret bygger på oplyst effekt og ccm — aldrig på gæt</li>
         <li class="hero-trust-item">Mangler et tal, står der "Ikke oplyst"</li>
       </ul>
     </div>
