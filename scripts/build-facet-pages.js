@@ -138,6 +138,76 @@ const harEgenSide = l => !l.isExternal;
 
 const THRESHOLD = 10;
 
+/* KORTLOFT — runde 11 (R11-F-5). Mærkesiderne har cappet til 24 siden runde 7;
+   facetsiderne bagte ALT. Målt: region-midtjylland 522 KB / 12.885 tags /
+   88.482 px høj på mobil, type-cruiser 49.515 px. Ingen køber scroller
+   88.000 px, Lighthouse klager over DOM-størrelsen, og hver crawl henter en
+   halv megabyte. Samme kontrakt som mærkesiden: de første 24 + et link til
+   søgningen, hvor resten ligger. noscript-listen beholder ALLE — den er ren
+   tekst og koster ingenting, og så er lageret stadig synligt uden JS. */
+const FACET_KORT = 24;
+
+/* Er annoncens tal til at stole på? Runde 11 (R11-F-9): mærkesiden ankrede
+   "fra 4.000 kr." i en outlier, og regionssiden skrev "årgange mellem 1955 og
+   2027". Vi RETTER ikke kildens tal og skjuler ikke annoncen — men et tal, der
+   ikke kan passe, må ikke blive til sidens overskrift. Kun aggregaterne
+   (min/max/spænd) renses; kortene viser, hvad kilden skrev. */
+const I_AAR = 2026;
+const troværdigtAar = y => y != null && y >= 1900 && y <= I_AAR + 1;
+function aggregatPriser(items){
+  return items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0).sort((a, b) => a - b);
+}
+
+/* Substans først (R11-F-11, og blinddommerens ene råd til taberen): den rå
+   createdAt-sortering lagde fotoløse kort uden km øverst på en vareside.
+   Vi opdigter intet — vi viser bare det bedst oplyste først, og inden for
+   samme oplysningsgrad det nyeste. */
+function substansScore(l){
+  let s = 0;
+  if ((l.photoUrls && l.photoUrls.length) || l.thumbnailUrl) s += 4;
+  if (tilTal(l.km) !== null) s += 2;
+  if (tilTal(l.price) > 0) s += 2;
+  if (hkEllerNull(l.power) != null) s += 1;
+  return s;
+}
+function sorterSubstans(items){
+  return items.slice().sort((a, b) =>
+    substansScore(b) - substansScore(a) || new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+/* "Brugte" var hardcodet i titel, meta og intro — på type-cruiser bar 32 af
+   91 kort "Ny"-mærkat, og modelsiden skrev "Brugte Honda CMX 500 Rebel" over
+   en tekst, der selv sagde "12 af dem sælges som nye". Mærkesiden har længe
+   haft den rigtige regel (D7-M1); den flyttes hertil. */
+const erNyVare = l => l.condition === 'ny' || l.kildeStand === 'ny';
+function brugtOrd(items, ental, flertal){
+  const nye = items.filter(erNyVare).length;
+  const en = items.length === 1;
+  if (!nye) return `brugt${en ? ` ${ental}` : `e ${flertal}`}`;
+  if (nye === items.length) return `fabriksny${en ? ` ${ental}` : `e ${flertal}`}`;
+  return en ? ental : flertal;   // blandet lager: intet adjektiv, tallene står i introen
+}
+
+/* Kommaliste med ét afsluttende "og" (R11-F-13) — brand-generatorens
+   listeJoin(). Uden den blev kildelinjen "MC Syd og Jensens Motorcykler og
+   Gul og Gratis og Rydbergs MC": tre "og" i træk, hvoraf det ene hører til
+   et kildenavn. */
+function listeJoin(dele){
+  if (dele.length <= 1) return dele.join('');
+  return `${dele.slice(0, -1).join(', ')} og ${dele[dele.length - 1]}`;
+}
+
+/* Største sidst_set = hvornår lageret sidst er bekræftet hos kilderne.
+   Mærkesiden har vist datoen siden D9-M2; facetsiderne sagde intet om
+   friskhed overhovedet (R11-F-10). */
+function senestBekraeftet(items){
+  const datoer = items.map(l => l.sidstSet || l.sidst_set).filter(Boolean).sort();
+  if (!datoer.length) return null;
+  const d = new Date(datoer[datoer.length - 1]);
+  return Number.isFinite(d.getTime())
+    ? d.toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' }) : null;
+}
+
 function jsonLdBlock(objs){
   return objs.filter(Boolean).map(o =>
     `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, '\\u003c')}</script>`
@@ -320,14 +390,19 @@ function uoplystAntal(facet, alle){
 }
 
 function introForType(facet, items){
-  const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0).sort((a, b) => a - b);
-  const aar = items.map(l => tilTal(l.year)).filter(y => y !== null && y > 0);
+  const priser = aggregatPriser(items);
+  const aar = items.map(l => tilTal(l.year)).filter(troværdigtAar);
   const eksterne = items.filter(l => l.isExternal);
   const kilder = [...new Set(eksterne.map(l => l.source?.navn).filter(Boolean))];
   const en = items.length === 1;
+  const nye = items.filter(erNyVare).length;
 
-  const dele = [`Der er lige nu <strong>${items.length}</strong> ${en ? 'brugt' : 'brugte'} `
-    + `${esc(facet.label)}${en ? '-motorcykel' : '-motorcykler'} til salg på Bikerbasen`];
+  /* "brugte" stod fast i skabelonen, mens 32 af 91 kort bar "Ny" (R11-F-2),
+     og "til salg PÅ Bikerbasen" var den påstand, D8-M4 selv fjernede fra
+     mærkesiderne: annoncerne er til salg hos kilderne — vi indekserer dem. */
+  const dele = [`Der er <strong>${items.length}</strong> `
+    + `${brugtOrd(items, `${esc(facet.label)}-motorcykel`, `${esc(facet.label)}-motorcykler`)}`
+    + ` til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen`];
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
     dele.push(` — fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}`);
   } else if (priser.length){
@@ -341,11 +416,14 @@ function introForType(facet, items){
     // (dkk() bærer selv punktummet) — ellers "58.400 kr..".
     dele.push('.');
   }
+  if (nye && nye !== items.length){
+    dele.push(` ${nye} af dem sælges som ${nye === 1 ? 'ny' : 'nye'}.`);
+  }
   if (eksterne.length && kilder.length){
     const hvem = eksterne.length === items.length
       ? (en ? 'Annoncen er' : 'Annoncerne er')
       : `${eksterne.length} af annoncerne er`;
-    dele.push(` ${hvem} indekseret fra ${kilder.map(esc).join(' og ')}, og handlen sker hos kilden.`);
+    dele.push(` ${hvem} indekseret fra ${listeJoin(kilder.map(esc))}, og handlen sker hos kilden.`);
   }
   return dele.join('');
 }
@@ -353,8 +431,10 @@ function introForType(facet, items){
 /* Prisspaend, aargange, kilder — samme skabelon som typerne. Kun tal, der
    kan taelles efter paa siden; "vi gaetter aldrig". */
 function prisOgAargang(items){
-  const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0).sort((a, b) => a - b);
-  const aar = items.map(l => tilTal(l.year)).filter(y => y !== null && y > 0);
+  const priser = aggregatPriser(items);
+  // Aargangsspaendet ankres ikke i et modelaar, der ikke findes endnu
+  // (R11-F-9: "aargange mellem 1955 og 2027" paa en side dateret 2026).
+  const aar = items.map(l => tilTal(l.year)).filter(troværdigtAar);
   const dele = [];
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]) dele.push(` — fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}`);
   else if (priser.length) dele.push(` — til ${dkk(priser[0])}`);
@@ -368,7 +448,7 @@ function kildeSaetning(items){
   if (!eksterne.length || !kilder.length) return '';
   const en = items.length === 1;
   const hvem = eksterne.length === items.length ? (en ? 'Annoncen er' : 'Annoncerne er') : `${eksterne.length} af annoncerne er`;
-  return ` ${hvem} indekseret fra ${kilder.map(esc).join(' og ')}, og handlen sker hos kilden.`;
+  return ` ${hvem} indekseret fra ${listeJoin(kilder.map(esc))}, og handlen sker hos kilden.`;
 }
 function introForRegion(facet, items, alle){
   const en = items.length === 1;
@@ -377,7 +457,7 @@ function introForRegion(facet, items, alle){
   for (const l of items){ const b = String(l.city || '').trim(); if (b) byer.set(b, (byer.get(b) || 0) + 1); }
   const top = [...byer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
   const { tekst } = prisOgAargang(items);
-  let s = `Der er lige nu <strong>${items.length}</strong> ${en ? 'motorcykel' : 'motorcykler'} til salg i ${esc(facet.id)} på Bikerbasen${tekst}`;
+  let s = `Der er <strong>${items.length}</strong> ${en ? 'motorcykel' : 'motorcykler'} til salg i ${esc(facet.id)}, indekseret på Bikerbasen${tekst}`;
   if (top.length){
     // Aerligt om fordelingen: 96 % af Syddanmark er én by (Roedding, MC Syd).
     // Det skal staa, ellers lover overskriften en landsdel og leverer én gade.
@@ -392,7 +472,7 @@ function introForModel(facet, items){
   const en = items.length === 1;
   const { tekst } = prisOgAargang(items);
   const km = items.map(l => tilTal(l.km)).filter(k => k !== null && k >= 0).sort((a, b) => a - b);
-  let s = `Der er lige nu <strong>${items.length}</strong> ${esc(facet.brand)} ${esc(facet.model)} til salg på Bikerbasen${tekst}`;
+  let s = `Der er <strong>${items.length}</strong> ${esc(facet.brand)} ${esc(facet.model)} til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen${tekst}`;
   if (km.length > 1 && km[0] !== km[km.length - 1]) s += ` Kilometertal fra ${tal(km[0])} til ${tal(km[km.length - 1])} km${km.length < items.length ? ` (${items.length - km.length} uden oplyst km)` : ''}.`;
   const nye = items.filter(l => l.condition === 'ny' || l.kildeStand === 'ny').length;
   if (nye) s += ` ${nye === items.length ? (en ? 'Den' : 'Alle') : nye} ${nye === items.length ? 'sælges som ny' : `af dem sælges som nye`}.`;
@@ -406,7 +486,10 @@ function faqLdForModel(facet, items){
   const qa = [];
   if (priser.length >= 3){
     qa.push({ q: `Hvad koster en brugt ${facet.brand} ${facet.model}?`,
-      a: `Lige nu ligger ${priser.length} ${facet.brand} ${facet.model} til salg på Bikerbasen til mellem ${dkk(priser[0])} og ${dkk(priser[priser.length - 1])}. Prisen afhænger af årgang, kilometertal og stand — tallene opdateres, hver gang lageret indekseres.` });
+      // "N til salg" om KUN dem med pris var forkert (R11-I-7): de øvrige er
+      // også til salg, de oplyser bare ikke prisen. Og dkk() slutter selv på
+      // "kr." — et punktum mere gav "kr..".
+      a: `${priser.length} af de ${items.length} ${facet.brand} ${facet.model}, vi har indekseret, oplyser en pris: fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}. Prisen afhænger af årgang, kilometertal og stand — tallene opdateres, hver gang lageret indekseres.` });
   }
   const kk = [...new Set(items.map(l => koerekortForListing(l)).filter(Boolean))];
   if (kk.length === 1){
@@ -427,8 +510,8 @@ function introForKoerekort(facet, items, uoplyst){
      "Ikke udelukket ... ud fra det, annoncerne oplyser" er det, filteret
      faktisk kan stå inde for (js/data.js: "vi kan aldrig love at en mc ER
      A2 — kun at den ikke er udelukket på effekt"). */
-  const dele = [`Der er lige nu <strong>${items.length}</strong> ${en ? 'brugt motorcykel' : 'brugte motorcykler'} `
-    + `til salg på Bikerbasen, der ikke er udelukket til et ${esc(facet.id)}-kørekort ud fra det, annoncerne oplyser.`];
+  const dele = [`Der er <strong>${items.length}</strong> ${brugtOrd(items, 'motorcykel', 'motorcykler')} `
+    + `indekseret på Bikerbasen, der ikke er udelukket til et ${esc(facet.id)}-kørekort ud fra det, annoncerne oplyser.`];
   // dkk() slutter selv på "kr." — et ekstra punktum ville give "kr..".
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
     dele.push(` Priserne ligger mellem ${dkk(priser[0])} og ${dkk(priser[priser.length - 1])}`);
@@ -485,31 +568,37 @@ function facetSearchUrl(facet, extra){
 }
 
 function side(facet, alle){
-  const items = alle.filter(facet.match).slice()
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const items = sorterSubstans(alle.filter(facet.match));
   const qualifies = items.length >= THRESHOLD;
   const uoplyst = uoplystAntal(facet, alle);
   const fil = `${facet.slug}.html`;
-  const kort = items.map((l, i) => listingCardHTML(l, i)).join('\n      ');
-  const foersteFoto = (items[0] && items[0].photoUrls && items[0].photoUrls[0]) || null;
+  const viste = items.slice(0, FACET_KORT);
+  const kort = viste.map((l, i) => listingCardHTML(l, i)).join('\n      ');
+  const senestOpdateret = senestBekraeftet(items);
+  const foersteFoto = (viste[0] && viste[0].photoUrls && viste[0].photoUrls[0]) || null;
 
   const intro = facet.kind === 'type' ? introForType(facet, items)
     : facet.kind === 'region' ? introForRegion(facet, items, alle)
     : facet.kind === 'model' ? introForModel(facet, items)
     : introForKoerekort(facet, items, uoplyst);
-  const hvad = facet.kind === 'type' ? `brugte ${esc(facet.label)}-motorcykler til salg i Danmark`
+  /* Titel og meta må ikke sige "brugte" om et lager med fabriksnye i (R11-F-2),
+     og kørekorttitlen må ikke antyde egnethed, som sidens egen intro
+     omhyggeligt undgår (R11-I-4). Begge dele skrives derfor af tallene. */
+  const varer = brugtOrd(items, 'motorcykel', 'motorcykler');
+  const hvad = facet.kind === 'type' ? `${brugtOrd(items, `${esc(facet.label)}-motorcykel`, `${esc(facet.label)}-motorcykler`)} til salg i Danmark`
     : facet.kind === 'region' ? `motorcykler til salg i ${esc(facet.id)}`
     : facet.kind === 'model' ? `${esc(facet.brand)} ${esc(facet.model)} til salg i Danmark`
-    : `brugte motorcykler til ${esc(facet.id)}-kørekort til salg i Danmark`;
+    : `motorcykler, der ikke er udelukket til ${esc(facet.id)}-kørekort ud fra de oplyste tal`;
   const beskrivelse = qualifies
     ? `Se ${items.length} ${hvad}. Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.`
-    : `${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} lige nu — se hele udvalget af `
-      + `brugte motorcykler på Bikerbasen i stedet.`;
+    : `${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} — se hele udvalget af `
+      + `motorcykler på Bikerbasen i stedet.`;
+  const stort = s => s.charAt(0).toUpperCase() + s.slice(1);
   const sideTitel = !qualifies ? esc(facet.titel)
-    : facet.kind === 'type' ? `Brugte ${esc(facet.titel)} til salg`
+    : facet.kind === 'type' ? `${stort(brugtOrd(items, `${esc(facet.label)}-motorcykel`, `${esc(facet.label)}-motorcykler`))} til salg`
     : facet.kind === 'region' ? `Motorcykler til salg i ${esc(facet.id)}`
-    : facet.kind === 'model' ? `Brugte ${esc(facet.brand)} ${esc(facet.model)} til salg`
-    : `Brugte motorcykler til ${esc(facet.id)}-kørekort`;
+    : facet.kind === 'model' ? `${stort(brugtOrd(items, `${esc(facet.brand)} ${esc(facet.model)}`, `${esc(facet.brand)} ${esc(facet.model)}`))} til salg`
+    : `Motorcykler til ${esc(facet.id)}-kørekort — ikke udelukket på de oplyste tal`;
   const andreRegioner = REGIONS.filter(r => r !== facet.id)
     .map(r => `<a class="popular-chip" href="region-${slugify(r)}.html">${esc(r)}</a>`).join('\n        ');
   const brandFil = facet.kind === 'model' ? `maerke-${slugify(facet.brand)}.html` : null;
@@ -525,6 +614,19 @@ function side(facet, alle){
     .map(k => `<a class="popular-chip" href="${k.slug}.html">${esc(k.titel)}</a>`).join('\n        ');
 
   const maerker = maerkeChips(facet, items);
+
+  /* FAQ'en blev bygget som JSON-LD UDEN synligt indhold paa siden (R11-F-4).
+     Google kraever, at svaret staar paa siden — usynlig structured data
+     risikerer manual action for hele domaenet. Samme <details>-moenster som
+     maerkesiden (build-brand-pages.js:884). */
+  const faqData = facet.kind === 'model' && qualifies ? faqLdForModel(facet, items) : null;
+  const faqHtml = faqData ? `<section class="section" style="padding-top:0;">
+      <h2 class="brand-sub">Ofte stillede spørgsmål om ${esc(facet.brand)} ${esc(facet.model)}</h2>
+      ${faqData.mainEntity.map(q => `<details class="brand-faq-item">
+        <summary>${esc(q.name)}</summary>
+        <p class="brand-intro">${esc(q.acceptedAnswer.text)}</p>
+      </details>`).join('\n      ')}
+    </section>` : '';
 
   return `<!doctype html>
 <html lang="da">
@@ -560,7 +662,7 @@ ${jsonLdBlock([
          { name: facet.kind === 'type' ? 'Type' : facet.kind === 'region' ? 'Landsdel' : facet.kind === 'model' ? 'Modeller' : 'Kørekort', path: 'soegning.html' },
          { name: facet.titel, path: fil }]),
   itemListLd(`${facet.titel} — Bikerbasen`, items),
-  facet.kind === 'model' && qualifies ? faqLdForModel(facet, items) : null,
+  faqData,
 ])}
 </head>
 <body>
@@ -580,13 +682,20 @@ ${header}
       <p class="brand-intro">${intro}</p>
       <div class="brand-actions">
         <a href="${facetSearchUrl(facet)}" class="btn btn-primary">Søg i alle ${frase(facet)}</a>
-        <a href="opret-annonce.html" class="btn btn-outline">Sælg din motorcykel</a>
+        <!-- Soegeagenten er det ene, referencen goer paa hver listeside, som vi
+             baade MAA og KAN kopiere: flowet findes (soegning.html), og ?agent=1
+             aabner det med facettens egne filtre. "Saelg din motorcykel" stod her
+             foer — en saelger-CTA paa en koeberside (R11-F-14). -->
+        <a href="${facetSearchUrl(facet)}&amp;agent=1" class="btn btn-outline">Få besked om nye ${frase(facet)}</a>
       </div>
     </div>
 
-    ${maerker.length ? `<section class="section" style="padding-top:0;">
+    ${maerker.length && facet.kind !== 'model' ? `<section class="section" style="padding-top:0;">
       <!-- Samme regel som maerke-*.html's modelchips: kun maerker der reelt
-           er repraesenteret her, aldrig en kurateret liste (D-010). -->
+           er repraesenteret her, aldrig en kurateret liste (D-010).
+           Modelsider undtaget (R11-F-8): "Se Honda CMX 500 Rebel efter maerke"
+           med én chip ("Honda") er en tautologi, der linker samme sted som
+           CTA'en lige ovenover — 90 px over folden brugt paa ingenting. -->
       <h2 class="brand-sub">Se ${frase(facet)} efter mærke</h2>
       <div class="popular-row">
         ${maerker.map(([b]) => `<a class="popular-chip" href="${facetSearchUrl(facet, b)}">${esc(b)}</a>`).join('\n        ')}
@@ -594,8 +703,13 @@ ${header}
     </section>` : ''}
 
     <section class="section" style="padding-top:var(--space-6);">
-      <h2 class="brand-sub">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} lige nu</h2>
-      ${items.length ? `<div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>${kort}</div>
+      <!-- "lige nu" er væk (R11-I-10): tallet bages ved byg og opdateres ikke
+           ved visning, saa "lige nu" kunne aeldes til en loegn mellem to
+           crawl. Datoen under siger i stedet, hvornaar lageret sidst blev
+           bekraeftet — samme linje som maerkesiden (D9-M2). -->
+      <div><h2 class="brand-sub" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}${items.length > FACET_KORT ? ` — de første ${FACET_KORT} her` : ''}</h2>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div>
+      ${items.length ? `<div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>${kort}</div>
+      ${items.length > FACET_KORT ? `<p class="facet-mere"><a href="${facetSearchUrl(facet)}" class="btn btn-outline">Se alle ${items.length} i søgningen</a></p>` : ''}
       <noscript>
         <ul class="brand-noscript">
           ${items.map(l => `<li>${harEgenSide(l) ? `<a href="${esc(listingSlug(l))}">${noscriptLinje(l)}</a>` : noscriptLinje(l)}</li>`).join('\n          ')}
@@ -607,6 +721,8 @@ ${header}
         <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg alle motorcykler</a>
       </div>`}
     </section>
+
+    ${faqHtml}
 
     ${facet.kind === 'model' ? `${andreModeller ? `<section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre ${esc(facet.brand)}-modeller</h2>
@@ -664,14 +780,24 @@ ${footer}
   const mount = document.getElementById('facet-listings');
   if (!mount) return;
   const kind = mount.dataset.facetKind, id = mount.dataset.facetId;
+  const viste = Number(mount.dataset.viste) || ${FACET_KORT};
   const alle = Store.getAllListings();
   // Samme noegle som scripts/build-facet-pages.js modelNoegle(): trim + ét mellemrum.
   const norm = s => String(s || '').trim().replace(/\\s+/g, ' ');
+  /* SAMME raekkefoelge og SAMME antal som byggetrinnet (R11-F-6): siden bagte
+     24 kort sorteret paa substans, hvorefter det her script tegnede ALLE
+     igen i createdAt-orden — foerste kort skiftede identitet efter load.
+     Og substansScore holder fotoloese kort uden km nede, hvor de hoerer til
+     (R11-F-11), i stedet for oeverst paa en vareside. */
+  const substans = l => ((l.photoUrls && l.photoUrls.length) || l.thumbnailUrl ? 4 : 0)
+    + (l.km != null && l.km !== '' ? 2 : 0) + (Number(l.price) > 0 ? 2 : 0)
+    + (hkEllerNull(l.power) != null ? 1 : 0);
   const items = (kind === 'type' ? alle.filter(l => l.type === id)
     : kind === 'region' ? alle.filter(l => l.region === id)
     : kind === 'model' ? alle.filter(l => norm(l.brand) === norm(mount.dataset.facetBrand) && norm(l.model) === norm(mount.dataset.facetModel))
     : alle.filter(l => passerKoerekort(l, id)))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .sort((a, b) => substans(b) - substans(a) || new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, viste);
   if (!items.length){
     mount.className = 'empty-state';
     mount.innerHTML = '<h3>Ingen til salg lige nu</h3>'
@@ -680,7 +806,12 @@ ${footer}
     return;
   }
   mount.className = 'listings-grid';
-  mount.innerHTML = items.map(listingCardHTML).join('');
+  /* Roer kun DOM'en, hvis lageret HAR aendret sig siden bygget — samme
+     id-sammenligning som js/maerke.js (D7-M2). Ellers er en genrender ren
+     layouturo paa sidens vigtigste element. */
+  const nuIds = [...mount.querySelectorAll('.card[data-listing-id]')].map(c => c.dataset.listingId).join('|');
+  const nyeIds = items.map(l => String(l.id)).join('|');
+  if (nuIds !== nyeIds) mount.innerHTML = items.map((l, i) => listingCardHTML(l, i)).join('');
   wireFavoriteButtons(mount);
 });</script>
 </body>

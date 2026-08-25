@@ -531,10 +531,14 @@ function faqFor(brand, items, stats, kk){
   if (!kendtKK){
     kkSvar = `Det kan vi ikke se ud fra dataene i dag — ingen af de ${n} ${brand}-annoncer oplyser den effekt i hk, der afgør kørekortkategorien. Kilden til de indekserede annoncer sender ikke tallet med, og Bikerbasen gætter aldrig på den slags — vi viser hellere ingen kategori end en forkert.`;
   } else if (!(kk.A1 + kk.A2)){
-    kkSvar = `Nej, ikke blandt de annoncer, vi kan afgøre — ${kk.A} af ${kendtKK} ${brand}-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de ${A2_MAX_HK} hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle.`
+    kkSvar = `Ikke blandt de annoncer, vi kan afgøre — ${kk.A} af ${kendtKK} ${brand}-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de ${A2_MAX_HK} hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle.`
       + (kk.ukendt ? ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen og vises derfor uden kategori.` : '');
   } else {
-    kkSvar = `Ja, til dels — ${kk.A1 + kk.A2} af ${kendtKK} ${brand}-annoncer med kendt effekt holder sig under A2-loftet på ${A2_MAX_HK} hk${kk.A1 ? ` (heraf ${kk.A1} også inden for A1-grænsen)` : ''}, mens ${kk.A} kræver stort kørekort. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra.`
+    /* "Ja, til dels" svarede bekræftende på lovlighed ud fra effekt alene —
+       og dette svar ryger i FAQPage-JSON-LD'en, altså direkte i Googles rige
+       resultat. A2 kræver også maks. 0,2 kW/kg og afledningsreglen, som ingen
+       annonce oplyser (js/data.js ~852, docs/forretning.md §3.1). */
+    kkSvar = `${kk.A1 + kk.A2} af ${kendtKK} ${brand}-annoncer med kendt effekt er ikke udelukket på effekt til A2 — de holder sig under loftet på ${A2_MAX_HK} hk (35 kW)${kk.A1 ? `, heraf ${kk.A1} også inden for A1-grænsen` : ''} — mens ${kk.A} kræver stort kørekort. A2 stiller også krav om maks. 0,2 kW pr. kg og om, at maskinen ikke er afledt af en model med over dobbelt effekt; det står ikke i annoncerne, så tjek registreringsattesten. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra.`
       + (kk.ukendt ? ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen hos kilden.` : '');
   }
   spg.push({ q: `Kan man køre ${brand} på A2-kørekort?`, a: kkSvar });
@@ -603,8 +607,10 @@ function bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand){
        kun ind i soegning.html's søgefilter, aldrig ud til de nye statiske,
        indekserbare sider. Fundet af runde 3's SEO-kritiker. */
     const facetLinks = [];
-    if (kk.A1) facetLinks.push('<a href="koerekort-a1.html">Se alle motorcykler på A1-kørekort</a>');
-    if (a1a2) facetLinks.push('<a href="koerekort-a2.html">Se alle motorcykler på A2-kørekort</a>');
+    // "på A1-kørekort" antyder kørbarhed; målsiderne siger selv "ikke
+    // udelukket". Linkteksten skal love det samme som destinationen.
+    if (kk.A1) facetLinks.push('<a href="koerekort-a1.html">Se motorcykler, der ikke er udelukket til A1</a>');
+    if (a1a2) facetLinks.push('<a href="koerekort-a2.html">Se motorcykler, der ikke er udelukket til A2</a>');
     if (facetLinks.length) dele.push(`<p>${facetLinks.join(' · ')}</p>`);
   }
 
@@ -1080,7 +1086,12 @@ const dealerUrls = [...dealerLastmod.entries()].map(([id, lastmod]) => ({
 const today = new Date().toISOString().slice(0,10);
 const entries = [
   ...staticPages.map(u => ({ loc: cleanUrl(u), lastmod: today })),
-  ...brands.map(b => ({ loc: cleanUrl(`maerke-${slugify(b)}.html`), lastmod: today })),
+  /* Kun mærkesider, der faktisk er indekserbare. En noindex-side i sitemappet
+     er et modsat signal (se noten linje ~1029) — og præcis den regel, facet-
+     scriptet allerede følger med sit `qualifies`-filter. Tærsklen er den
+     samme, der afgør noindex på selve siden. */
+  ...brands.filter(b => (byBrand[b] || []).length >= MIN_LISTINGS_FULD_TEKST)
+    .map(b => ({ loc: cleanUrl(`maerke-${slugify(b)}.html`), lastmod: today })),
   ...listingUrls.map(e => ({ loc: `${base}/${e.loc}`, lastmod: e.lastmod })),
   ...dealerUrls.map(e => ({ loc: `${base}/${e.loc}`, lastmod: e.lastmod })),
 ];

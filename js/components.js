@@ -628,8 +628,19 @@ function koerekortMaerkat(l){
 
   if (kode){
     const grundlag = [ccm ? formatCcm(ccm) : null, hk != null ? formatPower(hk) : null].filter(Boolean).join(' og ');
-    return { kode, tekst: `Kørekort ${kode}`, forklaring:
-      `Kan føres på ${kode}-kørekort. Udledt af ${grundlag} — vejledende, for en motorcykel kan være en effektbegrænset udgave, og A2 har også en grænse for effekt pr. kilo, som ingen annonce oplyser.` };
+    /* "Kørekort A2" + "Kan føres på A2-kørekort" var konklusionen først og
+       forbeholdet bagefter — den påstand, resten af sitet er bygget til
+       ikke at give: effekt og ccm kan aldrig BEKRÆFTE A1/A2, kun udelukke
+       (kW/kg og afledningsreglen står ikke i annoncen — se blokken over
+       KOEREKORT i js/data.js og docs/forretning.md §3.1: "Mulig A2" indtil
+       alt er dokumenteret). A-grenen må gerne konkludere: A har ingen
+       øvre grænser, så "kræver A" følger af effekten alene. */
+    if (kode === 'A'){
+      return { kode, tekst: 'Kørekort A', forklaring:
+        `Kræver A-kørekort: ${grundlag} er over A2-grænsen på ${A2_MAX_HK} hk (35 kW).` };
+    }
+    return { kode, tekst: `Mulig ${kode}`, forklaring:
+      `Ikke udelukket til ${kode} ud fra ${grundlag}. ${kode} kræver også en grænse for effekt pr. kilo${kode === 'A2' ? ', og at maskinen ikke er afledt af en model med over dobbelt effekt' : ''} — det står ikke i annoncen, så tjek registreringsattesten.` };
   }
 
   // 3. Ccm ≤ 125, men effekten ikke oplyst: A1 kræver begge, vi har kun det ene.
@@ -800,8 +811,12 @@ function externalCardHTML(l, i){
      også et juridisk vilkår (garanti frem for reklamationsret), og den skal
      læses før tallet giver mening. */
   const erNy = eksternErNy(l);
+  /* Garanti-sætningen er et løfte om TREDJEPARTS vilkår og må kun stå, hvor
+     sælgertypen faktisk er oplyst som forhandler — samme regel, detaljesiden
+     fik i D7-A1. En Gul og Gratis-annonce uden sælgertype får spørgsmålet i
+     stedet for påstanden. */
   const nyHTML = erNy
-    ? `<span class="card-ny" title="Annoncen ligger i ${escapeHTML(l.source?.navn || 'kilden')}s katalog over NYE motorcykler. Den er ikke brugt: du køber med garanti frem for reklamationsret, og kilometerstanden er derfor ikke oplyst.">Ny</span>`
+    ? `<span class="card-ny" title="Annoncen ligger i ${escapeHTML(l.source?.navn || 'kilden')}s katalog over NYE motorcykler. Den er ikke brugt${saelgerType === 'Forhandler' ? ': du køber med garanti frem for reklamationsret, og kilometerstanden er derfor ikke oplyst' : ' — spørg sælgeren om garanti- og reklamationsvilkår'}.">Ny</span>`
     : '';
   const mark = eksternSalgsmarkoerer(l);
   const markHTML = mark.tekst

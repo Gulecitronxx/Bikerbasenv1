@@ -527,8 +527,6 @@ function renderExternalListing(listing){
   const kkM = koerekortMaerkat(listing);   // ét sted for hele sitet, se js/components.js
   const kk  = kkM.kode;
   const kkUvis = !kk && ccm > A1_MAX_CCM;
-  const kkMeta = KOEREKORT.find(k => k.id === kk);
-
   /* HER STOD "MAKS. 48 HK", OG DET VAR EN HK FOR MEGET.
      A2-loftet er 35 kW. 35 / 0,7355 = 47,59 hk, så 47 er grænsen — 48 hk er
      35,30 kW og altså over. Tallet var rettet i js/data.js (A2_MAX_HK) og i
@@ -555,13 +553,20 @@ function renderExternalListing(listing){
     : `<div class="external-detail-kk">
          <span class="external-detail-kk-code">${escapeHTML(kk)}</span>
          <div>
-           <b>Du kan køre den på ${escapeHTML(kk)}-kørekort</b>
-           <!-- hint'en i KOEREKORT (js/data.js) sluttede paa et punktum,
-                og saetningen her satte et til: "... ikke oplyst.. Regnet ud
-                fra". Punktummet fjernes, saa de to kan skrives uafhaengigt. -->
-           <p>${escapeHTML(String(kkMeta?.hint || '').replace(/\.\s*$/, ''))}. Regnet ud fra
-              ${ccm ? formatCcm(ccm) : 'effekten'}${hk ? ` og ${formatPower(hk)}` : ''} og
-              vejledende — en mc kan være en effektbegrænset udgave, så få det bekræftet hos ${kilde}.</p>
+           ${kk === 'A'
+             /* A-grenen må konkludere: A har ingen øvre grænser, så "kræver A"
+                følger af effekten alene. */
+             ? `<b>Kræver A-kørekort</b>
+           <p>Effekten (${formatPower(hk)}) er over A2-grænsen på ${A2_MAX_HK} hk (35 kW),
+              så det store kørekort skal til.</p>`
+             /* "Du kan køre den på A2-kørekort" var præcis det svar, kommentaren
+                ovenfor siger, vi ikke har: effekt og ccm kan kun UDELUKKE A1/A2,
+                aldrig bekræfte dem — kW/kg og afledningsreglen står ikke i
+                annoncen (js/data.js over KOEREKORT, docs/forretning.md §3.1). */
+             : `<b>Ikke udelukket til ${escapeHTML(kk)} — men få det bekræftet</b>
+           <p>Regnet ud fra ${ccm ? formatCcm(ccm) : 'effekten'}${hk ? ` og ${formatPower(hk)}` : ''}.
+              ${escapeHTML(kk)} kræver også en grænse for effekt pr. kilo${kk === 'A2' ? ', og at maskinen ikke er afledt af en model med over dobbelt effekt' : ''} —
+              det står ikke i annoncen, så spørg ${kilde}, og tjek registreringsattesten.</p>`}
          </div>
        </div>`;
 

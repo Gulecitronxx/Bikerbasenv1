@@ -2121,6 +2121,15 @@ function wireCoreControls(){
     document.getElementById('save-search-btn').click();
   });
 
+  /* ?agent=1 — facet- og modelsidernes "Få besked om nye ..."-knap (runde 11,
+     R11-F-14) lander her med facettens filtre allerede i URL'en og åbner
+     søgeagenten med det samme. Ukendte parametre ignoreres af
+     readStateFromURL(), så flaget forstyrrer ingen filtre, og agenten gemmes
+     på de samme filtre, brugeren kom fra. */
+  if (new URLSearchParams(window.location.search).get('agent') === '1'){
+    document.getElementById('save-search-btn').click();
+  }
+
   /* Runde 7 (D7-S2, koerer ved start — filterpanelet bygges foerst ved klik paa mobil): "Maerke eller model" (≈165 px) klippede stadig i et
      ≈150 px felt paa 390. Kort tekst under 421 px; css saetter ellipse som
      bagstopper, saa det aldrig klipper midt i et ord igen. */
