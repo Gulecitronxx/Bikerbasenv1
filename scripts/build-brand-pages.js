@@ -534,7 +534,7 @@ function faqFor(brand, items, stats, kk){
     kkSvar = `Nej, ikke blandt de annoncer, vi kan afgøre — ${kk.A} af ${kendtKK} ${brand}-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de ${A2_MAX_HK} hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle.`
       + (kk.ukendt ? ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen og vises derfor uden kategori.` : '');
   } else {
-    kkSvar = `Ja, til dels — ${kk.A1 + kk.A2} af ${kendtKK} ${brand}-annoncer med kendt effekt holder sig under A2-loftet på ${A2_MAX_HK} hk${kk.A1 ? ` (heraf ${kk.A1} også inden for A1-grænsen)` : ''}, mens ${kk.A} kræver stort kørekort. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så du kun ser dem, du faktisk må køre.`
+    kkSvar = `Ja, til dels — ${kk.A1 + kk.A2} af ${kendtKK} ${brand}-annoncer med kendt effekt holder sig under A2-loftet på ${A2_MAX_HK} hk${kk.A1 ? ` (heraf ${kk.A1} også inden for A1-grænsen)` : ''}, mens ${kk.A} kræver stort kørekort. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra.`
       + (kk.ukendt ? ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen hos kilden.` : '');
   }
   spg.push({ q: `Kan man køre ${brand} på A2-kørekort?`, a: kkSvar });
@@ -595,7 +595,7 @@ function bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand){
       p += ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen hos kilden og vises uden kategori.`;
     }
     if (a1a2){
-      p += ` <a href="soegning.html?brands=${encodeURIComponent(brand)}&amp;koerekort=A2">Se de ${a1a2} ${esc(brand)}, der kan køres på A1 eller A2</a>.`;
+      p += ` <a href="soegning.html?brands=${encodeURIComponent(brand)}&amp;koerekort=A2">Se de ${a1a2} ${esc(brand)}, der holder sig inden for A2-loftet</a>.`;
     }
     dele.push(`<p>${p}</p>`);
     /* Krydslink til de faktiske A1/A2-facetsider (koerekort-a1.html,

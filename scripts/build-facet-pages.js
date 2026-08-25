@@ -182,13 +182,19 @@ const KOEREKORT_FACETS = [
     // ("Søg i alle kørekort a1" er forkert dansk — "A1" skal blive ved med
     // at være et alfanumerisk kort, ikke et ord der kan lower-cases).
     frase: 'motorcykler til A1-kørekort',
-    forklaring: `Må køres på et A1-kørekort: højst ${A1_MAX_CCM} cm³ og højst ${A1_MAX_HK} hk.`,
+    // "Må køres på et A1-kørekort" var et løfte, filteret ikke kan holde:
+    // A1 kræver også højst 0,1 kW pr. kg, og vægten står ikke i annoncerne
+    // (js/data.js, "vi kan aldrig love at en mc ER A2" — samme regel for A1).
+    // Sig grænserne og hullet, ikke konklusionen.
+    forklaring: `A1-grænsen er højst ${A1_MAX_CCM} cm³ og højst ${A1_MAX_HK} hk (11 kW). A1 kræver også højst 0,1 kW pr. kg — vægten står ikke i annoncerne, så tjek altid registreringsattesten.`,
   },
   {
     id: 'A2', slug: 'koerekort-a2',
     titel: 'Kørekort A2',
     frase: 'motorcykler til A2-kørekort',
-    forklaring: `Må køres på et A2-kørekort: højst ${A2_MAX_HK} hk (eller effektbegrænset til det).`,
+    // Samme rettelse som A1 ovenfor: grænser og hul, ikke "må køres".
+    // A2's to ekstra krav (kW/kg og afledningsreglen) står i js/data.js ~852.
+    forklaring: `A2-grænsen er maks. 35 kW (${A2_MAX_HK} hk), også for maskiner effektbegrænset til det. A2 kræver desuden højst 0,2 kW pr. kg, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncerne, så tjek altid registreringsattesten.`,
   },
 ];
 
@@ -291,12 +297,25 @@ function frase(facet){
 /* Antal annoncer, der IKKE kan afgøres for denne facet, fordi et felt
    mangler — ikke fordi de reelt falder udenfor. "Vi gætter aldrig"
    (work/DECISIONS.md, "Kørekort er vores ene strukturelle fordel").
-   For A1 er det ccm; for A2 er det hk (samme skel som passerKoerekort()
-   selv laver: A1 kan afgøres uden hk, A2 kan ikke afgøres uden). */
+   Samme skel som passerKoerekort() selv laver: A1 kræver BÅDE kendt
+   ccm ≤ 125 OG kendt hk ≤ 15 (js/data.js, "en lille slagvolumen er ingen
+   garanti for lav effekt"), så en annonce er kun AFGJORT, når den enten
+   er bekræftet på begge felter eller udelukket på ét af dem. Her stod
+   tidligere kun "mangler ccm" for A1 — en kendt lille motor med ukendt
+   effekt blev altså filtreret fra uden at indgå i regnskabet, og siden
+   påstod at have gjort regnskabet op. For A2 tæller et manglende hk kun
+   som uafgjort, hvis sælgers drosselflag ikke allerede har svaret ja. */
 function uoplystAntal(facet, alle){
   if (facet.kind !== 'koerekort') return 0;
-  if (facet.id === 'A1') return alle.filter(l => !(Number(l.ccm) > 0)).length;
-  if (facet.id === 'A2') return alle.filter(l => hkEllerNull(l.power) == null).length;
+  if (facet.id === 'A1'){
+    return alle.filter(l => {
+      const ccm = Number(l.ccm) || 0, hk = hkEllerNull(l.power);
+      if (ccm > A1_MAX_CCM) return false;             // afgjort: udelukket på ccm
+      if (hk != null && hk > A1_MAX_HK) return false; // afgjort: udelukket på hk
+      return !(ccm > 0 && hk != null);                // resten er uafgjort, hvis et felt mangler
+    }).length;
+  }
+  if (facet.id === 'A2') return alle.filter(l => hkEllerNull(l.power) == null && !l.kanNedsaettesA2).length;
   return 0;
 }
 
@@ -392,7 +411,7 @@ function faqLdForModel(facet, items){
   const kk = [...new Set(items.map(l => koerekortForListing(l)).filter(Boolean))];
   if (kk.length === 1){
     qa.push({ q: `Hvilket kørekort kræver en ${facet.brand} ${facet.model}?`,
-      a: `De ${items.length} annoncer, vi har, kan alle køres på kørekort ${kk[0]} ud fra den oplyste effekt og slagvolumen. Tjek altid registreringsattesten på den konkrete motorcykel.` });
+      a: `De ${items.length} annoncer, vi har, ligger alle inden for grænserne for kørekort ${kk[0]} ud fra den oplyste effekt og slagvolumen. Kørekortsreglerne stiller også krav, der ikke står i annoncerne — tjek altid registreringsattesten på den konkrete motorcykel.` });
   }
   if (!qa.length) return null;
   return { '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -402,8 +421,14 @@ function faqLdForModel(facet, items){
 function introForKoerekort(facet, items, uoplyst){
   const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0).sort((a, b) => a - b);
   const en = items.length === 1;
+  /* "der må køres på et A2-kørekort" var den samme påstand, forsidens hero
+     mistede 25.08.2026: filteret kender kun effekt og ccm (og sælgers eget
+     drosselflag), men A1/A2 kræver også kW/kg — og A2 afledningsreglen.
+     "Ikke udelukket ... ud fra det, annoncerne oplyser" er det, filteret
+     faktisk kan stå inde for (js/data.js: "vi kan aldrig love at en mc ER
+     A2 — kun at den ikke er udelukket på effekt"). */
   const dele = [`Der er lige nu <strong>${items.length}</strong> ${en ? 'brugt motorcykel' : 'brugte motorcykler'} `
-    + `til salg på Bikerbasen, der må køres på et ${esc(facet.id)}-kørekort.`];
+    + `til salg på Bikerbasen, der ikke er udelukket til et ${esc(facet.id)}-kørekort ud fra det, annoncerne oplyser.`];
   // dkk() slutter selv på "kr." — et ekstra punktum ville give "kr..".
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
     dele.push(` Priserne ligger mellem ${dkk(priser[0])} og ${dkk(priser[priser.length - 1])}`);
@@ -416,7 +441,7 @@ function introForKoerekort(facet, items, uoplyst){
     // aldrig som et nej. Se "Hero'en siger, hvor mange vi ikke kan svare
     // for" i work/DECISIONS.md — samme regnskab, ny side.
     dele.push(` ${tal(uoplyst)} ${uoplyst === 1 ? 'annonce mangler' : 'annoncer mangler'} `
-      + `${facet.id === 'A1' ? 'oplyst motorstørrelse (ccm)' : 'oplyst effekt (hk)'}, og kan derfor `
+      + `${facet.id === 'A1' ? 'oplyst motorstørrelse (ccm) eller effekt (hk)' : 'oplyst effekt (hk)'}, og kan derfor `
       + `hverken bekræftes eller afvises til ${esc(facet.id)} — de vises IKKE her. Vi gætter aldrig.`);
   }
   return dele.join('');
@@ -694,11 +719,11 @@ function facetLinksBlock(resultater, variant){
   const tekst = variant === 'index'
     ? {
         typeH2: 'Se hele udvalget efter type', typeP: 'Priser, årgange og hvad du skal tjekke — for hver type for sig, ikke kun et filter.',
-        kkH2: 'Se hele udvalget efter kørekort', kkP: 'Faste sider med kun de motorcykler, du faktisk må køre.',
+        kkH2: 'Se hele udvalget efter kørekort', kkP: 'Faste sider uden de motorcykler, der er udelukket på dit kørekort ud fra de oplyste tal.',
       }
     : {
         typeH2: 'Søg efter type', typeP: 'Faste sider med det aktuelle udvalg, prisniveau og hvad du skal tjekke — ikke kun et filter.',
-        kkH2: 'Søg efter kørekort', kkP: 'Se kun de motorcykler, du faktisk må køre på dit kørekort.',
+        kkH2: 'Søg efter kørekort', kkP: 'Se udvalget uden de motorcykler, der er udelukket på dit kørekort ud fra de oplyste tal.',
       };
 
   const chip = r => `<a class="popular-chip" href="${r.facet.slug}.html">${esc(r.facet.titel)}</a>`;
