@@ -23,7 +23,7 @@ juridiske, ikke tekniske præferencer.
 
 ### Hvor reglerne står i koden
 
-Efterprøvet 17.08.2026. Det her afsnit er ikke en del af reglerne — det er en
+Efterprøvet 17.08.2026, regel 4 og 6 genefterprøvet 25.08.2026. Det her afsnit er ikke en del af reglerne — det er en
 optegnelse af, hvor de håndhæves, så den næste kan finde spærren i stedet for at
 lede. En regel, koden ikke bakker op, er en hensigt.
 
@@ -35,20 +35,17 @@ lede. En regel, koden ikke bakker op, er en hensigt.
 | 2 ingen kontaktoplysninger | `crawler/normalize.js` `fjernPersonoplysninger()` fjerner telefonnumre, mails og adresser fra titlen, før den gemmes | håndhævet |
 | 3 rate limit | `crawler/hastighed.js`, kø pr. domæne. Databasen har `check (crawl_delay_ms >= 2000)` i `supabase/014_aggregator.sql` | håndhævet i to lag |
 | 3 ingen parallelle | `crawler/hastighed.js` serialiserer pr. domæne; `crawler/hastighed.test.js` låser det | håndhævet |
-| 4 User-Agent | `crawler/hent.js:22` — `Bikerbasen-indeksering/1.0 (+https://bikerbasen.dk/om-indeksering)` | **halvt** — se nedenfor |
+| 4 User-Agent | `crawler/hent.js:22` — `Bikerbasen-indeksering/1.0 (+https://bikerbasen.dk/om-indeksering)`. Siden `om-indeksering.html` findes i repoet, er med i udgivelses-allowlisten og svarede 200 live 25.08.2026 | håndhævet |
 | 5 opt-out | `aktiv: false` i `sources/<domaene>.yaml`. `crawler/config.js` springer kilden over | håndhævet |
 | 6 claim | `krav`s INSERT-politik kræver `status='afventer'`, `behandlet_af is null`, `behandlet is null` (migration 018). Godkendelse kan kun ske via `service_role` | **delvist** — se nedenfor |
 
-**Regel 4 er halvt indfriet.** User-Agent'en identificerer os korrekt, men
-`https://bikerbasen.dk/om-indeksering` svarer **404**. En forhandler, der ser trafikken i
-sin log og følger linket, finder ingenting — altså er kontaktvejen en påstand, ikke en vej.
-Siden skal skrives, eller URL'en skal pege et sted hen, der findes.
-
 **Regel 6 er delvist indfriet.** Selvgodkendelse er lukket i databasen, og der kan kun være
-ét godkendt krav pr. annonce. Men *verifikationen* — domæne-match på e-mail, kode på egen
-side, manuel godkendelse — er ikke bygget endnu, og frontenden bruger slet ikke `krav`
-(nul træf i `js/`). Reglen holder, fordi ingen kan claime overhovedet; den er ikke afprøvet
-af en rigtig claim.
+ét godkendt krav pr. annonce. Frontenden kan nu indsende og følge krav (`js/dashboard.js`:
+søg egne annoncer, indsend, statusliste) — men de automatiske verifikationsveje, domæne-match
+på e-mail og kode på egen side, er ikke bygget. Den eneste vej til godkendelse er manuel via
+`service_role`, hvilket er reglens tredje tilladte metode. Reglen holder altså, men hviler
+på at godkenderen faktisk verificerer ejerskab, før der godkendes — der er ingen teknisk
+spærre for en sjusket manuel godkendelse.
 
 **Til den, der vil ændre noget her:** spærrerne i `crawler/config.js` er ikke stil. De
 nægter at køre en kilde uden `tilladelse_modtaget` OG en dato for den. Et review, der
