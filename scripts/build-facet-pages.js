@@ -416,7 +416,7 @@ function introForType(facet, items){
   /* "brugte" stod fast i skabelonen, mens 32 af 91 kort bar "Ny" (R11-F-2),
      og "til salg PÅ Bikerbasen" var den påstand, D8-M4 selv fjernede fra
      mærkesiderne: annoncerne er til salg hos kilderne — vi indekserer dem. */
-  const dele = [`Der er <strong>${items.length}</strong> `
+  const dele = [`Der er <strong id="facet-intro-antal">${items.length}</strong> `
     + `${brugtOrd(items, `${esc(facet.label)}-motorcykel`, `${esc(facet.label)}-motorcykler`)}`
     + ` til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen`];
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
@@ -473,7 +473,7 @@ function introForRegion(facet, items, alle){
   for (const l of items){ const b = String(l.city || '').trim(); if (b) byer.set(b, (byer.get(b) || 0) + 1); }
   const top = [...byer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
   const { tekst } = prisOgAargang(items);
-  let s = `Der er <strong>${items.length}</strong> ${en ? 'motorcykel' : 'motorcykler'} til salg i ${esc(facet.id)}, indekseret på Bikerbasen${tekst}`;
+  let s = `Der er <strong id="facet-intro-antal">${items.length}</strong> ${en ? 'motorcykel' : 'motorcykler'} til salg i ${esc(facet.id)}, indekseret på Bikerbasen${tekst}`;
   if (top.length){
     // Aerligt om fordelingen: 96 % af Syddanmark er én by (Roedding, MC Syd).
     // Det skal staa, ellers lover overskriften en landsdel og leverer én gade.
@@ -488,7 +488,7 @@ function introForModel(facet, items){
   const en = items.length === 1;
   const { tekst } = prisOgAargang(items);
   const km = items.map(l => tilTal(l.km)).filter(k => k !== null && k >= 0).sort((a, b) => a - b);
-  let s = `Der er <strong>${items.length}</strong> ${esc(facet.brand)} ${esc(facet.model)} til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen${tekst}`;
+  let s = `Der er <strong id="facet-intro-antal">${items.length}</strong> ${esc(facet.brand)} ${esc(facet.model)} til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen${tekst}`;
   if (km.length > 1 && km[0] !== km[km.length - 1]) s += ` Kilometertal fra ${tal(km[0])} til ${tal(km[km.length - 1])} km${km.length < items.length ? ` (${items.length - km.length} uden oplyst km)` : ''}.`;
   const nye = items.filter(l => l.condition === 'ny' || l.kildeStand === 'ny').length;
   if (nye) s += ` ${nye === items.length ? (en ? 'Den' : 'Alle') : nye} ${nye === items.length ? 'sælges som ny' : `af dem sælges som nye`}.`;
@@ -526,7 +526,7 @@ function introForKoerekort(facet, items, uoplyst){
      "Ikke udelukket ... ud fra det, annoncerne oplyser" er det, filteret
      faktisk kan stå inde for (js/data.js: "vi kan aldrig love at en mc ER
      A2 — kun at den ikke er udelukket på effekt"). */
-  const dele = [`Der er <strong>${items.length}</strong> ${brugtOrd(items, 'motorcykel', 'motorcykler')} `
+  const dele = [`Der er <strong id="facet-intro-antal">${items.length}</strong> ${brugtOrd(items, 'motorcykel', 'motorcykler')} `
     + `indekseret på Bikerbasen, der ikke er udelukket til et ${esc(facet.id)}-kørekort ud fra det, annoncerne oplyser.`];
   // dkk() slutter selv på "kr." — et ekstra punktum ville give "kr..".
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
@@ -814,9 +814,9 @@ ${header}
            ved visning, saa "lige nu" kunne aeldes til en loegn mellem to
            crawl. Datoen under siger i stedet, hvornaar lageret sidst blev
            bekraeftet — samme linje som maerkesiden (D9-M2). -->
-      <div><h2 class="brand-sub" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2>${items.length > FACET_KORT ? `<p class="brand-facet-note">De første ${FACET_KORT} vises her.</p>` : ''}${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div>
+      <div><h2 class="brand-sub" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2>${items.length > FACET_KORT ? `<p class="brand-facet-note" id="facet-note">De første ${FACET_KORT} vises her.</p>` : ''}${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div>
       ${items.length ? `${facetVaerktoejer(facet, items)}
-      <div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>${kort}</div>
+      <div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}" data-facet-frase="${frase(facet)}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>${kort}</div>
       ${items.length > FACET_KORT ? `<!-- RUNDE 13 (R12-D-9-resten): samme handling som maerkesidernes "Se alle
            276 Honda i soegningen", men den stod som hvid ghost-pille, hvor
            maerkesidens er fyldt primaer. Baade runde 13's kritiker og den
@@ -905,17 +905,30 @@ ${footer}
   const substans = l => ((l.photoUrls && l.photoUrls.length) || l.thumbnailUrl ? 4 : 0)
     + (l.km != null && l.km !== '' ? 2 : 0) + (Number(l.price) > 0 ? 2 : 0)
     + (hkEllerNull(l.power) != null ? 1 : 0);
-  const items = (kind === 'type' ? alle.filter(l => l.type === id)
+  const traef = (kind === 'type' ? alle.filter(l => l.type === id)
     : kind === 'region' ? alle.filter(l => l.region === id)
     : kind === 'model' ? alle.filter(l => norm(l.brand) === norm(mount.dataset.facetBrand) && norm(l.model) === norm(mount.dataset.facetModel))
     : alle.filter(l => passerKoerekort(l, id)))
-    .sort((a, b) => substans(b) - substans(a) || new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, viste);
+    .sort((a, b) => substans(b) - substans(a) || new Date(b.createdAt) - new Date(a.createdAt));
+  /* RUNDE 13 (R13-7): TOTALEN foer udsnittet. Overskriften "58 annoncer" og
+     introens "Der er 58 motorcykler" er bagt ved bygget og blev ALDRIG
+     opdateret i drift — js/maerke.js har gjort det for maerkesiderne siden
+     runde 7. Aendrer lageret sig efter bygget (fx en kilde sat aktiv:false,
+     som regel 5 kraever skal virke med ét flag), stod tallet over et gitter
+     med et andet antal. Paa et site, hvis eneste loefte er, at tallene er
+     sande, er det den dyreste slags stilhed. */
+  const alleTraef = traef.length;
+  const items = traef.slice(0, viste);
+  const frase = mount.dataset.facetFrase || 'motorcykler';
   if (!items.length){
     mount.className = 'empty-state';
-    mount.innerHTML = '<h3>Ingen til salg lige nu</h3>'
+    /* R13-14: tomtilstanden her sagde "Ingen til salg lige nu" uden at naevne
+       kategorien — byggetidens udgave og maerkesiden naevner den begge. */
+    mount.innerHTML = '<h3>Ingen ' + frase + ' til salg lige nu</h3>'
       + '<p>Vi har ingen annoncer, der matcher denne kategori i øjeblikket. Adressen bliver stående — kig forbi igen, eller søg i hele udvalget.</p>'
       + '<a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg alle motorcykler</a>';
+    const tom = document.getElementById('facet-antal');
+    if (tom) tom.textContent = '0 annoncer';
     return;
   }
   mount.className = 'listings-grid';
@@ -925,6 +938,16 @@ ${footer}
   const nuIds = [...mount.querySelectorAll('.card[data-listing-id]')].map(c => c.dataset.listingId).join('|');
   const nyeIds = items.map(l => String(l.id)).join('|');
   if (nuIds !== nyeIds) mount.innerHTML = items.map((l, i) => listingCardHTML(l, i)).join('');
+  const antal = document.getElementById('facet-antal');
+  if (antal) antal.textContent = alleTraef + (alleTraef === 1 ? ' annonce' : ' annoncer');
+  /* Introens tal staar paa SAMME skaerm som overskriftens. To tal, der kan
+     blive uenige, er vaerre end ét, der er gammelt — saa de opdateres sammen.
+     Prisspaend og aargange i folden er stadig fra bygget; det er derfor
+     "Senest bekraeftet hos kilderne {dato}" staar paa siden. */
+  const introAntal = document.getElementById('facet-intro-antal');
+  if (introAntal) introAntal.textContent = String(alleTraef);
+  const note = document.getElementById('facet-note');
+  if (note) note.textContent = alleTraef > viste ? 'De første ' + viste + ' vises her.' : '';
   wireFavoriteButtons(mount);
 });</script>
 </body>

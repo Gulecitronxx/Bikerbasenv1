@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-oRdHo5PXHzHqgJTtIe1p36aJzV3AvQI3EwbHwLKRmGw=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-IDj2iACEg1eqXN+17v1S06skc2dh3wJk74z2kT91Pds=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Cruiser-motorcykler til salg — Bikerbasen</title>
 <meta name="description" content="Se 91 Cruiser-motorcykler til salg i Danmark. Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.">
@@ -114,7 +114,7 @@ try{
 
     <div class="brand-hero">
       <h1>Cruiser-motorcykler</h1>
-      <p class="brand-intro">Der er <strong>91</strong> Cruiser-motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 15.000 kr. til 449.800 kr., med årgange mellem 1976 og 2026.</p>
+      <p class="brand-intro">Der er <strong id="facet-intro-antal">91</strong> Cruiser-motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 15.000 kr. til 449.800 kr., med årgange mellem 1976 og 2026.</p>
       <details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">32 af dem sælges som nye. Annoncerne er indekseret fra MC Syd, og handlen sker hos kilden.</p></details>
     </div>
 
@@ -167,7 +167,7 @@ try{
            ved visning, saa "lige nu" kunne aeldes til en loegn mellem to
            crawl. Datoen under siger i stedet, hvornaar lageret sidst blev
            bekraeftet — samme linje som maerkesiden (D9-M2). -->
-      <div><h2 class="brand-sub" id="facet-antal">91 annoncer</h2><p class="brand-facet-note">De første 24 vises her.</p><p class="brand-facet-note">Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
+      <div><h2 class="brand-sub" id="facet-antal">91 annoncer</h2><p class="brand-facet-note" id="facet-note">De første 24 vises her.</p><p class="brand-facet-note">Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
       
       <div class="brand-facet-fold">
         <input type="checkbox" class="brand-facet-check" id="facetvaerktoej-type-cruiser">
@@ -187,7 +187,7 @@ try{
           <a class="popular-chip popular-chip-sm" href="soegning.html?type=cruiser&amp;sort=year-desc">Årgang: nyeste</a></div>
         </div>
       </div>
-      <div class="listings-grid" id="facet-listings" data-facet-kind="type" data-facet-id="cruiser" data-viste="24">
+      <div class="listings-grid" id="facet-listings" data-facet-kind="type" data-facet-id="cruiser" data-viste="24" data-facet-frase="cruiser-motorcykler">
   <article class="card card-external" data-listing-id="028653e2-985c-4210-9153-5337cf20ed3d" data-external="1">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/176252/Honda_F6_Valkyrie_0_2.jpg?v=1" alt="Honda F6 Valkyrie" loading="eager" fetchpriority="high" decoding="async" class="card-photo">
@@ -1188,17 +1188,30 @@ try{
   const substans = l => ((l.photoUrls && l.photoUrls.length) || l.thumbnailUrl ? 4 : 0)
     + (l.km != null && l.km !== '' ? 2 : 0) + (Number(l.price) > 0 ? 2 : 0)
     + (hkEllerNull(l.power) != null ? 1 : 0);
-  const items = (kind === 'type' ? alle.filter(l => l.type === id)
+  const traef = (kind === 'type' ? alle.filter(l => l.type === id)
     : kind === 'region' ? alle.filter(l => l.region === id)
     : kind === 'model' ? alle.filter(l => norm(l.brand) === norm(mount.dataset.facetBrand) && norm(l.model) === norm(mount.dataset.facetModel))
     : alle.filter(l => passerKoerekort(l, id)))
-    .sort((a, b) => substans(b) - substans(a) || new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, viste);
+    .sort((a, b) => substans(b) - substans(a) || new Date(b.createdAt) - new Date(a.createdAt));
+  /* RUNDE 13 (R13-7): TOTALEN foer udsnittet. Overskriften "58 annoncer" og
+     introens "Der er 58 motorcykler" er bagt ved bygget og blev ALDRIG
+     opdateret i drift — js/maerke.js har gjort det for maerkesiderne siden
+     runde 7. Aendrer lageret sig efter bygget (fx en kilde sat aktiv:false,
+     som regel 5 kraever skal virke med ét flag), stod tallet over et gitter
+     med et andet antal. Paa et site, hvis eneste loefte er, at tallene er
+     sande, er det den dyreste slags stilhed. */
+  const alleTraef = traef.length;
+  const items = traef.slice(0, viste);
+  const frase = mount.dataset.facetFrase || 'motorcykler';
   if (!items.length){
     mount.className = 'empty-state';
-    mount.innerHTML = '<h3>Ingen til salg lige nu</h3>'
+    /* R13-14: tomtilstanden her sagde "Ingen til salg lige nu" uden at naevne
+       kategorien — byggetidens udgave og maerkesiden naevner den begge. */
+    mount.innerHTML = '<h3>Ingen ' + frase + ' til salg lige nu</h3>'
       + '<p>Vi har ingen annoncer, der matcher denne kategori i øjeblikket. Adressen bliver stående — kig forbi igen, eller søg i hele udvalget.</p>'
       + '<a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg alle motorcykler</a>';
+    const tom = document.getElementById('facet-antal');
+    if (tom) tom.textContent = '0 annoncer';
     return;
   }
   mount.className = 'listings-grid';
@@ -1208,6 +1221,16 @@ try{
   const nuIds = [...mount.querySelectorAll('.card[data-listing-id]')].map(c => c.dataset.listingId).join('|');
   const nyeIds = items.map(l => String(l.id)).join('|');
   if (nuIds !== nyeIds) mount.innerHTML = items.map((l, i) => listingCardHTML(l, i)).join('');
+  const antal = document.getElementById('facet-antal');
+  if (antal) antal.textContent = alleTraef + (alleTraef === 1 ? ' annonce' : ' annoncer');
+  /* Introens tal staar paa SAMME skaerm som overskriftens. To tal, der kan
+     blive uenige, er vaerre end ét, der er gammelt — saa de opdateres sammen.
+     Prisspaend og aargange i folden er stadig fra bygget; det er derfor
+     "Senest bekraeftet hos kilderne {dato}" staar paa siden. */
+  const introAntal = document.getElementById('facet-intro-antal');
+  if (introAntal) introAntal.textContent = String(alleTraef);
+  const note = document.getElementById('facet-note');
+  if (note) note.textContent = alleTraef > viste ? 'De første ' + viste + ' vises her.' : '';
   wireFavoriteButtons(mount);
 });</script>
 <!--cookie:start-->

@@ -75,7 +75,7 @@ function facetLinksFor(brand, items){
         <label class="brand-facet-greb" for="${foldId}">Filtrér og sortér ${esc(brand)}<span class="chev"></span></label>
         <div class="brand-facetter">
         ${raekker.map(r => `<div class="brand-facet-raekke${r.klasse || ''}"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}">${l.tekst}</a>`).join('\n          ')}</div>`).join('\n        ')}
-        </div>${typeNote}
+        ${typeNote}</div>
       </div>`;
 }
 
