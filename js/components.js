@@ -869,7 +869,7 @@ function externalCardHTML(l, i){
       </h3>
       <div class="card-specblok">
         <dl class="card-specs">${specs}
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort${kkKlasse}" title="${escapeHTML(kk.forklaring)}" aria-label="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}</span></dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}<span class="visually-hidden">. ${escapeHTML(kk.forklaring)}</span></span></dd></div>
         </dl>
       </div>
       <div class="card-footer">

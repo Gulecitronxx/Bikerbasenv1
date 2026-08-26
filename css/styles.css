@@ -1182,6 +1182,22 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    er dyrest. Over 560 px er laasen uroert. */
 @media (max-width:559px){
   .card-specs{ height:auto; }
+  /* RUNDE 13 (R13-3): titlen var laast til ÉN linje med ellipse. Maalt paa
+     maerke-harley-davidson ved 390 px: 8 af 24 titler klippet — og det tabte
+     var modelnavnet, det eneste der skiller kortene, fordi maerket allerede
+     havde spist de foerste 16 tegn ("Harley-Davidson FLHRC Road K…" i stedet
+     for "Road King Classic"). Et forkortet modelnavn er ikke et kortere navn,
+     det er et andet navn.
+
+     Samme undtagelse og samme begrundelse som .card-specs ovenfor: den faste
+     hoejde findes for at holde NABOkort lige hoeje, og under 560 px er der én
+     spalte og ingen nabo. To linjer, derefter ellipse — saa en ekstrem titel
+     stadig ikke kan vaelte kortet. */
+  .card-external .card-title{ height:auto; }
+  .card-title-main{
+    white-space:normal; height:auto;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
 }
 /* Runde 6 (D6-S6): "2025 · 1.000 ccm · km ikke oplyst · Koerekort ikke afgjort"
    klippede km-chippen til "km i…" i én raekke. Samme faste hoejde-idé (D-011),
