@@ -1125,6 +1125,16 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 @container (max-width: 320px){
   .card-specs{ flex-wrap:wrap; align-content:flex-start; height:54px; }
 }
+/* RUNDE 12: den faste 54 px er PLADS TIL TO chip-raekker, og den reserveres
+   ogsaa naar kortet kun bruger én — maalt ~28 px tom, laast plads pr. kort.
+   Laasen findes for at holde nabokort lige hoeje (D-011), og den grund gaelder
+   kun i FLERSPALTEDE gitre. Under 560 px er gitteret én spalte (linje 835), og
+   der er ingen nabo at flugte med. Kortene maa derfor vaere forskellige hoeje
+   der — 24 kort × ~28 px er en halv skaerm ren luft paa den side, hvor pladsen
+   er dyrest. Over 560 px er laasen uroert. */
+@media (max-width:559px){
+  .card-specs{ height:auto; }
+}
 /* Runde 6 (D6-S6): "2025 · 1.000 ccm · km ikke oplyst · Koerekort ikke afgjort"
    klippede km-chippen til "km i…" i én raekke. Samme faste hoejde-idé (D-011),
    bare en anden fast hoejde for den kortklasse, der har brug for to raekker. */

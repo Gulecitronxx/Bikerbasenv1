@@ -389,6 +389,22 @@ function uoplystAntal(facet, alle){
   return 0;
 }
 
+/* Del introen i "det, der staar", og "det, der ligger bag folden" — samme
+   greb som maerkesiderne har haft siden runde 7 (D7-M3), og som runde 11's
+   kritiker bad om for koerekortsiderne: "Behold hvert forbehold, men
+   omstrukturer: én kort lead-saetning + foldbar boks."
+
+   Delingen sker ved foerste punktum efterfulgt af et NYT saetningsbegyndende
+   tegn (stort bogstav eller ciffer). Den naive /\.\s/ ville dele midt i
+   "fra 4.000 kr. til 107.999 kr." og efterlade prisspaendet halvt — dansk
+   skriver "kr." med punktum midt i saetningen. Smaat bogstav efter punktum
+   betyder derfor: samme saetning, del ikke her. */
+function delIntro(html){
+  const m = /\.\s+(?=[A-ZÆØÅ0-9])/.exec(html);
+  if (!m) return { foerste: html, rest: '' };
+  return { foerste: html.slice(0, m.index + 1), rest: html.slice(m.index + m[0].length).trim() };
+}
+
 function introForType(facet, items){
   const priser = aggregatPriser(items);
   const aar = items.map(l => tilTal(l.year)).filter(troværdigtAar);
@@ -581,6 +597,15 @@ function side(facet, alle){
     : facet.kind === 'region' ? introForRegion(facet, items, alle)
     : facet.kind === 'model' ? introForModel(facet, items)
     : introForKoerekort(facet, items, uoplyst);
+  const introDelt = delIntro(intro);
+  /* Etiketten paa folden er ikke pynt. Paa koerekortsiderne ligger BAADE
+     graenserne og regnskabet over, hvad listen udelader ("161 annoncer mangler
+     oplyst effekt — de vises IKKE her"), bag folden. En fold, der bare hedder
+     "Mere om udvalget", skjuler at der ER noget udeladt. Etiketten siger det
+     derfor selv, ogsaa mens folden er lukket. */
+  const introFoldEtiket = facet.kind === 'koerekort'
+    ? `Hvad kræver ${esc(facet.id)} — og hvad vises ikke her?`
+    : 'Mere om udvalget';
   /* Titel og meta må ikke sige "brugte" om et lager med fabriksnye i (R11-F-2),
      og kørekorttitlen må ikke antyde egnethed, som sidens egen intro
      omhyggeligt undgår (R11-I-4). Begge dele skrives derfor af tallene. */
@@ -679,7 +704,8 @@ ${header}
 
     <div class="brand-hero">
       <h1>${esc(facet.titel)}</h1>
-      <p class="brand-intro">${intro}</p>
+      <p class="brand-intro">${introDelt.foerste}</p>
+      ${introDelt.rest ? `<details class="brand-intro-mere"><summary>${introFoldEtiket}</summary><p class="brand-intro">${introDelt.rest}</p></details>` : ''}
       <div class="brand-actions">
         <a href="${facetSearchUrl(facet)}" class="btn btn-primary">Søg i alle ${frase(facet)}</a>
         <!-- Soegeagenten er det ene, referencen goer paa hver listeside, som vi
