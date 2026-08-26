@@ -59,7 +59,7 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/183275/Honda_CMX_500_Rebel_0_2.jpg?v=1" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=c24579f7">
+<link rel="stylesheet" href="css/styles.css?v=f29bf75d">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Kørekort","item":"https://bikerbasen.dk/soegning"},{"@type":"ListItem","position":3,"name":"Kørekort A2","item":"https://bikerbasen.dk/koerekort-a2"}]}</script>
 </head>
 <body>
@@ -126,13 +126,18 @@ try{
       </div>
     </div>
 
-    <section class="section" style="padding-top:0;">
+    <section class="section brand-maerkerow-sektion" style="padding-top:0;">
       <!-- Samme regel som maerke-*.html's modelchips: kun maerker der reelt
            er repraesenteret her, aldrig en kurateret liste (D-010).
            Modelsider undtaget (R11-F-8): "Se Honda CMX 500 Rebel efter maerke"
            med én chip ("Honda") er en tautologi, der linker samme sted som
-           CTA'en lige ovenover — 90 px over folden brugt paa ingenting. -->
-      <h2 class="brand-sub">Se motorcykler til A2-kørekort efter mærke</h2>
+           CTA'en lige ovenover — 90 px over folden brugt paa ingenting.
+
+           RUNDE 12: raekken bar en synlig h2 og en hel sektions luft over
+           varen — samme fund som paa maerkesiderne. Overskriften bliver
+           staaende for skaermlaesere og dokumentstruktur; den koster bare
+           ingen pixels over folden laengere. -->
+      <h2 class="visually-hidden">Se motorcykler til A2-kørekort efter mærke</h2>
       <div class="popular-row">
         <a class="popular-chip" href="soegning.html?koerekort=A2&brands=Honda">Honda</a>
         <a class="popular-chip" href="soegning.html?koerekort=A2&brands=Royal+Enfield">Royal Enfield</a>
@@ -152,7 +157,7 @@ try{
            ved visning, saa "lige nu" kunne aeldes til en loegn mellem to
            crawl. Datoen under siger i stedet, hvornaar lageret sidst blev
            bekraeftet — samme linje som maerkesiden (D9-M2). -->
-      <div><h2 class="brand-sub" id="facet-antal">58 annoncer — de første 24 her</h2><p class="brand-facet-note">Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
+      <div><h2 class="brand-sub" id="facet-antal">58 annoncer</h2><p class="brand-facet-note">De første 24 vises her.</p><p class="brand-facet-note">Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
       <div class="listings-grid" id="facet-listings" data-facet-kind="koerekort" data-facet-id="A2" data-viste="24">
   <article class="card card-external" data-listing-id="2ad7bcd4-c5b5-4e80-9601-9bd0b203fe97" data-external="1">
     <div class="card-media">
@@ -1081,16 +1086,16 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=c24579f7"></script>
-<script defer src="js/supabase-config.js?v=c24579f7"></script>
-<script defer src="js/supabase-api.js?v=c24579f7"></script>
-<script defer src="js/icons.js?v=c24579f7"></script>
-<script defer src="js/bike-art.js?v=c24579f7"></script>
-<script defer src="js/data.js?v=c24579f7"></script>
-<script defer src="js/store.js?v=c24579f7"></script>
-<script defer src="js/maaling.js?v=c24579f7"></script>
-<script defer src="js/backend-bridge.js?v=c24579f7"></script>
-<script defer src="js/components.js?v=c24579f7"></script>
+<script defer src="js/security.js?v=f29bf75d"></script>
+<script defer src="js/supabase-config.js?v=f29bf75d"></script>
+<script defer src="js/supabase-api.js?v=f29bf75d"></script>
+<script defer src="js/icons.js?v=f29bf75d"></script>
+<script defer src="js/bike-art.js?v=f29bf75d"></script>
+<script defer src="js/data.js?v=f29bf75d"></script>
+<script defer src="js/store.js?v=f29bf75d"></script>
+<script defer src="js/maaling.js?v=f29bf75d"></script>
+<script defer src="js/backend-bridge.js?v=f29bf75d"></script>
+<script defer src="js/components.js?v=f29bf75d"></script>
 <!-- Ingen separat js/facet.js: opgavens filliste omfatter ikke nye
      js/*.js-filer, og siden hydrerer sig selv med samme fem linjer som
      js/maerke.js bruger til maerke-*.html, bare filtreret paa type/koerekort

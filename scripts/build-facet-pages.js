@@ -716,13 +716,18 @@ ${header}
       </div>
     </div>
 
-    ${maerker.length && facet.kind !== 'model' ? `<section class="section" style="padding-top:0;">
+    ${maerker.length && facet.kind !== 'model' ? `<section class="section brand-maerkerow-sektion" style="padding-top:0;">
       <!-- Samme regel som maerke-*.html's modelchips: kun maerker der reelt
            er repraesenteret her, aldrig en kurateret liste (D-010).
            Modelsider undtaget (R11-F-8): "Se Honda CMX 500 Rebel efter maerke"
            med én chip ("Honda") er en tautologi, der linker samme sted som
-           CTA'en lige ovenover — 90 px over folden brugt paa ingenting. -->
-      <h2 class="brand-sub">Se ${frase(facet)} efter mærke</h2>
+           CTA'en lige ovenover — 90 px over folden brugt paa ingenting.
+
+           RUNDE 12: raekken bar en synlig h2 og en hel sektions luft over
+           varen — samme fund som paa maerkesiderne. Overskriften bliver
+           staaende for skaermlaesere og dokumentstruktur; den koster bare
+           ingen pixels over folden laengere. -->
+      <h2 class="visually-hidden">Se ${frase(facet)} efter mærke</h2>
       <div class="popular-row">
         ${maerker.map(([b]) => `<a class="popular-chip" href="${facetSearchUrl(facet, b)}">${esc(b)}</a>`).join('\n        ')}
       </div>
@@ -733,7 +738,7 @@ ${header}
            ved visning, saa "lige nu" kunne aeldes til en loegn mellem to
            crawl. Datoen under siger i stedet, hvornaar lageret sidst blev
            bekraeftet — samme linje som maerkesiden (D9-M2). -->
-      <div><h2 class="brand-sub" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}${items.length > FACET_KORT ? ` — de første ${FACET_KORT} her` : ''}</h2>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div>
+      <div><h2 class="brand-sub" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2>${items.length > FACET_KORT ? `<p class="brand-facet-note">De første ${FACET_KORT} vises her.</p>` : ''}${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div>
       ${items.length ? `<div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>${kort}</div>
       ${items.length > FACET_KORT ? `<p class="facet-mere"><a href="${facetSearchUrl(facet)}" class="btn btn-outline">Se alle ${items.length} i søgningen</a></p>` : ''}
       <noscript>

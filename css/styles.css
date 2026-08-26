@@ -1191,6 +1191,18 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .card-external .card-koerekort.kk-a1, .card-external .card-koerekort.kk-a2{ background: var(--color-primary); color: var(--color-on-primary); border-color:transparent; }
+/* RUNDE 12 (R12-D-3): accentfarven er et udsagn — "her staar svaret". Paa en
+   side, der ALLEREDE er filtreret paa koerekort, er svaret ikke nyt: chippen
+   stod orange paa 24 ud af 24 kort i samme position, og den primaere knap
+   oeverst druknede i sin egen farve. Maalt af kritikeren: 63 % af sidens
+   orange pixels var den chip. Teksten ("Mulig A1" mod "Mulig A2") baerer
+   stadig forskellen — den var i oevrigt usynlig i farven, for begge
+   kategorier havde samme orange. Gitteret baerer allerede data-facet-kind,
+   saa det her koster ingen generator-aendring. */
+[data-facet-kind="koerekort"] .card-external .card-koerekort.kk-a1,
+[data-facet-kind="koerekort"] .card-external .card-koerekort.kk-a2{
+  background: transparent; color: var(--color-fg); border-color: var(--color-border);
+}
 .card-external .card-price{ font-size:22px; letter-spacing:-0.01em; }
 /* Runde 5 (D5-S7): domaenet vinder pladskampen i fodlinjen; stedet viger.
    Runde 6 (D6-S3): 40 %, og i spalter under 300 px falder saelgertypen vaek,
@@ -2795,7 +2807,15 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-intro{ color: var(--color-fg-muted); line-height:1.7; font-size:16px; }
 .brand-intro strong{ color: var(--color-fg); }
 .brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
-.brand-sub{ font-size:19px; margin-bottom: var(--space-4); }
+/* RUNDE 12 (R12-D-1): halens h2'er ("Prisniveau for Honda", "Ofte stillede
+   spoergsmaal") stod 19 px mod broedtekstens 16 — forholdet 1,2. En overskrift,
+   der er samme stoerrelse som teksten under den, er ikke en overskrift.
+   Referencen koerer omkring 2,8. 22 px giver 1,4 uden at raabe.
+   Tael-etiketterne ("276 annoncer") er derimod IKKE sektionsoverskrifter, men
+   etiketter paa en liste, og de bliver staaende paa 19, saa h1'en bliver ved
+   med at vaere det ene dominerende hoved i foerste skaerm. */
+.brand-sub{ font-size:22px; margin-bottom: var(--space-4); }
+#brand-antal, #facet-antal{ font-size:19px; }
 /* O3-1b: samtykke-hint i telefonfeltet. */
 .field-hint-inline{ display:block; font-size:12.5px; color: var(--color-fg-muted); font-weight:400; margin-top:2px; }
 
@@ -2839,6 +2859,24 @@ body.overlay-open .cookie-banner{ display:none; }
 .checkbox-inline label{ font-size:14px; color: var(--color-fg); }
 
 /* Runde 7 (D7-M3/M4): fold paa indledningen, luft over h2'er, "se alle"-knap. */
+/* RUNDE 12 (R12-D-6): .brand-faq-item havde NUL regler — tre bare sorte
+   browser-trekanter uden raekker, skillelinjer eller flade, mens den samme
+   komponent stod orange i "Mere om udvalget" 13.000 px laengere oppe. Det var
+   sidens tydeligste "her har ingen vaeret". Nu: raekker med haarlinjer, egen
+   chevron (samme ▾/▴ som facetgrebet, saa sitet har ÉN foldmarkoer), og
+   summary som flexboks, saa et ombrudt spoergsmaal flugter med sin egen
+   foerste linje i stedet for at haenge ud i venstremargin. */
+.brand-faq-item{ border-top:1px solid var(--color-border); }
+.brand-faq-item:last-of-type{ border-bottom:1px solid var(--color-border); }
+.brand-faq-item > summary{
+  list-style:none; cursor:pointer; display:flex; align-items:flex-start; gap:12px;
+  padding:14px 0; font-weight:600; font-size:16px; line-height:1.4; color: var(--color-fg);
+}
+.brand-faq-item > summary::-webkit-details-marker{ display:none; }
+.brand-faq-item > summary::after{ content:'▾'; margin-left:auto; flex:0 0 auto; color: var(--color-fg-muted); }
+.brand-faq-item[open] > summary::after{ content:'▴'; }
+.brand-faq-item > .brand-intro{ margin:0 0 14px; }
+
 .brand-intro-mere{ margin-top:8px; }
 .brand-intro-mere summary{ cursor:pointer; color: var(--color-primary); font-weight:500; font-size:14px; }
 .brand-intro-mere > .brand-intro{ margin-top:8px; }
@@ -2867,6 +2905,11 @@ body.overlay-open .cookie-banner{ display:none; }
   .brand-facet-check:checked ~ .brand-facetter{ display:grid; margin-top:10px; }
   .brand-facet-check:checked + .brand-facet-greb .chev::before{ content:'▴'; }
 }
+/* RUNDE 12: maerkeraekken paa facetsiderne har skjult overskrift (se
+   scripts/build-facet-pages.js) og skal derfor ikke baere en sektions
+   bundluft oveni — ellers staar der bare et tomt hul, hvor h2'en var. */
+.brand-maerkerow-sektion{ padding-bottom: var(--space-4); }
+
 /* RUNDE 12: modelchipsene flyttede op i hero-blokken (se
    scripts/build-brand-pages.js). De skal ligge taet paa introen, ikke baere
    en hel sektions luft — raekken er navigation, ikke en sektion for sig. */
