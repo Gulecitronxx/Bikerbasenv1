@@ -475,12 +475,54 @@ function erKildensPladsholder(url){
   return !!u && PLADSHOLDER_MOENSTRE.some(re => re.test(u));
 }
 
-const MAERKE_AKRONYM = { bsa: 'BSA', ajs: 'AJS', mz: 'MZ', ktm: 'KTM', bmw: 'BMW', gasgas: 'GasGas', 'gas gas': 'GasGas', cfmoto: 'CFMoto', 'cf moto': 'CFMoto', 'mv agusta': 'MV Agusta' };
+const MAERKE_AKRONYM = { bsa: 'BSA', ajs: 'AJS', mz: 'MZ', ktm: 'KTM', bmw: 'BMW', gasgas: 'GasGas', 'gas gas': 'GasGas', cfmoto: 'CFMoto', 'cf moto': 'CFMoto', 'mv agusta': 'MV Agusta',
+  /* RUNDE 13 (R13-5). Tre skrivemaader, der delte ét maerke i to — eller
+     udgav en ikke-maerkeside:
+
+     'royal-enfield'  Kilden skriver med bindestreg. Uden den her stod
+                      "Royal Enfield" OG "Royal-enfield" som to maerker i
+                      chiprraekken paa samme skaerm, hvilket underminerer
+                      tilliden til alle andre tal paa siden.
+     'lauge'          Ét maerke, to sider: maerke-lauge.html (1 annonce) og
+                      maerke-lauge-jensen.html (1 annonce). Annoncen bag den
+                      foerste hedder selv "Lauge Jensen Great Dane" og kommer
+                      fra Jensens Motorcykler. "Lauge" alene er ikke et
+                      motorcykelmaerke. Samme fold som 'harley' ->
+                      'Harley-Davidson', der allerede staar i tabellen.
+     'andet maerke'   Kildens RESERVEKATEGORI, ikke et maerke. Den udgav en
+                      indekserbar landingsside med h1 "Andet Maerke-motorcykler
+                      til salg i Danmark", hvis fire annoncer reelt er Victory,
+                      DKW og Fantic. Kilden har ikke oplyst maerket, saa svaret
+                      er 'Ukendt' — sentinelen, resten af koden allerede bruger
+                      (build-brand-pages.js:671 udelader den fra maerkesider,
+                      maerkeChips springer den over). Vi gaetter ikke paa, hvad
+                      der stod i stedet. */
+  'royal-enfield': 'Royal Enfield', 'lauge': 'Lauge Jensen',
+  'andet maerke': 'Ukendt', 'andet mærke': 'Ukendt' };
 function maerkeAkronym(m){
   if (!m) return m;
-  const k = String(m).trim().toLowerCase();
-  return MAERKE_AKRONYM[k] || m;
+  const k = String(m).trim().toLowerCase().replace(/\s+/g, ' ');
+  /* Slaa ogsaa op med bindestreger foldet til mellemrum, saa en ny kilde, der
+     skriver "Moto-Guzzi" eller "Can-Am", ikke faar sit eget maerke. */
+  return MAERKE_AKRONYM[k] || MAERKE_AKRONYM[k.replace(/-/g, ' ')] || m;
 }
+
+/* Maerket gentaget i modelfeltet: "Lauge Jensen **Lauge Jensen** Great Dane",
+   "BSA **BSA** Lightning", "Fb Mondial **FB Mondial** HPS 125 Hipster". Kortets
+   titel saettes som maerke + model, saa gentagelsen bliver synlig to gange i
+   samme linje. Det er ren dublet af den samme streng — ingen oplysning gaar
+   tabt ved at fjerne den, og ingen ny opfindes. */
+function fjernMaerkeDublet(maerke, model){
+  if (!maerke || !model) return model;
+  const m = String(model).trim();
+  const b = String(maerke).trim();
+  if (m.toLowerCase().startsWith(b.toLowerCase() + ' ')){
+    const uden = m.slice(b.length).trim();
+    if (uden) return uden;   // model, der KUN var maerkenavnet, bliver staaende
+  }
+  return m;
+}
+
 
 /* ---------- Runde 7 (D7-S4): salgsstoej i modelfeltet ----------
    Kildernes titler baerer reklame efter modelnavnet: "CBR 650 R MC-SYD",
@@ -579,10 +621,12 @@ function normalizeExternalListing(row){
        kildens hul — ikke noget vi skal fylde ud. */
     model: (() => {
       // Runde 7 (D7-S4): stoej klippes ogsaa af de raekker, der ligger.
-      if (row.model) return rensModelStoej(row.model, row.aargang) || '';
+      // Runde 13 (R13-5): og maerket fjernes, hvis modellen gentager det.
+      const maerke = maerkeAkronym(row.maerke) || '';
+      if (row.model) return fjernMaerkeDublet(maerke, rensModelStoej(row.model, row.aargang) || '');
       const t = String(row.titel || '').trim();
       const ren = t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() ? t : '';
-      return rensModelStoej(ren, row.aargang) || '';
+      return fjernMaerkeDublet(maerke, rensModelStoej(ren, row.aargang) || '');
     })(),
 
     /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og

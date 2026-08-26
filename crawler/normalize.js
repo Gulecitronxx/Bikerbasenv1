@@ -247,12 +247,26 @@ const MAERKE_ALIAS = {
   'nimbus': 'Nimbus', 'mz': 'MZ', 'jawa': 'Jawa', 'cf moto': 'CFMoto', 'cfmoto': 'CFMoto',
   // Runde 6 (D6-F7): akronymer, der ellers fik "stort forbogstav" ("Bsa").
   'bsa': 'BSA', 'ajs': 'AJS', 'gas gas': 'GasGas', 'gasgas': 'GasGas',
+  /* Runde 13 (R13-5): samme tre folder som js/backend-bridge.js laver paa de
+     raekker, der allerede ligger. Her, saa NYE crawls gemmer rent.
+       'lauge'        ét maerke havde to maerkesider; annoncen bag den ene
+                      hedder selv "Lauge Jensen Great Dane".
+       'andet maerke' kildens reservekategori, ikke et maerke. Kilden har ikke
+                      oplyst maerket, saa svaret er 'Ukendt' — vi gaetter ikke
+                      paa, hvad der stod i stedet. */
+  'lauge': 'Lauge Jensen', 'lauge jensen': 'Lauge Jensen',
+  'andet mærke': 'Ukendt', 'andet maerke': 'Ukendt',
 };
 
 function normaliserMaerke(raa){
   if (!raa) return null;
   const n = String(raa).trim().toLowerCase().replace(/\s+/g, ' ');
   if (MAERKE_ALIAS[n]) return MAERKE_ALIAS[n];
+  /* Bindestreger foldes til mellemrum ved OPSLAGET (ikke i svaret): kilden
+     skrev "Royal-enfield", og uden det her stod "Royal Enfield" og
+     "Royal-enfield" som to maerker i chiprraekken paa samme skaerm. */
+  const uBindestreg = n.replace(/-/g, ' ');
+  if (MAERKE_ALIAS[uBindestreg]) return MAERKE_ALIAS[uBindestreg];
   // Ukendt mærke: behold det, men med stort begyndelsesbogstav.
   return n.split(' ').map(o => o.charAt(0).toUpperCase() + o.slice(1)).join(' ');
 }
