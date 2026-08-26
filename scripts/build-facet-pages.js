@@ -769,7 +769,17 @@ ${header}
       <h1>${esc(facet.titel)}</h1>
       <p class="brand-intro">${introDelt.foerste}</p>
       ${introDelt.rest ? `<details class="brand-intro-mere"><summary>${introFoldEtiket}</summary><p class="brand-intro">${introDelt.rest}</p></details>` : ''}
-      <div class="brand-actions">
+    </div>
+
+    <!-- RUNDE 13: handlingsblokken laa INDE i hero'en og kostede 130 px af
+         foerste skaerm paa mobil, foer koeberen saa én vare. Begge knapper er
+         handlinger, man tager EFTER at have set udvalget: "Soeg i alle" er
+         desuden samme sted som "Se alle N i soegningen" under gitteret, og
+         soegeagenten er en tilmelding. Blokken er derfor sin egen soeskende
+         nu, saa CSS kan laegge den efter listen paa smalle skaerme (se
+         .container-ombrydningen i css/styles.css). Paa desktop staar den, hvor
+         den altid har staaet. -->
+    <div class="brand-actions">
         <a href="${facetSearchUrl(facet)}" class="btn btn-primary">Søg i alle ${frase(facet)}</a>
         <!-- Soegeagenten er det ene, referencen goer paa hver listeside, som vi
              baade MAA og KAN kopiere: flowet findes (soegning.html), og ?agent=1
@@ -779,8 +789,7 @@ ${header}
              dermed 359 px paa en 375 px skaerm — den loeb 16 px ud over
              containerens polstring, fordi knapper er white-space:nowrap.
              Den gentog desuden sidens egen kontekst: vi ER paa A2-siden. -->
-        <a href="${facetSearchUrl(facet)}&amp;agent=1" class="btn btn-outline">Få besked om nye annoncer</a>
-      </div>
+      <a href="${facetSearchUrl(facet)}&amp;agent=1" class="btn btn-outline">Få besked om nye annoncer</a>
     </div>
 
     ${maerker.length && facet.kind !== 'model' ? `<section class="section brand-maerkerow-sektion" style="padding-top:0;">
@@ -800,7 +809,7 @@ ${header}
       </div>
     </section>` : ''}
 
-    <section class="section" style="padding-top:var(--space-6);">
+    <section class="section facet-liste-sektion" style="padding-top:var(--space-6);">
       <!-- "lige nu" er væk (R11-I-10): tallet bages ved byg og opdateres ikke
            ved visning, saa "lige nu" kunne aeldes til en loegn mellem to
            crawl. Datoen under siger i stedet, hvornaar lageret sidst blev

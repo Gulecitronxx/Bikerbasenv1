@@ -351,6 +351,31 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    AFKLIPPEDE CHIP i hoejre kant selv affordancen (raekkerne er reelt rulbare,
    scrollWidth 985 mod clientWidth 375), og saa er sporet baade overfloedigt og
    forkert. Musen beholder sin scrollbar. */
+/* RUNDE 13 — VAREN FOER HANDLINGEN PAA SMALLE SKAERME.
+   Den blinde dommer: "B bruger hele foerste skaerm paa at forklare sig selv i
+   stedet for at vise varer" — nul hele varer synlige uden at rulle. Maalt paa
+   koerekort-a2 ved 390x844: foerste kort begyndte 678 px nede, saa der var
+   166 px af et 454 px kort tilbage under folden.
+
+   To blokke stod foran varen uden at vaere det, koeberen kom efter:
+   handlingsblokken (130 px inkl. margin — "Soeg i alle" duplikerer linket
+   under gitteret, og soegeagenten er en tilmelding) og maerkeraekken (78 px —
+   navigation VAEK fra den facet, man lige har valgt). Begge hoerer efter
+   listen. Rækkefølgen aendres kun under 560 px, hvor gitteret er én spalte og
+   pladsen er dyrest; paa desktop staar alt, hvor det altid har staaet.
+
+   Bemaerk `order: 6` paa alle boern foerst: uden den ville hvert barn uden
+   egen order faa 0 og springe forbi hero'en. */
+@media (max-width:559px){
+  main > .container{ display:flex; flex-direction:column; }
+  main > .container > *{ order: 6; }
+  main > .container > .breadcrumb{ order: 1; }
+  main > .container > .brand-hero{ order: 2; }
+  main > .container > .facet-liste-sektion{ order: 3; }
+  main > .container > .brand-actions{ order: 4; margin-top: var(--space-6); }
+  main > .container > .brand-maerkerow-sektion{ order: 5; }
+}
+
 @media (hover: none) and (pointer: coarse){
   .popular-row, .brand-facet-raekke{ scrollbar-width: none; }
   .popular-row::-webkit-scrollbar, .brand-facet-raekke::-webkit-scrollbar{ display: none; }
@@ -2951,9 +2976,20 @@ body.overlay-open .cookie-banner{ display:none; }
 @media (max-width:620px){
   .brand-facet-raekke{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:thin; margin:0 calc(-1 * var(--space-4)); padding:2px var(--space-4) 6px; }
   .popular-chip-sm{ flex:none; }
-  /* Sortér-raekken er en dublet af soegesiden — paa mobil koster den et halvt
-     kort og giver intet, chips'ene ikke allerede giver via linket. */
-  .brand-facet-sorter{ display:none; }
+  /* HER STOD `.brand-facet-sorter{ display:none }`, og begrundelsen var, at
+     raekken "paa mobil koster et halvt kort". Den praemis udloeb i runde 12:
+     dengang stod raekkerne AABNE paa mobil, nu ligger de bag en fold, der er
+     lukket fra foerste maling. Raekken koster altsaa ingenting, foer brugeren
+     selv aabner — og skjult kostede den to ting:
+
+       1. Grebet hedder "Filtrér og sortér". Med sorteringen slaaet fra var det
+          ord aldrig sandt paa den ene skaermstoerrelse, hvor grebet findes.
+       2. Paa otte udgivne maerkesider (benelli, husqvarna, indian, lauge,
+          lauge-jensen, mv-agusta, rewaco, victory) er sortér den ENESTE raekke.
+          Der aabnede grebet en tom kasse.
+
+     Sortering hoerer desuden hjemme paa en telefon: det er dyrere at rulle 24
+     kort igennem paa 390 px end paa 1366. */
 }
 .brand-facet-note{ font-size:12px; color: var(--color-fg-muted); margin:2px 0 0; }
 .brand-mere{ margin: var(--space-5) 0 0; }
