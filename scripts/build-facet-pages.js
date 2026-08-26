@@ -583,6 +583,48 @@ function facetSearchUrl(facet, extra){
   return `soegning.html?${p.toString()}`;
 }
 
+/* RUNDE 12 (R12-D-13 + R11-KK-6): facetsiderne havde NUL vaerktoejer — ingen
+   sortering, intet prisfilter, 24 ens kort i én ubrudt kolonne. To kritikere
+   fandt det uafhaengigt.
+
+   Designkritikeren foreslog Bilbasens greb: moerke forhandlerbannere spredt ud
+   over kolonnen som rytmebryder. Det goer vi IKKE. Bilbasens bannere er BETALT
+   placering; kopierer vi det visuelle uden det kommercielle, antyder kortet et
+   forhold, der ikke findes — og alle 602 annoncer er indekseret paa lige vilkaar.
+   Monotonien loeses med kontrol, ikke med dekoration.
+
+   Samme fold, samme link-sortering som maerkesiderne (ingen inline-JS af hensyn
+   til CSP, og en crawler kan foelge dem). Prisspring vises kun, naar de faktisk
+   deler lageret — et filter, der rammer alt eller intet, er stoej. */
+function facetVaerktoejer(facet, items){
+  const base = facetSearchUrl(facet);
+  const q = ekstra => `${base}&amp;${ekstra}`;
+  const raekker = [];
+
+  const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0);
+  const pris = [[30000, 'Under 30.000'], [60000, 'Under 60.000'], [100000, 'Under 100.000']]
+    .map(([max, tekst]) => ({ tekst, max, n: priser.filter(p => p <= max).length }))
+    .filter(x => x.n > 0 && x.n < priser.length);
+  if (pris.length) raekker.push({ navn: 'Pris', links: pris.map(x => ({ tekst: `${x.tekst} kr. · ${x.n}`, href: q(`maxPrice=${x.max}`) })) });
+
+  raekker.push({ navn: 'Sortér', klasse: ' brand-facet-sorter', links: [
+    { tekst: 'Pris: lav → høj', href: q('sort=price-asc') },
+    { tekst: 'Pris: høj → lav', href: q('sort=price-desc') },
+    { tekst: 'Årgang: nyeste', href: q('sort=year-desc') },
+  ] });
+
+  if (!raekker.length) return '';
+  const foldId = `facetvaerktoej-${facet.slug}`;
+  return `
+      <div class="brand-facet-fold">
+        <input type="checkbox" class="brand-facet-check" id="${foldId}">
+        <label class="brand-facet-greb" for="${foldId}">Filtrér og sortér<span class="chev"></span></label>
+        <div class="brand-facetter">
+        ${raekker.map(r => `<div class="brand-facet-raekke${r.klasse || ''}"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}">${l.tekst}</a>`).join('\n          ')}</div>`).join('\n        ')}
+        </div>
+      </div>`;
+}
+
 function side(facet, alle){
   const items = sorterSubstans(alle.filter(facet.match));
   const qualifies = items.length >= THRESHOLD;
@@ -743,7 +785,8 @@ ${header}
            crawl. Datoen under siger i stedet, hvornaar lageret sidst blev
            bekraeftet — samme linje som maerkesiden (D9-M2). -->
       <div><h2 class="brand-sub" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2>${items.length > FACET_KORT ? `<p class="brand-facet-note">De første ${FACET_KORT} vises her.</p>` : ''}${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div>
-      ${items.length ? `<div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>${kort}</div>
+      ${items.length ? `${facetVaerktoejer(facet, items)}
+      <div class="listings-grid" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}"${facet.kind === 'model' ? ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"` : ''}>${kort}</div>
       ${items.length > FACET_KORT ? `<p class="facet-mere"><a href="${facetSearchUrl(facet)}" class="btn btn-outline">Se alle ${items.length} i søgningen</a></p>` : ''}
       <noscript>
         <ul class="brand-noscript">

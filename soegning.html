@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-Js4Mp8/IDJ3p3l0wX6kElnTtV9M0Df9WcgsP+1jjEHw=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-Js4Mp8/IDJ3p3l0wX6kElnTtV9M0Df9WcgsP+1jjEHw=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <!-- Titel og beskrivelse er DE SAMME, som js/seo.js seoSearchResults() saetter
      for den ufiltrerede standardsoegning (overskriften "Brugte motorcykler til
@@ -30,7 +30,12 @@
 <meta name="twitter:title" content="Motorcykler til salg — nye og brugte | Bikerbasen">
 <meta name="twitter:description" content="Motorcykler til salg i Danmark — nye og brugte, samlet fra danske forhandlere og markedspladser. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
+
+
+
+
+
 
 
 
@@ -58,7 +63,7 @@ try{
 </script>
 <script id="boot-listings">(function(){var k="sb_publishable_m_ZXdYaGVARkJRyDyyJJhA_9lgcw-t5";window.__bbListingsBoot=fetch("https://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/listings?select=*%2Cseller%3Apublic_profiles!listings_seller_id_fkey(*)%2Cphotos%3Alisting_photos(id%2Cstorage_path%2Cposition)&status=eq.active&order=created_at.desc&limit=200",{headers:{apikey:k,Authorization:"Bearer "+k}}).then(function(r){return r.ok?r.json():null}).catch(function(){return null})})();</script>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
-<!--kildefotos:start--><link rel="preconnect" href="https://images.danbase.dk" crossorigin><link rel="preconnect" href="https://assets.guloggratis.dk" crossorigin><!--kildefotos:slut-->
+<!--kildefotos:start--><link rel="preconnect" href="https://images.danbase.dk" crossorigin><link rel="preconnect" href="https://assets.guloggratis.dk" crossorigin><link rel="preconnect" href="https://www.guloggratis.dk" crossorigin><link rel="preconnect" href="https://www.123mc.dk" crossorigin><link rel="preconnect" href="https://www.jensensmc.dk" crossorigin><!--kildefotos:slut-->
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <style>
