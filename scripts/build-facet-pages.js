@@ -264,7 +264,7 @@ const KOEREKORT_FACETS = [
     frase: 'motorcykler til A2-kørekort',
     // Samme rettelse som A1 ovenfor: grænser og hul, ikke "må køres".
     // A2's to ekstra krav (kW/kg og afledningsreglen) står i js/data.js ~852.
-    forklaring: `A2-grænsen er maks. 35 kW (${A2_MAX_HK} hk), også for maskiner effektbegrænset til det. A2 kræver desuden højst 0,2 kW pr. kg, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncerne, så tjek altid registreringsattesten.`,
+    forklaring: `Et A2-kørekort dækker også A1-motorcykler, så dem finder du her sammen med A2-maskinerne. A2-grænsen er maks. 35 kW (${A2_MAX_HK} hk), også for maskiner effektbegrænset til det. A2 kræver desuden højst 0,2 kW pr. kg, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncerne, så tjek altid registreringsattesten.`,
   },
 ];
 
@@ -638,9 +638,16 @@ function facetVaerktoejer(facet, items){
   const foldId = `facetvaerktoej-${facet.slug}`;
   return `
       <div class="brand-facet-fold">
-        <input type="checkbox" class="brand-facet-check" id="${foldId}">
-        <label class="brand-facet-greb" for="${foldId}">Filtrér og sortér<span class="chev"></span></label>
-        <div class="brand-facetter">
+        <!-- RUNDE 13 (R13-10): checkbox+label baerer ingen disclosure-rolle, saa
+             en skaermlaeser hoerte "afkrydsningsfelt, ikke markeret" uden at
+             faa at vide, at den styrer indholdet nedenfor. CSS-mekanikken
+             bliver (den er grunden til, at folden ikke giver layouthop),
+             men kontrollen peger nu paa sit panel med aria-controls, og
+             tilstanden staar i selve navnet via to skjulte ord, CSS bytter
+             om paa ved :checked. Ingen JS, ingen CSP-undtagelse. -->
+        <input type="checkbox" class="brand-facet-check" id="${foldId}" aria-controls="${foldId}-panel">
+        <label class="brand-facet-greb" for="${foldId}">Filtrér og sortér<span class="visually-hidden fold-vis"> — vis</span><span class="visually-hidden fold-skjul"> — skjul</span><span class="chev"></span></label>
+        <div class="brand-facetter" id="${foldId}-panel">
         ${raekker.map(r => `<div class="brand-facet-raekke${r.klasse || ''}"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}">${l.tekst}</a>`).join('\n          ')}</div>`).join('\n        ')}
         </div>
       </div>`;

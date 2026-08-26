@@ -59,7 +59,7 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/183275/Honda_CMX_500_Rebel_0_2.jpg?v=1" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=e5214fdd">
+<link rel="stylesheet" href="css/styles.css?v=f01468c0">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Kørekort","item":"https://bikerbasen.dk/soegning"},{"@type":"ListItem","position":3,"name":"Kørekort A2","item":"https://bikerbasen.dk/koerekort-a2"}]}</script>
 </head>
 <body>
@@ -115,7 +115,7 @@ try{
     <div class="brand-hero">
       <h1>Kørekort A2</h1>
       <p class="brand-intro">Der er <strong id="facet-intro-antal">58</strong> motorcykler indekseret på Bikerbasen, der ikke er udelukket til et A2-kørekort ud fra det, annoncerne oplyser.</p>
-      <details class="brand-intro-mere"><summary>Hvad kræver A2 — og hvad vises ikke her?</summary><p class="brand-intro">Priserne ligger mellem 4.000 kr. og 107.999 kr. A2-grænsen er maks. 35 kW (47 hk), også for maskiner effektbegrænset til det. A2 kræver desuden højst 0,2 kW pr. kg, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncerne, så tjek altid registreringsattesten. 161 annoncer mangler oplyst effekt (hk), og kan derfor hverken bekræftes eller afvises til A2 — de vises IKKE her. Vi gætter aldrig.</p></details>
+      <details class="brand-intro-mere"><summary>Hvad kræver A2 — og hvad vises ikke her?</summary><p class="brand-intro">Priserne ligger mellem 4.000 kr. og 107.999 kr. Et A2-kørekort dækker også A1-motorcykler, så dem finder du her sammen med A2-maskinerne. A2-grænsen er maks. 35 kW (47 hk), også for maskiner effektbegrænset til det. A2 kræver desuden højst 0,2 kW pr. kg, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncerne, så tjek altid registreringsattesten. 161 annoncer mangler oplyst effekt (hk), og kan derfor hverken bekræftes eller afvises til A2 — de vises IKKE her. Vi gætter aldrig.</p></details>
     </div>
 
     <!-- RUNDE 13: handlingsblokken laa INDE i hero'en og kostede 130 px af
@@ -172,9 +172,16 @@ try{
       <div><h2 class="brand-sub" id="facet-antal">58 annoncer</h2><p class="brand-facet-note" id="facet-note">De første 24 vises her.</p><p class="brand-facet-note">Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
       
       <div class="brand-facet-fold">
-        <input type="checkbox" class="brand-facet-check" id="facetvaerktoej-koerekort-a2">
-        <label class="brand-facet-greb" for="facetvaerktoej-koerekort-a2">Filtrér og sortér<span class="chev"></span></label>
-        <div class="brand-facetter">
+        <!-- RUNDE 13 (R13-10): checkbox+label baerer ingen disclosure-rolle, saa
+             en skaermlaeser hoerte "afkrydsningsfelt, ikke markeret" uden at
+             faa at vide, at den styrer indholdet nedenfor. CSS-mekanikken
+             bliver (den er grunden til, at folden ikke giver layouthop),
+             men kontrollen peger nu paa sit panel med aria-controls, og
+             tilstanden staar i selve navnet via to skjulte ord, CSS bytter
+             om paa ved :checked. Ingen JS, ingen CSP-undtagelse. -->
+        <input type="checkbox" class="brand-facet-check" id="facetvaerktoej-koerekort-a2" aria-controls="facetvaerktoej-koerekort-a2-panel">
+        <label class="brand-facet-greb" for="facetvaerktoej-koerekort-a2">Filtrér og sortér<span class="visually-hidden fold-vis"> — vis</span><span class="visually-hidden fold-skjul"> — skjul</span><span class="chev"></span></label>
+        <div class="brand-facetter" id="facetvaerktoej-koerekort-a2-panel">
         <div class="brand-facet-raekke"><span class="brand-facet-navn">Pris:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?koerekort=A2&amp;maxPrice=30000">Under 30.000 kr. · 7</a>
           <a class="popular-chip popular-chip-sm" href="soegning.html?koerekort=A2&amp;maxPrice=60000">Under 60.000 kr. · 26</a>
           <a class="popular-chip popular-chip-sm" href="soegning.html?koerekort=A2&amp;maxPrice=100000">Under 100.000 kr. · 51</a></div>
@@ -1122,16 +1129,16 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=e5214fdd"></script>
-<script defer src="js/supabase-config.js?v=e5214fdd"></script>
-<script defer src="js/supabase-api.js?v=e5214fdd"></script>
-<script defer src="js/icons.js?v=e5214fdd"></script>
-<script defer src="js/bike-art.js?v=e5214fdd"></script>
-<script defer src="js/data.js?v=e5214fdd"></script>
-<script defer src="js/store.js?v=e5214fdd"></script>
-<script defer src="js/maaling.js?v=e5214fdd"></script>
-<script defer src="js/backend-bridge.js?v=e5214fdd"></script>
-<script defer src="js/components.js?v=e5214fdd"></script>
+<script defer src="js/security.js?v=f01468c0"></script>
+<script defer src="js/supabase-config.js?v=f01468c0"></script>
+<script defer src="js/supabase-api.js?v=f01468c0"></script>
+<script defer src="js/icons.js?v=f01468c0"></script>
+<script defer src="js/bike-art.js?v=f01468c0"></script>
+<script defer src="js/data.js?v=f01468c0"></script>
+<script defer src="js/store.js?v=f01468c0"></script>
+<script defer src="js/maaling.js?v=f01468c0"></script>
+<script defer src="js/backend-bridge.js?v=f01468c0"></script>
+<script defer src="js/components.js?v=f01468c0"></script>
 <!-- Ingen separat js/facet.js: opgavens filliste omfatter ikke nye
      js/*.js-filer, og siden hydrerer sig selv med samme fem linjer som
      js/maerke.js bruger til maerke-*.html, bare filtreret paa type/koerekort

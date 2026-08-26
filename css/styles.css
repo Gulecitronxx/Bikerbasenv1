@@ -2965,6 +2965,10 @@ body.overlay-open .cookie-banner{ display:none; }
   .brand-facet-greb .chev{ margin-left:auto; }
   .brand-facet-greb .chev::before{ content:'▾'; color: var(--color-fg-muted); }
   .brand-facet-check:focus-visible + .brand-facet-greb{ outline:2px solid var(--color-primary); outline-offset:2px; }
+  /* RUNDE 13 (R13-10): tilstanden i selve det tilgaengelige navn. Uden JS. */
+  .brand-facet-greb .fold-skjul{ display:none; }
+  .brand-facet-check:checked ~ .brand-facet-greb .fold-vis{ display:none; }
+  .brand-facet-check:checked ~ .brand-facet-greb .fold-skjul{ display:inline; }
   .brand-facet-fold > .brand-facetter{ display:none; }
   .brand-facet-check:checked ~ .brand-facetter{ display:grid; margin-top:10px; }
   .brand-facet-check:checked + .brand-facet-greb .chev::before{ content:'▴'; }
