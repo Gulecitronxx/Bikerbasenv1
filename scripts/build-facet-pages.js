@@ -712,7 +712,11 @@ ${header}
              baade MAA og KAN kopiere: flowet findes (soegning.html), og ?agent=1
              aabner det med facettens egne filtre. "Saelg din motorcykel" stod her
              foer — en saelger-CTA paa en koeberside (R11-F-14). -->
-        <a href="${facetSearchUrl(facet)}&amp;agent=1" class="btn btn-outline">Få besked om nye ${frase(facet)}</a>
+        <!-- RUNDE 12: etiketten var "Faa besked om nye ${frase(facet)}" og blev
+             dermed 359 px paa en 375 px skaerm — den loeb 16 px ud over
+             containerens polstring, fordi knapper er white-space:nowrap.
+             Den gentog desuden sidens egen kontekst: vi ER paa A2-siden. -->
+        <a href="${facetSearchUrl(facet)}&amp;agent=1" class="btn btn-outline">Få besked om nye annoncer</a>
       </div>
     </div>
 
