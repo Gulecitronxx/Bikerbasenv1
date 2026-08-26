@@ -806,7 +806,7 @@ function renderExternalListing(listing){
              sammenlign (lokal, D-008), del, meld fejl (reports.target_id er
              text). Ingen favorit (afvist, D-008). Bjælken forbliver én handling. -->
         <div class="external-detail-actions">
-          <button type="button" class="btn btn-ghost btn-sm" data-compare-toggle="${escapeHTML(String(listing.id))}" aria-pressed="${typeof Store !== 'undefined' && Store.isComparing && Store.isComparing(listing.id) ? 'true' : 'false'}">${Icon.chart || ''}Sammenlign</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-compare-toggle="${escapeHTML(String(listing.id))}" aria-pressed="${typeof Store !== 'undefined' && Store.isComparing && Store.isComparing(listing.id) ? 'true' : 'false'}">${Icon.compare || ''}Sammenlign</button>
           <button type="button" class="btn btn-ghost btn-sm" id="share-listing-btn">${Icon.share || ''}Del</button>
           <button type="button" class="btn btn-ghost btn-sm report-link" id="report-listing-btn">${Icon.flag || ''}Meld fejl</button>
         </div>

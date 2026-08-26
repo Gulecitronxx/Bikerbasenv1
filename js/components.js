@@ -855,7 +855,7 @@ function externalCardHTML(l, i){
   <article class="card card-external" data-listing-id="${l.id}" data-external="1">
     <div class="card-media">
       ${listingMediaHTML(l, altTekst, i === 0)}
-      <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
+      <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
     </div>
     <div class="card-body">
       <div class="card-prisrække">
@@ -919,7 +919,7 @@ function listingCardHTML(l, i){
         const k = koerekortMaerkat(l);
         return k.kode ? `<span class="card-koerekort" title="${escapeHTML(k.forklaring)}" aria-label="${escapeHTML(k.forklaring)}">${k.kode}</span>` : '';
       })()}
-      <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.chart}</button>
+      <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
     </div>
     <div class="card-body">
       <div class="card-price">${formatPrice(l.price)}</div>

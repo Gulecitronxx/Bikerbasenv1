@@ -332,6 +332,12 @@ main#main-content{ min-height: calc(100vh - var(--header-h)); }
    infosider — dér manglede sektionernes 64px luft ved første maling, og
    siden hoppede op til 461px, når arket landede. */
 .section{ padding: var(--space-8) 0; }
+/* RUNDE 12 (R12-D-5): sidste sektions bundpolstring (64 px) blev lagt oveni
+   footerens egen margin-top (96 px) — 160 px hvidt foer footeren, og siden saa
+   afklippet ud. Begge tal er rigtige hver for sig; det er summen, der er gal.
+   Footeren ejer afstanden ned til sig selv, saa den sidste sektion afgiver sin.
+   Maalt paa koerekort-a2: gab mellem sidste blaek og footer 160 -> 96 px. */
+main > .container > .section:last-child{ padding-bottom: 0; }
 .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:var(--space-4); margin-bottom: var(--space-5); flex-wrap:wrap; }
 .section-head h2{ font-size: clamp(22px,3vw,30px); }
 .section-head p{ color:var(--color-fg-muted); margin-top:4px; }

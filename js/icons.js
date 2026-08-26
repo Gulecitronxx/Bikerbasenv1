@@ -46,6 +46,13 @@ const Icon = {
   bellOff: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.3A6 6 0 0 1 18 9c0 2.2.4 3.8.9 4.9M5.7 5.7A6 6 0 0 0 6 9c0 5-2 6.5-2 6.5h12"/><path d="M13.7 20a2 2 0 0 1-3.4 0M3 3l18 18"/></svg>`,
   arrowUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>`,
   arrowDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>`,
+  /* RUNDE 12 (R12-D-11): sammenlign-knappen laante 'chart' — bogstaveligt et
+     soejlediagram (akser + tre soejler). Paa et annoncekort laeses det som
+     "statistik", ikke "sammenlign", og paa et kort uden foto stod det som
+     eneste element i fladen og lignede et fejlikon. To modsatrettede pile er
+     den konvention, en koeber kender fra prissammenligning. 'chart' bliver
+     staaende — dashboardet bruger den til det, den faktisk er. */
+  compare: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg>`,
   chart: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12.5 16V8M17 16v-6"/></svg>`,
   share: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="5.5" r="2.6"/><circle cx="17.5" cy="18.5" r="2.6"/><path d="M8.4 10.8 15 6.9M8.4 13.2l6.6 3.9"/></svg>`,
   flag: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4.5c1.5-1 3.5-1 5 0s3.5 1 5 0v9c-1.5 1-3.5 1-5 0s-3.5-1-5 0Z"/></svg>`,
