@@ -92,3 +92,65 @@ uden at betale for det et andet sted.**
 
 `node --check` på alle js/crawler/scripts, `npm test` 331/331, `scripts/build.js`
 og `scripts/udgiv.js` grønne før hver af rundens tre commits.
+
+---
+
+## 5. Designkritikerens 13 fund — én for én
+
+Kritikeren dømte visuelt mod Bilbasen: typografi, hierarki, rytme, farve,
+kortdesign. Dens egen slutdom var **NEJ, ikke på niveau** — "kortet er der
+næsten, men typeskalaen kollapser under kortlisten, accenten er brugt som tapet
+på A2, og tre ustylede detaljer i træk afslører at nederste tredjedel er
+genereret, ikke designet."
+
+| ID | Status | Hvad der skete |
+|---|---|---|
+| R12-D-1 halens h2 = brødtekst | **lukket** | Sektionsoverskrifter 19 → 22 px. Stigen er nu 26 / 22 / 19 / 16. Tæl-etiketterne holdt på 19, så h1 forbliver det ene dominerende hoved |
+| R12-D-2 kortets typografi for stor | **afvist, med måling** | Se nedenfor |
+| R12-D-3 orange som tapet på A2 | **lukket** | Chippen er neutral på sider, der allerede er filtreret på kørekort. Ren CSS — gitteret bar allerede `data-facet-kind` |
+| R12-D-4 41 px dødt bånd i kortet | **lukket, men ikke som beskrevet** | Se nedenfor |
+| R12-D-5 tom beige før footeren | **åben** | Ikke rørt denne runde |
+| R12-D-6 FAQ'en helt ustylet | **lukket** | `.brand-faq-item` havde nul CSS-regler. Nu rækker, hårlinjer, egen chevron (samme ▾/▴ som facetgrebet) og flexboks-summary, så ombrudte spørgsmål flugter |
+| R12-D-7 chiprækker klippet uden affordance | **afvist, faktuelt forkert** | Se nedenfor |
+| R12-D-8 A2-introen som monolit | **lukket** | Første kort 941 → 620 px |
+| R12-D-9 to knapstile til samme handling | **delvist** | Søgeagent-knappen løb 16 px ud over containeren og er kortet ned. Stilforskellen består |
+| R12-D-10 tre chipstile i én række | **åben** | |
+| R12-D-11 sammenlign-ikonet læses som statistik | **åben** | |
+| R12-D-12 hvide fotoflader | **metodefund, ikke en fejl** | Kritikeren efterprøvede selv: uindlæste eksterne thumbnails i optagelsen, ikke en tom-tilstand |
+| R12-D-13 ingen rytmebryder i 24 kort | **åben** | |
+
+### De tre afviste — med måling, som DECISIONS.md kræver
+
+**R12-D-4 var målt på et billede, ikke i DOM'en.** Kritikeren angav et 41 px dødt
+bånd mellem specs og hårlinje i hvert kort. Målt i browseren: **12 px**. Men
+fundet pegede på noget ægte, som den ikke selv fandt: `.card-specs` er låst til
+54 px — plads til *to* chip-rækker — også når kortet bruger én. På A2-siden
+brugte **0 af 24 kort** den anden række. Låsen findes for at holde nabokort lige
+høje (D-011), og den grund gælder kun flerspaltede gitre; under 560 px er
+gitteret én spalte. Låsen er ophævet der. Kortet: 468 → 442 px.
+
+**R12-D-2 hvilede på den fejlmåling.** Forslaget var pris 22 → 18 px og titel
+17 → 15 px, begrundet i at kortet var "typografisk overdimensioneret" og at
+siden skulle blive kortere. De 700 px, forslaget ville hente, kom i stedet fra
+D-4-låsen — uden at røre det tal, en køber leder efter først. Prisen er kortets
+vigtigste oplysning; den skrumper ikke for at spare plads, vi kunne hente
+gratis et andet sted.
+
+**R12-D-7 er faktuelt forkert.** Fundet lyder "ingen fade, ingen pil, ingen
+halv-chip-peek". Chiprækken har `scrollbar-width: thin` — en synlig, tynd
+scrollbar, indført netop som rulle-affordance i runde 9 (D9-M4), og synlig i
+kritikerens eget skærmbillede. Målt: `getComputedStyle(.popular-row)
+.scrollbarWidth === "thin"`, og rækken er reelt rulbar. En `mask-image`-fade
+oveni ville desuden falme den sidste chip permanent, også på rækker der ikke
+render over.
+
+## 6. Målt resultat, runde 12 samlet
+
+| Side, mobil 375 | Første kort | Sidehøjde |
+|---|---|---|
+| `maerke-honda` | 768 → **671 px** | — |
+| `koerekort-a2` | 941 → **620 px** | 14.238 → **13.290 px** |
+
+Layout-shift 0,00 på begge sider og begge skærmbredder. Intet vandret overløb.
+Nul klippede specs på 48 efterprøvede kort. Verifikationsgaten grøn før hver af
+rundens seks commits.
