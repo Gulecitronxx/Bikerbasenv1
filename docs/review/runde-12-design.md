@@ -109,15 +109,35 @@ genereret, ikke designet."
 | R12-D-2 kortets typografi for stor | **afvist, med måling** | Se nedenfor |
 | R12-D-3 orange som tapet på A2 | **lukket** | Chippen er neutral på sider, der allerede er filtreret på kørekort. Ren CSS — gitteret bar allerede `data-facet-kind` |
 | R12-D-4 41 px dødt bånd i kortet | **lukket, men ikke som beskrevet** | Se nedenfor |
-| R12-D-5 tom beige før footeren | **åben** | Ikke rørt denne runde |
+| R12-D-5 tom beige før footeren | **lukket** | Målt 160 px, ikke 165-180: sidste sektions bundpolstring (64) lagt oveni footerens margin-top (96). Footeren ejer afstanden; sektionen afgiver sin. 160 → 96 px |
 | R12-D-6 FAQ'en helt ustylet | **lukket** | `.brand-faq-item` havde nul CSS-regler. Nu rækker, hårlinjer, egen chevron (samme ▾/▴ som facetgrebet) og flexboks-summary, så ombrudte spørgsmål flugter |
 | R12-D-7 chiprækker klippet uden affordance | **afvist, faktuelt forkert** | Se nedenfor |
 | R12-D-8 A2-introen som monolit | **lukket** | Første kort 941 → 620 px |
 | R12-D-9 to knapstile til samme handling | **delvist** | Søgeagent-knappen løb 16 px ud over containeren og er kortet ned. Stilforskellen består |
-| R12-D-10 tre chipstile i én række | **åben** | |
-| R12-D-11 sammenlign-ikonet læses som statistik | **åben** | |
+| R12-D-10 tre chipstile i én række | **lukket som følge af D-3** | På facetsiderne er der nu to: grå fyld til data, kontur til kørekort. På mærkesiderne står den orange, fordi kørekortet dér ER nyhed — se konfidensstigen i CSS'en (orange = udledt, kontur = A, dæmpet = ukendt). Det er betydning, ikke støj |
+| R12-D-11 sammenlign-ikonet læses som statistik | **lukket** | Knappen lånte ikonet `chart` — bogstaveligt et søjlediagram (`js/icons.js:49`). Nyt `compare`-ikon, to modsatrettede pile, skiftet fem steder. `chart` bliver stående, hvor dashboardet bruger den til det, den er |
 | R12-D-12 hvide fotoflader | **metodefund, ikke en fejl** | Kritikeren efterprøvede selv: uindlæste eksterne thumbnails i optagelsen, ikke en tom-tilstand |
-| R12-D-13 ingen rytmebryder i 24 kort | **åben** | |
+| R12-D-13 ingen rytmebryder i 24 kort | **lukket, men ikke som foreslået** | Se nedenfor |
+
+### R12-D-13: monotoni løses med kontrol, ikke dekoration
+
+Forslaget var Bilbasens greb — mørke forhandlerbannere spredt ud over kolonnen
+som rytmebryder. **Det gør vi ikke.** Bilbasens bannere er betalt placering.
+Kopierer vi det visuelle uden det kommercielle, antyder kortet et forhold, der
+ikke findes, og alle 602 annoncer er indekseret på lige vilkår.
+
+Den ærlige læsning af "24 ens kort" er, at siden ikke giver brugeren noget at
+gøre — og runde 11's kritiker fandt uafhængigt det samme (R11-KK-6: "Facetsiden
+har NUL værktøjer"). To kritikere på samme sted er et signal. Facetsiderne har
+nu mærkesidernes fold med prisspring og sortering, link-baseret så CSP'en holder
+og en crawler kan følge dem. Efterprøvet at tallene holder: chippen "Under
+30.000 kr. · 7" fører til en søgning, der giver præcis 7 kort.
+
+**Fundet undervejs, en ægte fejl loopet ikke ledte efter:** CSP'ens `img-src` er
+håndskrevet pr. side, og `soegning.html` + `annonce.html` manglede tre af
+forsidens billedværter. Thumbnails fra to hele kilder blev blokeret på sitets
+vigtigste side. Det er formentlig også en del af forklaringen bag D-12's hvide
+fotoflader.
 
 ### De tre afviste — med måling, som DECISIONS.md kræver
 
