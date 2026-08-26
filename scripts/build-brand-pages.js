@@ -867,18 +867,24 @@ ${header}
       <h1>${nye ? '' : 'Brugte '}${esc(brand)}-motorcykler til salg i Danmark</h1>
       <p class="brand-intro">${introFoerste}</p>
       ${introRest ? `<details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
-    </div>
-
-    ${allModels.length ? `<section class="section" style="padding-top:0;">
+      ${allModels.length ? `
       <!-- "Se X efter model", ikke "Populaere X-modeller" og ikke "alle
            modeller til salg": raekken er de 12 med flest annoncer, og
            overskriften maa hverken paastaa popularitet, vi ikke maaler, eller
-           fuldstaendighed, den ikke har. Den er en navigationsetiket. -->
-      <h2 class="brand-sub">Se ${esc(brand)} efter model</h2>
-      <div class="popular-row">
+           fuldstaendighed, den ikke har. Den er en navigationsetiket.
+
+           RUNDE 12, MAALT: raekken laa i sin EGEN <section> med synlig h2 og
+           fuld sektionsluft — 164 px plus et 80 px gab, altsaa en tredjedel af
+           afstanden ned til foerste vare paa mobil. Chipsene er navigation, og
+           navigation skal ikke koste mere plads end varen. Nu ligger de i
+           hero-blokken som én kompakt rulleraekke. Overskriften bliver staaende
+           for skaermlaesere og dokumentstruktur — den koster bare ingen pixels
+           laengere. -->
+      <h2 class="visually-hidden">Se ${esc(brand)} efter model</h2>
+      <div class="popular-row brand-modelrow">
         ${allModels.map(([m, antalM]) => `<a class="popular-chip" href="soegning.html?brands=${encodeURIComponent(brand)}&amp;q=${encodeURIComponent(m)}">${esc(m)} · ${antalM}</a>`).join('\n        ')}
-      </div>
-    </section>` : ''}
+      </div>` : ''}
+    </div>
 
     <section class="section" style="padding-top:var(--space-4);">
       <div class="section-head">

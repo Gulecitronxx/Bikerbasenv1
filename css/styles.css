@@ -2857,6 +2857,11 @@ body.overlay-open .cookie-banner{ display:none; }
   .brand-facet-check:checked ~ .brand-facetter{ display:grid; margin-top:10px; }
   .brand-facet-check:checked + .brand-facet-greb .chev::before{ content:'▴'; }
 }
+/* RUNDE 12: modelchipsene flyttede op i hero-blokken (se
+   scripts/build-brand-pages.js). De skal ligge taet paa introen, ikke baere
+   en hel sektions luft — raekken er navigation, ikke en sektion for sig. */
+.brand-modelrow{ margin-top: var(--space-4); }
+
 /* Runde 8 (D8-M3): facetlinks med tal over maerkesidens gitter.
    Runde 9 (D9-M1): raekkerne kostede ≈260 px og skubbede foerste kort til
    ≈890/835. Nu: to kolonner paa desktop, tættere chips paa mobil — funktionen

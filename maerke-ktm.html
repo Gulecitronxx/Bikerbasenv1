@@ -64,7 +64,7 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/158968/KTM_890_Adventure_R_0_2.jpg?v=1" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=62cf98c0">
+<link rel="stylesheet" href="css/styles.css?v=91a2022c">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"KTM","item":"https://bikerbasen.dk/maerke-ktm"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en brugt KTM-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"12 af de 13 KTM-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 37.999 kr. til 234.999 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 137.497 kr. De resterende 1 annonce oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre KTM på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"2 af 12 KTM-annoncer med kendt effekt er ikke udelukket på effekt til A2 — de holder sig under loftet på 47 hk (35 kW) — mens 10 kræver stort kørekort. A2 stiller også krav om maks. 0,2 kW pr. kg og om, at maskinen ikke er afledt af en model med over dobbelt effekt; det står ikke i annoncerne, så tjek registreringsattesten. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra. De resterende 1 annonce mangler effektoplysningen hos kilden."}},{"@type":"Question","name":"Hvilke KTM-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 13 KTM-annoncer går 1190 (2 stk.), 1290 Super (2 stk.), 1290 Super Duke R (2 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle KTM-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
 </head>
@@ -127,15 +127,21 @@ try{
       <h1>Brugte KTM-motorcykler til salg i Danmark</h1>
       <p class="brand-intro">Der er <strong>13</strong> brugte KTM motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 37.999 kr.</p>
       <details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">KTM har rødder i offroad- og enduroracing, og det mærkes på gadecyklerne: lette, aggressive chassiser i den karakteristiske orange farve. til 234.999 kr., med årgange mellem 2013 og 2024. Udvalget dækker Adventure/Enduro, Naked. 1 annonce oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Jensens Motorcykler, Rydbergs MC og Gul og Gratis, og handlen sker hos kilden.</p></details>
-    </div>
-
-    <section class="section" style="padding-top:0;">
+      
       <!-- "Se X efter model", ikke "Populaere X-modeller" og ikke "alle
            modeller til salg": raekken er de 12 med flest annoncer, og
            overskriften maa hverken paastaa popularitet, vi ikke maaler, eller
-           fuldstaendighed, den ikke har. Den er en navigationsetiket. -->
-      <h2 class="brand-sub">Se KTM efter model</h2>
-      <div class="popular-row">
+           fuldstaendighed, den ikke har. Den er en navigationsetiket.
+
+           RUNDE 12, MAALT: raekken laa i sin EGEN <section> med synlig h2 og
+           fuld sektionsluft — 164 px plus et 80 px gab, altsaa en tredjedel af
+           afstanden ned til foerste vare paa mobil. Chipsene er navigation, og
+           navigation skal ikke koste mere plads end varen. Nu ligger de i
+           hero-blokken som én kompakt rulleraekke. Overskriften bliver staaende
+           for skaermlaesere og dokumentstruktur — den koster bare ingen pixels
+           laengere. -->
+      <h2 class="visually-hidden">Se KTM efter model</h2>
+      <div class="popular-row brand-modelrow">
         <a class="popular-chip" href="soegning.html?brands=KTM&amp;q=1190">1190 · 2</a>
         <a class="popular-chip" href="soegning.html?brands=KTM&amp;q=1290%20Super">1290 Super · 2</a>
         <a class="popular-chip" href="soegning.html?brands=KTM&amp;q=1290%20Super%20Duke%20R">1290 Super Duke R · 2</a>
@@ -146,7 +152,7 @@ try{
         <a class="popular-chip" href="soegning.html?brands=KTM&amp;q=890%20R">890 R · 1</a>
         <a class="popular-chip" href="soegning.html?brands=KTM&amp;q=990%20Duke">990 Duke · 1</a>
       </div>
-    </section>
+    </div>
 
     <section class="section" style="padding-top:var(--space-4);">
       <div class="section-head">
@@ -713,23 +719,23 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=62cf98c0"></script>
-<script defer src="js/supabase-config.js?v=62cf98c0"></script>
-<script defer src="js/supabase-api.js?v=62cf98c0"></script>
-<script defer src="js/icons.js?v=62cf98c0"></script>
-<script defer src="js/bike-art.js?v=62cf98c0"></script>
+<script defer src="js/security.js?v=91a2022c"></script>
+<script defer src="js/supabase-config.js?v=91a2022c"></script>
+<script defer src="js/supabase-api.js?v=91a2022c"></script>
+<script defer src="js/icons.js?v=91a2022c"></script>
+<script defer src="js/bike-art.js?v=91a2022c"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=62cf98c0"></script>
-<script defer src="js/store.js?v=62cf98c0"></script>
-<script defer src="js/maaling.js?v=62cf98c0"></script>
-<script defer src="js/backend-bridge.js?v=62cf98c0"></script>
-<script defer src="js/components.js?v=62cf98c0"></script>
+<script defer src="js/data.js?v=91a2022c"></script>
+<script defer src="js/store.js?v=91a2022c"></script>
+<script defer src="js/maaling.js?v=91a2022c"></script>
+<script defer src="js/backend-bridge.js?v=91a2022c"></script>
+<script defer src="js/components.js?v=91a2022c"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=62cf98c0"></script>
-<script defer src="js/maerke.js?v=62cf98c0"></script>
+<script defer src="js/sortering.js?v=91a2022c"></script>
+<script defer src="js/maerke.js?v=91a2022c"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">
