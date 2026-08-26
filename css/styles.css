@@ -2834,16 +2834,28 @@ body.overlay-open .cookie-banner{ display:none; }
 .brand-intro-mere > .brand-intro{ margin-top:8px; }
 .brand-sub:not(:first-child){ margin-top: var(--space-6); }
 .section-head .brand-sub{ margin-top:0; }
-/* Runde 10 (D9-M1-rest): facetfolden. Summary skjules paa desktop (altid aaben). */
+/* Runde 10 (D9-M1-rest): facetfolden. RUNDE 11: fra <details> til ren CSS —
+   se den maalte begrundelse i scripts/build-brand-pages.js (200 px spring paa
+   mobil, 124 px hvis man vender den om). Checkboxen holder tilstanden, labelen
+   er grebet, og der er ingen JS involveret paa nogen skaerm. */
 .brand-facet-fold{ margin:0 0 var(--space-4); }
-.brand-facet-fold > summary{ list-style:none; cursor:pointer; display:none; align-items:center; gap:8px; font-weight:600; font-size:14px; padding:10px 14px; border:1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); }
-.brand-facet-fold > summary::-webkit-details-marker{ display:none; }
-.brand-facet-fold > summary .chev{ margin-left:auto; }
-.brand-facet-fold > summary .chev::before{ content:'▾'; color: var(--color-fg-muted); }
-.brand-facet-fold[open] > summary .chev::before{ content:'▴'; }
+/* Desktop: raekkerne staar aabne fra foerste maling. Greb og checkbox er
+   display:none — grebet ville vaere en knap uden funktion, og checkboxen
+   ville vaere et tabuloerdens-stop uden virkning. */
+.brand-facet-check{ display:none; }
+.brand-facet-greb{ display:none; }
+.brand-facet-fold > .brand-facetter{ display:grid; }
 @media (max-width:620px){
-  .brand-facet-fold > summary{ display:flex; }
-  .brand-facet-fold[open] > summary{ margin-bottom:10px; }
+  /* Mobil: skjult, men FOKUSERBAR — ikke display:none, ellers kan man ikke
+     tabbe til grebet. */
+  .brand-facet-check{ display:block; position:absolute; width:1px; height:1px; opacity:0; margin:0; pointer-events:none; }
+  .brand-facet-greb{ list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:600; font-size:14px; padding:10px 14px; border:1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); }
+  .brand-facet-greb .chev{ margin-left:auto; }
+  .brand-facet-greb .chev::before{ content:'▾'; color: var(--color-fg-muted); }
+  .brand-facet-check:focus-visible + .brand-facet-greb{ outline:2px solid var(--color-primary); outline-offset:2px; }
+  .brand-facet-fold > .brand-facetter{ display:none; }
+  .brand-facet-check:checked ~ .brand-facetter{ display:grid; margin-top:10px; }
+  .brand-facet-check:checked + .brand-facet-greb .chev::before{ content:'▴'; }
 }
 /* Runde 8 (D8-M3): facetlinks med tal over maerkesidens gitter.
    Runde 9 (D9-M1): raekkerne kostede ≈260 px og skubbede foerste kort til

@@ -46,18 +46,37 @@ function facetLinksFor(brand, items){
   ] });
 
   if (!raekker.length) return '';
-  /* Runde 10 (D9-M1-rest): paa mobil kostede raekkerne stadig ≈160 px over det
-     foerste kort. Nu ligger de i en <details>, som js/maerke.js klapper sammen
-     paa ≤620 px — funktionen er ét tryk vaek (som Bilbasens eget filterlag),
-     og uden JS er folden aaben, saa intet gemmes for en crawler. Paa desktop
-     er den altid aaben, og summary er skjult (css). */
+  /* Runde 10 (D9-M1-rest): paa mobil kostede raekkerne ≈160 px over det
+     foerste kort, saa de blev lagt i en fold — funktionen ét tryk vaek (som
+     Bilbasens eget filterlag), og paa desktop staar de altid aabne.
+
+     RUNDE 11, MAALT: folden var en <details open>, som js/maerke.js lukkede
+     paa mobil efter DOMContentLoaded. Foerste kort sprang 910 -> 712 px ved
+     HVER mobilindlaesning: 200 px CLS paa sidens vigtigste element, betalt
+     for at spare plads. At vende den om (lukket i markup, JS aabner paa
+     desktop) flyttede bare regningen — maalt 124 px spring paa desktop i
+     stedet.
+
+     Derfor er folden nu ren CSS og slet ingen JS. En skjult checkbox holder
+     tilstanden, en <label> er grebet:
+       desktop  raekkerne staar aabne fra foerste maling, grebet og
+                checkboxen er display:none (ogsaa ude af tabuloerdenen)
+       mobil    lukket fra foerste maling, grebet aabner
+     Nul spring paa begge skaerme, nul JS, og indholdet staar altid i DOM'en
+     for crawlere og for skaermlaesere.
+
+     FAELDE FOR DEN NAESTE: fristes man tilbage til <details>, saa laes
+     ovenstaaende to maalinger foerst. Og checkboxen maa IKKE skjules med
+     display:none paa mobil — saa kan man ikke laengere tabbe til grebet. */
+  const foldId = `facetfold-${slugify(brand)}`;
   return `
-      <details class="brand-facet-fold" open>
-        <summary>Filtrér og sortér ${esc(brand)}<span class="chev"></span></summary>
+      <div class="brand-facet-fold">
+        <input type="checkbox" class="brand-facet-check" id="${foldId}">
+        <label class="brand-facet-greb" for="${foldId}">Filtrér og sortér ${esc(brand)}<span class="chev"></span></label>
         <div class="brand-facetter">
         ${raekker.map(r => `<div class="brand-facet-raekke${r.klasse || ''}"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}">${l.tekst}</a>`).join('\n          ')}</div>`).join('\n        ')}
         </div>${typeNote}
-      </details>`;
+      </div>`;
 }
 
 /* Runde 7 (D7-M1): "Brugte Honda" — 165 af 262 Honda er fabriksnye (sidens egen
