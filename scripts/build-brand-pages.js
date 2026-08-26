@@ -39,7 +39,7 @@ function facetLinksFor(brand, items){
     ? `<p class="brand-facet-note">${udenType} uden oplyst type — dem finder du i <a href="soegning.html?brands=${encodeURIComponent(brand)}">den fulde søgning</a>.</p>` : '';
 
   // Sortering som links — ingen inline-JS (CSP), og en crawler kan foelge dem.
-  raekker.push({ navn: 'Sortér', klasse: ' brand-facet-sorter', links: [
+  raekker.push({ navn: 'Sortér i søgningen', klasse: ' brand-facet-sorter', links: [
     { tekst: 'Pris: lav → høj', href: q('sort=price-asc') },
     { tekst: 'Pris: høj → lav', href: q('sort=price-desc') },
     { tekst: 'Årgang: nyeste', href: q('sort=year-desc') },

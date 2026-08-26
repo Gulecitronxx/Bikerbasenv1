@@ -27,7 +27,17 @@ function updateAuthVisibility(){
   const loggedIn = !!Store.getUser();
   // Fuld href, så "Gemte annoncer" (mine-annoncer.html?tab=favoritter) ikke
   // rammes — favoritter virker for anonyme og skal blive stående.
-  const authOnly = ['opret-annonce.html', 'mine-annoncer.html'];
+  /* RUNDE 13 (R13-15): "opret-annonce.html" stod her og blev SKJULT for
+     anonyme, saa ingen blev lokket ind i et doedt link. Men linket er ikke
+     doedt: js/opret-annonce.js:1064 sender selv en anonym bruger til
+     login.html?redirect=opret-annonce.html og tilbage igen bagefter.
+
+     Prisen var, at saelgersidens primaere indgang var usynlig for praecis den
+     gruppe, der endnu ikke HAR en konto — paa en Google-landing var
+     desktop-headeren "Forside · Soeg motorcykler · Log ind", og kun footeren
+     havde vejen ind. docs/forretning.md kalder privat udbud den knappe
+     ressource; saa maa vejen derind ikke vaere skjult for nytilkomne. */
+  const authOnly = ['mine-annoncer.html'];
   document.querySelectorAll('.main-nav a, .mobile-drawer-panel a[href], .header-cta').forEach(a => {
     if (authOnly.includes(a.getAttribute('href'))) a.hidden = !loggedIn;
   });

@@ -628,7 +628,7 @@ function facetVaerktoejer(facet, items){
     .filter(x => x.n > 0 && x.n < km.length);
   if (kmSpring.length) raekker.push({ navn: 'Km', links: kmSpring.map(x => ({ tekst: `${x.tekst} km · ${x.n}`, href: q(`kmMax=${x.max}`) })) });
 
-  raekker.push({ navn: 'Sortér', klasse: ' brand-facet-sorter', links: [
+  raekker.push({ navn: 'Sortér i søgningen', klasse: ' brand-facet-sorter', links: [
     { tekst: 'Pris: lav → høj', href: q('sort=price-asc') },
     { tekst: 'Pris: høj → lav', href: q('sort=price-desc') },
     { tekst: 'Årgang: nyeste', href: q('sort=year-desc') },
