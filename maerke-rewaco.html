@@ -65,7 +65,7 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/181437/Rewaco_Trike_0_2.jpg?v=1" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=91a2022c">
+<link rel="stylesheet" href="css/styles.css?v=3c6e437e">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Rewaco","item":"https://bikerbasen.dk/maerke-rewaco"}]}</script>
 </head>
 <body>
@@ -150,7 +150,12 @@ try{
       <div class="section-head">
         <!-- Runde 9 (D9-M2): "nu" uden dato bag sig er D8-F2's fejl — datoen er
              stoerste sidst_set i lageret, skrevet ved bygget. -->
-        <div><h2 class="brand-sub" id="brand-antal">1 annonce</h2><p class="brand-facet-note">Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
+        <!-- RUNDE 12: overskriften var "276 annoncer — de foerste 24 her" og
+             brugte to linjer i samme skaermbillede som h1'en. To naesten lige
+             store overskrifter over hinanden er ikke hierarki. Tallet er
+             etiketten; loftet er en oplysning og hoerer i notelinjen, hvor
+             datoen allerede staar. Ingen oplysning er fjernet. -->
+        <div><h2 class="brand-sub" id="brand-antal">1 annonce</h2><p class="brand-facet-note" id="brand-note">Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
         <a class="section-link" href="soegning.html?brands=Rewaco">Alle 1 i søgningen<span aria-hidden="true"></span></a>
       </div>
       
@@ -273,23 +278,23 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=91a2022c"></script>
-<script defer src="js/supabase-config.js?v=91a2022c"></script>
-<script defer src="js/supabase-api.js?v=91a2022c"></script>
-<script defer src="js/icons.js?v=91a2022c"></script>
-<script defer src="js/bike-art.js?v=91a2022c"></script>
+<script defer src="js/security.js?v=3c6e437e"></script>
+<script defer src="js/supabase-config.js?v=3c6e437e"></script>
+<script defer src="js/supabase-api.js?v=3c6e437e"></script>
+<script defer src="js/icons.js?v=3c6e437e"></script>
+<script defer src="js/bike-art.js?v=3c6e437e"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=91a2022c"></script>
-<script defer src="js/store.js?v=91a2022c"></script>
-<script defer src="js/maaling.js?v=91a2022c"></script>
-<script defer src="js/backend-bridge.js?v=91a2022c"></script>
-<script defer src="js/components.js?v=91a2022c"></script>
+<script defer src="js/data.js?v=3c6e437e"></script>
+<script defer src="js/store.js?v=3c6e437e"></script>
+<script defer src="js/maaling.js?v=3c6e437e"></script>
+<script defer src="js/backend-bridge.js?v=3c6e437e"></script>
+<script defer src="js/components.js?v=3c6e437e"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=91a2022c"></script>
-<script defer src="js/maerke.js?v=91a2022c"></script>
+<script defer src="js/sortering.js?v=3c6e437e"></script>
+<script defer src="js/maerke.js?v=3c6e437e"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

@@ -890,7 +890,12 @@ ${header}
       <div class="section-head">
         <!-- Runde 9 (D9-M2): "nu" uden dato bag sig er D8-F2's fejl — datoen er
              stoerste sidst_set i lageret, skrevet ved bygget. -->
-        <div><h2 class="brand-sub" id="brand-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}${items.length > MAERKE_KORT ? ` — de første ${MAERKE_KORT} her` : ''}</h2>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div>
+        <!-- RUNDE 12: overskriften var "276 annoncer — de foerste 24 her" og
+             brugte to linjer i samme skaermbillede som h1'en. To naesten lige
+             store overskrifter over hinanden er ikke hierarki. Tallet er
+             etiketten; loftet er en oplysning og hoerer i notelinjen, hvor
+             datoen allerede staar. Ingen oplysning er fjernet. -->
+        <div><h2 class="brand-sub" id="brand-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="brand-note">${items.length > MAERKE_KORT ? `De første ${MAERKE_KORT} vises her. ` : ''}${senestOpdateret ? `Senest bekræftet hos kilderne ${senestOpdateret}.` : ''}</p></div>
         <a class="section-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Alle ${items.length} i søgningen<span aria-hidden="true"></span></a>
       </div>
       ${facetLinksFor(brand, items)}

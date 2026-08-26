@@ -31,9 +31,18 @@ document.addEventListener('DOMContentLoaded', async () => {
          <p>Gem en søgning på ${escapeHTML(brand)}, så tæller den nye annoncer, næste gang du kigger.</p>
          <a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a></div>`;
   }
+  /* RUNDE 12: overskriften baerer kun tallet, og loftet staar i notelinjen —
+     samme opdeling som i scripts/build-brand-pages.js. Noten skrives ogsaa her,
+     ellers ville de to kunne vaere uenige om, hvor mange der vises. */
   const antal = document.getElementById('brand-antal');
   if (antal && alle.length){
-    antal.textContent = `${alle.length} ${alle.length === 1 ? 'annonce' : 'annoncer'}${alle.length > viste ? ` — de første ${viste} her` : ''}`;
+    antal.textContent = `${alle.length} ${alle.length === 1 ? 'annonce' : 'annoncer'}`;
+    const note = document.getElementById('brand-note');
+    if (note){
+      const loft = alle.length > viste ? `De første ${viste} vises her. ` : '';
+      const dato = (note.textContent.match(/Senest bekræftet.*$/) || [''])[0];
+      note.textContent = `${loft}${dato}`.trim();
+    }
   }
   wireFavoriteButtons(mount);
 });
