@@ -5,7 +5,7 @@
   "scripts": {
     "crawl": "node crawler/run.js",
     "udgiv": "node scripts/udgiv.js",
-    "test": "node --test crawler/normalize.test.js crawler/parse.test.js crawler/hastighed.test.js crawler/detalje.test.js crawler/borte.test.js crawler/afbryd.test.js crawler/robots.test.js crawler/db.test.js js/koerekort.test.js js/bedoemmelse.test.js js/eksternt-kort.test.js js/favoritter.test.js js/scroll-padding.test.js js/seo-adresser.test.js js/soegning-tom.test.js js/lager-determinisme.test.js js/sortering.test.js js/maaling.test.js js/skrivevej.test.js scripts/maerkeside.test.js scripts/csp-hashes.test.js crawler/model-stoej.test.js",
+    "test": "node --test crawler/normalize.test.js crawler/parse.test.js crawler/hastighed.test.js crawler/detalje.test.js crawler/borte.test.js crawler/afbryd.test.js crawler/robots.test.js crawler/db.test.js js/csp-billedvaerter.test.js js/koerekort.test.js js/bedoemmelse.test.js js/eksternt-kort.test.js js/favoritter.test.js js/scroll-padding.test.js js/seo-adresser.test.js js/soegning-tom.test.js js/lager-determinisme.test.js js/sortering.test.js js/maaling.test.js js/skrivevej.test.js scripts/maerkeside.test.js scripts/csp-hashes.test.js crawler/model-stoej.test.js",
     "crawl:tjek": "node crawler/tjek.js",
     "tjek:backend": "node scripts/tjek-backend.js",
     "deploy:backend": "node scripts/backend-deploy.js",
