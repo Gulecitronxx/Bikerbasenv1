@@ -2462,7 +2462,11 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .cookie-modal a{ color:#fff; text-decoration:underline; }
 .cookie-modal-actions{ display:flex; gap:var(--space-3); margin-top: var(--space-5); }
 .cookie-modal-knap{
-  flex:1 1 0; justify-content:center; text-align:center; white-space:normal;
+  /* min-width:0 er ikke pynt: uden den giver flex-elementer sig selv
+     min-width:auto, saa den laengste etiket ("Kun noedvendige") presser sin
+     knap 5 px bredere end den anden. Smaat, men paastanden om at de to svar er
+     lige lette skal kunne holde bogstaveligt — ogsaa naar nogen maaler efter. */
+  flex:1 1 0; min-width:0; justify-content:center; text-align:center; white-space:normal;
   background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,0.45);
 }
 .cookie-modal-knap:hover{ background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.7); }
