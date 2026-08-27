@@ -1096,41 +1096,45 @@ function openInfoModal(title, bodyHTML){
    scroll-padding-bottom blive stående og holde 187px fri af ingenting resten
    af sessionen. Reglen i stilarket hænger på #cookie-banner:not([hidden]),
    så den slipper af sig selv; det her rydder variablen med. */
-function ryddCookieHoejde(){
-  document.documentElement.style.removeProperty('--cookie-h');
-}
 
 function initCookieConsent(){
-  const banner = document.getElementById('cookie-banner');
-  if (!banner) return;
-  if (Store.getCookieConsent()){ banner.remove(); document.body.classList.remove('cookie-banner-vises'); ryddCookieHoejde(); return; }
+  const dialog = document.getElementById('cookie-banner');
+  if (!dialog) return;
+  if (Store.getCookieConsent()){
+    if (dialog.open && dialog.close) dialog.close();
+    dialog.remove();
+    return;
+  }
 
-  /* Fortæl siden at banneret står der, og hvor højt det er. Annoncesidens
-     handlingsbjælke skubbes op oven over det — før lå banneret oven på
-     "Skriv til sælger", så sidens primære handling ikke kunne trykkes,
-     før man havde svaret på cookies.
+  /* RUNDE 14, EFTER MENNESKETS BESLUTNING: samtykket var en bundbjaelke, man
+     kunne rulle forbi og bruge siden udenom. Nu er det en modal, der spaerrer,
+     til man har valgt.
 
-     Tallet skrives på documentElement og IKKE på body. Det er ikke kosmetik:
-     WCAG 2.2 SC 2.4.11 kræver, at rulningen holder fokus fri af banneret, og
-     den regel skal stå på html (scroll-padding-bottom). Et html-regelsæt kan
-     ikke læse en variabel, der er sat på body — det var netop derfor
-     cookiebanneret stod tilbage, da resten af 2.4.11 blev lukket. body arver
-     stadig værdien, så .listing-actionbar's calc() er uændret. */
-  document.body.classList.add('cookie-banner-vises');
-  const maalHoejde = () => document.documentElement.style.setProperty('--cookie-h', banner.offsetHeight + 'px');
-  maalHoejde();
-  if (window.ResizeObserver) new ResizeObserver(maalHoejde).observe(banner);
-  /* Runde 7 (D7-F6): indlaeses siden i en skjult fane, maales 226 px ved foerste
-     maling mod bannerets 80 — og tallet fryser, fordi intet aendrer stoerrelse.
-     Maal igen, naar fanen bliver synlig, og efter load. */
-  document.addEventListener('visibilitychange', maalHoejde);
-  window.addEventListener('load', () => requestAnimationFrame(maalHoejde), { once: true });
+     Bygget paa <dialog>.showModal() frem for en haandrullet overlay, fordi
+     browseren saa selv leverer det, der plejer at gaa galt: fokus flyttes ind i
+     dialogen, fokus kan ikke tabbe ud, baggrunden bliver inert (ikke bare
+     visuelt daempet — den kan hverken klikkes eller naas med tastatur), og
+     dialogen ligger i top-laget, saa ingen z-index kan komme foran den.
+
+     JURIDISK, og derfor ikke til forhandling: begge svar skal vaere lige lette.
+     De to knapper har SAMME stoerrelse, samme vaegt og samme fremtoning — der er
+     ingen primaerfarve paa "Accepter alle", som ville goere fravalget til det
+     svaere valg. Det er kravet bag "frivilligt samtykke", og en vaeg, hvor
+     accept er eneste vej videre, ville vaere ulovlig.
+
+     Escape lukker den ikke: et valg er paakraevet, og BEGGE valg staar aabne.
+     Uden det ville dialogen kunne afvises uden svar, og saa ville statistikken
+     staa i et uafklaret limbo. */
+  if (!dialog.open){
+    if (dialog.showModal) dialog.showModal();
+    else dialog.setAttribute('open', '');   // aeldre browser: dialogen vises, men uden top-lag
+  }
+  dialog.addEventListener('cancel', e => e.preventDefault());
 
   const svar = level => () => {
     Store.setCookieConsent(level);
-    banner.remove();
-    document.body.classList.remove('cookie-banner-vises');
-    ryddCookieHoejde();
+    if (dialog.open && dialog.close) dialog.close();
+    dialog.remove();
     // Statistik er valgfri og starter foerst her — aldrig ved sideindlaesning.
     // "Kun noedvendige" starter den altsaa aldrig.
     if (level === 'all' && typeof window.bbStartAnalytics === 'function') window.bbStartAnalytics();

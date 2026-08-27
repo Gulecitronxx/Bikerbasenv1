@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-6LPIE/97SE6jK2xECdufbLiQ9e5tUhZClKp1NwM8BaA=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Bikerbasen — motorcykler til salg i Danmark, nye og brugte</title>
 <meta name="description" content="Motorcykler til salg fra danske forhandlere og markedspladser — nye og brugte, samlet ét sted. Kilden står på hvert kort.">
@@ -60,7 +60,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=c0e9a41c">
+<link rel="stylesheet" href="css/styles.css?v=93953457">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -513,36 +513,38 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=c0e9a41c"></script>
-<script defer src="js/supabase-config.js?v=c0e9a41c"></script>
-<script defer src="js/supabase-api.js?v=c0e9a41c"></script>
-<script defer src="js/icons.js?v=c0e9a41c"></script>
-<script defer src="js/data.js?v=c0e9a41c"></script>
+<script defer src="js/security.js?v=93953457"></script>
+<script defer src="js/supabase-config.js?v=93953457"></script>
+<script defer src="js/supabase-api.js?v=93953457"></script>
+<script defer src="js/icons.js?v=93953457"></script>
+<script defer src="js/data.js?v=93953457"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=c0e9a41c"></script>
+<script defer src="js/filtrering.js?v=93953457"></script>
 <!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
      (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
      orden. Samme fil som soegning.html og scripts/build-srp.js. -->
-<script defer src="js/sortering.js?v=c0e9a41c"></script>
-<script defer src="js/store.js?v=c0e9a41c"></script>
-<script defer src="js/maaling.js?v=c0e9a41c"></script>
-<script defer src="js/backend-bridge.js?v=c0e9a41c"></script>
-<script defer src="js/components.js?v=c0e9a41c"></script>
-<script defer src="js/home.js?v=c0e9a41c"></script>
+<script defer src="js/sortering.js?v=93953457"></script>
+<script defer src="js/store.js?v=93953457"></script>
+<script defer src="js/maaling.js?v=93953457"></script>
+<script defer src="js/backend-bridge.js?v=93953457"></script>
+<script defer src="js/components.js?v=93953457"></script>
+<script defer src="js/home.js?v=93953457"></script>
 <!--cookie:start-->
-<div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
-  <div class="cookie-banner-text">
-    <strong>Vi bruger cookies</strong>
-    <p>Bikerbasen bruger nødvendige cookies for at få siden til at fungere, og valgfrie cookies til statistik og forbedring af oplevelsen. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+<dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
+  <div class="cookie-modal-indhold">
+    <h2 id="cookie-modal-titel">Vi bruger cookies</h2>
+    <p>Bikerbasen bruger <strong>nødvendige cookies</strong> for at få siden til at fungere — dem kan du ikke fravælge, og de bruges ikke til at følge dig.</p>
+    <p>Vi vil desuden gerne bruge <strong>valgfrie cookies til statistik</strong>, så vi kan se, hvad der virker på siden. Dem starter vi kun, hvis du siger ja.</p>
+    <p class="cookie-modal-note">Du kan altid skifte mening. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+    <div class="cookie-modal-actions">
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-necessary-only" autofocus>Kun nødvendige</button>
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-accept-all">Accepter alle</button>
+    </div>
   </div>
-  <div class="cookie-banner-actions">
-    <button type="button" class="btn btn-outline btn-sm" id="cookie-necessary-only">Kun nødvendige</button>
-    <button type="button" class="btn btn-primary btn-sm" id="cookie-accept-all">Accepter alle</button>
-  </div>
-</div>
-<script>try{if(!localStorage.getItem("bb_cookie_consent"))document.getElementById("cookie-banner").hidden=false;}catch(e){}</script>
+</dialog>
+<script>try{if(!localStorage.getItem("bb_cookie_consent")){var d=document.getElementById("cookie-banner");if(d&&d.showModal){d.showModal();}else if(d){d.setAttribute("open","");}}}catch(e){}</script>
 <!--cookie:end-->
 </body>
 </html>

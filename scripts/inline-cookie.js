@@ -25,17 +25,19 @@ const NØGLE = (fs.readFileSync(path.join(root, 'js', 'store.js'), 'utf8')
 if (!NØGLE) throw new Error('inline-cookie: kunne ikke læse cookieConsent-nøglen fra js/store.js');
 
 const blok = `<!--cookie:start-->
-<div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
-  <div class="cookie-banner-text">
-    <strong>Vi bruger cookies</strong>
-    <p>Bikerbasen bruger nødvendige cookies for at få siden til at fungere, og valgfrie cookies til statistik og forbedring af oplevelsen. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+<dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
+  <div class="cookie-modal-indhold">
+    <h2 id="cookie-modal-titel">Vi bruger cookies</h2>
+    <p>Bikerbasen bruger <strong>nødvendige cookies</strong> for at få siden til at fungere — dem kan du ikke fravælge, og de bruges ikke til at følge dig.</p>
+    <p>Vi vil desuden gerne bruge <strong>valgfrie cookies til statistik</strong>, så vi kan se, hvad der virker på siden. Dem starter vi kun, hvis du siger ja.</p>
+    <p class="cookie-modal-note">Du kan altid skifte mening. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+    <div class="cookie-modal-actions">
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-necessary-only" autofocus>Kun nødvendige</button>
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-accept-all">Accepter alle</button>
+    </div>
   </div>
-  <div class="cookie-banner-actions">
-    <button type="button" class="btn btn-outline btn-sm" id="cookie-necessary-only">Kun nødvendige</button>
-    <button type="button" class="btn btn-primary btn-sm" id="cookie-accept-all">Accepter alle</button>
-  </div>
-</div>
-<script>try{if(!localStorage.getItem(${JSON.stringify(NØGLE)}))document.getElementById("cookie-banner").hidden=false;}catch(e){}<\/script>
+</dialog>
+<script>try{if(!localStorage.getItem(${JSON.stringify(NØGLE)})){var d=document.getElementById("cookie-banner");if(d&&d.showModal){d.showModal();}else if(d){d.setAttribute("open","");}}}catch(e){}<\/script>
 <!--cookie:end-->`;
 
 const files = fs.readdirSync(root).filter(f => f.endsWith('.html'));

@@ -25,6 +25,10 @@ const path = require('node:path');
 
 const css = fs.readFileSync(path.join(__dirname, '..', 'css', 'styles.css'), 'utf8');
 const komponenter = fs.readFileSync(path.join(__dirname, 'components.js'), 'utf8');
+/* Selve samtykke-markuppen genereres af scripts/inline-cookie.js og bages ind i
+   hver side. Vi laeser generatoren, saa testen ikke afhaenger af, at et byg lige
+   har koert. */
+const cookieMarkup = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'inline-cookie.js'), 'utf8');
 
 test('html har scroll-padding-top, og den er headerens højde', () => {
   const m = css.match(/(^|\})\s*html\s*\{[^}]*scroll-padding-top:\s*([^;}]+)/m);
@@ -54,56 +58,49 @@ test('scroll-padding-bottom er scopet til den side, der HAR en bjælke', () => {
   assert.ok(blok, 'scroll-padding-bottom skal stå i samme @media (max-width:959px), som viser bjælken');
 });
 
-/* ---- Cookiebanneret: den tredje faste flade ----
-   Målt på annonce.html?id=1021, 390x844, tømt storage, rigtige Tab-tryk:
-   18 af 40 tab-stop lå helt eller delvis bag banneret eller den bjælke,
-   banneret havde skubbet 195px op. Efter reglerne herunder: 0 af 44.
-   Banneret står på ALLE 14 sider ved første besøg, så fejlen var sitets
-   bredeste — den var bare usynlig, fordi den forsvinder, så snart man har
-   klikket én gang og aldrig kommer igen. */
+/* ---- Cookiesamtykket: fra bundbjaelke til modal (runde 14) ----
+   HER STOD FIRE TESTS, der vogtede WCAG SC 2.4.11 for en BUNDBJAELKE: at et
+   Tab-tryk ikke kunne lande bag banneret. Maalt dengang: 18 af 40 tab-stop laa
+   helt eller delvis bag banneret. Reglerne loeste det ved at reservere
+   bannerets hoejde (--cookie-h) som scroll-padding og body-padding.
 
-test('banneret måles på documentElement, ikke på body', () => {
-  /* Det her ER hele grunden til, at cookiebanneret stod tilbage, da resten af
-     SC 2.4.11 blev lukket: scroll-padding skal stå på html, og et
-     html-regelsæt kan ikke læse en variabel, der er sat på body. */
-  assert.match(komponenter, /document\.documentElement\.style\.setProperty\('--cookie-h'/,
-    '--cookie-h skal sættes på documentElement — på body kan html-reglen ikke læse den');
-  assert.ok(!/document\.body\.style\.setProperty\('--cookie-h'/.test(komponenter),
-    '--cookie-h må ikke sættes på body: så virker scroll-padding-bottom ikke');
-  assert.match(komponenter, /removeProperty\('--cookie-h'\)/,
-    'højden skal ryddes igen, når banneret er væk — ellers holdes 187px fri af ingenting');
+   Samtykket er nu en <dialog>.showModal() efter menneskets beslutning, og saa
+   findes den fejlmulighed ikke laengere: browseren goer HELE baggrunden inert,
+   saa der er intet tab-stop at gemme bag noget. Maskineriet er fjernet frem
+   for at staa som doed kode.
+
+   De gamle tests er ikke bare slettet — de er erstattet af dem, der vogter det,
+   modalen skal kunne. Særligt den sidste: at fravalget er lige saa let som
+   tilvalget er et JURIDISK krav (frivilligt samtykke), ikke en smagssag, og
+   det er praecis den slags, der stille kan skride, naar nogen senere vil have
+   "Accepter alle" til at skille sig ud. */
+
+test('samtykket er en aegte modal — baggrunden er inert, ikke bare daempet', () => {
+  assert.match(cookieMarkup, /<dialog[^>]*id="cookie-banner"/,
+    'samtykket skal vaere et <dialog>: fokusfaelde og inert baggrund kommer fra browseren');
+  assert.match(cookieMarkup, /showModal\(\)/,
+    'showModal() (ikke show() og ikke open-attributten) er det, der giver top-lag og inert baggrund');
+  assert.match(komponenter, /addEventListener\('cancel',\s*e\s*=>\s*e\.preventDefault\(\)\)/,
+    'Escape maa ikke kunne afvise dialogen uden et svar — begge svar staar aabne');
 });
 
-test('rulning og dokument holder plads fri af cookiebanneret', () => {
-  assert.match(css, /html:has\(#cookie-banner:not\(\[hidden\]\)\)\s*\{[^}]*scroll-padding-bottom:\s*var\(--cookie-h,\s*\d+px\)/,
-    'uden denne regel lander Tab bag banneret på alle 14 sider ved første besøg');
-  assert.match(css, /body:has\(#cookie-banner:not\(\[hidden\]\)\)\s*\{[^}]*padding-bottom:\s*var\(--cookie-h,\s*\d+px\)/,
-    'scroll-padding kan ikke hjælpe det SIDSTE element: er der ikke mere at rulle, ruller browseren ikke');
-});
-
-test('begge faste flader tælles sammen på annoncesiden', () => {
-  /* .listing-actionbar skubbes op til --cookie-h + 8px, når banneret er der.
-     Den frie zone er derfor summen, ikke den højeste af de to — bjælkens top
-     blev målt til at flytte fra y 775 til y 580, mens scroll-padding-bottom
-     stod på 76px og altså dækkede en tredjedel af det, der var brug for. */
-  const sum = /calc\(var\(--cookie-h,\s*\d+px\)\s*\+\s*8px\s*\+\s*var\(--actionbar-h\)\)/g;
-  const fund = css.match(sum) || [];
-  assert.equal(fund.length, 2,
-    'både scroll-padding-bottom og body-padding skal lægge de to højder sammen (fandt ' + fund.length + ')');
-  assert.match(css, /bottom:\s*calc\(var\(--cookie-h,\s*\d+px\)\s*\+\s*8px\)/,
-    'de 8px skal være det SAMME mellemrum, som bjælken skubbes op med');
-});
-
-test('fallbacken dækker den højeste bannerhøjde, der findes', () => {
-  /* Banneret vises af en inline-linje i markuppen, længe før js/components.js
-     kan måle det. I det vindue gælder fallbacken. Målt bannerhøjde:
-     320px bredde -> 206px, 390 -> 187, 768 -> 119, 1280 -> 80. Fallbacken
-     skal være over den højeste; at reservere for meget koster kun nogle få
-     pixels ekstra rulning, mens for lidt er selve fejlen igen. */
-  const fald = [...css.matchAll(/(scroll-)?padding-bottom:[^;}]*var\(--cookie-h,\s*(\d+)px\)/g)]
-    .map(m => Number(m[2]));
-  assert.equal(fald.length, 4, 'forventede fire pladsreservationer bygget på --cookie-h');
-  for (const v of fald){
-    assert.ok(v >= 206, `fallbacken er ${v}px, men banneret måler 206px ved 320px bredde`);
+test('de to samtykkeknapper er lige lette at vaelge', () => {
+  /* Juridisk krav bag "frivilligt samtykke": fravalget skal vaere lige saa
+     tilgaengeligt som tilvalget. Konkret betyder det, at ingen af de to baerer
+     primaerfarven, og at de deler den samme klasse — saa de ikke kan skride fra
+     hinanden ved en senere aendring. */
+  const knapper = [...cookieMarkup.matchAll(/<button[^>]*id="cookie-(accept-all|necessary-only)"[^>]*>/g)]
+    .map(m => m[0]);
+  assert.equal(knapper.length, 2, 'der skal vaere praecis to svarknapper');
+  for (const k of knapper){
+    assert.match(k, /class="[^"]*cookie-modal-knap/, 'begge knapper skal dele samme klasse');
+    assert.ok(!/btn-primary/.test(k),
+      'ingen af svarene maa baere primaerfarven: det ville goere fravalget til det svaere valg');
   }
 });
+
+test('statistik starter kun ved et udtrykkeligt ja', () => {
+  assert.match(komponenter, /level === 'all' && typeof window\.bbStartAnalytics === 'function'/,
+    '"Kun noedvendige" maa aldrig starte statistikken');
+});
+

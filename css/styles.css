@@ -154,7 +154,9 @@ html{ scroll-padding-top: var(--header-h); }
       annoncesiden er den frie zone BEGGE højder plus mellemrummet — ikke den
       højeste af dem. Målt: bjælkens top gik fra y 775 til y 580, mens
       scroll-padding-bottom stod på 76px. */
-html:has(#cookie-banner:not([hidden])){ scroll-padding-bottom: var(--cookie-h, 208px); }
+/* RUNDE 14: reglen reserverede plads til bundbjaelken. Samtykket er nu en
+   modal, der ikke skubber indhold — og `:not([hidden])` ville matche ALTID paa
+   et <dialog>, som ikke bruger hidden-attributten. */
 
 /* Bunden gælder kun dér, hvor bjælken faktisk vises: annoncesiden
    (body.har-actionbar, sat i js/annonce.js) under 960px, jf. media-reglen
@@ -164,9 +166,6 @@ html:has(#cookie-banner:not([hidden])){ scroll-padding-bottom: var(--cookie-h, 2
   html:has(body.har-actionbar){ scroll-padding-bottom: var(--actionbar-h); }
   /* Begge faste flader på én gang. De 8px er det samme mellemrum, som
      .listing-actionbar skubbes op med. */
-  html:has(body.har-actionbar):has(#cookie-banner:not([hidden])){
-    scroll-padding-bottom: calc(var(--cookie-h, 208px) + 8px + var(--actionbar-h));
-  }
 }
 
 /* Og pladsen i selve dokumentet. scroll-padding kan ikke hjælpe det sidste
@@ -176,12 +175,7 @@ html:has(#cookie-banner:not([hidden])){ scroll-padding-bottom: var(--cookie-h, 2
    betingelser" i footeren bag banneret uden nogen vej fri (målt: 24 af 24 px).
    Pladsen tilføjes NEDERST, så intet element flytter sig; kun dokumentet
    bliver højere, og banneret dækker præcis den strimmel, det selv lagde. */
-body:has(#cookie-banner:not([hidden])){ padding-bottom: var(--cookie-h, 208px); }
-@media (max-width:959px){
-  body.har-actionbar:has(#cookie-banner:not([hidden])){
-    padding-bottom: calc(var(--cookie-h, 208px) + 8px + var(--actionbar-h));
-  }
-}
+
 body{
   font-family: var(--font-body);
   background: var(--color-bg);
@@ -1788,22 +1782,12 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    som scroll-padding-bottom i reset'en, så et tastetryk ikke lander under
    bjælken (SC 2.4.11) — derfor er det en variabel og ikke to 76'ere. */
 @media (max-width:959px){ body.har-actionbar{ padding-bottom: var(--actionbar-h); } }
-/* Cookiebanneret laa OVEN PAA handlingsbjaelken, saa "Skriv til saelger" —
-   annoncesidens primaere handling — ikke kunne trykkes, foer man havde taget
-   stilling til cookies. Bevist med en hit-test: banneret opfangede klikket.
-   Det ramte alle brugere, ikke kun tastaturbrugere.
+/* HER SKUBBEDE handlingsbjaelken sig op over cookiebanneret, fordi banneret
+   laa som en bundbjaelke oven paa "Skriv til saelger" — annoncesidens primaere
+   handling. Runde 14 gjorde samtykket til en modal: den daekker ikke bjaelken,
+   den spaerrer hele siden, indtil man har svaret. Der er ingen bundflade at
+   vige for laengere, og --cookie-h maales ikke mere. */
 
-   Nu skubbes bjaelken op over banneret i stedet. Samtykket staar stadig
-   oeverst og skal stadig besvares — men det spaerrer ikke for den ene knap,
-   hele siden findes for. */
-body.har-actionbar .cookie-banner{ z-index:120; }
-body.har-actionbar.cookie-banner-vises .listing-actionbar{
-  bottom: calc(var(--cookie-h, 132px) + 8px);
-  transition: bottom .2s var(--ease-out);
-}
-@media (prefers-reduced-motion: reduce){
-  body.har-actionbar.cookie-banner-vises .listing-actionbar{ transition:none; }
-}
 
 .spec-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: 1px; background: var(--color-border); border:1px solid var(--color-border); border-radius: var(--radius-md); overflow:hidden; }
 @media (min-width:560px){ .spec-grid{ grid-template-columns: repeat(3,1fr); } }
@@ -2456,21 +2440,35 @@ body.har-actionbar.cookie-banner-vises .listing-actionbar{
    "Vis resultater" i filterskuffen på mobil — man kunne vælge filtre, men
    ikke komme videre. Skuffen skjuler banneret mens den er åben; det er
    tilbage igen straks skuffen lukkes, så samtykket ikke kan smutte forbi. */
-body.overlay-open .cookie-banner{ display:none; }
 
-.cookie-banner{
-  position:fixed; bottom:0; left:0; right:0; z-index:500;
-  background: var(--color-dark); color:#EDEAE4; padding: var(--space-4) var(--space-5);
-  display:flex; align-items:center; gap: var(--space-5); flex-wrap:wrap; box-shadow: var(--shadow-lg);
-  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+
+/* ---------- Cookiesamtykke som modal (runde 14, menneskets beslutning) ----------
+   Bygget paa <dialog> + showModal(): fokusfaelde, inert baggrund og top-lag
+   kommer fra browseren, ikke fra vores egen JS.
+
+   De to knapper er BEVIDST ens. Juridisk skal fravalget vaere lige saa let som
+   tilvalget, saa ingen af dem baerer primaerfarven. */
+.cookie-modal{
+  border:none; border-radius: var(--radius-lg); padding:0;
+  max-width: 34rem; width: calc(100vw - 2 * var(--space-4));
+  background: var(--color-dark); color:#EDEAE4; box-shadow: var(--shadow-lg);
 }
-.cookie-banner-text{ flex:1; min-width:240px; }
-.cookie-banner-text strong{ display:block; margin-bottom:4px; }
-.cookie-banner-text p{ font-size:13px; color:#B4AEA3; line-height:1.5; }
-.cookie-banner-text a{ color:#fff; text-decoration:underline; }
-.cookie-banner-actions{ display:flex; gap:10px; flex-shrink:0; }
-.cookie-banner .btn-outline{ color:#fff; border-color:rgba(255,255,255,0.35); }
-.cookie-banner .btn-outline:hover{ background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.5); }
+.cookie-modal::backdrop{ background: rgba(15,13,10,0.72); }
+.cookie-modal-indhold{ padding: var(--space-6); }
+.cookie-modal h2{ font-size:22px; line-height:1.25; margin:0 0 var(--space-4); color:#fff; }
+.cookie-modal p{ font-size:14px; line-height:1.6; color:#C9C3B8; margin:0 0 var(--space-3); }
+.cookie-modal strong{ color:#fff; font-weight:600; }
+.cookie-modal-note{ font-size:13px; }
+.cookie-modal a{ color:#fff; text-decoration:underline; }
+.cookie-modal-actions{ display:flex; gap:var(--space-3); margin-top: var(--space-5); }
+.cookie-modal-knap{
+  flex:1 1 0; justify-content:center; text-align:center; white-space:normal;
+  background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,0.45);
+}
+.cookie-modal-knap:hover{ background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.7); }
+.cookie-modal-knap:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+/* Under 380 px bliver to knapper side om side for smalle til etiketterne. */
+@media (max-width:379px){ .cookie-modal-actions{ flex-direction:column; } }
 
 /* ============ Verification steps (auth) ============ */
 .verify-row{
