@@ -371,9 +371,14 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   main > .container > *{ order: 6; }
   main > .container > .breadcrumb{ order: 1; }
   main > .container > .brand-hero{ order: 2; }
-  main > .container > .facet-liste-sektion{ order: 3; }
+  main > .container > .facet-liste-sektion,
+  main > .container > .brand-liste-sektion{ order: 3; }
   main > .container > .brand-actions{ order: 4; margin-top: var(--space-6); }
   main > .container > .brand-maerkerow-sektion{ order: 5; }
+  /* Maerkesidernes modelchips er samme slags navigation som facetsidernes
+     maerkechips: VAEK fra det, man lige har valgt. De laa inde i hero'en og
+     kostede 62 px foran varen. Nu efter listen, som paa facetsiderne. */
+  main > .container > .brand-modelrow-sektion{ order: 5; margin-top: var(--space-4); }
 }
 
 @media (hover: none) and (pointer: coarse){

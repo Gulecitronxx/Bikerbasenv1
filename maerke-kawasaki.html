@@ -64,7 +64,7 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/140597/Kawasaki_ZR-7_0_2.jpg?v=1" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=61f368d0">
+<link rel="stylesheet" href="css/styles.css?v=a6ca26c4">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Kawasaki","item":"https://bikerbasen.dk/maerke-kawasaki"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en brugt Kawasaki-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"32 af de 34 Kawasaki-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 1.900 kr. til 194.995 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 70.750 kr. De resterende 2 annoncer oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre Kawasaki på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"Ikke blandt de annoncer, vi kan afgøre — 29 af 29 Kawasaki-annoncer med kendt effekt kræver stort kørekort (kategori A), altså mere end de 47 hk (35 kW), som A2 tillader. Har du kategori A, må du under alle omstændigheder køre dem alle. De resterende 5 annoncer mangler effektoplysningen og vises derfor uden kategori."}},{"@type":"Question","name":"Hvilke Kawasaki-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 34 Kawasaki-annoncer går GTR 1400 (2 stk.), VN 650 Vulcan S (2 stk.), ZX6R (2 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Kawasaki-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
 </head>
@@ -127,7 +127,9 @@ try{
       <h1>Brugte Kawasaki-motorcykler til salg i Danmark</h1>
       <p class="brand-intro">Der er <strong>34</strong> brugte Kawasaki motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 1.900 kr.</p>
       <details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Kawasaki er kendt for Ninja-sportscyklerne og de kraftfulde Z-nakede modeller — et mærke med et udpræget performance-ry. til 194.995 kr., med årgange mellem 1979 og 2026. Udvalget dækker Naked, Cruiser, Sport m.fl. 2 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Rydbergs MC og Jensens Motorcykler, og handlen sker hos kilden.</p></details>
-      
+    </div>
+
+
       <!-- "Se X efter model", ikke "Populaere X-modeller" og ikke "alle
            modeller til salg": raekken er de 12 med flest annoncer, og
            overskriften maa hverken paastaa popularitet, vi ikke maaler, eller
@@ -139,7 +141,16 @@ try{
            navigation skal ikke koste mere plads end varen. Nu ligger de i
            hero-blokken som én kompakt rulleraekke. Overskriften bliver staaende
            for skaermlaesere og dokumentstruktur — den koster bare ingen pixels
-           laengere. -->
+           laengere.
+
+           RUNDE 14: raekken laa stadig INDE i hero'en og kostede 62 px foran
+           varen paa mobil — maalt: foerste kort 681 px paa maerkesiderne mod
+           470 paa facetsiderne, som fik omrokeringen i runde 13. Modelchips er
+           samme slags navigation som facetsidernes maerkechips: VAEK fra det,
+           man lige har valgt. Raekken er nu soeskende, saa CSS kan laegge den
+           efter listen paa smalle skaerme. Paa desktop staar den, hvor den
+           altid har staaet. -->
+    <section class="brand-modelrow-sektion">
       <h2 class="visually-hidden">Se Kawasaki efter model</h2>
       <div class="popular-row brand-modelrow">
         <a class="popular-chip" href="soegning.html?brands=Kawasaki&amp;q=GTR%201400">GTR 1400 · 2</a>
@@ -155,9 +166,9 @@ try{
         <a class="popular-chip" href="soegning.html?brands=Kawasaki&amp;q=VN%201500">VN 1500 · 1</a>
         <a class="popular-chip" href="soegning.html?brands=Kawasaki&amp;q=VN%201500%20Classic">VN 1500 Classic · 1</a>
       </div>
-    </div>
+    </section>
 
-    <section class="section" style="padding-top:var(--space-4);">
+    <section class="section brand-liste-sektion" style="padding-top:var(--space-4);">
       <div class="section-head">
         <!-- Runde 9 (D9-M2): "nu" uden dato bag sig er D8-F2's fejl — datoen er
              stoerste sidst_set i lageret, skrevet ved bygget. -->
@@ -1118,23 +1129,23 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=61f368d0"></script>
-<script defer src="js/supabase-config.js?v=61f368d0"></script>
-<script defer src="js/supabase-api.js?v=61f368d0"></script>
-<script defer src="js/icons.js?v=61f368d0"></script>
-<script defer src="js/bike-art.js?v=61f368d0"></script>
+<script defer src="js/security.js?v=a6ca26c4"></script>
+<script defer src="js/supabase-config.js?v=a6ca26c4"></script>
+<script defer src="js/supabase-api.js?v=a6ca26c4"></script>
+<script defer src="js/icons.js?v=a6ca26c4"></script>
+<script defer src="js/bike-art.js?v=a6ca26c4"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=61f368d0"></script>
-<script defer src="js/store.js?v=61f368d0"></script>
-<script defer src="js/maaling.js?v=61f368d0"></script>
-<script defer src="js/backend-bridge.js?v=61f368d0"></script>
-<script defer src="js/components.js?v=61f368d0"></script>
+<script defer src="js/data.js?v=a6ca26c4"></script>
+<script defer src="js/store.js?v=a6ca26c4"></script>
+<script defer src="js/maaling.js?v=a6ca26c4"></script>
+<script defer src="js/backend-bridge.js?v=a6ca26c4"></script>
+<script defer src="js/components.js?v=a6ca26c4"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=61f368d0"></script>
-<script defer src="js/maerke.js?v=61f368d0"></script>
+<script defer src="js/sortering.js?v=a6ca26c4"></script>
+<script defer src="js/maerke.js?v=a6ca26c4"></script>
 <!--cookie:start-->
 <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookiesamtykke" hidden>
   <div class="cookie-banner-text">

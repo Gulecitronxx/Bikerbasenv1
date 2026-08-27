@@ -874,7 +874,9 @@ ${header}
       <h1>${nye ? '' : 'Brugte '}${esc(brand)}-motorcykler til salg i Danmark</h1>
       <p class="brand-intro">${introFoerste}</p>
       ${introRest ? `<details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
-      ${allModels.length ? `
+    </div>
+
+${allModels.length ? `
       <!-- "Se X efter model", ikke "Populaere X-modeller" og ikke "alle
            modeller til salg": raekken er de 12 med flest annoncer, og
            overskriften maa hverken paastaa popularitet, vi ikke maaler, eller
@@ -886,14 +888,23 @@ ${header}
            navigation skal ikke koste mere plads end varen. Nu ligger de i
            hero-blokken som én kompakt rulleraekke. Overskriften bliver staaende
            for skaermlaesere og dokumentstruktur — den koster bare ingen pixels
-           laengere. -->
+           laengere.
+
+           RUNDE 14: raekken laa stadig INDE i hero'en og kostede 62 px foran
+           varen paa mobil — maalt: foerste kort 681 px paa maerkesiderne mod
+           470 paa facetsiderne, som fik omrokeringen i runde 13. Modelchips er
+           samme slags navigation som facetsidernes maerkechips: VAEK fra det,
+           man lige har valgt. Raekken er nu soeskende, saa CSS kan laegge den
+           efter listen paa smalle skaerme. Paa desktop staar den, hvor den
+           altid har staaet. -->
+    <section class="brand-modelrow-sektion">
       <h2 class="visually-hidden">Se ${esc(brand)} efter model</h2>
       <div class="popular-row brand-modelrow">
         ${allModels.map(([m, antalM]) => `<a class="popular-chip" href="soegning.html?brands=${encodeURIComponent(brand)}&amp;q=${encodeURIComponent(m)}">${esc(m)} · ${antalM}</a>`).join('\n        ')}
-      </div>` : ''}
-    </div>
+      </div>
+    </section>` : ''}
 
-    <section class="section" style="padding-top:var(--space-4);">
+    <section class="section brand-liste-sektion" style="padding-top:var(--space-4);">
       <div class="section-head">
         <!-- Runde 9 (D9-M2): "nu" uden dato bag sig er D8-F2's fejl — datoen er
              stoerste sidst_set i lageret, skrevet ved bygget. -->
