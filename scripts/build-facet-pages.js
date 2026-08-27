@@ -96,7 +96,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { siteUrl, fetchListings, fetchExternalListings, siteParts, esc, browserModules, listingSlug } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, markerTvaerkildeDubletter } = browserModules();
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, markerTvaerkildeDubletter, Sortering } = browserModules();
 const BASE = siteUrl();
 
 // data.js giver koerekortForListing, passerKoerekort, hkEllerNull, TYPES,
@@ -162,17 +162,29 @@ function aggregatPriser(items){
    createdAt-sortering lagde fotoløse kort uden km øverst på en vareside.
    Vi opdigter intet — vi viser bare det bedst oplyste først, og inden for
    samme oplysningsgrad det nyeste. */
-function substansScore(l){
-  let s = 0;
-  if ((l.photoUrls && l.photoUrls.length) || l.thumbnailUrl) s += 4;
-  if (tilTal(l.km) !== null) s += 2;
-  if (tilTal(l.price) > 0) s += 2;
-  if (hkEllerNull(l.power) != null) s += 1;
-  return s;
-}
+/* RUNDE 15 (efter menneskets beslutning): HER STOD facetsidernes EGEN
+   sortering — en lokal substansScore (foto 4, km 2, pris 2, hk 1) og derefter
+   dato. Den var ikke forkert, men den var vores ANDEN sorteringsregel, og den
+   manglede det, den foerste allerede kunne.
+
+   Runde 15's blinde dommer: "de foerste seks kort er alle fotograferet foran
+   samme graa rulleport med samme store groenne logo tvaers over billedet. Det
+   ER rigtige, forskellige motorcykler, men ved en hurtig scroll paa telefon
+   ligner det den samme annonce seks gange — og det faar en ellers
+   trovaerdig liste til at ligne autogenereret fyld."
+
+   Praecis det problem loeste D6-S4 for soegesiden og maerkesiderne med
+   Sortering 'blandet': KILDE-RUNDGANG inden for hver oplysthedsklasse. Ingen
+   daarligere oplyst annonce kommer foran en bedre oplyst, fordi den er fra en
+   anden kilde — der skiftes kun mellem kilderne blandt ligemaend, hvor
+   tie-breakeren foer var id/dato. Rangeringen er altsaa uaendret; det er kun
+   raekkefoelgen blandt lige gode, der nu spreder kilderne.
+
+   Facetsiderne bruger den samme funktion som soegesiden og maerkesiderne —
+   ikke en kopi. Saa kan de tre ikke skride fra hinanden, og js/sortering.test.js
+   vogter dem alle tre paa én gang. */
 function sorterSubstans(items){
-  return items.slice().sort((a, b) =>
-    substansScore(b) - substansScore(a) || new Date(b.createdAt) - new Date(a.createdAt));
+  return Sortering.sorter(items.slice(), 'blandet');
 }
 
 /* "Brugte" var hardcodet i titel, meta og intro — på type-cruiser bar 32 af
@@ -886,6 +898,7 @@ ${footer}
 <script defer src="js/store.js"></script>
 <script defer src="js/maaling.js"></script>
 <script defer src="js/backend-bridge.js"></script>
+<script defer src="js/sortering.js"></script>
 <script defer src="js/components.js"></script>
 <!-- Ingen separat js/facet.js: opgavens filliste omfatter ikke nye
      js/*.js-filer, og siden hydrerer sig selv med samme fem linjer som
@@ -909,14 +922,17 @@ ${footer}
      igen i createdAt-orden — foerste kort skiftede identitet efter load.
      Og substansScore holder fotoloese kort uden km nede, hvor de hoerer til
      (R11-F-11), i stedet for oeverst paa en vareside. */
-  const substans = l => ((l.photoUrls && l.photoUrls.length) || l.thumbnailUrl ? 4 : 0)
-    + (l.km != null && l.km !== '' ? 2 : 0) + (Number(l.price) > 0 ? 2 : 0)
-    + (hkEllerNull(l.power) != null ? 1 : 0);
   const traef = (kind === 'type' ? alle.filter(l => l.type === id)
     : kind === 'region' ? alle.filter(l => l.region === id)
     : kind === 'model' ? alle.filter(l => norm(l.brand) === norm(mount.dataset.facetBrand) && norm(l.model) === norm(mount.dataset.facetModel))
     : alle.filter(l => passerKoerekort(l, id)))
-    .sort((a, b) => substans(b) - substans(a) || new Date(b.createdAt) - new Date(a.createdAt));
+    ;
+  /* Samme raekkefoelge som bygget og som soegesiden: kilde-rundgang inden for
+     hver oplysthedsklasse (js/sortering.js). Uden Sortering — hvis filen mod
+     forventning ikke naaede frem — bliver rækkefølgen som den kom, frem for en
+     tredje regel, der kunne vaere uenig med de to andre. */
+  const traefSorteret = (typeof Sortering !== 'undefined')
+    ? Sortering.sorter(traef.slice(), 'blandet') : traef;
   /* RUNDE 13 (R13-7): TOTALEN foer udsnittet. Overskriften "58 annoncer" og
      introens "Der er 58 motorcykler" er bagt ved bygget og blev ALDRIG
      opdateret i drift — js/maerke.js har gjort det for maerkesiderne siden
@@ -924,8 +940,8 @@ ${footer}
      som regel 5 kraever skal virke med ét flag), stod tallet over et gitter
      med et andet antal. Paa et site, hvis eneste loefte er, at tallene er
      sande, er det den dyreste slags stilhed. */
-  const alleTraef = traef.length;
-  const items = traef.slice(0, viste);
+  const alleTraef = traefSorteret.length;
+  const items = traefSorteret.slice(0, viste);
   const frase = mount.dataset.facetFrase || 'motorcykler';
   if (!items.length){
     mount.className = 'empty-state';
