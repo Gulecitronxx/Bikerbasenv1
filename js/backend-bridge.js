@@ -512,6 +512,21 @@ function maerkeAkronym(m){
    titel saettes som maerke + model, saa gentagelsen bliver synlig to gange i
    samme linje. Det er ren dublet af den samme streng — ingen oplysning gaar
    tabt ved at fjerne den, og ingen ny opfindes. */
+/* RUNDE 14 (blind dommer): "Harley-Davidson FLSTC Heritage Softail Classic
+   Classic" — ordet stod to gange, paa tre udgivne sider. Kilden har enten
+   gentaget sig selv, eller karrosseritypen er blevet haengt paa en model, der
+   allerede endte paa den. Dommeren naevnte den blandt "smaa ting, men det er
+   praecis dem, der faar mig til at tvivle paa km-tallet".
+
+   Reglen slaar KUN nabo-ord sammen, og kun naar de er ens bortset fra store og
+   smaa bogstaver. Ingen oplysning gaar tabt: "Classic Classic" og "Classic"
+   siger det samme. Modelnavne med et aegte gentaget naboord findes ikke i
+   lageret (efterproevet paa alle 221 unikke titler: ét traef, dette). */
+function fjernOrdDublet(tekst){
+  if (!tekst) return tekst;
+  return String(tekst).split(/\s+/).filter((o, i, a) => i === 0 || o.toLowerCase() !== a[i-1].toLowerCase()).join(' ');
+}
+
 function fjernMaerkeDublet(maerke, model){
   if (!maerke || !model) return model;
   const m = String(model).trim();
@@ -519,6 +534,17 @@ function fjernMaerkeDublet(maerke, model){
   if (m.toLowerCase().startsWith(b.toLowerCase() + ' ')){
     const uden = m.slice(b.length).trim();
     if (uden) return uden;   // model, der KUN var maerkenavnet, bliver staaende
+  }
+  /* RUNDE 14: dubletten kan ogsaa opstaa PAA TVAERS af de to felter, og det
+     goer den, naar vi selv har kanoniseret maerket. Kilden skrev maerke
+     "Lauge" + model "Jensen Great Dane"; runde 13 foldede maerket til "Lauge
+     Jensen", og saa blev kortets titel "Lauge Jensen Jensen Great Dane".
+     Starter modellen paa maerkets SIDSTE ord, er det ord allerede sagt. */
+  const sidsteOrd = b.split(/\s+/).pop();
+  if (sidsteOrd && b.split(/\s+/).length > 1
+      && m.toLowerCase().startsWith(sidsteOrd.toLowerCase() + ' ')){
+    const uden = m.slice(sidsteOrd.length).trim();
+    if (uden) return uden;
   }
   return m;
 }
@@ -623,10 +649,10 @@ function normalizeExternalListing(row){
       // Runde 7 (D7-S4): stoej klippes ogsaa af de raekker, der ligger.
       // Runde 13 (R13-5): og maerket fjernes, hvis modellen gentager det.
       const maerke = maerkeAkronym(row.maerke) || '';
-      if (row.model) return fjernMaerkeDublet(maerke, rensModelStoej(row.model, row.aargang) || '');
+      if (row.model) return fjernOrdDublet(fjernMaerkeDublet(maerke, rensModelStoej(row.model, row.aargang) || ''));
       const t = String(row.titel || '').trim();
       const ren = t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() ? t : '';
-      return fjernMaerkeDublet(maerke, rensModelStoej(ren, row.aargang) || '');
+      return fjernOrdDublet(fjernMaerkeDublet(maerke, rensModelStoej(ren, row.aargang) || ''));
     })(),
 
     /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og
