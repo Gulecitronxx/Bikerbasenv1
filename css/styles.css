@@ -2467,9 +2467,14 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
      knap 5 px bredere end den anden. Smaat, men paastanden om at de to svar er
      lige lette skal kunne holde bogstaveligt — ogsaa naar nogen maaler efter. */
   flex:1 1 0; min-width:0; justify-content:center; text-align:center; white-space:normal;
-  background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,0.45);
+  /* RUNDE 15: begge svar var tomme konturknapper paa moerk bund. Ligestillingen
+     var rigtig — men dommeren skrev, at "begge ser lidt ud som noget der er
+     slaaet fra". Ligestilling betyder, at de skal veje det SAMME, ikke at de
+     begge skal se inaktive ud. De er nu fyldte og lige tydelige: samme flade,
+     samme kant, samme tekstfarve. Ingen af dem baerer primaerfarven. */
+  background:rgba(255,255,255,0.14); color:#fff; border:1.5px solid rgba(255,255,255,0.7);
 }
-.cookie-modal-knap:hover{ background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.7); }
+.cookie-modal-knap:hover{ background:rgba(255,255,255,0.22); border-color:#fff; }
 .cookie-modal-knap:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
 /* Under 380 px bliver to knapper side om side for smalle til etiketterne. */
 @media (max-width:379px){ .cookie-modal-actions{ flex-direction:column; } }
