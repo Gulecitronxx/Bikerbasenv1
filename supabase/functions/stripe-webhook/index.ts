@@ -40,17 +40,32 @@ const admin = createClient(
 // begrundelse som i migrationen).
 async function opdaterPlan(customerId: string, opts: { userId?: string; status?: string; periodEnd?: number | null }) {
   const aktiv = opts.status === 'active' || opts.status === 'trialing';
-  const patch: Record<string, unknown> = {
+  /* MIGRATION 024: abonnementsfelterne ligger i profiles_private, mens
+     is_dealer bliver i profiles (det er et offentligt felt — kortet viser
+     "Forhandler"). Skrivningen er derfor delt i to.
+
+     Kunde-id'et er nu ogsaa i den private tabel, saa opslaget "hvem hoerer den
+     her Stripe-kunde til" gaar derigennem. */
+  const privatPatch: Record<string, unknown> = {
     plan: aktiv ? 'dealer' : 'free',
     subscription_status: opts.status ?? null,
     subscription_period_end: opts.periodEnd ? new Date(opts.periodEnd * 1000).toISOString() : null,
     stripe_customer_id: customerId,
   };
-  if (aktiv) patch.is_dealer = true;
-  // Find profilen enten paa user-id (foerste betaling) eller paa kunde-id.
-  const q = admin.from('profiles').update(patch);
-  if (opts.userId) await q.eq('id', opts.userId);
-  else await q.eq('stripe_customer_id', customerId);
+
+  let brugerId = opts.userId ?? null;
+  if (!brugerId) {
+    const { data } = await admin.from('profiles_private')
+      .select('id').eq('stripe_customer_id', customerId).maybeSingle();
+    brugerId = data?.id ?? null;
+  }
+  // Uden en bruger er der intet at opdatere — og en blind update ville ramme
+  // hele tabellen. Sig fra i stedet.
+  if (!brugerId) return;
+
+  await admin.from('profiles_private')
+    .upsert({ id: brugerId, ...privatPatch }, { onConflict: 'id' });
+  if (aktiv) await admin.from('profiles').update({ is_dealer: true }).eq('id', brugerId);
 }
 
 Deno.serve(async (req) => {

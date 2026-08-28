@@ -87,11 +87,14 @@ Deno.serve(async (req) => {
     const { kind } = await req.json().catch(() => ({ kind: null }));
 
     if (kind === 'cvr'){
-      const { data: profil } = await admin.from('profiles')
-        .select('cvr, company, is_dealer').eq('id', user.id).single();
+      // MIGRATION 024: cvr ligger i profiles_private, company/is_dealer i profiles.
+      const [{ data: profil }, { data: privat }] = await Promise.all([
+        admin.from('profiles').select('company, is_dealer').eq('id', user.id).single(),
+        admin.from('profiles_private').select('cvr').eq('id', user.id).maybeSingle(),
+      ]);
       if (!profil?.is_dealer) return svar(400, { error: 'CVR-verificering gælder kun forhandlerkonti.' });
 
-      const res = await slaaCvrOp(profil.cvr ?? '', profil.company ?? '');
+      const res = await slaaCvrOp(privat?.cvr ?? '', profil.company ?? '');
       if (!res.ok){
         return svar(res.ikkeOpsat ? 503 : 400, { error: res.grund });
       }

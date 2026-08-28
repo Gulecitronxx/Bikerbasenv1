@@ -181,12 +181,25 @@ const db = (function(){
       const { data } = await c.auth.getUser();
       return data?.user || null;
     },
+    /* MIGRATION 024: profilen ligger i TO tabeller nu. `profiles` baerer de
+       felter, en koeber maa se, og er offentligt laesbar; telefon, samtykke,
+       cvr og betalingsforhold ligger i `profiles_private`, som RLS kun aabner
+       for ejeren selv. Vi henter begge og fletter, saa resten af koden — der
+       forventer ét fladt profilobjekt — ikke skal skrives om.
+
+       Den private raekke KAN mangle (en konto oprettet foer 024, eller en
+       raekke der endnu ikke er skrevet). Det er ikke en fejl: saa har brugeren
+       bare ingen telefon og standardplanen, og `|| {}` giver praecis det. */
     async currentProfile(){
       const c = init(); if (!c) return null;
       const user = await this.currentUser();
       if (!user) return null;
-      const { data } = await c.from('profiles').select('*').eq('id', user.id).single();
-      return data || null;
+      const [offentlig, privat] = await Promise.all([
+        c.from('profiles').select('*').eq('id', user.id).single(),
+        c.from('profiles_private').select('*').eq('id', user.id).maybeSingle(),
+      ]);
+      if (!offentlig.data) return null;
+      return { ...offentlig.data, ...(privat.data || {}) };
     },
 
     /* ---------- Annoncer ---------- */
@@ -418,7 +431,11 @@ const db = (function(){
       const c = init(); if (!c) return { error: null };
       const user = await this.currentUser();
       if (!user) return { error: { message: 'Ikke logget ind' } };
-      return c.from('profiles').update({ vis_telefon: !!vis }).eq('id', user.id);
+      /* MIGRATION 024: samtykket bor i profiles_private nu. upsert frem for
+         update, saa en konto uden privat raekke ogsaa kan give samtykke —
+         insert-politikken kraever stadig, at id'et er ens eget. */
+      return c.from('profiles_private')
+        .upsert({ id: user.id, vis_telefon: !!vis }, { onConflict: 'id' });
     },
 
     async myListingSaves(){

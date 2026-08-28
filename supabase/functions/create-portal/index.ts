@@ -40,8 +40,9 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: 'Ikke logget ind' }, 401);
 
     // Find brugerens Stripe-kunde. Uden en er der intet abonnement at styre.
+    // MIGRATION 024: kunde-id'et ligger i profiles_private.
     const { data: profil } = await admin
-      .from('profiles').select('stripe_customer_id').eq('id', user.id).single();
+      .from('profiles_private').select('stripe_customer_id').eq('id', user.id).maybeSingle();
     if (!profil?.stripe_customer_id) {
       return json({ error: 'Intet abonnement fundet' }, 404);
     }

@@ -47,10 +47,13 @@ Deno.serve(async (req) => {
     if (!user) return json({ error: 'Ikke logget ind' }, 401);
 
     // Genbrug brugerens Stripe-kunde hvis den findes, ellers opret en.
-    const { data: profil } = await admin
-      .from('profiles').select('stripe_customer_id, name').eq('id', user.id).single();
+    // MIGRATION 024: navnet ligger i profiles, kunde-id'et i profiles_private.
+    const [{ data: profil }, { data: privat }] = await Promise.all([
+      admin.from('profiles').select('name').eq('id', user.id).single(),
+      admin.from('profiles_private').select('stripe_customer_id').eq('id', user.id).maybeSingle(),
+    ]);
 
-    let customerId = profil?.stripe_customer_id;
+    let customerId = privat?.stripe_customer_id;
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
@@ -58,7 +61,9 @@ Deno.serve(async (req) => {
         metadata: { supabase_user_id: user.id },
       });
       customerId = customer.id;
-      await admin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id);
+      // upsert: den private raekke findes ikke noedvendigvis endnu.
+      await admin.from('profiles_private')
+        .upsert({ id: user.id, stripe_customer_id: customerId }, { onConflict: 'id' });
     }
 
     const session = await stripe.checkout.sessions.create({
