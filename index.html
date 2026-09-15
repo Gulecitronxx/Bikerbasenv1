@@ -34,6 +34,7 @@
 
 
 
+
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
@@ -67,7 +68,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=55fb0140">
+<link rel="stylesheet" href="css/styles.css?v=9c2c6174">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -336,7 +337,7 @@ try{
         </li>
         <li class="problem-item">
           <h3>Samme model, to udgaver</h3>
-          <p>Mange modeller sælges både spærret og fri. Står der &ldquo;A2&rdquo; i annoncteksten, er det tit sælgerens vurdering, ikke en registreret oplysning.</p>
+          <p>Mange modeller sælges både spærret og fri. Står der &ldquo;A2&rdquo; i annonceteksten, er det tit sælgerens vurdering, ikke en registreret oplysning.</p>
         </li>
         <li class="problem-item">
           <h3>Motorcykler er en underkategori</h3>
@@ -390,7 +391,7 @@ try{
       <div class="section-head">
         <div>
           <h2>Tryghed når du handler</h2>
-          <p>Bikerbasen er bygget til at gøre køb og salg trygt for alle.</p>
+          <p>Det, vi kan stå inde for på hvert kort.</p>
         </div>
       </div>
       <div class="trust-strip" id="trust-strip"></div>
@@ -418,8 +419,8 @@ try{
           <h3 class="spor-titel">Skal du sælge</h3>
           <ol class="spor-trin">
             <li><strong>Opret en konto.</strong> Den er gratis, og den skal bruges for at kunne redigere din annonce igen.</li>
-            <li><strong>Udfyld annoncen.</strong> Mærke, model, årgang, km og effekt. Jo flere tal, jo flere søgninger rammer den — effekten afgør, hvilke kørekortfiltre den kommer med i.</li>
-            <li><strong>Den er live.</strong> Din annonce står i søgningen side om side med de indekserede.</li>
+            <li><strong>Udfyld annoncen.</strong> Mærke, model, årgang, km og effekt. Effekten afgør, hvilke kørekortfiltre annoncen kommer med i.</li>
+            <li><strong>Den er live.</strong> Din annonce står i søgningen side om side med de indekserede. Dit navn vises kun for indloggede, og dit telefonnummer kun hvis du selv slår det til.</li>
           </ol>
           <a class="btn btn-outline" href="opret-annonce.html">Opret gratis annonce</a>
         </div>
@@ -428,6 +429,32 @@ try{
   </section>
 
 
+
+
+
+
+  <!-- AFSLUTTENDE CTA. Gentager hovedbudskabet og siger hvem siden er for.
+       Sidste linje er med vilje: kategorien "motorcyklist" laeses af mange som
+       erfarne folk med stort koerekort, og produktets staerkeste maalgruppe er
+       praecis dem, der IKKE har det endnu. Samme to CTA-tekster som i hero'en,
+       samme rangorden. -->
+  <section class="section slut-cta" aria-labelledby="slut-cta-titel">
+    <div class="container">
+      <div class="slut-cta-boks">
+        <h2 id="slut-cta-titel">Har du kørekort til motorcykel, har du en søgning her</h2>
+        <p>A1, A2 eller A — filteret er det samme, og det siger fra, når tallene ikke rækker til et svar. Du behøver ikke en konto for at søge.</p>
+        <div class="slut-cta-knapper">
+          <a class="btn btn-primary btn-lg" href="soegning.html">Søg motorcykler</a>
+          <a class="btn btn-outline btn-lg" href="opret-annonce.html">Opret gratis annonce</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RUNDE 16: browse- og SEO-blokken stod mellem "Saadan fungerer det" og
+       den afsluttende CTA — syv sektioner, der brød fortaellingen lige foer
+       dens sidste ord. Den er flyttet herned, uroert: linkene er stadig
+       crawlbare og stadig nyttige for den, der vil bladre. -->
 <section class="section">
     <div class="container">
       <div class="section-head">
@@ -531,90 +558,6 @@ try{
   <!-- facet-links:end -->
   </div>
 
-  <!-- Runde 5 (D5-F5): ÉT saelgerbaand nederst i stedet for to (saelgerbaand
-       midt paa siden + CTA-baand i bunden). 0 af 548 annoncer er oprettet af
-       saelgere hos os — saelgertalen skal ikke staa mellem koeberen og lageret.
-       Priskortet (.sell-band-art) skjules under 820 px: ≈300 px for at sige
-       "0 kr." to gange. -->
-  <!-- SAADAN FUNGERER DET. To spor, holdt visuelt adskilt, saa en koeber ikke
-       laeser saelgertrin og omvendt.
-
-       SAELGERTRINNENE ER DE FAKTISKE. Briefen bad om "angiv
-       registreringsnummer (valgfrit)" som trin 2 — det felt findes ikke i
-       opret-annonce.html i dag (docs/forretning.md har det under "Next"), og
-       en side, der beskriver en funktion, som ikke er bygget, er praecis den
-       fejl resten af sitet er bygget for at undgaa. Trin 1 siger ogsaa
-       ligeud, at der skal en konto til: js/opret-annonce.js omdirigerer
-       anonyme til login, saa "ingen skjulte krav" ville vaere usandt. -->
-  <section class="section" id="sell-section" style="padding-top:0;">
-    <div class="container">
-      <div class="sell-band">
-        <div class="sell-band-copy">
-          <span class="sell-band-eyebrow">Sælg din motorcykel</span>
-          <!-- Runde 6 (D6-F2): "set af hele Danmark", "koebere i hele landet",
-               "under 5 minutter" og "entusiaster, der leder efter netop din model"
-               var raekkevidde- og tidspaastande uden én maaling bag — paa et site
-               med 0 egne annoncer. Samme slaegt som Bilbasens "700.000 potentielle
-               koebere", som runde 5 satte paa "kopiér ikke"-listen. Nu kun det,
-               koden goer. -->
-          <h2>Gratis annonce for private</h2>
-          <!-- O3-2: "kontaktinfo vises kun for indloggede" — der findes ingen
-               kontaktinfo at vise for NOGEN (phone er null paa alt fra basen).
-               Det, der faktisk gaelder: navnet er bag login, telefon/e-mail
-               vises aldrig offentligt. -->
-          <p>Ingen kommission, ingen skjulte gebyrer. Din annonce står i søgningen side om side med de indekserede — dit navn vises kun for indloggede, og dit telefonnummer vises kun, hvis du selv slår det til.</p>
-          <ul class="sell-points">
-            <li><span class="sell-check" aria-hidden="true"></span>Helt gratis for private sælgere</li>
-            <!-- "Din kontaktinfo er skjult, indtil du selv deler den" lovede
-                 sælgeren en aktiv handling — et valg pr. henvendelse. Det
-                 findes ikke i koden: der er ingen "del nu"-knap for
-                 sælgeren, kun login-muren, som enhver oprettet bruger kan
-                 gå igennem (se js/annonce.js, saelgerKortHTML()). Rettelsen
-                 lover det, systemet faktisk gør: skjuler nummeret for
-                 udloggede, søgemaskiner og robotter — ikke at sælgeren
-                 styrer det i realtid. -->
-            <li><span class="sell-check" aria-hidden="true"></span>Dit navn er skjult for udloggede, søgemaskiner og robotter — og telefonvisning er dit eget valg, kun for indloggede</li>
-            <li><span class="sell-check" aria-hidden="true"></span>Kørekortkategori, pris og specifikationer vises på samme måde som for alle andre annoncer</li>
-          </ul>
-          <div class="sell-band-actions">
-            <a href="opret-annonce.html" class="btn btn-primary btn-lg">Opret annonce</a>
-            <a href="sikkerhed.html" class="btn btn-outline btn-lg">Sådan sælger du trygt</a>
-          </div>
-        </div>
-        <div class="sell-band-art">
-          <div class="price-card">
-            <span class="price-card-label">Din pris som privat</span>
-            <div class="price-card-amount">0 kr.</div>
-            <span class="price-card-sub">Gratis annonce · ingen binding</span>
-            <ul class="price-card-list">
-              <li>Ingen kommission af salget</li>
-              <li>Ingen skjulte gebyrer</li>
-              <li>Behold 100% af salgssummen</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- AFSLUTTENDE CTA. Gentager hovedbudskabet og siger hvem siden er for.
-       Sidste linje er med vilje: kategorien "motorcyklist" laeses af mange som
-       erfarne folk med stort koerekort, og produktets staerkeste maalgruppe er
-       praecis dem, der IKKE har det endnu. Samme to CTA-tekster som i hero'en,
-       samme rangorden. -->
-  <section class="section slut-cta" aria-labelledby="slut-cta-titel">
-    <div class="container">
-      <div class="slut-cta-boks">
-        <h2 id="slut-cta-titel">Har du kørekort til motorcykel, har du en søgning her</h2>
-        <p>A1, A2 eller A — filteret er det samme, og det siger fra, når tallene ikke rækker til et svar. Du behøver hverken konto eller cookies for at søge.</p>
-        <div class="slut-cta-knapper">
-          <a class="btn btn-primary btn-lg" href="soegning.html">Søg motorcykler</a>
-          <a class="btn btn-outline btn-lg" href="opret-annonce.html">Opret gratis annonce</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
 </main>
 
 <footer class="site-footer">
@@ -622,7 +565,7 @@ try{
     <div class="footer-grid">
       <div>
         <div class="footer-brand"><img src="logo-mark.png?v=logo1" alt="" class="brand-logo" width="30" height="30"><span>Bikerbasen</span></div>
-        <p style="color:#B4AEA3; font-size:14px; max-width:320px;">Motorcykler til salg fra danske forhandlere og markedspladser — samlet ét sted. Bygget til entusiaster, af entusiaster.</p>
+        <p style="color:#B4AEA3; font-size:14px; max-width:320px;">Motorcykler til salg fra danske forhandlere og markedspladser — samlet ét sted.</p>
       </div>
       <div class="footer-col">
         <h2 class="footer-col-title">Køb & salg</h2>
@@ -662,24 +605,24 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=55fb0140"></script>
-<script defer src="js/supabase-config.js?v=55fb0140"></script>
-<script defer src="js/supabase-api.js?v=55fb0140"></script>
-<script defer src="js/icons.js?v=55fb0140"></script>
-<script defer src="js/data.js?v=55fb0140"></script>
+<script defer src="js/security.js?v=9c2c6174"></script>
+<script defer src="js/supabase-config.js?v=9c2c6174"></script>
+<script defer src="js/supabase-api.js?v=9c2c6174"></script>
+<script defer src="js/icons.js?v=9c2c6174"></script>
+<script defer src="js/data.js?v=9c2c6174"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=55fb0140"></script>
+<script defer src="js/filtrering.js?v=9c2c6174"></script>
 <!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
      (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
      orden. Samme fil som soegning.html og scripts/build-srp.js. -->
-<script defer src="js/sortering.js?v=55fb0140"></script>
-<script defer src="js/store.js?v=55fb0140"></script>
-<script defer src="js/maaling.js?v=55fb0140"></script>
-<script defer src="js/backend-bridge.js?v=55fb0140"></script>
-<script defer src="js/components.js?v=55fb0140"></script>
-<script defer src="js/home.js?v=55fb0140"></script>
+<script defer src="js/sortering.js?v=9c2c6174"></script>
+<script defer src="js/store.js?v=9c2c6174"></script>
+<script defer src="js/maaling.js?v=9c2c6174"></script>
+<script defer src="js/backend-bridge.js?v=9c2c6174"></script>
+<script defer src="js/components.js?v=9c2c6174"></script>
+<script defer src="js/home.js?v=9c2c6174"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

@@ -303,7 +303,7 @@ async function buildForside(){
          .lead lige under med samme budskab, saa halen vises kun paa mobil
          (css .hero-count-kilder). */
       const kilderHale = antalKilder
-        ? `<span class="hero-count-kilder"> hos <b>${daTal(antalKilder)}</b> danske `
+        ? `<span class="hero-count-kilder"> hos ${daTal(antalKilder)} danske `
           + `${antalKilder === 1 ? 'forhandler eller markedsplads' : 'forhandlere og markedspladser'}`
           + `${antalEgne ? ' — og her på Bikerbasen' : ''}</span>`
         : '';
