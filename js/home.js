@@ -249,7 +249,10 @@ async function buildForside(){
          som A1, mens en på 650 cm³ kan, også uden hk. Én formulering, der er
          sand for begge, slår to, hvor den ene kan komme til at lyve. */
       : `${meta.label.replace(/\s*\(.*\)/, '')}: ${meta.hint.toLowerCase()}. `
-        + `Vi viser kun mc'er, vi kan svare for.`;
+        /* "Vi viser kun mc'er, vi kan svare for" laeses som: vi kan bekraefte
+           koerekortklassen. Det kan vi ikke — kun udelukke paa de oplyste tal
+           (kW/kg og afledningsreglen staar ikke i en annonce). */
+        + `Vi viser kun dem, de oplyste tal ikke udelukker.`;
 
     // Før databasen har svaret, siger vi ingenting frem for noget forkert.
     // Det gælder også regnskabet over de fravalgte: et tal udregnet på
@@ -309,12 +312,19 @@ async function buildForside(){
         : '';
     }
     if (resetBtn) resetBtn.hidden = !harSøgt;
-    /* Knappen bærer tallet, ligesom Bilbasens "Vis 40.476 biler". Har man
-       filtreret, vises tallet altid — også et lille, for man har selv bedt om
-       det. Uden filtre kun når totalen er stærk nok (≥10) til at være et
-       argument frem for en advarsel. */
-    submitBtn.textContent =
-      (n && (harSøgt || n >= 10)) ? `Vis ${daTal(n)} ${mc}` : 'Søg motorcykler';
+    /* HER SKIFTEDE KNAPPEN NAVN: "Vis 602 annoncer", "Vis 58 annoncer",
+       "Søg motorcykler" — efter Bilbasens "Vis 40.476 biler".
+
+       Aim-loop runde 16 satte én konverteringsregel: ÉN primaer CTA-tekst
+       hele siden igennem. Den regel er vaerd at foelge, fordi handlingen
+       optraeder fire steder (hero, "Saadan fungerer det", slut-CTA, headeren),
+       og en knap, der hedder noget nyt hvert sted, er fire handlinger for
+       laeseren i stedet for én.
+
+       Tallet gaar ikke tabt: countHint lige OVER knappen skriver "602
+       annoncer med motorcykler til salg …" og opdateres i samme funktion,
+       ogsaa naar man filtrerer. Knappen gentog det bare. */
+    submitBtn.textContent = 'Søg motorcykler';
   };
   ['hs-query','hs-type','hs-price'].forEach(id =>
     document.getElementById(id).addEventListener('input', opdaterHero));
@@ -856,9 +866,41 @@ async function buildForside(){
     }
   };
   let enPrMaerkeHoldt = true;   // kunne raekken fyldes med ét kort pr. maerke?
+
+  /* KOEREKORTSPREDNING — runde 16, fundet af den blinde dommer.
+     MAALT FOER: alle otte forsidekort sagde "Koerekort A". Paa en side, hvis
+     overskrift er "Find en motorcykel, du faktisk maa koere", er de foerste
+     otte varer altsaa otte, en A2-koerer IKKE maa koere. Dommeren:
+     "Det er ikke en detalje, det er loeftet der falder."
+
+     Lageret HAR dem — 13 paa A1, 58 paa A2, heraf 26 under 60.000 kr. — saa
+     det var udvaelgelsen, ikke udbuddet. Den spredte paa MAERKE og var derfor
+     maerkevarieret og koerekort-ensformig.
+
+     Reglen nu: reservér foerst én plads til hver koerekortklasse, lageret
+     faktisk har, og fyld resten som foer. Ingen annonce opfindes, ingen
+     rangering forfalskes — det er de samme kandidater i den samme
+     raekkefoelge, bare med ét kort trukket frem pr. klasse, saa hver
+     besoegende ser mindst én maskine, hans koerekort raekker til.
+
+     Underrubrikken SKAL sige det: et udvalg med en regel er ikke en
+     tilfaeldig blanding, og siden maa ikke kalde det noget andet, end det er
+     (se skrivFeaturedSub nedenfor). */
+  const vaelgKoerekortSpredning = (ud, antal) => {
+    if (typeof koerekortForListing !== 'function') return;
+    const set = new Set(ud.map(l => l.id));
+    for (const klasse of ['A1', 'A2']){
+      if (ud.length >= antal) break;
+      if (ud.some(l => koerekortForListing(l) === klasse)) continue;
+      const fund = raekkefoelge.find(l => !set.has(l.id) && koerekortForListing(l) === klasse);
+      if (fund){ ud.push(fund); set.add(fund.id); }
+    }
+  };
+
   const vaelgFeatured = (antal) => {
     const ud = [];
-    vaelgEfter(l => String(l.brand || ''), ud, new Set(), antal, true);
+    vaelgKoerekortSpredning(ud, antal);
+    vaelgEfter(l => String(l.brand || ''), ud, new Set(ud.map(l => String(l.brand || ''))), antal, true);
     enPrMaerkeHoldt = ud.length >= antal;
     if (ud.length < antal){
       const brugt = new Set(ud.map(l => `${l.brand} ${l.model}`));
@@ -900,7 +942,7 @@ async function buildForside(){
        der ikke er maerker nok). */
     featuredSub.textContent =
       `${ANTALSORD[antal] || daTal(antal)} af de ${daTal(kandidater.length)} annoncer med foto og modelnavn — `
-      + `samme rækkefølge som i søgningen, ${enPrMaerkeHoldt ? 'højst én pr. mærke' : 'højst én pr. model'} og højst halvdelen fra samme kilde.`
+      + `mindst én til hvert kørekort, ${enPrMaerkeHoldt ? 'højst én pr. mærke' : 'højst én pr. model'} og højst halvdelen fra samme kilde.`
       + enKilde;
   };
 

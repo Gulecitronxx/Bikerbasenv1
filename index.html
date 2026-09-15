@@ -25,7 +25,14 @@
 <meta name="twitter:title" content="Bikerbasen — motorcykler til salg i Danmark, nye og brugte">
 <meta name="twitter:description" content="Motorcykler til salg fra danske forhandlere og markedspladser — nye og brugte, samlet ét sted. Kilden står på hvert kort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
+
+
+
+
+
+
+
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -60,7 +67,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=13e0ff0f">
+<link rel="stylesheet" href="css/styles.css?v=55fb0140">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -124,7 +131,13 @@ try{
     <div class="container">
       <div class="hero-inner">
         <span class="hero-eyebrow">Kun motorcykler — intet andet</span>
-        <h1>Danmarks markedsplads for motorcykler</h1>
+        <!-- H1 talte om OS ("Danmarks markedsplads"), ikke om koeberens
+             resultat — og paastanden var oven i koebet den sidste rest af et
+             markedsplads-selvbillede paa et lager, der er 100 % indekseret fra
+             andres sider (R13-I-20). Overskriften siger nu, hvad den
+             besoegende faar, og "faktisk" baerer hele forskellen til en
+             bilside: ikke bare motorcykler, men dem du maa koere. -->
+        <h1>Find en motorcykel, du faktisk må køre</h1>
         <!-- Antallet står HER, mellem overskrift og søgekort — samme sted som
              Bilbasen sætter "50.356 annoncer i dag". Før lå det under kortet i
              brødtekststørrelse, hvor ingen så det. Højden er reserveret i CSS,
@@ -136,7 +149,7 @@ try{
              selv "Annonce fra <kilde>". Linjen skal være sand uanset
              blandingen af egne og indekserede annoncer — derfor hverken tal
              eller "private". -->
-        <p class="lead">Motorcykler til salg fra forhandlere og markedspladser i hele landet — samlet ét sted, og du kan filtrere på det kørekort, du faktisk har.</p>
+        <p class="lead">Vælg A1, A2 eller A, og se kun de motorcykler, der ikke er udelukket på de tal, annoncerne oplyser — samlet fra forhandlere og markedspladser i hele landet.</p>
       </div>
 
       <form class="search-panel" id="hero-search-form" aria-label="Søg motorcykler">
@@ -195,6 +208,13 @@ try{
             <button type="submit" class="btn btn-primary btn-lg" id="hs-submit">Søg motorcykler</button>
           </div>
         </div>
+        <!-- Saelgersporet staar i hero'en, men UNDER soegeknappen og i en
+             lettere vaegt: en koeber, der lander fra Google, skal ikke moede
+             saelgersprog foerst, og en saelger skal ikke lede efter vejen ind.
+             Samme to CTA-tekster bruges hele siden igennem. -->
+        <p class="hero-secondary">
+          Skal du sælge i stedet? <a href="opret-annonce.html">Opret gratis annonce</a>
+        </p>
         <!-- Regnskabet over de annoncer, hero'ens filtre har valgt fra, fordi
              oplysningen mangler. Samme tal og samme feltnavne som linjen på
              soegning.html — se js/home.js uoplystTekst().
@@ -251,49 +271,11 @@ try{
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2>Søg efter type</h2>
-          <!-- Teksten skrives om af js/home.js (fyldTypeAntal), så snart
-               lageret har svaret: den skal sige, hvor mange annoncer der
-               IKKE har en type fra kilden og derfor ikke ligger bag nogen af
-               de otte fliser. Sætningen her er den korte, sande udgave, der
-               står, indtil tallet findes — ikke et tal, der retter sig selv. -->
-          <p id="types-sub">Find hurtigt den type, du leder efter.</p>
-        </div>
-      </div>
-      <div class="tiles-grid" id="category-tiles"></div>
-    </div>
-  </section>
-
   <!-- Runde 5 (D5-F5): "Saadan koeber du trygt" (tre trin, ≈860 px paa mobil)
        er flyttet til sikkerhed.html, hvor koebeguiden i forvejen staar.
        Trin 1 lovede "Gem favoritter" — det kan ingen af de indekserede
        annoncer (D-008). Forsiden beholder #trust-strip, som siger det samme
        kortere og kun det, der gaelder hvert kort. -->
-
-  <section class="section" style="padding-top:0;">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <!-- Runde 5 (D5-F2): listen bygges af LAGERET (js/home.js bid 5): de 12
-               maerker med flest annoncer (mindst 2), tallet staar paa chippen, og
-               linket gaar til maerkesiden. Foer: en fast liste filtreret mod
-               BRANDS_BY_MODEL — Vespa (0 annoncer) var med, Harley-Davidson (72)
-               var ikke, og "soeger mest" byggede paa ingen data. -->
-          <h2>Mærker med flest annoncer</h2>
-          <!-- Runde 8 (D8-F2): "lige nu" var en friskhedspaastand, data ikke kan
-               baere (seneste kildekoersel kan vaere dage gammel). -->
-          <p>Tallet er antallet af annoncer hos kilderne.</p>
-        </div>
-        <a class="section-link" href="maerker.html">Alle mærker<span aria-hidden="true"></span></a>
-      </div>
-      <div class="brand-cloud" id="brand-cloud" data-maerkesider="aprilia,benelli,bmw,bsa,cagiva,ducati,fb-mondial,harley-davidson,honda,husqvarna,hyosung,indian,kawasaki,ktm,kymco,lauge-jensen,moto-guzzi,mv-agusta,rewaco,royal-enfield,suzuki,sym,triumph,victory,yamaha"></div>
-    </div>
-  </section>
-
   <!-- Runde 5 (D5-F1a): hele sektionen skjules af js/home.js, naar ingen annonce
        har en dato (drift: 548 af 548 er indekserede uden createdAt). Ingen dato
        opfindes; sektionen vender selv tilbage, den dag en annonce har en. -->
@@ -332,6 +314,77 @@ try{
     </div>
   </section>
 
+  <!-- PROBLEM. Tonen er praecis, ikke dramatisk: hvert punkt er en
+       kendsgerning, en koeber kan efterproeve, ikke en foelelse vi paastaar
+       han har. Tallene er lovens egne (js/data.js ~836), ikke vores. -->
+  <section class="section problem-section" aria-labelledby="problem-titel">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 id="problem-titel">Kubikcentimeter fortæller dig ikke, om du må køre den</h2>
+          <p>Fire ting gør det svært at se, hvad et A1- eller A2-kørekort rækker til.</p>
+        </div>
+      </div>
+      <ul class="problem-grid">
+        <li class="problem-item">
+          <h3>A2 er ikke en ccm-grænse</h3>
+          <p>Den er maks. 35 kW, maks. 0,2 kW pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt. To af de tre tal står sjældent i en annonce.</p>
+        </li>
+        <li class="problem-item">
+          <h3>Tallene er ofte upålidelige</h3>
+          <p>Effekt og vægt i brugtannoncer er tit afrundede, taget fra en anden årgang eller helt fraværende — og du kan ikke se hvilken af delene.</p>
+        </li>
+        <li class="problem-item">
+          <h3>Samme model, to udgaver</h3>
+          <p>Mange modeller sælges både spærret og fri. Står der &ldquo;A2&rdquo; i annoncteksten, er det tit sælgerens vurdering, ikke en registreret oplysning.</p>
+        </li>
+        <li class="problem-item">
+          <h3>Motorcykler er en underkategori</h3>
+          <p>På bilsiderne ligger de som en fane ved siden af bilerne. Andre steder er de blandet sammen med alt fra havemøbler til trailere.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- LOESNING. "Vi gaetter aldrig" er konkretiseret i tre paastande, der hver
+       kan efterproeves paa et kort — ikke som slogan. Bemaerk formuleringen af
+       totrins-maerkningen: den ER produktets regel (PRODUCT.md), og teksten
+       maa ikke love det ene, naar filteret kun kan staa inde for det andet. -->
+  <section class="section loesning-section" aria-labelledby="loesning-titel">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 id="loesning-titel">Vi gør regnestykket — og siger fra, når tallene mangler</h2>
+        </div>
+      </div>
+      <ol class="loesning-grid">
+        <li class="loesning-item">
+          <span class="loesning-nr" aria-hidden="true">1</span>
+          <h3>Kørekortet er det første filter</h3>
+          <p>Ikke et felt du skal huske at sætte. Vælger du A2, forsvinder alt, der er udelukket på de oplyste tal, før du overhovedet begynder at kigge.</p>
+        </li>
+        <li class="loesning-item">
+          <span class="loesning-nr" aria-hidden="true">2</span>
+          <h3>To niveauer, ikke ét</h3>
+          <!-- HER STOD "A2 bekraeftet ... er dokumenteret" som et maerkat,
+               siden angiveligt saetter. Den findes ikke: js/components.js
+               returnerer kun "Mulig A1"/"Mulig A2"/"Koerekort A", og
+               annoncesiden skriver "Ikke udelukket til A2 — men faa det
+               bekraeftet". PRODUCT.md har "A2 bekraeftet" som det NAESTE
+               niveau, ikke som noget, der er bygget. At beskrive det i
+               nutid er praecis den fejl, resten af sitet er bygget for at
+               undgaa — saa teksten siger nu, hvad kortene faktisk viser. -->
+          <p>Vi mærker aldrig en motorcykel som lovlig. Kortet siger <strong>Mulig A2</strong> — altså ikke udelukket på de tal, annoncen oplyser — og fortæller samtidig, hvad du selv skal tjekke på registreringsattesten.</p>
+        </li>
+        <li class="loesning-item">
+          <span class="loesning-nr" aria-hidden="true">3</span>
+          <h3>Manglende tal står som manglende</h3>
+          <p>Er effekten ikke oplyst, skriver vi &ldquo;Ikke oplyst&rdquo; — og annoncen ryger ud af kørekortfilteret i stedet for at blive gættet ind. Vi siger også hvor mange, der røg ud.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
   <section class="section">
     <div class="container">
       <div class="section-head">
@@ -341,6 +394,74 @@ try{
         </div>
       </div>
       <div class="trust-strip" id="trust-strip"></div>
+    </div>
+  </section>
+
+<section class="section saadan-section" aria-labelledby="saadan-titel">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 id="saadan-titel">Sådan fungerer det</h2>
+        </div>
+      </div>
+      <div class="saadan-spor">
+        <div class="spor spor-koeber">
+          <h3 class="spor-titel">Skal du købe</h3>
+          <ol class="spor-trin">
+            <li><strong>Vælg dit kørekort.</strong> A1, A2 eller A — øverst på forsiden eller i søgningen.</li>
+            <li><strong>Se kun det, der ikke er udelukket.</strong> Alt, de oplyste tal udelukker, er væk — vægt og afledningsregel kan vi ikke se, og det siger kortet. Du får også at vide, hvor mange annoncer der manglede tal.</li>
+            <li><strong>Se hvad der er bekræftet.</strong> Hvert kort viser kilden, og hvilke tal der er oplyst — og hvilke der ikke er.</li>
+          </ol>
+          <a class="btn btn-primary" href="soegning.html">Søg motorcykler</a>
+        </div>
+        <div class="spor spor-saelger">
+          <h3 class="spor-titel">Skal du sælge</h3>
+          <ol class="spor-trin">
+            <li><strong>Opret en konto.</strong> Den er gratis, og den skal bruges for at kunne redigere din annonce igen.</li>
+            <li><strong>Udfyld annoncen.</strong> Mærke, model, årgang, km og effekt. Jo flere tal, jo flere søgninger rammer den — effekten afgør, hvilke kørekortfiltre den kommer med i.</li>
+            <li><strong>Den er live.</strong> Din annonce står i søgningen side om side med de indekserede.</li>
+          </ol>
+          <a class="btn btn-outline" href="opret-annonce.html">Opret gratis annonce</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+<section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2>Søg efter type</h2>
+          <!-- Teksten skrives om af js/home.js (fyldTypeAntal), så snart
+               lageret har svaret: den skal sige, hvor mange annoncer der
+               IKKE har en type fra kilden og derfor ikke ligger bag nogen af
+               de otte fliser. Sætningen her er den korte, sande udgave, der
+               står, indtil tallet findes — ikke et tal, der retter sig selv. -->
+          <p id="types-sub">Find hurtigt den type, du leder efter.</p>
+        </div>
+      </div>
+      <div class="tiles-grid" id="category-tiles"></div>
+    </div>
+  </section>
+
+<section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <!-- Runde 5 (D5-F2): listen bygges af LAGERET (js/home.js bid 5): de 12
+               maerker med flest annoncer (mindst 2), tallet staar paa chippen, og
+               linket gaar til maerkesiden. Foer: en fast liste filtreret mod
+               BRANDS_BY_MODEL — Vespa (0 annoncer) var med, Harley-Davidson (72)
+               var ikke, og "soeger mest" byggede paa ingen data. -->
+          <h2>Mærker med flest annoncer</h2>
+          <!-- Runde 8 (D8-F2): "lige nu" var en friskhedspaastand, data ikke kan
+               baere (seneste kildekoersel kan vaere dage gammel). -->
+          <p>Tallet er antallet af annoncer hos kilderne.</p>
+        </div>
+        <a class="section-link" href="maerker.html">Alle mærker<span aria-hidden="true"></span></a>
+      </div>
+      <div class="brand-cloud" id="brand-cloud" data-maerkesider="aprilia,benelli,bmw,bsa,cagiva,ducati,fb-mondial,harley-davidson,honda,husqvarna,hyosung,indian,kawasaki,ktm,kymco,lauge-jensen,moto-guzzi,mv-agusta,rewaco,royal-enfield,suzuki,sym,triumph,victory,yamaha"></div>
     </div>
   </section>
 
@@ -415,6 +536,16 @@ try{
        saelgere hos os — saelgertalen skal ikke staa mellem koeberen og lageret.
        Priskortet (.sell-band-art) skjules under 820 px: ≈300 px for at sige
        "0 kr." to gange. -->
+  <!-- SAADAN FUNGERER DET. To spor, holdt visuelt adskilt, saa en koeber ikke
+       laeser saelgertrin og omvendt.
+
+       SAELGERTRINNENE ER DE FAKTISKE. Briefen bad om "angiv
+       registreringsnummer (valgfrit)" som trin 2 — det felt findes ikke i
+       opret-annonce.html i dag (docs/forretning.md har det under "Next"), og
+       en side, der beskriver en funktion, som ikke er bygget, er praecis den
+       fejl resten af sitet er bygget for at undgaa. Trin 1 siger ogsaa
+       ligeud, at der skal en konto til: js/opret-annonce.js omdirigerer
+       anonyme til login, saa "ingen skjulte krav" ville vaere usandt. -->
   <section class="section" id="sell-section" style="padding-top:0;">
     <div class="container">
       <div class="sell-band">
@@ -461,6 +592,24 @@ try{
               <li>Behold 100% af salgssummen</li>
             </ul>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AFSLUTTENDE CTA. Gentager hovedbudskabet og siger hvem siden er for.
+       Sidste linje er med vilje: kategorien "motorcyklist" laeses af mange som
+       erfarne folk med stort koerekort, og produktets staerkeste maalgruppe er
+       praecis dem, der IKKE har det endnu. Samme to CTA-tekster som i hero'en,
+       samme rangorden. -->
+  <section class="section slut-cta" aria-labelledby="slut-cta-titel">
+    <div class="container">
+      <div class="slut-cta-boks">
+        <h2 id="slut-cta-titel">Har du kørekort til motorcykel, har du en søgning her</h2>
+        <p>A1, A2 eller A — filteret er det samme, og det siger fra, når tallene ikke rækker til et svar. Du behøver hverken konto eller cookies for at søge.</p>
+        <div class="slut-cta-knapper">
+          <a class="btn btn-primary btn-lg" href="soegning.html">Søg motorcykler</a>
+          <a class="btn btn-outline btn-lg" href="opret-annonce.html">Opret gratis annonce</a>
         </div>
       </div>
     </div>
@@ -513,24 +662,24 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=13e0ff0f"></script>
-<script defer src="js/supabase-config.js?v=13e0ff0f"></script>
-<script defer src="js/supabase-api.js?v=13e0ff0f"></script>
-<script defer src="js/icons.js?v=13e0ff0f"></script>
-<script defer src="js/data.js?v=13e0ff0f"></script>
+<script defer src="js/security.js?v=55fb0140"></script>
+<script defer src="js/supabase-config.js?v=55fb0140"></script>
+<script defer src="js/supabase-api.js?v=55fb0140"></script>
+<script defer src="js/icons.js?v=55fb0140"></script>
+<script defer src="js/data.js?v=55fb0140"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=13e0ff0f"></script>
+<script defer src="js/filtrering.js?v=55fb0140"></script>
 <!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
      (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
      orden. Samme fil som soegning.html og scripts/build-srp.js. -->
-<script defer src="js/sortering.js?v=13e0ff0f"></script>
-<script defer src="js/store.js?v=13e0ff0f"></script>
-<script defer src="js/maaling.js?v=13e0ff0f"></script>
-<script defer src="js/backend-bridge.js?v=13e0ff0f"></script>
-<script defer src="js/components.js?v=13e0ff0f"></script>
-<script defer src="js/home.js?v=13e0ff0f"></script>
+<script defer src="js/sortering.js?v=55fb0140"></script>
+<script defer src="js/store.js?v=55fb0140"></script>
+<script defer src="js/maaling.js?v=55fb0140"></script>
+<script defer src="js/backend-bridge.js?v=55fb0140"></script>
+<script defer src="js/components.js?v=55fb0140"></script>
+<script defer src="js/home.js?v=55fb0140"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

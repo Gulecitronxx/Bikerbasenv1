@@ -1356,10 +1356,27 @@ ${galleriHTML}
     });
 
     document.getElementById('open-payment-modal').addEventListener('click', () => {
-      openInfoModal('Betal sikkert via MobilePay', `
-        <p>Ved almindelige køb betaler du direkte til sælger via MobilePay, når I mødes og du har godkendt motorcyklen.</p>
-        <p>Ved dyrere motorcykler kan du bede sælger om at bruge Bikerbasens <strong>sikker betaling</strong>: en ekstern, PCI-certificeret betalingspartner holder pengene, indtil du har bekræftet, at du har modtaget motorcyklen som beskrevet — så du ikke sender penge direkte til en fremmed på forhånd.</p>
-        <p style="margin-bottom:0;">Bikerbasen håndterer eller opbevarer aldrig dine kortoplysninger.</p>
+      /* HER STOD DEN TJENESTE, VORES EGEN SIKKERHEDSSIDE KALDER ET
+         SVINDELTEGN.
+
+         Teksten tilbod "Bikerbasens sikker betaling: en ekstern,
+         PCI-certificeret betalingspartner holder pengene". Den findes ikke.
+         sikkerhed.html siger ordret: "Bikerbasen tilbyder i dag intet 'sikker
+         betaling'- eller escrowflow ... Henviser en saelger til 'Bikerbasens
+         sikre betaling' eller lignende, er det et advarselstegn: den tjeneste
+         findes ikke."
+
+         Det var altsaa ikke bare en opdigtet funktion — det var en, der
+         gjorde koeberen MODTAGELIG for praecis det nummer, sitet advarer mod.
+         En svindler kunne skrive "lad os bruge Bikerbasens sikre betaling",
+         og koeberen ville have laest det paa annoncesiden selv.
+
+         Modalen siger nu det samme som sikkerhed.html. Hvis der en dag
+         kommer et escrowflow, skal BEGGE steder rettes samtidig. */
+      openInfoModal('Sådan betaler I hinanden', `
+        <p>Du betaler direkte til sælger — typisk via MobilePay eller bankoverførsel — når I mødes, og du har set motorcyklen og godkendt den.</p>
+        <p><strong>Bikerbasen har ingen betalingsløsning og rører aldrig pengene.</strong> Henviser nogen til &ldquo;Bikerbasens sikre betaling&rdquo; eller et depositum via os, er det et advarselstegn: den tjeneste findes ikke.</p>
+        <p style="margin-bottom:0;">Se <a href="sikkerhed.html">rådene om tryg handel</a>, før du kører af sted.</p>
       `);
     });
 
