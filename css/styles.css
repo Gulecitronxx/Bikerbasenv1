@@ -4522,3 +4522,16 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   margin: var(--space-3) 0 0; font-size:14px; color: var(--color-fg-muted);
 }
 .hero-secondary a{ color: var(--color-primary); font-weight:600; }
+
+/* ---- Moerkt tema: de moerke flader mister deres kant ----
+   --color-dark er #0F0D0A i moerkt tema og sidens baggrund #16140F.
+   Maalt i browseren: kontrast 1,04:1 — altsaa ingen synlig kant overhovedet.
+   Baade den afsluttende CTA-kasse og footeren flyder ud i siden, selvom hele
+   pointen med at gøre dem moerke er, at de skal kunne skelnes. De faar en
+   eksplicit kant i stedet for en ny farve, saa det lyse tema staar uroert. */
+:root[data-theme="dark"] .slut-cta-boks{ border:1px solid rgba(255,255,255,0.14); }
+:root[data-theme="dark"] .site-footer{ border-top:1px solid rgba(255,255,255,0.10); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .slut-cta-boks{ border:1px solid rgba(255,255,255,0.14); }
+  :root:not([data-theme="light"]) .site-footer{ border-top:1px solid rgba(255,255,255,0.10); }
+}
