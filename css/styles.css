@@ -564,7 +564,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* Fodlinkene var 18 px høje. WCAG 2.5.8 kræver mindst 24×24 for et
    klikmål, og på en telefon var de reelt svære at ramme. */
 .footer-col ul li a{ display:inline-flex; align-items:center; min-height:24px; }
-@media (pointer:coarse){ .footer-col ul li a{ min-height:40px; } }
+@media (pointer:coarse){ .footer-col ul li a{ min-height:44px; } }
 .footer-bottom{
   border-top:1px solid rgba(255,255,255,0.1); padding: var(--space-4) 0;
   display:flex; flex-wrap:wrap; gap:var(--space-3); justify-content:space-between; font-size:13px; color:#9C958A;
@@ -750,7 +750,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .kk-seg input{ position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
 .kk-seg label{
   flex:1 1 0; display:flex; align-items:center; justify-content:center;
-  min-height:40px; padding:0 10px; border-radius: var(--radius-pill);
+  min-height:44px; padding:0 10px; border-radius: var(--radius-pill);
   font-weight:600; font-size:14px; color: var(--color-fg-muted);
   cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
   transition: background-color .15s var(--ease-out), color .15s var(--ease-out);
@@ -4535,3 +4535,21 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   :root:not([data-theme="light"]) .slut-cta-boks{ border:1px solid rgba(255,255,255,0.14); }
   :root:not([data-theme="light"]) .site-footer{ border-top:1px solid rgba(255,255,255,0.10); }
 }
+
+/* ---- Runde 17: kritikerens P2'ere ----
+   K17-P2-2: .kk-hint reserverede to linjer. A2- og A-teksten fylder tre paa
+   390 px (maalt 49 px mod 32), saa soegeknappen hoppede 16 px under
+   fingeren ved det vigtigste valg. Tre linjer reserveres paa smal skaerm. */
+@media (max-width:559px){ .kk-hint{ min-height:4.05em; } }
+/* K17-P2-4: trykflader under 44 px paa touch. Den negative margin holder
+   linjens hoejde uaendret, saa layoutet ikke flytter sig. */
+@media (pointer:coarse){
+  .hero-secondary a{ display:inline-flex; align-items:center; min-height:44px; margin:-13px 0; }
+  .footer-theme{ min-height:44px; }
+}
+/* K17-P2-2, den egentlige aarsag: det var ikke .kk-hint, der flyttede
+   soegeknappen, men antalslinjen over soegekortet. Den skifter mellem to og
+   tre linjer efter filteret (maalt 46/69 px ved 375; ved 390 den omvendte
+   vej), og to reserverede linjer rakte ikke. Paa smalle skaerme reserveres
+   tre, saa knappen staar fast, uanset hvad der vaelges. */
+@media (max-width:460px){ .hero-count{ min-height: 4.05em; } }

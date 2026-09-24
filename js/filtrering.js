@@ -247,7 +247,7 @@ const Filtrering = (() => {
     if (state.vinterklar)
       list = filtrerMedUoplyst(list, 'vinterklargøring', l => l.vinterklar == null ? UOPLYST : !!l.vinterklar, opsamler);
     if (brug('koerekort') && state.koerekort)
-      list = filtrerMedUoplyst(list, 'kørekortkategori', l => koerekortSvar(l, state.koerekort), opsamler);
+      list = filtrerMedUoplyst(list, 'effekt/ccm', l => koerekortSvar(l, state.koerekort), opsamler);
 
     return list;
   }

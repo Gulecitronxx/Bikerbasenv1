@@ -25,7 +25,8 @@
 <meta name="twitter:title" content="Bikerbasen — motorcykler til salg i Danmark, nye og brugte">
 <meta name="twitter:description" content="Motorcykler til salg fra danske forhandlere og markedspladser — nye og brugte, samlet ét sted. Kilden står på hvert kort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
+
 
 
 
@@ -68,7 +69,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=fff79889">
+<link rel="stylesheet" href="css/styles.css?v=b9c453f3">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -138,7 +139,11 @@ try{
              andres sider (R13-I-20). Overskriften siger nu, hvad den
              besoegende faar, og "faktisk" baerer hele forskellen til en
              bilside: ikke bare motorcykler, men dem du maa koere. -->
-        <h1>Find en motorcykel, du faktisk må køre</h1>
+        <!-- Runde 17 (K17-P1-1): "Find en motorcykel, du faktisk maa koere"
+             lovede mere, end filteret kan — det kan kun udelukke — og paa
+             mobil er .lead med forbeholdet skjult, saa loeftet stod alene
+             over folden. Overskriften siger nu mekanikken, ikke udfaldet. -->
+        <h1>Søg motorcykler efter det kørekort, du har</h1>
         <!-- Antallet står HER, mellem overskrift og søgekort — samme sted som
              Bilbasen sætter "50.356 annoncer i dag". Før lå det under kortet i
              brødtekststørrelse, hvor ingen så det. Højden er reserveret i CSS,
@@ -242,7 +247,7 @@ try{
            oplyste tal, ikke gaet. -->
       <ul class="hero-trust">
         <li class="hero-trust-item">Kilden står på hvert kort</li>
-        <li class="hero-trust-item">Kørekortfilteret bygger på oplyst effekt og ccm — aldrig på gæt</li>
+        <li class="hero-trust-item">Kørekortfilteret bygger på oplyste tal — aldrig på gæt</li>
         <li class="hero-trust-item">Mangler et tal, står der "Ikke oplyst"</li>
       </ul>
     </div>
@@ -362,7 +367,7 @@ try{
         <li class="loesning-item">
           <span class="loesning-nr" aria-hidden="true">1</span>
           <h3>Kørekortet er det første filter</h3>
-          <p>Ikke et felt du skal huske at sætte. Vælger du A2, forsvinder alt, der er udelukket på de oplyste tal, før du overhovedet begynder at kigge.</p>
+          <p>Det står i søgekortet øverst, ikke gemt i et filterpanel. Vælger du A2, forsvinder alt, der er udelukket på de oplyste tal, før du overhovedet begynder at kigge.</p>
         </li>
         <li class="loesning-item">
           <span class="loesning-nr" aria-hidden="true">2</span>
@@ -375,7 +380,7 @@ try{
                niveau, ikke som noget, der er bygget. At beskrive det i
                nutid er praecis den fejl, resten af sitet er bygget for at
                undgaa — saa teksten siger nu, hvad kortene faktisk viser. -->
-          <p>Vi mærker aldrig en motorcykel som lovlig. Kortet siger <strong>Mulig A2</strong> — altså ikke udelukket på de tal, annoncen oplyser — og fortæller samtidig, hvad du selv skal tjekke på registreringsattesten.</p>
+          <p>Vi mærker aldrig en motorcykel som lovlig. Kortet siger <strong>Mulig A2</strong> — altså ikke udelukket på de tal, annoncen oplyser — og annoncesiden fortæller, hvad du selv skal tjekke på registreringsattesten.</p>
         </li>
         <li class="loesning-item">
           <span class="loesning-nr" aria-hidden="true">3</span>
@@ -605,24 +610,24 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=fff79889"></script>
-<script defer src="js/supabase-config.js?v=fff79889"></script>
-<script defer src="js/supabase-api.js?v=fff79889"></script>
-<script defer src="js/icons.js?v=fff79889"></script>
-<script defer src="js/data.js?v=fff79889"></script>
+<script defer src="js/security.js?v=b9c453f3"></script>
+<script defer src="js/supabase-config.js?v=b9c453f3"></script>
+<script defer src="js/supabase-api.js?v=b9c453f3"></script>
+<script defer src="js/icons.js?v=b9c453f3"></script>
+<script defer src="js/data.js?v=b9c453f3"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=fff79889"></script>
+<script defer src="js/filtrering.js?v=b9c453f3"></script>
 <!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
      (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
      orden. Samme fil som soegning.html og scripts/build-srp.js. -->
-<script defer src="js/sortering.js?v=fff79889"></script>
-<script defer src="js/store.js?v=fff79889"></script>
-<script defer src="js/maaling.js?v=fff79889"></script>
-<script defer src="js/backend-bridge.js?v=fff79889"></script>
-<script defer src="js/components.js?v=fff79889"></script>
-<script defer src="js/home.js?v=fff79889"></script>
+<script defer src="js/sortering.js?v=b9c453f3"></script>
+<script defer src="js/store.js?v=b9c453f3"></script>
+<script defer src="js/maaling.js?v=b9c453f3"></script>
+<script defer src="js/backend-bridge.js?v=b9c453f3"></script>
+<script defer src="js/components.js?v=b9c453f3"></script>
+<script defer src="js/home.js?v=b9c453f3"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

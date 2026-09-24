@@ -248,11 +248,14 @@ async function buildForside(){
          men for A1 er det slagvolumen — en annonce uden ccm kan ikke afvises
          som A1, mens en på 650 cm³ kan, også uden hk. Én formulering, der er
          sand for begge, slår to, hvor den ene kan komme til at lyve. */
-      : `${meta.label.replace(/\s*\(.*\)/, '')}: ${meta.hint.toLowerCase()}. `
+      /* K17-P2-1: hint'en blev sendt gennem toLowerCase() ("35 kw", "a2")
+         og fik et ekstra punktum. Den staar nu, som den er skrevet. */
+      : `${meta.label.replace(/\s*\(.*\)/, '')}: ${meta.hint.replace(/\.\s*$/, '')}. `
         /* "Vi viser kun mc'er, vi kan svare for" laeses som: vi kan bekraefte
            koerekortklassen. Det kan vi ikke — kun udelukke paa de oplyste tal
            (kW/kg og afledningsreglen staar ikke i en annonce). */
-        + `Vi viser kun dem, de oplyste tal ikke udelukker.`;
+        /* A udelukker intet, saa saetningen ville modsige hint'en lige foer. */
+        + (meta.id === 'A' ? '' : `Vi viser kun dem, de oplyste tal ikke udelukker.`);
 
     // Før databasen har svaret, siger vi ingenting frem for noget forkert.
     // Det gælder også regnskabet over de fravalgte: et tal udregnet på
@@ -427,8 +430,8 @@ async function buildForside(){
     { label: 'Under 30.000 kr.', href: 'soegning.html?maxPrice=30000' },
     { label: 'Under 60.000 kr.', href: 'soegning.html?maxPrice=60000' },
     { label: 'Under 100.000 kr.', href: 'soegning.html?maxPrice=100000' },
-    { label: 'Kan køres på A1', href: 'soegning.html?koerekort=A1' },
-    { label: 'Kan køres på A2', href: 'soegning.html?koerekort=A2' },
+    { label: 'Mulige A1-motorcykler', href: 'soegning.html?koerekort=A1' },
+    { label: 'Mulige A2-motorcykler', href: 'soegning.html?koerekort=A2' },
     { label: 'Kun forhandlere', href: 'soegning.html?dealer=1' },
   ]);
 
@@ -448,7 +451,7 @@ async function buildForside(){
     </div>
     <div class="trust-card">
       <span class="trust-icon">${Icon.mail}</span>
-      <div><h3>Din kontaktinfo er skjult for udloggede</h3><p>Opretter du en annonce på Bikerbasen, er dit navn og telefonnummer kun synlige for indloggede brugere — ikke for robotter, søgemaskiner eller udloggede besøgende.</p></div>
+      <div><h3>Din kontaktinfo er skjult for udloggede</h3><p>Opretter du en annonce på Bikerbasen, er dit navn kun synligt for indloggede brugere — ikke for robotter, søgemaskiner eller udloggede besøgende. Dit telefonnummer vises kun, hvis du selv slår det til.</p></div>
     </div>
     <!-- Her stod "Verificerede forhandlere — Forhandlere godkendes med CVR og
          MitID". Det passede ikke. verifiedBadgeHTML() i js/components.js
@@ -538,8 +541,16 @@ async function buildForside(){
          ikke. Resten ordnes efter antal, flest foerst (css order), saa
          Cruiser 89 staar foerst og Cross 1 sidst. Ingen type gaettes. */
       const flise = el.closest('.tile');
-      if (flise){ flise.hidden = n === 0; flise.style.order = String(-n); }
+      if (flise){ flise.hidden = n === 0; flise.dataset.antal = String(n); }
     });
+    /* K17-P2-5: css order gav én visuel raekkefoelge og en anden for
+       tastaturet (WCAG 2.4.3). Fliserne flyttes nu i DOM'en, flest foerst. */
+    const fliseRaekke = document.getElementById('category-tiles');
+    if (fliseRaekke){
+      [...fliseRaekke.querySelectorAll(':scope > .tile')]
+        .sort((x, y) => Number(y.dataset.antal || 0) - Number(x.dataset.antal || 0))
+        .forEach(t => fliseRaekke.appendChild(t));
+    }
     /* Paa mobil er raekken en vandret rulleliste med snap. Chrome bevarer
        snap-maalet (DOM-foerste flise, Sport) hen over omordningen og rullede
        raekken 664 px til hoejre. Tilbage til start, naar ordenen er sat. */
@@ -928,7 +939,16 @@ async function buildForside(){
      Fjernet, fordi to identiske kommentarer er lige så forvirrende som en
      forkert.) */
   const featuredSub = document.getElementById('featured-sub');
-  const ANTALSORD = { 1: 'Én', 2: 'To', 3: 'Tre', 4: 'Fire', 5: 'Fem', 6: 'Seks' };
+  const ANTALSORD = { 1: 'Én', 2: 'To', 3: 'Tre', 4: 'Fire', 5: 'Fem', 6: 'Seks', 7: 'Syv', 8: 'Otte', 9: 'Ni', 10: 'Ti', 11: 'Elleve', 12: 'Tolv' };
+  /* K17-P2-7: "mindst én til hvert kørekort" laeses som et loefte om, at
+     kortet kan koeres paa klassen, og stod der ogsaa, naar lageret ingen
+     kandidat havde. Nu kun de klasser, der faktisk er med, og som "mulig". */
+  const koerekortDel = (kort) => {
+    if (typeof koerekortForListing !== 'function') return '';
+    const med = ['A1', 'A2'].filter(k => kort.some(l => koerekortForListing(l) === k));
+    if (!med.length) return '';
+    return `mindst én mulig ${med.join(' og én mulig ')}, `;
+  };
   const skrivFeaturedSub = (antal) => {
     if (!featuredSub || !antal) return;
     const byer = [...new Set(kandidater.map(l => l.city).filter(Boolean))];
@@ -942,7 +962,8 @@ async function buildForside(){
        der ikke er maerker nok). */
     featuredSub.textContent =
       `${ANTALSORD[antal] || daTal(antal)} af de ${daTal(kandidater.length)} annoncer med foto og modelnavn — `
-      + `mindst én til hvert kørekort, ${enPrMaerkeHoldt ? 'højst én pr. mærke' : 'højst én pr. model'} og højst halvdelen fra samme kilde.`
+      + koerekortDel(featured)
+      + `${enPrMaerkeHoldt ? 'højst én pr. mærke' : 'højst én pr. model'} og højst halvdelen fra samme kilde.`
       + enKilde;
   };
 

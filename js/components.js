@@ -927,7 +927,10 @@ function listingCardHTML(l, i){
            kategorien ikke afgøres, står der ingenting frem for en lang
            sætning hen over billedet. Forklaringen følger med som titel. */
         const k = koerekortMaerkat(l);
-        return k.kode ? `<span class="card-koerekort" title="${escapeHTML(k.forklaring)}" aria-label="${escapeHTML(k.forklaring)}">${k.kode}</span>` : '';
+        /* K17-P1-4: brikken sagde bare "A2" med forbeholdet i aria-label paa
+           en rolleloes span. Samme tekst som det indekserede kort nu, og
+           forbeholdet som rigtig tekst til skaermlaeseren. */
+        return k.kode ? `<span class="card-koerekort" title="${escapeHTML(k.forklaring)}">${escapeHTML(k.tekst)}<span class="visually-hidden">. ${escapeHTML(k.forklaring)}</span></span>` : '';
       })()}
       <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
     </div>
