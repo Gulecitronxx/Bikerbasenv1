@@ -108,7 +108,25 @@ andet sted end i `verify-profile`.
 
 ---
 
-## 5. Søgeagenter — bygget, mangler to secrets
+## 5. Søgeagenter — færdig (27.09.2026)
+
+**Status: live.** Alle tre secrets er sat på `notify-saved-searches`
+(`NOTIFY_SECRET`, `RESEND_API_KEY`, `SITE_URL`), Resend-domænet
+`bikerbasen.dk` var allerede verificeret, og migration 013 var allerede
+kørt. Efterprøvet direkte mod den kørende database: trigger, tabel og
+funktion findes, og NOTIFY_SECRET i den deployede edge-funktion matcher
+værdien bagt ind i `notify_saved_searches()`-triggeren.
+
+Ingen live-test af selve mailafsendelsen — `select count(*) from
+saved_searches where notify` gav 0 på tidspunktet, så der var ingen rigtig
+bruger at teste imod uden at risikere en uventet mail. Den fulde vej
+(gem søgning → annonce bliver aktiv → mail) virker først, når den første
+rigtige søgeagent findes, men kræver ingen yderligere handling herfra.
+
+Historikken herunder er den oprindelige runbook — bevaret som dokumentation
+af, hvad der skulle gøres, ikke som en åben opgave længere.
+
+### Søgeagenter — bygget, mangler to secrets (oprindelig, 24.08.2026)
 
 Søgeagenten var tom hele vejen ned: knappen skrev kun til localStorage,
 tabellen `saved_searches` blev aldrig skrevet til, metoderne i
