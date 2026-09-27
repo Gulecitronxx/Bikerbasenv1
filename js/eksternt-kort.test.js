@@ -129,6 +129,26 @@ test('kilden nævnes stadig på kortet — fodlinje (med forklaring i title) og 
   assert.match(attrFor(html, 'card-link')['aria-label'], /hos MC Syd/);
 });
 
+/* R18-P1: hjørne-badgen er IKKE runde 5's genopstandne stribe (den
+   forrige test låser netop, at .card-kilde ikke findes). Den er en ny,
+   lille pille i .card-media — ét <span>, ingen ny <a>, så testen ovenfor
+   ("der må kun være ét <a> på kortet") holder stadig. */
+test('hjørne-badgen viser domænet i .card-media, uden at tilføje en ny vej ud af sitet', () => {
+  const html = externalCardHTML(eksternAnnonce(), 1);
+  const badge = (html.match(/<span class="card-source-badge"[^>]*>[\s\S]*?<\/span><\/span>/) || [])[0];
+  assert.ok(badge, 'badgen skal findes på kortet');
+  assert.match(badge, /mcsyd\.dk/);
+  assert.match(badge, /title="Annoncen ligger hos MC Syd[^"]*"/);
+  const links = html.match(/<a\b[^>]*>/g) || [];
+  assert.equal(links.length, 1, 'badgen må ikke tilføje et nyt <a>');
+});
+
+test('uden et oplyst domæne udelades badgen helt — ingen tomt hjørne-mærke', () => {
+  const l = eksternAnnonce({ source: { navn: 'Gul og Gratis', domaene: undefined } });
+  const html = externalCardHTML(l, 1);
+  assert.doesNotMatch(html, /class="card-source-badge"/);
+});
+
 test('listerækken følger kortet: ét link, og det peger indad', () => {
   const l = eksternAnnonce();
   const html = externalRowHTML(l, 1);

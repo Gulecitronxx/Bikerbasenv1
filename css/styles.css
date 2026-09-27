@@ -3359,6 +3359,24 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .card-compare.active{ background: var(--color-primary); color: var(--color-on-primary); }
 :root[data-theme="dark"] .card-compare{ background: rgba(31,28,23,.92); }
 
+/* R18-P1: se begrundelsen i js/components.js ved externalCardHTML(). Solid
+   baggrund med vilje, ikke en gennemsigtig pille — en tidligere pille
+   direkte over et forhandlerfoto maalte 2,64:1 kontrast, under AA's 4,5:1
+   (se komment ved externalCardHTML, punkt 5). Samme moerk-tema-moenster
+   som .card-compare. */
+.card-source-badge{
+  position:absolute; top:10px; left:10px; z-index:2;
+  display:inline-flex; align-items:center; gap:5px;
+  background: rgba(255,255,255,.92); color: var(--color-dark);
+  font-size:11px; font-weight:600; line-height:1.2;
+  padding:4px 10px; border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm); max-width: calc(100% - 20px);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  pointer-events:none;
+}
+.card-source-badge svg{ width:12px; height:12px; flex:0 0 auto; }
+:root[data-theme="dark"] .card-source-badge{ background: rgba(31,28,23,.92); color:#fff; }
+
 .compare-bar{
   position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:60;
   display:flex; align-items:center; gap:16px;
@@ -4466,7 +4484,12 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .problem-item-regel h3{ font-size:20px; }
 .problem-item-minor{ padding-bottom: var(--space-3); border-bottom:1px solid var(--color-border); }
 .problem-item-minor:last-child{ border-bottom:none; padding-bottom:0; }
-.problem-item-minor h3{ font-size:15px; }
+/* R18-P0-efterslaeb: stod paa 15px, samme stoerrelse som brodtekst under den
+   (font-size:15px paa .problem-item p) — detektoren fangede den flade
+   hierarki (body/h3 begge ~15px, ingen tydelig trin). Nedtoningen af de tre
+   mindre punkter kommer allerede fra stregen vaek og bund-kanten; den
+   trænger ikke ogsaa til at dele stoerrelse med broedteksten. Falder nu
+   tilbage til basens 17px. */
 .problem-item-minor h3::before{ display:none; }
 @media (min-width:1100px){
   .problem-grid{ grid-template-columns: 1.3fr 1fr; align-items:start; }
