@@ -15,37 +15,41 @@ produktionskode.
 
 ---
 
-## R18-1 — hero-søgeknappen er statisk, Bilbasens er ikke
+## R18-1 — TRUKKET TILBAGE (27.09.2026): findingen var forkert
 
-**Rolle:** designer · **Akse:** funktionalitet · **Sev:** P2
+**Oprindelig påstand:** hero-søgeknappen er statisk, Bilbasens er ikke.
 
-**Fil:** `index.html:151` (`#hero-count-hint`), `index.html:214`
-(`#hs-submit`)
+**Hvorfor den var forkert:** jeg læste kun den statiske markup i
+`index.html:214` (`#hs-submit`, tekst "Søg motorcykler") og konkluderede
+derfra, at intet reagerer på filtervalg. Jeg tjekkede ikke `js/home.js`'s
+runtime — hvor mekanikken allerede findes, bare andetsteds:
 
-**Problem:** `#hero-count-hint` viser totalantallet, sat ved page load, og
-rører sig ikke, når brugeren ændrer type/pris/kørekort i `#hero-search-form`.
-Knappen `#hs-submit` siger konstant "Søg motorcykler". På bilbasen.dk opdaterer
-CTA-knappen sig selv til "Vis 41.573 biler" (eller hvad optællingen bliver)
-for hver ændring i formularen, før der klikkes søg — brugeren ser konsekvensen
-af filtrene, ikke først efter et sideskift.
+- `js/home.js:174-195` (`heroFiltre`/`heroListe`) regner en live liste af
+  `Filtrering.anvendFiltre(Store.getAllListings(), filtre, null, skjult)` —
+  samme delte filterkæde som `soegning.html` bruger (`js/filtrering.js`,
+  indført runde 3 netop for at forhindre to sider, der tæller hver sin vej).
+- `js/home.js:224-330` (`opdaterHero`) skriver resultatet ind i
+  `#hero-count-hint` (**ikke** knappen): "Din søgning matcher **91**
+  annoncer lige nu." — efterprøvet live i browseren 27.09.2026: valgte
+  "Cruiser" i typefeltet, linjen skiftede fra det statiske "603 annoncer …"
+  til "Din søgning matcher 91 annoncer lige nu." uden sideskift.
+- `js/home.js:332-338` binder `input`/`change` på præcis de tre felter
+  (`hs-query`, `hs-type`, `hs-price`) plus kørekort-radioerne og et
+  `reset`-håndtag — dækker samme overflade, mit forslag pegede på.
+- Knappens tekst er med vilje uændret: kommentaren ved linje 318-330 siger
+  det direkte — en tidligere runde ("Aim-loop runde 16") PRØVEDE en
+  dynamisk knaptekst ("Vis 602 annoncer") og trak den tilbage til fordel
+  for én konsistent CTA-tekst hele siden igennem (den optræder fire steder:
+  hero, "Sådan fungerer det", slut-CTA, header), med tallet i stedet
+  liggende lige over knappen, hvor det opdateres af samme funktion.
 
-**Hvorfor det er en reel forskel og ikke bare pynt:** siden bygger allerede
-sit løfte på præcise tal ("603 annoncer", "Vi gætter aldrig") — et statisk
-"Søg motorcykler"-CTA bryder ikke det løfte, men det udnytter heller ikke det,
-lageret allerede kan svare på client-side. `kandidater`/`raekkefoelge` (samme
-datasæt som `vaelgFeatured` bruger, `js/home.js:911`) er til stede i
-hukommelsen på forsiden, så en optælling kræver ikke et ekstra kald.
+**Lektion for mig selv, ikke kun for arkivet:** en finding, der citerer
+statisk markup uden at følge JS'ens runtime-bindinger, kan se ud som et
+reelt hul, selvom mekanismen allerede findes ét niveau dybere. Næste gang
+et "mangler X" skal først eftervises med `grep` på funktionsnavnet i den
+tilhørende `.js`-fil, ikke kun på teksten i `.html`-filen.
 
-**Forslag til retning (ikke bindende for dev):** knappens tekst opdateres til
-"Vis N annoncer" ved hver `change`/`input` på `#hero-search-form`'s felter,
-regnet af samme filterlogik som `soegning.html` bruger, så tallet ikke kan
-komme i utakt med søgesidens eget. Falder tallet til 0, skal knappen sige det
-— ikke skjule sig eller vise "0" råt (jf. `js/soegning-tom.test.js`'s
-mønster for søgesidens tomtilstand).
-
-**Risiko/faldgrube for critic at holde øje med:** et `input`-event på
-`#hs-query` (fritekst) uden debounce kan omregne på hvert tastetryk — mål
-kald/sekund før det godkendes.
+**Status:** trukket tilbage, intet at rette. Ingen kode ændret for R18-1.
 
 ---
 
@@ -119,3 +123,30 @@ To adskilte veje herfra — begge kræver mennesket:
 Uden ét af de to svar (nu: vej 1's opslag, eller vent på vej 2's data) er
 R18-2 fortsat en gætteforbedring, præcis den kategori runde 10 bad om at
 stoppe med at måle på screenshots alene.
+
+---
+
+## Status ved lukning af runde 18 (aim-loop, 27.09.2026)
+
+Efter R18-1's tilbagetrækning og R18-2's rettelse blev der brugt en ny
+kritik-cyklus på at lede efter mere at sammenligne mod bilbasen.dk. Resultat:
+
+- **Forsiden, søgesiden, annoncesiden, opret-annonce-flowet og
+  sælgerprofilen er alle allerede dækket i dybden** — henholdsvis runde
+  1-13 + K16/K17 (commits, ikke egne docs), `opret-runde-1/2/3-kritik.md`,
+  og `bar/` (dedikeret Bilbasen-benchmark af sælgerprofilen, se
+  `js/forhandler.js`'s egen henvisning til `bar/RUBRIC.md`). En ny fuld
+  blind sammenligning af de samme fem overflader ville med stor
+  sandsynlighed gentage runde 10's egen dom: aftagende udbytte.
+- **Frisk sundhedstjek i browseren (27.09.2026, produktion, `v=b51efa92`):**
+  nul konsolfejl, alle 12 netværkskald på forsiden 200. Ingen ny drift at
+  rette.
+- **Konklusion:** denne cyklus fandt ingen ny, navngivet finding, der
+  holder til samme bevisstandard som R18-2. Det er ikke det samme som
+  "intet at forbedre" — runde 9's kritiker pegede allerede på de reelle
+  næste skridt, og de er stadig ubesvarede, fordi de kræver mennesket, ikke
+  mere kode: crawl-kadence (manuel i dag), claim-verifikation
+  (domæne/kode-verifikation ikke bygget), søgeagent-mail (Resend-nøgle
+  mangler), flere kilder (kræver tilladelsesaftaler). Den, der vil have
+  næste reelle gevinst, finder den der — ikke i endnu en
+  skærmbillede-sammenligning med bilbasen.dk.
