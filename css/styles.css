@@ -4441,8 +4441,6 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   display:grid; gap: var(--space-5);
   grid-template-columns: 1fr;
 }
-@media (min-width:640px){ .problem-grid{ grid-template-columns: repeat(2,1fr); } }
-@media (min-width:1100px){ .problem-grid{ grid-template-columns: repeat(4,1fr); } }
 .problem-item h3{
   font-family: var(--font-display); font-size:17px; line-height:1.3;
   margin:0 0 var(--space-2);
@@ -4455,8 +4453,42 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 }
 .problem-item p{ margin:0; color: var(--color-fg-muted); font-size:15px; line-height:1.55; }
 
+/* R18-P0: fire ens kort var scaffoldet, ikke et budskab — reglen, siden
+   findes for at forklare, drukner i tre andre punkter med samme vaegt.
+   Regel-punktet faar nu sit eget kort og de tre andre bliver en tættere,
+   tydeligt mindre liste, saa oejet ved, hvad det skal laese foerst.
+   Kommer EFTER .problem-item h3::before med vilje, saa display:none her
+   vinder kaskaden paa ens specificitet i stedet for at tabe til den. */
+.problem-item-regel{
+  background: var(--color-surface); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-5);
+}
+.problem-item-regel h3{ font-size:20px; }
+.problem-item-minor{ padding-bottom: var(--space-3); border-bottom:1px solid var(--color-border); }
+.problem-item-minor:last-child{ border-bottom:none; padding-bottom:0; }
+.problem-item-minor h3{ font-size:15px; }
+.problem-item-minor h3::before{ display:none; }
+@media (min-width:1100px){
+  .problem-grid{ grid-template-columns: 1.3fr 1fr; align-items:start; }
+  .problem-item-regel{ grid-row: 1 / span 3; padding: var(--space-6); }
+  .problem-item-regel h3{ font-size:24px; }
+}
+
+/* Regel-tallene som glanceable chips, ikke kun proza — samme visuelle sprog
+   som .loesning-nr (primary-tint pille), ikke en ny dekoration. */
+.regel-stats{ display:flex; flex-wrap:wrap; gap: var(--space-2); margin: var(--space-3) 0; padding:0; list-style:none; }
+.regel-stat{
+  display:inline-flex; align-items:center; gap:4px;
+  background: var(--color-primary-tint); color: var(--color-primary);
+  border-radius: var(--radius-pill); padding: 4px 12px;
+  font-size:13px; font-weight:600; line-height:1.3;
+}
+.regel-stat b{ font-family: var(--font-display); font-size:15px; }
+
 /* Loesningen er nummereret, fordi den ER en raekkefoelge: filteret foerst,
-   saa maerkningen, saa det vi ikke kan svare paa. */
+   saa maerkningen, saa det vi ikke kan svare paa. Linjen mellem tallene gør
+   raekkefoelgen synlig, ikke kun tekstlig — samme border-token som resten
+   af siden, ingen ny farve. */
 .loesning-grid{
   list-style:none; margin:0; padding:0; counter-reset:none;
   display:grid; gap: var(--space-6); grid-template-columns:1fr;
@@ -4468,7 +4500,13 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   width:34px; height:34px; border-radius: var(--radius-pill);
   background: var(--color-primary-tint); color: var(--color-primary);
   font-family: var(--font-display); font-weight:700; font-size:16px;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-2); position:relative;
+}
+@media (min-width:860px){
+  .loesning-item:not(:last-child) .loesning-nr::after{
+    content:''; position:absolute; top:50%; left:100%; width: var(--space-6);
+    height:2px; background: var(--color-border); transform:translateY(-50%);
+  }
 }
 .loesning-item h3{ font-family: var(--font-display); font-size:18px; margin:0; line-height:1.3; }
 .loesning-item p{ margin:0; color: var(--color-fg-muted); font-size:15px; line-height:1.6; }
@@ -4492,6 +4530,11 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .spor-trin li{ color: var(--color-fg-muted); font-size:15px; line-height:1.55; }
 .spor-trin strong{ color: var(--color-fg); }
 .spor .btn{ align-self:flex-start; margin-top:auto; }
+
+/* R18-P0: uden denne stod tre sektioner i traek (loesning, tryghed, saadan)
+   paa samme flade efter problem-sektionens surface-2 — kun ét skift i
+   rytmen i stedet for en veksling. Samme token som problem-section. */
+.trust-section{ background: var(--color-surface-2); }
 
 /* Afsluttende CTA: moerk flade, fordi den er sidste ord paa siden og skal
    kunne skelnes fra saelgerbaandet lige over. Ingen gradient. */
