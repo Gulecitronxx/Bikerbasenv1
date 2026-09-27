@@ -60,6 +60,7 @@ const Maaling = (function(){
       brands: (state.brands || []).slice(0, 5).join(',') || undefined,
       types: (state.types || []).slice(0, 5).join(',') || undefined,
       koerekort: state.koerekort || undefined,
+      dealer: state.dealerOnly || undefined,
       price_max: state.priceMax != null ? state.priceMax : undefined,
       price_min: state.priceMin != null ? state.priceMin : undefined,
       sort: state.sort || undefined,

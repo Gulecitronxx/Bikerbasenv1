@@ -21,15 +21,20 @@ test('uden samtykke (intet window.gtag) sendes INTET — og intet køes', () => 
 });
 
 test('search: filtrenes værdier og antal, søgeord klippet til 80 tegn, tomme felter udelades', () => medGtag(kald => {
-  const state = { q: 'Yamaha MT-07 '.repeat(20), brands: ['Honda', 'Yamaha'], types: [], koerekort: 'A2', priceMax: 60000, priceMin: null, sort: 'blandet' };
+  const state = { q: 'Yamaha MT-07 '.repeat(20), brands: ['Honda', 'Yamaha'], types: [], koerekort: 'A2', dealerOnly: true, priceMax: 60000, priceMin: null, sort: 'blandet' };
   Maaling.soegning(state, 47);
   const [ev, navn, p] = kald[0];
   assert.equal(ev, 'event'); assert.equal(navn, 'search');
   assert.equal(p.search_term.length, 80);
   assert.equal(p.brands, 'Honda,Yamaha');
   assert.equal(p.types, undefined, 'tom liste sendes ikke');
-  assert.equal(p.koerekort, 'A2'); assert.equal(p.price_max, 60000); assert.equal(p.price_min, undefined);
+  assert.equal(p.koerekort, 'A2'); assert.equal(p.dealer, true); assert.equal(p.price_max, 60000); assert.equal(p.price_min, undefined);
   assert.equal(p.results, 47);
+}));
+
+test('search: dealerOnly=false sendes ikke med (R18-2 — kun sat, når filteret faktisk er aktivt)', () => medGtag(kald => {
+  Maaling.soegning({ brands: [], types: [], koerekort: '', dealerOnly: false, priceMax: null, priceMin: null, sort: 'blandet' }, 603);
+  assert.equal(kald[0][2].dealer, undefined);
 }));
 
 test('view_item / kilde_klik: annoncens mærke, model, type, pris og kilde — aldrig sælgerens oplysninger', () => medGtag(kald => {
