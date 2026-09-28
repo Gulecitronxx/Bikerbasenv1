@@ -829,6 +829,10 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   cursor:pointer;
 }
 .tile:hover{ transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--color-primary); }
+/* Runde 23 (R20-P2): sat af balancerFliseraekke() (js/home.js), når et
+   flisetal ikke går op i gitterets fire spalter — skjuler den mindst
+   populære resterende flise, så sidste række ikke ender med tomme felter. */
+.tile-trimmed{ display:none; }
 .tile .tile-media{ position:relative; display:block; aspect-ratio:4/3; overflow:hidden; background: var(--color-surface-2); }
 .tile .tile-media img{ width:100%; height:100%; object-fit:cover; transition: transform .45s var(--ease-out); }
 /* Ensartende, varm tone oven på de forskellige studiebilleder, så et lyst
@@ -3082,6 +3086,18 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 }
 .brand-chip-go{ color: var(--color-fg-muted); display:inline-flex; opacity:0; transform: translateX(-4px); transition: opacity .18s var(--ease-out), transform .18s var(--ease-out), color .18s var(--ease-out); }
 .brand-chip-go svg{ width:16px; height:16px; }
+/* Runde 23 (R20-P2): sat af balancerMaerkeraekke() (js/home.js), når 12
+   kuraterede mærker ikke går op i gitterets auto-fill-spalter (2/4/5, alt
+   efter bredde) — fylder resten af sidste række med "Alle mærker" i stedet
+   for tomme felter. Stiplet kant, samme sprog som .newest-cta, så den læses
+   som en gennemgang, ikke et 13. mærke. */
+.brand-chip-fyld{
+  justify-content:center; border-style:dashed;
+  border-color: color-mix(in srgb, var(--color-primary) 42%, var(--color-border));
+}
+.brand-chip-fyld:hover{ border-style:solid; border-color: var(--color-primary); }
+.brand-chip-fyld .brand-chip-name{ color: var(--color-primary); }
+.brand-chip-fyld .brand-chip-go{ opacity:1; transform:none; color: var(--color-primary); }
 .brand-chip:hover .brand-chip-go{ opacity:1; transform: translateX(0); color: var(--color-primary); }
 
 /* ============ Forside: Sælg-bånd ============ */

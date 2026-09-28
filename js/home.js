@@ -526,6 +526,28 @@ async function buildForside(){
      ville tro, vi tabte annoncer undervejs. Vi gætter ikke en type ud fra
      modelnavnet; se typeFraTitel() i js/backend-bridge.js, der HOLDER OP,
      når kildens kategoriord ikke er der. */
+  /* Runde 23 (R20-P2): fire faste spalter fra 640px (css/styles.css). Skjuler
+     D5-F3 en flise (0 annoncer), knækker et flisetal, der ikke går op i fire,
+     sidste række til tomme felter ved siden af de sidste fliser. Samme greb
+     som tegnFeatured (D8-F1) længere nede: vis hele rækker, og skjul i stedet
+     den mindst populære af de resterende fliser — den findes stadig via fuld
+     søgning, ligesom et fravalgt "udvalgt"-kort. På mobil er rækken en
+     vandret rulleliste (ingen rækker at balancere). */
+  const balancerFliseraekke = () => {
+    tilesMount.querySelectorAll(':scope > .tile.tile-trimmed').forEach(t => t.classList.remove('tile-trimmed'));
+    if (!window.matchMedia('(min-width:640px)').matches) return;
+    const cols = getComputedStyle(tilesMount).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+    const synlige = [...tilesMount.querySelectorAll(':scope > .tile')].filter(t => !t.hidden);
+    const rest = synlige.length % cols;
+    if (synlige.length > cols && rest){
+      synlige.slice(synlige.length - rest).forEach(t => t.classList.add('tile-trimmed'));
+    }
+  };
+  let _tilesRAF;
+  window.addEventListener('resize', () => {
+    cancelAnimationFrame(_tilesRAF);
+    _tilesRAF = requestAnimationFrame(balancerFliseraekke);
+  });
   const fyldTypeAntal = () => {
     let udenType = 0;
     for (const l of ALLE) if (l.type == null) udenType++;
@@ -551,6 +573,7 @@ async function buildForside(){
         .sort((x, y) => Number(y.dataset.antal || 0) - Number(x.dataset.antal || 0))
         .forEach(t => fliseRaekke.appendChild(t));
     }
+    balancerFliseraekke();
     /* Paa mobil er raekken en vandret rulleliste med snap. Chrome bevarer
        snap-maalet (DOM-foerste flise, Sport) hen over omordningen og rullede
        raekken 664 px til hoejre. Tilbage til start, naar ordenen er sat. */
@@ -580,6 +603,37 @@ async function buildForside(){
   const slugify = (name) => String(name).toLowerCase()
     .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  /* Runde 23 (R20-P2): `.brand-cloud` er auto-fill (css/styles.css) — 2/4/5
+     spalter alt efter bredde, og 12 chips går kun lige op ved 2, 3, 4, 6 og
+     12. Ved ≥1024px (5 spalter, målt: container topper ud ved 1176px, så
+     1024–1920px giver alle 5 spalter) står sidste række med 2 chips og TRE
+     tomme felter. I stedet for at skære i de 12 kuraterede mærker (som ville
+     skjule en reel, populær chip) fyldes resten af rækken med den samme
+     "Alle mærker"-destination, der allerede står i sektionshovedet — samme
+     idé som newest-cta (css/styles.css) løste for "Nyeste annoncer": en
+     stiplet fyld-chip, ikke tomme gitterfelter. */
+  const balancerMaerkeraekke = () => {
+    if (!brandCloud) return;
+    brandCloud.querySelectorAll(':scope > .brand-chip-fyld').forEach(el => el.remove());
+    const n = brandCloud.children.length;
+    if (!n) return;
+    const cols = getComputedStyle(brandCloud).gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+    const rest = n % cols;
+    if (rest){
+      const span = cols - rest;
+      brandCloud.insertAdjacentHTML('beforeend',
+        `<a href="maerker.html" class="brand-chip brand-chip-fyld" style="grid-column: span ${span};" aria-label="Se alle mærker">
+           <span class="brand-chip-name">Alle mærker</span>
+           <span class="brand-chip-go" aria-hidden="true">${Icon.arrowRight}</span>
+         </a>`);
+    }
+  };
+  let _maerkeRAF;
+  window.addEventListener('resize', () => {
+    if (!brandCloud || !brandCloud.children.length) return;
+    cancelAnimationFrame(_maerkeRAF);
+    _maerkeRAF = requestAnimationFrame(balancerMaerkeraekke);
+  });
   const tegnMaerker = () => {
     const pr = new Map();
     for (const l of ALLE){
@@ -602,6 +656,7 @@ async function buildForside(){
            <span class="brand-chip-go" aria-hidden="true">${Icon.arrowRight}</span>
          </a>`).join('');
       const sec = brandCloud.closest('section'); if (sec) sec.hidden = top.length === 0;
+      balancerMaerkeraekke();
     }
     fillSeoCol('seo-brands', top.slice(0, 8).map(m => ({ label: `${m.navn} (${daTal(m.n)})`, href: href(m) })));
   };
