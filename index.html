@@ -69,7 +69,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=31369c63">
+<link rel="stylesheet" href="css/styles.css?v=0be80df8">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -464,8 +464,18 @@ try{
   <!-- RUNDE 16: browse- og SEO-blokken stod mellem "Saadan fungerer det" og
        den afsluttende CTA — syv sektioner, der brød fortaellingen lige foer
        dens sidste ord. Den er flyttet herned, uroert: linkene er stadig
-       crawlbare og stadig nyttige for den, der vil bladre. -->
-<section class="section">
+       crawlbare og stadig nyttige for den, der vil bladre.
+
+       RUNDE 24 (R20-P2): flytningen loeste narrativet FOER CTA'en, men
+       efterlod fire fuldvaegts-sektioner EFTER den — samme skrift, samme
+       baggrund som hovedindholdet ovenfor CTA'en, saa siden "fortsaetter"
+       lige efter klimakset i stedet for at falde til ro mod footeren.
+       .section-eftertekst (css/styles.css) laegger en faelles, lavmaelt
+       baggrund og mindre overskrifter hen over alle fire, saa de laeses som
+       ét sammenhaengende "bladr videre"-baand mellem CTA'en og footeren —
+       ikke som mere hovedindhold. Rører intet ved indholdet: linkene er de
+       samme, kun registeret er lavere. -->
+<section class="section section-eftertekst">
     <div class="container">
       <div class="section-head">
         <div>
@@ -482,7 +492,7 @@ try{
     </div>
   </section>
 
-<section class="section" style="padding-top:0;">
+<section class="section section-eftertekst" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
         <div>
@@ -502,7 +512,7 @@ try{
     </div>
   </section>
 
-  <section class="section seo-browse" aria-labelledby="seo-browse-title">
+  <section class="section seo-browse section-eftertekst" aria-labelledby="seo-browse-title">
     <div class="container">
       <h2 id="seo-browse-title" class="seo-browse-title">Find brugte motorcykler i hele Danmark</h2>
       <div class="seo-cols">
@@ -526,7 +536,7 @@ try{
     </div>
   </section>
 
-  <div class="container">
+  <div class="container section-eftertekst">
     <!-- facet-links:start (genereret af scripts/build-facet-pages.js, funktionen skrivFacetLinks) -->
   <section class="section" style="padding-top:0;">
       <div class="section-head"><div>
@@ -615,24 +625,24 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=31369c63"></script>
-<script defer src="js/supabase-config.js?v=31369c63"></script>
-<script defer src="js/supabase-api.js?v=31369c63"></script>
-<script defer src="js/icons.js?v=31369c63"></script>
-<script defer src="js/data.js?v=31369c63"></script>
+<script defer src="js/security.js?v=0be80df8"></script>
+<script defer src="js/supabase-config.js?v=0be80df8"></script>
+<script defer src="js/supabase-api.js?v=0be80df8"></script>
+<script defer src="js/icons.js?v=0be80df8"></script>
+<script defer src="js/data.js?v=0be80df8"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=31369c63"></script>
+<script defer src="js/filtrering.js?v=0be80df8"></script>
 <!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
      (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
      orden. Samme fil som soegning.html og scripts/build-srp.js. -->
-<script defer src="js/sortering.js?v=31369c63"></script>
-<script defer src="js/store.js?v=31369c63"></script>
-<script defer src="js/maaling.js?v=31369c63"></script>
-<script defer src="js/backend-bridge.js?v=31369c63"></script>
-<script defer src="js/components.js?v=31369c63"></script>
-<script defer src="js/home.js?v=31369c63"></script>
+<script defer src="js/sortering.js?v=0be80df8"></script>
+<script defer src="js/store.js?v=0be80df8"></script>
+<script defer src="js/maaling.js?v=0be80df8"></script>
+<script defer src="js/backend-bridge.js?v=0be80df8"></script>
+<script defer src="js/components.js?v=0be80df8"></script>
+<script defer src="js/home.js?v=0be80df8"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

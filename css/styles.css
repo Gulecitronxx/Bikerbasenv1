@@ -3127,7 +3127,22 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* Runde 5 (D5-F5): priskortet (≈300 px) siger "0 kr." to gange — kun paa desktop. */
 @media (max-width:819px){ .sell-band-art{ display:none; } }
 
-/* ============ Forside: SEO-browse-bånd ============ */
+/* ============ Forside: eftertekst-baand (CTA → footer) ============ */
+/* Runde 24 (R20-P2): .slut-cta-boks er bevidst moerk — samme --color-dark
+   som footeren, et ekko der varsler afslutningen. Men EFTER den kom fire
+   fuldvaegts-sektioner (typer, maerker, SEO-spalter, facet-chips) i samme
+   lyse baggrund og samme overskriftsstoerrelse som hovedindholdet OVER
+   CTA'en, saa siden syntes at fortsaette forbi sit eget klimaks i stedet
+   for at falde til ro. Indholdet er rigtigt (crawlbare sider,
+   scripts/build-facet-pages.js's egen anti-dublet-logik) — det er kun
+   registeret, der skal ned. Samme overfladefarve og mindre overskrift paa
+   alle fire (ingen mellemrum, ingen synlig kant ud over .seo-browses egen)
+   laeser dem som ÉT sammenhaengende "bladr videre"-baand, ikke som endnu
+   en sektion efter den sidste. */
+.section-eftertekst{ background: var(--color-surface-2); padding: var(--space-6) 0; }
+.section-eftertekst .section-head{ margin-bottom: var(--space-4); }
+.section-eftertekst .section-head h2{ font-size: clamp(17px,2vw,20px); }
+.section-eftertekst .section-head p{ font-size:13px; }
 .seo-browse{ border-top:1px solid var(--color-border); }
 .seo-browse-title{ font-size: clamp(18px,2.4vw,24px); margin-bottom: var(--space-5); }
 .seo-cols{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-5) var(--space-4); }
