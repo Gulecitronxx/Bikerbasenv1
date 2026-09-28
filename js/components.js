@@ -891,7 +891,17 @@ function externalCardHTML(l, i){
       </h3>
       <div class="card-specblok">
         <dl class="card-specs">${specs}
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}<span class="visually-hidden">. ${escapeHTML(kk.forklaring)}</span></span></dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${
+            /* R18-P1: "Mulig A2" laeses ved et skim som bekraeftet — kritikkens
+               fund. Forklaringen (kk.forklaring) er allerede praecis og maa
+               ikke omskrives (den staar allerede i title + visually-hidden);
+               det, der mangler, er en VISUEL, ikke-hover-afhaengig markoer af,
+               at "Mulig" er en tentativ konklusion. Kun paa "Mulig A1/A2" —
+               "Kørekort A" er en bekraeftet udelukkelse (ingen oevre graense
+               for A), saa den skal ikke have samme ikon. Genbruger Icon.info,
+               ikke et nyt unicode-tegn. */
+            kk.kode && kk.kode !== 'A' ? Icon.info : ''
+          }${escapeHTML(kk.tekst)}<span class="visually-hidden">. ${escapeHTML(kk.forklaring)}</span></span></dd></div>
         </dl>
       </div>
       <div class="card-footer">
