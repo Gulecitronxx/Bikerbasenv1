@@ -861,9 +861,21 @@ function externalCardHTML(l, i){
   const region = l.region || regionFraPostnr(l.postnr);
   const sted = by || region || (l.postnr ? String(l.postnr) : 'Sted ikke oplyst');
   const stedTitle = by && region ? `${by}, ${region}` : sted;
+  /* R18-P1: forhandlerens eget vandmaerke i fotoet er uforudsigeligt i
+     placering og stoerrelse (maalt: 5 af 8 kort paa forsiden daekket
+     40-60%). Et lille, ensartet Bikerbasen-maerke i det tomme oeverste
+     venstre hjoerne (det eneste hjoerne, det eksterne kort ikke allerede
+     bruger — sammenlign sidder nederst til hoejre) giver oejet ÉT fast
+     sted, i stedet for at konkurrere med et andet, tilfaeldigt et.
+     IKKE en genindfoerelse af runde 5's fjernede kilde-stribe (D5-S2,
+     js/eksternt-kort.test.js:127): den var 34px fuld bredde, identisk
+     tekst paa hvert kort. Denne er en lille pille, kun i hjoernet, og
+     dens formaal er at modvirke et foto-problem, ikke at gentage
+     fodlinjens oplysning. */
   return `
   <article class="card card-external" data-listing-id="${l.id}" data-external="1">
     <div class="card-media">
+      ${domaene ? `<span class="card-source-badge" title="Annoncen ligger hos ${kilde} (${escapeHTML(saelger)}). Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}<span>${domaene}</span></span>` : ''}
       ${listingMediaHTML(l, altTekst, i === 0)}
       <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
     </div>
@@ -879,7 +891,17 @@ function externalCardHTML(l, i){
       </h3>
       <div class="card-specblok">
         <dl class="card-specs">${specs}
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}<span class="visually-hidden">. ${escapeHTML(kk.forklaring)}</span></span></dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${
+            /* R18-P1: "Mulig A2" laeses ved et skim som bekraeftet — kritikkens
+               fund. Forklaringen (kk.forklaring) er allerede praecis og maa
+               ikke omskrives (den staar allerede i title + visually-hidden);
+               det, der mangler, er en VISUEL, ikke-hover-afhaengig markoer af,
+               at "Mulig" er en tentativ konklusion. Kun paa "Mulig A1/A2" —
+               "Kørekort A" er en bekraeftet udelukkelse (ingen oevre graense
+               for A), saa den skal ikke have samme ikon. Genbruger Icon.info,
+               ikke et nyt unicode-tegn. */
+            kk.kode && kk.kode !== 'A' ? Icon.info : ''
+          }${escapeHTML(kk.tekst)}<span class="visually-hidden">. ${escapeHTML(kk.forklaring)}</span></span></dd></div>
         </dl>
       </div>
       <div class="card-footer">

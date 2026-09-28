@@ -129,6 +129,26 @@ test('kilden nævnes stadig på kortet — fodlinje (med forklaring i title) og 
   assert.match(attrFor(html, 'card-link')['aria-label'], /hos MC Syd/);
 });
 
+/* R18-P1: hjørne-badgen er IKKE runde 5's genopstandne stribe (den
+   forrige test låser netop, at .card-kilde ikke findes). Den er en ny,
+   lille pille i .card-media — ét <span>, ingen ny <a>, så testen ovenfor
+   ("der må kun være ét <a> på kortet") holder stadig. */
+test('hjørne-badgen viser domænet i .card-media, uden at tilføje en ny vej ud af sitet', () => {
+  const html = externalCardHTML(eksternAnnonce(), 1);
+  const badge = (html.match(/<span class="card-source-badge"[^>]*>[\s\S]*?<\/span><\/span>/) || [])[0];
+  assert.ok(badge, 'badgen skal findes på kortet');
+  assert.match(badge, /mcsyd\.dk/);
+  assert.match(badge, /title="Annoncen ligger hos MC Syd[^"]*"/);
+  const links = html.match(/<a\b[^>]*>/g) || [];
+  assert.equal(links.length, 1, 'badgen må ikke tilføje et nyt <a>');
+});
+
+test('uden et oplyst domæne udelades badgen helt — ingen tomt hjørne-mærke', () => {
+  const l = eksternAnnonce({ source: { navn: 'Gul og Gratis', domaene: undefined } });
+  const html = externalCardHTML(l, 1);
+  assert.doesNotMatch(html, /class="card-source-badge"/);
+});
+
 test('listerækken følger kortet: ét link, og det peger indad', () => {
   const l = eksternAnnonce();
   const html = externalRowHTML(l, 1);
@@ -227,6 +247,23 @@ test('kilden nævnes stadig i bunden, nu på samme linje som stedet', () => {
   assert.match(html, /class="card-sted" title="Rødding, Syddanmark"/);
   // Runde 5 (D5-S3/S4): kørekortchippen står i spec-rækken, med kode-klasse.
   assert.match(html, /class="card-spec card-spec-kk"[\s\S]*?class="card-koerekort kk-[a-z0-9]+"/);
+});
+
+/* R18-P1: "Mulig A2" må ikke læses som bekræftet ved et skim — kritikkens
+   fund. Icon.info markerer det tentative synligt, uden at røre den
+   allerede efterprøvede forklaringstekst i title/visually-hidden. */
+test('info-ikonet står på "Mulig A2", men ikke på den bekræftede "Kørekort A"', () => {
+  // 300 ccm, 28 hk — under A2-loftet, ikke udelukket, men ikke bekræftet.
+  const mulig = externalCardHTML(eksternAnnonce({ ccm: 300, power: 28 }), 1);
+  const muligPille = (mulig.match(/class="card-koerekort kk-a2"[\s\S]*?<\/span>/) || [''])[0];
+  assert.match(muligPille, /<svg/, 'Mulig A2 skal have et synligt ikon, ikke kun en title');
+  assert.match(muligPille, /Mulig A2/);
+
+  // Standardfixturen (150 hk) er over A2-graensen — en bekraeftet udelukkelse.
+  const bekraeftet = externalCardHTML(eksternAnnonce(), 1);
+  const bekraeftetPille = (bekraeftet.match(/class="card-koerekort kk-a"[\s\S]*?<\/span>/) || [''])[0];
+  assert.ok(bekraeftetPille, 'fixturen skal give "Kørekort A"');
+  assert.ok(!/<svg/.test(bekraeftetPille), 'Kørekort A er bekræftet og skal ikke have usikkerheds-ikonet');
 });
 
 /* ---------- D-008: favoritten, der ikke kan gemmes ----------
