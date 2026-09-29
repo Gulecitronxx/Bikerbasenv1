@@ -45,6 +45,26 @@ testes; 8 nye tests i `js/soegeoverskrift.test.js`, registreret i
 `package.json` (scriptet opremser filerne, så en ny fil, der ikke føjes til
 listen, ville være en test, der aldrig kører — første kørsel gav stadig 336).
 
+## Undersøgt og bevidst IKKE rørt: type- og kørekortfiltre
+
+`?type=sport`, `?koerekort=A1`, `?q=Honda`, `?dealerOnly=1` og `?maxPrice=…`
+giver alle H1 og title "Motorcykler til salg i Danmark". Det ser tyndt ud ved
+siden af kildesidens nye overskrift, men er ikke rettet, fordi:
+
+- title udledes af H1 (`seoSearchResults(listings, heading)` i `js/seo.js`), så
+  en ny H1 er også en ny title og ny ItemList-`name` — en SEO-ændring, ikke en
+  visningsrettelse;
+- de forudtegnede sider `type-sport.html` ("Sport-motorcykler til salg") og
+  `koerekort-a1.html` ("Motorcykler til A1-kørekort …") har allerede de ord og
+  hver sin canonical. En dynamisk side med samme title ville konkurrere med
+  dem om samme søgning;
+- søgesiden er `index, follow` i alle filtertilstande, og `seoSearchResults`
+  sætter ikke canonical. Hvad filtrerede adresser skal pege på, er et
+  spørgsmål, der skal måles, ikke gættes.
+
+Kildesiden har ingen sådan side og rører ingen facet-title, derfor kunne den
+rettes uden den risiko. Åbent for en senere runde med Search Console-tal.
+
 ## Aggregator-reglerne
 
 Ingen berørt. Kun visningstekst; ingen crawler-, lagrings- eller claim-kode.
