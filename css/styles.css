@@ -1562,6 +1562,14 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* Runde 9 (D9-S3): kort etiket paa mobil, fuld paa desktop. */
 #save-search-kort{ display:none; }
 @media (max-width:620px){ #save-search-kort{ display:inline; } }
+/* Runde 27: på 360 px er søgefeltet 130 px bredt og efterlader 73 px til
+   "Mærke/model" (101 px) — den klippede. Klokken alene bærer "Gem" (label og
+   title er der stadig for skærmlæsere og tryk-hold); feltet vinder ~36 px.
+   min-width holder trykmålet på 44 px, som ikonet alene ellers ikke ville nå. */
+@media (max-width:380px){
+  #save-search-kort{ display:none; }
+  .srp-bar #save-search-btn{ min-width:44px; justify-content:center; }
+}
 /* Runde 7 (D7-S2/S3) */
 #filter-q::placeholder{ text-overflow:ellipsis; }
 #filter-price-quick{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
@@ -3339,6 +3347,17 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
      det). Paa mobil skrives den kompakt af renderResultsCount(): "fra 4
      kilder (i)" — fordelingen staar i (i) og paa desktop. */
   .results-mix .mix-part.mix-ekstern .mix-lang{ display:none; }
+  /* Runde 27: linjen "654 annoncer · 52 annoncer på Bikerbasen · fra 4 kilder
+     (i)" er 269 px, og .results-mix (nowrap + overflow:hidden, se
+     soeg-perf i soegning.html) har 220 px på 360, 235 på 375 og 250 på 390.
+     (i)-knappen — der forklarer "indekseret" — var klippet væk på alle tre.
+     Ordet "annoncer" er overflødigt lige efter "654 annoncer": det skjules
+     for øjet (ikke for skærmlæsere). Og skulle linjen stadig ikke passe, er
+     det egne-leddet, der får ellipse — halen med (i) er fast. */
+  .results-mix .mix-ord{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  .results-mix .mix-egne{ min-width:0; }
+  .results-mix .mix-tekst{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .results-mix .mix-tail{ flex:none; }
 }
 @media (min-width: 621px){
   .results-mix .mix-kort{ display:none; }
@@ -4043,6 +4062,11 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
   .search-layout{ padding-top:4px; }
   .srp-search{ margin-bottom:12px; }
   #filter-q{ height:48px; }
+  /* Runde 27: "Mærke/model" (101 px) klippede til "Mærke/n" i det 160 px brede
+     felt — 46 px på hver side lod 68 px til teksten. Højre side er reserveret
+     til ryd-knappen, som først findes, når der står noget i feltet; er feltet
+     tomt (:placeholder-shown), får teksten pladsen: 160 − 42 − 12 = 106 px. */
+  #filter-q:placeholder-shown{ padding-left:42px; padding-right:12px; }
   .results-toolbar{ row-gap:8px; margin-bottom:10px; }
   .results-mix{ margin-top:2px; line-height:1.35; }
   /* Sorteringen er nu et par (etiket + vælger). Den overtager den

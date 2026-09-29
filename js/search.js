@@ -910,8 +910,11 @@ function renderResultsCount(list){
   const kildeTekst = 'indekseret: ' + sorteret.slice(0, 2)
     .map(([navn, n]) => `${n} hos ${escapeHTML(navn)}`).join(' · ');
   const flere = sorteret.length > 2 ? ` · ${restN} hos ${sorteret.length - 2} ${sorteret.length - 2 === 1 ? 'anden' : 'andre'}` : '';
+  /* Ordet "annonce(r)" står i sit eget led: på mobil skjules det for øjet
+     (men ikke for skærmlæsere, som stadig hører "52 annoncer på Bikerbasen"),
+     fordi linjen ellers er 269 px og der er 220–250 px at have på 360–390 px. */
   const egneTekst = egne
-    ? `<span class="mix-part mix-egne">${egne} ${egne === 1 ? 'annonce' : 'annoncer'} på Bikerbasen</span>`
+    ? `<span class="mix-part mix-egne"><span class="mix-tekst">${egne} <span class="mix-ord">${egne === 1 ? 'annonce' : 'annoncer'} </span>på Bikerbasen</span></span>`
     : '';
 
   /* (i)-knappen ligger i en .mix-tail SAMMEN med kildeleddet, og det er ikke
