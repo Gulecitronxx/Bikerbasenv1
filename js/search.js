@@ -1611,10 +1611,7 @@ function render(){
   // Dynamisk H1 fra aktive mærker/regioner — scannability + SEO (konkurrenter
   // scorer på "Brugte Yamaha til salg i København").
   // Runde 8 (D8-S1): "Brugte" droppet — ≈172 af annoncerne er fabriksnye.
-  let heading = state.brands.length
-    ? `${state.brands.slice(0,3).join(', ')} til salg`
-    : 'Motorcykler til salg i Danmark';
-  if (state.regions.length === 1) heading += ` i ${state.regions[0]}`;
+  const heading = soegeoverskrift(state, filtered);
   const headingEl = document.querySelector('.search-heading');
   if (headingEl.textContent !== heading) headingEl.textContent = heading;
 
@@ -1656,6 +1653,25 @@ function render(){
 
   clearTimeout(secondaryHandle);
   secondaryHandle = setTimeout(() => renderSecondary(pills, pageItems, heading, total, totalPages), 0);
+}
+
+/* H1 fra de aktive filtre. Kildesider (?kilde=mcsyd.dk) er det nærmeste, en
+   indekseret forhandler har til en profil: H1 stod på "i Danmark" ved siden af
+   et "Hos mcsyd.dk"-filter og 345 annoncer fra ét sted. Kildenavnet slås op
+   i de filtrerede annoncer (domænet er kun nøglen); kendes det ikke, står
+   domænet. Kun uden mærkefilter — "Honda til salg" er stadig det rigtige
+   svar, og kildechippen viser resten. */
+function soegeoverskrift(state, listings){
+  if (state.kilde && !state.brands.length){
+    const fraKilden = listings.find(l => l.source?.domaene === state.kilde);
+    return `Motorcykler hos ${fraKilden?.source?.navn || state.kilde}`;
+  }
+  /* Regionen ERSTATTER "i Danmark" — den blev før hængt på og gav "Motorcykler
+     til salg i Danmark i Syddanmark", i både H1 og title. Uden region og med
+     mærke står der ikke "i Danmark" (det gjorde der heller ikke før). */
+  const region = state.regions.length === 1 ? ` i ${state.regions[0]}` : '';
+  if (state.brands.length) return `${state.brands.slice(0,3).join(', ')} til salg${region}`;
+  return `Motorcykler til salg${region || ' i Danmark'}`;
 }
 
 /* Rådet i tomtilstanden skal passe til den tilstand, brugeren står i (D-012).
