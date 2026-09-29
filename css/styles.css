@@ -1830,7 +1830,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .sidebar-card{ background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-5); }
 .sidebar-card + .sidebar-card{ margin-top: var(--space-4); }
 .seller-row{ display:flex; align-items:center; gap: var(--space-3); }
-.avatar{ width:52px; height:52px; border-radius:50%; background: var(--color-primary-tint); color:var(--color-primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:18px; flex-shrink:0; }
+.avatar{ width:52px; height:52px; border-radius:50%; background: var(--color-primary-tint); color:var(--color-primary-hover); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:18px; flex-shrink:0; }
 .seller-name{ font-weight:700; display:flex; align-items:center; gap:6px; }
 .seller-name svg{ width:16px; height:16px; color: var(--color-success); }
 .seller-sub{ font-size:13px; color:var(--color-fg-muted); }
@@ -2166,7 +2166,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .radio-card .radio-card-label{ font-size:13px; font-weight:600; padding:9px 4px; }
 .radio-card .radio-card-inner svg{ width:24px; height:24px; color: var(--color-fg-muted); }
 .radio-card input:checked + .radio-card-inner{ border-color: var(--color-primary); box-shadow: 0 0 0 1.5px var(--color-primary); }
-.radio-card input:checked + .radio-card-inner .radio-card-label{ color: var(--color-primary); background: var(--color-primary-tint); }
+.radio-card input:checked + .radio-card-inner .radio-card-label{ color: var(--color-primary-hover); background: var(--color-primary-tint); }
 .radio-card input:focus-visible + .radio-card-inner{ outline: 2.5px solid var(--color-ring); outline-offset:2px; }
 .eq-count{ color: var(--color-primary); font-weight:600; font-size:13px; margin-left:4px; }
 
@@ -2244,7 +2244,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 /* ============ Profile / dealer page ============ */
 .profile-hero{ background: var(--color-surface); border-bottom:1px solid var(--color-border); padding: var(--space-6) 0; }
 .profile-top{ display:flex; gap: var(--space-4); align-items:flex-start; flex-wrap:wrap; }
-.avatar-lg{ width:84px; height:84px; border-radius:50%; background: var(--color-primary-tint); color:var(--color-primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:28px; flex-shrink:0; }
+.avatar-lg{ width:84px; height:84px; border-radius:50%; background: var(--color-primary-tint); color:var(--color-primary-hover); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:28px; flex-shrink:0; }
 .profile-info h1{ font-size:24px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .profile-info h1 svg{ width:20px; height:20px; color: var(--color-success); }
 .profile-meta{ display:flex; gap: var(--space-4); flex-wrap:wrap; color: var(--color-fg-muted); font-size:14px; margin-top:8px; }
@@ -4573,7 +4573,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .regel-stats{ display:flex; flex-wrap:wrap; gap: var(--space-2); margin: var(--space-3) 0; padding:0; list-style:none; }
 .regel-stat{
   display:inline-flex; align-items:center; gap:4px;
-  background: var(--color-primary-tint); color: var(--color-primary);
+  background: var(--color-primary-tint); color: var(--color-primary-hover);
   border-radius: var(--radius-pill); padding: 4px 12px;
   font-size:13px; font-weight:600; line-height:1.3;
 }
@@ -4592,7 +4592,7 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 .loesning-nr{
   display:flex; align-items:center; justify-content:center;
   width:34px; height:34px; border-radius: var(--radius-pill);
-  background: var(--color-primary-tint); color: var(--color-primary);
+  background: var(--color-primary-tint); color: var(--color-primary-hover);
   font-family: var(--font-display); font-weight:700; font-size:16px;
   margin-bottom: var(--space-2); position:relative;
 }
