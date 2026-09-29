@@ -142,13 +142,61 @@ function wireHeader(){
   const drawer = document.getElementById('mobile-drawer');
   const openBtn = document.querySelector('.mobile-menu-btn');
   if (openBtn && drawer){
+    /* Menuskuffen skiftede før kun en CSS-klasse. Åben var den en dialog i
+       markup (role="dialog"), men opførte sig ikke som en: knappen sagde ikke
+       "udvidet", fokus blev på knappen bag skuffen, Escape lukkede ikke, Tab
+       løb ud i siden bag, og baggrunden var stadig tabbar. Samme greb som
+       filterskuffen (setBackgroundInert i js/search.js): inert på baggrunden,
+       fokus ind og tilbage, Escape og en Tab-fælde. Lukket er skuffen
+       display:none og altså ikke tabbar, så den lukkede tilstand er urørt. */
+    const panel = drawer.querySelector('.mobile-drawer-panel');
+    const luk = drawer.querySelector('.mobile-drawer-close');
+    const erAaben = () => drawer.classList.contains('open');
+    const setBaggrundInert = (on) => {
+      // Alle søskende på vejen op fra skuffen: header, main og footer, uden at
+      // kende dem ved navn — samme tilgang som filterskuffen.
+      let node = drawer;
+      while (node && node !== document.body){
+        const foraeldre = node.parentElement;
+        if (foraeldre) Array.from(foraeldre.children).forEach(sib => {
+          if (sib === node) return;
+          if (on) sib.setAttribute('inert', ''); else sib.removeAttribute('inert');
+        });
+        node = foraeldre;
+      }
+    };
+    openBtn.setAttribute('aria-controls', 'mobile-drawer');
+    openBtn.setAttribute('aria-expanded', 'false');
     // overlay-open skjuler cookiebanneret, der ellers ligger oven på skuffen.
-    const setDrawer = (open) => {
+    const setDrawer = (open, gendanFokus = true) => {
       drawer.classList.toggle('open', open);
       document.body.classList.toggle('overlay-open', open);
+      openBtn.setAttribute('aria-expanded', String(open));
+      setBaggrundInert(open);
+      if (panel){
+        if (open) panel.setAttribute('aria-modal', 'true'); else panel.removeAttribute('aria-modal');
+      }
+      if (open) (luk || panel).focus();
+      else if (gendanFokus) openBtn.focus();
     };
     openBtn.addEventListener('click', () => setDrawer(true));
     drawer.querySelectorAll('[data-drawer-close]').forEach(el => el.addEventListener('click', () => setDrawer(false)));
+    document.addEventListener('keydown', (e) => {
+      if (!erAaben()) return;
+      if (e.key === 'Escape'){ setDrawer(false); return; }
+      if (e.key !== 'Tab' || !panel) return;
+      const f = Array.from(panel.querySelectorAll('a[href], button:not([disabled])')).filter(n => n.offsetParent !== null);
+      if (!f.length) return;
+      const foerste = f[0], sidste = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === foerste){ e.preventDefault(); sidste.focus(); }
+      else if (!e.shiftKey && document.activeElement === sidste){ e.preventDefault(); foerste.focus(); }
+    });
+    // Vokser vinduet forbi menuknappens breakpoint (1024 px), mens skuffen står
+    // åben, er knappen væk og skuffen en tom dialog over desktopsiden — inert
+    // ville blive hængende og gøre hele siden utilgængelig.
+    window.matchMedia('(min-width:1024px)').addEventListener('change', (e) => {
+      if (e.matches && erAaben()) setDrawer(false, false);
+    });
   }
   // Runde 5 (D5-F7): to knapper — headerens (desktop) og skuffens (mobil).
   document.querySelectorAll('.theme-toggle').forEach(b => b.addEventListener('click', toggleTheme));
