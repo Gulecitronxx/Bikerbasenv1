@@ -110,6 +110,33 @@ function markFieldError(el, refs, besked){
   if (refs && !refs.first) refs.first = el;
 }
 
+/* Typevalget er en radiogruppe, ikke et felt med .field — markFieldError()
+   passer ikke. Samme mønster: fast tekst ved gruppen (.felt-fejl), koblet med
+   aria-describedby, og aria-invalid på selve gruppen (understøttet på
+   role="radiogroup"). Toasten forsvinder efter 2,6 s; teksten her bliver stående,
+   til man vælger. */
+function markTypeError(){
+  const gruppe = document.getElementById('type-radio-group');
+  if (!gruppe) return;
+  gruppe.setAttribute('aria-invalid', 'true');
+  let fejl = document.getElementById('type-radio-group-fejl');
+  if (!fejl){
+    fejl = document.createElement('p');
+    fejl.className = 'felt-fejl';
+    fejl.id = 'type-radio-group-fejl';
+    gruppe.insertAdjacentElement('afterend', fejl);
+  }
+  fejl.textContent = 'Vælg en motorcykeltype.';
+  gruppe.setAttribute('aria-describedby', fejl.id);
+}
+function clearTypeError(){
+  const gruppe = document.getElementById('type-radio-group');
+  if (!gruppe) return;
+  gruppe.removeAttribute('aria-invalid');
+  gruppe.removeAttribute('aria-describedby');
+  document.getElementById('type-radio-group-fejl')?.remove();
+}
+
 /* O2-3: tavs kontrol — er trinnets paakraevede felter udfyldt? Ingen toasts,
    ingen roede rammer; bruges kun ved gendannelsen efter login-omvejen. */
 function trinUdfyldt(n){
@@ -139,7 +166,15 @@ function validateStep(n){
     if (!ok(Number(el.value))){ valid = false; markFieldError(el, refs, m); msg = m; }
   };
   if (n === 1){
-    if (!document.querySelector('input[name="bike-type"]:checked')){ valid = false; msg = msg || 'Vælg venligst en motorcykeltype'; }
+    if (!document.querySelector('input[name="bike-type"]:checked')){
+      valid = false; msg = msg || 'Vælg venligst en motorcykeltype';
+      markTypeError();
+      /* Typen står øverst, så den er første fejl i læserækkefølgen — også når
+         felterne under den mangler. Før satte den aldrig refs.first: manglede
+         kun typen, flyttede fokus ingen steder, og eneste tegn var en toast. */
+      const foersteType = document.querySelector('input[name="bike-type"]');
+      if (foersteType) refs.first = foersteType;
+    } else clearTypeError();
     const nowY = new Date().getFullYear();
     bound('f-year', v => v >= 1900 && v <= nowY + 1, `Årgang skal være mellem 1900 og ${nowY + 1}`);
     bound('f-km', v => v >= 0 && v <= 500000, 'Kilometerstanden virker urealistisk (0–500.000)');
@@ -189,6 +224,9 @@ function renderTypeTilesIfStale(){
 
 function populateStaticFields(){
   renderTypeTilesIfStale();
+  // Delegeret på gruppen, så den overlever, at renderTypeTilesIfStale() gentegner
+  // fliserne: fejlen ryddes i samme øjeblik, der vælges en type.
+  document.getElementById('type-radio-group').addEventListener('change', clearTypeError);
 
   const brandSelect = document.getElementById('f-brand');
   brandSelect.innerHTML = `<option value="">Vælg mærke</option>` + Object.keys(BRANDS_BY_MODEL).sort().map(b => `<option value="${b}">${b}</option>`).join('');

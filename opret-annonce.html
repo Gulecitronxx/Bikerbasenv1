@@ -81,7 +81,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=d5a86604">
+<link rel="stylesheet" href="css/styles.css?v=5ce6d6b8">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -144,7 +144,7 @@ try{
 
       <!-- Step 1: Type & basic specs -->
       <section class="form-step" data-step="1">
-        <h2 style="margin-bottom:16px;">Motorcykeltype</h2>
+        <h2 id="type-overskrift" style="margin-bottom:16px;">Motorcykeltype</h2>
         <!-- Fliserne står statisk i HTML'en, fordi de ellers først blev bygget
              af populateStaticFields() efter at data.js var hentet. Indtil da var
              beholderen 0px høj, og når de otte fliser (714px på mobil) landede,
@@ -152,7 +152,10 @@ try{
              største enkeltpost i sidens CLS. TYPES i js/data.js er stadig
              kilden: opret-annonce.js sammenligner og gentegner, hvis de
              afviger, så listen ikke kan drive fra hinanden. -->
-        <div class="radio-card-group" id="type-radio-group">
+        <!-- role="radiogroup" + navn: otte radioknapper uden gruppe læses som
+             "Sport, Touring, …" uden at sige, hvad man vælger imellem. Fejlen
+             for "ingen valgt" tegnes af validateStep() i js/opret-annonce.js. -->
+        <div class="radio-card-group" id="type-radio-group" role="radiogroup" aria-labelledby="type-overskrift">
           <label class="radio-card"><input type="radio" name="bike-type" value="sport"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/sport.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Sport</span></span></label>
           <label class="radio-card"><input type="radio" name="bike-type" value="touring"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/touring.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Touring</span></span></label>
           <label class="radio-card"><input type="radio" name="bike-type" value="cruiser"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/cruiser.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Cruiser</span></span></label>
@@ -441,18 +444,18 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=d5a86604"></script>
-<script defer src="js/vendor/supabase.js?v=d5a86604"></script>
-<script defer src="js/supabase-config.js?v=d5a86604"></script>
-<script defer src="js/supabase-api.js?v=d5a86604"></script>
-<script defer src="js/icons.js?v=d5a86604"></script>
-<script defer src="js/postnumre.js?v=d5a86604"></script>
-<script defer src="js/data.js?v=d5a86604"></script>
-<script defer src="js/store.js?v=d5a86604"></script>
-<script defer src="js/maaling.js?v=d5a86604"></script>
-<script defer src="js/backend-bridge.js?v=d5a86604"></script>
-<script defer src="js/components.js?v=d5a86604"></script>
-<script defer src="js/opret-annonce.js?v=d5a86604"></script>
+<script defer src="js/security.js?v=5ce6d6b8"></script>
+<script defer src="js/vendor/supabase.js?v=5ce6d6b8"></script>
+<script defer src="js/supabase-config.js?v=5ce6d6b8"></script>
+<script defer src="js/supabase-api.js?v=5ce6d6b8"></script>
+<script defer src="js/icons.js?v=5ce6d6b8"></script>
+<script defer src="js/postnumre.js?v=5ce6d6b8"></script>
+<script defer src="js/data.js?v=5ce6d6b8"></script>
+<script defer src="js/store.js?v=5ce6d6b8"></script>
+<script defer src="js/maaling.js?v=5ce6d6b8"></script>
+<script defer src="js/backend-bridge.js?v=5ce6d6b8"></script>
+<script defer src="js/components.js?v=5ce6d6b8"></script>
+<script defer src="js/opret-annonce.js?v=5ce6d6b8"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">
