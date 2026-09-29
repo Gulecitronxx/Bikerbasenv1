@@ -1064,6 +1064,74 @@ function safetyBannerHTML(){
   </div>`;
 }
 
+/* ============ Overlays: dialog-opførsel ============
+   info-modalen, rapport-modalen og sammenligningen var overlays i udseende og
+   ikke i opførsel: ingen rolle eller navn (bortset fra sammenligningen), fokus
+   blev på knappen bag dem, Escape lukkede ikke (bortset fra sammenligningen),
+   Tab løb ud i siden bag, og baggrunden var tabbar. Målt på "Hvor kommer
+   annoncerne fra?": fokus på (i)-knappen, Escape uden virkning.
+
+   Alle tre åbnes og lukkes af, at en klasse eller `hidden` skiftes fra flere
+   steder (info-modalen lukkes tre forskellige steder, rapporten også ved
+   indsendelse). I stedet for at røre hvert sted følger en MutationObserver
+   overlayets tilstand, og resten — inert baggrund, fokus ind, fokus tilbage,
+   Escape og Tab-fælde — hænger på den. Samme greb som menu- og filterskuffen
+   (setBackgroundInert i js/search.js), her samlet i én funktion.
+
+   erAaben(overlay) og luk(overlay) er de eneste, der kender overlayets måde at
+   være åbent på. `boks` er selektoren for panelet, der får role="dialog". */
+function goerOverlayTilgaengelig(overlay, { erAaben, luk, boks, titelId }){
+  const panel = boks ? overlay.querySelector(boks) : null;
+  if (panel){
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-modal', 'true');
+    if (titelId) panel.setAttribute('aria-labelledby', titelId);
+  }
+  let aaben = false, opener = null;
+  const fokuserbare = () => Array.from(overlay.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+  )).filter(n => n.offsetParent !== null);
+  const setBaggrundInert = (on) => {
+    // Alle søskende på vejen op fra overlayet, uden at kende dem ved navn.
+    let node = overlay;
+    while (node && node !== document.body){
+      const foraeldre = node.parentElement;
+      if (foraeldre) Array.from(foraeldre.children).forEach(sib => {
+        if (sib === node) return;
+        if (on) sib.setAttribute('inert', ''); else sib.removeAttribute('inert');
+      });
+      node = foraeldre;
+    }
+  };
+  const synk = () => {
+    const nu = !!erAaben(overlay);
+    if (nu === aaben) return;
+    aaben = nu;
+    setBaggrundInert(nu);
+    if (nu){
+      opener = document.activeElement;
+      const f = fokuserbare();
+      if (f.length) f[0].focus();
+    } else if (opener && document.contains(opener)){
+      opener.focus();
+      opener = null;
+    }
+  };
+  new MutationObserver(synk).observe(overlay, { attributes: true, attributeFilter: ['class', 'hidden'] });
+  document.addEventListener('keydown', (e) => {
+    if (!aaben) return;
+    if (e.key === 'Escape'){ luk(overlay); return; }
+    if (e.key !== 'Tab') return;
+    const f = fokuserbare();
+    if (!f.length) return;
+    const foerste = f[0], sidste = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === foerste){ e.preventDefault(); sidste.focus(); }
+    else if (!e.shiftKey && document.activeElement === sidste){ e.preventDefault(); foerste.focus(); }
+  });
+}
+const lukModalOverlay = (o) => o.classList.remove('open');
+const modalOverlayAaben = (o) => o.classList.contains('open');
+
 /* ============ Report / notice-and-action modal ============ */
 function ensureReportModal(){
   if (document.getElementById('report-modal')) return;
@@ -1072,7 +1140,7 @@ function ensureReportModal(){
   <div class="modal-overlay" id="report-modal">
     <div class="modal-box">
       <div class="modal-head">
-        <h2>Anmeld annonce</h2>
+        <h2 id="report-modal-title">Anmeld annonce</h2>
         <button type="button" class="icon-btn" data-report-close aria-label="Luk">${Icon.close}</button>
       </div>
       <form id="report-form">
@@ -1100,6 +1168,7 @@ function ensureReportModal(){
   document.body.appendChild(el.firstElementChild);
 
   const modal = document.getElementById('report-modal');
+  goerOverlayTilgaengelig(modal, { erAaben: modalOverlayAaben, luk: lukModalOverlay, boks: '.modal-box', titelId: 'report-modal-title' });
   modal.querySelectorAll('[data-report-close]').forEach(b => b.addEventListener('click', () => modal.classList.remove('open')));
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
   document.getElementById('report-form').addEventListener('submit', async (e) => {
@@ -1150,6 +1219,7 @@ function ensureInfoModal(){
   </div>`;
   document.body.appendChild(el.firstElementChild);
   const modal = document.getElementById('info-modal');
+  goerOverlayTilgaengelig(modal, { erAaben: modalOverlayAaben, luk: lukModalOverlay, boks: '.modal-box', titelId: 'info-modal-title' });
   modal.querySelectorAll('[data-info-close]').forEach(b => b.addEventListener('click', () => modal.classList.remove('open')));
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 }
@@ -1248,6 +1318,9 @@ function wireFavoriteButtons(root){
     const modal = document.createElement('div');
     modal.className = 'compare-modal'; modal.hidden = true;
     document.body.appendChild(modal);
+    // Panelet (role="dialog", aria-modal) tegnes ved hver åbning, så `boks`
+    // udelades; helperen står kun for fokus, inert baggrund, Escape og Tab.
+    goerOverlayTilgaengelig(modal, { erAaben: () => !modal.hidden, luk: () => closeModal() });
 
     function renderBar(){
       const ids = Store.getCompare();
