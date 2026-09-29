@@ -11,8 +11,20 @@ To ting er manuelle (konto og nameservere). Resten er kode:
 ```
 node scripts/cloudflare-setup.js --dry-run   # vis hvad der sættes
 node scripts/cloudflare-setup.js             # sæt det (idempotent)
-node scripts/tjek-headers.js                 # efterprøv (kun læsning) — i dag 6/15
+node scripts/tjek-headers.js                 # efterprøv (kun læsning)
 ```
+
+> **Status 29.09.2026: opsætningen er gennemført og live — 14/15.** Sitet svarer
+> via Cloudflare, og HSTS, nosniff, `X-Frame-Options`, `frame-ancestors`,
+> Permissions-Policy, Referrer-Policy, `immutable` på versionerede filer og begge
+> redirects består. (Tidligere stod her "i dag 6/15"; det er overhalet.) Den ene
+> fejl er **Brotli på css/js**: når klienten sender `Accept-Encoding: gzip, deflate,
+> br` — som Chrome og Safari gør — får den gzip, som GitHub Pages leverer. Kun en
+> klient, der *udelukkende* accepterer `br`, får Brotli (målt med `curl`, samme
+> fil: `br` → br, `br, gzip` → gzip). Forskellen er lille: `styles.css` er
+> 25,5 KB med gzip -9 og 21,2 KB med Brotli -11 (målt lokalt på `_site/`; live
+> leveres 26,6 KB) — ca. 4 KB pr. førstegangsbesøg. Ikke undersøgt: om en Compression Rule i Cloudflare kan
+> gennemtvinge Brotli mod en gzip-origin; det kræver adgang til zonen.
 
 ## Udgangspunkt (målt 23.08.2026)
 
