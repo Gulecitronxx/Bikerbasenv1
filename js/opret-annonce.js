@@ -334,6 +334,14 @@ function wirePhotoUpload(){
   const zone = document.getElementById('upload-zone');
   const input = document.getElementById('photo-input');
   zone.addEventListener('click', () => input.click());
+  /* Zonen har role="button" og tabindex="0" (opret-annonce.html): en knap skal
+     kunne tages med Enter og mellemrum. Mellemrum får preventDefault, ellers
+     ruller siden. Kun når zonen SELV har fokus — ellers ville en Enter i et
+     element inde i zonen åbne filvælgeren to gange. */
+  zone.addEventListener('keydown', (e) => {
+    if (e.target !== zone) return;
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); input.click(); }
+  });
   zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
   zone.addEventListener('drop', (e) => {

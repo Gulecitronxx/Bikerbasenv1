@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Sælg din motorcykel — gratis annonce for private — Bikerbasen">
 <meta name="twitter:description" content="Opret en annonce for din motorcykel på Bikerbasen — gratis for private. Fire trin, kladde undervejs, og dit navn vises kun for indloggede.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -81,7 +81,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=f94c9582">
+<link rel="stylesheet" href="css/styles.css?v=424ff225">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -316,14 +316,17 @@ try{
       <!-- Step 3: Photos -->
       <section class="form-step" data-step="3" hidden>
         <h2 style="margin-bottom:16px;">Billeder</h2>
-        <div class="upload-zone" id="upload-zone">
+        <!-- role/tabindex/aria: zonen var en div med kun en click-lytter, og
+             filfeltet er `hidden`, så tastatur og skærmlæser ikke kunne uploade
+             overhovedet. js/opret-annonce.js svarer på Enter og mellemrum. -->
+        <div class="upload-zone" id="upload-zone" role="button" tabindex="0" aria-labelledby="upload-titel" aria-describedby="upload-tekst">
           <!-- accept: .heic/.heif står eksplicit ved siden af image/*, fordi
                Windows og Android ofte ikke kender MIME-typen for et
                iPhone-foto. Med image/* alene var filen grå i filvælgeren. -->
           <input type="file" id="photo-input" accept="image/*,.heic,.heif" multiple hidden>
           <div id="upload-icon-mount"></div>
-          <h3>Træk billeder herind, eller klik for at vælge</h3>
-          <p>Tilføj op til 12 billeder. Det første er forsidebillede — træk for at ombytte, eller vælg ★ for at gøre et billede til forside.</p>
+          <h3 id="upload-titel">Træk billeder herind, eller klik for at vælge</h3>
+          <p id="upload-tekst">Tilføj op til 12 billeder. Det første er forsidebillede — træk for at ombytte, eller vælg ★ for at gøre et billede til forside.</p>
         </div>
         <div class="photo-grid" id="photo-grid"></div>
         <!-- Teksten skal være ORDRET den samme som renderPhotoGrid() skriver,
@@ -438,18 +441,18 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=f94c9582"></script>
-<script defer src="js/vendor/supabase.js?v=f94c9582"></script>
-<script defer src="js/supabase-config.js?v=f94c9582"></script>
-<script defer src="js/supabase-api.js?v=f94c9582"></script>
-<script defer src="js/icons.js?v=f94c9582"></script>
-<script defer src="js/postnumre.js?v=f94c9582"></script>
-<script defer src="js/data.js?v=f94c9582"></script>
-<script defer src="js/store.js?v=f94c9582"></script>
-<script defer src="js/maaling.js?v=f94c9582"></script>
-<script defer src="js/backend-bridge.js?v=f94c9582"></script>
-<script defer src="js/components.js?v=f94c9582"></script>
-<script defer src="js/opret-annonce.js?v=f94c9582"></script>
+<script defer src="js/security.js?v=424ff225"></script>
+<script defer src="js/vendor/supabase.js?v=424ff225"></script>
+<script defer src="js/supabase-config.js?v=424ff225"></script>
+<script defer src="js/supabase-api.js?v=424ff225"></script>
+<script defer src="js/icons.js?v=424ff225"></script>
+<script defer src="js/postnumre.js?v=424ff225"></script>
+<script defer src="js/data.js?v=424ff225"></script>
+<script defer src="js/store.js?v=424ff225"></script>
+<script defer src="js/maaling.js?v=424ff225"></script>
+<script defer src="js/backend-bridge.js?v=424ff225"></script>
+<script defer src="js/components.js?v=424ff225"></script>
+<script defer src="js/opret-annonce.js?v=424ff225"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">
