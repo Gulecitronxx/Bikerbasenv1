@@ -3153,7 +3153,9 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    alle fire (ingen mellemrum, ingen synlig kant ud over .seo-browses egen)
    laeser dem som ÉT sammenhaengende "bladr videre"-baand, ikke som endnu
    en sektion efter den sidste. */
-.section-eftertekst{ background: var(--color-surface-2); padding: var(--space-6) 0; }
+/* padding-block, ikke shorthand: `padding: X 0` nulstillede .container's sidepadding og lod
+   .popular-row (margin -16px) stikke 16 px ud paa mobil — sidens eneste vandrette overflow. */
+.section-eftertekst{ background: var(--color-surface-2); padding-block: var(--space-6); }
 .section-eftertekst .section-head{ margin-bottom: var(--space-4); }
 .section-eftertekst .section-head h2{ font-size: clamp(17px,2vw,20px); }
 .section-eftertekst .section-head p{ font-size:13px; }
