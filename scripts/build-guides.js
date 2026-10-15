@@ -83,7 +83,7 @@ function typeTiles(){
 function kkTabel(){
   return `<div class="gd-table-wrap" role="region" aria-label="Kørekortkategorier til motorcykel" tabindex="0">
 <table class="gd-table">
-<caption>Hovedregler for motorcykelkørekort. Kilde: kørekortbekendtgørelsen §§ 11-13 og 35-37.</caption>
+<caption>Hovedregler for motorcykelkørekort. Kilde: kørekortbekendtgørelsen §§ 11-13 og 35-37. Trehjulede køretøjer har egne grænser (A1 og A2 op til 15 kW).</caption>
 <thead><tr><th scope="col">Kategori</th><th scope="col">Mindstealder</th><th scope="col">Du kan føre</th></tr></thead>
 <tbody>
 <tr><th scope="row">A1 <span>Lille motorcykel</span></th><td data-label="Mindstealder">18 år</td><td data-label="Du kan føre">Tohjulet motorcykel på højst 125 cm³, 11 kW og 0,1 kW pr. kg.</td></tr>
@@ -104,7 +104,7 @@ function fyldBidder(html){
 /* Trehjulede og scootere er ikke en tohjulet motorcykel i kørekortbekendtgørelsens §12-forstand
    (trehjulet kun op til 15 kW på A2). Vi kan ikke udlede det af alle annoncer, så de
    kendte navne holdes ude, og modulets overskrift lover kun den oplyste effekt. */
-const IKKE_TOHJULET = /tricity|niken|mp3|spyder|ryker|can-?am|trike|trehjul|sl?d+ ?3w|piaggio mp|quadro|kymco cv3|cv3/i;
+const IKKE_TOHJULET = /tricity|niken|\bmp3\b|spyder|ryker|can-?am|trike|trehjul|quadro|\bcv3\b|forza|burgman|\bnss\b|\bc ?(400|650) ?(gt|x)\b|nmax|xmax|t-?max|vespa|\bpcx\b|silver ?wing|\bsh ?\d{3}\b|scooter|\btf ?\d+ ?-?e\b|elektrisk|electric|\bzero\b|energica|\bev\b/i;
 function udvalgTilSidebjaelke(alle){
   if (!alle || !alle.length) return [];
   const { Sortering } = browserModules();
@@ -114,7 +114,7 @@ function udvalgTilSidebjaelke(alle){
     const foto = l.photoUrls && l.photoUrls[0];
     const y = Number(l.year);
     return hk != null && hk <= A2_MAX_HK && Number.isFinite(pris) && pris > 0 && foto && /^https?:\/\//.test(foto)
-      && y >= 1900 && y <= 2027 && !IKKE_TOHJULET.test(`${l.brand} ${l.model} ${l.variant || ''}`) && l.type !== 'scooter' && String(l.brand || '').trim() && String(l.model || '').trim() && l.brand !== 'Ukendt';
+      && y >= 1900 && y <= 2027 && !IKKE_TOHJULET.test(`${l.brand} ${l.model} ${l.variant || ''}`) && l.type !== 'scooter' && l.type !== 'cross' && String(l.brand || '').trim() && String(l.model || '').trim() && l.brand !== 'Ukendt';
   });
   const sorteret = Sortering.sorter(kandidater.slice(), 'blandet');
   const set = new Set(), ud = [];

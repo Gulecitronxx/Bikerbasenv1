@@ -50,3 +50,10 @@ Branch `gauntlet/guides`, port 8718. Nye filer: `scripts/build-guides.js`, `scri
 - F-3: noten viser "Udvalg pr. <dato>, kan være ændret siden". F-4: syn dato-bundet ("Til og med 31. dec. 2026 ...; fra 1. jan. 2027 ophævet, BEK 259/2026"), 3-ugers frist og tærskler (BEK 1685/2025 § 63 stk. 1-2, verificeret i teksten). F-7: hjelm "passagerer fra 15 år; fører sørger for 5-15 år" (§ 81 stk. 1+3). F-6: tabel nævner trehjulede > 15 kW. F-9: scroll-margin-top. F-10: sticky kræver nu viewport >= 1040 px.
 - Ikke gjort (nice-to-have): pr.-guide hero og nyt CTA-foto (kun ét hero-sæt findes i img/).
 - Tests: 30/30 i guides.test.js (nye: falsk reklamationspåstand, trehjulede, overskrift, syn-dato); `npm test` 364 pass; overflow 32 målinger (320/390/1024/1440, lys+mørk) 0, konsol 0 fejl.
+
+## Runde 3 (Critic P2/P3)
+- Privatkøb: 2 år er kun yderfrist (købeloven § 54); reklamation uden ugrundet ophold (§ 52); fejl sælger ikke kendte kan ikke kræves rettet (forbrug.dk); "som beset" dækker ikke svig (§ 53), urigtige tilsikrede egenskaber kan give erstatning (§ 42 stk. 2), undersøgelsespligt (§ 47); gem annoncen. Ingen henvisning til § 19. Ny kilde i guide 3: købeloven LBK 1853/2021 (læst i teksten). Bemærk: købeloven er ændret af LOV 723/2026 (reparationsfrist) — ikke omtalt.
+- Forhandler: retten dækker mangler ved levering, ikke normal slitage.
+- Sidebjælke: udelukker nu også Forza/Burgman/NSS/C 400/NMAX/Vespa m.fl. (maxi-scootere), el-modeller (TF 250-E) og type cross. Navnefilter kan ikke være udtømmende; noten siger det ærligt.
+- P3: § 81 (sele-undtagelse, ikke på parkeringsplads), tabelnote om trehjulede.
+- Tests 31/31 (guides), npm test 364 pass, overflow 32 målinger 0, konsol 0.

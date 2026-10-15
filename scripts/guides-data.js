@@ -47,6 +47,10 @@ const SRC = {
     label: 'Den digitale Bilbog — Life in Denmark (borger.dk); opslag sker på tinglysning.dk',
     url: 'https://lifeindenmark.borger.dk/travel-and-transport/motor-vehicles/the-digital-motor-vehicle-securities-register',
   },
+  koebeloven: {
+    label: 'Købeloven (LBK nr. 1853 af 24. september 2021), §§ 42, 47 og 52-54 (mangler, undersøgelse, reklamation og to-årsfristen) — retsinformation.dk',
+    url: 'https://www.retsinformation.dk/eli/lta/2021/1853',
+  },
   syn: {
     label: 'Bekendtgørelse om godkendelse og syn af køretøjer (BEK nr. 1685 af 16. december 2025), § 63 — retsinformation.dk',
     url: 'https://www.retsinformation.dk/eli/lta/2025/1685',
@@ -121,7 +125,7 @@ const GUIDES = [
 <li><strong>Ny motorcykel:</strong> du kender historikken, og stand er ikke et spørgsmål. Til gengæld binder du flere penge.</li>
 <li><strong>Brugt motorcykel:</strong> du kan få mere motorcykel for pengene, men du skal selv tjekke stand, papirer og historik. Brug <a href="guide-brugt-motorcykel.html">vores tjekliste til brugt motorcykel</a>.</li>
 </ul>
-<p>Køber du af en forhandler, er det et forbrugerkøb med to års reklamationsret, også når varen er brugt. Køber du af en privatperson, gælder de forbrugerbeskyttende regler ikke, og sælgeren kan aftale forbehold som "købt som beset". Læs mere i guiden til <a href="guide-brugt-motorcykel.html">køb af brugt motorcykel</a>. Det er en vigtig forskel at kende, før du sammenligner priser.</p>
+<p>Køber du af en forhandler, er det et forbrugerkøb med to års reklamationsret, også når varen er brugt. Hos en forhandler dækker reklamationsretten mangler, der var der ved levering, ikke normal slitage. Køber du af en privatperson, gælder de forbrugerbeskyttende regler ikke, og sælgeren kan aftale forbehold som "købt som beset", som dog ikke dækker svig. Læs mere i guiden til <a href="guide-brugt-motorcykel.html">køb af brugt motorcykel</a>. Det er en vigtig forskel at kende, før du sammenligner priser.</p>
 <p>Bikerbasen viser både nye og brugte motorcykler fra forskellige kilder, og kilden står på hvert kort, så du kan se, hvem du handler med.</p>`,
       },
       {
@@ -132,7 +136,7 @@ const GUIDES = [
 <ul>
 <li><strong>Passer den til din krop?</strong> Prøv at sidde på den. Kan du nå jorden, og kan du løfte og skubbe den uden at miste kontrollen? Vægt og sædehøjde mærker du først i virkeligheden.</li>
 <li><strong>Er effekten til at styre?</strong> En motorcykel, hvor kræfterne er lette at håndtere, gør det nemmere at lære. Husk, at dit kørekort sætter en øvre grænse.</li>
-<li><strong>Udstyr:</strong> styrthjelm er lovpligtig for føreren og for passagerer fra 15 år, og føreren skal sørge for, at passagerer fra 5 til 15 år bruger den (færdselsloven § 81). Jakke, handsker, bukser og støvler er ikke et lovkrav, men de hører med i budgettet.</li>
+<li><strong>Udstyr:</strong> styrthjelm er lovpligtig for føreren og for passagerer fra 15 år, og føreren skal sørge for, at passagerer fra 5 til 15 år bruger den, medmindre passagersædet har sikkerhedssele. Pligten gælder ikke på fx en parkeringsplads (færdselsloven § 81). Jakke, handsker, bukser og støvler er ikke et lovkrav, men de hører med i budgettet.</li>
 <li><strong>Forsikring:</strong> motordrevne køretøjer skal være dækket af en ansvarsforsikring (færdselsloven § 105). Indhent et tilbud, før du køber.</li>
 <li><strong>Løbende udgifter:</strong> forsikring, afgifter, dæk og service kommer oveni købsprisen.</li>
 <li><strong>Papirerne:</strong> se registreringsattesten og sammenlign stelnummer og oplysninger med motorcyklen.</li>
@@ -296,11 +300,11 @@ const GUIDES = [
     cardPos: 'center',
     tldr: [
       'Se registreringsattesten og slå stelnummeret op i Bilbogen, før du betaler.',
-      'Hos en forhandler har du to års reklamationsret. Ved privatkøb kan I aftale noget andet, fx "som beset", så få det på skrift.',
+      'Hos en forhandler har du to års reklamationsret på mangler, der var der ved levering. Ved privatkøb afhænger det af aftalen: reklamer straks, og få aftaler og tilsagn på skrift.',
       'Som ny ejer skal du omregistrere inden for 4 hverdage.',
       'Tegn ansvarsforsikring. Det er et lovkrav.',
     ],
-    sources: ['ejerskifte', 'afgifter', 'bilbogen', 'syn', 'synaendring', 'faerdsel', 'reklamation', 'brugtbil', 'brugtevarer'],
+    sources: ['ejerskifte', 'afgifter', 'bilbogen', 'syn', 'synaendring', 'faerdsel', 'koebeloven', 'reklamation', 'brugtbil', 'brugtevarer'],
     sections: [
       {
         id: 'foer',
@@ -379,8 +383,8 @@ const GUIDES = [
         html: `
 <p>Hvem du køber af, afgør dine rettigheder:</p>
 <ul>
-<li><strong>Forhandler:</strong> et køb hos en erhvervsdrivende er et forbrugerkøb. Du har to års reklamationsret, der løber fra leveringen, også når varen er brugt. En forhandler kan ikke fraskrive sig den med generelle forbehold.</li>
-<li><strong>Privatperson:</strong> de forbrugerbeskyttende regler gælder ikke, men ifølge Forbrugerstyrelsen har du som udgangspunkt også to års reklamationsret, hvis I ikke har aftalt noget andet. Det er dog almindeligt, at private sælger "som beset" og uden reklamationsret. Hvad I har aftalt, afgør derfor meget, og en fejl skal reklameres inden for rimelig tid. Spørg en rådgiver, hvis I bliver uenige.</li>
+<li><strong>Forhandler:</strong> et køb hos en erhvervsdrivende er et forbrugerkøb. Du har to års reklamationsret, der løber fra leveringen, også når varen er brugt. Den dækker mangler, der var til stede ved levering, ikke normal slitage, og på en brugt motorcykel afhænger det af alder og slid, hvad der er en mangel. En forhandler kan ikke fraskrive sig retten med generelle forbehold.</li>
+<li><strong>Privatperson:</strong> de forbrugerbeskyttende regler gælder ikke, og din beskyttelse afhænger meget af aftalen. Har I ikke aftalt andet, gælder købeloven: du skal give sælger besked uden ugrundet ophold, efter du har opdaget fejlen (§ 52), og to år er kun den yderste frist (§ 54). Du kan ikke kræve rettet fejl, som sælgeren ikke kendte (Forbrugerstyrelsen). Mange private sælger "som beset" og uden reklamationsret. Det dækker ikke svig, og urigtige oplysninger om tilsikrede egenskaber kan give ret til erstatning (§ 42, stk. 2, og § 53). Til gengæld kan du ikke påberåbe dig fejl, som du burde have opdaget ved en undersøgelse før købet (§ 47). Gem derfor annoncen som skærmbillede, og få aftaler skriftligt. Spørg en rådgiver, hvis I bliver uenige.</li>
 </ul>
 <p>Uanset hvem du køber af: få en <strong>skriftlig købsaftale</strong> med motorcyklens oplysninger (mærke, model, årgang, stelnummer, kilometer), prisen og de forbehold, I har aftalt. Behold dokumentationen.</p>
 <p>Vi hoster ikke annoncerne, og vi er ikke part i handlen. Vi linker til kilden, og aftalen laver du med sælger.</p>`,
@@ -393,7 +397,7 @@ const GUIDES = [
 <ul>
 <li><strong>Omregistrering:</strong> som ny ejer skal du omregistrere inden for 4 hverdage fra købet. Det kan du selv gøre i Motorstyrelsens app Ejerskifte eller i Motorregistret, hvor du skal bruge MitID, registreringsattesten og dit betalingskort. Ifølge borger.dk koster omregistrering i Motorregistret 340 kr. i 2026.</li>
 <li><strong>Ansvarsforsikring:</strong> motordrevne køretøjer skal være dækket af en ansvarsforsikring i et selskab med Finanstilsynets tilladelse (færdselsloven § 105). Tegn den, før du kører hjem.</li>
-<li><strong>Udstyr:</strong> styrthjelm er lovpligtig for føreren og for passagerer fra 15 år, og føreren skal sørge for, at passagerer fra 5 til 15 år bruger den (færdselsloven § 81).</li>
+<li><strong>Udstyr:</strong> styrthjelm er lovpligtig for føreren og for passagerer fra 15 år, og føreren skal sørge for, at passagerer fra 5 til 15 år bruger den, medmindre passagersædet har sikkerhedssele. Pligten gælder ikke på fx en parkeringsplads (færdselsloven § 81).</li>
 </ul>
 <p>Er du på vej til din første motorcykel, kan du læse mere i <a href="guide-foerste-motorcykel.html">guiden til din første motorcykel</a>. Er du klar til at lede efter en, så start i <a href="soegning.html">søgningen</a>.</p>
 <p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,

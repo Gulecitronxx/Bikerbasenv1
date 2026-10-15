@@ -142,7 +142,7 @@ test('privatkøb: ingen falsk påstand om, at reklamationsretten slet ikke finde
   const g = GUIDES.find(x => x.slug === 'guide-brugt-motorcykel');
   const html = renderGuide(g, ctx);
   assert.ok(!/Ved privatkøb gælder den ikke/.test(html), 'tl;dr må ikke afvise reklamationsretten ved privatkøb');
-  assert.match(html, /hvis I ikke har aftalt noget andet/);
+  assert.match(html, /Har I ikke aftalt andet, gælder købeloven/);
   assert.match(html, /Til og med 31\. december 2026/);
   assert.match(html, /3 uger/);
   assert.match(html, /passagerer fra 15 år/);
@@ -157,4 +157,17 @@ test('sidebjælken: trehjulede og scootere udelukkes, og overskriften lover kun 
   assert.match(html, /Oplyst effekt under A2-grænsen/);
   assert.ok(!/Motorcykler til A2-kørekort/.test(html));
   assert.match(html, /Udvalg pr\. 24\. august 2026/);
+});
+
+test('sidebjælken: maxi-scootere og el-crossere udelukkes; privatkøb nævner yderfrist og svig', () => {
+  const mk = (i, brand, model, extra) => Object.assign({ id: String(i), brand, model, year: 2020, km: 1000, ccm: 300, power: 28, price: 50000, photoUrls: ['https://example.com/a.jpg'], isExternal: false, createdAt: '2026-01-01', saelgertype: 'forhandler' }, extra);
+  const ud = udvalgTilSidebjaelke([mk(1, 'Honda', 'NSS 300 Forza'), mk(2, 'Suzuki', 'AN 400 Burgman'), mk(3, 'BMW', 'C 400 GT'), mk(4, 'Triumph', 'TF 250-E'), mk(5, 'Honda', 'X', { type: 'cross', model: 'Y 250' }), mk(6, 'Honda', 'CB500F'), mk(7, 'Yamaha', 'MT-07')]);
+  assert.deepStrictEqual(ud.map(l => l.model).sort(), ['CB500F', 'MT-07']);
+  const html = renderGuide(GUIDES.find(x => x.slug === 'guide-brugt-motorcykel'), ctx);
+  assert.match(html, /uden ugrundet ophold/);
+  assert.match(html, /yderste frist/);
+  assert.match(html, /Det dækker ikke svig/);
+  assert.match(html, /ikke normal slitage/);
+  assert.ok(!/§ 19/.test(html), '§ 19 er ikke "som beset"-paragraffen');
+  assert.match(html, /eli\/lta\/2021\/1853/);
 });
