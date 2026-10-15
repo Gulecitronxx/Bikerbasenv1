@@ -7,9 +7,19 @@ function renderHeader(activeOverride){
   const header = document.querySelector('.site-header');
   if (!header) return;
   const current = activeOverride || location.pathname.split('/').pop() || 'index.html';
+  /* Aktiv menu = den sidefamilie man står i, ikke kun præcis den fil: mærkesider hører under
+     Mærker, type-/region-/model-/annoncesider under Motorcykler, kørekortsider under Kørekort,
+     guides under Artikler & guides. */
+  const familie = /^maerke-|^maerker\.html$/.test(current) ? 'maerker.html'
+    : /^(type-|region-|model-|annonce)/.test(current) || current === 'soegning.html' ? 'soegning.html'
+    : /^koerekort-/.test(current) ? 'koerekort-a2.html'
+    : /^guide/.test(current) ? 'guides.html' : current;
   document.querySelectorAll('.main-nav a, .mobile-drawer-panel a[href]').forEach(a => {
     if (a.hasAttribute('data-auth-slot-mobile')) return;
-    a.classList.toggle('active', a.getAttribute('href') === current);
+    const href = a.getAttribute('href');
+    const aktiv = href === current || href === familie;
+    a.classList.toggle('active', aktiv);
+    if (aktiv) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   updateAuthVisibility();
   injectDealerNav(current);

@@ -484,7 +484,11 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 }
 .drawer-theme svg{ width:22px; height:22px; }
 
-@media (min-width: 1024px){
+/* Headeren kan ikke rumme hele menuen + favorit/profil/CTA under ~1180 px (P1 fra samlet Critic:
+   73-301 px vandret overflow ved 1024). Under 1180 bruges menuskuffen; under 1500 skjules de
+   to sekundære punkter (står stadig i footer og skuffe). */
+@media (max-width: 1499px){ .main-nav .nav-sek{ display:none; } }
+@media (min-width: 1180px){
   /* Nav'en står lige efter logoet; handlingerne skubbes til højre kant. */
   .main-nav{ display:flex; margin-left:var(--space-3); }
   .header-actions{ margin-left:auto; gap:6px; }
@@ -563,7 +567,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    fotoets underkant (.hero-sok trækkes op over hero'en). Topbaren er den samme hvide/mørke header
    som på alle andre sider — ingen gennemsigtig header hen over fotoet længere. */
 /* Forsiden: header, hero og alle sektioner står på ÉN venstrekant (billedets komposition). */
-.container--wide, body.home .site-header > .container{ max-width:1480px; }
+/* Headerens bredde er ens paa ALLE sider (samlet Critic: den hoppede 100 px mellem forsiden og resten). */
+.container--wide, .site-header > .container{ max-width:1480px; }
 .hero{
   position:relative; overflow:hidden;
   background: var(--color-dark);

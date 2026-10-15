@@ -35,6 +35,11 @@ Juridiske regler: `/CLAUDE.md` (ufravigelige).
 | V-006/V-007 | Formularkanter 1,3:1 og placeholder-kontrast (nyt token `--color-input-border`) | P2 | rettet — afventer Critic |
 | F-F1..F3 | Søgning: match hen over ordgrænse (`gs`→"Road King Special"), symbol-only q giver alt, ingen rangering | P3 | åben |
 | UX-1 | "Sådan virker Bikerbasen": 4-trins modul over de to spor på forsiden (ejerens favorit; kun sande trin, favoritter udeladt pga. F-005) | P2 | bygget — afventer Critic |
+| SAMLET-1 | **P1** Header løb vandret over (73–301 px ved 1024 med favorit/forhandler) | P1 | **rettet** — menuskuffe under 1180 px, sekundære menupunkter skjult under 1500 px; måling 0 px i alle kombinationer (hdr.js) |
+| SAMLET-2 | Header hoppede 100 px mellem forside og øvrige sider | P2 | **rettet** — header 1480 px på alle sider |
+| SAMLET-3 | Aktiv menu kun på 6 sider, ingen aria-current | P2 | **rettet** — aktiv = sidefamilie, aria-current |
+| SAMLET-4 | Forsidens A-flise (655) pegede på koerekort-a (411) | P2 | **rettet** — A-flisen peger på søgningen |
+| F-12 | Blokeret localStorage kastede fejl | P2 | **rettet** — hukommelses-shim i store.js (A/B: 0 vs 2–3 fejl) |
 | G-002 | Header (`.header-actions`, `.spor-koeber`) klippes ikke under ~269 px viewport | P3 | åben — under WCAG 320 px-grænsen, lav prioritet |
 
 ## Prioriteret kø (fra Detective-rapporterne, rangeret efter værdi/indsats)

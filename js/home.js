@@ -320,7 +320,9 @@ async function buildForside(){
   document.querySelectorAll('.tal-grid a[data-kk]').forEach(a => {
     const id = a.dataset.kk;
     const side = facetSider.get(`koerekort:${id}`);
-    if (side) a.setAttribute('href', side);
+    /* A bliver på søgningen: tallet her er "ikke udelukket for A" (alle), mens koerekort-a.html kun
+       viser dem med OPLYST effekt over A2-grænsen — to forskellige tal bag samme flise. */
+    if (side && id !== 'A') a.setAttribute('href', side);
     const n = Filtrering.anvendFiltre(ALLE, { koerekort: id }, null, null).length;
     a.querySelector('[data-antal]').textContent = `${daTal(n)} ${n === 1 ? 'annonce' : 'annoncer'}`;
   });
