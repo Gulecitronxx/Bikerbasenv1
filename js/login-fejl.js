@@ -30,7 +30,7 @@
   }
 
   /* fejl: valgfrit hele fejlobjektet (giver navn/status), message: teksten. */
-  function daError(message, fejl) {
+  function daError(message, fejl, kontekst) {
     const raa = (fejl && typeof fejl === 'object') ? fejl : { message };
     if (erNetvaerksfejl(raa) || erNetvaerksfejl(message)) return NETVAERK_TEKST;
     const m = (message || '').toLowerCase();
@@ -48,6 +48,8 @@
        sitet er i stykker. Sig hvor længe det drejer sig om — og at profilen
        sandsynligvis allerede ER oprettet, så man skal logge ind, ikke oprette
        en ny. */
+    if (kontekst === 'nulstil' && (m.includes('rate limit') || m.includes('for security purposes') || m.includes('too many')))
+      return 'Vi kan ikke sende flere mails lige nu (der er en grænse). Vent lidt, og prøv igen.';
     if (m.includes('email rate limit') || m.includes('over_email_send_rate_limit'))
       return 'Vi kan ikke sende flere bekræftelsesmails lige nu (der er en grænse pr. time). '
            + 'Er din profil allerede oprettet, så prøv at logge ind i stedet — ellers vent op til en time.';

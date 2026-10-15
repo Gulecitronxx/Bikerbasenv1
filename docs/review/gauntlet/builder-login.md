@@ -35,3 +35,11 @@
 
 ## Filer / commits
 `login.html`, `js/login.js`, `afmeld.html`, nye `css/p-login.css`, `js/login-fejl.js`, `js/login-fejl.test.js`, denne rapport. Commit på gauntlet/login, ikke pushet. Kendt rest: login.html bruger `<link href="css/p-login.css">` uden `?v=` (stampes af build); forhandler-opret-tilstand er høj på desktop (højre halvdel strækker sig).
+
+## Runde 2 (efter critic-login.md, 3,3/5)
+- **Foto = helt i højre halvdel**: fade fra ~30 % (ikke 75 %), motorcyklen stor og hel (foto løftet/forskudt), svag scrim kun øverst/nederst; mørk: ensartet .32. Teksten ligger på en lokal glasflade (`.lg-promo-body`, 450 px, blur) — ikke over hele panelet. Ingen rytter-motiv findes i img/ (kun hero + type-fotos); sportscyklen er helten.
+- **Mobil/tablet <960**: foto-header (230 px, motorcykel-udsnit) over kortet; kortet overlapper.
+- Titler 48/44 px bold, fordelsikoner 44 px runde, højre CTA ~10 px fra venstre "Log ind" (samme linje), strimmel: 44 px runde ikoner, `align-items:flex-start`, kortere titler (ingen 3-liniers brud).
+- Fund: F-3 kontrast (links på flade bruger --color-primary-hover, kortere tekster); touch-mål >=44 px (glemt, opret, log ind her, vilkår/privatlivspolitik); F-1 `identities:[]` -> "E-mailen findes måske allerede…" (ingen verify-trin); F-4 `otp_expired` -> venlig besked + glemt-trin åbnet; F-5 rate-limit ved nulstil siger ikke "bekræftelsesmails" (`daError(..., 'nulstil')`); afmeld-kortet større og centreret. F-2 (store.js) overladt til Orchestratoren.
+- Tests: 29 mock-flows PASS (26 + 3 nye: identities:[], otp_expired, rate-limit); kun kendt store.js-`blocked`. Enhedstests 6/6.
+- Målt runde 2: overflow 0 på 36/36; kontrast >=4,5:1 på alle målte tekster (glasflade 93 %, faste tekstfarver #55504B / #CFC8BE; links --color-primary-hover). 3 visuelle iterationer (1440/390/1024, lys+mørk). Rest: ingen rytter-motiv (kun sportscykel), glasfladen skjuler en del af cyklens bagende på 1440, CTA-linjen er ~10 px forskudt.

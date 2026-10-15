@@ -52,3 +52,10 @@ test('ukendt engelsk tekst vises aldrig rå', () => {
   assert.strictEqual(daError(''), 'Noget gik galt. Prøv igen om lidt.');
   assert.strictEqual(daError(undefined), 'Noget gik galt. Prøv igen om lidt.');
 });
+
+test('rate limit ved nulstilling nævner ikke bekræftelsesmails', () => {
+  const t = daError('email rate limit exceeded', null, 'nulstil');
+  assert.doesNotMatch(t, /bekræftelsesmail/);
+  assert.match(t, /Vent lidt/);
+  assert.match(daError('email rate limit exceeded'), /bekræftelsesmails/);
+});

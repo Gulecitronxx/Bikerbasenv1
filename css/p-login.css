@@ -209,3 +209,104 @@ html[data-lgmode="register"] .lg-only-login{ display:none; }
 
 /* afmeld.html har ingen footer, så ingen margin at udligne. */
 body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
+
+/* =====================================================================
+   Runde 2 — fotoet er hovedpersonen (billede 6), tungere titler, mobilfoto
+   ===================================================================== */
+.lg-head h1{ font-size: clamp(32px, 8vw, 48px); font-weight:700; letter-spacing:-.025em; line-height:1.05; }
+.lg-promo h2{ font-size: clamp(32px, 8vw, 44px); font-weight:700; line-height:1.05; letter-spacing:-.025em; }
+.lg-head p{ font-size:17px; }
+.lg-bi{ width:44px; height:44px; }
+.lg-bi svg{ width:22px; height:22px; }
+.lg-benefits strong{ font-size:18px; }
+.lg-benefits{ gap:18px; margin: var(--space-5) 0; }
+.lg-promo-lead{ margin-top:10px; }
+/* Links på den lokale flade: mørkere brandtone for AA (>=4.5:1) */
+.lg-promo .link-btn, .lg-promo-body .link-btn{ color: var(--color-primary-hover); }
+:root[data-theme="dark"] .lg-promo .link-btn{ color: var(--color-primary); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .lg-promo .link-btn{ color: var(--color-primary); } }
+
+/* Lysere, mere levende foto: svag scrim kun øverst/nederst */
+.lg-bg::after{ background: linear-gradient(180deg, rgba(20,16,12,.18) 0%, rgba(20,16,12,0) 40%, rgba(20,16,12,.22) 100%); }
+:root[data-theme="dark"] .lg-bg::after{ background: rgba(10,8,6,.32); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .lg-bg::after{ background: rgba(10,8,6,.32); } }
+
+/* Lokal flade bag teksten (ikke over hele panelet) */
+.lg-promo-body{ position:relative; }
+.lg-promo-body > *{ max-width:none; }
+
+/* Touch-mål: >=44 px */
+.lg-forgot{ min-height:44px; display:inline-flex; align-items:center; }
+.lg-switch-btn{ min-height:44px; }
+.lg-member .link-btn{ min-height:44px; display:inline-flex; align-items:center; padding:0 4px; }
+.lg-legal a{ display:inline-block; padding:13px 3px; }
+
+/* Bundstrimmel: lige høje kolonner */
+.lg-strip-list li{ align-items:flex-start; }
+.lg-strip-list strong{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lg-si{ width:44px; height:44px; border-radius:50%; background: var(--color-primary-tint); }
+.lg-si svg{ width:24px; height:24px; }
+
+/* ---- Mobil/tablet: foto-header over kortet ---- */
+@media (max-width:959px){
+  .lg-main{ background: var(--color-bg); }
+  .lg-bg{ inset:0 0 auto 0; height:230px; }
+  .lg-bg::after{ background: linear-gradient(180deg, rgba(20,16,12,.12), rgba(20,16,12,0) 60%, color-mix(in srgb, var(--color-bg) 0%, transparent)); }
+  .lg-bg-photo{ object-position: 88% 68%; }
+  .lg-stage{ padding-top:150px; padding-bottom: var(--space-5); }
+  .lg-promo-body{ position:static; }
+}
+
+/* ---- Desktop: fotoet fylder højre halvdel ---- */
+@media (min-width:960px){
+  .lg-bg-photo{ right:-6%; width:106%; object-position:100% 78%; }
+  .lg-promo{
+    background: linear-gradient(90deg, var(--color-surface-2) 0%, var(--color-surface-2) 30%,
+      color-mix(in srgb, var(--color-surface-2) 40%, transparent) 55%, transparent 80%);
+    padding: 48px 48px 44px;
+  }
+  .lg-promo-body{
+    max-width:470px; padding: 28px 28px 24px; margin:-28px 0 0 -28px;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-surface-2) 88%, transparent);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .lg-promo > *{ max-width:none; }
+  .lg-benefits{ max-width:none; }
+  .lg-promo-cta, .lg-member{ max-width:none; }
+  .lg-benefits li span:not(.lg-bi){ font-size:15px; }
+}
+@media (min-width:960px) and (max-width:1279px){
+  .lg-promo{ background: linear-gradient(90deg, var(--color-surface-2) 0%, var(--color-surface-2) 30%, color-mix(in srgb, var(--color-surface-2) 40%, transparent) 62%, transparent 92%); }
+  .lg-bg-photo{ right:-14%; width:114%; }
+}
+
+/* afmeld: større kort */
+.lg-solo{ max-width:760px; padding: var(--space-7) var(--space-7); text-align:center; }
+.lg-solo h1{ font-size: clamp(30px, 7vw, 44px); }
+.lg-solo p{ font-size:18px; }
+.lg-solo-actions{ justify-content:center; }
+@media (max-width:640px){ .lg-solo{ padding: var(--space-6) var(--space-5); } }
+
+/* Runde 2b */
+@media (min-width:960px){
+  .lg-promo > .lg-promo-body{ max-width:470px; }
+  .lg-bg-photo{ top:-20%; height:120%; }
+}
+.lg-legal a{ padding:0 2px; }
+@media (max-width:959px){
+  .lg-legal a{ display:inline-flex; align-items:center; min-height:44px; padding:0 4px; }
+}
+
+/* Runde 2c */
+@media (min-width:960px){
+  .lg-promo > .lg-promo-body{ max-width:450px; background: color-mix(in srgb, var(--color-surface-2) 86%, transparent); }
+  .lg-bg-photo{ right:-14%; width:114%; }
+}
+@media (min-width:960px) and (max-width:1279px){ .lg-bg-photo{ right:-22%; width:122%; } }
+
+/* Runde 2d: AA på glasfladen (faste værdier: 6,6:1 lys, 9:1 mørk) */
+.lg-promo-body .lg-promo-lead, .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#55504B; }
+:root[data-theme="dark"] .lg-promo-body .lg-promo-lead, :root[data-theme="dark"] .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#CFC8BE; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .lg-promo-body .lg-promo-lead, :root:not([data-theme="light"]) .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#CFC8BE; } }
+@media (min-width:960px){ .lg-promo > .lg-promo-body{ background: color-mix(in srgb, var(--color-surface-2) 93%, transparent); } }

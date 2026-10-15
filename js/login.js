@@ -262,6 +262,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('forgot-submit').style.display = '';
   });
 
+  /* Udløbet/brugt link fra mailen: Supabase sender #error=access_denied&error_code=otp_expired.
+     Vis en venlig besked og åbn "glemt kode", så man kan bede om et nyt link. */
+  if (/error_code=otp_expired|error=access_denied/.test(location.hash + location.search)){
+    document.getElementById('forgot-password-btn').click();
+    authError('Linket er udløbet eller allerede brugt. Skriv din e-mail, så sender vi et nyt.');
+  }
+
   document.getElementById('forgot-cancel').addEventListener('click', () => {
     document.querySelector('[data-auth-tab="login"]').click();
   });
@@ -282,7 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const redirectTo = location.origin + location.pathname;
     const { error } = await sikkert(() => db.resetPasswordForEmail(email, redirectTo));
     setLoading(btn, false, 'Send nulstillingslink');
-    if (error){ authError(daError(error.message, error)); return; }
+    if (error){ authError(daError(error.message, error, 'nulstil')); return; }
 
     // Supabase svarer succes uanset om e-mailen findes i systemet — det
     // gentager vi her i stedet for at modsige det med en anden besked, for
@@ -395,6 +402,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data, error } = await sikkert(() => db.signUp({ email, password, name, phone, isDealer, company, cvr }));
     setLoading(btn, false, 'Fortsæt');
     if (error){ authError(daError(error.message, error)); return; }
+    /* Med e-mailbekræftelse slået til svarer Supabase 200 med identities:[]
+       for en e-mail, der allerede har en profil (mod opremsning af brugere).
+       Så er der IKKE sendt nogen bekræftelsesmail — sig det ærligt. */
+    if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0){
+      authError('E-mailen findes måske allerede. Prøv at logge ind, eller nulstil din adgangskode under "Glemt din adgangskode?".');
+      return;
+    }
     if (typeof Maaling !== 'undefined') Maaling.oprettet('email', isDealer);
 
     // Med e-mailbekræftelse slået til findes brugeren, men har ingen session endnu.
