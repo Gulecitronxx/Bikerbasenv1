@@ -77,9 +77,42 @@
     return fejl;
   }
 
+  /* Hele datasættet (formen fra collectFormData / en gemt kladde) mod den samme
+     tabel. Bruges ved gendannelse af en kladde og som sidste gate i publishListing,
+     så ingen vej uden om trin-valideringen kan give ugyldige tal.
+     kunUgyldige: spring "mangler"-tjek over (en halvfærdig kladde er lovlig). */
+  var DATA_NOEGLER = {
+    'f-year': 'year', 'f-km': 'km', 'f-ccm': 'ccm', 'f-power': 'power', 'f-price': 'price',
+    'f-ejere': 'antalEjere', 'f-synsaar': 'sidsteSyn', 'f-daek': 'daekAar'
+  };
+  var PAAKRAEVET = ['f-year', 'f-km', 'f-ccm', 'f-price'];
+  var PAAKRAEVET_TEKST = { 'f-brand': 'brand', 'f-model': 'model', 'f-desc': 'description' };
+
+  function validerData(d, aar, valg) {
+    var kun = !!(valg && valg.kunUgyldige), fejl = [];
+    d = d || {};
+    Object.keys(DATA_NOEGLER).forEach(function (id) {
+      var v = d[DATA_NOEGLER[id]];
+      var raa = v == null ? '' : String(v);
+      if (raa.trim() === '') {
+        if (!kun && PAAKRAEVET.indexOf(id) !== -1) fejl.push({ id: id, besked: 'Feltet skal udfyldes.' });
+        return;
+      }
+      var b = validerTal(id, raa, aar);
+      if (b) fejl.push({ id: id, besked: b });
+    });
+    Object.keys(PAAKRAEVET_TEKST).forEach(function (id) {
+      var raa = d[PAAKRAEVET_TEKST[id]];
+      if (!kun && String(raa == null ? '' : raa).trim() === '') fejl.push({ id: id, besked: 'Feltet skal udfyldes.' });
+    });
+    var b2 = validerBeskrivelse(d.description);
+    if (b2) fejl.push({ id: 'f-desc', besked: b2 });
+    return fejl;
+  }
+
   var api = {
     REGLER: REGLER, TRIN_FELTER: TRIN_FELTER, MAX_BESKRIVELSE: MAX_BESKRIVELSE,
-    graenser: graenser, validerTal: validerTal, validerBeskrivelse: validerBeskrivelse, validerTrin: validerTrin
+    graenser: graenser, validerTal: validerTal, validerBeskrivelse: validerBeskrivelse, validerTrin: validerTrin, validerData: validerData
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OpretValidering = api;

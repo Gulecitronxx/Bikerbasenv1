@@ -76,3 +76,29 @@ test('validerTrin: samler fejl i feltrækkefølge pr. trin', () => {
   assert.deepEqual(t2.map(f => f.id), ['f-price']);
   assert.deepEqual(V.validerTrin(3, () => '', AAR), []);
 });
+
+test('validerData: ugyldige tal i en kladde fanges (F-1)', () => {
+  const kladde = { brand: 'Yamaha', model: 'MT-07', type: 'naked', year: 1850, km: -5, ccm: 99999, power: 9999, price: 99999999, description: 'ok', videreTilTrin: 3 };
+  const fejl = V.validerData(kladde, AAR);
+  assert.deepEqual(fejl.map(f => f.id).sort(), ['f-ccm', 'f-km', 'f-power', 'f-price', 'f-year']);
+  fejl.forEach(f => assert.ok(f.besked.length > 10));
+});
+
+test('validerData: gyldigt sæt giver ingen fejl; tom kladde kun "mangler"', () => {
+  const ok = { brand: 'Honda', model: 'CB500F', year: 2019, km: 20000, ccm: 471, power: 47, price: 59900, description: 'Pæn.', antalEjere: 1, sidsteSyn: 2025, daekAar: 2024 };
+  assert.deepEqual(V.validerData(ok, AAR), []);
+  const tom = V.validerData({}, AAR);
+  assert.ok(tom.length >= 6 && tom.every(f => f.besked === 'Feltet skal udfyldes.'));
+  assert.deepEqual(V.validerData({}, AAR, { kunUgyldige: true }), []);
+});
+
+test('validerData: ugyldig valgfri historik (fold) fanges, tom historik ikke', () => {
+  const base = { brand: 'a', model: 'b', year: 2020, km: 1, ccm: 100, price: 1, description: 'x' };
+  assert.deepEqual(V.validerData(Object.assign({}, base, { antalEjere: 0 }), AAR).map(f => f.id), ['f-ejere']);
+  assert.deepEqual(V.validerData(Object.assign({}, base, { antalEjere: null, sidsteSyn: null }), AAR), []);
+});
+
+test('validerData: for lang beskrivelse', () => {
+  const d = { brand: 'a', model: 'b', year: 2020, km: 1, ccm: 100, price: 1, description: 'x'.repeat(4001) };
+  assert.deepEqual(V.validerData(d, AAR).map(f => f.id), ['f-desc']);
+});

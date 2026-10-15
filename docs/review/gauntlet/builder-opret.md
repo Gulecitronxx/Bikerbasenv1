@@ -32,3 +32,9 @@ Overflow: 0 af 48 kombinationer (320–1440, lys/mørk, trin 1–4). Kontrast AA
 Hero 4 · Trinbjælke 4,5 · Felt-sektioner 4,3 · Tips 4 · Billedupload 4,2 · Sidebjælke 4,3 · Mobil 4 · Trin 4 3,8 → **samlet ≈ 4,2** (Critic før: 3,7).
 
 Rest: live-kortet er `inert` (ikke tilgængeligt for AT; formularen er kilden).
+
+## Runde 3 (Critic runde 2: ACCEPTER, F-1..F-8)
+- **F-1 (P2)**: `OpretValidering.validerData` (hele tabellen + "mangler"-tjek) bruges ved gendannelse af kladde (ugyldige tal blokerer `videreTilTrin:3`, fejl vises ved felterne) og som SIDSTE gate i `publishListing` (ingen POST; brugeren sendes til side 1 med fejl). Testet incl. redigeret localStorage og DOM-tampering på gennemse-trinnet.
+- **F-2 (P2)**: fejl i den lukkede fold åbner den automatisk; fokus + `aria-invalid` + `aria-describedby` på feltet.
+- **F-3** filstørrelse (>12 MB) afvises ved valg med besked. **F-4** trinbjælken er `<nav aria-label="Trin i annoncen">`, skjult "Trin n af 4"-tekst + `aria-current`. **F-5** `beforeunload`-advarsel ved uudgivne ændringer/valgte fotos (programmatiske skift via `forlad()` udløser den ikke; kladde gemt nulstiller). **F-6** scroll-lås bag bundarket. **F-7** pillen skjules ved fokus i felt og når kortet/footeren er i syne; handlingsknapper stakker helt ≤420 px; trin 4's infoboks er neutral (ikke rød); "Pris ikke oplyst" i arket nedtonet. **F-8** "de indekserede" → "forhandlere og markedspladser"; "tit et af de første spørgsmål…" fjernet; hero siger ikke længere "fire trin".
+- Tests: `js/opret-validering.test.js` 16 + `js/opret-annonce-markup.test.js` 6 = 22/22; `npm test` 364/364; flowtest 79 checks grønne (60 gamle + 19 nye: F-1..F-8), konsol ren; overflow 0 af 48; kontrast AA; hero h1 ≥5,6:1.
