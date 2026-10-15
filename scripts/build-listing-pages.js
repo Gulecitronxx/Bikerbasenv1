@@ -103,8 +103,10 @@ function jsonLd(l, url){
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Forside', item: `${BASE}` },
-      { '@type': 'ListItem', position: 2, name: typeLabel(l.type), item: `${BASE}/soegning?type=${l.type}` },
-      { '@type': 'ListItem', position: 3, name: navn, item: url },
+      { '@type': 'ListItem', position: 2, name: 'Motorcykler', item: `${BASE}/soegning` },
+      { '@type': 'ListItem', position: 3, name: l.brand, item: `${BASE}/soegning?brands=${encodeURIComponent(l.brand)}` },
+      { '@type': 'ListItem', position: 4, name: l.model, item: `${BASE}/soegning?brands=${encodeURIComponent(l.brand)}&model=${encodeURIComponent(l.model)}` },
+      { '@type': 'ListItem', position: 5, name: `${navn} (${l.year})`, item: url },
     ],
   };
   /* id'erne skal matche dem js/seo.js bruger. Seo.setJsonLd fjerner en
@@ -166,6 +168,7 @@ ${csp}
 </style>
 ${billeder.length ? `<link rel="preload" as="image" href="${esc(billeder[0])}" fetchpriority="high">
 ` : ''}<link rel="stylesheet" href="css/styles.css${v}">
+<link rel="stylesheet" href="css/p-annonce.css">
 ${jsonLd(l, url)}
 </head>
 <body>
@@ -173,11 +176,16 @@ ${header}
 
 <main id="main-content">
   <div class="container">
-    <nav class="breadcrumb" aria-label="Brødkrumme">
-      <a href="index.html">Forside</a><span class="bc-sep"></span>
-      <a href="soegning.html?type=${esc(l.type)}" id="bc-type">${esc(typeLabel(l.type))}</a><span class="bc-sep"></span>
-      <span id="bc-current">${esc(navn)}</span>
-    </nav>
+    <div class="an-crumbrow">
+      <nav class="breadcrumb" id="bc-nav" aria-label="Brødkrumme">
+        <a href="index.html">Forside</a><span class="bc-sep"></span>
+        <a href="soegning.html">Motorcykler</a><span class="bc-sep"></span>
+        <a href="soegning.html?brands=${encodeURIComponent(l.brand)}">${esc(l.brand)}</a><span class="bc-sep"></span>
+        <a href="soegning.html?brands=${encodeURIComponent(l.brand)}&amp;model=${encodeURIComponent(l.model)}">${esc(l.model)}</a><span class="bc-sep"></span>
+        <span id="bc-current">${esc(navn)} (${esc(l.year)})</span>
+      </nav>
+      <div class="an-actions" id="an-actions"></div>
+    </div>
 
     <h1 id="listing-h1">${esc(navn)}</h1>
 
@@ -206,7 +214,7 @@ ${[
   specRow('Mærke', l.brand),
   specRow('Model', l.model),
   specRow('Årgang', l.year),
-  specRow('Km-stand', formatKm(l.km)),
+  specRow('Kilometer', formatKm(l.km)),
   specRow('Motorstørrelse', formatCcm(l.ccm)),
   l.power ? specRow('Effekt', formatPower(l.power)) : '',
   specRow('Type', typeLabel(l.type)),
@@ -249,9 +257,10 @@ ${udstyr.map(e => `            <li>${esc(equipmentLabel(e))}</li>`).join('\n')}
     </div>
 
     <section class="similar-strip">
-      <div class="section-head"><div><h2>Lignende annoncer</h2></div></div>
+      <div class="section-head"><div><h2>Lignende motorcykler</h2></div><a class="an-link" id="similar-all" href="soegning.html" hidden>Se alle lignende motorcykler</a></div>
       <div class="listings-grid compact" id="similar-listings"></div>
     </section>
+    <nav class="an-videre" id="an-videre" aria-label="Søg videre" hidden></nav>
   </div>
 </main>
 
@@ -260,7 +269,7 @@ ${udstyr.map(e => `            <li>${esc(equipmentLabel(e))}</li>`).join('\n')}
      kortet i sidebjaelken. position:fixed => skubber intet (ingen CLS). -->
 <div class="listing-actionbar" id="listing-actionbar" hidden>
   <button type="button" class="btn btn-primary" id="bar-contact">Skriv til sælger</button>
-  <button type="button" class="btn btn-outline" id="bar-phone" aria-label="Vis telefonnummer">Ring op</button>
+  <button type="button" class="btn btn-outline" id="bar-phone">Vis nummer</button>
 </div>
 
 ${footer}

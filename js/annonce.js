@@ -62,7 +62,7 @@ function renderGallery(){
   main.innerHTML = fotoHTML(currentPhotoIndex);
   const taeller = document.getElementById('gallery-counter');
   if (taeller) taeller.textContent = `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
-  document.querySelectorAll('.gallery-thumbs button').forEach((b, i) => b.classList.toggle('active', i === currentPhotoIndex));
+  document.querySelectorAll('.gallery-thumbs button').forEach(b => b.classList.toggle('active', Number(b.dataset.thumb) === currentPhotoIndex || (b.dataset.more && currentPhotoIndex >= 5)));
 }
 
 function shiftPhoto(dir){
@@ -235,13 +235,13 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
           <button type="button" class="btn btn-primary btn-block" id="open-contact-modal">${Icon.mail}Skriv til sælger</button>
           ${telefon || telefonMulig ? `<button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
           <button type="button" class="btn btn-outline btn-block" id="open-payment-modal">${Icon.lock}Betal sikkert (MobilePay)</button>
-          <button type="button" class="btn btn-outline btn-block" id="share-listing-btn">${Icon.share}Del annonce</button>
+          ${profilKnapHTML}
         </div>
         ${telefon || telefonMulig ? '' : `<p class="seller-locked-note">${Icon.info}<span>Sælgeren har ikke oplyst et telefonnummer. Skriv i stedet — så får du svaret på skrift.</span></p>`}
         ${raad}
       </div>
 
-      ${profilNoegle ? `<div class="sidebar-card">${profilKnapHTML}</div>` : ''}`;
+`;
 }
 
 /* Tæller én visning pr. annonce pr. browsersession.
@@ -344,6 +344,317 @@ const FORHANDLERAFTALER = {
    renderExternalListing(). */
 const VIS_REKLAMATIONSRET = true;
 
+/* ============ Annonceside i tre kolonner (referencebillede 3) ============
+
+   Både vores egne og de indekserede annoncer bygges nu i samme skal, så siden
+   har ÉN komposition: galleri · titelblok med nøgletal · sælgerboks, og under
+   dem faktatabel, kørekortkort og tjekliste. Hvert felt kommer fra annoncen;
+   mangler det, står der "Ikke oplyst" (grundfelterne) eller også er rækken der
+   ikke (valgfri felter). Ingen tal, anmeldelser eller svartider er opdigtet.
+
+   Klasserne har præfikset .an- og bor i css/p-annonce.css. */
+const anSvg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const AN_IKON = {
+  bolt:    anSvg('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'),
+  fuel:    anSvg('<path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M14 9h2.5a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 0 3 0V8l-3-3M6 8h6"/>'),
+  palette: anSvg('<circle cx="12" cy="12" r="9"/><circle cx="8" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10.5" r="1"/>'),
+  cog:     anSvg('<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>'),
+  wrench:  anSvg('<path d="M14.5 6a4 4 0 0 0 5 5L10 20.5a2.1 2.1 0 0 1-3-3z"/>'),
+  users:   anSvg('<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14a5 5 0 0 1 4.5 6"/>'),
+  plate:   anSvg('<rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h2m3 0h5"/>'),
+  idcard:  anSvg('<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M5.8 16.5a3.3 3.3 0 0 1 6.4 0M14 10h4M14 13h4"/>'),
+  clipboard: anSvg('<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>'),
+  doc:     anSvg('<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>'),
+  snow:    anSvg('<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/>'),
+  tag:     anSvg('<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/>'),
+};
+
+const anEnc = (s) => encodeURIComponent(s);
+
+/* Brødkrumme: Forside › Motorcykler › Mærke › Model › Mærke Model (årgang).
+   Mærket og modellen peger på den søgning, der viser præcis dem. "Ukendt" er
+   ikke et mærke man kan søge på, så leddet udelades. */
+function anBrodkrumme(l){
+  const nav = document.getElementById('bc-nav');
+  if (!nav) return;
+  const maerkeOK = l.brand && l.brand !== 'Ukendt';
+  const led = [['index.html', 'Forside'], ['soegning.html', 'Motorcykler']];
+  if (maerkeOK) led.push([`soegning.html?brands=${anEnc(l.brand)}`, l.brand]);
+  if (maerkeOK && l.model) led.push([`soegning.html?brands=${anEnc(l.brand)}&model=${anEnc(l.model)}`, l.model]);
+  const sidste = [maerkeOK ? l.brand : '', l.model].filter(Boolean).join(' ') || 'Annonce';
+  nav.innerHTML = led.map(([h, t]) => `<a href="${h}">${escapeHTML(t)}</a><span class="bc-sep">${Icon.chevronRight}</span>`).join('')
+    + `<span id="bc-current" aria-current="page">${escapeHTML(sidste)}${l.year ? ` (${escapeHTML(String(l.year))})` : ''}</span>`;
+}
+
+/* "Del annonce", "Sammenlign" og "Gem som favorit" øverst til højre — kun de
+   handlinger, der findes. Indekserede annoncer har ingen favorit (D-008). */
+function anAktioner(l, eget){
+  const mount = document.getElementById('an-actions');
+  if (!mount) return;
+  const id = escapeHTML(String(l.id));
+  const fav = Store.isFavorite(l.id);
+  const sammenlign = Store.isComparing && Store.isComparing(l.id);
+  mount.innerHTML = `
+    <button type="button" class="an-act" id="share-listing-btn">${Icon.share}<span>Del annonce</span></button>
+    <button type="button" class="an-act" data-compare-toggle="${id}" aria-pressed="${sammenlign ? 'true' : 'false'}">${Icon.compare}<span>Sammenlign</span></button>
+    ${(l.isExternal || eget) ? '' : `<button type="button" class="an-act an-fav ${fav ? 'active' : ''}" aria-pressed="${fav}" data-fav-toggle="${id}">${Icon.heart}<span class="an-fav-off">Gem som favorit</span><span class="an-fav-on">Gemt som favorit</span></button>`}`;
+}
+
+/* Strukturerede data skal følge den synlige brødkrumme (5 led). seo.js
+   (delt lag) skriver kun 3; her skrives den om, så de to er ens, og det
+   sidste leds adresse bevares som seo.js satte den. */
+function anSeoBrodkrumme(l){
+  if (typeof Seo === 'undefined') return;
+  const el = document.getElementById('jsonld-breadcrumb');
+  let sidste = '';
+  try { sidste = JSON.parse(el.textContent).itemListElement.slice(-1)[0].item; } catch (e) { return; }
+  const maerkeOK = l.brand && l.brand !== 'Ukendt';
+  const led = [{ name: 'Forside', path: '' }, { name: 'Motorcykler', path: 'soegning' }];
+  if (maerkeOK) led.push({ name: l.brand, path: `soegning?brands=${anEnc(l.brand)}` });
+  if (maerkeOK && l.model) led.push({ name: l.model, path: `soegning?brands=${anEnc(l.brand)}&model=${anEnc(l.model)}` });
+  led.push({ name: `${maerkeOK ? l.brand + ' ' : ''}${l.model || 'Annonce'}${l.year ? ` (${l.year})` : ''}`, path: sidste.replace(SITE_URL + '/', '') });
+  Seo.setJsonLd('breadcrumb', Seo.breadcrumb(led));
+}
+
+function anVirkDel(l){
+  document.getElementById('share-listing-btn')?.addEventListener('click', async () => {
+    const url = location.href;
+    const title = `${l.brand} ${l.model}${l.price ? ` — ${formatPrice(l.price)}` : ''}`;
+    if (navigator.share){
+      try { await navigator.share({ title, url }); return; }
+      catch (e) { if (e.name === 'AbortError') return; }
+    }
+    try { await navigator.clipboard.writeText(url); toast('Link kopieret til udklipsholderen'); }
+    catch (e) { prompt('Kopiér linket:', url); }
+  });
+}
+
+/* H1'en står i markup uden for #listing-detail (én h1 pr. side, også uden
+   JavaScript). Her flyttes den ind i titelblokken, så den sidder, hvor
+   billedet har den. */
+function anFlytH1(tekst){
+  const h1 = document.getElementById('listing-h1');
+  const plads = document.getElementById('an-h1-slot');
+  if (!h1 || !plads) return;
+  if (tekst) h1.textContent = tekst;
+  h1.classList.remove('visually-hidden');
+  h1.classList.add('an-h1');
+  plads.replaceWith(h1);
+}
+
+const anChips = (liste) => liste.filter(Boolean).map(c => `<span class="an-chip">${escapeHTML(c)}</span>`).join('');
+
+/* Ikon-rækken med nøgletal: kun de tal annoncen oplyser. */
+function anNoegletal(l, hk){
+  const felter = [
+    l.km != null   ? [Icon.gauge,    formatKm(l.km), 'Kørt'] : null,
+    l.year != null ? [Icon.calendar, String(l.year), 'Årgang'] : null,
+    Number(l.ccm) > 0 ? [Icon.engine, formatCcm(l.ccm), 'Motor'] : null,
+    hk ? [AN_IKON.bolt, formatPower(hk), 'Effekt'] : null,
+  ].filter(Boolean);
+  if (!felter.length) return '';
+  return `<ul class="an-stats">${felter.map(([ikon, v, e]) => `<li>${ikon}<span><b>${escapeHTML(v)}</b><small>${e}</small></span></li>`).join('')}</ul>`;
+}
+
+/* "Fakta om motorcyklen": to kolonner, ikon + etiket + værdi. Rækker med
+   værdi null/'' udelades; grundfelterne får 'Ikke oplyst' af kaldstedet. */
+function anFakta(rader){
+  const synlige = rader.filter(r => r && r[2] != null && r[2] !== '');
+  return `
+    <section class="an-card an-fakta" aria-labelledby="an-fakta-h">
+      <h2 id="an-fakta-h">Fakta om motorcyklen</h2>
+      <dl class="an-facts">
+        ${synlige.map(([ikon, etiket, v]) => `<div class="an-fact"><span class="an-fact-ico">${ikon}</span><dt>${etiket}</dt><dd${v === 'Ikke oplyst' ? ' class="an-na"' : ''}>${String(v).includes('<') ? v : String(v).replace(/\//g, '/<wbr>')}</dd></div>`).join('')}
+      </dl>
+    </section>`;
+}
+
+/* "Kan du køre denne motorcykel?" — svaret kommer fra koerekortMaerkat(), det
+   samme sted som kortene og filteret. Oplysninger kan kun UDELUKKE A1/A2,
+   aldrig bekræfte dem; derfor "ikke udelukket ud fra de oplyste tal".
+   Reglerne (A1: højst 125 cm³ / 11 kW / 0,1 kW/kg · A2: højst 35 kW / 0,2 kW/kg
+   og ikke afledt af en model med over dobbelt effekt) er læst på
+   fstyr.dk/privat/koerekort/udvidelse-af-koerekort/koerekort-til-motorcykel. */
+function anKoerekortKort(l, kkM, uvisA2A){
+  const kk = kkM.kode;
+  const badge = kk ? kk : (uvisA2A ? 'A2/A' : '?');
+  const badgeTekst = kk === 'A' ? 'Kræver A-kørekort'
+    : kk ? `Ikke udelukket ud fra de oplyste tal` : 'Kan ikke afgøres';
+  const ekstra = (kk === 'A' && l.kanNedsaettesA2) ? ' Sælgeren oplyser, at den kan effektbegrænses til A2.' : '';
+  const side = kk === 'A1' ? 'koerekort-a1.html' : 'koerekort-a2.html';
+  return `
+    <section class="an-card an-kk" aria-labelledby="an-kk-h">
+      <span class="an-kk-ico" aria-hidden="true">${AN_IKON.idcard}</span>
+      <div class="an-kk-tekst">
+        <h2 id="an-kk-h">Kan du køre denne motorcykel?</h2>
+        <p>${escapeHTML(kkM.forklaring)}${ekstra}</p>
+        <a class="an-link" href="${side}">Læs mere om kørekort og regler${Icon.arrowRight}</a>
+      </div>
+      <div class="an-kk-badge" role="img" aria-label="${escapeHTML(badge)}: ${escapeHTML(badgeTekst)}"><b>${escapeHTML(badge)}</b><small>${escapeHTML(badgeTekst)}</small></div>
+    </section>`;
+}
+
+/* Generelle, sande råd — ingen påstande om netop denne motorcykel. */
+function anTjekKort(){
+  const punkter = [
+    'Tjek servicehistorik og dokumentation',
+    'Undersøg slidtage (dæk, kæde, bremser)',
+    'Lyt til motoren og prøvekør',
+    'Kontrollér for skader og tidligere uheld',
+    'Tjek, at stelnummeret matcher papirerne',
+  ];
+  return `
+    <section class="an-card an-tjek" aria-labelledby="an-tjek-h">
+      <span class="an-tjek-ico" aria-hidden="true">${AN_IKON.clipboard}</span>
+      <div>
+        <h2 id="an-tjek-h">Det bør du tjekke, inden du køber</h2>
+        <p class="an-tjek-sub">Gå motorcyklen grundigt igennem, inden du køber. Her er de vigtigste punkter:</p>
+        <ol class="an-tjek-liste">${punkter.map(p => `<li>${p}</li>`).join('')}</ol>
+        <a class="an-link" href="guide-brugt-motorcykel.html">Se vores guide til brugt motorcykel${Icon.arrowRight}</a>
+      </div>
+    </section>`;
+}
+
+/* "Handl trygt på Bikerbasen" — kun punkter, siden faktisk lever op til. */
+function anTrygtKort(ekstern, kilde){
+  const punkter = ekstern
+    ? [
+        [Icon.shieldCheck, `Kilden står på hvert kort — her: ${kilde}`],
+        [Icon.externalLink, 'Vi hoster ikke annoncen — du går videre til sælger'],
+        [Icon.checkCircle, 'Kørekortvurderingen bygger kun på oplyste tal'],
+        [Icon.lock, 'Bikerbasen har ingen betalingsløsning og rører aldrig pengene'],
+      ]
+    : [
+        [Icon.shieldCheck, 'Sælgerens type og by står åbent på annoncen'],
+        [Icon.phone, 'Telefonnummer vises kun, hvis sælgeren selv har slået det til'],
+        [Icon.checkCircle, 'Kørekortvurderingen bygger kun på oplyste tal'],
+        [Icon.lock, 'Bikerbasen har ingen betalingsløsning og rører aldrig pengene'],
+      ];
+  return `
+    <section class="an-card an-trygt" aria-labelledby="an-trygt-h">
+      <h2 id="an-trygt-h">Handl trygt på Bikerbasen</h2>
+      <ul class="an-trygt-liste">${punkter.map(([i, t]) => `<li><span class="an-trygt-ico">${i}</span><span>${t}</span></li>`).join('')}</ul>
+      <a class="an-link" href="sikkerhed.html">Læs mere om sikker handel${Icon.arrowRight}</a>
+    </section>`;
+}
+
+/* "Lignende motorcykler": samme pointsystem for begge slags annoncer. Mærke,
+   model, pris, kubik, årgang og type — kun felter vi har. Kræver minimumsscore
+   (tom stribe er ærligere end 1983 mod 2023), og fotos vinder ved lige point. */
+function anLignende(listing){
+  const ccm = Number(listing.ccm) || 0;
+  const score = (l) => {
+    let s = 0;
+    if (listing.model && l.model && String(l.model).toLowerCase() === String(listing.model).toLowerCase()) s += 3;
+    if (l.brand === listing.brand) s += 2;
+    if (listing.price > 0 && l.price > 0 && Math.abs(l.price - listing.price) / listing.price <= 0.4) s += 3;
+    if (ccm > 0 && Number(l.ccm) > 0 && Math.abs(Number(l.ccm) - ccm) / ccm <= 0.35) s += 2;
+    if (listing.year && l.year && Math.abs(Number(l.year) - Number(listing.year)) <= 6) s += 1;
+    if (listing.type && l.type === listing.type) s += 2;
+    return s;
+  };
+  const andre = Store.getAllListings().filter(l => String(l.id) !== String(listing.id));
+  const rangeret = andre
+    .map(l => [score(l) + ((l.photoUrls && l.photoUrls[0]) ? 0.5 : 0), l])
+    .filter(([s]) => s >= 4)
+    .sort((a, b) => b[0] - a[0]);
+  const set = new Set(); const valgt = [];
+  for (const [, l] of rangeret){
+    const n = `${l.brand}|${l.model}|${l.price}`;
+    if (set.has(n)) continue;
+    set.add(n); valgt.push(l);
+    if (valgt.length === 6) break;
+  }
+  return valgt;
+}
+
+function anFyldLignende(listing){
+  const stribe = document.querySelector('.similar-strip');
+  const mount = document.getElementById('similar-listings');
+  if (!stribe || !mount) return;
+  const lignende = anLignende(listing);
+  if (!lignende.length){ stribe.hidden = true; return; }
+  stribe.hidden = false;
+  mount.innerHTML = lignende.map((l, i) => listingCardHTML(l, i)).join('');
+  wireFavoriteButtons(mount);
+  const alle = document.getElementById('similar-all');
+  if (alle){
+    const maerke = listing.brand && listing.brand !== 'Ukendt';
+    alle.href = maerke ? `soegning.html?brands=${anEnc(listing.brand)}` : 'soegning.html';
+    alle.hidden = false;
+  }
+}
+
+/* "Søg videre": interne links med tal, regnet med søgesidens egen filterkæde,
+   så tallet på linket er tallet på resultatsiden. Et link uden træf tegnes ikke. */
+function anFyldVidere(l, kk){
+  const mount = document.getElementById('an-videre');
+  if (!mount) return;
+  const alle = (typeof Store !== 'undefined' && Store.getAllListings) ? Store.getAllListings() : [];
+  const tael = (f) => (typeof Filtrering !== 'undefined' && Filtrering.anvendFiltre) ? Filtrering.anvendFiltre(alle, f, null, null).length : null;
+  const links = [];
+  const dom = l.source?.domaene;
+  if (dom){
+    const n = alle.filter(x => x.source?.domaene === dom).length;
+    if (n > 1) links.push([`soegning.html?kilde=${anEnc(dom)}`, `Alle annoncer fra ${l.source.navn || dom}`, n]);
+  }
+  if (l.brand && l.brand !== 'Ukendt'){
+    const n = tael({ brands: [l.brand] });
+    if (n == null || n > 0) links.push([`soegning.html?brands=${anEnc(l.brand)}`, `Alle ${l.brand} til salg`, n]);
+  }
+  if (kk){
+    const n = tael({ koerekort: kk });
+    if (n == null || n > 0) links.push([`soegning.html?koerekort=${anEnc(kk)}`, `Motorcykler til ${kk}-kørekort`, n]);
+  }
+  if (!l.isExternal && l.type){
+    const n = tael({ types: [l.type] });
+    if (n == null || n > 0) links.push([`soegning.html?type=${anEnc(l.type)}`, `Alle ${typeLabel(l.type)}`, n]);
+  }
+  const region = l.region || (l.postnr && typeof findPostnr === 'function' ? findPostnr(l.postnr)?.region : '');
+  if (region){
+    const n = tael({ regions: [region] });
+    if (n == null || n > 0) links.push([`soegning.html?regions=${anEnc(region)}`, `Motorcykler i ${region}`, n]);
+  }
+  links.push(['soegning.html', 'Alle motorcykler', alle.length || null]);
+  mount.innerHTML = `<h2>Søg videre på Bikerbasen</h2><ul>${links.map(([h, t, n]) =>
+    `<li><a href="${h}"><span>${escapeHTML(t)}</span>${n != null ? `<span class="an-videre-n">${n.toLocaleString('da-DK')}</span>` : ''}</a></li>`).join('')}</ul>`;
+  mount.hidden = false;
+}
+
+/* Fast bjælke på mobil for indekserede annoncer: pris + den ene handling.
+   Lå før som inline-script i annonce.html (CSP-hash); flyttet hertil. Bjælken
+   viser sig først, når knappen i sælgerboksen er rullet ud af synsfeltet, så
+   der altid er præcis én synlig "Gå til annoncen". */
+function anEksternBjaelke(href, listing, kilde, prisTekst){
+  if (!href) return;
+  const bar = document.createElement('div');
+  bar.className = 'listing-actionbar';
+  bar.id = 'ekstern-actionbar';
+  if (prisTekst){
+    const pris = document.createElement('span');
+    pris.className = 'listing-actionbar-pris';
+    pris.textContent = prisTekst;
+    bar.appendChild(pris);
+  }
+  const knap = document.createElement('a');
+  knap.href = href;
+  knap.target = '_blank';
+  knap.rel = 'noopener noreferrer nofollow';
+  knap.className = 'btn btn-primary';
+  knap.dataset.listingId = String(listing.id);
+  knap.innerHTML = `Gå til annoncen hos&nbsp;<span class="an-nb">${kilde}</span>${Icon.externalLink}`;
+  bar.appendChild(knap);
+  document.body.appendChild(bar);
+  document.body.classList.add('har-actionbar');
+  const blok = document.querySelector('.an-cta');
+  if (blok && 'IntersectionObserver' in window){
+    bar.hidden = true;
+    new IntersectionObserver(es => es.forEach(e => {
+      bar.hidden = e.isIntersecting || (e.boundingClientRect.top > 0 && e.boundingClientRect.top < window.innerHeight);
+    }), { threshold: 0 }).observe(blok);
+  }
+}
+
 function renderExternalListing(listing){
   const kildeNavn = listing.source?.navn || 'forhandleren';
   const kilde   = escapeHTML(kildeNavn);
@@ -363,18 +674,8 @@ function renderExternalListing(listing){
      — de kommer fra en forhandlers DOM, ikke fra os selv. */
   seoExternalListingPage(listing, (listing.photoUrls || []).map(sikkerUrl).filter(Boolean));
 
-  /* Brødkrummen følger Bilbasens: Mærke › Model. Mellemleddet pegede på en
-     tom søgning; nu er det mærket, og det er den vej, en køber faktisk vil
-     tilbage ad. "Ukendt" er ikke et mærke, man kan søge på, så dér bliver
-     linket stående som søgesiden. */
-  const bcType = document.getElementById('bc-type');
-  if (bcType && listing.brand && listing.brand !== 'Ukendt'){
-    bcType.textContent = listing.brand;
-    bcType.href = `soegning.html?brands=${encodeURIComponent(listing.brand)}`;
-  }
-  const bc = document.getElementById('bc-current');
-  if (bc) bc.textContent = listing.model || listing.brand || 'Annonce';
-  document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
+  anBrodkrumme(listing);
+  anSeoBrodkrumme(listing);
 
   /* ---------- Sted: by + landsdel, ikke by + postnummer ----------
      Bilbasen skriver "Odder, Østjylland". Vi skrev "Rødding 6630". Et
@@ -527,105 +828,28 @@ function renderExternalListing(listing){
   const kkM = koerekortMaerkat(listing);   // ét sted for hele sitet, se js/components.js
   const kk  = kkM.kode;
   const kkUvis = !kk && ccm > A1_MAX_CCM;
-  /* HER STOD "MAKS. 48 HK", OG DET VAR EN HK FOR MEGET.
-     A2-loftet er 35 kW. 35 / 0,7355 = 47,59 hk, så 47 er grænsen — 48 hk er
-     35,30 kW og altså over. Tallet var rettet i js/data.js (A2_MAX_HK) og i
-     testene, men stod stadig skrevet ud i hånden her, på den ene side hvor
-     køberen læser sætningen i ro. Det skrives nu fra konstanten, så de to
-     ikke kan skride fra hinanden igen.
-
-     Og overskriften er ikke længere "Du skal mindst have A2". Den var sand
-     og blev læst som "A2 er nok" — præcis den forveksling, mærkatet
-     "Kørekort mindst A2" kostede os på kortene. Spørgsmålet, en køber
-     stiller, er "må JEG køre den?", og det svar har vi ikke her. */
-  const koerekortPanel = kkUvis
-    ? `<div class="external-detail-kk is-uvis">
-         <span class="external-detail-kk-code">A2/A</span>
-         <div>
-           <b>Vi kan ikke afgøre, hvilket kørekort der skal til</b>
-           <p>${escapeHTML(kkM.forklaring)} Det, vi ved, er at A1 er udelukket —
-              motorcyklen er over ${A1_MAX_CCM} cm³. Om du kan nøjes med A2
-              (maks. ${A2_MAX_HK} hk) eller skal have A, afhænger af effekten.
-              Spørg ${kilde}, før du regner med A2.</p>
-         </div>
-       </div>`
-    : !kk ? ''   // hverken ccm eller hk: der er intet at sige, heller ikke uvist
-    : `<div class="external-detail-kk">
-         <span class="external-detail-kk-code">${escapeHTML(kk)}</span>
-         <div>
-           ${kk === 'A'
-             /* A-grenen må konkludere: A har ingen øvre grænser, så "kræver A"
-                følger af effekten alene. */
-             ? `<b>Kræver A-kørekort</b>
-           <p>Effekten (${formatPower(hk)}) er over A2-grænsen på ${A2_MAX_HK} hk (35 kW),
-              så det store kørekort skal til.</p>`
-             /* "Du kan køre den på A2-kørekort" var præcis det svar, kommentaren
-                ovenfor siger, vi ikke har: effekt og ccm kan kun UDELUKKE A1/A2,
-                aldrig bekræfte dem — kW/kg og afledningsreglen står ikke i
-                annoncen (js/data.js over KOEREKORT, docs/forretning.md §3.1). */
-             : `<b>Ikke udelukket til ${escapeHTML(kk)} — men få det bekræftet</b>
-           <p>Regnet ud fra ${ccm ? formatCcm(ccm) : 'effekten'}${hk ? ` og ${formatPower(hk)}` : ''}.
-              ${escapeHTML(kk)} kræver også en grænse for effekt pr. kilo${kk === 'A2' ? ', og at maskinen ikke er afledt af en model med over dobbelt effekt' : ''} —
-              det står ikke i annoncen, så spørg ${kilde}, og tjek registreringsattesten.</p>`}
-         </div>
-       </div>`;
-
-  /* ---------- Nøgletal ----------
-     Bilbasens fire specs, oversat til motorcykel. Faste etiketter, fast
-     rækkefølge — men kun de tal, vi faktisk har. Et felt med "–" i er
-     støj, der får resten af tabellen til at se upålidelig ud; et felt, der
-     ikke er der, er bare et felt, der ikke er der. */
-  /* Runde 5 (D5-A2): kørekortet er vores ene strukturelle fordel over
-     Bilbasen og stod som et 120 px forklaringspanel UNDER folden — på 390 px
-     begravet under vores egen faste bjælke. Nu er det første celle i
-     nøgletalsgitteret, som flyttes op lige under prisen; panelet med
-     regnestykket bliver stående nedenunder som forklaring, ikke overskrift. */
-  const noegletal = [
-    kk ? [Icon.checkCircle, 'Kørekort', `${escapeHTML(kk)} <small>vejl.</small>`]
-       : (kkUvis ? [Icon.checkCircle, 'Kørekort', 'A2/A — uvist'] : null),
-    listing.year != null ? [Icon.calendar, 'Årgang', String(listing.year)] : null,
-    listing.km   != null ? [Icon.gauge,    'Kilometer', formatKm(listing.km)] : null,
-    listing.ccm  != null ? [Icon.engine,   'Kubik', formatCcm(listing.ccm)] : null,
-    hk                   ? [Icon.engine,   'Effekt', formatPower(hk)] : null,
-  ].filter(Boolean);
-
-  const raekke = (etiket, vaerdi) => vaerdi == null || vaerdi === ''
-    ? ''
-    : `<div class="external-detail-row"><dt>${etiket}</dt><dd>${vaerdi}</dd></div>`;
-
-  const detaljer = [
-    raekke('Mærke', listing.brand && listing.brand !== 'Ukendt' ? brand : null),
-    raekke('Model', model || null),
-    /* Rækken hed "Variant" og skrev kildens eget kategoriord ud — "Street",
-       "Sportstouring", "Klassiker". Det er en TYPE, ikke en variant, og
-       ingen af de ord findes i vores Type-filter. Rækken hedder nu Type og
-       viser typeLabel(listing.type), altså præcis den værdi, filteret
-       sorterer på. Kan typen ikke kortlægges, falder rækken væk. */
-    raekke('Type', listing.type ? escapeHTML(typeLabel(listing.type)) : null),
-    /* Runde 9 (D9-A2): Aargang/Kilometer/Kubik/Effekt/Koerekort staar allerede
-       i noegletalsgitteret 400 px hoejere oppe — her vises de KUN, naar
-       gitteret ikke har dem (dvs. naar feltet mangler og gitteret sprang
-       cellen over: saa er "Kan ikke afgoeres"-svaret stadig et svar). */
-    listing.year != null ? '' : raekke('Årgang', null),
-    listing.km != null ? '' : raekke('Kilometer', null),
-    listing.ccm != null ? '' : raekke('Kubik', null),
-    hk ? '' : raekke('Effekt', null),
-    // "Kan ikke afgøres" er et svar; en manglende række ville lade køberen
-    // tro, at spørgsmålet ikke er stillet. Samme ord som sammenligningen.
-    (kk || kkUvis) ? '' : raekke('Kørekort', 'Kan ikke afgøres'),
-    /* 162 af de 332 indekserede er FABRIKSNYE. Stod der ikke ét sted, og
-       "Kilometer: Ikke oplyst" på en 2025-model læses som et hul i dataene i
-       stedet for som det, det er: en motorcykel, der ikke har kørt endnu.
-       Se eksternErNy() i js/components.js for hvor oplysningen kommer fra. */
-    raekke('Stand', erNy === true ? 'Fabriksny' : (erNy === false ? 'Brugt' : null)),
-    raekke('Salgsvilkår', salgsmarkoerer.length ? salgsmarkoerer.map(escapeHTML).join(' · ') : null),
-    raekke('Sælger', listing.isDealer ? `Forhandler · ${kilde}` : null),
-    raekke('Sted', stedTekst ? escapeHTML(stedTekst) : null),
-    /* Runde 5 (D5-A6): et 36 tegns uuid ombrød til fire linjer etiket + to
-       linjer værdi på 390 px. Kun korte id'er (MC Syds "137963") er noget, en
-       køber kan citere i telefonen; resten står som ref. i kildekortet. */
-    raekke(`Annonce-id hos ${kilde}`, listing.sourceListingId && String(listing.sourceListingId).length <= 12 ? escapeHTML(listing.sourceListingId) : null),
-  ].join('');
+  /* ---------- Fakta om motorcyklen ----------
+     Grundfelterne står altid (med "Ikke oplyst", når kilden ikke har dem);
+     resten kun, når kilden har oplyst dem. Kørekort står som vurdering, ikke
+     som løfte — se koerekortMaerkat() i js/components.js. */
+  const IO = 'Ikke oplyst';
+  const faktaRader = [
+    [Icon.bike, 'Mærke', listing.brand && listing.brand !== 'Ukendt' ? brand : IO],
+    [Icon.info, 'Model', model || IO],
+    [Icon.calendar, 'Årgang', listing.year != null ? String(listing.year) : IO],
+    [Icon.gauge, 'Kilometer', listing.km != null ? formatKm(listing.km) : IO],
+    [Icon.bike, 'Type', listing.type ? escapeHTML(typeLabel(listing.type)) : IO],
+    [Icon.engine, 'Motorstørrelse', ccm > 0 ? formatCcm(ccm) : IO],
+    [AN_IKON.bolt, 'Ydelse', hk ? formatPower(hk) : IO],
+    [Icon.shieldCheck, 'Kørekort', kk ? escapeHTML(kkM.tekst) : (kkUvis ? 'A2 eller A — kan ikke afgøres' : 'Kan ikke afgøres')],
+    erNy === true ? [Icon.checkCircle, 'Stand', 'Fabriksny'] : (erNy === false ? [Icon.checkCircle, 'Stand', 'Brugt'] : null),
+    salgsmarkoerer.length ? [AN_IKON.tag, 'Salgsvilkår', salgsmarkoerer.map(escapeHTML).join(' · ')] : null,
+    listing.isDealer ? [Icon.store, 'Sælger', `Forhandler · ${kilde}`] : (listing.saelgertype === 'privat' ? [Icon.user, 'Sælger', 'Privat sælger'] : null),
+    stedTekst ? [Icon.mapPin, 'Sted', escapeHTML(stedTekst)] : null,
+    /* Kun korte id'er (MC Syds "137963") er noget, en køber kan citere i
+       telefonen; et uuid ombrød til flere linjer på mobil. */
+    listing.sourceListingId && String(listing.sourceListingId).length <= 12 ? [AN_IKON.doc, `Annonce-id hos ${kilde}`, escapeHTML(listing.sourceListingId)] : null,
+  ];
 
   /* Datoen er den dag, VI fandt annoncen — ikke den dag, den blev oprettet
      hos kilden. Etiketten siger derfor præcis det, og ikke "Oprettet".
@@ -655,282 +879,116 @@ function renderExternalListing(listing){
       + (bekraeftet ? ` · sidst bekræftet ${bekraeftet}` : ` — ${relativ(listing.indekseretFoerste)}`);
   }
 
-  /* Runde 6 (D6-A2): links med tal. Tallene regnes med soegesidens egen
-     filterkaede (Filtrering.anvendFiltre), saa tallet paa linket er det,
-     resultatsiden viser. Et link uden traef tegnes ikke. */
-  const lagerAlle = (typeof Store !== 'undefined' && Store.getAllListings) ? Store.getAllListings() : [];
-  const taelFilter = (f) => (typeof Filtrering !== 'undefined' && Filtrering.anvendFiltre) ? Filtrering.anvendFiltre(lagerAlle, f, null, null).length : null;
-  const kildeDomaene = listing.source?.domaene || null;
-  const videreLinks = [];
-  if (kildeDomaene){
-    const n = lagerAlle.filter(l => l.source?.domaene === kildeDomaene).length;
-    if (n > 1) videreLinks.push({ href: `soegning.html?kilde=${encodeURIComponent(kildeDomaene)}`, tekst: `Alle annoncer fra ${kilde}`, n });
-  }
-  if (listing.brand && listing.brand !== 'Ukendt'){
-    const n = taelFilter({ brands: [listing.brand] });
-    if (n == null || n > 0) videreLinks.push({ href: `soegning.html?brands=${encodeURIComponent(listing.brand)}`, tekst: `Alle ${brand} til salg`, n });
-  }
-  if (kk && !kkUvis){
-    const n = taelFilter({ koerekort: kk });
-    if (n == null || n > 0) videreLinks.push({ href: `soegning.html?koerekort=${encodeURIComponent(kk)}`, tekst: `Motorcykler til ${escapeHTML(kk)}-kørekort`, n });
-  }
-  if (opslag?.region){
-    const n = taelFilter({ regions: [opslag.region] });
-    if (n == null || n > 0) videreLinks.push({ href: `soegning.html?regions=${encodeURIComponent(opslag.region)}`, tekst: `Motorcykler i ${escapeHTML(opslag.region)}`, n });
-  }
-  videreLinks.push({ href: 'soegning.html', tekst: 'Alle motorcykler', n: lagerAlle.length || null });
+  const saelgerTypeTekst = listing.isDealer ? 'Forhandler' : (listing.saelgertype === 'privat' ? 'Privat sælger' : '');
+  const prisTekst = listing.price == null ? '' : formatPrice(listing.price);
 
-  const kildeKort = `
-    <aside class="external-detail-source" aria-labelledby="kilde-titel">
-      <div class="external-detail-source-head">
-        ${Icon.store}
-        <div>
-          <p class="external-detail-source-label">Du køber af</p>
-          <h2 id="kilde-titel" class="external-detail-source-name">${kilde}</h2>
-          ${domaene ? `<p class="external-detail-source-domain">${domaene}</p>` : ''}
+  const saelgerKort = `
+      <section class="an-card an-seller" aria-labelledby="kilde-titel">
+        <div class="an-seller-head">
+          <span class="an-avatar">${Icon.store}</span>
+          <div>
+            <h2 id="kilde-titel" class="an-seller-name">${kilde}</h2>
+            ${domaene ? `<p class="an-seller-sub">${domaene}</p>` : ''}
+            ${saelgerTypeTekst ? `<span class="an-chip an-chip-soft">${saelgerTypeTekst}</span>` : ''}
+          </div>
         </div>
-      </div>
-      ${href
-        ? `<a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
-              data-listing-id="${escapeHTML(String(listing.id))}"
-              class="btn btn-primary btn-block">Se annoncen hos ${kilde}${Icon.externalLink}</a>`
-        : `<p class="external-detail-broken">${Icon.alertTriangle}Annoncen kan ikke åbnes lige nu. Prøv igen senere${domaene ? `, eller find den på ${domaene}` : ''}.</p>`}
-      <!-- Runde 6 (D6-A2 / D5-A3): datoen op under knappen som én linje ("Hentet
-           16. aug. — for 7 dage siden"), kroppen kortet til det, der ikke staar
-           et andet sted paa siden ("Pris og udstyr kan vaere aendret" staar
-           allerede under "Foer du koerer derhen"). -->
-      ${hentetLinje ? `<p class="external-detail-source-meta external-detail-hentet">${Icon.clock}${hentetLinje}</p>` : ''}
-      ${(listing.ogsaaHos || []).length ? `<p class="external-detail-source-meta external-detail-ogsaa">${Icon.externalLink}Samme annonce ligger også hos ${listing.ogsaaHos.map(o => o.url ? `<a href="${escapeHTML(o.url)}" target="_blank" rel="noopener noreferrer nofollow">${escapeHTML(o.navn || o.domaene || 'en anden kilde')}</a>` : escapeHTML(o.navn || o.domaene || 'en anden kilde')).join(' og ')} — vi viser den én gang.</p>` : ''}
-      <p class="external-detail-source-body">
-        ${hvorStaarDen}
-        ${hvemHandlerDuMed}
-      </p>
-      <p class="external-detail-source-meta">${Icon.info}${kilde}s kontaktoplysninger og åbningstider står på deres egen side.</p>
-    </aside>
+        ${stedTekst ? `<p class="an-seller-loc">${Icon.mapPin}<span>${escapeHTML(stedTekst)}</span></p>` : ''}
+        ${href
+          ? `<a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
+                data-listing-id="${escapeHTML(String(listing.id))}"
+                class="btn btn-primary btn-block an-cta">Gå til annoncen hos&nbsp;<span class="an-nb">${kilde}</span>${Icon.externalLink}</a>`
+          : `<p class="external-detail-broken">${Icon.alertTriangle}Annoncen kan ikke åbnes lige nu. Prøv igen senere${domaene ? `, eller find den på ${domaene}` : ''}.</p>`}
+        ${hentetLinje ? `<p class="an-meta">${Icon.clock}<span>${hentetLinje}</span></p>` : ''}
+        ${(listing.ogsaaHos || []).length ? `<p class="an-meta">${Icon.externalLink}<span>Samme annonce ligger også hos ${listing.ogsaaHos.map(o => o.url ? `<a href="${escapeHTML(o.url)}" target="_blank" rel="noopener noreferrer nofollow">${escapeHTML(o.navn || o.domaene || 'en anden kilde')}</a>` : escapeHTML(o.navn || o.domaene || 'en anden kilde')).join(' og ')} — vi viser den én gang.</span></p>` : ''}
+        <p class="an-seller-body">${hvorStaarDen}${hvemHandlerDuMed}</p>
+        <p class="an-meta">${Icon.info}<span>${kilde}s kontaktoplysninger og åbningstider står på deres egen side.</span></p>
+        <button type="button" class="an-report" id="report-listing-btn">${Icon.flag}Meld fejl i annoncen</button>
+      </section>`;
 
-    <!-- Runde 6 (D6-A2): Bilbasens "Se forhandlerens 46 annoncer" — handlinger med
-         tal, vi HAR: kildens antal i lageret (samme tal som soegesidens
-         kildelinje), maerkets, koerekortets, regionens. Tallene regnes af
-         Store.getAllListings() med Filtrering.anvendFiltre — samme kaede som
-         soegesiden, saa tallet paa linket er tallet paa resultatsiden. -->
-    <aside class="external-detail-next" aria-labelledby="videre-titel">
-      <h2 id="videre-titel">Søg videre på Bikerbasen</h2>
-      <ul>
-        ${videreLinks.map(v => `<li><a href="${v.href}"><span>${v.tekst}</span><span class="external-detail-next-n">${v.n != null ? v.n.toLocaleString('da-DK') : ''}${Icon.chevronRight || Icon.arrowRight}</span></a></li>`).join('')}
-      </ul>
-    </aside>`;
+  /* Eksterne annoncer har ingen tekst hos os (CLAUDE.md regel 2): kun et
+     evt. kort uddrag. Uden uddrag siger blokken ærligt, hvor teksten står. */
+  const beskrivelseHTML = listing.description
+    ? `<section class="an-desc-sec">
+         <h2>Beskrivelse</h2>
+         <blockquote class="an-quote">${escapeHTML(String(listing.description).slice(0, 200))}${String(listing.description).length > 200 ? '…' : ''}</blockquote>
+         <p class="an-note">Begyndelsen af ${kilde}s egen tekst. Resten står i deres annonce.</p>
+       </section>`
+    : `<section class="an-desc-sec">
+         <h2>Beskrivelse og flere billeder</h2>
+         <p>Beskrivelse, udstyr og flere billeder står i annoncen hos ${kilde}. Vi gemmer ikke kildens tekst eller billeder — vi viser de oplyste nøgletal og sender dig videre.</p>
+         <p>Pris og oplysninger kan være ændret, siden vi hentede annoncen. Tjek dem hos ${kilde}, før du kører derhen.</p>
+       </section>`;
 
-  /* Runde 7 (D7-A2): paa <960 px flyttes handlingsraekken (Sammenlign · Del ·
-     Meld fejl) ned UNDER noegletallene efter tegningen, saa koerekort/aargang/
-     km staar paa foerste skaerm (gitteret begyndte ved 863 paa 844 hoej skaerm).
-     Samme knapper, samme id'er — kun placeringen. Paa desktop staar raekken paa
-     titlens linje (css). */
-  const flytHandlinger = () => {
-    if (!window.matchMedia('(max-width:959px)').matches) return;
-    const stats = document.querySelector('#listing-detail .external-detail-stats');
-    const handlinger = document.querySelector('#listing-detail .external-detail-actions');
-    if (stats && handlinger) stats.after(handlinger);
-  };
-  setTimeout(flytHandlinger, 0);
+  /* Tre grene — kildens svar, ikke vores gæt (se sellerTypeNoteHTML). */
+  const saelgerNote = listing.isDealer
+    ? (VIS_REKLAMATIONSRET ? sellerTypeNoteHTML(true) : '')
+    : (listing.saelgertype === 'privat' ? sellerTypeNoteHTML(false) : sellerTypeNoteHTML(null));
+
+  const chips = anChips([
+    erNy === true ? 'Ny motorcykel' : (erNy === false ? 'Brugt motorcykel' : ''),
+    variant,
+    kk ? kkM.tekst : '',
+  ]);
+  const delVaerdier = [listing.year != null ? String(listing.year) : '', listing.km != null ? formatKm(listing.km) : '', variant].filter(Boolean);
+
+  const fotoHTMLext = foto
+    ? `<figure class="an-photo">
+         <img src="${escapeHTML(foto)}" alt="${brand} ${model}" loading="eager" decoding="async">
+         <figcaption>${Icon.info}<span>Foto: ${kilde} — flere billeder i deres annonce</span></figcaption>
+       </figure>`
+    /* Kilden har ikke sat et foto på annoncen. Vi tegner ingenting og lover
+       ikke, at der er billeder andetsteds. */
+    : `<div class="an-photo-tom">${Icon.camera}
+         <p><b>${kilde} har ikke sat et foto på den her annonce.</b></p>
+         <p>Vi viser det foto, kilden selv lægger på annoncen, og her er der ingen. Bed ${kilde} om billeder, før du kører efter den.</p>
+       </div>`;
 
   document.getElementById('listing-detail').innerHTML = `
-    <div class="external-detail">
-      <!-- Runde 8 (D8-A2): flaget er HELT vaek. Paa mobilens foerste skaerm stod
-           kilden fem gange (flag, fototekst, "hos X" ved prisen,
-           "Forhandlerannonce", CTA) — flaget var gentagelse nr. 5 og kostede
-           ≈50 px over noegletallene. "Hvem koeber jeg af" staar stadig tre
-           steder paa foerste skaerm og i kildekortet. -->
+    <div class="an-grid">
+      <div class="an-col an-col-a">
+      <div class="an-gallery">${fotoHTMLext}</div>
 
-      <figure class="external-detail-photo">
-        ${foto
-          ? `<img src="${escapeHTML(foto)}" alt="${brand} ${model}" loading="eager" decoding="async">
-             <figcaption>${Icon.info}Foto: ${kilde} — flere billeder i deres annonce</figcaption>`
-          /* Her stod "Billederne af den her motorcykel ligger i <kilde>s
-             annonce". Det var et løfte, vi ikke kunne holde: vi mangler
-             fotoet, fordi kilden ikke har sat et på annoncen. MC Syd
-             markerer dem selv med class="empty" i gitteret, og på de to, vi
-             åbnede (Honda VT 700 137963 og Honda CB 72 128471), var deres
-             egen billedkarrusel også tom. Teksten sendte altså køberen hen
-             til en annonce efter billeder, der ikke er der.
+      ${anFakta(faktaRader)}
 
-             Nu siger den kun det, vi ved i alle tilfælde — kilden sendte
-             intet foto med — og peger på den vej, der faktisk kan skaffe
-             et: at spørge sælgeren. At påstå "der er heller ingen billeder
-             hos dem" ville være den samme fejl igen, bare med nyt fortegn:
-             en anden forhandler kan have fotos på detaljesiden, som ikke
-             står i gitteret. */
-          : `<div class="external-detail-photo-tom">${Icon.camera}
-               <span><b>${kilde} har ikke sat et foto på den her annonce.</b></span>
-               <span>Vi viser det foto, kilden selv lægger på annoncen, og her er der
-                 ingen. Bed ${kilde} om billeder, før du kører efter den.</span>
-             </div>`}
-      </figure>
-
-      <header class="external-detail-head">
-        <h2 class="external-detail-title">${brand} ${model}</h2>
-        ${variant ? `<p class="external-detail-variant">${escapeHTML(variant)}</p>` : ''}
-        ${fabriksnyNote ? `<p class="external-detail-ny">${Icon.info}<span>${fabriksnyNote}</span></p>` : ''}
-        <p class="external-detail-sub">
-          ${stedTekst ? `${Icon.mapPin}${escapeHTML(stedTekst)}` : ''}
-          ${stedTekst && listing.isDealer ? '<span class="external-detail-dot">·</span>' : ''}
-          ${listing.isDealer ? `${Icon.store}Forhandlerannonce` : ''}
-        </p>
-        <div class="external-detail-price-block">
-          <!-- "Pris ikke oplyst" sat i sidens største skrift råber en
-               ikke-oplysning ud som var den nyheden. Mangler prisen, træder
-               tallet tilbage og bliver til en henvisning.
-               Runde 5 (D5-A2): etiketten står på LINJE med tallet ("164.995 kr.
-               hos Gul og Gratis"), som Bilbasens "Kontantpris · 44.900 kr.",
-               i stedet for som versallinje over det — 18 px sparet på mobil. -->
+      </div>
+      <div class="an-col an-col-b">
+      <section class="an-head" aria-label="Om motorcyklen">
+        <div class="an-chips">${chips}</div>
+        <div id="an-h1-slot"></div>
+        ${delVaerdier.length ? `<p class="an-sub">${delVaerdier.map(v => `<span>${escapeHTML(v)}</span>`).join('')}</p>` : ''}
+        <div class="an-price-block">
           ${listing.price == null
-            ? `<p class="external-detail-price is-tom">Ikke oplyst — spørg ${kilde}</p>`
-            : `<p class="external-detail-price">${formatPrice(listing.price)} <span class="external-detail-price-label">hos ${kilde}</span></p>`}
+            ? `<p class="an-price is-tom">Ikke oplyst — spørg ${kilde}</p>`
+            : `<p class="an-price">${formatPrice(listing.price)}<span class="an-price-label">hos ${kilde}</span></p>`}
           ${salgsmarkoerer.length ? `
-          <p class="external-detail-vilkaar">
-            ${salgsmarkoerer.map(m => `<span class="external-detail-vilkaar-chip">${escapeHTML(m)}</span>`).join('')}
-          </p>
-          <p class="external-detail-vilkaar-note">Salgsvilkår oplyst i annoncen hos ${kilde} — de er en del af prisen. Få dem bekræftet dér.</p>` : ''}
+          <p class="an-vilkaar">${salgsmarkoerer.map(m => `<span class="an-chip an-chip-soft">${escapeHTML(m)}</span>`).join('')}</p>
+          <p class="an-note">Salgsvilkår oplyst i annoncen hos ${kilde} — de er en del af prisen. Få dem bekræftet dér.</p>` : ''}
         </div>
-        <!-- Runde 6 (D6-A1): paa <960 px havde foerste skaerm INGEN primaer knap —
-             bjaelken var skjult, mens prisblokken var i view (D5-A7), og
-             kildekortets knap stod foerst ved ≈2 770 px. Bilbasen: "Book en
-             proevetur" ved 77 px. Knappen her er den samme (href, rel, target,
-             data-listing-id → C3-maalingen) som kildekortets; annonce.html lader
-             bjaelken foelge DENNE knap, saa der altid er praecis én synlig.
-             ≥960 skjules den (css) — hoejre spalte har knappen 20 px derfra. -->
-        ${href ? `<a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
-              data-listing-id="${escapeHTML(String(listing.id))}"
-              class="btn btn-primary btn-block external-detail-cta">Se annoncen hos ${kilde}${Icon.externalLink}</a>` : ''}
-        <!-- Runde 5 (D5-A4): handlingsrække som Bilbasens "Sammenlign · Print ·
-             Anmeld" — kun handlinger, der findes for en indekseret annonce:
-             sammenlign (lokal, D-008), del, meld fejl (reports.target_id er
-             text). Ingen favorit (afvist, D-008). Bjælken forbliver én handling. -->
-        <div class="external-detail-actions">
-          <button type="button" class="btn btn-ghost btn-sm" data-compare-toggle="${escapeHTML(String(listing.id))}" aria-pressed="${typeof Store !== 'undefined' && Store.isComparing && Store.isComparing(listing.id) ? 'true' : 'false'}">${Icon.compare || ''}Sammenlign</button>
-          <button type="button" class="btn btn-ghost btn-sm" id="share-listing-btn">${Icon.share || ''}Del</button>
-          <button type="button" class="btn btn-ghost btn-sm report-link" id="report-listing-btn">${Icon.flag || ''}Meld fejl</button>
-        </div>
-      </header>
-
-      ${noegletal.length ? `
-      <div class="external-detail-stats">
-        ${noegletal.map(([ikon, etiket, vaerdi]) => `
-          <div class="external-detail-stat">
-            <span class="external-detail-stat-label">${ikon}${etiket}</span>
-            <b>${vaerdi}</b>
-          </div>`).join('')}
-      </div>` : ''}
-      ${koerekortPanel}
-
-      <section class="external-detail-section">
-        <h2>Detaljer</h2>
-        <dl class="external-detail-specs">${detaljer}</dl>
-        <p class="external-detail-note">
-          Tallene står, som ${kilde} har skrevet dem i annoncen. Mangler et felt, har de
-          ikke oplyst det — vi udfylder ikke huller med gæt. Der tages forbehold for fejl.
-        </p>
+        ${anNoegletal(listing, hk)}
+        ${fabriksnyNote ? `<p class="an-note an-ny">${Icon.info}<span>${fabriksnyNote}</span></p>` : ''}
       </section>
 
-      <!-- Runde 8 (D8-A3): en h2 "Beskrivelse" over et fravaer lovede en tekst,
-           vi (med rette, regel 2) ikke har. Uden beskrivelse: én linje i
-           "Foer du koerer derhen" i stedet for en tom sektion. -->
-      ${listing.description ? `
-      <section class="external-detail-section">
-        <h2>Beskrivelse</h2>
-        <blockquote class="external-detail-quote">${escapeHTML(listing.description)}</blockquote>
-        <p class="external-detail-note">Begyndelsen af ${kilde}s egen tekst. Resten står i deres annonce.</p>
-      </section>` : ''}
+      <div class="an-desc">
+        ${beskrivelseHTML}
+        ${saelgerNote}
+      </div>
 
-      <!-- PRIVAT-ADVARSLEN MANGLEDE HELT PÅ EKSTERNE ANNONCER — RETTET, runde 4.
-           Betingelsen stod før som "vis kun noten, når sælgeren ER forhandler",
-           så en Gul og Gratis-annonce (isDealer === false) fik hverken
-           reklamationsret-linjen ELLER advarslen om, at den ikke gælder —
-           bare tavshed om et spørgsmål, sellerTypeNoteHTML() allerede vidste
-           svaret på (samme funktion bruges korrekt på egne annoncer, linje
-           ~985). Kritikeren målte det på 16 Gul og Gratis-stikprøver: 0/16
-           havde privat-advarslen. VIS_REKLAMATIONSRET er en tredjeparts-
-           kildekontrol (er crawlerens isDealer-læsning til at stole på?) og
-           skal derfor kun kunne slukke DEALER-påstanden om MC Syd —
-           privat-advarslen er ikke en påstand om en tredjepart, den er en
-           oplysning om dansk ret, og den er den forsigtige retning at tage
-           fejl i (frem for at love en reklamationsret, der ikke findes). -->
-      <!-- Runde 7 (D7-A1): tre grene — kildens svar, ikke vores gaet. Gul og
-           Gratis oplyser ingen saelgertype (saelgertype === null), og dér stod
-           foer "Privat annonce … reklamationsret gaelder ikke" — ogsaa paa
-           forhandlerannoncer (MC Syd/Aalborg MC paa GG). -->
-      ${listing.isDealer
-        ? (VIS_REKLAMATIONSRET ? sellerTypeNoteHTML(true) : '')
-        : (listing.saelgertype === 'privat' ? sellerTypeNoteHTML(false) : sellerTypeNoteHTML(null))}
+      </div>
+      <div class="an-side">
+        <div class="an-seller-wrap">${saelgerKort}</div>
+        <div class="an-trygt-wrap">${anTrygtKort(true, kilde)}</div>
+      </div>
+      ${anKoerekortKort(listing, kkM, kkUvis)}
+      ${anTjekKort()}
+    </div>`;
 
-      <section class="external-detail-section">
-        <h2>Før du kører derhen</h2>
-        <ul class="external-detail-raad">
-          <li>${Icon.shieldCheck}Tjek pris og oplysninger hos ${kilde}, før du kører — de kan være ændret, siden vi hentede annoncen.</li>
-          <li>${Icon.shieldCheck}Se motorcyklen fysisk, og få stelnummeret, før du betaler noget som helst.</li>
-          <li>${Icon.shieldCheck}Kørekortkategorien her er vejledende. Er du i tvivl, så få den bekræftet i registreringsattesten.</li>
-          ${listing.description ? '' : `<li>${Icon.info}Beskrivelse, udstyrsliste og flere billeder står i ${kilde}s egen annonce — teksten er deres, og vi gemmer den ikke her.</li>`}
-        </ul>
-        <p class="external-detail-note"><a href="sikkerhed.html">Læs Bikerbasens sikkerhedsguide</a></p>
-      </section>
-    </div>
+  anFlytH1(fuldTitel);
+  anAktioner(listing, false);
+  anVirkDel(listing);
+  anFyldLignende(listing);
+  anFyldVidere(listing, kk);
+  anEksternBjaelke(href, listing, kilde, prisTekst);
 
-    <div class="external-detail-aside">${kildeKort}</div>`;
-
-  /* ---------- Lignende annoncer ----------
-     Bilbasen slutter annoncesiden med "Lignende biler". Vores stribe blev
-     skjult helt, og siden endte derfor blindt: enten klikkede man videre til
-     kilden, eller også var der ikke mere. Nu fyldes den — med vores egne
-     annoncer først, fordi dem kan køberen faktisk handle på hos os.
-
-     Typen kendes ikke på indekserede annoncer (den står ikke i kilden), så
-     "lignende" er samme mærke først og derefter samme kubikklasse. */
-  const stribe = document.querySelector('.similar-strip');
-  const mount = document.getElementById('similar-listings');
-  const andre = Store.getAllListings().filter(l => String(l.id) !== String(listing.id));
-  const sammeMaerke = andre.filter(l => l.brand === listing.brand);
-  const naerKubik = ccm
-    ? andre.filter(l => l.ccm && Math.abs(l.ccm - ccm) <= ccm * 0.35)
-    : [];
-  const set = new Set();
-  /* Runde 5 (D5-A5): mærket vandt over alt — til en 2023 NT 1100 A til
-     164.995 kr. stod en 1983 CX 650 til 20.000 og en Gold Wing til 575.000.
-     Bilbasen går model → segment → prisbånd. Samme idé som point, kun med
-     felter vi har; kræv en minimumsscore, ellers skjules striben — tom er
-     ærligere end 1983 mod 2023. */
-  const score = (l) => {
-    let s = 0;
-    if (listing.model && l.model && l.model.toLowerCase() === String(listing.model).toLowerCase()) s += 3;
-    if (l.brand === listing.brand) s += 2;
-    if (listing.price > 0 && l.price > 0 && Math.abs(l.price - listing.price) / listing.price <= 0.4) s += 3;
-    if (ccm > 0 && Number(l.ccm) > 0 && Math.abs(Number(l.ccm) - ccm) / ccm <= 0.35) s += 2;
-    if (listing.year && l.year && Math.abs(Number(l.year) - Number(listing.year)) <= 6) s += 1;
-    if (listing.type && l.type === listing.type) s += 2;
-    return s;
-  };
-  // Tre ens kort (samme model, samme pris — en forhandlers lagerstykker) ligner
-  // en fejl; tag den bedste af hver (model, pris), og fyld op med de naeste.
-  const rangeret = andre.map(l => [score(l), l]).filter(([s]) => s >= 4).sort((a, b) => b[0] - a[0]);
-  /* Runde 6 (D6-A6): er der kandidater nok (≥3 med score ≥4), dedupleres paa
-     maerke|model, saa striben ikke viser to fabriksnye af samme model side
-     om side (aerligt, men laeses som en dublet); ellers paa maerke|model|pris. */
-  const noegleFn = rangeret.length >= 3 ? (l => `${l.brand}|${l.model}`) : (l => `${l.brand}|${l.model}|${l.price}`);
-  const set2 = new Set(); const lignende = [];
-  for (const [, l] of rangeret){ const n = noegleFn(l); if (set2.has(n)) continue; set2.add(n); lignende.push(l); if (lignende.length === 3) break; }
-  if (lignende.length < 3) for (const [, l] of rangeret){ if (!lignende.includes(l)) lignende.push(l); if (lignende.length === 3) break; }
-  void sammeMaerke; void naerKubik; void set;
-  if (stribe && mount && lignende.length){
-    const overskrift = stribe.querySelector('h2');
-    if (overskrift){
-      const dele = [listing.brand !== 'Ukendt' ? listing.brand : null,
-        ccm ? `${formatCcm(Math.round(ccm * 0.65)).replace(/\s*ccm$/, '')}–${formatCcm(Math.round(ccm * 1.35))}` : null,
-        listing.price > 0 ? `${Math.round(listing.price * 0.6 / 1000)}–${Math.round(listing.price * 1.4 / 1000)} t.kr.` : null].filter(Boolean);
-      overskrift.textContent = dele.length ? `Lignende: ${dele.join(' · ')}` : 'Lignende motorcykler på Bikerbasen';
-    }
-    mount.innerHTML = lignende.map((l, i) => listingCardHTML(l, i)).join('');
-    wireFavoriteButtons(mount);
-  } else if (stribe){
-    stribe.style.display = 'none';
-  }
 
   /* Alt, der peger på en sælger, fjernes fra DOM'en frem for bare at blive
      skjult. En skjult knap er stadig en knap: den kan tabbes til, den kan
@@ -943,57 +1001,9 @@ function renderExternalListing(listing){
   document.getElementById('contact-modal')?.remove();
   document.getElementById('listing-actionbar')?.remove();
   // Runde 5 (D5-A4): del + meld fejl — samme adfærd som på egne annoncer.
-  document.getElementById('share-listing-btn')?.addEventListener('click', async () => {
-    const url = location.href;
-    const title = `${listing.brand} ${listing.model}${listing.price ? ` — ${formatPrice(listing.price)}` : ''}`;
-    if (navigator.share){
-      try { await navigator.share({ title, url }); return; }
-      catch (e) { if (e.name === 'AbortError') return; }
-    }
-    try { await navigator.clipboard.writeText(url); toast('Link kopieret til udklipsholderen'); }
-    catch (e) { prompt('Kopiér linket:', url); }
-  });
   document.getElementById('report-listing-btn')?.addEventListener('click', () => {
     openReportModal('listing', fuldTitel, listing.id);
   });
-  document.body.classList.remove('har-actionbar');
-}
-
-/* ---------- "Søg videre" i højre spalte ----------
-
-   Kritikeren målte højre spalte som tom fra ca. y=1000 og ned: omtrent
-   halvdelen af desktopsiden var hvidt felt ved siden af beskrivelsen, mens
-   sælgerkortet lå og sluttede oppe i toppen. Tomhed ved siden af sidens
-   længste tekst er ikke ro — det er en spalte, der holder op med at svare.
-
-   Kortet er den samme opskrift som `.external-detail-next` på
-   kildeannoncerne længere oppe i filen: en kort liste af søgninger, der ALLE
-   findes. Ingen af linjerne er gættet — mærke, type og landsdel står i
-   annoncen, og kørekortlinjen kommer kun med, når koerekortForListing()
-   faktisk kunne regne kategorien ud (den svarer null frem for at gætte).
-
-   Sammen med `.listing-aside{position:sticky}` betyder det, at spalten
-   følger med ned gennem specs og beskrivelse i stedet for at blive
-   efterladt. */
-function videreKortHTML(listing, kk){
-  const brand = escapeHTML(listing.brand || '');
-  const type = listing.type ? typeLabel(listing.type) : '';
-  const links = [
-    listing.brand && listing.brand !== 'Ukendt'
-      ? [`soegning.html?brands=${encodeURIComponent(listing.brand)}`, `Alle ${brand} til salg`] : null,
-    kk ? [`soegning.html?koerekort=${encodeURIComponent(kk)}`, `Motorcykler til ${escapeHTML(kk)}-kørekort`] : null,
-    type ? [`soegning.html?type=${encodeURIComponent(listing.type)}`, `Alle ${escapeHTML(type)}`] : null,
-    listing.region ? [`soegning.html?regions=${encodeURIComponent(listing.region)}`, `Motorcykler i ${escapeHTML(listing.region)}`] : null,
-    ['soegning.html', 'Alle motorcykler'],
-  ].filter(Boolean);
-
-  return `
-      <div class="sidebar-card listing-next">
-        <h2>Søg videre på Bikerbasen</h2>
-        <ul>
-          ${links.map(([href, tekst]) => `<li><a href="${href}">${tekst}</a></li>`).join('')}
-        </ul>
-      </div>`;
 }
 
 /* O3-6: kvitteringsbanner efter udgivelse — kun paa egen annonce, kun med
@@ -1072,10 +1082,8 @@ function renderListing(){
   // uden JavaScript ser en overskrift.
   const h1 = document.getElementById('listing-h1');
   if (h1){ h1.textContent = `${listing.brand} ${listing.model}`; }
-  document.getElementById('bc-type').textContent = typeLabel(listing.type);
-  document.getElementById('bc-type').href = `soegning.html?type=${listing.type}`;
-  document.getElementById('bc-current').textContent = `${listing.brand} ${listing.model}`;
-  document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
+  anBrodkrumme(listing);
+  anSeoBrodkrumme(listing);
 
   const fav = Store.isFavorite(listing.id);
   const loggedIn = !!Store.getUser();
@@ -1122,10 +1130,13 @@ function renderListing(){
      længere nede i den her fil (kildeannoncen uden foto): kameraikon,
      stiplet kant, lav kasse. Med vilje samme udtryk — ikke et tredje. */
   const fotoAntal = currentPhotos.length;
-  const favKnapHTML = isOwnListing(listing)
-    ? ''
-    : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${listing.id}">${Icon.heart}</button>`;
 
+  /* Tre tilstande, og hver af dem viser kun det, annoncen kan bakke op:
+       flere fotos → stort foto med tæller, pile og en miniaturerække
+                     (maks. fem + "+N", så rækken aldrig vokser ud af siden)
+       ét foto     → billedet alene, uden tæller og pile
+       nul fotos   → ét felt, der siger det. Ingen tegning i stedet. */
+  const synligeThumbs = fotoAntal > 6 ? 5 : fotoAntal;
   const galleriHTML = fotoAntal ? `
       <div class="gallery">
         <div class="gallery-main">
@@ -1135,117 +1146,129 @@ function renderListing(){
           <button type="button" class="gallery-nav prev" aria-label="Forrige billede">${Icon.chevronLeft}</button>
           <button type="button" class="gallery-nav next" aria-label="Næste billede">${Icon.chevronRight}</button>` : ''}
         </div>
-        ${favKnapHTML}
         ${fotoAntal > 1 ? `<div class="gallery-thumbs">
-          ${currentPhotos.map((_, i) => `<button type="button" aria-label="Billede ${i+1} af ${fotoAntal}" data-thumb="${i}">${fotoHTML(i, { thumb:true })}</button>`).join('')}
+          ${currentPhotos.slice(0, synligeThumbs).map((_, i) => `<button type="button" aria-label="Billede ${i+1} af ${fotoAntal}" data-thumb="${i}">${fotoHTML(i, { thumb:true })}</button>`).join('')}
+          ${fotoAntal > 6 ? `<button type="button" class="gallery-more" aria-label="Flere billeder: vis billede 6 af ${fotoAntal}" data-thumb="5" data-more="1">${fotoHTML(5, { thumb:true })}<span>+${fotoAntal - 5}</span></button>` : ''}
         </div>` : ''}
       </div>` : `
       <div class="gallery-tom">
-        ${favKnapHTML}
         ${Icon.camera}
         <p class="gallery-tom-titel">Ingen fotos i denne annonce</p>
         <p class="gallery-tom-tekst">Sælgeren har ikke lagt billeder op. Vi viser ikke en tegning i stedet —
           bed sælgeren om fotos af netop den her motorcykel, før du kører efter den.</p>
       </div>`;
 
-  document.getElementById('listing-detail').innerHTML = `
-    <div>
-      ${suspicious ? `<div class="safety-banner" style="background:var(--color-danger-tint); color:var(--color-danger); border-color:color-mix(in srgb, var(--color-danger) 30%, transparent);">${Icon.alertTriangle}<span>Prisen er væsentligt under markedsniveau for denne type — vær ekstra opmærksom, og følg altid vores sikkerhedsråd.</span></div>` : ''}
-${galleriHTML}
+  const IO = 'Ikke oplyst';
+  const ejere = Number(listing.antalEjere) || 0;
+  const hkEgen = hkEllerNull(listing.power);
+  const standTekst = listing.condition
+    ? (/^(brugt|ny)$/i.test(String(listing.condition).trim()) ? `${String(listing.condition).trim()} motorcykel` : String(listing.condition))
+    : '';
+  const chips = anChips([
+    standTekst,
+    listing.type ? typeLabel(listing.type) : '',
+    kk ? kkM.tekst : '',
+    ejere ? `${ejere} ${ejere === 1 ? 'ejer' : 'ejere'}` : '',
+  ]) + (isOwnListing(listing)
+    ? `<a class="own-listing-tag" href="opret-annonce.html?rediger=${encodeURIComponent(listing.id)}">${Icon.edit}Din annonce</a>` : '');
+  const delVaerdier = [listing.year != null ? String(listing.year) : '', listing.km != null ? formatKm(listing.km) : '', listing.type ? typeLabel(listing.type) : ''].filter(Boolean);
 
-      <div class="listing-header">
-        <div>
-          <p class="listing-title">${brand} ${model}</p>
-          <div class="listing-loc">${Icon.mapPin}${escapeHTML(listing.city)}, ${escapeHTML(listing.postnr)} · ${escapeHTML(listing.region)}</div>
-          ${oprettet ? `<div class="listing-loc listing-alder">${Icon.clock}Annoncen er oprettet ${escapeHTML(oprettet)} · ${escapeHTML(timeAgoDa(listing.createdAt))}</div>` : ''}
-        </div>
-        <div class="listing-price-block">
-          <div class="listing-price-label">Pris</div>
-          <div class="listing-price">${formatPrice(listing.price)}</div>
-          ${isOwnListing(listing)
-            ? `<a class="own-listing-tag" href="opret-annonce.html?rediger=${encodeURIComponent(listing.id)}" style="margin-top:8px;">${Icon.edit}Din annonce</a>`
-            : ''}
-        </div>
-      </div>
+  const faktaRader = [
+    [Icon.bike, 'Mærke', listing.brand ? brand : IO],
+    [Icon.info, 'Model', listing.model ? model : IO],
+    [Icon.calendar, 'Årgang', listing.year != null ? String(listing.year) : IO],
+    [Icon.gauge, 'Kilometer', listing.km != null ? formatKm(listing.km) : IO],
+    [Icon.bike, 'Type', listing.type ? escapeHTML(typeLabel(listing.type)) : IO],
+    [Icon.engine, 'Motorstørrelse', Number(listing.ccm) > 0 ? formatCcm(listing.ccm) : IO],
+    [AN_IKON.bolt, 'Ydelse', hkEgen ? formatPower(hkEgen) : IO],
+    [Icon.shieldCheck, 'Kørekort', kk ? escapeHTML(kkM.tekst) : 'Kan ikke afgøres'],
+    listing.condition ? [Icon.checkCircle, 'Stand', escapeHTML(listing.condition)] : null,
+    [AN_IKON.plate, 'Registrering', listing.registration ? escapeHTML(listing.registration) : IO],
+    [Icon.lock, 'Afgift', escapeHTML(listing.afgift || IO)],
+    listing.fuel ? [AN_IKON.fuel, 'Brændstof', escapeHTML(listing.fuel)] : null,
+    listing.drive ? [AN_IKON.cog, 'Træktype', escapeHTML(listing.drive)] : null,
+    listing.cylinders ? [Icon.engine, 'Cylindre', String(Number(listing.cylinders))] : null,
+    listing.color ? [AN_IKON.palette, 'Farve', escapeHTML(listing.color)] : null,
+    listing.serviceHistorik ? [AN_IKON.wrench, 'Servicehistorik', escapeHTML(listing.serviceHistorik)] : null,
+    ejere ? [AN_IKON.users, 'Antal ejere', String(ejere)] : null,
+    listing.sidsteSyn ? [Icon.checkCircle, 'Sidste syn', String(Number(listing.sidsteSyn))] : null,
+    listing.daekAar ? [Icon.gauge, 'Dæk skiftet', String(Number(listing.daekAar))] : null,
+    listing.vinterklar ? [AN_IKON.snow, 'Vinterklargjort', 'Ja'] : null,
+  ];
 
-      <!-- Tillidsstriben laa over galleriet og skubbede fotoet 90px ned.
-           Fotoet er det foerste koeberen vil se; raadene er relevante i det
-           oejeblik man kigger paa pris og saelger — altsaa her. -->
-      ${safetyBannerHTML()}
-      ${sellerTypeNoteHTML(listing.isDealer)}
+  /* ✓-listen under beskrivelsen: kun det, sælgeren faktisk har oplyst. */
+  const punkterOK = [
+    listing.serviceHistorik === 'Fuld' ? 'Fuld servicehistorik' : '',
+    ejere === 1 ? '1 ejer' : '',
+    listing.vinterklar ? 'Vinterklargjort' : '',
+    ...(listing.equipment || []).map(e => equipmentLabel(e)),
+  ].filter(Boolean);
 
-      ${(kk || listing.serviceHistorik === 'Fuld' || listing.kanNedsaettesA2) ? `<div class="detail-chip-row">
-        ${kk ? `<span class="badge badge-koerekort" title="${escapeHTML(kkM.forklaring)}">${Icon.shieldCheck}Kørekort ${kk}</span>` : ''}
-        ${(listing.kanNedsaettesA2 && kk === 'A') ? `<span class="badge badge-koerekort" title="Kan effektbegrænses til A2-kørekort">${Icon.shieldCheck}Kan nedsættes til A2</span>` : ''}
-        ${listing.serviceHistorik === 'Fuld' ? `<span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span>` : ''}
-      </div>` : ''}
-
-      <!-- Kan kategorien ikke udledes, forsvandt mærkatet før uden et ord.
-           Detaljesiden er dér, beslutningen om 80.000 kr. traeffes, og et
-           felt der bare mangler ligner et felt, ingen har stillet. Her staar
-           i stedet, hvad vi ved, og hvor hullet er. Samme sætning som
-           kortet baerer i sin titel — kkM.forklaring er den ene kilde. -->
-      ${!kk && kkM.forklaring ? `<p class="listing-kk-uvis">${Icon.info}<span><b>${escapeHTML(kkM.tekst)}.</b> ${escapeHTML(kkM.forklaring)}</span></p>` : ''}
-
-      <div class="spec-grid" style="margin-top:var(--space-4);">
-        <div class="spec-item"><span class="spec-icon">${Icon.bike} Mærke</span><b>${brand}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.info} Model</span><b>${model}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.calendar} Årgang</span><b>${listing.year}</b></div>
-        <!-- "Km-stand" og "Motorstørrelse" var bilbasenismer. En dansk
-             MC-køber siger kilometer og kubik, og de to ord står nu ens
-             på vores egne annoncer og på forhandlerannoncerne. -->
-        <div class="spec-item"><span class="spec-icon">${Icon.gauge} Kilometer</span><b>${formatKm(listing.km)}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.engine} Kubik</span><b>${formatCcm(listing.ccm)}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.engine} Effekt</span><b>${formatPower(listing.power)}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.info} Type</span><b>${typeLabel(listing.type)}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Stand</span><b>${escapeHTML(listing.condition)}</b></div>
-        <div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Registrering</span><b>${escapeHTML(listing.registration)}</b></div>
-        <!-- Stod som "Ukendt". Afgift er et OPLYST felt (sælgeren krydser af
-             i opret-annonce), og mangler det, er det ikke oplyst — det er
-             samme sag som resten af tabellen, hvor formatKm()/formatPrice()
-             i js/data.js skriver "ikke oplyst". To ord for samme tomrum i
-             den SAMME tabel. -->
-        <div class="spec-item"><span class="spec-icon">${Icon.lock} Afgift</span><b>${escapeHTML(listing.afgift || 'Ikke oplyst')}</b></div>
-        ${listing.fuel ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Brændstof</span><b>${escapeHTML(listing.fuel)}</b></div>` : ''}
-        ${listing.drive ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Træktype</span><b>${escapeHTML(listing.drive)}</b></div>` : ''}
-        ${listing.cylinders ? `<div class="spec-item"><span class="spec-icon">${Icon.engine} Cylindre</span><b>${Number(listing.cylinders)}</b></div>` : ''}
-        ${listing.color ? `<div class="spec-item"><span class="spec-icon">${Icon.info} Farve</span><b>${escapeHTML(listing.color)}</b></div>` : ''}
-        ${listing.serviceHistorik ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Servicehistorik</span><b>${escapeHTML(listing.serviceHistorik)}</b></div>` : ''}
-        ${listing.antalEjere ? `<div class="spec-item"><span class="spec-icon">${Icon.user} Antal ejere</span><b>${Number(listing.antalEjere)}</b></div>` : ''}
-        ${listing.sidsteSyn ? `<div class="spec-item"><span class="spec-icon">${Icon.checkCircle} Sidste syn</span><b>${Number(listing.sidsteSyn)}</b></div>` : ''}
-        ${listing.daekAar ? `<div class="spec-item"><span class="spec-icon">${Icon.gauge} Dæk skiftet</span><b>${Number(listing.daekAar)}</b></div>` : ''}
-        ${listing.vinterklar ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Vinterklargjort</span><b>Ja</b></div>` : ''}
-      </div>
-
-      ${(listing.equipment || []).length ? `
-      <div class="detail-section" style="margin-top:var(--space-5);">
-        <h2>Udstyr</h2>
-        <ul class="equipment-list">
-          ${listing.equipment.map(e => `<li>${Icon.checkCircle}${escapeHTML(equipmentLabel(e))}</li>`).join('')}
-        </ul>
-      </div>` : ''}
-
-      <div class="detail-section">
+  const beskrivelseHTML = `
+      <section class="an-desc-sec">
         <h2>Beskrivelse</h2>
-        <p class="desc">${escapeHTML(listing.description)}</p>
+        ${listing.description ? `<p class="desc an-clamp" id="an-desc-tekst">${escapeHTML(listing.description)}</p><button type="button" class="an-link an-mere" id="an-desc-mere" hidden aria-expanded="false">Vis hele beskrivelsen</button>` : `<p class="desc an-na">Sælgeren har ikke skrevet en beskrivelse.</p>`}
+        ${punkterOK.length ? `<ul class="an-ok">${punkterOK.map(p => `<li>${Icon.check}<span>${escapeHTML(p)}</span></li>`).join('')}</ul>` : ''}
+      </section>`;
+
+  document.getElementById('listing-detail').innerHTML = `
+    <div class="an-grid">
+      <div class="an-col an-col-a">
+      <div class="an-gallery">${galleriHTML}</div>
+
+      ${anFakta(faktaRader)}
+
+      </div>
+      <div class="an-col an-col-b">
+      <section class="an-head" aria-label="Om motorcyklen">
+        <div class="an-chips">${chips}</div>
+        <div id="an-h1-slot"></div>
+        ${delVaerdier.length ? `<p class="an-sub">${delVaerdier.map(v => `<span>${escapeHTML(v)}</span>`).join('')}</p>` : ''}
+        <div class="an-price-block">
+          <p class="an-price">${formatPrice(listing.price)}</p>
+        </div>
+        <div class="an-loc">
+          <span>${Icon.mapPin}${escapeHTML(listing.city)}, ${escapeHTML(listing.postnr)} · ${escapeHTML(listing.region)}</span>
+          ${oprettet ? `<span>${Icon.clock}Oprettet ${escapeHTML(oprettet)} · ${escapeHTML(timeAgoDa(listing.createdAt))}</span>` : ''}
+        </div>
+        ${anNoegletal(listing, hkEgen)}
+      </section>
+
+      <div class="an-desc">
+        ${suspicious ? `<div class="safety-banner an-advarsel">${Icon.alertTriangle}<span>Prisen er væsentligt under markedsniveau for denne type — vær ekstra opmærksom, og følg altid vores sikkerhedsråd.</span></div>` : ''}
+        ${beskrivelseHTML}
+        ${sellerTypeNoteHTML(listing.isDealer)}
       </div>
 
-      <div class="detail-section" style="margin-top:var(--space-5);">
-        <button type="button" class="report-link" id="report-listing-btn">${Icon.flag}Anmeld annonce</button>
       </div>
-    </div>
-
-    <!-- To lag med vilje: den ydre er gitterets celle og strækkes ned til
-         venstre spaltes højde, den indre er den, der klæber. Sætter man
-         sticky direkte på cellen, har den ingen strækning at bevæge sig i
-         (se .listing-aside i css/styles.css). -->
-    <div class="listing-aside">
-      <div class="listing-aside-inner">
-        ${saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig })}
-        ${videreKortHTML(listing, kk)}
+      <div class="an-side">
+        <div class="an-seller-wrap">
+          ${saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig })}
+          <button type="button" class="an-report" id="report-listing-btn">${Icon.flag}Anmeld annonce</button>
+        </div>
+        <div class="an-trygt-wrap">${anTrygtKort(false)}</div>
       </div>
+      ${anKoerekortKort(listing, kkM, false)}
+      ${anTjekKort()}
     </div>
   `;
+
+  /* Lange beskrivelser klippes til 12 linjer med en knap, så midterkolonnen
+     ikke bliver meget længere end de andre. Knappen findes kun, når teksten
+     faktisk er klippet. */
+  const dTekst = document.getElementById('an-desc-tekst'), dMere = document.getElementById('an-desc-mere');
+  if (dTekst && dMere && dTekst.scrollHeight > dTekst.clientHeight + 2){
+    dMere.hidden = false;
+    dMere.addEventListener('click', () => {
+      const aaben = dTekst.classList.toggle('an-clamp') === false;
+      dMere.textContent = aaben ? 'Vis mindre' : 'Vis hele beskrivelsen';
+      dMere.setAttribute('aria-expanded', String(aaben));
+    });
+  }
+  anFlytH1(`${listing.brand} ${listing.model}`);
+  anAktioner(listing, isOwnListing(listing));
+  anVirkDel(listing);
+  anFyldVidere(listing, kk);
 
   /* Galleriets knapper findes kun, når der ER mere end ét foto — og
      gallery-main-img findes kun, når der er mindst ét. `?.` frem for et
@@ -1339,22 +1362,6 @@ ${galleriHTML}
       revealBtn.replaceWith(note);
     });
 
-    document.getElementById('share-listing-btn').addEventListener('click', async () => {
-      const url = location.href;
-      const title = `${listing.brand} ${listing.model} — ${formatPrice(listing.price)}`;
-      // Web Share hvor det findes (mobil); ellers kopiér linket.
-      if (navigator.share){
-        try { await navigator.share({ title, url }); return; }
-        catch (e) { if (e.name === 'AbortError') return; /* ellers: fald til kopiering */ }
-      }
-      try {
-        await navigator.clipboard.writeText(url);
-        toast('Link kopieret til udklipsholderen');
-      } catch (e) {
-        prompt('Kopiér linket:', url);
-      }
-    });
-
     document.getElementById('open-payment-modal').addEventListener('click', () => {
       /* HER STOD DEN TJENESTE, VORES EGEN SIKKERHEDSSIDE KALDER ET
          SVINDELTEGN.
@@ -1384,9 +1391,36 @@ ${galleriHTML}
     // Sælgers navn i titlen, så man kan se, hvem beskeden går til —
     // "Skriv til sælger" føles anonymt, når navnet står lige ved siden af.
     document.getElementById('contact-modal-title').textContent = `Skriv til ${listing.seller.name}`;
-    document.getElementById('open-contact-modal').addEventListener('click', () => modal.classList.add('open'));
-    modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.remove('open')));
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+    /* Tilgængelig dialog: fokus ind ved åbning, tilbage til udløseren ved
+       lukning, Escape lukker, Tab bliver inde i dialogen. Modalen bor i
+       annonce.html og styres kun her, så løsningen er lokal. */
+    let udloeser = null;
+    const aabnKontakt = () => { udloeser = document.activeElement; modal.classList.add('open'); };
+    const lukKontakt = () => modal.classList.remove('open');
+    new MutationObserver(() => {
+      if (modal.classList.contains('open')){
+        modal.querySelector('[role="dialog"]') || modal.querySelector('.modal-box')?.setAttribute('role', 'dialog');
+        modal.querySelector('.modal-box')?.setAttribute('aria-modal', 'true');
+        modal.querySelector('.modal-box')?.setAttribute('aria-labelledby', 'contact-modal-title');
+        const mal = modal.querySelector('#cf-message:not([hidden])') || modal.querySelector('#contact-receipt:not([hidden])') || modal.querySelector('.modal-box');
+        if (mal) mal.focus();
+      } else if (udloeser && document.contains(udloeser)){
+        udloeser.focus(); udloeser = null;
+      }
+    }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+    document.addEventListener('keydown', (e) => {
+      if (!modal.classList.contains('open')) return;
+      if (e.key === 'Escape'){ e.preventDefault(); lukKontakt(); return; }
+      if (e.key !== 'Tab') return;
+      const fokus = [...modal.querySelectorAll('button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled && el.offsetParent !== null);
+      if (!fokus.length) return;
+      const foerste = fokus[0], sidste = fokus[fokus.length - 1];
+      if (e.shiftKey && (document.activeElement === foerste || !modal.contains(document.activeElement))){ e.preventDefault(); sidste.focus(); }
+      else if (!e.shiftKey && document.activeElement === sidste){ e.preventDefault(); foerste.focus(); }
+    });
+    document.getElementById('open-contact-modal').addEventListener('click', aabnKontakt);
+    modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', lukKontakt));
+    modal.addEventListener('click', (e) => { if (e.target === modal) lukKontakt(); });
 
     const besked = document.getElementById('cf-message');
     const taeller = document.getElementById('cf-counter');
@@ -1503,18 +1537,7 @@ ${galleriHTML}
     });
   }
 
-  const similarMount = document.getElementById('similar-listings');
-  const similar = Store.getAllListings().filter(l => l.type === listing.type && l.id !== listing.id).slice(0, 3);
-  // Skjul hele "Lignende annoncer"-sektionen, når der ingen er — en overskrift
-  // over et tomt gitter ser i stykker ud (samme mønster som forsidens sektioner).
-  const similarStrip = similarMount.closest('.similar-strip');
-  if (similar.length === 0){
-    if (similarStrip) similarStrip.hidden = true;
-  } else {
-    if (similarStrip) similarStrip.hidden = false;
-    similarMount.innerHTML = similar.map(listingCardHTML).join('');
-    wireFavoriteButtons(similarMount);
-  }
+  anFyldLignende(listing);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

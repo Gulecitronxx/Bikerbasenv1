@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-cg7zs+t/ofIyn5lKAxqbDvyY5339mTORdIzNy1xVblc=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title id="page-title">Annonce — Bikerbasen</title>
 <meta name="description" content="Pris, årgang, km, ccm og kørekortkategori for en motorcykel til salg hos en dansk forhandler eller markedsplads — indekseret af Bikerbasen.">
@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Annonce — Bikerbasen">
 <meta name="twitter:description" content="Pris, årgang, km, ccm og kørekortkategori for en motorcykel til salg hos en dansk forhandler eller markedsplads — indekseret af Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -71,7 +71,8 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=96635651">
+<link rel="stylesheet" href="css/styles.css?v=7d0a409f">
+<link rel="stylesheet" href="css/p-annonce.css?v=7d0a409f">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -121,11 +122,14 @@ try{
 
 <main id="main-content">
   <div class="container">
-    <nav class="breadcrumb" aria-label="Brødkrumme">
-      <a href="index.html">Forside</a><span class="bc-sep"></span>
-      <a href="soegning.html" id="bc-type">Søgeresultater</a><span class="bc-sep"></span>
-      <span id="bc-current">Annonce</span>
-    </nav>
+    <div class="an-crumbrow">
+      <nav class="breadcrumb" id="bc-nav" aria-label="Brødkrumme">
+        <a href="index.html">Forside</a><span class="bc-sep"></span>
+        <a href="soegning.html">Motorcykler</a><span class="bc-sep"></span>
+        <span id="bc-current">Annonce</span>
+      </nav>
+      <div class="an-actions" id="an-actions"></div>
+    </div>
 
     <h1 id="listing-h1" class="visually-hidden">Motorcykel til salg</h1>
 
@@ -141,10 +145,12 @@ try{
 
     <section class="similar-strip">
       <div class="section-head">
-        <div><h2>Lignende annoncer</h2></div>
+        <div><h2>Lignende motorcykler</h2></div>
+        <a class="an-link" id="similar-all" href="soegning.html" hidden>Se alle lignende motorcykler</a>
       </div>
       <div class="listings-grid compact" id="similar-listings"></div>
     </section>
+    <nav class="an-videre" id="an-videre" aria-label="Søg videre" hidden></nav>
   </div>
 </main>
 
@@ -274,100 +280,22 @@ try{
   </div>
 </div>
 
-<script defer src="js/security.js?v=96635651"></script>
-<script defer src="js/vendor/supabase.js?v=96635651"></script>
-<script defer src="js/supabase-config.js?v=96635651"></script>
-<script defer src="js/supabase-api.js?v=96635651"></script>
-<script defer src="js/icons.js?v=96635651"></script>
-<script defer src="js/postnumre.js?v=96635651"></script>
-<script defer src="js/data.js?v=96635651"></script>
+<script defer src="js/security.js?v=7d0a409f"></script>
+<script defer src="js/vendor/supabase.js?v=7d0a409f"></script>
+<script defer src="js/supabase-config.js?v=7d0a409f"></script>
+<script defer src="js/supabase-api.js?v=7d0a409f"></script>
+<script defer src="js/icons.js?v=7d0a409f"></script>
+<script defer src="js/postnumre.js?v=7d0a409f"></script>
+<script defer src="js/data.js?v=7d0a409f"></script>
 <!-- Runde 6 (D6-A2): "Soeg videre"-linkene baerer tal regnet med soegesidens
      filterkaede (Filtrering.anvendFiltre) — samme tal som resultatsiden. -->
-<script defer src="js/filtrering.js?v=96635651"></script>
-<script defer src="js/store.js?v=96635651"></script>
-<script defer src="js/maaling.js?v=96635651"></script>
-<script defer src="js/backend-bridge.js?v=96635651"></script>
-<script defer src="js/components.js?v=96635651"></script>
-<script defer src="js/seo.js?v=96635651"></script>
-<script defer src="js/annonce.js?v=96635651"></script>
-<!-- Sticky CTA for indekserede annoncer (annonce cta, runde 4).
-
-     js/annonce.js's renderExternalListing() fjerner #listing-actionbar helt
-     for MC Syd/Gul og Gratis/Rydbergs/Jensens-annoncer (den bjælke var bygget
-     til "Skriv til sælger", som ingen indekseret annonce har) — og bygger
-     ikke en erstatning. Eneste CTA blev dermed "Se annoncen hos <kilde>"
-     nede i sidebjælken, som på mobil ligger for enden af hele siden: målt
-     på en rigtig MC Syd-annonce ved 390 px bredde stod knappen 2.716 px nede
-     af 6.227 px — ingen sticky bjælke, samme mangel egne annoncer havde,
-     før .listing-actionbar blev indført til dem.
-
-     js/annonce.js er en anden builders fil denne runde, så løsningen bor
-     her i stedet: et lille script, der venter på at #listing-detail er
-     fyldt (MutationObserver — ingen antagelse om hvornår backendReady()
-     er færdig), og hvis siden viste sig at være en indekseret annonce MED
-     et virkende link, bygger en bjælke med præcis den samme klasse,
-     .listing-actionbar, som egne annoncer bruger. Al styling (fast bund,
-     kun under 960px, plads under cookiebanneret) kommer derfor gratis fra
-     css/styles.css uden en eneste ny regel. Er linket i stykker
-     (.external-detail-broken — kilden svarer ikke), bygges der ingen
-     bjælke; kortet i sidebjælken forklarer allerede hvorfor, og der er
-     ingen handling at tilbyde. Egne annoncer og "annoncen findes ikke"
-     rammer aldrig .external-detail-source, så der sker intet for dem. -->
-<script defer>
-(function(){
-  function byggBjaelke(link){
-    var bar = document.createElement('div');
-    bar.className = 'listing-actionbar';
-    bar.id = 'ekstern-actionbar';
-    /* Runde 5 (D5-A7): bjælken bærer prisen med (læst fra siden selv) og
-       viser sig først, når prisblokken er rullet ud af synsfeltet — så første
-       skærm er fri, og pris + knap følger med fra anden skærm. */
-    var prisEl = document.querySelector('.external-detail-price');
-    if (prisEl && !prisEl.classList.contains('is-tom')){
-      var pris = document.createElement('span');
-      pris.className = 'listing-actionbar-pris';
-      var tal = (prisEl.firstChild && prisEl.firstChild.nodeType === 3) ? prisEl.firstChild.textContent.trim() : prisEl.textContent.trim();
-      pris.textContent = tal;
-      var kildeLabel = prisEl.querySelector('.external-detail-price-label');
-      if (kildeLabel){ var sm = document.createElement('small'); sm.textContent = ' ' + kildeLabel.textContent.trim(); pris.appendChild(sm); }
-      bar.appendChild(pris);
-    }
-    /* Runde 6 (D6-A1): bjælken følger den knap, der står under prisen (kun
-       synlig <960 px) — er knappen i view, er bjælken væk; er den rullet ud,
-       kommer bjælken. Så er der altid præcis én synlig "Se annoncen"-knap.
-       På ≥960 er knappen display:none, og så er det prisblokken som før. */
-    var inlineCta = document.querySelector('.external-detail-cta');
-    var blok = (inlineCta && inlineCta.offsetParent !== null) ? inlineCta : document.querySelector('.external-detail-price-block');
-    if (blok && 'IntersectionObserver' in window){
-      bar.hidden = true;
-      new IntersectionObserver(function(es){ es.forEach(function(e){ bar.hidden = e.isIntersecting || e.boundingClientRect.top > 0 && e.boundingClientRect.top < window.innerHeight; }); }, { threshold: 0 }).observe(blok);
-    }
-    var knap = document.createElement('a');
-    knap.href = link.href;
-    knap.target = '_blank';
-    knap.rel = 'noopener noreferrer nofollow';
-    knap.className = 'btn btn-primary';
-    knap.innerHTML = link.innerHTML; // samme tekst + eksternt-link-ikon som kortet i sidebjælken
-    if (link.dataset.listingId) knap.dataset.listingId = link.dataset.listingId; // C3: kilde_klik kender annoncen
-    bar.appendChild(knap);
-    document.body.appendChild(bar);
-    document.body.classList.add('har-actionbar');
-  }
-  function forsoeg(){
-    var boks = document.getElementById('listing-detail');
-    // :empty i css/styles.css reserverer pladsen indtil boksen er fyldt —
-    // her bruges samme signal til at vide, om renderListing() er færdig.
-    if (!boks || !boks.firstElementChild) return false;
-    var link = document.querySelector('.external-detail-source a.btn');
-    if (link) byggBjaelke(link);
-    return true; // uanset udfald: siden er færdigrendret, stop med at lytte
-  }
-  if (forsoeg()) return;
-  var obs = new MutationObserver(function(){ if (forsoeg()) obs.disconnect(); });
-  var maal = document.getElementById('listing-detail');
-  if (maal) obs.observe(maal, { childList: true });
-})();
-</script>
+<script defer src="js/filtrering.js?v=7d0a409f"></script>
+<script defer src="js/store.js?v=7d0a409f"></script>
+<script defer src="js/maaling.js?v=7d0a409f"></script>
+<script defer src="js/backend-bridge.js?v=7d0a409f"></script>
+<script defer src="js/components.js?v=7d0a409f"></script>
+<script defer src="js/seo.js?v=7d0a409f"></script>
+<script defer src="js/annonce.js?v=7d0a409f"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">
