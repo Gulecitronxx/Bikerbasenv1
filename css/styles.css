@@ -1749,8 +1749,9 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 }
 @media (min-width:700px){ .prerender-gallery img:first-child{ aspect-ratio:16/10; } }
 
-.listing-detail{ display:grid; grid-template-columns:1fr; gap: var(--space-6); padding: var(--space-5) 0 var(--space-9); }
-@media (min-width:960px){ .listing-detail{ grid-template-columns: 1.6fr 1fr; align-items:start; } }
+/* V-001: minmax(0,…) — et spor med 1fr kan ikke blive smallere end galleriets thumbnail-stribe (min-content), og siden fik 76 px vandret overflow paa 360/390. */
+.listing-detail{ display:grid; grid-template-columns:minmax(0,1fr); gap: var(--space-6); padding: var(--space-5) 0 var(--space-9); }
+@media (min-width:960px){ .listing-detail{ grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); align-items:start; } }
 
 .gallery{ border-radius: var(--radius-lg); overflow:hidden; background: var(--color-surface-2); position:relative; }
 /* Fotoet er det, køberen kigger på først. På mobil gik der 16:10 indrykket
