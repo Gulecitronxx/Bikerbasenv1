@@ -963,7 +963,114 @@ function externalCardHTML(l, i){
   </article>`;
 }
 
-function listingCardHTML(l, i){
+/* ============ Det rige kort (forsidens udvalg, referencebillede 1) ============
+
+   Samme data og samme regler som de to andre korttyper — kun en tættere
+   opstilling, valgt med `listingCardHTML(l, i, { rich: true })`:
+
+     titel + pris på samme linje
+     år | km | type
+     kørekort-chip + ccm-chip + hk-chip (KUN de tal, annoncen oplyser)
+     sted + "Kilde: …"
+
+   Reglerne fra de to andre kort gælder uændret:
+   - Kørekortchippen kommer fra koerekortMaerkat(), altså samme udregning som
+     filteret. "Mulig A2", aldrig "A2 godkendt".
+   - Et tal, annoncen ikke oplyser, tegnes ikke som chip. I stedet siger ÉN
+     dæmpet chip, hvilke der mangler ("ccm og hk ikke oplyst") — forsidens
+     løfte er, at mangler et tal, så står der "Ikke oplyst".
+   - Der står ingen vægt (kg): ingen annonce i lageret bærer et vægttal, og
+     chippen ville være et gæt.
+   - Kun de felter, CLAUDE.md regel 2 tillader: titel, mærke, model, årgang,
+     km, ccm, pris, postnr, sælgertype, ét thumbnail, kilde-domæne, deeplink.
+   - Det indekserede kort har intet gem-hjerte (D-008: favorit-nøglen peger på
+     vores egen tabel). Dets sammenlign-knap står der, hvor hjertet ellers ville.
+   - Kortfladen peger på VORES annonceside; ingen vej ud af sitet herfra. */
+function rigtKortFakta(l){
+  const ext = !!l.isExternal;
+  const titel = ext
+    ? eksternTitel(l).primaer
+    : [l.brand, l.model].filter(Boolean).join(' ').trim() || 'Motorcykel';
+  const hk = hkEllerNull(l.power);
+  const ccm = Number(l.ccm) > 0 ? Number(l.ccm) : null;
+  const by = String(l.city || '').trim();
+  const region = l.region || (ext ? regionFraPostnr(l.postnr) : '');
+  const sted = by || region || (l.postnr ? String(l.postnr) : 'Sted ikke oplyst');
+  const domaene = ext && l.source && l.source.domaene ? String(l.source.domaene) : '';
+  const kilde = ext
+    ? (domaene || (l.source && l.source.navn) || 'ekstern kilde')
+    : (l.isDealer ? 'Forhandler' : 'Privat');
+  return {
+    ext, titel, hk, ccm, sted, kilde,
+    aar: l.year == null ? null : l.year,
+    km: l.km == null ? null : l.km,
+    type: l.type ? typeLabel(l.type) : '',
+    kk: koerekortMaerkat(l),
+  };
+}
+
+function rigtKortHTML(l, i){
+  const f = rigtKortFakta(l);
+  if (f.ext && !sikkerUrl(l.externalUrl)) return '';   // en annonce uden brugbar kilde-URL vises ikke
+  const titel = escapeHTML(f.titel);
+  const pris = f.ext ? eksternPrisTekst(l.price) : formatPrice(l.price);
+  const fav = !f.ext && !isOwnListing(l);
+  const erFav = fav && Store.isFavorite(l.id);
+
+  const linje = [];
+  linje.push(f.aar != null ? `<span>${escapeHTML(String(f.aar))}</span>` : '<span class="rk-mangler">Årgang ikke oplyst</span>');
+  linje.push(f.km != null ? `<span>${escapeHTML(formatKm(f.km))}</span>` : '<span class="rk-mangler">Km ikke oplyst</span>');
+  if (f.type) linje.push(`<span>${escapeHTML(f.type)}</span>`);
+
+  const kk = f.kk;
+  const kkKlasse = kk.kode ? ` kk-${String(kk.kode).toLowerCase()}` : ' kk-ukendt';
+  const chips = [
+    `<li class="rk-chip rk-kk${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}<span class="visually-hidden">. ${escapeHTML(kk.forklaring)}</span></li>`,
+  ];
+  if (f.ccm) chips.push(`<li class="rk-chip">${escapeHTML(formatCcm(f.ccm))}</li>`);
+  if (f.hk) chips.push(`<li class="rk-chip">${escapeHTML(formatPower(f.hk))}</li>`);
+  const mangler = [!f.ccm && 'ccm', !f.hk && 'hk'].filter(Boolean);
+  if (mangler.length) chips.push(`<li class="rk-chip rk-chip-mangler">${escapeHTML(opremsDa(mangler))} ikke oplyst</li>`);
+
+  const altTekst = escapeHTML([l.brand, l.model].filter(Boolean).join(' '));
+  const badges = f.ext ? '' : `<div class="card-badges">
+        ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
+        ${l.isDealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : ''}
+      </div>`;
+  const hjerte = fav
+    ? `<button type="button" class="fav-btn ${erFav ? 'active' : ''}" aria-pressed="${erFav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`
+    : '';
+  const kildeTitel = f.ext
+    ? `Annoncen ligger hos ${escapeHTML((l.source && l.source.navn) || f.kilde)}${f.kilde && l.source && l.source.domaene ? ' (' + escapeHTML(f.kilde) + ')' : ''}. Bikerbasen viser den, men handlen sker hos kilden.`
+    : 'Annoncen ligger på Bikerbasen.';
+
+  return `
+  <article class="card card-rich${f.ext ? '' : ' rk-egen'}" data-listing-id="${l.id}"${f.ext ? ' data-external="1"' : ''}>
+    <div class="card-media">
+      ${listingMediaHTML(l, altTekst, i === 0)}
+      ${badges}
+      ${hjerte}
+      <button type="button" class="card-compare ${Store.isComparing(l.id) ? 'active' : ''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
+    </div>
+    <div class="rk-body">
+      <div class="rk-top">
+        <h3 class="rk-titel">${titel}</h3>
+        <span class="rk-pris${l.price == null ? ' pris-mangler' : ''}">${escapeHTML(pris)}</span>
+      </div>
+      <p class="rk-linje">${linje.join('')}</p>
+      <ul class="rk-chips">${chips.join('')}</ul>
+      <div class="rk-fod">
+        <span class="rk-sted" title="${escapeHTML(f.sted)}">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
+        <span class="rk-kilde" title="${kildeTitel}">Kilde: ${escapeHTML(f.kilde)}</span>
+      </div>
+    </div>
+    <a href="annonce.html?id=${l.id}" class="card-link" aria-label="Se annonce: ${titel}, ${escapeHTML(pris)}${f.ext ? ' — hos ' + escapeHTML(f.kilde) : ''}"></a>
+  </article>`;
+}
+
+/* `opts.rich`: det rige kort (se rigtKortHTML). Uden opts er alt som før. */
+function listingCardHTML(l, i, opts){
+  if (opts && opts.rich) return rigtKortHTML(l, i);
   if (l.isExternal) return externalCardHTML(l, i);
   const fav = Store.isFavorite(l.id);
   const brand = escapeHTML(l.brand), model = escapeHTML(l.model), city = escapeHTML(l.city);

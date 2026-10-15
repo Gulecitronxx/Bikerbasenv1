@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Log ind — Bikerbasen">
 <meta name="twitter:description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -93,7 +93,7 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=2f44a00a">
+<link rel="stylesheet" href="css/styles.css?v=2c35d1fd">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -101,23 +101,21 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
   <div class="container">
     <a href="index.html" class="brand"><img src="logo-mark.png?v=logo1" alt="" class="brand-logo" width="30" height="30"><span>Biker<span style="color:var(--color-primary)">basen</span></span></a>
     <nav class="main-nav" aria-label="Hovednavigation">
-      <a href="index.html">Forside</a>
-      <a href="soegning.html">Søg motorcykler</a>
+      <a href="soegning.html">Motorcykler</a>
+      <a href="maerker.html">Mærker</a>
+      <div class="nav-item"><a href="koerekort-a2.html">Kørekort<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></a><div class="nav-sub"><a href="koerekort-a1.html">Kørekort A1</a><a href="koerekort-a2.html">Kørekort A2</a></div></div>
+      <a href="om-bikerbasen.html">Om Bikerbasen</a>
       <a href="mine-annoncer.html">Mine annoncer</a>
     </nav>
     <div class="header-actions">
-      <a href="mine-annoncer.html?tab=favoritter" class="icon-btn" aria-label="Gemte annoncer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>
-        <span class="fav-count" data-fav-count data-count="0">0</span>
-      </a>
+      <a href="mine-annoncer.html?tab=favoritter" class="header-fav" aria-label="Gemte annoncer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg><span class="header-fav-tekst">Favoritter</span><span class="fav-count" data-fav-count data-count="0">0</span></a>
       <button type="button" class="icon-btn theme-toggle" aria-label="Skift mellem lys og mørk tilstand">
         <span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span>
         <span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>
       </button>
-      <a href="login.html" class="btn btn-outline" data-auth-slot><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind</a>
-      <a href="opret-annonce.html" class="btn btn-primary header-cta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Opret annonce</a>
-      <!-- Runde 5 (D5-F7): kontoindgang i mobilheaderen (Bilbasen: profil + hjerte + menu).
-           Temaskiftet er flyttet ned i skuffen paa mobil — en indstilling, ikke en opgave. -->
+      <a href="login.html" class="header-login" data-auth-slot><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind</a>
+      <a href="opret-annonce.html" class="btn btn-primary header-cta">Opret annonce</a>
+      <!-- Kontoindgang i mobilheaderen: profil + menu. Temaskiftet ligger i skuffen på mobil. -->
       <a href="login.html" class="icon-btn mobile-profile" data-auth-slot-icon aria-label="Log ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg></a>
       <button type="button" class="icon-btn mobile-menu-btn" aria-label="Åbn menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     </div>
@@ -127,8 +125,11 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
   <div class="mobile-drawer-scrim" data-drawer-close></div>
   <div class="mobile-drawer-panel" role="dialog" aria-label="Menu">
     <button type="button" class="icon-btn mobile-drawer-close" data-drawer-close aria-label="Luk menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-    <a href="index.html">Forside</a>
-    <a href="soegning.html">Søg motorcykler</a>
+    <a href="soegning.html">Motorcykler</a>
+    <a href="maerker.html">Mærker</a>
+    <a href="koerekort-a1.html">Kørekort A1</a>
+    <a href="koerekort-a2.html">Kørekort A2</a>
+    <a href="om-bikerbasen.html">Om Bikerbasen</a>
     <a href="opret-annonce.html">Opret annonce</a>
     <a href="mine-annoncer.html">Mine annoncer</a>
     <div class="drawer-divider"></div>
@@ -342,21 +343,21 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
   </div>
 </footer>
 
-<script defer src="js/security.js?v=2f44a00a"></script>
-<script defer src="js/vendor/supabase.js?v=2f44a00a"></script>
-<script defer src="js/supabase-config.js?v=2f44a00a"></script>
-<script defer src="js/supabase-api.js?v=2f44a00a"></script>
-<script defer src="js/icons.js?v=2f44a00a"></script>
+<script defer src="js/security.js?v=2c35d1fd"></script>
+<script defer src="js/vendor/supabase.js?v=2c35d1fd"></script>
+<script defer src="js/supabase-config.js?v=2c35d1fd"></script>
+<script defer src="js/supabase-api.js?v=2c35d1fd"></script>
+<script defer src="js/icons.js?v=2c35d1fd"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk. findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og login/opret-profil har
      intet postnummerfelt (det ligger på opret-annonce.html:256). Den lå i
      samme download-kø som fontene og css'en og forsinkede første maling. -->
-<script defer src="js/data.js?v=2f44a00a"></script>
-<script defer src="js/store.js?v=2f44a00a"></script>
-<script defer src="js/maaling.js?v=2f44a00a"></script>
-<script defer src="js/backend-bridge.js?v=2f44a00a"></script>
-<script defer src="js/components.js?v=2f44a00a"></script>
-<script defer src="js/login.js?v=2f44a00a"></script>
+<script defer src="js/data.js?v=2c35d1fd"></script>
+<script defer src="js/store.js?v=2c35d1fd"></script>
+<script defer src="js/maaling.js?v=2c35d1fd"></script>
+<script defer src="js/backend-bridge.js?v=2c35d1fd"></script>
+<script defer src="js/components.js?v=2c35d1fd"></script>
+<script defer src="js/login.js?v=2c35d1fd"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

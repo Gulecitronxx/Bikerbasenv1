@@ -1166,8 +1166,8 @@ Sitemap: ${base}/sitemap.xml
 {
   const indexPath = path.join(ROOT, 'index.html');
   let ih = fs.readFileSync(indexPath, 'utf8');
-  const attr = `<div class="brand-cloud" id="brand-cloud" data-maerkesider="${brands.map(slugify).join(',')}">`;
-  const re = /<div class="brand-cloud" id="brand-cloud"[^>]*>/;
+  const attr = `<div class="maerke-grid" id="brand-cloud" data-maerkesider="${brands.map(slugify).join(',')}">`;
+  const re = /<div class="[a-z -]*" id="brand-cloud"[^>]*>/;
   if (re.test(ih)){ fs.writeFileSync(indexPath, ih.replace(re, attr)); }
   else console.warn('build-brand-pages: fandt ikke #brand-cloud i index.html — maerkeskyen falder tilbage til soegning.html?brands=');
 }

@@ -1018,6 +1018,28 @@ function facetLinksBlock(resultater, variant){
 
   const chip = r => `<a class="popular-chip" href="${r.facet.slug}.html">${esc(r.facet.titel)}</a>`;
 
+  /* Forsiden (variant 'index') får ikke tre fuldbredde-sektioner længere, men tre små linkgrupper i
+     .seo-links-båndet over footeren. Linkmålene er de samme som før (kun facetter med nok annoncer), og
+     hvert link bærer data-facet ("type:sport", "koerekort:A2", "region:Hovedstaden"): js/home.js bruger
+     dem til at pege typefliser, kørekortfliser og regionsfliser på den faste side, hvis den findes —
+     og på søgningen, hvis den ikke gør. */
+  if (variant === 'index'){
+    const gruppe = (id, titel, links) => links.length
+      ? `<div class="seo-gruppe" id="${id}">
+        <h2>${titel}</h2>
+        <ul>
+          ${links.join('\n          ')}
+        </ul>
+      </div>`
+      : '';
+    const li = (r, tekst) => `<li><a href="${r.facet.slug}.html" data-facet="${r.facet.kind}:${esc(r.facet.id)}">${esc(tekst)}</a></li>`;
+    return [
+      gruppe('seo-types', 'Typer', typer.map(r => li(r, r.facet.titel))),
+      gruppe('seo-koerekort', 'Kørekort', koerekort.map(r => li(r, r.facet.titel))),
+      gruppe('seo-regions', 'Landsdele', regioner.map(r => li(r, r.facet.id))),
+    ].filter(Boolean).join('\n      ');
+  }
+
   const dele = [];
   if (typer.length){
     dele.push(`<section class="section" style="padding-top:0;">
