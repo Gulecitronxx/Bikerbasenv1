@@ -58,7 +58,8 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=09e196d1">
+<link rel="stylesheet" href="css/styles.css?v=2f44a00a">
+<link rel="stylesheet" href="css/p-login.css">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -68,12 +69,15 @@ try{
   </div>
 </header>
 
-<main id="main-content">
-  <div class="container" style="max-width:620px; padding-top:var(--space-7); padding-bottom:var(--space-9);">
-    <div class="legal-card" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-6);">
-      <h1 style="font-size:24px; margin-bottom:var(--space-3);" id="afmeld-titel">Afmelder din søgeagent…</h1>
-      <p style="color:var(--color-fg-muted);" id="afmeld-tekst">Et øjeblik.</p>
-      <div style="margin-top:var(--space-5); display:flex; gap:var(--space-3); flex-wrap:wrap;" id="afmeld-handlinger" hidden>
+<main id="main-content" class="lg-main">
+  <div class="lg-bg" aria-hidden="true">
+    <img class="lg-bg-photo" src="img/hero-1600.webp" srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="2560" height="1086" decoding="async">
+  </div>
+  <div class="lg-stage">
+    <div class="lg-solo">
+      <h1 id="afmeld-titel">Afmelder din søgeagent…</h1>
+      <p id="afmeld-tekst" role="status">Et øjeblik.</p>
+      <div class="lg-solo-actions" id="afmeld-handlinger" hidden>
         <a href="soegning.html" class="btn btn-primary">Søg motorcykler</a>
         <a href="mine-annoncer.html" class="btn btn-outline">Mine søgeagenter</a>
       </div>

@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Log ind — Bikerbasen">
 <meta name="twitter:description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer, sende beskeder til sælgere og oprette dine egne annoncer.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -81,7 +81,6 @@ try{
 /* Slår de inline display-attributter i markuppen, som ellers vinder. */
 html[data-authtab="register"] #login-form{ display:none !important; }
 html[data-authtab="register"] #register-form{ display:block !important; }
-html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; color:var(--color-fg-muted); }
 </style>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
@@ -93,7 +92,8 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=09e196d1">
+<link rel="stylesheet" href="css/styles.css?v=2f44a00a">
+<link rel="stylesheet" href="css/p-login.css">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -139,160 +139,180 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
   </div>
 </div>
 
-<main id="main-content">
-  <div class="auth-wrap">
-   <div class="auth-shell">
-    <aside class="auth-hero">
-      <a href="index.html" class="auth-hero-brand"><img src="logo-mark.png?v=logo1" alt="" class="brand-logo" width="30" height="30"><span>Bikerbasen</span></a>
-      <h2 class="auth-hero-title">Din genvej til det danske<br>motorcykelmarked</h2>
-      <p class="auth-hero-lead">Opret en gratis profil, og få adgang til hele Bikerbasen.</p>
-      <ul class="auth-hero-benefits" id="auth-hero-benefits">
-        <li><span data-benefit="heart"></span>Gem dine favoritannoncer ét sted</li>
-        <!-- O1-3: to loefter holdt ikke: mails sendes ikke for indekserede annoncer
-             (D7-S1), og der findes ingen beskedlevering. Kun det, der sker. -->
-        <li><span data-benefit="bell"></span>Gem en søgning, og se hvor mange nye annoncer der er kommet</li>
-        <li><span data-benefit="mail"></span>Se sælgerens navn, og markér at du vil i kontakt</li>
-        <li><span data-benefit="plus"></span>Opret dine egne annoncer — gratis for private</li>
-      </ul>
-    </aside>
+<main id="main-content" class="lg-main">
+  <div class="lg-bg" aria-hidden="true">
+    <img class="lg-bg-photo" src="img/hero-1600.webp"
+         srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
+         sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
+  </div>
+  <div class="lg-stage">
+    <div class="lg-card" id="auth-card">
 
-    <div class="auth-card">
-      <div style="text-align:center; margin-bottom:20px;">
-        <h1 style="font-size:22px;" id="auth-title">Velkommen til Bikerbasen</h1>
-        <p style="color:var(--color-fg-muted); font-size:14px; margin-top:6px;" id="auth-subtitle">Log ind for at gemme annoncer og oprette dine egne annoncer.</p>
-      </div>
-
-      <div class="auth-tabs">
-        <button type="button" class="active" data-auth-tab="login">Log ind</button>
-        <button type="button" data-auth-tab="register">Opret profil</button>
-      </div>
-
-      <form id="login-form">
-        <div class="form-grid">
-          <div class="field field-full">
-            <label for="login-email">E-mail</label>
-            <input class="input" id="login-email" type="email" required autocomplete="email">
-          </div>
-          <div class="field field-full">
-            <label for="login-password">Adgangskode</label>
-            <input class="input" id="login-password" type="password" required autocomplete="current-password">
-            <button type="button" class="link-btn" id="forgot-password-btn" style="margin-top:8px; font-size:13px;">Glemt din adgangskode?</button>
-          </div>
+      <section class="lg-pane lg-form-pane" aria-labelledby="auth-title">
+        <div id="auth-head" class="lg-head">
+          <h1 id="auth-title"><span class="lg-only-login">Log ind på Bikerbasen</span><span class="lg-only-register">Opret din gratis konto</span></h1>
+          <p id="auth-subtitle"><span class="lg-only-login">Få adgang til dine favoritter, gemte søgninger og annoncer – alt samlet ét sted.</span><span class="lg-only-register">Udfyld felterne herunder, så er du klar.</span></p>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top:20px;">Log ind</button>
-      </form>
 
-      <!-- Nulstil adgangskode. Fandtes ikke før i koden — hverken knap, felt
-           eller kald til Supabase — så et klik på et "Glemt kode"-link kunne
-           aldrig have sendt en mail. Begge trin ligger her, ikke på en ny
-           side: redirectTo peger tilbage på DENNE side, og Supabase sætter en
-           midlertidig "recovery"-session, som js/login.js lytter efter
-           (onAuthStateChange, PASSWORD_RECOVERY) og skifter til trin 2 med. -->
-      <div id="forgot-step" style="display:none;">
-        <h2 style="font-size:18px; margin-bottom:4px;">Nulstil din adgangskode</h2>
-        <p style="color:var(--color-fg-muted); font-size:13px; margin-bottom:16px;" id="forgot-intro">
-          Skriv din e-mail, så sender vi et link til at vælge en ny adgangskode.
-        </p>
-        <div class="form-grid" id="forgot-fields">
-          <div class="field field-full">
-            <label for="forgot-email">E-mail</label>
-            <input class="input" id="forgot-email" type="email" required autocomplete="email">
-          </div>
-        </div>
-        <button type="button" class="btn btn-primary btn-block" id="forgot-submit" style="margin-top:16px;">Send nulstillingslink</button>
-        <button type="button" class="link-btn" id="forgot-cancel" style="display:block; margin:14px auto 0;">Tilbage til log ind</button>
-      </div>
-
-      <div id="new-password-step" style="display:none;">
-        <h2 style="font-size:18px; margin-bottom:4px;">Vælg en ny adgangskode</h2>
-        <p style="color:var(--color-fg-muted); font-size:13px; margin-bottom:16px;">
-          Du kom hertil via linket i mailen. Skriv en ny adgangskode nedenfor.
-        </p>
-        <div class="form-grid">
-          <div class="field field-full">
-            <label for="new-password">Ny adgangskode</label>
-            <input class="input" id="new-password" type="password" required minlength="6" autocomplete="new-password">
-          </div>
-        </div>
-        <button type="button" class="btn btn-primary btn-block" id="new-password-submit" style="margin-top:16px;">Gem ny adgangskode</button>
-      </div>
-
-      <form id="register-form" style="display:none;">
-        <div class="form-grid">
-          <div class="field field-full">
-            <label for="reg-name">Navn <span class="required-mark">*</span></label>
-            <input class="input" id="reg-name" required autocomplete="name" placeholder="F.eks. Mikkel Jensen">
-          </div>
-          <div class="field field-full">
-            <label for="reg-email">E-mail <span class="required-mark">*</span></label>
-            <input class="input" id="reg-email" type="email" required autocomplete="email">
-          </div>
-          <div class="field field-full">
-            <!-- O1-5: nummeret var PAAKRAEVET, men public_profiles udstiller det
-                 ikke — ingen koeber, ingen support har nogensinde brugt det.
-                 En obligatorisk personoplysning uden et formaal, den opfylder. -->
-            <label for="reg-phone">Telefonnummer</label>
-            <input class="input" id="reg-phone" type="tel" autocomplete="tel" placeholder="12 34 56 78">
-            <span class="field-hint">Valgfrit. Vises ikke for købere.</span>
-          </div>
-          <div class="field field-full">
-            <label for="reg-password">Adgangskode <span class="required-mark">*</span></label>
-            <input class="input" id="reg-password" type="password" required minlength="6" autocomplete="new-password">
-          </div>
-          <div class="field field-full">
-            <label class="checkbox-row" style="min-height:auto;"><input type="checkbox" id="reg-dealer">Jeg er forhandler (virksomhed)</label>
-          </div>
-          <div class="field field-full kyc-fields" id="kyc-fields">
-            <div class="form-grid cols-2">
-              <div class="field">
-                <label for="reg-company">Virksomhedsnavn <span class="required-mark">*</span></label>
-                <input class="input" id="reg-company" autocomplete="organization" placeholder="F.eks. Motorcykel Centret ApS">
+        <form id="login-form" novalidate>
+          <div class="lg-fields">
+            <div class="field">
+              <label for="login-email">E-mail</label>
+              <div class="lg-input">
+                <svg class="lg-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.3"/><path d="m4 6.5 8 6 8-6"/></svg>
+                <input class="input" id="login-email" type="email" required autocomplete="email" placeholder="din@email.dk">
               </div>
-              <div class="field">
-                <label for="reg-cvr">CVR-nummer <span class="required-mark">*</span></label>
-                <input class="input" id="reg-cvr" placeholder="8 cifre" maxlength="8" inputmode="numeric">
-                <span class="field-hint">Kontrolleres kun aritmetisk (kontrolciffer) — vi slår ikke op i CVR-registret.</span>
+            </div>
+            <div class="field">
+              <label for="login-password">Adgangskode</label>
+              <div class="lg-input">
+                <svg class="lg-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+                <input class="input" id="login-password" type="password" required autocomplete="current-password" placeholder="Indtast din adgangskode">
+                <button type="button" class="lg-eye" data-pw-toggle="login-password" aria-label="Vis adgangskode" aria-pressed="false"></button>
+              </div>
+              <button type="button" class="link-btn lg-forgot" id="forgot-password-btn">Glemt din adgangskode?</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg btn-block lg-cta">Log ind<span class="lg-arrow" aria-hidden="true"></span></button>
+        </form>
+
+        <!-- Nulstil adgangskode. Begge trin ligger her, ikke på en ny side:
+             redirectTo peger tilbage på DENNE side, og Supabase sætter en
+             midlertidig "recovery"-session, som js/login.js lytter efter
+             (onAuthStateChange, PASSWORD_RECOVERY) og skifter til trin 2 med. -->
+        <div id="forgot-step" style="display:none;">
+          <h2 class="lg-step-title">Nulstil din adgangskode</h2>
+          <p class="lg-step-text" id="forgot-intro">
+            Skriv din e-mail, så sender vi et link til at vælge en ny adgangskode.
+          </p>
+          <div class="lg-fields" id="forgot-fields">
+            <div class="field">
+              <label for="forgot-email">E-mail</label>
+              <div class="lg-input">
+                <svg class="lg-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.3"/><path d="m4 6.5 8 6 8-6"/></svg>
+                <input class="input" id="forgot-email" type="email" required autocomplete="email" placeholder="din@email.dk">
               </div>
             </div>
           </div>
-          <!-- O1-8: "Jeg er ikke en robot"-checkboxen er fjernet — den stoppede ingen robot. -->
-        </div>
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top:12px;">Fortsæt</button>
-      </form>
-
-      <div id="verify-step" style="display:none;">
-        <h2 style="font-size:18px; margin-bottom:4px;">Din profil er oprettet</h2>
-        <!-- Her stod tre "bekraeft"-knapper for SMS, MitID og CVR. Ingen af
-             dem gjorde noget: der blev ikke sendt en sms, MitID blev ikke
-             kaldt, og CVR blev ikke slaaet op. De er fjernet frem for at lade
-             en bruger tro, at de har bekraeftet noget. Naar en rigtig
-             udbyder er koblet paa (se supabase/VERIFICERING.md), kommer de
-             igen — og saa er det Edge Function'en, der afgoer resultatet. -->
-        <p style="color:var(--color-fg-muted); font-size:13px; margin-bottom:16px;" id="verify-intro">
-          Vi har sendt dig en bekræftelsesmail. Klik på linket i mailen, og log derefter ind.
-        </p>
-        <!-- Kun synlig når needsConfirm er sand (js/login.js — showVerifyStep).
-             Lukker en fælde uden den: mailen kan være væk i spam, og uden en
-             vej herfra må man vente eller give op. -->
-        <button type="button" class="link-btn" id="verify-resend" style="display:none; margin-bottom:16px;">Send bekræftelsesmailen igen</button>
-        <div class="safety-tip" style="margin-bottom:4px;">
-          <span id="verify-info-icon"></span>
-          <span>Identitetskontrol med MitID og SMS er ikke sat op endnu. Ingen profiler på Bikerbasen er identitetsverificerede — vurder altid sælgeren selv, og følg vores <a href="sikkerhed.html">gode råd</a>.</span>
+          <button type="button" class="btn btn-primary btn-lg btn-block lg-cta" id="forgot-submit">Send nulstillingslink</button>
+          <button type="button" class="link-btn lg-back" id="forgot-cancel">Tilbage til log ind</button>
         </div>
 
-        <button type="button" class="btn btn-primary btn-block" id="finish-registration" style="margin-top:20px;">Fortsæt</button>
-      </div>
+        <div id="new-password-step" style="display:none;">
+          <h2 class="lg-step-title">Vælg en ny adgangskode</h2>
+          <p class="lg-step-text">
+            Du kom hertil via linket i mailen. Skriv en ny adgangskode nedenfor.
+          </p>
+          <div class="lg-fields">
+            <div class="field">
+              <label for="new-password">Ny adgangskode</label>
+              <div class="lg-input">
+                <svg class="lg-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+                <input class="input" id="new-password" type="password" required minlength="6" autocomplete="new-password" placeholder="Mindst 6 tegn">
+                <button type="button" class="lg-eye" data-pw-toggle="new-password" aria-label="Vis adgangskode" aria-pressed="false"></button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-lg btn-block lg-cta" id="new-password-submit">Gem ny adgangskode</button>
+        </div>
 
-      <div id="auth-primary-extras">
-        <div class="auth-divider">eller</div>
-        <button type="button" class="btn btn-outline btn-block" id="google-btn"><span id="google-icon"></span>Fortsæt med Google</button>
+        <form id="register-form" style="display:none;">
+          <div class="lg-fields">
+            <div class="field">
+              <label for="reg-name">Navn <span class="required-mark">*</span></label>
+              <input class="input" id="reg-name" required autocomplete="name" placeholder="F.eks. Mikkel Jensen">
+            </div>
+            <div class="field">
+              <label for="reg-email">E-mail <span class="required-mark">*</span></label>
+              <input class="input" id="reg-email" type="email" required autocomplete="email">
+            </div>
+            <div class="field">
+              <!-- O1-5: nummeret var PÅKRÆVET, men public_profiles udstiller det
+                   ikke. En obligatorisk personoplysning uden et formål. -->
+              <label for="reg-phone">Telefonnummer</label>
+              <input class="input" id="reg-phone" type="tel" autocomplete="tel" placeholder="12 34 56 78">
+              <span class="field-hint">Valgfrit. Vises ikke for købere.</span>
+            </div>
+            <div class="field">
+              <label for="reg-password">Adgangskode <span class="required-mark">*</span></label>
+              <div class="lg-input lg-input-plain">
+                <input class="input" id="reg-password" type="password" required minlength="6" autocomplete="new-password">
+                <button type="button" class="lg-eye" data-pw-toggle="reg-password" aria-label="Vis adgangskode" aria-pressed="false"></button>
+              </div>
+              <span class="field-hint">Mindst 6 tegn.</span>
+            </div>
+            <div class="field">
+              <label class="checkbox-row" style="min-height:auto;"><input type="checkbox" id="reg-dealer">Jeg er forhandler (virksomhed)</label>
+            </div>
+            <div class="field kyc-fields" id="kyc-fields">
+              <div class="form-grid cols-2">
+                <div class="field">
+                  <label for="reg-company">Virksomhedsnavn <span class="required-mark">*</span></label>
+                  <input class="input" id="reg-company" autocomplete="organization" placeholder="F.eks. Motorcykel Centret ApS">
+                </div>
+                <div class="field">
+                  <label for="reg-cvr">CVR-nummer <span class="required-mark">*</span></label>
+                  <input class="input" id="reg-cvr" placeholder="8 cifre" maxlength="8" inputmode="numeric">
+                  <span class="field-hint">Kontrolleres kun aritmetisk (kontrolciffer) — vi slår ikke op i CVR-registret.</span>
+                </div>
+              </div>
+            </div>
+            <!-- O1-8: "Jeg er ikke en robot"-checkboxen er fjernet — den stoppede ingen robot. -->
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg btn-block lg-cta">Opret konto<span class="lg-arrow" aria-hidden="true"></span></button>
+        </form>
 
-        <p style="text-align:center; font-size:12px; color:var(--color-fg-muted); margin-top:20px;">
-          Ved at fortsætte accepterer du Bikerbasens <a href="vilkaar.html">vilkår</a> og <a href="privatlivspolitik.html">privatlivspolitik</a>.
-        </p>
-      </div>
+        <div id="verify-step" style="display:none;">
+          <h2 class="lg-step-title">Din profil er oprettet</h2>
+          <!-- Her stod tre "bekræft"-knapper for SMS, MitID og CVR. Ingen af dem
+               gjorde noget, og de er fjernet frem for at lade en bruger tro, at
+               de har bekræftet noget (se supabase/VERIFICERING.md). -->
+          <p class="lg-step-text" id="verify-intro">
+            Vi har sendt dig en bekræftelsesmail. Klik på linket i mailen, og log derefter ind.
+          </p>
+          <!-- Kun synlig når needsConfirm er sand (js/login.js — showVerifyStep). -->
+          <button type="button" class="link-btn" id="verify-resend" style="display:none; margin-bottom:16px;">Send bekræftelsesmailen igen</button>
+          <div class="safety-tip" style="margin-bottom:4px;">
+            <span id="verify-info-icon"></span>
+            <span>Identitetskontrol med MitID og SMS er ikke sat op endnu. Ingen profiler på Bikerbasen er identitetsverificerede — vurder altid sælgeren selv, og følg vores <a href="sikkerhed.html">gode råd</a>.</span>
+          </div>
+          <button type="button" class="btn btn-primary btn-lg btn-block lg-cta" id="finish-registration">Fortsæt</button>
+        </div>
+
+        <div id="auth-primary-extras" class="lg-extras">
+          <p class="lg-switch lg-only-login">Har du ikke en konto? <button type="button" class="link-btn lg-switch-btn" data-auth-tab="register">Opret en gratis konto<span class="lg-arrow" aria-hidden="true"></span></button></p>
+          <p class="lg-switch lg-only-register">Har du allerede en konto? <button type="button" class="link-btn lg-switch-btn" data-auth-tab="login">Log ind<span class="lg-arrow" aria-hidden="true"></span></button></p>
+          <p class="lg-legal">Ved at fortsætte accepterer du Bikerbasens <a href="vilkaar.html">vilkår</a> og <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+        </div>
+      </section>
+
+      <aside class="lg-pane lg-promo" aria-labelledby="lg-promo-title">
+        <div class="lg-promo-body">
+        <span class="lg-pill">Gratis at oprette</span>
+        <h2 id="lg-promo-title">Opret en konto på Bikerbasen</h2>
+        <p class="lg-promo-lead">Alt, du gemmer og sælger, ét sted.</p>
+        <ul class="lg-benefits" id="auth-hero-benefits">
+          <li><span class="lg-bi" data-benefit="heart"></span><div><strong>Gem dine favoritter</strong><span>Hold styr på de motorcykler, du er interesseret i.</span></div></li>
+          <!-- O1-3: kun det, der sker. Mails sendes ikke for indekserede annoncer,
+               og der findes ingen beskedlevering. -->
+          <li><span class="lg-bi" data-benefit="bell"></span><div><strong>Gem en søgning</strong><span>Se hvor mange nye annoncer der er kommet.</span></div></li>
+          <li><span class="lg-bi" data-benefit="edit"></span><div><strong>Administrer dine annoncer</strong><span>Opret, rediger og slet dine egne annoncer ét sted.</span></div></li>
+          <li><span class="lg-bi" data-benefit="user"></span><div><strong>Se sælgerens navn</strong><span>Markér, at du vil i kontakt.</span></div></li>
+        </ul>
+        <button type="button" class="btn btn-primary btn-lg lg-promo-cta lg-only-login" data-auth-tab="register">Opret en gratis konto<span class="lg-arrow" aria-hidden="true"></span></button>
+        <p class="lg-member">Allerede medlem? <button type="button" class="link-btn" data-auth-tab="login">Log ind her</button></p>
+        </div>
+      </aside>
     </div>
-   </div>
+  </div>
+
+  <div class="lg-strip">
+    <ul class="lg-strip-list">
+      <li><span class="lg-si" data-strip="search"></span><div><strong>Samlet ét sted</strong><span>Annoncer fra danske forhandlere og markedspladser</span></div></li>
+      <li><span class="lg-si" data-strip="shieldCheck"></span><div><strong>Kilden på hver annonce</strong><span>Du handler direkte med sælgeren</span></div></li>
+      <li><span class="lg-si" data-strip="checkCircle"></span><div><strong>Gratis for private</strong><span>Det koster ikke noget at oprette og annoncere</span></div></li>
+      <li><span class="lg-si" data-strip="lock"></span><div><strong>Dit nummer er privat</strong><span>Telefonnummer er valgfrit og vises ikke</span></div></li>
+    </ul>
   </div>
 </main>
 
@@ -343,21 +363,22 @@ html[data-authtab="register"] [data-auth-tab="login"]{ background:transparent; c
   </div>
 </footer>
 
-<script defer src="js/security.js?v=09e196d1"></script>
-<script defer src="js/vendor/supabase.js?v=09e196d1"></script>
-<script defer src="js/supabase-config.js?v=09e196d1"></script>
-<script defer src="js/supabase-api.js?v=09e196d1"></script>
-<script defer src="js/icons.js?v=09e196d1"></script>
+<script defer src="js/security.js?v=2f44a00a"></script>
+<script defer src="js/vendor/supabase.js?v=2f44a00a"></script>
+<script defer src="js/supabase-config.js?v=2f44a00a"></script>
+<script defer src="js/supabase-api.js?v=2f44a00a"></script>
+<script defer src="js/icons.js?v=2f44a00a"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk. findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og login/opret-profil har
      intet postnummerfelt (det ligger på opret-annonce.html:256). Den lå i
      samme download-kø som fontene og css'en og forsinkede første maling. -->
-<script defer src="js/data.js?v=09e196d1"></script>
-<script defer src="js/store.js?v=09e196d1"></script>
-<script defer src="js/maaling.js?v=09e196d1"></script>
-<script defer src="js/backend-bridge.js?v=09e196d1"></script>
-<script defer src="js/components.js?v=09e196d1"></script>
-<script defer src="js/login.js?v=09e196d1"></script>
+<script defer src="js/data.js?v=2f44a00a"></script>
+<script defer src="js/store.js?v=2f44a00a"></script>
+<script defer src="js/maaling.js?v=2f44a00a"></script>
+<script defer src="js/backend-bridge.js?v=2f44a00a"></script>
+<script defer src="js/components.js?v=2f44a00a"></script>
+<script defer src="js/login-fejl.js?v=2f44a00a"></script>
+<script defer src="js/login.js?v=2f44a00a"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">
