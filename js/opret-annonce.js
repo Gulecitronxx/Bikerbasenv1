@@ -1,4 +1,6 @@
 const STEP_LABELS = ['Type & specs', 'Pris & beskrivelse', 'Billeder', 'Gennemse'];
+/* Undertitler i trinbjælken (billede 4: titel + en linje under). */
+const STEP_SUBS = ['Om din motorcykel', 'Pris, sted og tekst', 'Upload fotos', 'Og udgiv annoncen'];
 let currentStep = 1;
 let uploadedPhotos = []; // { url, name }
 /* O1-4: dokumentupload fjernet — filerne blev aldrig uploadet eller vist. */
@@ -45,9 +47,9 @@ function renderStepper(){
     const n = i + 1;
     const cls = n === currentStep ? 'active' : (n < currentStep ? 'done' : '');
     return `
-    <div class="step-item ${cls}" title="Trin ${n}: ${label}" aria-label="Trin ${n}: ${label}${n === currentStep ? ' (nuværende)' : ''}">
+    <div class="step-item ${cls}" title="Trin ${n}: ${label}" aria-label="Trin ${n}: ${label}${n === currentStep ? ' (nuværende)' : ''}"${n === currentStep ? ' aria-current="step"' : ''}>
       <span class="step-dot">${n < currentStep ? '' : n}</span>
-      <span class="step-label">${label}</span>
+      <span class="step-text"><span class="step-label">${label}</span><span class="step-sub">${STEP_SUBS[i]}</span></span>
     </div>
     ${n < STEP_LABELS.length ? '<span class="step-line"></span>' : ''}`;
   }).join('');
@@ -69,6 +71,7 @@ function goToStep(n){
   document.getElementById('step-next').textContent =
     n === STEP_LABELS.length ? (editingId ? 'Gem ændringer' : 'Udgiv annonce') : 'Fortsæt';
   if (n === STEP_LABELS.length) renderPreview();
+  renderLiveCard();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   /* O1-12: fokus paa trinnets overskrift — ellers staar en skaermlaeser stadig
      paa "Fortsaet" uden at faa at vide, at siden skiftede. */
@@ -150,57 +153,73 @@ function trinUdfyldt(n){
 function validateStep(n){
   const section = document.querySelector(`.form-step[data-step="${n}"]`);
   let valid = true;
-  const refs = { first: null };
-  let msg = '';
+  /* Alle fejl samles som { el, besked }, og fokus går til den FØRSTE i
+     dokumentets rækkefølge — ikke til den første, vi tilfældigvis opdagede.
+     Før blev "mangler" fundet før "urealistisk tal", så fokus kunne hoppe
+     over et felt højere oppe. */
+  const fejl = [];
+  const aar = new Date().getFullYear();
   section.querySelectorAll('[required]').forEach(el => {
     const field = el.closest('.field') || el.closest('.checkbox-inline');
     const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
-    if (!ok){ valid = false; markFieldError(el, refs); }
+    if (!ok){ valid = false; fejl.push({ el, besked: null }); }
     else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); field?.querySelector('.felt-fejl')?.remove(); el.removeAttribute('aria-describedby'); }
   });
-  // Grænseværdier — feltet er tomt-tjekket ovenfor; her fanger vi urealistiske tal
-  // (formularen er novalidate, så min/max i HTML håndhæves ikke af sig selv).
-  const bound = (id, ok, m) => {
-    const el = document.getElementById(id);
-    if (!el || el.value.trim() === '') return;
-    if (!ok(Number(el.value))){ valid = false; markFieldError(el, refs, m); msg = m; }
-  };
+  /* Grænseværdier står ÉT sted: js/opret-validering.js. Formularen er
+     novalidate, så min/max i HTML håndhæves ikke af browseren. */
+  OpretValidering.validerTrin(n, id => (document.getElementById(id) || {}).value, aar).forEach(f => {
+    const el = document.getElementById(f.id);
+    if (!el) return;
+    valid = false;
+    const dubletter = fejl.findIndex(x => x.el === el);
+    if (dubletter !== -1) fejl.splice(dubletter, 1);
+    fejl.push({ el, besked: f.besked });
+  });
+  let msg = '';
   if (n === 1){
     if (!document.querySelector('input[name="bike-type"]:checked')){
-      valid = false; msg = msg || 'Vælg venligst en motorcykeltype';
+      valid = false; msg = 'Vælg venligst en motorcykeltype';
       markTypeError();
       /* Typen står øverst, så den er første fejl i læserækkefølgen — også når
-         felterne under den mangler. Før satte den aldrig refs.first: manglede
-         kun typen, flyttede fokus ingen steder, og eneste tegn var en toast. */
+         felterne under den mangler. */
       const foersteType = document.querySelector('input[name="bike-type"]');
-      if (foersteType) refs.first = foersteType;
+      if (foersteType) fejl.push({ el: foersteType, besked: null, kunFokus: true });
     } else clearTypeError();
-    const nowY = new Date().getFullYear();
-    bound('f-year', v => v >= 1900 && v <= nowY + 1, `Årgang skal være mellem 1900 og ${nowY + 1}`);
-    bound('f-km', v => v >= 0 && v <= 500000, 'Kilometerstanden virker urealistisk (0–500.000)');
-    bound('f-ccm', v => v >= 50 && v <= 3000, 'Motorstørrelsen skal være mellem 50 og 3.000 ccm');
   }
   /* Trin 4 er to afkrydsningsfelter, ikke felter man udfylder. Den generelle
      besked ("Udfyld venligst alle felter markeret med *") gav ingen mening
-     dér: man havde lige skrevet hele annoncen færdig og fik at vide, at man
-     skulle udfylde noget. Sig hvad der mangler. */
+     dér. Sig hvad der mangler. */
   if (n === 4){
     // O1-8: robot-checkboxen er fjernet — den var en kontrol af udseende, ikke af noget.
     if (!document.getElementById('f-terms').checked) msg = 'Du skal acceptere vilkårene for annoncering';
   }
   if (n === 2){
-    bound('f-price', v => v > 0 && v <= 2000000, 'Angiv en realistisk pris');
     // Frit indtastet postnummer uden bekræftet valg = annonce uden by/region.
-    if (!acceptExactPostnr()){ valid = false; markFieldError(document.getElementById('f-postnr'), refs); msg = 'Vælg et postnummer fra listen'; }
+    if (!acceptExactPostnr()){
+      valid = false;
+      const pn = document.getElementById('f-postnr');
+      const i = fejl.findIndex(x => x.el === pn);
+      if (i !== -1) fejl.splice(i, 1);
+      fejl.push({ el: pn, besked: 'Vælg et postnummer fra listen.' });
+    }
   }
-  if (!valid){
-    if (refs.first){
+  const refs = { first: null };
+  fejl.sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
+  fejl.forEach(f => {
+    if (!f.kunFokus) markFieldError(f.el, refs, f.besked || undefined);
+    else if (!refs.first) refs.first = f.el;
+  });
+  if (fejl.length && !refs.first) refs.first = fejl[0].el;
+  const forste = fejl.find(f => f.besked);
+  if (forste) msg = forste.besked;
+  if (!valid || msg){
+    if (!valid && refs.first){
       refs.first.scrollIntoView({ block: 'center', behavior: 'smooth' });
       setTimeout(() => { try { refs.first.focus({ preventScroll: true }); } catch(e){} }, 280);
     }
-    toast(msg || 'Udfyld venligst alle felter markeret med *', { type: 'error' });
+    if (!valid || msg) toast(msg || 'Udfyld venligst alle felter markeret med *', { type: 'error' });
   }
-  return valid;
+  return valid && !(n === 4 && msg);
 }
 
 /* Typefliserne står nu statisk i opret-annonce.html, så de er der ved første
@@ -268,13 +287,37 @@ function populateStaticFields(){
   // Live "X valgt" på udstyrsgrupperne.
   document.getElementById('equipment-groups').addEventListener('change', updateEqCounts);
 
+  /* Grænserne kommer fra js/opret-validering.js — samme tal som valideringen,
+     så min/max på feltet og fejlteksten aldrig kan være uenige. */
+  const aar = new Date().getFullYear();
+  Object.keys(OpretValidering.REGLER).forEach(id => {
+    const el = document.getElementById(id), g = OpretValidering.graenser(id, aar);
+    if (!el || !g) return;
+    el.min = g.min; el.max = g.max; el.step = 1;
+  });
+
   // Ryd fejlmarkeringen mens brugeren retter feltet (rød kant hang før ved).
+  // Fejlteksten under feltet fjernes også, ellers står den og modsiger rettelsen.
   document.querySelectorAll('.form-step .input, .form-step input, .form-step select, .form-step textarea').forEach(el => {
-    el.addEventListener('input', () => {
+    const ryd = () => {
       const f = el.closest('.field'); if (f) f.classList.remove('has-error');
       if (el.style) el.style.borderColor = '';
-    });
+      if (el.getAttribute('aria-invalid') === 'true'){
+        el.removeAttribute('aria-invalid');
+        el.removeAttribute('aria-describedby');
+        f?.querySelector('.felt-fejl')?.remove();
+      }
+    };
+    el.addEventListener('input', ryd);
+    el.addEventListener('change', ryd);
   });
+
+  // Live-forhåndsvisning og tegntæller: opdateres ved hver ændring i formularen.
+  const form = document.getElementById('listing-form');
+  form.addEventListener('input', planlaegLiveKort);
+  form.addEventListener('change', planlaegLiveKort);
+  document.getElementById('f-desc').addEventListener('input', opdaterTaeller);
+  opdaterTaeller();
 
   document.getElementById('upload-icon-mount').innerHTML = Icon.upload;
   document.getElementById('back-icon').innerHTML = Icon.chevronLeft;
@@ -472,7 +515,7 @@ function renderPhotoGrid(){
   const eksisterende = existingPhotos.map((p, i) => `
     <div class="photo-thumb">
       <img src="${p.url}" alt="${escapeHTML(fotoAltTekst(i))}">
-      ${i === 0 ? '<span class="cover-tag">Forside</span>' : ''}
+      ${i === 0 ? '<span class="cover-tag">Primært billede</span>' : ''}
       <button type="button" class="remove-photo" data-remove-existing="${p.id}" aria-label="Fjern dette billede fra annoncen">${Icon.close}</button>
     </div>`).join('');
 
@@ -483,7 +526,7 @@ function renderPhotoGrid(){
   const nye = uploadedPhotos.map((p, i) => `
     <div class="photo-thumb" draggable="true" data-idx="${i}">
       <img src="${p.url}" alt="${escapeHTML(fotoAltTekst(existingPhotos.length + i))}" draggable="false">
-      ${isCover(i) ? '<span class="cover-tag">Forside</span>' : '<span class="cover-tag new">Ny</span>'}
+      ${isCover(i) ? '<span class="cover-tag">Primært billede</span>' : '<span class="cover-tag new">Ny</span>'}
       <div class="photo-actions">
         <button type="button" class="photo-move" data-move="${i}" data-dir="-1" aria-label="Flyt tidligere"${i === 0 ? ' disabled' : ''}>${chevL}</button>
         ${(!existingPhotos.length && i > 0) ? `<button type="button" class="photo-cover" data-cover="${i}" aria-label="Sæt som forsidebillede" title="Sæt som forside">${star}</button>` : ''}
@@ -492,7 +535,14 @@ function renderPhotoGrid(){
       <button type="button" class="remove-photo" data-remove="${i}" aria-label="Fjern billede">${Icon.close}</button>
     </div>`).join('');
 
-  grid.innerHTML = eksisterende + nye;
+  const antalNu = existingPhotos.length + uploadedPhotos.length;
+  /* "Tilføj flere billeder" som en flise i rækken (billede 4) — samme filvælger
+     som dropzonen, kun synlig når der er noget at tilføje til og plads til mere. */
+  const tilfoej = (antalNu > 0 && antalNu < MAX_FOTOS)
+    ? `<button type="button" class="photo-add" id="photo-add-more">${Icon.plus}<span>Tilføj flere billeder</span></button>` : '';
+  grid.innerHTML = eksisterende + nye + tilfoej;
+  document.getElementById('op-photos')?.classList.toggle('has-photos', antalNu > 0);
+  document.getElementById('photo-add-more')?.addEventListener('click', () => document.getElementById('photo-input').click());
 
   grid.querySelectorAll('[data-remove]').forEach(btn => {
     btn.addEventListener('click', () => { uploadedPhotos.splice(Number(btn.dataset.remove), 1); renderPhotoGrid(); });
@@ -544,6 +594,8 @@ function renderPhotoGrid(){
     const fjernet = removedPhotoIds.length ? ` ${removedPhotoIds.length} bliver fjernet når du gemmer.` : '';
     hint.textContent = `${ialt} billede${ialt === 1 ? '' : 'r'} i alt (${dele.join(', ')}).${fjernet}`;
   }
+
+  planlaegLiveKort();
 }
 
 function collectFormData(){
@@ -829,6 +881,55 @@ function wireSeoAssist(){
   });
 }
 
+/* Tegntæller på beskrivelsen. Loftet står i js/opret-validering.js. */
+function opdaterTaeller(){
+  const felt = document.getElementById('f-desc'), taeller = document.getElementById('desc-counter');
+  if (!felt || !taeller) return;
+  const n = felt.value.length, max = OpretValidering.MAX_BESKRIVELSE;
+  taeller.textContent = `${n.toLocaleString('da-DK')}/${max.toLocaleString('da-DK')}`;
+  taeller.classList.toggle('over', n > max);
+}
+
+/* Live-forhåndsvisning i sidebjælken: SAMME delte annoncekort som søgningen
+   (listingCardHTML), tegnet af det sælgeren har udfyldt indtil nu. Intet
+   gættes: det, der ikke er udfyldt, vises som "ikke oplyst" af kortet selv, og
+   mærke/model får en tydelig pladsholder, indtil de er valgt. */
+let _liveTimer = null;
+function planlaegLiveKort(){
+  clearTimeout(_liveTimer);
+  _liveTimer = setTimeout(renderLiveCard, 120);
+}
+function renderLiveCard(){
+  const mount = document.getElementById('op-live-card');
+  if (!mount || typeof collectFormData !== 'function') return;
+  const d = collectFormData();
+  /* Et tal, der ikke består valideringen (fx 9999 hk eller årgang 1850), vises
+     ikke på kortet — det ville give et falsk kørekortmærkat og en urealistisk
+     pris. Feltet står stadig med sin fejltekst; kortet behandler det som tomt. */
+  const aarNu = new Date().getFullYear();
+  [['f-year', 'year'], ['f-km', 'km'], ['f-ccm', 'ccm'], ['f-power', 'power'], ['f-price', 'price']].forEach(([id, k]) => {
+    if (OpretValidering.validerTal(id, (document.getElementById(id) || {}).value, aarNu)) d[k] = null;
+  });
+  const user = Store.getUser() || { name: 'Dig', isDealer: false };
+  const photoUrls = [...existingPhotos.map(p => p.url), ...uploadedPhotos.map(p => p.url)];
+  const harNavn = !!(d.brand || d.model);
+  const l = Object.assign({}, d, {
+    id: 'preview',
+    brand: d.brand || 'Mærke', model: d.model || (d.brand ? '' : 'og model'),
+    year: d.year || '—', city: d.city || 'Sted ikke valgt', region: d.region || '',
+    isDealer: !!user.isDealer, createdAt: new Date().toISOString(),
+    photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(Object.assign({}, user, { city: d.city })),
+  });
+  let html;
+  try { html = listingCardHTML(l); } catch (e) { html = ''; }
+  mount.innerHTML = html.replace('card-link" aria-label', 'card-link" tabindex="-1" aria-label');
+  mount.classList.toggle('op-live-tom', !harNavn);
+  const note = document.getElementById('op-prev-note');
+  if (note) note.textContent = harNavn
+    ? 'Kortet opdateres, mens du udfylder. Det, du ikke har oplyst, står som "ikke oplyst".'
+    : 'Vælg mærke og model, så begynder kortet at tage form.';
+}
+
 function renderPreview(){
   formData = collectFormData();
   const user = Store.getUser() || { name: 'Dig', isDealer: false };
@@ -1088,8 +1189,8 @@ function startEditing(id){
   renderPhotoGrid();
 
   document.title = 'Rediger annonce — Bikerbasen';
-  document.querySelector('.page-title-bar h1').textContent = 'Rediger annonce';
-  const lead = document.querySelector('.page-title-bar p');
+  document.querySelector('.op-hero h1').textContent = 'Rediger annonce';
+  const lead = document.querySelector('.op-hero-lead');
   if (lead) lead.textContent = 'Ret oplysningerne og gem. Billederne bliver på annoncen, medmindre du selv fjerner dem.';
   return true;
 }

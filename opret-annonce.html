@@ -82,6 +82,7 @@ try{
 
 
 <link rel="stylesheet" href="css/styles.css?v=2f44a00a">
+<link rel="stylesheet" href="css/p-opret.css">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -126,35 +127,47 @@ try{
   </div>
 </div>
 
-<main id="main-content">
-  <div class="container" style="max-width:760px;">
-    <div class="page-title-bar">
-      <h1>Opret annonce</h1>
-      <!-- O1-2: "det tager under 5 minutter" var en tidspaastand uden maaling —
-           samme fejl som D6-F2 fjernede fra forsiden. Sig hvad flowet ER. -->
-      <p>Fire trin: motorcyklen, pris og beskrivelse, billeder, gennemse. Gratis for private — og du kan gemme en kladde undervejs.</p>
-      <!-- O3-3: den udloggede, der lander direkte her fra soegningen/Google, saa
-           aldrig forsidens salgsargumenter. Én sand linje + ét link. -->
-      <p class="page-title-note">Din annonce står i søgningen side om side med alle indekserede annoncer, og dit navn er skjult for udloggede. <a href="sikkerhed.html">Sådan sælger du trygt →</a></p>
+<main id="main-content" class="op-page">
+  <section class="op-hero" aria-labelledby="op-h1">
+    <div class="op-hero-media" aria-hidden="true">
+      <img class="op-hero-photo" src="img/hero-1600.webp" srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="1600" height="900" decoding="async" fetchpriority="high">
     </div>
+    <div class="container op-hero-inner">
+      <div class="op-hero-text">
+        <a class="op-back" href="index.html"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>Tilbage til forsiden</a>
+        <h1 id="op-h1">Opret annonce</h1>
+        <p class="op-hero-lead">Fire trin: motorcyklen, pris og beskrivelse, billeder, gennemse. Gratis for private — og du kan gemme en kladde undervejs.</p>
+      </div>
+      <ul class="op-trust" aria-label="Det her gælder, når du sælger på Bikerbasen">
+        <li><span class="op-trust-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><b>Gratis for private</b><small>Du betaler ikke for at annoncere.</small></span></li>
+        <li><span class="op-trust-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4.2l10-10a2.1 2.1 0 0 0-3-3l-10 10Z"/><path d="M14.5 6.5 17.5 9.5"/></svg></span><span><b>Du styrer selv annoncen</b><small>Ret eller slet under Mine annoncer.</small></span></li>
+        <li><span class="op-trust-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.8v5.4c0 4.7 3 8 7 9.6 4-1.6 7-4.9 7-9.6V5.8Z"/><path d="m9 12 2.2 2.2L15.5 9.7"/></svg></span><span><b>Side om side med de indekserede</b><small>Samme søgning som alle andre annoncer.</small></span></li>
+      </ul>
+    </div>
+  </section>
 
-    <div class="stepper" id="stepper"></div>
+  <div class="container op-wrap">
+    <div class="op-stepper-card"><div class="stepper" id="stepper"></div></div>
 
-    <form id="listing-form" novalidate>
+    <div class="op-layout">
+    <form id="listing-form" class="op-form op-card" novalidate>
 
       <!-- Step 1: Type & basic specs -->
       <section class="form-step" data-step="1">
-        <h2 id="type-overskrift" style="margin-bottom:16px;">Motorcykeltype</h2>
+        <header class="op-sec-head">
+          <div>
+            <h2><span class="op-num">1.</span> Motorcyklens detaljer</h2>
+            <p class="op-sec-sub">Vælg type og udfyld oplysningerne, så købere nemt kan finde den.</p>
+          </div>
+          <p class="op-req-note">Felter markeret med <span class="required-mark" aria-hidden="true">*</span> skal udfyldes</p>
+        </header>
         <!-- Fliserne står statisk i HTML'en, fordi de ellers først blev bygget
              af populateStaticFields() efter at data.js var hentet. Indtil da var
-             beholderen 0px høj, og når de otte fliser (714px på mobil) landede,
-             blev hele resten af formularen skubbet ned — det var langt den
-             største enkeltpost i sidens CLS. TYPES i js/data.js er stadig
+             beholderen 0px høj, og når de otte fliser landede, blev hele resten
+             af formularen skubbet ned (CLS). TYPES i js/data.js er stadig
              kilden: opret-annonce.js sammenligner og gentegner, hvis de
              afviger, så listen ikke kan drive fra hinanden. -->
-        <!-- role="radiogroup" + navn: otte radioknapper uden gruppe læses som
-             "Sport, Touring, …" uden at sige, hvad man vælger imellem. Fejlen
-             for "ingen valgt" tegnes af validateStep() i js/opret-annonce.js. -->
+        <h3 class="op-label-h" id="type-overskrift">Motorcykeltype <span class="required-mark" aria-hidden="true">*</span></h3>
         <div class="radio-card-group" id="type-radio-group" role="radiogroup" aria-labelledby="type-overskrift">
           <label class="radio-card"><input type="radio" name="bike-type" value="sport"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/sport.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Sport</span></span></label>
           <label class="radio-card"><input type="radio" name="bike-type" value="touring"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/touring.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Touring</span></span></label>
@@ -166,31 +179,48 @@ try{
           <label class="radio-card"><input type="radio" name="bike-type" value="cross"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/cross.webp" alt="" width="760" height="570" loading="lazy" decoding="async"></span><span class="radio-card-label">Cross/MX</span></span></label>
         </div>
 
-        <div class="form-grid cols-2" style="margin-top:24px;">
+        <div class="op-split">
+          <div class="op-grid op-grid-2">
+            <div class="field">
+              <label for="f-brand">Mærke <span class="required-mark" aria-hidden="true">*</span></label>
+              <select class="input" id="f-brand" required></select>
+            </div>
+            <div class="field">
+              <label for="f-model">Model <span class="required-mark" aria-hidden="true">*</span></label>
+              <input class="input" id="f-model" list="model-suggestions" required maxlength="60" placeholder="F.eks. MT-07" autocomplete="off">
+              <datalist id="model-suggestions"></datalist>
+            </div>
+            <p class="op-title-note field-hint">Annoncens overskrift dannes af mærke, model og årgang — kortet "Din annonce" viser, hvordan den ser ud.</p>
+          </div>
+          <aside class="op-tips" aria-labelledby="tips-titel-h">
+            <span class="op-tips-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>
+            <div>
+              <h3 id="tips-titel-h">Gode titler tiltrækker flere købere</h3>
+              <ul>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Skriv mærke, model og årstal</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Nævn særligt udstyr eller stand i beskrivelsen</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Hold det kort og præcist</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+
+        <div class="op-grid op-grid-4">
           <div class="field">
-            <label for="f-brand">Mærke <span class="required-mark">*</span></label>
-            <select class="input" id="f-brand" required></select>
+            <label for="f-year">Årgang <span class="required-mark" aria-hidden="true">*</span></label>
+            <input class="input" id="f-year" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 2021">
           </div>
           <div class="field">
-            <label for="f-model">Model <span class="required-mark">*</span></label>
-            <input class="input" id="f-model" list="model-suggestions" required>
-            <datalist id="model-suggestions"></datalist>
+            <label for="f-km">Km-stand <span class="required-mark" aria-hidden="true">*</span></label>
+            <div class="op-unit"><input class="input" id="f-km" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 12500"><span class="op-unit-sfx" aria-hidden="true">km</span></div>
           </div>
           <div class="field">
-            <label for="f-year">Årgang <span class="required-mark">*</span></label>
-            <input class="input" id="f-year" type="number" inputmode="numeric" min="1950" max="2026" required>
+            <label for="f-ccm">Motorstørrelse <span class="required-mark" aria-hidden="true">*</span></label>
+            <div class="op-unit"><input class="input" id="f-ccm" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 689"><span class="op-unit-sfx" aria-hidden="true">ccm</span></div>
           </div>
           <div class="field">
-            <label for="f-km">Km-stand <span class="required-mark">*</span></label>
-            <input class="input" id="f-km" type="number" inputmode="numeric" min="0" required>
-          </div>
-          <div class="field">
-            <label for="f-ccm">Motorstørrelse (ccm) <span class="required-mark">*</span></label>
-            <input class="input" id="f-ccm" type="number" inputmode="numeric" min="0" required>
-          </div>
-          <div class="field">
-            <label for="f-power">Effekt (hk)</label>
-            <input class="input" id="f-power" type="number" inputmode="numeric" min="0">
+            <label for="f-power">Effekt</label>
+            <div class="op-unit"><input class="input" id="f-power" type="number" inputmode="numeric" step="1" placeholder="F.eks. 72"><span class="op-unit-sfx" aria-hidden="true">hk</span></div>
           </div>
           <div class="field">
             <label for="f-registration">Registreringsstatus</label>
@@ -227,9 +257,9 @@ try{
              bag én fold — stadig samme felter, samme navne, intet fjernet. -->
         <details class="valgfri-fold" id="valgfri-fold">
           <summary>Flere oplysninger — historik og udstyr <span class="valgfri-tag">valgfrit, men godt for køberen</span></summary>
-        <h2 style="margin:16px 0 4px;">Historik</h2>
+        <h3 class="op-fold-h">Historik</h3>
         <p class="field-hint" style="margin-bottom:16px;">Historik er det, seriøse købere kigger efter. Udfyld det, du kan stå inde for.</p>
-        <div class="form-grid cols-3">
+        <div class="op-grid op-grid-3">
           <div class="field">
             <label for="f-service">Servicehistorik</label>
             <select class="input" id="f-service">
@@ -242,26 +272,26 @@ try{
           </div>
           <div class="field">
             <label for="f-ejere">Antal ejere</label>
-            <input class="input" id="f-ejere" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="f.eks. 2">
+            <input class="input" id="f-ejere" type="number" step="1" inputmode="numeric" placeholder="f.eks. 2">
           </div>
           <div class="field">
             <label for="f-synsaar">Sidste syn (årstal)</label>
-            <input class="input" id="f-synsaar" type="number" min="1980" max="2026" step="1" inputmode="numeric" placeholder="f.eks. 2025">
+            <input class="input" id="f-synsaar" type="number" step="1" inputmode="numeric" placeholder="f.eks. 2025">
             <span class="field-hint">Lad stå tom, hvis ikke relevant.</span>
           </div>
           <div class="field">
             <label for="f-daek">Dæk skiftet (årstal)</label>
-            <input class="input" id="f-daek" type="number" min="1990" max="2026" step="1" inputmode="numeric" placeholder="f.eks. 2024">
+            <input class="input" id="f-daek" type="number" step="1" inputmode="numeric" placeholder="f.eks. 2024">
           </div>
-          <div class="field">
-            <label class="checkbox-row" style="margin-top:26px;"><input type="checkbox" id="f-vinter">Vinterklargjort</label>
+          <div class="field op-check-field">
+            <label class="checkbox-row"><input type="checkbox" id="f-vinter">Vinterklargjort</label>
           </div>
-          <div class="field">
-            <label class="checkbox-row" style="margin-top:26px;"><input type="checkbox" id="f-a2nedsat">Kan nedsættes til A2</label>
+          <div class="field op-check-field">
+            <label class="checkbox-row"><input type="checkbox" id="f-a2nedsat">Kan nedsættes til A2</label>
           </div>
         </div>
 
-        <h2 style="margin:28px 0 4px;">Udstyr</h2>
+        <h3 class="op-fold-h">Udstyr</h3>
         <p class="field-hint" style="margin-bottom:16px;">Sæt kryds ved det motorcyklen har. Købere filtrerer på det her — jo flere du udfylder, jo flere søgninger dukker din annonce op i.</p>
         <div id="equipment-groups"></div>
         </details>
@@ -269,18 +299,24 @@ try{
 
       <!-- Step 2: Price, condition, location, description -->
       <section class="form-step" data-step="2" hidden>
-        <h2 style="margin-bottom:16px;">Pris & beskrivelse</h2>
-        <div class="form-grid cols-2">
+        <header class="op-sec-head">
+          <div>
+            <h2><span class="op-num">2.</span> Pris og beskrivelse</h2>
+            <p class="op-sec-sub">Sæt en pris, fortæl hvor motorcyklen står, og beskriv den ærligt.</p>
+          </div>
+          <p class="op-req-note">Felter markeret med <span class="required-mark" aria-hidden="true">*</span> skal udfyldes</p>
+        </header>
+        <div class="op-grid op-grid-3">
           <div class="field">
-            <label for="f-price">Pris (DKK) <span class="required-mark">*</span></label>
-            <input class="input" id="f-price" type="number" inputmode="numeric" min="0" required>
+            <label for="f-price">Pris <span class="required-mark" aria-hidden="true">*</span></label>
+            <div class="op-unit"><input class="input" id="f-price" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 69900"><span class="op-unit-sfx" aria-hidden="true">kr.</span></div>
           </div>
           <div class="field">
-            <label for="f-condition">Stand <span class="required-mark">*</span></label>
+            <label for="f-condition">Stand <span class="required-mark" aria-hidden="true">*</span></label>
             <select class="input" id="f-condition" required></select>
           </div>
-          <div class="field field-full">
-            <label for="f-postnr">Postnummer eller by <span class="required-mark">*</span></label>
+          <div class="field">
+            <label for="f-postnr">Postnummer eller by <span class="required-mark" aria-hidden="true">*</span></label>
             <div class="combo" id="postnr-combo">
               <input class="input" id="f-postnr" required autocomplete="postal-code"
                      placeholder="F.eks. 2100 eller København"
@@ -289,28 +325,47 @@ try{
               <ul class="combo-list" id="postnr-list" role="listbox" hidden></ul>
             </div>
             <span class="field-hint" id="postnr-hint">Søg blandt alle 1.089 danske postnumre.</span>
-            <span class="field-error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/></svg>Vælg et postnummer fra listen.</span>
             <input type="hidden" id="f-city">
             <input type="hidden" id="f-region">
           </div>
-          <div class="field field-full">
-            <label for="f-desc">Beskrivelse <span class="required-mark">*</span></label>
-            <textarea class="input" id="f-desc" required placeholder="Beskriv stand, historik, evt. ekstraudstyr og servicehistorik..."></textarea>
-            <span class="field-hint">Vær ærlig om stand og eventuelle mangler — det skaber tillid hos køber.</span>
+        </div>
+
+        <div class="op-split op-split-desc">
+          <div class="field">
+            <div class="op-label-row">
+              <label for="f-desc">Beskrivelse <span class="required-mark" aria-hidden="true">*</span></label>
+              <span class="op-counter" id="desc-counter">0/4.000</span>
+            </div>
+            <textarea class="input" id="f-desc" required aria-describedby="desc-hint" placeholder="Beskriv din motorcykel. F.eks. stand, servicehistorik, udstyr og hvorfor du sælger den …"></textarea>
+            <span class="field-hint" id="desc-hint">Vær ærlig om stand og eventuelle mangler — det skaber tillid hos køber.</span>
           </div>
-          <!-- Strukturerer sælgerens EGEN tekst — tilføjer intet, hun ikke selv har
-               skrevet eller tastet ind et andet sted i formularen. Se
-               js/opret-annonce.js strukturerBeskrivelse(). -->
-          <div class="field field-full" id="beskrivelse-assist">
+          <aside class="op-tips" aria-labelledby="tips-besk-h">
+            <span class="op-tips-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>
+            <div>
+              <h3 id="tips-besk-h">En god beskrivelse skaber tillid</h3>
+              <ul>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Beskriv stand og vedligeholdelse</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Nævn relevant udstyr og service</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Vær ærlig og præcis</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Skriv også, hvorfor du sælger</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+        <!-- Strukturerer sælgerens EGEN tekst — tilføjer intet, hun ikke selv har
+             skrevet eller tastet ind et andet sted i formularen. Se
+             js/opret-annonce.js strukturerBeskrivelse(). -->
+        <div class="field" id="beskrivelse-assist">
+          <div>
             <button type="button" class="btn btn-outline btn-sm" id="btn-strukturer">Strukturér min beskrivelse</button>
-            <span class="field-hint" style="display:block; margin-top:6px;">Laver to linjer og en punktliste ud fra det, du selv har skrevet og udfyldt ovenfor — intet digtes med.</span>
-            <div id="beskrivelse-forslag-boks" hidden style="margin-top:12px; border:1px solid var(--color-border); border-radius:var(--radius-sm); padding:16px;">
-              <p class="field-hint" style="margin-bottom:8px;">Forslag — udelukkende det, du selv har skrevet og udfyldt:</p>
-              <pre id="beskrivelse-forslag-tekst" style="white-space:pre-wrap; font-family:inherit; font-size:14px; margin:0 0 12px;"></pre>
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button type="button" class="btn btn-primary btn-sm" id="btn-brug-forslag">Brug denne tekst</button>
-                <button type="button" class="btn btn-ghost btn-sm" id="btn-luk-forslag">Behold min egen</button>
-              </div>
+          </div>
+          <span class="field-hint">Laver to linjer og en punktliste ud fra det, du selv har skrevet og udfyldt ovenfor — intet digtes med.</span>
+          <div id="beskrivelse-forslag-boks" class="op-forslag" hidden>
+            <p class="field-hint" style="margin-bottom:8px;">Forslag — udelukkende det, du selv har skrevet og udfyldt:</p>
+            <pre id="beskrivelse-forslag-tekst"></pre>
+            <div class="op-forslag-actions">
+              <button type="button" class="btn btn-primary btn-sm" id="btn-brug-forslag">Brug denne tekst</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-luk-forslag">Behold min egen</button>
             </div>
           </div>
         </div>
@@ -318,51 +373,58 @@ try{
 
       <!-- Step 3: Photos -->
       <section class="form-step" data-step="3" hidden>
-        <h2 style="margin-bottom:16px;">Billeder</h2>
+        <header class="op-sec-head">
+          <div>
+            <h2><span class="op-num">3.</span> Billeder</h2>
+            <p class="op-sec-sub">Tilføj billeder af din motorcykel. Det første billede er forsidebilledet på kortet.</p>
+          </div>
+          <p class="op-req-note">Op til 12 billeder</p>
+        </header>
         <!-- role/tabindex/aria: zonen var en div med kun en click-lytter, og
              filfeltet er `hidden`, så tastatur og skærmlæser ikke kunne uploade
              overhovedet. js/opret-annonce.js svarer på Enter og mellemrum. -->
+        <div class="op-photos" id="op-photos">
         <div class="upload-zone" id="upload-zone" role="button" tabindex="0" aria-labelledby="upload-titel" aria-describedby="upload-tekst">
           <!-- accept: .heic/.heif står eksplicit ved siden af image/*, fordi
                Windows og Android ofte ikke kender MIME-typen for et
                iPhone-foto. Med image/* alene var filen grå i filvælgeren. -->
           <input type="file" id="photo-input" accept="image/*,.heic,.heif" multiple hidden>
           <div id="upload-icon-mount"></div>
-          <h3 id="upload-titel">Træk billeder herind, eller klik for at vælge</h3>
-          <p id="upload-tekst">Tilføj op til 12 billeder. Det første er forsidebillede — træk for at ombytte, eller vælg ★ for at gøre et billede til forside.</p>
+          <h3 id="upload-titel">Upload billeder</h3>
+          <p id="upload-tekst">Træk og slip billeder her, eller klik for at vælge. Op til 12 billeder — JPG, PNG eller HEIC, maks. 12 MB pr. billede.</p>
         </div>
         <div class="photo-grid" id="photo-grid"></div>
+        </div>
         <!-- Teksten skal være ORDRET den samme som renderPhotoGrid() skriver,
-             ellers skifter linjen under sælgerens øjne, når JS'en lander.
-             Den lød før: "vi viser en illustration som eksempel, indtil du
-             uploader dine egne". Det var usandt — tegningen blev fjernet fra
-             hele sitet, og en annonce uden foto står nu med "Ingen fotos i
-             denne annonce". Løftet fjernede desuden sælgerens eneste grund
-             til at uploade. -->
+             ellers skifter linjen under sælgerens øjne, når JS'en lander. -->
         <p class="field-hint" id="photo-hint" style="margin-top:12px;">Ingen billeder valgt endnu — uden foto står dit kort som "Ingen fotos i denne annonce" i søgningen.</p>
+        <p class="field-hint" style="margin-top:6px;">Det første billede er forsidebilledet — træk for at ombytte, eller vælg ★ for at gøre et billede til forside.</p>
         <p class="field-hint" style="margin-top:6px;">Tip: Undgå billeder hvor nummerplade eller husnummer er tydeligt, hvis du vil beskytte din lokation.</p>
 
         <!-- O1-4: dokumentupload er FJERNET — filerne blev vist i et gitter og
-             derefter smidt vaek ved "Udgiv" (ingen kolonne, ingen upload, ingen
-             visning). En funktion, der lover tillid og leverer et hul. Kommer
-             der en bucket + tabel + visning, kommer feltet igen. -->
+             derefter smidt vaek ved "Udgiv". Kommer der en bucket + tabel +
+             visning, kommer feltet igen. -->
         <p class="field-hint" style="margin-top:24px;">Har du servicehæfte, fakturaer eller synsrapport, så nævn det i beskrivelsen — købere spørger efter det, og du kan vise papirerne ved fremvisningen.</p>
       </section>
 
       <!-- Step 4: Preview -->
       <section class="form-step" data-step="4" hidden>
-        <h2 style="margin-bottom:16px;">Gennemse & udgiv</h2>
+        <header class="op-sec-head">
+          <div>
+            <h2><span class="op-num">4.</span> Gennemse og udgiv</h2>
+            <p class="op-sec-sub">Tjek, at alt er rigtigt, før annoncen går live.</p>
+          </div>
+        </header>
         <div class="preview-note" id="preview-note"></div>
         <!-- Sælgerens egen SEO- og udgivelsesassistent — se js/opret-annonce.js
-             renderSeoAssistent(). Gælder kun egne annoncer; se scoping-noten
-             øverst i filen. -->
+             renderSeoAssistent(). Gælder kun egne annoncer. -->
         <div id="seo-assist-panel"></div>
-        <div class="preview-card-wrap">
+        <div class="preview-card-wrap op-step4-card">
           <div class="listings-grid" id="preview-card-mount" style="grid-template-columns:1fr;"></div>
         </div>
         <div id="preview-details"></div>
         <!-- O1-6: flowet sagde aldrig, hvordan en koeber naar saelgeren. Sig det
-             SANDE foer udgivelsen — ikke bagefter, naar en koeber ikke kom igennem. -->
+             SANDE foer udgivelsen. -->
         <div class="naa-koebere" id="naa-koebere">
           <h3>Sådan når købere dig</h3>
           <ul>
@@ -382,20 +444,36 @@ try{
           <input type="checkbox" id="f-terms" required>
           <label for="f-terms">Jeg bekræfter, at oplysningerne og billederne er retvisende, og at jeg accepterer Bikerbasens <a href="vilkaar.html" target="_blank">vilkår</a> for annoncering.</label>
         </div>
-        <!-- O1-8: "Jeg er ikke en robot" var en almindelig checkbox — ingen
-             udfordring, intet token. Den lignede en kontrol uden at vaere én
-             (samme fejl som et badge uden verificering) og kostede hvert salg
-             et klik. En RIGTIG kontrol (Turnstile, A3) kan komme ind her. -->
       </section>
 
       <div class="form-actions">
         <button type="button" class="btn btn-outline" id="step-back" style="visibility:hidden;"><span id="back-icon"></span>Tilbage</button>
-        <div style="display:flex; gap:12px;">
+        <div class="op-actions-right">
           <button type="button" class="btn btn-ghost" id="save-draft">Gem kladde</button>
           <button type="button" class="btn btn-primary" id="step-next">Fortsæt</button>
         </div>
       </div>
     </form>
+
+    <aside class="op-side" aria-label="Forhåndsvisning og tryghed">
+      <section class="op-card op-preview" aria-labelledby="op-prev-h">
+        <h2 id="op-prev-h">Din annonce</h2>
+        <p class="op-side-sub">Sådan vil din annonce se ud for købere.</p>
+        <div class="op-live-card" id="op-live-card" inert></div>
+        <p class="op-prev-note" id="op-prev-note">Kortet opdateres, mens du udfylder.</p>
+      </section>
+      <section class="op-card op-safe" aria-labelledby="op-safe-h">
+        <h2 id="op-safe-h">Sælg trygt på Bikerbasen</h2>
+        <ul>
+          <li><span class="op-safe-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg></span><span><b>Dit navn vises kun for indloggede</b><small>Udloggede besøgende ser ikke, hvem der sælger.</small></span></li>
+          <li><span class="op-safe-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1.3 1.3 0 0 1 1.4-.3c1 .4 2.2.6 3.3.6.8 0 1.4.6 1.4 1.4V20.4c0 .8-.6 1.4-1.4 1.4C11.5 21.8 2.2 12.5 2.2 4c0-.8.6-1.4 1.4-1.4h3.5c.8 0 1.4.6 1.4 1.4 0 1.2.2 2.3.6 3.3.1.5 0 1-.3 1.4L6.6 10.8Z"/></svg></span><span><b>Telefon kun hvis du slår det til</b><small>Du vælger selv, om dit nummer kan ses — og kun af indloggede.</small></span></li>
+          <li><span class="op-safe-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.4"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="1.4"/><rect x="3.5" y="13" width="7.5" height="7.5" rx="1.4"/><rect x="13" y="13" width="7.5" height="7.5" rx="1.4"/></svg></span><span><b>Side om side med de indekserede</b><small>Din annonce står i samme søgning som annoncerne fra forhandlere og markedspladser.</small></span></li>
+          <li><span class="op-safe-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span><span><b>Skjulte stedsdata fjernes fra fotos</b><small>Vi fjerner EXIF-data, fx GPS-position, når billederne uploades.</small></span></li>
+        </ul>
+        <a class="op-safe-link" href="sikkerhed.html">Sådan sælger du trygt <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+      </section>
+    </aside>
+    </div>
   </div>
 </main>
 
@@ -457,6 +535,7 @@ try{
 <script defer src="js/maaling.js?v=2f44a00a"></script>
 <script defer src="js/backend-bridge.js?v=2f44a00a"></script>
 <script defer src="js/components.js?v=2f44a00a"></script>
+<script defer src="js/opret-validering.js"></script>
 <script defer src="js/opret-annonce.js?v=2f44a00a"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">

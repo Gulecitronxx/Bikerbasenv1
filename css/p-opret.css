@@ -1,0 +1,285 @@
+/* ============================================================
+   Opret annonce — sidespecifik CSS (strøm "opret", billede 4)
+   Prefix .op-  · tokens fra css/styles.css · ingen nye farver.
+   Linkes EFTER styles.css fra opret-annonce.html.
+   ============================================================ */
+
+/* ---------- Hero: foto, tilbage-link, h1, lead, tillidsboks ---------- */
+.op-hero{
+  position:relative; overflow:hidden; isolation:isolate;
+  background: var(--color-dark); color:#fff;
+  padding: var(--space-6) 0 calc(var(--space-8) + var(--space-4));
+}
+.op-hero-media{ position:absolute; inset:0; z-index:-2; }
+.op-hero-photo{ width:100%; height:100%; object-fit:cover; object-position: 68% 40%; display:block; }
+.op-hero::after{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:
+    /* Stoppene følger tekstens højre kant (container-venstre + 640px), ikke en
+       procent af vinduet — samme greb som forsidens hero. */
+    linear-gradient(90deg,
+      var(--color-dark) 0%,
+      color-mix(in srgb, var(--color-dark) 86%, transparent) 34%,
+      color-mix(in srgb, var(--color-dark) 66%, transparent) max(740px, 60%),
+      transparent calc(max(740px, 60%) + 230px)),
+    linear-gradient(0deg, color-mix(in srgb, var(--color-dark) 55%, transparent) 0%, transparent 40%);
+}
+.op-hero-inner{ display:grid; grid-template-columns: 1fr; gap: var(--space-5); align-items:start; }
+@media (min-width:900px){ .op-hero-inner{ grid-template-columns: minmax(0,1fr) 340px; gap: var(--space-6); } }
+.op-hero-text{ max-width: 640px; }
+.op-back{
+  display:inline-flex; align-items:center; gap:6px; min-height:44px;
+  color:#fff; font-size:14px; font-weight:500; text-decoration:none;
+  text-shadow: 0 1px 10px rgba(0,0,0,.5);
+}
+.op-back svg{ width:16px; height:16px; }
+.op-back:hover{ text-decoration:underline; }
+.op-hero h1{
+  font-size: clamp(34px, 6vw, 56px); line-height:1.04; font-weight:700; letter-spacing:-.02em;
+  margin: var(--space-2) 0 var(--space-3); text-shadow: 0 2px 28px rgba(0,0,0,.45); color:#fff;
+}
+.op-hero-lead{ font-size: clamp(16px, 2vw, 19px); color:#F2EEE7; max-width:560px; margin:0; text-shadow: 0 1px 14px rgba(0,0,0,.55); }
+
+.op-trust{
+  list-style:none; margin:0; padding: var(--space-4);
+  background: var(--color-surface); color: var(--color-fg);
+  border:1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+  display:flex; flex-direction:column; gap: var(--space-3);
+}
+.op-trust li{ display:flex; align-items:center; gap: var(--space-3); }
+.op-trust-ico{
+  flex:0 0 auto; width:38px; height:38px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  background: var(--color-success-tint); color: var(--color-success);
+}
+.op-trust-ico svg{ width:20px; height:20px; }
+.op-trust b{ display:block; font-size:14px; line-height:1.3; }
+.op-trust small{ display:block; font-size:12.5px; color: var(--color-fg-muted); line-height:1.35; }
+@media (max-width:899px){
+  .op-trust{ flex-direction:row; flex-wrap:wrap; gap: var(--space-3) var(--space-4); padding: var(--space-3) var(--space-4); }
+  .op-trust li{ flex:1 1 220px; }
+}
+@media (max-width:560px){
+  .op-trust small{ display:none; }
+  .op-trust li{ flex-basis:100%; }
+  .op-trust-ico{ width:30px; height:30px; }
+  .op-trust-ico svg{ width:16px; height:16px; }
+}
+
+/* ---------- Trinbjælke: kort der overlapper banneren ---------- */
+.op-wrap{ position:relative; z-index:2; padding-bottom: var(--space-8); }
+.op-stepper-card{
+  margin-top: calc(-1 * var(--space-7));
+  background: var(--color-surface); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+  padding: var(--space-4) var(--space-5);
+}
+.op-page .stepper{ margin:0; overflow:visible; gap: var(--space-3); align-items:center; min-height:44px; }
+.op-page .step-item{ gap: var(--space-3); flex-shrink:1; min-width:0; }
+.op-page .step-dot{ width:40px; height:40px; font-size:16px; font-family: var(--font-display); }
+.op-page .step-dot svg{ width:20px; height:20px; }
+.op-page .step-item:not(.active):not(.done) .step-dot{ background: var(--color-surface-2); }
+.op-page .step-text{ display:flex; flex-direction:column; min-width:0; }
+.op-page .step-label{ font-size:14.5px; font-weight:700; color: var(--color-fg); white-space:nowrap; }
+.op-page .step-item:not(.active) .step-label{ color: var(--color-fg); }
+.op-page .step-sub{ font-size:12.5px; color: var(--color-fg-muted); white-space:nowrap; }
+.op-page .step-line{ flex:1 1 16px; width:auto; min-width:12px; height:2px; background: var(--color-border); }
+@media (max-width:1023px){
+  .op-page .step-sub{ display:none; }
+  .op-page .step-label{ font-size:14px; }
+}
+@media (max-width:700px){
+  .op-stepper-card{ padding: var(--space-3); margin-top: calc(-1 * var(--space-6)); }
+  .op-page .stepper{ gap:6px; }
+  .op-page .step-item:not(.active) .step-text{
+    position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap;
+  }
+  .op-page .step-item.active .step-text{ max-width:96px; }
+  .op-page .step-item.active .step-label{ white-space:normal; line-height:1.15; font-size:13.5px; }
+  .op-page .step-dot{ width:36px; height:36px; font-size:15px; }
+  .op-page .step-line{ min-width:6px; flex-basis:6px; }
+}
+
+/* ---------- To kolonner ---------- */
+.op-layout{ display:grid; grid-template-columns: minmax(0,1fr); gap: var(--space-5); margin-top: var(--space-5); align-items:start; }
+@media (min-width:1024px){ .op-layout{ grid-template-columns: minmax(0,1fr) 340px; } }
+.op-card{
+  background: var(--color-surface); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+@media (max-width:560px){ .op-card{ padding: var(--space-4); } }
+.op-form{ container-type:inline-size; container-name:opform; min-width:0; }
+.op-side{ display:flex; flex-direction:column; gap: var(--space-4); min-width:0; }
+@media (min-width:1024px){ .op-side{ position:sticky; top: calc(var(--header-h) + var(--space-4)); } }
+@media (max-width:1023px){ .op-side{ order:2; } }
+
+/* ---------- Sektionshoved: "1. Motorcyklens detaljer" ---------- */
+.op-sec-head{ display:flex; justify-content:space-between; align-items:flex-start; gap: var(--space-2) var(--space-5); flex-wrap:wrap; margin-bottom: var(--space-5); }
+.op-sec-head h2{ font-size: clamp(22px, 3vw, 28px); line-height:1.15; margin:0; letter-spacing:-.01em; }
+.op-num{ margin-right:2px; }
+.op-sec-sub{ color: var(--color-fg-muted); font-size:15px; margin:6px 0 0; max-width:60ch; }
+.op-req-note{ color: var(--color-fg-muted); font-size:13px; margin:0; padding-top:6px; }
+.op-label-h{ font-size:14px; font-weight:600; margin:0 0 var(--space-2); }
+.op-fold-h{ font-size:17px; margin:16px 0 4px; }
+
+/* ---------- Felter ---------- */
+.op-form .field label{
+  font-size:14px; font-weight:600; letter-spacing:0; text-transform:none; color: var(--color-fg);
+}
+.op-form .field label.checkbox-row{ font-weight:500; }
+.op-form .required-mark{ color: var(--color-danger); font-weight:700; }
+.op-form .input{ background: var(--color-surface); }
+.op-form input[type="number"]{ -moz-appearance:textfield; appearance:textfield; }
+.op-form input[type="number"]::-webkit-outer-spin-button,
+.op-form input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.op-form .field.has-error .input{ border-color: var(--color-danger); }
+.op-form .felt-fejl{ font-weight:500; }
+
+.op-grid{ display:grid; grid-template-columns: minmax(0,1fr); gap: var(--space-4); margin-top: var(--space-5); }
+.op-grid > *{ min-width:0; }
+.op-split .op-grid{ margin-top:0; }
+@container opform (min-width: 280px){
+  .op-grid-2, .op-grid-3, .op-grid-4{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  /* Pris + stand deler række; postnummer (lang pladsholder) får hele rækken. */
+  .op-grid-3 > .field:last-child:nth-child(3){ grid-column: 1 / -1; }
+}
+@container opform (min-width: 640px){
+  .op-grid-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .op-grid-3 > .field:last-child:nth-child(3){ grid-column:auto; }
+}
+@container opform (min-width: 700px){
+  .op-grid-4{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+.op-title-note{ grid-column:1 / -1; margin:0; }
+.op-check-field{ justify-content:flex-end; padding-bottom:6px; }
+
+.op-unit{ position:relative; }
+.op-unit .input{ padding-right:54px; }
+.op-unit-sfx{ position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:13px; color: var(--color-fg-muted); pointer-events:none; }
+
+.op-split{ display:grid; grid-template-columns: minmax(0,1fr); gap: var(--space-4); margin-top: var(--space-5); align-items:start; }
+.op-split > *{ min-width:0; }
+@container opform (min-width: 700px){
+  .op-split{ grid-template-columns: minmax(0,1fr) 270px; gap: var(--space-5); }
+}
+.op-split-desc textarea.input{ min-height:190px; }
+
+.op-label-row{ display:flex; justify-content:space-between; align-items:baseline; gap: var(--space-3); }
+.op-counter{ font-size:12.5px; color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+.op-counter.over{ color: var(--color-danger); font-weight:700; }
+
+/* ---------- Tips-bokse (grøn/lys) ---------- */
+.op-tips{
+  display:flex; gap: var(--space-3); align-items:flex-start;
+  background: var(--color-success-tint);
+  border:1px solid color-mix(in srgb, var(--color-success) 28%, var(--color-border));
+  border-radius: var(--radius-md); padding: var(--space-4);
+  color: var(--color-fg);
+}
+.op-tips-ico{ flex:0 0 auto; color: var(--color-success); display:inline-flex; margin-top:1px; }
+.op-tips-ico svg{ width:24px; height:24px; }
+.op-tips h3{ font-size:14.5px; line-height:1.3; margin:0 0 var(--space-2); }
+.op-tips ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.op-tips li{ display:flex; gap:8px; align-items:flex-start; font-size:13.5px; line-height:1.4; }
+.op-tips li svg{ width:16px; height:16px; flex:0 0 auto; margin-top:2px; color: var(--color-success); }
+
+/* ---------- Strukturér-assistent ---------- */
+#beskrivelse-assist{ margin-top: var(--space-4); gap:8px; }
+.op-forslag{ margin-top:12px; border:1px solid var(--color-border); border-radius: var(--radius-sm); padding:16px; background: var(--color-surface-2); }
+.op-forslag pre{ white-space:pre-wrap; font-family:inherit; font-size:14px; margin:0 0 12px; }
+.op-forslag-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+/* ---------- Billeder ---------- */
+.op-form .upload-zone{
+  border:2px dashed var(--color-input-border); border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  padding: var(--space-6) var(--space-4);
+}
+.op-form .upload-zone:hover, .op-form .upload-zone.dragover{ background: var(--color-primary-tint); border-color: var(--color-primary); }
+.op-form .upload-zone:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:3px; }
+.op-form .upload-zone h3{ font-size:17px; }
+.op-form .upload-zone p{ max-width:56ch; margin:0 auto; }
+.op-form .photo-grid{ grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:12px; margin-top: var(--space-4); }
+.op-form .photo-grid:empty{ display:none; }
+.op-form .photo-thumb{ aspect-ratio: 4/3; border-radius: var(--radius-sm); border:1px solid var(--color-border); }
+.op-form .photo-thumb .cover-tag{
+  top:8px; left:8px; bottom:auto; background:#fff; color:#1C1A18;
+  font-size:11px; font-weight:700; text-transform:none; letter-spacing:0; padding:3px 8px; border-radius:6px; max-width:calc(100% - 46px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.op-form .photo-thumb .cover-tag.new{ background: var(--color-primary); color: var(--color-on-primary); }
+.op-form .photo-thumb .remove-photo{ width:28px; height:28px; top:6px; right:6px; }
+.photo-add{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  aspect-ratio:4/3; border:2px dashed var(--color-input-border); border-radius: var(--radius-sm);
+  background: var(--color-surface); color: var(--color-fg); cursor:pointer;
+  font:inherit; font-size:13px; font-weight:600; padding:8px; text-align:center;
+}
+.photo-add svg{ width:22px; height:22px; }
+.photo-add:hover{ border-color: var(--color-primary); background: var(--color-primary-tint); }
+.photo-add:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
+
+/* ---------- Gennemse (trin 4) ---------- */
+@media (min-width:1024px){ .op-step4-card{ display:none; } }
+.op-form .naa-koebere{ background: var(--color-surface-2); }
+
+/* ---------- Handlinger ---------- */
+.op-actions-right{ display:flex; gap:12px; flex-wrap:wrap; justify-content:flex-end; }
+.op-form .form-actions{ margin-top: var(--space-6); }
+.op-form #step-next{ min-width:132px; }
+
+/* ---------- Sidebjælke: forhåndsvisning + tryghed ---------- */
+.op-side h2{ font-size:20px; line-height:1.2; margin:0; }
+.op-side-sub{ color: var(--color-fg-muted); font-size:14px; margin:4px 0 var(--space-4); }
+.op-live-card{ pointer-events:none; }
+.op-live-card .card{ transform:none !important; box-shadow: var(--shadow-sm); }
+.op-live-card .card:hover{ transform:none; }
+.op-prev-note{ font-size:12.5px; color: var(--color-fg-muted); margin:var(--space-3) 0 0; }
+.op-safe h2{ margin-bottom: var(--space-4); }
+.op-safe ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap: var(--space-4); }
+.op-safe li{ display:flex; gap: var(--space-3); align-items:flex-start; }
+.op-safe-ico{
+  flex:0 0 auto; width:38px; height:38px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  background: var(--color-success-tint); color: var(--color-success);
+}
+.op-safe-ico svg{ width:20px; height:20px; }
+.op-safe b{ display:block; font-size:14.5px; line-height:1.3; }
+.op-safe small{ display:block; font-size:13px; color: var(--color-fg-muted); line-height:1.4; margin-top:2px; }
+.op-safe-link{
+  display:inline-flex; align-items:center; gap:6px; margin-top: var(--space-4); min-height:44px;
+  font-weight:600; font-size:14px; color: var(--color-primary); text-decoration:none;
+}
+.op-safe-link:hover{ text-decoration:underline; }
+.op-safe-link svg{ width:16px; height:16px; }
+:root[data-theme="light"] .op-safe-link{ color: var(--color-primary-hover); }
+
+/* Mørk tilstand: tillidsboksen og tips-boksene følger tokens; kun skygge justeres. */
+:root[data-theme="dark"] .op-trust{ box-shadow: 0 8px 28px rgba(0,0,0,.55); }
+@media (prefers-reduced-motion: reduce){
+  .photo-add, .op-form .upload-zone{ transition:none; }
+}
+
+/* Typefliser: lavere foto, så otte fliser ikke æder formularen (billede 4 har ingen). */
+.op-form .radio-card .radio-card-media{ aspect-ratio: 16/9; }
+@media (max-width:480px){ .op-form #type-radio-group .radio-card-media{ aspect-ratio:2/1; } }
+
+/* Smal skærm: teksten ligger over hele fotoet (også motorcyklens lyse felt) — jævnt mørkt lag. */
+@media (max-width:899px){
+  .op-hero::after{
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-dark) 74%, transparent) 0%,
+      color-mix(in srgb, var(--color-dark) 84%, transparent) 100%);
+  }
+}
+
+/* Billeder (billede 4): dropzone og miniaturer i samme række, når der er billeder. */
+.op-photos{ display:grid; grid-template-columns: minmax(0,1fr); gap: var(--space-4); align-items:stretch; }
+.op-photos .photo-grid{ margin-top:0; }
+@container opform (min-width: 700px){
+  .op-photos.has-photos{ grid-template-columns: 210px minmax(0,1fr); }
+  .op-photos.has-photos .upload-zone{ display:flex; flex-direction:column; justify-content:center; padding: var(--space-4); }
+  .op-photos.has-photos .upload-zone p{ font-size:12px; }
+  .op-photos.has-photos .photo-grid{ align-content:start; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
