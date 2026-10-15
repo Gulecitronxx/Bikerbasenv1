@@ -149,13 +149,29 @@ const Filtrering = (() => {
      lægges sammen uden dobbelttælling. Byt om på to led, og totalen står
      stadig, men fordelingen på feltnavne skifter — og feltnavnene er
      præcis dét, begge sider skriver ud i deres forklaringslinje. */
+  const SOEGE_ALIAS = { hd: 'harleydavidson' };
+  function soegeNoegle(s){
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9æøå]+/g, '');
+  }
+  function soegeOrd(q){
+    return String(q || '').trim().split(/\s+/).map(soegeNoegle).filter(Boolean).map(o => SOEGE_ALIAS[o] || o);
+  }
   function anvendFiltre(alle, filtre, spring, opsamler){
     const state = { ...TOMT_FILTER, ...(filtre || {}) };
     let list = alle;
     const brug = (navn) => navn !== spring;
 
-    const q = state.q.trim().toLowerCase();
-    if (brug('q') && q) list = list.filter(l => `${l.brand} ${l.model}`.toLowerCase().includes(q));
+    // F-001: "goldwing", "cb500", "mt09", "harley davidson", "tenere" skal finde motorcyklen,
+    // selv om annoncen staar som "Gold Wing", "CB 500", "MT-09", "Harley-Davidson", "Ténéré".
+    // Begge sider normaliseres (smaa bogstaver, uden accenter, uden mellemrum/tegn); hvert ord
+    // i soegningen skal findes i mærke+model (OG).
+    const ord = soegeOrd(state.q);
+    if (brug('q') && ord.length){
+      list = list.filter(l => {
+        const hø = soegeNoegle(`${l.brand} ${l.model}`);
+        return ord.every(o => hø.includes(o));
+      });
+    }
 
     // Mærke, model og titel kender vi altid — de kommer med annoncen fra kilden.
     if (brug('brands') && state.brands.length) list = list.filter(l => state.brands.includes(l.brand));
