@@ -1,0 +1,211 @@
+/* Login / opret konto (referencebillede 6). Kun denne side bruger filen.
+   Prefix .lg- — ingen nye farver eller knapper: .btn, .input, .field,
+   .link-btn og tokens fra styles.css genbruges. */
+
+/* ---------- Tilstand: log ind / opret ----------
+   login.html sætter data-authtab="register" på <html> i første chunk, når
+   man kommer fra opret-annonce (ingen layoutspring). js/login.js tager
+   over med data-lgmode, så snart brugeren selv vælger. */
+.lg-only-register{ display:none; }
+html[data-authtab="register"] .lg-only-register,
+html[data-lgmode="register"] .lg-only-register{ display:revert; }
+html[data-authtab="register"] .lg-only-login,
+html[data-lgmode="register"] .lg-only-login{ display:none; }
+
+/* ---------- Scene: fuldbredde foto + kort + bundstrimmel ---------- */
+.lg-main{
+  position:relative; isolation:isolate;
+  display:flex; flex-direction:column;
+  min-height: calc(100dvh - var(--header-h));
+  overflow:hidden; margin-bottom: calc(var(--space-9) * -1); /* footer har margin-top: space-9 */
+  background: var(--color-dark);
+}
+.lg-bg{ position:absolute; inset:0; z-index:-1; }
+.lg-bg-photo{ width:100%; height:100%; object-fit:cover; object-position: 78% 62%; display:block; }
+.lg-bg::after{
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(20,16,12,.34) 0%, rgba(20,16,12,.12) 45%, rgba(20,16,12,.38) 100%);
+}
+:root[data-theme="dark"] .lg-bg::after{ background: rgba(10,8,6,.55); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .lg-bg::after{ background: rgba(10,8,6,.55); }
+}
+
+.lg-stage{
+  flex:1; display:flex; align-items:center; justify-content:center;
+  padding: var(--space-7) var(--space-5);
+}
+
+/* ---------- Kortet: to halvdele ---------- */
+.lg-card{
+  width:100%; max-width:1240px;
+  display:grid; grid-template-columns:minmax(0,1fr);
+  border-radius: var(--radius-lg); overflow:hidden;
+  box-shadow: var(--shadow-lg);
+  background: var(--color-surface);
+}
+.lg-pane{ min-width:0; }
+.lg-form-pane{ padding: var(--space-6) var(--space-5); background: var(--color-surface); display:flex; flex-direction:column; justify-content:center; }
+
+.lg-head h1{
+  font-size: clamp(28px, 7vw, 40px); line-height:1.1; letter-spacing:-.02em;
+}
+.lg-head p{ color: var(--color-fg-muted); font-size:16px; line-height:1.5; margin-top:12px; min-height:0; }
+.lg-head{ margin-bottom: var(--space-6); }
+#auth-subtitle{ min-height:0; }
+
+.auth-error{ margin: calc(var(--space-3) * -1) 0 var(--space-5); }
+
+.lg-fields{ display:grid; gap: var(--space-5); }
+.lg-card .field{ gap:8px; }
+.lg-card .field label{ font-size:14px; font-weight:600; text-transform:none; letter-spacing:0; color: var(--color-fg); }
+.lg-card .input{ font-size:16px; min-height:52px; padding:12px 14px; } /* 16px: ingen iOS-zoom */
+.lg-card .field-hint{ font-size:13px; }
+
+.lg-input{ position:relative; }
+.lg-input .input{ padding-left:46px; padding-right:50px; }
+.lg-input.lg-input-plain .input{ padding-left:14px; }
+.lg-ic{
+  position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  width:20px; height:20px; color: var(--color-fg-muted); pointer-events:none;
+}
+.lg-eye{
+  position:absolute; right:4px; top:50%; transform:translateY(-50%);
+  width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center;
+  background:none; border:none; border-radius: var(--radius-sm); cursor:pointer;
+  color: var(--color-fg-muted);
+}
+.lg-eye:hover{ color: var(--color-fg); }
+.lg-eye svg{ width:22px; height:22px; }
+
+.lg-forgot{ align-self:flex-end; font-size:14px; font-weight:500; min-height:24px; }
+
+.lg-cta{
+  margin-top: var(--space-6); min-height:56px; font-size:18px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.lg-arrow{ display:inline-flex; width:20px; height:20px; flex-shrink:0; }
+.lg-arrow svg{ width:20px; height:20px; }
+.lg-back{ display:block; margin: var(--space-4) auto 0; font-weight:500; }
+
+.lg-step-title{ font-size:26px; letter-spacing:-.01em; margin-bottom:8px; }
+.lg-step-text{ color: var(--color-fg-muted); font-size:15px; margin-bottom: var(--space-5); line-height:1.5; }
+#verify-step .lg-cta{ margin-top: var(--space-5); }
+
+.lg-extras{ margin-top: var(--space-6); }
+.lg-switch{ text-align:center; font-size:15px; color: var(--color-fg); }
+.lg-switch-btn{ display:inline-flex; align-items:center; gap:6px; text-decoration:none; font-size:15px; font-weight:700; min-height:32px; vertical-align:middle; }
+.lg-switch-btn:hover{ text-decoration:underline; }
+.lg-legal{ text-align:center; font-size:12.5px; color: var(--color-fg-muted); margin-top: var(--space-4); }
+.lg-legal a{ text-decoration:underline; text-underline-offset:2px; }
+
+/* ---------- Højre halvdel: fordele ---------- */
+.lg-promo{
+  position:relative; padding: var(--space-6) var(--space-5) var(--space-7);
+  background: var(--color-surface-2);
+  border-top:1px solid var(--color-border);
+}
+.lg-pill{
+  display:inline-block; padding:7px 14px; border-radius: var(--radius-pill);
+  background: var(--color-primary-tint); color: var(--color-primary-hover);
+  font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+}
+.lg-promo h2{ font-size: clamp(28px, 7vw, 40px); line-height:1.08; letter-spacing:-.02em; margin-top: var(--space-4); max-width:14em; }
+.lg-promo-lead{ color: var(--color-fg-muted); font-size:17px; line-height:1.5; margin-top: var(--space-3); max-width:30em; }
+.lg-benefits{ list-style:none; display:grid; gap: var(--space-5); margin: var(--space-6) 0; max-width:30em; }
+.lg-benefits li{ display:flex; gap: var(--space-4); align-items:flex-start; }
+.lg-bi{
+  flex-shrink:0; width:52px; height:52px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  background: var(--color-primary-tint); color: var(--color-primary);
+}
+.lg-bi svg{ width:24px; height:24px; }
+.lg-benefits strong{ display:block; font-size:17px; line-height:1.3; }
+.lg-benefits li span:not(.lg-bi){ display:block; color: var(--color-fg-muted); font-size:15px; line-height:1.45; margin-top:2px; }
+.lg-promo-cta{
+  display:flex; width:100%; max-width:380px; min-height:56px; font-size:18px; font-weight:700;
+  align-items:center; justify-content:center; gap:10px;
+}
+.lg-member{ max-width:380px; text-align:center; margin-top: var(--space-4); font-size:15px; }
+.lg-member .link-btn{ text-decoration:none; font-weight:700; }
+.lg-member .link-btn:hover{ text-decoration:underline; }
+
+/* ---------- Bundstrimmel ---------- */
+.lg-strip{ background: var(--color-surface); border-top:1px solid var(--color-border); position:relative; }
+.lg-strip-list{
+  list-style:none; margin:0 auto; max-width:1240px;
+  display:grid; grid-template-columns:minmax(0,1fr); padding: var(--space-3) var(--space-5);
+}
+.lg-strip-list li{ display:flex; gap: var(--space-4); align-items:center; padding: var(--space-3) 0; }
+.lg-strip-list li + li{ border-top:1px solid var(--color-border); }
+.lg-si{ flex-shrink:0; width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; color: var(--color-primary); }
+.lg-si svg{ width:32px; height:32px; }
+.lg-strip-list strong{ display:block; font-family: var(--font-display); font-size:16px; line-height:1.3; }
+.lg-strip-list li span:not(.lg-si){ display:block; color: var(--color-fg-muted); font-size:14px; line-height:1.4; }
+
+/* ---------- Tablet: strimlen i 2x2 ---------- */
+@media (min-width:640px){
+  .lg-form-pane, .lg-promo{ padding: var(--space-7) var(--space-7); }
+  .lg-strip-list{ grid-template-columns:repeat(2,minmax(0,1fr)); column-gap: var(--space-6); }
+  .lg-strip-list li + li{ border-top:none; }
+  .lg-strip-list li:nth-child(n+3){ border-top:1px solid var(--color-border); }
+}
+
+/* ---------- Desktop: to halvdele som billede 6 ---------- */
+@media (min-width:960px){
+  .lg-stage{ padding: var(--space-8) var(--space-6); }
+  .lg-card{
+    grid-template-columns: minmax(0,5fr) minmax(0,7fr);
+    background:transparent;
+  }
+  .lg-form-pane{ padding: 56px 56px 44px; }
+  /* Højre halvdel: fladen fader ud mod fotoet, så motorcyklen står frit
+     i kortets højre side (samme greb som billedet). */
+  .lg-promo{
+    padding: 48px 48px 44px;
+    border-top:none;
+    background: linear-gradient(90deg,
+      var(--color-surface-2) 0%,
+      var(--color-surface-2) 64%,
+      color-mix(in srgb, var(--color-surface-2) 55%, transparent) 84%,
+      color-mix(in srgb, var(--color-surface-2) 0%, transparent) 100%);
+  }
+  .lg-promo > *{ max-width:430px; }
+  .lg-promo > .lg-benefits{ max-width:430px; }
+  .lg-strip-list{ grid-template-columns:repeat(4,minmax(0,1fr)); column-gap:0; padding: var(--space-5) var(--space-6); }
+  .lg-strip-list li{ padding: var(--space-2) var(--space-5); }
+  .lg-strip-list li + li, .lg-strip-list li:nth-child(n+3){ border-top:none; }
+  .lg-strip-list li + li{ border-left:1px solid var(--color-border); }
+  .lg-strip-list li:first-child{ padding-left:0; }
+}
+/* Fotoet flyttes ud over højre kant, så motorcyklen står i kortets højre side
+   og ikke bag teksten. */
+@media (min-width:960px){
+  .lg-bg-photo{ position:absolute; top:0; bottom:0; left:auto; right:-30%; width:130%; max-width:none; height:100%; object-position:100% 72%; }
+}
+/* Smalle skærme: teksten fylder mere af halvdelen — fladen holdes helt uden
+   om teksten (AA-kontrast), og kun den yderste kant fader. */
+@media (min-width:960px) and (max-width:1279px){
+  .lg-promo{
+    background: linear-gradient(90deg,
+      var(--color-surface-2) 0%,
+      var(--color-surface-2) 92%,
+      color-mix(in srgb, var(--color-surface-2) 70%, transparent) 100%);
+  }
+}
+@media (min-width:1280px){
+  .lg-form-pane{ padding: 64px 64px 48px; }
+  .lg-promo{ padding: 56px 64px 48px; }
+}
+
+@media (prefers-reduced-motion: reduce){ .lg-card *{ transition:none !important; } }
+
+/* ---------- afmeld.html (samme scene, kun ét kort) ---------- */
+.lg-solo{ width:100%; max-width:620px; background: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: var(--space-6); }
+.lg-solo h1{ font-size: clamp(24px, 6vw, 30px); letter-spacing:-.02em; margin-bottom: var(--space-3); }
+.lg-solo p{ color: var(--color-fg-muted); }
+.lg-solo-actions{ margin-top: var(--space-5); display:flex; gap: var(--space-3); flex-wrap:wrap; }
+.lg-solo-actions[hidden]{ display:none; }
+
+/* afmeld.html har ingen footer, så ingen margin at udligne. */
+body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
