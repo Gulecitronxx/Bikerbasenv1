@@ -1,5 +1,25 @@
 # Bikerbasen — Design DNA
 
+## ⚠ DESIGN PRIORITY OVERRIDE (15.10.2026, ejeren) — gælder FØR resten af dokumentet
+
+De 10 billeder i `C:\Users\pasca\Desktop\Bikerbasen billeder` er nu det **primære visuelle og strukturelle mål**, ikke løs inspiration.
+Ved konflikt mellem nuværende layout og billedets layout **vælges billedets**, medmindre der er stærk teknisk, UX- eller forretningsmæssig grund.
+
+**Billede → sidefamilie** (filnavnenes endelse -1…-10): 1 Forside · 2 Søgeresultater · 3 Annoncedetalje · 4 Opret annonce · 5 Mine annoncer/profil · 6 Login/opret konto · 7 Kørekort A2 · 8 Typeside (Sport) · 9 Mærkeside (Yamaha) · 10 Guide/artikel.
+Prioriteret rækkefølge: Forside → Søgning → Annonce → Kørekort → Mærke → Type → Guide → Opret annonce → Login → Profil.
+
+**Tages fra billederne (så tæt som muligt):** sidekomposition og sektionsrækkefølge · hero med foto + overlappende søgekort + 4-ikon tillidsrække · mere informative annoncekort (kørekortbadge, ccm/hk/kg-chips, sted, kildetype) · typefliser med foto og antal · "Sådan virker Bikerbasen" · CTA-panel ved siden af annoncerækken · populære mærker / kørekort / region som tre kolonner · filtersidebar + aktive filter-chips + sortering + grid/liste · annoncedetalje med galleri, faktatabel, sælgerboks, "Kan du køre denne?", "Det bør du tjekke", lignende · trinbaseret opret-annonce med live-forhåndsvisning og tips-bokse · login/opret to-kolonne · dashboard med statkort og annonceliste · guide med indholdsfortegnelse og "Kort fortalt".
+Hvid/lys sidekrop, hvid topbar, kort med rolig skygge og runde hjørner, grønne ✓ til positive punkter.
+
+**Bevares (brandet):** navn "Bikerbasen" + logo · tone (ærlig, dansk, ingen overdrivelser) · domæne/indhold/data/funktion · den orange/kobber **brandfarve som primær CTA-farve** (billedernes grønne CTA erstattes af brandfarven; grøn kun til ✓/verificeret) · både lys og mørk tilstand skal virke (lys er målet at ligne billederne mest) · de juridiske regler i `CLAUDE.md`.
+
+**Stadig forbudt at kopiere fra billederne (opdigtet):** konkrete tal ("12.842", "120.000+", "3x flere"), anmeldelser/stjerner, "svartid", "autoriseret forhandler", Google/Facebook/Apple-login, beskeder, visningstal/+24 %, fiktive specs, AI-fotos som annoncebilleder. Moduler uden ægte data **udelades eller bygges som ærlig version** (fx tal beregnes fra lageret). Ingen billedgallerier/kontaktdata fra kilder.
+
+**Critic spørger nu også:** "Matcher dette tydeligt billedets opsætning?" · "Er vi tæt nok på billedets struktur?" · "Er vi stadig for tæt på det gamle site, hvor vi burde have været mere modige?"
+
+---
+(Resten er det oprindelige DNA; hvor det modsiger overriden, gælder overriden.)
+
 Autoritativ kilde: den kørende side (`css/styles.css` tokens, `index.html`, `js/components.js`).
 Dette dokument er designreferencen for Builder og Critic. Kort med vilje.
 
