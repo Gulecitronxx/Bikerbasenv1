@@ -33,7 +33,7 @@ async function hentStatistik(){
   if (!db.enabled) return;
 
   const [{ data: raekker }, { data: gemte }] = await Promise.all([
-    db.myListingStats(DASH_DAYS),
+    db.myListingStats(DASH_DAYS * 2),   // 60 dage: de seneste 30 + de 30 før
     db.myListingSaves(),
   ]);
 
@@ -62,6 +62,27 @@ function statsForListing(listing){
   const views = series.reduce((s, n) => s + n, 0);
   const inquiries = dashDays().reduce((s, d) => s + (perDag.get(d)?.contacts || 0), 0);
   return { series, views, inquiries, saves: SAVES_BY_LISTING.get(listing.id) || 0 };
+}
+
+/* Visninger i de 30 dage FØR det viste vindue (dag 31-60 tilbage). */
+function visningerForrige(listings){
+  const nu = Date.now();
+  let sum = 0;
+  listings.forEach(l => {
+    const perDag = STATS_BY_LISTING.get(l.id);
+    if (!perDag) return;
+    for (let i = DASH_DAYS; i < DASH_DAYS * 2; i++){
+      sum += perDag.get(new Date(nu - i * 86400000).toISOString().slice(0, 10))?.views || 0;
+    }
+  });
+  return sum;
+}
+
+/* Ændring i procent mod forrige periode — null når der ikke er noget at
+   sammenligne med (så vises intet i stedet for et gæt). */
+function visningerAendring(nu, forrige){
+  if (!forrige) return null;
+  return Math.round(((nu - forrige) / forrige) * 100);
 }
 
 function sumSeries(all){
@@ -207,10 +228,11 @@ function sparklineSVG(series){
 function kpiTile(label, value, opts){
   opts = opts || {};
   const delta = opts.delta;
-  const deltaHTML = (delta == null) ? '' : `
-    <span class="kpi-delta ${delta >= 0 ? 'up' : 'down'}">
-      ${delta >= 0 ? Icon.arrowUp : Icon.arrowDown}${Math.abs(delta)}%<span class="kpi-delta-period">vs. forrige 30 dage</span>
-    </span>`;
+  const deltaHTML = (delta == null) ? '' : (delta === 0 ? `
+    <span class="kpi-delta"><span class="kpi-delta-period">Uændret vs. forrige 30 dage</span></span>` : `
+    <span class="kpi-delta ${delta > 0 ? 'up' : 'down'}">
+      ${delta > 0 ? Icon.arrowUp : Icon.arrowDown}${Math.abs(delta)}%<span class="kpi-delta-period">vs. forrige 30 dage</span>
+    </span>`);
   const subHTML = opts.sub ? `<span class="db-stat-sub">${opts.sub}</span>` : '';
   return `
   <article class="db-stat">
@@ -447,9 +469,11 @@ function renderKravResults(rows, soegt){
 }
 
 let AKTUEL_KRAV_ANNONCE = null;
+let KRAV_FOKUS_TILBAGE = null;
 
 function aabnKravDialog(row){
   AKTUEL_KRAV_ANNONCE = row;
+  KRAV_FOKUS_TILBAGE = document.activeElement;
   document.getElementById('krav-dialog-annonce').textContent =
     `${row.titel}${row.by ? ' · ' + row.by : ''} · ${eksternKildeNavn(row)}`;
   document.getElementById('krav-dialog-doku').value = '';
@@ -460,6 +484,8 @@ function aabnKravDialog(row){
 function lukKravDialog(){
   document.getElementById('krav-dialog').classList.remove('open');
   AKTUEL_KRAV_ANNONCE = null;
+  if (KRAV_FOKUS_TILBAGE && KRAV_FOKUS_TILBAGE.focus) KRAV_FOKUS_TILBAGE.focus();
+  KRAV_FOKUS_TILBAGE = null;
 }
 
 function wireKravUI(){
@@ -479,7 +505,15 @@ function wireKravUI(){
   document.getElementById('krav-dialog-cancel').addEventListener('click', lukKravDialog);
   dialog.addEventListener('click', (e) => { if (e.target === dialog) lukKravDialog(); });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && dialog.classList.contains('open')) lukKravDialog();
+    if (!dialog.classList.contains('open')) return;
+    if (e.key === 'Escape'){ lukKravDialog(); return; }
+    if (e.key !== 'Tab') return;
+    // Fokusfælde: Tab bliver inde i dialogen.
+    const felter = [...dialog.querySelectorAll('button, textarea, input, select, a[href]')].filter(el => !el.disabled && el.offsetParent !== null);
+    if (!felter.length) return;
+    const foerst = felter[0], sidst = felter[felter.length - 1];
+    if (e.shiftKey && document.activeElement === foerst){ e.preventDefault(); sidst.focus(); }
+    else if (!e.shiftKey && document.activeElement === sidst){ e.preventDefault(); foerst.focus(); }
   });
 
   document.getElementById('krav-dialog-form').addEventListener('submit', async (e) => {
@@ -516,9 +550,7 @@ function renderDashboard(user){
   const totalInquiries = stats.reduce((s, x) => s + x.inquiries, 0);
   const totalSaves = stats.reduce((s, x) => s + x.saves, 0);
 
-  const firstHalf = totalSeries.slice(0, 15).reduce((s, n) => s + n, 0);
-  const secondHalf = totalSeries.slice(15).reduce((s, n) => s + n, 0);
-  const viewsDelta = firstHalf ? Math.round(((secondHalf - firstHalf) / firstHalf) * 100) : 0;
+  const viewsDelta = visningerAendring(totalViews, visningerForrige(mine));
 
   const avgRating = Store.getAverageRating(user.name, null);
   const reviewCount = Store.getReviews(user.name).length;
@@ -658,7 +690,17 @@ function setDashTab(tab, { fokus = false } = {}){
   history.replaceState(null, '', window.location.pathname + '?' + p.toString());
 }
 
+function wireTabFade(){
+  const rk = document.querySelector('.db-tabs');
+  if (!rk) return;
+  const opd = () => rk.classList.toggle('at-end', rk.scrollLeft + rk.clientWidth >= rk.scrollWidth - 4);
+  rk.addEventListener('scroll', opd, { passive: true });
+  window.addEventListener('resize', opd);
+  opd();
+}
+
 function wireDashTabs(){
+  wireTabFade();
   const faner = [...document.querySelectorAll('[data-dtab]')];
   faner.forEach((btn, i) => {
     btn.addEventListener('click', () => setDashTab(btn.dataset.dtab));
@@ -710,5 +752,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   wireKravUI();
   wireDashTabs();
   renderDashboard(user);
-  setDashTab(new URLSearchParams(window.location.search).get('tab') || 'oversigt');
+  // Gamle bogmærker: #krav-panel / #ekstern-panel åbner fanen Krav.
+  const anker = window.location.hash;
+  const start = (anker === '#krav-panel' || anker === '#ekstern-panel') ? 'krav' : (new URLSearchParams(window.location.search).get('tab') || 'oversigt');
+  setDashTab(start);
+  if (start === 'krav' && anker) document.querySelector(anker)?.scrollIntoView();
 });

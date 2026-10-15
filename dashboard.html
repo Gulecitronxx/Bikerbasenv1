@@ -290,9 +290,9 @@ try{
      .modal-overlay/.modal-box fra js/components.js' anmeld-modal — samme
      mønster, ikke en ny dialogkomponent for én formular. -->
 <div class="modal-overlay" id="krav-dialog">
-  <div class="modal-box">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="krav-dialog-titel">
     <div class="modal-head">
-      <h2>Gør krav på denne annonce</h2>
+      <h2 id="krav-dialog-titel">Gør krav på denne annonce</h2>
       <button type="button" class="icon-btn" id="krav-dialog-close" aria-label="Luk"><span data-icon="close"></span></button>
     </div>
     <p id="krav-dialog-annonce" style="color:var(--color-fg-muted); font-size:14px; margin-bottom:16px;"></p>

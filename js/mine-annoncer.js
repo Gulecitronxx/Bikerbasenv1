@@ -9,6 +9,7 @@
 const DB_IKON = {
   logout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5H6.5A2 2 0 0 0 4.5 6.5v11a2 2 0 0 0 2 2H9"/><path d="M15 8l4 4-4 4M19 12H9.5"/></svg>',
   pause: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6v12M15 6v12"/></svg>',
+  dots: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="18.5" r="1.8"/></svg>',
   play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg>',
 };
 function dbIkon(navn){ return DB_IKON[navn] || (typeof Icon !== 'undefined' && Icon[navn]) || ''; }
@@ -96,12 +97,16 @@ function setCount(id, n){
    annonceliste kun indeholder aktive — en annonce på pause ville ellers
    forsvinde fra "Mine annoncer", så ejeren ikke kunne aktivere den igen. */
 let EGNE_ALLE = null;
+let EGNE_FEJL = false;
 
 async function hentEgneAlle(){
   const bruger = Store.getUser();
+  EGNE_FEJL = false;
   if (!bruger?.remote || typeof db === 'undefined' || !db.enabled){ EGNE_ALLE = null; return; }
   const { data, error } = await db.myListings();
-  if (error || !Array.isArray(data)){ EGNE_ALLE = null; return; }
+  /* Fejler hentningen, falder siden tilbage til de aktive annoncer — men siger
+     det højt (se #mine-error), så pausede og solgte ikke forsvinder tavst. */
+  if (error || !Array.isArray(data)){ EGNE_ALLE = null; EGNE_FEJL = true; return; }
   const lokale = Store.getLocalListings();
   EGNE_ALLE = [...data.map(r => Object.assign(normalizeRemoteListing(r), { status: r.status })), ...lokale];
 }
@@ -148,7 +153,14 @@ function ownRowHTML(l){
     <div class="db-actions">
       ${kanRedigere ? `<a class="btn btn-outline btn-sm" href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}">${Icon.edit}Rediger</a>` : ''}
       ${kanSkifte ? `<button type="button" class="btn btn-outline btn-sm" data-status-skift="${l.id}">${dbIkon(naeste.ikon)}${naeste.knap}</button>` : ''}
-      <button type="button" class="btn btn-outline btn-sm db-danger" data-delete-listing="${l.id}" aria-label="Slet annonce: ${brand} ${model}">${Icon.trash}<span class="db-lbl">Slet</span></button>
+      <details class="db-more">
+        <summary class="db-icon-btn" aria-label="Flere handlinger: ${brand} ${model}">${DB_IKON.dots}</summary>
+        <div class="db-more-menu">
+          <a href="${url}">${Icon.eye}Se annonce</a>
+          <button type="button" data-copy-link="${url}">${Icon.share}Kopiér link</button>
+          <button type="button" class="db-danger" data-delete-listing="${l.id}">${Icon.trash}Slet annonce</button>
+        </div>
+      </details>
     </div>
   </article>`;
 }
@@ -190,32 +202,52 @@ function favRowHTML(l){
   </article>`;
 }
 
-/* "X visninger · Y henvendelser (30 dage)" — ægte tal fra listing_stats (ejer-RLS).
-   Fejler kaldet, står der ingenting; aldrig et gættet nul. */
+/* Visninger og favoritter (30 dage) som kolonner pr. aktiv annonce — kun når
+   kaldene lykkes (listing_stats + my_listing_saves, ejer-RLS). Et tal uden data
+   er et rigtigt nul; fejler kaldet, står der intet. */
 async function visAnnonceStatistik(grid){
   if (typeof db === 'undefined' || !db.enabled || !Store.getUser()?.remote) return;
-  const { data, error } = await db.myListingStats(30);
-  if (error || !data) return;
+  const [st, sv] = await Promise.all([db.myListingStats(30), db.myListingSaves()]);
+  if (st.error || !st.data) return;
   const sum = new Map();
-  for (const r of data){
+  for (const r of st.data){
     const s = sum.get(r.listing_id) || { views: 0, contacts: 0 };
     s.views += r.views || 0; s.contacts += r.contacts || 0;
     sum.set(r.listing_id, s);
   }
+  const gemt = new Map();
+  if (!sv.error && Array.isArray(sv.data)) sv.data.forEach(r => gemt.set(r.listing, Number(r.saves) || 0));
+  const harGemt = !sv.error && Array.isArray(sv.data);
   grid.querySelectorAll('.db-row[data-listing-id]').forEach(row => {
-    const s = sum.get(row.dataset.listingId);
-    if (!s) return;
-    const linje = document.createElement('span');
-    linje.className = 'db-when db-stats-line';
-    linje.innerHTML = `${Icon.eye}<span>${s.views} ${s.views === 1 ? 'visning' : 'visninger'} · ${s.contacts} ${s.contacts === 1 ? 'henvendelse' : 'henvendelser'}<small>seneste 30 dage</small></span>`;
-    row.querySelector('.db-status')?.appendChild(linje);
+    if (row.dataset.status !== 'active' || !isUuid(row.dataset.listingId)) return;
+    const s = sum.get(row.dataset.listingId) || { views: 0, contacts: 0 };
+    const kol = (n, t) => `<span class="db-num"><b>${n.toLocaleString('da-DK')}</b>${t}</span>`;
+    const blok = document.createElement('div');
+    blok.className = 'db-nums db-nums-row';
+    blok.title = 'Seneste 30 dage';
+    blok.innerHTML = kol(s.views, 'Visninger') + (harGemt ? kol(gemt.get(row.dataset.listingId) || 0, 'Favoritter') : '') + kol(s.contacts, 'Henvendelser');
+    row.querySelector('.db-status')?.appendChild(blok);
   });
+}
+
+/* Gratis-grænsen (3 aktive for private) håndhæves i databasen kun ved INSERT
+   (trg_listing_limit, before insert), så en genaktivering kan snige sig forbi.
+   Så længe adgangen er gratis for alle (FRI_ADGANG) gælder grænsen ikke; ellers
+   stopper siden den her med en klar besked. Se DELT-ØNSKE i rapporten. */
+function overGraense(egne, bruger, fri){
+  if (fri) return false;
+  if (bruger && (bruger.isDealer || bruger.plan === 'dealer')) return false;
+  return egne.filter(l => listingStatus(l) === 'active').length >= 3;
 }
 
 async function skiftStatus(id, btn){
   const l = egneListe().find(x => String(x.id) === String(id));
   if (!l) return;
   const naeste = naesteStatus(listingStatus(l));
+  if (naeste.status === 'active' && overGraense(egneListe(), Store.getUser(), typeof FRI_ADGANG !== 'undefined' && FRI_ADGANG)){
+    toast('Du har allerede 3 aktive annoncer. Sæt en anden på pause eller bliv forhandler, før du aktiverer denne.', { type: 'error' });
+    return;
+  }
   btn.disabled = true;
   const { error } = await db.updateListing(id, { status: naeste.status });
   if (error){
@@ -252,7 +284,17 @@ async function sletAnnonce(id, btn){
   renderMine();
 }
 
+function visEgneFejl(){
+  const el = document.getElementById('mine-error');
+  if (!el) return;
+  el.hidden = !EGNE_FEJL;
+  if (!EGNE_FEJL){ el.innerHTML = ''; return; }
+  el.innerHTML = `${Icon.alertTriangle}<span><b>Vi kunne ikke hente alle dine annoncer.</b> Pausede og solgte annoncer mangler måske her, og tallene kan være for lave.</span><button type="button" class="btn btn-outline btn-sm" id="mine-retry">Prøv igen</button>`;
+  document.getElementById('mine-retry').addEventListener('click', async () => { await hentEgneAlle(); renderMine(); });
+}
+
 function renderMine(){
+  visEgneFejl();
   const mine = sortListings(egneListe(), document.getElementById('mine-sort')?.value);
   const kladde = draftSummary(Store.getDraft());
   const grid = document.getElementById('mine-grid');
@@ -279,6 +321,14 @@ function renderMine(){
   visAnnonceStatistik(grid);
   grid.querySelectorAll('[data-delete-listing]').forEach(btn => {
     btn.addEventListener('click', () => sletAnnonce(btn.dataset.deleteListing, btn));
+  });
+  grid.querySelectorAll('[data-copy-link]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const full = new URL(btn.dataset.copyLink, window.location.href).href;
+      try { await navigator.clipboard.writeText(full); toast('Link kopieret'); }
+      catch (e) { toast('Linket kunne ikke kopieres: ' + full); }
+      btn.closest('details')?.removeAttribute('open');
+    });
   });
   grid.querySelectorAll('[data-status-skift]').forEach(btn => {
     btn.addEventListener('click', () => skiftStatus(btn.dataset.statusSkift, btn));
@@ -523,6 +573,7 @@ function renderProfileCard(){
   const raekke = (label, vaerdi) => vaerdi
     ? `<div class="verify-row"><div class="verify-row-info"><span>${label}</span></div><span class="db-profile-val">${escapeHTML(String(vaerdi))}</span></div>`
     : '';
+  const kanSamtykke = !!user.remote && typeof db !== 'undefined' && db.enabled;
   card.innerHTML = `
     <h3 style="margin-bottom:14px;">Dine oplysninger</h3>
     ${raekke('Navn', user.name)}
@@ -531,7 +582,27 @@ function renderProfileCard(){
     ${raekke('Kontotype', user.isDealer ? 'Forhandler' : 'Privat sælger')}
     ${raekke('Virksomhed', user.company)}
     ${raekke('CVR', user.cvr)}
-    <p style="font-size:13px; color:var(--color-fg-muted); margin:12px 0 0;">Vil du rette oplysningerne, så skriv til <a href="mailto:kontakt@bikerbasen.dk" style="color:var(--color-primary);">kontakt@bikerbasen.dk</a>.</p>`;
+    ${kanSamtykke ? `
+    <form class="db-profile-form" id="vis-telefon-form">
+      <label class="db-check"><input type="checkbox" id="pf-vis-telefon" disabled><span>Vis mit telefonnummer for indloggede købere på mine annoncer</span></label>
+      <p class="field-hint" id="pf-hint">Henter dit valg…</p>
+      <button type="submit" class="btn btn-outline btn-sm" id="pf-gem" disabled>Gem valg</button>
+    </form>` : ''}
+    <p style="font-size:13px; color:var(--color-fg-muted); margin:12px 0 0;">Vil du rette navn eller e-mail, så skriv til <a href="mailto:kontakt@bikerbasen.dk" style="color:var(--color-primary);">kontakt@bikerbasen.dk</a>.</p>`;
+  if (!kanSamtykke) return;
+  const boks = document.getElementById('pf-vis-telefon'), hint = document.getElementById('pf-hint'), gem = document.getElementById('pf-gem');
+  db.currentProfile().then(p => {
+    boks.checked = !!p?.vis_telefon; boks.disabled = false; gem.disabled = false;
+    hint.textContent = String(p?.phone || '').trim() ? 'Kun for indloggede — aldrig for søgemaskiner eller udloggede.' : 'Du har ikke oplyst et nummer, så der er intet at vise endnu.';
+  }).catch(() => { hint.textContent = 'Dit valg kunne ikke hentes lige nu.'; });
+  document.getElementById('vis-telefon-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    gem.disabled = true;
+    const { error } = await db.saetVisTelefon(boks.checked);
+    gem.disabled = false;
+    if (error) toast('Valget kunne ikke gemmes: ' + error.message, { type: 'error' });
+    else toast('Dit valg er gemt');
+  });
 }
 
 /* Kontokortet i sidebjælken: initialer, navn og e-mail fra sessionen. */
@@ -572,7 +643,17 @@ function setActiveTab(tab, { fokus = false, scroll = false } = {}){
   if (scroll) document.querySelector('.db-tabbar')?.scrollIntoView({ block: 'start' });
 }
 
+function wireTabFade(){
+  const rk = document.querySelector('.db-tabs');
+  if (!rk) return;
+  const opd = () => rk.classList.toggle('at-end', rk.scrollLeft + rk.clientWidth >= rk.scrollWidth - 4);
+  rk.addEventListener('scroll', opd, { passive: true });
+  window.addEventListener('resize', opd);
+  opd();
+}
+
 function wireTabs(){
+  wireTabFade();
   const faner = [...document.querySelectorAll('.db-tab')];
   faner.forEach((btn, i) => {
     btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
@@ -622,6 +703,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderAgents();
   wireTabs();
 
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.db-more[open]').forEach(d => { if (!d.contains(e.target)) d.removeAttribute('open'); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.querySelectorAll('.db-more[open]').forEach(d => { d.removeAttribute('open'); d.querySelector('summary')?.focus(); });
+  });
   document.getElementById('mine-sort').addEventListener('change', renderMine);
   document.getElementById('fav-sort').addEventListener('change', renderFavorites);
   document.addEventListener('bb:favorites-changed', renderFavorites);

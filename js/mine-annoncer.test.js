@@ -9,7 +9,7 @@ const path = require('path');
 const læs = f => fs.readFileSync(path.join(__dirname, f), 'utf8');
 const M = new Function('document', 'window', 'Store', 'db',
   ['data.js', 'icons.js', 'mine-annoncer.js'].map(læs).join('\n;\n')
-  + '\n;return { listingStatus, statusVisning, naesteStatus, rowMeta, draftSummary, initials, oversigtTal, sortListings };')(
+  + '\n;return { listingStatus, statusVisning, naesteStatus, rowMeta, draftSummary, initials, oversigtTal, sortListings, overGraense };')(
   { readyState: 'loading', addEventListener(){}, querySelector(){ return null; } }, {}, {}, { enabled: false });
 
 test('listingStatus: hidden=pause, sold=solgt, alt andet aktivt', () => {
@@ -67,4 +67,12 @@ test('sortListings: nyeste først og pris', () => {
   assert.deepEqual(M.sortListings(l, 'date').map(x => x.id), [2, 1]);
   assert.deepEqual(M.sortListings(l, 'price-asc').map(x => x.id), [1, 2]);
   assert.deepEqual(M.sortListings(l, 'year-desc').map(x => x.id), [2, 1]);
+});
+
+test('overGraense: blokerer genaktivering ved 3 aktive, kun uden fri adgang', () => {
+  const tre = [{}, {}, { status: 'active' }, { status: 'hidden' }];
+  assert.equal(M.overGraense(tre, { isDealer: false }, false), true);
+  assert.equal(M.overGraense(tre, { isDealer: false }, true), false);     // gratis for alle i dag
+  assert.equal(M.overGraense(tre, { isDealer: true }, false), false);     // forhandler: ubegrænset
+  assert.equal(M.overGraense(tre.slice(0, 2), { isDealer: false }, false), false);
 });
