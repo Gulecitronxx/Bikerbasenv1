@@ -32,9 +32,9 @@ test('pris: 1 til 5.000.000, ingen negative eller nul', () => {
   afvist('f-price', '-100'); afvist('f-price', '0'); afvist('f-price', '5000001');
 });
 
-test('ccm: heltal 50 til 3000, afviser 500,5', () => {
-  ok('f-ccm', '50'); ok('f-ccm', '689'); ok('f-ccm', '3000');
-  afvist('f-ccm', '49'); afvist('f-ccm', '3001'); afvist('f-ccm', '500.5'); afvist('f-ccm', '-1');
+test('ccm: heltal 1 til 3000 (knallert 45 er 49 ccm), afviser 0 og 500,5', () => {
+  ok('f-ccm', '1'); ok('f-ccm', '49'); ok('f-ccm', '50'); ok('f-ccm', '689'); ok('f-ccm', '3000');
+  afvist('f-ccm', '0'); afvist('f-ccm', '3001'); afvist('f-ccm', '500.5'); afvist('f-ccm', '-1');
 });
 
 test('km: 0 til 500.000', () => {
@@ -57,6 +57,7 @@ test('ukendt felt giver ingen fejl', () => {
 });
 
 test('graenser() deler tallene med min/max-attributterne', () => {
+  assert.deepEqual(V.graenser('f-ccm', AAR), { min: 1, max: 3000 });
   assert.deepEqual(V.graenser('f-power', AAR), { min: 1, max: 300 });
   assert.deepEqual(V.graenser('f-year', AAR), { min: 1900, max: 2027 });
   assert.equal(V.graenser('f-findes-ikke', AAR), null);

@@ -42,15 +42,25 @@ function erBilledfil(file){
   return BILLED_ENDELSER.test(file.name || '');
 }
 
+/* Trin 1 og 2 ("Type & specs" og "Pris & beskrivelse") står på ÉN side, som i
+   billede 4. currentStep er derfor 1, 3 eller 4; ankerTrin (1 eller 2) siger,
+   hvilken af de to sektioner på siden man er ved — trinbjælken er her
+   sektionsnavigation, og scroll-lytteren holder den ajour. */
+let ankerTrin = 1;
+let _foersteTegning = true;
+
 function renderStepper(){
+  const vis = currentStep === 1 ? ankerTrin : currentStep;
   document.getElementById('stepper').innerHTML = STEP_LABELS.map((label, i) => {
     const n = i + 1;
-    const cls = n === currentStep ? 'active' : (n < currentStep ? 'done' : '');
+    const cls = n === vis ? 'active' : (currentStep > 1 && n < vis ? 'done' : '');
+    const klik = currentStep === 1 ? n <= 2 : n < currentStep;
+    const tag = klik ? 'button type="button" data-goto="' + n + '"' : 'div';
     return `
-    <div class="step-item ${cls}" title="Trin ${n}: ${label}" aria-label="Trin ${n}: ${label}${n === currentStep ? ' (nuværende)' : ''}"${n === currentStep ? ' aria-current="step"' : ''}>
-      <span class="step-dot">${n < currentStep ? '' : n}</span>
+    <${tag} class="step-item ${cls}" title="Trin ${n}: ${label}" aria-label="Trin ${n}: ${label}${n === vis ? ' (nuværende)' : ''}"${n === vis ? ' aria-current="step"' : ''}>
+      <span class="step-dot">${cls === 'done' ? '' : n}</span>
       <span class="step-text"><span class="step-label">${label}</span><span class="step-sub">${STEP_SUBS[i]}</span></span>
-    </div>
+    </${klik ? 'button' : 'div'}>
     ${n < STEP_LABELS.length ? '<span class="step-line"></span>' : ''}`;
   }).join('');
   document.querySelectorAll('.step-item.done .step-dot').forEach(d => d.innerHTML = Icon.check);
@@ -61,22 +71,51 @@ function goToStep(n){
      "Gem kladde" — det er trinskiftet, folk mister arbejde paa. Kun fremad/
      tilbage efter foerste tegning (ellers overskrives en gendannet kladde af
      en tom formular ved init). */
-  if (typeof collectFormData === 'function' && currentStep !== n && !editingId){
+  const maal = n === 2 ? 1 : n;     // 2 = anker på side 1, ikke en egen side
+  if (typeof collectFormData === 'function' && currentStep !== maal && !editingId){
     try { Store.saveDraft('form', collectFormData()); } catch (e) { /* aldrig blokere et trinskift */ }
   }
-  currentStep = n;
-  document.querySelectorAll('.form-step').forEach(s => s.hidden = Number(s.dataset.step) !== n);
+  currentStep = maal;
+  ankerTrin = n === 2 ? 2 : 1;
+  document.querySelectorAll('.form-step').forEach(s => {
+    const t = Number(s.dataset.step);
+    s.hidden = maal === 1 ? t > 2 : t !== maal;
+  });
   renderStepper();
-  document.getElementById('step-back').style.visibility = n === 1 ? 'hidden' : 'visible';
+  document.getElementById('step-back').style.visibility = maal === 1 ? 'hidden' : 'visible';
   document.getElementById('step-next').textContent =
-    n === STEP_LABELS.length ? (editingId ? 'Gem ændringer' : 'Udgiv annonce') : 'Fortsæt';
-  if (n === STEP_LABELS.length) renderPreview();
+    maal === STEP_LABELS.length ? (editingId ? 'Gem ændringer' : 'Udgiv annonce')
+      : (maal === 1 ? 'Fortsæt til billeder' : 'Fortsæt til gennemse');
+  if (maal === STEP_LABELS.length) renderPreview();
   renderLiveCard();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  /* O1-12: fokus paa trinnets overskrift — ellers staar en skaermlaeser stadig
-     paa "Fortsaet" uden at faa at vide, at siden skiftede. */
   const h2 = document.querySelector(`.form-step[data-step="${n}"] h2`);
-  if (h2){ h2.setAttribute('tabindex', '-1'); setTimeout(() => { try { h2.focus({ preventScroll: true }); } catch (e) {} }, 250); }
+  if (n === 2 && h2) h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  else if (!_foersteTegning) window.scrollTo({ top: 0, behavior: 'smooth' });
+  /* O1-12: fokus paa trinnets overskrift — ellers staar en skaermlaeser stadig
+     paa "Fortsaet" uden at faa at vide, at siden skiftede. Ikke ved første
+     tegning: siden skal ikke åbne med fokus på en overskrift. */
+  if (h2 && !_foersteTegning){ h2.setAttribute('tabindex', '-1'); setTimeout(() => { try { h2.focus({ preventScroll: true }); } catch (e) {} }, 250); }
+  _foersteTegning = false;
+}
+
+/* Scroll-lytter: på side 1 følger trinbjælken, hvilken sektion der er i syne. */
+function wireAnkerSpy(){
+  let travl = false;
+  window.addEventListener('scroll', () => {
+    if (currentStep !== 1 || travl) return;
+    travl = true;
+    requestAnimationFrame(() => {
+      travl = false;
+      const h = document.querySelector('.form-step[data-step="2"] h2');
+      if (!h) return;
+      const nyt = h.getBoundingClientRect().top < window.innerHeight * 0.45 ? 2 : 1;
+      if (nyt !== ankerTrin){ ankerTrin = nyt; renderStepper(); }
+    });
+  }, { passive: true });
+  document.getElementById('stepper').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-goto]');
+    if (b) goToStep(Number(b.dataset.goto));
+  });
 }
 
 function updateEqCounts(){
@@ -151,49 +190,46 @@ function trinUdfyldt(n){
 }
 
 function validateStep(n){
-  const section = document.querySelector(`.form-step[data-step="${n}"]`);
+  /* Trin 1 og 2 står på samme side og valideres samlet. */
+  const trin = n <= 2 ? [1, 2] : [n];
   let valid = true;
   /* Alle fejl samles som { el, besked }, og fokus går til den FØRSTE i
-     dokumentets rækkefølge — ikke til den første, vi tilfældigvis opdagede.
-     Før blev "mangler" fundet før "urealistisk tal", så fokus kunne hoppe
-     over et felt højere oppe. */
+     dokumentets rækkefølge — ikke til den første, vi tilfældigvis opdagede. */
   const fejl = [];
   const aar = new Date().getFullYear();
-  section.querySelectorAll('[required]').forEach(el => {
-    const field = el.closest('.field') || el.closest('.checkbox-inline');
-    const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
-    if (!ok){ valid = false; fejl.push({ el, besked: null }); }
-    else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); field?.querySelector('.felt-fejl')?.remove(); el.removeAttribute('aria-describedby'); }
-  });
-  /* Grænseværdier står ÉT sted: js/opret-validering.js. Formularen er
-     novalidate, så min/max i HTML håndhæves ikke af browseren. */
-  OpretValidering.validerTrin(n, id => (document.getElementById(id) || {}).value, aar).forEach(f => {
-    const el = document.getElementById(f.id);
-    if (!el) return;
-    valid = false;
-    const dubletter = fejl.findIndex(x => x.el === el);
-    if (dubletter !== -1) fejl.splice(dubletter, 1);
-    fejl.push({ el, besked: f.besked });
+  trin.forEach(t => {
+    const section = document.querySelector(`.form-step[data-step="${t}"]`);
+    section.querySelectorAll('[required]').forEach(el => {
+      const field = el.closest('.field') || el.closest('.checkbox-inline');
+      const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
+      if (!ok){ valid = false; fejl.push({ el, besked: null }); }
+      else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); field?.querySelector('.felt-fejl')?.remove(); el.removeAttribute('aria-describedby'); }
+    });
+    /* Grænseværdier står ÉT sted: js/opret-validering.js. Formularen er
+       novalidate, så min/max i HTML håndhæves ikke af browseren. */
+    OpretValidering.validerTrin(t, id => (document.getElementById(id) || {}).value, aar).forEach(f => {
+      const el = document.getElementById(f.id);
+      if (!el) return;
+      valid = false;
+      const d = fejl.findIndex(x => x.el === el);
+      if (d !== -1) fejl.splice(d, 1);
+      fejl.push({ el, besked: f.besked });
+    });
   });
   let msg = '';
-  if (n === 1){
+  if (trin.includes(1)){
     if (!document.querySelector('input[name="bike-type"]:checked')){
       valid = false; msg = 'Vælg venligst en motorcykeltype';
       markTypeError();
-      /* Typen står øverst, så den er første fejl i læserækkefølgen — også når
-         felterne under den mangler. */
       const foersteType = document.querySelector('input[name="bike-type"]');
       if (foersteType) fejl.push({ el: foersteType, besked: null, kunFokus: true });
     } else clearTypeError();
   }
-  /* Trin 4 er to afkrydsningsfelter, ikke felter man udfylder. Den generelle
-     besked ("Udfyld venligst alle felter markeret med *") gav ingen mening
-     dér. Sig hvad der mangler. */
+  /* Trin 4 er to afkrydsningsfelter, ikke felter man udfylder. Sig hvad der mangler. */
   if (n === 4){
-    // O1-8: robot-checkboxen er fjernet — den var en kontrol af udseende, ikke af noget.
     if (!document.getElementById('f-terms').checked) msg = 'Du skal acceptere vilkårene for annoncering';
   }
-  if (n === 2){
+  if (trin.includes(2)){
     // Frit indtastet postnummer uden bekræftet valg = annonce uden by/region.
     if (!acceptExactPostnr()){
       valid = false;
@@ -217,7 +253,7 @@ function validateStep(n){
       refs.first.scrollIntoView({ block: 'center', behavior: 'smooth' });
       setTimeout(() => { try { refs.first.focus({ preventScroll: true }); } catch(e){} }, 280);
     }
-    if (!valid || msg) toast(msg || 'Udfyld venligst alle felter markeret med *', { type: 'error' });
+    toast(msg || 'Udfyld venligst alle felter markeret med *', { type: 'error' });
   }
   return valid && !(n === 4 && msg);
 }
@@ -235,7 +271,6 @@ function renderTypeTilesIfStale(){
     <label class="radio-card">
       <input type="radio" name="bike-type" value="${t.id}">
       <span class="radio-card-inner">
-        <span class="radio-card-media"><img src="img/type/${t.id}.webp" alt="" width="760" height="570"${i < 4 ? '' : ' loading="lazy"'} decoding="async"></span>
         <span class="radio-card-label">${t.label}</span>
       </span>
     </label>`).join('');
@@ -831,8 +866,9 @@ function renderSeoAssistent(data){
     ? `<div class="detail-section" style="margin-top:20px;">
          <h2 style="font-size:16px;">Før du udgiver</h2>
          <ul class="equipment-list" style="grid-template-columns:1fr;">
-           ${gaps.map(g => `<li><span style="color:var(--color-danger); display:inline-flex;">${Icon.alertTriangle}</span>${escapeHTML(g)}</li>`).join('')}
+           ${gaps.slice(0, 4).map(g => `<li><span style="color:var(--color-danger); display:inline-flex;">${Icon.alertTriangle}</span>${escapeHTML(g)}</li>`).join('')}
          </ul>
+         ${gaps.length > 4 ? `<p class="field-hint" style="margin-top:8px;">…og ${gaps.length - 4} ting mere, du kan nævne i beskrivelsen.</p>` : ''}
        </div>`
     : `<div class="preview-note" style="margin-top:20px;">${Icon.checkCircle}<span>Ingen flere forslag herfra — annoncen dækker det, købere typisk spørger om.</span></div>`;
 
@@ -848,15 +884,15 @@ function renderSeoAssistent(data){
   const titel = serpTitel(data);
   const besk = serpBeskrivelse(data);
   const serpHTML = titel
-    ? `<div class="detail-section" style="margin-top:20px;">
-         <h2 style="font-size:16px;">Titel og søgetekst</h2>
+    ? `<details class="detail-section op-serp" style="margin-top:20px;">
+         <summary><h2 style="font-size:16px; display:inline;">Titel og søgetekst</h2></summary>
          <p class="field-hint" style="margin-bottom:10px;">Bikerbasen sammensætter automatisk titel og søgetekst af dine egne tal (mærke, model, årgang, pris, km, ccm, stand, by). Her er de, som de bliver ud fra det, du har udfyldt nu.</p>
          <div style="border:1px solid var(--color-border); border-radius:var(--radius-sm); padding:12px 14px;">
            <p style="font-weight:600; margin:0 0 4px;">${escapeHTML(titel)}</p>
            <p class="field-hint" style="margin:0;">${escapeHTML(besk)}</p>
          </div>
          <p class="field-hint" style="margin-top:6px;">Titel: ${titel.length} tegn${titel.length > 65 ? ' (Google forkorter typisk over ca. 65)' : ''}. Søgetekst: ${besk.length} tegn.</p>
-       </div>`
+       </details>`
     : '';
 
   mount.innerHTML = gapsHTML + chipsHTML + serpHTML;
@@ -894,6 +930,7 @@ function opdaterTaeller(){
    (listingCardHTML), tegnet af det sælgeren har udfyldt indtil nu. Intet
    gættes: det, der ikke er udfyldt, vises som "ikke oplyst" af kortet selv, og
    mærke/model får en tydelig pladsholder, indtil de er valgt. */
+let editingCreatedAt = null;
 let _liveTimer = null;
 function planlaegLiveKort(){
   clearTimeout(_liveTimer);
@@ -917,17 +954,39 @@ function renderLiveCard(){
     id: 'preview',
     brand: d.brand || 'Mærke', model: d.model || (d.brand ? '' : 'og model'),
     year: d.year || '—', city: d.city || 'Sted ikke valgt', region: d.region || '',
-    isDealer: !!user.isDealer, createdAt: new Date().toISOString(),
+    isDealer: !!user.isDealer, createdAt: editingCreatedAt || new Date().toISOString(),
     photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(Object.assign({}, user, { city: d.city })),
   });
   let html;
-  try { html = listingCardHTML(l); } catch (e) { html = ''; }
-  mount.innerHTML = html.replace('card-link" aria-label', 'card-link" tabindex="-1" aria-label');
+  if (!harNavn){
+    /* Venlig tom tilstand i stedet for et kort fuldt af "ikke oplyst". */
+    html = `<div class="op-live-tomt">${Icon.bike}<b>Dit annoncekort vises her</b><span>Vælg mærke og model, så begynder kortet at tage form.</span></div>`;
+  } else {
+    try { html = listingCardHTML(l); } catch (e) { html = ''; }
+    html = html.replace('card-link" aria-label', 'card-link" tabindex="-1" aria-label');
+  }
+  mount.innerHTML = html;
   mount.classList.toggle('op-live-tom', !harNavn);
+  mount.classList.toggle('op-live-nopris', harNavn && d.price == null);
   const note = document.getElementById('op-prev-note');
   if (note) note.textContent = harNavn
     ? 'Kortet opdateres, mens du udfylder. Det, du ikke har oplyst, står som "ikke oplyst".'
-    : 'Vælg mærke og model, så begynder kortet at tage form.';
+    : 'Kortet opdateres, mens du udfylder.';
+}
+
+/* Mobil: forhåndsvisningen ligger under formularen, så en knap åbner den som et
+   bundark (modal <dialog>: fokusfælde + Escape). Indholdet er en kopi af
+   sidebjælkens kort, så det aldrig kan vise noget andet. */
+function wireForhaandsvisningsark(){
+  const dlg = document.getElementById('op-prev-dialog'), aabn = document.getElementById('op-prev-open');
+  if (!dlg || !aabn || !dlg.showModal) return;
+  aabn.addEventListener('click', () => {
+    renderLiveCard();
+    dlg.querySelector('.op-sheet-body').innerHTML = document.getElementById('op-live-card').innerHTML;
+    dlg.showModal();
+  });
+  dlg.querySelectorAll('[data-sheet-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
 }
 
 function renderPreview(){
@@ -936,9 +995,8 @@ function renderPreview(){
   // Vis det RIGTIGE forsidebillede og antal — ikke en pladsholder. Rækkefølgen
   // matcher billed-gitteret (eksisterende først, så nye), så forsiden stemmer.
   const photoUrls = [...existingPhotos.map(p => p.url), ...uploadedPhotos.map(p => p.url)];
-  const previewListing = { id: 'preview', ...formData, isDealer: !!user.isDealer, createdAt: new Date().toISOString(), photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(user) };
-  document.getElementById('preview-note').innerHTML = `${Icon.info}<span>Sådan vil din annonce se ud i søgeresultater. Tjek at alt er korrekt, før du udgiver.</span>`;
-  document.getElementById('preview-card-mount').innerHTML = listingCardHTML(previewListing).replace('card-link" aria-label', 'card-link" tabindex="-1" style="pointer-events:none;" aria-label');
+  const previewListing = { id: 'preview', ...formData, isDealer: !!user.isDealer, createdAt: editingCreatedAt || new Date().toISOString(), photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(user) };
+  document.getElementById('preview-note').innerHTML = `${Icon.info}<span>Tjek, at alt er korrekt, før du udgiver. Kortet under "Din annonce" viser, hvordan annoncen ser ud i søgeresultater.</span>`;
   const eqLabels = (formData.equipment || []).map(e => equipmentLabel(e));
   document.getElementById('preview-details').innerHTML = `
     <div class="spec-grid" style="margin-top:24px;">
@@ -956,7 +1014,7 @@ function renderPreview(){
       ${formData.vinterklar ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Vinterklargjort</span><b>Ja</b></div>` : ''}
       ${formData.kanNedsaettesA2 ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Kan nedsættes til A2</span><b>Ja</b></div>` : ''}
     </div>
-    ${formData.description ? `<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="white-space:pre-wrap;">${escapeHTML(formData.description)}</p></div>` : '<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="color:var(--color-fg-muted);">Du har ikke skrevet en beskrivelse endnu — en god beskrivelse giver flere henvendelser.</p></div>'}
+    ${formData.description ? `<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="white-space:pre-wrap;">${escapeHTML(formData.description)}</p></div>` : '<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="color:var(--color-fg-muted);">Du har ikke skrevet en beskrivelse endnu.</p></div>'}
     ${eqLabels.length ? `<div class="detail-section" style="margin-top:24px;"><h2>Udstyr (${eqLabels.length})</h2><ul class="equipment-list">${eqLabels.map(l => `<li>${Icon.checkCircle}${escapeHTML(l)}</li>`).join('')}</ul></div>` : ''}`;
   renderSeoAssistent(formData);
 }
@@ -1180,6 +1238,7 @@ function startEditing(id){
   }
 
   editingId = listing.id;
+  editingCreatedAt = listing.createdAt || null;
   fillForm(listing);
 
   // Annoncens nuværende billeder lægges i gitteret, så de kan ses og
@@ -1254,13 +1313,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       startTrin = 3;
     }
   }
+  wireAnkerSpy();
+  wireForhaandsvisningsark();
   goToStep(startTrin);
 
   document.getElementById('step-next').addEventListener('click', () => {
     if (!validateStep(currentStep)) return;
     /* O1-1: login-gaten ligger HER — efter at motorcyklen og prisen er skrevet,
        foer billederne. Kladden gemmes foerst, saa intet gaar tabt. */
-    if (currentStep === 2 && kraeverLogin()){
+    if (currentStep === 1 && kraeverLogin()){
       // O2-3: toasten lover "fortsaetter med billederne" — saa skal kladden
       // huske trinnet, ellers lander man paa trin 1 efter login.
       Store.saveDraft('form', Object.assign(collectFormData(), { videreTilTrin: 3 }));
@@ -1268,11 +1329,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       setTimeout(() => { window.location.href = 'login.html?redirect=' + encodeURIComponent('opret-annonce.html'); }, 1400);
       return;
     }
-    if (currentStep < STEP_LABELS.length) goToStep(currentStep + 1);
+    if (currentStep < STEP_LABELS.length) goToStep(currentStep === 1 ? 3 : currentStep + 1);
     else publishListing();
   });
   document.getElementById('step-back').addEventListener('click', () => {
-    if (currentStep > 1) goToStep(currentStep - 1);
+    if (currentStep > 1) goToStep(currentStep === 3 ? 1 : currentStep - 1);
   });
   /* O2-7: i redigeringstilstand skjules knappen — ellers skrev en eksisterende
      annonces data sig ind i ny-annonce-kladden, og naeste "Udgiv" blev en dublet. */

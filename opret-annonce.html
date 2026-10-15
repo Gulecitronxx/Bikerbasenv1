@@ -169,14 +169,14 @@ try{
              afviger, så listen ikke kan drive fra hinanden. -->
         <h3 class="op-label-h" id="type-overskrift">Motorcykeltype <span class="required-mark" aria-hidden="true">*</span></h3>
         <div class="radio-card-group" id="type-radio-group" role="radiogroup" aria-labelledby="type-overskrift">
-          <label class="radio-card"><input type="radio" name="bike-type" value="sport"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/sport.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Sport</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="touring"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/touring.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Touring</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="cruiser"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/cruiser.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Cruiser</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="naked"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/naked.webp" alt="" width="760" height="570" decoding="async"></span><span class="radio-card-label">Naked</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="adventure"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/adventure.webp" alt="" width="760" height="570" loading="lazy" decoding="async"></span><span class="radio-card-label">Adventure/Enduro</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="scooter"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/scooter.webp" alt="" width="760" height="570" loading="lazy" decoding="async"></span><span class="radio-card-label">Scooter</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="classic"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/classic.webp" alt="" width="760" height="570" loading="lazy" decoding="async"></span><span class="radio-card-label">Classic/Veteran</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="cross"><span class="radio-card-inner"><span class="radio-card-media"><img src="img/type/cross.webp" alt="" width="760" height="570" loading="lazy" decoding="async"></span><span class="radio-card-label">Cross/MX</span></span></label>
+          <label class="radio-card"><input type="radio" name="bike-type" value="sport"><span class="radio-card-inner"><span class="radio-card-label">Sport</span></span></label>
+          <label class="radio-card"><input type="radio" name="bike-type" value="touring"><span class="radio-card-inner"><span class="radio-card-label">Touring</span></span></label>
+          <label class="radio-card"><input type="radio" name="bike-type" value="cruiser"><span class="radio-card-inner"><span class="radio-card-label">Cruiser</span></span></label>
+          <label class="radio-card"><input type="radio" name="bike-type" value="naked"><span class="radio-card-inner"><span class="radio-card-label">Naked</span></span></label>
+          <label class="radio-card"><input type="radio" name="bike-type" value="adventure"><span class="radio-card-inner"><span class="radio-card-label">Adventure/Enduro</span></span></label>
+          <label class="radio-card"><input type="radio" name="bike-type" value="scooter"><span class="radio-card-inner"><span class="radio-card-label">Scooter</span></span></label>
+          <label class="radio-card"><input type="radio" name="bike-type" value="classic"><span class="radio-card-inner"><span class="radio-card-label">Classic/Veteran</span></span></label>
+          <label class="radio-card"><input type="radio" name="bike-type" value="cross"><span class="radio-card-inner"><span class="radio-card-label">Cross/MX</span></span></label>
         </div>
 
         <div class="op-split">
@@ -190,30 +190,29 @@ try{
               <input class="input" id="f-model" list="model-suggestions" required maxlength="60" placeholder="F.eks. MT-07" autocomplete="off">
               <datalist id="model-suggestions"></datalist>
             </div>
-            <p class="op-title-note field-hint">Annoncens overskrift dannes af mærke, model og årgang — kortet "Din annonce" viser, hvordan den ser ud.</p>
+            <div class="field">
+              <label for="f-year">Årgang <span class="required-mark" aria-hidden="true">*</span></label>
+              <input class="input" id="f-year" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 2021">
+            </div>
+            <div class="field">
+              <label for="f-km">Km-stand <span class="required-mark" aria-hidden="true">*</span></label>
+              <div class="op-unit"><input class="input" id="f-km" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 12500"><span class="op-unit-sfx" aria-hidden="true">km</span></div>
+            </div>
           </div>
           <aside class="op-tips" aria-labelledby="tips-titel-h">
             <span class="op-tips-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>
             <div>
-              <h3 id="tips-titel-h">Gode titler tiltrækker flere købere</h3>
+              <h3 id="tips-titel-h">Sådan udfylder du mærke og model</h3>
               <ul>
-                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Skriv mærke, model og årstal</li>
-                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Nævn særligt udstyr eller stand i beskrivelsen</li>
-                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Hold det kort og præcist</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Vælg mærket, og skriv modellen som i papirerne</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Mærke, model og årgang bliver overskriften</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Effekt (hk) viser, om den kan køres på A2</li>
               </ul>
             </div>
           </aside>
         </div>
 
         <div class="op-grid op-grid-4">
-          <div class="field">
-            <label for="f-year">Årgang <span class="required-mark" aria-hidden="true">*</span></label>
-            <input class="input" id="f-year" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 2021">
-          </div>
-          <div class="field">
-            <label for="f-km">Km-stand <span class="required-mark" aria-hidden="true">*</span></label>
-            <div class="op-unit"><input class="input" id="f-km" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 12500"><span class="op-unit-sfx" aria-hidden="true">km</span></div>
-          </div>
           <div class="field">
             <label for="f-ccm">Motorstørrelse <span class="required-mark" aria-hidden="true">*</span></label>
             <div class="op-unit"><input class="input" id="f-ccm" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 689"><span class="op-unit-sfx" aria-hidden="true">ccm</span></div>
@@ -304,7 +303,7 @@ try{
             <h2><span class="op-num">2.</span> Pris og beskrivelse</h2>
             <p class="op-sec-sub">Sæt en pris, fortæl hvor motorcyklen står, og beskriv den ærligt.</p>
           </div>
-          <p class="op-req-note">Felter markeret med <span class="required-mark" aria-hidden="true">*</span> skal udfyldes</p>
+          
         </header>
         <div class="op-grid op-grid-3">
           <div class="field">
@@ -419,9 +418,6 @@ try{
         <!-- Sælgerens egen SEO- og udgivelsesassistent — se js/opret-annonce.js
              renderSeoAssistent(). Gælder kun egne annoncer. -->
         <div id="seo-assist-panel"></div>
-        <div class="preview-card-wrap op-step4-card">
-          <div class="listings-grid" id="preview-card-mount" style="grid-template-columns:1fr;"></div>
-        </div>
         <div id="preview-details"></div>
         <!-- O1-6: flowet sagde aldrig, hvordan en koeber naar saelgeren. Sig det
              SANDE foer udgivelsen. -->
@@ -475,6 +471,13 @@ try{
     </aside>
     </div>
   </div>
+  <button type="button" class="op-prev-fab" id="op-prev-open"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"/><circle cx="12" cy="12" r="3"/></svg>Se forhåndsvisning</button>
+  <dialog class="op-sheet" id="op-prev-dialog" aria-labelledby="op-sheet-h">
+    <div class="op-sheet-head"><h2 id="op-sheet-h">Din annonce</h2><button type="button" class="icon-btn" data-sheet-close aria-label="Luk forhåndsvisning"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <p class="op-side-sub">Sådan vil din annonce se ud for købere.</p>
+    <div class="op-sheet-body op-live-card" inert></div>
+    <button type="button" class="btn btn-outline btn-block" data-sheet-close>Luk</button>
+  </dialog>
 </main>
 
 <footer class="site-footer">

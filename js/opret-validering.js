@@ -17,7 +17,7 @@
   var REGLER = {
     'f-year':     { navn: 'Årgang', enhed: '', min: 1900, max: function (aar) { return aar + 1; }, tekst: function (r) { return 'Årgang skal være et helt år mellem ' + r.min + ' og ' + r.max + '.'; } },
     'f-km':       { navn: 'Km-stand', enhed: 'km', min: 0, max: function () { return 500000; }, tekst: function () { return 'Kilometerstanden skal være et helt tal mellem 0 og 500.000 km.'; } },
-    'f-ccm':      { navn: 'Motorstørrelse', enhed: 'ccm', min: 50, max: function () { return 3000; }, tekst: function () { return 'Motorstørrelsen skal være et helt tal mellem 50 og 3.000 ccm.'; } },
+    'f-ccm':      { navn: 'Motorstørrelse', enhed: 'ccm', min: 1, max: function () { return 3000; }, tekst: function () { return 'Motorstørrelsen skal være et helt tal mellem 1 og 3.000 ccm.'; } },
     'f-power':    { navn: 'Effekt', enhed: 'hk', min: 1, max: function () { return 300; }, tekst: function () { return 'Effekten skal være et helt tal mellem 1 og 300 hk — eller lad feltet stå tomt.'; } },
     'f-price':    { navn: 'Pris', enhed: 'kr.', min: 1, max: function () { return 5000000; }, tekst: function () { return 'Prisen skal være et helt beløb mellem 1 og 5.000.000 kr.'; } },
     'f-ejere':    { navn: 'Antal ejere', enhed: '', min: 1, max: function () { return 99; }, tekst: function () { return 'Antal ejere skal være et helt tal mellem 1 og 99 — eller lad feltet stå tomt.'; } },

@@ -28,7 +28,7 @@ test('validering indlæses før opret-annonce.js, og siden har én h1', () => {
 });
 
 test('siden har trinbjælke, live-forhåndsvisning og tryghedsboks', () => {
-  ['id="stepper"', 'id="op-live-card"', 'op-safe', 'Gode titler tiltrækker flere købere', 'En god beskrivelse skaber tillid', 'Felter markeret med'].forEach(s =>
+  ['id="stepper"', 'id="op-live-card"', 'op-safe', 'Sådan udfylder du mærke og model', 'En god beskrivelse skaber tillid', 'Felter markeret med'].forEach(s =>
     assert.ok(html.includes(s), `mangler: ${s}`));
 });
 
