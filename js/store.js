@@ -1,4 +1,22 @@
 /* ============ Local persistence ============ */
+/* F-12: med blokeret lagring (privat vindue, "bloker alle cookies") KASTER adgang til
+   window.localStorage, og siden stod med uncaught fejl og døde formularer. Er lageret
+   ikke brugbart, erstattes det af en hukommelses-udgave, så resten af koden virker
+   uændret (data huskes bare kun, til siden lukkes). */
+(function(){
+  try { localStorage.setItem('__bb_t', '1'); localStorage.removeItem('__bb_t'); return; } catch(e){}
+  const m = Object.create(null);
+  const shim = {
+    getItem(k){ return k in m ? m[k] : null; },
+    setItem(k, v){ m[k] = String(v); },
+    removeItem(k){ delete m[k]; },
+    clear(){ for (const k in m) delete m[k]; },
+    key(i){ return Object.keys(m)[i] || null; },
+    get length(){ return Object.keys(m).length; },
+  };
+  try { Object.defineProperty(window, 'localStorage', { value: shim, configurable: true }); } catch(e){}
+})();
+
 const Store = {
   KEYS: {
     favorites: 'bb_favorites', myListings: 'bb_my_listings', theme: 'bb_theme', user: 'bb_user', draft: 'bb_draft',
