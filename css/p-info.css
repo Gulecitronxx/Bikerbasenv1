@@ -1,0 +1,257 @@
+/* Info-/tekstsiderne (om-bikerbasen, vilkaar, privatlivspolitik, sikkerhed, om-indeksering, 404). Prefix: .if-
+   Samme designsprog som guiderne (billede 10): foto-hero med brødkrumme, kicker, h1 og ingress,
+   indholdsfortegnelse + nummererede afsnit til venstre, sticky sidebjælke med "Kort fortalt" til højre.
+   Genbruger tokens og .btn/.breadcrumb/.input/.saadan-trin* fra css/styles.css. Primær CTA er brandfarven. */
+
+.if-page main#main-content{ min-height: 0; }
+
+/* ---------- Hero ---------- */
+.if-hero{
+  position: relative; isolation: isolate; overflow: hidden;
+  background: var(--color-dark); color: #fff;
+  padding-bottom: var(--space-7);
+}
+.if-hero-media{ position:absolute; inset:0; z-index:-1; }
+.if-hero-photo{ width:100%; height:100%; object-fit:cover; object-position: 72% 55%; display:block; }
+.if-hero-media::after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(90deg, rgba(15,13,10,.9) 0%, rgba(15,13,10,.72) 42%, rgba(15,13,10,.18) 100%),
+    linear-gradient(0deg, rgba(15,13,10,.35), rgba(15,13,10,0) 40%);
+}
+.if-hero-inner{ max-width: 1240px; }
+.if-hero .breadcrumb{ color: rgba(255,255,255,.82); padding-top: var(--space-4); }
+.if-hero .breadcrumb a{ color:#fff; }
+.if-hero .breadcrumb a:hover{ color:#fff; text-decoration: underline; }
+.if-hero .breadcrumb [aria-current]{ color: rgba(255,255,255,.82); }
+.if-kicker{
+  margin: var(--space-5) 0 var(--space-2);
+  font-size: 13px; font-weight: 700; letter-spacing: .12em; color:#fff; opacity:.92;
+}
+.if-hero h1{
+  color:#fff; font-size: clamp(32px, 5.4vw, 56px); line-height: 1.06; letter-spacing: -0.02em;
+  max-width: 17ch; text-wrap: balance; overflow-wrap: anywhere;
+}
+.if-hero-lang h1{ max-width: 22ch; }
+.if-lede{
+  margin: var(--space-4) 0 0; max-width: 40em;
+  font-size: clamp(16px, 1.8vw, 19px); line-height: 1.55; color: rgba(255,255,255,.94);
+}
+.if-lede strong{ color:#fff; }
+.if-updated{
+  margin: var(--space-5) 0 0; display:flex; align-items:center; gap: var(--space-3);
+  font-size: 14px; color: rgba(255,255,255,.92);
+}
+.if-ic{ display:inline-flex; width:26px; height:26px; flex:none; color:#fff; }
+.if-ic svg{ width:26px; height:26px; }
+
+/* ---------- Layout ---------- */
+.if-layout{ display:flex; flex-direction:column; gap: var(--space-5); padding-top: var(--space-5); padding-bottom: var(--space-8); }
+.if-layout > .if-main{ min-width:0; order:2; }
+.if-side{ display:contents; }
+.if-side > .if-tldr{ order:1; }
+.if-side > .if-links{ order:3; }
+
+@media (min-width:1024px){
+  .if-hero{ min-height: 340px; padding-bottom: 104px; }
+  .if-layout{
+    display:grid; grid-template-columns: minmax(0,1fr) 392px; column-gap: var(--space-7);
+    align-items:start; padding-top: 0;
+  }
+  .if-layout > .if-main{ order:0; padding-top: var(--space-5); }
+  .if-side{
+    display:flex; flex-direction:column; gap: var(--space-4);
+    margin-top: -92px; position:relative; z-index:2;
+  }
+  .if-side > *{ order:0; }
+}
+@media (min-width:1024px) and (min-height:900px){
+  .if-side{ position:sticky; top: calc(var(--header-h) + var(--space-4)); }
+}
+
+/* ---------- Indholdsfortegnelse ---------- */
+.if-toc{
+  background: var(--color-surface-2); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+.if-toc h2{ display:flex; align-items:center; gap: var(--space-4); font-size: 20px; margin-bottom: var(--space-3); }
+.if-toc-ic{ display:inline-flex; width:24px; height:24px; color: var(--color-fg); }
+.if-toc-ic svg{ width:24px; height:24px; }
+.if-toc ol{ margin:0; padding-left: 1.6em; display:grid; gap: 6px 40px; font-size:15px; }
+@media (min-width:700px){ .if-toc ol{ grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(var(--if-toc-rows, 4), auto); } }
+.if-toc li{ list-style: decimal; }
+.if-toc li::marker{ color: var(--color-fg-muted); font-weight:600; }
+.if-toc a{ color: var(--color-fg); text-decoration:none; }
+.if-toc a:hover{ color: var(--color-primary); text-decoration: underline; }
+
+/* ---------- Ikon-række: principper (om-bikerbasen) ---------- */
+.if-principper{
+  list-style:none; margin: 0 0 var(--space-6); padding: var(--space-5);
+  display:grid; gap: var(--space-5) var(--space-5); grid-template-columns: minmax(0,1fr);
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+}
+@media (min-width:560px){ .if-principper{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.if-princip{ display:grid; grid-template-columns: 40px minmax(0,1fr); gap: var(--space-3); align-items:start; }
+.if-princip-ic{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background: var(--color-surface-2); color: var(--color-primary); border:1px solid var(--color-border); }
+.if-princip-ic svg{ width:22px; height:22px; }
+.if-princip strong{ display:block; font-family: var(--font-display); font-size:15px; line-height:1.25; }
+.if-princip span span{ display:block; margin-top:3px; font-size:13.5px; line-height:1.45; color: var(--color-fg-muted); }
+
+/* ---------- Regler som kort (om-indeksering) ---------- */
+.if-overblik{ margin-bottom: var(--space-6); }
+.if-overblik h2{ font-size: 20px; margin-bottom: var(--space-3); }
+.if-regler{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-3); grid-template-columns: minmax(0,1fr); }
+@media (min-width:600px){ .if-regler{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:1280px){ .if-regler{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+.if-regel{
+  display:flex; flex-direction:column; gap: var(--space-2);
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); padding: var(--space-4);
+}
+.if-regel-ic{ display:inline-flex; width:36px; height:36px; align-items:center; justify-content:center; border-radius: var(--radius-sm); background: var(--color-surface-2); color: var(--color-primary); }
+.if-regel-ic svg{ width:22px; height:22px; }
+.if-regel strong{ font-family: var(--font-display); font-size:16px; line-height:1.25; }
+.if-regel span.if-regel-tekst{ font-size:14px; line-height:1.5; color: var(--color-fg-muted); }
+
+/* ---------- Artikel (den juridiske/informative tekst, uændret ordlyd) ---------- */
+.if-article{ counter-reset: if-sec; font-size: 17px; line-height: 1.7; color: var(--color-fg); max-width: 760px; }
+.if-article h2{
+  font-size: clamp(24px, 3.2vw, 32px); line-height:1.15; margin: var(--space-8) 0 var(--space-4); letter-spacing:-0.015em;
+  scroll-margin-top: calc(var(--header-h) + var(--space-4)); overflow-wrap: anywhere;
+}
+.if-article > h2:first-child, .if-article > .safety-banner + h2{ margin-top: 0; }
+.if-numbered h2{ counter-increment: if-sec; }
+.if-numbered h2::before{ content: counter(if-sec) ". "; }
+.if-article h3{ font-size: 19px; margin: var(--space-5) 0 var(--space-2); }
+.if-article p{ margin: 0 0 var(--space-4); color: var(--color-fg); }
+.if-article ul, .if-article ol{ margin: 0 0 var(--space-4); padding-left: 1.4em; color: var(--color-fg); line-height:1.7; }
+.if-article li{ list-style: disc; margin-bottom: var(--space-2); }
+.if-article ol li{ list-style: decimal; }
+.if-article li::marker{ color: var(--color-fg-muted); }
+.if-article strong{ color: var(--color-fg); }
+.if-article a{ color: var(--color-primary); text-underline-offset: 3px; }
+.if-article a.btn{ text-decoration:none; }
+.if-article a.btn-primary{ color: var(--color-on-primary); }
+.if-article code{
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: .88em;
+  background: var(--color-surface-2); border:1px solid var(--color-border); border-radius: 6px; padding: 1px 6px; overflow-wrap:anywhere;
+}
+/* User-Agent som kodevisning */
+.if-article pre.legal-pre{
+  margin: var(--space-4) 0 var(--space-5); padding: var(--space-4) var(--space-5);
+  background: var(--color-dark); color: #F2EFEA; border:1px solid var(--color-border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 14px; line-height: 1.6; overflow-x:auto; max-width:100%; white-space: pre; tab-size: 2;
+  border-left: 4px solid var(--color-primary);
+}
+.if-article .legal-kontakt{ margin: 0 0 var(--space-4); }
+.if-article .legal-kontakt a{
+  display:inline-flex; align-items:center; min-height:44px; padding: 0 var(--space-5);
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: 999px;
+  box-shadow: var(--shadow-sm); font-weight:700; text-decoration:none; color: var(--color-primary);
+}
+.if-article .legal-kontakt a:hover{ border-color: var(--color-primary); }
+.if-article .safety-banner{ margin: 0 0 var(--space-6); }
+.if-article .guide-card{ background: var(--color-surface); box-shadow: var(--shadow-sm); border-radius: var(--radius-md); }
+.if-article .guide-card ul{ margin-bottom:0; }
+.if-article .if-cta-center{ text-align:center; margin-top: var(--space-7); }
+.if-article .if-cta-center a{ text-decoration:none; }
+
+/* ---------- Sidebjælke ---------- */
+.if-tldr{
+  background: var(--color-success-tint); border:1px solid color-mix(in srgb, var(--color-success) 28%, transparent);
+  border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-lg);
+}
+.if-tldr h2{ display:flex; align-items:center; gap: var(--space-3); font-size:20px; margin-bottom: var(--space-3); }
+.if-tldr-ic{ display:inline-flex; width:26px; height:26px; color: var(--color-fg); }
+.if-tldr-ic svg{ width:26px; height:26px; }
+.if-checks{ list-style:none; margin:0 0 var(--space-4); padding:0; display:grid; gap: var(--space-3); font-size:14.5px; line-height:1.45; }
+.if-checks li{ display:grid; grid-template-columns: 22px 1fr; gap: var(--space-2); align-items:start; }
+.if-check{ display:inline-flex; width:20px; height:20px; border-radius:50%; background: var(--color-success); color:#fff; align-items:center; justify-content:center; margin-top:1px; }
+:root[data-theme="dark"] .if-check{ color:#0b1f16; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .if-check{ color:#0b1f16; } }
+.if-check svg{ width:13px; height:13px; stroke-width:3; }
+.if-cta{ width:100%; justify-content:center; text-align:center; gap: var(--space-2); }
+.if-cta svg{ width:16px; height:16px; }
+
+.if-dark{
+  position:relative; isolation:isolate; overflow:hidden; border-radius: var(--radius-lg);
+  background: var(--color-dark) url("../img/hero-800.webp") 85% center / cover no-repeat;
+  color:#fff; padding: var(--space-5); margin-top: var(--space-8);
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: var(--space-4) var(--space-6);
+}
+.if-dark::before{ content:""; position:absolute; inset:0; z-index:-1; background: linear-gradient(90deg, rgba(15,13,10,.94) 0%, rgba(15,13,10,.78) 60%, rgba(15,13,10,.4) 100%); }
+.if-dark-tekst{ flex:1 1 320px; min-width:0; }
+.if-dark h2{ color:#fff; font-size:22px; line-height:1.2; max-width: 20em; margin-bottom: var(--space-2); }
+.if-dark p{ margin:0; font-size:15px; line-height:1.5; color: rgba(255,255,255,.94); max-width: 32em; }
+.if-dark .btn{ flex:none; }
+.if-dark .if-dark-btn{ color:#fff; border-color: rgba(255,255,255,.8); background: transparent; }
+.if-dark .if-dark-btn:hover{ background: rgba(255,255,255,.14); color:#fff; border-color:#fff; }
+.if-dark .if-dark-btn svg{ width:16px; height:16px; }
+
+.if-links{
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm); padding: var(--space-4) var(--space-5);
+}
+.if-links h2{ font-size:18px; margin-bottom: var(--space-2); }
+.if-links ul{ list-style:none; margin:0; padding:0; }
+.if-links li + li{ border-top:1px solid var(--color-border); }
+.if-links a{
+  display:flex; align-items:center; gap: var(--space-3); min-height:44px; padding: var(--space-2) 0;
+  color: var(--color-fg); text-decoration:none; font-size:15px; font-weight:500;
+}
+.if-links a:hover{ color: var(--color-primary); }
+.if-links a .if-links-ic{ display:inline-flex; flex:none; width:22px; height:22px; color: var(--color-fg-muted); }
+.if-links a .if-links-ic svg{ width:22px; height:22px; }
+.if-links a .if-links-pil{ margin-left:auto; display:inline-flex; width:14px; height:14px; color: var(--color-fg-muted); }
+.if-links a .if-links-pil svg{ width:14px; height:14px; }
+.if-links-note{ margin: var(--space-3) 0 0; padding-top: var(--space-3); border-top:1px solid var(--color-border); font-size:14px; line-height:1.5; color: var(--color-fg-muted); }
+.if-links-note a{ display:inline; min-height:0; padding:0; color: var(--color-primary); text-decoration:underline; text-underline-offset:3px; overflow-wrap:anywhere; font-weight:600; }
+
+/* ---------- Sådan virker Bikerbasen (om-bikerbasen) ---------- */
+.if-saadan{ padding-bottom: var(--space-4); }
+.if-saadan .saadan-strip{ grid-template-columns: minmax(0,1fr); }
+
+/* ---------- Fejlside (404) ---------- */
+.if-fejl-sog{
+  display:flex; flex-wrap:wrap; gap: var(--space-3); align-items:stretch;
+  background: var(--color-surface); color: var(--color-fg); border:1px solid var(--color-border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); padding: var(--space-4); max-width: 640px; margin-top: var(--space-6);
+}
+.if-fejl-sog .input-icon-wrap{ flex:1 1 240px; min-width:0; }
+.if-fejl-sog .btn{ flex:0 0 auto; }
+.if-fejl-kode{ font-family: var(--font-display); font-weight:700; letter-spacing:.12em; }
+.if-fejl-wrap{ padding-top: var(--space-7); padding-bottom: var(--space-9); }
+.if-fejl-wrap h2{ font-size: 22px; margin-bottom: var(--space-4); }
+.if-fejl-grid{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-3); grid-template-columns: minmax(0,1fr); }
+@media (min-width:560px){ .if-fejl-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:900px){ .if-fejl-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+.if-fejl-grid a{
+  display:grid; grid-template-columns: 44px minmax(0,1fr) 16px; gap: var(--space-3); align-items:center; height:100%;
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); padding: var(--space-4); color: var(--color-fg); text-decoration:none;
+  transition: box-shadow .2s ease, border-color .2s ease;
+}
+.if-fejl-grid a:hover{ box-shadow: var(--shadow-md); border-color: var(--color-primary); }
+.if-fejl-ic{ display:inline-flex; width:44px; height:44px; align-items:center; justify-content:center; border-radius:50%; background: var(--color-surface-2); color: var(--color-primary); border:1px solid var(--color-border); }
+.if-fejl-ic svg{ width:22px; height:22px; }
+.if-fejl-grid strong{ display:block; font-family: var(--font-display); font-size:16px; line-height:1.25; }
+.if-fejl-grid span span{ display:block; margin-top:2px; font-size:13.5px; line-height:1.4; color: var(--color-fg-muted); }
+.if-fejl-grid .if-pil{ display:inline-flex; width:16px; height:16px; color: var(--color-fg-muted); }
+.if-fejl-grid .if-pil svg{ width:16px; height:16px; }
+
+@media (max-width:480px){
+  .if-toc{ padding: var(--space-4); }
+  .if-hero h1{ max-width: none; }
+  .if-article{ font-size:16px; }
+  .if-article pre.legal-pre{ padding: var(--space-3) var(--space-4); font-size:13px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .if-fejl-grid a{ transition:none; }
+}
+
+@media (max-width:599px){
+  .if-regel{ display:grid; grid-template-columns: 36px minmax(0,1fr); column-gap: var(--space-3); row-gap: 2px; align-items:start; }
+  .if-regel-ic{ grid-row: 1 / span 2; }
+}

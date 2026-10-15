@@ -25,14 +25,7 @@
 <meta name="twitter:title" content="Om vores indeksering — Bikerbasen">
 <meta name="twitter:description" content="Læs Bikerbasens vilkår og betingelser, herunder regler for annoncer, forhandlere og betaling mellem brugere.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
-
-
-
-
-
-
-
+<!-- meta:end -->
 
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -63,12 +56,11 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 
-
-
-
 <link rel="stylesheet" href="css/styles.css?v=0b0906a5">
+<link rel="stylesheet" href="css/p-info.css?v=0b0906a5">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Om vores indeksering","item":"https://bikerbasen.dk/om-indeksering"}]}</script>
 </head>
-<body>
+<body class="if-page" data-aktiv="om-indeksering.html">
 <a class="skip-link" href="#main-content">Gå til indhold</a>
 <header class="site-header">
   <div class="container">
@@ -112,24 +104,59 @@ try{
     <a href="login.html" data-auth-slot-mobile><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg>Log ind / Opret profil</a>
     <a href="mine-annoncer.html?tab=favoritter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>Gemte annoncer (<span data-fav-count-mobile>0</span>)</a>
   </div>
-</div><main id="main-content">
-  <div class="container">
-    <div class="legal-content">
-      <h1>Om vores indeksering</h1>
-      <p class="legal-updated">Sidst opdateret: 17. august 2026</p>
+</div>
 
-      <p>Bikerbasen er en <strong>aggregator</strong>. Vi hoster ikke annoncer &mdash; vi
-      indekserer dem hos kilden og linker tilbage. Handlen sker hos den, der har annoncen.</p>
+<main id="main-content">
+  <header class="if-hero">
+    <div class="if-hero-media" aria-hidden="true">
+      <img class="if-hero-photo" src="img/hero-1600.webp" srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="1600" height="679" fetchpriority="high" decoding="async">
+    </div>
+    <div class="container if-hero-inner">
+      <nav class="breadcrumb if-crumb" aria-label="Brødkrumme"><a href="index.html">Forside</a><span class="bc-sep" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span><span aria-current="page">Om vores indeksering</span></nav>
+      <p class="if-kicker">INDEKSERING</p>
+      <h1 data-juridisk="1">Om vores indeksering</h1>
+      <p class="if-lede" data-juridisk="3">Bikerbasen er en <strong>aggregator</strong>. Vi hoster ikke annoncer &mdash; vi indekserer dem hos kilden og linker tilbage. Handlen sker hos den, der har annoncen.</p>
+      <p class="if-updated" data-juridisk="2"><span class="if-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span><span>Sidst opdateret: 17. august 2026</span></p>
+    </div>
+  </header>
 
+  <div class="container if-layout">
+    <div class="if-main">
+      <section class="if-overblik" aria-labelledby="if-overblik-h">
+        <h2 id="if-overblik-h">Reglerne i korte træk</h2>
+        <ul class="if-regler">
+          <li class="if-regel"><span class="if-regel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/></svg></span><strong>Højst ét kald hvert andet sekund</strong><span class="if-regel-tekst">Pr. domæne, og aldrig samtidige kald mod samme domæne.</span></li>
+          <li class="if-regel"><span class="if-regel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.8v5.4c0 4.7 3 8 7 9.6 4-1.6 7-4.9 7-9.6V5.8Z"/><path d="m9 12 2.2 2.2L15.5 9.7"/></svg></span><strong>robots.txt ved hver kørsel</strong><span class="if-regel-tekst">Vi læser den hver gang, følger Crawl-delay og henter ikke spærrede stier.</span></li>
+          <li class="if-regel"><span class="if-regel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><strong>Skriftligt ja først</strong><span class="if-regel-tekst">Vi indekserer kun kilder, vi har fået et skriftligt ja fra.</span></li>
+          <li class="if-regel"><span class="if-regel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4.5" width="14" height="16.5" rx="2.2"/><path d="M9 4.5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v.5"/><path d="M8.5 10.5h7M8.5 14h7M8.5 17.5h4"/></svg></span><strong>Det vi gemmer</strong><span class="if-regel-tekst">Titel, mærke, model, årgang, kilometer, slagvolumen, effekt, pris, postnummer, sælgertype, kildens domæne, link og ét miniaturebillede, vi linker til.</span></li>
+          <li class="if-regel"><span class="if-regel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"/><circle cx="12" cy="12" r="3"/></svg></span><strong>Det vi ikke gemmer</strong><span class="if-regel-tekst">Ingen annoncetekst, ingen billedgallerier og ingen kontaktoplysninger.</span></li>
+          <li class="if-regel"><span class="if-regel-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.3"/><path d="m4 6.5 8 6 8-6"/></svg></span><strong>Skriv, så stopper vi</strong><span class="if-regel-tekst">Ét flag i vores konfiguration, og vi henter ikke mere fra dit domæne.</span></li>
+        </ul>
+      </section>
+      <nav class="if-toc" aria-labelledby="if-toc-h">
+        <h2 id="if-toc-h"><span class="if-toc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg></span>Indholdsfortegnelse</h2>
+        <ol style="--if-toc-rows:4">
+          <li><a href="#kender-os">S&aring;dan kender du os i loggen</a></li>
+          <li><a href="#gemmer">Hvad vi gemmer</a></li>
+          <li><a href="#gemmer-ikke">Hvad vi ikke gemmer</a></li>
+          <li><a href="#hastighed">Hvor ofte, og hvor langsomt</a></li>
+          <li><a href="#tilladelse">Vi sp&oslash;rger, f&oslash;r vi begynder</a></li>
+          <li><a href="#stop">S&aring;dan f&aring;r du os til at holde op</a></li>
+          <li><a href="#kontakt">Kontakt</a></li>
+          <li><a href="#retsgrundlag">Retsgrundlag</a></li>
+        </ol>
+      </nav>
+
+      <article class="if-article if-numbered" data-juridisk="9">
       <p>Ser du vores trafik i din serverlog, er den her side svaret p&aring;, hvem vi er,
       hvad vi henter, hvor ofte, og hvordan du f&aring;r os til at holde op.</p>
 
-      <h2>S&aring;dan kender du os i loggen</h2>
+      <h2 id="kender-os">S&aring;dan kender du os i loggen</h2>
       <p>Vores User-Agent indeholder navnet <code>Bikerbasen-indeksering</code> og en adresse
       til den her side:</p>
       <pre class="legal-pre">Bikerbasen-indeksering/1.0 (+https://bikerbasen.dk/om-indeksering.html)</pre>
 
-      <h2>Hvad vi gemmer</h2>
+      <h2 id="gemmer">Hvad vi gemmer</h2>
       <p>Kun de felter, der skal til for at vise et kort og sende k&oslash;beren videre til dig:</p>
       <ul>
         <li>Titel, m&aelig;rke, model, &aring;rgang, kilometer, slagvolumen og effekt</li>
@@ -139,7 +166,7 @@ try{
         <li>Kildens domæne og et direkte link til annoncen</li>
       </ul>
 
-      <h2>Hvad vi ikke gemmer</h2>
+      <h2 id="gemmer-ikke">Hvad vi ikke gemmer</h2>
       <ul>
         <li><strong>Ingen annoncetekst.</strong> Vi henter ikke beskrivelsen. Feltet st&aring;r tomt i vores database.</li>
         <li><strong>Ingen billedgallerier.</strong> Billederne er dine. Vi viser &eacute;t miniaturebillede fra din egen server og kopierer intet.</li>
@@ -148,7 +175,7 @@ try{
       <p>K&oslash;beren skal kontakte s&aelig;lgeren <em>hos dig</em>, hvor s&aelig;lgeren selv har valgt at
       l&aelig;gge sine oplysninger. Derfor har vi dem ikke.</p>
 
-      <h2>Hvor ofte, og hvor langsomt</h2>
+      <h2 id="hastighed">Hvor ofte, og hvor langsomt</h2>
       <ul>
         <li><strong>H&oslash;jst &eacute;t kald hvert andet sekund</strong> pr. dom&aelig;ne. Henter vi en side pr. annonce, g&aring;r vi langsommere endnu.</li>
         <li><strong>Aldrig samtidige kald</strong> mod samme dom&aelig;ne. Foresp&oslash;rgslerne st&aring;r i k&oslash;.</li>
@@ -156,32 +183,66 @@ try{
         <li>Sp&aelig;rrer din <code>robots.txt</code> en sti, henter vi den ikke.</li>
       </ul>
 
-      <h2>Vi sp&oslash;rger, f&oslash;r vi begynder</h2>
+      <h2 id="tilladelse">Vi sp&oslash;rger, f&oslash;r vi begynder</h2>
       <p>En <code>robots.txt</code>, der siger ja, er en teknisk regel &mdash; ikke en aftale.
       Vi indekserer kun kilder, vi har f&aring;et et <strong>skriftligt ja</strong> fra, og vores
       egen pipeline n&aelig;gter at k&oslash;re en kilde uden. Det er ikke en indstilling, nogen kan
       klikke fra.</p>
 
-      <h2>S&aring;dan f&aring;r du os til at holde op</h2>
+      <h2 id="stop">S&aring;dan f&aring;r du os til at holde op</h2>
       <p>Skriv til os, og vi stopper. Der skal &eacute;t flag til i vores konfiguration, og s&aring;
       henter vi ikke mere fra dit dom&aelig;ne. Du beh&oslash;ver ikke begrunde det, og du beh&oslash;ver ikke
       &aelig;ndre din <code>robots.txt</code> for vores skyld.</p>
       <p>Vil du hellere kun have os v&aelig;k fra bestemte sider, virker <code>Disallow</code> i din
       <code>robots.txt</code> med det samme &mdash; vi l&aelig;ser den ved hver k&oslash;rsel.</p>
 
-      <h2>Kontakt</h2>
+      <h2 id="kontakt">Kontakt</h2>
       <p>Sp&oslash;rgsm&aring;l til vores indeksering, eller &oslash;nske om at komme ud:</p>
       <p class="legal-kontakt"><a href="mailto:kontakt@bikerbasen.dk">kontakt@bikerbasen.dk</a></p>
       <p>Skriver du fra et dom&aelig;ne, vi indekserer, beder vi ikke om andet end en mail fra
       dom&aelig;net selv.</p>
 
-      <h2>Retsgrundlag</h2>
+      <h2 id="retsgrundlag">Retsgrundlag</h2>
       <p>Vi indekserer faktuelle oplysninger og linker til kilden. Vi bygger ikke en kopi af
       din database: reglerne ovenfor &mdash; feltlisten, den manglende annoncetekst og de
       manglende gallerier &mdash; er skrevet for at holde os inden for
       databasebeskyttelsen i ophavsretslovens &sect;71 og inden for kildernes egne vilk&aring;r.</p>
-    </div></div>
+      </article>
+
+      <section class="if-dark" aria-labelledby="if-dark-h">
+        <div class="if-dark-tekst">
+          <h2 id="if-dark-h">Er det dit domæne?</h2>
+          <p>Skriv til os, så henter vi ikke mere fra dit domæne.</p>
+        </div>
+        <a class="btn btn-outline if-dark-btn" href="mailto:kontakt@bikerbasen.dk">Skriv til os <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+      </section>
+    </div>
+    <aside class="if-side" aria-label="Kort fortalt og genveje">
+      <section class="if-tldr" aria-labelledby="if-tldr-h">
+        <h2 id="if-tldr-h"><span class="if-tldr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
+        <ul class="if-checks">
+          <li><span class="if-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Vores User-Agent indeholder navnet Bikerbasen-indeksering og en adresse til denne side.</span></li>
+          <li><span class="if-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Vi indekserer kun kilder, vi har fået et skriftligt ja fra.</span></li>
+          <li><span class="if-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Vi henter og læser din robots.txt ved hver eneste kørsel.</span></li>
+          <li><span class="if-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Skriv til os, og vi stopper — du behøver ikke begrunde det.</span></li>
+        </ul>
+        <a class="btn btn-primary if-cta" href="soegning.html">Søg motorcykler på Bikerbasen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+      </section>
+      <section class="if-links" aria-labelledby="if-links-h">
+        <h2 id="if-links-h">Læs også</h2>
+        <ul>
+          <li><a href="privatlivspolitik.html"><span class="if-links-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>Privatlivspolitik<span class="if-links-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span></a></li>
+          <li><a href="vilkaar.html"><span class="if-links-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4.5" width="14" height="16.5" rx="2.2"/><path d="M9 4.5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v.5"/><path d="M8.5 10.5h7M8.5 14h7M8.5 17.5h4"/></svg></span>Vilkår og betingelser<span class="if-links-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span></a></li>
+          <li><a href="om-bikerbasen.html"><span class="if-links-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg></span>Om Bikerbasen<span class="if-links-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span></a></li>
+          <li><a href="sikkerhed.html"><span class="if-links-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.8v5.4c0 4.7 3 8 7 9.6 4-1.6 7-4.9 7-9.6V5.8Z"/><path d="m9 12 2.2 2.2L15.5 9.7"/></svg></span>Sikkerhed &amp; gode råd<span class="if-links-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span></a></li>
+          <li><a href="guides.html"><span class="if-links-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5Z"/></svg></span>Artikler &amp; guides<span class="if-links-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span></a></li>
+        </ul>
+        <p class="if-links-note">Spørgsmål? Skriv til <a href="mailto:kontakt@bikerbasen.dk">kontakt@bikerbasen.dk</a>.</p>
+      </section>
+    </aside>
+  </div>
 </main>
+
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
@@ -228,6 +289,7 @@ try{
     </div>
   </div>
 </footer>
+
 <!-- C1 (23.08.2026): siden er ren tekst og bruger kun header/footer. Samme
      scriptsaet som sikkerhed.html — uden supabase-js (52 KB gzip), supabase-api,
      postnumre og backend-bridge, som ingenting her kaldte. Login-status i
@@ -238,9 +300,7 @@ try{
 <script defer src="js/store.js?v=0b0906a5"></script>
 <script defer src="js/maaling.js?v=0b0906a5"></script>
 <script defer src="js/components.js?v=0b0906a5"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => { renderHeader('vilkaar.html'); });
-</script>
+<script defer src="js/info.js?v=0b0906a5"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">
