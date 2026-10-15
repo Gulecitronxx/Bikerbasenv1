@@ -1,4 +1,4 @@
-/* Tests for det rige annoncekort (forsiden, referencebillede 1): listingCardHTML(l, i, { rich: true }).
+/* Tests for annoncekortet (ét kort på alle flader; forsiden er referencebillede 1): listingCardHTML(l, i).
 
    Kortet er en tættere opstilling af de samme data som de to andre korttyper.
    Det, der må holde, er reglerne, ikke pixelerne:
@@ -42,12 +42,12 @@ const sessionStorage = { getItem:()=>null, setItem:noop, removeItem:noop };
 const Store = { isComparing:()=>false, isFavorite:()=>false, getUser:()=>null };
 `;
 
-const { listingCardHTML, externalCardHTML, koerekortMaerkat } = new Function(
+const { listingCardHTML, koerekortMaerkat } = new Function(
   STUB + KILDER.map(læs).join('\n') +
-  '\nreturn { listingCardHTML, externalCardHTML, koerekortMaerkat };')();
+  '\nreturn { listingCardHTML, koerekortMaerkat };')();
 
 const KILDE_URL = 'https://mcsyd.dk/Produkter/Motorcykel/Brugt/Honda?p=180898&m=1489';
-const rig = (l, i = 1) => listingCardHTML(l, i, { rich: true });
+const rig = (l, i = 1) => listingCardHTML(l, i);
 const linje = html => html.match(/<p class="rk-linje">([\s\S]*?)<\/p>/)[1];
 const chipsAf = html => html.match(/<ul class="rk-chips">([\s\S]*?)<\/ul>/)[1];
 
@@ -101,8 +101,8 @@ test('mangler hk, siger en dæmpet chip det; mangler begge, siger den begge', ()
 test('kørekortchippen er filterets udregning, ordret', () => {
   for (const l of [ekstern(), ekstern({ power: 30, ccm: 373 }), egen(), ekstern({ power: null, ccm: 650 })]){
     const k = koerekortMaerkat(l);
-    const vist = k.kode === 'A' ? 'A' : k.tekst;   // chippen er smal: 'Kørekort A' vises som 'A', teksten ligger i skærmlæsertekst og title
-    assert.ok(rig(l).includes(`>${vist}<span class="visually-hidden">. ${k.kode === 'A' ? 'Kørekort A. ' : ''}${k.forklaring}</span></li>`),
+    const vist = k.kode === 'A' ? 'Kræver A' : k.tekst;   // chippen er smal: 'Kørekort A' vises som 'Kræver A'; hele sætningen ligger i skærmlæsertekst og title
+    assert.ok(rig(l).includes(`<span>${vist}</span><span class="visually-hidden">. ${k.kode === 'A' ? 'Kørekort A. ' : ''}${k.forklaring}</span></li>`),
       `chippen skal sige "${k.tekst}" med forklaringen i klartekst`);
   }
   assert.match(rig(egen()), /rk-kk kk-a2/, 'A2-klassen følger med som CSS-klasse');
@@ -116,7 +116,7 @@ test('det indekserede rige kort: intet hjerte, ét internt link, ingen vej ud af
   assert.equal(links.length, 1);
   assert.match(links[0], /href="annonce\.html\?id=42410d86-c150-4ce9-8e0f-8ca744bb4e0c"/);
   assert.ok(!/href="https?:/.test(html) && !/target="_blank"/.test(html));
-  assert.match(html, /Kilde: mcsyd\.dk/);
+  assert.match(html, /class="rk-kilde"[\s\S]*?mcsyd\.dk/);
   assert.match(html, /title="Annoncen ligger hos MC Syd/);
 });
 
@@ -125,11 +125,11 @@ test('en indekseret annonce uden brugbar kilde-URL vises ikke', () => {
   assert.equal(rig(ekstern({ externalUrl: '' })), '');
 });
 
-test('vores egen annonce: hjerte og "Kilde: Privat" / "Forhandler"', () => {
+test('vores egen annonce: hjerte og "Privat sælger" / "Forhandler" i bunden', () => {
   const html = rig(egen());
   assert.match(html, /class="fav-btn [^"]*" aria-pressed="false" aria-label="Gem annonce" data-fav-toggle="1021"/);
-  assert.match(html, /Kilde: Privat/);
-  assert.match(rig(egen({ isDealer: true })), /Kilde: Forhandler/);
+  assert.match(html, /class="rk-kilde"[\s\S]*?Privat sælger/);
+  assert.match(rig(egen({ isDealer: true })), /class="rk-kilde"[\s\S]*?Forhandler/);
 });
 
 test('uden pris står der "Pris ved henvendelse", aldrig "null kr."', () => {
@@ -138,12 +138,12 @@ test('uden pris står der "Pris ved henvendelse", aldrig "null kr."', () => {
   assert.ok(!/null|NaN|undefined/.test(html));
 });
 
-test('uden opts er de to eksisterende korttyper uændrede', () => {
-  const e = ekstern();
-  assert.equal(listingCardHTML(e, 1), externalCardHTML(e, 1));
-  assert.ok(!/card-rich/.test(listingCardHTML(egen(), 1)));
-  // .map(listingCardHTML) sender (element, indeks, liste): listen må ikke læses som opts
-  assert.ok(!/card-rich/.test([egen()].map(listingCardHTML)[0]));
+test('der er ÉT kort: ekstern og egen annonce har samme anatomi, uanset hvordan funktionen kaldes', () => {
+  const dele = html => ['card-media', 'rk-top', 'rk-linje', 'rk-chips', 'rk-fod', 'card-compare', 'card-link'].filter(k => html.includes(k));
+  assert.deepEqual(dele(listingCardHTML(ekstern(), 1)), dele(listingCardHTML(egen(), 1)));
+  // .map(listingCardHTML) sender (element, indeks, liste): listen må ikke gøre noget ved kortet
+  assert.equal([egen()].map(listingCardHTML)[0], listingCardHTML(egen(), 0));
+  assert.ok(!/card-external|card-body|card-meta/.test(listingCardHTML(egen(), 1)), 'ingen rester af de gamle korttyper');
 });
 
 test('kun de lovlige felter står på kortet — ingen annoncetekst, ingen kontaktoplysninger', () => {

@@ -60,9 +60,9 @@ const sessionStorage = { getItem:()=>null, setItem:noop, removeItem:noop };
 const Store = { isComparing:()=>false, isFavorite:()=>false, getUser:()=>null };
 `;
 
-const { externalCardHTML, externalRowHTML, listingCardHTML, markerFotoFejl, tjekFejledeFotos, fotoFejlHTML } = new Function(
+const { externalRowHTML, listingCardHTML, markerFotoFejl, tjekFejledeFotos, fotoFejlHTML } = new Function(
   STUB + KILDER.map(læs).join('\n') +
-  '\nreturn { externalCardHTML, externalRowHTML, listingCardHTML, markerFotoFejl, tjekFejledeFotos, fotoFejlHTML };')();
+  '\nreturn { externalRowHTML, listingCardHTML, markerFotoFejl, tjekFejledeFotos, fotoFejlHTML };')();
 
 const KILDE_URL = 'https://mcsyd.dk/Produkter/Motorcykel/Brugt/Honda?p=180898&m=1489';
 
@@ -92,7 +92,7 @@ function attrFor(html, klasse){
 
 test('kortfladen på et indekseret kort peger på VORES annonceside', () => {
   const l = eksternAnnonce();
-  const link = attrFor(externalCardHTML(l, 1), 'card-link');
+  const link = attrFor(listingCardHTML(l, 1), 'card-link');
   assert.ok(link, 'kortet skal stadig have en .card-link');
   assert.equal(link.href, `annonce.html?id=${l.id}`);
   // Ny fane hører til et link, der forlader sitet. Vores egen side gør ikke.
@@ -107,7 +107,7 @@ test('kortfladen på et indekseret kort peger på VORES annonceside', () => {
    frem for som "findes klassen ikke": kommer der en dag et andet link ud af
    sitet på kortet, skal den også fange det. */
 test('kortet har ingen vej ud af sitet — hverken CTA eller anden ekstern URL', () => {
-  const html = externalCardHTML(eksternAnnonce(), 1);
+  const html = listingCardHTML(eksternAnnonce(), 1);
   const links = html.match(/<a\b[^>]*>/g) || [];
   assert.equal(links.length, 1, 'der må kun være ét <a> på kortet');
   assert.match(links[0], /class="card-link"/);
@@ -119,34 +119,21 @@ test('kortet har ingen vej ud af sitet — hverken CTA eller anden ekstern URL',
 /* Kilden skal stadig NÆVNES. Det er ikke pynt: en køber, der lander på en
    annonceside, som sender ham videre til en forhandler, må kunne se det på
    kortet først. Det er kun det klikbare link ud, der skulle væk. */
-test('kilden nævnes stadig på kortet — fodlinje (med forklaring i title) og navn i kortlinket', () => {
-  /* Runde 5 (D5-S2): striben øverst er væk — 34 px identisk tekst på 24 af 24
-     kort. Kilden bor nu ÉT sted: fodlinjen, med domænet, det eksterne-link-
-     ikon og stribens forklaring som title. Og stadig i kortlinkets navn. */
-  const html = externalCardHTML(eksternAnnonce(), 1);
+test('kilden nævnes stadig på kortet — i bunden (med forklaring i title) og navn i kortlinket', () => {
+  /* Kilden bor ÉT sted på kortet: bunden, med domænet, det eksterne-link-ikon og forklaringen som title.
+     (Hjørne-pillen oven på fotoet og kildestriben øverst er væk — samme oplysning tre gange.) */
+  const html = listingCardHTML(eksternAnnonce(), 1);
   assert.doesNotMatch(html, /class="card-kilde"/);
-  assert.match(html, /class="card-kildelinje" title="Annoncen ligger hos MC Syd[^"]*"[\s\S]*?mcsyd\.dk/);
+  assert.doesNotMatch(html, /card-source-badge/, 'ingen pille oven på fotoet: domænet står i bunden');
+  assert.match(html, /class="rk-kilde" title="Annoncen ligger hos MC Syd[^"]*"[\s\S]*?mcsyd\.dk/);
   assert.match(attrFor(html, 'card-link')['aria-label'], /hos MC Syd/);
 });
 
-/* R18-P1: hjørne-badgen er IKKE runde 5's genopstandne stribe (den
-   forrige test låser netop, at .card-kilde ikke findes). Den er en ny,
-   lille pille i .card-media — ét <span>, ingen ny <a>, så testen ovenfor
-   ("der må kun være ét <a> på kortet") holder stadig. */
-test('hjørne-badgen viser domænet i .card-media, uden at tilføje en ny vej ud af sitet', () => {
-  const html = externalCardHTML(eksternAnnonce(), 1);
-  const badge = (html.match(/<span class="card-source-badge"[^>]*>[\s\S]*?<\/span><\/span>/) || [])[0];
-  assert.ok(badge, 'badgen skal findes på kortet');
-  assert.match(badge, /mcsyd\.dk/);
-  assert.match(badge, /title="Annoncen ligger hos MC Syd[^"]*"/);
-  const links = html.match(/<a\b[^>]*>/g) || [];
-  assert.equal(links.length, 1, 'badgen må ikke tilføje et nyt <a>');
-});
-
-test('uden et oplyst domæne udelades badgen helt — ingen tomt hjørne-mærke', () => {
+test('uden et oplyst domæne står kildens navn i bunden — ingen tom plads', () => {
   const l = eksternAnnonce({ source: { navn: 'Gul og Gratis', domaene: undefined } });
-  const html = externalCardHTML(l, 1);
-  assert.doesNotMatch(html, /class="card-source-badge"/);
+  const html = listingCardHTML(l, 1);
+  const fod = (html.match(/class="rk-kilde"[\s\S]*?<\/span><\/span>/) || [''])[0].replace(/<[^>]+>/g, '');
+  assert.match(fod, /Gul og Gratis/);
 });
 
 test('listerækken følger kortet: ét link, og det peger indad', () => {
@@ -164,19 +151,12 @@ test('listerækken følger kortet: ét link, og det peger indad', () => {
   assert.match(html, /row-origin[\s\S]*?mcsyd\.dk/);
 });
 
-/* Prisen er det, købet træffes på, og den skal derfor stå først og størst.
-   Den stod sidst og lige så stor som titlen: `.card-external .card-price` var
-   sat ned til 17px — samme størrelse og vægt som `.card-title-main` — og
-   prisrækken kom efter titlen i DOM'en. Målt på 1440 lå prisen 56px UNDER
-   titlen. Rækkefølgen låses her, fordi den ikke kan ses i en CSS-fil: en
-   senere oprydning, der "samler titlen øverst som på vores egne kort", ville
-   vende hierarkiet om igen uden at nogen opdagede det. */
-test('prisen står FØR titlen på det indekserede kort', () => {
-  const html = externalCardHTML(eksternAnnonce(), 1);
-  const pris = html.indexOf('card-prisrække');
-  const titel = html.indexOf('card-title-main');
-  assert.ok(pris > -1 && titel > -1, 'begge felter skal findes');
-  assert.ok(pris < titel, 'prisrækken skal stå før titlen i DOM-rækkefølgen');
+/* Titel og pris står på ÉN linje (.rk-top), titlen først — forsidens opstilling, nu på alle kort. Rækkefølgen
+   låses her, fordi den ikke kan ses i en CSS-fil. */
+test('titel og pris står på samme linje på det indekserede kort', () => {
+  const html = listingCardHTML(eksternAnnonce(), 1);
+  const top = (html.match(/<div class="rk-top">([\s\S]*?)<\/div>/) || [])[1] || '';
+  assert.ok(top.indexOf('rk-titel') > -1 && top.indexOf('rk-pris') > top.indexOf('rk-titel'), 'titel før pris i .rk-top');
 });
 
 test('uden en brugbar kilde-URL vises den indekserede annonce slet ikke', () => {
@@ -184,7 +164,7 @@ test('uden en brugbar kilde-URL vises den indekserede annonce slet ikke', () => 
   // kortet VILLE virke uden kildens URL, fordi fladen peger på vores side.
   // En annonce, man ikke kan handle på, skal alligevel ikke stå i listen.
   for (const url of [null, '', 'javascript:alert(1)', 'ikke-en-url']){
-    assert.equal(externalCardHTML(eksternAnnonce({ externalUrl: url }), 1), '',
+    assert.equal(listingCardHTML(eksternAnnonce({ externalUrl: url }), 1), '',
       `externalUrl=${JSON.stringify(url)} skal give et tomt kort`);
     assert.equal(externalRowHTML(eksternAnnonce({ externalUrl: url }), 1), '',
       `externalUrl=${JSON.stringify(url)} skal give en tom række`);
@@ -200,70 +180,51 @@ test('vores egne kort er urørte: ét internt link, ingen ny fane', () => {
   assert.equal(link.target, undefined);
 });
 
-/* ---------- D-011: én rytme i listen ----------
-   De to korttyper i den samme liste var 118px fra hinanden ved 390px (579 mod
-   461), og størstedelen sad i specblokken: fire chips i et 2×2-gitter mod det
-   egne korts ene linje. Testene her låser DET, der ikke kan ses i en
-   CSS-fil — hvilke felter linjen bærer, og hvad der sker med de huller, der
-   er i data (163 af 332 mangler km). */
+/* ---------- Ét kort: linjen og chips ----------
+   Før stod årgang, km og kubik som en <dl>; nu bærer .rk-linje år | km | type og chips bærer kørekort, ccm og
+   hk. Huller i data (163 af 332 mangler km) siges højt — aldrig "0 km". */
 
-test('speclinjen bærer de samme tre felter som vores eget kort', () => {
-  const html = externalCardHTML(eksternAnnonce(), 1);
-  const felter = [...html.matchAll(/<dt>([^<]+)<\/dt><dd>([^<]*)<\/dd>/g)].map(m => [m[1], m[2]]);
-  assert.deepEqual(felter, [['Årgang', '2024'], ['Kilometer', '8.100 km'], ['Kubik', '1.000 ccm']]);
-  /* Fire værdier kan ikke stå på én linje: den bredeste måler 266px, og
-     kortets krop er nede på 241px i drift. Effekt blev det felt, der gik —
-     kørekortchippen lige nedenunder ER udledt af den. */
-  assert.ok(!/<dt>Effekt<\/dt>/.test(html), 'hk hører ikke til på kortets speclinje');
-  assert.match(html, /card-koerekort/, 'kørekortkategorien skal blive — den er hk\'s konklusion');
+test('linjen bærer år, km og type; chips bærer kørekort, ccm og hk', () => {
+  const html = listingCardHTML(eksternAnnonce({ type: 'naked' }), 1);
+  assert.match(html, /<p class="rk-linje"><span>2024<\/span><span>8\.100 km<\/span><span>Naked<\/span><\/p>/);
+  assert.match(html, /1\.000 ccm/);
+  assert.match(html, /150 hk/);
+  assert.match(html, /class="rk-chip rk-kk kk-[a-z0-9]+"/, 'kørekortkategorien skal blive — den er hk\'s konklusion');
+  assert.ok(!/<dl|<dt>/.test(html), 'den gamle spec-liste er væk');
 });
 
-test('manglende felter samles i ét led, der siger HVILKE', () => {
-  const kun = l => (l.match(/<div class="card-spec[^"]*">[\s\S]*?<\/div>/g) || []).join('');
-  // Ét hul.
-  let html = externalCardHTML(eksternAnnonce({ km: null }), 1);
-  assert.match(html, /<div class="card-spec spec-tom"><dt>Ikke oplyst af kilden<\/dt><dd>km<\/dd><\/div>/);
-  assert.ok(!/<dd>Ikke oplyst<\/dd>/.test(html), 'et bart "Ikke oplyst" siger ikke hvad der mangler');
-  // To huller — dansk opremsning med "og".
-  html = externalCardHTML(eksternAnnonce({ km: null, ccm: null }), 1);
-  assert.match(html, /<dd>km og kubik<\/dd>/);
-  // Ingen huller: intet led.
-  html = externalCardHTML(eksternAnnonce(), 1);
-  assert.ok(!/spec-tom/.test(html), 'uden huller skal der ikke stå noget om manglende felter');
-  assert.ok(kun(html).length > 0);
+test('manglende tal siges højt — km i linjen, ccm/hk i en dæmpet chip', () => {
+  let html = listingCardHTML(eksternAnnonce({ km: null }), 1);
+  assert.match(html, /Km ikke oplyst/);
+  assert.ok(!/ 0 km|null|NaN/.test(html));
+  html = listingCardHTML(eksternAnnonce({ ccm: null, power: null }), 1);
+  assert.match(html, /ccm og hk ikke oplyst/);
+  html = listingCardHTML(eksternAnnonce(), 1);
+  assert.ok(!/ikke oplyst/.test(html), 'uden huller skal der ikke stå noget om manglende felter');
 });
 
-test('kilden nævnes stadig i bunden, nu på samme linje som stedet', () => {
-  /* Fodlinjen gik fra to rækker til én. Begge oplysninger skal blive:
-     stedet er det eneste geografiske på kortet, og domænet er det eneste,
-     køberen selv kan slå op, før han klikker. */
-  const html = externalCardHTML(eksternAnnonce(), 1);
-  assert.match(html, /class="card-sted"[\s\S]*?Rødding/);
-  // Runde 6 (D6-S3): sælgertypen i sit eget span (skjules i spalter < 300 px),
-  // domænet altid helt synligt. Uden tags læses linjen stadig "Forhandler · mcsyd.dk".
-  const fod = (html.match(/class="card-kildelinje"[\s\S]*?<\/span><\/span>/) || [''])[0].replace(/<[^>]+>/g, '');
+test('sted til venstre og sælgertype + kilde til højre i bunden', () => {
+  const html = listingCardHTML(eksternAnnonce(), 1);
+  assert.match(html, /class="rk-sted" title="Rødding, Syddanmark"[\s\S]*?<span>Rødding<\/span>/);
+  const fod = (html.match(/class="rk-kilde"[\s\S]*?<\/span><\/span>/) || [''])[0].replace(/<[^>]+>/g, '');
   assert.match(fod, /Forhandler · mcsyd\.dk/);
-  // Runde 5 (D5-S7): byen alene i linjen, regionen i title — domænet skal have pladsen.
-  assert.match(html, /class="card-sted" title="Rødding, Syddanmark"/);
-  // Runde 5 (D5-S3/S4): kørekortchippen står i spec-rækken, med kode-klasse.
-  assert.match(html, /class="card-spec card-spec-kk"[\s\S]*?class="card-koerekort kk-[a-z0-9]+"/);
+  // Sælgertypen ligger i eget span, så smalle kort kan skjule den og lade domænet stå.
+  assert.match(html, /<span class="rk-saelgertype">Forhandler · <\/span>mcsyd\.dk/);
 });
 
-/* R18-P1: "Mulig A2" må ikke læses som bekræftet ved et skim — kritikkens
-   fund. Icon.info markerer det tentative synligt, uden at røre den
-   allerede efterprøvede forklaringstekst i title/visually-hidden. */
-test('info-ikonet står på "Mulig A2", men ikke på den bekræftede "Kørekort A"', () => {
+/* "Mulig A2" må ikke læses som bekræftet ved et skim (R18-P1). Chippen siger "Mulig", aldrig "A2 godkendt", og
+   den bekræftede "A" siger "Kræver A". Forklaringen står som title og skærmlæsertekst. */
+test('"Mulig A2" er tentativ i selve ordlyden; "Kræver A" er den bekræftede udelukkelse', () => {
   // 300 ccm, 28 hk — under A2-loftet, ikke udelukket, men ikke bekræftet.
-  const mulig = externalCardHTML(eksternAnnonce({ ccm: 300, power: 28 }), 1);
-  const muligPille = (mulig.match(/class="card-koerekort kk-a2"[\s\S]*?<\/span>/) || [''])[0];
-  assert.match(muligPille, /<svg/, 'Mulig A2 skal have et synligt ikon, ikke kun en title');
-  assert.match(muligPille, /Mulig A2/);
-
-  // Standardfixturen (150 hk) er over A2-graensen — en bekraeftet udelukkelse.
-  const bekraeftet = externalCardHTML(eksternAnnonce(), 1);
-  const bekraeftetPille = (bekraeftet.match(/class="card-koerekort kk-a"[\s\S]*?<\/span>/) || [''])[0];
-  assert.ok(bekraeftetPille, 'fixturen skal give "Kørekort A"');
-  assert.ok(!/<svg/.test(bekraeftetPille), 'Kørekort A er bekræftet og skal ikke have usikkerheds-ikonet');
+  const mulig = listingCardHTML(eksternAnnonce({ ccm: 300, power: 28 }), 1);
+  const muligChip = (mulig.match(/<li class="rk-chip rk-kk kk-a2"[\s\S]*?<\/li>/) || [''])[0];
+  assert.match(muligChip, /<span>Mulig A2<\/span>/);
+  assert.match(muligChip, /title="[^"]*A2/);
+  // Standardfixturen (150 hk) er over A2-grænsen — en bekræftet udelukkelse.
+  const bekraeftet = listingCardHTML(eksternAnnonce(), 1);
+  const aChip = (bekraeftet.match(/<li class="rk-chip rk-kk kk-a"[\s\S]*?<\/li>/) || [''])[0];
+  assert.match(aChip, /<span>Kræver A<\/span>/);
+  assert.match(aChip, /Kørekort A\./, 'skærmlæseren hører hele sætningen');
 });
 
 /* ---------- D-008: favoritten, der ikke kan gemmes ----------
@@ -275,7 +236,7 @@ test('info-ikonet står på "Mulig A2", men ikke på den bekræftede "Kørekort 
    senere "konsistens-oprydning" retter uden at kende grunden. */
 
 test('det indekserede kort har intet gem-hjerte — og vores eget har ét', () => {
-  const ekstern = externalCardHTML(eksternAnnonce(), 1);
+  const ekstern = listingCardHTML(eksternAnnonce(), 1);
   assert.ok(!/fav-btn/.test(ekstern), 'en favorit, databasen afviser, må ikke se ud som om den virker');
   assert.ok(!/data-fav-toggle/.test(ekstern));
   assert.match(ekstern, /data-compare-toggle/,

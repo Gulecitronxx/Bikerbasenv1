@@ -39,6 +39,13 @@
   --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
 
   --header-h: 68px;
+  /* EN containerskala for hele sitet (header, hero, soegekort, filtre+resultater, annonce, maerke, kategori, guide,
+     login, opret, dashboard, footer): indhold staar paa x = (viewport - site-w)/2 + gutter. */
+  --site-w: 1480px;
+  --gutter: 16px;
+  /* EN h1-skala for alle hero-sider (forside, søgning, kategori, guide, opret, login, dashboard). Dybe sider
+     (annonce, tekstsider) har deres egne, mindre størrelser. */
+  --h1-hero: clamp(28px, 3.6vw, 50px);
   /* Annoncesidens faste handlingsbjælke. Målt til 69px (10 + 48 + 10 + 1px
      kant); de 76 er den plads, body'en allerede holdt fri under den, og nu
      er det ét tal i stedet for to — se scroll-padding-bottom i reset'en og
@@ -209,11 +216,11 @@ svg{display:block; width:1em; height:1em;}
 
 .container{
   width:100%;
-  max-width:1240px;
+  max-width:var(--site-w);
   margin: 0 auto;
-  padding: 0 var(--space-4);
+  padding: 0 var(--gutter);
 }
-@media (min-width: 768px){ .container{ padding: 0 var(--space-6); } }
+@media (min-width: 768px){ :root{ --gutter: var(--space-6); } }
 
 .visually-hidden{
   position:absolute; width:1px; height:1px; overflow:hidden;
@@ -568,7 +575,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    som på alle andre sider — ingen gennemsigtig header hen over fotoet længere. */
 /* Forsiden: header, hero og alle sektioner står på ÉN venstrekant (billedets komposition). */
 /* Headerens bredde er ens paa ALLE sider (samlet Critic: den hoppede 100 px mellem forsiden og resten). */
-.container--wide, .site-header > .container{ max-width:1480px; }
+/* .container--wide er nu et alias: alle containere har samme bredde (--site-w). */
+.container--wide{ max-width:var(--site-w); }
 .hero{
   position:relative; overflow:hidden;
   background: var(--color-dark);
@@ -633,7 +641,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   color:#fff;
   margin-bottom: var(--space-3); text-shadow: 0 1px 10px rgba(0,0,0,.55);
 }
-.hero h1{ font-size: clamp(28px, 3.6vw, 50px); line-height:1.06; font-weight:700; margin-bottom: var(--space-3); text-shadow: 0 2px 22px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.35); text-wrap: balance; }
+.hero h1{ font-size: var(--h1-hero); line-height:1.06; font-weight:700; margin-bottom: var(--space-3); text-shadow: 0 2px 22px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.35); text-wrap: balance; }
 .hero p.lead{ font-size: clamp(15px,1.3vw,18px); line-height:1.5; color:#F2EEE7; max-width:600px; margin:0; text-shadow:0 1px 14px rgba(0,0,0,.65), 0 1px 2px rgba(0,0,0,.4); }
 
 /* Søgekortet og tillidsrækken. Wrapperen trækkes op over hero'en; dens øverste del er gennemsigtig
@@ -661,6 +669,14 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Etiketterne står som i referencen: almindelig skrift, mørk, ikke versaler. */
 .search-panel .field label, .search-panel .kk-field legend{
   font-size:13px; font-weight:600; color: var(--color-fg); text-transform:none; letter-spacing:0; padding:0; margin:0 0 6px;
+}
+/* ÉT labelsæt for ALLE søgekort — forside, søgning, mærke, type, kørekort og region (samlet Critic P3: fed
+   sentence-case her, små versaler dér). Marginer hører til hver kortfamilie; kun skriften er ens. */
+.search-panel .field label, .search-panel .kk-field legend,
+.so-field > label, .so-field > legend,
+.fa-soeg .field label, .fa-soeg .kk-field legend,
+.mk-search .field label, .mk-search .kk-field legend{
+  font-size:13px; font-weight:600; line-height:1.2; color: var(--color-fg); text-transform:none; letter-spacing:0;
 }
 .search-panel .field{ gap:0; }
 .search-panel .input, .search-panel select.input{ min-height:46px; border-radius:10px; font-size:15px; }
@@ -790,36 +806,74 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 }
 .check-ikon svg{ width:14px; height:14px; stroke-width:2.6; }
 
-/* ============ Det rige annoncekort (forsiden; js/components.js rigtKortHTML) ============ */
-.card-rich{ border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
-.card-rich .card-media{ aspect-ratio: 16/9; }
+/* ============ Annoncekortet — ÉT kort (js/components.js listingCardHTML) ============
+   Samme kort på forside, søgning, mærke, type, kørekort, region, model, "lignende", noscript og forhåndsvisning:
+   samme foto-forhold (3:2), samme kant og skygge, kørekortchippen først, sted + kilde nederst. */
+.card-rich{ border-radius: var(--radius-md); box-shadow: var(--shadow-sm); container-type: inline-size; min-width:0; }
+.card-rich .card-media{ aspect-ratio: 3/2; }
 /* Ingen foto: feltet må ikke vokse — fakta-linjen findes i kortets krop. */
 .card-rich .foto-tom-fakta{ display:none; }
 .card-rich .foto-tom{ padding: var(--space-2); }
-/* Det indekserede kort har intet hjerte: dets sammenlign-knap står, hvor hjertet ellers ville stå. */
-.card-rich:not(.rk-egen) .card-compare{ top:8px; right:8px; bottom:auto; }
-.rk-body{ display:flex; flex-direction:column; gap:7px; flex:1; padding: 11px 11px 10px; min-width:0; }
+.rk-body{ display:flex; flex-direction:column; gap:8px; flex:1; padding: 12px 12px 11px; min-width:0; }
 .rk-top{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
-.rk-titel{ font-family: var(--font-display); font-size:14.5px; font-weight:700; line-height:1.25; margin:0; min-width:0; overflow-wrap:anywhere; }
-.rk-pris{ flex:none; font-family: var(--font-display); font-size:14.5px; font-weight:700; white-space:nowrap; }
+/* Smalle kort (forsidens fem-række, mærkesidens kortrække): prisen står under titlen i stedet for at presse den. */
+@container (max-width: 262px){
+  .rk-top{ flex-direction:column; align-items:flex-start; gap:2px; }
+  .rk-pris.pris-mangler{ text-align:left; }
+}
+.rk-titel{ font-family: var(--font-display); font-size:15px; font-weight:700; line-height:1.25; margin:0; min-width:0; overflow-wrap:anywhere; }
+.rk-pris{ flex:none; font-family: var(--font-display); font-size:15px; font-weight:700; white-space:nowrap; }
 .rk-pris.pris-mangler{ white-space:normal; text-align:right; font-size:12.5px; font-weight:600; color: var(--color-fg-muted); }
 .rk-linje{ display:flex; flex-wrap:wrap; margin:0; font-size:12.5px; line-height:1.3; color: var(--color-fg-muted); row-gap:2px; }
 .rk-linje span + span{ margin-left:8px; padding-left:8px; border-left:1px solid var(--color-border); }
 .rk-mangler{ font-style:normal; }
+.rk-ny{ font-weight:700; color: var(--color-primary-hover); }
 .rk-chips{ display:flex; flex-wrap:wrap; gap:5px; list-style:none; margin:0; padding:0; }
 .rk-chip{
-  font-size:11.5px; font-weight:600; line-height:1; padding:6px 6px; border-radius:6px;
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:11.5px; font-weight:600; line-height:1; padding:6px 7px; border-radius:6px;
   background: var(--color-surface-2); color: var(--color-fg); white-space:nowrap;
 }
-/* Kørekortchippen: A1/A2 (udelukker noget) i brandfarvens tone, A (udelukker intet) mørk, uafgjort stiplet. */
+.rk-chip svg{ width:13px; height:13px; flex:none; }
+/* Kørekortchippen (altid først): A1/A2 (udelukker noget) i brandfarvens tone, A (udelukker intet) mørk, uafgjort stiplet. */
 .rk-kk.kk-a1, .rk-kk.kk-a2{ background: var(--color-primary-tint); color: var(--color-primary-hover); }
 .rk-kk.kk-a{ background: var(--color-dark); color:#fff; }
 .rk-kk.kk-ukendt, .rk-chip-mangler{ background:transparent; border:1px dashed var(--color-input-border); color: var(--color-fg-muted); padding:5px 6px; }
-.rk-fod{ margin-top:auto; padding-top:6px; display:flex; align-items:center; justify-content:space-between; gap: var(--space-2); font-size:12px; color: var(--color-fg-muted); }
-.rk-sted{ display:inline-flex; align-items:center; gap:4px; min-width:0; flex:0 1 auto; }
-.rk-sted svg{ width:14px; height:14px; flex:none; }
-.rk-sted span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.rk-kilde{ flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; }
+.rk-chip-ok svg{ color: var(--color-success); }
+/* Salgsmarkør ("Engros", "Uden klargøring"): forklarer prisen; må ombrydes, aldrig klippes. */
+.rk-chip-note{ white-space:normal; line-height:1.2; text-transform:none; background:transparent; border:1px solid var(--color-border); color: var(--color-fg-muted); }
+.rk-fod{ margin-top:auto; padding-top:8px; border-top:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; gap: var(--space-2); font-size:12px; color: var(--color-fg-muted); }
+.rk-sted, .rk-kilde{ display:inline-flex; align-items:center; gap:4px; min-width:0; }
+.rk-sted{ flex:1 1 auto; }
+.rk-kilde{ flex:0 1 auto; justify-content:flex-end; }
+.rk-sted svg, .rk-kilde svg{ width:13px; height:13px; flex:none; }
+.rk-sted span, .rk-kilde span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.rk-kilde > span{ text-align:right; }
+/* Smalle kort: sælgertypen viger for domænet. */
+@container (max-width: 250px){ .rk-saelgertype{ display:none; } }
+
+/* Uden foto: afdæmpet typebillede (img/type) + en ærlig mærkat — det er ikke annoncens motorcykel. */
+.foto-tom--type{ justify-content:flex-end; align-items:flex-start; padding:0; background: var(--color-surface-2); overflow:hidden; }
+.foto-tom--type::before{
+  inset:0; border:0; border-radius:0;
+  background: var(--tt-img, none) 50% 55% / cover no-repeat; opacity:.5; filter: grayscale(.8);
+}
+:root[data-theme="dark"] .foto-tom--type::before{ opacity:.32; }
+.foto-tom--type .foto-tom-ikon{ display:none; }
+.foto-tom--type .foto-tom-titel{
+  position:relative; margin:0 0 8px 8px; padding:4px 9px; max-width: calc(100% - 64px);
+  font-size:11px; font-weight:600; line-height:1.25; text-align:left; border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent); color: var(--color-fg);
+}
+.tt-sport{ --tt-img: url(../img/type/sport.webp); }
+.tt-touring{ --tt-img: url(../img/type/touring.webp); }
+.tt-cruiser{ --tt-img: url(../img/type/cruiser.webp); }
+.tt-naked{ --tt-img: url(../img/type/naked.webp); }
+.tt-adventure{ --tt-img: url(../img/type/adventure.webp); }
+.tt-scooter{ --tt-img: url(../img/type/scooter.webp); }
+.tt-classic{ --tt-img: url(../img/type/classic.webp); }
+.tt-cross{ --tt-img: url(../img/type/cross.webp); }
+.row-media .foto-tom--type .foto-tom-titel{ margin:0 0 4px 4px; padding:2px 6px; font-size:9.5px; max-width:calc(100% - 8px); }
 
 /* ============ Category tiles ============ */
 /* Typefliser: foto med navn og antal. Billederne er ALTID hentet (ikke lazy, V-004), og navnet står på en
@@ -1011,27 +1065,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   box-shadow: var(--shadow-sm); pointer-events:none;
 }
 .card-koerekort::before{ content:"Kørekort\00a0"; font-weight:600; opacity:.7; font-size:10px; }
-/* "Intet foto" oven på den illustrerede pladsholder.
-   Midt i feltet, fordi alle fire hjørner er optaget: mærkater øverst til
-   venstre, favoritknap øverst til højre, kørekort nederst til venstre,
-   sammenlign nederst til højre.
-   Den egne svg-regel er nødvendig: .card-media svg sætter 100% bredde og
-   højde, og uden en mere specifik regel ville kameraikonet fylde hele
-   kortet. */
-.card-intet-foto{
-  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2;
-  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
-  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
-  color: var(--color-fg-muted); font-size:12px; font-weight:600;
-  padding:5px 11px; border-radius: var(--radius-pill);
-  border:1px solid var(--color-border); box-shadow: var(--shadow-sm);
-  pointer-events:none;
-}
-.card-media .card-intet-foto svg,
-.row-media .card-intet-foto svg,
-.swipe-card-media .card-intet-foto svg{ width:14px; height:14px; flex:0 0 auto; }
-/* Listevisningens miniature er lille — der er ikke plads til andet end ordet. */
-.row-media .card-intet-foto{ font-size:11px; padding:3px 8px; gap:4px; }
 .badge{
   font-size:11px; font-weight:700; padding:4px 9px; border-radius: var(--radius-pill);
   text-transform:uppercase; letter-spacing:.03em; display:inline-flex; align-items:center; gap:4px;
@@ -1039,40 +1072,10 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .badge-new{ background: var(--color-badge-new); color:#fff; }
 /* Kørekort-badge på detaljesiden — mørk pille, samme signal som på kortet. */
 .badge-koerekort{ background: var(--color-dark); color:#fff; }
-/* Tillidschip i listing-card-body (kun ved fuld servicehistorik). */
-.card-trust{ display:flex; }
 .detail-chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top: var(--space-3); }
 .badge-dealer{ background: var(--color-dark); color:#fff; }
 .badge-dealer svg{ width:12px; height:12px; }
 .badge-neutral{ background: rgba(255,255,255,0.9); color: var(--color-dark); }
-
-/* ---------- Indekserede annoncer fra andre sider ----------
-   Kortet skal kunne aflæses på under et sekund: HVILKEN motorcykel, hvad
-   koster den, hvilket kørekort kræver den, hvor står den — og at annoncen
-   ligger hos en anden. Alt herunder tjener den rækkefølge.
-
-   Tre regler holder kortet sammen, og de er ikke til forhandling:
-
-   1. FASTE SLOTS. Titel, pris, specrække og bund har fast højde, uanset hvad
-      kilden havde med. Skrider ét felt, skrider hele kolonnen, og så kan en
-      side med 40 kort ikke skimmes — man skal læse hvert kort forfra.
-   2. FIRE SKRIFTSTØRRELSER: 21 / 17 / 14 / 12, og prisen har de 21. Hvert
-      trin er over 1,15x, så forskellen ses. Seks størrelser er ikke et
-      hierarki, det er støj — men tre var én for få: prisen stod på 17 som
-      titlen, og et hierarki uden forskel er heller ikke et hierarki.
-   3. ALLE LODRETTE AFSTANDE ER 4, 8, 12 ELLER 16. Fire værdier, alle
-      multipla af 4. Rytmen er dét, der får kortet til at virke roligt.
-
-   Kanten er heltrukken. Den var stiplet, og det var en fejl: i stort set
-   ethvert designsprog betyder stiplet ramme kladde, drop-zone, uafsluttet.
-   Kortet skulle signalere "lånt fra en anden side" — det signalerede
-   "ufærdig", og det gik ud over MC Syd, ikke os. Signalet er nu kildestriben
-   øverst, som siger det med ord i stedet. */
-
-.card-external{
-  border-style: solid;
-  border-color: color-mix(in srgb, var(--color-fg-muted) 40%, var(--color-border));
-}
 
 /* ---- Kildestriben ----
    Mærket lå før som en pille oven på fotoet. Målt over et vilkårligt
@@ -1102,299 +1105,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 }
 .badge-external svg{ width:12px; height:12px; flex:0 0 auto; }
 
-.card-external .card-body{ gap:12px; padding:16px; }
-
-/* ---- Titlen: to linjer, fast højde ----
-   "Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING" på én linje blev
-   klippet efter "Cruiser", og så fortalte kortet kun, at der stod meget.
-   Linje 1 bærer modellen, linje 2 varianten, dæmpet. Titlen står UNDER
-   prisen og et trin mindre end den — se prisrækken nedenfor.
-
-   Højden er låst til 44px (24+20), også når varianten er tom. Uden det ville
-   et kort uden variant være 20px lavere end naboen, og alt nedenunder ville
-   stå i forskellig højde fra kort til kort. */
-.card-external .card-title{ display:flex; flex-direction:column; min-width:0; height:44px; }
-.card-title-main{
-  font-family: var(--font-display); font-weight:700; font-size:17px;
-  line-height:24px; height:24px;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-.card-title-variant{
-  font-weight:400; font-size:14px; line-height:20px; height:20px;
-  color: var(--color-fg-muted);
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-
-/* ---- Pris + salgsbetingelser på samme linje, ØVERST i kroppen ----
-   Prisen fylder sit, og salgsmarkørerne ("ENGROS", "UDEN KLARGØRING") står
-   til højre. De hører til her og ikke i titlen: de forklarer PRISEN. Og de
-   ligger ikke længere oven på fotoet, hvor to piller dækkede 185 af 204 px
-   af billedet ved smal kortbredde.
-
-   D-002: prishierarkiet var vendt om på 87 % af lageret. `.card-price` var
-   sat ned til 17px HER — samme størrelse og vægt som `.card-title-main` — og
-   rækken stod efter titlen i DOM'en, målt til 56px UNDER den. Vores eget kort
-   gjorde det modsatte i samme gitter (pris 21px over titel 15px), så de to
-   korttyper i den samme liste svarede på hver sit spørgsmål først.
-
-   Rækken er nu 28px, så de 21px fra den delte `.card-price` (:1007) kan stå
-   i den, og overskrivningen herunder sætter kun linjehøjde og flex.
-
-   De 22 uden pris: "Pris ved henvendelse" er ikke et beløb og må ikke se ud
-   som et. Linjen skifter ikke højde — kun størrelse, vægt og farve, så øjet
-   ikke læser det som et tal. */
-.card-prisrække{
-  display:flex; align-items:baseline; justify-content:space-between; gap:8px;
-  height:28px; min-width:0;
-}
-.card-external .card-price{ line-height:28px; flex:0 0 auto; }
-.card-external .card-price.pris-mangler{
-  font-family: var(--font-body); font-size:14px; font-weight:500;
-  color: var(--color-fg-muted);
-}
-.card-salgsmarkoerer{
-  flex:0 1 auto; min-width:0;
-  font-size:12px; font-weight:600; line-height:16px; padding:0 8px;
-  border-radius:4px; background: var(--color-surface-2); color: var(--color-fg-muted);
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-
-/* ---- Fire specchips + kørekort ----
-   Tre ikoner på én linje ("2003 · 38.000 km · 750 ccm") tvang læseren til at
-   afkode hvert ikon for at vide, hvad tallet var, og linjen brød på smalle
-   kort. Fire chips i et 2x2-gitter stod her og var to rækker á 28px plus 8px
-   imellem = 64px, hvor vores EGET kort skriver de samme oplysninger på én
-   20px-linje ("2021 · 9.100 km · 373 ccm").
-
-   D-011: det var den enkelte største grund til, at de to korttyper i den
-   samme liste var 118px fra hinanden (målt 390px: 579 mod 461). En liste med
-   to rytmer er to lister.
-
-   Chipsene blev valgt, fordi et ikon uden tal ser ud som en fejl, og fordi
-   der ER huller i data (163 af 332 mangler km, 113 mangler hk). Den
-   indvending gjaldt ikon+tekst — der er ingen ikoner her — og hullerne er
-   løst i js/components.js' eksternSpecs() i stedet: de kendte værdier står
-   på linjen, og de manglende samles i ét led til sidst, der siger hvilke.
-   Se begrundelsen og tallene dér.
-
-   Højden er LÅST til 20px. Det er den samme regel som titlens 44px: skrider
-   ét felt, skrider hele kolonnen, og så kan en side med 24 kort ikke
-   skimmes. */
-.card-specblok{ display:flex; flex-direction:column; gap:8px; }
-/* Runde 5 (D5-S4): fakta som chips i ÉN 24 px-raekke (Bilbasen: "7/2025 ·
-   7.000 km · 566 km raekkevidde · El" som fire graa chips). Chips kan
-   skannes lodret ned gennem listen — km sidder i samme kolonne paa hvert kort.
-   D-011 afviste chips, fordi de var et 2x2-gitter paa 64 px; det var
-   gitteret, der var galt, ikke chippen. */
-.card-specs{
-  display:flex; align-items:center; gap:6px; margin:0; padding:0;
-  min-width:0; height:24px; overflow:hidden;
-  font-size:12.5px; line-height:18px;
-}
-/* De kendte værdier fylder hvad de fylder; kun det manglende led må klippes,
-   for det er det eneste, man kan gætte resten af. */
-.card-spec{ display:flex; min-width:0; flex:0 0 auto; white-space:nowrap; }
-.card-spec.spec-tom{ flex:0 1 auto; }
-/* Separatoren hænger EFTER leddet og ikke før det næste. Det betyder noget,
-   når linjen bryder (se media-reglen nedenfor): en "·" i slutningen af
-   første række læses som "der kommer mere", en "·" i starten af anden række
-   læses som en fejl. */
-/* Separator-prikken er vaek: chipsene baerer adskillelsen selv (D5-S4). */
-
-/* Den smalle spalte: linjen bryder til to rækker frem for at klippe et tal.
-
-   Det HER er en container-forespørgsel og ikke en media-forespørgsel, og det
-   er ikke smag. Kortets bredde følger ikke vinduets: søgesiden har et
-   filterpanel ved siden af gitteret, forsiden og mærkesiderne har ikke, og
-   gitteret skifter spalteantal fire gange undervejs. Målt bliver den samme
-   spalte for smal ved viewport 320, 620, 1240 OG 1920 — fire vidt forskellige
-   vinduer — mens 360-1024 har plads. Et sæt breakpoints på vinduet ville
-   ramme forkert på mindst to af de fire.
-
-   Tallene, målt på 224 indekserede kort (soegning.html og maerke-honda.html):
-
-     bredeste linje UDEN manglende felt   244px  ("1997 · 36.000 km · 1.520 ccm")
-     bredeste linje MED manglende felt    266px  ("2025 · 1.000 ccm · km ikke oplyst")
-     smalleste krop i drift               241px  (viewport 320, én spalte)
-     næstsmalleste                        243px  (viewport 1240, tre spalter + filterpanel)
-
-   Grænsen står derfor på 270px: over den er der plads til det bredeste
-   tilfælde, under den brydes linjen. Alternativet — at lade den sidste værdi
-   få ellipsis — ville skrive "1.52…", og et forkortet tal er et FORKERT tal.
-   Skulle noget alligevel løbe over, er det KUN det manglende led, der kan
-   skrumpe (flex:0 1 auto); de kendte værdier står fast. */
-.card-external .card-body{ container-type: inline-size; }
-/* Runde 5: bredeste kendte tilfaelde som chips ("1997 · 36.000 km · 1.520 ccm ·
-   Koerekort A") = ca. 315 px; kroppen er 324 px ved 390. Under 320 px bryder
-   raekken til to, som foer. */
-@container (max-width: 320px){
-  .card-specs{ flex-wrap:wrap; align-content:flex-start; height:54px; }
-}
-/* RUNDE 12: den faste 54 px er PLADS TIL TO chip-raekker, og den reserveres
-   ogsaa naar kortet kun bruger én — maalt ~28 px tom, laast plads pr. kort.
-   Laasen findes for at holde nabokort lige hoeje (D-011), og den grund gaelder
-   kun i FLERSPALTEDE gitre. Under 560 px er gitteret én spalte (linje 835), og
-   der er ingen nabo at flugte med. Kortene maa derfor vaere forskellige hoeje
-   der — 24 kort × ~28 px er en halv skaerm ren luft paa den side, hvor pladsen
-   er dyrest. Over 560 px er laasen uroert. */
-@media (max-width:559px){
-  .card-specs{ height:auto; }
-  /* RUNDE 13 (R13-3): titlen var laast til ÉN linje med ellipse. Maalt paa
-     maerke-harley-davidson ved 390 px: 8 af 24 titler klippet — og det tabte
-     var modelnavnet, det eneste der skiller kortene, fordi maerket allerede
-     havde spist de foerste 16 tegn ("Harley-Davidson FLHRC Road K…" i stedet
-     for "Road King Classic"). Et forkortet modelnavn er ikke et kortere navn,
-     det er et andet navn.
-
-     Samme undtagelse og samme begrundelse som .card-specs ovenfor: den faste
-     hoejde findes for at holde NABOkort lige hoeje, og under 560 px er der én
-     spalte og ingen nabo. To linjer, derefter ellipse — saa en ekstrem titel
-     stadig ikke kan vaelte kortet. */
-  .card-external .card-title{ height:auto; }
-  .card-title-main{
-    white-space:normal; height:auto;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-  }
-}
-/* Runde 6 (D6-S6): "2025 · 1.000 ccm · km ikke oplyst · Koerekort ikke afgjort"
-   klippede km-chippen til "km i…" i én raekke. Samme faste hoejde-idé (D-011),
-   bare en anden fast hoejde for den kortklasse, der har brug for to raekker. */
-/* Runde 7 (D7-S5): kortets krop er en container — reglen skal foelge kortets
-   bredde, ikke skaermens (maerkesidens 3 spalter ved 1 366 klippede igen). */
-@container (max-width: 420px){
-  .card-specs:has(.spec-tom):has(.kk-ukendt){ flex-wrap:wrap; align-content:flex-start; height:54px; }
-}
-/* Feltnavnet er der for skærmlæseren; linjen viser kun værdien. */
-.card-spec dt{
-  position:absolute; width:1px; height:1px; margin:0; padding:0;
-  font-size:14px; overflow:hidden; clip-path: inset(50%); white-space:nowrap;
-}
-/* padding, background og border-radius står her med 0/none MED VILJE.
-   Værdien var en chip, og de tre egenskaber hørte til chippen. At fjerne dem
-   fra reglen er ikke nok: hele "Cards / listings grid"-sektionen indlejres af
-   scripts/inline-critical.js i dokumentet på fem sidetyper, og den
-   indlejrede kopi er den, der gælder, indtil det asynkrone ark lander — og
-   for en egenskab, det nye ark slet ikke nævner, gælder den gamle værdi
-   BAGEFTER også. Chippen ville altså overleve rettelsen på hver eneste side,
-   der ikke var bygget om. Det har kostet en fejlmåling i dette repo før
-   (D-007, opacity). Reglen siger derfor selv, hvad den vil have. */
-.card-spec dd{
-  margin:0; font-weight:600;
-  padding:2px 8px; background: var(--color-surface-2); border-radius:4px;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-.card-spec.spec-tom dd{ background:transparent; padding-inline:0; font-weight:500; }
-.card-spec-kk dd{ padding:0; background:transparent; }
-/* Aldrig et tomt felt, aldrig en bar tankestreg — men heller ikke et tal, vi
-   ikke har. Leddet bliver stående og siger, HVAD kilden ikke oplyste.
-   Ordene "ikke oplyst" står her og ikke i markuppen, fordi det skjulte <dt>
-   allerede bærer dem for skærmlæseren; stod de begge steder, blev de læst to
-   gange. */
-.card-spec.spec-tom dd{ font-weight:500; color: var(--color-fg-muted); }
-.card-spec.spec-tom dd::after{ content:" ikke oplyst"; }
-
-/* Kørekortkategorien er det eneste felt på kortet, der kan gøre hele
-   annoncen irrelevant for læseren: må han køre den eller ej. Den står derfor
-   alene, i fuld bredde, i sitets accentfarve — og den forsvinder ALDRIG.
-   Kan den ikke udledes, står der "Kørekort ukendt", for et manglende felt
-   dér ville læses som "ingen krav". */
-/* Runde 5 (D5-S3): "Koerekort A" staar paa 548 af 548 annoncer (A udelukker
-   ingen) og var den ENESTE fyldte accentfarve paa siden — 24 gange det samme
-   ord, hoejere end prisen. Kontur som standard; fyldt kun for A1/A2, hvor
-   chippen baerer en oplysning, Bilbasen ikke har (13 + 47 annoncer, en
-   19-aarig kan koebe). Altid synlig, stadig fed, stadig "Koerekort A". */
-.card-external .card-koerekort{
-  position:static; display:inline-block; align-self:flex-start; max-width:100%;
-  font-family: var(--font-display); font-size:12.5px; font-weight:700;
-  line-height:18px; padding:2px 8px; letter-spacing:0;
-  border-radius:4px; box-shadow:none;
-  background:transparent; color: var(--color-fg); border:1.5px solid var(--color-border);
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-.card-external .card-koerekort.kk-a1, .card-external .card-koerekort.kk-a2{ background: var(--color-primary); color: var(--color-on-primary); border-color:transparent; }
-/* R18-P1: info-ikonet paa "Mulig A1/A2" (js/components.js, koerekortMaerkat)
-   — synligt uden hover, i modsaetning til title-attributten. Kun disse to
-   klasser faar ikonet i markup'en; kk-a (bekraeftet) og kk-ukendt faar det
-   aldrig, saa reglen haandhaeves ét sted (JS), ikke to. */
-.card-external .card-koerekort svg{
-  width:12px; height:12px; flex-shrink:0; vertical-align:-2px; margin-right:3px;
-}
-.card-external .card-koerekort{ display:inline-flex; align-items:center; }
-/* RUNDE 12 (R12-D-3): accentfarven er et udsagn — "her staar svaret". Paa en
-   side, der ALLEREDE er filtreret paa koerekort, er svaret ikke nyt: chippen
-   stod orange paa 24 ud af 24 kort i samme position, og den primaere knap
-   oeverst druknede i sin egen farve. Maalt af kritikeren: 63 % af sidens
-   orange pixels var den chip. Teksten ("Mulig A1" mod "Mulig A2") baerer
-   stadig forskellen — den var i oevrigt usynlig i farven, for begge
-   kategorier havde samme orange. Gitteret baerer allerede data-facet-kind,
-   saa det her koster ingen generator-aendring. */
-[data-facet-kind="koerekort"] .card-external .card-koerekort.kk-a1,
-[data-facet-kind="koerekort"] .card-external .card-koerekort.kk-a2{
-  background: transparent; color: var(--color-fg); border-color: var(--color-border);
-}
-.card-external .card-price{ font-size:22px; letter-spacing:-0.01em; }
-/* Runde 5 (D5-S7): domaenet vinder pladskampen i fodlinjen; stedet viger.
-   Runde 6 (D6-S3): 40 %, og i spalter under 300 px falder saelgertypen vaek,
-   saa domaenet staar helt ("Svendborg" + "guloggratis.dk" = 197 px < 248). */
-.card-external .card-footer .card-sted{ flex:0 1 auto; max-width:40%; }
-@container (max-width: 300px){ .card-external .card-saelgertype{ display:none; } }
-.card-external .card-footer .card-kildelinje{ flex:1 1 auto; min-width:0; justify-content:flex-end; }
-/* Accentfarven er et udsagn: "sådan her er reglen". Kan vi ikke udlede
-   kategorien, må chippen ikke lyde lige så sikker — den bliver stående, men
-   dæmpet, så farven fortsætter med at betyde "her står svaret". */
-.card-external .card-koerekort.kk-ukendt{
-  background: var(--color-surface-2); color: var(--color-fg-muted);
-}
-/* Teksten står nu i elementet selv, så ::before-etiketten ville stå to
-   gange — og skærmlæseren ville læse den med. */
-.card-external .card-koerekort::before{ content:none; }
-
-/* ---- Bunden: hvor står den, og hvem sælger den ----
-   ÉN linje, ikke to. De stod på hver sin række med den begrundelse, at de
-   ellers ville knække forskelligt fra kort til kort — men begge har
-   text-overflow:ellipsis og knækker derfor slet ikke, og de 21px, den anden
-   række kostede, er en femtedel af hele D-011's højdeforskel.
-
-   Stedet står til venstre og sælgerlinjen til højre. Kun sælgerlinjen må
-   klippes: "Odense 5000" er kort og altid vores egen formatering, mens
-   "Forhandler · mcsyd.dk" bærer et domæne, vi ikke bestemmer længden af.
-
-   Der var en tredje linje her: "Se annoncen hos <kilde>", et link direkte til
-   kilden. Den er væk, og det er ikke en oprydning — det er kravet om, at
-   vejen ud af sitet går GENNEM vores annonceside, ikke uden om den. Se
-   externalCardHTML() i js/components.js. */
-.card-external .card-footer{
-  display:flex; flex-direction:row; align-items:center;
-  justify-content:space-between; gap:10px;
-  padding-top:12px; font-size:12px; min-width:0; height:28px;
-}
-.card-sted{ flex:0 0 auto; }
-.card-kildelinje{ flex:0 1 auto; }
-.card-sted, .card-kildelinje{
-  display:flex; align-items:center; gap:6px; min-width:0; line-height:16px;
-}
-.card-sted svg, .card-kildelinje svg{
-  width:14px; height:14px; flex:0 0 auto;
-}
-.card-sted > span, .card-kildelinje > span{
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-.card-kildelinje{ color: var(--color-fg-muted); }
-
-.card-seller.is-external{
-  display:flex; align-items:center; gap:8px;
-  color: var(--color-fg-muted); font-size:14px;
-}
-.card-seller.is-external svg{ width:14px; height:14px; flex:0 0 auto; }
-
-/* Under 280px kan et annoncefoto ikke bære en motorcykel, og specchipsene
-   begynder at klippe. Fire spalter giver 206px ved 1280px viewport; tre
-   giver knap 300px. Reglen hører hjemme hos .listings-grid, men den ejes af
-   søgesidens layout — den står her, indtil den kan flyttes derhen. */
-@media (min-width:1240px) and (max-width:1559px){
-  .listings-grid:has(> .card-external){ grid-template-columns: repeat(3, minmax(0,1fr)); }
-}
-
 /* Trykfeltet er 44x44 (minimumskravet), mens den synlige cirkel bliver 36px
    via ::before. Ellers ville knappen se klodset stor ud på kortene. */
 /* Vises på annoncesiden i stedet for gem-hjertet, når annoncen er ens egen —
@@ -1421,30 +1131,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .fav-btn.active{ color: var(--color-primary); }
 .fav-btn.active svg{ fill: var(--color-primary); }
 
-.card-body{ padding: var(--space-4); display:flex; flex-direction:column; gap:8px; flex:1; }
-.card-price{ font-family: var(--font-display); font-size:21px; font-weight:700; }
-.card-title{ font-weight:600; font-size:15px; line-height:1.3; }
-.card-meta{ display:flex; flex-wrap:wrap; gap: 10px 14px; color: var(--color-fg-muted); font-size:13px; }
-.card-meta span{ display:inline-flex; align-items:center; gap:5px; }
-.card-meta svg{ width:15px; height:15px; flex-shrink:0; }
-.card-footer{ margin-top:auto; padding-top:10px; border-top:1px solid var(--color-border); display:flex; justify-content:space-between; align-items:center; font-size:12px; color: var(--color-fg-muted); }
-
 .card-link{ position:absolute; inset:0; z-index:1; }
 .card-link:focus-visible{ outline-offset:-2px; }
-
-/* ============ Kort: hvem saelger ============
-   Kritikeren i runde 18 valgte referencen med den begrundelse, at vores kort
-   ikke fortalte hvem der stod bag beloebet. Linjen ligger lige over by og
-   tid — det sidste man laeser foer man beslutter sig for at klikke. */
-.card-seller{
-  display:flex; align-items:center; gap:6px;
-  font-size:13px; color: var(--color-fg-muted);
-  margin-top: 8px; min-width:0;
-}
-.card-seller svg{ width:15px; height:15px; flex-shrink:0; }
-.card-seller span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-/* Forhandlernavnet er det, koeberen genkender — det maa gerne veje mere. */
-.card-seller.is-dealer{ color: var(--color-fg); font-weight:600; }
 
 /* ============ Trust strip ============ */
 .trust-strip{ display:grid; grid-template-columns: repeat(1,1fr); gap: var(--space-4); }
@@ -2731,11 +2419,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 @media (min-width:640px){
   .listings-grid.list-view .card{ flex-direction:row; align-items:stretch; }
   .listings-grid.list-view .card-media{ width:240px; flex-shrink:0; aspect-ratio:auto; }
-  .listings-grid.list-view .card-body{ flex-direction:row; flex-wrap:wrap; align-items:center; gap:var(--space-4); padding:var(--space-4) var(--space-5); }
-  .listings-grid.list-view .card-price{ order:3; margin-left:auto; font-size:22px; }
-  .listings-grid.list-view .card-title{ order:1; flex-basis:100%; font-size:17px; }
-  .listings-grid.list-view .card-meta{ order:2; }
-  .listings-grid.list-view .card-footer{ order:4; flex-basis:100%; margin-top:0; }
 }
 
 /* ---------- Rækken ----------
@@ -2860,7 +2543,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* "Se hos MC Syd ↗" stod her, hvor tidsstemplet står på vores egne rækker.
    Den er væk sammen med kortets tilsvarende linje: rækkefladen går til vores
    egen annonceside, og vejen ud af sitet skal gå IGENNEM den, ikke uden om.
-   Se externalRowHTML() i js/search.js og externalCardHTML() i
+   Se externalRowHTML() i js/search.js og listingCardHTML() i
    js/components.js. Kilden står stadig to steder i rækken — mærkatet "Hos
    <kilde>" og domænet i .row-origin — men ingen af dem er en vej ud. */
 
@@ -3300,24 +2983,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .card-compare.active{ background: var(--color-primary); color: var(--color-on-primary); }
 :root[data-theme="dark"] .card-compare{ background: rgba(31,28,23,.92); }
 
-/* R18-P1: se begrundelsen i js/components.js ved externalCardHTML(). Solid
-   baggrund med vilje, ikke en gennemsigtig pille — en tidligere pille
-   direkte over et forhandlerfoto maalte 2,64:1 kontrast, under AA's 4,5:1
-   (se komment ved externalCardHTML, punkt 5). Samme moerk-tema-moenster
-   som .card-compare. */
-.card-source-badge{
-  position:absolute; top:10px; left:10px; z-index:2;
-  display:inline-flex; align-items:center; gap:5px;
-  background: rgba(255,255,255,.92); color: var(--color-dark);
-  font-size:11px; font-weight:600; line-height:1.2;
-  padding:4px 10px; border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-sm); max-width: calc(100% - 20px);
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  pointer-events:none;
-}
-.card-source-badge svg{ width:12px; height:12px; flex:0 0 auto; }
-:root[data-theme="dark"] .card-source-badge{ background: rgba(31,28,23,.92); color:#fff; }
-
 .compare-bar{
   position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:60;
   display:flex; align-items:center; gap:16px;
@@ -3566,23 +3231,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    at noget kan være galt. */
 .seller-cvr-fejl{ color: var(--color-danger); }
 .seller-cvr-fejl b{ color: var(--color-danger); }
-
-/* ---------- "Ny" på et indekseret kort ----------
-   162 af 332 indekserede annoncer er fabriksnye. Chippen står i prislinjen
-   ved siden af forhandlerens salgsmarkører, fordi den forklarer det samme:
-   hvorfor prisen ser ud, som den gør. Den er tydeligere end en salgsmarkør,
-   fordi den også er et juridisk vilkår — derfor primærfarvens tint frem for
-   den neutrale flade. Ingen ny farve. */
-.card-ny{
-  flex:0 0 auto;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary-tint, var(--color-surface-2));
-  color: var(--color-primary-hover);
-  border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
-  font-size:12px; font-weight:600; line-height:1.6;
-  white-space:nowrap;
-}
 
 /* Samme oplysning på detaljesiden, i sætningsform. */
 .external-detail-ny{
@@ -4063,12 +3711,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    overholde de 44px (Apple HIG / Material). */
 .profil-anmeld-kort{ margin-top: var(--space-4); padding: var(--space-2) var(--space-5); }
 .profil-anmeld-kort .report-link{ min-height:44px; }
-
-/* ---------- Annoncelisten ----------
-   Rækkerne er den delte listevisning fra søgesiden. Det eneste, der skal
-   væk, er sælgerlinjen på hvert kort: den siger "Privat sælger" eller
-   forhandlerens navn tolv gange i træk på sælgerens egen side. */
-.profil-hoved .card-seller{ display:none; }
 /* Den delte listevisning sætter aspect-ratio:auto på fotofeltet, så billedet
    strækkes til rækkens højde. Det virker på et rigtigt foto med
    object-fit:cover. Vores egne annoncer har ingen uploadede fotos, så feltet

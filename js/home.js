@@ -428,7 +428,7 @@ async function buildForside(){
     if (cs.display !== 'grid') return 6;
     return Math.max(2, cs.gridTemplateColumns.split(' ').filter(Boolean).length);
   };
-  const kortHTML = (l, i) => listingCardHTML(l, i + 1, { rich: true });
+  const kortHTML = (l, i) => listingCardHTML(l, i + 1);
   const tegnFeatured = async () => {
     const antal = maal();
     featured = vaelgFeatured(antal);
