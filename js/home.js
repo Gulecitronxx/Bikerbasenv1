@@ -129,8 +129,11 @@ async function buildForside(){
     /* Grænserne hentes fra KOEREKORT i js/data.js — de må kun stå ét sted. Etiketten trimmes for
        parentesen ("A2 (mellem mc)" → "A2"). */
     const meta = KOEREKORT.find(k => k.id === kat);
+    /* Forbeholdet vises kun, når et kørekort er valgt — så er søgekortet lavt som på billedet. Den faste
+       "vi gætter aldrig"-sætning står i tillidsrækken. */
+    kkHint.hidden = !meta;
     kkHint.textContent = !meta
-      ? 'Vi gætter aldrig: er effekten ikke oplyst, siger vi det. A2 afhænger også af vægt og afledningsregel — filteret frasorterer kun det, der er udelukket på effekt og ccm.'
+      ? ''
       : `${meta.label.replace(/\s*\(.*\)/, '')}: ${meta.hint.replace(/\.\s*$/, '')}. `
         /* "Vi viser kun mc'er, vi kan svare for" læses som en bekræftelse; vi kan kun udelukke. */
         + (meta.id === 'A' ? '' : `Vi viser kun dem, de oplyste tal ikke udelukker.`);

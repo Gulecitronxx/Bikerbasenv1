@@ -198,6 +198,23 @@ function wireHeader(){
       if (e.matches && erAaben()) setDrawer(false, false);
     });
   }
+  /* Undermenuen (Kørekort → A1/A2) åbner på hover og fokus og skal kunne afvises uden at flytte musen
+     eller fokus (WCAG 1.4.13): Escape sætter data-lukket, som CSS læser; hover/fokus ud af menuen
+     fjerner det igen. Ligger fokus i undermenuen, flyttes det op til forældrelinket. */
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const genåbn = () => item.removeAttribute('data-lukket');
+    item.addEventListener('mouseleave', genåbn);
+    item.addEventListener('focusout', (e) => { if (!item.contains(e.relatedTarget)) genåbn(); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.nav-item:hover, .nav-item:focus-within').forEach(item => {
+      if (item.hasAttribute('data-lukket')) return;
+      item.setAttribute('data-lukket', '');
+      const forael = item.querySelector(':scope > a');
+      if (forael && item.querySelector('.nav-sub').contains(document.activeElement)) forael.focus();
+    });
+  });
   // Runde 5 (D5-F7): to knapper — headerens (desktop) og skuffens (mobil).
   document.querySelectorAll('.theme-toggle').forEach(b => b.addEventListener('click', toggleTheme));
   document.addEventListener('bb:favorites-changed', updateFavCount);
@@ -1004,7 +1021,7 @@ function rigtKortFakta(l){
     ext, titel, hk, ccm, sted, kilde,
     aar: l.year == null ? null : l.year,
     km: l.km == null ? null : l.km,
-    type: l.type ? typeLabel(l.type) : '',
+    type: l.type ? typeLabel(l.type).split('/')[0] : '',   // "Classic/Veteran" -> "Classic": kortet er smalt
     kk: koerekortMaerkat(l),
   };
 }
@@ -1025,7 +1042,7 @@ function rigtKortHTML(l, i){
   const kk = f.kk;
   const kkKlasse = kk.kode ? ` kk-${String(kk.kode).toLowerCase()}` : ' kk-ukendt';
   const chips = [
-    `<li class="rk-chip rk-kk${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.tekst)}<span class="visually-hidden">. ${escapeHTML(kk.forklaring)}</span></li>`,
+    `<li class="rk-chip rk-kk${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.kode === 'A' ? 'A' : kk.tekst)}<span class="visually-hidden">. ${kk.kode === 'A' ? 'Kørekort A. ' : ''}${escapeHTML(kk.forklaring)}</span></li>`,
   ];
   if (f.ccm) chips.push(`<li class="rk-chip">${escapeHTML(formatCcm(f.ccm))}</li>`);
   if (f.hk) chips.push(`<li class="rk-chip">${escapeHTML(formatPower(f.hk))}</li>`);

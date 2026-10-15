@@ -96,3 +96,19 @@ test('kun sande løfter: tillidsrækken og sælg-panelet siger ikke mere end sid
   const saelg = index.match(/<aside class="saelg-panel"[\s\S]*?<\/aside>/)[0];
   assert.ok(!/tusindvis|nem og sikker/i.test(saelg));
 });
+
+test('undermenuen kan afvises med Escape (WCAG 1.4.13) — JS sætter data-lukket, CSS læser det', () => {
+  assert.match(læs('js/components.js'), /e\.key !== 'Escape'[\s\S]{0,200}setAttribute\('data-lukket'/);
+  assert.match(læs('css/styles.css'), /\.nav-item\[data-lukket\] \.nav-sub\{ display:none; \}/);
+});
+
+test('forsiden slutter kompakt: én "Hvorfor"-sektion, de lange forklaringer i <details>, ingen slut-CTA', () => {
+  assert.equal((index.match(/class="hvorfor"/g) || []).length, 1);
+  assert.match(index, /<details class="hvorfor-mere">[\s\S]*Skal du købe[\s\S]*Skal du sælge[\s\S]*<\/details>/);
+  assert.ok(!/slut-cta|problem-section|loesning-section/.test(index));
+});
+
+test('søgekortet er lavt: ingen fast disclaimer-fodlinje, forbeholdet vises først ved valgt kørekort', () => {
+  assert.match(index, /<p class="kk-hint" id="hs-kk-hint" role="status" hidden><\/p>/);
+  assert.ok(!/sk-fod/.test(index));
+});

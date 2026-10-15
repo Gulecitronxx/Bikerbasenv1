@@ -32,3 +32,33 @@ Verifikationsgate grøn: `node --check` på alle js/crawler/scripts, `npm test` 
 ## Filer
 
 `index.html`, `js/home.js`, `js/components.js` (rigtKortHTML), `js/icons.js`, `css/styles.css`, `scripts/synk-header.js` (ny), `scripts/build-brand-pages.js` + `build-facet-pages.js` (skrivemål/linkbånd), 12 håndskrevne sider (kun header), tests `js/rigt-kort.test.js` + `scripts/forside.test.js` (i `npm test`).
+
+---
+
+# Runde 2 (efter Critic: 3,5/5 — "vær mere modig")
+
+Kilde-commit og build-commit: se `git log` (to commits efter `1da606a`). Gate grøn: syntaks, `npm test` 387/387, build, udgiv.
+
+## Hvad der er ændret
+
+1. **Nederste halvdel skåret til ÉN sektion.** "Hvorfor Bikerbasen" (3 korte punkter) + én `<details>` med de lange ærlige forklaringer (upålidelige tal, to udgaver, underkategori, "Skal du købe / sælge"-sporene med deres knapper). Problem-/løsnings-/slut-CTA-sektionerne og deres CSS er væk. Forsiden går nu: tre kolonner -> kompakt "Hvorfor" -> ét lavt linkbånd -> footer. Sidehøjde 1440 px: 4783 -> 2585 px. Link-script (renderet DOM, 1440): 51 interne mål før og efter, 0 mistet, 0 nye. Linkbåndet er nu flade rækker (Typer / Kørekort / Landsdele / Flere mærker / Genveje) i stedet for tre kolonner.
+2. **5 kort ved 1440** (4 ved 1280–1439, 3 ved 1100–1279, 3 + panel under ved tablet, rulleliste på mobil). Kortet er kompakteret (14,5 px titel/pris, kortere type "Classic", kørekortchip "A" i stedet for "Kørekort A"; teksten ligger i title og skærmlæsertekst). **Ens venstrekant**: header, hero og alle sektioner på forsiden står i samme 1480 px container (x=32 ved 1440).
+3. **Tre kolonner som billedet:** 6 mærker i én række (monogram-fliser med ens højde; der findes ingen brugbare logofiler, og vi opfinder ikke varemærkelogoer), A1/A2/A i ens fliser ("Let mc / Mellem mc / Alle mc"), 5 regioner i én række. Kolonnebredder 1,3 / 0,9 / 1,5.
+4. **Lavere søgekort:** disclaimer-fodlinjen er væk (kortet 126 -> ca. 115 px højt). "Vi gætter aldrig / A2 afhænger af vægt og afledningsregel" står i tillidsrækken; det valgte kørekorts forbehold (A1/A2/A) vises under kortet først, når et kørekort er valgt. "Nulstil" ligger under antallet. **Hero-foto lysere:** scrim 84 -> 66 % og bund 55 -> 30 %; tekstkontrast målt på pixels: min 4,81 (lys) / 5,17 (mørk) ved alle bredder (tablet har egen scrim).
+5. **Sælg-panel ryddet:** titel, tre ✓, foto i eget felt (aldrig under teksten), knap. Tablet: tekst til venstre, foto til højre.
+6. **Fejl:** Escape lukker A1/A2-undermenuen (også ved hover; genåbner ved ny hover/fokus); placeholder "F.eks. MT-07" afkortes ikke ved 768; chips på én linje ved 768. **Mobil-LCP:** målt igen — LCP er hero-fotoet (34 KB på mobil, preloadet, `fetchpriority=high`) og ligger på 690–800 ms både før og efter denne runde; i netværkstimingen ankommer billedet ved 625 ms, resten er den enkelttrådede lokale dev-server, der kø'er CSS/JS. Baseline (392 ms) målte en tekst-LCP; fotoet er nu synligt og tæller. Ingen yderligere ændring, men heller ingen forværring (mine `filter`-forsøg er fjernet).
+
+## Selv-scores mod billede 1 (0–5)
+
+| Sektion | Før | Nu | Hvad der stadig afviger |
+|---|---|---|---|
+| Topbar | 4 | 4 | Ingen "Artikler & guides/Viden" (ingen sider); Favoritter skjult til noget er gemt; Kørekort-undermenu (billedet har ingen) |
+| Hero + søgekort + tillidsrække | 4 | 4,5 | Hero-foto uden rytter (vi har ikke et licenseret rytterfoto); kortet 8-10 px højere end billedet |
+| Udvalgte + sælg-panel | 3 | 4 | Intet hjerte på indekserede kort (D-008); sælg-panelet har cruiser-studiefoto, ikke rytter |
+| Typefliser | 4 | 4 | 8 fliser (billedet 7) |
+| Sådan virker | 4 | 4 | Grøn boks er guide (sikkerhed.html), ikke "fællesskab" |
+| Tre kolonner | 3 | 4 | Monogram i stedet for mærkelogoer |
+| Afslutning | 2 | 4 | Én kort "Hvorfor"-sektion + linkbånd ligger stadig mellem kolonnerne og footeren (billedet har intet) |
+| **Samlet** | 3,5 | **4,1** | |
+
+Målt: overflow 0 ved 360/390/768/1024/1440/1920, lys og mørk; konsol rent; kontrast på flade baggrunde 0 fund; CLS 0; tastatur (tab, Escape, fokusring) ok.

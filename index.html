@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Bikerbasen — motorcykler til salg i Danmark, nye og brugte">
 <meta name="twitter:description" content="Motorcykler til salg fra danske forhandlere og markedspladser — nye og brugte, samlet ét sted. Kilden står på hvert kort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -69,7 +69,7 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=2c35d1fd">
+<link rel="stylesheet" href="css/styles.css?v=09e196d1">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -135,7 +135,7 @@ try{
            sizes="100vw" alt="" width="2560" height="1086"
            fetchpriority="high" decoding="async">
     </div>
-    <div class="container">
+    <div class="container container--wide">
       <div class="hero-inner">
         <span class="hero-eyebrow">Danske motorcykelannoncer — samlet ét sted</span>
         <!-- Overskriften siger mekanikken, ikke udfaldet: filteret kan kun udelukke (K17-P1-1). -->
@@ -146,14 +146,14 @@ try{
   </section>
 
   <div class="hero-sok">
-    <div class="container container--mid">
+    <div class="container container--wide">
       <form class="search-panel" id="hero-search-form" aria-label="Søg motorcykler">
         <div class="sk-grid">
           <div class="field sk-q">
             <label for="hs-query">Mærke eller model</label>
             <!-- Forslag fra LAGERET (mærke og mærke+model med mindst én annonce), fyldt af js/home.js. -->
             <div class="input-icon-wrap" id="hs-query-wrap">
-              <input class="input" type="text" id="hs-query" name="q" placeholder="F.eks. MT-07, Honda, KTM" list="hs-suggest" autocomplete="off">
+              <input class="input" type="text" id="hs-query" name="q" placeholder="F.eks. MT-07" list="hs-suggest" autocomplete="off">
               <datalist id="hs-suggest"></datalist>
             </div>
           </div>
@@ -196,12 +196,12 @@ try{
             <button type="submit" class="btn btn-primary btn-lg sk-knap" id="hs-submit"><span class="sk-ico" data-icon="search" aria-hidden="true"></span>Søg motorcykler<span class="sk-ico" data-icon="arrowRight" aria-hidden="true"></span></button>
             <!-- Antallet kommer først, når lageret har svaret (js/home.js); højden er reserveret. -->
             <p class="sk-antal" id="hero-count-hint"></p>
+            <button type="reset" class="hero-reset" id="hs-reset" hidden>Nulstil</button>
           </div>
         </div>
-        <div class="sk-fod">
-          <p class="kk-hint" id="hs-kk-hint">Vi gætter aldrig: er effekten ikke oplyst, siger vi det. A2 afhænger også af vægt og afledningsregel — filteret frasorterer kun det, der er udelukket på effekt og ccm.</p>
-          <button type="reset" class="hero-reset" id="hs-reset" hidden>Nulstil</button>
-        </div>
+        <!-- Kørekortets forbehold vises, når et kørekort er valgt (js/home.js). Den faste "vi gætter aldrig"-
+             sætning står i tillidsrækken, så søgekortet er lavt som på billedet. -->
+        <p class="kk-hint" id="hs-kk-hint" role="status" hidden></p>
         <!-- Regnskabet over de annoncer, filtrene har valgt fra, fordi oplysningen mangler. Samme tal og
              feltnavne som linjen på soegning.html — se js/home.js uoplystTekst(). role="status", fordi den
              dukker op som følge af et filterklik uden at flytte fokus. -->
@@ -212,10 +212,10 @@ try{
     <!-- Kun løfter, der gælder HVERT kort. "Aldrig gættet" gælder kørekortFILTRET (oplyste tal), ikke
          klassen — A2 kræver også kW/kg og afledningsregel, som ingen annonce oplyser. -->
     <div class="trust-band">
-      <div class="container container--mid">
+      <div class="container container--wide">
         <ul class="trust-row">
           <li><span class="trust-ico" data-icon="shieldCheck" aria-hidden="true"></span><div><strong>Kilden står på hvert kort</strong><span>Du kan altid se, hvor oplysningerne kommer fra.</span></div></li>
-          <li><span class="trust-ico" data-icon="idCard" aria-hidden="true"></span><div><strong>Kørekortfilter på oplyste tal</strong><span>Vi gætter aldrig: filteret bygger kun på tal, annoncen selv oplyser.</span></div></li>
+          <li><span class="trust-ico" data-icon="idCard" aria-hidden="true"></span><div><strong>Kørekortfilter på oplyste tal</strong><span>Vi gætter aldrig. A2 afhænger også af vægt og afledningsregel, som annoncer sjældent oplyser.</span></div></li>
           <li><span class="trust-ico" data-icon="clipboard" aria-hidden="true"></span><div><strong>Mangler et tal, står der &ldquo;Ikke oplyst&rdquo;</strong><span>Intet skøn i stedet for et tal, vi ikke har.</span></div></li>
           <li><span class="trust-ico" data-icon="externalLink" aria-hidden="true"></span><div><strong>Du går videre til sælger</strong><span>Vi hoster ikke de indekserede annoncer — handlen sker hos kilden.</span></div></li>
         </ul>
@@ -245,8 +245,9 @@ try{
               <li><span class="check-ikon" data-icon="check" aria-hidden="true"></span>Du styrer selv annoncen</li>
               <li><span class="check-ikon" data-icon="check" aria-hidden="true"></span>Side om side med de indekserede</li>
             </ul>
-            <a class="btn btn-primary" href="opret-annonce.html">Opret annonce<span class="sk-ico" data-icon="arrowRight" aria-hidden="true"></span></a>
           </div>
+          <div class="saelg-foto" aria-hidden="true"></div>
+          <a class="btn btn-primary saelg-knap" href="opret-annonce.html">Opret annonce<span class="sk-ico" data-icon="arrowRight" aria-hidden="true"></span></a>
         </aside>
       </div>
     </div>
@@ -333,14 +334,14 @@ try{
         <section class="kol" aria-labelledby="kol-kk-titel">
           <div class="kol-hoved">
             <h2 id="kol-kk-titel"><span class="kol-ico" data-icon="idCard" aria-hidden="true"></span>Udforsk efter kørekort</h2>
-            <a class="kol-link" href="koerekort-a2.html">Læs om kørekort<span aria-hidden="true" data-icon="arrowRight"></span></a>
+            <a class="kol-link" href="koerekort-a2.html">Om kørekort<span aria-hidden="true" data-icon="arrowRight"></span></a>
           </div>
           <ul class="tal-grid tal-grid-3">
-            <li><a href="koerekort-a1.html" data-kk="A1"><strong>A1</strong><span>Let motorcykel</span><span class="tal-n" data-antal></span></a></li>
-            <li><a href="koerekort-a2.html" data-kk="A2"><strong>A2</strong><span>Mellem motorcykel</span><span class="tal-n" data-antal></span></a></li>
-            <li><a href="soegning.html?koerekort=A" data-kk="A"><strong>A</strong><span>Alle motorcykler</span><span class="tal-n" data-antal></span></a></li>
+            <li><a href="koerekort-a1.html" data-kk="A1"><strong>A1</strong><span>Let mc</span><span class="tal-n" data-antal></span></a></li>
+            <li><a href="koerekort-a2.html" data-kk="A2"><strong>A2</strong><span>Mellem mc</span><span class="tal-n" data-antal></span></a></li>
+            <li><a href="soegning.html?koerekort=A" data-kk="A"><strong>A</strong><span>Alle mc</span><span class="tal-n" data-antal></span></a></li>
           </ul>
-          <p class="kol-note">Antal = annoncer, der ikke er udelukket på de oplyste tal.</p>
+          <p class="kol-note">Ikke udelukket på de oplyste tal.</p>
         </section>
         <section class="kol" aria-labelledby="kol-region-titel">
           <div class="kol-hoved">
@@ -358,114 +359,56 @@ try{
     </div>
   </section>
 
-  <!-- PROBLEM. Hvert punkt er en kendsgerning, en køber kan efterprøve. Tallene er lovens egne
-       (js/data.js), ikke vores. -->
-  <section class="section problem-section" aria-labelledby="problem-titel">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2 id="problem-titel">Kubikcentimeter fortæller dig ikke, om du må køre den</h2>
-          <p>Fire ting gør det svært at se, hvad et A1- eller A2-kørekort rækker til.</p>
-        </div>
-      </div>
-      <ul class="problem-grid">
-        <li class="problem-item problem-item-regel">
+  <!-- Runde 2: billedet slutter ved de tre kolonner. De lange tekstsektioner (problem, løsning, "Skal du
+       købe eller sælge", slut-CTA) er skåret ned til ÉN kompakt sektion. Ordlyden, der bærer en ærlig
+       forklaring, ligger i <details> — den er stadig på siden og kan læses, men fylder ikke. -->
+  <section class="hvorfor" aria-labelledby="hvorfor-titel">
+    <div class="container container--wide">
+      <h2 id="hvorfor-titel">Hvorfor Bikerbasen</h2>
+      <ul class="hvorfor-grid">
+        <li>
           <h3>A2 er ikke en ccm-grænse</h3>
-          <div class="regel-stats" role="list" aria-label="A2-grænsens tre tal">
-            <span class="regel-stat" role="listitem"><b>35</b> kW</span>
-            <span class="regel-stat" role="listitem"><b>0,2</b> kW/kg</span>
-            <span class="regel-stat" role="listitem">ikke <b>afledt</b> af kraftigere model</span>
-          </div>
-          <p>To af de tre tal står sjældent i en annonce.</p>
+          <p>35 kW, 0,2 kW/kg og ikke afledt af en kraftigere model. To af de tre tal står sjældent i en annonce — derfor regner vi med det, der er oplyst.</p>
         </li>
-        <li class="problem-item problem-item-minor">
-          <h3>Tallene er ofte upålidelige</h3>
-          <p>Effekt og vægt i brugtannoncer er tit afrundede, taget fra en anden årgang eller helt fraværende — og du kan ikke se hvilken af delene.</p>
+        <li>
+          <h3>Vi gætter aldrig</h3>
+          <p>Er effekten ikke oplyst, skriver vi &ldquo;Ikke oplyst&rdquo; — og annoncen ryger ud af kørekortfilteret i stedet for at blive gættet ind. Vi siger også, hvor mange der røg ud.</p>
         </li>
-        <li class="problem-item problem-item-minor">
-          <h3>Samme model, to udgaver</h3>
-          <p>Mange modeller sælges både spærret og fri. Står der &ldquo;A2&rdquo; i annonceteksten, er det tit sælgerens vurdering, ikke en registreret oplysning.</p>
-        </li>
-        <li class="problem-item problem-item-minor">
-          <h3>Motorcykler er en underkategori</h3>
-          <p>På bilsiderne ligger de som en fane ved siden af bilerne. Andre steder er de blandet sammen med alt fra havemøbler til trailere.</p>
+        <li>
+          <h3>&ldquo;Mulig A2&rdquo;, aldrig &ldquo;lovlig&rdquo;</h3>
+          <p>Kortet siger, hvad de oplyste tal ikke udelukker. Vægt og afledningsregel kan vi ikke se, så registreringsattesten afgør resten.</p>
         </li>
       </ul>
-    </div>
-  </section>
-
-  <!-- LØSNING. "Vi gætter aldrig" er konkretiseret i tre påstande, der hver kan efterprøves på et kort.
-       Teksten må ikke love det ene, når filteret kun kan stå inde for det andet (PRODUCT.md). -->
-  <section class="section loesning-section" aria-labelledby="loesning-titel">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2 id="loesning-titel">Vi gør regnestykket — og siger fra, når tallene mangler</h2>
+      <details class="hvorfor-mere">
+        <summary>Mere om kørekortet — og om at købe eller sælge her</summary>
+        <div class="hvorfor-mere-krop">
+          <ul class="hvorfor-liste">
+            <li><strong>Tallene er ofte upålidelige.</strong> Effekt og vægt i brugtannoncer er tit afrundede, taget fra en anden årgang eller helt fraværende — og du kan ikke se hvilken af delene.</li>
+            <li><strong>Samme model, to udgaver.</strong> Mange modeller sælges både spærret og fri. Står der &ldquo;A2&rdquo; i annonceteksten, er det tit sælgerens vurdering, ikke en registreret oplysning.</li>
+            <li><strong>Motorcykler er en underkategori.</strong> På bilsiderne ligger de som en fane ved siden af bilerne. Andre steder er de blandet sammen med alt fra havemøbler til trailere.</li>
+          </ul>
+          <div class="saadan-spor">
+            <div class="spor spor-koeber">
+              <h3 class="spor-titel">Skal du købe</h3>
+              <ol class="spor-trin">
+                <li><strong>Vælg dit kørekort.</strong> A1, A2 eller A — øverst på forsiden eller i søgningen.</li>
+                <li><strong>Se kun det, der ikke er udelukket.</strong> Alt, de oplyste tal udelukker, er væk — vægt og afledningsregel kan vi ikke se, og det siger kortet. Du får også at vide, hvor mange annoncer der manglede tal.</li>
+                <li><strong>Se hvad der er bekræftet.</strong> Hvert kort viser kilden, og hvilke tal der er oplyst — og hvilke der ikke er.</li>
+              </ol>
+              <a class="btn btn-primary" href="soegning.html">Søg motorcykler</a>
+            </div>
+            <div class="spor spor-saelger">
+              <h3 class="spor-titel">Skal du sælge</h3>
+              <ol class="spor-trin">
+                <li><strong>Opret en konto.</strong> Den er gratis, og den skal bruges for at kunne redigere din annonce igen.</li>
+                <li><strong>Udfyld annoncen.</strong> Mærke, model, årgang, km og effekt. Effekten afgør, hvilke kørekortfiltre annoncen kommer med i.</li>
+                <li><strong>Den er live.</strong> Din annonce står i søgningen side om side med de indekserede. Dit navn vises kun for indloggede, og dit telefonnummer kun hvis du selv slår det til.</li>
+              </ol>
+              <a class="btn btn-outline" href="opret-annonce.html">Opret gratis annonce</a>
+            </div>
+          </div>
         </div>
-      </div>
-      <ol class="loesning-grid">
-        <li class="loesning-item">
-          <span class="loesning-nr" aria-hidden="true">1</span>
-          <h3>Kørekortet er det første filter</h3>
-          <p>Det står i søgekortet øverst, ikke gemt i et filterpanel. Vælger du A2, forsvinder alt, der er udelukket på de oplyste tal, før du overhovedet begynder at kigge.</p>
-        </li>
-        <li class="loesning-item">
-          <span class="loesning-nr" aria-hidden="true">2</span>
-          <h3>To niveauer, ikke ét</h3>
-          <!-- Kortet returnerer kun "Mulig A1"/"Mulig A2"/"Kørekort A"; "A2 bekræftet" er et NÆSTE niveau, ikke bygget (js/components.js). -->
-          <p>Vi mærker aldrig en motorcykel som lovlig. Kortet siger <strong>Mulig A2</strong> — altså ikke udelukket på de tal, annoncen oplyser — og annoncesiden fortæller, hvad du selv skal tjekke på registreringsattesten.</p>
-        </li>
-        <li class="loesning-item">
-          <span class="loesning-nr" aria-hidden="true">3</span>
-          <h3>Manglende tal står som manglende</h3>
-          <p>Er effekten ikke oplyst, skriver vi &ldquo;Ikke oplyst&rdquo; — og annoncen ryger ud af kørekortfilteret i stedet for at blive gættet ind. Vi siger også hvor mange, der røg ud.</p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <section class="section saadan-spor-sektion" aria-labelledby="spor-titel">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2 id="spor-titel">Skal du købe eller sælge?</h2>
-        </div>
-      </div>
-      <div class="saadan-spor">
-        <div class="spor spor-koeber">
-          <h3 class="spor-titel">Skal du købe</h3>
-          <ol class="spor-trin">
-            <li><strong>Vælg dit kørekort.</strong> A1, A2 eller A — øverst på forsiden eller i søgningen.</li>
-            <li><strong>Se kun det, der ikke er udelukket.</strong> Alt, de oplyste tal udelukker, er væk — vægt og afledningsregel kan vi ikke se, og det siger kortet. Du får også at vide, hvor mange annoncer der manglede tal.</li>
-            <li><strong>Se hvad der er bekræftet.</strong> Hvert kort viser kilden, og hvilke tal der er oplyst — og hvilke der ikke er.</li>
-          </ol>
-          <a class="btn btn-primary" href="soegning.html">Søg motorcykler</a>
-        </div>
-        <div class="spor spor-saelger">
-          <h3 class="spor-titel">Skal du sælge</h3>
-          <ol class="spor-trin">
-            <li><strong>Opret en konto.</strong> Den er gratis, og den skal bruges for at kunne redigere din annonce igen.</li>
-            <li><strong>Udfyld annoncen.</strong> Mærke, model, årgang, km og effekt. Effekten afgør, hvilke kørekortfiltre annoncen kommer med i.</li>
-            <li><strong>Den er live.</strong> Din annonce står i søgningen side om side med de indekserede. Dit navn vises kun for indloggede, og dit telefonnummer kun hvis du selv slår det til.</li>
-          </ol>
-          <a class="btn btn-outline" href="opret-annonce.html">Opret gratis annonce</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- AFSLUTTENDE CTA. Gentager hovedbudskabet og siger hvem siden er for. Samme to CTA-tekster som
-       i hero'en og sælg-panelet, samme rangorden. -->
-  <section class="section slut-cta" aria-labelledby="slut-cta-titel">
-    <div class="container">
-      <div class="slut-cta-boks">
-        <h2 id="slut-cta-titel">Har du kørekort til motorcykel, har du en søgning her</h2>
-        <p>A1, A2 eller A — filteret er det samme, og det siger fra, når tallene ikke rækker til et svar. Du behøver ikke en konto for at søge.</p>
-        <div class="slut-cta-knapper">
-          <a class="btn btn-primary btn-lg" href="soegning.html">Søg motorcykler</a>
-          <a class="btn btn-outline btn-lg" href="opret-annonce.html">Opret gratis annonce</a>
-        </div>
-      </div>
+      </details>
     </div>
   </section>
 
@@ -475,7 +418,7 @@ try{
        med nok annoncer) skrives af scripts/build-facet-pages.js; js/home.js bruger linkene til at pege
        fliser og kolonner på de faste sider. -->
   <nav class="seo-links" aria-label="Alle sider og genveje">
-    <div class="container">
+    <div class="container container--wide">
       <!-- facet-links:start (genereret af scripts/build-facet-pages.js, funktionen skrivFacetLinks) -->
   <div class="seo-gruppe" id="seo-types">
         <h2>Typer</h2>
@@ -577,24 +520,24 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=2c35d1fd"></script>
-<script defer src="js/supabase-config.js?v=2c35d1fd"></script>
-<script defer src="js/supabase-api.js?v=2c35d1fd"></script>
-<script defer src="js/icons.js?v=2c35d1fd"></script>
-<script defer src="js/data.js?v=2c35d1fd"></script>
+<script defer src="js/security.js?v=09e196d1"></script>
+<script defer src="js/supabase-config.js?v=09e196d1"></script>
+<script defer src="js/supabase-api.js?v=09e196d1"></script>
+<script defer src="js/icons.js?v=09e196d1"></script>
+<script defer src="js/data.js?v=09e196d1"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=2c35d1fd"></script>
+<script defer src="js/filtrering.js?v=09e196d1"></script>
 <!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
      (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
      orden. Samme fil som soegning.html og scripts/build-srp.js. -->
-<script defer src="js/sortering.js?v=2c35d1fd"></script>
-<script defer src="js/store.js?v=2c35d1fd"></script>
-<script defer src="js/maaling.js?v=2c35d1fd"></script>
-<script defer src="js/backend-bridge.js?v=2c35d1fd"></script>
-<script defer src="js/components.js?v=2c35d1fd"></script>
-<script defer src="js/home.js?v=2c35d1fd"></script>
+<script defer src="js/sortering.js?v=09e196d1"></script>
+<script defer src="js/store.js?v=09e196d1"></script>
+<script defer src="js/maaling.js?v=09e196d1"></script>
+<script defer src="js/backend-bridge.js?v=09e196d1"></script>
+<script defer src="js/components.js?v=09e196d1"></script>
+<script defer src="js/home.js?v=09e196d1"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

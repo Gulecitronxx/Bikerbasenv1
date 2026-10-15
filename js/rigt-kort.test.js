@@ -101,7 +101,8 @@ test('mangler hk, siger en dæmpet chip det; mangler begge, siger den begge', ()
 test('kørekortchippen er filterets udregning, ordret', () => {
   for (const l of [ekstern(), ekstern({ power: 30, ccm: 373 }), egen(), ekstern({ power: null, ccm: 650 })]){
     const k = koerekortMaerkat(l);
-    assert.ok(rig(l).includes(`>${k.tekst}<span class="visually-hidden">. ${k.forklaring}</span></li>`),
+    const vist = k.kode === 'A' ? 'A' : k.tekst;   // chippen er smal: 'Kørekort A' vises som 'A', teksten ligger i skærmlæsertekst og title
+    assert.ok(rig(l).includes(`>${vist}<span class="visually-hidden">. ${k.kode === 'A' ? 'Kørekort A. ' : ''}${k.forklaring}</span></li>`),
       `chippen skal sige "${k.tekst}" med forklaringen i klartekst`);
   }
   assert.match(rig(egen()), /rk-kk kk-a2/, 'A2-klassen følger med som CSS-klasse');
