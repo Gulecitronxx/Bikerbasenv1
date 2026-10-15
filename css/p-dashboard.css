@@ -39,7 +39,7 @@
 .db-hero .breadcrumb a:hover{ color: #fff; }
 .db-hero .breadcrumb svg{ width: 14px; height: 14px; }
 .db-hero h1{
-  font-size: clamp(32px, 5.2vw, 52px); line-height: 1.04; font-weight: 700; color: #fff;
+  font-size: var(--h1-hero); line-height: 1.04; font-weight: 700; color: #fff;
   letter-spacing: -0.02em; margin: 0 0 var(--space-3); text-shadow: 0 2px 24px rgba(0,0,0,.35);
 }
 .db-hero-lead{ max-width: 44ch; margin: 0; font-size: clamp(15px, 1.7vw, 19px); line-height: 1.45; color: rgba(255,255,255,.92); text-wrap: balance; }
@@ -310,7 +310,7 @@ a.db-tab{ display: inline-flex; align-items: center; text-decoration: none; }
 .db-num{ white-space: nowrap; }
 /* Sælgerprofilen (forhandler.html): samme hero, kortere. */
 .db-hero--slim{ --db-hero-h: 168px; }
-.db-hero--slim h1{ font-size: clamp(28px, 4.4vw, 42px); }
+.db-hero--slim h1{ font-size: var(--h1-hero); }
 .db-page-profile .profile-hero{ border-top: 0; }
 
 /* Mindste bredde 0 hele vejen ned, så intet indhold skubber siden ud over 320 px. */

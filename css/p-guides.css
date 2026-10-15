@@ -19,7 +19,7 @@
     linear-gradient(90deg, rgba(15,13,10,.9) 0%, rgba(15,13,10,.72) 42%, rgba(15,13,10,.18) 100%),
     linear-gradient(0deg, rgba(15,13,10,.35), rgba(15,13,10,0) 40%);
 }
-.gd-hero-inner{ max-width: 1240px; }
+.gd-hero-inner{ max-width: var(--site-w); }
 .gd-hero .breadcrumb{ color: rgba(255,255,255,.82); padding-top: var(--space-4); }
 .gd-hero .breadcrumb a{ color:#fff; }
 .gd-hero .breadcrumb a:hover{ color:#fff; text-decoration: underline; }
@@ -29,8 +29,8 @@
   font-size: 13px; font-weight: 700; letter-spacing: .12em; color:#fff; opacity:.92;
 }
 .gd-hero h1{
-  color:#fff; font-size: clamp(32px, 5.4vw, 56px); line-height: 1.06; letter-spacing: -0.02em;
-  max-width: 17ch; text-wrap: balance;
+  color:#fff; font-size: var(--h1-hero); line-height: 1.06; letter-spacing: -0.02em;
+  max-width: 24ch; text-wrap: balance;
 }
 .gd-hero-lille h1{ max-width: 22ch; }
 .gd-lede{
