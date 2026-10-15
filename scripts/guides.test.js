@@ -137,3 +137,24 @@ test('reserverede adresser findes og er de fire, andre strømme linker til', () 
     ['guide-a2-koerekort.html', 'guide-brugt-motorcykel.html', 'guide-foerste-motorcykel.html']);
   assert.ok(sider.some(s => s.navn === 'guides.html'));
 });
+
+test('privatkøb: ingen falsk påstand om, at reklamationsretten slet ikke findes', () => {
+  const g = GUIDES.find(x => x.slug === 'guide-brugt-motorcykel');
+  const html = renderGuide(g, ctx);
+  assert.ok(!/Ved privatkøb gælder den ikke/.test(html), 'tl;dr må ikke afvise reklamationsretten ved privatkøb');
+  assert.match(html, /hvis I ikke har aftalt noget andet/);
+  assert.match(html, /Til og med 31\. december 2026/);
+  assert.match(html, /3 uger/);
+  assert.match(html, /passagerer fra 15 år/);
+});
+
+test('sidebjælken: trehjulede og scootere udelukkes, og overskriften lover kun oplyst effekt', () => {
+  const mk = (i, brand, model, extra) => Object.assign({ id: String(i), brand, model, year: 2020, km: 1000, ccm: 300, power: 28, price: 50000, photoUrls: ['https://example.com/a.jpg'], isExternal: false, createdAt: '2026-01-01', saelgertype: 'forhandler' }, extra);
+  const ud = udvalgTilSidebjaelke([mk(1, 'Yamaha', 'Tricity 300'), mk(2, 'Piaggio', 'MP3 500'), mk(3, 'Honda', 'NMAX 125', { type: 'scooter' }), mk(4, 'Honda', 'CB500F'), mk(5, 'Yamaha', 'MT-07')]);
+  assert.deepStrictEqual(ud.map(l => l.model).sort(), ['CB500F', 'MT-07']);
+  const { populaerModul } = require('./build-guides');
+  const html = populaerModul(ud, '24. august 2026');
+  assert.match(html, /Oplyst effekt under A2-grænsen/);
+  assert.ok(!/Motorcykler til A2-kørekort/.test(html));
+  assert.match(html, /Udvalg pr\. 24\. august 2026/);
+});

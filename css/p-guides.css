@@ -72,7 +72,7 @@
   }
   .gd-side > *{ order:0; }
 }
-@media (min-width:1024px) and (min-height:1000px){
+@media (min-width:1024px) and (min-height:1040px){
   .gd-side{ position:sticky; top: calc(var(--header-h) + var(--space-4)); }
 }
 
@@ -252,3 +252,5 @@
   .gd-table td::before{ content: attr(data-label); display:block; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); }
   .gd-table caption{ caption-side:top; padding:0; border:0; margin-top: var(--space-2); }
 }
+
+.gd-sec, .gd-sources, .gd-toc{ scroll-margin-top: calc(var(--header-h) + var(--space-4)); }

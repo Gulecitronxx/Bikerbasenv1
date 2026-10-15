@@ -88,7 +88,7 @@ function kkTabel(){
 <tbody>
 <tr><th scope="row">A1 <span>Lille motorcykel</span></th><td data-label="Mindstealder">18 år</td><td data-label="Du kan føre">Tohjulet motorcykel på højst 125 cm³, 11 kW og 0,1 kW pr. kg.</td></tr>
 <tr><th scope="row">A2 <span>Mellemstor motorcykel</span></th><td data-label="Mindstealder">20 år</td><td data-label="Du kan føre">Højst 35 kW og 0,2 kW pr. kg, og ikke afledt af en motorcykel med mere end dobbelt så høj effekt. Ingen grænse for cm³.</td></tr>
-<tr><th scope="row">A <span>Stor motorcykel</span></th><td data-label="Mindstealder">24 år, eller 22 år med mindst to års erfaring på A2 og en bestået praktisk prøve</td><td data-label="Du kan føre">Tohjulede motorcykler uden effektgrænse.</td></tr>
+<tr><th scope="row">A <span>Stor motorcykel</span></th><td data-label="Mindstealder">24 år, eller 22 år med mindst to års erfaring på A2 og en bestået praktisk prøve</td><td data-label="Du kan føre">Tohjulede motorcykler uden effektgrænse, og trehjulede over 15 kW.</td></tr>
 </tbody>
 </table>
 </div>`;
@@ -101,6 +101,10 @@ function fyldBidder(html){
    Udvalget kommer af lageret: kun annoncer med KENDT effekt under A2-grænsen,
    en pris og et foto. Samme krav som passerKoerekort() stiller (ukendt effekt er
    ikke "ja"). Er der færre end to, udelades modulet. */
+/* Trehjulede og scootere er ikke en tohjulet motorcykel i kørekortbekendtgørelsens §12-forstand
+   (trehjulet kun op til 15 kW på A2). Vi kan ikke udlede det af alle annoncer, så de
+   kendte navne holdes ude, og modulets overskrift lover kun den oplyste effekt. */
+const IKKE_TOHJULET = /tricity|niken|mp3|spyder|ryker|can-?am|trike|trehjul|sl?d+ ?3w|piaggio mp|quadro|kymco cv3|cv3/i;
 function udvalgTilSidebjaelke(alle){
   if (!alle || !alle.length) return [];
   const { Sortering } = browserModules();
@@ -110,7 +114,7 @@ function udvalgTilSidebjaelke(alle){
     const foto = l.photoUrls && l.photoUrls[0];
     const y = Number(l.year);
     return hk != null && hk <= A2_MAX_HK && Number.isFinite(pris) && pris > 0 && foto && /^https?:\/\//.test(foto)
-      && y >= 1900 && y <= 2027 && String(l.brand || '').trim() && String(l.model || '').trim() && l.brand !== 'Ukendt';
+      && y >= 1900 && y <= 2027 && !IKKE_TOHJULET.test(`${l.brand} ${l.model} ${l.variant || ''}`) && l.type !== 'scooter' && String(l.brand || '').trim() && String(l.model || '').trim() && l.brand !== 'Ukendt';
   });
   const sorteret = Sortering.sorter(kandidater.slice(), 'blandet');
   const set = new Set(), ud = [];
@@ -146,13 +150,13 @@ function populaerModul(udvalg, bekraeftet){
   if (!udvalg.length) return '';
   return `<section class="gd-pop" aria-labelledby="gd-pop-h">
       <div class="gd-pop-head">
-        <h2 id="gd-pop-h">Motorcykler til A2-kørekort</h2>
+        <h2 id="gd-pop-h">Oplyst effekt under A2-grænsen</h2>
         <a class="gd-pop-all" href="soegning.html?koerekort=A2">Se alle ${Icon.arrowRight}</a>
       </div>
       <ul class="gd-pop-list">
         ${udvalg.map(miniKort).filter(Boolean).join('\n        ')}
       </ul>
-      <p class="gd-pop-note">Udvalg efter oplyst effekt${bekraeftet ? `, hentet ${esc(bekraeftet)}` : ''}. Kilden står på kortet. Tjek altid registreringsattesten.</p>
+      <p class="gd-pop-note">Udvalg pr. ${bekraeftet ? esc(bekraeftet) : 'seneste build'}, så kortene kan være ændret siden. Vi har kun kildens effekt (ikke vægt eller afledning), så det er ikke en garanti for A2. Tjek altid registreringsattesten.</p>
     </section>`;
 }
 
@@ -482,4 +486,4 @@ if (require.main === module){
   })().catch(e => { console.error(e.message); process.exit(1); });
 }
 
-module.exports = { byg, renderGuide, renderOversigt, udvalgTilSidebjaelke, laesetid, antalOrd, guideMinutter, OVERSIGT, cleanUrl, udvidSitemap };
+module.exports = { populaerModul, byg, renderGuide, renderOversigt, udvalgTilSidebjaelke, laesetid, antalOrd, guideMinutter, OVERSIGT, cleanUrl, udvidSitemap };

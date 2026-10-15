@@ -43,3 +43,10 @@ Branch `gauntlet/guides`, port 8718. Nye filer: `scripts/build-guides.js`, `scri
 - Samme hero-foto på alle guides. Mini-kortenes foto er kildens thumbnail (hotlink, som resten af sitet). Sidebjælkens udvalg er bagt ved build og ældes mellem builds (datoen står under kortene).
 - Kontrast kun kontrolleret visuelt + tokens (ikke automatisk axe-kørsel).
 - Syn-afsnittet i guide 3 skal gennemlæses efter 1. jan. 2027 (reglen om syn ved ejerskifte ophæves).
+
+## Rettelser efter Critic (runde 2)
+- F-1 (P1): privatkøb omformuleret efter forbrug.dk "Brugte varer generelt": forbrugerreglerne gælder ikke, men som udgangspunkt 2 års reklamationsret, hvis andet ikke er aftalt; "som beset" er almindeligt; skriftlig aftale. tl;dr, brødtekst og guide 1 rettet.
+- F-2 (P1): sidebjælken hedder nu "Oplyst effekt under A2-grænsen"; trehjulede (Tricity, MP3, Spyder m.fl.) og type scooter udelukkes; note: kun kildens effekt, ikke vægt/afledning, ingen A2-garanti. Yamaha Tricity er væk.
+- F-3: noten viser "Udvalg pr. <dato>, kan være ændret siden". F-4: syn dato-bundet ("Til og med 31. dec. 2026 ...; fra 1. jan. 2027 ophævet, BEK 259/2026"), 3-ugers frist og tærskler (BEK 1685/2025 § 63 stk. 1-2, verificeret i teksten). F-7: hjelm "passagerer fra 15 år; fører sørger for 5-15 år" (§ 81 stk. 1+3). F-6: tabel nævner trehjulede > 15 kW. F-9: scroll-margin-top. F-10: sticky kræver nu viewport >= 1040 px.
+- Ikke gjort (nice-to-have): pr.-guide hero og nyt CTA-foto (kun ét hero-sæt findes i img/).
+- Tests: 30/30 i guides.test.js (nye: falsk reklamationspåstand, trehjulede, overskrift, syn-dato); `npm test` 364 pass; overflow 32 målinger (320/390/1024/1440, lys+mørk) 0, konsol 0 fejl.
