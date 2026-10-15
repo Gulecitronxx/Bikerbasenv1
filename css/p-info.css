@@ -19,7 +19,7 @@
     linear-gradient(90deg, rgba(15,13,10,.9) 0%, rgba(15,13,10,.72) 42%, rgba(15,13,10,.18) 100%),
     linear-gradient(0deg, rgba(15,13,10,.35), rgba(15,13,10,0) 40%);
 }
-.if-hero-inner{ max-width: 1240px; }
+.if-hero-inner{ max-width: var(--site-w); }
 .if-hero .breadcrumb{ color: rgba(255,255,255,.82); padding-top: var(--space-4); }
 .if-hero .breadcrumb a{ color:#fff; }
 .if-hero .breadcrumb a:hover{ color:#fff; text-decoration: underline; }
