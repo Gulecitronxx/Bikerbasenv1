@@ -36,3 +36,12 @@ Filer: `scripts/build-brand-pages.js` (generator), `css/p-maerke.css` (ny, prefi
 ## Kendte rester
 - Genereret output er RÅT (uden build-meta/OG, GA-inline, CSP-hashes, `?v=`); Orchestrator kører `build.js`. `sitemap.xml`/`robots.txt` fra generatoren er IKKE committet (de mangler facet-siderne, som build-facet-pages tilføjer).
 - Generatoren henter live fra Supabase; antal kan afvige fra tidligere committet output (data, ikke design).
+
+## Runde 2 (Critic 3,8/5 → mere modig)
+- **P2-2 modeltal:** årsag: flisen talte annoncer med netop modelnavnet, men linket (`q=`) er en delstrengssøgning ("K 1200" finder også K 1200 GT). Nu tæller flisen med søgningens egen regel (`Filtrering.anvendFiltre({q})`), linket er uændret (så `build-facet-pages` stadig kan relinke til modelsider). Test: flise-tal = filterantal.
+- **P2-3:** `erModelnavn()` kasserer sælgertitler (≥2 små ord, tegnsætning, >40 tegn); ægte modeller ("Ténéré 700 World Raid T7", "Gs katana", "Xv 750 virago") består. Kun linkene til de to titel-"modeller" (Hyosung, Kymco) er væk; modellisten er nu op til 30 (6 fliser + åbn-felt), så ingen ægte model-links tabes (SEO-script: 0 tabte uden de 2 titler).
+- **P2-4 mærkeidentitet:** hero = foto kun for cruiser-mærker; alle andre får deres mest solgte type som illustration (`img/type`), mærker uden kendt type får neutral mørk flade. Panelbillede = ægte annoncethumbnail fra mærkets lager (aldrig samme foto som første kort; ingen ved ét kort). Typefliser = mærkets egne annoncefotos (helst ikke mcsyd-skilt), ellers typeillustration. Stort typografisk navn + monogram-cirkel (ingen logo/slogan).
+- **Layout:** 5 kort + panel ved ≥1280 (bredere sektioner som billedet), 1-2 annoncer: panelet som bjælke ved siden af kortet, tre kolonner lige høje og fyldt (kørekortlinks + guide-link), "Sådan virker" som forsidens strip (ikoner, pile, "Køb og sælg trygt"-boks → `sikkerhed.html`; CSS afgrænset til `.mk-saadan`, identisk med forsidens).
+- Målt: overflow 0 (sweep 6 sider x 12), konsol ren, `npm test` 375/375. 3 nye render-iterationer (1440/1280/900/390, lys+mørk).
+- **Selv-score mod billede 9 (0-5):** hero 3,8 · søgekort 4,5 · tillid 4,0 · annoncerække+panel 4,3 · typefliser 4,0 · sådan virker 4,5 · tre kolonner 4,2 · samlet ca. 4,2.
+- Rest: hero kan ikke få rigtige mærkefotos/ryttere (ingen licenserede); typefliser fra mcsyd bærer firmaskilt; `guide-a2-koerekort.html` oprettes af guides-strømmen. Nye tests i `scripts/maerkeside.test.js` (25 grønne).

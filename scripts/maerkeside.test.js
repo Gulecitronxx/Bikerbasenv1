@@ -193,3 +193,65 @@ test('fremhævet række: annoncer med foto går foran fotolose, og rækkefølgen
   assert.deepEqual(vaelgFremhaevede([uden(1)], 5).map(l => l.id), ['u1'], 'har mærket få annoncer, vises de alle');
   assert.deepEqual(vaelgFremhaevede([], 5), []);
 });
+
+/* ---- Runde 2: modeltal = søgeantal, titler er ikke modeller, mærkespecifik hero/panel ---- */
+
+const { erModelnavn, modelTal, heroVariant, ctaFoto, monogram, typeFoto, maerkeFakta } = require('./build-brand-pages.js');
+const { Filtrering } = require('./shared').browserModules();
+
+test('P2-3: en sælgertitel er ikke et modelnavn — ægte modeller består', () => {
+  for (const titel of ['God velkørende custom med lav. KM', 'Sælges billigt pga. plads', 'meget pæn og velholdt maskine', 'Flot stand, nysynet og klar til sæsonen']){
+    assert.equal(erModelnavn(titel), false, `"${titel}" blev regnet for en model`);
+  }
+  for (const model of ['FJR 1300 A', 'XV 1900', 'Ténéré 700 World Raid T7', 'Super Meteor 650 Astral', 'Gs katana', 'Xv 750 virago', 'Fzr 600', 'MT-09', 'CB 1000 Hornet', 'Z 900 RS', 'R 1250 GS Adventure']){
+    assert.equal(erModelnavn(model), true, `ægte model "${model}" blev kasseret`);
+  }
+  assert.equal(erModelnavn(''), false);
+  assert.equal(erModelnavn(null), false);
+});
+
+test('P2-2: modelflisens tal er præcis det antal, soegningen viser (samme q-filter)', () => {
+  const m = (id, model) => ekstern({ id: `x${id}`, brand: 'BMW', model, type: 'touring' });
+  // "K 1200" er en delstreng af "K 1200 GT" og "K 1200 RS": søgningen q=K 1200 finder alle fire.
+  const items = [m(1, 'K 1200'), m(2, 'K 1200 GT'), m(3, 'K 1200 GT'), m(4, 'K 1200 RS'), m(5, 'R 1200'), m(6, 'God velkørende custom med lav. KM')];
+  const liste = modelTal(items);
+  for (const { m: navn, n } of liste){
+    assert.equal(n, Filtrering.anvendFiltre(items, { q: navn }, null, null).length, `${navn}: flisen og soegningen er uenige`);
+  }
+  assert.equal(liste.find(x => x.m === 'K 1200').n, 4, 'K 1200 taeller de tre K 1200 GT/RS med, ligesom soegningen');
+  assert.ok(!liste.some(x => x.m.startsWith('God velkørende')), 'sælgertitlen kom med som model');
+  // Samme tal findes i det genererede markup.
+  const fakta = maerkeFakta('BMW', items);
+  assert.deepEqual(fakta.modeller.map(x => [x.m, x.n]), liste.slice(0, 30).map(x => [x.m, x.n]));
+});
+
+test('hero: cruisere beholder hero-fotoet, alle andre typer faar deres egen illustration', () => {
+  const med = type => [ekstern({ type }), ekstern({ type }), ekstern({ type: 'sport' })].slice(0, 2);
+  assert.deepEqual(heroVariant(med('cruiser')), { foto: true, type: null });
+  assert.deepEqual(heroVariant(med('scooter')), { foto: false, type: 'scooter' });
+  assert.deepEqual(heroVariant(med('sport')), { foto: false, type: 'sport' });
+  // Ingen kendt type: hverken forkert foto eller forkert illustration.
+  assert.deepEqual(heroVariant([ekstern({ type: null })]), { foto: false, type: null });
+});
+
+test('panelfoto: et ægte thumbnail fra lageret, aldrig samme som første kort, og intet at vise ved ét kort', () => {
+  const l = (id, foto) => ekstern({ id, photoUrls: foto ? [`https://x.example/${id}.jpg`] : [] });
+  assert.equal(ctaFoto([l('a', true), l('b', true)]), 'https://x.example/b.jpg');
+  assert.equal(ctaFoto([l('a', true)]), null, 'ét kort: ingen dublet af kortets eget foto');
+  assert.equal(ctaFoto([l('a', true), l('b', false)]), null);
+  assert.equal(ctaFoto([]), null);
+});
+
+test('typeflisens foto er mærkets eget — helst fra en kilde uden skilt på billedet', () => {
+  const foto = (id, dom) => ekstern({ id, type: 'sport', photoUrls: [`https://x.example/${id}.jpg`], source: { navn: dom, domaene: dom } });
+  assert.equal(typeFoto([foto('a', 'mcsyd.dk'), foto('b', 'guloggratis.dk')], 'sport'), 'https://x.example/b.jpg');
+  assert.equal(typeFoto([foto('a', 'mcsyd.dk')], 'sport'), 'https://x.example/a.jpg', 'ingen anden mulighed: brug det der er');
+  assert.equal(typeFoto([foto('a', 'mcsyd.dk')], 'touring'), null);
+});
+
+test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
+  assert.equal(monogram('Yamaha'), 'Y');
+  assert.equal(monogram('Harley-Davidson'), 'HD');
+  assert.equal(monogram('Royal Enfield'), 'RE');
+  assert.equal(monogram('Moto Guzzi'), 'MG');
+});

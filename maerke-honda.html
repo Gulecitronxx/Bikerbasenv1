@@ -25,7 +25,6 @@
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/180898/Honda_CB_1000_0_2.jpg?v=2" fetchpriority="high">
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/p-maerke.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Honda","item":"https://bikerbasen.dk/maerke-honda"}]}</script>
@@ -82,11 +81,9 @@
        liste, facetter, prisniveau, FAQ og andre mærker (SEO).
        Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
        reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
-  <section class="mk-hero">
+  <section class="mk-hero mk-hero-type">
     <div class="mk-hero-media" aria-hidden="true">
-      <img class="mk-hero-photo" src="img/hero-1600.webp"
-           srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
-           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
+      <img class="mk-hero-typeimg" src="img/type/adventure.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async">
     </div>
     <div class="container mk-hero-inner">
       <nav class="breadcrumb" aria-label="Brødkrumme">
@@ -94,7 +91,7 @@
         <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
         <span>Honda</span>
       </nav>
-      <p class="mk-wordmark" aria-hidden="true">Honda</p>
+      <p class="mk-wordmark" aria-hidden="true"><span class="mk-mono">H</span><span>Honda</span></p>
       <h1>Honda-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">Der er <strong>276</strong> Honda motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — <strong>109</strong> brugte og <strong>167</strong> fabriksnye — fra 4.000 kr. til 609.995 kr., med årgange mellem 1963 og 2026.</p>
       <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Honda er verdens største motorcykelproducent og kendt for driftssikkerhed og et usædvanligt bredt program — fra små citymodeller til CBR-sportscykler, Africa Twin-adventure og Gold Wing-tourere. Udvalget dækker Naked, Cruiser, Touring m.fl. 23 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Jensens Motorcykler og Rydbergs MC, og handlen sker hos kilden.</p></details>
@@ -108,7 +105,7 @@
           <label for="mk-q">Mærke eller model</label>
           <div class="input-icon-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Honda (fx GL 1800 Gold Wing …)" aria-describedby="mk-q-hint">
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Honda (fx CB 1000 …)" aria-describedby="mk-q-hint">
           </div>
           <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til Honda. Skriv en model for at snævre ind.</span>
         </div>
@@ -161,12 +158,12 @@
   </div>
 
   <section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
-    <div class="container">
+    <div class="container mk-wide">
       <div class="mk-sek-head">
         <h2 id="mk-featured-h">Honda motorcykler på Bikerbasen</h2>
         <a class="mk-link" href="soegning.html?brands=Honda">Se alle Honda motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
       </div>
-      <div class="mk-featured">
+      <div class="mk-featured" data-n="5">
         <div class="mk-featured-kort" id="mk-featured-kort" data-fremhaevet="5">
   <article class="card card-external" data-listing-id="0098fee2-be9d-49aa-8956-4a732ed50bf3" data-external="1">
     <div class="card-media">
@@ -348,93 +345,123 @@
             </ul>
             <a class="btn btn-primary" href="soegning.html?brands=Honda">Søg Honda motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
           </div>
-          <img class="mk-cta-img" src="img/sell-cruiser.webp" alt="" width="640" height="400" loading="lazy" decoding="async">
+          <img class="mk-cta-img" src="https://assets.guloggratis.dk/images/328caf06-e15f-42a9-9ef2-e800ccc4cc13/328caf06-e15f-42a9-9ef2-e800ccc4cc13-320x240.webp" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         </aside>
       </div>
     </div>
   </section>
 
   <section class="section mk-sektion" aria-labelledby="mk-typer-h">
-    <div class="container">
+    <div class="container mk-wide">
       <div class="mk-sek-head"><h2 id="mk-typer-h">Udforsk Honda efter type</h2></div>
       <div class="tiles-grid mk-tiles">
         <a href="soegning.html?brands=Honda&amp;type=adventure" class="tile">
-          <span class="tile-media"><img src="img/type/adventure.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/106584/Honda_CRF_1000_L_Africa_Twin_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>Adventure/<wbr>Enduro</span><span class="mk-tile-n">53 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
         </a>
         <a href="soegning.html?brands=Honda&amp;type=cruiser" class="tile">
-          <span class="tile-media"><img src="img/type/cruiser.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/176252/Honda_F6_Valkyrie_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>Cruiser</span><span class="mk-tile-n">41 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
         </a>
         <a href="soegning.html?brands=Honda&amp;type=naked" class="tile">
-          <span class="tile-media"><img src="img/type/naked.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/180898/Honda_CB_1000_0_2.jpg?v=2" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>Naked</span><span class="mk-tile-n">36 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
         </a>
         <a href="soegning.html?brands=Honda&amp;type=touring" class="tile">
-          <span class="tile-media"><img src="img/type/touring.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/183074/Honda_NT_1100_A_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>Touring</span><span class="mk-tile-n">33 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
         </a>
         <a href="soegning.html?brands=Honda&amp;type=sport" class="tile">
-          <span class="tile-media"><img src="img/type/sport.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/93208/Honda_VF_1000_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>Sport</span><span class="mk-tile-n">10 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
         </a>
         <a href="soegning.html?brands=Honda&amp;type=classic" class="tile">
-          <span class="tile-media"><img src="img/type/classic.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/181871/Honda_GL_1100_Gold_Wing_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>Classic/<wbr>Veteran</span><span class="mk-tile-n">2 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
         </a>
       </div>
     </div>
   </section>
 
-  <section class="section mk-sektion saadan-section" aria-labelledby="saadan-titel">
-    <div class="container">
-      <div class="mk-sek-head"><h2 id="saadan-titel">Sådan virker Bikerbasen</h2></div>
-      <ol class="saadan-trin" aria-label="Fire trin fra kørekort til annonce">
-        <li class="saadan-trin-punkt">
-          <span class="saadan-nr" aria-hidden="true">1</span>
-          <strong>Vælg dit kørekort</strong>
-          <span>A1, A2 eller A. Vi skjuler det, de oplyste tal udelukker.</span>
-        </li>
-        <li class="saadan-trin-punkt">
-          <span class="saadan-nr" aria-hidden="true">2</span>
-          <strong>Filtrer efter behov</strong>
-          <span>Mærke, type, pris og årgang — i søgekortet øverst eller i søgningen.</span>
-        </li>
-        <li class="saadan-trin-punkt">
-          <span class="saadan-nr" aria-hidden="true">3</span>
-          <strong>Se, hvad der er oplyst</strong>
-          <span>Hvert kort viser kilden og de tal, der står i annoncen. Mangler et tal, står der "Ikke oplyst".</span>
-        </li>
-        <li class="saadan-trin-punkt">
-          <span class="saadan-nr" aria-hidden="true">4</span>
-          <strong>Gå videre til sælger</strong>
-          <span>Annoncesiden samler tallene. Knappen derfra fører til forhandleren eller markedspladsen.</span>
-        </li>
-      </ol>
+  <section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
+    <div class="container mk-wide">
+      <div class="saadan-strip">
+        <div class="saadan-hoved">
+          <h2 id="saadan-titel">Sådan virker Bikerbasen</h2>
+          <ol class="saadan-trin" aria-label="Fire trin fra kørekort til annonce">
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">1</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg></span>
+              <div><strong>Vælg dit kørekort</strong><span>A1, A2 eller A — vi skjuler det, tallene udelukker.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">2</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
+              <div><strong>Filtrer efter dine behov</strong><span>Mærke, model, type og maks. pris.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">3</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+              <div><strong>Se, hvad der er oplyst</strong><span>Kortet viser kilden og de tal, annoncen oplyser.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">4</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span>
+              <div><strong>Gå videre til sælger</strong><span>Annoncesiden fører dig videre til kilden.</span></div>
+            </li>
+          </ol>
+        </div>
+        <aside class="guide-boks" aria-labelledby="guide-titel">
+          <span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5Z"/></svg></span>
+          <div>
+            <h3 id="guide-titel">Køb og sælg trygt</h3>
+            <p>Gode råd før du køber, sælger eller mødes med den anden part — og tegn på svindel.</p>
+            <a href="sikkerhed.html">Læs gode råd<span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a>
+          </div>
+        </aside>
+      </div>
     </div>
   </section>
 
   <section class="section mk-sektion">
-    <div class="container">
+    <div class="container mk-wide">
       <div class="mk-cols mk-cols-3">
         <section class="mk-col" aria-labelledby="mk-mod-h">
         <div class="mk-col-head"><h2 id="mk-mod-h">Honda-modeller med flest annoncer</h2></div>
         <ul class="mk-mini">
-          <li><a href="soegning.html?brands=Honda&amp;q=GL%201800%20Gold%20Wing"><strong>GL 1800 Gold Wing</strong><span>20 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Honda&amp;q=CMX%20500%20Rebel"><strong>CMX 500 Rebel</strong><span>17 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Honda&amp;q=CMX%201100%20D%20Rebel"><strong>CMX 1100 D Rebel</strong><span>15 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Honda&amp;q=CRF%201100%20L%20Africa"><strong>CRF 1100 L Africa</strong><span>15 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Honda&amp;q=NT%201100%20A"><strong>NT 1100 A</strong><span>13 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Honda&amp;q=NX%20500"><strong>NX 500</strong><span>10 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CB%201000"><strong>CB 1000</strong><span>29 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CRF%20110%20F"><strong>CRF 110 F</strong><span>25 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CRF%201100%20L"><strong>CRF 1100 L</strong><span>24 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CB%201000%20R"><strong>CB 1000 R</strong><span>22 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CMX%201100%20D%20Rebel"><strong>CMX 1100 D Rebel</strong><span>22 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CMX%201100%20Rebel"><strong>CMX 1100 Rebel</strong><span>22 annoncer</span></a></li>
         </ul>
-        <details class="mk-mere"><summary>Flere Honda-modeller (6)</summary>
+        <details class="mk-mere"><summary>Flere Honda-modeller (24)</summary>
           <ul class="mk-mini">
+            <li><a href="soegning.html?brands=Honda&amp;q=CMX%20500%20Rebel"><strong>CMX 500 Rebel</strong><span>20 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CRF%201100%20L%20Africa"><strong>CRF 1100 L Africa</strong><span>20 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=GL%201800%20Gold%20Wing"><strong>GL 1800 Gold Wing</strong><span>20 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20650"><strong>CB 650</strong><span>17 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20650%20R"><strong>CB 650 R</strong><span>16 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NT%201100%20A"><strong>NT 1100 A</strong><span>16 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NT%201100%20D"><strong>NT 1100 D</strong><span>16 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=Nt%201100%20d"><strong>Nt 1100 d</strong><span>16 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NC%20750"><strong>NC 750</strong><span>15 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NC%20750%20X"><strong>NC 750 X</strong><span>14 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NX%20500"><strong>NX 500</strong><span>10 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20500"><strong>CB 500</strong><span>9 annoncer</span></a></li>
             <li><a href="soegning.html?brands=Honda&amp;q=CB%201000%20Hornet"><strong>CB 1000 Hornet</strong><span>8 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Honda&amp;q=CB%20650%20R"><strong>CB 650 R</strong><span>7 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CBR%201000"><strong>CBR 1000</strong><span>8 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=XL%20750%20Transalp"><strong>XL 750 Transalp</strong><span>8 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CBR%20650%20R"><strong>CBR 650 R</strong><span>7 annoncer</span></a></li>
             <li><a href="soegning.html?brands=Honda&amp;q=CL%20500%20A"><strong>CL 500 A</strong><span>7 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Honda&amp;q=CB%201000%20R"><strong>CB 1000 R</strong><span>6 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Honda&amp;q=CBR%20650%20R"><strong>CBR 650 R</strong><span>6 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Honda&amp;q=NC%20750%20X"><strong>NC 750 X</strong><span>6 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CBR%201000%20F"><strong>CBR 1000 F</strong><span>6 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20750"><strong>CB 750</strong><span>5 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CRF%201000%20L%20Africa%20Twin"><strong>CRF 1000 L Africa Twin</strong><span>5 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CRF%201100%20L%20Africa%20Twin"><strong>CRF 1100 L Africa Twin</strong><span>5 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NC%20750%20XA"><strong>NC 750 XA</strong><span>5 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20750%20Hornet"><strong>CB 750 Hornet</strong><span>4 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CBF%201000"><strong>CBF 1000</strong><span>4 annoncer</span></a></li>
           </ul>
         </details>
         <p class="mk-col-foot"><a class="mk-link" href="soegning.html?brands=Honda">Se alle Honda-annoncer<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
@@ -446,7 +473,12 @@
           <li><a href="soegning.html?brands=Honda&amp;koerekort=A2"><strong>A2</strong><span>33 Honda</span></a></li>
           <li><a href="soegning.html?brands=Honda&amp;koerekort=A"><strong>A</strong><span>276 Honda</span></a></li>
         </ul>
-        <p class="mk-col-note">Antal motorcykler, der ikke er udelukket på de oplyste tal. Se også <a href="koerekort-a1.html">A1</a> og <a href="koerekort-a2.html">A2</a>.</p>
+        <ul class="mk-links">
+          <li><a href="koerekort-a2.html">Hvad må du køre på A2?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+          <li><a href="koerekort-a1.html">Hvad må du køre på A1?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+          <li><a href="guide-a2-koerekort.html">Guide: fra A2 til A-kørekort<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+        </ul>
+        <p class="mk-col-note">Antal motorcykler, der ikke er udelukket på de oplyste tal — A omfatter derfor alle.</p>
       </section>
         <section class="mk-col" aria-labelledby="mk-reg-h">
         <div class="mk-col-head"><h2 id="mk-reg-h">Find Honda i din region</h2></div>
@@ -463,7 +495,7 @@
     </div>
   </section>
 
-  <div class="container">
+  <div class="container mk-wide">
     <section class="section brand-liste-sektion mk-liste" style="padding-top:var(--space-4);" aria-labelledby="brand-antal">
       <div class="section-head">
         <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og

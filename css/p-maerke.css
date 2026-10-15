@@ -32,6 +32,24 @@
     linear-gradient(180deg, rgba(12,10,8,.35) 0%, rgba(12,10,8,0) 40%, rgba(12,10,8,.5) 100%);
 }
 .mk-hero-inner{ position:relative; z-index:1; }
+/* Hero uden foto: mærkets mest solgte type som illustration til højre (kun
+   cruisere hører hjemme på hero-fotoet), ellers varm mørk flade. */
+.mk-hero-type .mk-hero-media{
+  background: radial-gradient(120% 140% at 85% 40%, #2c2620 0%, #17130f 60%, #0f0d0a 100%);
+}
+.mk-hero-typeimg{
+  position:absolute; right:0; top:0; height:100%; width:auto; max-width:62%; object-fit:cover; object-position: 100% 50%;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 45%);
+          mask-image: linear-gradient(to right, transparent 0%, #000 45%);
+  opacity:.95;
+}
+.mk-mono{
+  display:inline-flex; align-items:center; justify-content:center; flex:none;
+  width:1.05em; height:1.05em; margin-right:.28em; border-radius:50%;
+  border:2px solid var(--color-primary); color:#fff; font-size:.52em; letter-spacing:0; line-height:1;
+  text-shadow:none;
+}
+.mk-wordmark{ display:flex; align-items:center; flex-wrap:wrap; }
 .mk-hero .breadcrumb{ color: rgba(255,255,255,.86); padding-top: var(--space-3); }
 .mk-hero .breadcrumb a{ color:#fff; }
 .mk-hero .breadcrumb a:hover{ color:#fff; text-decoration:underline; }
@@ -46,10 +64,7 @@
   font-size: clamp(36px, 7vw, 68px);
   overflow-wrap:anywhere; text-shadow: 0 2px 24px rgba(0,0,0,.45);
 }
-.mk-wordmark::after{
-  content:""; display:block; width:56px; height:5px; margin-top:var(--space-3);
-  border-radius:3px; background: var(--color-primary);
-}
+
 .mk-wordmark-lang{ font-size: clamp(28px, 5.4vw, 54px); }
 .mk-hero h1{
   font-size: clamp(18px, 2.3vw, 26px); font-weight:600; line-height:1.25;
@@ -63,6 +78,11 @@
 .mk-intro-mere{ margin-top: var(--space-2); max-width:58ch; }
 .mk-intro-mere summary{ color:#fff; font-weight:600; text-decoration:underline; text-underline-offset:3px; }
 .mk-intro-mere > .brand-intro{ color:#ECE7DD; }
+
+/* Billedets sektioner er bredere end headeren (billede 9: kort fra x=43). */
+@media (min-width:1100px){
+  .mk-wide{ max-width: 1456px; padding-inline: var(--space-5); }
+}
 
 /* ---------- Søgekort (over fotoets underkant) ---------- */
 .mk-soeg-wrap{ position:relative; z-index:3; margin-top: -56px; }
@@ -167,8 +187,18 @@
   .mk-cta{ grid-column:auto; }
 }
 @media (min-width:1280px){
-  .mk-featured{ grid-template-columns: repeat(5, minmax(0,1fr)); }
-  .mk-featured-kort > :nth-child(4){ display:block; }
+  .mk-featured{ grid-template-columns: repeat(5, minmax(0,1fr)) minmax(0,1.1fr); }
+  .mk-featured-kort > :nth-child(n+4){ display:block; }
+}
+/* 1-2 annoncer: kortene står som de er, og panelet fylder resten som en bred
+   bjælke i stedet for at stå alene i et tomt gitter. */
+@media (min-width:700px){
+  .mk-featured[data-n="1"]{ grid-template-columns: minmax(0,320px) minmax(0,1fr); }
+  .mk-featured[data-n="1"] .mk-cta{ grid-column:auto; }
+}
+@media (min-width:1100px){
+  .mk-featured[data-n="2"]{ grid-template-columns: repeat(2, minmax(0,320px)) minmax(0,1fr); }
+  .mk-featured[data-n="2"] .mk-cta{ grid-column:auto; }
 }
 .mk-cta{
   position:relative; display:flex; flex-direction:column; overflow:hidden;
@@ -196,13 +226,26 @@
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 42%);
           mask-image: linear-gradient(to bottom, transparent 0%, #000 42%);
 }
-/* Mellem 700 og 1099 px ligger panelet under kortene som en bred bjælke. */
+/* Mellem 700 og 1099 px ligger panelet under kortene som en bred bjælke; med
+   1-2 annoncer er det altid en bjælke (.mk-cta-bar). */
 @media (min-width:700px) and (max-width:1099px){
   .mk-cta{ flex-direction:row; align-items:stretch; }
-  .mk-cta-body{ flex:1 1 55%; }
-  .mk-cta-img{ flex:0 0 40%; width:40%; height:auto; min-height:0; object-position:center;
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 35%); mask-image: linear-gradient(to right, transparent 0%, #000 35%); }
+  .mk-cta-body{ flex:1 1 58%; max-width:60%; }
+  .mk-cta-img{
+    position:absolute; right:0; top:0; bottom:0; width:42%; height:100%; min-height:0; flex:none; object-position:center;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 35%); mask-image: linear-gradient(to right, transparent 0%, #000 35%);
+  }
 }
+@media (min-width:700px){
+  .mk-cta-bar{ flex-direction:row; align-items:stretch; min-height:220px; }
+  .mk-cta-bar .mk-cta-body{ flex:1 1 58%; max-width:60%; }
+  .mk-cta-bar .mk-cta-img{
+    position:absolute; right:0; top:0; bottom:0; width:42%; height:100%; min-height:0; flex:none; object-position:center;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 35%); mask-image: linear-gradient(to right, transparent 0%, #000 35%);
+  }
+}
+.mk-cta-uden{ background: linear-gradient(160deg, var(--color-surface) 0%, var(--color-surface-2) 100%); }
+.mk-cta-uden .mk-cta-body{ padding-bottom: var(--space-5); }
 
 /* ---------- Typefliser (genbruger .tile / .tiles-grid) ---------- */
 @media (min-width:640px){
@@ -223,6 +266,7 @@
   .mk-cols-2{ grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 .mk-col{
+  display:flex; flex-direction:column;
   background: var(--color-surface); border:1px solid var(--color-border);
   border-radius: var(--radius-md); padding: var(--space-4) var(--space-5) var(--space-5); min-width:0;
 }
@@ -259,7 +303,14 @@
 .mk-mere summary{ cursor:pointer; font-weight:600; font-size:14px; color: var(--color-primary-hover); padding: 6px 0; min-height:32px; }
 .mk-mere .mk-mini{ margin-top: var(--space-2); }
 .mk-col-foot{ margin: var(--space-3) 0 0; }
-.mk-col-note{ margin: var(--space-3) 0 0; font-size:12.5px; line-height:1.45; color: var(--color-fg-muted); }
+.mk-links{ list-style:none; margin: var(--space-3) 0 0; padding:0; display:grid; gap:2px; }
+.mk-links a{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); min-height:40px; padding:6px 2px;
+  border-top:1px solid var(--color-border); font-size:14px; font-weight:500;
+}
+.mk-links a:hover{ color: var(--color-primary-hover); }
+.mk-links svg{ width:16px; height:16px; flex:none; color: var(--color-fg-muted); }
+.mk-col-note{ margin: auto 0 0; padding-top: var(--space-3); font-size:12.5px; line-height:1.45; color: var(--color-fg-muted); }
 .mk-col-note a{ text-decoration:underline; text-underline-offset:2px; }
 
 /* ---------- Den fulde liste under billedets struktur ---------- */
@@ -325,3 +376,53 @@
   .mk-brandtile, .mk-mini a{ transition:none; }
   .mk-brandtile:hover{ transform:none; }
 }
+
+/* ---------- Sådan virker (strip) — som forsidens; afgrænset til .mk-saadan ---------- */
+.mk-saadan{ padding-top: var(--space-5); }
+.mk-saadan .saadan-strip{ display:grid; grid-template-columns: minmax(0,1fr); gap: var(--space-3); }
+@media (min-width:1200px){ .mk-saadan .saadan-strip{ grid-template-columns: minmax(0,1fr) 340px; gap: var(--space-4); } }
+.mk-saadan .saadan-hoved{
+  display:grid; grid-template-columns: minmax(0,1fr); gap: var(--space-4); align-items:center;
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+}
+@media (min-width:1200px){ .mk-saadan .saadan-hoved{ grid-template-columns: 150px minmax(0,1fr); } }
+.mk-saadan .saadan-hoved h2{ font-size:19px; line-height:1.2; }
+.mk-saadan .saadan-trin{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns: minmax(0,1fr); gap: var(--space-4); }
+@media (min-width:600px){ .mk-saadan .saadan-trin{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:1000px){ .mk-saadan .saadan-trin{ grid-template-columns: repeat(4, minmax(0,1fr)); column-gap: 40px; } }
+.mk-saadan .saadan-trin-punkt{
+  position:relative; display:grid; grid-template-columns: 46px minmax(0,1fr); gap: var(--space-2); align-items:start;
+  padding:0; background:none; border:0; border-radius:0;
+}
+.mk-saadan .saadan-nr{
+  grid-column:1; grid-row:1; z-index:1; justify-self:start; align-self:start; margin:0;
+  display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%;
+  background: var(--color-primary); color: var(--color-on-primary);
+  font-family: var(--font-display); font-weight:700; font-size:13px; line-height:1;
+}
+.mk-saadan .saadan-ico{ grid-column:1; grid-row:1; display:inline-flex; width:34px; height:34px; margin:8px 0 0 10px; color: var(--color-fg); }
+.mk-saadan .saadan-ico svg{ width:34px; height:34px; stroke-width:1.5; }
+.mk-saadan .saadan-trin-punkt strong{ display:block; font-family: var(--font-display); font-size:14.5px; line-height:1.25; }
+.mk-saadan .saadan-trin-punkt div span{ display:block; margin-top:3px; font-size:12.5px; line-height:1.4; color: var(--color-fg-muted); }
+@media (min-width:1000px){
+  .mk-saadan .saadan-trin-punkt:not(:last-child)::after{
+    content:""; position:absolute; right:-30px; top:16px; width:20px; height:20px; background: var(--color-input-border); opacity:.7;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h16M14 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h16M14 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+}
+.mk-saadan .guide-boks{
+  display:flex; align-items:center; gap: var(--space-4);
+  background: var(--color-success-tint); border:1px solid color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+  border-radius: var(--radius-md); padding: var(--space-4) var(--space-5);
+}
+.mk-saadan .guide-ico{ flex:none; display:inline-flex; width:44px; height:44px; color: var(--color-success); }
+.mk-saadan .guide-ico svg{ width:44px; height:44px; stroke-width:1.4; }
+.mk-saadan .guide-boks h3{ font-size:16px; margin:0 0 2px; }
+.mk-saadan .guide-boks p{ margin:0 0 6px; font-size:13px; line-height:1.4; color: var(--color-fg-muted); }
+.mk-saadan .guide-boks a{ display:inline-flex; align-items:center; gap:4px; min-height:24px; font-size:13.5px; font-weight:700; color: var(--color-fg); text-decoration:underline; text-underline-offset:3px; }
+.mk-saadan .guide-boks a svg{ width:15px; height:15px; }
+
+.mk-cta-bar .btn{ width:auto; align-self:flex-start; }
+@media (min-width:700px) and (max-width:1099px){ .mk-cta .btn{ width:auto; align-self:flex-start; } }

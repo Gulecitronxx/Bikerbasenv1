@@ -702,11 +702,74 @@ function vaelgFremhaevede(sorteret, n){
   return sorteret.filter(harFoto).concat(sorteret.filter(l => !harFoto(l))).slice(0, n);
 }
 
+/* P2-3: en sælgertitel er ikke et modelnavn. "God velkørende custom med lav.
+   KM" stod som model på Hyosung-siden. Reglen er forsigtig: et modelnavn har
+   højst ét lille-bogstavs-ord (Gs katana, Xv 750 virago, Fzr 600), ingen
+   sætningsskilletegn og er ikke en lang sætning. Ægte modeller som "Ténéré 700
+   World Raid T7" (0 små ord) eller "Super Meteor 650 Astral" består. */
+function erModelnavn(m){
+  const t = String(m || '').trim();
+  if (!t || t.length > 40) return false;
+  if (/[.!?;:]/.test(t.replace(/\b[A-Za-z]\.(?=[A-Za-z]\b)/g, ''))) return false;   // "m.fl." o.l. er ikke modeller
+  const ord = t.split(/\s+/);
+  if (ord.length > 6) return false;
+  const smaa = ord.filter(o => /^[a-zæøåéèü]{3,}$/.test(o));
+  return smaa.length <= 1;
+}
+
+/* P2-2: tallet på en modelflise er det antal, soegesiden viser, når man
+   klikker (soegning.html?brands=X&q=model): q-filteret er en
+   delstrengssoegning ("K 1200" finder også K 1200 GT), så flisen taeller med
+   SAMME regel — Filtrering.anvendFiltre({ q }) — og ikke "annoncer med netop
+   dette modelnavn". Linket er uaendret, saa build-facet-pages kan relinke det. */
+function modelTal(items){
+  const navne = [...new Set(items.map(l => String(l.model || '').trim()).filter(erModelnavn))];
+  return navne
+    .map(m => ({ m, n: Filtrering.anvendFiltre(items, { q: m }, null, null).length }))
+    .filter(x => x.n > 0)
+    .sort((a, b) => b.n - a.n || a.m.localeCompare(b.m, 'da'));
+}
+
+/* Hero-baggrund efter det, mærket mest saelger: kun cruisere hører hjemme på
+   hero-fotoet (det viser en cruiser); alle andre typer faar deres egen
+   typeillustration (img/type/<id>.webp) i stedet for en forkert maskine. */
+function heroVariant(items){
+  const d = dominerendeType(items);
+  const id = d && d.id;
+  return { foto: id === 'cruiser', type: id && id !== 'cruiser' && TYPER_MED_BILLEDE.has(id) ? id : null };
+}
+const TYPER_MED_BILLEDE = new Set(['adventure', 'classic', 'cross', 'cruiser', 'naked', 'scooter', 'sport', 'touring']);
+
+/* Panelets billede: et ÆGTE annoncethumbnail fra mærkets lager (ét pr.
+   annonce, jf. CLAUDE.md regel 2), og en anden end rækkens foerste kort. */
+function ctaFoto(fremhaevede){
+  // Aldrig samme foto to gange side om side: med ét kort er der intet at vise.
+  const l = fremhaevede.find((x, i) => i > 0 && harFoto(x));
+  return l ? l.photoUrls[0] : null;
+}
+
+/* Diskret monogram i stedet for et logo: foerste bogstav i op til to ord. */
+function monogram(brand){
+  const ord = String(brand).split(/[\s-]+/).filter(Boolean);
+  return (ord.length > 1 ? ord[0][0] + ord[1][0] : ord[0].slice(0, 1)).toLocaleUpperCase('da');
+}
+
+/* Flisens foto: mærkets egen annonce af den type, helst fra en kilde uden
+   skilt på vaeggen (mcsyd.dk-billederne bærer firmaets skilt og fylder hele
+   fotoet, V-015). Intet at vaelge imellem -> det foerste foto. */
+function typeFoto(items, typeId){
+  const kandidater = items.filter(l => l.type === typeId && harFoto(l));
+  const bedst = kandidater.find(l => !/mcsyd\.dk/.test(String((l.source && l.source.domaene) || ''))) || kandidater[0];
+  return bedst ? bedst.photoUrls[0] : null;
+}
+
 function maerkeFakta(brand, items){
   const tael = f => Filtrering.anvendFiltre(items, f, null, null).length;
-  const typer = (global.__T || []).map(t => ({ id: t.id, label: t.label, n: tael({ types: [t.id] }) }))
-    .filter(x => x.n > 0).sort((a, b) => b.n - a.n);
-  const modeller = topModeller(items, 12).map(([m, n]) => ({ m, n }));
+  const typer = (global.__T || []).map(t => ({
+    id: t.id, label: t.label, n: tael({ types: [t.id] }),
+    foto: typeFoto(items, t.id),
+  })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
+  const modeller = modelTal(items).slice(0, 30);
   const kk = ['A1', 'A2', 'A'].map(k => ({ k, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
   const regioner = [...new Set(items.map(l => l.region).filter(Boolean))]
     .map(r => ({ r, n: tael({ regions: [r] }) })).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.r.localeCompare(b.r, 'da'));
@@ -781,7 +844,9 @@ function tillidsraekkeHTML(){
 
 function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
   const b = esc(brand);
-  const ctaHtml = `<aside class="mk-cta" aria-labelledby="mk-cta-h">
+  const foto = ctaFoto(fremhaevede);
+  const faa = fremhaevede.length <= 2;
+  const ctaHtml = `<aside class="mk-cta${faa ? ' mk-cta-bar' : ''}${foto ? '' : ' mk-cta-uden'}" aria-labelledby="mk-cta-h">
           <div class="mk-cta-body">
             <p class="mk-cta-navn" aria-hidden="true">${b}</p>
             <h3 id="mk-cta-h">Find din næste ${b}</h3>
@@ -792,15 +857,15 @@ function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
             </ul>
             <a class="btn btn-primary" href="${sogHref(brand)}">Søg ${b} motorcykler${ICON.arrowRight}</a>
           </div>
-          <img class="mk-cta-img" src="img/sell-cruiser.webp" alt="" width="640" height="400" loading="lazy" decoding="async">
+          ${foto ? `<img class="mk-cta-img" src="${esc(foto)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
         </aside>`;
   return `<section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
-    <div class="container">
+    <div class="container mk-wide">
       <div class="mk-sek-head">
         <h2 id="mk-featured-h">${b} motorcykler på Bikerbasen</h2>
         <a class="mk-link" href="${sogHref(brand)}">Se alle ${b} motorcykler${ICON.arrowRight}</a>
       </div>
-      <div class="mk-featured">
+      <div class="mk-featured" data-n="${fremhaevede.length}">
         <div class="mk-featured-kort" id="mk-featured-kort" data-fremhaevet="${FREMHAEVEDE_ANTAL}">${kortHtml}</div>
         ${ctaHtml}
       </div>
@@ -812,11 +877,11 @@ function typeFlisersHTML(brand, fakta){
   if (!fakta.typer.length) return '';
   const b = esc(brand);
   return `<section class="section mk-sektion" aria-labelledby="mk-typer-h">
-    <div class="container">
+    <div class="container mk-wide">
       <div class="mk-sek-head"><h2 id="mk-typer-h">Udforsk ${b} efter type</h2></div>
       <div class="tiles-grid mk-tiles">
         ${fakta.typer.map(t => `<a href="${sogHref(brand, 'type=' + t.id)}" class="tile">
-          <span class="tile-media"><img src="img/type/${t.id}.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
+          <span class="tile-media"><img src="${t.foto ? esc(t.foto) : `img/type/${t.id}.webp`}" alt="" width="456" height="342" loading="lazy" decoding="async"${t.foto ? ' referrerpolicy="no-referrer"' : ''}></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>${esc(t.label).replace('/', '/<wbr>')}</span><span class="mk-tile-n">${antalTekst(t.n, 'annonce', 'annoncer')}</span></span><span class="tile-go" aria-hidden="true">${ICON.arrowRight}</span></span>
         </a>`).join('\n        ')}
       </div>
@@ -826,32 +891,45 @@ function typeFlisersHTML(brand, fakta){
 
 /* De samme fire trin som forsiden (index.html #saadan-titel) — ikke nye
    løfter. Klasserne .saadan-trin* ligger i css/styles.css. */
+/* "Sådan virker Bikerbasen" — samme strip som forsiden (index.html), med
+   ikoner og pile mellem trinnene. Forsidens CSS lander først, når gauntlet/
+   master flettes ind; derfor står den også (afgrænset til .mk-saadan) i
+   css/p-maerke.css. Guide-boksen peger på en side, der findes (sikkerhed.html)
+   — der er intet fællesskab at invitere til. */
+const IKON_TRIN = {
+  idCard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg>',
+  sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5Z"/></svg>',
+};
 function saadanHTML(){
-  return `<section class="section mk-sektion saadan-section" aria-labelledby="saadan-titel">
-    <div class="container">
-      <div class="mk-sek-head"><h2 id="saadan-titel">Sådan virker Bikerbasen</h2></div>
-      <ol class="saadan-trin" aria-label="Fire trin fra kørekort til annonce">
-        <li class="saadan-trin-punkt">
-          <span class="saadan-nr" aria-hidden="true">1</span>
-          <strong>Vælg dit kørekort</strong>
-          <span>A1, A2 eller A. Vi skjuler det, de oplyste tal udelukker.</span>
-        </li>
-        <li class="saadan-trin-punkt">
-          <span class="saadan-nr" aria-hidden="true">2</span>
-          <strong>Filtrer efter behov</strong>
-          <span>Mærke, type, pris og årgang — i søgekortet øverst eller i søgningen.</span>
-        </li>
-        <li class="saadan-trin-punkt">
-          <span class="saadan-nr" aria-hidden="true">3</span>
-          <strong>Se, hvad der er oplyst</strong>
-          <span>Hvert kort viser kilden og de tal, der står i annoncen. Mangler et tal, står der "Ikke oplyst".</span>
-        </li>
-        <li class="saadan-trin-punkt">
-          <span class="saadan-nr" aria-hidden="true">4</span>
-          <strong>Gå videre til sælger</strong>
-          <span>Annoncesiden samler tallene. Knappen derfra fører til forhandleren eller markedspladsen.</span>
-        </li>
-      </ol>
+  const trin = [
+    ['1', IKON_TRIN.idCard, 'Vælg dit kørekort', 'A1, A2 eller A — vi skjuler det, tallene udelukker.'],
+    ['2', IKON_TRIN.sliders, 'Filtrer efter dine behov', 'Mærke, model, type og maks. pris.'],
+    ['3', ICON.search, 'Se, hvad der er oplyst', 'Kortet viser kilden og de tal, annoncen oplyser.'],
+    ['4', ICON.externalLink, 'Gå videre til sælger', 'Annoncesiden fører dig videre til kilden.'],
+  ];
+  return `<section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
+    <div class="container mk-wide">
+      <div class="saadan-strip">
+        <div class="saadan-hoved">
+          <h2 id="saadan-titel">Sådan virker Bikerbasen</h2>
+          <ol class="saadan-trin" aria-label="Fire trin fra kørekort til annonce">
+            ${trin.map(([n, ik, t, u]) => `<li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">${n}</span>
+              <span class="saadan-ico" aria-hidden="true">${ik}</span>
+              <div><strong>${t}</strong><span>${u}</span></div>
+            </li>`).join('\n            ')}
+          </ol>
+        </div>
+        <aside class="guide-boks" aria-labelledby="guide-titel">
+          <span class="guide-ico" aria-hidden="true">${IKON_TRIN.book}</span>
+          <div>
+            <h3 id="guide-titel">Køb og sælg trygt</h3>
+            <p>Gode råd før du køber, sælger eller mødes med den anden part — og tegn på svindel.</p>
+            <a href="sikkerhed.html">Læs gode råd<span aria-hidden="true">${ICON.arrowRight}</span></a>
+          </div>
+        </aside>
+      </div>
     </div>
   </section>`;
 }
@@ -882,7 +960,12 @@ function treKolonnerHTML(brand, fakta, items){
         <ul class="mk-mini mk-mini-kk">
           ${fakta.kk.map(x => `<li><a href="${sogHref(brand, 'koerekort=' + x.k)}"><strong>${x.k}</strong><span>${tal(x.n)} ${b}</span></a></li>`).join('\n          ')}
         </ul>
-        <p class="mk-col-note">Antal motorcykler, der ikke er udelukket på de oplyste tal. Se også <a href="koerekort-a1.html">A1</a> og <a href="koerekort-a2.html">A2</a>.</p>
+        <ul class="mk-links">
+          <li><a href="koerekort-a2.html">Hvad må du køre på A2?${ICON.arrowRight}</a></li>
+          <li><a href="koerekort-a1.html">Hvad må du køre på A1?${ICON.arrowRight}</a></li>
+          <li><a href="guide-a2-koerekort.html">Guide: fra A2 til A-kørekort${ICON.arrowRight}</a></li>
+        </ul>
+        <p class="mk-col-note">Antal motorcykler, der ikke er udelukket på de oplyste tal — A omfatter derfor alle.</p>
       </section>`);
   }
   if (fakta.regioner.length){
@@ -896,7 +979,7 @@ function treKolonnerHTML(brand, fakta, items){
   }
   if (!kolonner.length) return '';
   return `<section class="section mk-sektion">
-    <div class="container">
+    <div class="container mk-wide">
       <div class="mk-cols mk-cols-${kolonner.length}">
         ${kolonner.join('\n        ')}
       </div>
@@ -995,6 +1078,7 @@ for (const brand of brands){
   const fremKort = fremhaevede.map((l, i) => listingCardHTML(l, i)).join('\n          ');
   const kort = visteKort.map((l, i) => listingCardHTML(l, i + fremhaevede.length)).join('\n      ');
   const fakta = maerkeFakta(brand, items);
+  const heroV = heroVariant(items);
   /* Runde 9 (D9-M2): stoerste sidst_set = hvornaar lageret sidst er bekraeftet. */
   const senestOpdateret = (() => {
     const t = Math.max(0, ...items.map(l => l.sidstSet ? new Date(l.sidstSet).getTime() : 0));
@@ -1085,8 +1169,7 @@ ${noindexMeta}<!-- Canonical staar HER, ikke kun i det blok scripts/build-meta.j
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-${foersteFoto ? `<link rel="preload" as="image" href="${foersteFoto}" fetchpriority="high">
-` : ''}<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/p-maerke.css">
 ${jsonLdBlock([
   breadcrumbLd([
@@ -1109,11 +1192,12 @@ ${header}
        liste, facetter, prisniveau, FAQ og andre mærker (SEO).
        Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
        reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
-  <section class="mk-hero">
+  <section class="mk-hero${heroV.foto ? '' : ' mk-hero-type'}">
     <div class="mk-hero-media" aria-hidden="true">
-      <img class="mk-hero-photo" src="img/hero-1600.webp"
+      ${heroV.foto ? `<img class="mk-hero-photo" src="img/hero-1600.webp"
            srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
-           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
+           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">`
+        : (heroV.type ? `<img class="mk-hero-typeimg" src="img/type/${heroV.type}.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async">` : '')}
     </div>
     <div class="container mk-hero-inner">
       <nav class="breadcrumb" aria-label="Brødkrumme">
@@ -1121,7 +1205,7 @@ ${header}
         <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
         <span>${esc(brand)}</span>
       </nav>
-      <p class="mk-wordmark${brand.length > 11 ? ' mk-wordmark-lang' : ''}" aria-hidden="true">${esc(brand)}</p>
+      <p class="mk-wordmark${brand.length > 11 ? ' mk-wordmark-lang' : ''}" aria-hidden="true"><span class="mk-mono">${esc(monogram(brand))}</span><span>${esc(brand)}</span></p>
       <h1>${nye ? '' : 'Brugte '}${esc(brand)}-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">${introFoerste}</p>
       ${introRest ? `<details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
@@ -1141,7 +1225,7 @@ ${header}
 
   ${treKolonnerHTML(brand, fakta, items)}
 
-  <div class="container">
+  <div class="container mk-wide">
     <section class="section brand-liste-sektion mk-liste" style="padding-top:var(--space-4);" aria-labelledby="brand-antal">
       <div class="section-head">
         <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
@@ -1480,4 +1564,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede };
+module.exports = { typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede };
