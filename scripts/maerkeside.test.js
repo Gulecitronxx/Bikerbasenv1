@@ -29,7 +29,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 // require.main-gaten i build-brand-pages.js gør, at det her IKKE kører et byg.
-const { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager }
+const { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede }
   = require('./build-brand-pages.js');
 
 function ekstern(extra){
@@ -147,4 +147,49 @@ test('rækkefølgen er dansk, og tomme lister vælter ikke', () => {
   assert.deepEqual(maerkerUdenLager(['Ural', 'Beta', 'Zontes'], []), ['Beta', 'Ural', 'Zontes']);
   assert.deepEqual(maerkerUdenLager([], ['Honda']), []);
   assert.deepEqual(maerkerUdenLager(['Honda'], null), ['Honda']);
+});
+
+/* ---- NF-1: den synlige første sætning deles ikke midt i "kr." ---- */
+
+test('NF-1: indledningen deles ikke ved "kr. " midt i prisspændet', () => {
+  const tekst = introFor('Honda', [ekstern({ price: 4000, year: null }), ekstern({ price: 59900, year: null })]);
+  // Uden årgang og typer ender sætningen først efter prisspændet — og
+  // "fra 4.000 kr. til 59.900 kr." indeholder to "kr. " før sætningsslut.
+  const { foerste, rest } = splitIntro(tekst);
+  assert.match(foerste, /fra 4\.000 kr\. til 59\.900 kr\./, `det synlige afsnit blev skåret midt i prisen: ${foerste}`);
+  assert.ok(!/fra 4\.000 kr\.$/.test(foerste), `det synlige afsnit slutter på "fra 4.000 kr.": ${foerste}`);
+  assert.equal(`${foerste} ${rest}`.trim(), tekst, 'ingen tekst må gå tabt eller fordobles ved delingen');
+});
+
+test('NF-1: "kr. " tæller ikke som sætningsslut — heller ikke når årgang og typer følger', () => {
+  const tekst = introFor('Honda', [ekstern({ price: 4000 }), ekstern({ price: 59900, year: 2001 })]);
+  const { foerste, rest } = splitIntro(tekst);
+  assert.match(foerste, /til 59\.900 kr\./, `første sætning er skåret før prisspændets slutning: ${foerste}`);
+  assert.ok(!/fra 4\.000 kr\.$/.test(foerste), `første sætning slutter midt i prisspændet: ${foerste}`);
+  assert.match(`${foerste}${rest}`, /årgange mellem 1986 og 2001/);
+});
+
+test('NF-1: "m.fl. " er heller ikke sætningsslut', () => {
+  const { foerste, rest } = splitIntro('Der er 9 motorcykler. Udvalget dækker Sport, Naked, Touring m.fl. Næste sætning.');
+  assert.equal(foerste, 'Der er 9 motorcykler.');
+  assert.ok(rest.startsWith('Udvalget dækker Sport, Naked, Touring m.fl. Næste'), rest);
+  // Én sætning med "m.fl. " midt i: ingen deling overhovedet.
+  assert.deepEqual(splitIntro('Se Sport, Naked, Touring m.fl. og Cross.'),
+    { foerste: 'Se Sport, Naked, Touring m.fl. og Cross.', rest: '' });
+});
+
+test('splitIntro: en intro uden sætningsskifte bliver helt stående', () => {
+  assert.deepEqual(splitIntro('Der er 1 motorcykel.'), { foerste: 'Der er 1 motorcykel.', rest: '' });
+});
+
+/* ---- Fremhævet række: annoncer med foto først, aldrig flere end bedt om ---- */
+
+test('fremhævet række: annoncer med foto går foran fotolose, og rækkefølgen ellers bevares', () => {
+  const uden = id => ekstern({ id: `u${id}`, photoUrls: [] });
+  const med = id => ekstern({ id: `m${id}`, photoUrls: ['https://x.example/a.jpg'] });
+  const liste = [uden(1), med(1), uden(2), med(2), med(3)];
+  assert.deepEqual(vaelgFremhaevede(liste, 5).map(l => l.id), ['m1', 'm2', 'm3', 'u1', 'u2']);
+  assert.deepEqual(vaelgFremhaevede(liste, 2).map(l => l.id), ['m1', 'm2']);
+  assert.deepEqual(vaelgFremhaevede([uden(1)], 5).map(l => l.id), ['u1'], 'har mærket få annoncer, vises de alle');
+  assert.deepEqual(vaelgFremhaevede([], 5), []);
 });

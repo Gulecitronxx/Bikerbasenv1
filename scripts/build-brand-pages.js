@@ -10,6 +10,11 @@ const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
 const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering } = browserModules();
 
+/* Sidens egne ikoner (js/icons.js) som markup — samme SVG'er som resten af
+   sitet, ikke en ny ikonpakke. Filen er et almindeligt script med en
+   top-level `const Icon`, så den kan hentes ud uden at røre browser-globaler. */
+const ICON = new Function(fs.readFileSync(path.join(ROOT, 'js/icons.js'), 'utf8') + '\n;return Icon;')();
+
 /* Runde 8 (D8-M3): maerkesiden tabte blinddommen paa FUNKTION — "Honda paa A2
    under 60.000" var to klik og et sideskift; hos Bilbasen nul. Uden at bygge
    sidebjaelken om: statiske, crawlbare facetlinks med tal OVER gitteret.
@@ -281,8 +286,10 @@ if (!/site-footer/.test(footer)) throw new Error('Udtrukket footer mangler .site
    mærkesiderne begyndte at vise dem, ville hvert kort have stået med et
    blokeret billede — og CSP-fejl vises kun i konsollen, ikke på siden. To
    politikker at holde i sync var problemet; nu er der én.
-   maerker.html beholder sin egen, strammere: den viser ingen billeder og
-   henter ingen data (se scriptlisten nederst i den). */
+   maerker.html bruger nu den samme: siden loader js/maerke.js (som kan tegne
+   annoncekort) og er en kort-tegnende side for js/csp-billedvaerter.test.js.
+   Den egen, strammere politik var en fordel for en side uden scripts, ikke
+   for en med. */
 const csp = (index.match(/<meta http-equiv="Content-Security-Policy"[^>]*>/) || [])[0];
 if (!csp) throw new Error('Fandt ingen Content-Security-Policy i index.html — build afbrudt.');
 
@@ -670,6 +677,233 @@ function noscriptLinje(l){
   return `${navn}${fakta.length ? ' — ' + fakta.map(esc).join(', ') : ''}${sted ? ` (${esc(sted)})` : ''}`;
 }
 
+/* NF-1: "kr. " og "m.fl. " er ikke sætningsslut. Splitter indledningen i
+   "første sætning" (tallet — står synligt i hero'en) og resten (bag
+   "Mere om udvalget"). Den gamle regex splittede ved første ". ", og siden
+   prisspændet står FØR sætningsslut ("fra 4.000 kr. til 59.900 kr.") endte det
+   synlige afsnit på "fra 4.000 kr." — midt i en sætning. */
+function splitIntro(introTal){
+  const i = introTal.search(/(?<!\bkr|\bm\.fl)\.\s/);
+  return i > 0
+    ? { foerste: introTal.slice(0, i + 1), rest: introTal.slice(i + 1).trim() }
+    : { foerste: introTal, rest: '' };
+}
+
+/* ============ Mærkesidens billed-9-moduler ============
+   Alle tal her regnes af SAMME `items` som sidens titel, intro og FAQ — og
+   med soegesidens egen filterkæde (Filtrering.anvendFiltre) — så tallet på et
+   link er tallet på resultatsiden, og siden kun har ét antal (V-012). */
+const FREMHAEVEDE_ANTAL = 5;
+const harFoto = l => !!(l.photoUrls && l.photoUrls.length);
+/* Annoncer MED foto først (V-014: fotolose kort ser tomme ud i en
+   fremhævet række), ellers soegesidens 'blandet' orden. Samme funktion står
+   i js/maerke.js — holdes i sync, ellers omrokerer siden ved hydrering. */
+function vaelgFremhaevede(sorteret, n){
+  return sorteret.filter(harFoto).concat(sorteret.filter(l => !harFoto(l))).slice(0, n);
+}
+
+function maerkeFakta(brand, items){
+  const tael = f => Filtrering.anvendFiltre(items, f, null, null).length;
+  const typer = (global.__T || []).map(t => ({ id: t.id, label: t.label, n: tael({ types: [t.id] }) }))
+    .filter(x => x.n > 0).sort((a, b) => b.n - a.n);
+  const modeller = topModeller(items, 12).map(([m, n]) => ({ m, n }));
+  const kk = ['A1', 'A2', 'A'].map(k => ({ k, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
+  const regioner = [...new Set(items.map(l => l.region).filter(Boolean))]
+    .map(r => ({ r, n: tael({ regions: [r] }) })).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.r.localeCompare(b.r, 'da'));
+  const priser = [30000, 60000, 100000, 200000].filter(max => tael({ priceMax: max }) > 0);
+  return { typer, modeller, kk, regioner, priser, udenRegion: items.filter(l => !l.region).length };
+}
+
+const talTekst = n => tal(n);
+const antalTekst = (n, ental, flertal) => `${tal(n)} ${n === 1 ? ental : flertal}`;
+const sogHref = (brand, ekstra) => `soegning.html?brands=${encodeURIComponent(brand)}${ekstra ? '&amp;' + ekstra : ''}`;
+
+function heroSoegHTML(brand, slug, items, fakta){
+  const b = esc(brand);
+  const eks = fakta.modeller.length ? fakta.modeller[0].m : '';
+  return `<form class="mk-search" id="mk-search" action="soegning.html" method="get" aria-label="Søg ${b} motorcykler">
+        <input type="hidden" name="brands" value="${b}">
+        <div class="field mk-f-q">
+          <label for="mk-q">Mærke eller model</label>
+          <div class="input-icon-wrap">
+            ${ICON.search}
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="${b}${eks ? ` (fx ${esc(eks)} …)` : ''}" aria-describedby="mk-q-hint">
+          </div>
+          <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til ${b}. Skriv en model for at snævre ind.</span>
+        </div>
+        <div class="field mk-f-type">
+          <label for="mk-type">Type</label>
+          <select class="input" id="mk-type" name="type">
+            <option value="">Alle typer</option>
+            ${fakta.typer.map(t => `<option value="${t.id}">${esc(t.label)}</option>`).join('\n            ')}
+          </select>
+        </div>
+        <div class="field mk-f-pris">
+          <label for="mk-pris">Maks. pris</label>
+          <select class="input" id="mk-pris" name="maxPrice">
+            <option value="">Alle priser</option>
+            ${fakta.priser.map(p => `<option value="${p}">Op til ${tal(p)} kr.</option>`).join('\n            ')}
+          </select>
+        </div>
+        <fieldset class="kk-field mk-f-kk">
+          <legend>Kørekort</legend>
+          <div class="kk-seg">
+            <input type="radio" name="koerekort" id="mk-kk-alle" value="" checked>
+            <label for="mk-kk-alle">Alle</label>
+            <input type="radio" name="koerekort" id="mk-kk-A1" value="A1">
+            <label for="mk-kk-A1">A1</label>
+            <input type="radio" name="koerekort" id="mk-kk-A2" value="A2">
+            <label for="mk-kk-A2">A2</label>
+            <input type="radio" name="koerekort" id="mk-kk-A" value="A">
+            <label for="mk-kk-A">A</label>
+          </div>
+        </fieldset>
+        <div class="mk-f-go">
+          <button type="submit" class="btn btn-primary btn-lg">Søg ${b} motorcykler${ICON.arrowRight}</button>
+          <p class="mk-count"><span data-mk-n>${tal(items.length)}</span> ${b} ${items.length === 1 ? 'motorcykel' : 'motorcykler'} i Danmark</p>
+        </div>
+      </form>`;
+}
+
+/* Fire løfter, der gælder HVER annonce på siden — ingen, vi ikke kan
+   dokumentere ("vi fjerner svindel", "fællesskab", svartider er ude). */
+function tillidsraekkeHTML(){
+  const punkter = [
+    [ICON.shieldCheck, 'Kilden står på hvert kort', 'Du kan altid se, hvor oplysningerne kommer fra.'],
+    [ICON.filter, 'Kørekortfilter på oplyste tal', 'Vi gætter aldrig — filteret bygger kun på det, annoncen oplyser.'],
+    [ICON.info, 'Ikke oplyst frem for gæt', 'Mangler et tal, står der "Ikke oplyst" i stedet for et skøn.'],
+    [ICON.externalLink, 'Handlen sker hos sælger', 'Vi er et indeks og tager ingen kommission af salget.'],
+  ];
+  return `<ul class="mk-trust" aria-label="Det kan du regne med">
+        ${punkter.map(([ik, t, u]) => `<li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true">${ik}</span><span><strong>${t}</strong><span class="mk-trust-sub">${u}</span></span></li>`).join('\n        ')}
+      </ul>`;
+}
+
+function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
+  const b = esc(brand);
+  const ctaHtml = `<aside class="mk-cta" aria-labelledby="mk-cta-h">
+          <div class="mk-cta-body">
+            <p class="mk-cta-navn" aria-hidden="true">${b}</p>
+            <h3 id="mk-cta-h">Find din næste ${b}</h3>
+            <ul class="mk-checks">
+              <li><span class="mk-ok" aria-hidden="true">${ICON.check}</span>Danske forhandlere og markedspladser</li>
+              <li><span class="mk-ok" aria-hidden="true">${ICON.check}</span>Kilden står på hvert kort</li>
+              <li><span class="mk-ok" aria-hidden="true">${ICON.check}</span>Filtrér på dit kørekort</li>
+            </ul>
+            <a class="btn btn-primary" href="${sogHref(brand)}">Søg ${b} motorcykler${ICON.arrowRight}</a>
+          </div>
+          <img class="mk-cta-img" src="img/sell-cruiser.webp" alt="" width="640" height="400" loading="lazy" decoding="async">
+        </aside>`;
+  return `<section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
+    <div class="container">
+      <div class="mk-sek-head">
+        <h2 id="mk-featured-h">${b} motorcykler på Bikerbasen</h2>
+        <a class="mk-link" href="${sogHref(brand)}">Se alle ${b} motorcykler${ICON.arrowRight}</a>
+      </div>
+      <div class="mk-featured">
+        <div class="mk-featured-kort" id="mk-featured-kort" data-fremhaevet="${FREMHAEVEDE_ANTAL}">${kortHtml}</div>
+        ${ctaHtml}
+      </div>
+    </div>
+  </section>`;
+}
+
+function typeFlisersHTML(brand, fakta){
+  if (!fakta.typer.length) return '';
+  const b = esc(brand);
+  return `<section class="section mk-sektion" aria-labelledby="mk-typer-h">
+    <div class="container">
+      <div class="mk-sek-head"><h2 id="mk-typer-h">Udforsk ${b} efter type</h2></div>
+      <div class="tiles-grid mk-tiles">
+        ${fakta.typer.map(t => `<a href="${sogHref(brand, 'type=' + t.id)}" class="tile">
+          <span class="tile-media"><img src="img/type/${t.id}.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>${esc(t.label).replace('/', '/<wbr>')}</span><span class="mk-tile-n">${antalTekst(t.n, 'annonce', 'annoncer')}</span></span><span class="tile-go" aria-hidden="true">${ICON.arrowRight}</span></span>
+        </a>`).join('\n        ')}
+      </div>
+    </div>
+  </section>`;
+}
+
+/* De samme fire trin som forsiden (index.html #saadan-titel) — ikke nye
+   løfter. Klasserne .saadan-trin* ligger i css/styles.css. */
+function saadanHTML(){
+  return `<section class="section mk-sektion saadan-section" aria-labelledby="saadan-titel">
+    <div class="container">
+      <div class="mk-sek-head"><h2 id="saadan-titel">Sådan virker Bikerbasen</h2></div>
+      <ol class="saadan-trin" aria-label="Fire trin fra kørekort til annonce">
+        <li class="saadan-trin-punkt">
+          <span class="saadan-nr" aria-hidden="true">1</span>
+          <strong>Vælg dit kørekort</strong>
+          <span>A1, A2 eller A. Vi skjuler det, de oplyste tal udelukker.</span>
+        </li>
+        <li class="saadan-trin-punkt">
+          <span class="saadan-nr" aria-hidden="true">2</span>
+          <strong>Filtrer efter behov</strong>
+          <span>Mærke, type, pris og årgang — i søgekortet øverst eller i søgningen.</span>
+        </li>
+        <li class="saadan-trin-punkt">
+          <span class="saadan-nr" aria-hidden="true">3</span>
+          <strong>Se, hvad der er oplyst</strong>
+          <span>Hvert kort viser kilden og de tal, der står i annoncen. Mangler et tal, står der "Ikke oplyst".</span>
+        </li>
+        <li class="saadan-trin-punkt">
+          <span class="saadan-nr" aria-hidden="true">4</span>
+          <strong>Gå videre til sælger</strong>
+          <span>Annoncesiden samler tallene. Knappen derfra fører til forhandleren eller markedspladsen.</span>
+        </li>
+      </ol>
+    </div>
+  </section>`;
+}
+
+/* "Populære" er bevidst ikke brugt: rækken er de modeller, der har flest
+   annoncer, og siden måler ikke popularitet (jf. runde 8, D8-M5). */
+function treKolonnerHTML(brand, fakta, items){
+  const b = esc(brand);
+  const modelFlise = x => `<li><a href="${sogHref(brand, 'q=' + encodeURIComponent(x.m))}"><strong>${esc(x.m)}</strong><span>${antalTekst(x.n, 'annonce', 'annoncer')}</span></a></li>`;
+  const kolonner = [];
+  if (fakta.modeller.length){
+    kolonner.push(`<section class="mk-col" aria-labelledby="mk-mod-h">
+        <div class="mk-col-head"><h2 id="mk-mod-h">${b}-modeller med flest annoncer</h2></div>
+        <ul class="mk-mini">
+          ${fakta.modeller.slice(0, 6).map(modelFlise).join('\n          ')}
+        </ul>
+        ${fakta.modeller.length > 6 ? `<details class="mk-mere"><summary>Flere ${b}-modeller (${fakta.modeller.length - 6})</summary>
+          <ul class="mk-mini">
+            ${fakta.modeller.slice(6).map(modelFlise).join('\n            ')}
+          </ul>
+        </details>` : ''}
+        <p class="mk-col-foot"><a class="mk-link" href="${sogHref(brand)}">Se alle ${b}-annoncer${ICON.arrowRight}</a></p>
+      </section>`);
+  }
+  if (fakta.kk.length){
+    kolonner.push(`<section class="mk-col" aria-labelledby="mk-kk-h">
+        <div class="mk-col-head"><h2 id="mk-kk-h">Udforsk ${b} efter kørekort</h2></div>
+        <ul class="mk-mini mk-mini-kk">
+          ${fakta.kk.map(x => `<li><a href="${sogHref(brand, 'koerekort=' + x.k)}"><strong>${x.k}</strong><span>${tal(x.n)} ${b}</span></a></li>`).join('\n          ')}
+        </ul>
+        <p class="mk-col-note">Antal motorcykler, der ikke er udelukket på de oplyste tal. Se også <a href="koerekort-a1.html">A1</a> og <a href="koerekort-a2.html">A2</a>.</p>
+      </section>`);
+  }
+  if (fakta.regioner.length){
+    kolonner.push(`<section class="mk-col" aria-labelledby="mk-reg-h">
+        <div class="mk-col-head"><h2 id="mk-reg-h">Find ${b} i din region</h2></div>
+        <ul class="mk-mini mk-mini-reg">
+          ${fakta.regioner.map(x => `<li><a href="${sogHref(brand, 'regions=' + encodeURIComponent(x.r))}"><strong>${esc(x.r)}</strong><span>${tal(x.n)}</span></a></li>`).join('\n          ')}
+        </ul>
+        ${fakta.udenRegion ? `<p class="mk-col-note">${antalTekst(fakta.udenRegion, 'annonce oplyser', 'annoncer oplyser')} ikke landsdel.</p>` : ''}
+      </section>`);
+  }
+  if (!kolonner.length) return '';
+  return `<section class="section mk-sektion">
+    <div class="container">
+      <div class="mk-cols mk-cols-${kolonner.length}">
+        ${kolonner.join('\n        ')}
+      </div>
+    </div>
+  </section>`;
+}
+
 function byg(){
 /* "Ukendt" er ikke et mærke, man søger på — normalizeExternalListing sætter
    det, når kilden ikke oplyser mærket. En maerke-ukendt.html ville være en
@@ -752,8 +986,15 @@ for (const brand of brands){
      vaek i soegningen — med filtre, sortering og sideinddeling. <noscript>-
      listen baerer stadig alle (SEO). */
   const items = Sortering.sorter(byBrand[brand].slice(), 'blandet');
-  const visteKort = items.slice(0, MAERKE_KORT);
-  const kort = visteKort.map((l, i) => listingCardHTML(l, i)).join('\n      ');
+  /* Billed 9: en fremhævet række (op til 5, med foto først) og derunder resten
+     — de samme annoncer vises ikke to gange. */
+  const fremhaevede = vaelgFremhaevede(items, FREMHAEVEDE_ANTAL);
+  const fremIds = new Set(fremhaevede.map(l => String(l.id)));
+  const resten = items.filter(l => !fremIds.has(String(l.id)));
+  const visteKort = resten.slice(0, MAERKE_KORT);
+  const fremKort = fremhaevede.map((l, i) => listingCardHTML(l, i)).join('\n          ');
+  const kort = visteKort.map((l, i) => listingCardHTML(l, i + fremhaevede.length)).join('\n      ');
+  const fakta = maerkeFakta(brand, items);
   /* Runde 9 (D9-M2): stoerste sidst_set = hvornaar lageret sidst er bekraeftet. */
   const senestOpdateret = (() => {
     const t = Math.max(0, ...items.map(l => l.sidstSet ? new Date(l.sidstSet).getTime() : 0));
@@ -804,10 +1045,9 @@ for (const brand of brands){
   /* Runde 7 (D7-M3): tallet ("Der er lige nu …") foerst og synligt; arven og
      resten bag en fold. */
   const introTal = introFor(brand, items);
-  // NF-1: "kr. " og "m.fl. " er ikke saetningsslut — ellers endte det synlige afsnit paa "fra 4.000 kr.".
-  const foerstePunktum = introTal.search(/(?<!\bkr|\bm\.fl)\.\s/);
-  const introFoerste = foerstePunktum > 0 ? introTal.slice(0, foerstePunktum + 1) : introTal;
-  const introRest = [arvSaetning, foerstePunktum > 0 ? introTal.slice(foerstePunktum + 1).trim() : ''].filter(Boolean).join(' ');
+  // NF-1: se splitIntro() — "kr. " og "m.fl. " er ikke sætningsslut.
+  const { foerste: introFoerste, rest: introEfter } = splitIntro(introTal);
+  const introRest = [arvSaetning, introEfter].filter(Boolean).join(' ');
   const faqs = kvalificeret ? faqFor(brand, items, stats, kk) : null;
   const bundHtml = kvalificeret ? bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand) : '';
 
@@ -847,6 +1087,7 @@ ${noindexMeta}<!-- Canonical staar HER, ikke kun i det blok scripts/build-meta.j
 </style>
 ${foersteFoto ? `<link rel="preload" as="image" href="${foersteFoto}" fetchpriority="high">
 ` : ''}<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/p-maerke.css">
 ${jsonLdBlock([
   breadcrumbLd([
     { name: 'Forside', path: 'index.html' },
@@ -857,70 +1098,61 @@ ${jsonLdBlock([
   faqs ? faqLd(faqs) : null,
 ])}
 </head>
-<body>
+<body class="mk-body" data-mk-brand="${esc(brand)}">
 ${header}
 
 <main id="main-content">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Brødkrumme">
-      <a href="index.html">Forside</a><span class="bc-sep"></span>
-      <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
-      <span>${esc(brand)}</span>
-    </nav>
-
-    <!-- Runde 7 (D7-M3): foerste kort stod ved 873 px (390) / 728 (1 366) —
-         12 linjer indledning foer lageret. Nu: h1 + den foerste saetning
-         (tallet) synligt, resten af indledningen bag <details>, modelchips
-         (navigation) foer knapperne, og gitteret lige under. -->
-    <div class="brand-hero">
-      <h1>${nye ? '' : 'Brugte '}${esc(brand)}-motorcykler til salg i Danmark</h1>
-      <p class="brand-intro">${introFoerste}</p>
-      ${introRest ? `<details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
+  <!-- Billede 9 (Yamaha): hero med foto og mærkenavn → søgekort over fotoets
+       underkant → tillidsrække → fremhævet annoncerække + CTA-panel → typefliser
+       → "Sådan virker Bikerbasen" → tre kolonner (modeller / kørekort / region).
+       Under billedets struktur ligger det, siden altid har haft: den fulde
+       liste, facetter, prisniveau, FAQ og andre mærker (SEO).
+       Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
+       reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
+  <section class="mk-hero">
+    <div class="mk-hero-media" aria-hidden="true">
+      <img class="mk-hero-photo" src="img/hero-1600.webp"
+           srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
+           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
     </div>
+    <div class="container mk-hero-inner">
+      <nav class="breadcrumb" aria-label="Brødkrumme">
+        <a href="index.html">Forside</a><span class="bc-sep"></span>
+        <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
+        <span>${esc(brand)}</span>
+      </nav>
+      <p class="mk-wordmark${brand.length > 11 ? ' mk-wordmark-lang' : ''}" aria-hidden="true">${esc(brand)}</p>
+      <h1>${nye ? '' : 'Brugte '}${esc(brand)}-motorcykler til salg i Danmark</h1>
+      <p class="brand-intro mk-intro">${introFoerste}</p>
+      ${introRest ? `<details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
+    </div>
+  </section>
 
-${allModels.length ? `
-      <!-- "Se X efter model", ikke "Populaere X-modeller" og ikke "alle
-           modeller til salg": raekken er de 12 med flest annoncer, og
-           overskriften maa hverken paastaa popularitet, vi ikke maaler, eller
-           fuldstaendighed, den ikke har. Den er en navigationsetiket.
+  <div class="container mk-soeg-wrap">
+    ${heroSoegHTML(brand, slug, items, fakta)}
+    ${tillidsraekkeHTML()}
+  </div>
 
-           RUNDE 12, MAALT: raekken laa i sin EGEN <section> med synlig h2 og
-           fuld sektionsluft — 164 px plus et 80 px gab, altsaa en tredjedel af
-           afstanden ned til foerste vare paa mobil. Chipsene er navigation, og
-           navigation skal ikke koste mere plads end varen. Nu ligger de i
-           hero-blokken som én kompakt rulleraekke. Overskriften bliver staaende
-           for skaermlaesere og dokumentstruktur — den koster bare ingen pixels
-           laengere.
+  ${fremhaevetHTML(brand, items, fremhaevede, fremKort)}
 
-           RUNDE 14: raekken laa stadig INDE i hero'en og kostede 62 px foran
-           varen paa mobil — maalt: foerste kort 681 px paa maerkesiderne mod
-           470 paa facetsiderne, som fik omrokeringen i runde 13. Modelchips er
-           samme slags navigation som facetsidernes maerkechips: VAEK fra det,
-           man lige har valgt. Raekken er nu soeskende, saa CSS kan laegge den
-           efter listen paa smalle skaerme. Paa desktop staar den, hvor den
-           altid har staaet. -->
-    <section class="brand-modelrow-sektion">
-      <h2 class="visually-hidden">Se ${esc(brand)} efter model</h2>
-      <div class="popular-row brand-modelrow">
-        ${allModels.map(([m, antalM]) => `<a class="popular-chip" href="soegning.html?brands=${encodeURIComponent(brand)}&amp;q=${encodeURIComponent(m)}">${esc(m)} · ${antalM}</a>`).join('\n        ')}
-      </div>
-    </section>` : ''}
+  ${typeFlisersHTML(brand, fakta)}
 
-    <section class="section brand-liste-sektion" style="padding-top:var(--space-4);">
+  ${saadanHTML()}
+
+  ${treKolonnerHTML(brand, fakta, items)}
+
+  <div class="container">
+    <section class="section brand-liste-sektion mk-liste" style="padding-top:var(--space-4);" aria-labelledby="brand-antal">
       <div class="section-head">
-        <!-- Runde 9 (D9-M2): "nu" uden dato bag sig er D8-F2's fejl — datoen er
-             stoerste sidst_set i lageret, skrevet ved bygget. -->
-        <!-- RUNDE 12: overskriften var "276 annoncer — de foerste 24 her" og
-             brugte to linjer i samme skaermbillede som h1'en. To naesten lige
-             store overskrifter over hinanden er ikke hierarki. Tallet er
-             etiketten; loftet er en oplysning og hoerer i notelinjen, hvor
-             datoen allerede staar. Ingen oplysning er fjernet. -->
-        <div><h2 class="brand-sub" id="brand-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="brand-note">${items.length > MAERKE_KORT ? `De første ${MAERKE_KORT} vises her. ` : ''}${senestOpdateret ? `Senest bekræftet hos kilderne ${senestOpdateret}.` : ''}</p></div>
-        <a class="section-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Alle ${items.length} i søgningen<span aria-hidden="true"></span></a>
+        <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
+             FAQ. js/maerke.js opdaterer alle [data-mk-n] samlet, hvis lageret
+             har ændret sig siden bygget — aldrig kun ét af dem. -->
+        <div><h2 class="brand-sub" id="brand-antal">${items.length > fremhaevede.length ? `Flere ${esc(brand)}-annoncer` : `Alle ${esc(brand)}-annoncer`}</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>${tal(items.length)}</span> ${items.length === 1 ? 'annonce' : 'annoncer'} i alt. ${items.length > fremhaevede.length + MAERKE_KORT ? `De første ${MAERKE_KORT} af resten vises her. ` : ''}${senestOpdateret ? `Senest bekræftet hos kilderne ${senestOpdateret}.` : ''}</p></div>
+        <a class="section-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Alle <span data-mk-n>${tal(items.length)}</span> i søgningen<span aria-hidden="true"></span></a>
       </div>
       ${facetLinksFor(brand, items)}
-      <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}" data-viste="${MAERKE_KORT}">${kort}</div>
-      ${items.length > MAERKE_KORT ? `<p class="brand-mere"><a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Se alle ${items.length} ${esc(brand)} i søgningen</a></p>` : ''}
+      <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}" data-viste="${MAERKE_KORT}"${resten.length ? '' : ' hidden'}>${kort}</div>
+      ${resten.length > MAERKE_KORT ? `<p class="brand-mere"><a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Se alle ${items.length} ${esc(brand)} i søgningen</a></p>` : ''}
       <div class="brand-actions">
         <a href="opret-annonce.html" class="btn btn-outline">Sælg din ${esc(brand)}</a>
       </div>
@@ -983,13 +1215,25 @@ ${footer}
 
 /* ---- Brand index ---- */
 const udenLager = maerkerUdenLager(Object.keys(BRANDS_BY_MODEL), brands);
+const topMaerker = brands.filter(b => slugify(b) !== 'andet-maerke')
+  .sort((a, b) => byBrand[b].length - byBrand[a].length || a.localeCompare(b, 'da')).slice(0, 8);
+/* A–Z: første bogstav, dansk sortering (Æ Ø Å sidst). */
+const bogstaver = (() => {
+  const grupper = new Map();
+  for (const b of brands){
+    const k = b.trim().charAt(0).toLocaleUpperCase('da');
+    if (!grupper.has(k)) grupper.set(k, []);
+    grupper.get(k).push(b);
+  }
+  return [...grupper.entries()].sort((x, y) => x[0].localeCompare(y[0], 'da'));
+})();
 
 const indexHtml = `<!doctype html>
 <html lang="da">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+${csp}
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Alle motorcykelmærker — Bikerbasen</title>
 <meta name="description" content="Find brugte motorcykler efter mærke. Se udvalget fra ${brands.length} mærker med annoncer til salg i Danmark på Bikerbasen.">
@@ -1008,6 +1252,7 @@ const indexHtml = `<!doctype html>
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/p-maerke.css">
 ${jsonLdBlock([
   breadcrumbLd([
     { name: 'Forside', path: 'index.html' },
@@ -1015,44 +1260,74 @@ ${jsonLdBlock([
   ]),
 ])}
 </head>
-<body>
+<body class="mk-body">
 ${header}
 
 <main id="main-content">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Brødkrumme">
-      <a href="index.html">Forside</a><span class="bc-sep"></span><span>Mærker</span>
-    </nav>
-
-    <div class="brand-hero">
-      <h1>Motorcykler efter mærke</h1>
-      <p class="brand-intro">Gennemse brugte motorcykler efter mærke. Øverst dem, der er til salg lige nu — nederst dem, vi kender, men ikke har på lager i øjeblikket.</p>
+  <section class="mk-hero mk-hero-lav">
+    <div class="mk-hero-media" aria-hidden="true">
+      <img class="mk-hero-photo" src="img/hero-1600.webp"
+           srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
+           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
     </div>
+    <div class="container mk-hero-inner">
+      <nav class="breadcrumb" aria-label="Brødkrumme">
+        <a href="index.html">Forside</a><span class="bc-sep"></span><span>Mærker</span>
+      </nav>
+      <h1>Motorcykler efter mærke</h1>
+      <p class="brand-intro mk-intro">Gennemse brugte motorcykler efter mærke. Øverst dem, der er til salg lige nu — nederst dem, vi kender, men ikke har på lager i øjeblikket.</p>
+    </div>
+  </section>
 
-    ${brands.length ? `<section class="section" style="padding-top:0;">
-      <div class="section-head"><div>
-        <h2>Mærker med annoncer nu</h2>
-        <p>Spring direkte til udvalget hos de mærker, der er til salg lige nu.</p>
-      </div></div>
-      <div class="brand-grid">
-        ${brands.map(b => `<a class="brand-card" href="maerke-${slugify(b)}.html">
-          <span class="brand-card-name">${esc(b)}</span>
-          <span class="brand-card-count">${byBrand[b].length} ${byBrand[b].length === 1 ? 'annonce' : 'annoncer'}</span>
+  <div class="container mk-soeg-wrap mk-soeg-wrap-lav">
+    ${tillidsraekkeHTML()}
+  </div>
+
+  ${brands.length ? `<section class="section mk-sektion" aria-labelledby="mk-top-h">
+    <div class="container">
+      <div class="mk-sek-head">
+        <h2 id="mk-top-h">Mærker med flest annoncer</h2>
+        <a class="mk-link" href="soegning.html">Søg blandt alle ${tal(LISTINGS.length)} annoncer${ICON.arrowRight}</a>
+      </div>
+      <div class="mk-brandtiles">
+        ${topMaerker.map(b => `<a class="mk-brandtile" href="maerke-${slugify(b)}.html">
+          <span class="mk-brandtile-navn">${esc(b)}</span>
+          <span class="mk-brandtile-n">${antalTekst(byBrand[b].length, 'annonce', 'annoncer')}</span>
+          <span class="mk-brandtile-go" aria-hidden="true">${ICON.arrowRight}</span>
         </a>`).join('\n        ')}
       </div>
-    </section>` : ''}
+    </div>
+  </section>
 
-    ${udenLager.length ? `<section class="section" style="padding-top:0;">
-      <div class="section-head"><div>
-        <h2>Mærker uden annoncer lige nu (${udenLager.length})</h2>
-        <p>Dem kender vi godt — der er bare ingen til salg i øjeblikket. Vi linker dem, når der er noget at vise.</p>
-      </div></div>
+  <section class="section mk-sektion" aria-labelledby="mk-az-h">
+    <div class="container">
+      <div class="mk-sek-head"><h2 id="mk-az-h">Alle mærker A–Z</h2></div>
+      <nav class="mk-bogstaver" aria-label="Spring til bogstav">
+        ${bogstaver.map(([bogstav]) => `<a href="#mk-az-${bogstav.toLowerCase()}">${bogstav}</a>`).join('\n        ')}
+      </nav>
+      <div class="mk-az">
+        ${bogstaver.map(([bogstav, liste]) => `<section class="mk-az-gruppe" id="mk-az-${bogstav.toLowerCase()}" aria-label="Mærker med ${bogstav}">
+          <h3>${bogstav}</h3>
+          <ul>
+            ${liste.map(b => `<li><a href="maerke-${slugify(b)}.html"><span>${esc(b)}</span><span class="mk-az-n">${byBrand[b].length}</span></a></li>`).join('\n            ')}
+          </ul>
+        </section>`).join('\n        ')}
+      </div>
+    </div>
+  </section>` : ''}
+
+  ${saadanHTML()}
+
+  ${udenLager.length ? `<section class="section mk-sektion">
+    <div class="container">
+      <div class="mk-sek-head"><h2>Mærker uden annoncer lige nu (${udenLager.length})</h2></div>
+      <p class="brand-intro">Dem kender vi godt — der er bare ingen til salg i øjeblikket. Vi linker dem, når der er noget at vise.</p>
       <p class="brand-intro">${udenLager.map(esc).join(', ')}.</p>
       <div class="brand-actions">
         <a href="soegning.html" class="btn btn-outline">Søg blandt alle ${tal(LISTINGS.length)} annoncer</a>
       </div>
-    </section>` : ''}
-  </div>
+    </div>
+  </section>` : ''}
 </main>
 
 ${footer}
@@ -1071,10 +1346,7 @@ ${footer}
 <script defer src="js/data.js"></script>
 <script defer src="js/store.js"></script>
 <script defer src="js/components.js"></script>
-<script>document.addEventListener('DOMContentLoaded', () => {
-  renderHeader('maerker.html');
-  document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
-});</script>
+<script defer src="js/maerke.js"></script>
 </body>
 </html>
 `;
@@ -1208,4 +1480,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager };
+module.exports = { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede };
