@@ -1,0 +1,225 @@
+/* ============================================================
+   p-facet.css — type-, kørekort-, landsdels- og modelsider
+   (genereret af scripts/build-facet-pages.js). Prefix: fa-.
+   Efter referencebillede 7 (kørekort A2) og 8 (typeside Sport).
+   Bruger kun tokens fra css/styles.css; ingen egne farver ud over
+   hvid/sort på selve foto-heroen (som er mørk i begge temaer).
+   ============================================================ */
+
+.fa-side{ display:block; }
+.fa-side > .container.fa-krop{ display:block; padding-bottom: var(--space-5); }
+/* Mobil-omrokeringen fra styles.css (brand-hero/facet-liste-sektion) gælder
+   de gamle facetsider; her står alt i DOM-rækkefølge. */
+@media (max-width:559px){
+  main.fa-side > .container > *{ order: 0 !important; }
+}
+.fa-ik{ display:inline-flex; flex:none; width:28px; height:28px; color: var(--color-primary); }
+.fa-ik svg{ width:100%; height:100%; }
+.fa-pil{ display:inline-flex; width:18px; height:18px; flex:none; }
+.fa-pil svg{ width:100%; height:100%; }
+
+/* ---------- Hero ---------- */
+.fa-hero{
+  position:relative; overflow:hidden; background: var(--color-dark); color:#fff;
+  padding: var(--space-4) 0 calc(var(--space-8) + var(--space-5));
+}
+.fa-koerekort .fa-hero{ padding-bottom: var(--space-5); }
+.fa-hero-media{ position:absolute; inset:0; z-index:0; }
+.fa-hero-media img{ width:100%; height:100%; object-fit:cover; object-position: 75% 40%; display:block; }
+.fa-hero::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(15,13,10,.92) 0%, rgba(15,13,10,.78) 38%, rgba(15,13,10,.35) 70%, rgba(15,13,10,.15) 100%),
+    linear-gradient(0deg, rgba(15,13,10,.5) 0%, transparent 35%);
+}
+.fa-hero-inner{ position:relative; z-index:2; }
+.fa-bc{ color: rgba(255,255,255,.82); padding-top: var(--space-3); }
+.fa-bc a{ color:#fff; }
+.fa-bc a:hover{ color:#fff; text-decoration:underline; }
+.fa-bc svg{ color: rgba(255,255,255,.6); }
+.fa-hero-grid{ display:grid; gap: var(--space-5); align-items:end; padding-top: var(--space-5); }
+@media (min-width:960px){ .fa-hero-grid{ grid-template-columns: minmax(0,1fr) 330px; padding-top: var(--space-6); } }
+.fa-hero-tekst{ max-width: 720px; }
+.fa-kicker{
+  font-family: var(--font-display); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color: color-mix(in srgb, var(--color-primary) 30%, #fff 70%); margin:0 0 var(--space-2);
+}
+.fa-hero h1{ font-size: clamp(30px, 5.4vw, 56px); line-height:1.04; font-weight:700; margin: 0 0 var(--space-3); color:#fff; text-wrap:balance; text-shadow:0 2px 24px rgba(0,0,0,.45); }
+.fa-hero-intro{ color:#F2EEE7; font-size: clamp(15px,1.6vw,18px); line-height:1.6; margin:0; max-width:62ch; text-shadow:0 1px 12px rgba(0,0,0,.5); }
+.fa-hero-intro strong{ color:#fff; }
+.fa-mere-intro{ margin-top: var(--space-3); max-width:62ch; }
+.fa-mere-intro summary{ color:#fff; font-weight:600; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+.fa-mere-intro .brand-intro{ color:#E6E0D6; margin-top: var(--space-2); font-size:14.5px; }
+.fa-mere-intro .brand-intro strong{ color:#fff; }
+
+.fa-panel{
+  list-style:none; margin:0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+  background: rgba(15,13,10,.74); border:1px solid rgba(255,255,255,.14); backdrop-filter: blur(6px);
+  display:grid; gap: 2px;
+}
+.fa-panel li{ display:flex; gap: var(--space-3); align-items:center; padding: 10px 0; }
+.fa-panel li + li{ border-top:1px solid rgba(255,255,255,.12); }
+.fa-panel .fa-ik{ color:#fff; opacity:.9; }
+.fa-panel strong{ display:block; font-size:15px; color:#fff; }
+.fa-panel span:not(.fa-ik){ display:block; font-size:13.5px; color:#DDD6CB; line-height:1.4; }
+
+/* ---------- Søgekort (overlapper hero) ---------- */
+.fa-soeg-vrap{ position:relative; z-index:3; margin-top: calc(-1 * var(--space-8)); }
+.fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-5); }
+.fa-soeg{
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg); padding: var(--space-4) var(--space-5) var(--space-3);
+}
+.fa-soeg-titel{ font-size:18px; margin:0 0 var(--space-3); }
+.fa-soeg-felter{ display:flex; flex-wrap:wrap; gap: var(--space-3); align-items:flex-end; }
+.fa-felt{ flex:1 1 170px; min-width:0; }
+.fa-felt-q{ flex: 2 1 240px; }
+.fa-soeg-knap{ flex: 0 0 auto; white-space:normal; text-align:center; max-width:100%; }
+.fa-soeg-antal{ text-align:center; font-size:13px; color: var(--color-fg-muted); margin: var(--space-3) 0 0; }
+.fa-agent{ text-align:center; font-size:13px; margin: var(--space-2) 0 0; }
+.fa-agent a{ color: var(--color-primary); font-weight:600; text-decoration:underline; text-underline-offset:3px; }
+@media (max-width:640px){
+  .fa-soeg{ padding: var(--space-4); }
+  .fa-soeg-knap{ flex:1 1 100%; }
+  .fa-felt{ flex: 1 1 calc(50% - 8px); }
+  .fa-felt-q{ flex: 1 1 100%; }
+}
+@media (min-width:641px) and (max-width:980px){ .fa-soeg-knap{ flex:1 1 100%; } }
+
+/* ---------- Tillidsrække / faktarække ---------- */
+.fa-tillid, .fa-fakta-liste{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-4); }
+.fa-tillid{ padding: var(--space-5) 0 var(--space-2); grid-template-columns: repeat(2, minmax(0,1fr)); }
+@media (min-width:960px){ .fa-tillid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+@media (max-width:480px){ .fa-tillid{ grid-template-columns: 1fr; } }
+.fa-tillid li, .fa-fakta-liste li{ display:flex; gap: var(--space-3); align-items:flex-start; min-width:0; }
+.fa-tillid .fa-ik, .fa-fakta-liste .fa-ik{ width:36px; height:36px; }
+.fa-tillid strong, .fa-fakta-liste strong, .fa-fakta-guide strong{ display:block; font-size:14.5px; line-height:1.3; }
+.fa-tillid span:not(.fa-ik), .fa-fakta-liste span:not(.fa-ik), .fa-fakta-guide span:not(.fa-ik):not(.fa-pil){ display:block; font-size:13px; line-height:1.45; color: var(--color-fg-muted); margin-top:2px; }
+
+.fa-fakta{ display:grid; gap: var(--space-4); padding: var(--space-5) 0 0; }
+@media (min-width:1100px){ .fa-fakta{ grid-template-columns: minmax(0,1fr) 300px; align-items:center; column-gap: var(--space-6); } .fa-fakta-kilde{ grid-column: 1 / -1; } }
+.fa-fakta-liste{ grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); }
+.fa-fakta-liste li + li{ padding-left: 0; }
+.fa-fakta-guide{
+  display:flex; gap: var(--space-3); align-items:center; padding: var(--space-3) var(--space-4);
+  background: var(--color-success-tint); border:1px solid color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+  border-radius: var(--radius-md); color: var(--color-fg);
+}
+.fa-fakta-guide .fa-ik{ color: var(--color-success); width:34px; height:34px; }
+.fa-fakta-guide .fa-pil{ margin-left:auto; color: var(--color-success); }
+.fa-fakta-guide:hover{ border-color: var(--color-success); }
+.fa-fakta-kilde{ font-size:12.5px; color: var(--color-fg-muted); margin:0; }
+.fa-fakta-kilde a{ color: var(--color-primary); text-decoration:underline; text-underline-offset:2px; }
+
+/* ---------- Sektioner ---------- */
+.fa-side .section, .fa-sektion{ padding-top: var(--space-6); padding-bottom: 0; }
+.fa-h2{ font-size: clamp(20px,2.4vw,24px); margin:0 0 var(--space-4); }
+.fa-h3{ font-size:17px; margin:0 0 var(--space-3); }
+.fa-h2-raekke{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); flex-wrap:wrap; margin-bottom: var(--space-4); }
+.fa-h2-raekke .fa-h2{ margin:0; }
+.fa-mere{ display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:14.5px; color: var(--color-primary); text-decoration:none; min-height:24px; }
+.fa-mere:hover{ text-decoration:underline; }
+.fa-mere .fa-pil{ width:16px; height:16px; }
+#facet-antal{ font-size: clamp(20px,2.4vw,24px); }
+
+/* Udvalgte + CTA */
+.fa-udvalgte-gitter{ display:grid; gap: var(--space-4); }
+@media (min-width:1100px){ .fa-udvalgte-gitter{ grid-template-columns: minmax(0,1fr) 300px; gap: var(--space-5); align-items:stretch; } }
+.fa-side .fa-kortraekke{ grid-template-columns: repeat(1, minmax(0,1fr)); }
+@media (max-width:519px){
+  .fa-side .fa-kortraekke{ display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap: var(--space-3); margin:0 calc(-1 * var(--space-4)); padding:2px var(--space-4) var(--space-3); scrollbar-width:thin; }
+  .fa-side .fa-kortraekke > *{ flex:0 0 78%; scroll-snap-align:start; }
+}
+@media (min-width:520px){ .fa-side .fa-kortraekke{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:1100px){ .fa-side .fa-kortraekke{ grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-3); } }
+.fa-kortraekke:empty{ min-height:0; }
+.fa-cta{
+  position:relative; overflow:hidden; border-radius: var(--radius-md); color:#fff; padding: var(--space-5);
+  background:
+    linear-gradient(90deg, rgba(15,13,10,.94) 0%, rgba(15,13,10,.82) 55%, rgba(15,13,10,.55) 100%),
+    url(../img/hero-960.webp) 78% center / cover no-repeat;
+  display:flex; flex-direction:column; gap: var(--space-4); justify-content:center;
+}
+.fa-cta h2{ font-size: clamp(20px,2vw,24px); line-height:1.2; margin:0; color:#fff; text-wrap:balance; }
+.fa-cta ul{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-2); }
+.fa-cta li{ display:flex; gap:10px; align-items:center; font-size:14.5px; color:#F2EEE7; }
+.fa-ok{ display:inline-flex; width:22px; height:22px; padding:4px; flex:none; border-radius:50%; background: var(--color-badge-new); color:#fff; }
+.fa-ok svg{ width:100%; height:100%; }
+.fa-cta .btn{ align-self:flex-start; }
+@media (max-width:640px){ .fa-cta .btn{ align-self:stretch; } }
+
+/* Populære typer */
+.fa-typer{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-3); grid-template-columns: repeat(2, minmax(0,1fr)); }
+@media (min-width:640px){ .fa-typer{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+@media (min-width:1000px){ .fa-typer{ grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); } }
+.fa-typer a{ position:relative; display:block; border-radius: var(--radius-md); overflow:hidden; aspect-ratio: 16 / 9; background:#2a2622; color:#fff; border:1px solid var(--color-border); }
+.fa-typer img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; transition: transform .3s var(--ease-out); }
+.fa-typer a:hover img{ transform: scale(1.04); }
+.fa-typer a::after{ content:""; position:absolute; inset:0; background: linear-gradient(0deg, rgba(10,8,6,.88) 0%, rgba(10,8,6,.55) 38%, rgba(10,8,6,0) 70%); }
+.fa-type-tekst{ position:absolute; left:10px; bottom:8px; right:34px; z-index:2; display:block; line-height:1.25; }
+.fa-type-tekst strong{ display:block; font-size:15px; }
+.fa-type-tekst span{ display:block; font-size:12px; color:#E6E0D6; }
+.fa-typer .fa-pil{ position:absolute; right:8px; bottom:10px; z-index:2; width:22px; height:22px; padding:4px; border-radius:50%; background: rgba(255,255,255,.2); }
+
+/* Populære modeller */
+.fa-modeller{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); }
+.fa-modeller a{ display:flex; align-items:center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border:1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); min-height:64px; }
+.fa-modeller a:hover{ border-color: var(--color-primary); }
+.fa-modeller img{ width:64px; height:48px; object-fit:cover; border-radius:6px; background: var(--color-surface-2); flex:none; }
+.fa-model-ikon{ width:64px; height:48px; flex:none; display:grid; place-items:center; background: var(--color-surface-2); border-radius:6px; }
+.fa-model-ikon .fa-ik{ width:28px; height:28px; }
+.fa-model-tekst{ min-width:0; }
+.fa-model-tekst strong{ display:block; font-size:14.5px; overflow-wrap:anywhere; }
+.fa-model-tekst span{ font-size:12.5px; color: var(--color-fg-muted); }
+
+/* Info-bokse */
+.fa-bokse{ display:grid; gap: var(--space-3); }
+.fa-bokse-kk{ padding-top: var(--space-5); grid-template-columns: 1fr; }
+@media (min-width:700px){ .fa-bokse-kk{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:1100px){ .fa-bokse-kk{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+.fa-bokse-4{ grid-template-columns: 1fr; }
+@media (min-width:640px){ .fa-bokse-4{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:1000px){ .fa-bokse-4{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+.fa-boks{
+  display:flex; gap: var(--space-3); align-items:flex-start; padding: var(--space-4);
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+}
+.fa-boks h3{ font-size:15.5px; margin:0 0 var(--space-2); line-height:1.3; }
+.fa-boks p{ font-size:13.5px; line-height:1.55; color: var(--color-fg-muted); margin:0; }
+.fa-boks ul{ list-style:disc; margin:0; padding:0 0 0 18px; display:grid; gap:6px; font-size:13.5px; line-height:1.45; color: var(--color-fg-muted); }
+.fa-boks li::marker{ color: var(--color-primary); }
+.fa-boks .fa-ik{ width:36px; height:36px; padding:7px; border-radius:50%; background: var(--color-primary-tint); color: var(--color-primary); }
+.fa-groen .fa-ik{ background: var(--color-success-tint); color: var(--color-success); }
+.fa-groen li::marker{ color: var(--color-success); }
+.fa-blaa .fa-ik{ background: var(--color-surface-2); color: var(--color-fg); }
+.fa-blaa li::marker{ color: var(--color-fg-muted); }
+.fa-boks-naeste{ background: var(--color-success-tint); border-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border)); align-items:center; }
+.fa-boks-naeste .btn{ margin-top: var(--space-3); white-space:normal; text-align:center; }
+
+/* Guides */
+.fa-guides{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-3); grid-template-columns: 1fr; }
+@media (min-width:760px){ .fa-guides{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+.fa-guides a{ display:flex; align-items:center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); min-height:64px; }
+.fa-guides a:hover{ border-color: var(--color-primary); }
+.fa-guides strong{ font-size:14.5px; line-height:1.35; }
+.fa-guides .fa-pil{ margin-left:auto; color: var(--color-primary); }
+
+/* Relaterede søgninger + region */
+.fa-rel-grid{ display:grid; gap: var(--space-5); }
+@media (min-width:900px){ .fa-rel-grid{ grid-template-columns: 1.4fr 1fr; } .fa-rel-grid:has(.fa-rel:only-child){ grid-template-columns: 1fr; } }
+.fa-chips{ display:flex; flex-wrap:wrap; gap: var(--space-2); }
+.fa-chips .popular-chip{ white-space:normal; flex:0 1 auto; max-width:100%; min-height:36px; padding:6px 12px; font-size:13.5px; }
+.fa-chips .fa-ik{ width:16px; height:16px; }
+.fa-n{ color: var(--color-fg-muted); font-weight:500; }
+.fa-maerker .popular-row{ min-height:0; }
+.fa-rel-vrap:empty, .fa-rel-vrap:not(:has(.fa-rel)){ display:none; }
+
+/* Flere annoncer */
+.fa-flere .brand-facet-fold{ margin-top: var(--space-3); }
+.fa-flere .listings-grid{ margin-top: var(--space-4); }
+@media (min-width:760px){ .fa-flere .listings-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (min-width:1100px){ .fa-flere .listings-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+.fa-flere .brand-mere{ text-align:center; margin-top: var(--space-5); }
+.fa-side .brand-faq-item{ border-bottom:1px solid var(--color-border); padding: var(--space-3) 0; }
+.fa-side .brand-faq-item summary{ cursor:pointer; font-weight:600; }
+.fa-side .brand-faq-item p{ margin-top: var(--space-2); }
