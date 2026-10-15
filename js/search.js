@@ -216,12 +216,12 @@ function scheduleFilterPanel(){
    over 150.000 er tunge tourere og nye maskiner. */
 const PRIS_INTERVALLER = [
   /* Gauntlet: billede 2 viser fire bånd — Under 25.000, 25.000–50.000,
-     50.000–100.000 og Over 100.000 — og det er dem, der står her (før fem:
+     50.000–100.000 og Over 100.000 — og det er dem, der står her. Hvert bånd starter én krone over det forrige, så de ikke overlapper (et pris på præcis 50.000 tælles kun i 25–50.000) (før fem:
      30/60/100/150). Skyderen og talfelterne dækker alt derimellem. */
   { id: 'u25',    label: 'Under 25.000',      min: null,   max: 25000  },
-  { id: '25-50',  label: '25.000 – 50.000',   min: 25000,  max: 50000  },
-  { id: '50-100', label: '50.000 – 100.000',  min: 50000,  max: 100000 },
-  { id: 'o100',   label: 'Over 100.000',      min: 100000, max: null   },
+  { id: '25-50',  label: '25.000 – 50.000',   min: 25001,  max: 50000  },
+  { id: '50-100', label: '50.000 – 100.000',  min: 50001,  max: 100000 },
+  { id: 'o100',   label: 'Over 100.000',      min: 100001, max: null   },
 ];
 
 /* ============ Filtre uden dækning findes ikke ============
@@ -346,9 +346,9 @@ function populateFilterUI(){
      chip-rækker, hvoraf kun den ene var flervalg, og intet i markuppen eller
      i skærmlæseren sagde det. */
   document.getElementById('filter-types').innerHTML =
-    `<button type="button" class="chip so-all" data-type-all aria-pressed="false">Alle typer${FACET_SLOT}</button>` +
+    `<button type="button" class="chip so-all" data-type-all aria-pressed="false"><span class="so-ti" aria-hidden="true">${Icon.bike}</span>Alle typer${FACET_SLOT}</button>` +
     TYPES.map(t =>
-    `<button type="button" class="chip" data-type="${t.id}" aria-pressed="false">${t.label}${FACET_SLOT}</button>`).join('');
+    `<button type="button" class="chip" data-type="${t.id}" aria-pressed="false"><span class="so-ti" aria-hidden="true">${Icon.bike}</span>${t.label}${FACET_SLOT}</button>`).join('');
 
   document.getElementById('filter-price-quick').innerHTML = PRIS_INTERVALLER.map(p =>
     `<button type="button" class="chip" data-pris="${p.id}" role="radio" aria-checked="false" tabindex="-1">${p.label}${FACET_SLOT}</button>`).join('');
@@ -1130,9 +1130,16 @@ function reflectHeroCard(){
   const priceSel = document.getElementById('so-price');
   if (priceSel){
     priceSel.querySelectorAll('option[data-dyn]').forEach(o => o.remove());
-    const v = state.priceMax == null ? '' : String(state.priceMax);
-    if (v && ![...priceSel.options].some(o => o.value === v)){
-      const o = new Option(`Op til ${formatPrice(state.priceMax)}`, v); o.dataset.dyn = '1'; priceSel.add(o);
+    /* Vælgeren viser det SAMME interval som filteret: kun et loft = "Op til X"
+       (eller det matchende valg), kun et gulv = "Fra X", begge = "X – Y".
+       Det dynamiske valg står kun, når intet fast valg passer. */
+    const lo = state.priceMin, hi = state.priceMax;
+    let v = '';
+    if (lo == null && hi != null) v = String(hi);
+    if (lo != null || (hi != null && ![...priceSel.options].some(o => o.value === v))){
+      const tekst = lo == null ? `Op til ${formatPrice(hi)}` : hi == null ? `Fra ${formatPrice(lo)}` : `${formatPrice(lo)} – ${formatPrice(hi)}`;
+      const o = new Option(tekst, '__dyn'); o.dataset.dyn = '1'; priceSel.add(o);
+      v = '__dyn';
     }
     priceSel.value = v;
   }
@@ -1151,6 +1158,8 @@ function reflectBrandSelect(){
   } else bs.value = [...bs.options].some(o => o.value === state.brands[0]) ? state.brands[0] : '';
   // En flervalgs-tilstand skal kunne ses og ændres: foldes listen ud af sig selv.
   if (state.brands.length > 1 || state.models.length > 1) saetFlereFoldet(true);
+  const hint = document.getElementById('so-more-hint');
+  if (hint) hint.hidden = !state.models.length;
 }
 function saetFlereFoldet(aaben){
   const box = document.getElementById('so-more'), btn = document.getElementById('so-more-btn');
@@ -1994,6 +2003,9 @@ function wireDualRange(rangeId, minFieldId, maxFieldId, minKey, maxKey){
     fill.style.right = (100 - pct(hi)) + '%';
     // Når begge tomler står i bunden, skal min-tomlen kunne gribes ovenpå.
     drMin.style.zIndex = lo >= ceil - step ? 5 : 4;
+    const tekst = (v) => rangeId === 'range-price' ? (v >= ceil ? `${formatPrice(ceil)} eller mere` : formatPrice(v)) : String(v);
+    drMin.setAttribute('aria-valuetext', tekst(lo));
+    drMax.setAttribute('aria-valuetext', tekst(hi));
   };
   // Kaldes fra reflectStateToUI, så URL/talfelt-ændringer flytter tomlerne.
   el._sync = () => {
@@ -2254,11 +2266,19 @@ function wireCoreControls(){
         maal.scrollIntoView({ behavior: stille ? 'auto' : 'smooth', block: 'start' });
       }
     });
+    document.getElementById('so-card-more')?.addEventListener('click', (e) => {
+      const aaben = !soegekort.classList.contains('is-open');
+      soegekort.classList.toggle('is-open', aaben);
+      e.currentTarget.setAttribute('aria-expanded', String(aaben));
+    });
     document.getElementById('so-type')?.addEventListener('change', (e) => {
       const v = e.target.value; if (v === '__flere') return;
       state.types = v ? [v] : []; state.page = 1; pushFilterState();
     });
     document.getElementById('so-price')?.addEventListener('change', (e) => {
+      if (e.target.value === '__dyn') return;
+      // Maks. pris er ét loft: et gulv fra sidebaren/URL'en nulstilles med det nye valg.
+      state.priceMin = null;
       state.priceMax = e.target.value ? Number(e.target.value) : null; state.page = 1; pushFilterState();
     });
     soegekort.querySelectorAll('input[name="so-koerekort"]').forEach(r =>

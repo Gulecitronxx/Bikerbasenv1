@@ -32,3 +32,15 @@ Filer: `soegning.html`, `js/search.js`, `css/p-soegning.css` (ny), `js/soegning-
 ## Kendte rest-problemer
 - Fotos på kortene er kildens (vandmærker "MC SYD") — ikke ændret. Hero-kortet fylder en hel mobilskærm (390 px) før første resultat.
 - Prisbånd ændret fra 5 til billedets 4 (30/60/100/150 → 25/50/100): bevidst ejer-beslutning; skyder + felter dækker alt derimellem.
+
+## Runde 2 (Critic F1–F5 + billedet tættere på)
+- **F1** alle input/select <768 px er 16 px (målt 0 under 16 på side + bundark). **F2** hero-scrim: desktop gradient i px-stop; mobil lodret 80–86 %. Pixelmålt (p99 af baggrund bag teksten uden tekst, 320–1440, lys+mørk): titel/undertekst/brødkrumme alle ≥3 (stor) / ≥4,5; mobil ≈11:1. **F3** ≤380 px: sortering og visning på hver sin linje, kildelinjen ombryder (320 uden klip). **F4** mobil-hero: søgefelt + "Søg" på én linje, "Flere valg" folder Type/Pris/Kørekort ud; brødkrumme skjult <560; første kort starter y≈436 ved 390×844 (mål ≤520), 320 y≈550. **F5** hero-pris viser "Fra 150.000 kr." / "30.000 kr. – 60.000 kr." / "Op til X"; valg af "Op til" nulstiller gulvet. Testet begge.
+- **P3**: prisbånd uden overlap (25.001–50.000 osv.); kørekort er nu runde radio-felter med prik; "Andre mærker er nedtonet…"-hint ved valgt model; `aria-valuetext` på prisskyder (+årgang); "Ingen filtre valgt" fjernet (rækken beholder højden).
+- **Tættere på billedet**: ikoner i Type-/Pris-felt (egen inline SVG), cykelikon i Type-rækkerne (`Icon.bike`), livligere foto (mindre scrim + saturate), Årgang/Kilometer lukket som standard.
+- Selv-scores (0–5): Hero 4,5 (390: 4), Søgekort 4,5, Chip-række 4,5, Sidebar 4,5, Resultathoved 4,5 (320: 4), Gitter/kort 3,5 (delt kort), Mobil 4.
+- Målt: overflow 0/12; CLS 0,001–0,016 (320: 0,010); funktionschecks 43/43; `npm test` 364/364; priser-test 6/6; konsol ren.
+
+### DELT-ØNSKE til annoncekortet (præcist)
+1. Kørekortbadge ("A2"/"Mulig A2") som FØRSTE chip i chip-rækken (grøn/mærkefarvet), derefter ccm · hk · (kg kun hvis oplyst) — ens chip-række på ALLE kort (nu blandes ikon-liste på egne annoncer med chips på eksterne).
+2. Bundlinje: sted til venstre, sælgertype ("Privat sælger"/"Forhandler", data `isDealer`) højrejusteret; kildedomæne flyttes til badge på fotoet (findes).
+3. `scripts/build-srp.js`: skriv "motorcykler fundet" i det præ-tegnede antal og lad hero-undertekstens tal blive præ-tegnet (nu tom indtil JS).

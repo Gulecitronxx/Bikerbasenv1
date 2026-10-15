@@ -24,11 +24,11 @@ const PRIS = konstant('PRIS_INTERVALLER');
 
 test('billedets fire prisbånd: under 25.000, 25–50.000, 50–100.000, over 100.000', () => {
   assert.deepEqual(PRIS.map(p => [p.min, p.max]),
-    [[null, 25000], [25000, 50000], [50000, 100000], [100000, null]]);
+    [[null, 25000], [25001, 50000], [50001, 100000], [100001, null]]);
 });
 
 test('båndene er sammenhængende og har unikke id\'er', () => {
-  for (let i = 1; i < PRIS.length; i++) assert.equal(PRIS[i].min, PRIS[i - 1].max, `hul/overlap ved bånd ${i}`);
+  for (let i = 1; i < PRIS.length; i++) assert.equal(PRIS[i].min, PRIS[i - 1].max + 1, `hul/overlap ved bånd ${i}`);
   assert.equal(new Set(PRIS.map(p => p.id)).size, PRIS.length);
   PRIS.forEach(p => assert.ok(p.label && !/\d{4,}/.test(p.label), `etiketten bruger punktum som tusindtalsskilletegn: ${p.label}`));
 });
