@@ -49,9 +49,11 @@ for (const file of files){
   // Kun sider der kører den fælles komponentkode (og dermed havde banneret).
   if (!/js\/components\.js/.test(html)) continue;
 
+  /* 404.html bruges paa vilkaarlig dybe URL'er (/xx/yy/zz) — dér er et relativt link doedt. */
+  const sideblok = file === '404.html' ? blok.replace('href="privatlivspolitik.html"', 'href="/privatlivspolitik.html"') : blok;
   html = /<!--cookie:start-->[\s\S]*?<!--cookie:end-->/.test(html)
-    ? html.replace(/<!--cookie:start-->[\s\S]*?<!--cookie:end-->/, blok)
-    : html.replace('</body>', blok + '\n</body>');
+    ? html.replace(/<!--cookie:start-->[\s\S]*?<!--cookie:end-->/, () => sideblok)
+    : html.replace('</body>', () => sideblok + '\n</body>');
 
   fs.writeFileSync(htmlPath, html);
   touched++;
