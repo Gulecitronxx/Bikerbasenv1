@@ -1,4 +1,6 @@
 const STEP_LABELS = ['Type & specs', 'Pris & beskrivelse', 'Billeder', 'Gennemse'];
+/* Undertitler i trinbjælken (billede 4: titel + en linje under). */
+const STEP_SUBS = ['Om din motorcykel', 'Pris, sted og tekst', 'Upload fotos', 'Og udgiv annoncen'];
 let currentStep = 1;
 let uploadedPhotos = []; // { url, name }
 /* O1-4: dokumentupload fjernet — filerne blev aldrig uploadet eller vist. */
@@ -40,15 +42,34 @@ function erBilledfil(file){
   return BILLED_ENDELSER.test(file.name || '');
 }
 
+/* Trin 1 og 2 ("Type & specs" og "Pris & beskrivelse") står på ÉN side, som i
+   billede 4. currentStep er derfor 1, 3 eller 4; ankerTrin (1 eller 2) siger,
+   hvilken af de to sektioner på siden man er ved — trinbjælken er her
+   sektionsnavigation, og scroll-lytteren holder den ajour. */
+let ankerTrin = 1;
+/* F-5: advar mod at forlade siden med uudgivne ændringer eller valgte fotos
+   (fotos kan ikke gemmes i kladden). forlad() bruges af alle programmatiske
+   sideskift, så udgivelse og login-omvejen ikke udløser advarslen. */
+let _ugemt = false, _forladOk = false;
+function forlad(url){ _forladOk = true; window.location.href = url; }
+window.addEventListener('beforeunload', (e) => {
+  if (_forladOk) return;
+  if (uploadedPhotos.length || _ugemt){ e.preventDefault(); e.returnValue = ''; }
+});
+let _foersteTegning = true;
+
 function renderStepper(){
+  const vis = currentStep === 1 ? ankerTrin : currentStep;
   document.getElementById('stepper').innerHTML = STEP_LABELS.map((label, i) => {
     const n = i + 1;
-    const cls = n === currentStep ? 'active' : (n < currentStep ? 'done' : '');
+    const cls = n === vis ? 'active' : (currentStep > 1 && n < vis ? 'done' : '');
+    const klik = currentStep === 1 ? n <= 2 : n < currentStep;
+    const tag = klik ? 'button type="button" data-goto="' + n + '"' : 'div';
     return `
-    <div class="step-item ${cls}" title="Trin ${n}: ${label}" aria-label="Trin ${n}: ${label}${n === currentStep ? ' (nuværende)' : ''}">
-      <span class="step-dot">${n < currentStep ? '' : n}</span>
-      <span class="step-label">${label}</span>
-    </div>
+    <${tag} class="step-item ${cls}" title="Trin ${n}: ${label}"${n === vis ? ' aria-current="step"' : ''}>
+      <span class="visually-hidden">Trin ${n} af ${STEP_LABELS.length}${cls === 'done' ? ', færdigt' : ''}: </span><span class="step-dot">${cls === 'done' ? '' : n}</span>
+      <span class="step-text"><span class="step-label">${label}</span><span class="step-sub">${STEP_SUBS[i]}</span></span>
+    </${klik ? 'button' : 'div'}>
     ${n < STEP_LABELS.length ? '<span class="step-line"></span>' : ''}`;
   }).join('');
   document.querySelectorAll('.step-item.done .step-dot').forEach(d => d.innerHTML = Icon.check);
@@ -59,21 +80,51 @@ function goToStep(n){
      "Gem kladde" — det er trinskiftet, folk mister arbejde paa. Kun fremad/
      tilbage efter foerste tegning (ellers overskrives en gendannet kladde af
      en tom formular ved init). */
-  if (typeof collectFormData === 'function' && currentStep !== n && !editingId){
-    try { Store.saveDraft('form', collectFormData()); } catch (e) { /* aldrig blokere et trinskift */ }
+  const maal = n === 2 ? 1 : n;     // 2 = anker på side 1, ikke en egen side
+  if (typeof collectFormData === 'function' && currentStep !== maal && !editingId){
+    try { Store.saveDraft('form', collectFormData()); _ugemt = false; } catch (e) { /* aldrig blokere et trinskift */ }
   }
-  currentStep = n;
-  document.querySelectorAll('.form-step').forEach(s => s.hidden = Number(s.dataset.step) !== n);
+  currentStep = maal;
+  ankerTrin = n === 2 ? 2 : 1;
+  document.querySelectorAll('.form-step').forEach(s => {
+    const t = Number(s.dataset.step);
+    s.hidden = maal === 1 ? t > 2 : t !== maal;
+  });
   renderStepper();
-  document.getElementById('step-back').style.visibility = n === 1 ? 'hidden' : 'visible';
+  document.getElementById('step-back').style.visibility = maal === 1 ? 'hidden' : 'visible';
   document.getElementById('step-next').textContent =
-    n === STEP_LABELS.length ? (editingId ? 'Gem ændringer' : 'Udgiv annonce') : 'Fortsæt';
-  if (n === STEP_LABELS.length) renderPreview();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  /* O1-12: fokus paa trinnets overskrift — ellers staar en skaermlaeser stadig
-     paa "Fortsaet" uden at faa at vide, at siden skiftede. */
+    maal === STEP_LABELS.length ? (editingId ? 'Gem ændringer' : 'Udgiv annonce')
+      : (maal === 1 ? 'Fortsæt til billeder' : 'Fortsæt til gennemse');
+  if (maal === STEP_LABELS.length) renderPreview();
+  renderLiveCard();
   const h2 = document.querySelector(`.form-step[data-step="${n}"] h2`);
-  if (h2){ h2.setAttribute('tabindex', '-1'); setTimeout(() => { try { h2.focus({ preventScroll: true }); } catch (e) {} }, 250); }
+  if (n === 2 && h2) h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  else if (!_foersteTegning) window.scrollTo({ top: 0, behavior: 'smooth' });
+  /* O1-12: fokus paa trinnets overskrift — ellers staar en skaermlaeser stadig
+     paa "Fortsaet" uden at faa at vide, at siden skiftede. Ikke ved første
+     tegning: siden skal ikke åbne med fokus på en overskrift. */
+  if (h2 && !_foersteTegning){ h2.setAttribute('tabindex', '-1'); setTimeout(() => { try { h2.focus({ preventScroll: true }); } catch (e) {} }, 250); }
+  _foersteTegning = false;
+}
+
+/* Scroll-lytter: på side 1 følger trinbjælken, hvilken sektion der er i syne. */
+function wireAnkerSpy(){
+  let travl = false;
+  window.addEventListener('scroll', () => {
+    if (currentStep !== 1 || travl) return;
+    travl = true;
+    requestAnimationFrame(() => {
+      travl = false;
+      const h = document.querySelector('.form-step[data-step="2"] h2');
+      if (!h) return;
+      const nyt = h.getBoundingClientRect().top < window.innerHeight * 0.45 ? 2 : 1;
+      if (nyt !== ankerTrin){ ankerTrin = nyt; renderStepper(); }
+    });
+  }, { passive: true });
+  document.getElementById('stepper').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-goto]');
+    if (b) goToStep(Number(b.dataset.goto));
+  });
 }
 
 function updateEqCounts(){
@@ -148,59 +199,75 @@ function trinUdfyldt(n){
 }
 
 function validateStep(n){
-  const section = document.querySelector(`.form-step[data-step="${n}"]`);
+  /* Trin 1 og 2 står på samme side og valideres samlet. */
+  const trin = n <= 2 ? [1, 2] : [n];
   let valid = true;
-  const refs = { first: null };
-  let msg = '';
-  section.querySelectorAll('[required]').forEach(el => {
-    const field = el.closest('.field') || el.closest('.checkbox-inline');
-    const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
-    if (!ok){ valid = false; markFieldError(el, refs); }
-    else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); field?.querySelector('.felt-fejl')?.remove(); el.removeAttribute('aria-describedby'); }
+  /* Alle fejl samles som { el, besked }, og fokus går til den FØRSTE i
+     dokumentets rækkefølge — ikke til den første, vi tilfældigvis opdagede. */
+  const fejl = [];
+  const aar = new Date().getFullYear();
+  trin.forEach(t => {
+    const section = document.querySelector(`.form-step[data-step="${t}"]`);
+    section.querySelectorAll('[required]').forEach(el => {
+      const field = el.closest('.field') || el.closest('.checkbox-inline');
+      const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
+      if (!ok){ valid = false; fejl.push({ el, besked: null }); }
+      else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); field?.querySelector('.felt-fejl')?.remove(); el.removeAttribute('aria-describedby'); }
+    });
+    /* Grænseværdier står ÉT sted: js/opret-validering.js. Formularen er
+       novalidate, så min/max i HTML håndhæves ikke af browseren. */
+    OpretValidering.validerTrin(t, id => (document.getElementById(id) || {}).value, aar).forEach(f => {
+      const el = document.getElementById(f.id);
+      if (!el) return;
+      valid = false;
+      const d = fejl.findIndex(x => x.el === el);
+      if (d !== -1) fejl.splice(d, 1);
+      fejl.push({ el, besked: f.besked });
+    });
   });
-  // Grænseværdier — feltet er tomt-tjekket ovenfor; her fanger vi urealistiske tal
-  // (formularen er novalidate, så min/max i HTML håndhæves ikke af sig selv).
-  const bound = (id, ok, m) => {
-    const el = document.getElementById(id);
-    if (!el || el.value.trim() === '') return;
-    if (!ok(Number(el.value))){ valid = false; markFieldError(el, refs, m); msg = m; }
-  };
-  if (n === 1){
+  let msg = '';
+  if (trin.includes(1)){
     if (!document.querySelector('input[name="bike-type"]:checked')){
-      valid = false; msg = msg || 'Vælg venligst en motorcykeltype';
+      valid = false; msg = 'Vælg venligst en motorcykeltype';
       markTypeError();
-      /* Typen står øverst, så den er første fejl i læserækkefølgen — også når
-         felterne under den mangler. Før satte den aldrig refs.first: manglede
-         kun typen, flyttede fokus ingen steder, og eneste tegn var en toast. */
       const foersteType = document.querySelector('input[name="bike-type"]');
-      if (foersteType) refs.first = foersteType;
+      if (foersteType) fejl.push({ el: foersteType, besked: null, kunFokus: true });
     } else clearTypeError();
-    const nowY = new Date().getFullYear();
-    bound('f-year', v => v >= 1900 && v <= nowY + 1, `Årgang skal være mellem 1900 og ${nowY + 1}`);
-    bound('f-km', v => v >= 0 && v <= 500000, 'Kilometerstanden virker urealistisk (0–500.000)');
-    bound('f-ccm', v => v >= 50 && v <= 3000, 'Motorstørrelsen skal være mellem 50 og 3.000 ccm');
   }
-  /* Trin 4 er to afkrydsningsfelter, ikke felter man udfylder. Den generelle
-     besked ("Udfyld venligst alle felter markeret med *") gav ingen mening
-     dér: man havde lige skrevet hele annoncen færdig og fik at vide, at man
-     skulle udfylde noget. Sig hvad der mangler. */
+  /* Trin 4 er to afkrydsningsfelter, ikke felter man udfylder. Sig hvad der mangler. */
   if (n === 4){
-    // O1-8: robot-checkboxen er fjernet — den var en kontrol af udseende, ikke af noget.
     if (!document.getElementById('f-terms').checked) msg = 'Du skal acceptere vilkårene for annoncering';
   }
-  if (n === 2){
-    bound('f-price', v => v > 0 && v <= 2000000, 'Angiv en realistisk pris');
+  if (trin.includes(2)){
     // Frit indtastet postnummer uden bekræftet valg = annonce uden by/region.
-    if (!acceptExactPostnr()){ valid = false; markFieldError(document.getElementById('f-postnr'), refs); msg = 'Vælg et postnummer fra listen'; }
+    if (!acceptExactPostnr()){
+      valid = false;
+      const pn = document.getElementById('f-postnr');
+      const i = fejl.findIndex(x => x.el === pn);
+      if (i !== -1) fejl.splice(i, 1);
+      fejl.push({ el: pn, besked: 'Vælg et postnummer fra listen.' });
+    }
   }
-  if (!valid){
-    if (refs.first){
+  const refs = { first: null };
+  fejl.sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
+  fejl.forEach(f => {
+    /* Fejl i den lukkede fold "Flere oplysninger" skal kunne ses: åbn den. */
+    const fold = f.el.closest('details');
+    if (fold && !fold.open) fold.open = true;
+    if (!f.kunFokus) markFieldError(f.el, refs, f.besked || undefined);
+    else if (!refs.first) refs.first = f.el;
+  });
+  if (fejl.length && !refs.first) refs.first = fejl[0].el;
+  const forste = fejl.find(f => f.besked);
+  if (forste) msg = forste.besked;
+  if (!valid || msg){
+    if (!valid && refs.first){
       refs.first.scrollIntoView({ block: 'center', behavior: 'smooth' });
       setTimeout(() => { try { refs.first.focus({ preventScroll: true }); } catch(e){} }, 280);
     }
     toast(msg || 'Udfyld venligst alle felter markeret med *', { type: 'error' });
   }
-  return valid;
+  return valid && !(n === 4 && msg);
 }
 
 /* Typefliserne står nu statisk i opret-annonce.html, så de er der ved første
@@ -216,7 +283,6 @@ function renderTypeTilesIfStale(){
     <label class="radio-card">
       <input type="radio" name="bike-type" value="${t.id}">
       <span class="radio-card-inner">
-        <span class="radio-card-media"><img src="img/type/${t.id}.webp" alt="" width="760" height="570"${i < 4 ? '' : ' loading="lazy"'} decoding="async"></span>
         <span class="radio-card-label">${t.label}</span>
       </span>
     </label>`).join('');
@@ -268,13 +334,39 @@ function populateStaticFields(){
   // Live "X valgt" på udstyrsgrupperne.
   document.getElementById('equipment-groups').addEventListener('change', updateEqCounts);
 
+  /* Grænserne kommer fra js/opret-validering.js — samme tal som valideringen,
+     så min/max på feltet og fejlteksten aldrig kan være uenige. */
+  const aar = new Date().getFullYear();
+  Object.keys(OpretValidering.REGLER).forEach(id => {
+    const el = document.getElementById(id), g = OpretValidering.graenser(id, aar);
+    if (!el || !g) return;
+    el.min = g.min; el.max = g.max; el.step = 1;
+  });
+
   // Ryd fejlmarkeringen mens brugeren retter feltet (rød kant hang før ved).
+  // Fejlteksten under feltet fjernes også, ellers står den og modsiger rettelsen.
   document.querySelectorAll('.form-step .input, .form-step input, .form-step select, .form-step textarea').forEach(el => {
-    el.addEventListener('input', () => {
+    const ryd = () => {
       const f = el.closest('.field'); if (f) f.classList.remove('has-error');
       if (el.style) el.style.borderColor = '';
-    });
+      if (el.getAttribute('aria-invalid') === 'true'){
+        el.removeAttribute('aria-invalid');
+        el.removeAttribute('aria-describedby');
+        f?.querySelector('.felt-fejl')?.remove();
+      }
+    };
+    el.addEventListener('input', ryd);
+    el.addEventListener('change', ryd);
   });
+
+  // Live-forhåndsvisning og tegntæller: opdateres ved hver ændring i formularen.
+  const form = document.getElementById('listing-form');
+  form.addEventListener('input', () => { _ugemt = true; });
+  form.addEventListener('change', () => { _ugemt = true; });
+  form.addEventListener('input', planlaegLiveKort);
+  form.addEventListener('change', planlaegLiveKort);
+  document.getElementById('f-desc').addEventListener('input', opdaterTaeller);
+  opdaterTaeller();
 
   document.getElementById('upload-icon-mount').innerHTML = Icon.upload;
   document.getElementById('back-icon').innerHTML = Icon.chevronLeft;
@@ -403,8 +495,13 @@ function wirePhotoUpload(){
    en lyd, er den værste af de tavse fejl. */
 function handleFiles(files){
   const valgte = Array.from(files);
-  const billeder = valgte.filter(erBilledfil);
-  const ikkeBilleder = valgte.length - billeder.length;
+  const alleBilleder = valgte.filter(erBilledfil);
+  const ikkeBilleder = valgte.length - alleBilleder.length;
+  /* Størrelsesgrænsen (samme 12 MB som validateImage i js/supabase-api.js) tjekkes
+     NU, ikke først ved Udgiv, hvor annoncen allerede er oprettet. */
+  const MAX_BYTES = 12 * 1024 * 1024;
+  const forStore = alleBilleder.filter(f => f.size > MAX_BYTES);
+  const billeder = alleBilleder.filter(f => f.size <= MAX_BYTES);
 
   const plads = Math.max(0, MAX_FOTOS - existingPhotos.length - uploadedPhotos.length);
   const medtaget = billeder.slice(0, plads);
@@ -429,6 +526,7 @@ function handleFiles(files){
 
   const dele = [];
   if (forMange) dele.push(`${forMange} billede${forMange === 1 ? '' : 'r'} kom ikke med — der er plads til ${MAX_FOTOS} i alt`);
+  if (forStore.length) dele.push(`${forStore.length === 1 ? `"${forStore[0].name}" er` : forStore.length + ' billeder er'} for stor${forStore.length === 1 ? 't' : 'e'} (maks. 12 MB)`);
   if (ikkeBilleder) dele.push(`${ikkeBilleder} ${ikkeBilleder === 1 ? 'fil er ikke et billede' : 'filer er ikke billeder'}`);
   if (dele.length) toast(dele.join('. ') + '.', { type: 'error' });
 }
@@ -472,7 +570,7 @@ function renderPhotoGrid(){
   const eksisterende = existingPhotos.map((p, i) => `
     <div class="photo-thumb">
       <img src="${p.url}" alt="${escapeHTML(fotoAltTekst(i))}">
-      ${i === 0 ? '<span class="cover-tag">Forside</span>' : ''}
+      ${i === 0 ? '<span class="cover-tag">Primært billede</span>' : ''}
       <button type="button" class="remove-photo" data-remove-existing="${p.id}" aria-label="Fjern dette billede fra annoncen">${Icon.close}</button>
     </div>`).join('');
 
@@ -483,7 +581,7 @@ function renderPhotoGrid(){
   const nye = uploadedPhotos.map((p, i) => `
     <div class="photo-thumb" draggable="true" data-idx="${i}">
       <img src="${p.url}" alt="${escapeHTML(fotoAltTekst(existingPhotos.length + i))}" draggable="false">
-      ${isCover(i) ? '<span class="cover-tag">Forside</span>' : '<span class="cover-tag new">Ny</span>'}
+      ${isCover(i) ? '<span class="cover-tag">Primært billede</span>' : '<span class="cover-tag new">Ny</span>'}
       <div class="photo-actions">
         <button type="button" class="photo-move" data-move="${i}" data-dir="-1" aria-label="Flyt tidligere"${i === 0 ? ' disabled' : ''}>${chevL}</button>
         ${(!existingPhotos.length && i > 0) ? `<button type="button" class="photo-cover" data-cover="${i}" aria-label="Sæt som forsidebillede" title="Sæt som forside">${star}</button>` : ''}
@@ -492,7 +590,14 @@ function renderPhotoGrid(){
       <button type="button" class="remove-photo" data-remove="${i}" aria-label="Fjern billede">${Icon.close}</button>
     </div>`).join('');
 
-  grid.innerHTML = eksisterende + nye;
+  const antalNu = existingPhotos.length + uploadedPhotos.length;
+  /* "Tilføj flere billeder" som en flise i rækken (billede 4) — samme filvælger
+     som dropzonen, kun synlig når der er noget at tilføje til og plads til mere. */
+  const tilfoej = (antalNu > 0 && antalNu < MAX_FOTOS)
+    ? `<button type="button" class="photo-add" id="photo-add-more">${Icon.plus}<span>Tilføj flere billeder</span></button>` : '';
+  grid.innerHTML = eksisterende + nye + tilfoej;
+  document.getElementById('op-photos')?.classList.toggle('has-photos', antalNu > 0);
+  document.getElementById('photo-add-more')?.addEventListener('click', () => document.getElementById('photo-input').click());
 
   grid.querySelectorAll('[data-remove]').forEach(btn => {
     btn.addEventListener('click', () => { uploadedPhotos.splice(Number(btn.dataset.remove), 1); renderPhotoGrid(); });
@@ -544,6 +649,8 @@ function renderPhotoGrid(){
     const fjernet = removedPhotoIds.length ? ` ${removedPhotoIds.length} bliver fjernet når du gemmer.` : '';
     hint.textContent = `${ialt} billede${ialt === 1 ? '' : 'r'} i alt (${dele.join(', ')}).${fjernet}`;
   }
+
+  planlaegLiveKort();
 }
 
 function collectFormData(){
@@ -696,7 +803,7 @@ function manglerListe(data){
   if (!data.power) punkter.push('Effekt (hk) er ikke udfyldt — uden den kan vi ikke vise, om motorcyklen kan køres på et A2-kørekort.');
   // O3-4: "nysynet" har ingen ordgraense foer "syn" — kraevede man den, stod
   // punktet direkte under en beskrivelse, der allerede sagde det.
-  if (!data.sidsteSyn && !/syn/i.test(beskrivelse)) punkter.push('Sidste syn er ikke oplyst — det er tit et af de første spørgsmål, en køber stiller.');
+  if (!data.sidsteSyn && !/syn/i.test(beskrivelse)) punkter.push('Sidste syn er ikke oplyst — nævn det gerne i beskrivelsen.');
   if (!data.antalEjere && !/\bejer/i.test(beskrivelse)) punkter.push('Antal ejere er ikke udfyldt — så står der "Ikke oplyst" på annoncen.');
   if (!data.serviceHistorik && !/service/i.test(beskrivelse)) punkter.push('Servicehistorik er ikke valgt.');
   if (beskrivelse.length < 40) punkter.push('Beskrivelsen er meget kort — uddyb gerne stand, historik og evt. hvorfor du sælger.');
@@ -779,8 +886,9 @@ function renderSeoAssistent(data){
     ? `<div class="detail-section" style="margin-top:20px;">
          <h2 style="font-size:16px;">Før du udgiver</h2>
          <ul class="equipment-list" style="grid-template-columns:1fr;">
-           ${gaps.map(g => `<li><span style="color:var(--color-danger); display:inline-flex;">${Icon.alertTriangle}</span>${escapeHTML(g)}</li>`).join('')}
+           ${gaps.slice(0, 4).map(g => `<li><span style="color:var(--color-danger); display:inline-flex;">${Icon.alertTriangle}</span>${escapeHTML(g)}</li>`).join('')}
          </ul>
+         ${gaps.length > 4 ? `<p class="field-hint" style="margin-top:8px;">…og ${gaps.length - 4} ting mere, du kan nævne i beskrivelsen.</p>` : ''}
        </div>`
     : `<div class="preview-note" style="margin-top:20px;">${Icon.checkCircle}<span>Ingen flere forslag herfra — annoncen dækker det, købere typisk spørger om.</span></div>`;
 
@@ -796,15 +904,15 @@ function renderSeoAssistent(data){
   const titel = serpTitel(data);
   const besk = serpBeskrivelse(data);
   const serpHTML = titel
-    ? `<div class="detail-section" style="margin-top:20px;">
-         <h2 style="font-size:16px;">Titel og søgetekst</h2>
+    ? `<details class="detail-section op-serp" style="margin-top:20px;">
+         <summary><h2 style="font-size:16px; display:inline;">Titel og søgetekst</h2></summary>
          <p class="field-hint" style="margin-bottom:10px;">Bikerbasen sammensætter automatisk titel og søgetekst af dine egne tal (mærke, model, årgang, pris, km, ccm, stand, by). Her er de, som de bliver ud fra det, du har udfyldt nu.</p>
          <div style="border:1px solid var(--color-border); border-radius:var(--radius-sm); padding:12px 14px;">
            <p style="font-weight:600; margin:0 0 4px;">${escapeHTML(titel)}</p>
            <p class="field-hint" style="margin:0;">${escapeHTML(besk)}</p>
          </div>
          <p class="field-hint" style="margin-top:6px;">Titel: ${titel.length} tegn${titel.length > 65 ? ' (Google forkorter typisk over ca. 65)' : ''}. Søgetekst: ${besk.length} tegn.</p>
-       </div>`
+       </details>`
     : '';
 
   mount.innerHTML = gapsHTML + chipsHTML + serpHTML;
@@ -829,15 +937,105 @@ function wireSeoAssist(){
   });
 }
 
+/* Tegntæller på beskrivelsen. Loftet står i js/opret-validering.js. */
+function opdaterTaeller(){
+  const felt = document.getElementById('f-desc'), taeller = document.getElementById('desc-counter');
+  if (!felt || !taeller) return;
+  const n = felt.value.length, max = OpretValidering.MAX_BESKRIVELSE;
+  taeller.textContent = `${n.toLocaleString('da-DK')}/${max.toLocaleString('da-DK')}`;
+  taeller.classList.toggle('over', n > max);
+}
+
+/* Live-forhåndsvisning i sidebjælken: SAMME delte annoncekort som søgningen
+   (listingCardHTML), tegnet af det sælgeren har udfyldt indtil nu. Intet
+   gættes: det, der ikke er udfyldt, vises som "ikke oplyst" af kortet selv, og
+   mærke/model får en tydelig pladsholder, indtil de er valgt. */
+let editingCreatedAt = null;
+let _liveTimer = null;
+function planlaegLiveKort(){
+  clearTimeout(_liveTimer);
+  _liveTimer = setTimeout(renderLiveCard, 120);
+}
+function renderLiveCard(){
+  const mount = document.getElementById('op-live-card');
+  if (!mount || typeof collectFormData !== 'function') return;
+  const d = collectFormData();
+  /* Et tal, der ikke består valideringen (fx 9999 hk eller årgang 1850), vises
+     ikke på kortet — det ville give et falsk kørekortmærkat og en urealistisk
+     pris. Feltet står stadig med sin fejltekst; kortet behandler det som tomt. */
+  const aarNu = new Date().getFullYear();
+  [['f-year', 'year'], ['f-km', 'km'], ['f-ccm', 'ccm'], ['f-power', 'power'], ['f-price', 'price']].forEach(([id, k]) => {
+    if (OpretValidering.validerTal(id, (document.getElementById(id) || {}).value, aarNu)) d[k] = null;
+  });
+  const user = Store.getUser() || { name: 'Dig', isDealer: false };
+  const photoUrls = [...existingPhotos.map(p => p.url), ...uploadedPhotos.map(p => p.url)];
+  const harNavn = !!(d.brand || d.model);
+  const l = Object.assign({}, d, {
+    id: 'preview',
+    brand: d.brand || 'Mærke', model: d.model || (d.brand ? '' : 'og model'),
+    year: d.year || '—', city: d.city || 'Sted ikke valgt', region: d.region || '',
+    isDealer: !!user.isDealer, createdAt: editingCreatedAt || new Date().toISOString(),
+    photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(Object.assign({}, user, { city: d.city })),
+  });
+  let html;
+  if (!harNavn){
+    /* Venlig tom tilstand i stedet for et kort fuldt af "ikke oplyst". */
+    html = `<div class="op-live-tomt">${Icon.bike}<b>Dit annoncekort vises her</b><span>Vælg mærke og model, så begynder kortet at tage form.</span></div>`;
+  } else {
+    try { html = listingCardHTML(l); } catch (e) { html = ''; }
+    html = html.replace('card-link" aria-label', 'card-link" tabindex="-1" aria-label');
+  }
+  mount.innerHTML = html;
+  mount.classList.toggle('op-live-tom', !harNavn);
+  mount.classList.toggle('op-live-nopris', harNavn && d.price == null);
+  const note = document.getElementById('op-prev-note');
+  if (note) note.textContent = harNavn
+    ? 'Kortet opdateres, mens du udfylder. Det, du ikke har oplyst, står som "ikke oplyst".'
+    : 'Kortet opdateres, mens du udfylder.';
+}
+
+/* Mobil: forhåndsvisningen ligger under formularen, så en knap åbner den som et
+   bundark (modal <dialog>: fokusfælde + Escape). Indholdet er en kopi af
+   sidebjælkens kort, så det aldrig kan vise noget andet. */
+function wireForhaandsvisningsark(){
+  const dlg = document.getElementById('op-prev-dialog'), aabn = document.getElementById('op-prev-open');
+  if (!dlg || !aabn || !dlg.showModal) return;
+  aabn.addEventListener('click', () => {
+    renderLiveCard();
+    const kilde = document.getElementById('op-live-card');
+    const krop = dlg.querySelector('.op-sheet-body');
+    krop.innerHTML = kilde.innerHTML;
+    krop.classList.toggle('op-live-nopris', kilde.classList.contains('op-live-nopris'));
+    document.documentElement.style.overflow = 'hidden';   // scroll-lås bag arket
+    dlg.showModal();
+  });
+  dlg.querySelectorAll('[data-sheet-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('close', () => { document.documentElement.style.overflow = ''; });
+  /* Pillen skjules, mens man skriver (tastaturet) og når kortet/footeren er i syne. */
+  const side = document.querySelector('.op-side'), fod = document.querySelector('.site-footer');
+  const synlige = new Set();
+  const opdater = () => aabn.classList.toggle('skjult', synlige.size > 0 || document.body.classList.contains('op-skriver'));
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver((poster) => {
+      poster.forEach(p => { p.isIntersecting ? synlige.add(p.target) : synlige.delete(p.target); });
+      opdater();
+    });
+    [side, fod].forEach(e => e && io.observe(e));
+  }
+  const form = document.getElementById('listing-form');
+  form.addEventListener('focusin', (e) => { if (e.target.matches('input:not([type=checkbox]):not([type=radio]), textarea, select')){ document.body.classList.add('op-skriver'); opdater(); } });
+  form.addEventListener('focusout', () => { document.body.classList.remove('op-skriver'); opdater(); });
+}
+
 function renderPreview(){
   formData = collectFormData();
   const user = Store.getUser() || { name: 'Dig', isDealer: false };
   // Vis det RIGTIGE forsidebillede og antal — ikke en pladsholder. Rækkefølgen
   // matcher billed-gitteret (eksisterende først, så nye), så forsiden stemmer.
   const photoUrls = [...existingPhotos.map(p => p.url), ...uploadedPhotos.map(p => p.url)];
-  const previewListing = { id: 'preview', ...formData, isDealer: !!user.isDealer, createdAt: new Date().toISOString(), photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(user) };
-  document.getElementById('preview-note').innerHTML = `${Icon.info}<span>Sådan vil din annonce se ud i søgeresultater. Tjek at alt er korrekt, før du udgiver.</span>`;
-  document.getElementById('preview-card-mount').innerHTML = listingCardHTML(previewListing).replace('card-link" aria-label', 'card-link" tabindex="-1" style="pointer-events:none;" aria-label');
+  const previewListing = { id: 'preview', ...formData, isDealer: !!user.isDealer, createdAt: editingCreatedAt || new Date().toISOString(), photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(user) };
+  document.getElementById('preview-note').innerHTML = `${Icon.info}<span>Tjek, at alt er korrekt, før du udgiver. Kortet under "Din annonce" viser, hvordan annoncen ser ud i søgeresultater.</span>`;
   const eqLabels = (formData.equipment || []).map(e => equipmentLabel(e));
   document.getElementById('preview-details').innerHTML = `
     <div class="spec-grid" style="margin-top:24px;">
@@ -855,7 +1053,7 @@ function renderPreview(){
       ${formData.vinterklar ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Vinterklargjort</span><b>Ja</b></div>` : ''}
       ${formData.kanNedsaettesA2 ? `<div class="spec-item"><span class="spec-icon">${Icon.shieldCheck} Kan nedsættes til A2</span><b>Ja</b></div>` : ''}
     </div>
-    ${formData.description ? `<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="white-space:pre-wrap;">${escapeHTML(formData.description)}</p></div>` : '<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="color:var(--color-fg-muted);">Du har ikke skrevet en beskrivelse endnu — en god beskrivelse giver flere henvendelser.</p></div>'}
+    ${formData.description ? `<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="white-space:pre-wrap;">${escapeHTML(formData.description)}</p></div>` : '<div class="detail-section" style="margin-top:24px;"><h2>Beskrivelse</h2><p style="color:var(--color-fg-muted);">Du har ikke skrevet en beskrivelse endnu.</p></div>'}
     ${eqLabels.length ? `<div class="detail-section" style="margin-top:24px;"><h2>Udstyr (${eqLabels.length})</h2><ul class="equipment-list">${eqLabels.map(l => `<li>${Icon.checkCircle}${escapeHTML(l)}</li>`).join('')}</ul></div>` : ''}`;
   renderSeoAssistent(formData);
 }
@@ -889,6 +1087,17 @@ async function publishListing(){
     toast('Du skal acceptere vilkårene for at udgive annoncen');
     return;
   }
+  /* Sidste gate: hele datasættet mod valideringstabellen, uanset hvordan man
+     nåede hertil (kladde med videreTilTrin, redigeret localStorage, fremtidige
+     genveje). Ved fejl sendes brugeren til side 1, hvor fejlene står ved felterne. */
+  const ugyldige = OpretValidering.validerData(collectFormData(), new Date().getFullYear());
+  if (ugyldige.length){
+    goToStep(1);
+    setTimeout(() => {
+      if (validateStep(1)) toast(ugyldige[0].besked, { type: 'error' });
+    }, 350);
+    return;
+  }
   const nextBtn = document.getElementById('step-next');
 
   /* ---- Uden backend: som før, gemt lokalt ---- */
@@ -903,7 +1112,7 @@ async function publishListing(){
     Store.addMyListing(newListing);
     Store.clearDraft();
     toast('Din annonce er udgivet (gemt lokalt)');
-    setTimeout(() => { window.location.href = `annonce.html?id=${newListing.id}&udgivet=1`; }, 900);   // O3-6
+    setTimeout(() => { forlad(`annonce.html?id=${newListing.id}&udgivet=1`); }, 900);   // O3-6
     return;
   }
 
@@ -912,7 +1121,7 @@ async function publishListing(){
   if (!user){
     Store.saveDraft('form', collectFormData());   // O1-1/O1-9: intet maa gaa tabt paa vejen over login
     toast('Log ind for at udgive — din kladde er gemt på denne enhed.');
-    setTimeout(() => { window.location.href = 'login.html?redirect=opret-annonce.html'; }, 1200);
+    setTimeout(() => { forlad('login.html?redirect=opret-annonce.html'); }, 1200);
     return;
   }
 
@@ -1001,7 +1210,7 @@ async function publishListing(){
     // Beskeden får længere tid på skærmen, netop fordi den skal læses.
     toast(`Annoncen er gemt, men ${failed.length} af ${withFiles.length} billeder kunne ikke uploades: `
       + `${failed[0].grund} Du kan prøve igen under "Rediger annonce".`, { type: 'error' });
-    setTimeout(() => { window.location.href = `annonce.html?id=${created.id}`; }, 4500);
+    setTimeout(() => { forlad(`annonce.html?id=${created.id}`); }, 4500);
     return;
   }
   /* O3-1b: samtykket gemmes sammen med udgivelsen — kun hvis feltet var
@@ -1015,7 +1224,7 @@ async function publishListing(){
   if (typeof Maaling !== 'undefined') Maaling.opretAnnonce(created, !!editingId);
   // O3-6: toasten naar ikke at blive laest paa 1 sekund — annoncesiden viser
   // et lukbart banner ved ?udgivet=1, i det oejeblik saelgeren er mest modtagelig.
-  setTimeout(() => { window.location.href = `annonce.html?id=${created.id}${editingId ? '' : '&udgivet=1'}`; }, 1000);
+  setTimeout(() => { forlad(`annonce.html?id=${created.id}${editingId ? '' : '&udgivet=1'}`); }, 1000);
 }
 
 /* Fylder formularen med data i samme form som collectFormData returnerer.
@@ -1079,6 +1288,7 @@ function startEditing(id){
   }
 
   editingId = listing.id;
+  editingCreatedAt = listing.createdAt || null;
   fillForm(listing);
 
   // Annoncens nuværende billeder lægges i gitteret, så de kan ses og
@@ -1088,8 +1298,8 @@ function startEditing(id){
   renderPhotoGrid();
 
   document.title = 'Rediger annonce — Bikerbasen';
-  document.querySelector('.page-title-bar h1').textContent = 'Rediger annonce';
-  const lead = document.querySelector('.page-title-bar p');
+  document.querySelector('.op-hero h1').textContent = 'Rediger annonce';
+  const lead = document.querySelector('.op-hero-lead');
   if (lead) lead.textContent = 'Ret oplysningerne og gem. Billederne bliver på annoncen, medmindre du selv fjerner dem.';
   return true;
 }
@@ -1137,10 +1347,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   wireSeoAssist();
 
   let startTrin = 1;
+  let draftUgyldig = false;
   const redigerId = new URLSearchParams(window.location.search).get('rediger');
   if (redigerId){
     if (!startEditing(redigerId)){
-      setTimeout(() => { window.location.href = 'mine-annoncer.html'; }, 1500);
+      setTimeout(() => { forlad('mine-annoncer.html'); }, 1500);
       return;
     }
   } else if (restoreDraft()){
@@ -1149,29 +1360,38 @@ document.addEventListener('DOMContentLoaded', async () => {
        lande dér — men kun hvis trin 1 og 2 stadig er komplette (tavs kontrol,
        ingen roede rammer ved indlaesning). */
     const videre = Number(Store.getDraft()?.form?.videreTilTrin) || 0;
-    if (videre === 3 && Store.getUser()?.remote && trinUdfyldt(1) && trinUdfyldt(2)){
+    draftUgyldig = OpretValidering.validerData(Store.getDraft()?.form, new Date().getFullYear(), { kunUgyldige: true }).length > 0;
+    if (videre === 3 && Store.getUser()?.remote && trinUdfyldt(1) && trinUdfyldt(2) && !draftUgyldig){
       startTrin = 3;
     }
   }
+  wireAnkerSpy();
+  wireForhaandsvisningsark();
   goToStep(startTrin);
+  _ugemt = false;
+  /* F-1: en gendannet kladde kan indeholde tal, der ikke består valideringen
+     (gammel kladde, redigeret localStorage). Vis fejlene ved felterne med det samme. */
+  if (!redigerId && draftUgyldig){
+    setTimeout(() => { validateStep(1); }, 350);
+  }
 
   document.getElementById('step-next').addEventListener('click', () => {
     if (!validateStep(currentStep)) return;
     /* O1-1: login-gaten ligger HER — efter at motorcyklen og prisen er skrevet,
        foer billederne. Kladden gemmes foerst, saa intet gaar tabt. */
-    if (currentStep === 2 && kraeverLogin()){
+    if (currentStep === 1 && kraeverLogin()){
       // O2-3: toasten lover "fortsaetter med billederne" — saa skal kladden
       // huske trinnet, ellers lander man paa trin 1 efter login.
       Store.saveDraft('form', Object.assign(collectFormData(), { videreTilTrin: 3 }));
       toast('Din kladde er gemt på denne enhed — log ind, så fortsætter du med billederne.');
-      setTimeout(() => { window.location.href = 'login.html?redirect=' + encodeURIComponent('opret-annonce.html'); }, 1400);
+      setTimeout(() => { forlad('login.html?redirect=' + encodeURIComponent('opret-annonce.html')); }, 1400);
       return;
     }
-    if (currentStep < STEP_LABELS.length) goToStep(currentStep + 1);
+    if (currentStep < STEP_LABELS.length) goToStep(currentStep === 1 ? 3 : currentStep + 1);
     else publishListing();
   });
   document.getElementById('step-back').addEventListener('click', () => {
-    if (currentStep > 1) goToStep(currentStep - 1);
+    if (currentStep > 1) goToStep(currentStep === 3 ? 1 : currentStep - 1);
   });
   /* O2-7: i redigeringstilstand skjules knappen — ellers skrev en eksisterende
      annonces data sig ind i ny-annonce-kladden, og naeste "Udgiv" blev en dublet. */
@@ -1180,6 +1400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   kladdeKnap.addEventListener('click', () => {
     if (editingId) return;
     Store.saveDraft('form', collectFormData());
+    _ugemt = false;
     // O1-9: sig HVOR den er gemt — det er en lokal kladde, ikke konto-synk, og billeder er ikke med.
     toast('Kladde gemt på denne enhed (uden billeder). Den hentes frem, næste gang du åbner siden.');
   });
