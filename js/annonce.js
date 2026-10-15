@@ -235,12 +235,13 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
           <button type="button" class="btn btn-primary btn-block" id="open-contact-modal">${Icon.mail}Skriv til sælger</button>
           ${telefon || telefonMulig ? `<button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
           <button type="button" class="btn btn-outline btn-block" id="open-payment-modal">${Icon.lock}Betal sikkert (MobilePay)</button>
+          ${profilKnapHTML}
         </div>
         ${telefon || telefonMulig ? '' : `<p class="seller-locked-note">${Icon.info}<span>Sælgeren har ikke oplyst et telefonnummer. Skriv i stedet — så får du svaret på skrift.</span></p>`}
         ${raad}
       </div>
 
-      ${profilNoegle ? `<div class="sidebar-card">${profilKnapHTML}</div>` : ''}`;
+`;
 }
 
 /* Tæller én visning pr. annonce pr. browsersession.
@@ -397,6 +398,22 @@ function anAktioner(l, eget){
     <button type="button" class="an-act" id="share-listing-btn">${Icon.share}<span>Del annonce</span></button>
     <button type="button" class="an-act" data-compare-toggle="${id}" aria-pressed="${sammenlign ? 'true' : 'false'}">${Icon.compare}<span>Sammenlign</span></button>
     ${(l.isExternal || eget) ? '' : `<button type="button" class="an-act an-fav ${fav ? 'active' : ''}" aria-pressed="${fav}" data-fav-toggle="${id}">${Icon.heart}<span class="an-fav-off">Gem som favorit</span><span class="an-fav-on">Gemt som favorit</span></button>`}`;
+}
+
+/* Strukturerede data skal følge den synlige brødkrumme (5 led). seo.js
+   (delt lag) skriver kun 3; her skrives den om, så de to er ens, og det
+   sidste leds adresse bevares som seo.js satte den. */
+function anSeoBrodkrumme(l){
+  if (typeof Seo === 'undefined') return;
+  const el = document.getElementById('jsonld-breadcrumb');
+  let sidste = '';
+  try { sidste = JSON.parse(el.textContent).itemListElement.slice(-1)[0].item; } catch (e) { return; }
+  const maerkeOK = l.brand && l.brand !== 'Ukendt';
+  const led = [{ name: 'Forside', path: '' }, { name: 'Motorcykler', path: 'soegning' }];
+  if (maerkeOK) led.push({ name: l.brand, path: `soegning?brands=${anEnc(l.brand)}` });
+  if (maerkeOK && l.model) led.push({ name: l.model, path: `soegning?brands=${anEnc(l.brand)}&model=${anEnc(l.model)}` });
+  led.push({ name: `${maerkeOK ? l.brand + ' ' : ''}${l.model || 'Annonce'}${l.year ? ` (${l.year})` : ''}`, path: sidste.replace(SITE_URL + '/', '') });
+  Seo.setJsonLd('breadcrumb', Seo.breadcrumb(led));
 }
 
 function anVirkDel(l){
@@ -625,7 +642,7 @@ function anEksternBjaelke(href, listing, kilde, prisTekst){
   knap.rel = 'noopener noreferrer nofollow';
   knap.className = 'btn btn-primary';
   knap.dataset.listingId = String(listing.id);
-  knap.innerHTML = `Gå til annoncen hos ${kilde}${Icon.externalLink}`;
+  knap.innerHTML = `Gå til annoncen hos&nbsp;<span class="an-nb">${kilde}</span>${Icon.externalLink}`;
   bar.appendChild(knap);
   document.body.appendChild(bar);
   document.body.classList.add('har-actionbar');
@@ -658,6 +675,7 @@ function renderExternalListing(listing){
   seoExternalListingPage(listing, (listing.photoUrls || []).map(sikkerUrl).filter(Boolean));
 
   anBrodkrumme(listing);
+  anSeoBrodkrumme(listing);
 
   /* ---------- Sted: by + landsdel, ikke by + postnummer ----------
      Bilbasen skriver "Odder, Østjylland". Vi skrev "Rødding 6630". Et
@@ -878,7 +896,7 @@ function renderExternalListing(listing){
         ${href
           ? `<a href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow"
                 data-listing-id="${escapeHTML(String(listing.id))}"
-                class="btn btn-primary btn-block an-cta">Gå til annoncen hos ${kilde}${Icon.externalLink}</a>`
+                class="btn btn-primary btn-block an-cta">Gå til annoncen hos&nbsp;<span class="an-nb">${kilde}</span>${Icon.externalLink}</a>`
           : `<p class="external-detail-broken">${Icon.alertTriangle}Annoncen kan ikke åbnes lige nu. Prøv igen senere${domaene ? `, eller find den på ${domaene}` : ''}.</p>`}
         ${hentetLinje ? `<p class="an-meta">${Icon.clock}<span>${hentetLinje}</span></p>` : ''}
         ${(listing.ogsaaHos || []).length ? `<p class="an-meta">${Icon.externalLink}<span>Samme annonce ligger også hos ${listing.ogsaaHos.map(o => o.url ? `<a href="${escapeHTML(o.url)}" target="_blank" rel="noopener noreferrer nofollow">${escapeHTML(o.navn || o.domaene || 'en anden kilde')}</a>` : escapeHTML(o.navn || o.domaene || 'en anden kilde')).join(' og ')} — vi viser den én gang.</span></p>` : ''}
@@ -892,7 +910,7 @@ function renderExternalListing(listing){
   const beskrivelseHTML = listing.description
     ? `<section class="an-desc-sec">
          <h2>Beskrivelse</h2>
-         <blockquote class="an-quote">${escapeHTML(listing.description)}</blockquote>
+         <blockquote class="an-quote">${escapeHTML(String(listing.description).slice(0, 200))}${String(listing.description).length > 200 ? '…' : ''}</blockquote>
          <p class="an-note">Begyndelsen af ${kilde}s egen tekst. Resten står i deres annonce.</p>
        </section>`
     : `<section class="an-desc-sec">
@@ -932,7 +950,6 @@ function renderExternalListing(listing){
 
       ${anFakta(faktaRader)}
 
-      ${anKoerekortKort(listing, kkM, kkUvis)}
       </div>
       <div class="an-col an-col-b">
       <section class="an-head" aria-label="Om motorcyklen">
@@ -956,13 +973,13 @@ function renderExternalListing(listing){
         ${saelgerNote}
       </div>
 
-      ${anTjekKort()}
       </div>
       <div class="an-side">
         <div class="an-seller-wrap">${saelgerKort}</div>
         <div class="an-trygt-wrap">${anTrygtKort(true, kilde)}</div>
       </div>
-
+      ${anKoerekortKort(listing, kkM, kkUvis)}
+      ${anTjekKort()}
     </div>`;
 
   anFlytH1(fuldTitel);
@@ -987,7 +1004,6 @@ function renderExternalListing(listing){
   document.getElementById('report-listing-btn')?.addEventListener('click', () => {
     openReportModal('listing', fuldTitel, listing.id);
   });
-  document.body.classList.remove('har-actionbar');
 }
 
 /* O3-6: kvitteringsbanner efter udgivelse — kun paa egen annonce, kun med
@@ -1067,6 +1083,7 @@ function renderListing(){
   const h1 = document.getElementById('listing-h1');
   if (h1){ h1.textContent = `${listing.brand} ${listing.model}`; }
   anBrodkrumme(listing);
+  anSeoBrodkrumme(listing);
 
   const fav = Store.isFavorite(listing.id);
   const loggedIn = !!Store.getUser();
@@ -1190,7 +1207,7 @@ function renderListing(){
   const beskrivelseHTML = `
       <section class="an-desc-sec">
         <h2>Beskrivelse</h2>
-        ${listing.description ? `<p class="desc">${escapeHTML(listing.description)}</p>` : `<p class="desc an-na">Sælgeren har ikke skrevet en beskrivelse.</p>`}
+        ${listing.description ? `<p class="desc an-clamp" id="an-desc-tekst">${escapeHTML(listing.description)}</p><button type="button" class="an-link an-mere" id="an-desc-mere" hidden aria-expanded="false">Vis hele beskrivelsen</button>` : `<p class="desc an-na">Sælgeren har ikke skrevet en beskrivelse.</p>`}
         ${punkterOK.length ? `<ul class="an-ok">${punkterOK.map(p => `<li>${Icon.check}<span>${escapeHTML(p)}</span></li>`).join('')}</ul>` : ''}
       </section>`;
 
@@ -1201,7 +1218,6 @@ function renderListing(){
 
       ${anFakta(faktaRader)}
 
-      ${anKoerekortKort(listing, kkM, false)}
       </div>
       <div class="an-col an-col-b">
       <section class="an-head" aria-label="Om motorcyklen">
@@ -1224,7 +1240,6 @@ function renderListing(){
         ${sellerTypeNoteHTML(listing.isDealer)}
       </div>
 
-      ${anTjekKort()}
       </div>
       <div class="an-side">
         <div class="an-seller-wrap">
@@ -1233,10 +1248,23 @@ function renderListing(){
         </div>
         <div class="an-trygt-wrap">${anTrygtKort(false)}</div>
       </div>
-
+      ${anKoerekortKort(listing, kkM, false)}
+      ${anTjekKort()}
     </div>
   `;
 
+  /* Lange beskrivelser klippes til 12 linjer med en knap, så midterkolonnen
+     ikke bliver meget længere end de andre. Knappen findes kun, når teksten
+     faktisk er klippet. */
+  const dTekst = document.getElementById('an-desc-tekst'), dMere = document.getElementById('an-desc-mere');
+  if (dTekst && dMere && dTekst.scrollHeight > dTekst.clientHeight + 2){
+    dMere.hidden = false;
+    dMere.addEventListener('click', () => {
+      const aaben = dTekst.classList.toggle('an-clamp') === false;
+      dMere.textContent = aaben ? 'Vis mindre' : 'Vis hele beskrivelsen';
+      dMere.setAttribute('aria-expanded', String(aaben));
+    });
+  }
   anFlytH1(`${listing.brand} ${listing.model}`);
   anAktioner(listing, isOwnListing(listing));
   anVirkDel(listing);
@@ -1363,9 +1391,36 @@ function renderListing(){
     // Sælgers navn i titlen, så man kan se, hvem beskeden går til —
     // "Skriv til sælger" føles anonymt, når navnet står lige ved siden af.
     document.getElementById('contact-modal-title').textContent = `Skriv til ${listing.seller.name}`;
-    document.getElementById('open-contact-modal').addEventListener('click', () => modal.classList.add('open'));
-    modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => modal.classList.remove('open')));
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+    /* Tilgængelig dialog: fokus ind ved åbning, tilbage til udløseren ved
+       lukning, Escape lukker, Tab bliver inde i dialogen. Modalen bor i
+       annonce.html og styres kun her, så løsningen er lokal. */
+    let udloeser = null;
+    const aabnKontakt = () => { udloeser = document.activeElement; modal.classList.add('open'); };
+    const lukKontakt = () => modal.classList.remove('open');
+    new MutationObserver(() => {
+      if (modal.classList.contains('open')){
+        modal.querySelector('[role="dialog"]') || modal.querySelector('.modal-box')?.setAttribute('role', 'dialog');
+        modal.querySelector('.modal-box')?.setAttribute('aria-modal', 'true');
+        modal.querySelector('.modal-box')?.setAttribute('aria-labelledby', 'contact-modal-title');
+        const mal = modal.querySelector('#cf-message:not([hidden])') || modal.querySelector('#contact-receipt:not([hidden])') || modal.querySelector('.modal-box');
+        if (mal) mal.focus();
+      } else if (udloeser && document.contains(udloeser)){
+        udloeser.focus(); udloeser = null;
+      }
+    }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+    document.addEventListener('keydown', (e) => {
+      if (!modal.classList.contains('open')) return;
+      if (e.key === 'Escape'){ e.preventDefault(); lukKontakt(); return; }
+      if (e.key !== 'Tab') return;
+      const fokus = [...modal.querySelectorAll('button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled && el.offsetParent !== null);
+      if (!fokus.length) return;
+      const foerste = fokus[0], sidste = fokus[fokus.length - 1];
+      if (e.shiftKey && (document.activeElement === foerste || !modal.contains(document.activeElement))){ e.preventDefault(); sidste.focus(); }
+      else if (!e.shiftKey && document.activeElement === sidste){ e.preventDefault(); foerste.focus(); }
+    });
+    document.getElementById('open-contact-modal').addEventListener('click', aabnKontakt);
+    modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', lukKontakt));
+    modal.addEventListener('click', (e) => { if (e.target === modal) lukKontakt(); });
 
     const besked = document.getElementById('cf-message');
     const taeller = document.getElementById('cf-counter');

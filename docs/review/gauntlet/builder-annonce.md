@@ -33,3 +33,13 @@ fstyr.dk/privat/koerekort/udvidelse-af-koerekort/koerekort-til-motorcykel (læst
 
 ## Rest
 Ekstern `Type` er ofte "Ikke oplyst" (kilden oplyser den ikke). Lange egne beskrivelser gør midterkolonnen lang (højre kolonne er kortere).
+
+## Runde 2 (efter Critic ACCEPT, 15.10.2026)
+- F-1 rettet: `har-actionbar` fjernes ikke længere efter bjælken er bygget (body-padding 76 px; footerens ©-linje synlig på 390).
+- F-2 rettet lokalt i annonce.js: fokus ind i kontaktmodalen, Escape lukker, Tab fanget, fokus tilbage til udløseren, role=dialog/aria-modal. Testet.
+- F-3 rettet: generator + de to statiske sider har 5-leds BreadcrumbList; runtime omskriver seo.js' 3 led til 5 (`anSeoBrodkrumme`), så seo.js ikke røres.
+- P3: Lignende-titler/priser klippes med ellipsis; kildenavn i CTA har `nowrap` (ingen "MC / Syd"); ekstern uddrag klippes til 200 tegn i visningen; 50 cc "Ikke udelukket A1" er IKKE en fejl (A1 dækker ≤125 cm³) — evt. DELT-ØNSKE om "AM" i data.js, ikke ændret.
+- Tættere på billedet: "Kan du køre?" og "Det bør du tjekke" står side om side i bundrækken (desktop) med motorcykelfoto (img/sell-cruiser.webp, dekorativt) i tjekboksens højre side, lys+mørk; egen sælgerboks samlet i ét kort (kontakt, telefon, betalingsinfo, sælgerprofil); lange egne beskrivelser klippes til 12 linjer med "Vis hele beskrivelsen".
+- Målt: 1440/1180/390/320 lys+mørk, egen/ekstern/Gul og Gratis/statisk: ingen overflow, 1 h1, 0 konsolfejl. `npm test` 364 + annonce-skal 6 grønne.
+- Selv-score (0-5): brødkrumme 4, galleri 4, titelblok 4, fakta 4, beskrivelse 4, sælgerboks 3,5, trygt 4, kørekort 4,5, tjek 4,5, lignende 4, mobil 4.
+- DELT-ØNSKE uændret: header-container 1440, `p-annonce.css` i allowlist/?v=-stempling, test i `npm test`.

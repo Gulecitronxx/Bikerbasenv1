@@ -103,8 +103,10 @@ function jsonLd(l, url){
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Forside', item: `${BASE}` },
-      { '@type': 'ListItem', position: 2, name: typeLabel(l.type), item: `${BASE}/soegning?type=${l.type}` },
-      { '@type': 'ListItem', position: 3, name: navn, item: url },
+      { '@type': 'ListItem', position: 2, name: 'Motorcykler', item: `${BASE}/soegning` },
+      { '@type': 'ListItem', position: 3, name: l.brand, item: `${BASE}/soegning?brands=${encodeURIComponent(l.brand)}` },
+      { '@type': 'ListItem', position: 4, name: l.model, item: `${BASE}/soegning?brands=${encodeURIComponent(l.brand)}&model=${encodeURIComponent(l.model)}` },
+      { '@type': 'ListItem', position: 5, name: `${navn} (${l.year})`, item: url },
     ],
   };
   /* id'erne skal matche dem js/seo.js bruger. Seo.setJsonLd fjerner en
