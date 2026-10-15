@@ -34,6 +34,7 @@ Juridiske regler: `/CLAUDE.md` (ufravigelige).
 | G-003 | om-indeksering.html 641 px bred på mobil (`.legal-pre` uden CSS, auto-margener i flex) | P2 | rettet — afventer Critic |
 | V-006/V-007 | Formularkanter 1,3:1 og placeholder-kontrast (nyt token `--color-input-border`) | P2 | rettet — afventer Critic |
 | F-F1..F3 | Søgning: match hen over ordgrænse (`gs`→"Road King Special"), symbol-only q giver alt, ingen rangering | P3 | åben |
+| UX-1 | "Sådan virker Bikerbasen": 4-trins modul over de to spor på forsiden (ejerens favorit; kun sande trin, favoritter udeladt pga. F-005) | P2 | bygget — afventer Critic |
 | G-002 | Header (`.header-actions`, `.spor-koeber`) klippes ikke under ~269 px viewport | P3 | åben — under WCAG 320 px-grænsen, lav prioritet |
 
 ## Prioriteret kø (fra Detective-rapporterne, rangeret efter værdi/indsats)

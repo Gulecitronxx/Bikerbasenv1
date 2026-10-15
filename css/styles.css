@@ -4621,6 +4621,17 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
    saa rangordenen er den samme som i hero'en. */
 .saadan-spor{ display:grid; gap: var(--space-5); grid-template-columns:1fr; }
 @media (min-width:860px){ .saadan-spor{ grid-template-columns: repeat(2,1fr); gap: var(--space-6); } }
+/* "Sådan virker Bikerbasen": fire trin foer de to spor (reference: billede 1/4, i vores egen stil). */
+.saadan-trin{ list-style:none; margin:0 0 var(--space-6); padding:0; display:grid; gap:var(--space-3); grid-template-columns:1fr; counter-reset:none; }
+@media (min-width:560px){ .saadan-trin{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (min-width:960px){ .saadan-trin{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--space-4); } }
+.saadan-trin-punkt{ position:relative; display:flex; flex-direction:column; gap:6px; padding:var(--space-4); background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); }
+.saadan-trin-punkt strong{ font-family:var(--font-display); font-size:16px; line-height:1.25; }
+.saadan-trin-punkt span:not(.saadan-nr){ font-size:14px; color:var(--color-fg-muted); line-height:1.45; }
+.saadan-nr{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:var(--radius-pill); background:var(--color-primary); color:var(--color-on-primary); font-family:var(--font-display); font-weight:700; font-size:14px; margin-bottom:2px; }
+@media (min-width:960px){
+  .saadan-trin-punkt:not(:last-child)::after{ content:"→"; position:absolute; right:calc(-1 * var(--space-4) + 1px); top:50%; transform:translate(50%,-50%); width:var(--space-4); text-align:center; color:var(--color-fg-muted); font-size:16px; z-index:1; }
+}
 .spor{
   background: var(--color-surface); border:1px solid var(--color-border);
   border-radius: var(--radius-md); padding: var(--space-6);
