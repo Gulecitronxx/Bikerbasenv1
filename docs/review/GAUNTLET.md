@@ -56,6 +56,14 @@ S-004 crawl udløser ikke deploy · S-011 sitemap lastmod = byggedato · S-007/0
 - Ejerens favoritter at undersøge særligt: hero + søgekort + tillidsrække, mellemsektionens hierarki, "Sådan virker Bikerbasen"-modul.
 - SEO-Routine (cloud, kontinuerlig) er et **separat driftsspor**; forberedes efter de første produktforbedringer, må ikke blokere dem.
 
+## PARALLEL DESIGN GAUNTLET (startet 15.10.2026)
+
+Koordinering: [gauntlet/PARALLEL.md](gauntlet/PARALLEL.md). Design: `/DESIGN_DNA.md` (override: billederne er målet).
+9 strømme, hver med egen branch + worktree (`C:\Users\pasca\Desktop\rod\wt\<navn>`) + port: **master** (forside + delt lag, 8700) · soegning 8711 · annonce 8712 · opret 8713 · dashboard 8714 · login 8715 · facet 8716 (kørekort/type/region/model) · maerke 8717 · guides 8718.
+Hver strøm: Builder → rapport `gauntlet/builder-<navn>.md` → blind Critic (`gauntlet/critic-<navn>.md`, sammenligner med billedet) → integration i rækkefølge master → soegning → annonce → facet → maerke → opret → dashboard → login → guides, med fuld test + visuel kontrol af det samlede site før push til main.
+Genoptag efter afbrydelse: `git worktree list`, `git log --oneline gauntlet/<navn> -5`, læs `builder-<navn>.md`.
+Åbne delte opgaver (Orchestrator): tilføj nye testfiler til `npm test`; kobl `build-guides.js` på `build.js`; sitemap for guides; nav-link 'Artikler & guides' når guides er live; integrér DELT-ØNSKER fra rapporterne.
+
 ## Beslutninger
 
 - Branch `gauntlet/master` er oprettet fra `claude/aim-loop-runde4` (d199417). Ucommittede buildændringer fra før sessionen ligger i `git stash`.
