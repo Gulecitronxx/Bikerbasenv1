@@ -329,12 +329,23 @@ function listingMediaHTML(l, alt, eager){
   if (url){
     return `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" ${loadAttrs} class="card-photo">`;
   }
+  /* Uden foto: en neutral, afdæmpet typeillustration (img/type) i stedet for en tom flade. Den er IKKE annoncens
+     motorcykel, og kortet siger det i klartekst ("Typebillede — ikke annoncens foto"). Kendes typen ikke, står
+     kameraikonet alene. Klasserne .tt-<type> bærer billedet i CSS (ingen inline-style: CSP). */
+  const typ = l && TYPEBILLEDER.includes(l.type) ? l.type : '';
+  if (typ){
+    return `<div class="foto-tom foto-tom--type tt-${typ}" role="img" aria-label="Ingen fotos i denne annonce. Typebillede af ${escapeHTML(typeLabel(typ))}, ikke annoncens motorcykel">`
+      + `<p class="foto-tom-titel">Typebillede · intet foto</p>`
+      + `</div>`;
+  }
   return `<div class="foto-tom">`
     + `<span class="foto-tom-ikon" style="width:26px;height:26px;display:block">${Icon.camera}</span>`
     + `<p class="foto-tom-titel">Ingen fotos i denne annonce</p>`
     + fotoTomFaktaHTML(l)
     + `</div>`;
 }
+/* De typer, der har en illustration i img/type/<type>.webp (samme fliser som forsidens typerække). */
+const TYPEBILLEDER = ['sport', 'touring', 'cruiser', 'naked', 'adventure', 'scooter', 'classic', 'cross'];
 
 /* ---------- C3: klik videre til kilden måles ét sted ----------
    Det er tragtens vigtigste udgang for indekserede annoncer: handlen sker
@@ -376,8 +387,9 @@ if (typeof document !== 'undefined' && document.addEventListener){
    der naaede at fejle FOER scriptet koerte, fanges af tjekFejledeFotos():
    complete=true + naturalWidth=0 + et src er praecis "hentet, men
    mislykkedes" (lazy-billeder, der ikke er begyndt, har complete=false). */
-function fotoFejlHTML(){
-  return `<div class="foto-tom foto-fejl" role="img" aria-label="Fotoet kunne ikke hentes hos kilden">`
+function fotoFejlHTML(typ){
+  const t = TYPEBILLEDER.includes(typ) ? typ : '';
+  return `<div class="foto-tom foto-fejl${t ? ' foto-tom--type tt-' + t : ''}" role="img" aria-label="Fotoet kunne ikke hentes hos kilden">`
     + `<span class="foto-tom-ikon" style="width:26px;height:26px;display:block">${Icon.camera}</span>`
     + `<p class="foto-tom-titel">Fotoet kunne ikke hentes hos kilden</p>`
     + `</div>`;
@@ -388,7 +400,8 @@ function markerFotoFejl(img){
   const media = img.closest('.card-media');
   if (!media) return false;
   img.dataset.fotoFejl = '1';
-  img.insertAdjacentHTML('afterend', fotoFejlHTML());
+  const kort = media.closest ? media.closest('.card') : null;
+  img.insertAdjacentHTML('afterend', fotoFejlHTML(kort && kort.dataset ? kort.dataset.type : ''));
   img.remove();
   return true;
 }
@@ -424,9 +437,9 @@ if (typeof document !== 'undefined' && document.addEventListener){
    som før med sætningen alene. Sætningen bliver stående uanset hvad; det er
    den, der er løftet ("Vi viser ikke en tegning i stedet", annoncesiden).
 
-   Effekt springes over på indekserede annoncer: externalCardHTML() viser
-   allerede "Effekt" i sin spec-liste, og det samme tal to gange på ét kort
-   ligner en fejl. */
+   Effekt springes over på indekserede annoncer: kortets chips viser allerede
+   hk, og det samme tal to gange på ét kort ligner en fejl. (På kortet er
+   fakta-linjen skjult; feltet bruges i listevisningens miniature.) */
 function fotoTomFaktaHTML(l){
   const fakta = [];
   const hk = Number(l && l.power) > 0 ? Number(l.power) : null;
@@ -439,81 +452,22 @@ function fotoTomFaktaHTML(l){
     + `</p>`;
 }
 
-/* Hvem sælger den?
-
-   Kortet sagde det ikke. Forhandlere fik en lille "Forhandler"-mærkat oven
-   på fotoet; private fik INGENTING — og det er over halvdelen af annoncerne.
-   En køber, der skal skille seriøse forhandlerannoncer fra tilfældige
-   privatopslag i scrollet, kunne altså ikke, uden at klikke ind på hver
-   enkelt. Det er dét, der afgør om en handel til 80.000 kr. føles sikker.
-
-   Forhandleren nævnes ved navn — det er navnet, man genkender og googler.
-   Privatsælgere står som "Privat sælger": ikke ringere, men en anden handel
-   (ingen reklamationsret), og det skal køberen kunne se med det samme. */
-function sellerLineHTML(l){
-  const dealer = l.isDealer || l.seller?.isDealer;
-  const navn = escapeHTML(l.seller?.name || '');
-  if (dealer && navn){
-    return `<div class="card-seller is-dealer">${Icon.store}<span>${navn}</span></div>`;
-  }
-  return `<div class="card-seller">${Icon.user}<span>${dealer ? 'Forhandler' : 'Privat sælger'}</span></div>`;
-}
-
 /* ============ Listing card ============ */
 /* `i` kommer gratis fra .map(listingCardHTML) — kortet på plads 0 er det
-   eneste der er above-the-fold på mobil, og får derfor det ivrige foto. */
-/* Indekseret annonce fra en anden side.
+   eneste der er above-the-fold på mobil, og får derfor det ivrige foto.
 
-   Egen funktion frem for en håndfuld if'er inde i det almindelige kort. De to
-   korttyper ligner hinanden i dag, men de skal have lov at skille sig fra
-   hinanden — og et delt kort med syv betingelser er dét, der på et tidspunkt
-   får en ekstern annonce til at se ud som vores egen, fordi nogen tilføjede
-   en knap uden at tænke over grenen.
-
-   Fire ting adskiller den, og alle fire er bevidste:
-     1. Mærket "Hos <kilde>" øverst på billedet, ikke nede i teksten.
-     2. Linjen hvor sælgeren står, siger kildens navn og domæne.
-     3. Kortet har ÉT mål: vores egen annonceside. Der er ingen vej ud af
-        sitet herfra.
-
-        Sådan var det ikke før. Hele kortet VAR kildelinket — ét <a> på
-        357×605 px, 99,3 % af kortets areal, direkte til mcsyd.dk. Det gjorde
-        annonce.html uopnåelig for 332 af 383 annoncer, altså for alt lager i
-        drift: rejsen "søg → kort → annonce → se hos kilde" fandtes kun for de
-        egne. Og annoncesiden er dér, kørekortdommen står med sit regnestykke
-        ("Regnet ud fra 124 ccm og 11 hk") — den ene oplysning, en køber ikke
-        kan få hos kilden.
-
-        Første rettelse skrumpede kildelinket fra hele kortet til én række på
-        304×24 px i bunden. Det var stadig en genvej uden om vores egen side,
-        og ejerens krav er, at vejen ud går IGENNEM den: "inden vores side
-        viderestiller udbyder af annoncen skal man klikke ind på min annonce,
-        også kan man trykke på knappen til at komme videre". Rækken er derfor
-        væk. Knappen findes ét sted — på annoncesiden — og dér er den stadig
-        den primære handling.
-
-        Ærligheden om afsenderen bliver: kildestriben "Annonce fra <kilde>"
-        øverst og "Forhandler · mcsyd.dk" i bunden står uændret. De er ikke
-        genvejen; de er grunden til, at køberen ikke bliver overrasket over,
-        hvor annoncesiden sender ham videre hen.
-     4. Ingen favoritknap. Favoritter peger på listings med en
-        fremmednøgle — `favorites.listing_id uuid not null references
-        public.listings(id)` — så en uuid herfra bliver afvist af databasen,
-        og hjertet ville se ud som om det virkede.
-
-        D-008 spurgte, om det var et valg eller en forglemmelse. Det er et
-        valg, og det er nu skrevet ned med tallene i docs/review/DECISIONS.md.
-        Følgen — at hjertet i toppen aldrig kan blive andet end 0, så længe
-        `listings` har 0 rækker — er håndteret dér, hvor den hører hjemme:
-        updateFavCount() viser først indgangen, når der ER noget gemt.
-     5. Kildemærket ligger som en stribe ØVER fotoet, ikke som en pille
-        oven på det. Over et vilkårligt forhandlerfoto målte mærket 2,64:1
-        i kontrast — under AA's 4,5:1 — og det er kortets vigtigste tekst.
-        På en flade med kendt baggrund er den læsbar hver gang.
-     6. Kørekortpillen er flyttet ned i kroppen, hvor den kan bære en
-        tekst: uden hk kan A2 og A ikke skelnes, og en pille over fotoet
-        havde kun plads til ét bogstav — det forkerte. Se eksternKoerekort(). */
-/* ---- Hjælpere til det eksterne kort ----
+   Selve kortet (listingCardHTML) står længere nede. Det vigtigste, der blev besluttet, da der var tre korttyper,
+   og som stadig gælder for det ene kort:
+   - Kortfladen går til VORES annonceside, aldrig direkte til kilden. Hele kortet VAR engang kildelinket (99 % af
+     kortets areal), og det gjorde annonce.html uopnåelig for alt lager i drift. Annoncesiden er dér, kørekortdommen
+     står med sit regnestykke — den ene oplysning, en køber ikke kan få hos kilden. Vejen ud af sitet findes ét sted:
+     knappen på annoncesiden. Kilden NÆVNES på kortet (domæne i bunden, forklaring i title), men er ikke et link.
+   - Ingen favoritknap på indekserede annoncer. Favoritter peger på listings med en fremmednøgle
+     (`favorites.listing_id uuid not null references public.listings(id)`), så en uuid herfra bliver afvist af
+     databasen, og hjertet ville se ud som om det virkede (D-008, docs/review/DECISIONS.md). Sammenlign er lokalt og
+     har ingen konto at svigte, så den står på alle kort.
+   - Kørekortbadgen er koerekortMaerkat() — samme udregning som filteret. Se dens kommentar. */
+/* ---- Hjælpere til det indekserede kort ----
    De ligger her og ikke i data.js, fordi de alle sammen findes for at rette
    op på noget, der MANGLER i en indekseret annonce. Vores egne annoncer har
    felterne fra formularen; en crawlet annonce har det, kilden gad skrive. */
@@ -761,52 +715,6 @@ function koerekortMaerkat(l){
    "Kilometer: Ikke oplyst" gør ikke. */
 const EKSTERN_UKENDT = 'Ikke oplyst';
 
-/* Tre specfelter på ÉN linje: årgang, kilometer, kubik — nøjagtig de samme
-   tre, i samme rækkefølge, som vores eget kort skriver i .card-meta
-   ("2021 · 9.100 km · 373 ccm").
-
-   D-011. Felterne stod som fire chips i et 2×2-gitter: to rækker á 28px plus
-   8px imellem = 64px, mod det egne korts ene 20px-linje. Det var den enkelte
-   største grund til, at de to korttyper i den samme liste stod 118px fra
-   hinanden (målt 390px: 579 mod 461).
-
-   HVORFOR TRE OG IKKE FIRE. Effekt (hk) var det fjerde felt, og fire værdier
-   kan ikke være på én linje. Målt: den bredeste af de 20 linjer på side 1
-   krævede 341px, hvor kortets krop har 310px ved 390px vindue — og på
-   desktop, hvor filterpanelet står ved siden af, er spalten kun ~218px.
-   Enten fire værdier på to linjer (og så er vi tilbage ved to rytmer), eller
-   tre på én. Tre er valgt, fordi det er præcis det sæt, det egne kort har,
-   og fordi hk ikke forsvinder: kørekortchippen lige nedenunder ER udledt af
-   ccm og hk og siger konklusionen, listevisningen skriver "1.084 ccm · 87
-   hk" i sin Motor-celle, og annoncesiden viser tallet med sit regnestykke.
-
-   HULLERNE I DATA. Chipsene blev valgt, fordi et ikon uden tal ser ud som en
-   fejl, og fordi der ER huller. Målt på hele lageret, 332 annoncer:
-
-       årgang mangler        0
-       kilometer mangler   163  (49 %)
-       kubik mangler        12  (3,6 %)
-       annoncer med 0 / 1 / 2 manglende af de tre: 168 / 152 / 12
-
-   Den indvending gjaldt ikon+tekst, og der er ingen ikoner her. Men den
-   naive sammenlægning ("2024 · Ikke oplyst · Ikke oplyst") ville sætte to
-   tomme felter i samme linje, som ikke engang siger HVAD der mangler.
-
-   Derfor: de kendte værdier står som linjen, og de manglende samles i ÉT led
-   til sidst, der siger hvilke ("km og kubik ikke oplyst"). Ingen bar
-   tankestreg, intet tomt felt, intet tal vi ikke har — og det manglende
-   navngives nu også visuelt, hvor chippen kun sagde det til skærmlæseren. */
-function eksternSpecs(l){
-  const felter = [
-    // `kort` er ordet, der bruges i "… ikke oplyst" — derfor små bogstaver
-    // og den korte form, så linjen kan være der.
-    { navn: 'Årgang',    kort: 'årgang', vaerdi: l.year == null ? '' : String(l.year) },
-    { navn: 'Kilometer', kort: 'km',     vaerdi: l.km == null ? '' : formatKm(l.km) },
-    { navn: 'Kubik',     kort: 'kubik',  vaerdi: l.ccm == null ? '' : formatCcm(l.ccm) },
-  ];
-  return { kendte: felter.filter(f => f.vaerdi), mangler: felter.filter(f => !f.vaerdi).map(f => f.kort) };
-}
-
 /* "km", "km og hk", "km, kubik og hk" — dansk opremsning med "og" til sidst. */
 function opremsDa(ord){
   if (ord.length <= 1) return ord[0] || '';
@@ -862,158 +770,38 @@ function eksternErNy(l){
   return m[1].toLowerCase() === 'ny';
 }
 
-function externalCardHTML(l, i){
-  const kilde = escapeHTML(l.source?.navn || 'ekstern kilde');
-  /* Uden en brugbar URL er kortet et blindt link. Så vises annoncen ikke.
-     Kortfladen peger nu på vores egen side og ville teknisk kunne stå uden
-     kildens URL — men en indekseret annonce, man ikke kan komme videre til
-     og handle på, er en blindgyde med et prisskilt. Så den bliver ude. */
-  const href = sikkerUrl(l.externalUrl);
-  if (!href) return '';
+/* ============ Annoncekortet — ÉT kort på alle flader ============
 
-  const { primaer, variant } = eksternTitel(l);
-  const titel = escapeHTML(primaer), undertitel = escapeHTML(variant);
-  const altTekst = escapeHTML([l.brand, l.model].filter(Boolean).join(' '));
-  const pris = eksternPrisTekst(l.price);
-  const domaene = l.source?.domaene ? escapeHTML(l.source.domaene) : '';
-  // "Forhandler · mcsyd.dk": kildens navn står allerede i mærkatet og i
-  // linket. Her siger vi i stedet, hvad slags sælger det er, og domænet —
-  // det eneste på kortet, køberen selv kan slå op, før han klikker.
-  /* Runde 6 (D6-S3): "Privat sælger · guloggratis.dk" (31 tegn) klippede BEGGE
-     led i 280 px-spalten. "Privat" er ikke mindre aerligt ved siden af et
-     domaene; i smalle spalter skjuler css saelgertypen og lader domaenet —
-     det eneste, koeberen kan slaa op — staa helt. Typen bliver i title. */
-  /* Runde 7 (D7-F1): kun det, kilden har oplyst. Ved null (Gul og Gratis) staar
-     domaenet alene — ingen "Privat", der var et gaet. */
-  const saelgerType = l.saelgertype === 'forhandler' || (l.saelgertype === undefined && l.isDealer) ? 'Forhandler'
-    : l.saelgertype === 'privat' ? 'Privat' : null;
-  const saelger = [saelgerType, domaene].filter(Boolean).join(' · ') || (l.source && l.source.navn) || 'ekstern kilde';
-  const saelgerHTML = domaene
-    ? `${saelgerType ? `<span class="card-saelgertype">${saelgerType} · </span>` : ''}${escapeHTML(domaene)}`
-    : (saelgerType || kilde);
-  /* "Ny" står FØRST i prislinjen, foran forhandlerens salgsmarkører: den
-     forklarer prisen på samme måde som "UDEN KLARGØRING" gør, men den er
-     også et juridisk vilkår (garanti frem for reklamationsret), og den skal
-     læses før tallet giver mening. */
-  const erNy = eksternErNy(l);
-  /* Garanti-sætningen er et løfte om TREDJEPARTS vilkår og må kun stå, hvor
-     sælgertypen faktisk er oplyst som forhandler — samme regel, detaljesiden
-     fik i D7-A1. En Gul og Gratis-annonce uden sælgertype får spørgsmålet i
-     stedet for påstanden. */
-  const nyHTML = erNy
-    ? `<span class="card-ny" title="Annoncen ligger i ${escapeHTML(l.source?.navn || 'kilden')}s katalog over NYE motorcykler. Den er ikke brugt${saelgerType === 'Forhandler' ? ': du køber med garanti frem for reklamationsret, og kilometerstanden er derfor ikke oplyst' : ' — spørg sælgeren om garanti- og reklamationsvilkår'}.">Ny</span>`
-    : '';
-  const mark = eksternSalgsmarkoerer(l);
-  const markHTML = mark.tekst
-    ? `<span class="card-salgsmarkoerer" title="${escapeHTML(mark.alle.join(' · '))}">${escapeHTML(mark.tekst)}</span>`
-    : '';
-  /* <dl> med skjult <dt>: linjen viser kun værdien ("2003"), men
-     skærmlæseren hører "Årgang: 2003". Det manglende led får sit eget par,
-     så det læses som "Ikke oplyst af kilden: km og hk" og ikke som en løs
-     hale på det foregående tal. Ordet "ikke oplyst" står visuelt i CSS
-     (`.spec-tom dd::after`), fordi <dt> allerede bærer det for skærmlæseren
-     — ellers ville det blive læst to gange. */
-  const { kendte, mangler } = eksternSpecs(l);
-  const specs = kendte.map(s => `
-          <div class="card-spec"><dt>${s.navn}</dt><dd>${escapeHTML(s.vaerdi)}</dd></div>`).join('')
-    + (mangler.length ? `
-          <div class="card-spec spec-tom"><dt>${EKSTERN_UKENDT} af kilden</dt><dd>${escapeHTML(opremsDa(mangler))}</dd></div>` : '');
+   Forsiden, søgningen, mærke-, type-, kørekort-, region- og modelsiderne,
+   "lignende" på annoncesiden, noscript-listerne og forhåndsvisningen i opret-
+   annonce tegner det samme kort. Før fandtes tre former (forsidens rige kort,
+   standardkortet og det interne forhandlerkort uden foto) med hver sin
+   labelstil, og en side med blandede kilder viste dem side om side (samlet
+   Critic P2-5). Nu er der én opstilling:
 
-  const kk = koerekortMaerkat(l);
-  /* Runde 5 (D5-S2/S3/S4/S7, maalt mod Bilbasens kort):
-     - Kildestriben oeverst (34 px, identisk tekst paa 24 af 24 kort) er vaek;
-       kilden bor ÉT sted paa kortet — fodlinjen, med det eksterne-link-ikon
-       striben havde, domaenet og striben's forklaring som title. Fotoet
-       rykker 34 px op, 24 kort = 816 px kortere side.
-     - Koerekortet er en chip i SAMME raekke som aar/km/ccm (én 24 px-raekke
-       som Bilbasens fire graa fakta-chips), kontur som standard og fyldt kun
-       for A1/A2 — de kategorier, der faktisk udelukker noget (13 + 47 af 548)
-       — saa prisen igen er kortets tungeste element. Chippen staar ALTID.
-     - Fodlinjen: byen alene, naar den er kendt (regionen i title); domaenet
-       vinder pladskampen i stedet for at blive klippet foerst. */
-  const kkKlasse = kk.kode ? ` kk-${String(kk.kode).toLowerCase()}` : ' kk-ukendt';
-  const by = String(l.city || '').trim();
-  const region = l.region || regionFraPostnr(l.postnr);
-  const sted = by || region || (l.postnr ? String(l.postnr) : 'Sted ikke oplyst');
-  const stedTitle = by && region ? `${by}, ${region}` : sted;
-  /* R18-P1: forhandlerens eget vandmaerke i fotoet er uforudsigeligt i
-     placering og stoerrelse (maalt: 5 af 8 kort paa forsiden daekket
-     40-60%). Et lille, ensartet Bikerbasen-maerke i det tomme oeverste
-     venstre hjoerne (det eneste hjoerne, det eksterne kort ikke allerede
-     bruger — sammenlign sidder nederst til hoejre) giver oejet ÉT fast
-     sted, i stedet for at konkurrere med et andet, tilfaeldigt et.
-     IKKE en genindfoerelse af runde 5's fjernede kilde-stribe (D5-S2,
-     js/eksternt-kort.test.js:127): den var 34px fuld bredde, identisk
-     tekst paa hvert kort. Denne er en lille pille, kun i hjoernet, og
-     dens formaal er at modvirke et foto-problem, ikke at gentage
-     fodlinjens oplysning. */
-  return `
-  <article class="card card-external" data-listing-id="${l.id}" data-external="1">
-    <div class="card-media">
-      ${domaene ? `<span class="card-source-badge" title="Annoncen ligger hos ${kilde} (${escapeHTML(saelger)}). Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}<span>${domaene}</span></span>` : ''}
-      ${listingMediaHTML(l, altTekst, i === 0)}
-      <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price${l.price == null ? ' pris-mangler' : ''}">${pris}</span>
-        ${nyHTML}
-        ${markHTML}
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">${titel}</span>
-        <span class="card-title-variant"${undertitel ? ` title="${undertitel}"` : ''}>${undertitel}</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">${specs}
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${
-            /* R18-P1: "Mulig A2" laeses ved et skim som bekraeftet — kritikkens
-               fund. Forklaringen (kk.forklaring) er allerede praecis og maa
-               ikke omskrives (den staar allerede i title + visually-hidden);
-               det, der mangler, er en VISUEL, ikke-hover-afhaengig markoer af,
-               at "Mulig" er en tentativ konklusion. Kun paa "Mulig A1/A2" —
-               "Kørekort A" er en bekraeftet udelukkelse (ingen oevre graense
-               for A), saa den skal ikke have samme ikon. Genbruger Icon.info,
-               ikke et nyt unicode-tegn. */
-            kk.kode && kk.kode !== 'A' ? Icon.info : ''
-          }${escapeHTML(kk.tekst)}<span class="visually-hidden">. ${escapeHTML(kk.forklaring)}</span></span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="${escapeHTML(stedTitle)}">${Icon.mapPin}<span>${escapeHTML(sted)}</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos ${kilde} (${escapeHTML(saelger)}). Bikerbasen viser den, men handlen sker hos kilden.">${Icon.externalLink}<span>${saelgerHTML}</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=${l.id}"
-       class="card-link"
-       aria-label="Se annonce: ${titel}${undertitel ? ' ' + undertitel : ''}, ${pris} — hos ${kilde}"></a>
-  </article>`;
-}
+     foto (3:2)          — ægte foto fra kilden, ellers en neutral typeillustration
+     titel + pris        — på samme linje
+     år | km | type      — et manglende tal siges højt ("Km ikke oplyst")
+     chips               — kørekortbadge FØRST, så ccm og hk (KUN de tal annoncen oplyser)
+     sted + sælger/kilde — i bunden
 
-/* ============ Det rige kort (forsidens udvalg, referencebillede 1) ============
-
-   Samme data og samme regler som de to andre korttyper — kun en tættere
-   opstilling, valgt med `listingCardHTML(l, i, { rich: true })`:
-
-     titel + pris på samme linje
-     år | km | type
-     kørekort-chip + ccm-chip + hk-chip (KUN de tal, annoncen oplyser)
-     sted + "Kilde: …"
-
-   Reglerne fra de to andre kort gælder uændret:
+   Reglerne fra de gamle kort gælder uændret:
    - Kørekortchippen kommer fra koerekortMaerkat(), altså samme udregning som
      filteret. "Mulig A2", aldrig "A2 godkendt".
    - Et tal, annoncen ikke oplyser, tegnes ikke som chip. I stedet siger ÉN
-     dæmpet chip, hvilke der mangler ("ccm og hk ikke oplyst") — forsidens
-     løfte er, at mangler et tal, så står der "Ikke oplyst".
-   - Der står ingen vægt (kg): ingen annonce i lageret bærer et vægttal, og
-     chippen ville være et gæt.
+     dæmpet chip, hvilke der mangler ("ccm og hk ikke oplyst").
+   - Der står ingen vægt (kg): ingen annonce i lageret bærer et vægttal (og vægt
+     er ikke et felt, CLAUDE.md regel 2 tillader os at gemme), så chippen ville
+     være et gæt.
    - Kun de felter, CLAUDE.md regel 2 tillader: titel, mærke, model, årgang,
      km, ccm, pris, postnr, sælgertype, ét thumbnail, kilde-domæne, deeplink.
    - Det indekserede kort har intet gem-hjerte (D-008: favorit-nøglen peger på
-     vores egen tabel). Dets sammenlign-knap står der, hvor hjertet ellers ville.
-   - Kortfladen peger på VORES annonceside; ingen vej ud af sitet herfra. */
-function rigtKortFakta(l){
+     vores egen tabel). Sammenlign-knappen står samme sted på ALLE kort (nederst
+     til højre i fotoet); hjertet (kun egne annoncer) øverst til højre.
+   - Kortfladen peger på VORES annonceside; ingen vej ud af sitet herfra.
+   - Salgsmarkører ("ENGROS", "UDEN KLARGØRING") forklarer prisen og står som
+     fuldt læsbar chip — aldrig klippet til "EN…". */
+function kortFakta(l){
   const ext = !!l.isExternal;
   const titel = ext
     ? eksternTitel(l).primaer
@@ -1023,56 +811,93 @@ function rigtKortFakta(l){
   const by = String(l.city || '').trim();
   const region = l.region || (ext ? regionFraPostnr(l.postnr) : '');
   const sted = by || region || (l.postnr ? String(l.postnr) : 'Sted ikke oplyst');
+  const stedTitle = by && region && by !== region ? `${by}, ${region}` : sted;
   const domaene = ext && l.source && l.source.domaene ? String(l.source.domaene) : '';
+  /* Kun det kilden har oplyst (D7-F1): null = Gul og Gratis oplyser ingen sælgertype, og så står
+     domænet alene — ingen "Privat", der var et gæt. */
+  const saelgerType = !ext ? null
+    : (l.saelgertype === 'forhandler' || (l.saelgertype === undefined && l.isDealer)) ? 'Forhandler'
+    : l.saelgertype === 'privat' ? 'Privat' : null;
   const kilde = ext
     ? (domaene || (l.source && l.source.navn) || 'ekstern kilde')
-    : (l.isDealer ? 'Forhandler' : 'Privat');
+    : (l.isDealer ? ((l.seller && l.seller.name) || 'Forhandler') : 'Privat sælger');
   return {
-    ext, titel, hk, ccm, sted, kilde,
+    ext, titel, hk, ccm, sted, stedTitle, kilde, domaene, saelgerType,
     aar: l.year == null ? null : l.year,
     km: l.km == null ? null : l.km,
     type: l.type ? typeLabel(l.type).split('/')[0] : '',   // "Classic/Veteran" -> "Classic": kortet er smalt
     kk: koerekortMaerkat(l),
+    ny: ext ? eksternErNy(l) : null,
+    mark: ext ? eksternSalgsmarkoerer(l) : { tekst: '', alle: [] },
   };
 }
 
-function rigtKortHTML(l, i){
-  const f = rigtKortFakta(l);
+function listingCardHTML(l, i){
+  const f = kortFakta(l);
   if (f.ext && !sikkerUrl(l.externalUrl)) return '';   // en annonce uden brugbar kilde-URL vises ikke
   const titel = escapeHTML(f.titel);
   const pris = f.ext ? eksternPrisTekst(l.price) : formatPrice(l.price);
   const fav = !f.ext && !isOwnListing(l);
   const erFav = fav && Store.isFavorite(l.id);
+  const kildenavn = f.ext ? ((l.source && l.source.navn) || f.kilde) : '';
 
+  /* Fabriksnye motorcykler hos forhandleren (kildens eget ord eller adressen). "Ny" står først i
+     linjen: det er også et juridisk vilkår (garanti frem for reklamationsret). */
+  const nyTitel = f.ny
+    ? `Annoncen ligger i ${kildenavn}s katalog over NYE motorcykler. Den er ikke brugt${f.saelgerType === 'Forhandler' ? ': du køber med garanti frem for reklamationsret, og kilometerstanden er derfor ikke oplyst' : ' — spørg sælgeren om garanti- og reklamationsvilkår'}.`
+    : '';
   const linje = [];
+  if (f.ny) linje.push(`<span class="rk-ny" title="${escapeHTML(nyTitel)}">Ny</span>`);
   linje.push(f.aar != null ? `<span>${escapeHTML(String(f.aar))}</span>` : '<span class="rk-mangler">Årgang ikke oplyst</span>');
-  linje.push(f.km != null ? `<span>${escapeHTML(formatKm(f.km))}</span>` : '<span class="rk-mangler">Km ikke oplyst</span>');
+  if (f.km != null) linje.push(`<span>${escapeHTML(formatKm(f.km))}</span>`);
+  else if (!f.ny) linje.push('<span class="rk-mangler">Km ikke oplyst</span>');
   if (f.type) linje.push(`<span>${escapeHTML(f.type)}</span>`);
 
   const kk = f.kk;
   const kkKlasse = kk.kode ? ` kk-${String(kk.kode).toLowerCase()}` : ' kk-ukendt';
+  const kkTekst = kk.kode === 'A' ? 'Kræver A' : kk.tekst;
   const chips = [
-    `<li class="rk-chip rk-kk${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kk.kode === 'A' ? 'A' : kk.tekst)}<span class="visually-hidden">. ${kk.kode === 'A' ? 'Kørekort A. ' : ''}${escapeHTML(kk.forklaring)}</span></li>`,
+    `<li class="rk-chip rk-kk${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${Icon.idCard}<span>${escapeHTML(kkTekst)}</span><span class="visually-hidden">. ${kk.kode === 'A' ? 'Kørekort A. ' : ''}${escapeHTML(kk.forklaring)}</span></li>`,
   ];
   if (f.ccm) chips.push(`<li class="rk-chip">${escapeHTML(formatCcm(f.ccm))}</li>`);
   if (f.hk) chips.push(`<li class="rk-chip">${escapeHTML(formatPower(f.hk))}</li>`);
   const mangler = [!f.ccm && 'ccm', !f.hk && 'hk'].filter(Boolean);
   if (mangler.length) chips.push(`<li class="rk-chip rk-chip-mangler">${escapeHTML(opremsDa(mangler))} ikke oplyst</li>`);
+  if (!f.ext && l.serviceHistorik === 'Fuld') chips.push(`<li class="rk-chip rk-chip-ok">${Icon.shieldCheck}<span>Fuld service</span></li>`);
+  if (f.mark.tekst) chips.push(`<li class="rk-chip rk-chip-note" title="${escapeHTML(f.mark.alle.join(' · '))}">${escapeHTML(f.mark.tekst)}</li>`);
 
   const altTekst = escapeHTML([l.brand, l.model].filter(Boolean).join(' '));
-  const badges = f.ext ? '' : `<div class="card-badges">
-        ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
-        ${l.isDealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : ''}
-      </div>`;
+  /* Mærkater på fotoet gælder kun egne annoncer (kilden har sit eget). Prismærkatet fik sin forklaring
+     med tal, køberen selv kan efterprøve — se prisSammenligning() i js/data.js. */
+  let badges = '';
+  if (!f.ext){
+    const mistaenkt = isSuspiciouslyCheap(l);
+    const prisBasis = mistaenkt ? prisSammenligning(l) : null;
+    const prisTitel = prisBasis
+      ? `Prisen er under 45 % af medianen for ${prisBasis.antal} andre ${l.brand} ${l.model} fra ${prisBasis.aarFra}-${prisBasis.aarTil} på Bikerbasen (median ${formatPrice(prisBasis.median)}). Bed om ekstra dokumentation, og betal aldrig forud.`
+      : '';
+    const dele = [
+      isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : '',
+      l.isDealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : '',
+      mistaenkt ? `<span class="badge badge-warning" title="${escapeHTML(prisTitel)}">${Icon.alertTriangle}Under markedspris</span>` : '',
+    ].filter(Boolean);
+    if (dele.length) badges = `<div class="card-badges">${dele.join('')}</div>`;
+  }
   const hjerte = fav
     ? `<button type="button" class="fav-btn ${erFav ? 'active' : ''}" aria-pressed="${erFav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`
     : '';
   const kildeTitel = f.ext
-    ? `Annoncen ligger hos ${escapeHTML((l.source && l.source.navn) || f.kilde)}${f.kilde && l.source && l.source.domaene ? ' (' + escapeHTML(f.kilde) + ')' : ''}. Bikerbasen viser den, men handlen sker hos kilden.`
+    ? `Annoncen ligger hos ${escapeHTML(kildenavn)}${f.domaene ? ' (' + escapeHTML(f.domaene) + ')' : ''}. Bikerbasen viser den, men handlen sker hos kilden.`
     : 'Annoncen ligger på Bikerbasen.';
+  /* Bunden: sted til venstre, sælgertype + kilde til højre. Sælgertypen ligger i eget span, som smalle
+     kort skjuler (container query) — domænet er det eneste, køberen selv kan slå op, og det vinder pladsen. */
+  const kildeIkon = f.ext ? Icon.externalLink : (l.isDealer ? Icon.store : Icon.user);
+  const kildeHTML = f.ext
+    ? `${f.saelgerType ? `<span class="rk-saelgertype">${f.saelgerType} · </span>` : ''}${escapeHTML(f.kilde)}`
+    : escapeHTML(f.kilde);
 
   return `
-  <article class="card card-rich${f.ext ? '' : ' rk-egen'}" data-listing-id="${l.id}"${f.ext ? ' data-external="1"' : ''}>
+  <article class="card card-rich${f.ext ? '' : ' rk-egen'}" data-listing-id="${l.id}"${f.ext ? ' data-external="1"' : ''}${l.type ? ` data-type="${escapeHTML(l.type)}"` : ''}>
     <div class="card-media">
       ${listingMediaHTML(l, altTekst, i === 0)}
       ${badges}
@@ -1087,73 +912,11 @@ function rigtKortHTML(l, i){
       <p class="rk-linje">${linje.join('')}</p>
       <ul class="rk-chips">${chips.join('')}</ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="${escapeHTML(f.sted)}">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
-        <span class="rk-kilde" title="${kildeTitel}">Kilde: ${escapeHTML(f.kilde)}</span>
+        <span class="rk-sted" title="${escapeHTML(f.stedTitle)}">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
+        <span class="rk-kilde" title="${kildeTitel}">${kildeIkon}<span>${kildeHTML}</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=${l.id}" class="card-link" aria-label="Se annonce: ${titel}, ${escapeHTML(pris)}${f.ext ? ' — hos ' + escapeHTML(f.kilde) : ''}"></a>
-  </article>`;
-}
-
-/* `opts.rich`: det rige kort (se rigtKortHTML). Uden opts er alt som før. */
-function listingCardHTML(l, i, opts){
-  if (opts && opts.rich) return rigtKortHTML(l, i);
-  if (l.isExternal) return externalCardHTML(l, i);
-  const fav = Store.isFavorite(l.id);
-  const brand = escapeHTML(l.brand), model = escapeHTML(l.model), city = escapeHTML(l.city);
-  /* Mærkatet skal kunne bakkes op med tal, køberen selv kan efterprøve.
-     Før stod der "markedsniveau for den type og årgang" — årgang indgik
-     slet ikke i udregningen, og "markedet" var medianen for en hel type,
-     fra 125 til 1800 cm³. Nu siger forklaringen præcis hvad der er
-     sammenlignet med og hvor mange. Se prisSammenligning() i js/data.js.
-     Grundlaget hentes kun for de kort, der faktisk får mærkatet. */
-  const suspicious = isSuspiciouslyCheap(l);
-  const prisBasis = suspicious ? prisSammenligning(l) : null;
-  // Rå mærke/model her — hele strengen escapes én gang nedenfor. Bruges de
-  // allerede escapede `brand`/`model`, bliver et "&" til "&amp;amp;" i tippet.
-  const prisTitel = prisBasis
-    ? `Prisen er under 45 % af medianen for ${prisBasis.antal} andre ${l.brand} ${l.model} fra ${prisBasis.aarFra}-${prisBasis.aarTil} på Bikerbasen (median ${formatPrice(prisBasis.median)}). Bed om ekstra dokumentation, og betal aldrig forud.`
-    : '';
-  return `
-  <article class="card" data-listing-id="${l.id}">
-    <div class="card-media">
-      ${listingMediaHTML(l, `${brand} ${model}`, i === 0)}
-      <div class="card-badges">
-        ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
-        ${l.isDealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : ''}
-        ${suspicious ? `<span class="badge badge-warning" title="${escapeHTML(prisTitel)}">${Icon.alertTriangle}Under markedspris</span>` : ''}
-      </div>
-      ${isOwnListing(l) ? '' : `<button type="button" class="fav-btn ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
-      ${(() => {
-        /* Samme udregning som på det indekserede kort og som i filteret —
-           koerekortMaerkat() er det ene sted, mærkatet bliver til. Kortet
-           her er en lille brik oven på fotoet, så den viser kun koden; kan
-           kategorien ikke afgøres, står der ingenting frem for en lang
-           sætning hen over billedet. Forklaringen følger med som titel. */
-        const k = koerekortMaerkat(l);
-        /* K17-P1-4: brikken sagde bare "A2" med forbeholdet i aria-label paa
-           en rolleloes span. Samme tekst som det indekserede kort nu, og
-           forbeholdet som rigtig tekst til skaermlaeseren. */
-        return k.kode ? `<span class="card-koerekort" title="${escapeHTML(k.forklaring)}">${escapeHTML(k.tekst)}<span class="visually-hidden">. ${escapeHTML(k.forklaring)}</span></span>` : '';
-      })()}
-      <button type="button" class="card-compare ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
-    </div>
-    <div class="card-body">
-      <div class="card-price">${formatPrice(l.price)}</div>
-      <h3 class="card-title">${brand} ${model}</h3>
-      <div class="card-meta">
-        <span>${Icon.calendar}${l.year}</span>
-        <span>${Icon.gauge}${formatKm(l.km)}</span>
-        <span>${Icon.engine}${formatCcm(l.ccm)}</span>
-      </div>
-      ${l.serviceHistorik === 'Fuld' ? `<div class="card-trust"><span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span></div>` : ''}
-      ${sellerLineHTML(l)}
-      <div class="card-footer">
-        <span>${Icon.mapPin}${city}${l.region ? ', ' + escapeHTML(l.region) : ''}</span>
-        <span>${timeAgoDa(l.createdAt)}</span>
-      </div>
-    </div>
-    <a href="annonce.html?id=${l.id}" class="card-link" aria-label="Se annonce: ${brand} ${model}, ${formatPrice(l.price)}"></a>
+    <a href="annonce.html?id=${l.id}" class="card-link" aria-label="Se annonce: ${titel}, ${escapeHTML(pris)}${f.ext ? ' — hos ' + escapeHTML(kildenavn) : ''}"></a>
   </article>`;
 }
 

@@ -71,7 +71,7 @@
   margin: var(--space-3) 0 var(--space-2); max-width: 34ch; color:#fff;
   text-shadow: 0 1px 14px rgba(0,0,0,.5);
 }
-.mk-hero-lav h1{ font-size: clamp(28px, 4.4vw, 48px); line-height:1.08; max-width:20ch; margin-top: var(--space-4); }
+.mk-hero-lav h1{ font-size: var(--h1-hero); line-height:1.08; max-width:20ch; margin-top: var(--space-4); }
 .mk-intro{ color:#ECE7DD; max-width: 58ch; font-size:16px; line-height:1.6; text-shadow: 0 1px 12px rgba(0,0,0,.5); }
 .mk-hero .brand-intro strong{ color:#fff; }
 .mk-hero .brand-intro{ color:#ECE7DD; }
@@ -80,9 +80,7 @@
 .mk-intro-mere > .brand-intro{ color:#ECE7DD; }
 
 /* Billedets sektioner er bredere end headeren (billede 9: kort fra x=43). */
-@media (min-width:1100px){
-  .mk-wide{ max-width: 1456px; padding-inline: var(--space-5); }
-}
+/* .mk-wide er et alias for .container (samme bredde som headeren). */
 
 /* ---------- Søgekort (over fotoets underkant) ---------- */
 .mk-soeg-wrap{ position:relative; z-index:3; margin-top: -56px; }
@@ -248,10 +246,13 @@
 .mk-cta-uden .mk-cta-body{ padding-bottom: var(--space-5); }
 
 /* ---------- Typefliser (genbruger .tile / .tiles-grid) ---------- */
+/* .tiles-grid har ikke længere sin egen display:grid (forsiden bruger en rækkeskubber), så mærkesidens fliser sætter gitteret selv. */
+.mk-tiles{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-3); }
+.mk-tiles .tile{ flex:none; width:auto; min-width:0; }
 @media (min-width:640px){
-  .mk-tiles{ grid-template-columns: repeat(auto-fit, minmax(150px, 220px)); }
+  .mk-tiles{ grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 }
-.mk-tiles .tile-label{ align-items:flex-end; background: linear-gradient(to top, rgba(10,8,6,.96) 0%, rgba(10,8,6,.8) 55%, rgba(10,8,6,0) 100%); }
+.mk-tiles .tile-label{ flex-direction:row; justify-content:space-between; align-items:flex-end; background: linear-gradient(to top, rgba(10,8,6,.96) 0%, rgba(10,8,6,.8) 55%, rgba(10,8,6,0) 100%); }
 .mk-tile-tekst{ display:flex; flex-direction:column; gap:1px; min-width:0; }
 .mk-tile-tekst > span:first-child{ font-size:15px; line-height:1.2; overflow-wrap:break-word; }
 .mk-tile-n{ font-family: var(--font-body); font-size:12.5px; font-weight:500; color: rgba(255,255,255,.92); }

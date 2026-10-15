@@ -44,7 +44,7 @@
   font-family: var(--font-display); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
   color: color-mix(in srgb, var(--color-primary) 30%, #fff 70%); margin:0 0 var(--space-2);
 }
-.fa-hero h1{ font-size: clamp(30px, 5.4vw, 56px); line-height:1.04; font-weight:700; margin: 0 0 var(--space-3); color:#fff; text-wrap:balance; text-shadow:0 2px 24px rgba(0,0,0,.45); }
+.fa-hero h1{ font-size: var(--h1-hero); line-height:1.04; font-weight:700; margin: 0 0 var(--space-3); color:#fff; text-wrap:balance; text-shadow:0 2px 24px rgba(0,0,0,.45); }
 .fa-hero-intro{ color:#F2EEE7; font-size: clamp(15px,1.6vw,18px); line-height:1.6; margin:0; max-width:62ch; text-shadow:0 1px 12px rgba(0,0,0,.5); }
 .fa-hero-intro strong{ color:#fff; }
 .fa-mere-intro{ margin-top: var(--space-3); max-width:62ch; }
@@ -151,6 +151,11 @@
 /* Populære typer */
 .fa-typer{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-3); grid-template-columns: repeat(2, minmax(0,1fr)); }
 @media (min-width:640px){ .fa-typer{ grid-template-columns: repeat(auto-fill, minmax(160px, 236px)); } }
+/* Fra 1100 px fylder typerækken hele containerbredden (så højrekanten flugter med headeren): 4 spalter, 5 når der er fem fliser eller flere. */
+@media (min-width:1100px){
+  .fa-typer{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .fa-typer:has(> li:nth-child(5)){ grid-template-columns: repeat(5, minmax(0,1fr)); }
+}
 .fa-typer a{ position:relative; display:block; border-radius: var(--radius-md); overflow:hidden; aspect-ratio: 16 / 9; background:#2a2622; color:#fff; border:1px solid var(--color-border); }
 .fa-typer img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; transition: transform .3s var(--ease-out); }
 .fa-typer a:hover img{ transform: scale(1.04); }
@@ -243,7 +248,6 @@
 @media (min-width:1100px) and (max-width:1559px){ .fa-side .fa-kortraekke > :nth-child(5){ display:none; } }
 @media (min-width:520px) and (max-width:1099px){ .fa-side .fa-kortraekke > :nth-child(5){ display:none; } }
 @media (min-width:1560px){
-  .fa-krop, .fa-hero-inner{ max-width:1400px; }
   .fa-udvalgte-gitter{ grid-template-columns: minmax(0,1fr) 290px; }
   .fa-side .fa-kortraekke{ grid-template-columns: repeat(5, minmax(0,1fr)); gap: 12px; }
   .fa-side .fa-kortraekke > :nth-child(5){ display:block; }

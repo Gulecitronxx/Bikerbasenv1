@@ -3,7 +3,6 @@
    annonce-*.html (scripts/build-listing-pages.js). Kun tokens fra styles.css;
    klasserne har præfikset .an-. Lyst tema er målet, mørkt følger af tokens. */
 
-main > .container{ max-width: 1440px; }
 
 /* ---------- Brødkrumme + handlinger ---------- */
 .an-crumbrow{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); flex-wrap:wrap; }
@@ -299,9 +298,8 @@ main > .container{ max-width: 1440px; }
   }
 }
 
-/* Lignende: lange titler klippes i stedet for at løbe ud af kortet. */
-.similar-strip .card, .similar-strip .card-body{ min-width:0; }
-.similar-strip .card-title, .similar-strip .card-price{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Lignende: kortet er det samme som overalt ellers; stripen må kun ikke lade det vokse ud af sin spalte. */
+.similar-strip .card{ min-width:0; }
 
 /* Egen sælgerboks: rolig metarække i stedet for store tal. */
 .an-seller-wrap .avatar{ width:56px; height:56px; }

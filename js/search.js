@@ -790,7 +790,7 @@ function rowMarkersHTML(markers){
    peger på vores egne annoncer med en fremmednøgle.
 
    Rækkefladen gik før til KILDEN. Den går nu til vores egen annonceside, af
-   samme grund som kortet (se blokken over externalCardHTML i
+   samme grund som kortet (se blokken over Listing card i
    js/components.js): den side findes, den er god, og den var uopnåelig for
    87 % af lageret. "Se hos <kilde>" stod en overgang som sit eget lille link
    i rækkens højre ende — det var stadig en genvej uden om vores egen side, og

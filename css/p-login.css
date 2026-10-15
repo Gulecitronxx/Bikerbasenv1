@@ -38,7 +38,7 @@ html[data-lgmode="register"] .lg-only-login{ display:none; }
 
 /* ---------- Kortet: to halvdele ---------- */
 .lg-card{
-  width:100%; max-width:1240px;
+  width:100%; max-width: calc(var(--site-w) - 2 * var(--gutter));
   display:grid; grid-template-columns:minmax(0,1fr);
   border-radius: var(--radius-lg); overflow:hidden;
   box-shadow: var(--shadow-lg);
@@ -133,8 +133,8 @@ html[data-lgmode="register"] .lg-only-login{ display:none; }
 /* ---------- Bundstrimmel ---------- */
 .lg-strip{ background: var(--color-surface); border-top:1px solid var(--color-border); position:relative; }
 .lg-strip-list{
-  list-style:none; margin:0 auto; max-width:1240px;
-  display:grid; grid-template-columns:minmax(0,1fr); padding: var(--space-3) var(--space-5);
+  list-style:none; margin:0 auto; max-width:var(--site-w);
+  display:grid; grid-template-columns:minmax(0,1fr); padding: var(--space-3) var(--gutter);
 }
 .lg-strip-list li{ display:flex; gap: var(--space-4); align-items:center; padding: var(--space-3) 0; }
 .lg-strip-list li + li{ border-top:1px solid var(--color-border); }
@@ -213,7 +213,7 @@ body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
 /* =====================================================================
    Runde 2 — fotoet er hovedpersonen (billede 6), tungere titler, mobilfoto
    ===================================================================== */
-.lg-head h1{ font-size: clamp(32px, 8vw, 48px); font-weight:700; letter-spacing:-.025em; line-height:1.05; }
+.lg-head h1{ font-size: var(--h1-hero); font-weight:700; letter-spacing:-.025em; line-height:1.05; }
 .lg-promo h2{ font-size: clamp(32px, 8vw, 44px); font-weight:700; line-height:1.05; letter-spacing:-.025em; }
 .lg-head p{ font-size:17px; }
 .lg-bi{ width:44px; height:44px; }
