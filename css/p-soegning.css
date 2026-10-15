@@ -1,0 +1,420 @@
+/* ============================================================================
+   p-soegning.css — søgeresultatsiden (billede 2 i Parallel Design Gauntlet)
+   ============================================================================
+
+   Linkes fra soegning.html EFTER css/styles.css og ejer kun den sides
+   layout. Alt nyt har prefikset .so- (hero, søgekort, chip-række, sidebar-
+   udseende). Det delte lag (styles.css, annoncekortet i js/components.js) er
+   urørt; de få steder hvor en eksisterende regel i styles.css skal tilsidesættes,
+   står selektoren med ID eller .srp foran, så rækkefølgen ikke afgør noget.
+
+   Tokens: --color-*, --space-*, --radius-*, --font-* fra styles.css. Ingen nye
+   farver. Lys tilstand er målet; mørk følger af tokens.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------ hero --
+   Fuldbredde-foto med h1 og søgekort i bunden (billede 2: kortet ligger i
+   bannerets nederste del). Heroen er mørk i begge temaer, som forsiden. */
+.so-hero{
+  position:relative; overflow:hidden; isolation:isolate;
+  background: var(--color-dark); color:#fff;
+  padding: var(--space-4) 0 var(--space-5);
+}
+.so-hero-media{ position:absolute; inset:0; z-index:-2; background: var(--color-dark); }
+.so-hero-photo{ width:100%; height:100%; object-fit:cover; object-position: 74% 58%; display:block; filter:saturate(1.12) contrast(1.04); }
+/* Scrim: mørkt bag teksten til venstre, blødt mod motorcyklen til højre, og
+   et bundlag så det hvide kort altid har ro omkring sig. */
+.so-hero::after{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--color-dark) 90%, transparent) 0,
+      color-mix(in srgb, var(--color-dark) 76%, transparent) 420px,
+      color-mix(in srgb, var(--color-dark) 58%, transparent) 720px,
+      color-mix(in srgb, var(--color-dark) 22%, transparent) 940px,
+      transparent 1160px),
+    linear-gradient(0deg, color-mix(in srgb, var(--color-dark) 45%, transparent) 0%, transparent 40%);
+}
+.so-hero-inner{ position:relative; }
+
+.so-hero .so-breadcrumb{ padding:0 0 var(--space-3); margin:0; font-size:13px; color:#E6E0D6; }
+.so-hero .so-breadcrumb a{ color:#F4EFE7; text-decoration:underline; text-underline-offset:3px; }
+.so-hero .so-breadcrumb span{ color:#E6E0D6; }
+.so-hero .so-breadcrumb svg{ color:#E6E0D6; }
+
+.so-hero .so-h1{ margin:0 0 var(--space-4); max-width:760px; font-family: var(--font-display); text-shadow: 0 2px 24px rgba(0,0,0,.45); }
+.so-h1-title{ display:block; font-size: clamp(30px, 4.6vw, 52px); line-height:1.04; font-weight:700; letter-spacing:-.015em; color:#fff; text-wrap:balance; }
+.so-h1-sub{ display:block; margin-top:6px; min-height:1.4em; font-size: clamp(16px, 1.7vw, 21px); line-height:1.35; font-weight:500; color:#F1ECE3; }
+
+/* ------------------------------------------------------------ søgekortet -- */
+.so-card{
+  display:grid; align-items:end; gap: var(--space-3) var(--space-4);
+  grid-template-columns: minmax(0,1fr);
+  padding: var(--space-4);
+  background: var(--color-surface); color: var(--color-fg);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  border:1px solid color-mix(in srgb, #fff 14%, transparent);
+}
+.so-field{ display:flex; flex-direction:column; gap:6px; min-width:0; margin:0; padding:0; border:0; }
+.so-field > label, .so-field > legend{
+  padding:0; font-size:14px; font-weight:600; line-height:1.2;
+  color: var(--color-fg); text-transform:none; letter-spacing:0;
+}
+.so-field > legend{ float:left; width:100%; margin-bottom:6px; }
+.so-field > legend + *{ clear:both; }
+.so-card .input{ height:48px; min-height:48px; font-size:15px; }
+.so-card select.input{ padding-right:38px; }
+
+.so-inputwrap{ position:relative; }
+.so-ico{ position:absolute; left:14px; top:50%; transform:translateY(-50%); width:20px; height:20px; color: var(--color-fg-muted); pointer-events:none; display:block; }
+.so-ico svg{ width:20px; height:20px; display:block; }
+/* NF-3 (V-006/V-007): søgefeltet bruger .input og får dermed tokenets kant
+   (≥3:1) og placeholderfarven (≥4,5:1). ID-reglen i styles.css (#filter-q,
+   kant --color-border) skal slås, derfor .so-card #filter-q. */
+.so-card #filter-q{
+  width:100%; height:48px; padding:0 44px 0 44px; font-size:15px;
+  border:1.5px solid var(--color-input-border); border-radius: var(--radius-sm);
+  background: var(--color-surface); color: var(--color-fg);
+}
+.so-card #filter-q::placeholder{ color: var(--color-fg-muted); opacity:1; text-overflow:ellipsis; }
+.so-card #filter-q:placeholder-shown{ padding-left:44px; padding-right:12px; }
+.so-card #filter-q:hover{ border-color: var(--color-fg-muted); }
+.so-card #filter-q:focus-visible{ border-color: var(--color-primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent); outline:none; }
+.so-clear{
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;
+  border:0; border-radius:50%; background:transparent; color: var(--color-fg-muted); cursor:pointer;
+}
+.so-clear[hidden]{ display:none; }
+.so-clear:hover{ background: var(--color-surface-2); color: var(--color-fg); }
+.so-clear svg{ width:16px; height:16px; }
+
+/* Kørekortsegmentet er forsidens .kk-seg (styles.css) — kun bredden styres her. */
+.so-f-kk .kk-seg{ min-width:0; }
+.so-f-kk .kk-seg label{ min-height:38px; padding:0 14px; }
+.so-submit{ min-height:52px; padding:0 28px; justify-content:center; gap:10px; font-size:16px; white-space:nowrap; }
+.so-submit svg{ width:20px; height:20px; flex:none; }
+
+@media (min-width:560px){
+  .so-card{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .so-f-q{ grid-column:1 / -1; }
+  .so-f-kk{ grid-column:1 / 2; }
+  .so-submit{ grid-column:2 / 3; }
+}
+@media (min-width:760px){
+  .so-card{ grid-template-columns: minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr); }
+  .so-f-q{ grid-column:auto; }
+  .so-f-kk{ grid-column:1 / 3; max-width:420px; }
+  .so-submit{ grid-column:3 / 4; }
+}
+@media (min-width:1100px){
+  .so-card{ grid-template-columns: minmax(0,1.55fr) minmax(0,1fr) minmax(0,1fr) auto auto; }
+  .so-f-kk{ grid-column:auto; max-width:none; }
+  .so-submit{ grid-column:auto; }
+  .so-hero{ padding: var(--space-5) 0 var(--space-5); }
+}
+@media (max-width:559px){
+  .so-card{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .so-f-q, .so-f-kk, .so-submit{ grid-column:1 / -1; }
+  .so-hero{ padding: var(--space-3) 0 var(--space-4); }
+  .so-hero .so-breadcrumb{ padding-bottom: var(--space-2); font-size:12.5px; }
+  .so-hero .so-h1{ margin-bottom: var(--space-3); }
+  .so-card{ padding: var(--space-3); gap: 10px; }
+  .so-submit{ width:100%; }
+  .so-f-kk .kk-seg label{ padding:0 6px; }
+}
+
+/* --------------------------------------------------------- filter-chips -- */
+.so-wrap{ position:relative; }
+.so-chiprow{
+  display:flex; align-items:center; justify-content:space-between; gap: var(--space-4);
+  min-height:52px; padding: var(--space-3) 0;
+}
+.so-chips-area{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; min-width:0; flex:1 1 auto; }
+.so-chips.active-filters{ margin:0; gap:8px; }
+.so-chips.active-filters:empty{ display:none; }
+.so-chips .active-filter-pill{
+  font-size:14px; padding:7px 8px 7px 14px; gap:8px;
+  border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+.so-clear-all{
+  background:none; border:0; padding:6px 4px; font:inherit; font-size:14px; font-weight:600;
+  color: var(--color-primary-hover); cursor:pointer; text-decoration:none; border-radius:6px;
+}
+:root[data-theme="dark"] .so-clear-all{ color: var(--color-primary); }
+.so-clear-all:hover{ text-decoration:underline; text-underline-offset:3px; }
+.so-clear-all[hidden], .so-chips-none[hidden]{ display:none; }
+.so-chips-none{ font-size:14px; color: var(--color-fg-muted); }
+.so-chiprow-actions{ display:flex; align-items:center; gap:8px; flex:none; }
+.so-chiprow-actions .btn{ white-space:nowrap; }
+@media (max-width:959px){
+  .so-chiprow{ flex-direction:column-reverse; align-items:stretch; gap:10px; padding-bottom: var(--space-2); }
+  .so-chiprow-actions{ display:grid; grid-template-columns:1fr auto; }
+  .so-chiprow-actions .mobile-filter-btn{ order:-1; justify-content:center; }
+}
+@media (max-width:620px){
+  .so-chips-area{ min-height:0; }
+  .so-chiprow{ min-height:0; }
+}
+
+/* ---------------------------------------------------------------- layout -- */
+@media (min-width:1280px){
+  .so-wrap{ max-width:1360px; }
+}
+.so-layout{ gap: var(--space-5); padding-top: var(--space-2); }
+@media (min-width:960px){
+  .so-layout{ grid-template-columns: 280px minmax(0,1fr); }
+  .so-layout > .filters-overlay{ align-self:stretch; }
+}
+@media (max-width:620px){ .so-layout{ padding-top:0; } }
+
+/* ------------------------------------------------------------ sidebaren -- */
+.so-layout .filters-panel{ padding: var(--space-4) var(--space-4) var(--space-2); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.so-layout .filters-head{ margin-bottom: var(--space-2); }
+.so-layout .filters-head h2{ font-size:22px; font-family: var(--font-display); letter-spacing:-.01em; }
+.so-layout #clear-filters{
+  min-height:0; padding:6px 2px; background:none; border:0; border-radius:6px;
+  font-size:14px; font-weight:600; color: var(--color-primary-hover);
+}
+:root[data-theme="dark"] .so-layout #clear-filters{ color: var(--color-primary); }
+.so-layout #clear-filters:hover{ text-decoration:underline; text-underline-offset:3px; background:none; }
+.so-layout .filter-group{ padding: 10px 0; }
+.so-layout .filter-group summary{ font-size:15px; font-weight:700; min-height:32px; }
+.so-layout .filter-body{ gap:8px; padding-top:10px; }
+
+/* NF-5: søgefeltet i mærkelisten bruger tokenets kant og placeholderfarve. */
+.so-layout #brand-search{
+  height:40px; min-height:40px; padding:0 12px; font-size:14px;
+  border:1.5px solid var(--color-input-border); border-radius: var(--radius-sm);
+  background: var(--color-surface); color: var(--color-fg);
+}
+.so-layout #brand-search::placeholder{ color: var(--color-fg-muted); opacity:1; }
+.so-layout #brand-search:focus-visible{ border-color: var(--color-primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent); }
+
+/* Mærke og model: to rullemenuer ved siden af hinanden. */
+.so-pair{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.so-pair-item{ min-width:0; }
+.so-layout .so-sel{ height:42px; min-height:42px; padding:0 24px 0 9px; font-size:13px; text-overflow:ellipsis; background-position: right 8px center; }
+.so-layout .so-sel:disabled{ opacity:1; color: var(--color-fg-muted); background-color: var(--color-surface-2); cursor:not-allowed; }
+.so-more-btn{
+  display:inline-flex; align-items:center; gap:6px; align-self:flex-start;
+  background:none; border:0; padding:6px 0; min-height:32px; font:inherit; font-size:13px; font-weight:600;
+  color: var(--color-primary-hover); cursor:pointer; text-align:left;
+}
+:root[data-theme="dark"] .so-more-btn{ color: var(--color-primary); }
+.so-more-btn:hover{ text-decoration:underline; text-underline-offset:3px; }
+.so-more-btn > span:first-child{ font-size:16px; line-height:1; width:12px; text-align:center; }
+.so-more[hidden]{ display:none; }
+.so-more{ display:flex; flex-direction:column; gap:8px; padding-top:4px; border-top:1px dashed var(--color-border); }
+.so-more .so-model-group{ padding:6px 0 0; border-bottom:0; }
+
+/* Type og Kørekort: afkrydsningsrækker i stedet for pille-chips (billedet).
+   Knapperne er stadig .chip (aria-pressed / role=radio) — kun udseendet er et
+   felt. Kassen tegnes med ::before; et valgt felt får flueben. */
+.so-checklist{ display:flex; flex-direction:column; gap:0; }
+.so-checklist .chip{
+  position:relative; display:flex; align-items:center; gap:10px; width:100%;
+  min-height:34px; padding:5px 2px; border:0; border-radius:6px; background:transparent;
+  color: var(--color-fg); font-size:14px; font-weight:500; text-align:left;
+}
+.so-checklist .chip:hover{ background: var(--color-surface-2); }
+.so-checklist .chip::before,
+.so-checklist .chip[aria-pressed]::before,
+.so-checklist .chip[role="radio"]::before{
+  content:""; display:block; flex:none; width:18px; height:18px; margin:0; opacity:1; vertical-align:baseline;
+  border:1.5px solid var(--color-input-border); border-radius:4px; background: var(--color-surface);
+}
+.so-checklist .chip.active{ background:transparent; border:0; color: var(--color-fg); }
+.so-checklist .chip.active::before,
+.so-checklist .chip[aria-pressed="true"]::before,
+.so-checklist .chip[role="radio"][aria-checked="true"]::before{
+  background-color: var(--color-primary); border-color: var(--color-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  background-size:14px 14px; background-position:center; background-repeat:no-repeat;
+}
+.so-checklist .chip:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:1px; }
+.so-checklist .facet-n{ margin-left:auto; font-size:13px; font-weight:500; min-width:3ch; }
+.so-checklist .chip.facet-empty:hover{ background:transparent; }
+.so-checklist-2{ display:grid; grid-template-columns:1fr 1fr; column-gap:12px; }
+.so-checklist-2 .chip{ min-width:0; }
+.so-checklist-2 .so-all{ grid-column:auto; }
+.so-kk-id{ font-weight:600; }
+/* "(lille mc)" osv. står kun for skærmlæsere og som title — som i billedet. */
+.so-kk-ord{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+
+/* Pris: skyderen først, hurtigknapper i 2x2 under den. */
+.so-range-ends{ display:flex; justify-content:space-between; font-size:12.5px; color: var(--color-fg-muted); margin-bottom:-2px; }
+.so-quick.chip-group, .so-layout #filter-price-quick{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.so-quick .chip{
+  min-height:38px; padding:6px 4px; border-radius: var(--radius-sm); font-size:12.5px; font-weight:500;
+  justify-content:center; text-align:center; white-space:nowrap;
+  border:1.5px solid var(--color-border); color: var(--color-fg);
+}
+.so-quick .chip:hover{ border-color: var(--color-fg-muted); }
+.so-quick .chip.active{ background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.so-quick .facet-n{ display:none; }
+.so-quick .chip::before, .so-quick .chip[role="radio"]::before{ display:none; content:none; }
+.so-layout .range-row .input{ height:40px; min-height:40px; padding:0 10px; }
+
+/* ----------------------------------------------------- resultathovedet -- */
+.so-toolbar{ align-items:center; margin-bottom: var(--space-3); gap: var(--space-4); }
+.so-toolbar .results-count{ font-family: var(--font-display); font-size:22px; line-height:1.2; font-weight:700; letter-spacing:-.01em; color: var(--color-fg); }
+.so-toolbar .results-count span{ font-family: var(--font-body); font-size:inherit; font-weight:inherit; color: var(--color-fg); }
+.so-toolbar .results-count .results-side{ font-size:14px; font-weight:500; color: var(--color-fg-muted); }
+.so-results .sortering-note{ margin:0 0 var(--space-3); }
+.so-toolbar .toolbar-actions{ gap: var(--space-3); }
+.so-toolbar .sort-felt{
+  gap:0; padding:0 0 0 14px; border:1.5px solid var(--color-input-border); border-radius: var(--radius-sm);
+  background: var(--color-surface); align-items:center;
+}
+.so-toolbar .sort-felt > label{ font-size:14px; font-weight:500; color: var(--color-fg); }
+.so-toolbar .sort-felt .sortering-info{ order:3; }
+.so-toolbar .sort-felt select.input{
+  border:0; background-color:transparent; min-height:40px; height:40px; width:auto; min-width:150px;
+  padding:0 34px 0 10px; font-size:15px; font-weight:600; border-radius: var(--radius-sm); background-position: right 10px center;
+}
+.so-toolbar .sort-felt:focus-within{ border-color: var(--color-primary); }
+.so-toolbar .sort-felt select.input:focus-visible{ outline:none; }
+.so-toolbar .view-toggle{ border:1.5px solid var(--color-input-border); border-radius: var(--radius-sm); overflow:hidden; }
+.so-toolbar .view-toggle button{
+  display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:0 14px;
+  font-size:14px; font-weight:600; color: var(--color-fg);
+}
+.so-toolbar .view-toggle button.active{ background: var(--color-primary); color: var(--color-on-primary); }
+.so-toolbar .view-toggle button:focus-visible{ outline-offset:-3px; }
+.so-toolbar .view-toggle #view-swipe .vt-label{ display:none; }
+@media (max-width:620px){
+  .so-toolbar{ margin-bottom: var(--space-2); }
+  .so-toolbar .results-count{ font-size:18px; }
+  .so-toolbar .sort-felt{ padding-left:10px; }
+  .so-toolbar .sort-felt select.input{ min-width:0; }
+  .so-toolbar .view-toggle .vt-label{ display:none; }
+  .so-toolbar .view-toggle button{ padding:0 12px; min-width:44px; min-height:44px; justify-content:center; }
+}
+
+/* Uden sidebar (under 960) og med smal resultatspalte (under 1100) får tallet
+   og kildelinjen hele bredden, og sortering/visning står på rækken under. */
+@media (min-width:621px) and (max-width:1099px){
+  .so-toolbar{ flex-wrap:wrap; }
+  .so-toolbar .results-headline{ flex:1 1 100%; }
+  .so-toolbar .toolbar-actions{ flex:1 1 100%; justify-content:space-between; }
+}
+
+/* Kildelinjerne under tallet (V-025): én rolig linje, ikke fire. */
+.so-toolbar .results-mix{ font-size:13px; }
+
+/* ---------------------------------------------------------- resultatgitter --
+   4 spalter fra 1280 px, 3 fra 1100 (kortet må ikke blive smallere end ~220 px),
+   2 med sidebar mellem 960 og 1100, 3 uden sidebar fra 760, 2 fra 560, ellers 1.
+   #results-grid og :not(.list-view) slår styles.css' egne knækpunkter
+   (inkl. :has(> .card-external)-reglen); listevisning er urørt. */
+#results-grid:not(.list-view){ grid-template-columns: repeat(1, minmax(0,1fr)); gap: var(--space-4); }
+@media (min-width:560px){ #results-grid:not(.list-view){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:760px){ #results-grid:not(.list-view){ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (min-width:960px){ #results-grid:not(.list-view){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:1100px){ #results-grid:not(.list-view){ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (min-width:1280px){ #results-grid:not(.list-view){ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+#results-grid:not(.list-view) .card-external,
+#results-grid:not(.list-view) .card{ min-width:0; }
+@media (min-width:560px){ .srp #results-grid:not(.list-view) .card-media{ aspect-ratio: 4 / 3; } }
+.so-results{ min-width:0; }
+.so-results{ scroll-margin-top: calc(var(--header-h) + 12px); }
+
+
+/* ======================= Runde 2 (Critic F1–F5, billedet tættere på) ======= */
+
+/* Ikoner i Type- og Pris-felterne (billedet) */
+.so-iconselect .so-ico{ z-index:1; }
+.so-iconselect select.input{ padding-left:44px; }
+
+/* Ingen tom "Ingen filtre valgt"-linje (billedet har ingen); rækken beholder højden. */
+.so-chips-none{ display:none !important; }
+
+/* Type-rækker: kasse + cykelikon + navn + antal (billedet) */
+.so-ti{ flex:none; width:20px; height:20px; display:inline-flex; color: var(--color-fg-muted); }
+.so-ti svg{ width:20px; height:20px; }
+.so-checklist .chip.active .so-ti{ color: var(--color-primary-hover); }
+:root[data-theme="dark"] .so-checklist .chip.active .so-ti{ color: var(--color-primary); }
+
+/* Kørekort er radio: runde felter med prik — ærligt, ikke afkrydsning */
+#filter-koerekort .chip::before,
+#filter-koerekort .chip[role="radio"]::before{ border-radius:50%; }
+#filter-koerekort .chip.active::before,
+#filter-koerekort .chip[role="radio"][aria-checked="true"]::before{
+  background-image:none; background-color: var(--color-primary); border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 3.5px var(--color-surface);
+}
+
+/* "Flere mærker"-hint */
+.so-more-hint{ font-size:12.5px; line-height:1.4; color: var(--color-fg-muted); margin:0; }
+.so-more-hint[hidden]{ display:none; }
+
+/* Søg-knap: kort tekst kun på mobil */
+.so-submit-short{ display:none; }
+.so-card-more{ display:none; }
+
+/* ---------------------------------------------------- mobil (< 560 px) --
+   F4: kompakt hero. Søgefelt + "Søg" på én linje; Type, Pris og Kørekort ligger
+   bag "Flere valg" (de er stadig de samme filtre som i bundarket). */
+@media (max-width:559px){
+  .so-card{ grid-template-columns: repeat(12, minmax(0,1fr)); gap:10px 8px; }
+  .so-f-q{ grid-column: 1 / 10; }
+  .so-submit{ grid-column: 10 / 13; padding:0; min-height:48px; align-self:end; }
+  .so-submit-long{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  .so-submit-short{ display:inline; }
+  .so-f-q > label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  .so-card-more{
+    grid-column:1 / -1; grid-row:2; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    background:none; border:0; padding:4px 0 0; min-height:32px; font:inherit; font-size:14px; font-weight:600;
+    color: var(--color-primary-hover); cursor:pointer;
+  }
+  :root[data-theme="dark"] .so-card-more{ color: var(--color-primary); }
+  .so-card-more svg{ width:18px; height:18px; transition: transform .2s var(--ease-out); }
+  .so-card.is-open .so-card-more svg{ transform: rotate(180deg); }
+  .so-f-type, .so-f-price{ grid-column: span 6; grid-row:3; }
+  .so-f-kk{ grid-column:1 / -1; grid-row:4; }
+  .so-card:not(.is-open) .so-f-type,
+  .so-card:not(.is-open) .so-f-price,
+  .so-card:not(.is-open) .so-f-kk{ display:none; }
+  .so-hero .so-breadcrumb{ display:none; }
+  .so-hero{ padding: var(--space-4) 0 var(--space-3); }
+  .so-hero .so-h1{ margin-bottom:10px; }
+  .so-h1-title{ font-size:27px; }
+  .so-h1-sub{ font-size:16px; margin-top:4px; }
+  .so-card{ padding:10px; }
+  .so-chiprow{ padding-top:10px; padding-bottom:6px; }
+  /* Sorteringsforklaringen står i (i)-knappen; linjen over kortene koster 40 px på telefon. */
+  .so-results .sortering-note{ display:none; }
+  /* F2: kraftigere scrim bag teksten på smal skærm */
+  .so-hero::after{
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-dark) 86%, transparent) 0%,
+      color-mix(in srgb, var(--color-dark) 80%, transparent) 100%);
+  }
+  .so-h1-sub{ color:#fff; }
+}
+@media (min-width:560px){ .so-card-more{ display:none !important; } }
+
+/* F1: ingen input/select under 16 px på mobil (iOS zoomer ved fokus) */
+@media (max-width:767px){
+  body.srp .so-card .input,
+  body.srp .so-card select.input,
+  body.srp .so-card #filter-q,
+  body.srp .so-layout .so-sel,
+  body.srp .so-layout .input,
+  body.srp .so-layout #brand-search,
+  body.srp .so-layout .range-row .input,
+  body.srp .so-toolbar .sort-felt select.input,
+  body.srp #filter-age{ font-size:16px; }
+}
+
+/* F3: smalle skærme — sortering og visning på hver sin linje, kildelinjen må ombryde */
+@media (max-width:380px){
+  body.srp .results-toolbar .sort-felt{ grid-area: 2 / 1 / 3 / 3; }
+  body.srp .results-toolbar .view-toggle{ grid-area: 3 / 1 / 4 / 3; justify-self:stretch; }
+  body.srp .results-toolbar .view-toggle button{ flex:1 1 0; }
+  body.srp .results-headline{ min-height:44px; }
+  body.srp .results-mix{ white-space:normal; flex-wrap:wrap; overflow:visible; }
+  body.srp .results-mix .mix-tekst{ white-space:normal; overflow:visible; text-overflow:clip; }
+  body.srp .results-mix .mix-ord{ position:static; width:auto; height:auto; overflow:visible; clip:auto; }
+}

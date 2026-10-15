@@ -30,7 +30,7 @@
 <meta name="twitter:title" content="Motorcykler til salg — nye og brugte | Bikerbasen">
 <meta name="twitter:description" content="Motorcykler til salg i Danmark — nye og brugte, samlet fra danske forhandlere og markedspladser. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -99,9 +99,9 @@ try{
    samme øjeblik indholdet lander, så et forkert tal koster kun forskellen.
 
    Efter: CLS 0,014, og det der er tilbage er headerens hydrering. */
-#filter-koerekort:empty{min-height:120px}    /* 3 chips à 36px + 2 mellemrum */
-#filter-types:empty{min-height:246px}        /* 8 typechips over 6 raekker   */
-#filter-price-quick:empty{min-height:204px}  /* 5 prisintervaller à 36px     */
+#filter-koerekort:empty{min-height:68px}     /* 2 raekker à 34px (Alle/A1, A2/A) */
+#filter-types:empty{min-height:306px}        /* 9 raekker à 34px (Alle + 8 typer) */
+#filter-price-quick:empty{min-height:84px}   /* 4 prisintervaller i 2x2 à 38px + 8px */
 /* Sammensaetningslinjen ("51 paa Bikerbasen · 332 indekseret hos MC Syd")
    staar hidden ved foerste maling — vi ved endnu ikke hvor annoncerne kommer
    fra. Da den blev vist, voksede vaerktoejslinjen 22px og skubbede hele
@@ -159,10 +159,7 @@ try{
   /* En tom pillebeholder skal ikke koste en margen. */
   .srp .active-filters:empty{display:none}
   .srp .breadcrumb{padding-top:8px;font-size:12.5px}
-  .srp .search-heading{font-size:20px;margin-bottom:8px}
   .srp .search-layout{padding-top:4px}
-  .srp .srp-search{margin-bottom:12px}
-  .srp #filter-q{height:48px}
   /* Raekkeafstanden i vaerktoejslinjen: 10 -> 8. */
   .srp .results-toolbar{row-gap:8px;margin-bottom:10px}
   /* Kildelinjen passer paa én linje paa 390px med fire pixels til overs.
@@ -170,9 +167,6 @@ try{
      det koster 19px over den foerste pris. Maalt. */
   .srp .results-mix{margin-top:2px;line-height:1.35;column-gap:6px}
   .srp .mix-tail{gap:4px}
-  /* Sorteringen er nu et par (etiket + vaelger) og skal fylde raekken. */
-  .srp .srp-bar{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-bottom:12px}
-  .srp .srp-bar .srp-search{margin:0}
   .srp .results-toolbar{display:grid;grid-template-columns:1fr auto;align-items:center}
   .srp .results-headline{grid-area:1 / 1 / 2 / 3}
   .srp .sort-felt{grid-area:2 / 1;display:flex;align-items:center;gap:8px;min-width:0}
@@ -203,7 +197,8 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=bcc85a61">
+<link rel="stylesheet" href="css/styles.css?v=97c9892b">
+<link rel="stylesheet" href="css/p-soegning.css?v=97c9892b">
 
 
 
@@ -299,21 +294,92 @@ try{
 </div>
 
 <main id="main-content">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Brødkrumme">
-      <a href="index.html">Forside</a><span id="bc-sep-1">/</span><span id="bc-current">Søgeresultater</span>
-    </nav>
+  <!-- Hero: foto + overskrift + søgekort (billede 2). Søgekortets felter er
+       KUN en anden indgang til de samme filtre som sidebaren: søgefeltet er
+       stadig #filter-q, og type, pris og kørekort spejles til/fra `state`
+       (js/search.js, reflectStateToUI) — de har ingen egen logik. H1'en er
+       stadig den dynamiske (soegeoverskrift), nu med billedets "Find din
+       næste motorcykel" foran. -->
+  <section class="so-hero">
+    <div class="so-hero-media" aria-hidden="true">
+      <img class="so-hero-photo" src="img/hero-1600.webp"
+           srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
+           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="low" decoding="async">
+    </div>
+    <div class="container so-hero-inner">
+      <nav class="breadcrumb so-breadcrumb" aria-label="Brødkrumme">
+        <a href="index.html">Forside</a><span id="bc-sep-1">/</span><span id="bc-current">Søgeresultater</span>
+      </nav>
+      <!-- H1 skal stå før filterpanelets H2 i DOM'en (skærmlæser: sidens
+           første overskrift skal sige hvad siden handler om). Runde 8
+           (D8-S1): "Brugte" er droppet — ≈172 annoncer er fabriksnye. -->
+      <h1 class="search-heading so-h1"><span class="so-h1-title">Find din næste motorcykel</span><span class="visually-hidden"> — </span><span class="so-h1-sub"><span id="so-h1-n"></span><span id="so-h1-text">Motorcykler til salg i Danmark</span></span></h1>
+
+      <form class="so-card" id="srp-search" role="search" aria-label="Søg motorcykler" novalidate>
+        <div class="so-field so-f-q">
+          <label for="filter-q">Mærke eller model</label>
+          <div class="so-inputwrap">
+            <span class="so-ico" id="srp-search-icon" aria-hidden="true"></span>
+            <input type="search" id="filter-q" class="input" placeholder="Mærke eller model" autocomplete="off" enterkeyhint="search">
+            <button type="button" class="so-clear" id="filter-q-clear" aria-label="Ryd søgning" hidden></button>
+          </div>
+        </div>
+        <div class="so-field so-f-type">
+          <label for="so-type">Type</label>
+          <div class="so-inputwrap so-iconselect"><span class="so-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="16" r="3.5"/><circle cx="18.5" cy="16" r="3.5"/><path d="M5.5 16 9 8h5l4.5 8M9 8 7.5 5.5H5M12.5 12h4"/></svg></span>
+          <select class="input" id="so-type"><option value="">Alle typer</option></select></div>
+        </div>
+        <div class="so-field so-f-price">
+          <label for="so-price">Maks. pris</label>
+          <div class="so-inputwrap so-iconselect"><span class="so-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>
+          <select class="input" id="so-price">
+            <option value="">Alle priser</option>
+            <option value="30000">Op til 30.000 kr.</option>
+            <option value="60000">Op til 60.000 kr.</option>
+            <option value="100000">Op til 100.000 kr.</option>
+            <option value="200000">Op til 200.000 kr.</option>
+          </select></div>
+        </div>
+        <fieldset class="so-field so-f-kk">
+          <legend>Kørekort</legend>
+          <div class="kk-seg">
+            <input type="radio" name="so-koerekort" id="so-kk-alle" value="" checked>
+            <label for="so-kk-alle">Alle</label>
+            <input type="radio" name="so-koerekort" id="so-kk-A1" value="A1">
+            <label for="so-kk-A1">A1</label>
+            <input type="radio" name="so-koerekort" id="so-kk-A2" value="A2">
+            <label for="so-kk-A2">A2</label>
+            <input type="radio" name="so-koerekort" id="so-kk-A" value="A">
+            <label for="so-kk-A">A</label>
+          </div>
+        </fieldset>
+        <button type="button" class="so-card-more" id="so-card-more" aria-expanded="false">Flere valg: type, pris og kørekort<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button type="submit" class="btn btn-primary btn-lg so-submit"><span class="so-submit-long">Søg motorcykler</span><span class="so-submit-short" aria-hidden="true">Søg</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Aktive filtre som fjernbare piller + "Ryd alle filtre". Rækken har fast
+       højde, så den første pille ikke skubber sidebar og resultater ned. -->
+  <div class="container so-wrap">
+    <div class="so-chiprow" id="so-chiprow">
+      <div class="so-chips-area">
+        <div class="active-filters so-chips" id="active-filters" aria-label="Aktive filtre"></div>
+        <button type="button" class="so-clear-all" id="so-clear-all" hidden>Ryd alle filtre</button>
+        <span class="so-chips-none" id="so-chips-none">Ingen filtre valgt</span>
+      </div>
+      <div class="so-chiprow-actions">
+        <!-- Runde 9 (D9-S3): klokken alene var et ikon uden etiket for sitets
+             eneste agent-funktion. Paa mobil vises den korte etiket "Gem";
+             den fulde er stadig navnet for skaermlaesere. -->
+        <button type="button" class="btn btn-outline btn-sm" id="save-search-btn"><span id="save-search-icon"></span><span id="save-search-label">Gem søgning</span><span id="save-search-kort" aria-hidden="true">Gem</span></button>
+        <button type="button" class="btn btn-primary mobile-filter-btn" id="open-filters-btn" aria-expanded="false" aria-controls="filters-panel"><span id="filter-icon-mount"></span>Filtre<span class="filter-badge" id="filter-badge" hidden>0</span></button>
+      </div>
+    </div>
   </div>
 
-  <div class="container">
-    <!-- H1 skal stå før filterpanelets H2 i DOM'en. Lå den nede i
-         resultatkolonnen, mødte en skærmlæser "Filtre" som sidens første
-         overskrift, før den overhovedet fik at vide hvad siden handler om. -->
-    <!-- Runde 8 (D8-S1): ≈172 af lagerets annoncer er FABRIKSNYE (chip "Ny" paa
-         kortene lige under). "Brugte" i h1/title var D7-M1's fejl paa sitets
-         vigtigste side. -->
-    <h1 class="search-heading">Motorcykler til salg i Danmark</h1>
-    <div class="search-layout">
+  <div class="container so-wrap">
+    <div class="search-layout so-layout">
       <div class="filters-overlay" id="filters-overlay">
         <div class="filters-scrim" data-close-filters></div>
         <!-- <div>, ikke <aside>: axe (kørt runde 4) fangede at role="dialog"
@@ -329,88 +395,65 @@ try{
           <div class="filters-head">
             <h2>Filtre</h2>
             <div style="display:flex; gap:8px; align-items:center;">
-              <button type="button" class="btn btn-ghost btn-sm" id="clear-filters">Nulstil</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="clear-filters">Ryd alle</button>
               <button type="button" class="icon-btn filters-close" data-close-filters aria-label="Luk filtre"></button>
             </div>
           </div>
 
           <div class="filter-body-scroll">
-            <!-- Kørekort står ØVERST, og det er ikke en smagssag. Det er det
-                 ene spørgsmål en bilside ikke kan besvare, og det første en
-                 køber under 24 stiller. Lå det som nummer to, scrollede
-                 halvdelen forbi det på en telefon. -->
-            <!-- Runde 7 (D7-S3): Maerke foerst — Bilbasens 2. felt, og det filter,
-                 koeberen oftest roerer. Listen er sorteret efter antal (js/search.js)
-                 og folder efter 6, saa gruppen er ≈300 px; foer stod Maerke ved
-                 1 105 px i et panel paa 748 — usynlig uden indre rul. -->
-            <details class="filter-group" open>
-              <summary>Mærke<span class="chev"></span></summary>
-              <div class="filter-body" id="filter-brands"></div>
-            </details>
-
-            <details class="filter-group" id="model-group" open hidden>
-              <summary>Model<span class="chev"></span></summary>
-              <div class="filter-body" id="filter-models"></div>
-            </details>
-
-            <details class="filter-group" open>
-              <summary>Kørekort<span class="chev"></span></summary>
+            <!-- Rækkefølgen følger billede 2: Mærke og model, Type, Pris,
+                 Årgang, Kilometer, Kørekort, Region, Sælgertype — derefter de
+                 filtre billedet ikke har (ccm, hk, stand …). Hver gruppe er
+                 foldbar. Kørekort er stadig det ene spørgsmål en bilside ikke
+                 kan besvare; det står åbent i sidebaren og i søgekortet. -->
+            <details class="filter-group" id="grp-brand" open>
+              <summary>Mærke og model<span class="chev"></span></summary>
               <div class="filter-body">
-                <!-- Kun ÉT kørekort ad gangen (state.koerekort er ét felt, ikke
-                     en liste) — sagt højt her, fordi runde 3's kritiker fandt
-                     denne gruppe og Pris-gruppen visuelt identiske med
-                     Type-gruppen, som ER flervalg, og et klik på nummer to
-                     tavst annullerede det første. role="radiogroup" nedenfor
-                     giver skærmlæseren det samme svar. -->
-                <!-- Runde 5 (D5-S5): de to hints fyldte ≈190 px øverst i sidebaren på
-                     desktop, så det andet filter (Type) først stod ved ≈672 px — under
-                     folden. Teksten er rigtig og ærlig, men den kommer på det forkerte
-                     tidspunkt. Den korte regel står som én linje; forklaringen ligger
-                     ét klik væk i <details> — stadig i DOM'en for skærmlæser og SEO. -->
-                <p class="field-hint">Vælg én kategori — vejledende, ud fra effekt.</p>
-                <div class="chip-group" id="filter-koerekort" role="radiogroup" aria-label="Kørekort — vælg én kategori"></div>
-                <details class="field-hint-fold">
-                  <summary>Hvorfor er A hele lageret?</summary>
-                  <p class="field-hint">Tallet ved <b>A</b> er hele lageret: A har ingen effektgrænse, så den dækker også de annoncer, hvor effekten ikke er oplyst. Det er derfor A1 og A2 kan være små tal, uden at der mangler motorcykler. Tjek altid registreringsattesten — A2 kræver også maks. 0,2 kW/kg, og nogle mc'er sælges i begrænset udgave. Kun ét kørekort ad gangen: det seneste klik erstatter det forrige; klik den valgte igen for at fjerne den.</p>
-                </details>
+                <!-- To rullemenuer som i billedet. Mærke vælger ét mærke, Model
+                     de modeller af det mærke, der findes til salg. Vil man have
+                     flere, folder "Tilføj flere" den fulde liste (afkrydsning)
+                     ud — samme state.brands/state.models, så intet går tabt. -->
+                <div class="so-pair">
+                  <div class="so-pair-item"><label class="visually-hidden" for="so-brand">Mærke</label>
+                    <select class="input so-sel" id="so-brand"><option value="">Alle mærker</option></select></div>
+                  <div class="so-pair-item"><label class="visually-hidden" for="so-model">Model</label>
+                    <select class="input so-sel" id="so-model" disabled><option value="">Alle modeller</option></select></div>
+                </div>
+                <button type="button" class="so-more-btn" id="so-more-btn" aria-expanded="false" aria-controls="so-more"><span aria-hidden="true">+</span> <span id="so-more-label">Tilføj flere mærker eller modeller</span></button>
+                <div class="so-more" id="so-more" hidden>
+                  <p class="so-more-hint" id="so-more-hint" hidden>Andre mærker er nedtonet, fordi en valgt model hører til ét mærke. Vælg "Alle modeller" for at tilføje flere mærker.</p>
+                  <div id="filter-brands"></div>
+                  <details class="filter-group so-model-group" id="model-group" open hidden>
+                    <summary>Model<span class="chev"></span></summary>
+                    <div class="filter-body" id="filter-models"></div>
+                  </details>
+                </div>
               </div>
             </details>
 
-            <!-- Runde 6 (D6-S7): Pris staar FOER Type — det filter, koeberen oftest
-                 roerer efter maerke; Type er syv chips i to spalter og kan staa
-                 under folden paa desktop. -->
-            <!-- Pris står åben og med færdige intervaller øverst. "En A2'er
-                 til under 60.000" skal kunne klikkes, ikke tastes: før
-                 krævede det at folde gruppen ud og enten trække i en skyder
-                 eller skrive et tal — tre-fire handlinger for det mest
-                 almindelige krav en køber har. -->
+            <details class="filter-group" open>
+              <summary>Type<span class="chev"></span></summary>
+              <div class="filter-body">
+                <div class="chip-group so-checklist" id="filter-types" role="group" aria-label="Type — vælg én eller flere"></div>
+              </div>
+            </details>
+
+            <!-- Pris: skyder øverst, hurtigknapper under (billedet). Talfelterne
+                 beholdes til præcis indtastning. Intervallerne er gensidigt
+                 udelukkende (state.priceMin/Max er ÉT interval) — det står som
+                 skjult hjælpetekst til skærmlæsere, ikke som en linje over knapperne. -->
             <details class="filter-group" open>
               <summary>Pris (DKK)<span class="chev"></span></summary>
               <div class="filter-body">
-                <!-- Samme fund som Kørekort ovenfor, målt konkret af runde 3's
-                     kritiker: klik "Under 30.000", klik "30–60.000" — de 7
-                     billigste forsvandt uden et ord, fordi båndene er
-                     gensidigt udelukkende (state.priceMin/Max er ÉT interval),
-                     men så ud som Type-gruppens fravalgs-chips. -->
-                <p class="field-hint">Ét interval ad gangen — klik det valgte igen for at fjerne det.</p>
-                <div class="chip-group" id="filter-price-quick" role="radiogroup" aria-label="Prisinterval — vælg ét"></div>
+                <div class="so-range-ends" aria-hidden="true"><span>0 kr.</span><span>300.000+ kr.</span></div>
                 <div class="dual-range" id="range-price" data-floor="0" data-ceil="300000" data-step="1000">
                   <span class="dual-range-rail"></span>
                   <span class="dual-range-fill" data-fill></span>
                   <input type="range" class="dr-thumb dr-min" min="0" max="300000" step="1000" value="0" aria-label="Laveste pris">
                   <input type="range" class="dr-thumb dr-max" min="0" max="300000" step="1000" value="300000" aria-label="Højeste pris">
                 </div>
-                <!-- ETIKETTER, IKKE PLADSHOLDERE. Felterne havde kun
-                     placeholder="Min."/"Maks.". En pladsholder er ikke et navn:
-                     den forsvinder i samme sekund brugeren taster det første
-                     ciffer, og så står der to identiske tomme kasser uden at
-                     nogen kan se hvilken der er hvilken. (Axe og Lighthouse
-                     accepterer en pladsholder som tilgængeligt navn — derfor
-                     stod siden på 100 uden at have et rigtigt navn ét eneste
-                     sted. De 100 var altså ikke løgn, men de var heller ikke
-                     fortjent.) Etiketten siger BÅDE feltets ende og dets enhed,
-                     så navnet også giver mening læst alene af en skærmlæser,
-                     der ikke kan se gruppens overskrift. -->
+                <p class="visually-hidden">Ét interval ad gangen — vælg det valgte igen for at fjerne det.</p>
+                <div class="chip-group so-quick" id="filter-price-quick" role="radiogroup" aria-label="Prisinterval — vælg ét"></div>
                 <div class="range-row">
                   <div class="range-felt">
                     <label for="filter-price-min">Pris fra</label>
@@ -422,13 +465,6 @@ try{
                     <input type="number" class="input" id="filter-price-max" placeholder="Ingen grænse" inputmode="numeric">
                   </div>
                 </div>
-              </div>
-            </details>
-
-            <details class="filter-group" open>
-              <summary>Type<span class="chev"></span></summary>
-              <div class="filter-body">
-                <div class="chip-group" id="filter-types" role="group" aria-label="Type — vælg én eller flere"></div>
               </div>
             </details>
 
@@ -456,12 +492,40 @@ try{
             </details>
 
             <details class="filter-group">
-              <summary>Kilometertal<span class="chev"></span></summary>
+              <summary>Kilometer<span class="chev"></span></summary>
               <div class="filter-body">
                 <div class="range-felt">
                   <label for="filter-km-max">Kilometer højst</label>
                   <input type="number" class="input" id="filter-km-max" placeholder="fx 30000" inputmode="numeric">
                 </div>
+              </div>
+            </details>
+
+            <details class="filter-group" open>
+              <summary>Kørekort<span class="chev"></span></summary>
+              <div class="filter-body">
+                <!-- Kun ÉT kørekort ad gangen (state.koerekort er ét felt) —
+                     derfor role="radiogroup", selv om billedet tegner dem som
+                     afkrydsningsfelter: et klik på nummer to erstatter det
+                     første, og et klik på det valgte rydder det. "Alle" er
+                     "intet kørekortfilter". -->
+                <div class="chip-group so-checklist so-checklist-2" id="filter-koerekort" role="radiogroup" aria-label="Kørekort — vælg én kategori"></div>
+                <details class="field-hint-fold">
+                  <summary>Hvorfor er A hele lageret?</summary>
+                  <p class="field-hint">Vejledende, ud fra effekt. Tallet ved <b>A</b> er hele lageret: A har ingen effektgrænse, så den dækker også de annoncer, hvor effekten ikke er oplyst. Det er derfor A1 og A2 kan være små tal, uden at der mangler motorcykler. Tjek altid registreringsattesten — A2 kræver også maks. 0,2 kW/kg, og nogle mc'er sælges i begrænset udgave. Kun ét kørekort ad gangen: det seneste klik erstatter det forrige; klik den valgte igen for at fjerne den.</p>
+                </details>
+              </div>
+            </details>
+
+            <details class="filter-group">
+              <summary>Region<span class="chev"></span></summary>
+              <div class="filter-body" id="filter-regions"></div>
+            </details>
+
+            <details class="filter-group">
+              <summary>Sælgertype<span class="chev"></span></summary>
+              <div class="filter-body">
+                <label class="checkbox-row"><input type="checkbox" id="filter-dealer-only">Kun forhandlere</label>
               </div>
             </details>
 
@@ -500,11 +564,6 @@ try{
             </details>
 
             <details class="filter-group">
-              <summary>Region<span class="chev"></span></summary>
-              <div class="filter-body" id="filter-regions"></div>
-            </details>
-
-            <details class="filter-group">
               <summary>Stand<span class="chev"></span></summary>
               <div class="filter-body" id="filter-conditions"></div>
             </details>
@@ -515,7 +574,6 @@ try{
                 <label for="filter-age" class="field-label-sm">Oprettet</label>
                 <select class="input" id="filter-age"></select>
                 <label class="checkbox-row" style="margin-top:12px;"><input type="checkbox" id="filter-photos-only">Kun annoncer med billeder</label>
-                <label class="checkbox-row"><input type="checkbox" id="filter-dealer-only">Kun forhandlere</label>
               </div>
             </details>
 
@@ -572,7 +630,7 @@ try{
           </div>
 
           <div class="filter-drawer-footer">
-            <button type="button" class="btn btn-outline btn-block" id="clear-filters-mobile">Nulstil</button>
+            <button type="button" class="btn btn-outline btn-block" id="clear-filters-mobile">Ryd alle</button>
             <!-- Teksten skiftes af js/search.js til det faktiske antal træf.
                  Baren gør det samme ("Vis 40.474 biler"), og det er den eneste
                  måde at se på skuffen, om filteret ramte noget — uden den skal
@@ -582,79 +640,43 @@ try{
         </div>
       </div>
 
-      <div>
-        <!-- Runde 5 (D5-S1, maalt mod Bilbasens SRP): soegefelt + gem-soegning + Filtre i
-             ÉN raekke — som Bilbasens "Soeg paa bil | klokke | Filtre". Filtre er den eneste
-             fyldte knap over folden (foer var den graa kontur, mens 24 koerekortchips var
-             orange). Paa mobil sparer det en hel raekke oven paa listen. -->
-        <div class="srp-bar">
-        <form class="srp-search" id="srp-search" role="search">
-          <span class="srp-search-icon" id="srp-search-icon" aria-hidden="true"></span>
-          <input type="search" id="filter-q" placeholder="Mærke eller model" autocomplete="off" aria-label="Søg mærke eller model">
-          <button type="button" class="srp-search-clear" id="filter-q-clear" aria-label="Ryd søgning" hidden></button>
-        </form>
-          <!-- Runde 9 (D9-S3): klokken alene var et ikon uden etiket for sitets
-               eneste agent-funktion. Paa mobil vises den korte etiket "Gem";
-               den fulde er stadig navnet for skaermlaesere. -->
-          <button type="button" class="btn btn-outline btn-sm" id="save-search-btn"><span id="save-search-icon"></span><span id="save-search-label">Gem søgning</span><span id="save-search-kort" aria-hidden="true">Gem</span></button>
-          <button type="button" class="btn btn-primary mobile-filter-btn" id="open-filters-btn" aria-expanded="false" aria-controls="filters-panel"><span id="filter-icon-mount"></span>Filtre<span class="filter-badge" id="filter-badge" hidden>0</span></button>
-        </div>
-        <div class="active-filters" id="active-filters"></div>
-        <div class="results-toolbar">
+      <div class="so-results" id="so-results">
+        <div class="results-toolbar so-toolbar" id="so-results-head">
           <!-- aria-live: resultattallet ændrer sig når man sætter et filter,
-               uden at noget flytter fokus. Uden det får skærmlæserbrugere
-               ingen besked om, at søgningen gav et andet antal.
-
-               Live-området ligger om BEGGE linjer, så oplæsningen bliver
-               "383 annoncer fundet — 51 på Bikerbasen, 332 indekseret hos
-               MC Syd" i ét stykke. Sammensætningen er ikke en fodnote, den
-               hører til tallet.
+               uden at noget flytter fokus. Live-området ligger om BEGGE linjer,
+               så oplæsningen bliver "383 motorcykler fundet — 51 på Bikerbasen,
+               332 indekseret hos MC Syd" i ét stykke. Sammensætningen hører til tallet.
 
                #results-count skal blive ved med at være ét fladt element
                uden indlejrede <div>: scripts/build-srp.js skriver det
                forudtegnede antal ind i den med en regex, der stopper ved
-               første </div>. #results-mix fyldes kun af js/search.js — ved
-               første maling ved vi ikke, hvor annoncerne kommer fra. -->
+               første </div>. #results-mix fyldes kun af js/search.js. -->
           <div class="results-headline" role="status" aria-live="polite" aria-atomic="true">
             <div class="results-count" id="results-count">604 <span>annoncer<span class="results-count-fundet"> fundet</span></span></div>
             <p class="results-mix" id="results-mix" hidden></p>
           </div>
           <div class="toolbar-actions">
-            <div class="view-toggle" role="group" aria-label="Visningstype">
-              <button type="button" id="view-grid" aria-pressed="true" aria-label="Gallerivisning"></button>
-              <button type="button" id="view-list" aria-pressed="false" aria-label="Listevisning"></button>
-              <button type="button" id="view-swipe" aria-pressed="false" aria-label="Swipe-visning"></button>
-            </div>
             <!-- "Blandet udbud" er standard, og "Nyeste først" står lige
-                 under den. HVORFOR: 332 af 383 annoncer har ingen oprettelses-
+                 under den. HVORFOR: de fleste annoncer har ingen oprettelses-
                  dato (vi kender den ikke hos kilden og gætter den ikke), så
                  "Nyeste først" sorterede i praksis efter hvem annoncen kom
-                 fra — og gav en første side helt uden billeder. Valget er
-                 ikke fjernet: vil man have de nyeste, er det ét klik.
+                 fra. Valget er ikke fjernet: vil man have de nyeste, er det
+                 ét klik. Rækkefølgen ER en blanding — bedst oplyste først,
+                 annoncer uden foto fordelt i lagerets egen andel — og hedder
+                 derfor "Blandet", ikke "Mest relevante" (vi har ingen
+                 relevansmodel). Reglen skrives ud under værktøjslinjen med
+                 tal fra det aktuelle resultat, se renderSorteringsNote().
 
-                 NAVNET: valget hed "Mest relevante" i runde 1. Det lovede en
-                 relevansmodel, siden ikke har, og en kritiker målte det.
-                 Rækkefølgen ER en blanding — bedst oplyste først, annoncer
-                 uden foto fordelt i lagerets egen andel — og hedder nu det.
-                 Reglen skrives ud under værktøjslinjen med tal fra det
-                 aktuelle resultat, se renderSorteringsNote() i js/search.js. -->
-            <!-- "Sortér:" står som SYNLIG etiket og ikke kun som aria-label.
-                 Vælgeren stod bar med teksten "Blandet udbud", og en dansk
-                 køber kan ikke se på tre ord, om det er en sortering eller et
-                 filter — Bilbasen skriver "Sortér: Standard" af samme grund.
-                 Etiketten er et rigtigt <label for>, så den seende og
-                 skærmlæseren får det SAMME navn; aria-label'en er væk, fordi
-                 to navne på samme kontrol er én for meget. -->
+                 "Sortér:" står som SYNLIG etiket og er et rigtigt <label for>,
+                 så den seende og skærmlæseren får det SAMME navn. -->
             <div class="sort-felt">
               <label for="sort-select">Sortér:</label>
               <!-- Runde 5 (D5-S6): (i) bor her, ikke kun i notelinjen — så forklaringen
-                   altid er ét klik væk, også når linjen er skjult, fordi der ikke er
-                   noget at efterprøve på siden (0 kort uden foto). -->
+                   altid er ét klik væk, også når linjen er skjult. -->
               <button type="button" class="sortering-info" id="sortering-info-btn" title="Sådan er rækkefølgen sat" aria-label="Sådan er rækkefølgen sat" hidden></button>
-              <select class="input" id="sort-select" style="min-height:40px; padding:8px 32px 8px 12px;">
-              <!-- Runde 6 (D6-S1): korte tekster — vaelgeren er ≈115 px paa 390 px og
-                   klippede "Blandet udbud" til "Blandet udb". js/search.js laeser
-                   value, ikke tekst. -->
+              <select class="input" id="sort-select">
+              <!-- Runde 6 (D6-S1): korte tekster — vælgeren er ≈115 px på 390 px.
+                   js/search.js læser value, ikke tekst. -->
               <option value="blandet">Blandet</option>
               <option value="date-desc">Nyeste først</option>
               <option value="price-asc">Pris: lav → høj</option>
@@ -662,6 +684,11 @@ try{
               <option value="year-desc">Årgang: nyeste</option>
               <option value="km-asc">Km: laveste</option>
               </select>
+            </div>
+            <div class="view-toggle" role="group" aria-label="Visningstype">
+              <button type="button" id="view-grid" aria-pressed="true" aria-label="Gallerivisning"></button>
+              <button type="button" id="view-list" aria-pressed="false" aria-label="Listevisning"></button>
+              <button type="button" id="view-swipe" aria-pressed="false" aria-label="Swipe-visning"></button>
             </div>
           </div>
         </div>
@@ -1209,31 +1236,31 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=bcc85a61"></script>
-<script defer src="js/supabase-config.js?v=bcc85a61"></script>
-<script defer src="js/supabase-api.js?v=bcc85a61"></script>
-<script defer src="js/icons.js?v=bcc85a61"></script>
+<script defer src="js/security.js?v=97c9892b"></script>
+<script defer src="js/supabase-config.js?v=97c9892b"></script>
+<script defer src="js/supabase-api.js?v=97c9892b"></script>
+<script defer src="js/icons.js?v=97c9892b"></script>
 <!-- js/postnumre.js (40 KB, 1089 rækker) lå her, men ingen af søgesidens
      scripts slår et postnummer op — POSTNUMRE bruges kun ved oprettelse og
      redigering af annoncer. Filen blev altså hentet, parset og evalueret på
      hovedtråden uden at blive brugt. Fjernet herfra; de sider der faktisk
      bruger den (opret-annonce, dashboard, mine-annoncer …) loader den stadig. -->
-<script defer src="js/data.js?v=bcc85a61"></script>
-<script defer src="js/store.js?v=bcc85a61"></script>
-<script defer src="js/maaling.js?v=bcc85a61"></script>
+<script defer src="js/data.js?v=97c9892b"></script>
+<script defer src="js/store.js?v=97c9892b"></script>
+<script defer src="js/maaling.js?v=97c9892b"></script>
 <!-- js/filtrering.js: ÉT sted, hvor et filter afgør, hvad der er et træf.
      Skal loades EFTER js/data.js (den bruger passerKoerekort og
      hkEllerNull) og FØR js/search.js, som kalder Filtrering.* på
      topniveau i sin filterkæde. Se work/DECISIONS.md, "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=bcc85a61"></script>
-<script defer src="js/backend-bridge.js?v=bcc85a61"></script>
-<script defer src="js/components.js?v=bcc85a61"></script>
+<script defer src="js/filtrering.js?v=97c9892b"></script>
+<script defer src="js/backend-bridge.js?v=97c9892b"></script>
+<script defer src="js/components.js?v=97c9892b"></script>
 <!-- Sortering EFTER components.js (bruger koerekortMaerkat), FØR search.js
      (som læser Sortering ved indlæsning). Samme rækkefølge som
      browserModules() i scripts/shared.js — se js/sortering.js. -->
-<script defer src="js/sortering.js?v=bcc85a61"></script>
-<script defer src="js/seo.js?v=bcc85a61"></script>
-<script defer src="js/search.js?v=bcc85a61"></script>
+<script defer src="js/sortering.js?v=97c9892b"></script>
+<script defer src="js/seo.js?v=97c9892b"></script>
+<script defer src="js/search.js?v=97c9892b"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">
