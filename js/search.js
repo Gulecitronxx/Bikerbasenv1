@@ -163,8 +163,11 @@ function populateChrome(){
   if (qClearBtn) qClearBtn.innerHTML = Icon.close;
   document.getElementById('empty-icon').innerHTML = Icon.search;
   document.getElementById('bc-sep-1').innerHTML = Icon.chevronRight;
-  document.getElementById('view-grid').innerHTML = Icon.grid;
-  document.getElementById('view-list').innerHTML = Icon.list;
+  document.getElementById('view-grid').innerHTML = Icon.grid + '<span class="vt-label">Gitter</span>';
+  document.getElementById('view-list').innerHTML = Icon.list + '<span class="vt-label">Liste</span>';
+  // Søgekortets typevælger (billede 2): samme TYPES som sidebaren.
+  const typeSel = document.getElementById('so-type');
+  if (typeSel && typeSel.options.length === 1) TYPES.forEach(t => typeSel.add(new Option(t.label, t.id)));
   const vs = document.getElementById('view-swipe');
   if (vs) vs.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2" transform="rotate(-6 12 12)"/><path d="M9 20h6"/></svg>`;
 }
@@ -212,11 +215,13 @@ function scheduleFilterPanel(){
    30.000 er begynder- og projektcykler, 30-60.000 er den typiske A2'er,
    over 150.000 er tunge tourere og nye maskiner. */
 const PRIS_INTERVALLER = [
-  { id: 'u30',    label: 'Under 30.000',   min: null,   max: 30000  },
-  { id: '30-60',  label: '30–60.000',      min: 30000,  max: 60000  },
-  { id: '60-100', label: '60–100.000',     min: 60000,  max: 100000 },
-  { id: '100-150',label: '100–150.000',    min: 100000, max: 150000 },
-  { id: 'o150',   label: 'Over 150.000',   min: 150000, max: null   },
+  /* Gauntlet: billede 2 viser fire bånd — Under 25.000, 25.000–50.000,
+     50.000–100.000 og Over 100.000 — og det er dem, der står her (før fem:
+     30/60/100/150). Skyderen og talfelterne dækker alt derimellem. */
+  { id: 'u25',    label: 'Under 25.000',      min: null,   max: 25000  },
+  { id: '25-50',  label: '25.000 – 50.000',   min: 25000,  max: 50000  },
+  { id: '50-100', label: '50.000 – 100.000',  min: 50000,  max: 100000 },
+  { id: 'o100',   label: 'Over 100.000',      min: 100000, max: null   },
 ];
 
 /* ============ Filtre uden dækning findes ikke ============
@@ -340,7 +345,9 @@ function populateFilterUI(){
      det. Se D-011 i work/DECISIONS.md for hele fundet: to identiske
      chip-rækker, hvoraf kun den ene var flervalg, og intet i markuppen eller
      i skærmlæseren sagde det. */
-  document.getElementById('filter-types').innerHTML = TYPES.map(t =>
+  document.getElementById('filter-types').innerHTML =
+    `<button type="button" class="chip so-all" data-type-all aria-pressed="false">Alle typer${FACET_SLOT}</button>` +
+    TYPES.map(t =>
     `<button type="button" class="chip" data-type="${t.id}" aria-pressed="false">${t.label}${FACET_SLOT}</button>`).join('');
 
   document.getElementById('filter-price-quick').innerHTML = PRIS_INTERVALLER.map(p =>
@@ -370,17 +377,22 @@ function populateFilterUI(){
   const antalPrMaerke = new Map();
   for (const l of alle) if (l.brand) antalPrMaerke.set(l.brand, (antalPrMaerke.get(l.brand) || 0) + 1);
   const maerker = [...iLager].sort((a,b) => (antalPrMaerke.get(b) || 0) - (antalPrMaerke.get(a) || 0) || a.localeCompare(b,'da'));
+  const brandSel = document.getElementById('so-brand');
+  if (brandSel) brandSel.innerHTML = '<option value="">Alle mærker</option>' +
+    [...maerker].sort((a, b) => a.localeCompare(b, 'da')).map(b => `<option value="${escapeHTML(b)}">${escapeHTML(b)}</option>`).join('');
   const brandRows = maerker.map(b =>
     `<label class="checkbox-row" data-brand-row="${escapeHTML(b.toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(b)}"><span>${escapeHTML(b)}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `
-    <div class="filter-search"><input type="text" id="brand-search" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
+    <div class="filter-search"><input type="text" id="brand-search" class="input" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
     <div class="checkbox-list" id="brand-list">${brandRows}
       <p class="brand-noresult" id="brand-noresult" hidden>Ingen mærker matcher.</p>
     </div>
     <button type="button" class="brand-more" id="brand-more" aria-controls="brand-list" aria-expanded="false" hidden></button>`;
 
-  document.getElementById('filter-koerekort').innerHTML = KOEREKORT.map(k =>
-    `<button type="button" class="chip" data-koerekort="${k.id}" title="${k.hint}" role="radio" aria-checked="false" tabindex="-1">${k.label}${FACET_SLOT}</button>`).join('');
+  document.getElementById('filter-koerekort').innerHTML =
+    `<button type="button" class="chip so-all" data-koerekort="" title="Intet kørekortfilter" role="radio" aria-checked="false" tabindex="-1">Alle${FACET_SLOT}</button>` +
+    KOEREKORT.map(k =>
+    `<button type="button" class="chip" data-koerekort="${k.id}" title="${k.hint}" role="radio" aria-checked="false" tabindex="-1"><span class="so-kk-id">${k.id}</span><span class="so-kk-ord">${k.label.slice(k.id.length).trim()}</span>${FACET_SLOT}</button>`).join('');
 
   document.getElementById('filter-regions').innerHTML = REGIONS.map(r =>
     `<label class="checkbox-row"><input type="checkbox" data-region="${r}"><span>${r}</span>${FACET_SLOT}</label>`).join('');
@@ -440,6 +452,7 @@ function facetTal(){
     for (const l of kkBasis) if (koerekortSvar(l, k.id) === true) n++;
     koerekort.set(k.id, n);
   }
+  koerekort.set('', kkBasis.length);   // "Alle" = intet kørekortfilter
 
   const prisBasis = basis('price');
   const pris = new Map();
@@ -454,8 +467,10 @@ function facetTal(){
     pris.set(p.id, n);
   }
 
+  const typBasis = basis('types');
   return {
-    types:      tael(basis('types'),      l => l.type),
+    typeAlle:   typBasis.length,
+    types:      tael(typBasis,            l => l.type),
     brands:     tael(basis('brands'),     l => l.brand),
     regions:    tael(basis('regions'),    l => l.region),
     conditions: tael(basis('conditions'), l => l.condition),
@@ -480,8 +495,10 @@ function renderFacetCounts(){
   if (!filtersBuilt) return;
   const f = facetTal();
 
-  document.querySelectorAll('#filter-types .chip').forEach(c =>
-    saetFacet(c, f.types.get(c.dataset.type) || 0, state.types.includes(c.dataset.type)));
+  document.querySelectorAll('#filter-types .chip').forEach(c => {
+    const alle = c.hasAttribute('data-type-all');
+    saetFacet(c, alle ? f.typeAlle : (f.types.get(c.dataset.type) || 0), alle ? !state.types.length : state.types.includes(c.dataset.type));
+  });
   document.querySelectorAll('#filter-koerekort .chip').forEach(c =>
     saetFacet(c, f.koerekort.get(c.dataset.koerekort) || 0, state.koerekort === c.dataset.koerekort));
   document.querySelectorAll('#filter-price-quick .chip').forEach(c =>
@@ -891,7 +908,7 @@ function renderResultsCount(list){
   const totalSider = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const sideLed = state.page > 1 ? ` <span class="results-side">· side ${state.page} af ${totalSider}</span>` : '';
   document.getElementById('results-count').innerHTML =
-    `${total} <span>${total === 1 ? 'annonce' : 'annoncer'}<span class="results-count-fundet"> fundet</span>${sideLed}</span>`;
+    `${total} <span>${total === 1 ? 'motorcykel' : 'motorcykler'}<span class="results-count-fundet"> fundet</span>${sideLed}</span>`;
   // (Sidetallet i document.title saettes i js/seo.js, som ejer titlen.)
 
   const mix = document.getElementById('results-mix');
@@ -1059,7 +1076,7 @@ function syncRadioChips(chips, erValgt){
 /* Spejler state ned i de kontroller der først findes, når panelet er bygget. */
 function reflectFilterPanel(){
   document.querySelectorAll('#filter-types .chip').forEach(chip => {
-    const valgt = state.types.includes(chip.dataset.type);
+    const valgt = chip.hasAttribute('data-type-all') ? state.types.length === 0 : state.types.includes(chip.dataset.type);
     chip.classList.toggle('active', valgt);
     chip.setAttribute('aria-pressed', String(valgt));
   });
@@ -1078,6 +1095,7 @@ function reflectFilterPanel(){
   // Skal stå EFTER afkrydsningen: et valgt mærke må ikke være foldet væk.
   opdaterMaerkeliste();
   renderModelFilter();
+  reflectBrandSelect();
   document.querySelectorAll('#filter-regions input').forEach(cb => {
     cb.checked = state.regions.includes(cb.dataset.region);
   });
@@ -1095,6 +1113,66 @@ function reflectFilterPanel(){
   });
 }
 
+/* Søgekortet i hero'en (billede 2) er en anden indgang til de samme filtre:
+   Type, Maks. pris og Kørekort spejler `state` og skriver tilbage til det —
+   de har ingen egen logik. Står mere end ét valg i state (flere typer fra
+   sidebaren, et pris-interval uden for listen), vises det ærligt som et
+   ekstra valg i stedet for at vælgeren tilsyneladende siger noget andet. */
+function reflectHeroCard(){
+  const typeSel = document.getElementById('so-type');
+  if (typeSel){
+    typeSel.querySelectorAll('option[data-dyn]').forEach(o => o.remove());
+    if (state.types.length > 1){
+      const o = new Option(`${state.types.length} typer valgt`, '__flere'); o.dataset.dyn = '1'; typeSel.add(o);
+      typeSel.value = '__flere';
+    } else typeSel.value = [...typeSel.options].some(o => o.value === state.types[0]) ? state.types[0] : '';
+  }
+  const priceSel = document.getElementById('so-price');
+  if (priceSel){
+    priceSel.querySelectorAll('option[data-dyn]').forEach(o => o.remove());
+    const v = state.priceMax == null ? '' : String(state.priceMax);
+    if (v && ![...priceSel.options].some(o => o.value === v)){
+      const o = new Option(`Op til ${formatPrice(state.priceMax)}`, v); o.dataset.dyn = '1'; priceSel.add(o);
+    }
+    priceSel.value = v;
+  }
+  document.querySelectorAll('input[name="so-koerekort"]').forEach(r => { r.checked = r.value === state.koerekort; });
+}
+
+/* Mærke- og modelvælgerne øverst i sidebaren. De viser ÉT valg; vælger man
+   flere via "Tilføj flere" (afkrydsningslisten), står der "N mærker valgt". */
+function reflectBrandSelect(){
+  const bs = document.getElementById('so-brand');
+  if (!bs) return;
+  bs.querySelectorAll('option[data-dyn]').forEach(o => o.remove());
+  if (state.brands.length > 1){
+    const o = new Option(`${state.brands.length} mærker valgt`, '__flere'); o.dataset.dyn = '1'; bs.add(o);
+    bs.value = '__flere';
+  } else bs.value = [...bs.options].some(o => o.value === state.brands[0]) ? state.brands[0] : '';
+  // En flervalgs-tilstand skal kunne ses og ændres: foldes listen ud af sig selv.
+  if (state.brands.length > 1 || state.models.length > 1) saetFlereFoldet(true);
+}
+function saetFlereFoldet(aaben){
+  const box = document.getElementById('so-more'), btn = document.getElementById('so-more-btn');
+  if (!box || !btn) return;
+  box.hidden = !aaben;
+  btn.setAttribute('aria-expanded', String(aaben));
+  const lbl = document.getElementById('so-more-label');
+  if (lbl) lbl.textContent = aaben ? 'Skjul listen over mærker og modeller' : 'Tilføj flere mærker eller modeller';
+  const plus = btn.firstElementChild; if (plus) plus.textContent = aaben ? '–' : '+';
+}
+function fyldModelSelect(models){
+  const ms = document.getElementById('so-model');
+  if (!ms) return;
+  const ett = state.brands.length === 1;
+  ms.disabled = !ett || !models.length;
+  let html = `<option value="">Alle modeller</option>`;
+  if (ett) html += models.map(m => `<option value="${escapeHTML(m)}">${escapeHTML(m)}</option>`).join('');
+  if (state.models.length > 1) html += `<option value="__flere">${state.models.length} modeller valgt</option>`;
+  ms.innerHTML = html;
+  ms.value = state.models.length > 1 ? '__flere' : (state.models[0] && ett ? state.models[0] : '');
+}
+
 function reflectStateToUI(){
   /* Panelets egne kontroller findes kun når panelet er bygget. Er det ikke,
      springes hele blokken over — ensureFiltersBuilt kalder reflectStateToUI
@@ -1104,6 +1182,7 @@ function reflectStateToUI(){
   if (qInput && qInput.value !== state.q) qInput.value = state.q;
   const qClear = document.getElementById('filter-q-clear');
   if (qClear) qClear.hidden = !state.q;
+  reflectHeroCard();
   document.querySelectorAll('.dual-range').forEach(el => el._sync && el._sync());
   document.getElementById('filter-photos-only').checked = state.photosOnly;
   document.getElementById('filter-dealer-only').checked = state.dealerOnly;
@@ -1288,7 +1367,7 @@ function getFilteredListings(){
 function renderUoplystNote(){
   let el = document.getElementById('uoplyst-note');
   if (!el){
-    const anker = document.getElementById('active-filters');
+    const anker = document.getElementById('so-results-head') || document.getElementById('active-filters');
     if (!anker) return;
     el = document.createElement('p');
     el.id = 'uoplyst-note';
@@ -1579,6 +1658,8 @@ function render(){
   filterBar.querySelectorAll('[data-pill-clear]').forEach(btn => {
     btn.addEventListener('click', () => { pills[Number(btn.dataset.pillClear)].clear(); state.page = 1; pushFilterState(); });
   });
+  const rydAlle = document.getElementById('so-clear-all'); if (rydAlle) rydAlle.hidden = pills.length === 0;
+  const ingenFiltre = document.getElementById('so-chips-none'); if (ingenFiltre) ingenFiltre.hidden = pills.length > 0;
   const badge = document.getElementById('filter-badge');
   badge.textContent = pills.length;
   badge.hidden = pills.length === 0;
@@ -1615,8 +1696,18 @@ function render(){
   // scorer på "Brugte Yamaha til salg i København").
   // Runde 8 (D8-S1): "Brugte" droppet — ≈172 af annoncerne er fabriksnye.
   const heading = soegeoverskrift(state, filtered);
-  const headingEl = document.querySelector('.search-heading');
-  if (headingEl.textContent !== heading) headingEl.textContent = heading;
+  /* Billedets hero: "Find din næste motorcykel" (fast) + "N motorcykler til
+     salg i Danmark" (N = hele lageret, ikke det filtrerede — det står i
+     resultathovedet). Er overskriften ikke standardens ("Honda til salg",
+     "… i Syddanmark"), står den uden tal, så tallet aldrig påstår noget andet
+     end filteret. Hele h1'en er stadig den dynamiske overskrift (SEO). */
+  const hTekst = document.getElementById('so-h1-text'), hAntal = document.getElementById('so-h1-n');
+  const standard = heading === 'Motorcykler til salg i Danmark';
+  const lager = Store.getAllListings().length;
+  const nyTekst = standard && lager ? 'motorcykler til salg i Danmark' : heading;
+  const nyAntal = standard && lager ? lager.toLocaleString('da-DK') + ' ' : '';
+  if (hTekst && hTekst.textContent !== nyTekst) hTekst.textContent = nyTekst;
+  if (hAntal && hAntal.textContent !== nyAntal) hAntal.textContent = nyAntal;
 
   const grid = document.getElementById('results-grid');
   const empty = document.getElementById('empty-state');
@@ -1871,6 +1962,7 @@ function renderModelFilter(){
   /* skjulGruppe/visGruppe og ikke `group.hidden` alene: se kommentaren over
      skjulGruppe(). Model-gruppen var en af de syv tomme overskrifter, en
      kritiker talte i panelet. */
+  fyldModelSelect(models);
   if (!state.brands.length || !models.length){
     skjulGruppe(group); mount.innerHTML = ''; return;
   }
@@ -1971,6 +2063,10 @@ function wireRadioGroupNavigation(containerId, vaelg){
 function wireFilterControls(){
   document.querySelectorAll('#filter-types .chip').forEach(chip => {
     chip.addEventListener('click', () => {
+      if (chip.hasAttribute('data-type-all')){
+        if (!state.types.length) return;           // "Alle typer" er allerede valgt
+        state.types = []; state.page = 1; pushFilterState(); return;
+      }
       const id = chip.dataset.type;
       state.types = state.types.includes(id) ? state.types.filter(x=>x!==id) : [...state.types, id];
       state.page = 1; pushFilterState();
@@ -2007,6 +2103,17 @@ function wireFilterControls(){
     const m = cb.dataset.model;
     state.models = cb.checked ? [...state.models, m] : state.models.filter(x => x !== m);
     state.page = 1; pushFilterState();
+  });
+  document.getElementById('so-brand')?.addEventListener('change', (e) => {
+    const v = e.target.value; if (v === '__flere') return;
+    state.brands = v ? [v] : []; state.models = []; state.page = 1; pushFilterState();
+  });
+  document.getElementById('so-model')?.addEventListener('change', (e) => {
+    const v = e.target.value; if (v === '__flere') return;
+    state.models = v ? [v] : []; state.page = 1; pushFilterState();
+  });
+  document.getElementById('so-more-btn')?.addEventListener('click', () => {
+    saetFlereFoldet(document.getElementById('so-more').hidden);
   });
   const brandSearch = document.getElementById('brand-search');
   if (brandSearch) brandSearch.addEventListener('input', opdaterMaerkeliste);
@@ -2130,6 +2237,33 @@ function wireCoreControls(){
   document.getElementById('clear-filters').addEventListener('click', resetAll);
   document.getElementById('clear-filters-mobile').addEventListener('click', resetAll);
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);
+  document.getElementById('so-clear-all')?.addEventListener('click', resetAll);
+
+  // Søgekortet i hero'en: type/pris/kørekort er genveje til de samme filtre
+  // som sidebaren; "Søg motorcykler" sender fritekstfeltet af sted med det
+  // samme (uden at vente på debouncen) og fører øjet ned til resultaterne.
+  const soegekort = document.getElementById('srp-search');
+  if (soegekort){
+    soegekort.addEventListener('submit', (e) => {
+      e.preventDefault();
+      state.q = (document.getElementById('filter-q')?.value || '').trim();
+      state.page = 1; pushFilterState();
+      const maal = document.getElementById('so-results');
+      if (maal){
+        const stille = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        maal.scrollIntoView({ behavior: stille ? 'auto' : 'smooth', block: 'start' });
+      }
+    });
+    document.getElementById('so-type')?.addEventListener('change', (e) => {
+      const v = e.target.value; if (v === '__flere') return;
+      state.types = v ? [v] : []; state.page = 1; pushFilterState();
+    });
+    document.getElementById('so-price')?.addEventListener('change', (e) => {
+      state.priceMax = e.target.value ? Number(e.target.value) : null; state.page = 1; pushFilterState();
+    });
+    soegekort.querySelectorAll('input[name="so-koerekort"]').forEach(r =>
+      r.addEventListener('change', () => { if (r.checked) vaelgKoerekort(r.value); }));
+  }
 
   document.getElementById('view-grid').addEventListener('click', () => setViewMode('grid'));
   document.getElementById('view-list').addEventListener('click', () => setViewMode('list'));
