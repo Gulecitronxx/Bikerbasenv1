@@ -5,6 +5,7 @@
   --color-surface: #FFFFFF;
   --color-surface-2: #F0EDE8;
   --color-border: #E3DED6;
+  --color-input-border: #8A8279; /* V-006: >=3:1 mod flade (WCAG 1.4.11) */
   --color-fg: #1C1A18;
   --color-fg-muted: #6B6560;
   --color-primary: #C6420E;
@@ -52,6 +53,7 @@
   --color-surface: #1F1C17;
   --color-surface-2: #262219;
   --color-border: #37312A;
+  --color-input-border: #7A7268;
   --color-fg: #F5F1EB;
   --color-fg-muted: #A79E92;
   --color-primary: #FF6A32;
@@ -76,6 +78,7 @@
     --color-surface: #1F1C17;
     --color-surface-2: #262219;
     --color-border: #37312A;
+    --color-input-border: #7A7268;
     --color-fg: #F5F1EB;
     --color-fg-muted: #A79E92;
     --color-primary: #FF6A32;
@@ -265,10 +268,11 @@ svg{display:block; width:1em; height:1em;}
 .input, select.input{
   appearance:none; -webkit-appearance:none;
   width:100%; padding: 12px 14px; border-radius: var(--radius-sm);
-  border: 1.5px solid var(--color-border); background: var(--color-surface);
+  border: 1.5px solid var(--color-input-border); background: var(--color-surface);
   color: var(--color-fg); font-size:15px; min-height:44px;
   transition: border-color .15s var(--ease-out);
 }
+.input::placeholder{ color: var(--color-fg-muted); opacity:1; } /* V-007 */
 .input:hover{ border-color: var(--color-fg-muted); }
 .input:focus-visible{ border-color: var(--color-primary); }
 .input-icon-wrap{ position:relative; }
@@ -2536,6 +2540,9 @@ body.home .hero{ padding-top: calc(var(--header-h) + var(--space-5)); }
 
 /* ============ Legal / static content pages ============ */
 .legal-content{ max-width:720px; margin:0 auto; padding: var(--space-6) 0 var(--space-9); }
+/* om-indeksering.html: <pre> uden regel straekkede siden til 641 px paa mobil. */
+.legal-content{ width:100%; min-width:0; } /* auto-margener i en flex-container gor bredden til max-content */
+.legal-pre{ overflow-x:auto; max-width:100%; padding:var(--space-3) var(--space-4); background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:var(--radius-sm); font-size:13px; }
 .legal-content h1{ margin-bottom: var(--space-2); }
 .legal-content .legal-updated{ color: var(--color-fg-muted); font-size:13px; margin-bottom: var(--space-6); }
 .legal-content h2{ font-size:19px; margin: var(--space-7) 0 var(--space-3); }

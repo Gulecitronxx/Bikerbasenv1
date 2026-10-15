@@ -24,12 +24,16 @@ Juridiske regler: `/CLAUDE.md` (ufravigelige).
 | ID | Fund | Sev | Status |
 |---|---|---|---|
 | G-001 | Forsiden har 16 px vandret overflow på 360–414 px (`.section-eftertekst{padding:X 0}` nulstillede containerpadding) | P1 | **verificeret** (`3c5306b`) — blind Critic ACCEPTER, 4/4 krav PASS ([critic-G-001.md](gauntlet/critic-G-001.md)) |
-| S-001 | Kørekortsider: title 75 tegn, H1 "Kørekort A2" | P2 | rettet `702d64c` — Critic kører |
-| S-002 | Footer linkede typer til soegning.html?type= i stedet for statiske sider | P2 | rettet `702d64c` — Critic kører |
-| S-006 | annonce.html uden statisk noindex | P2 | rettet `b9e4a06` — Critic kører |
-| S-008 | "kr.." på model- og mærkesider | P3 | rettet `b9e4a06` — Critic kører |
-| V-001/F-004 | Annoncesiden 76 px vandret overflow på mobil (grid 1fr) | P1 | rettet `e44c366` — Critic kører |
-| F-001 | Fritekstsøgning: 17/46 realistiske søgninger gav 0 træf | P1 | rettet `ad13786` (+20 tests) — Critic kører |
+| S-001 | Kørekortsider: title 75 tegn, H1 "Kørekort A2" | P2 | **verificeret** (Critic ACCEPTER, [critic-S-001-S-002.md](gauntlet/critic-S-001-S-002.md)) |
+| S-002 | Footer linkede typer til soegning.html?type= i stedet for statiske sider | P2 | **verificeret** (Critic ACCEPTER, [critic-S-001-S-002.md](gauntlet/critic-S-001-S-002.md)) |
+| S-006 | annonce.html uden statisk noindex | P2 | **verificeret** (Critic ACCEPTER, [critic-batch2.md](gauntlet/critic-batch2.md)) |
+| S-008 | "kr.." på model- og mærkesider | P3 | **verificeret** (Critic ACCEPTER, [critic-batch2.md](gauntlet/critic-batch2.md)) |
+| V-001/F-004 | Annoncesiden 76 px vandret overflow på mobil (grid 1fr) | P1 | **verificeret** (Critic ACCEPTER, [critic-batch2.md](gauntlet/critic-batch2.md)) |
+| F-001 | Fritekstsøgning: 17/46 realistiske søgninger gav 0 træf | P1 | **verificeret** (Critic ACCEPTER, [critic-batch2.md](gauntlet/critic-batch2.md)) |
+| NF-1 | Mærkesiders intro splittes ved "kr. " → synligt afsnit ender "fra 4.000 kr." | P2 | rettet — afventer Critic |
+| G-003 | om-indeksering.html 641 px bred på mobil (`.legal-pre` uden CSS, auto-margener i flex) | P2 | rettet — afventer Critic |
+| V-006/V-007 | Formularkanter 1,3:1 og placeholder-kontrast (nyt token `--color-input-border`) | P2 | rettet — afventer Critic |
+| F-F1..F3 | Søgning: match hen over ordgrænse (`gs`→"Road King Special"), symbol-only q giver alt, ingen rangering | P3 | åben |
 | G-002 | Header (`.header-actions`, `.spor-koeber`) klippes ikke under ~269 px viewport | P3 | åben — under WCAG 320 px-grænsen, lav prioritet |
 
 ## Prioriteret kø (fra Detective-rapporterne, rangeret efter værdi/indsats)

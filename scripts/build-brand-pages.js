@@ -804,7 +804,8 @@ for (const brand of brands){
   /* Runde 7 (D7-M3): tallet ("Der er lige nu …") foerst og synligt; arven og
      resten bag en fold. */
   const introTal = introFor(brand, items);
-  const foerstePunktum = introTal.search(/\.\s/);
+  // NF-1: "kr. " og "m.fl. " er ikke saetningsslut — ellers endte det synlige afsnit paa "fra 4.000 kr.".
+  const foerstePunktum = introTal.search(/(?<!\bkr|\bm\.fl)\.\s/);
   const introFoerste = foerstePunktum > 0 ? introTal.slice(0, foerstePunktum + 1) : introTal;
   const introRest = [arvSaetning, foerstePunktum > 0 ? introTal.slice(foerstePunktum + 1).trim() : ''].filter(Boolean).join(' ');
   const faqs = kvalificeret ? faqFor(brand, items, stats, kk) : null;
