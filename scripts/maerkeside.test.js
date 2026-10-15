@@ -29,7 +29,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 // require.main-gaten i build-brand-pages.js gør, at det her IKKE kører et byg.
-const { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager }
+const { introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede }
   = require('./build-brand-pages.js');
 
 function ekstern(extra){
@@ -147,4 +147,111 @@ test('rækkefølgen er dansk, og tomme lister vælter ikke', () => {
   assert.deepEqual(maerkerUdenLager(['Ural', 'Beta', 'Zontes'], []), ['Beta', 'Ural', 'Zontes']);
   assert.deepEqual(maerkerUdenLager([], ['Honda']), []);
   assert.deepEqual(maerkerUdenLager(['Honda'], null), ['Honda']);
+});
+
+/* ---- NF-1: den synlige første sætning deles ikke midt i "kr." ---- */
+
+test('NF-1: indledningen deles ikke ved "kr. " midt i prisspændet', () => {
+  const tekst = introFor('Honda', [ekstern({ price: 4000, year: null }), ekstern({ price: 59900, year: null })]);
+  // Uden årgang og typer ender sætningen først efter prisspændet — og
+  // "fra 4.000 kr. til 59.900 kr." indeholder to "kr. " før sætningsslut.
+  const { foerste, rest } = splitIntro(tekst);
+  assert.match(foerste, /fra 4\.000 kr\. til 59\.900 kr\./, `det synlige afsnit blev skåret midt i prisen: ${foerste}`);
+  assert.ok(!/fra 4\.000 kr\.$/.test(foerste), `det synlige afsnit slutter på "fra 4.000 kr.": ${foerste}`);
+  assert.equal(`${foerste} ${rest}`.trim(), tekst, 'ingen tekst må gå tabt eller fordobles ved delingen');
+});
+
+test('NF-1: "kr. " tæller ikke som sætningsslut — heller ikke når årgang og typer følger', () => {
+  const tekst = introFor('Honda', [ekstern({ price: 4000 }), ekstern({ price: 59900, year: 2001 })]);
+  const { foerste, rest } = splitIntro(tekst);
+  assert.match(foerste, /til 59\.900 kr\./, `første sætning er skåret før prisspændets slutning: ${foerste}`);
+  assert.ok(!/fra 4\.000 kr\.$/.test(foerste), `første sætning slutter midt i prisspændet: ${foerste}`);
+  assert.match(`${foerste}${rest}`, /årgange mellem 1986 og 2001/);
+});
+
+test('NF-1: "m.fl. " er heller ikke sætningsslut', () => {
+  const { foerste, rest } = splitIntro('Der er 9 motorcykler. Udvalget dækker Sport, Naked, Touring m.fl. Næste sætning.');
+  assert.equal(foerste, 'Der er 9 motorcykler.');
+  assert.ok(rest.startsWith('Udvalget dækker Sport, Naked, Touring m.fl. Næste'), rest);
+  // Én sætning med "m.fl. " midt i: ingen deling overhovedet.
+  assert.deepEqual(splitIntro('Se Sport, Naked, Touring m.fl. og Cross.'),
+    { foerste: 'Se Sport, Naked, Touring m.fl. og Cross.', rest: '' });
+});
+
+test('splitIntro: en intro uden sætningsskifte bliver helt stående', () => {
+  assert.deepEqual(splitIntro('Der er 1 motorcykel.'), { foerste: 'Der er 1 motorcykel.', rest: '' });
+});
+
+/* ---- Fremhævet række: annoncer med foto først, aldrig flere end bedt om ---- */
+
+test('fremhævet række: annoncer med foto går foran fotolose, og rækkefølgen ellers bevares', () => {
+  const uden = id => ekstern({ id: `u${id}`, photoUrls: [] });
+  const med = id => ekstern({ id: `m${id}`, photoUrls: ['https://x.example/a.jpg'] });
+  const liste = [uden(1), med(1), uden(2), med(2), med(3)];
+  assert.deepEqual(vaelgFremhaevede(liste, 5).map(l => l.id), ['m1', 'm2', 'm3', 'u1', 'u2']);
+  assert.deepEqual(vaelgFremhaevede(liste, 2).map(l => l.id), ['m1', 'm2']);
+  assert.deepEqual(vaelgFremhaevede([uden(1)], 5).map(l => l.id), ['u1'], 'har mærket få annoncer, vises de alle');
+  assert.deepEqual(vaelgFremhaevede([], 5), []);
+});
+
+/* ---- Runde 2: modeltal = søgeantal, titler er ikke modeller, mærkespecifik hero/panel ---- */
+
+const { erModelnavn, modelTal, heroVariant, ctaFoto, monogram, typeFoto, maerkeFakta } = require('./build-brand-pages.js');
+const { Filtrering } = require('./shared').browserModules();
+
+test('P2-3: en sælgertitel er ikke et modelnavn — ægte modeller består', () => {
+  for (const titel of ['God velkørende custom med lav. KM', 'Sælges billigt pga. plads', 'meget pæn og velholdt maskine', 'Flot stand, nysynet og klar til sæsonen']){
+    assert.equal(erModelnavn(titel), false, `"${titel}" blev regnet for en model`);
+  }
+  for (const model of ['FJR 1300 A', 'XV 1900', 'Ténéré 700 World Raid T7', 'Super Meteor 650 Astral', 'Gs katana', 'Xv 750 virago', 'Fzr 600', 'MT-09', 'CB 1000 Hornet', 'Z 900 RS', 'R 1250 GS Adventure']){
+    assert.equal(erModelnavn(model), true, `ægte model "${model}" blev kasseret`);
+  }
+  assert.equal(erModelnavn(''), false);
+  assert.equal(erModelnavn(null), false);
+});
+
+test('P2-2: modelflisens tal er præcis det antal, soegningen viser (samme q-filter)', () => {
+  const m = (id, model) => ekstern({ id: `x${id}`, brand: 'BMW', model, type: 'touring' });
+  // "K 1200" er en delstreng af "K 1200 GT" og "K 1200 RS": søgningen q=K 1200 finder alle fire.
+  const items = [m(1, 'K 1200'), m(2, 'K 1200 GT'), m(3, 'K 1200 GT'), m(4, 'K 1200 RS'), m(5, 'R 1200'), m(6, 'God velkørende custom med lav. KM')];
+  const liste = modelTal(items);
+  for (const { m: navn, n } of liste){
+    assert.equal(n, Filtrering.anvendFiltre(items, { q: navn }, null, null).length, `${navn}: flisen og soegningen er uenige`);
+  }
+  assert.equal(liste.find(x => x.m === 'K 1200').n, 4, 'K 1200 taeller de tre K 1200 GT/RS med, ligesom soegningen');
+  assert.ok(!liste.some(x => x.m.startsWith('God velkørende')), 'sælgertitlen kom med som model');
+  // Samme tal findes i det genererede markup.
+  const fakta = maerkeFakta('BMW', items);
+  assert.deepEqual(fakta.modeller.map(x => [x.m, x.n]), liste.slice(0, 30).map(x => [x.m, x.n]));
+});
+
+test('hero: cruisere beholder hero-fotoet, alle andre typer faar deres egen illustration', () => {
+  const med = type => [ekstern({ type }), ekstern({ type }), ekstern({ type: 'sport' })].slice(0, 2);
+  assert.deepEqual(heroVariant(med('cruiser')), { foto: true, type: null });
+  assert.deepEqual(heroVariant(med('scooter')), { foto: false, type: 'scooter' });
+  assert.deepEqual(heroVariant(med('sport')), { foto: false, type: 'sport' });
+  // Ingen kendt type: hverken forkert foto eller forkert illustration.
+  assert.deepEqual(heroVariant([ekstern({ type: null })]), { foto: false, type: null });
+});
+
+test('panelfoto: et ægte thumbnail fra lageret, aldrig samme som første kort, og intet at vise ved ét kort', () => {
+  const l = (id, foto) => ekstern({ id, photoUrls: foto ? [`https://x.example/${id}.jpg`] : [] });
+  assert.equal(ctaFoto([l('a', true), l('b', true)]), 'https://x.example/b.jpg');
+  assert.equal(ctaFoto([l('a', true)]), null, 'ét kort: ingen dublet af kortets eget foto');
+  assert.equal(ctaFoto([l('a', true), l('b', false)]), null);
+  assert.equal(ctaFoto([]), null);
+});
+
+test('typeflisens foto er mærkets eget — helst fra en kilde uden skilt på billedet', () => {
+  const foto = (id, dom) => ekstern({ id, type: 'sport', photoUrls: [`https://x.example/${id}.jpg`], source: { navn: dom, domaene: dom } });
+  assert.equal(typeFoto([foto('a', 'mcsyd.dk'), foto('b', 'guloggratis.dk')], 'sport'), 'https://x.example/b.jpg');
+  assert.equal(typeFoto([foto('a', 'mcsyd.dk')], 'sport'), 'https://x.example/a.jpg', 'ingen anden mulighed: brug det der er');
+  assert.equal(typeFoto([foto('a', 'mcsyd.dk')], 'touring'), null);
+});
+
+test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
+  assert.equal(monogram('Yamaha'), 'Y');
+  assert.equal(monogram('Harley-Davidson'), 'HD');
+  assert.equal(monogram('Royal Enfield'), 'RE');
+  assert.equal(monogram('Moto Guzzi'), 'MG');
 });

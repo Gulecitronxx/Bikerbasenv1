@@ -63,12 +63,12 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/49046/Triumph_Speed_Triple_0_2.jpg?v=1" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=a886b9e2">
+<link rel="stylesheet" href="css/styles.css?v=96635651">
+<link rel="stylesheet" href="css/p-maerke.css?v=96635651">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Triumph","item":"https://bikerbasen.dk/maerke-triumph"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en Triumph-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"33 af de 34 Triumph-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 48.000 kr. til 189.900 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 94.800 kr. De resterende 1 annonce oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre Triumph på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"3 af 28 Triumph-annoncer med kendt effekt er ikke udelukket på effekt til A2 — de holder sig under loftet på 47 hk (35 kW) — mens 25 kræver stort kørekort. A2 stiller også krav om maks. 0,2 kW pr. kg og om, at maskinen ikke er afledt af en model med over dobbelt effekt; det står ikke i annoncerne, så tjek registreringsattesten. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra. De resterende 6 annoncer mangler effektoplysningen hos kilden."}},{"@type":"Question","name":"Hvilke Triumph-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 34 Triumph-annoncer går Daytona 1200 (2 stk.), Rocket III (2 stk.), Street Triple R (2 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Triumph-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
 </head>
-<body>
+<body class="mk-body" data-mk-brand="Triumph">
 <a class="skip-link" href="#main-content">Gå til indhold</a>
 <header class="site-header">
   <div class="container">
@@ -115,102 +115,96 @@ try{
 </div>
 
 <main id="main-content">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Brødkrumme">
-      <a href="index.html">Forside</a><span class="bc-sep"></span>
-      <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
-      <span>Triumph</span>
-    </nav>
-
-    <!-- Runde 7 (D7-M3): foerste kort stod ved 873 px (390) / 728 (1 366) —
-         12 linjer indledning foer lageret. Nu: h1 + den foerste saetning
-         (tallet) synligt, resten af indledningen bag <details>, modelchips
-         (navigation) foer knapperne, og gitteret lige under. -->
-    <div class="brand-hero">
-      <h1>Triumph-motorcykler til salg i Danmark</h1>
-      <p class="brand-intro">Der er <strong>34</strong> Triumph motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — <strong>32</strong> brugte og <strong>2</strong> fabriksnye — fra 48.000 kr. til 189.900 kr., med årgange mellem 1955 og 2027.</p>
-      <details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Triumph bærer den britiske motorcykeltradition videre: Bonneville- og Speed Twin-linjen holder den klassiske stil i live, mens Tiger og Speed Triple dækker adventure og naked. Udvalget dækker Naked, Sport, Adventure/Enduro m.fl. 1 annonce oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Jensens Motorcykler og Rydbergs MC, og handlen sker hos kilden.</p></details>
+  <!-- Billede 9 (Yamaha): hero med foto og mærkenavn → søgekort over fotoets
+       underkant → tillidsrække → fremhævet annoncerække + CTA-panel → typefliser
+       → "Sådan virker Bikerbasen" → tre kolonner (modeller / kørekort / region).
+       Under billedets struktur ligger det, siden altid har haft: den fulde
+       liste, facetter, prisniveau, FAQ og andre mærker (SEO).
+       Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
+       reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
+  <section class="mk-hero mk-hero-type">
+    <div class="mk-hero-media" aria-hidden="true">
+      <img class="mk-hero-typeimg" src="img/type/naked.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async">
     </div>
+    <div class="container mk-hero-inner">
+      <nav class="breadcrumb" aria-label="Brødkrumme">
+        <a href="index.html">Forside</a><span class="bc-sep"></span>
+        <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
+        <span>Triumph</span>
+      </nav>
+      <p class="mk-wordmark" aria-hidden="true"><span class="mk-mono">T</span><span>Triumph</span></p>
+      <h1>Triumph-motorcykler til salg i Danmark</h1>
+      <p class="brand-intro mk-intro">Der er <strong>34</strong> Triumph motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — <strong>32</strong> brugte og <strong>2</strong> fabriksnye — fra 48.000 kr. til 189.900 kr., med årgange mellem 1955 og 2027.</p>
+      <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Triumph bærer den britiske motorcykeltradition videre: Bonneville- og Speed Twin-linjen holder den klassiske stil i live, mens Tiger og Speed Triple dækker adventure og naked. Udvalget dækker Naked, Sport, Adventure/Enduro m.fl. 1 annonce oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Jensens Motorcykler og Rydbergs MC, og handlen sker hos kilden.</p></details>
+    </div>
+  </section>
 
+  <div class="container mk-soeg-wrap">
+    <form class="mk-search" id="mk-search" action="soegning.html" method="get" aria-label="Søg Triumph motorcykler">
+        <input type="hidden" name="brands" value="Triumph">
+        <div class="field mk-f-q">
+          <label for="mk-q">Mærke eller model</label>
+          <div class="input-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Triumph (fx Street Triple R …)" aria-describedby="mk-q-hint">
+          </div>
+          <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til Triumph. Skriv en model for at snævre ind.</span>
+        </div>
+        <div class="field mk-f-type">
+          <label for="mk-type">Type</label>
+          <select class="input" id="mk-type" name="type">
+            <option value="">Alle typer</option>
+            <option value="naked">Naked</option>
+            <option value="sport">Sport</option>
+            <option value="touring">Touring</option>
+            <option value="cruiser">Cruiser</option>
+            <option value="adventure">Adventure/Enduro</option>
+            <option value="classic">Classic/Veteran</option>
+          </select>
+        </div>
+        <div class="field mk-f-pris">
+          <label for="mk-pris">Maks. pris</label>
+          <select class="input" id="mk-pris" name="maxPrice">
+            <option value="">Alle priser</option>
+            <option value="60000">Op til 60.000 kr.</option>
+            <option value="100000">Op til 100.000 kr.</option>
+            <option value="200000">Op til 200.000 kr.</option>
+          </select>
+        </div>
+        <fieldset class="kk-field mk-f-kk">
+          <legend>Kørekort</legend>
+          <div class="kk-seg">
+            <input type="radio" name="koerekort" id="mk-kk-alle" value="" checked>
+            <label for="mk-kk-alle">Alle</label>
+            <input type="radio" name="koerekort" id="mk-kk-A1" value="A1">
+            <label for="mk-kk-A1">A1</label>
+            <input type="radio" name="koerekort" id="mk-kk-A2" value="A2">
+            <label for="mk-kk-A2">A2</label>
+            <input type="radio" name="koerekort" id="mk-kk-A" value="A">
+            <label for="mk-kk-A">A</label>
+          </div>
+        </fieldset>
+        <div class="mk-f-go">
+          <button type="submit" class="btn btn-primary btn-lg">Søg Triumph motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
+          <p class="mk-count"><span data-mk-n>34</span> Triumph motorcykler i Danmark</p>
+        </div>
+      </form>
+    <ul class="mk-trust" aria-label="Det kan du regne med">
+        <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.8v5.4c0 4.7 3 8 7 9.6 4-1.6 7-4.9 7-9.6V5.8Z"/><path d="m9 12 2.2 2.2L15.5 9.7"/></svg></span><span><strong>Kilden står på hvert kort</strong><span class="mk-trust-sub">Du kan altid se, hvor oplysningerne kommer fra.</span></span></li>
+        <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7.5 12h9M10.5 18h3"/></svg></span><span><strong>Kørekortfilter på oplyste tal</strong><span class="mk-trust-sub">Vi gætter aldrig — filteret bygger kun på det, annoncen oplyser.</span></span></li>
+        <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg></span><span><strong>Ikke oplyst frem for gæt</strong><span class="mk-trust-sub">Mangler et tal, står der "Ikke oplyst" i stedet for et skøn.</span></span></li>
+        <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span><span><strong>Handlen sker hos sælger</strong><span class="mk-trust-sub">Vi er et indeks og tager ingen kommission af salget.</span></span></li>
+      </ul>
+  </div>
 
-      <!-- "Se X efter model", ikke "Populaere X-modeller" og ikke "alle
-           modeller til salg": raekken er de 12 med flest annoncer, og
-           overskriften maa hverken paastaa popularitet, vi ikke maaler, eller
-           fuldstaendighed, den ikke har. Den er en navigationsetiket.
-
-           RUNDE 12, MAALT: raekken laa i sin EGEN <section> med synlig h2 og
-           fuld sektionsluft — 164 px plus et 80 px gab, altsaa en tredjedel af
-           afstanden ned til foerste vare paa mobil. Chipsene er navigation, og
-           navigation skal ikke koste mere plads end varen. Nu ligger de i
-           hero-blokken som én kompakt rulleraekke. Overskriften bliver staaende
-           for skaermlaesere og dokumentstruktur — den koster bare ingen pixels
-           laengere.
-
-           RUNDE 14: raekken laa stadig INDE i hero'en og kostede 62 px foran
-           varen paa mobil — maalt: foerste kort 681 px paa maerkesiderne mod
-           470 paa facetsiderne, som fik omrokeringen i runde 13. Modelchips er
-           samme slags navigation som facetsidernes maerkechips: VAEK fra det,
-           man lige har valgt. Raekken er nu soeskende, saa CSS kan laegge den
-           efter listen paa smalle skaerme. Paa desktop staar den, hvor den
-           altid har staaet. -->
-    <section class="brand-modelrow-sektion">
-      <h2 class="visually-hidden">Se Triumph efter model</h2>
-      <div class="popular-row brand-modelrow">
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Daytona%201200">Daytona 1200 · 2</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Rocket%20III">Rocket III · 2</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Street%20Triple%20R">Street Triple R · 2</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Street%20Triple%20RS">Street Triple RS · 2</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Bonneville%20T%20120%20Black%20Jet%20Black">Bonneville T 120 Black Jet Black · 1</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Bonneville%20T%20120%20C%20Classic%20Bike">Bonneville T 120 C Classic Bike · 1</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Daytona%20660">Daytona 660 · 1</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Daytona%20660%20Cosmic%20Yellow%20Sapphire%20Black">Daytona 660 Cosmic Yellow Sapphire Black · 1</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Daytona%20900">Daytona 900 · 1</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Daytona%20955i">Daytona 955i · 1</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Daytona%20955i%20bike">Daytona 955i bike · 1</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;q=Daytona%20T100R">Daytona T100R · 1</a>
+  <section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
+    <div class="container mk-wide">
+      <div class="mk-sek-head">
+        <h2 id="mk-featured-h">Triumph motorcykler på Bikerbasen</h2>
+        <a class="mk-link" href="soegning.html?brands=Triumph">Se alle Triumph motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
       </div>
-    </section>
-
-    <section class="section brand-liste-sektion" style="padding-top:var(--space-4);">
-      <div class="section-head">
-        <!-- Runde 9 (D9-M2): "nu" uden dato bag sig er D8-F2's fejl — datoen er
-             stoerste sidst_set i lageret, skrevet ved bygget. -->
-        <!-- RUNDE 12: overskriften var "276 annoncer — de foerste 24 her" og
-             brugte to linjer i samme skaermbillede som h1'en. To naesten lige
-             store overskrifter over hinanden er ikke hierarki. Tallet er
-             etiketten; loftet er en oplysning og hoerer i notelinjen, hvor
-             datoen allerede staar. Ingen oplysning er fjernet. -->
-        <div><h2 class="brand-sub" id="brand-antal">34 annoncer</h2><p class="brand-facet-note" id="brand-note">De første 24 vises her. Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
-        <a class="section-link" href="soegning.html?brands=Triumph">Alle 34 i søgningen<span aria-hidden="true"></span></a>
-      </div>
-      
-      <div class="brand-facet-fold">
-        <!-- RUNDE 13 (R13-10): checkbox+label baerer ingen disclosure-rolle, saa
-             en skaermlaeser hoerte "afkrydsningsfelt, ikke markeret" uden at
-             faa at vide, at den styrer indholdet nedenfor. CSS-mekanikken
-             bliver (den er grunden til, at folden ikke giver layouthop),
-             men kontrollen peger nu paa sit panel med aria-controls, og
-             tilstanden staar i selve navnet via to skjulte ord, CSS bytter
-             om paa ved :checked. Ingen JS, ingen CSP-undtagelse. -->
-        <input type="checkbox" class="brand-facet-check" id="facetfold-triumph" aria-controls="facetfold-triumph-panel">
-        <label class="brand-facet-greb" for="facetfold-triumph">Filtrér og sortér Triumph<span class="visually-hidden fold-vis"> — vis</span><span class="visually-hidden fold-skjul"> — skjul</span><span class="chev"></span></label>
-        <div class="brand-facetter" id="facetfold-triumph-panel">
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Kørekort:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;koerekort=A2">A2 · 3</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;koerekort=A">A · 34</a></div>
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Pris:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;maxPrice=60000">Under 60.000 · 6</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;maxPrice=100000">Under 100.000 · 22</a></div>
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Type:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=naked">Naked · 7</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=sport">Sport · 3</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=touring">Touring · 2</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=cruiser">Cruiser · 2</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=adventure">Adventure/Enduro · 1</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=classic">Classic/Veteran · 1</a></div>
-        <div class="brand-facet-raekke brand-facet-sorter"><span class="brand-facet-navn">Sortér i søgningen:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;sort=price-asc">Pris: lav → høj</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;sort=price-desc">Pris: høj → lav</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;sort=year-desc">Årgang: nyeste</a></div>
-        <p class="brand-facet-note">18 uden oplyst type — dem finder du i <a href="soegning.html?brands=Triumph">den fulde søgning</a>.</p></div>
-      </div>
-      <div class="listings-grid" id="brand-listings" data-brand="Triumph" data-viste="24">
+      <div class="mk-featured" data-n="5">
+        <div class="mk-featured-kort" id="mk-featured-kort" data-fremhaevet="5">
   <article class="card card-external" data-listing-id="04217c68-57e4-4487-b48a-a1eefdcd85b8" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -244,7 +238,7 @@ try{
        class="card-link"
        aria-label="Se annonce: Triumph Speed Triple Naked, 74.800 kr. — hos MC Syd"></a>
   </article>
-      
+          
   <article class="card card-external" data-listing-id="a442afde-8360-48ed-90bc-4442cee82546" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
@@ -278,7 +272,7 @@ try{
        class="card-link"
        aria-label="Se annonce: Triumph Tiger 850 Sport, 92.500 kr. — hos Gul og Gratis"></a>
   </article>
-      
+          
   <article class="card card-external" data-listing-id="053178da-3a43-4913-b49f-b586c10dc1c5" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -312,7 +306,7 @@ try{
        class="card-link"
        aria-label="Se annonce: Triumph Tiger 1050 Adventure/Enduro, 99.800 kr. — hos MC Syd"></a>
   </article>
-      
+          
   <article class="card card-external" data-listing-id="992bec89-3c4c-4b4e-88f2-1a03fa84b3db" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -346,7 +340,7 @@ try{
        class="card-link"
        aria-label="Se annonce: Triumph Street Triple R Naked, 94.800 kr. — hos MC Syd"></a>
   </article>
-      
+          
   <article class="card card-external" data-listing-id="a61f30e6-1a71-4f62-b905-f680f1cb4cf0" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -379,8 +373,203 @@ try{
     <a href="annonce.html?id=a61f30e6-1a71-4f62-b905-f680f1cb4cf0"
        class="card-link"
        aria-label="Se annonce: Triumph Daytona 1200 Touring, 48.000 kr. — hos MC Syd"></a>
-  </article>
+  </article></div>
+        <aside class="mk-cta" aria-labelledby="mk-cta-h">
+          <div class="mk-cta-body">
+            <p class="mk-cta-navn" aria-hidden="true">Triumph</p>
+            <h3 id="mk-cta-h">Find din næste Triumph</h3>
+            <ul class="mk-checks">
+              <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Danske forhandlere og markedspladser</li>
+              <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Kilden står på hvert kort</li>
+              <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Filtrér på dit kørekort</li>
+            </ul>
+            <a class="btn btn-primary" href="soegning.html?brands=Triumph">Søg Triumph motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+          </div>
+          <img class="mk-cta-img" src="https://assets.guloggratis.dk/images/7c1837ac-1077-4fb5-9ea1-c3233cb4ee8a/7c1837ac-1077-4fb5-9ea1-c3233cb4ee8a-320x240.webp" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mk-sektion" aria-labelledby="mk-typer-h">
+    <div class="container mk-wide">
+      <div class="mk-sek-head"><h2 id="mk-typer-h">Udforsk Triumph efter type</h2></div>
+      <div class="tiles-grid mk-tiles">
+        <a href="soegning.html?brands=Triumph&amp;type=naked" class="tile">
+          <span class="tile-media"><img src="https://assets.guloggratis.dk/images/e50a0db0-e462-4678-84da-2d509c707088/e50a0db0-e462-4678-84da-2d509c707088-320x240.webp" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Naked</span><span class="mk-tile-n">7 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Triumph&amp;type=sport" class="tile">
+          <span class="tile-media"><img src="https://assets.guloggratis.dk/images/7c1837ac-1077-4fb5-9ea1-c3233cb4ee8a/7c1837ac-1077-4fb5-9ea1-c3233cb4ee8a-320x240.webp" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Sport</span><span class="mk-tile-n">3 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Triumph&amp;type=touring" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/135253/Triumph_Daytona_1200_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Touring</span><span class="mk-tile-n">2 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Triumph&amp;type=cruiser" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/179086/Triumph_Rocket_lll_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Cruiser</span><span class="mk-tile-n">2 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Triumph&amp;type=adventure" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/153040/Triumph_Tiger_1050_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Adventure/<wbr>Enduro</span><span class="mk-tile-n">1 annonce</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Triumph&amp;type=classic" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/182051/Triumph_Tiger_750_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Classic/<wbr>Veteran</span><span class="mk-tile-n">1 annonce</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
+    <div class="container mk-wide">
+      <div class="saadan-strip">
+        <div class="saadan-hoved">
+          <h2 id="saadan-titel">Sådan virker Bikerbasen</h2>
+          <ol class="saadan-trin" aria-label="Fire trin fra kørekort til annonce">
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">1</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg></span>
+              <div><strong>Vælg dit kørekort</strong><span>A1, A2 eller A — vi skjuler det, tallene udelukker.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">2</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
+              <div><strong>Filtrer efter dine behov</strong><span>Mærke, model, type og maks. pris.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">3</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+              <div><strong>Se, hvad der er oplyst</strong><span>Kortet viser kilden og de tal, annoncen oplyser.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">4</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span>
+              <div><strong>Gå videre til sælger</strong><span>Annoncesiden fører dig videre til kilden.</span></div>
+            </li>
+          </ol>
+        </div>
+        <aside class="guide-boks" aria-labelledby="guide-titel">
+          <span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5Z"/></svg></span>
+          <div>
+            <h3 id="guide-titel">Køb og sælg trygt</h3>
+            <p>Gode råd før du køber, sælger eller mødes med den anden part — og tegn på svindel.</p>
+            <a href="sikkerhed.html">Læs gode råd<span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mk-sektion">
+    <div class="container mk-wide">
+      <div class="mk-cols mk-cols-3">
+        <section class="mk-col" aria-labelledby="mk-mod-h">
+        <div class="mk-col-head"><h2 id="mk-mod-h">Triumph-modeller med flest annoncer</h2></div>
+        <ul class="mk-mini">
+          <li><a href="soegning.html?brands=Triumph&amp;q=Street%20Triple%20R"><strong>Street Triple R</strong><span>4 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;q=Daytona%201200"><strong>Daytona 1200</strong><span>2 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;q=Daytona%20660"><strong>Daytona 660</strong><span>2 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;q=Daytona%20955i"><strong>Daytona 955i</strong><span>2 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;q=Rocket%20III"><strong>Rocket III</strong><span>2 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;q=Street%20Triple%20RS"><strong>Street Triple RS</strong><span>2 annoncer</span></a></li>
+        </ul>
+        <details class="mk-mere"><summary>Flere Triumph-modeller (24)</summary>
+          <ul class="mk-mini">
+            <li><a href="soegning.html?brands=Triumph&amp;q=Thruxton"><strong>Thruxton</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Tiger%20800"><strong>Tiger 800</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Bonneville%20T%20120%20Black%20Jet%20Black"><strong>Bonneville T 120 Black Jet Black</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Bonneville%20T%20120%20C%20Classic%20Bike"><strong>Bonneville T 120 C Classic Bike</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Daytona%20660%20Cosmic%20Yellow%20Sapphire%20Black"><strong>Daytona 660 Cosmic Yellow Sapphire Black</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Daytona%20900"><strong>Daytona 900</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Daytona%20955i%20bike"><strong>Daytona 955i bike</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Daytona%20T100R"><strong>Daytona T100R</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Rocket%20lll"><strong>Rocket lll</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Scrambler%20900"><strong>Scrambler 900</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Speed%20400%20Phantom%20Black%20Storm%20Grey"><strong>Speed 400 Phantom Black Storm Grey</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Speed%20Triple"><strong>Speed Triple</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Sprint%20ST%201050"><strong>Sprint ST 1050</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=TF%20250-E"><strong>TF 250-E</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Thruxton%201200"><strong>Thruxton 1200</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Tiger%201050"><strong>Tiger 1050</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Tiger%20750"><strong>Tiger 750</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Tiger%20800%20XCX%20Lucerne%20Blue"><strong>Tiger 800 XCX Lucerne Blue</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Tiger%20850"><strong>Tiger 850</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Tiger%20900%20Rally%20Pro"><strong>Tiger 900 Rally Pro</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Tiger%20Classic%20Bike"><strong>Tiger Classic Bike</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Tracker%20400%20Phantom%20Black"><strong>Tracker 400 Phantom Black</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Trident%20660%20Cosmic%20Yellow"><strong>Trident 660 Cosmic Yellow</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Triumph&amp;q=Trident%20660%20Stone%20Gray"><strong>Trident 660 Stone Gray</strong><span>1 annonce</span></a></li>
+          </ul>
+        </details>
+        <p class="mk-col-foot"><a class="mk-link" href="soegning.html?brands=Triumph">Se alle Triumph-annoncer<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
+      </section>
+        <section class="mk-col" aria-labelledby="mk-kk-h">
+        <div class="mk-col-head"><h2 id="mk-kk-h">Udforsk Triumph efter kørekort</h2></div>
+        <ul class="mk-mini mk-mini-kk">
+          <li><a href="soegning.html?brands=Triumph&amp;koerekort=A2"><strong>A2</strong><span>3 Triumph</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;koerekort=A"><strong>A</strong><span>34 Triumph</span></a></li>
+        </ul>
+        <ul class="mk-links">
+          <li><a href="koerekort-a2.html">Hvad må du køre på A2?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+          <li><a href="koerekort-a1.html">Hvad må du køre på A1?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+          <li><a href="guide-a2-koerekort.html">Guide: fra A2 til A-kørekort<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+        </ul>
+        <p class="mk-col-note">Antal motorcykler, der ikke er udelukket på de oplyste tal — A omfatter derfor alle.</p>
+      </section>
+        <section class="mk-col" aria-labelledby="mk-reg-h">
+        <div class="mk-col-head"><h2 id="mk-reg-h">Find Triumph i din region</h2></div>
+        <ul class="mk-mini mk-mini-reg">
+          <li><a href="soegning.html?brands=Triumph&amp;regions=Syddanmark"><strong>Syddanmark</strong><span>16</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;regions=Nordjylland"><strong>Nordjylland</strong><span>9</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;regions=Midtjylland"><strong>Midtjylland</strong><span>8</span></a></li>
+          <li><a href="soegning.html?brands=Triumph&amp;regions=Hovedstaden"><strong>Hovedstaden</strong><span>1</span></a></li>
+        </ul>
+        
+      </section>
+      </div>
+    </div>
+  </section>
+
+  <div class="container mk-wide">
+    <section class="section brand-liste-sektion mk-liste" style="padding-top:var(--space-4);" aria-labelledby="brand-antal">
+      <div class="section-head">
+        <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
+             FAQ. js/maerke.js opdaterer alle [data-mk-n] samlet, hvis lageret
+             har ændret sig siden bygget — aldrig kun ét af dem. -->
+        <div><h2 class="brand-sub" id="brand-antal">Flere Triumph-annoncer</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>34</span> annoncer i alt. De første 24 af resten vises her. Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
+        <a class="section-link" href="soegning.html?brands=Triumph">Alle <span data-mk-n>34</span> i søgningen<span aria-hidden="true"></span></a>
+      </div>
       
+      <div class="brand-facet-fold">
+        <!-- RUNDE 13 (R13-10): checkbox+label baerer ingen disclosure-rolle, saa
+             en skaermlaeser hoerte "afkrydsningsfelt, ikke markeret" uden at
+             faa at vide, at den styrer indholdet nedenfor. CSS-mekanikken
+             bliver (den er grunden til, at folden ikke giver layouthop),
+             men kontrollen peger nu paa sit panel med aria-controls, og
+             tilstanden staar i selve navnet via to skjulte ord, CSS bytter
+             om paa ved :checked. Ingen JS, ingen CSP-undtagelse. -->
+        <input type="checkbox" class="brand-facet-check" id="facetfold-triumph" aria-controls="facetfold-triumph-panel">
+        <label class="brand-facet-greb" for="facetfold-triumph">Filtrér og sortér Triumph<span class="visually-hidden fold-vis"> — vis</span><span class="visually-hidden fold-skjul"> — skjul</span><span class="chev"></span></label>
+        <div class="brand-facetter" id="facetfold-triumph-panel">
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Kørekort:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;koerekort=A2">A2 · 3</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;koerekort=A">A · 34</a></div>
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Pris:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;maxPrice=60000">Under 60.000 · 6</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;maxPrice=100000">Under 100.000 · 22</a></div>
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Type:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=naked">Naked · 7</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=sport">Sport · 3</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=touring">Touring · 2</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=cruiser">Cruiser · 2</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=adventure">Adventure/Enduro · 1</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;type=classic">Classic/Veteran · 1</a></div>
+        <div class="brand-facet-raekke brand-facet-sorter"><span class="brand-facet-navn">Sortér i søgningen:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;sort=price-asc">Pris: lav → høj</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;sort=price-desc">Pris: høj → lav</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Triumph&amp;sort=year-desc">Årgang: nyeste</a></div>
+        <p class="brand-facet-note">18 uden oplyst type — dem finder du i <a href="soegning.html?brands=Triumph">den fulde søgning</a>.</p></div>
+      </div>
+      <div class="listings-grid" id="brand-listings" data-brand="Triumph" data-viste="24">
   <article class="card card-external" data-listing-id="b256f45e-0455-41f4-8fef-0032c0cd3676" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -1025,6 +1214,176 @@ try{
     <a href="annonce.html?id=6aa3492d-fd89-4f02-a1e7-741b38bcf7a7"
        class="card-link"
        aria-label="Se annonce: Triumph Daytona 660, 129.995 kr. — hos Gul og Gratis"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="7ac03e6a-55a5-4a88-b59d-6519c5064ce0" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      <img src="https://assets.guloggratis.dk/images/535ffe91-95b4-4482-8a58-78a6b230766f/535ffe91-95b4-4482-8a58-78a6b230766f-320x240.webp" alt="Triumph TF 250-E" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="7ac03e6a-55a5-4a88-b59d-6519c5064ce0" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">79.900 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Triumph TF 250-E</span>
+        <span class="card-title-variant"></span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2026</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>250 ccm</dd></div>
+          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a2" title="Ikke udelukket til A2 ud fra 250 ccm og 14 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg>Mulig A2<span class="visually-hidden">. Ikke udelukket til A2 ud fra 250 ccm og 14 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten.</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Varde, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Varde</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=7ac03e6a-55a5-4a88-b59d-6519c5064ce0"
+       class="card-link"
+       aria-label="Se annonce: Triumph TF 250-E, 79.900 kr. — hos Gul og Gratis"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="84a10b1e-3a28-4676-b8aa-5af169a23f76" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      <img src="https://assets.guloggratis.dk/images/b6072823-a20f-419b-a461-1e0d83ac74a2/b6072823-a20f-419b-a461-1e0d83ac74a2-320x240.webp" alt="Triumph Speed 400 Phantom Black Storm Grey" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="84a10b1e-3a28-4676-b8aa-5af169a23f76" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">70.395 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Triumph Speed 400 Phantom Black Storm Grey</span>
+        <span class="card-title-variant"></span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2027</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>400 ccm</dd></div>
+          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a2" title="Ikke udelukket til A2 ud fra 400 ccm og 40 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg>Mulig A2<span class="visually-hidden">. Ikke udelukket til A2 ud fra 400 ccm og 40 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten.</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Nørresundby, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Nørresundby</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=84a10b1e-3a28-4676-b8aa-5af169a23f76"
+       class="card-link"
+       aria-label="Se annonce: Triumph Speed 400 Phantom Black Storm Grey, 70.395 kr. — hos Gul og Gratis"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="cf045ac3-efef-41e7-bd81-d55a7111509c" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      <img src="https://assets.guloggratis.dk/images/0fb51b3d-c50e-4456-8fca-d978c2dc6fee/0fb51b3d-c50e-4456-8fca-d978c2dc6fee-320x240.webp" alt="Triumph Scrambler 900" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="cf045ac3-efef-41e7-bd81-d55a7111509c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">159.900 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Triumph Scrambler 900</span>
+        <span class="card-title-variant"></span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2026</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>900 ccm</dd></div>
+          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 900 ccm og 65 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 900 ccm og 65 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Nørresundby, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Nørresundby</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=cf045ac3-efef-41e7-bd81-d55a7111509c"
+       class="card-link"
+       aria-label="Se annonce: Triumph Scrambler 900, 159.900 kr. — hos Gul og Gratis"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="e5ce7b50-a0ef-4f76-9e96-d1a6e38d3b1b" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      <img src="https://assets.guloggratis.dk/images/f93653fc-d758-4903-aa29-3cd9a1690446/f93653fc-d758-4903-aa29-3cd9a1690446-320x240.webp" alt="Triumph Daytona 660 Cosmic Yellow Sapphire Black" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="e5ce7b50-a0ef-4f76-9e96-d1a6e38d3b1b" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">129.995 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Triumph Daytona 660 Cosmic Yellow Sapphire Black</span>
+        <span class="card-title-variant"></span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2026</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>660 ccm</dd></div>
+          <div class="card-spec spec-tom"><dt>Ikke oplyst af kilden</dt><dd>km</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 660 ccm og 95 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 660 ccm og 95 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Nørresundby, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Nørresundby</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=e5ce7b50-a0ef-4f76-9e96-d1a6e38d3b1b"
+       class="card-link"
+       aria-label="Se annonce: Triumph Daytona 660 Cosmic Yellow Sapphire Black, 129.995 kr. — hos Gul og Gratis"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="689aab1f-6674-43eb-b20e-689bbd0b64e8" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      <img src="https://assets.guloggratis.dk/images/189147ed-da5f-4f14-9d29-bdfa91a73475/189147ed-da5f-4f14-9d29-bdfa91a73475-320x240.webp" alt="Triumph Daytona T100R" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="689aab1f-6674-43eb-b20e-689bbd0b64e8" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">49.000 kr.</span>
+        <span class="card-ny" title="Annoncen ligger i Gul og Gratiss katalog over NYE motorcykler. Den er ikke brugt — spørg sælgeren om garanti- og reklamationsvilkår.">Ny</span>
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Triumph Daytona T100R</span>
+        <span class="card-title-variant"></span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>1971</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>1.400 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>500 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.">Kørekort ikke afgjort<span class="visually-hidden">. Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Odense SV, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Odense SV</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=689aab1f-6674-43eb-b20e-689bbd0b64e8"
+       class="card-link"
+       aria-label="Se annonce: Triumph Daytona T100R, 49.000 kr. — hos Gul og Gratis"></a>
   </article></div>
       <p class="brand-mere"><a href="soegning.html?brands=Triumph" class="btn btn-primary">Se alle 34 Triumph i søgningen</a></p>
       <div class="brand-actions">
@@ -1162,23 +1521,23 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=a886b9e2"></script>
-<script defer src="js/supabase-config.js?v=a886b9e2"></script>
-<script defer src="js/supabase-api.js?v=a886b9e2"></script>
-<script defer src="js/icons.js?v=a886b9e2"></script>
-<script defer src="js/bike-art.js?v=a886b9e2"></script>
+<script defer src="js/security.js?v=96635651"></script>
+<script defer src="js/supabase-config.js?v=96635651"></script>
+<script defer src="js/supabase-api.js?v=96635651"></script>
+<script defer src="js/icons.js?v=96635651"></script>
+<script defer src="js/bike-art.js?v=96635651"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=a886b9e2"></script>
-<script defer src="js/store.js?v=a886b9e2"></script>
-<script defer src="js/maaling.js?v=a886b9e2"></script>
-<script defer src="js/backend-bridge.js?v=a886b9e2"></script>
-<script defer src="js/components.js?v=a886b9e2"></script>
+<script defer src="js/data.js?v=96635651"></script>
+<script defer src="js/store.js?v=96635651"></script>
+<script defer src="js/maaling.js?v=96635651"></script>
+<script defer src="js/backend-bridge.js?v=96635651"></script>
+<script defer src="js/components.js?v=96635651"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=a886b9e2"></script>
-<script defer src="js/maerke.js?v=a886b9e2"></script>
+<script defer src="js/sortering.js?v=96635651"></script>
+<script defer src="js/maerke.js?v=96635651"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

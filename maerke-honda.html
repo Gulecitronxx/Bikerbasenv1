@@ -63,12 +63,12 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="preload" as="image" href="https://images.danbase.dk/Content/Resellers/321/180898/Honda_CB_1000_0_2.jpg?v=2" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=a886b9e2">
+<link rel="stylesheet" href="css/styles.css?v=96635651">
+<link rel="stylesheet" href="css/p-maerke.css?v=96635651">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Honda","item":"https://bikerbasen.dk/maerke-honda"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en Honda-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"253 af de 276 Honda-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 4.000 kr. til 609.995 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 119.990 kr. De resterende 23 annoncer oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre Honda på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"33 af 187 Honda-annoncer med kendt effekt er ikke udelukket på effekt til A2 — de holder sig under loftet på 47 hk (35 kW), heraf 10 også inden for A1-grænsen — mens 154 kræver stort kørekort. A2 stiller også krav om maks. 0,2 kW pr. kg og om, at maskinen ikke er afledt af en model med over dobbelt effekt; det står ikke i annoncerne, så tjek registreringsattesten. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra. De resterende 89 annoncer mangler effektoplysningen hos kilden."}},{"@type":"Question","name":"Hvilke Honda-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 276 Honda-annoncer går GL 1800 Gold Wing (20 stk.), CMX 500 Rebel (17 stk.), CMX 1100 D Rebel (15 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Honda-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
 </head>
-<body>
+<body class="mk-body" data-mk-brand="Honda">
 <a class="skip-link" href="#main-content">Gå til indhold</a>
 <header class="site-header">
   <div class="container">
@@ -115,104 +115,97 @@ try{
 </div>
 
 <main id="main-content">
-  <div class="container">
-    <nav class="breadcrumb" aria-label="Brødkrumme">
-      <a href="index.html">Forside</a><span class="bc-sep"></span>
-      <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
-      <span>Honda</span>
-    </nav>
-
-    <!-- Runde 7 (D7-M3): foerste kort stod ved 873 px (390) / 728 (1 366) —
-         12 linjer indledning foer lageret. Nu: h1 + den foerste saetning
-         (tallet) synligt, resten af indledningen bag <details>, modelchips
-         (navigation) foer knapperne, og gitteret lige under. -->
-    <div class="brand-hero">
-      <h1>Honda-motorcykler til salg i Danmark</h1>
-      <p class="brand-intro">Der er <strong>276</strong> Honda motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — <strong>109</strong> brugte og <strong>167</strong> fabriksnye — fra 4.000 kr. til 609.995 kr., med årgange mellem 1963 og 2026.</p>
-      <details class="brand-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Honda er verdens største motorcykelproducent og kendt for driftssikkerhed og et usædvanligt bredt program — fra små citymodeller til CBR-sportscykler, Africa Twin-adventure og Gold Wing-tourere. Udvalget dækker Naked, Cruiser, Touring m.fl. 23 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Jensens Motorcykler og Rydbergs MC, og handlen sker hos kilden.</p></details>
+  <!-- Billede 9 (Yamaha): hero med foto og mærkenavn → søgekort over fotoets
+       underkant → tillidsrække → fremhævet annoncerække + CTA-panel → typefliser
+       → "Sådan virker Bikerbasen" → tre kolonner (modeller / kørekort / region).
+       Under billedets struktur ligger det, siden altid har haft: den fulde
+       liste, facetter, prisniveau, FAQ og andre mærker (SEO).
+       Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
+       reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
+  <section class="mk-hero mk-hero-type">
+    <div class="mk-hero-media" aria-hidden="true">
+      <img class="mk-hero-typeimg" src="img/type/adventure.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async">
     </div>
+    <div class="container mk-hero-inner">
+      <nav class="breadcrumb" aria-label="Brødkrumme">
+        <a href="index.html">Forside</a><span class="bc-sep"></span>
+        <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
+        <span>Honda</span>
+      </nav>
+      <p class="mk-wordmark" aria-hidden="true"><span class="mk-mono">H</span><span>Honda</span></p>
+      <h1>Honda-motorcykler til salg i Danmark</h1>
+      <p class="brand-intro mk-intro">Der er <strong>276</strong> Honda motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — <strong>109</strong> brugte og <strong>167</strong> fabriksnye — fra 4.000 kr. til 609.995 kr., med årgange mellem 1963 og 2026.</p>
+      <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Honda er verdens største motorcykelproducent og kendt for driftssikkerhed og et usædvanligt bredt program — fra små citymodeller til CBR-sportscykler, Africa Twin-adventure og Gold Wing-tourere. Udvalget dækker Naked, Cruiser, Touring m.fl. 23 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Jensens Motorcykler og Rydbergs MC, og handlen sker hos kilden.</p></details>
+    </div>
+  </section>
 
+  <div class="container mk-soeg-wrap">
+    <form class="mk-search" id="mk-search" action="soegning.html" method="get" aria-label="Søg Honda motorcykler">
+        <input type="hidden" name="brands" value="Honda">
+        <div class="field mk-f-q">
+          <label for="mk-q">Mærke eller model</label>
+          <div class="input-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Honda (fx CB 1000 …)" aria-describedby="mk-q-hint">
+          </div>
+          <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til Honda. Skriv en model for at snævre ind.</span>
+        </div>
+        <div class="field mk-f-type">
+          <label for="mk-type">Type</label>
+          <select class="input" id="mk-type" name="type">
+            <option value="">Alle typer</option>
+            <option value="adventure">Adventure/Enduro</option>
+            <option value="cruiser">Cruiser</option>
+            <option value="naked">Naked</option>
+            <option value="touring">Touring</option>
+            <option value="sport">Sport</option>
+            <option value="classic">Classic/Veteran</option>
+          </select>
+        </div>
+        <div class="field mk-f-pris">
+          <label for="mk-pris">Maks. pris</label>
+          <select class="input" id="mk-pris" name="maxPrice">
+            <option value="">Alle priser</option>
+            <option value="30000">Op til 30.000 kr.</option>
+            <option value="60000">Op til 60.000 kr.</option>
+            <option value="100000">Op til 100.000 kr.</option>
+            <option value="200000">Op til 200.000 kr.</option>
+          </select>
+        </div>
+        <fieldset class="kk-field mk-f-kk">
+          <legend>Kørekort</legend>
+          <div class="kk-seg">
+            <input type="radio" name="koerekort" id="mk-kk-alle" value="" checked>
+            <label for="mk-kk-alle">Alle</label>
+            <input type="radio" name="koerekort" id="mk-kk-A1" value="A1">
+            <label for="mk-kk-A1">A1</label>
+            <input type="radio" name="koerekort" id="mk-kk-A2" value="A2">
+            <label for="mk-kk-A2">A2</label>
+            <input type="radio" name="koerekort" id="mk-kk-A" value="A">
+            <label for="mk-kk-A">A</label>
+          </div>
+        </fieldset>
+        <div class="mk-f-go">
+          <button type="submit" class="btn btn-primary btn-lg">Søg Honda motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
+          <p class="mk-count"><span data-mk-n>276</span> Honda motorcykler i Danmark</p>
+        </div>
+      </form>
+    <ul class="mk-trust" aria-label="Det kan du regne med">
+        <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.8v5.4c0 4.7 3 8 7 9.6 4-1.6 7-4.9 7-9.6V5.8Z"/><path d="m9 12 2.2 2.2L15.5 9.7"/></svg></span><span><strong>Kilden står på hvert kort</strong><span class="mk-trust-sub">Du kan altid se, hvor oplysningerne kommer fra.</span></span></li>
+        <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7.5 12h9M10.5 18h3"/></svg></span><span><strong>Kørekortfilter på oplyste tal</strong><span class="mk-trust-sub">Vi gætter aldrig — filteret bygger kun på det, annoncen oplyser.</span></span></li>
+        <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg></span><span><strong>Ikke oplyst frem for gæt</strong><span class="mk-trust-sub">Mangler et tal, står der "Ikke oplyst" i stedet for et skøn.</span></span></li>
+        <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span><span><strong>Handlen sker hos sælger</strong><span class="mk-trust-sub">Vi er et indeks og tager ingen kommission af salget.</span></span></li>
+      </ul>
+  </div>
 
-      <!-- "Se X efter model", ikke "Populaere X-modeller" og ikke "alle
-           modeller til salg": raekken er de 12 med flest annoncer, og
-           overskriften maa hverken paastaa popularitet, vi ikke maaler, eller
-           fuldstaendighed, den ikke har. Den er en navigationsetiket.
-
-           RUNDE 12, MAALT: raekken laa i sin EGEN <section> med synlig h2 og
-           fuld sektionsluft — 164 px plus et 80 px gab, altsaa en tredjedel af
-           afstanden ned til foerste vare paa mobil. Chipsene er navigation, og
-           navigation skal ikke koste mere plads end varen. Nu ligger de i
-           hero-blokken som én kompakt rulleraekke. Overskriften bliver staaende
-           for skaermlaesere og dokumentstruktur — den koster bare ingen pixels
-           laengere.
-
-           RUNDE 14: raekken laa stadig INDE i hero'en og kostede 62 px foran
-           varen paa mobil — maalt: foerste kort 681 px paa maerkesiderne mod
-           470 paa facetsiderne, som fik omrokeringen i runde 13. Modelchips er
-           samme slags navigation som facetsidernes maerkechips: VAEK fra det,
-           man lige har valgt. Raekken er nu soeskende, saa CSS kan laegge den
-           efter listen paa smalle skaerme. Paa desktop staar den, hvor den
-           altid har staaet. -->
-    <section class="brand-modelrow-sektion">
-      <h2 class="visually-hidden">Se Honda efter model</h2>
-      <div class="popular-row brand-modelrow">
-        <a class="popular-chip" href="model-honda-gl-1800-gold-wing.html">GL 1800 Gold Wing · 20</a>
-        <a class="popular-chip" href="model-honda-cmx-500-rebel.html">CMX 500 Rebel · 17</a>
-        <a class="popular-chip" href="model-honda-cmx-1100-d-rebel.html">CMX 1100 D Rebel · 15</a>
-        <a class="popular-chip" href="model-honda-crf-1100-l-africa.html">CRF 1100 L Africa · 15</a>
-        <a class="popular-chip" href="model-honda-nt-1100-a.html">NT 1100 A · 13</a>
-        <a class="popular-chip" href="model-honda-nx-500.html">NX 500 · 10</a>
-        <a class="popular-chip" href="soegning.html?brands=Honda&amp;q=CB%201000%20Hornet">CB 1000 Hornet · 8</a>
-        <a class="popular-chip" href="soegning.html?brands=Honda&amp;q=CB%20650%20R">CB 650 R · 7</a>
-        <a class="popular-chip" href="soegning.html?brands=Honda&amp;q=CL%20500%20A">CL 500 A · 7</a>
-        <a class="popular-chip" href="soegning.html?brands=Honda&amp;q=CB%201000%20R">CB 1000 R · 6</a>
-        <a class="popular-chip" href="soegning.html?brands=Honda&amp;q=CBR%20650%20R">CBR 650 R · 6</a>
-        <a class="popular-chip" href="soegning.html?brands=Honda&amp;q=NC%20750%20X">NC 750 X · 6</a>
+  <section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
+    <div class="container mk-wide">
+      <div class="mk-sek-head">
+        <h2 id="mk-featured-h">Honda motorcykler på Bikerbasen</h2>
+        <a class="mk-link" href="soegning.html?brands=Honda">Se alle Honda motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
       </div>
-    </section>
-
-    <section class="section brand-liste-sektion" style="padding-top:var(--space-4);">
-      <div class="section-head">
-        <!-- Runde 9 (D9-M2): "nu" uden dato bag sig er D8-F2's fejl — datoen er
-             stoerste sidst_set i lageret, skrevet ved bygget. -->
-        <!-- RUNDE 12: overskriften var "276 annoncer — de foerste 24 her" og
-             brugte to linjer i samme skaermbillede som h1'en. To naesten lige
-             store overskrifter over hinanden er ikke hierarki. Tallet er
-             etiketten; loftet er en oplysning og hoerer i notelinjen, hvor
-             datoen allerede staar. Ingen oplysning er fjernet. -->
-        <div><h2 class="brand-sub" id="brand-antal">276 annoncer</h2><p class="brand-facet-note" id="brand-note">De første 24 vises her. Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
-        <a class="section-link" href="soegning.html?brands=Honda">Alle 276 i søgningen<span aria-hidden="true"></span></a>
-      </div>
-      
-      <div class="brand-facet-fold">
-        <!-- RUNDE 13 (R13-10): checkbox+label baerer ingen disclosure-rolle, saa
-             en skaermlaeser hoerte "afkrydsningsfelt, ikke markeret" uden at
-             faa at vide, at den styrer indholdet nedenfor. CSS-mekanikken
-             bliver (den er grunden til, at folden ikke giver layouthop),
-             men kontrollen peger nu paa sit panel med aria-controls, og
-             tilstanden staar i selve navnet via to skjulte ord, CSS bytter
-             om paa ved :checked. Ingen JS, ingen CSP-undtagelse. -->
-        <input type="checkbox" class="brand-facet-check" id="facetfold-honda" aria-controls="facetfold-honda-panel">
-        <label class="brand-facet-greb" for="facetfold-honda">Filtrér og sortér Honda<span class="visually-hidden fold-vis"> — vis</span><span class="visually-hidden fold-skjul"> — skjul</span><span class="chev"></span></label>
-        <div class="brand-facetter" id="facetfold-honda-panel">
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Kørekort:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;koerekort=A1">A1 · 10</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;koerekort=A2">A2 · 33</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;koerekort=A">A · 276</a></div>
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Pris:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;maxPrice=30000">Under 30.000 · 18</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;maxPrice=60000">Under 60.000 · 43</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;maxPrice=100000">Under 100.000 · 104</a></div>
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Type:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=adventure">Adventure/Enduro · 53</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=cruiser">Cruiser · 41</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=naked">Naked · 36</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=touring">Touring · 33</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=sport">Sport · 10</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=classic">Classic/Veteran · 2</a></div>
-        <div class="brand-facet-raekke brand-facet-sorter"><span class="brand-facet-navn">Sortér i søgningen:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;sort=price-asc">Pris: lav → høj</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;sort=price-desc">Pris: høj → lav</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;sort=year-desc">Årgang: nyeste</a></div>
-        <p class="brand-facet-note">101 uden oplyst type — dem finder du i <a href="soegning.html?brands=Honda">den fulde søgning</a>.</p></div>
-      </div>
-      <div class="listings-grid" id="brand-listings" data-brand="Honda" data-viste="24">
+      <div class="mk-featured" data-n="5">
+        <div class="mk-featured-kort" id="mk-featured-kort" data-fremhaevet="5">
   <article class="card card-external" data-listing-id="0098fee2-be9d-49aa-8956-4a732ed50bf3" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -246,7 +239,7 @@ try{
        class="card-link"
        aria-label="Se annonce: Honda CB 1000 Naked, 124.800 kr. — hos MC Syd"></a>
   </article>
-      
+          
   <article class="card card-external" data-listing-id="07def4c0-aeb3-47c7-8a7e-5d3b76023ecf" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
@@ -280,7 +273,7 @@ try{
        class="card-link"
        aria-label="Se annonce: Honda CX 650 E (Eurosport), 20.000 kr. — hos Gul og Gratis"></a>
   </article>
-      
+          
   <article class="card card-external" data-listing-id="028653e2-985c-4210-9153-5337cf20ed3d" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -314,7 +307,7 @@ try{
        class="card-link"
        aria-label="Se annonce: Honda F6 Valkyrie Cruiser, 99.800 kr. — hos MC Syd"></a>
   </article>
-      
+          
   <article class="card card-external" data-listing-id="1b56a4ee-fa0a-41ad-87d7-8ad5b4130d5a" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
@@ -348,7 +341,7 @@ try{
        class="card-link"
        aria-label="Se annonce: Honda Vf750f, 10.000 kr. — hos Gul og Gratis"></a>
   </article>
-      
+          
   <article class="card card-external" data-listing-id="0a72f9c3-a044-4377-958a-574021090a5f" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -381,8 +374,207 @@ try{
     <a href="annonce.html?id=0a72f9c3-a044-4377-958a-574021090a5f"
        class="card-link"
        aria-label="Se annonce: Honda NT 1100 A Touring, 149.800 kr. — hos MC Syd"></a>
-  </article>
+  </article></div>
+        <aside class="mk-cta" aria-labelledby="mk-cta-h">
+          <div class="mk-cta-body">
+            <p class="mk-cta-navn" aria-hidden="true">Honda</p>
+            <h3 id="mk-cta-h">Find din næste Honda</h3>
+            <ul class="mk-checks">
+              <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Danske forhandlere og markedspladser</li>
+              <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Kilden står på hvert kort</li>
+              <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Filtrér på dit kørekort</li>
+            </ul>
+            <a class="btn btn-primary" href="soegning.html?brands=Honda">Søg Honda motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+          </div>
+          <img class="mk-cta-img" src="https://assets.guloggratis.dk/images/328caf06-e15f-42a9-9ef2-e800ccc4cc13/328caf06-e15f-42a9-9ef2-e800ccc4cc13-320x240.webp" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mk-sektion" aria-labelledby="mk-typer-h">
+    <div class="container mk-wide">
+      <div class="mk-sek-head"><h2 id="mk-typer-h">Udforsk Honda efter type</h2></div>
+      <div class="tiles-grid mk-tiles">
+        <a href="soegning.html?brands=Honda&amp;type=adventure" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/106584/Honda_CRF_1000_L_Africa_Twin_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Adventure/<wbr>Enduro</span><span class="mk-tile-n">53 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Honda&amp;type=cruiser" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/176252/Honda_F6_Valkyrie_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Cruiser</span><span class="mk-tile-n">41 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Honda&amp;type=naked" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/180898/Honda_CB_1000_0_2.jpg?v=2" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Naked</span><span class="mk-tile-n">36 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Honda&amp;type=touring" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/183074/Honda_NT_1100_A_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Touring</span><span class="mk-tile-n">33 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Honda&amp;type=sport" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/93208/Honda_VF_1000_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Sport</span><span class="mk-tile-n">10 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a href="soegning.html?brands=Honda&amp;type=classic" class="tile">
+          <span class="tile-media"><img src="https://images.danbase.dk/Content/Resellers/321/181871/Honda_GL_1100_Gold_Wing_0_2.jpg?v=1" alt="" width="456" height="342" loading="lazy" decoding="async" referrerpolicy="no-referrer"></span>
+          <span class="tile-label"><span class="mk-tile-tekst"><span>Classic/<wbr>Veteran</span><span class="mk-tile-n">2 annoncer</span></span><span class="tile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
+    <div class="container mk-wide">
+      <div class="saadan-strip">
+        <div class="saadan-hoved">
+          <h2 id="saadan-titel">Sådan virker Bikerbasen</h2>
+          <ol class="saadan-trin" aria-label="Fire trin fra kørekort til annonce">
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">1</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg></span>
+              <div><strong>Vælg dit kørekort</strong><span>A1, A2 eller A — vi skjuler det, tallene udelukker.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">2</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></span>
+              <div><strong>Filtrer efter dine behov</strong><span>Mærke, model, type og maks. pris.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">3</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+              <div><strong>Se, hvad der er oplyst</strong><span>Kortet viser kilden og de tal, annoncen oplyser.</span></div>
+            </li>
+            <li class="saadan-trin-punkt">
+              <span class="saadan-nr" aria-hidden="true">4</span>
+              <span class="saadan-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span>
+              <div><strong>Gå videre til sælger</strong><span>Annoncesiden fører dig videre til kilden.</span></div>
+            </li>
+          </ol>
+        </div>
+        <aside class="guide-boks" aria-labelledby="guide-titel">
+          <span class="guide-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5Z"/></svg></span>
+          <div>
+            <h3 id="guide-titel">Køb og sælg trygt</h3>
+            <p>Gode råd før du køber, sælger eller mødes med den anden part — og tegn på svindel.</p>
+            <a href="sikkerhed.html">Læs gode råd<span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mk-sektion">
+    <div class="container mk-wide">
+      <div class="mk-cols mk-cols-3">
+        <section class="mk-col" aria-labelledby="mk-mod-h">
+        <div class="mk-col-head"><h2 id="mk-mod-h">Honda-modeller med flest annoncer</h2></div>
+        <ul class="mk-mini">
+          <li><a href="soegning.html?brands=Honda&amp;q=CB%201000"><strong>CB 1000</strong><span>29 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CRF%20110%20F"><strong>CRF 110 F</strong><span>25 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CRF%201100%20L"><strong>CRF 1100 L</strong><span>24 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CB%201000%20R"><strong>CB 1000 R</strong><span>22 annoncer</span></a></li>
+          <li><a href="model-honda-cmx-1100-d-rebel.html"><strong>CMX 1100 D Rebel</strong><span>22 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;q=CMX%201100%20Rebel"><strong>CMX 1100 Rebel</strong><span>22 annoncer</span></a></li>
+        </ul>
+        <details class="mk-mere"><summary>Flere Honda-modeller (24)</summary>
+          <ul class="mk-mini">
+            <li><a href="model-honda-cmx-500-rebel.html"><strong>CMX 500 Rebel</strong><span>20 annoncer</span></a></li>
+            <li><a href="model-honda-crf-1100-l-africa.html"><strong>CRF 1100 L Africa</strong><span>20 annoncer</span></a></li>
+            <li><a href="model-honda-gl-1800-gold-wing.html"><strong>GL 1800 Gold Wing</strong><span>20 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20650"><strong>CB 650</strong><span>17 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20650%20R"><strong>CB 650 R</strong><span>16 annoncer</span></a></li>
+            <li><a href="model-honda-nt-1100-a.html"><strong>NT 1100 A</strong><span>16 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NT%201100%20D"><strong>NT 1100 D</strong><span>16 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=Nt%201100%20d"><strong>Nt 1100 d</strong><span>16 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NC%20750"><strong>NC 750</strong><span>15 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NC%20750%20X"><strong>NC 750 X</strong><span>14 annoncer</span></a></li>
+            <li><a href="model-honda-nx-500.html"><strong>NX 500</strong><span>10 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20500"><strong>CB 500</strong><span>9 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%201000%20Hornet"><strong>CB 1000 Hornet</strong><span>8 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CBR%201000"><strong>CBR 1000</strong><span>8 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=XL%20750%20Transalp"><strong>XL 750 Transalp</strong><span>8 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CBR%20650%20R"><strong>CBR 650 R</strong><span>7 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CL%20500%20A"><strong>CL 500 A</strong><span>7 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CBR%201000%20F"><strong>CBR 1000 F</strong><span>6 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20750"><strong>CB 750</strong><span>5 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CRF%201000%20L%20Africa%20Twin"><strong>CRF 1000 L Africa Twin</strong><span>5 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CRF%201100%20L%20Africa%20Twin"><strong>CRF 1100 L Africa Twin</strong><span>5 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=NC%20750%20XA"><strong>NC 750 XA</strong><span>5 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CB%20750%20Hornet"><strong>CB 750 Hornet</strong><span>4 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Honda&amp;q=CBF%201000"><strong>CBF 1000</strong><span>4 annoncer</span></a></li>
+          </ul>
+        </details>
+        <p class="mk-col-foot"><a class="mk-link" href="soegning.html?brands=Honda">Se alle Honda-annoncer<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
+      </section>
+        <section class="mk-col" aria-labelledby="mk-kk-h">
+        <div class="mk-col-head"><h2 id="mk-kk-h">Udforsk Honda efter kørekort</h2></div>
+        <ul class="mk-mini mk-mini-kk">
+          <li><a href="soegning.html?brands=Honda&amp;koerekort=A1"><strong>A1</strong><span>10 Honda</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;koerekort=A2"><strong>A2</strong><span>33 Honda</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;koerekort=A"><strong>A</strong><span>276 Honda</span></a></li>
+        </ul>
+        <ul class="mk-links">
+          <li><a href="koerekort-a2.html">Hvad må du køre på A2?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+          <li><a href="koerekort-a1.html">Hvad må du køre på A1?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+          <li><a href="guide-a2-koerekort.html">Guide: fra A2 til A-kørekort<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></li>
+        </ul>
+        <p class="mk-col-note">Antal motorcykler, der ikke er udelukket på de oplyste tal — A omfatter derfor alle.</p>
+      </section>
+        <section class="mk-col" aria-labelledby="mk-reg-h">
+        <div class="mk-col-head"><h2 id="mk-reg-h">Find Honda i din region</h2></div>
+        <ul class="mk-mini mk-mini-reg">
+          <li><a href="soegning.html?brands=Honda&amp;regions=Syddanmark"><strong>Syddanmark</strong><span>215</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;regions=Midtjylland"><strong>Midtjylland</strong><span>46</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;regions=Nordjylland"><strong>Nordjylland</strong><span>8</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;regions=Hovedstaden"><strong>Hovedstaden</strong><span>5</span></a></li>
+          <li><a href="soegning.html?brands=Honda&amp;regions=Sj%C3%A6lland"><strong>Sjælland</strong><span>2</span></a></li>
+        </ul>
+        
+      </section>
+      </div>
+    </div>
+  </section>
+
+  <div class="container mk-wide">
+    <section class="section brand-liste-sektion mk-liste" style="padding-top:var(--space-4);" aria-labelledby="brand-antal">
+      <div class="section-head">
+        <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
+             FAQ. js/maerke.js opdaterer alle [data-mk-n] samlet, hvis lageret
+             har ændret sig siden bygget — aldrig kun ét af dem. -->
+        <div><h2 class="brand-sub" id="brand-antal">Flere Honda-annoncer</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>276</span> annoncer i alt. De første 24 af resten vises her. Senest bekræftet hos kilderne 24. aug. 2026.</p></div>
+        <a class="section-link" href="soegning.html?brands=Honda">Alle <span data-mk-n>276</span> i søgningen<span aria-hidden="true"></span></a>
+      </div>
       
+      <div class="brand-facet-fold">
+        <!-- RUNDE 13 (R13-10): checkbox+label baerer ingen disclosure-rolle, saa
+             en skaermlaeser hoerte "afkrydsningsfelt, ikke markeret" uden at
+             faa at vide, at den styrer indholdet nedenfor. CSS-mekanikken
+             bliver (den er grunden til, at folden ikke giver layouthop),
+             men kontrollen peger nu paa sit panel med aria-controls, og
+             tilstanden staar i selve navnet via to skjulte ord, CSS bytter
+             om paa ved :checked. Ingen JS, ingen CSP-undtagelse. -->
+        <input type="checkbox" class="brand-facet-check" id="facetfold-honda" aria-controls="facetfold-honda-panel">
+        <label class="brand-facet-greb" for="facetfold-honda">Filtrér og sortér Honda<span class="visually-hidden fold-vis"> — vis</span><span class="visually-hidden fold-skjul"> — skjul</span><span class="chev"></span></label>
+        <div class="brand-facetter" id="facetfold-honda-panel">
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Kørekort:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;koerekort=A1">A1 · 10</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;koerekort=A2">A2 · 33</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;koerekort=A">A · 276</a></div>
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Pris:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;maxPrice=30000">Under 30.000 · 18</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;maxPrice=60000">Under 60.000 · 43</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;maxPrice=100000">Under 100.000 · 104</a></div>
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Type:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=adventure">Adventure/Enduro · 53</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=cruiser">Cruiser · 41</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=naked">Naked · 36</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=touring">Touring · 33</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=sport">Sport · 10</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;type=classic">Classic/Veteran · 2</a></div>
+        <div class="brand-facet-raekke brand-facet-sorter"><span class="brand-facet-navn">Sortér i søgningen:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;sort=price-asc">Pris: lav → høj</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;sort=price-desc">Pris: høj → lav</a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Honda&amp;sort=year-desc">Årgang: nyeste</a></div>
+        <p class="brand-facet-note">101 uden oplyst type — dem finder du i <a href="soegning.html?brands=Honda">den fulde søgning</a>.</p></div>
+      </div>
+      <div class="listings-grid" id="brand-listings" data-brand="Honda" data-viste="24">
   <article class="card card-external" data-listing-id="4d439521-fe9d-49e1-aa36-db3a8bec272d" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
@@ -1027,6 +1219,176 @@ try{
     <a href="annonce.html?id=39de3e76-5fde-4223-8164-d56cf1e28fea"
        class="card-link"
        aria-label="Se annonce: Honda NC 700, Pris ved henvendelse — hos MC Syd"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="ba88b463-95ca-4620-99e8-f3804d49631e" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
+      <img src="https://images.danbase.dk/Content/Resellers/321/182982/Honda_NT_1100_A_0_2.jpg?v=1" alt="Honda NT 1100 A" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="ba88b463-95ca-4620-99e8-f3804d49631e" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">149.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda NT 1100 A</span>
+        <span class="card-title-variant" title="Touring">Touring</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2023</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>20.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.084 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 1.084 ccm og 101 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 1.084 ccm og 101 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=ba88b463-95ca-4620-99e8-f3804d49631e"
+       class="card-link"
+       aria-label="Se annonce: Honda NT 1100 A Touring, 149.800 kr. — hos MC Syd"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="bb2275e2-15e3-4b36-b73e-2de1db4804b5" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
+      <img src="https://images.danbase.dk/Content/Resellers/321/155917/Honda_VF_1000_0_2.jpg?v=1" alt="Honda VF 1000 F" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="bb2275e2-15e3-4b36-b73e-2de1db4804b5" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">17.500 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda VF 1000 F</span>
+        <span class="card-title-variant" title="Touring">Touring</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>1985</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>96.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>998 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 998 ccm og 116 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 998 ccm og 116 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=bb2275e2-15e3-4b36-b73e-2de1db4804b5"
+       class="card-link"
+       aria-label="Se annonce: Honda VF 1000 F Touring, 17.500 kr. — hos MC Syd"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="c00eb744-5910-43e4-bfda-c1d4c596da3a" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
+      <img src="https://images.danbase.dk/Content/Resellers/321/180899/Honda_VTR_1000_0_2.jpg?v=1" alt="Honda VTR 1000 SP-1" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="c00eb744-5910-43e4-bfda-c1d4c596da3a" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">69.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda VTR 1000 SP-1</span>
+        <span class="card-title-variant" title="Sport">Sport</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2001</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>58.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>999 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 999 ccm og 132 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 999 ccm og 132 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=c00eb744-5910-43e4-bfda-c1d4c596da3a"
+       class="card-link"
+       aria-label="Se annonce: Honda VTR 1000 SP-1 Sport, 69.800 kr. — hos MC Syd"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="cb1bd3e1-ea2d-4d36-b1f3-d1dd3cc043f2" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
+      <img src="https://images.danbase.dk/Content/Resellers/321/178809/Honda_VFR_1200_0_2.jpg?v=1" alt="Honda VFR 1200" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="cb1bd3e1-ea2d-4d36-b1f3-d1dd3cc043f2" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">129.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda VFR 1200</span>
+        <span class="card-title-variant" title="Adventure/Enduro">Adventure/Enduro</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2018</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>53.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>1.237 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 1.237 ccm og 129 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 1.237 ccm og 129 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=cb1bd3e1-ea2d-4d36-b1f3-d1dd3cc043f2"
+       class="card-link"
+       aria-label="Se annonce: Honda VFR 1200 Adventure/Enduro, 129.800 kr. — hos MC Syd"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="d9970b73-2ae1-4417-b415-7fa12693474f" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
+      <img src="https://images.danbase.dk/Content/Resellers/321/74035/Honda_CRF_1000_L_Africa_Twin_0_2.jpg?v=1" alt="Honda CRF 1000 L Africa Twin" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="d9970b73-2ae1-4417-b415-7fa12693474f" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">184.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">Honda CRF 1000 L Africa Twin</span>
+        <span class="card-title-variant" title="Adventure/Enduro">Adventure/Enduro</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2022</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>500 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>998 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 998 ccm og 95 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 998 ccm og 95 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=d9970b73-2ae1-4417-b415-7fa12693474f"
+       class="card-link"
+       aria-label="Se annonce: Honda CRF 1000 L Africa Twin Adventure/Enduro, 184.800 kr. — hos MC Syd"></a>
   </article></div>
       <p class="brand-mere"><a href="soegning.html?brands=Honda" class="btn btn-primary">Se alle 276 Honda i søgningen</a></p>
       <div class="brand-actions">
@@ -1406,23 +1768,23 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=a886b9e2"></script>
-<script defer src="js/supabase-config.js?v=a886b9e2"></script>
-<script defer src="js/supabase-api.js?v=a886b9e2"></script>
-<script defer src="js/icons.js?v=a886b9e2"></script>
-<script defer src="js/bike-art.js?v=a886b9e2"></script>
+<script defer src="js/security.js?v=96635651"></script>
+<script defer src="js/supabase-config.js?v=96635651"></script>
+<script defer src="js/supabase-api.js?v=96635651"></script>
+<script defer src="js/icons.js?v=96635651"></script>
+<script defer src="js/bike-art.js?v=96635651"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=a886b9e2"></script>
-<script defer src="js/store.js?v=a886b9e2"></script>
-<script defer src="js/maaling.js?v=a886b9e2"></script>
-<script defer src="js/backend-bridge.js?v=a886b9e2"></script>
-<script defer src="js/components.js?v=a886b9e2"></script>
+<script defer src="js/data.js?v=96635651"></script>
+<script defer src="js/store.js?v=96635651"></script>
+<script defer src="js/maaling.js?v=96635651"></script>
+<script defer src="js/backend-bridge.js?v=96635651"></script>
+<script defer src="js/components.js?v=96635651"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=a886b9e2"></script>
-<script defer src="js/maerke.js?v=a886b9e2"></script>
+<script defer src="js/sortering.js?v=96635651"></script>
+<script defer src="js/maerke.js?v=96635651"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">
