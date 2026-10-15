@@ -87,3 +87,29 @@ test('side: kørekortsiden viser kilden og de verificerede fakta', () => {
   assert.match(html, new RegExp(GUIDE.a2.replace('.', '\.')));
   assert.match(html, /ikke er udelukket til et A2-kørekort ud fra det, annoncerne oplyser/);
 });
+
+test('type-siden bruger typens eget hero-foto, og alle lagertal står i data-fa-n (ét tal pr. side)', () => {
+  global.ALLE_LISTINGS = [];
+  const alle = Array.from({ length: THRESHOLD + 3 }, (_, i) => l(i + 1, { type: 'sport', power: 100 }));
+  const html = side(buildFacetList(alle).find(f => f.slug === 'type-sport'), alle);
+  assert.match(html, /<div class="fa-hero-bike"[^>]*><img src="img\/type\/sport\.webp"/);
+  assert.match(html, /data-fa-n="all"/);
+  assert.match(html, /data-fa-hydreret/);
+  // intet lagertal står uden for et data-fa-n-element i "Se alle"-linket
+  assert.match(html, /Se alle <span data-fa-n="all">13<\/span> i søgningen/);
+});
+
+test('flertal: "1 A2-motorcykel", ikke "1 A2-motorcykler"', () => {
+  global.ALLE_LISTINGS = [];
+  const alle = Array.from({ length: THRESHOLD + 2 }, (_, i) => l(i + 1, { type: i === 0 ? 'sport' : 'naked' }));
+  const html = side(buildFacetList(alle).find(f => f.slug === 'koerekort-a2'), alle);
+  assert.match(html, /<span data-fa-n="type:sport">1<\/span> <span data-fa-ord[^>]*>A2-motorcykel<\/span>/);
+  assert.match(html, /<span data-fa-n="type:naked">11<\/span> <span data-fa-ord[^>]*>A2-motorcykler<\/span>/);
+});
+
+test('kørekortsiden har foto-guidekort til de reserverede guide-adresser', () => {
+  global.ALLE_LISTINGS = [];
+  const alle = Array.from({ length: 12 }, (_, i) => l(i + 1));
+  const html = side(buildFacetList(alle).find(f => f.slug === 'koerekort-a2'), alle);
+  for (const g of [GUIDE.a2, GUIDE.foerste, GUIDE.brugt]) assert.match(html, new RegExp(`<a href="${g.replace('.', '\.')}"><img src="img/`));
+});

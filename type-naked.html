@@ -22,7 +22,7 @@
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="preload" as="image" href="img/hero-1600.webp" imagesrcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" imagesizes="100vw" fetchpriority="high">
+
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/p-facet.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Type","item":"https://bikerbasen.dk/soegning"},{"@type":"ListItem","position":3,"name":"Naked-motorcykler","item":"https://bikerbasen.dk/type-naked"}]}</script>
@@ -72,9 +72,7 @@
 
 <main id="main-content" class="fa-side fa-type">
   <section class="fa-hero">
-    <div class="fa-hero-media" aria-hidden="true">
-      <img src="img/hero-1600.webp" srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
-    </div>
+    <div class="fa-hero-media fa-hero-studio" aria-hidden="true"></div>
     <div class="container fa-hero-inner">
       <nav class="breadcrumb fa-bc" aria-label="Brødkrumme">
         <a href="index.html">Forside</a><span class="bc-sep"></span>
@@ -87,7 +85,8 @@
           <p class="fa-hero-intro">Der er <strong id="facet-intro-antal">59</strong> Naked-motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 20.000 kr. til 559.900 kr., med årgange mellem 1981 og 2026.</p>
           <details class="brand-intro-mere fa-mere-intro"><summary>Mere om udvalget</summary><p class="brand-intro">34 af dem sælges som nye. Annoncerne er indekseret fra MC Syd, Rydbergs MC og Gul og Gratis, og handlen sker hos kilden.</p></details>
         </div>
-        <ul class="fa-panel" aria-label="Fakta om udvalget"><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg></span><div><strong id="fa-panel-antal">59</strong><span>naked-motorcykler indekseret</span></div></li><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.8l2.9 6 6.5.7-4.9 4.4 1.3 6.4L12 17l-5.8 3.3 1.3-6.4-4.9-4.4 6.5-.7Z"/></svg></span><div><strong>Mest udbudte mærker</strong><span>Honda, Triumph, Harley-Davidson, Suzuki, Ducati</span></div></li><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12.2V4.5h7.7l9.3 9.3-7.7 7.7z"/><circle cx="8" cy="9" r="1.2"/></svg></span><div><strong>Prisniveau</strong><span>fra 20.000 kr. til 559.900 kr.</span></div></li></ul>
+        <div class="fa-hero-bike" aria-hidden="true"><img src="img/type/naked.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async"></div>
+        <ul class="fa-panel" aria-label="Fakta om udvalget"><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg></span><div><strong><span data-fa-n="all">59</span></strong><span><span data-fa-ord data-fa-et="naked-motorcykel" data-fa-fl="naked-motorcykler">naked-motorcykler</span> indekseret</span></div></li><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.8l2.9 6 6.5.7-4.9 4.4 1.3 6.4L12 17l-5.8 3.3 1.3-6.4-4.9-4.4 6.5-.7Z"/></svg></span><div><strong>Mest udbudte mærker</strong><span>Honda, Triumph, Harley-Davidson, Suzuki, Ducati</span></div></li><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12.2V4.5h7.7l9.3 9.3-7.7 7.7z"/><circle cx="8" cy="9" r="1.2"/></svg></span><div><strong>Prisniveau</strong><span>fra 20.000 kr. til 559.900 kr.</span></div></li></ul>
       </div>
     </div>
   </section>
@@ -131,16 +130,16 @@
           
           <button type="submit" class="btn btn-primary btn-lg fa-soeg-knap">Søg naked-motorcykler <span class="fa-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></button>
         </div>
-        <p class="fa-soeg-antal"><span id="fa-soeg-antal">59</span> naked-motorcykler indekseret på Bikerbasen</p>
+        <p class="fa-soeg-antal"><span data-fa-n="all">59</span> <span data-fa-ord data-fa-et="naked-motorcykel" data-fa-fl="naked-motorcykler">naked-motorcykler</span> indekseret på Bikerbasen</p>
       </form>
       <p class="fa-agent"><a href="soegning.html?type=naked&amp;agent=1">Få besked om nye annoncer</a></p>
     </div>
     <ul class="fa-tillid"><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.8v5.4c0 4.7 3 8 7 9.6 4-1.6 7-4.9 7-9.6V5.8Z"/><path d="m9 12 2.2 2.2L15.5 9.7"/></svg></span><div><strong>Kilden står på hvert kort</strong><span>Du kan altid se, hvor annoncen kommer fra.</span></div></li><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.8 2.8L16.3 9"/></svg></span><div><strong>Kørekortfilter på oplyste tal</strong><span>Vi gætter aldrig. Mangler et tal, står der "Ikke oplyst".</span></div></li><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg></span><div><strong>Gem dine favoritter</strong><span>Tryk på hjertet på et kort og find dem igen senere.</span></div></li><li><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/></svg></span><div><strong>Bekræftet 24. aug. 2026</strong><span>Senest bekræftet hos kilderne.</span></div></li></ul>
 
     <section class="section facet-liste-sektion fa-udvalgte">
-      <div class="fa-h2-raekke"><h2 class="fa-h2">Udvalgte naked-motorcykler på Bikerbasen</h2><a class="fa-mere" href="soegning.html?type=naked">Se alle 59 i søgningen <span class="fa-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a></div>
+      <div class="fa-h2-raekke"><h2 class="fa-h2">Udvalgte naked-motorcykler på Bikerbasen</h2><a class="fa-mere" href="soegning.html?type=naked"><span>Se alle <span data-fa-n="all">59</span> i søgningen</span> <span class="fa-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a></div>
       <div class="fa-udvalgte-gitter">
-        <div class="listings-grid fa-kortraekke" id="facet-listings" data-facet-kind="type" data-facet-id="naked" data-viste="24" data-udvalgte="4" data-facet-frase="naked-motorcykler">
+        <div class="listings-grid fa-kortraekke" id="facet-listings" data-facet-kind="type" data-facet-id="naked" data-viste="24" data-udvalgte="5" data-facet-frase="naked-motorcykler">
   <article class="card card-external" data-listing-id="0098fee2-be9d-49aa-8956-4a732ed50bf3" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -275,8 +274,43 @@
     <a href="annonce.html?id=0884700d-bfee-4fb5-a491-383e65c0ab9d"
        class="card-link"
        aria-label="Se annonce: Ducati Scrambler Naked, 94.800 kr. — hos MC Syd"></a>
+  </article>
+      
+  <article class="card card-external" data-listing-id="27de59b1-65df-4705-8fa5-5a187b56fea4" data-external="1">
+    <div class="card-media">
+      <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
+      <img src="https://images.danbase.dk/Content/Resellers/321/176800/BMW_F_800_R_0_2.jpg?v=1" alt="BMW F 800 R" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <button type="button" class="card-compare " data-compare-toggle="27de59b1-65df-4705-8fa5-5a187b56fea4" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+    </div>
+    <div class="card-body">
+      <div class="card-prisrække">
+        <span class="card-price">79.800 kr.</span>
+        
+        
+      </div>
+      <h3 class="card-title">
+        <span class="card-title-main">BMW F 800 R</span>
+        <span class="card-title-variant" title="Naked">Naked</span>
+      </h3>
+      <div class="card-specblok">
+        <dl class="card-specs">
+          <div class="card-spec"><dt>Årgang</dt><dd>2018</dd></div>
+          <div class="card-spec"><dt>Kilometer</dt><dd>18.000 km</dd></div>
+          <div class="card-spec"><dt>Kubik</dt><dd>798 ccm</dd></div>
+          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 798 ccm og 90 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 798 ccm og 90 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
+        </dl>
+      </div>
+      <div class="card-footer">
+        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
+        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
+      </div>
+    </div>
+    <a href="annonce.html?id=27de59b1-65df-4705-8fa5-5a187b56fea4"
+       class="card-link"
+       aria-label="Se annonce: BMW F 800 R Naked, 79.800 kr. — hos MC Syd"></a>
   </article></div>
-        <aside class="fa-cta" aria-label="Guide">
+        <aside class="fa-cta fa-cta-studio" aria-label="Guide">
+        <img class="fa-cta-foto" src="img/type/naked.webp" alt="" width="456" height="342" loading="lazy" decoding="async">
         <h2>Er en naked-motorcykel noget for dig?</h2>
         <ul><li><span class="fa-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Få overblik over typerne</li><li><span class="fa-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Se hvilket kørekort du skal bruge</li><li><span class="fa-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Tjek-punkter ved brugt køb</li><li><span class="fa-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Tips til en tryg handel</li></ul>
         <a class="btn btn-primary" href="guide-foerste-motorcykel.html">Læs vores guide <span class="fa-pil" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span></a>
@@ -289,18 +323,18 @@
     <section class="section fa-sektion">
       <h2 class="fa-h2">Populære naked-modeller</h2>
       <ul class="fa-modeller"><li><a href="soegning.html?brands=Honda&amp;model=CB+650+R">
-          <img src="https://images.danbase.dk/Content/Resellers/321/134026/Honda_CB_650_0_2.jpg?v=1" alt="" width="64" height="48" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-          <span class="fa-model-tekst"><strong>Honda CB 650 R</strong><span>7 indekseret</span></span></a></li><li><a href="soegning.html?brands=Honda&amp;model=CB+1000+Hornet">
-          <img src="https://images.danbase.dk/Content/Resellers/321/167781/Honda_CB_1000_0_2.jpg?v=1" alt="" width="64" height="48" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-          <span class="fa-model-tekst"><strong>Honda CB 1000 Hornet</strong><span>6 indekseret</span></span></a></li><li><a href="soegning.html?brands=Honda&amp;model=CL+500+A">
-          <img src="https://images.danbase.dk/Content/Resellers/321/139117/Honda_CL_500_A_0_2.jpg?v=1" alt="" width="64" height="48" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-          <span class="fa-model-tekst"><strong>Honda CL 500 A</strong><span>4 indekseret</span></span></a></li><li><a href="soegning.html?brands=Honda&amp;model=MSX+125">
-          <img src="https://images.danbase.dk/Content/Resellers/321/135972/Honda_MSX_125_0_2.jpg?v=1" alt="" width="64" height="48" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-          <span class="fa-model-tekst"><strong>Honda MSX 125</strong><span>4 indekseret</span></span></a></li><li><a href="soegning.html?brands=Honda&amp;model=CB+1000+R">
-          <img src="https://images.danbase.dk/Content/Resellers/321/115749/Honda_CB_1000_R_0_2.jpg?v=1" alt="" width="64" height="48" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-          <span class="fa-model-tekst"><strong>Honda CB 1000 R</strong><span>3 indekseret</span></span></a></li><li><a href="soegning.html?brands=Harley-Davidson&amp;model=FLHXS+Glide+Special">
-          <img src="https://www.123mc.dk/large-mcimgs-400_285888_T6S0_1744015742.jpeg" alt="" width="64" height="48" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-          <span class="fa-model-tekst"><strong>Harley-Davidson FLHXS Glide Special</strong><span>2 indekseret</span></span></a></li></ul>
+          <img src="https://images.danbase.dk/Content/Resellers/321/134026/Honda_CB_650_0_2.jpg?v=1" alt="" width="96" height="72" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <span class="fa-model-tekst"><strong>Honda CB 650 R</strong><span><span data-fa-n="model:Honda|CB 650 R">7</span> indekseret</span></span></a></li><li><a href="soegning.html?brands=Honda&amp;model=CB+1000+Hornet">
+          <img src="https://images.danbase.dk/Content/Resellers/321/167781/Honda_CB_1000_0_2.jpg?v=1" alt="" width="96" height="72" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <span class="fa-model-tekst"><strong>Honda CB 1000 Hornet</strong><span><span data-fa-n="model:Honda|CB 1000 Hornet">6</span> indekseret</span></span></a></li><li><a href="soegning.html?brands=Honda&amp;model=CL+500+A">
+          <img src="https://images.danbase.dk/Content/Resellers/321/139117/Honda_CL_500_A_0_2.jpg?v=1" alt="" width="96" height="72" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <span class="fa-model-tekst"><strong>Honda CL 500 A</strong><span><span data-fa-n="model:Honda|CL 500 A">4</span> indekseret</span></span></a></li><li><a href="soegning.html?brands=Honda&amp;model=MSX+125">
+          <img src="https://images.danbase.dk/Content/Resellers/321/135972/Honda_MSX_125_0_2.jpg?v=1" alt="" width="96" height="72" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <span class="fa-model-tekst"><strong>Honda MSX 125</strong><span><span data-fa-n="model:Honda|MSX 125">4</span> indekseret</span></span></a></li><li><a href="soegning.html?brands=Honda&amp;model=CB+1000+R">
+          <img src="https://images.danbase.dk/Content/Resellers/321/115749/Honda_CB_1000_R_0_2.jpg?v=1" alt="" width="96" height="72" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <span class="fa-model-tekst"><strong>Honda CB 1000 R</strong><span><span data-fa-n="model:Honda|CB 1000 R">3</span> indekseret</span></span></a></li><li><a href="soegning.html?brands=Harley-Davidson&amp;model=FLHXS+Glide+Special">
+          <img src="https://www.123mc.dk/large-mcimgs-400_285888_T6S0_1744015742.jpeg" alt="" width="96" height="72" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+          <span class="fa-model-tekst"><strong>Harley-Davidson FLHXS Glide Special</strong><span><span data-fa-n="model:Harley-Davidson|FLHXS Glide Special">2</span> indekseret</span></span></a></li></ul>
     </section>
 
     <section class="section brand-maerkerow-sektion fa-maerker" aria-labelledby="fa-maerker-h">
@@ -339,55 +373,21 @@
         <input type="checkbox" class="brand-facet-check" id="facetvaerktoej-type-naked" aria-controls="facetvaerktoej-type-naked-panel">
         <label class="brand-facet-greb" for="facetvaerktoej-type-naked">Filtrér og sortér<span class="visually-hidden fold-vis"> — vis</span><span class="visually-hidden fold-skjul"> — skjul</span><span class="chev"></span></label>
         <div class="brand-facetter" id="facetvaerktoej-type-naked-panel">
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Pris:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=30000">Under 30.000 kr. · 1</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=60000">Under 60.000 kr. · 15</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=100000">Under 100.000 kr. · 31</a></div>
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Årgang:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;yearMin=2024">2024 og nyere · 35</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;yearMin=2021">2021 og nyere · 41</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;yearMin=2016">2016 og nyere · 49</a></div>
-        <div class="brand-facet-raekke"><span class="brand-facet-navn">Km:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;kmMax=10000">Under 10.000 km · 6</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;kmMax=30000">Under 30.000 km · 16</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;kmMax=60000">Under 60.000 km · 19</a></div>
-        <div class="brand-facet-raekke brand-facet-sorter"><span class="brand-facet-navn">Sortér i søgningen:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;sort=price-asc">Pris: lav → høj</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;sort=price-desc">Pris: høj → lav</a>
-          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;sort=year-desc">Årgang: nyeste</a></div>
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Pris:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=30000"><span>Under 30.000 kr. · <span data-fa-n="pris:30000">1</span></span></a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=60000"><span>Under 60.000 kr. · <span data-fa-n="pris:60000">15</span></span></a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=100000"><span>Under 100.000 kr. · <span data-fa-n="pris:100000">31</span></span></a></div>
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Årgang:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;yearMin=2024"><span>2024 og nyere · <span data-fa-n="aar:2024">35</span></span></a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;yearMin=2021"><span>2021 og nyere · <span data-fa-n="aar:2021">41</span></span></a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;yearMin=2016"><span>2016 og nyere · <span data-fa-n="aar:2016">49</span></span></a></div>
+        <div class="brand-facet-raekke"><span class="brand-facet-navn">Km:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;kmMax=10000"><span>Under 10.000 km · <span data-fa-n="km:10000">6</span></span></a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;kmMax=30000"><span>Under 30.000 km · <span data-fa-n="km:30000">16</span></span></a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;kmMax=60000"><span>Under 60.000 km · <span data-fa-n="km:60000">19</span></span></a></div>
+        <div class="brand-facet-raekke brand-facet-sorter"><span class="brand-facet-navn">Sortér i søgningen:</span> <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;sort=price-asc"><span>Pris: lav → høj</span></a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;sort=price-desc"><span>Pris: høj → lav</span></a>
+          <a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;sort=year-desc"><span>Årgang: nyeste</span></a></div>
         </div>
       </div>
       <div class="listings-grid" id="facet-listings-flere">
-  <article class="card card-external" data-listing-id="27de59b1-65df-4705-8fa5-5a187b56fea4" data-external="1">
-    <div class="card-media">
-      <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
-      <img src="https://images.danbase.dk/Content/Resellers/321/176800/BMW_F_800_R_0_2.jpg?v=1" alt="BMW F 800 R" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      <button type="button" class="card-compare " data-compare-toggle="27de59b1-65df-4705-8fa5-5a187b56fea4" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="card-body">
-      <div class="card-prisrække">
-        <span class="card-price">79.800 kr.</span>
-        
-        
-      </div>
-      <h3 class="card-title">
-        <span class="card-title-main">BMW F 800 R</span>
-        <span class="card-title-variant" title="Naked">Naked</span>
-      </h3>
-      <div class="card-specblok">
-        <dl class="card-specs">
-          <div class="card-spec"><dt>Årgang</dt><dd>2018</dd></div>
-          <div class="card-spec"><dt>Kilometer</dt><dd>18.000 km</dd></div>
-          <div class="card-spec"><dt>Kubik</dt><dd>798 ccm</dd></div>
-          <div class="card-spec card-spec-kk"><dt>Kørekort</dt><dd><span class="card-koerekort kk-a" title="Kræver A-kørekort: 798 ccm og 90 hk er over A2-grænsen på 47 hk (35 kW).">Kørekort A<span class="visually-hidden">. Kræver A-kørekort: 798 ccm og 90 hk er over A2-grænsen på 47 hk (35 kW).</span></span></dd></div>
-        </dl>
-      </div>
-      <div class="card-footer">
-        <span class="card-sted" title="Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="card-kildelinje" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="card-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=27de59b1-65df-4705-8fa5-5a187b56fea4"
-       class="card-link"
-       aria-label="Se annonce: BMW F 800 R Naked, 79.800 kr. — hos MC Syd"></a>
-  </article>
-      
   <article class="card card-external" data-listing-id="3004927e-f7c3-4bf1-8be9-04325bedcf32" data-external="1">
     <div class="card-media">
       <span class="card-source-badge" title="Annoncen ligger hos MC Syd (Forhandler · mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>mcsyd.dk</span></span>
@@ -1033,7 +1033,7 @@
        class="card-link"
        aria-label="Se annonce: Honda CB 650 R Naked, 114.995 kr. — hos MC Syd"></a>
   </article></div>
-      <p class="brand-mere"><a href="soegning.html?type=naked" class="btn btn-primary">Se alle 59 i søgningen</a></p>
+      <p class="brand-mere"><a href="soegning.html?type=naked" class="btn btn-primary"><span>Se alle <span data-fa-n="all">59</span> i søgningen</span></a></p>
     </section>
     <noscript>
       <ul class="brand-noscript">
@@ -1108,8 +1108,8 @@
 
     <section class="section fa-sektion fa-rel-vrap">
       <div class="fa-rel-grid">
-        <div class="fa-rel"><h2 class="fa-h3">Relaterede søgninger</h2><div class="fa-chips"><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;koerekort=A1">A1 naked-motorcykler <span class="fa-n">6</span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;koerekort=A2">A2 naked-motorcykler <span class="fa-n">13</span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=30000">Naked-motorcykler under 30.000 kr. <span class="fa-n">1</span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=60000">Naked-motorcykler under 60.000 kr. <span class="fa-n">15</span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;maxPrice=100000">Naked-motorcykler under 100.000 kr. <span class="fa-n">31</span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;yearMin=2024">Naked-motorcykler fra 2024 <span class="fa-n">35</span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;yearMin=2021">Naked-motorcykler fra 2021 <span class="fa-n">41</span></a></div></div>
-        <div class="fa-rel"><h2 class="fa-h3">Se naked-motorcykler i din region</h2><div class="fa-chips"><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;regions=Syddanmark"><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></span>Syddanmark <span class="fa-n">54</span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;regions=Midtjylland"><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></span>Midtjylland <span class="fa-n">4</span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;regions=Nordjylland"><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></span>Nordjylland <span class="fa-n">1</span></a></div></div>
+        <div class="fa-rel"><h2 class="fa-h3">Relaterede søgninger</h2><div class="fa-chips"><a class="popular-chip popular-chip-sm fa-rel-chip" href="soegning.html?type=naked&amp;koerekort=A1"><span>A1 naked-motorcykler <span class="fa-n"><span data-fa-n="kk:A1">6</span></span></span></a><a class="popular-chip popular-chip-sm fa-rel-chip" href="soegning.html?type=naked&amp;koerekort=A2"><span>A2 naked-motorcykler <span class="fa-n"><span data-fa-n="kk:A2">13</span></span></span></a><a class="popular-chip popular-chip-sm fa-rel-chip" href="soegning.html?type=naked&amp;maxPrice=30000"><span>Naked-motorcykler under 30.000 kr. <span class="fa-n"><span data-fa-n="pris:30000">1</span></span></span></a><a class="popular-chip popular-chip-sm fa-rel-chip" href="soegning.html?type=naked&amp;maxPrice=60000"><span>Naked-motorcykler under 60.000 kr. <span class="fa-n"><span data-fa-n="pris:60000">15</span></span></span></a><a class="popular-chip popular-chip-sm fa-rel-chip" href="soegning.html?type=naked&amp;maxPrice=100000"><span>Naked-motorcykler under 100.000 kr. <span class="fa-n"><span data-fa-n="pris:100000">31</span></span></span></a><a class="popular-chip popular-chip-sm fa-rel-chip" href="soegning.html?type=naked&amp;yearMin=2024"><span>Naked-motorcykler fra 2024 <span class="fa-n"><span data-fa-n="aar:2024">35</span></span></span></a><a class="popular-chip popular-chip-sm fa-rel-chip" href="soegning.html?type=naked&amp;yearMin=2021"><span>Naked-motorcykler fra 2021 <span class="fa-n"><span data-fa-n="aar:2021">41</span></span></span></a></div></div>
+        <div class="fa-rel"><h2 class="fa-h3">Se naked-motorcykler i din region</h2><div class="fa-chips"><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;regions=Syddanmark"><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></span><span>Syddanmark <span class="fa-n"><span data-fa-n="region:Syddanmark">54</span></span></span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;regions=Midtjylland"><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></span><span>Midtjylland <span class="fa-n"><span data-fa-n="region:Midtjylland">4</span></span></span></a><a class="popular-chip popular-chip-sm" href="soegning.html?type=naked&amp;regions=Nordjylland"><span class="fa-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></span><span>Nordjylland <span class="fa-n"><span data-fa-n="region:Nordjylland">1</span></span></span></a></div></div>
       </div>
     </section>
 
@@ -1209,7 +1209,7 @@
   const mount2 = document.getElementById('facet-listings-flere');
   const kind = mount.dataset.facetKind, id = mount.dataset.facetId;
   const viste = Number(mount.dataset.viste) || 24;
-  const udvalgte = Number(mount.dataset.udvalgte) || 4;
+  const udvalgte = Number(mount.dataset.udvalgte) || 5;
   const alle = Store.getAllListings();
   // Samme noegle som scripts/build-facet-pages.js modelNoegle(): trim + ét mellemrum.
   const norm = s => String(s || '').trim().replace(/\s+/g, ' ');
@@ -1240,6 +1240,7 @@
       + '<a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg alle motorcykler</a>';
     const tom = document.getElementById('facet-antal');
     if (tom) tom.textContent = '0 annoncer';
+    document.documentElement.setAttribute('data-fa-hydreret', '1');
     return;
   }
   mount.className = 'listings-grid fa-kortraekke';
@@ -1255,14 +1256,36 @@
   if (antal) antal.textContent = alleTraef + (alleTraef === 1 ? ' annonce' : ' annoncer');
   const introAntal = document.getElementById('facet-intro-antal');
   if (introAntal) introAntal.textContent = String(alleTraef);
-  const soegAntal = document.getElementById('fa-soeg-antal');
-  if (soegAntal) soegAntal.textContent = alleTraef.toLocaleString('da-DK');
-  const panelAntal = document.getElementById('fa-panel-antal');
-  if (panelAntal) panelAntal.textContent = alleTraef.toLocaleString('da-DK');
+  /* ALLE tal, der er regnet af lageret, står i [data-fa-n] og regnes her om
+     paa samme annoncer som overskriften — saa siden aldrig viser to tal for
+     det samme. Reglerne er de samme som i byggetrinnet (pris>0, aar>1900, km>=0). */
+  const tilT = v => (v === null || v === undefined || v === '') ? null : (Number.isFinite(Number(v)) ? Number(v) : null);
+  const tael = noegle => {
+    const i = noegle.indexOf(':'), t = i < 0 ? noegle : noegle.slice(0, i), v = i < 0 ? '' : noegle.slice(i + 1);
+    if (t === 'all') return alleTraef;
+    if (t === 'type') return traef.filter(l => l.type === v).length;
+    if (t === 'region') return traef.filter(l => l.region === v).length;
+    if (t === 'kk') return traef.filter(l => passerKoerekort(l, v)).length;
+    if (t === 'pris') return traef.filter(l => { const p = tilT(l.price); return p !== null && p > 0 && p <= Number(v); }).length;
+    if (t === 'aar') return traef.filter(l => { const y = tilT(l.year); return y !== null && y > 1900 && y >= Number(v); }).length;
+    if (t === 'km') return traef.filter(l => { const k = tilT(l.km); return k !== null && k >= 0 && k <= Number(v); }).length;
+    if (t === 'model'){ const [b, m] = v.split('|'); return traef.filter(l => norm(l.brand) === b && norm(l.model) === m).length; }
+    return null;
+  };
+  document.querySelectorAll('[data-fa-n]').forEach(el => {
+    const n = tael(el.dataset.faN);
+    if (n === null) return;
+    el.textContent = n.toLocaleString('da-DK');
+    const ord = el.parentElement && el.parentElement.querySelector('[data-fa-ord]');
+    if (ord) ord.textContent = n === 1 ? ord.dataset.faEt : ord.dataset.faFl;
+    const maal = el.closest('.fa-rel-chip, .fa-typer li, .fa-modeller li, .brand-facet-raekke a');
+    if (maal) maal.hidden = n === 0;
+  });
   const note = document.getElementById('facet-note');
   if (note) note.textContent = alleTraef > viste ? 'De første ' + viste + ' vises her.' : '';
   wireFavoriteButtons(mount);
   if (mount2) wireFavoriteButtons(mount2);
+  document.documentElement.setAttribute('data-fa-hydreret', '1');
 });</script>
 </body>
 </html>

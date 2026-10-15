@@ -6,7 +6,7 @@
    hvid/sort på selve foto-heroen (som er mørk i begge temaer).
    ============================================================ */
 
-.fa-side{ display:block; }
+.fa-side{ display:block; overflow-x:clip; }
 .fa-side > .container.fa-krop{ display:block; padding-bottom: var(--space-5); }
 /* Mobil-omrokeringen fra styles.css (brand-hero/facet-liste-sektion) gælder
    de gamle facetsider; her står alt i DOM-rækkefølge. */
@@ -150,15 +150,14 @@
 
 /* Populære typer */
 .fa-typer{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-3); grid-template-columns: repeat(2, minmax(0,1fr)); }
-@media (min-width:640px){ .fa-typer{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
-@media (min-width:1000px){ .fa-typer{ grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); } }
+@media (min-width:640px){ .fa-typer{ grid-template-columns: repeat(auto-fill, minmax(160px, 236px)); } }
 .fa-typer a{ position:relative; display:block; border-radius: var(--radius-md); overflow:hidden; aspect-ratio: 16 / 9; background:#2a2622; color:#fff; border:1px solid var(--color-border); }
 .fa-typer img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; transition: transform .3s var(--ease-out); }
 .fa-typer a:hover img{ transform: scale(1.04); }
 .fa-typer a::after{ content:""; position:absolute; inset:0; background: linear-gradient(0deg, rgba(10,8,6,.88) 0%, rgba(10,8,6,.55) 38%, rgba(10,8,6,0) 70%); }
 .fa-type-tekst{ position:absolute; left:10px; bottom:8px; right:34px; z-index:2; display:block; line-height:1.25; }
 .fa-type-tekst strong{ display:block; font-size:15px; }
-.fa-type-tekst span{ display:block; font-size:12px; color:#E6E0D6; }
+.fa-type-tekst > span{ display:block; font-size:12px; color:#E6E0D6; }
 .fa-typer .fa-pil{ position:absolute; right:8px; bottom:10px; z-index:2; width:22px; height:22px; padding:4px; border-radius:50%; background: rgba(255,255,255,.2); }
 
 /* Populære modeller */
@@ -223,3 +222,58 @@
 .fa-side .brand-faq-item{ border-bottom:1px solid var(--color-border); padding: var(--space-3) 0; }
 .fa-side .brand-faq-item summary{ cursor:pointer; font-weight:600; }
 .fa-side .brand-faq-item p{ margin-top: var(--space-2); }
+
+/* ============ Runde 2 (Critic): tættere på billede 7/8 ============ */
+
+/* Type-specifikt hero: mørkt rum med varmt spot; typens eget studiefoto står i en egen kolonne ved siden af teksten. */
+.fa-hero-studio{ background: radial-gradient(ellipse 50% 110% at 58% 55%, #4f4538 0%, #26221d 50%, #0f0d0a 100%); }
+.fa-hero:has(.fa-hero-studio)::after{ background: linear-gradient(0deg, rgba(15,13,10,.4) 0%, transparent 30%); }
+.fa-hero-bike{ display:block; max-width:320px; margin: 0 auto; }
+.fa-hero-bike img{ width:100%; height:auto; display:block;
+  -webkit-mask-image: radial-gradient(ellipse 49% 50% at 50% 52%, #000 42%, transparent 100%);
+          mask-image: radial-gradient(ellipse 49% 50% at 50% 52%, #000 42%, transparent 100%); }
+@media (min-width:1100px){
+  .fa-type .fa-hero-grid, .fa-model .fa-hero-grid{ grid-template-columns: minmax(0,1fr) 430px 300px; align-items:center; gap: var(--space-4); }
+  .fa-hero-bike{ max-width:none; margin:0 -30px; }
+  .fa-type .fa-hero-tekst, .fa-model .fa-hero-tekst{ max-width: 600px; }
+}
+@media (min-width:960px) and (max-width:1099px){ .fa-type .fa-hero-grid, .fa-model .fa-hero-grid{ grid-template-columns: minmax(0,1fr) 300px; } .fa-hero-bike{ display:none; } }
+
+/* 5 kort + CTA-panel fra 1280 px; 4 kort + panel 1100-1279; derunder 2 kolonner uden det 5. kort. */
+@media (min-width:1100px) and (max-width:1559px){ .fa-side .fa-kortraekke > :nth-child(5){ display:none; } }
+@media (min-width:520px) and (max-width:1099px){ .fa-side .fa-kortraekke > :nth-child(5){ display:none; } }
+@media (min-width:1560px){
+  .fa-krop, .fa-hero-inner{ max-width:1400px; }
+  .fa-udvalgte-gitter{ grid-template-columns: minmax(0,1fr) 290px; }
+  .fa-side .fa-kortraekke{ grid-template-columns: repeat(5, minmax(0,1fr)); gap: 12px; }
+  .fa-side .fa-kortraekke > :nth-child(5){ display:block; }
+}
+.fa-cta-foto{ position:absolute; right:-26%; bottom:-14%; width:86%; height:auto; opacity:.95; pointer-events:none;
+  -webkit-mask-image: radial-gradient(ellipse 56% 56% at 50% 50%, #000 55%, transparent 100%);
+          mask-image: radial-gradient(ellipse 56% 56% at 50% 50%, #000 55%, transparent 100%); }
+.fa-cta-studio{ background: radial-gradient(ellipse 90% 70% at 85% 80%, #5a4e40 0%, #25211c 55%, #0f0d0a 100%); }
+.fa-cta > *:not(.fa-cta-foto){ position:relative; z-index:1; }
+.fa-cta-studio h2, .fa-cta-studio ul{ max-width: 100%; }
+@media (min-width:1100px){ .fa-cta{ min-height: 360px; } }
+
+/* Scroll-indikator på mobil-kortscrolleren: kantfade + tekst. */
+@media (max-width:519px){
+  .fa-side .fa-kortraekke{ -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent 100%); mask-image: linear-gradient(90deg, #000 86%, transparent 100%); }
+  .fa-udvalgte-gitter::after{ content:"Stryg for at se flere \2192"; display:block; text-align:right; font-size:12.5px; color: var(--color-fg-muted); margin-top: -6px; }
+}
+
+/* Guide-kort med foto */
+.fa-guides a{ flex-direction:column; align-items:stretch; padding:0; overflow:hidden; gap:0; min-height:0; }
+.fa-guides img{ width:100%; height:190px; object-fit:cover; display:block; background:#2a2622; }
+.fa-guide-tekst{ display:block; padding: var(--space-3) var(--space-4) var(--space-4); }
+.fa-guide-tekst strong{ display:block; font-size:15px; margin-bottom:4px; }
+.fa-guide-tekst span{ display:block; font-size:13px; color: var(--color-fg-muted); line-height:1.45; }
+.fa-guides a:hover .fa-guide-tekst strong{ color: var(--color-primary); }
+
+/* Modeller: større miniature */
+.fa-modeller{ grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); }
+.fa-modeller img, .fa-model-ikon{ width:96px; height:72px; border-radius:8px; }
+.fa-modeller a{ min-height:88px; }
+
+/* Chips: hover må ikke ligne et valgt filter (ingen tint, ingen løft). */
+.fa-side .popular-chip:hover{ background: var(--color-surface-2); border-color: var(--color-fg-muted); transform:none; }
