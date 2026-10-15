@@ -24,7 +24,25 @@ Juridiske regler: `/CLAUDE.md` (ufravigelige).
 | ID | Fund | Sev | Status |
 |---|---|---|---|
 | G-001 | Forsiden har 16 px vandret overflow på 360–414 px (`.section-eftertekst{padding:X 0}` nulstillede containerpadding) | P1 | **verificeret** (`3c5306b`) — blind Critic ACCEPTER, 4/4 krav PASS ([critic-G-001.md](gauntlet/critic-G-001.md)) |
+| S-001 | Kørekortsider: title 75 tegn, H1 "Kørekort A2" | P2 | rettet `702d64c` — Critic kører |
+| S-002 | Footer linkede typer til soegning.html?type= i stedet for statiske sider | P2 | rettet `702d64c` — Critic kører |
+| S-006 | annonce.html uden statisk noindex | P2 | rettet `b9e4a06` — Critic kører |
+| S-008 | "kr.." på model- og mærkesider | P3 | rettet `b9e4a06` — Critic kører |
+| V-001/F-004 | Annoncesiden 76 px vandret overflow på mobil (grid 1fr) | P1 | rettet `e44c366` — Critic kører |
+| F-001 | Fritekstsøgning: 17/46 realistiske søgninger gav 0 træf | P1 | rettet `ad13786` (+20 tests) — Critic kører |
 | G-002 | Header (`.header-actions`, `.spor-koeber`) klippes ikke under ~269 px viewport | P3 | åben — under WCAG 320 px-grænsen, lav prioritet |
+
+## Prioriteret kø (fra Detective-rapporterne, rangeret efter værdi/indsats)
+
+Funktion/data (`gauntlet/detective-funktion.md`): F-002 falsk "Ny"-mærke (P1) · F-007 ccm/hk læst forkert fra titler (P2) ·
+F-003 lager 51–60 dage gammelt vises som aktuelt, dato mangler på forside/søgning (P1; ejer skal beslutte aldersgrænse) ·
+F-005 favorit-hjerte kun på 2/604 kort (P1, M) · F-012 blokeret localStorage kaster (P2) · F-013 login viser rå "Failed to fetch" (P2) ·
+interne "RUNDE 12"-noter i offentlig HTML (P2) · "ENGROS"-jargon på kort · Sym/SYM-facetter.
+Visuel (`gauntlet/detective-visuel.md`): V-009 landingssider uden hero/søgekort/tillidsrække (P2) · V-006/V-007 formularkanter 1,3:1 og placeholder-kontrast (P2, XS) ·
+V-002 CLS 0,72 på søgning ved 768 · V-004/V-005 type-fliser: lazy-load + labelkontrast 2,0–3,0:1 · "Sådan virker Bikerbasen"-modul + "Sælg din motorcykel"-CTA-panel (`img/sell-cruiser.webp` ligger ubrugt) ·
+V-012 mærkeside viser både 49 og 55 annoncer · V-016 hovednavigation kun Forside + Søg · V-022/V-023 CSS/JS-størrelse.
+SEO (`gauntlet/detective-seo.md`): S-005 transient Supabase-fejl kan fjerne annoncesider fra sitemap uden build-fejl · S-003 to URL'er pr. side (.html vs udvidelsesfri; Cloudflare, kræver ejer) ·
+S-004 crawl udløser ikke deploy · S-011 sitemap lastmod = byggedato · S-007/015/016/017 nye sidefamilier (modelsider, by, prisintervaller, købsguides).
 
 ## Åbent / næste handling
 
