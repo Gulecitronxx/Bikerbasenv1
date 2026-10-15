@@ -852,29 +852,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Smalle kort: sælgertypen viger for domænet. */
 @container (max-width: 250px){ .rk-saelgertype{ display:none; } }
 
-/* Uden foto: afdæmpet typebillede (img/type) + en ærlig mærkat — det er ikke annoncens motorcykel. */
-.foto-tom--type{ justify-content:flex-end; align-items:flex-start; padding:0; background: var(--color-surface-2); overflow:hidden; }
-.foto-tom--type::before{
-  inset:0; border:0; border-radius:0;
-  background: var(--tt-img, none) 50% 55% / cover no-repeat; opacity:.5; filter: grayscale(.8);
-}
-:root[data-theme="dark"] .foto-tom--type::before{ opacity:.32; }
-.foto-tom--type .foto-tom-ikon{ display:none; }
-.foto-tom--type .foto-tom-titel{
-  position:relative; margin:0 0 8px 8px; padding:4px 9px; max-width: calc(100% - 64px);
-  font-size:11px; font-weight:600; line-height:1.25; text-align:left; border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--color-surface) 92%, transparent); color: var(--color-fg);
-}
-.tt-sport{ --tt-img: url(../img/type/sport.webp); }
-.tt-touring{ --tt-img: url(../img/type/touring.webp); }
-.tt-cruiser{ --tt-img: url(../img/type/cruiser.webp); }
-.tt-naked{ --tt-img: url(../img/type/naked.webp); }
-.tt-adventure{ --tt-img: url(../img/type/adventure.webp); }
-.tt-scooter{ --tt-img: url(../img/type/scooter.webp); }
-.tt-classic{ --tt-img: url(../img/type/classic.webp); }
-.tt-cross{ --tt-img: url(../img/type/cross.webp); }
-.row-media .foto-tom--type .foto-tom-titel{ margin:0 0 4px 4px; padding:2px 6px; font-size:9.5px; max-width:calc(100% - 8px); }
-
 /* ============ Category tiles ============ */
 /* Typefliser: foto med navn og antal. Billederne er ALTID hentet (ikke lazy, V-004), og navnet står på en
    gradient-scrim, der giver teksten mindst 4,5:1 uanset fotoet (V-005). */
@@ -1385,7 +1362,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .swipe-card-media img{ width:100%; height:100%; object-fit:cover; }
 .swipe-card-media::after{ content:""; position:absolute; inset:0; background: linear-gradient(to top, rgba(10,8,6,.28), transparent 40%); pointer-events:none; }
 .swipe-card-flag{ position:absolute; top:12px; left:12px; }
-.swipe-card-kk{ position:absolute; top:12px; right:12px; }
+.swipe-card-kk{ position:absolute; top:12px; right:12px; left:auto; bottom:auto; } /* .card-koerekort saetter left/bottom: uden auto spaendtes badgen ud over hele fotoet */
 .swipe-stamp{
   position:absolute; top:22px; font-family:var(--font-display); font-weight:700; font-size:26px; letter-spacing:.04em;
   text-transform:uppercase; padding:6px 14px; border-radius:10px; border:3px solid currentColor; opacity:0;

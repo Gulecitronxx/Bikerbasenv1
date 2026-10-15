@@ -329,15 +329,8 @@ function listingMediaHTML(l, alt, eager){
   if (url){
     return `<img src="${escapeHTML(url)}" alt="${escapeHTML(alt || '')}" ${loadAttrs} class="card-photo">`;
   }
-  /* Uden foto: en neutral, afdæmpet typeillustration (img/type) i stedet for en tom flade. Den er IKKE annoncens
-     motorcykel, og kortet siger det i klartekst ("Typebillede — ikke annoncens foto"). Kendes typen ikke, står
-     kameraikonet alene. Klasserne .tt-<type> bærer billedet i CSS (ingen inline-style: CSP). */
-  const typ = l && TYPEBILLEDER.includes(l.type) ? l.type : '';
-  if (typ){
-    return `<div class="foto-tom foto-tom--type tt-${typ}" role="img" aria-label="Ingen fotos i denne annonce. Typebillede af ${escapeHTML(typeLabel(typ))}, ikke annoncens motorcykel">`
-      + `<p class="foto-tom-titel">Typebillede · intet foto</p>`
-      + `</div>`;
-  }
+  /* Uden foto: et ærligt tomt felt (kameraikon, stiplet kant) — ikke en tegning eller et typebillede. Det
+     samme lover annoncesiden ("Vi viser ikke en tegning i stedet"); se kommentaren ovenfor og work/DECISIONS.md. */
   return `<div class="foto-tom">`
     + `<span class="foto-tom-ikon" style="width:26px;height:26px;display:block">${Icon.camera}</span>`
     + `<p class="foto-tom-titel">Ingen fotos i denne annonce</p>`
@@ -345,7 +338,6 @@ function listingMediaHTML(l, alt, eager){
     + `</div>`;
 }
 /* De typer, der har en illustration i img/type/<type>.webp (samme fliser som forsidens typerække). */
-const TYPEBILLEDER = ['sport', 'touring', 'cruiser', 'naked', 'adventure', 'scooter', 'classic', 'cross'];
 
 /* ---------- C3: klik videre til kilden måles ét sted ----------
    Det er tragtens vigtigste udgang for indekserede annoncer: handlen sker
@@ -388,8 +380,7 @@ if (typeof document !== 'undefined' && document.addEventListener){
    complete=true + naturalWidth=0 + et src er praecis "hentet, men
    mislykkedes" (lazy-billeder, der ikke er begyndt, har complete=false). */
 function fotoFejlHTML(typ){
-  const t = TYPEBILLEDER.includes(typ) ? typ : '';
-  return `<div class="foto-tom foto-fejl${t ? ' foto-tom--type tt-' + t : ''}" role="img" aria-label="Fotoet kunne ikke hentes hos kilden">`
+  return `<div class="foto-tom foto-fejl" role="img" aria-label="Fotoet kunne ikke hentes hos kilden">`
     + `<span class="foto-tom-ikon" style="width:26px;height:26px;display:block">${Icon.camera}</span>`
     + `<p class="foto-tom-titel">Fotoet kunne ikke hentes hos kilden</p>`
     + `</div>`;

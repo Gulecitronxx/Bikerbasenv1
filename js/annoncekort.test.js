@@ -138,13 +138,13 @@ test('"Ny" (fabriksny hos forhandler) står først i linjen og forklarer garanti
 
 /* ---------- uden foto ---------- */
 
-test('uden foto: neutral typeillustration, ærligt mærket — aldrig en tom flade', () => {
+test('uden foto: ærligt tomt felt med kameraikon — aldrig en tegning eller et typebillede', () => {
   for (const l of [ekstern({ photoUrls: [] }), egen({ photoUrls: [] })]){
     const html = listingCardHTML(l, 1);
     const felt = (html.match(/<div class="foto-tom[^"]*"[\s\S]*?<\/div>/) || [''])[0];
-    assert.match(felt, new RegExp(`foto-tom foto-tom--type tt-${l.type}`));
-    assert.match(felt, /Typebillede · intet foto/, 'siger i klartekst, at det ikke er annoncens motorcykel');
-    assert.match(felt, /aria-label="Ingen fotos i denne annonce\. Typebillede af/);
+    assert.match(felt, /class="foto-tom"/);
+    assert.match(felt, /Ingen fotos i denne annonce/);
+    assert.ok(!/tt-|Typebillede|foto-tom--type/.test(felt), 'ingen typeillustration (annoncesiden lover: vi viser ikke en tegning i stedet)');
   }
 });
 
@@ -155,9 +155,9 @@ test('uden foto og uden kendt type: kameraikon + sætningen (ingen opfundet type
   assert.ok(!/tt-/.test(html));
 });
 
-test('mislykket kortfoto får samme typeillustration, når typen kendes', () => {
-  assert.match(fotoFejlHTML('sport'), /foto-tom foto-fejl foto-tom--type tt-sport/);
-  assert.match(fotoFejlHTML(), /class="foto-tom foto-fejl"/);
+test('mislykket kortfoto er et ærligt felt uden typeillustration', () => {
+  assert.match(fotoFejlHTML('sport'), /class="foto-tom foto-fejl"/);
+  assert.ok(!/tt-|foto-tom--type/.test(fotoFejlHTML('sport')));
   const kort = { dataset: { type: 'cruiser' } };
   const media = { children: [], closest: s => (s === '.card' ? kort : null) };
   let indsat = '';
@@ -167,19 +167,7 @@ test('mislykket kortfoto får samme typeillustration, når typen kendes', () => 
     insertAdjacentHTML: (_p, h) => { indsat = h; }, remove: () => {},
   };
   assert.equal(markerFotoFejl(img), true);
-  assert.match(indsat, /tt-cruiser/);
-});
-
-test('hver typeillustration findes som fil og har sin CSS-klasse', () => {
-  const css = læsRod('css/styles.css');
-  const typer = ['sport', 'touring', 'cruiser', 'naked', 'adventure', 'scooter', 'classic', 'cross'];
-  for (const t of typer){
-    assert.ok(fs.existsSync(path.join(ROD, 'img', 'type', `${t}.webp`)), `img/type/${t}.webp`);
-    assert.ok(css.includes(`.tt-${t}{ --tt-img: url(../img/type/${t}.webp); }`), `.tt-${t} i styles.css`);
-  }
-  // Billedtyperne i data.js er netop disse otte — ingen type uden billede.
-  const { TYPES } = new Function(læs('data.js') + '\nreturn { TYPES };')();
-  assert.deepEqual(TYPES.map(t => t.id).sort(), typer.slice().sort());
+  assert.ok(!/tt-/.test(indsat), 'ingen typeillustration i stedet for et mislykket foto');
 });
 
 /* ---------- én containerskala ---------- */
