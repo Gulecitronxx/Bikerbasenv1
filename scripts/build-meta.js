@@ -57,7 +57,7 @@ function metaBlock(file, title, description){
     NOINDEX.has(file) ? '<meta name="robots" content="noindex, follow">' : null,
     '<meta name="theme-color" content="#C6420E" media="(prefers-color-scheme: light)">',
     '<meta name="theme-color" content="#0F0D0A" media="(prefers-color-scheme: dark)">',
-    '<meta property="og:type" content="website">',
+    `<meta property="og:type" content="${/^guide-/.test(file) ? 'article' : 'website'}">`,
     '<meta property="og:site_name" content="Bikerbasen">',
     '<meta property="og:locale" content="da_DK">',
     `<meta property="og:url" content="${url}">`,
