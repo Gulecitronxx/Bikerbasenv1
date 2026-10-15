@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Sælgerprofil — Bikerbasen">
 <meta name="twitter:description" content="Se sælgerens profil, bedømmelse og aktive motorcykelannoncer på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -64,7 +64,8 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=a4d6963e">
+<link rel="stylesheet" href="css/styles.css?v=bcc85a61">
+<link rel="stylesheet" href="css/p-dashboard.css?v=bcc85a61">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -120,13 +121,16 @@ try{
      begge lå bag et klik. Tillidsspørgsmålet i bar/RUBRIC.md er formuleret
      "uden at klikke", og en fane, der skjuler svaret, taber det spørgsmål,
      uanset hvor pænt indholdet er sat op. Alt står nu på én side. -->
-<main id="main-content">
+<main id="main-content" class="db-page db-page-profile">
+  <section class="db-hero db-hero--slim" aria-labelledby="profile-h1">
+    <img class="db-hero-img" src="img/hero-1600.webp" srcset="img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="1600" height="679" fetchpriority="high" decoding="async">
+    <div class="container db-hero-inner">
+      <nav class="breadcrumb db-crumb" aria-label="Brødkrumme"><a href="index.html">Forside</a><span class="bc-sep"></span><span aria-current="page">Sælgerprofil</span></nav>
+      <h1 id="profile-h1">Sælgerprofil på Bikerbasen</h1>
+    </div>
+  </section>
   <section class="profile-hero">
     <div class="container">
-      <nav class="breadcrumb" aria-label="Brødkrumme" style="padding-top:0; margin-bottom:16px;">
-        <a href="index.html">Forside</a><span class="bc-sep"></span><span>Sælgerprofil</span>
-      </nav>
-      <h1 id="profile-h1" class="visually-hidden">Sælgerprofil på Bikerbasen</h1>
       <div id="profil-ejer-banner"></div>
       <div class="profile-top" id="profile-top"></div>
     </div>
@@ -193,21 +197,21 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=a4d6963e"></script>
-<script defer src="js/vendor/supabase.js?v=a4d6963e"></script>
-<script defer src="js/supabase-config.js?v=a4d6963e"></script>
-<script defer src="js/supabase-api.js?v=a4d6963e"></script>
-<script defer src="js/icons.js?v=a4d6963e"></script>
+<script defer src="js/security.js?v=bcc85a61"></script>
+<script defer src="js/vendor/supabase.js?v=bcc85a61"></script>
+<script defer src="js/supabase-config.js?v=bcc85a61"></script>
+<script defer src="js/supabase-api.js?v=bcc85a61"></script>
+<script defer src="js/icons.js?v=bcc85a61"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk. findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og sælgerprofilen har nul
      formularfelter. Den lå i samme download-kø som fontene og css'en. -->
-<script defer src="js/data.js?v=a4d6963e"></script>
-<script defer src="js/store.js?v=a4d6963e"></script>
-<script defer src="js/maaling.js?v=a4d6963e"></script>
-<script defer src="js/backend-bridge.js?v=a4d6963e"></script>
-<script defer src="js/components.js?v=a4d6963e"></script>
-<script defer src="js/seo.js?v=a4d6963e"></script>
-<script defer src="js/forhandler.js?v=a4d6963e"></script>
+<script defer src="js/data.js?v=bcc85a61"></script>
+<script defer src="js/store.js?v=bcc85a61"></script>
+<script defer src="js/maaling.js?v=bcc85a61"></script>
+<script defer src="js/backend-bridge.js?v=bcc85a61"></script>
+<script defer src="js/components.js?v=bcc85a61"></script>
+<script defer src="js/seo.js?v=bcc85a61"></script>
+<script defer src="js/forhandler.js?v=bcc85a61"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

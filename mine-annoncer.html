@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Mine annoncer — Bikerbasen">
 <meta name="twitter:description" content="Se overblik over dine egne motorcykelannoncer og dine gemte annoncer på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -67,7 +67,8 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=a4d6963e">
+<link rel="stylesheet" href="css/styles.css?v=bcc85a61">
+<link rel="stylesheet" href="css/p-dashboard.css?v=bcc85a61">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -115,58 +116,92 @@ try{
   </div>
 </div>
 
-<main id="main-content">
-  <div class="container">
-    <h1 class="visually-hidden">Mine annoncer</h1>
+<main id="main-content" class="db-page">
 
-    <!-- Tælle-faner: hver fane viser sit antal, som på Bilbasen. Den aktive
-         markeres, og Konto ligger som et link til højre. -->
-    <div class="account-head">
-      <div class="count-tabs" id="tabs-row" role="tablist" aria-label="Din konto">
-        <button type="button" class="count-tab active" data-tab="mine" role="tab">
-          <span class="count-tab-icon" data-icon="bike"></span>
-          <span class="count-tab-text"><span class="count-tab-label">Mine annoncer</span><span class="count-tab-num" id="count-mine">0</span></span>
-        </button>
-        <button type="button" class="count-tab" data-tab="favoritter" role="tab">
-          <span class="count-tab-icon" data-icon="heart"></span>
-          <span class="count-tab-text"><span class="count-tab-label">Favoritter</span><span class="count-tab-num" id="count-fav">0</span></span>
-        </button>
-        <button type="button" class="count-tab" data-tab="agenter" role="tab">
-          <span class="count-tab-icon" data-icon="search"></span>
-          <span class="count-tab-text"><span class="count-tab-label">Søgeagenter</span><span class="count-tab-num" id="count-agenter">0</span></span>
-        </button>
-      </div>
-      <button type="button" class="account-link" data-tab="konto"><span data-icon="user"></span>Konto</button>
+  <!-- Hero med foto, brødkrumme og overskrift (billede 5). Fotoet er forsidens
+       eget heltefoto; det er pynt, ikke en annonce. -->
+  <section class="db-hero" aria-labelledby="db-h1">
+    <img class="db-hero-img" src="img/hero-1600.webp" srcset="img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="1600" height="679" fetchpriority="high" decoding="async">
+    <div class="container db-hero-inner">
+      <nav class="breadcrumb db-crumb" aria-label="Brødkrumme"><a href="index.html">Forside</a><span class="bc-sep"></span><span aria-current="page">Min profil</span></nav>
+      <h1 id="db-h1">Mine annoncer</h1>
+      <p class="db-hero-lead">Få overblik over dine annoncer, favoritter og søgeagenter, og administrér dem nemt ét sted.</p>
     </div>
+  </section>
 
-    <div class="account-layout">
-     <div class="account-main">
+  <!-- Fanelinje: kun faner, der har indhold at vise. -->
+  <div class="db-tabbar">
+    <div class="container db-tabbar-in">
+      <div class="db-tabs" id="tabs-row" role="tablist" aria-label="Din profil">
+        <button type="button" class="db-tab active" role="tab" id="tabbtn-oversigt" data-tab="oversigt" aria-selected="true" aria-controls="db-panel-annoncer">Oversigt</button>
+        <button type="button" class="db-tab" role="tab" id="tabbtn-mine" data-tab="mine" aria-selected="false" aria-controls="db-panel-annoncer" tabindex="-1">Mine annoncer</button>
+        <button type="button" class="db-tab" role="tab" id="tabbtn-favoritter" data-tab="favoritter" aria-selected="false" aria-controls="tab-favoritter" tabindex="-1">Favoritter</button>
+        <button type="button" class="db-tab" role="tab" id="tabbtn-agenter" data-tab="agenter" aria-selected="false" aria-controls="tab-agenter" tabindex="-1">Søgeagenter</button>
+        <button type="button" class="db-tab" role="tab" id="tabbtn-konto" data-tab="konto" aria-selected="false" aria-controls="tab-konto" tabindex="-1">Profilindstillinger</button>
+      </div>
+      <a href="opret-annonce.html" class="btn btn-primary db-tabbar-cta"><span data-icon="plus"></span>Opret ny annonce</a>
+    </div>
+  </div>
 
-      <div id="tab-mine" role="tabpanel">
-        <div class="list-toolbar">
-          <h2 class="list-heading">Mine annoncer <span id="mine-count-inline">0</span></h2>
-          <label class="sort-inline">Sorter efter
+  <div class="container db-layout">
+    <div class="db-main">
+
+      <!-- Statistikkort: tal beregnes fra brugerens egne data. -->
+      <section class="db-stats" id="db-stats" aria-label="Overblik">
+        <article class="db-stat">
+          <span class="db-stat-icon is-ok" data-icon="bike"></span>
+          <div class="db-stat-body"><b class="db-stat-num" id="stat-aktive">0</b><span class="db-stat-label">Aktive annoncer</span></div>
+          <button type="button" class="db-stat-link" data-tab-go="mine">Se mine annoncer<span data-icon="arrowRight"></span></button>
+        </article>
+        <article class="db-stat">
+          <span class="db-stat-icon" data-icon="edit"></span>
+          <div class="db-stat-body"><b class="db-stat-num" id="stat-kladder">0</b><span class="db-stat-label">Kladde</span></div>
+          <a class="db-stat-link" id="stat-kladde-link" href="opret-annonce.html">Opret annonce<span data-icon="arrowRight"></span></a>
+        </article>
+        <article class="db-stat">
+          <span class="db-stat-icon is-heart" data-icon="heart"></span>
+          <div class="db-stat-body"><b class="db-stat-num" id="stat-fav">0</b><span class="db-stat-label">Favoritter</span></div>
+          <button type="button" class="db-stat-link" data-tab-go="favoritter">Se favoritter<span data-icon="arrowRight"></span></button>
+        </article>
+        <article class="db-stat">
+          <span class="db-stat-icon is-blue" data-icon="bell"></span>
+          <div class="db-stat-body"><b class="db-stat-num" id="stat-agenter">0</b><span class="db-stat-label">Søgeagenter</span></div>
+          <button type="button" class="db-stat-link" data-tab-go="agenter">Se søgeagenter<span data-icon="arrowRight"></span></button>
+        </article>
+      </section>
+
+      <!-- Annoncelisten vises under både "Oversigt" og "Mine annoncer". -->
+      <section id="db-panel-annoncer" class="db-panel" role="tabpanel" aria-labelledby="tabbtn-oversigt">
+        <div class="db-list-head" id="mine-toolbar">
+          <h2 class="db-list-title">Mine annoncer <span id="mine-count-inline">0</span></h2>
+          <label class="db-sort">Sorter efter
             <select class="input" id="mine-sort">
-              <option value="date">Sidst oprettet</option>
+              <option value="date">Nyeste først</option>
               <option value="price-desc">Pris (høj–lav)</option>
               <option value="price-asc">Pris (lav–høj)</option>
               <option value="year-desc">Årgang (nyeste)</option>
             </select>
           </label>
         </div>
-        <div id="mine-empty" class="empty-state" style="display:none;">
-          <div id="mine-empty-icon"></div>
+        <div id="mine-error" class="db-alert" role="alert" hidden></div>
+        <div id="mine-empty" class="db-empty" style="display:none;">
+          <span class="db-empty-icon" id="mine-empty-icon"></span>
           <h3>Du har ingen annoncer endnu</h3>
           <p>Opret din første annonce, og kom i gang med at sælge.</p>
-          <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
+          <a href="opret-annonce.html" class="btn btn-primary">Opret annonce</a>
         </div>
-        <div id="mine-grid" class="listing-rows"></div>
-      </div>
+        <div id="mine-grid" class="db-rows" aria-live="polite"></div>
+        <div class="db-create" id="mine-create">
+          <span class="db-create-plus" data-icon="plus"></span>
+          <div class="db-create-text"><b>Opret en ny annonce</b><span>Beskriv din motorcykel, tilføj fotos og få den ud til købere på Bikerbasen.</span></div>
+          <a href="opret-annonce.html" class="btn btn-primary">Opret annonce<span data-icon="plus"></span></a>
+        </div>
+      </section>
 
-      <div id="tab-favoritter" style="display:none;" role="tabpanel">
-        <div class="list-toolbar">
-          <h2 class="list-heading">Favoritter <span id="fav-count-inline">0</span></h2>
-          <label class="sort-inline">Sorter efter
+      <section id="tab-favoritter" class="db-panel" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-favoritter">
+        <div class="db-list-head">
+          <h2 class="db-list-title">Favoritter <span id="fav-count-inline">0</span></h2>
+          <label class="db-sort">Sorter efter
             <select class="input" id="fav-sort">
               <option value="date">Sidst tilføjet</option>
               <option value="price-desc">Pris (høj–lav)</option>
@@ -175,27 +210,30 @@ try{
             </select>
           </label>
         </div>
-        <div id="fav-empty" class="empty-state" style="display:none;">
-          <div id="fav-empty-icon"></div>
+        <div id="fav-empty" class="db-empty" style="display:none;">
+          <span class="db-empty-icon" id="fav-empty-icon"></span>
           <h3>Ingen gemte annoncer</h3>
           <p>Klik på hjertet på en annonce for at gemme den her.</p>
-          <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
+          <a href="soegning.html" class="btn btn-primary">Søg motorcykler</a>
         </div>
-        <div id="fav-grid" class="listing-rows"></div>
-      </div>
+        <div id="fav-grid" class="db-rows"></div>
+      </section>
 
-      <div id="tab-agenter" style="display:none;" role="tabpanel">
-        <p class="demo-note" style="margin-top:var(--space-4);"><span id="agent-note-icon"></span>En søgeagent gemmer dine filtre og viser, hvor mange nye annoncer der er kommet til siden du oprettede den. E-mailnotifikationer kræver en server og er ikke aktive i denne prototype.</p>
+      <section id="tab-agenter" class="db-panel" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-agenter">
+        <div class="db-list-head"><h2 class="db-list-title">Søgeagenter <span id="agent-count-inline">0</span></h2></div>
+        <p class="demo-note"><span id="agent-note-icon"></span>En søgeagent gemmer dine filtre og viser, hvor mange nye annoncer der er kommet til siden du oprettede den. E-mailnotifikationer kræver en server og er ikke aktive i denne prototype.</p>
         <div id="agents-list"></div>
-        <div id="agents-empty" class="empty-state" style="display:none;">
-          <div id="agents-empty-icon"></div>
+        <div id="agents-empty" class="db-empty" style="display:none;">
+          <span class="db-empty-icon" id="agents-empty-icon"></span>
           <h3>Ingen søgeagenter endnu</h3>
           <p>Sæt dine filtre på søgesiden og klik "Gem søgning" for at blive holdt opdateret.</p>
-          <a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a>
+          <a href="soegning.html" class="btn btn-primary">Søg motorcykler</a>
         </div>
-      </div>
+      </section>
 
-      <div id="tab-konto" style="display:none; max-width:640px;" role="tabpanel">
+      <section id="tab-konto" class="db-panel" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-konto">
+        <div class="db-list-head"><h2 class="db-list-title">Profilindstillinger</h2></div>
+        <div class="sidebar-card" id="profile-card"></div>
         <div class="sidebar-card" id="plan-card"></div>
 
         <div class="sidebar-card">
@@ -216,14 +254,45 @@ try{
             <button type="button" class="btn btn-danger-outline" id="delete-account-btn">Ryd mine data i denne browser</button>
           </div>
         </div>
-      </div>
+      </section>
 
-     </div><!-- /account-main -->
+    </div><!-- /db-main -->
 
-     <!-- Hjælpe-sidebar, som Bilbasens "Bilbasen hjælper dig". Skifter indhold
-          efter hvilken fane man står på. -->
-     <aside class="account-aside" id="account-aside"></aside>
-    </div><!-- /account-layout -->
+    <!-- Højre sidebjælke: konto, tips og hjælp. Navn og e-mail fyldes ind fra sessionen. -->
+    <aside class="db-aside" aria-label="Konto og hjælp">
+      <section class="db-card db-account" aria-labelledby="db-konto-h">
+        <h2 id="db-konto-h">Min konto</h2>
+        <button type="button" class="db-user" data-tab-go="konto">
+          <span class="db-avatar" id="db-avatar" aria-hidden="true">?</span>
+          <span class="db-user-text"><b id="db-user-name">Din profil</b><span id="db-user-mail"></span></span>
+          <span class="db-user-go" data-icon="chevronRight"></span>
+        </button>
+        <nav class="db-menu" aria-label="Kontomenu">
+          <button type="button" class="db-menu-item" data-tab-go="konto"><span data-icon="user"></span>Profilindstillinger</button>
+          <button type="button" class="db-menu-item" data-tab-go="mine"><span data-icon="bike"></span>Mine annoncer<span class="db-menu-go" data-icon="chevronRight"></span></button>
+          <button type="button" class="db-menu-item" data-tab-go="favoritter"><span data-icon="heart"></span>Favoritter</button>
+          <button type="button" class="db-menu-item" id="db-logout"><span data-icon="logout"></span>Log ud</button>
+        </nav>
+      </section>
+
+      <section class="db-card db-tip" aria-labelledby="db-tip-h">
+        <div class="db-tip-body">
+          <h2 id="db-tip-h">Sælg hurtigere</h2>
+          <p>En komplet annonce med gode billeder er lettere at sige ja til. Felter, du ikke udfylder, står som "Ikke oplyst" for køberen.</p>
+          <a href="sikkerhed.html" class="db-link">Se vores gode råd<span data-icon="arrowRight"></span></a>
+        </div>
+      </section>
+
+      <section class="db-card db-help" aria-labelledby="db-help-h">
+        <span class="db-help-icon" data-icon="shieldCheck"></span>
+        <div>
+          <h2 id="db-help-h">Brug for hjælp?</h2>
+          <p>Læs, hvordan Bikerbasen fungerer, og hvordan du handler sikkert.</p>
+          <a href="om-bikerbasen.html" class="db-link">Om Bikerbasen<span data-icon="arrowRight"></span></a>
+          <a href="sikkerhed.html" class="db-link">Sikkerhed og gode råd<span data-icon="arrowRight"></span></a>
+        </div>
+      </section>
+    </aside>
   </div>
 </main>
 
@@ -274,18 +343,18 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=a4d6963e"></script>
-<script defer src="js/vendor/supabase.js?v=a4d6963e"></script>
-<script defer src="js/supabase-config.js?v=a4d6963e"></script>
-<script defer src="js/supabase-api.js?v=a4d6963e"></script>
-<script defer src="js/icons.js?v=a4d6963e"></script>
-<script defer src="js/postnumre.js?v=a4d6963e"></script>
-<script defer src="js/data.js?v=a4d6963e"></script>
-<script defer src="js/store.js?v=a4d6963e"></script>
-<script defer src="js/maaling.js?v=a4d6963e"></script>
-<script defer src="js/backend-bridge.js?v=a4d6963e"></script>
-<script defer src="js/components.js?v=a4d6963e"></script>
-<script defer src="js/mine-annoncer.js?v=a4d6963e"></script>
+<script defer src="js/security.js?v=bcc85a61"></script>
+<script defer src="js/vendor/supabase.js?v=bcc85a61"></script>
+<script defer src="js/supabase-config.js?v=bcc85a61"></script>
+<script defer src="js/supabase-api.js?v=bcc85a61"></script>
+<script defer src="js/icons.js?v=bcc85a61"></script>
+<script defer src="js/postnumre.js?v=bcc85a61"></script>
+<script defer src="js/data.js?v=bcc85a61"></script>
+<script defer src="js/store.js?v=bcc85a61"></script>
+<script defer src="js/maaling.js?v=bcc85a61"></script>
+<script defer src="js/backend-bridge.js?v=bcc85a61"></script>
+<script defer src="js/components.js?v=bcc85a61"></script>
+<script defer src="js/mine-annoncer.js?v=bcc85a61"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

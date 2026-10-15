@@ -26,7 +26,7 @@
 <meta name="twitter:title" content="Forhandler-dashboard — Bikerbasen">
 <meta name="twitter:description" content="Overblik over dine annoncer, visninger, henvendelser og bedømmelser som forhandler på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -65,7 +65,8 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=a4d6963e">
+<link rel="stylesheet" href="css/styles.css?v=bcc85a61">
+<link rel="stylesheet" href="css/p-dashboard.css?v=bcc85a61">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -112,144 +113,176 @@ try{
     <a href="mine-annoncer.html?tab=favoritter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>Gemte annoncer (<span data-fav-count-mobile>0</span>)</a>
   </div>
 </div>
-<main id="main-content">
-  <div class="container">
-
-    <div id="dash-gate" style="display:none;">
-      <div class="empty-state" style="padding-top:var(--space-9);">
-        <div id="gate-icon"></div>
-        <h3>Dashboardet er for forhandlere</h3>
-        <p style="max-width:420px; margin:0 auto var(--space-4);">Din profil er registreret som privat sælger. Bliv forhandler for at få adgang til salgsoverblik, statistik, annoncestyring og krav på dine egne indekserede annoncer.</p>
-        <a href="mine-annoncer.html?tab=konto" class="btn btn-primary">Bliv forhandler</a>
-      </div>
+<main id="main-content" class="db-page">
+  <section class="db-hero" aria-labelledby="db-h1">
+    <img class="db-hero-img" src="img/hero-1600.webp" srcset="img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="1600" height="679" fetchpriority="high" decoding="async">
+    <div class="container db-hero-inner">
+      <nav class="breadcrumb db-crumb" aria-label="Brødkrumme"><a href="index.html">Forside</a><span class="bc-sep"></span><a href="mine-annoncer.html">Min profil</a><span class="bc-sep"></span><span aria-current="page">Forhandler</span></nav>
+      <h1 id="db-h1">Forhandler-dashboard</h1>
+      <p class="db-hero-lead" id="dash-subtitle">Overblik over dine annoncer og krav.</p>
     </div>
+  </section>
 
-    <div id="dash-content" style="display:none;">
-      <div class="dash-head">
+  <div class="db-tabbar" id="dash-tabbar" style="display:none;">
+    <div class="container db-tabbar-in">
+      <div class="db-tabs" role="tablist" aria-label="Forhandler-dashboard">
+        <button type="button" class="db-tab active" role="tab" id="dtab-oversigt" data-dtab="oversigt" aria-selected="true" aria-controls="dpanel-oversigt">Oversigt</button>
+        <button type="button" class="db-tab" role="tab" id="dtab-annoncer" data-dtab="annoncer" aria-selected="false" aria-controls="dpanel-annoncer" tabindex="-1">Annoncer</button>
+        <button type="button" class="db-tab" role="tab" id="dtab-krav" data-dtab="krav" aria-selected="false" aria-controls="dpanel-krav" tabindex="-1">Krav på annoncer</button>
+        <a class="db-tab" href="mine-annoncer.html?tab=konto">Profilindstillinger</a>
+      </div>
+      <a href="opret-annonce.html" class="btn btn-primary db-tabbar-cta"><span data-icon="plus"></span>Opret ny annonce</a>
+    </div>
+  </div>
+
+  <div class="container db-layout">
+    <div class="db-main">
+
+      <div id="dash-gate" style="display:none;">
+        <div class="db-empty">
+          <span class="db-empty-icon" id="gate-icon"></span>
+          <h2>Dashboardet er for forhandlere</h2>
+          <p>Din profil er registreret som privat sælger. Bliv forhandler for at få adgang til salgsoverblik, statistik, annoncestyring og krav på dine egne indekserede annoncer.</p>
+          <a href="mine-annoncer.html?tab=konto" class="btn btn-primary">Bliv forhandler</a>
+        </div>
+      </div>
+
+      <div id="dash-content" style="display:none;">
+        <div id="dash-plan-strip"></div>
+        <div id="dash-kickoff" style="display:none;"></div>
+
+        <div id="dpanel-oversigt" role="tabpanel" aria-labelledby="dtab-oversigt" class="db-main">
+          <section aria-labelledby="kpi-heading">
+            <h2 id="kpi-heading" class="visually-hidden">Nøgletal</h2>
+            <div class="db-stats db-stats--5" id="kpi-row"></div>
+          </section>
+          <p class="demo-note"><span data-icon="info"></span>Visninger tælles én gang pr. besøgende pr. session. Henvendelser er antallet af gange nogen har fået vist dit telefonnummer. Begge dele findes kun for annoncer, du har oprettet direkte på Bikerbasen — ikke for indekserede annoncer, du har gjort krav på (se fanen Krav på annoncer).</p>
+          <section class="dash-grid">
+            <div class="panel">
+              <div class="panel-head">
+                <div><h2>Visninger de seneste 30 dage</h2><p id="views-summary"></p></div>
+                <button type="button" class="btn btn-ghost btn-sm" data-toggle-table="views">Vis tabel</button>
+              </div>
+              <div class="chart-wrap" id="views-chart"></div>
+              <div class="chart-table" id="views-table" hidden></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div><h2>Mest sete annoncer</h2><p>Visninger pr. annonce, seneste 30 dage</p></div>
+                <button type="button" class="btn btn-ghost btn-sm" data-toggle-table="top">Vis tabel</button>
+              </div>
+              <div class="chart-wrap" id="top-chart"></div>
+              <div class="chart-table" id="top-table" hidden></div>
+            </div>
+          </section>
+        </div>
+
+        <div id="dpanel-annoncer" role="tabpanel" aria-labelledby="dtab-annoncer" class="db-main" style="display:none;">
+          <section>
+            <div class="db-list-head">
+              <h2 class="db-list-title">Dine annoncer <span id="listings-count">0</span></h2>
+              <p class="db-when" id="listings-summary"></p>
+            </div>
+            <div id="listings-rows" class="db-rows"></div>
+            <div id="listings-empty" class="db-empty" style="display:none;">
+              <h3>Ingen annoncer endnu</h3>
+              <p>Opret din første annonce for at se statistik her.</p>
+              <a href="opret-annonce.html" class="btn btn-primary">Opret annonce</a>
+            </div>
+            <div class="db-create">
+              <span class="db-create-plus" data-icon="plus"></span>
+              <div class="db-create-text"><b>Opret en ny annonce</b><span>Beskriv din motorcykel, tilføj fotos og få den ud til købere på Bikerbasen.</span></div>
+              <a href="opret-annonce.html" class="btn btn-primary">Opret annonce<span data-icon="plus"></span></a>
+            </div>
+          </section>
+        </div>
+
+        <div id="dpanel-krav" role="tabpanel" aria-labelledby="dtab-krav" class="db-main" style="display:none;">
+          <section class="panel" id="ekstern-panel">
+            <div class="panel-head">
+              <div>
+                <h2>Annoncer du har gjort krav på</h2>
+                <p id="ekstern-summary"></p>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="data-table" id="ekstern-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Annonce</th>
+                    <th scope="col" class="num">Pris</th>
+                    <th scope="col">Kilde</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="visually-hidden">Handlinger</span></th>
+                  </tr>
+                </thead>
+                <tbody id="ekstern-tbody"></tbody>
+              </table>
+            </div>
+            <div id="ekstern-empty" class="empty-state" style="display:none;">
+              <h3>Ingen godkendte krav endnu</h3>
+              <p>Har din forretning allerede annoncer indekseret fra en anden side, kan du gøre krav på dem herunder i stedet for at oprette dem forfra.</p>
+            </div>
+          </section>
+
+          <section class="panel" id="krav-panel">
+            <div class="panel-head">
+              <div>
+                <h2>Gør krav på dine annoncer</h2>
+                <p>Bikerbasen har indekseret annoncer fra andre danske MC-sider. Er en af dem din, kan du gøre krav på den og selv rette prisen, statussen og andre felter.</p>
+              </div>
+            </div>
+            <form id="krav-search-form" class="krav-search-form">
+              <label class="visually-hidden" for="krav-search-input">Søg efter mærke, model eller by</label>
+              <input class="input" id="krav-search-input" type="search" placeholder="Søg efter mærke, model eller by, fx “Honda” eller “Kolding”" autocomplete="off">
+              <button type="submit" class="btn btn-outline"><span data-icon="search"></span>Søg</button>
+            </form>
+            <div id="krav-search-hint" class="krav-search-hint"></div>
+            <div id="krav-results" class="krav-results"></div>
+
+            <div id="krav-status-wrap" style="display:none;">
+              <h3 class="krav-status-heading">Dine indsendte krav</h3>
+              <div id="krav-status-list" class="krav-status-list"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div><!-- /db-main -->
+
+    <aside class="db-aside" aria-label="Konto og hjælp">
+      <section class="db-card db-account" aria-labelledby="db-konto-h">
+        <h2 id="db-konto-h">Min konto</h2>
+        <a class="db-user" href="mine-annoncer.html?tab=konto">
+          <span class="db-avatar" id="db-avatar" aria-hidden="true">?</span>
+          <span class="db-user-text"><b id="db-user-name">Din profil</b><span id="db-user-mail"></span></span>
+          <span class="db-user-go" data-icon="chevronRight"></span>
+        </a>
+        <nav class="db-menu" aria-label="Kontomenu">
+          <a class="db-menu-item" href="mine-annoncer.html?tab=konto"><span data-icon="user"></span>Profilindstillinger</a>
+          <a class="db-menu-item" href="mine-annoncer.html?tab=mine"><span data-icon="bike"></span>Mine annoncer<span class="db-menu-go" data-icon="chevronRight"></span></a>
+          <a class="db-menu-item" href="mine-annoncer.html?tab=favoritter"><span data-icon="heart"></span>Favoritter</a>
+          <button type="button" class="db-menu-item" id="db-logout"><span data-icon="logout"></span>Log ud</button>
+        </nav>
+      </section>
+
+      <section class="db-card db-tip" aria-labelledby="db-tip-h">
+        <div class="db-tip-body">
+          <h2 id="db-tip-h">Sælg hurtigere</h2>
+          <p>En komplet annonce med gode billeder er lettere at sige ja til. Felter, du ikke udfylder, står som "Ikke oplyst" for køberen.</p>
+          <a href="sikkerhed.html" class="db-link">Se vores gode råd<span data-icon="arrowRight"></span></a>
+        </div>
+      </section>
+
+      <section class="db-card db-help" aria-labelledby="db-help-h">
+        <span class="db-help-icon" data-icon="shieldCheck"></span>
         <div>
-          <h1>Forhandler-dashboard</h1>
-          <p id="dash-subtitle"></p>
-        </div>
-        <div class="dash-head-actions">
-          <a href="opret-annonce.html" class="btn btn-primary"><span data-icon="plus"></span>Opret annonce</a>
-        </div>
-      </div>
-
-      <div id="dash-plan-strip"></div>
-
-      <div id="dash-kickoff" style="display:none;"></div>
-
-      <p class="demo-note"><span data-icon="info"></span>Visninger tælles én gang pr. besøgende pr. session. Henvendelser er antallet af gange nogen har fået vist dit telefonnummer. Begge dele findes kun for annoncer, du har oprettet direkte på Bikerbasen — ikke for indekserede annoncer, du har gjort krav på (se nedenfor).</p>
-
-      <section aria-labelledby="kpi-heading">
-        <h2 id="kpi-heading" class="visually-hidden">Nøgletal</h2>
-        <div class="kpi-row" id="kpi-row"></div>
-      </section>
-
-      <section class="dash-grid">
-        <div class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Visninger de seneste 30 dage</h2>
-              <p id="views-summary"></p>
-            </div>
-            <button type="button" class="btn btn-ghost btn-sm" data-toggle-table="views">Vis tabel</button>
-          </div>
-          <div class="chart-wrap" id="views-chart"></div>
-          <div class="chart-table" id="views-table" hidden></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head">
-            <div>
-              <h2>Mest sete annoncer</h2>
-              <p>Visninger pr. annonce, seneste 30 dage</p>
-            </div>
-            <button type="button" class="btn btn-ghost btn-sm" data-toggle-table="top">Vis tabel</button>
-          </div>
-          <div class="chart-wrap" id="top-chart"></div>
-          <div class="chart-table" id="top-table" hidden></div>
+          <h2 id="db-help-h">Brug for hjælp?</h2>
+          <p>Læs, hvordan Bikerbasen fungerer, og hvordan du handler sikkert.</p>
+          <a href="om-bikerbasen.html" class="db-link">Om Bikerbasen<span data-icon="arrowRight"></span></a>
+          <a href="sikkerhed.html" class="db-link">Sikkerhed og gode råd<span data-icon="arrowRight"></span></a>
         </div>
       </section>
-
-      <section class="panel">
-        <div class="panel-head">
-          <div>
-            <h2>Dine annoncer</h2>
-            <p id="listings-summary"></p>
-          </div>
-        </div>
-        <div class="table-scroll">
-          <table class="data-table" id="listings-table">
-            <thead>
-              <tr>
-                <th scope="col">Annonce</th>
-                <th scope="col" class="num">Pris</th>
-                <th scope="col" class="num">Visninger</th>
-                <th scope="col" class="num">Henvendelser</th>
-                <th scope="col" class="num">Gemt</th>
-                <th scope="col">Status</th>
-                <th scope="col"><span class="visually-hidden">Handlinger</span></th>
-              </tr>
-            </thead>
-            <tbody id="listings-tbody"></tbody>
-          </table>
-        </div>
-        <div id="listings-empty" class="empty-state" style="display:none;">
-          <h3>Ingen annoncer endnu</h3>
-          <p>Opret din første annonce for at se statistik her.</p>
-          <a href="opret-annonce.html" class="btn btn-primary" style="margin-top:16px;">Opret annonce</a>
-        </div>
-      </section>
-
-      <section class="panel" id="ekstern-panel">
-        <div class="panel-head">
-          <div>
-            <h2>Annoncer du har gjort krav på</h2>
-            <p id="ekstern-summary"></p>
-          </div>
-        </div>
-        <div class="table-scroll">
-          <table class="data-table" id="ekstern-table">
-            <thead>
-              <tr>
-                <th scope="col">Annonce</th>
-                <th scope="col" class="num">Pris</th>
-                <th scope="col">Kilde</th>
-                <th scope="col">Status</th>
-                <th scope="col"><span class="visually-hidden">Handlinger</span></th>
-              </tr>
-            </thead>
-            <tbody id="ekstern-tbody"></tbody>
-          </table>
-        </div>
-        <div id="ekstern-empty" class="empty-state" style="display:none;">
-          <h3>Ingen godkendte krav endnu</h3>
-          <p>Har din forretning allerede annoncer indekseret fra en anden side, kan du gøre krav på dem herunder i stedet for at oprette dem forfra.</p>
-        </div>
-      </section>
-
-      <section class="panel" id="krav-panel">
-        <div class="panel-head">
-          <div>
-            <h2>Gør krav på dine annoncer</h2>
-            <p>Bikerbasen har indekseret annoncer fra andre danske MC-sider. Er en af dem din, kan du gøre krav på den og selv rette prisen, statussen og andre felter.</p>
-          </div>
-        </div>
-        <form id="krav-search-form" class="krav-search-form">
-          <label class="visually-hidden" for="krav-search-input">Søg efter mærke, model eller by</label>
-          <input class="input" id="krav-search-input" type="search" placeholder="Søg efter mærke, model eller by, fx “Honda” eller “Kolding”" autocomplete="off">
-          <button type="submit" class="btn btn-outline"><span data-icon="search"></span>Søg</button>
-        </form>
-        <div id="krav-search-hint" class="krav-search-hint"></div>
-        <div id="krav-results" class="krav-results"></div>
-
-        <div id="krav-status-wrap" style="display:none;">
-          <h3 class="krav-status-heading">Dine indsendte krav</h3>
-          <div id="krav-status-list" class="krav-status-list"></div>
-        </div>
-      </section>
-    </div>
+    </aside>
   </div>
 </main>
 
@@ -260,9 +293,9 @@ try{
      .modal-overlay/.modal-box fra js/components.js' anmeld-modal — samme
      mønster, ikke en ny dialogkomponent for én formular. -->
 <div class="modal-overlay" id="krav-dialog">
-  <div class="modal-box">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="krav-dialog-titel">
     <div class="modal-head">
-      <h2>Gør krav på denne annonce</h2>
+      <h2 id="krav-dialog-titel">Gør krav på denne annonce</h2>
       <button type="button" class="icon-btn" id="krav-dialog-close" aria-label="Luk"><span data-icon="close"></span></button>
     </div>
     <p id="krav-dialog-annonce" style="color:var(--color-fg-muted); font-size:14px; margin-bottom:16px;"></p>
@@ -325,18 +358,18 @@ try{
     </div>
   </div>
 </footer>
-<script defer src="js/security.js?v=a4d6963e"></script>
-<script defer src="js/vendor/supabase.js?v=a4d6963e"></script>
-<script defer src="js/supabase-config.js?v=a4d6963e"></script>
-<script defer src="js/supabase-api.js?v=a4d6963e"></script>
-<script defer src="js/icons.js?v=a4d6963e"></script>
-<script defer src="js/postnumre.js?v=a4d6963e"></script>
-<script defer src="js/data.js?v=a4d6963e"></script>
-<script defer src="js/store.js?v=a4d6963e"></script>
-<script defer src="js/maaling.js?v=a4d6963e"></script>
-<script defer src="js/backend-bridge.js?v=a4d6963e"></script>
-<script defer src="js/components.js?v=a4d6963e"></script>
-<script defer src="js/dashboard.js?v=a4d6963e"></script>
+<script defer src="js/security.js?v=bcc85a61"></script>
+<script defer src="js/vendor/supabase.js?v=bcc85a61"></script>
+<script defer src="js/supabase-config.js?v=bcc85a61"></script>
+<script defer src="js/supabase-api.js?v=bcc85a61"></script>
+<script defer src="js/icons.js?v=bcc85a61"></script>
+<script defer src="js/postnumre.js?v=bcc85a61"></script>
+<script defer src="js/data.js?v=bcc85a61"></script>
+<script defer src="js/store.js?v=bcc85a61"></script>
+<script defer src="js/maaling.js?v=bcc85a61"></script>
+<script defer src="js/backend-bridge.js?v=bcc85a61"></script>
+<script defer src="js/components.js?v=bcc85a61"></script>
+<script defer src="js/dashboard.js?v=bcc85a61"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

@@ -33,7 +33,7 @@ async function hentStatistik(){
   if (!db.enabled) return;
 
   const [{ data: raekker }, { data: gemte }] = await Promise.all([
-    db.myListingStats(DASH_DAYS),
+    db.myListingStats(DASH_DAYS * 2),   // 60 dage: de seneste 30 + de 30 før
     db.myListingSaves(),
   ]);
 
@@ -62,6 +62,27 @@ function statsForListing(listing){
   const views = series.reduce((s, n) => s + n, 0);
   const inquiries = dashDays().reduce((s, d) => s + (perDag.get(d)?.contacts || 0), 0);
   return { series, views, inquiries, saves: SAVES_BY_LISTING.get(listing.id) || 0 };
+}
+
+/* Visninger i de 30 dage FØR det viste vindue (dag 31-60 tilbage). */
+function visningerForrige(listings){
+  const nu = Date.now();
+  let sum = 0;
+  listings.forEach(l => {
+    const perDag = STATS_BY_LISTING.get(l.id);
+    if (!perDag) return;
+    for (let i = DASH_DAYS; i < DASH_DAYS * 2; i++){
+      sum += perDag.get(new Date(nu - i * 86400000).toISOString().slice(0, 10))?.views || 0;
+    }
+  });
+  return sum;
+}
+
+/* Ændring i procent mod forrige periode — null når der ikke er noget at
+   sammenligne med (så vises intet i stedet for et gæt). */
+function visningerAendring(nu, forrige){
+  if (!forrige) return null;
+  return Math.round(((nu - forrige) / forrige) * 100);
 }
 
 function sumSeries(all){
@@ -207,18 +228,18 @@ function sparklineSVG(series){
 function kpiTile(label, value, opts){
   opts = opts || {};
   const delta = opts.delta;
-  const deltaHTML = (delta == null) ? '' : `
-    <span class="kpi-delta ${delta >= 0 ? 'up' : 'down'}">
-      ${delta >= 0 ? Icon.arrowUp : Icon.arrowDown}${Math.abs(delta)}%<span class="kpi-delta-period">vs. forrige 30 dage</span>
-    </span>`;
-  const subHTML = opts.sub ? `<span class="kpi-sub">${opts.sub}</span>` : '';
+  const deltaHTML = (delta == null) ? '' : (delta === 0 ? `
+    <span class="kpi-delta"><span class="kpi-delta-period">Uændret vs. forrige 30 dage</span></span>` : `
+    <span class="kpi-delta ${delta > 0 ? 'up' : 'down'}">
+      ${delta > 0 ? Icon.arrowUp : Icon.arrowDown}${Math.abs(delta)}%<span class="kpi-delta-period">vs. forrige 30 dage</span>
+    </span>`);
+  const subHTML = opts.sub ? `<span class="db-stat-sub">${opts.sub}</span>` : '';
   return `
-  <div class="kpi-tile">
-    <span class="kpi-label">${label}</span>
-    <span class="kpi-value">${value}</span>
-    ${deltaHTML}${subHTML}
-    ${opts.spark ? sparklineSVG(opts.spark) : ''}
-  </div>`;
+  <article class="db-stat">
+    <span class="db-stat-icon ${opts.tone || ''}">${opts.icon || ''}</span>
+    <div class="db-stat-body"><b class="db-stat-num${String(value).length > 8 ? ' is-text' : ''}">${value}</b><span class="db-stat-label">${label}</span>${subHTML}</div>
+    ${deltaHTML ? `<div class="db-stat-delta">${deltaHTML}</div>` : ''}
+  </article>`;
 }
 
 /* ---------- Kontostatus-strimlen ----------
@@ -273,7 +294,7 @@ function renderKickoff(harAndetEndTomt){
           <div>
             <h3>Gør krav på annoncer, der allerede findes</h3>
             <p>Bikerbasen har indekseret hundredvis af annoncer fra andre danske MC-sider. Er nogle af dem dine, kan du overtage dem i stedet for at oprette dem forfra.</p>
-            <a href="#krav-panel" class="btn btn-outline btn-sm">Søg dine annoncer</a>
+            <button type="button" class="btn btn-outline btn-sm" data-dtab-go="krav">Søg dine annoncer</button>
           </div>
         </div>
         <div class="kickoff-step">
@@ -448,9 +469,11 @@ function renderKravResults(rows, soegt){
 }
 
 let AKTUEL_KRAV_ANNONCE = null;
+let KRAV_FOKUS_TILBAGE = null;
 
 function aabnKravDialog(row){
   AKTUEL_KRAV_ANNONCE = row;
+  KRAV_FOKUS_TILBAGE = document.activeElement;
   document.getElementById('krav-dialog-annonce').textContent =
     `${row.titel}${row.by ? ' · ' + row.by : ''} · ${eksternKildeNavn(row)}`;
   document.getElementById('krav-dialog-doku').value = '';
@@ -461,6 +484,8 @@ function aabnKravDialog(row){
 function lukKravDialog(){
   document.getElementById('krav-dialog').classList.remove('open');
   AKTUEL_KRAV_ANNONCE = null;
+  if (KRAV_FOKUS_TILBAGE && KRAV_FOKUS_TILBAGE.focus) KRAV_FOKUS_TILBAGE.focus();
+  KRAV_FOKUS_TILBAGE = null;
 }
 
 function wireKravUI(){
@@ -480,7 +505,15 @@ function wireKravUI(){
   document.getElementById('krav-dialog-cancel').addEventListener('click', lukKravDialog);
   dialog.addEventListener('click', (e) => { if (e.target === dialog) lukKravDialog(); });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && dialog.classList.contains('open')) lukKravDialog();
+    if (!dialog.classList.contains('open')) return;
+    if (e.key === 'Escape'){ lukKravDialog(); return; }
+    if (e.key !== 'Tab') return;
+    // Fokusfælde: Tab bliver inde i dialogen.
+    const felter = [...dialog.querySelectorAll('button, textarea, input, select, a[href]')].filter(el => !el.disabled && el.offsetParent !== null);
+    if (!felter.length) return;
+    const foerst = felter[0], sidst = felter[felter.length - 1];
+    if (e.shiftKey && document.activeElement === foerst){ e.preventDefault(); sidst.focus(); }
+    else if (!e.shiftKey && document.activeElement === sidst){ e.preventDefault(); foerst.focus(); }
   });
 
   document.getElementById('krav-dialog-form').addEventListener('submit', async (e) => {
@@ -517,9 +550,7 @@ function renderDashboard(user){
   const totalInquiries = stats.reduce((s, x) => s + x.inquiries, 0);
   const totalSaves = stats.reduce((s, x) => s + x.saves, 0);
 
-  const firstHalf = totalSeries.slice(0, 15).reduce((s, n) => s + n, 0);
-  const secondHalf = totalSeries.slice(15).reduce((s, n) => s + n, 0);
-  const viewsDelta = firstHalf ? Math.round(((secondHalf - firstHalf) / firstHalf) * 100) : 0;
+  const viewsDelta = visningerAendring(totalViews, visningerForrige(mine));
 
   const avgRating = Store.getAverageRating(user.name, null);
   const reviewCount = Store.getReviews(user.name).length;
@@ -532,17 +563,17 @@ function renderDashboard(user){
     (kravAktive ? ` (${mine.length} oprettet her, ${kravAktive} via krav)` : '');
 
   document.getElementById('kpi-row').innerHTML = [
-    kpiTile('Aktive annoncer', totalAktive, kravAktive ? { sub: `${mine.length} oprettet · ${kravAktive} via krav` } : undefined),
-    kpiTile('Visninger (30 dage)', compactNumber(totalViews), { delta: viewsDelta, spark: totalSeries }),
-    kpiTile('Henvendelser (30 dage)', compactNumber(totalInquiries)),
-    kpiTile('Gemt af købere', compactNumber(totalSaves)),
+    kpiTile('Aktive annoncer', totalAktive, Object.assign({ icon: Icon.bike, tone: 'is-ok' }, kravAktive ? { sub: `${mine.length} oprettet · ${kravAktive} via krav` } : {})),
+    kpiTile('Visninger (30 dage)', compactNumber(totalViews), { delta: viewsDelta, icon: Icon.eye }),
+    kpiTile('Henvendelser (30 dage)', compactNumber(totalInquiries), { icon: Icon.phone, tone: 'is-blue' }),
+    kpiTile('Gemt af købere', compactNumber(totalSaves), { icon: Icon.heart, tone: 'is-heart' }),
     /* Stregen er væk. En sælgerprofil-builder efterlod netop den her linje
        som en note i work/DECISIONS.md ("den, der ejer dashboardet, bør
        fjerne stregen som på profilen") — et "–" i feltet Bedømmelse ligner
        en dårlig karakter, ikke et manglende tal. Under tre anmeldelser er
        der intet snit at vise (Store.MIN_ANMELDELSER_FOR_SNIT), og så siger
        feltet hvorfor i stedet for at tegne en streg. */
-    kpiTile('Bedømmelse', avgRating != null ? `${avgRating} ★` : 'Ikke nok endnu', { sub: `${reviewCount} ${reviewCount === 1 ? 'anmeldelse' : 'anmeldelser'}` }),
+    kpiTile('Bedømmelse', avgRating != null ? `${avgRating} ★` : 'Ikke nok endnu', { icon: Icon.star, sub: `${reviewCount} ${reviewCount === 1 ? 'anmeldelse' : 'anmeldelser'}` }),
   ].join('');
 
   document.getElementById('views-summary').textContent =
@@ -558,36 +589,40 @@ function renderDashboard(user){
   renderTopChart(topRows);
   renderTopTable(topRows);
 
-  // Listings table
-  const tbody = document.getElementById('listings-tbody');
-  const tableEl = document.getElementById('listings-table');
+  // Annoncer som rækker (samme række som på "Mine annoncer")
+  const rowsEl = document.getElementById('listings-rows');
   const emptyEl = document.getElementById('listings-empty');
   if (!stats.length){
-    tableEl.style.display = 'none';
+    rowsEl.style.display = 'none';
     emptyEl.style.display = 'block';
   } else {
-    tableEl.style.display = '';
+    rowsEl.style.display = '';
     emptyEl.style.display = 'none';
-    tbody.innerHTML = stats.map(x => {
+    rowsEl.innerHTML = stats.map(x => {
       const l = x.listing;
+      const antal = (l.photoUrls || []).length;
+      const tal = (n, t) => `<span class="db-num"><b>${n.toLocaleString('da-DK')}</b>${t}</span>`;
       return `
-      <tr>
-        <td>
-          <a href="annonce.html?id=${l.id}" class="table-title">${escapeHTML(l.brand)} ${escapeHTML(l.model)}</a>
-          <span class="table-sub">${l.year} · ${formatKm(l.km)}</span>
-        </td>
-        <td class="num">${formatPrice(l.price)}</td>
-        <td class="num">${x.views.toLocaleString('da-DK')}</td>
-        <td class="num">${x.inquiries.toLocaleString('da-DK')}</td>
-        <td class="num">${x.saves.toLocaleString('da-DK')}</td>
-        <td><span class="status-pill ${isNewListing(l.createdAt) ? 'is-new' : 'is-active'}">${isNewListing(l.createdAt) ? 'Ny' : 'Aktiv'}</span></td>
-        <td class="row-actions">
+      <article class="db-row" data-listing-id="${l.id}">
+        <a class="db-thumb" href="annonce.html?id=${l.id}" tabindex="-1" aria-hidden="true">${listingMediaHTML(l, '')}${antal ? `<span class="db-photos">${Icon.camera}${antal}</span>` : ''}</a>
+        <div class="db-info">
+          <a href="annonce.html?id=${l.id}" class="db-title">${escapeHTML(l.brand)} ${escapeHTML(l.model)}</a>
+          <p class="db-meta">${[l.year, l.km != null ? formatKm(l.km) : null, l.type ? typeLabel(l.type) : null].filter(Boolean).join(' | ')}</p>
+          ${l.city ? `<p class="db-place">${Icon.mapPin}${escapeHTML(l.city)}</p>` : ''}
+          <p class="db-price">${formatPrice(l.price)}</p>
+        </div>
+        <div class="db-status">
+          <span class="db-badge is-active">Aktiv</span>
+          <div class="db-nums">${tal(x.views, 'Visninger')}${tal(x.saves, 'Gemt')}${tal(x.inquiries, 'Henvendelser')}</div>
+        </div>
+        <div class="db-actions">
+          <a href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}" class="btn btn-outline btn-sm">${Icon.edit}Rediger</a>
           <a href="annonce.html?id=${l.id}" class="btn btn-outline btn-sm">Se</a>
-          <button type="button" class="btn btn-outline btn-sm" data-del="${l.id}">Slet</button>
-        </td>
-      </tr>`;
+          <button type="button" class="btn btn-outline btn-sm db-danger" data-del="${l.id}" aria-label="Slet annonce">${Icon.trash}<span class="db-lbl">Slet</span></button>
+        </div>
+      </article>`;
     }).join('');
-    tbody.querySelectorAll('[data-del]').forEach(btn => {
+    rowsEl.querySelectorAll('[data-del]').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!confirm('Er du sikker på, at du vil slette denne annonce? Det kan ikke fortrydes.')) return;
         const id = btn.dataset.del;
@@ -610,9 +645,10 @@ function renderDashboard(user){
       });
     });
   }
+  document.getElementById('listings-count').textContent = stats.length;
 
   document.getElementById('listings-summary').textContent =
-    `${stats.length} ${stats.length === 1 ? 'annonce' : 'annoncer'} · sorteret efter oprettelsesdato`;
+    'sorteret efter oprettelsesdato';
 
   // Chart/table toggles
   document.querySelectorAll('[data-toggle-table]').forEach(btn => {
@@ -635,6 +671,62 @@ function renderDashboard(user){
   renderKravStatusList();
 }
 
+const DASH_LOGOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5H6.5A2 2 0 0 0 4.5 6.5v11a2 2 0 0 0 2 2H9"/><path d="M15 8l4 4-4 4M19 12H9.5"/></svg>';
+
+/* Faner: Oversigt / Annoncer / Krav viser de eksisterende sektioner. */
+const DASH_FANER = ['oversigt', 'annoncer', 'krav'];
+function setDashTab(tab, { fokus = false } = {}){
+  if (!DASH_FANER.includes(tab)) tab = 'oversigt';
+  document.querySelectorAll('[data-dtab]').forEach(b => {
+    const aktiv = b.dataset.dtab === tab;
+    b.classList.toggle('active', aktiv);
+    b.setAttribute('aria-selected', String(aktiv));
+    b.tabIndex = aktiv ? 0 : -1;
+    if (aktiv && fokus) b.focus();
+  });
+  DASH_FANER.forEach(t => { document.getElementById('dpanel-' + t).style.display = t === tab ? '' : 'none'; });
+  const p = new URLSearchParams(window.location.search);
+  p.set('tab', tab);
+  history.replaceState(null, '', window.location.pathname + '?' + p.toString());
+}
+
+function wireTabFade(){
+  const rk = document.querySelector('.db-tabs');
+  if (!rk) return;
+  const opd = () => rk.classList.toggle('at-end', rk.scrollLeft + rk.clientWidth >= rk.scrollWidth - 4);
+  rk.addEventListener('scroll', opd, { passive: true });
+  window.addEventListener('resize', opd);
+  opd();
+}
+
+function wireDashTabs(){
+  wireTabFade();
+  const faner = [...document.querySelectorAll('[data-dtab]')];
+  faner.forEach((btn, i) => {
+    btn.addEventListener('click', () => setDashTab(btn.dataset.dtab));
+    btn.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (d){ e.preventDefault(); setDashTab(faner[(i + d + faner.length) % faner.length].dataset.dtab, { fokus: true }); }
+    });
+  });
+  document.addEventListener('click', (e) => {
+    const go = e.target.closest && e.target.closest('[data-dtab-go]');
+    if (go) setDashTab(go.dataset.dtabGo);
+  });
+}
+
+function fyldDashKonto(user){
+  const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+  const dele = String(user.name || user.email || '').trim().split(/\s+/).filter(Boolean);
+  set('db-avatar', dele.length ? (dele[0][0] + (dele.length > 1 ? dele[dele.length - 1][0] : '')).toUpperCase() : '?');
+  set('db-user-name', user.name || 'Din profil');
+  set('db-user-mail', user.email || '');
+  document.getElementById('db-logout')?.addEventListener('click', () => {
+    const slot = document.querySelector('[data-auth-slot]');
+    if (slot) slot.click(); else { Store.logout(); window.location.href = 'index.html'; }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await backendReady();
   const user = Store.getUser();
@@ -643,16 +735,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
   renderHeader('dashboard.html');
-  document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = Icon[el.dataset.icon] || ''; });
+  document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = el.dataset.icon === 'logout' ? DASH_LOGOUT : (Icon[el.dataset.icon] || ''); });
+  document.querySelectorAll('.bc-sep').forEach(s => { s.innerHTML = Icon.chevronRight; });
+  fyldDashKonto(user);
 
   if (!user.isDealer){
     document.getElementById('gate-icon').innerHTML = Icon.shieldCheck;
     document.getElementById('dash-gate').style.display = '';
+    document.getElementById('dash-subtitle').textContent = 'Kun for forhandlere.';
     return;
   }
   document.getElementById('dash-content').style.display = '';
+  document.getElementById('dash-tabbar').style.display = '';
   await hentStatistik();
   await hentEkstern();
   wireKravUI();
+  wireDashTabs();
   renderDashboard(user);
+  // Gamle bogmærker: #krav-panel / #ekstern-panel åbner fanen Krav.
+  const anker = window.location.hash;
+  const start = (anker === '#krav-panel' || anker === '#ekstern-panel') ? 'krav' : (new URLSearchParams(window.location.search).get('tab') || 'oversigt');
+  setDashTab(start);
+  if (start === 'krav' && anker) document.querySelector(anker)?.scrollIntoView();
 });
