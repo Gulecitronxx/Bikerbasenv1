@@ -705,7 +705,7 @@ function side(facet, alle){
     : facet.kind === 'type' ? `${stort(brugtOrd(items, `${esc(facet.label)}-motorcykel`, `${esc(facet.label)}-motorcykler`))} til salg`
     : facet.kind === 'region' ? `Motorcykler til salg i ${esc(facet.id)}`
     : facet.kind === 'model' ? `${stort(brugtOrd(items, `${esc(facet.brand)} ${esc(facet.model)}`, `${esc(facet.brand)} ${esc(facet.model)}`))} til salg`
-    : `Motorcykler til ${esc(facet.id)}-kørekort — ikke udelukket på de oplyste tal`;
+    : `Motorcykler til ${esc(facet.id)}-kørekort`; // S-001: kort title; forbeholdet står i introen
   const andreRegioner = REGIONS.filter(r => r !== facet.id)
     .map(r => `<a class="popular-chip" href="region-${slugify(r)}.html">${esc(r)}</a>`).join('\n        ');
   const brandFil = facet.kind === 'model' ? `maerke-${slugify(facet.brand)}.html` : null;
@@ -785,7 +785,7 @@ ${header}
     </nav>
 
     <div class="brand-hero">
-      <h1>${esc(facet.titel)}</h1>
+      <h1>${facet.kind === 'koerekort' && qualifies ? `Motorcykler til ${esc(facet.id)}-kørekort` : esc(facet.titel)}</h1>
       <p class="brand-intro">${introDelt.foerste}</p>
       ${introDelt.rest ? `<details class="brand-intro-mere"><summary>${introFoldEtiket}</summary><p class="brand-intro">${introDelt.rest}</p></details>` : ''}
     </div>
