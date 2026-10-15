@@ -1,12 +1,12 @@
 /* Tests for annoncekortet (ét kort på alle flader; forsiden er referencebillede 1): listingCardHTML(l, i).
 
-   Kortet er en tættere opstilling af de samme data som de to andre korttyper.
+   Der er kun ÉT kort (forsidens opstilling) — se også js/annoncekort.test.js for anatomi, typebillede og containerskala.
    Det, der må holde, er reglerne, ikke pixelerne:
    - kun oplyste tal bliver til chips; et manglende tal siges højt som "ikke oplyst"
    - ingen vægt (kg): ingen annonce bærer et vægttal, og en chip ville være et gæt
    - kørekortchippen er den samme udregning som filteret (koerekortMaerkat)
    - det indekserede kort har intet gem-hjerte og ingen vej ud af sitet (D-008, CLAUDE.md regel 2)
-   - uden opts er kortene uændrede
+   - kaldes funktionen via .map(), må (element, indeks, liste) ikke ændre kortet
 
    Samme harness som js/eksternt-kort.test.js: browserscripts uden module.exports evalueres i en
    funktion, så testen kører den kode, browseren kører. */

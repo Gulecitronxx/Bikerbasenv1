@@ -38,7 +38,7 @@ html[data-lgmode="register"] .lg-only-login{ display:none; }
 
 /* ---------- Kortet: to halvdele ---------- */
 .lg-card{
-  width:100%; max-width:var(--site-w);
+  width:100%; max-width: calc(var(--site-w) - 2 * var(--gutter));
   display:grid; grid-template-columns:minmax(0,1fr);
   border-radius: var(--radius-lg); overflow:hidden;
   box-shadow: var(--shadow-lg);
@@ -134,7 +134,7 @@ html[data-lgmode="register"] .lg-only-login{ display:none; }
 .lg-strip{ background: var(--color-surface); border-top:1px solid var(--color-border); position:relative; }
 .lg-strip-list{
   list-style:none; margin:0 auto; max-width:var(--site-w);
-  display:grid; grid-template-columns:minmax(0,1fr); padding: var(--space-3) var(--space-5);
+  display:grid; grid-template-columns:minmax(0,1fr); padding: var(--space-3) var(--gutter);
 }
 .lg-strip-list li{ display:flex; gap: var(--space-4); align-items:center; padding: var(--space-3) 0; }
 .lg-strip-list li + li{ border-top:1px solid var(--color-border); }
