@@ -343,7 +343,8 @@ function introFor(brand, items){
     const lav = Math.min(...aar), hoej = Math.max(...aar);
     dele.push(lav === hoej ? `, årgang ${lav}.` : `, med årgange mellem ${lav} og ${hoej}.`);
   } else {
-    dele.push('.');
+    // dkk() slutter selv paa "kr." — et ekstra punktum gav "27.800 kr.." (S-008).
+    dele.push(dele[dele.length - 1].endsWith('kr.') ? '' : '.');
   }
   if (types.length){
     // "m.fl." har sit eget punktum. Uden det her tjek stod der "m.fl..".

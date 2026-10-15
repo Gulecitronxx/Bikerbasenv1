@@ -20,7 +20,9 @@ const BASE = require('./site-url')(ROOT);
 const OG_IMAGE = `${BASE}/og-image.png`;
 
 /* Sider bag login eller uden selvstændig værdi i et søgeresultat. */
-const NOINDEX = new Set(['dashboard.html', 'mine-annoncer.html', 'login.html']);
+// annonce.html er skabelonen til ?id=… — js/annonce.js sætter altid noindex, men en crawler
+// uden JS skal ikke se en indekserbar skabelon (S-006).
+const NOINDEX = new Set(['dashboard.html', 'mine-annoncer.html', 'login.html', 'annonce.html']);
 
 const START = '<!-- meta:start (genereret af scripts/build-meta.js) -->';
 const END = '<!-- meta:end -->';

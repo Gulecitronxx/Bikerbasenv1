@@ -517,7 +517,7 @@ function faqLdForModel(facet, items){
       // "N til salg" om KUN dem med pris var forkert (R11-I-7): de øvrige er
       // også til salg, de oplyser bare ikke prisen. Og dkk() slutter selv på
       // "kr." — et punktum mere gav "kr..".
-      a: `${priser.length} af de ${items.length} ${facet.brand} ${facet.model}, vi har indekseret, oplyser en pris: fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}. Prisen afhænger af årgang, kilometertal og stand — tallene opdateres, hver gang lageret indekseres.` });
+      a: `${priser.length} af de ${items.length} ${facet.brand} ${facet.model}, vi har indekseret, oplyser en pris: fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])} Prisen afhænger af årgang, kilometertal og stand — tallene opdateres, hver gang lageret indekseres.` });
   }
   const kk = [...new Set(items.map(l => koerekortForListing(l)).filter(Boolean))];
   if (kk.length === 1){
