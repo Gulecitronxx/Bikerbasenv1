@@ -38,7 +38,8 @@ test('hovednavigationen peger kun på sider, der findes', () => {
   for (const side of ['soegning.html', 'maerker.html', 'koerekort-a2.html', 'om-bikerbasen.html']){
     assert.ok(nav.includes(`href="${side}"`), `hovednavigationen skal linke til ${side}`);
   }
-  assert.ok(!/Artikler|Viden/.test(nav), 'ingen menupunkter til sider, der ikke findes');
+  assert.ok(nav.includes('href="guides.html"'), 'guides.html findes nu og skal være i hovednavigationen');
+  assert.ok(!/Viden/.test(nav), 'ingen menupunkter til sider, der ikke findes');
 });
 
 test('login-pladsen, favoritpladsen og menuknappen er stadig koblet til components.js', () => {
