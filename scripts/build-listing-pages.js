@@ -152,7 +152,9 @@ function side(l){
 
   const dele = [`Årgang ${l.year}`, formatKm(l.km), formatCcm(l.ccm), l.condition].filter(Boolean);
   const titel = `${navn} ${l.year} — ${formatPrice(l.price)} — Bikerbasen`;
-  const beskr = `${navn}, ${dele.join(', ')}. Til salg i ${l.city} på Bikerbasen.`;
+  /* W7: description 120-160 tegn. Felterne er annoncens egne; den faste slutning tilføjer kun, hvad siden faktisk viser. */
+  const grundBeskr = `${navn}, ${dele.join(', ')}. Til salg i ${l.city} på Bikerbasen.`;
+  const beskr = grundBeskr.length < 120 && (grundBeskr + ' Se pris, billeder og sælgers oplysninger.').length <= 160 ? grundBeskr + ' Se pris, billeder og sælgers oplysninger.' : grundBeskr;
   const ogBillede = billeder[0] || `${BASE}/og-image.png`;
 
   return `<!doctype html>
