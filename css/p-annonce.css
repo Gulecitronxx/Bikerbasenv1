@@ -304,6 +304,9 @@
 /* ---------- Fast bjælke på mobil ---------- */
 .listing-actionbar-pris{ flex:0 0 auto; align-self:center; }
 .listing-actionbar .btn{ white-space:normal; font-size:14px; padding-inline:12px; line-height:1.2; text-align:center; }
+/* Ekstern kilde-knap: tekst + navn + pil skal løbe som én sætning (inline-flex delte dem i tre bokse og brækkede over tre linjer). */
+.listing-actionbar .btn:has(.an-nb){ display:block; padding-block:8px; }
+.listing-actionbar .btn:has(.an-nb) svg{ display:inline-block; vertical-align:-3px; margin-left:6px; width:16px; height:16px; }
 
 /* ---------- Runde 2: tættere på billedet ---------- */
 .an-nb{ white-space:nowrap; }
