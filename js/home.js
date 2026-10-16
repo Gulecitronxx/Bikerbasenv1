@@ -279,8 +279,10 @@ async function buildForside(){
   fyldTypeAntal();
 
   /* ============ Tre kolonner: mærker, kørekort, regioner ============ */
-  const slugify = (name) => String(name).toLowerCase()
-    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
+  /* Skal give de samme adresser som scripts/slug.js (accenter foldes: Zündapp -> zundapp). */
+  const slugify = (name) => String(name).normalize('NFC').toLowerCase()
+    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   /* Mærkerne lægges sammen på slug, præcis som scripts/build-brand-pages.js gør ("Royal Enfield"/

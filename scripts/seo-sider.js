@@ -57,9 +57,7 @@ const BY_OVERLAP_MAX = 0.8;
 const KOMBI_ANDEL_AF_TYPE_MAX = 0.75;
 
 /* ---------- Sluggere ---------- */
-const slugify = s => String(s).toLowerCase()
-  .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
-  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const { slugify } = require('./slug');   // ÉN slugify til alle sideadresser (accenter foldes)
 
 const budgetSlug = max => `budget-under-${max}`;
 const bySlug = navn => `by-${slugify(navn)}`;

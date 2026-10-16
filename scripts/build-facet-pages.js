@@ -382,9 +382,7 @@ function modelNoegle(l){
   if (!b || b === 'Ukendt' || !m) return null;
   return `${b}\u0000${m}`;
 }
-const slugify = s => String(s).toLowerCase()
-  .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
-  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const { slugify } = require('./slug');   // ÉN slugify til alle sideadresser (accenter foldes)
 function modelSlug(brand, model){ return `model-${slugify(brand)}-${slugify(model)}`; }
 /* Eksisterende model-sider paa disken: { slug -> { brand, model } } laest ud
    af sidens egne data-attributter, saa noeglen er den samme som ved bygning. */

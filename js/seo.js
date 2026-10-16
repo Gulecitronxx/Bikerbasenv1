@@ -133,9 +133,11 @@ const Seo = (function(){
    Adressen, en indekseret annonce faktisk kan naas paa, er annonce.html?id=. */
 function listingPageUrl(listing){
   if (!listing || listing.isExternal) return null;
+  // Samme slugify som scripts/slug.js (accenter foldes), ellers peger adressen forbi den statiske side.
   const slug = `${listing.brand} ${listing.model} ${listing.year}`
-    .toLowerCase()
-    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
+    .normalize('NFC').toLowerCase()
+    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   return `${SITE_URL}/annonce-${slug}-${String(listing.id).slice(0, 8)}.html`;
 }

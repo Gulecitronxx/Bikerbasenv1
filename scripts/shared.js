@@ -17,11 +17,8 @@ function siteUrl(){
   return require('./site-url')(ROOT);
 }
 
-function slugify(name){
-  return String(name).toLowerCase()
-    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
+/* Delt med alle sidegeneratorerne: se scripts/slug.js (accenter foldes, så Zündapp ikke bliver "z-ndapp"). */
+const { slugify } = require('./slug');
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
