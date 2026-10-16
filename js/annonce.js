@@ -767,10 +767,10 @@ function renderExternalListing(listing){
   const salgsmarkoerer = (() => {
     const raa = listing.salgsmarkoerer ?? listing.salgsmarkører ?? listing.markoerer ?? null;
     const liste = Array.isArray(raa) ? raa : (raa ? String(raa).split(/\s*[\/,;]\s*/) : []);
-    // "ENGROS" råbt med versaler er kildens formatering, ikke en oplysning.
+    // Samme label-funktion som kortet og listerækken (salgsmarkoerLabel i js/data.js): "Engros" overalt.
     return liste.map(m => String(m).trim())
       .filter(Boolean)
-      .map(m => m.charAt(0).toUpperCase() + m.slice(1).toLowerCase())
+      .map(salgsmarkoerLabel)
       .slice(0, 4);
   })();
 
@@ -805,31 +805,8 @@ function renderExternalListing(listing){
      stedet at motorcyklen er fabriksny AF DEN GRUND km ikke er oplyst, og
      henviser til privatsalgs-noten længere nede — den var før slet ikke
      med for eksterne annoncer (se noten ved sellerTypeNoteHTML nedenfor). */
-  /* Noten siger kun "kilometerstanden er ikke oplyst", når den faktisk ikke er det (w3-data). */
-  const kmIkkeOplyst = listing.km == null;
-  /* "Katalog over nye motorcykler" er kun sandt for en forhandlers katalogsti (MC Syds /Ny/). En privat
-     annonce er ikke et katalog: der siger noten kun, hvad kilden selv markerer. */
-  const iKatalog = /\/ny\//i.test(String(listing.externalUrl || ''));
-  const nyKilde = iKatalog
-    ? `Annoncen ligger i ${kilde}s katalog over nye motorcykler, ikke blandt de brugte${kmIkkeOplyst ? ', og kilometerstanden er derfor ikke oplyst' : ''}.`
-    : `Kilden markerer annoncen som ny${kmIkkeOplyst ? '' : ', og kilometertallet passer til det'}.`;
-  const fabriksnyNote = erNy === true
-    ? (listing.isDealer
-        ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-          + `over nye motorcykler, ikke blandt de brugte.`
-          + (kmIkkeOplyst
-              ? `${VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret,' : ','}`
-                + ` og kilometerstanden er derfor ikke oplyst.`
-              : (VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret.' : ''))
-        : listing.saelgertype === 'privat'
-          ? `<b>Kilden markerer den som ny.</b> ${nyKilde} `
-            + `Sælgeren er privat — reklamationsret gælder ikke mellem private, `
-            + `heller ikke når motorcyklen er ny (se nedenfor).`
-          /* Runde 7 (D7-A1): saelgertypen er ikke oplyst af kilden — ingen paastand
-             om reklamationsret den ene eller anden vej. */
-          : `<b>Kilden markerer den som ny.</b> ${nyKilde} `
-            + `Spørg sælgeren om garanti- og reklamationsvilkår (se nedenfor).`)
-    : null;
+  /* Noten bygges af fabriksnyNoteTekst() i js/data.js (samme erNy som kortet og SEO). */
+  const fabriksnyNote = fabriksnyNoteTekst(listing, erNy, kilde, VIS_REKLAMATIONSRET);
 
   const hk  = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;

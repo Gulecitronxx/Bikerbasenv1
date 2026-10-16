@@ -833,9 +833,11 @@ function listingCardHTML(l, i){
 
   /* Fabriksnye motorcykler hos forhandleren (kildens eget ord eller adressen). "Ny" står først i
      linjen: det er også et juridisk vilkår (garanti frem for reklamationsret). */
-  const nyTitel = f.ny
-    ? `Annoncen ligger i ${kildenavn}s katalog over NYE motorcykler. Den er ikke brugt${f.saelgerType === 'Forhandler' ? ': du køber med garanti frem for reklamationsret' + (f.km == null ? ', og kilometerstanden er derfor ikke oplyst' : '') : ' — spørg sælgeren om garanti- og reklamationsvilkår'}.`
-    : '';
+  /* "Katalog over nye motorcykler" kun ved MC Syds /Ny/-sti (erKatalogSti); ellers siger tooltippen kun, at kilden markerer den som ny. */
+  const nyTitel = !f.ny ? ''
+    : erKatalogSti(l)
+      ? `Annoncen ligger i ${kildenavn}s katalog over NYE motorcykler. Den er ikke brugt${f.saelgerType === 'Forhandler' ? ': du køber med garanti frem for reklamationsret' + (f.km == null ? ', og kilometerstanden er derfor ikke oplyst' : '') : ' — spørg sælgeren om garanti- og reklamationsvilkår'}.`
+      : `Kilden markerer annoncen som ny${f.km == null ? '' : ', og kilometertallet passer til det'}. Spørg sælgeren om garanti- og reklamationsvilkår.`;
   const linje = [];
   if (f.ny) linje.push(`<span class="rk-ny" title="${escapeHTML(nyTitel)}">Ny</span>`);
   linje.push(f.aar != null ? `<span>${escapeHTML(String(f.aar))}</span>` : '<span class="rk-mangler">Årgang ikke oplyst</span>');

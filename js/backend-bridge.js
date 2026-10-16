@@ -739,7 +739,17 @@ function harmoniserStavning(liste){
   return liste;
 }
 
+/* ÉN sandhedskilde for ny/brugt: normalizeExternalListing bygger først den FÆRDIGE annonce, og
+   `condition` regnes derefter af kildeNyStatus() på det objekt — præcis det kald, kortets badge
+   (eksternErNy), SEO, annoncesiden og generatorerne også laver. Ingen parallelle kald med manglende felter. */
 function normalizeExternalListing(row){
+  const l = byggEksternAnnonce(row);
+  const ny = kildeNyStatus(l);
+  l.condition = ny === true ? 'Ny' : ny === false ? 'Brugt' : conditionFraStand(row.stand);
+  return l;
+}
+
+function byggEksternAnnonce(row){
   const kilde = row.kilde || {};
   /* F-008: er mærket "Ukendt", kan deeplinkets sti nævne et kendt mærke. */
   const brand = (() => {
@@ -748,8 +758,6 @@ function normalizeExternalListing(row){
   })();
   /* F-007: tal læst forkert af titlen (ccm = årstal, 1200 læst som 120). */
   const tal = saniterTal({ ccm: row.ccm, hk: row.hk, aargang: row.aargang, tekst: [row.titel, row.model].filter(Boolean).join(' ') });
-  /* F-002/F-006: "ny" kun når tallene ikke modsiger kilden; en modsagt ny er brugt. */
-  const nyStatus = kildeNyStatus({ kildeStand: row.stand, externalUrl: row.url, km: row.km, year: row.aargang });
   return {
     id: row.id,
     /* Runde 6 (D6-F7): akronymer, kilden skrev med smaa bogstaver og crawleren
@@ -826,7 +834,7 @@ function normalizeExternalListing(row){
     // Kildens stand (migration 015) OVERSAT til vores ordliste. Se
     // ordlisten ovenfor: "brugt" oversættes, "ny" har endnu ingen plads i
     // CONDITIONS og bliver derfor null.
-    condition: nyStatus === true ? 'Ny' : nyStatus === false ? 'Brugt' : conditionFraStand(row.stand),
+    condition: conditionFraStand(row.stand),   // overskrives i normalizeExternalListing() af kildeNyStatus() på det færdige objekt
 
     /* ---------- Kildens EGNE ord, ubearbejdet ----------
 

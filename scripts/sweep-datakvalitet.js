@@ -40,7 +40,7 @@ function sweep(raekker, nu = new Date()){
     const sigerNy = /^(ny|new)$/i.test(String(row.stand || '').trim());
     if (sigerNy){
       ud.ny.sigerNy++;
-      const s = M.kildeNyStatus({ kildeStand: row.stand, externalUrl: row.url, km: row.km, year: row.aargang }, aar);
+      const s = M.eksternErNy(l);   // samme kald på det FÆRDIGE objekt som kort, condition og SEO
       if (s === true) ud.ny.bekraeftet++;
       else if (s === false) ud.ny.modsagt.push(navn);
       else ud.ny.ubevist.push(navn);

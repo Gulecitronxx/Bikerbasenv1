@@ -135,6 +135,7 @@ function renseUrealistiskeTal(t){
   if (ccm != null && hk != null && hk / ccm > grænse(ccm)){
     if (hk > 250) hk = null; else ccm = null;
   }
+  if (hk != null && hk > 1000) hk = null;
   return { ccm, hk };
 }
 

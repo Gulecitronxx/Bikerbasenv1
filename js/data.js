@@ -161,11 +161,17 @@ function erUbevistNy(l){
   const ord = String((l && l.kildeStand) || '').toLowerCase().trim();
   return (ord === 'ny' || ord === 'new') && kildeNyStatus(l) === null;
 }
+/* Er stien MC Syds katalogsti (/Produkter/…/Ny/…)? Kun DEN er et "katalog over nye motorcykler". */
+function erKatalogSti(l){
+  return /^https?:\/\/(www\.)?mcsyd\.dk\/.*\/ny\//i.test(String((l && l.externalUrl) || ''));
+}
 function kildeNyStatus(l, nu){
   const aar = nu == null ? new Date().getFullYear() : nu;
   const ord = String((l && l.kildeStand) || '').toLowerCase().trim();
-  const m = String((l && l.externalUrl) || '').match(/\/(ny|brugt)\//i);
-  const vedSti = m ? m[1].toLowerCase() === 'ny' : null;
+  const url = String((l && l.externalUrl) || '');
+  const vedSti = /^https?:\/\/(www\.)?mcsyd\.dk\//i.test(url)
+    ? (/\/ny\//i.test(url) ? true : (/\/brugt\//i.test(url) ? false : null))
+    : null;                          // kun MC Syds sti kendes (andre kilders /ny/ er ikke et katalog)
   let kilde = null;
   if (ord === 'ny' || ord === 'new') kilde = true;
   else if (ord === 'brugt' || ord === 'used') kilde = false;
@@ -190,6 +196,38 @@ function kildeNyStatus(l, nu){
   return (forhandler && ung) ? true : null;
 }
 
+/* ÉN opgørelse af nye/ubeviste i en liste annoncer, brugt af begge generatorer (mærke- og facetsider),
+   så "brugte" aldrig skrives over et lager med ubeviste "ny". Kaldes på de FÆRDIGE normaliserede annoncer. */
+function standOpgoerelse(items){
+  const liste = items || [];
+  const nye = liste.filter(l => kildeNyStatus(l) === true).length;
+  const ubeviste = liste.filter(erUbevistNy).length;
+  return { antal: liste.length, nye, ubeviste, renBrugt: !nye && !ubeviste, alleNye: liste.length > 0 && nye === liste.length };
+}
+
+/* Annoncesidens note om "ny" — ÉN funktion, så noten, kortet og SEO aldrig er uenige. `erNy` er svaret fra
+   eksternErNy(). "Katalog over nye motorcykler" står KUN ved MC Syds /Ny/-sti; ellers siger noten blot, hvad
+   kilden selv markerer. "Kilometerstanden er ikke oplyst" står kun når den faktisk ikke er det. */
+function fabriksnyNoteTekst(listing, erNy, kilde, visReklamationsret){
+  if (erNy !== true) return null;
+  const kmIkkeOplyst = listing.km == null;
+  const iKatalog = erKatalogSti(listing);
+  const nyKilde = iKatalog
+    ? `Annoncen ligger i ${kilde}s katalog over nye motorcykler, ikke blandt de brugte${kmIkkeOplyst ? ', og kilometerstanden er derfor ikke oplyst' : ''}.`
+    : `Kilden markerer annoncen som ny${kmIkkeOplyst ? '' : ', og kilometertallet passer til det'}.`;
+  const overskrift = iKatalog ? 'Det her er en fabriksny motorcykel.' : 'Kilden markerer den som ny.';
+  if (listing.isDealer && iKatalog){
+    return `<b>${overskrift}</b> ${nyKilde}`
+      + (visReklamationsret ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret.' : '');
+  }
+  if (listing.isDealer) return `<b>${overskrift}</b> ${nyKilde} Spørg forhandleren om garanti- og reklamationsvilkår (se nedenfor).`;
+  if (listing.saelgertype === 'privat'){
+    return `<b>${overskrift}</b> ${nyKilde} Sælgeren er privat — reklamationsret gælder ikke mellem private, heller ikke når motorcyklen er ny (se nedenfor).`;
+  }
+  // Sælgertypen er ikke oplyst af kilden: ingen påstand om reklamationsret den ene eller anden vej.
+  return `<b>${overskrift}</b> ${nyKilde} Spørg sælgeren om garanti- og reklamationsvilkår (se nedenfor).`;
+}
+
 /* ---------- Tal, der er læst forkert af titlen (F-007) ----------
 
    GoG-titler som "Kawasaki GPZ 500S årg 1992" endte med ccm 1992 (årstallet),
@@ -204,7 +242,8 @@ function kildeNyStatus(l, nu){
                                            i titlen begynder med ccm-cifrene (XJ 900 årg 90),
                                            eller årgangen er selv 19NN og tallet ikke står i
                                            modelnavnet og hk ikke bakker ccm op. Uden bevis
-                                           bevares tallet (Puch Maxi S årg 50, XR 80 årg 80)
+                                           bevares tallet (Puch Maxi S årg 50, XR 80 årg 80). KENDT AFVEJNING: er `aargang` udfyldt og lig tallet
+                                           (Super Cub årg 90 + aargang 1990), er det tvetydigt og tallet nulstilles
      ccm > 6000                         -> ukendt (fejl; ægte store 2458/2600 bevares)
      hk/ccm over grænsen                -> det urealistiske nulstilles: hk > 250
                                            er det mistænkelige tal, ellers ccm
@@ -215,7 +254,7 @@ function kildeNyStatus(l, nu){
 function urimeligHkPrCcm(ccm){ return ccm <= 125 ? 0.50 : ccm < 500 ? 0.40 : 0.35; }
 const MIN_CCM = 45;
 const MAKS_HK = 250;
-const MAKS_CCM = 6000;   // over det er det en fejl (dokumenterede ægte store: 2458 Triumph Rocket, 2600 Boss Hoss)
+const MAKS_CCM = 6000;   // over det er det en fejl (ægte store 2458 Triumph Rocket, 2600 Boss Hoss bevares; en Boss Hoss på 6200-8300 ccm nulstilles bevidst — kendt afvejning)
 function saniterTal(t){
   const tal = v => (v == null || v === '' || !Number.isFinite(Number(v)) || Number(v) <= 0) ? null : Number(v);
   let ccm = tal(t && t.ccm);
@@ -241,27 +280,24 @@ function saniterTal(t){
   if (ccm != null && hk != null && hk / ccm > urimeligHkPrCcm(ccm)){
     if (hk > MAKS_HK) hk = null; else ccm = null;
   }
+  if (hk != null && hk > 1000) hk = null;   // ingen motorcykel har over 1000 hk (også uden ccm)
   return { ccm, hk };
 }
 
 /* ---------- Efterspørgsel er ikke et udbud (F-009) ----------
    "BSA / Triumph / Norton købes" lå som til salg under BSA. Kun entydige ord:
    "søger" er med vilje IKKE med ("søger ny ejer" er et salg). */
-/* REGEL: en annonce skjules KUN når titlen STARTER med en efterspørgselsfrase. Står ordet midt i
-   eller til sidst ("ny ejer søges", "bytte søges", "kan købes", "hurtig handel købes"), er det
-   et salg og beholdes: hellere ét efterspørgsels-opslag for meget i søgningen end et ægte salg
-   skjult. "Søger/Søges + ny/nyt/køber/ejer/hjem" er et salg ("Søger nyt hjem til min Honda"). */
-const EFT_START = new RegExp('^[\\s"\'(]*(?:'
-  + 'købes(?![\\p{L}\\d])(?!\\s+og\\s+sælges)'
-  + '|køb\\s*:'
-  + '|(?:søges|søger)(?![\\p{L}\\d])(?!\\s+(?:et\\s+|en\\s+)?(?:ny|nyt|nye|køber|ejer|hjem|kærlig|god|passende|liv)(?![\\p{L}\\d]))'
-  + '|ønskes\\s+købt(?![\\p{L}\\d])'
-  + '|vil\\s+købe(?![\\p{L}\\d])'
-  + '|leder\\s+efter(?![\\p{L}\\d])'
-  + '|efterlyses(?![\\p{L}\\d])'
-  + ')', 'iu');
+/* REGEL (forenklet — reglerne selv var risikoen): en annonce skjules KUN når titlen STARTER med
+   købes, ønskes købt, vil købe eller efterlyses (ordgrænse, evt. efter citationstegn/parentes). Alt andet beholdes,
+   også "BSA / Triumph / Norton købes", "Søges: …", "Søger …", "Køb: …" og "Leder efter …": falske negativer er
+   accepteret — hellere ét efterspørgsels-opslag for meget i søgningen end et ægte salg skjult. Der er ingen
+   undtagelsesliste. "Vil købe" kræver desuden, at titlen hverken har "?" eller "her er" ("Vil købe? Her er min Honda"). */
+const EFT_START = new RegExp('^[\\s"\'(]*(?:købes|ønskes\\s+købt|efterlyses|vil\\s+købe)(?![\\p{L}\\d])', 'iu');
 function erEfterspoergsel(titel){
-  return EFT_START.test(String(titel || '').trim());
+  const t = String(titel || '').trim();
+  if (!EFT_START.test(t)) return false;
+  if (/^[\s"'(]*vil\s+købe/i.test(t) && (/\?/.test(t) || /\bher\s+er\b/i.test(t))) return false;
+  return true;
 }
 
 /* ---------- Salgsmærkater (F-010) ----------
@@ -289,12 +325,14 @@ function senesteBekraeftet(liste, nu){
     const t = l && l.sidstSet ? Date.parse(l.sidstSet) : NaN;
     if (!Number.isFinite(t)) continue;
     if (t > slut.getTime() + 86400000) continue;   // en dato i fremtiden er ukendt, ikke "friskt"
+    if (new Date(t).getFullYear() < 2000) continue; // Date.parse('0000') og lignende junk
     tider.push(t);
   }
   if (!tider.length) return null;
   /* MEDIANEN, ikke maksimum: ét friskt opslag må ikke skjule et gammelt lager. */
   tider.sort((a, b) => a - b);
-  const max = tider[Math.floor((tider.length - 1) / 2)];
+  const faa = tider.length <= 2;                 // 1-2 annoncer: den ÆLDSTE dato (ingen "de fleste")
+  const max = faa ? tider[0] : tider[Math.floor((tider.length - 1) / 2)];
   const min = tider[0], nyeste = tider[tider.length - 1];
   const tekstFor = ms => {
     const d = new Date(ms);
@@ -305,9 +343,9 @@ function senesteBekraeftet(liste, nu){
   const datoTekst = tekstFor(max);
   return {
     datoTekst, aeldsteTekst: tekstFor(min), nyesteTekst: tekstFor(nyeste), dage, gammel,
-    tekst: `De fleste annoncer er bekræftet senest ${datoTekst}`,
+    tekst: `${faa ? (tider.length === 1 ? 'Annoncen er' : 'Annoncerne er') : 'De fleste annoncer er'} bekræftet senest ${datoTekst}`,
     advarsel: gammel ? 'Annoncerne kan være ændret siden.' : '',
-    samlet: `De fleste annoncer er bekræftet senest ${datoTekst}${datoTekst.endsWith('.') ? '' : '.'}` + (gammel ? ' Annoncerne kan være ændret siden.' : ''),
+    samlet: `${faa ? (tider.length === 1 ? 'Annoncen er' : 'Annoncerne er') : 'De fleste annoncer er'} bekræftet senest ${datoTekst}${datoTekst.endsWith('.') ? '' : '.'}` + (gammel ? ' Annoncerne kan være ændret siden.' : ''),
   };
 }
 

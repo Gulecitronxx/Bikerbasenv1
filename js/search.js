@@ -779,7 +779,7 @@ function rowSpecsHTML(l){
 function rowMarkersHTML(markers){
   if (!markers || !markers.length) return '';
   return `<span class="row-markers">${markers.slice(0, 2).map(m =>
-    `<span class="row-marker">${escapeHTML(m.toLowerCase())}</span>`).join('')}</span>`;
+    `<span class="row-marker">${escapeHTML(salgsmarkoerLabel(m))}</span>`).join('')}</span>`;
 }
 
 /* Indekseret annonce som listerække.

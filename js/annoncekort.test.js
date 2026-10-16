@@ -132,9 +132,14 @@ test('ikoner: sammenlign på alle kort, hjerte KUN hvor det virker (egne annonce
 });
 
 test('"Ny" (fabriksny hos forhandler) står først i linjen og forklarer garanti — og savnet km tælles ikke som hul', () => {
-  const html = listingCardHTML(ekstern({ km: null, kildeStand: 'ny' }), 1);
-  assert.match(html, /<p class="rk-linje"><span class="rk-ny" title="[^"]*garanti frem for reklamationsret[^"]*">Ny<\/span>/);
+  // Katalogsti (MC Syds /Ny/): "katalog over NYE motorcykler" og garantisætningen.
+  const html = listingCardHTML(ekstern({ km: null, kildeStand: 'ny', externalUrl: 'https://mcsyd.dk/Produkter/Motorcykel/Ny/Honda%20CB%201000/1' }), 1);
+  assert.match(html, /<p class="rk-linje"><span class="rk-ny" title="[^"]*katalog over NYE motorcykler[^"]*garanti frem for reklamationsret[^"]*">Ny<\/span>/);
   assert.ok(!/Km ikke oplyst/.test(html), 'en ny motorcykel har ingen km — det er ikke et hul');
+  // Ingen katalogsti: kortet siger kun, hvad kilden markerer — aldrig "katalog".
+  const uden = listingCardHTML(ekstern({ km: null, kildeStand: 'ny' }), 1);
+  assert.match(uden, /<span class="rk-ny" title="Kilden markerer annoncen som ny[^"]*">Ny<\/span>/);
+  assert.ok(!/katalog/.test(uden));
 });
 
 /* ---------- uden foto ---------- */

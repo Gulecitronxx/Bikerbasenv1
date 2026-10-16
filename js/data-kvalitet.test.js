@@ -235,22 +235,20 @@ test('F-011: FB Mondial, HD og CB 12.5', () => {
   assert.deepEqual(b.map(l => l.model), ['CB 12.5', 'CB 125', 'CB 125'], 'CB 12.5 foldes ikke med CB 125');
 });
 
-test('F-009: kun en titel, der STARTER med en efterspørgselsfrase, skjules; alt andet er et salg', () => {
+test('F-009: kun købes / ønskes købt / vil købe / efterlyses i titlens START skjules; alt andet er et salg', () => {
   // Efterspørgsel (skjules).
-  for (const t of ['Købes: Honda CBR', 'Købes Honda CB 750', 'Søges: Honda CB 750', 'Søges: MT-07', 'Søger MT-07', 'Søger Yamaha MT-07 i god stand',
-                   'Ønskes købt: Kawasaki Z1', 'Vil købe Honda Hornet', 'Leder efter Yamaha XJ 600', 'Efterlyses: Triumph Bonneville', 'Køb: Honda CBR 600', 'KØBES KONTANT', '  Søges'])
+  for (const t of ['Købes: Honda CBR', 'Købes Yamaha MT-07', 'Købes - Honda CB 500', 'Ønskes købt: CB 500', 'Efterlyses: Honda Monkey', 'Vil købe Honda Hornet', 'KØBES KONTANT', '  Købes'])
     assert.equal(M.erEfterspoergsel(t), true, t);
-  // Ægte salg (beholdes) — også de formuleringer Critic fandt.
-  for (const t of ['Honda CB 500', 'Yamaha XV 750 Virago', 'Triumph Bonneville søger ny ejer', 'Kawasaki Z1 sælges, køber betaler omregistrering', 'Suzuki Intruder',
-                   'BSA / Triumph / Norton købes',   // slutningen er ikke nok: vi skjuler hellere ét opslag for lidt
-                   'Honda CBR 600 kan købes med 12 mdr garanti', 'Honda VFR - søges nyt hjem', 'Honda VFR søges ny ejer', 'Søges ny ejer: Honda VFR', 'Honda CBR kan købes',
-                   'Honda CB 500 – ny ejer søges', 'Honda CB 500 – nyt hjem søges', 'Honda CB 500 – ejer søges', 'Honda CB 500 – kærlig ejer søges', 'Honda CB 500 – køber søges',
-                   'Honda CB 500 – passende køber søges', 'Søges køber: Honda CB 500', 'Honda CB 500 – bytte søges', 'Honda CBR til salg, bytte søges', 'Honda CB 500 – bud søges',
-                   'Honda kan også købes', 'Honda kan gerne købes', 'Honda CB 500 (kan købes)', 'Honda nem at købes', 'Honda CB 500 – hurtig handel købes',
-                   'Honda CB 500, pæn og velholdt, "Købes"', 'Honda CB 500 kan finansieres, købes', 'Kan købes uden at søges', 'Søger ny ejer / nyt hjem', 'Søger et nyt hjem til min Honda',
-                   'Søger køber til Honda CB 500', 'Kawasaki ZX-6R SØGES NYT HJEM', 'Søges nyt liv', 'Købes og sælges motorcykler', 'MC købes kontant og bytter',
-                   'Købt ny, kan evt. byttes', 'Suzuki Bandit – købesum', 'Triumph søgesæt'])
+  // Ægte salg (beholdes): Criticens titler, og alle andre ord end de fire.
+  for (const t of ['Honda CB 500', 'Yamaha XV 750 Virago', 'Triumph Bonneville søger ny ejer', 'Kawasaki Z1 sælges, køber betaler omregistrering',
+                   'BSA / Triumph / Norton købes',    // slut-"købes" skjules ikke længere (accepteret falsk negativ)
+                   'Honda CBR 600 kan købes med 12 mdr garanti', 'Honda VFR - søges nyt hjem', 'Honda VFR søges ny ejer', 'Honda CB 500 – ny ejer søges', 'Honda CB 500 – køber søges',
+                   'Søges: kærlig ejer til min Honda', 'Søger efter ny ejer', 'Køb: Honda CB 500 til salg', 'Køb: din næste Harley her', 'Søger du en pæn CB 500? Her er den',
+                   'Søges kun seriøse købere', 'Leder efter ny ejer til min Honda', 'Søger bytte', 'Vil købe? Her er min Honda', 'Vil du købe en Honda? Her er den',
+                   'Søges ny ejer: Honda VFR', 'Søger et nyt hjem til min Honda', 'Honda kan også købes', 'Honda CB 500 (kan købes)', 'Honda CB 500 – hurtig handel købes',
+                   'Købt ny, kan evt. byttes', 'Suzuki Bandit – købesum', 'Triumph søgesæt', 'Købsaftale medfølger: Honda CB 500', 'Søges', 'Leder efter Yamaha XJ 600', 'Søger MT-07'])
     assert.equal(M.erEfterspoergsel(t), false, t);
+  // Kendt falsk positiv ved enhver start-regel (accepteret): "Købes og sælges motorcykler".
   const liste = [
     norm({ id: 'k', titel: 'Købes: BSA / Triumph / Norton', maerke: 'BSA', model: null, pris_dkk: null }),
     norm({ id: 's', titel: 'BSA A65', maerke: 'BSA', model: 'A65' }),
@@ -343,23 +341,135 @@ test('F-003: en sidstSet i fremtiden er ukendt, ikke friskt', () => {
   assert.equal(M.senesteBekraeftet([{ sidstSet: '2026-12-01T12:00:00Z' }], nu), null);
 });
 
-test('generatorerne: ubevist ny (kilde siger ny, tal hverken bekræfter eller afviser) er hverken ny eller brugt', () => {
-  assert.equal(M.erUbevistNy({ kildeStand: 'ny', km: null, year: null }), true);
-  assert.equal(M.erUbevistNy({ kildeStand: 'ny', km: 420, year: 2025 }), true);
-  assert.equal(M.erUbevistNy({ kildeStand: 'ny', km: 0, year: 2026 }), false);
-  assert.equal(M.erUbevistNy({ kildeStand: 'ny', km: 99000, year: 2007 }), false, 'modsagt = brugt');
-  assert.equal(M.erUbevistNy({ kildeStand: 'brugt' }), false);
-  for (const f of ['build-brand-pages.js', 'build-facet-pages.js']){
-    assert.match(fs.readFileSync(path.join(__dirname, '..', 'scripts', f), 'utf8'), /erUbevistNy/, f);
+/* ---- Generatorerne (P0 fra Critic 3): de kaldes rigtigt, i det scope de selv bruger. ---- */
+const brandGen = require('./../scripts/build-brand-pages.js');
+const facetGen = require('./../scripts/build-facet-pages.js');
+const nyRaekke = (o) => norm(Object.assign({ stand: 'ny', saelgertype: 'forhandler', aargang: 2026, km: 0, url: 'https://mcsyd.dk/Produkter/Motorcykel/Ny/Honda%20CB%20500/1', kilde: { navn: 'MC Syd', domaene: 'mcsyd.dk' } }, o));
+
+test('generatorerne: standOpgoerelse tæller nye, ubeviste og rene brugte ens for alle', () => {
+  const ny = nyRaekke({});
+  const ubevist = norm({ stand: 'ny', aargang: null, km: null, saelgertype: 'privat' });
+  const brugt = norm({ stand: 'brugt' });
+  assert.deepEqual(M.standOpgoerelse([brugt, brugt]), { antal: 2, nye: 0, ubeviste: 0, renBrugt: true, alleNye: false });
+  assert.deepEqual(M.standOpgoerelse([ny, ubevist, brugt]), { antal: 3, nye: 1, ubeviste: 1, renBrugt: false, alleNye: false });
+  assert.equal(M.standOpgoerelse([ny]).alleNye, true);
+  assert.equal(M.standOpgoerelse([]).renBrugt, true);
+});
+
+test('generatorerne: brugtOrd i mærke- og facetsiderne kører (ingen manglende import) og skriver ikke "brugte" over ubeviste ny', () => {
+  const ubevist = norm({ stand: 'ny', aargang: null, km: null, saelgertype: 'privat' });
+  const brugt = norm({ stand: 'brugt' });
+  const ny = nyRaekke({});
+  // Mærkesiderne
+  assert.equal(brandGen.brugtOrd([brugt, brugt]), 'brugte ');
+  assert.equal(brandGen.brugtOrd([brugt, ubevist]), '', 'ubevist ny er hverken ny eller brugt');
+  assert.equal(brandGen.brugtOrd([brugt, ny]), '');
+  assert.equal(brandGen.nyeAf([brugt, ny, ubevist]), 1);
+  // Facetsiderne
+  assert.equal(facetGen.brugtOrd([brugt, brugt], 'motorcykel', 'motorcykler'), 'brugte motorcykler');
+  assert.equal(facetGen.brugtOrd([brugt], 'motorcykel', 'motorcykler'), 'brugt motorcykel');
+  assert.equal(facetGen.brugtOrd([brugt, ubevist], 'motorcykel', 'motorcykler'), 'motorcykler');
+  assert.equal(facetGen.brugtOrd([ny, ny], 'motorcykel', 'motorcykler'), 'fabriksnye motorcykler');
+  assert.equal(facetGen.brugtOrd([ny, brugt], 'motorcykel', 'motorcykler'), 'motorcykler');
+});
+
+test('generatorerne: den fælles opgørelse er tilgængelig i begge generatorers scope (eksporterede hjælpere kaster ikke)', () => {
+  for (const [navn, gen] of [['brand', brandGen], ['facet', facetGen]]){
+    assert.equal(typeof gen.brugtOrd, 'function', navn);
+    assert.doesNotThrow(() => gen.brugtOrd([nyRaekke({})], 'x', 'y'), navn);
+    assert.doesNotThrow(() => gen.brugtOrd([], 'x', 'y'), navn);
   }
 });
 
-test('annoncesidens fabriksny-note siger kun "kilometerstanden er ikke oplyst", når km mangler', () => {
-  const src = fs.readFileSync(path.join(__dirname, 'annonce.js'), 'utf8');
-  assert.match(src, /const kmIkkeOplyst = listing\.km == null/);
-  assert.equal((src.match(/kilometerstanden er derfor ikke oplyst/g) || []).length, 2, 'dealer-note + katalog-note');
-  assert.match(src, /const iKatalog = /, 'katalog-påstanden kræver en katalogsti');
+/* ---- Én sandhedskilde: badge, condition, JSON-LD og note giver ALTID samme svar ---- */
+function indlaesSeo(){
+  const src = fs.readFileSync(path.join(__dirname, 'seo.js'), 'utf8');
+  const born = [];
+  const doc = {
+    head: { querySelector: () => null, querySelectorAll: () => [], appendChild(el){ born.push(el); } },
+    getElementById: id => born.find(e => e.id === id) || null,
+    createElement: () => ({ id: '', type: '', textContent: '', setAttribute(k, v){ this[k] = v; }, remove(){} }),
+    title: '',
+  };
+  const api = new Function('document', 'console', 'formatKm', 'formatCcm', 'formatPrice', 'typeLabel', 'sikkerUrl', 'eksternErNy',
+    src + '\n;return { seoExternalListingPage, Seo };'
+  )(doc, { warn(){}, log(){} }, n => n + ' km', n => n + ' ccm', n => n + ' kr.', t => String(t), u => u, M.eksternErNy);
+  return { api, born };
+}
+function jsonLdItemCondition(l){
+  const { api, born } = indlaesSeo();
+  api.seoExternalListingPage(l, []);
+  const el = born.find(e => /jsonld/.test(e.id || '') && /Motorcycle|itemCondition/.test(e.textContent || ''));
+  if (!el) return undefined;
+  const ld = JSON.parse(el.textContent);
+  const c = ld.itemCondition || (ld.offers && ld.offers.itemCondition) || null;
+  return c ? c.replace('https://schema.org/', '') : null;
+}
 
+test('integration: kortets badge, condition, JSON-LD og annoncesidens note giver ALTID samme svar (60+ kombinationer)', () => {
+  const stande = ['ny', 'brugt', null];
+  const kms = [null, 0, 40, 420, 800, 53000];
+  const aar = [null, 2026, 2022, 1985];
+  const typer = ['forhandler', 'privat', null];
+  const stier = ['https://mcsyd.dk/Produkter/Motorcykel/Ny/Honda%20CB%20500/1', 'https://mcsyd.dk/Produkter/Motorcykel/Brugt/Honda%20CB%20500/1', 'https://www.guloggratis.dk/annonce/ny/x1', 'https://rydbergsmc.dk/x'];
+  let antal = 0; 
+  for (const stand of stande) for (const km of kms) for (const aargang of aar) for (const saelgertype of typer) for (const url of stier){ antal++;
+    const l = M.normalizeExternalListing(raa({ stand, km, aargang, saelgertype, url, ccm: 500, hk: 48 }));
+    const ny = M.eksternErNy(l);
+    const k = JSON.stringify({ stand, km, aargang, saelgertype, url });
+    const badge = /rk-ny/.test(M.listingCardHTML(l, 0));
+    assert.equal(badge, ny === true, 'badge ' + k);
+    assert.equal(l.condition === 'Ny', ny === true, 'condition=Ny ' + k);
+    if (ny === false) assert.equal(l.condition, 'Brugt', 'condition=Brugt ' + k);
+    const ld = jsonLdItemCondition(l);
+    assert.equal(ld === 'NewCondition', ny === true, 'JSON-LD new ' + k);
+    assert.equal(ld === 'UsedCondition', ny === false, 'JSON-LD used ' + k);
+    const note = M.fabriksnyNoteTekst(l, ny, 'Kilden', true);
+    assert.equal(note != null, ny === true, 'note ' + k);
+    assert.equal(M.erUbevistNy(l), /^ny$/i.test(String(stand || '')) && ny === null, 'ubevist ' + k);
+  }
+  assert.ok(antal >= 60);
+});
+
+test('"katalog over nye motorcykler" står KUN ved MC Syds /Ny/-sti — i noten og i kortets tooltip', () => {
+  const alle = [
+    nyRaekke({}),                                                                         // MC Syd /Ny/
+    nyRaekke({ url: 'https://rydbergsmc.dk/x', saelgertype: 'forhandler' }),              // forhandler, ikke katalog
+    norm({ stand: 'ny', km: 0, aargang: 2025, saelgertype: 'privat' }),                   // Gul og Gratis privat
+    norm({ stand: 'ny', km: 0, aargang: 2025, saelgertype: null }),
+  ];
+  const [katalog, ...andre] = alle;
+  assert.ok(M.eksternErNy(katalog) === true);
+  assert.match(M.fabriksnyNoteTekst(katalog, true, 'MC Syd', true), /katalog over nye motorcykler/);
+  assert.match(M.listingCardHTML(katalog, 0), /katalog over NYE motorcykler/);
+  for (const l of andre){
+    assert.ok(M.eksternErNy(l) === true);
+    assert.ok(!/katalog/.test(M.fabriksnyNoteTekst(l, true, 'Kilden', true)));
+    assert.match(M.fabriksnyNoteTekst(l, true, 'Kilden', true), /Kilden markerer/);
+    assert.ok(!/katalog/.test(M.listingCardHTML(l, 0)));
+  }
+  // "Kilometerstanden er ikke oplyst" kun når den ikke er det.
+  assert.match(M.fabriksnyNoteTekst({ ...katalog, km: null }, true, 'MC Syd', true), /kilometerstanden er derfor ikke oplyst/);
+  assert.ok(!/kilometerstanden er derfor ikke oplyst/.test(M.fabriksnyNoteTekst({ ...katalog, km: 0 }, true, 'MC Syd', true)));
+});
+
+test('smårettelser: Engros ens overalt, hk > 1000, junk-datoer, 1-2 annoncer', () => {
+  assert.equal(M.salgsmarkoerLabel('engros'), 'engros', 'mixed/lowercase kildeord ændres ikke; kun HELT VERSALE pænnes');
+  assert.equal(M.salgsmarkoerLabel('ENGROS'), 'Engros');
+  assert.equal(M.salgsmarkoerLabel('BYTTER GERNE'), 'Bytter gerne');
+  assert.equal(M.saniterTal({ ccm: null, hk: 9999 }).hk, null);
+  assert.equal(M.saniterTal({ ccm: 1000, hk: 1001 }).hk, null);
+  assert.equal(M.saniterTal({ ccm: 1000, hk: 200 }).hk, 200);
+  const nu = new Date('2026-10-16T12:00:00Z');
+  assert.equal(M.senesteBekraeftet([{ sidstSet: '0000' }, { sidstSet: '1970-01-01' }], nu), null, 'junk-datoer er ukendte');
+  const en = M.senesteBekraeftet([{ sidstSet: '2026-10-10T12:00:00Z' }], nu);
+  assert.equal(en.tekst, 'Annoncen er bekræftet senest 10. okt.');
+  const to = M.senesteBekraeftet([{ sidstSet: '2026-10-10T12:00:00Z' }, { sidstSet: '2026-06-01T12:00:00Z' }], nu);
+  assert.equal(to.datoTekst, '1. jun.', 'ved to annoncer: den ældste dato, ikke "de fleste"');
+  assert.match(to.tekst, /^Annoncerne er bekræftet senest/);
+  assert.match(M.senesteBekraeftet([1, 2, 3].map(() => ({ sidstSet: '2026-10-10T12:00:00Z' })), nu).tekst, /^De fleste annoncer/);
+  const soeg = fs.readFileSync(path.join(__dirname, 'search.js'), 'utf8');
+  assert.match(soeg, /salgsmarkoerLabel\(m\)/, 'listerækken bruger samme label-funktion som kort og annonceside (kildetekst-tjek: search.js kan ikke kaldes uden DOM)');
 });
 
 test('F-003: forside og søgning viser datoen (kildekode-kontrakt)', () => {
