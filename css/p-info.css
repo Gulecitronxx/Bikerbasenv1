@@ -16,17 +16,19 @@
 .if-hero-media::after{
   content:""; position:absolute; inset:0;
   background:
-    linear-gradient(90deg, rgba(15,13,10,.9) 0%, rgba(15,13,10,.72) 42%, rgba(15,13,10,.18) 100%),
+    /* V2-002: scrimmen følger tekstkolonnen (px-stop), ikke fotoets bredde: bag h1/kicker/ingress >= .62 også ved 390 px,
+       hvor kolonnen fylder hele bredden; motorcyklen til højre står stadig frem på brede skærme. */
+    linear-gradient(90deg, rgba(15,13,10,.9) 0%, rgba(15,13,10,.78) min(40%, 560px), rgba(15,13,10,.64) min(100%, 840px), rgba(15,13,10,.16) min(100%, 1320px)),
     linear-gradient(0deg, rgba(15,13,10,.35), rgba(15,13,10,0) 40%);
 }
 .if-hero-inner{ max-width: var(--site-w); }
-.if-hero .breadcrumb{ color: rgba(255,255,255,.82); padding-top: var(--space-4); }
+.if-hero .breadcrumb{ color: rgba(255,255,255,.82); padding-top: 4px; }
 .if-hero .breadcrumb a{ color:#fff; }
 .if-hero .breadcrumb a:hover{ color:#fff; text-decoration: underline; }
 .if-hero .breadcrumb [aria-current]{ color: rgba(255,255,255,.82); }
 .if-kicker{
   margin: var(--space-5) 0 var(--space-2);
-  font-size: 13px; font-weight: 700; letter-spacing: .12em; color:#fff; opacity:.92;
+  font-size: 13px; font-weight: 700; letter-spacing: .12em; color:#fff;
 }
 .if-hero h1{
   color:#fff; font-size: clamp(32px, 5.4vw, 56px); line-height: 1.06; letter-spacing: -0.02em;
@@ -78,11 +80,11 @@
 .if-toc h2{ display:flex; align-items:center; gap: var(--space-4); font-size: 20px; margin-bottom: var(--space-3); }
 .if-toc-ic{ display:inline-flex; width:24px; height:24px; color: var(--color-fg); }
 .if-toc-ic svg{ width:24px; height:24px; }
-.if-toc ol{ margin:0; padding-left: 1.6em; display:grid; gap: 6px 40px; font-size:15px; }
+.if-toc ol{ margin:0; padding-left: 1.6em; display:grid; gap: 0 40px; font-size:15px; }
 @media (min-width:700px){ .if-toc ol{ grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(var(--if-toc-rows, 4), auto); } }
 .if-toc li{ list-style: decimal; }
 .if-toc li::marker{ color: var(--color-fg-muted); font-weight:600; }
-.if-toc a{ color: var(--color-fg); text-decoration:none; }
+.if-toc a{ color: var(--color-fg); text-decoration:none; display:flex; align-items:center; min-height:40px; }
 .if-toc a:hover{ color: var(--color-primary); text-decoration: underline; }
 
 /* ---------- Ikon-række: principper (om-bikerbasen) ---------- */
