@@ -37,3 +37,10 @@ Branch `gauntlet/w9-frontend` fra 4378bba. Mål: billede 1 (forside) + header/fo
 - Sælg-panelets foto er en cruiser-illustration, ikke rytter på vej. "Bliv en del af fællesskabet" er ærligt erstattet af "Køb og sælg trygt" (intet fællesskab findes).
 - Footer er mørk (billede 1 viser ingen footer) og indeholder hårdkodet inline-farve i alle sider; ændring kræver synk-header over mange filer og er ikke gjort. Nav har ikke "Viden".
 - Mobil-hero og kortets tomhøjde er ikke målt mod billedet pixel for pixel (kun billede 1 desktop).
+
+## Runde 2 (efter Critic AFVIS)
+- P1-1: banneret ligger nu i .kort-raekke-pladsholderen (min-height 330/360 px fra første maling), så svaret ikke flytter noget. CLS tom+fejl, 320/390/768/1440, lys+mørk, svarforsinkelse 0 og 1200 ms: alle 0,000. Overflow 0.
+- P1-2: det kompakte sælg-bånd er fjernet; sælg-panelet står som i normaltilstand (ingen tom højre kolonne).
+- P3: forside-h1 clamp(54px,4.3vw,62px) fra 1100 px (kun forsiden). Normal CLS 0-0,010.
+- Ny testfil: js/w9-frontend-tom.test.js (6 browsertests, skippes uden Chromium). npm test 927 grøn; smoke index 320-1440 lys+mørk 0 fejl.
+- Rettelse af tidligere påstand: F4 var ikke kun 1440 lys; også 768 og mørk. Nu løst.
