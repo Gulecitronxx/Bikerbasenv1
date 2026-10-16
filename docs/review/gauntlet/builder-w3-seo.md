@@ -100,3 +100,19 @@ Præcist: CI skriver aldrig ledgeren, så baseline er den committede. Efter `til
 - **P3:** model-tærsklen ≥10 tæller RÅT (kun området 5-9 tæller distinkte) — bevaret bevidst, så de seks eksisterende indekserede modelsider ikke ændrer status; ≥10 identiske lagerenheder kunne give en tynd side (notér). De tre testfiler (49 tests) tilføjes af Orchestrator til `npm test`. By-hysterese hviler på de committede sider: i CI uden commit er den et simpelt snit ved 8. Committede facetsider kan have forældede CSP-hashes; CI kører csp-hashes, men kør en fuld lokal build før merge.
 
 **Måling:** `npm test` 525/525; `node --test` seo-vagt+seo-sider+seo-krav 49/49; `node --check` ok; `seo-audit` 82 sider/57 indekserbare/0 fund. Alle simuleringer kørt på kopier i scratch (`cd` + `pwd` kontrolleret), aldrig i hovedmappen.
+
+---
+
+## Runde 4 — Critic 3 (ACCEPTERET; P2-1..P2-3 taget før merge)
+
+- **P2-1 (døde annonce-URL'er):** listing-generatoren sletter ikke længere selv, når den kaldes fra `build.js`: den skriver listen til `BB_SLETTELISTE`, og `build.js` sletter først SIDST og kun hvis intet datatrin er sprunget. Ved et sprunget trin udskydes sletningen (`[SEO_FALD-MARKØR] ... UDSKUDT`), så siderne, det gendannede sitemap og de ikke-opdaterede mærke-/budgetsider er konsistente; næste vellykkede byg sletter. Kørt direkte (`node scripts/listing...`) sletter den som før. Test: stub-kæde med 3 annoncesider og 2 på sletteliste — brand springes over: 3 står; alle lykkes: 1 står + warning. Kopi-simulering (3 sider, 2 hentet, facet/brand fejler): 3 står; uden fald: den solgte slettes.
+- **P2-2 (netværksfejl):** `fetchExternalListings` fanger en kastet `fetch`-fejl og kaster `SEO_HENT` (netværk: ...) som ved HTTP-fejl -> exit 3, fail-soft. Test for både ECONNRESET og HTTP 502; kopi-simulering med ECONNRESET kun i brand: exit 0, committede sider bevaret. Dertil: `afslut()` udsætter `process.exit` 50 ms — ellers gav en afbrudt fetch en libuv-assertion på Windows (exit 3221226505) i stedet for exit 3. build-srp bruger nu samme `afslut`.
+- **P2-3 (tillad_fald for bredt):** nul eksterne mod en kendt baseline er altid fejl, også under `BB_TILLAD_FALD` (`nulAltidFejl`; kun procent- og kildegulvene omgås). Bevidst fald uden nul og "sidste egne annonce solgt" omgås som før. Test.
+
+### Åbne beslutningspunkter (IKKE implementeret)
+1. **Frosset datalag er "grønt"** (P2-4 / P2-3 fra runde 3): sidste egne annonce(r) sælges (kun 2 i dag), opt-out uden YAML eller en lille kilde der falder til 0 fryser brand/facet/srp/sitemap, kun med en annotation, til `tillad_fald` + lokal committet build. Forslag: rødt afsluttende job på `[SEO_FALD-MARKØR]` eller `$GITHUB_STEP_SUMMARY` — ejerens beslutning.
+2. **Modelsider uden mærkelinks, når kun facet springes over:** mærkesidernes modelchips/type-fliser relinkes i facet-trinnet; springes det over, står de committede mærkesider uden de nye links til næste fulde byg.
+3. **Tynd modelside ved 10 identiske enheder:** tærsklen fra 10 tæller rå antal (bevaret for de seks eksisterende sider); distinkte tæller kun i 5-9-området.
+4. **Budget-overlap:** 30k ⊂ 50k ⊂ 75k ⊂ 100k har lav unik tekst (6-13 %); intentionerne er forskellige, så de er beholdt; 75k kan droppes, hvis indeksbloat bliver et problem.
+
+**Måling:** `npm test` 525/525; seo-vagt+seo-sider+seo-krav 52/52; `node --check` ok; `seo-audit` 0 fund. Alle build-simuleringer kørt på kopier i scratch.
