@@ -59,7 +59,7 @@ S-004 crawl udløser ikke deploy · S-011 sitemap lastmod = byggedato · S-007/0
 - Detective-rapporter (SEO, funktion/data, visuel/mobil) er bestilt; Orchestrator prioriterer dem i denne fil, når de er landet.
 - Foreløbig observation (hypotese): "Søg efter type"-fliserne på forsiden viste ingen fotos i et automatiseret screenshot — skal verificeres af Detective visuel.
 - Ejerens favoritter at undersøge særligt: hero + søgekort + tillidsrække, mellemsektionens hierarki, "Sådan virker Bikerbasen"-modul.
-- SEO-Routine (cloud, kontinuerlig) er et **separat driftsspor**; forberedes efter de første produktforbedringer, må ikke blokere dem.
+- SEO-Routine (cloud, kontinuerlig) er et **separat driftsspor**: opgave og rammer er skrevet i [`docs/seo-routine.md`](../seo-routine.md); selve cloud-routinen er endnu ikke oprettet (kræver ejerens godkendelse af adgang/interval).
 
 ## PARALLEL DESIGN GAUNTLET (startet 15.10.2026)
 
