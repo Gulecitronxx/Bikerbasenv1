@@ -742,7 +742,7 @@ function bandSaetning(facet, items){
   const priser = aggregatPriser(band);
   const aar = band.map(l => tilTal(l.year)).filter(troværdigtAar).sort((a, b) => a - b);
   let s = ` Interval ${dkk(facet.lo + 1)} til ${dkk(facet.max)}: ${band.length} annoncer, medianpris ${dkk(SIDER.median(priser))}`;
-  if (aar.length >= 3) s += `, medianårgang ${SIDER.median(aar)}`;
+  if (aar.length >= 3) s += `, medianårgang ${SIDER.medianAarTekst(aar)}`;
   s += '.';
   const typer = typerMedDaekning(band, 2);
   if (typer.length) s += ` Mest udbudte typer i intervallet: ${typer.map(typeOrd).join(' og ')}.`;
@@ -889,7 +889,7 @@ function maerkeChips(facet, items){
 function facetSearchUrl(facet, extra){
   /* Facetten kender selv sit søgefilter (facet.soeg); by-siderne har intet — søgningen kender landsdel, ikke by. */
   const grund = facet.kind === 'by' ? (facet.region ? { regions: [facet.region] } : {}) : facet.soeg;
-  return LINK.soegHref(LINK.og(grund, extra ? { brands: [extra] } : null), { html: false });
+  return LINK.soegHref(LINK.og(grund, extra ? { brands: [extra] } : null), { html: true });
 }
 
 /* RUNDE 12 (R12-D-13 + R11-KK-6): facetsiderne havde NUL vaerktoejer — ingen
@@ -1731,10 +1731,12 @@ ${footer}
   const prisT = l => Number(l.price) > 0 ? Number(l.price) : null;
   const visListe = kind === 'budget' && lo ? traefSorteret.filter(l => prisT(l) > lo).concat(traefSorteret.filter(l => !(prisT(l) > lo))) : kind !== 'model' ? traefSorteret : (() => {
     const set = new Map();
-    for (const l of traefSorteret){
-      const k = [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
+    traefSorteret.forEach((l, i) => {
+      const k = (dnum(l.price) === '' || dnum(l.year) === '')
+        ? 'ukendt|' + (l.id != null ? l.id : (l.externalUrl || l.url || 'plads' + i))
+        : [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
       if (!set.has(k)) set.set(k, l);
-    }
+    });
     return [...set.values()];
   })();
   /* RUNDE 13 (R13-7): TOTALEN foer udsnittet — tallet i overskrift og intro

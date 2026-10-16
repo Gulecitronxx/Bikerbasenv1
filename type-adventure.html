@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-B6YuJ4OAUiuX5Zz+/mClZCAM4zDZunAPkLuxoDjei4g=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-GHJpZ+y4oUkf4Y4jHjkL13zUGA2Y7aLjX/Sw4082mhQ=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Adventure/Enduro-motorcykler til salg — Bikerbasen</title>
 <meta name="description" content="Se 68 Adventure/Enduro-motorcykler til salg i Danmark. Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.">
@@ -323,14 +323,14 @@ try{
            Modelsider undtaget (R11-F-8): en chip ("Honda") er en tautologi. -->
       <h2 class="fa-h3" id="fa-maerker-h">Se adventure/enduro-motorcykler efter mærke</h2>
       <div class="popular-row">
-        <a class="popular-chip" href="soegning.html?brands=Honda&type=adventure">Honda</a>
-        <a class="popular-chip" href="soegning.html?brands=KTM&type=adventure">KTM</a>
-        <a class="popular-chip" href="soegning.html?brands=BMW&type=adventure">BMW</a>
-        <a class="popular-chip" href="soegning.html?brands=Suzuki&type=adventure">Suzuki</a>
-        <a class="popular-chip" href="soegning.html?brands=Benelli&type=adventure">Benelli</a>
-        <a class="popular-chip" href="soegning.html?brands=Cagiva&type=adventure">Cagiva</a>
-        <a class="popular-chip" href="soegning.html?brands=Husqvarna&type=adventure">Husqvarna</a>
-        <a class="popular-chip" href="soegning.html?brands=Triumph&type=adventure">Triumph</a>
+        <a class="popular-chip" href="soegning.html?brands=Honda&amp;type=adventure">Honda</a>
+        <a class="popular-chip" href="soegning.html?brands=KTM&amp;type=adventure">KTM</a>
+        <a class="popular-chip" href="soegning.html?brands=BMW&amp;type=adventure">BMW</a>
+        <a class="popular-chip" href="soegning.html?brands=Suzuki&amp;type=adventure">Suzuki</a>
+        <a class="popular-chip" href="soegning.html?brands=Benelli&amp;type=adventure">Benelli</a>
+        <a class="popular-chip" href="soegning.html?brands=Cagiva&amp;type=adventure">Cagiva</a>
+        <a class="popular-chip" href="soegning.html?brands=Husqvarna&amp;type=adventure">Husqvarna</a>
+        <a class="popular-chip" href="soegning.html?brands=Triumph&amp;type=adventure">Triumph</a>
       </div>
     </section>
 
@@ -1000,10 +1000,12 @@ try{
   const prisT = l => Number(l.price) > 0 ? Number(l.price) : null;
   const visListe = kind === 'budget' && lo ? traefSorteret.filter(l => prisT(l) > lo).concat(traefSorteret.filter(l => !(prisT(l) > lo))) : kind !== 'model' ? traefSorteret : (() => {
     const set = new Map();
-    for (const l of traefSorteret){
-      const k = [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
+    traefSorteret.forEach((l, i) => {
+      const k = (dnum(l.price) === '' || dnum(l.year) === '')
+        ? 'ukendt|' + (l.id != null ? l.id : (l.externalUrl || l.url || 'plads' + i))
+        : [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
       if (!set.has(k)) set.set(k, l);
-    }
+    });
     return [...set.values()];
   })();
   /* RUNDE 13 (R13-7): TOTALEN foer udsnittet — tallet i overskrift og intro

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-B6YuJ4OAUiuX5Zz+/mClZCAM4zDZunAPkLuxoDjei4g=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-GHJpZ+y4oUkf4Y4jHjkL13zUGA2Y7aLjX/Sw4082mhQ=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Motorcykler til salg i Horsens — Bikerbasen</title>
 <meta name="description" content="Se 43 brugte motorcykler til salg i Horsens (Midtjylland). Priser fra 24.995 kr. Sammenlign årgang, km og type på Bikerbasen.">
@@ -917,10 +917,12 @@ try{
   const prisT = l => Number(l.price) > 0 ? Number(l.price) : null;
   const visListe = kind === 'budget' && lo ? traefSorteret.filter(l => prisT(l) > lo).concat(traefSorteret.filter(l => !(prisT(l) > lo))) : kind !== 'model' ? traefSorteret : (() => {
     const set = new Map();
-    for (const l of traefSorteret){
-      const k = [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
+    traefSorteret.forEach((l, i) => {
+      const k = (dnum(l.price) === '' || dnum(l.year) === '')
+        ? 'ukendt|' + (l.id != null ? l.id : (l.externalUrl || l.url || 'plads' + i))
+        : [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
       if (!set.has(k)) set.set(k, l);
-    }
+    });
     return [...set.values()];
   })();
   /* RUNDE 13 (R13-7): TOTALEN foer udsnittet — tallet i overskrift og intro
