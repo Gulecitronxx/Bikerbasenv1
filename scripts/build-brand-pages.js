@@ -130,7 +130,7 @@ async function hentAnnoncer(){
      fejler (beskyttelsen i hentAlt() kræver, at BÅDE egne og eksterne er tomme).
      Derfor kastes fejlen, så buildet kan ses at fejle. */
   if (!url || !key){
-    throw new Error('Ingen Supabase-konfiguration — egne annoncer kan ikke hentes. Build afbrudt (S-005).');
+    throw Object.assign(new Error('Ingen Supabase-konfiguration — egne annoncer kan ikke hentes. Build afbrudt (S-005).'), { code: 'SEO_HENT' });
   }
   try {
     // Fotos og saelger skal med: maerkesidens kort tegnes nu i byggeriet, og
@@ -143,8 +143,8 @@ async function hentAnnoncer(){
     console.log(`Hentede ${rows.length} annoncer fra databasen.`);
     return rows.map(normalizeRemoteListing);
   } catch (e) {
-    throw new Error('Kunne ikke hente egne annoncer fra databasen (' + e.message + '). '
-      + 'Build afbrudt frem for at skrive mærkesider og sitemap uden dem (S-005).');
+    throw Object.assign(new Error('Kunne ikke hente egne annoncer fra databasen (' + e.message + '). '
+      + 'Build afbrudt frem for at skrive mærkesider og sitemap uden dem (S-005).'), { code: 'SEO_HENT' });
   }
 }
 
@@ -1518,7 +1518,7 @@ const entries = [
 ];
 const urls = entries;
 /* S-005: et sitemap, der skrumper drastisk, er næsten altid en fejlet hentning. */
-SEO.tjekAntal('Sitemap-poster (mærketrinnet)', entries.length, ledger.meta.brandUrls);
+SEO.tjekAntal('Sitemap-poster (mærketrinnet)', entries.length, ledger.meta.brandUrls, { minAndel: SEO.MIN_ANDEL_KATEGORI });
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'),
 `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -1529,6 +1529,7 @@ ledger.meta.brandUrls = entries.length;
 ledger.meta.egne = LISTINGS.filter(harEgenSide).length;
 ledger.meta.eksterne = LISTINGS.length - ledger.meta.egne;
 ledger.meta.maerkesider = brands.length;
+ledger.meta.perKilde = SEO.taelPrKilde(LISTINGS.filter(l => !harEgenSide(l)));
 SEO.skrivLedger(ROOT, ledger);
 
 fs.writeFileSync(path.join(ROOT, 'robots.txt'),
@@ -1569,12 +1570,12 @@ async function hentAlt(){
   /* S-005: tomt eller drastisk faldet i forhold til det sidst kendte gode — de
      committede annonce-*.html og tallet fra forrige vellykkede byg. */
   const baseline = SEO.laesLedger(ROOT).meta;
-  SEO.tjekAntal('Egne annoncer', egne.length, SEO.taelAnnonceSider(ROOT));
-  SEO.tjekAntal('Indekserede annoncer', eksterne.length, baseline.eksterne);
+  SEO.tjekLager({ egne: egne.length, eksterne: eksterne.length, perKilde: SEO.taelPrKilde(eksterne), baseline,
+    inaktive: SEO.laesInaktiveDomaener(ROOT), egneSider: SEO.taelAnnonceSider(ROOT) });
   if (!egne.length && !eksterne.length){
-    throw new Error('Nul annoncer i alt — hverken egne eller indekserede. Build afbrudt: '
+    throw Object.assign(new Error('Nul annoncer i alt — hverken egne eller indekserede. Build afbrudt: '
       + 'byg videre ville slette alle maerkesider og skrive et sitemap uden long-tail. '
-      + 'Det er praecis den tilstand, findingen C-014 beskriver.');
+      + 'Det er praecis den tilstand, findingen C-014 beskriver.'), { code: 'SEO_FALD' });
   }
   return [...egne, ...eksterne]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -1584,7 +1585,7 @@ if (require.main === module){
   (async () => {
     LISTINGS = await hentAlt();
     byg();
-  })().catch(e => { console.error(e.message); process.exit(1); });
+  })().catch(e => SEO.afslut(e));
 }
 
 /* Kun til tests (scripts/maerkeside.test.js). Sidens egne ord er det ene

@@ -5,24 +5,30 @@
   "egne": 2,
   "eksterne": 602,
   "maerkesider": 25,
-  "efterFacetUrls": 61,
-  "facetSider": 40
+  "efterFacetUrls": 52,
+  "facetSider": 31,
+  "perKilde": {
+   "rydbergsmc.dk": 74,
+   "mcsyd.dk": 345,
+   "jensensmc.dk": 28,
+   "guloggratis.dk": 155
+  }
  },
  "sider": {
   "budget-under-100000": {
-   "h": "8a0bd77f458d",
+   "h": "f39b7acdc218",
    "d": "2026-10-16"
   },
   "budget-under-30000": {
-   "h": "3603153d8c6c",
+   "h": "4717afc20117",
    "d": "2026-10-16"
   },
   "budget-under-50000": {
-   "h": "b78197054e33",
+   "h": "594ceb6b0799",
    "d": "2026-10-16"
   },
   "budget-under-75000": {
-   "h": "96331434dc3a",
+   "h": "ab9f27c538e7",
    "d": "2026-10-16"
   },
   "by-farum": {
@@ -30,7 +36,7 @@
    "d": "2026-10-16"
   },
   "by-horsens": {
-   "h": "a1c92f5f082f",
+   "h": "b8bc4ec500b0",
    "d": "2026-10-16"
   },
   "by-noerresundby": {
@@ -38,15 +44,15 @@
    "d": "2026-10-16"
   },
   "by-skive": {
-   "h": "c6647ab7b49a",
+   "h": "47d777128c23",
    "d": "2026-10-16"
   },
   "by-thorsoe": {
-   "h": "cd2d09123419",
+   "h": "a9909b3c2798",
    "d": "2026-10-16"
   },
   "index": {
-   "h": "b8f6c1b527c8",
+   "h": "2b1aa6721a5a",
    "d": "2026-10-16"
   },
   "koerekort-a": {
@@ -106,23 +112,23 @@
    "d": null
   },
   "mc-harley-davidson-cruiser": {
-   "h": "539bd7a4d2f0",
+   "h": "afce78dc21d9",
    "d": "2026-10-16"
   },
   "mc-honda-cruiser": {
-   "h": "de6678b37a31",
+   "h": "6522c34d7fea",
    "d": "2026-10-16"
   },
   "mc-honda-naked": {
-   "h": "fd4f3c0caf88",
+   "h": "7ed4cce3f4d4",
    "d": "2026-10-16"
   },
   "mc-honda-touring": {
-   "h": "3a0d58a8cbe3",
+   "h": "e18b607690a8",
    "d": "2026-10-16"
   },
   "model-harley-davidson-flstc-heritage-softail-classic": {
-   "h": "c1babe00f972",
+   "h": "65ff34359b02",
    "d": "2026-10-16"
   },
   "model-honda-cb-1000-hornet": {
@@ -146,19 +152,19 @@
    "d": "2026-10-16"
   },
   "model-honda-cmx-1100-d-rebel": {
-   "h": "588878d73f48",
+   "h": "a17896396ae7",
    "d": "2026-10-16"
   },
   "model-honda-cmx-500-rebel": {
-   "h": "fa9d4e976cc7",
+   "h": "e442c1a7f46c",
    "d": "2026-10-16"
   },
   "model-honda-crf-1100-l-africa": {
-   "h": "a0507a2b593c",
+   "h": "6e1630910a6c",
    "d": "2026-10-16"
   },
   "model-honda-gl-1800-gold-wing": {
-   "h": "80d7c8007ee1",
+   "h": "ccee4dedcafe",
    "d": "2026-10-16"
   },
   "model-honda-nc-750-x": {
@@ -166,11 +172,11 @@
    "d": "2026-10-16"
   },
   "model-honda-nt-1100-a": {
-   "h": "ce06ef6ca01a",
+   "h": "dbd34c34e834",
    "d": "2026-10-16"
   },
   "model-honda-nx-500": {
-   "h": "e30b91500fb8",
+   "h": "d2760e3b059a",
    "d": "2026-10-16"
   },
   "model-honda-xl-750-transalp": {
@@ -178,7 +184,7 @@
    "d": "2026-10-16"
   },
   "model-suzuki-vlr-1800": {
-   "h": "abcc1bac77fb",
+   "h": "725b2ecb4584",
    "d": "2026-10-16"
   },
   "om-bikerbasen": {
@@ -198,7 +204,7 @@
    "d": null
   },
   "region-hovedstaden": {
-   "h": "8ac83f9dbee3",
+   "h": "7e852eb6610a",
    "d": "2026-10-16"
   },
   "region-midtjylland": {
@@ -206,7 +212,7 @@
    "d": "2026-10-16"
   },
   "region-nordjylland": {
-   "h": "63c185c8b19a",
+   "h": "fd3229b56cc1",
    "d": "2026-10-16"
   },
   "region-syddanmark": {
@@ -218,7 +224,7 @@
    "d": null
   },
   "soegning": {
-   "h": "877649333bb0",
+   "h": "1a1705340ef3",
    "d": "2026-10-16"
   },
   "type-adventure": {

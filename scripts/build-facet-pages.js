@@ -183,8 +183,12 @@ const THRESHOLD = 10;
    - og, for de nye familier, har et ÆGTE indhold: oplyst pris og årgang på mindst 3
      annoncer. Ellers er "prisniveau" og "årgange" tomme ord. */
 const facetTaerskel = facet => facet.taerskel || THRESHOLD;
+/* Modelsider: fra 10 annoncer gælder den gamle regel uændret (siderne, der allerede er indekseret).
+   I det sænkede område (5-9) tæller kun DISTINKTE annoncer — identiske dealer-lagerenheder (samme pris,
+   årgang, km, kilde) er én annonce — ellers er en side på 7 annoncer, hvoraf 4 er samme vare, tynd. */
+const antalTilTaerskel = (facet, items) => facet.distinkt && items.length < THRESHOLD ? SIDER.distinkte(items).length : items.length;
 function erIndekserbar(facet, items){
-  if (items.length < facetTaerskel(facet)) return false;
+  if (antalTilTaerskel(facet, items) < facetTaerskel(facet)) return false;
   if (facet.udvalgt === false) return false;
   if (facet.kraevIndhold && !SIDER.harIndhold(items)) return false;
   return true;
@@ -293,7 +297,8 @@ function itemListLd(name, items){
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name,
-    numberOfItems: medSide.length,
+    // numberOfItems kun naar listen daekker ALLE viste annoncer — ellers lover tallet mere/mindre end siden viser (S-012)
+    ...(medSide.length === items.length ? { numberOfItems: medSide.length } : {}),
     itemListElement: medSide.map((l, i) => ({
       '@type': 'ListItem', position: i + 1,
       url: `${BASE}/${listingSlug(l)}`,
@@ -407,7 +412,8 @@ function eksisterendeSider(re){
     if (!re.test(f)) continue;
     const html = fs.readFileSync(path.join(ROOT, f), 'utf8');
     const attr = n => { const m = html.match(new RegExp(`data-facet-${n}="([^"]*)"`)); return m ? afEsc(m[1]) : null; };
-    ud.set(f.replace(/\.html$/, ''), { by: attr('by'), postnr: attr('postnr'), brand: attr('brand'), model: attr('model'), type: attr('type') });
+    ud.set(f.replace(/\.html$/, ''), { by: attr('by'), postnr: attr('postnr'), brand: attr('brand'), model: attr('model'), type: attr('type'),
+      indeks: !/<meta name="robots" content="noindex/.test(html) });
   }
   return ud;
 }
@@ -426,14 +432,14 @@ function modelFacets(alle){
   }
   const valgte = new Map(); // slug -> { brand, model }
   for (const g of grupper.values()){
-    if (g.items.length >= SIDER.TAERSKLER.model && SIDER.harIndhold(g.items)) valgte.set(modelSlug(g.brand, g.model), { brand: g.brand, model: g.model });
+    if (antalTilTaerskel({ distinkt: true }, g.items) >= SIDER.TAERSKLER.model && SIDER.harIndhold(g.items)) valgte.set(modelSlug(g.brand, g.model), { brand: g.brand, model: g.model });
   }
   for (const [slug, e] of eksisterendeSider(/^model-.*\.html$/)) if (!valgte.has(slug) && e.brand && e.model) valgte.set(slug, { brand: e.brand, model: e.model });
   return [...valgte.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([slug, { brand, model }]) => {
     const mv = SIDER.visModel(brand, model);
     return {
       kind: 'model', id: `${brand} ${model}`, slug, label: `${brand} ${mv}`, brand, model, mv,
-      titel: `${brand} ${mv}`, taerskel: SIDER.TAERSKLER.model, kraevIndhold: true,
+      titel: `${brand} ${mv}`, taerskel: SIDER.TAERSKLER.model, kraevIndhold: true, distinkt: true,
       match: l => modelNoegle(l) === `${brand}\u0000${model}`,
     };
   });
@@ -454,8 +460,10 @@ let _postnumre = null;
 const postnumre = () => _postnumre || (_postnumre = SIDER.laesPostnumre(ROOT));
 function byFacets(alle){
   const valgte = new Map();   // slug -> { navn, postnumre }
-  for (const b of SIDER.vaelgByer(alle, postnumre())) if (!b.afvist) valgte.set(b.slug, { navn: b.navn, postnumre: b.postnumre, udvalgt: true });
-  for (const [slug, e] of eksisterendeSider(/^by-.*\.html$/)){
+  const paaDisk = eksisterendeSider(/^by-.*\.html$/);
+  const beholdt = new Set([...paaDisk].filter(([, e]) => e.indeks).map(([slug]) => slug));
+  for (const b of SIDER.vaelgByer(alle, postnumre(), { beholdt })) if (!b.afvist) valgte.set(b.slug, { navn: b.navn, postnumre: b.postnumre, udvalgt: true });
+  for (const [slug, e] of paaDisk){
     if (!valgte.has(slug) && e.by) valgte.set(slug, { navn: e.by, postnumre: String(e.postnr || '').split(',').filter(Boolean), udvalgt: false });
   }
   return [...valgte.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([slug, b]) => {
@@ -657,7 +665,7 @@ function faqLdForModel(facet, items){
   const { priser } = prisOgAargang(items);
   const qa = [];
   if (priser.length >= 3){
-    qa.push({ q: `Hvad koster en brugt ${facet.brand} ${facet.mv}?`,
+    qa.push({ q: `Hvad koster en ${facet.brand} ${facet.mv}?`,
       // "N til salg" om KUN dem med pris var forkert (R11-I-7): de øvrige er
       // også til salg, de oplyser bare ikke prisen. Og dkk() slutter selv på
       // "kr." — et punktum mere gav "kr..".
@@ -1297,8 +1305,11 @@ function titelMedMaerke(t){
    dkk() slutter selv paa "kr." — derfor aldrig et punktum lige efter. */
 function nyFamilieMeta(facet, items, qualifies){
   if (!qualifies || !['budget', 'by', 'kombi'].includes(facet.kind)) return null;
-  const min = aggregatPriser(items)[0];
-  const pris = min != null ? ` Priser fra ${dkk(min)}` : '';
+  /* 5. percentil, rundet til nærmeste tusinde — ikke laveste pris: en enkelt fejlpris (1.900 kr.) må ikke
+     blive sidens salgsløfte. Under 20 priser: ingen "fra". */
+  const pr = aggregatPriser(items);
+  const fra = pr.length >= 20 ? Math.max(1000, Math.round(SIDER.percentil(pr, 0.05) / 1000) * 1000) : null;
+  const pris = fra != null ? ` Priser fra ca. ${dkk(fra)}` : '';
   const slut = ' Sammenlign årgang, km og type på Bikerbasen.';
   const n = items.length;
   if (facet.kind === 'budget'){
@@ -1377,8 +1388,15 @@ function side(facet, alle){
     : facet.kind === 'region' ? `Motorcykler til salg i ${esc(facet.id)}`
     : facet.kind === 'model' ? `${stort(brugtOrd(items, `${esc(facet.brand)} ${esc(facet.mv)}`, `${esc(facet.brand)} ${esc(facet.mv)}`))} til salg`
     : `Motorcykler til ${esc(facet.id)}-kørekort`; // S-001: kort title; forbeholdet står i introen
+  /* Chips peger kun paa INDEKSERBARE sider; en noindex-side (type-scooter, region-sjaelland) er ingen
+     landingsside. Er siden noindex, bliver chippen et soegefilter i stedet — brugeren faar stadig vejen. */
+  const sideEllerSoeg = (slug, soeg) => {
+    const alleF = global.__FACETTER;
+    const f = alleF && alleF.find(x => x.slug === slug);
+    return !alleF || !f || f.qualifies ? `${slug}.html` : soeg;
+  };
   const andreRegioner = REGIONS.filter(r => r !== facet.id)
-    .map(r => `<a class="popular-chip" href="region-${slugify(r)}.html">${esc(r)}</a>`).join('\n        ');
+    .map(r => `<a class="popular-chip" href="${sideEllerSoeg(`region-${slugify(r)}`, `soegning.html?regions=${encodeURIComponent(r)}`)}">${esc(r)}</a>`).join('\n        ');
   const brandFil = facet.kind === 'model' || facet.kind === 'kombi' ? `maerke-${slugify(facet.brand)}.html` : null;
   const brandFindes = brandFil && fs.existsSync(path.join(ROOT, brandFil));
   const regionFil = facet.kind === 'by' && facet.region ? `region-${slugify(facet.region)}.html` : null;
@@ -1391,13 +1409,20 @@ function side(facet, alle){
   const faqEmne = facet.kind === 'model' ? `${esc(facet.brand)} ${esc(facet.mv)}` : frase(facet);
   const andreModeller = facet.kind === 'model'
     ? (global.__MODELFACETTER || []).filter(f => f.brand === facet.brand && f.slug !== facet.slug && f.qualifies)
-        .map(f => `<a class="popular-chip" href="${f.slug}.html">${esc(f.model)}</a>`).join('\n        ')
+        .map(f => `<a class="popular-chip" href="${f.slug}.html">${esc(f.model)}</a>`)
+        /* Lignende modeller af samme hovedtype fra andre mærker, og mærkets mærke+type-sider: relevante
+           indlink til sider, der ellers kun nås fra typesiden. */
+        .concat((global.__MODELFACETTER || []).filter(f => f.slug !== facet.slug && f.qualifies && f.brand !== facet.brand && f.domType && f.domType === facet.domType)
+          .slice(0, 4).map(f => `<a class="popular-chip" href="${f.slug}.html">${esc(f.brand)} ${esc(f.mv)}</a>`))
+        .concat((global.__FACETTER || []).filter(f => f.kind === 'kombi' && f.qualifies && f.brand === facet.brand)
+          .map(f => `<a class="popular-chip" href="${f.slug}.html">${esc(f.brand)} ${esc(String(f.typeLabel).toLowerCase())}-motorcykler</a>`))
+        .join('\n        ')
     : '';
 
   const andreTyper = TYPES.filter(t => `type-${t.id}` !== facet.slug)
-    .map(t => `<a class="popular-chip" href="type-${t.id}.html">${esc(t.label)}</a>`).join('\n        ');
+    .map(t => `<a class="popular-chip" href="${sideEllerSoeg(`type-${t.id}`, `soegning.html?type=${t.id}`)}">${esc(t.label)}</a>`).join('\n        ');
   const andreKk = KOEREKORT_FACETS.filter(k => k.slug !== facet.slug)
-    .map(k => `<a class="popular-chip" href="${k.slug}.html">${esc(k.titel)}</a>`).join('\n        ');
+    .map(k => `<a class="popular-chip" href="${sideEllerSoeg(k.slug, `soegning.html?koerekort=${k.id}`)}">${esc(k.titel)}</a>`).join('\n        ');
 
   const maerker = maerkeChips(facet, items);
 
@@ -1562,7 +1587,7 @@ ${header}
     </section>
 
     ${facet.kind === 'model' ? `${andreModeller ? `<section class="section fa-sektion">
-      <h2 class="fa-h2">Andre ${esc(facet.brand)}-modeller</h2>
+      <h2 class="fa-h2">Se også</h2>
       <div class="popular-row">
         ${andreModeller}
         ${brandFindes ? `<a class="popular-chip" href="${brandFil}">Alle ${esc(facet.brand)}</a>` : ''}
@@ -1931,6 +1956,7 @@ function byg(){
     f.antal = items.length;
     f.qualifies = erIndekserbar(f, items);
     if (f.kind === 'by') f.region = dominerendeRegion(items);
+    if (f.kind === 'model') f.domType = (typeFordeling(items)[0] || {}).id || null;
   }
   global.__FACETTER = facets;
   global.__MODELFACETTER = facets.filter(f => f.kind === 'model');
@@ -1950,7 +1976,7 @@ function byg(){
   }
   console.log('  [koerekort-a.html viser kun annoncer, hvis oplyste effekt er over A2-graensen — se kraeverA() og filhovedet.]');
   const afvist = [
-    ...SIDER.vaelgByer(alle, postnumre()).filter(b => b.afvist && b.antal >= 5).map(b => `by ${b.navn}: ${b.antal} annoncer — ${b.afvist}`),
+    ...SIDER.vaelgByer(alle, postnumre(), { beholdt: new Set() }).filter(b => b.afvist && b.antal >= 5).map(b => `by ${b.navn}: ${b.antal} annoncer — ${b.afvist}`),
     ...SIDER.vaelgKombi(alle, TYPES.map(t => t.id), {}).filter(k => k.afvist && k.antal >= 8).map(k => `mærke+type ${k.brand}/${k.typeId}: ${k.antal} annoncer — ${k.afvist}`),
   ];
   if (afvist.length){ console.log('Kandidater uden egen side (bevidst):'); afvist.forEach(a => console.log('  - ' + a)); }
@@ -1990,7 +2016,7 @@ function udvidSitemap(resultater){
     return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
   }, ledger, idag);
   const antalUrls = SEO.taelSitemapUrls(xml);
-  SEO.tjekAntal('Sitemap-poster (efter facet-trinnet)', antalUrls, ledger.meta.efterFacetUrls);
+  SEO.tjekAntal('Sitemap-poster (efter facet-trinnet)', antalUrls, ledger.meta.efterFacetUrls, { minAndel: SEO.MIN_ANDEL_KATEGORI });
   fs.writeFileSync(sitemapPath, xml, 'utf8');
   ledger.meta.efterFacetUrls = antalUrls;
   ledger.meta.facetSider = nye.length;
@@ -2008,11 +2034,11 @@ async function hentAlt(){
   // S-005: kraevDatabase — en fejlet hentning må ikke blive til "0 egne annoncer" og slettede sider.
   const egne = (await fetchListings(global.__L, { kraevDatabase: true })).map(normalizeRemoteListing);
   const eksterne = markerTvaerkildeDubletter((await fetchExternalListings()).map(normalizeExternalListing)).beholdt;   // Runde 7 (D7-F2)
-  SEO.tjekAntal('Egne annoncer', egne.length, SEO.taelAnnonceSider(ROOT));
-  SEO.tjekAntal('Indekserede annoncer', eksterne.length, SEO.laesLedger(ROOT).meta.eksterne);
+  SEO.tjekLager({ egne: egne.length, eksterne: eksterne.length, perKilde: SEO.taelPrKilde(eksterne), baseline: SEO.laesLedger(ROOT).meta,
+    inaktive: SEO.laesInaktiveDomaener(ROOT), egneSider: SEO.taelAnnonceSider(ROOT) });
   if (!egne.length && !eksterne.length){
-    throw new Error('build-facet-pages: nul annoncer i alt. Build afbrudt — se samme vagt i '
-      + 'build-brand-pages.js (findingen C-014).');
+    throw Object.assign(new Error('build-facet-pages: nul annoncer i alt. Build afbrudt — se samme vagt i '
+      + 'build-brand-pages.js (findingen C-014).'), { code: 'SEO_FALD' });
   }
   return [...egne, ...eksterne].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
@@ -2023,7 +2049,7 @@ if (require.main === module){
     const resultater = byg();
     skrivFacetLinks(resultater);
     udvidSitemap(resultater);
-  })().catch(e => { console.error(e.message); process.exit(1); });
+  })().catch(e => SEO.afslut(e));
 }
 
 module.exports = { THRESHOLD, buildFacetList, uoplystAntal, cleanUrl, facetLinksBlock, side, facetSearchUrl, kraeverA, topModeller, erIndekserbar, faqLdFor, nyFamilieMeta };

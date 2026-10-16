@@ -24,8 +24,14 @@ const TAERSKLER = {
      kilometerspænd — men KUN hvis der er oplyst pris og årgang på mindst 3 af dem
      (harIndhold). Under 5 er et prisspænd en enkelt tilfældig annonce. */
   model: 5,
-  /* Byer: 10, som landsdelene. */
-  by: 10,
+  /* Byer: en NY side kræver 20 annoncer, eller 15 fra mindst to kilder (en by, hvor alt kommer fra én
+     privatannonce-kilde, er flygtig: annoncerne forsvinder, når de sælges). Har siden allerede været
+     indekseret (den committede fil findes uden noindex), beholdes den til lageret er under 8 —
+     hysterese, så en side ikke flipper mellem index og noindex ved hver crawl. */
+  by: 15,
+  byStor: 20,
+  byKilder: 2,
+  byBehold: 8,
   /* Prisintervaller: 10. Alle fire trin ligger langt over (55-262 annoncer), så
      tærsklen afgør i dag ikke noget — den er der, hvis lageret skrumper. */
   budget: 10,
@@ -68,6 +74,24 @@ const tilTal = v => {
 const medPris = (l) => { const p = tilTal(l.price); return p !== null && p > 0 ? p : null; };
 const I_AAR = 2026;
 const troevaerdigtAar = y => y != null && y >= 1900 && y <= I_AAR + 1;
+
+/* Distinkte annoncer: identiske dealer-lagerenheder (samme pris, årgang, km og kilde) tæller ÉN gang. En
+   modelside på 7 annoncer, hvoraf 4 er den samme lagervare, har 4 distinkte — og er tynd. */
+function distinkte(items){
+  const set = new Map();
+  for (const l of items){
+    const k = [tilTal(l.price), tilTal(l.year), tilTal(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
+    if (!set.has(k)) set.set(k, l);
+  }
+  return [...set.values()];
+}
+
+/* p-percentil (0..1) af en sorteret liste — bruges til "priser fra", så en enkelt fejlpris
+   ikke bliver sidens salgsløfte. */
+function percentil(sorteret, p){
+  if (!sorteret.length) return null;
+  return sorteret[Math.min(sorteret.length - 1, Math.floor(sorteret.length * p))];
+}
 
 function median(sorteret){
   if (!sorteret.length) return null;
@@ -134,7 +158,8 @@ function byGrupper(alle, tabel){
 
 /* De byer, der får en side NU. Afviser med årsag, så rapporten kan vise hvorfor. */
 function vaelgByer(alle, tabel, opts = {}){
-  const taerskel = opts.taerskel ?? TAERSKLER.by;
+  const opret = opts.taerskel ?? TAERSKLER.by;
+  const beholdt = opts.beholdt || new Set();   // slugs, der allerede er indekseret (committet uden noindex)
   const overlapMax = opts.overlapMax ?? BY_OVERLAP_MAX;
   const regionAntal = new Map();
   for (const l of alle) if (l.region) regionAntal.set(l.region, (regionAntal.get(l.region) || 0) + 1);
@@ -145,11 +170,15 @@ function vaelgByer(alle, tabel, opts = {}){
     const region = [...pr.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || null;
     const andel = region ? e.items.length / (regionAntal.get(region) || e.items.length) : 0;
     let afvist = null;
-    if (e.items.length < taerskel) afvist = 'for-faa';
+    const n = e.items.length;
+    const kilder = new Set(e.items.map(l => (l.source && l.source.domaene) || 'egen')).size;
+    const nyOk = n >= TAERSKLER.byStor || (n >= opret && kilder >= TAERSKLER.byKilder);
+    const behold = beholdt.has(e.slug) && n >= TAERSKLER.byBehold;
+    if (!nyOk && !behold) afvist = n < opret ? 'for-faa' : 'faa-kilder';
     else if (!region) afvist = 'ingen-region';
     else if (andel >= overlapMax) afvist = 'region-dublet';
     else if (!harIndhold(e.items)) afvist = 'tyndt-indhold';
-    ud.push({ navn: e.navn, slug: e.slug, postnumre: [...e.postnumre].sort(), antal: e.items.length, region, andelAfRegion: andel, afvist });
+    ud.push({ navn: e.navn, slug: e.slug, postnumre: [...e.postnumre].sort(), antal: n, kilder, region, andelAfRegion: andel, afvist });
   }
   return ud.sort((a, b) => b.antal - a.antal || a.navn.localeCompare(b.navn, 'da'));
 }
@@ -187,6 +216,6 @@ const underGraense = (alle, max) => alle.filter(l => { const p = medPris(l); ret
 
 module.exports = {
   TAERSKLER, BUDGET_TRIN, BY_OVERLAP_MAX, KOMBI_ANDEL_AF_TYPE_MAX, MODEL_ALIAS,
-  slugify, budgetSlug, bySlug, kombiSlug, tilTal, medPris, median, troevaerdigtAar, harIndhold,
+  slugify, budgetSlug, bySlug, kombiSlug, tilTal, medPris, median, distinkte, percentil, troevaerdigtAar, harIndhold,
   visModel, laesPostnumre, renBynavn, byNavn, byGrupper, vaelgByer, vaelgKombi, underGraense,
 };
