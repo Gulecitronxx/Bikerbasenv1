@@ -1402,6 +1402,14 @@ function renderSorteringsNote(sideItems, heleResultatet){
     + `${udenPaaSiden} på denne side.${infoKnap}`;
 }
 
+/* Ingen levende annoncer: hverken egne eller indekserede kom med, og mindst ét kald fejlede eller svarede tomt. */
+function lagerUaktuelt(){
+  const st = window.DATA_STATUS || {};
+  const live = (window.REMOTE_LISTINGS || []).length + (window.EXTERNAL_LISTINGS || []).length;
+  if (live > 0) return false;
+  return [st.egne, st.eksterne].some(v => v === 'fejlet' || v === 'ok');
+}
+
 function getFilteredListings(){
   uoplystSkjult = [];
   const list = anvendFiltre(Store.getAllListings(), null, uoplystSkjult);
@@ -1726,7 +1734,10 @@ function render(){
   badge.hidden = pills.length === 0;
   refreshSaveSearchButton();
 
-  const filtered = getFilteredListings();
+  /* Backend 500 eller tomt svar: kun det statiske udsnit fra js/data.js er tilbage, og det må ikke stå som et levende
+     lager ("51 motorcykler fundet"). Så vises den ærlige fejltilstand med "Prøv igen", uden antal og uden kort. */
+  const uaktuelt = lagerUaktuelt();
+  const filtered = uaktuelt ? [] : getFilteredListings();
   maalSoegning(filtered.length);
   // Skal stå EFTER getFilteredListings(), som er den der tæller de skjulte.
   renderUoplystNote();
@@ -1736,6 +1747,10 @@ function render(){
   const pageItems = filtered.slice((state.page-1)*PAGE_SIZE, state.page*PAGE_SIZE);
 
   renderResultsCount(filtered);
+  if (uaktuelt){
+    const rc = document.getElementById('results-count');
+    if (rc) rc.textContent = 'Lageret kunne ikke hentes';
+  }
   /* Sorteringslinjen tæller på DENNE side og på hele resultatet, så den
      skal stå efter udsnittet — og i etape 1, fordi den ligger over kortene.
      Elementet FINDES i soegning.html fra første maling med den samme
@@ -1764,7 +1779,7 @@ function render(){
      end filteret. Hele h1'en er stadig den dynamiske overskrift (SEO). */
   const hTekst = document.getElementById('so-h1-text'), hAntal = document.getElementById('so-h1-n');
   const standard = heading === 'Motorcykler til salg i Danmark';
-  const lager = Store.getAllListings().length;
+  const lager = uaktuelt ? 0 : Store.getAllListings().length;
   const nyTekst = standard && lager ? 'motorcykler til salg i Danmark' : heading;
   const nyAntal = standard && lager ? lager.toLocaleString('da-DK') + ' ' : '';
   if (hTekst && hTekst.textContent !== nyTekst) hTekst.textContent = nyTekst;
@@ -1788,7 +1803,7 @@ function render(){
        ikke er nogen annoncer endnu, var sidens primære handling altså en
        knap, der ikke gjorde noget som helst. Præcis den tilstand er den, et
        nyt site møder brugerne med hver eneste dag, indtil lageret vokser. */
-    const intetLager = Store.getAllListings().length === 0;
+    const intetLager = uaktuelt || Store.getAllListings().length === 0;
     const tom = tomtilstandsIndhold(intetLager, pills);
     document.getElementById('empty-title').textContent = tom.titel;
     document.getElementById('empty-text').textContent = tom.tekst;

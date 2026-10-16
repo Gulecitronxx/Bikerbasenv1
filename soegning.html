@@ -657,7 +657,6 @@ try{
                første </div>. #results-mix fyldes kun af js/search.js. -->
           <div class="results-headline" role="status" aria-live="polite" aria-atomic="true">
             <div class="results-count" id="results-count">604 <span>annoncer<span class="results-count-fundet"> fundet</span></span></div>
-            <p class="results-mix" id="results-mix" hidden></p>
           </div>
           <div class="toolbar-actions">
             <!-- "Blandet udbud" er standard, og "Nyeste først" står lige
@@ -697,6 +696,9 @@ try{
           </div>
         </div>
 
+        <!-- Ét roligt info-bånd (w9): kildefordeling, lagerets alder og sorteringsreglen står sammen i stedet for tre spredte linjer. -->
+        <div class="so-infoband" id="so-infoband" role="status" aria-live="polite">
+          <p class="results-mix" id="results-mix" hidden></p>
         <!-- Lagerets alder (F-003). Pladsen står i MARKUPPEN (som "Blandet udbud" nedenfor): en linje, der først
              kommer, når annoncerne er hentet, skubber hele resultatgitteret ned (CLS). js/search.js fylder den
              med "De fleste annoncer er bekræftet senest <dato>" og skjuler den, hvis der ingen dato er. -->
@@ -723,6 +725,7 @@ try{
              Fordelingen er den eneste af de to regler, man kan efterprøve på
              skærmen, og den er nu den eneste, der står der. -->
         <p class="sortering-note" id="sortering-note" hidden>Blandet udbud: annoncerne uden foto er fordelt jævnt ud over listen i stedet for at ligge samlet.</p>
+        </div>
 
         <!-- Kortenes <h3> hang tidligere direkte under <h1>: filtrenes <h2>
              er skjult på mobil, så overskriftsrækken sprang et niveau over. -->
