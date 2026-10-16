@@ -184,13 +184,13 @@ const THRESHOLD = 10;
    - og, for de nye familier, har et ÆGTE indhold: oplyst pris og årgang på mindst 3
      annoncer. Ellers er "prisniveau" og "årgange" tomme ord. */
 const facetTaerskel = facet => facet.taerskel || THRESHOLD;
-/* Modelsider: fra 10 annoncer gælder den gamle regel uændret (siderne, der allerede er indekseret).
-   I det sænkede område (5-9) tæller kun DISTINKTE annoncer — identiske dealer-lagerenheder (samme pris,
-   årgang, km, kilde) er én annonce — ellers er en side på 7 annoncer, hvoraf 4 er samme vare, tynd. */
-const antalTilTaerskel = (facet, items) => facet.distinkt && items.length < THRESHOLD ? SIDER.distinkte(items).length : items.length;
+/* Modelsider (T-003): identiske dealer-lagerenheder (samme pris, årgang, km, kilde) er ÉN annonce. Siden skal have
+   mindst 3 forskellige annoncer med pris og årgang (SIDER.modelKvalificerer) — ikke 10 kort, der er den samme
+   vare. Gælder fra første annonce, ikke kun under 10: model-honda-nx-500 havde 10 kort og 2 forskellige. */
 function erIndekserbar(facet, items){
-  if (antalTilTaerskel(facet, items) < facetTaerskel(facet)) return false;
   if (facet.udvalgt === false) return false;
+  if (facet.distinkt) return SIDER.modelKvalificerer(items);
+  if (items.length < facetTaerskel(facet)) return false;
   if (facet.kraevIndhold && !SIDER.harIndhold(items)) return false;
   return true;
 }
@@ -433,7 +433,7 @@ function modelFacets(alle){
   }
   const valgte = new Map(); // slug -> { brand, model }
   for (const g of grupper.values()){
-    if (antalTilTaerskel({ distinkt: true }, g.items) >= SIDER.TAERSKLER.model && SIDER.harIndhold(g.items)) valgte.set(modelSlug(g.brand, g.model), { brand: g.brand, model: g.model });
+    if (SIDER.modelKvalificerer(g.items)) valgte.set(modelSlug(g.brand, g.model), { brand: g.brand, model: g.model });
   }
   for (const [slug, e] of eksisterendeSider(/^model-.*\.html$/)) if (!valgte.has(slug) && e.brand && e.model) valgte.set(slug, { brand: e.brand, model: e.model });
   return [...valgte.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([slug, { brand, model }]) => {
@@ -1359,7 +1359,12 @@ function side(facet, alle){
   const ny = nyFamilieMeta(facet, items, qualifies);
   const uoplyst = uoplystAntal(facet, alle);
   const fil = `${facet.slug}.html`;
-  const viste = items.slice(0, FACET_KORT);
+  /* T-003: på modelsider vises identiske lagerenheder som ÉT kort; antallet i overskrift og intro er stadig
+     alle annoncer (det er sandt), og en linje siger, at de er samlet. */
+  const liste = facet.kind === 'model' ? SIDER.distinkte(items) : items;
+  const samlet = items.length - liste.length;
+  const samletTekst = n => `${n} af de ${items.length} annoncer er identiske lagerenheder (samme pris, årgang, km og forhandler) og vises som ét kort.`;
+  const viste = liste.slice(0, FACET_KORT);
   const kort1 = viste.slice(0, UDVALGTE).map((l, i) => listingCardHTML(l, i)).join('\n      ');
   const kort2 = viste.slice(UDVALGTE).map((l, i) => listingCardHTML(l, i + UDVALGTE)).join('\n      ');
   const senestOpdateret = senestBekraeftet(items);
@@ -1546,7 +1551,7 @@ ${header}
       ${items.length ? `<div class="fa-udvalgte-gitter">
         <div class="listings-grid fa-kortraekke" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}" data-udvalgte="${UDVALGTE}" data-facet-frase="${frase(facet)}"${facetAttrs(facet)}>${kort1}</div>
         ${ctaPanel(facet, ctaFoto(facet, items))}
-      </div>` : `<div class="empty-state" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}"${facetAttrs(facet)}>
+      </div>${facet.kind === 'model' ? `<p class="brand-facet-note" id="facet-dubletter"${samlet ? '' : ' hidden'}>${samlet ? samletTekst(samlet) : ''}</p>` : ''}` : `<div class="empty-state" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}"${facetAttrs(facet)}>
         <h3>Ingen ${frase(facet)} til salg lige nu</h3>
         <p>Vi har ingen annoncer, der matcher denne kategori i øjeblikket. Adressen bliver stående —
            kig forbi igen, eller søg i hele udvalget.</p>
@@ -1569,18 +1574,18 @@ ${header}
       </div>
     </section>` : ''}
 
-    ${items.length > UDVALGTE ? `<section class="section fa-flere">
+    ${liste.length > UDVALGTE ? `<section class="section fa-flere">
       <!-- "lige nu" er væk (R11-I-10): tallet bages ved byg og opdateres ikke
            ved visning. Datoen under siger i stedet, hvornaar lageret sidst blev
            bekraeftet — samme linje som maerkesiden (D9-M2). -->
-      <div class="fa-h2-raekke"><div><h2 class="fa-h2" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="facet-note">${items.length > FACET_KORT ? `De første ${FACET_KORT} vises her.` : ''}</p>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div></div>
+      <div class="fa-h2-raekke"><div><h2 class="fa-h2" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="facet-note">${liste.length > FACET_KORT ? `De første ${FACET_KORT} vises her.` : ''}</p>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div></div>
       ${facetVaerktoejer(facet, items, ctx)}
       <div class="listings-grid" id="facet-listings-flere">${kort2}</div>
-      ${items.length > FACET_KORT ? `<p class="brand-mere"><a href="${facetSearchUrl(facet)}" class="btn btn-primary"><span>${seAlle(facet, items, ctx)}</span></a></p>` : ''}
+      ${liste.length > FACET_KORT ? `<p class="brand-mere"><a href="${facetSearchUrl(facet)}" class="btn btn-primary"><span>${seAlle(facet, items, ctx)}</span></a></p>` : ''}
     </section>` : `<h2 class="visually-hidden" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="visually-hidden" id="facet-note"></p>${items.length ? `<section class="section fa-flere">${facetVaerktoejer(facet, items, ctx)}</section>` : ''}`}
     ${items.length ? `<noscript>
       <ul class="brand-noscript">
-        ${items.map(l => `<li>${harEgenSide(l) ? `<a href="${esc(listingSlug(l))}">${noscriptLinje(l)}</a>` : noscriptLinje(l)}</li>`).join('\n        ')}
+        ${liste.map(l => `<li>${harEgenSide(l) ? `<a href="${esc(listingSlug(l))}">${noscriptLinje(l)}</a>` : noscriptLinje(l)}</li>`).join('\n        ')}
       </ul>
     </noscript>` : ''}
 
@@ -1690,10 +1695,21 @@ ${footer}
      hver oplysthedsklasse (js/sortering.js). */
   const traefSorteret = (typeof Sortering !== 'undefined')
     ? Sortering.sorter(traef.slice(), 'blandet') : traef;
+  /* T-003: modelsider viser identiske lagerenheder (samme pris, årgang, km, kilde) som ét kort — samme nøgle som
+     scripts/seo-sider.js distinkte(). Tallene i overskrift og intro er stadig ALLE annoncer. */
+  const dnum = v => (v === null || v === undefined || v === '') ? '' : (Number.isFinite(Number(v)) ? Number(v) : '');
+  const visListe = kind !== 'model' ? traefSorteret : (() => {
+    const set = new Map();
+    for (const l of traefSorteret){
+      const k = [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
+      if (!set.has(k)) set.set(k, l);
+    }
+    return [...set.values()];
+  })();
   /* RUNDE 13 (R13-7): TOTALEN foer udsnittet — tallet i overskrift og intro
      bages ved bygget og skal opdateres, hvis lageret har aendret sig. */
   const alleTraef = traefSorteret.length;
-  const items = traefSorteret.slice(0, viste);
+  const items = visListe.slice(0, viste);
   const frase = mount.dataset.facetFrase || 'motorcykler';
   if (!items.length){
     mount.className = 'empty-state';
@@ -1744,7 +1760,13 @@ ${footer}
     if (maal) maal.hidden = n === 0;
   });
   const note = document.getElementById('facet-note');
-  if (note) note.textContent = alleTraef > viste ? 'De første ' + viste + ' vises her.' : '';
+  if (note) note.textContent = visListe.length > viste ? 'De første ' + viste + ' vises her.' : '';
+  const dubl = document.getElementById('facet-dubletter');
+  if (dubl){
+    const samlet = alleTraef - visListe.length;
+    dubl.hidden = !samlet;
+    dubl.textContent = samlet ? samlet + ' af de ' + alleTraef + ' annoncer er identiske lagerenheder (samme pris, årgang, km og forhandler) og vises som ét kort.' : '';
+  }
   wireFavoriteButtons(mount);
   if (mount2) wireFavoriteButtons(mount2);
   document.documentElement.setAttribute('data-fa-hydreret', '1');

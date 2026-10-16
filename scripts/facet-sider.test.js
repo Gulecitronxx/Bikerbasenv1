@@ -169,3 +169,32 @@ test('T-001: kørekortsiden koerekort-a2 beholder den kommercielle titel og H1',
   assert.match(html, /<title>Motorcykler til A2-kørekort — Bikerbasen<\/title>/);
   assert.match(html, /<h1>Motorcykler til A2-kørekort<\/h1>/);
 });
+
+test('T-003: 10 identiske dealerenheder = 1 distinkt = noindex; en model med dubletter viser dem som ét kort', () => {
+  const kilde = { navn: 'MC Syd', domaene: 'mcsyd.dk' };
+  const alleKort = html => (html.slice(0, html.indexOf('<ul class="brand-noscript">')).match(/data-listing-id=/g) || []).length;
+  // (a) NX 500: 10 ens fra samme forhandler (committet model-side findes på disken, så facetten bygges).
+  const ens = Array.from({ length: 10 }, (_, i) => l(i + 1, { brand: 'Honda', model: 'NX 500', price: 89995, year: 2024, km: 0, source: kilde, type: 'adventure', externalUrl: 'https://mcsyd.dk/ny/nx500' }));
+  global.ALLE_LISTINGS = ens;
+  const nx = forberedFacetter(ens).find(f => f.slug === 'model-honda-nx-500');
+  assert.ok(nx, 'model-honda-nx-500 findes som facet');
+  assert.strictEqual(nx.qualifies, false, '1 distinkt annonce kan ikke være en indekserbar side');
+  const html = side(nx, ens);
+  assert.match(html, /<meta name="robots" content="noindex, follow">/);
+  assert.strictEqual(alleKort(html), 1, 'ét kort, ikke ti');
+  assert.match(html, /9 af de 10 annoncer er identiske lagerenheder/);
+  // (b) 4 ens + 2 forskellige = 3 distinkte: kvalificerer, men viser 3 kort, og antallet er stadig 6.
+  const blandet = [
+    ...Array.from({ length: 4 }, (_, i) => l(i + 1, { brand: 'Kawasaki', model: 'Ninja 650', price: 59995, year: 2023, km: 0, source: kilde, type: 'sport', externalUrl: 'https://mcsyd.dk/ny/ninja' })),
+    l(5, { brand: 'Kawasaki', model: 'Ninja 650', price: 49000, year: 2021, km: 12000, type: 'sport', externalUrl: 'https://test.dk/5' }),
+    l(6, { brand: 'Kawasaki', model: 'Ninja 650', price: 44000, year: 2019, km: 30000, type: 'sport', externalUrl: 'https://test.dk/6' }),
+  ];
+  global.ALLE_LISTINGS = blandet;
+  const ninja = forberedFacetter(blandet).find(f => f.slug === 'model-kawasaki-ninja-650');
+  assert.ok(ninja && ninja.qualifies, '3 forskellige annoncer med pris og årgang er en side');
+  const h2 = side(ninja, blandet);
+  assert.ok(!/name="robots"/.test(h2));
+  assert.strictEqual(alleKort(h2), 3);
+  assert.match(h2, /3 af de 6 annoncer er identiske lagerenheder/);
+  assert.match(h2, /id="facet-antal">6 annoncer</, 'overskriften tæller stadig alle annoncer');
+});

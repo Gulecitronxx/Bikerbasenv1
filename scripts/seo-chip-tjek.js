@@ -111,12 +111,15 @@ function lagerFixture(){
     for (let k = 0; k < n; k++){
       i++;
       const v = variation ? variation(k) : {};
-      alle.push(Object.assign({
+      const post = Object.assign({
         id: `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`, isExternal: true,
         brand: 'Honda', model: 'CB 500', year: 2019, price: 40000, km: 10000, type: 'naked',
         region: 'Hovedstaden', city: 'København', postnr: '1050', ccm: 471, power: 47,
         condition: 'brugt', source: { navn: 'Test', domaene: 'test.dk' }, createdAt: '2026-08-01T10:00:00Z', photoUrls: [],
-      }, basis, udenNull(v)));
+      }, basis, udenNull(v));
+      // Et indekseret kort uden brugbar kilde-URL tegnes ikke (components.js listingCardHTML).
+      if (post.isExternal && post.source) post.externalUrl = `https://${post.source.domaene}/annonce/${i}`;
+      alle.push(post);
     }
   };
   const regioner = [
