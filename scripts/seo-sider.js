@@ -79,12 +79,23 @@ const troevaerdigtAar = y => y != null && y >= 1900 && y <= I_AAR + 1;
 
 /* Distinkte annoncer: identiske dealer-lagerenheder (samme pris, årgang, km og kilde) tæller ÉN gang. En
    modelside på 7 annoncer, hvoraf 4 er den samme lagervare, har 4 distinkte — og er tynd. */
+/* Nøglen kræver, at pris OG årgang er oplyst. Uden dem kan vi ikke vide, at to annoncer er den samme lagervare:
+   fem annoncer fra samme kilde uden pris/årgang/km er fem ukendte, ikke én (Critic P3 w6). Så får en annonce uden
+   de to felter sin egen nøgle (annoncens id, ellers dens adresse, ellers pladsen i listen). km må mangle
+   (nye motorcykler har ingen), så længe pris og årgang er ens. Browser-hydreringen i build-facet-pages.js har en
+   kopi af nøglen og skal følge denne. */
+function distinktNoegle(l, i = 0){
+  const pris = tilTal(l.price), aar = tilTal(l.year);
+  if (pris === null || aar === null) return 'ukendt|' + (l.id != null ? l.id : (l.externalUrl || l.url || 'plads' + i));
+  return [pris, aar, tilTal(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
+}
+
 function distinkte(items){
   const set = new Map();
-  for (const l of items){
-    const k = [tilTal(l.price), tilTal(l.year), tilTal(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
+  items.forEach((l, i) => {
+    const k = distinktNoegle(l, i);
     if (!set.has(k)) set.set(k, l);
-  }
+  });
   return [...set.values()];
 }
 
@@ -99,6 +110,17 @@ function median(sorteret){
   if (!sorteret.length) return null;
   const m = Math.floor(sorteret.length / 2);
   return sorteret.length % 2 ? sorteret[m] : Math.round((sorteret[m - 1] + sorteret[m]) / 2);
+}
+
+/* Medianårgang som tekst. Ved et lige antal med to forskellige midterårgange (2015 og 2016) er medianen
+   ikke et helt år; den rundes IKKE op (2015,5 -> 2016 var en skjult afrunding), men vises som intervallet
+   mellem de to midterste: "2015–2016". Ellers det enkelte år. */
+function medianAarTekst(sorteret){
+  if (!sorteret.length) return null;
+  const m = Math.floor(sorteret.length / 2);
+  if (sorteret.length % 2) return String(sorteret[m]);
+  const lav = sorteret[m - 1], hoej = sorteret[m];
+  return lav === hoej ? String(lav) : lav + '–' + hoej;
 }
 
 /* Har udvalget et ægte indhold, som en side kan stå på? Mindst 3 oplyste priser og
@@ -226,6 +248,6 @@ const underGraense = (alle, max) => alle.filter(l => { const p = medPris(l); ret
 
 module.exports = {
   TAERSKLER, BUDGET_TRIN, BY_OVERLAP_MAX, KOMBI_ANDEL_AF_TYPE_MAX, MODEL_ALIAS,
-  slugify, budgetSlug, bySlug, kombiSlug, tilTal, medPris, median, distinkte, percentil, troevaerdigtAar, harIndhold, modelKvalificerer,
+  slugify, budgetSlug, bySlug, kombiSlug, tilTal, medPris, median, medianAarTekst, distinkte, distinktNoegle, percentil, troevaerdigtAar, harIndhold, modelKvalificerer,
   visModel, laesPostnumre, renBynavn, byNavn, byGrupper, vaelgByer, vaelgKombi, underGraense,
 };

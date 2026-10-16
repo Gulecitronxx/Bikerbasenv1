@@ -60,6 +60,7 @@ const RODMOENSTRE = [
   /^CNAME$/,                       // domænet — uden den falder Pages tilbage til github.io
   /^\.nojekyll$/,                  // ellers spiser Jekyll filer der starter med _
   /^robots\.txt$/,
+  /^llms\.txt$/,
   /^sitemap\.xml$/,
   /^favicon\.(png|svg|ico)$/,
   /^apple-touch-icon\.png$/,
