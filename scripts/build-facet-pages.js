@@ -1332,6 +1332,12 @@ function titelMedMaerke(t){
   return kandidater.find(k => laengde(k) <= TITEL_MAX) || kandidater[kandidater.length - 1];
 }
 
+/* Description: den lange slutning, hvis totalen holder sig inden for 160 tegn (Google afkorter derefter), ellers den korte. */
+const BESK_MAX = 160;
+function medSlut(base, kort, lang){
+  return (base + lang).length <= BESK_MAX ? base + lang : base + kort;
+}
+
 /* Titel og beskrivelse for de nye familier (budget, by, kombi). Raa tekst ind, escapet titel ud.
    dkk() slutter selv paa "kr." — derfor aldrig et punktum lige efter. */
 function nyFamilieMeta(facet, items, qualifies){
@@ -1343,21 +1349,22 @@ function nyFamilieMeta(facet, items, qualifies){
      stod som "fra ca. 35.000" i beskrivelsen mod "fra 14.995" på siden. */
   const fra = pr.length ? pr[0] : null;
   const pris = fra != null ? ` Priser fra ${dkk(fra)}` : '';
-  const slut = ' Sammenlign årgang, km og type på Bikerbasen.';
+  /* W7: description skal være 120-160 tegn. Den lange slutning bruges, når den passer; ellers den korte. */
+  const slut = b => medSlut(b, ' Sammenlign årgang, km og type på Bikerbasen.', ' Sammenlign årgang, km, type og kilde, og gå videre til annoncen hos sælger.');
   const n = items.length;
   if (facet.kind === 'budget'){
     const ord = brugtOrd(items, 'motorcykel', 'motorcykler');
     return { sideTitel: esc(stort(ord)) + ` under ${tal(facet.max)} kr.`,
-      beskrivelse: `Se ${n} ${ord} til salg under ${tal(facet.max)} kr.${pris}${slut}` };
+      beskrivelse: slut(`Se ${n} ${ord} til salg under ${tal(facet.max)} kr.${pris}`) };
   }
   if (facet.kind === 'by'){
     const ord = brugtOrd(items, 'motorcykel', 'motorcykler');
     return { sideTitel: `Motorcykler til salg i ${esc(facet.by)}`,
-      beskrivelse: `Se ${n} ${ord} til salg i ${facet.by}${facet.region ? ` (${facet.region})` : ''}.${pris}${slut}` };
+      beskrivelse: slut(`Se ${n} ${ord} til salg i ${facet.by}${facet.region ? ` (${facet.region})` : ''}.${pris}`) };
   }
   const tl = String(facet.typeLabel).toLowerCase();
   const ord = brugtOrd(items, `${facet.brand} ${tl}-motorcykel`, `${facet.brand} ${tl}-motorcykler`);
-  return { sideTitel: esc(stort(ord)) + ' til salg', beskrivelse: `Se ${n} ${ord} til salg.${pris}${slut}` };
+  return { sideTitel: esc(stort(ord)) + ' til salg', beskrivelse: slut(`Se ${n} ${ord} til salg.${pris}`) };
 }
 
 /* "Se alle N i soegningen" — undtagen paa by-sider, hvor soegningen viser hele landsdelen. */
@@ -1424,7 +1431,7 @@ function side(facet, alle){
     : facet.id === 'A' ? 'motorcykler, hvis oplyste effekt er over A2-grænsen (kræver kørekort A)'
     : `motorcykler, der ikke er udelukket til ${esc(facet.id)}-kørekort ud fra de oplyste tal`;
   const beskrivelse = ny ? ny.beskrivelse : qualifies
-    ? `Se ${items.length} ${hvad}. Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.`
+    ? medSlut(`Se ${items.length} ${hvad}.`, ' Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.', ' Sammenlign pris, årgang, km-stand og ccm. Kilden står på hvert kort, så du kan gå videre til annoncen.')
     : `${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'} — se hele udvalget af `
       + `motorcykler på Bikerbasen i stedet.`;
   const sideTitel = ny ? ny.sideTitel : !qualifies ? esc(facet.titel)
@@ -2146,4 +2153,4 @@ if (require.main === module){
   })().catch(e => SEO.afslut(e));
 }
 
-module.exports = { THRESHOLD, forberedFacetter, buildFacetList, uoplystAntal, cleanUrl, facetLinksBlock, side, facetSearchUrl, kraeverA, topModeller, brugtOrd, erIndekserbar, faqLdFor, nyFamilieMeta };
+module.exports = { THRESHOLD, forberedFacetter, buildFacetList, uoplystAntal, cleanUrl, facetLinksBlock, side, facetSearchUrl, kraeverA, topModeller, brugtOrd, erIndekserbar, faqLdFor, nyFamilieMeta, medSlut, BESK_MAX };

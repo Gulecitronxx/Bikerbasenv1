@@ -1345,7 +1345,7 @@ const indexHtml = `<!doctype html>
 ${csp}
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Alle motorcykelmærker — Bikerbasen</title>
-<meta name="description" content="Find brugte motorcykler efter mærke. Se udvalget fra ${brands.length} mærker med annoncer til salg i Danmark på Bikerbasen.">
+<meta name="description" content="Find brugte motorcykler efter mærke. Se udvalget fra ${brands.length} mærker med annoncer til salg i Danmark, og gå videre til annoncen hos kilden.">
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
