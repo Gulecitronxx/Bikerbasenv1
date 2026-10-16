@@ -1075,6 +1075,15 @@ function visForhandlerGraense(antal){
   const nextBtn = document.getElementById('step-next');
   nextBtn.disabled = false;
   nextBtn.textContent = 'Udgiv annonce';
+  /* Betaling er ikke bygget (BETALING_BYGGET i js/store.js): ingen link til et abonnement,
+     der ikke kan købes. */
+  if (typeof BETALING_BYGGET === 'undefined' || BETALING_BYGGET !== true){
+    openInfoModal('Du har nået grænsen for aktive annoncer', `
+      <p>Private konti kan have <strong>3 aktive annoncer</strong>, og du har allerede ${antal}.</p>
+      <p style="margin-bottom:0;">Sæt en af dine annoncer på pause eller markér den som solgt under Mine annoncer, hvis du vil udgive en ny. Betaling er ikke åben endnu, så der er ingen måde at få flere på lige nu.</p>
+    `);
+    return;
+  }
   openInfoModal('Du har nået gratis-grænsen', `
     <p>Private konti kan have <strong>3 aktive annoncer</strong> gratis, og du har allerede ${antal}.</p>
     <p>Vil du sælge flere motorcykler, kan du blive <strong>forhandler</strong> og få ubegrænsede annoncer, en shop-side og et forhandler-badge.</p>
@@ -1082,7 +1091,37 @@ function visForhandlerGraense(antal){
   `);
 }
 
+/* Id'et på en annonce, der ER oprettet i databasen under det her udgiv-forsøg. Fejler noget
+   bagefter (billeder, netværk), må knappen ikke genåbnes til en ny oprettelse (dublet). */
+let _oprettetId = null;
+
+/* Et kald mod backend kan KASTE (netværket er væk) i stedet for at returnere { error }. */
+async function sikkertKald(fn){
+  try { return (await fn()) || { data: null, error: new Error('Intet svar') }; }
+  catch (err){ return { data: null, error: err || new Error('Failed to fetch') }; }
+}
+
 async function publishListing(){
+  _oprettetId = null;
+  try {
+    await udgivTrin();
+  } catch (err){
+    const nextBtn = document.getElementById('step-next');
+    if (_oprettetId){
+      // Annoncen findes allerede — send brugeren til den i stedet for at lade dem udgive igen.
+      toast('Annoncen er gemt, men noget gik galt bagefter: ' + escapeHTML(fejlTekst(err)) + ' Tjek den under "Rediger annonce".', { type: 'error', duration: 5000 });
+      setTimeout(() => { forlad(`annonce.html?id=${_oprettetId}`); }, 4500);
+      return;
+    }
+    if (nextBtn){
+      nextBtn.disabled = false;
+      nextBtn.textContent = editingId ? 'Gem ændringer' : 'Udgiv annonce';
+    }
+    toast('Annoncen kunne ikke gemmes: ' + escapeHTML(fejlTekst(err)), { type: 'error' });
+  }
+}
+
+async function udgivTrin(){
   if (!document.getElementById('f-terms').checked){
     toast('Du skal acceptere vilkårene for at udgive annoncen');
     return;
@@ -1168,13 +1207,14 @@ async function publishListing(){
     // Serveren afviste pga. gratis-grænsen (fallback hvis for-tjekket blev
     // omgået, fx to faner åbne samtidig).
     if (/GRAENSE/.test(error.message || '')){ visForhandlerGraense(3); return; }
-    toast('Annoncen kunne ikke gemmes: ' + error.message, { type: 'error' });
+    toast('Annoncen kunne ikke gemmes: ' + escapeHTML(fejlTekst(error)), { type: 'error' });
     return;
   }
+  _oprettetId = created && created.id;
 
   // Kun de billeder brugeren udtrykkeligt har fjernet, slettes.
   for (const foto of removedPhotoIds){
-    const res = await db.deleteListingPhoto(foto.id, foto.path);
+    const res = await sikkertKald(() => db.deleteListingPhoto(foto.id, foto.path));
     if (res.error) console.warn('Billedet kunne ikke slettes:', res.error.message);
   }
 
@@ -1194,9 +1234,9 @@ async function publishListing(){
   const failed = [];
   for (let i = 0; i < withFiles.length; i++){
     showUploadProgress(i, withFiles.length);
-    const res = await db.uploadListingPhoto(created.id, withFiles[i].file, naestePosition + i);
+    const res = await sikkertKald(() => db.uploadListingPhoto(created.id, withFiles[i].file, naestePosition + i));
     if (res.error){
-      failed.push({ navn: withFiles[i].name, grund: res.error.message });
+      failed.push({ navn: withFiles[i].name, grund: fejlTekst(res.error) });
       console.warn('Billedet kunne ikke uploades:', withFiles[i].name, '—', res.error.message);
     }
   }
@@ -1209,7 +1249,7 @@ async function publishListing(){
     // uden at vide hvad der gik galt, eller at billederne kan lægges på igen.
     // Beskeden får længere tid på skærmen, netop fordi den skal læses.
     toast(`Annoncen er gemt, men ${failed.length} af ${withFiles.length} billeder kunne ikke uploades: `
-      + `${failed[0].grund} Du kan prøve igen under "Rediger annonce".`, { type: 'error' });
+      + `${escapeHTML(failed[0].grund)} Du kan prøve igen under "Rediger annonce".`, { type: 'error' });
     setTimeout(() => { forlad(`annonce.html?id=${created.id}`); }, 4500);
     return;
   }
@@ -1218,7 +1258,7 @@ async function publishListing(){
      vaelte udgivelsen; naeste besoeg viser profilens faktiske vaerdi. */
   const visFelt = document.getElementById('vis-telefon-felt');
   if (visFelt && !visFelt.hidden){
-    db.saetVisTelefon(document.getElementById('f-vis-telefon').checked).catch?.(() => {});
+    sikkertKald(() => db.saetVisTelefon(document.getElementById('f-vis-telefon').checked));
   }
   toast(editingId ? 'Ændringerne er gemt!' : 'Din annonce er udgivet!');
   if (typeof Maaling !== 'undefined') Maaling.opretAnnonce(created, !!editingId);

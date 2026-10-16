@@ -28,7 +28,7 @@ const AUTH_KONTEKST = {
   },
   'dashboard.html': {
     titel: 'Dit overblik',
-    tekst: 'Log ind for at se visninger, henvendelser og status på dine annoncer.',
+    tekst: 'Log ind for at se visninger, telefonvisninger og status på dine annoncer.',
   },
   'forhandler.html': {
     titel: 'Se forhandlerens profil',
@@ -56,6 +56,27 @@ function anvendAuthKontekst(){
 }
 
 let pendingUser = null;
+
+/* Telefonnummeret er valgfrit, men står det der, skal det ligne et nummer: tal, mellemrum, bindestreg og
+   evt. +landekode, mindst 8 cifre (danske numre er 8 cifre; udenlandske er længere). Bogstaver og
+   tomme strenge af tegnsætning afvises i stedet for at havne i profilen. */
+function telefonOK(v){
+  const s = String(v == null ? '' : v).trim();
+  if (!s) return true;
+  if (!/^\+?[\d\s-]+$/.test(s)) return false;
+  const cifre = s.replace(/\D/g, '');
+  return cifre.length >= 8 && cifre.length <= 15;
+}
+
+/* syncSessionToStore() kan kaste (netværket væk lige efter login). Så er brugeren stadig logget ind hos
+   backend, men Store kender ikke sessionen — sig det i stedet for en uhåndteret fejl. */
+async function synkSession(){
+  try { await syncSessionToStore(); return true; }
+  catch (err){
+    authError('Du er logget ind, men vi kunne ikke hente din profil. Genindlæs siden og prøv igen.');
+    return false;
+  }
+}
 
 /* resendEmail: valgfri. Er den sat, får fejlboksen en "Send igen"-knap under
    teksten — brugt til "email not confirmed", den ene fejl her, man ikke kan
@@ -314,7 +335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setLoading(btn, false, 'Gem ny adgangskode');
     if (error){ authError(daError(error.message, error)); return; }
 
-    await syncSessionToStore();
+    if (!(await synkSession())) return;
     toast('Din adgangskode er ændret');
     setTimeout(redirectAfterAuth, 400);
   });
@@ -336,8 +357,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btn = e.target.querySelector('button[type="submit"]');
 
     if (!db.enabled){
-      Store.setUser({ name: 'Mikkel Jensen', email, isDealer: false, verified: true,
-        emailVerified: true, phoneVerified: true, mitIdVerified: true });
+      /* Ingen opdigtet identitet og ingen opdigtede bekræftelser: en lokal session har kun den e-mail,
+         brugeren selv skrev. */
+      Store.setUser({ name: email.split('@')[0] || 'Bruger', email, isDealer: false, verified: false,
+        emailVerified: false, phoneVerified: false, mitIdVerified: false });
       toast('Du er nu logget ind (lokalt)');
       setTimeout(redirectAfterAuth, 500);
       return;
@@ -357,7 +380,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    await syncSessionToStore();
+    if (!(await synkSession())) return;
     toast('Du er nu logget ind');
     setTimeout(redirectAfterAuth, 400);
   });
@@ -375,6 +398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // O1-5: telefonnummer er valgfrit — det vises ikke for nogen endnu.
     let cvr = '', company = '';
+    if (!telefonOK(phone)){ authError('Telefonnummeret ser forkert ud. Skriv kun tal (mindst 8 cifre), eller lad feltet stå tomt.'); return; }
     if (isDealer){
       cvr = document.getElementById('reg-cvr').value.trim();
       company = document.getElementById('reg-company').value.trim();
@@ -458,7 +482,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         authError('Bekræft din e-mail via linket, og log derefter ind.');
         return;
       }
-      await syncSessionToStore();
+      if (!(await synkSession())) return;
       toast('Din profil er oprettet');
       setTimeout(redirectAfterAuth, 400);
       return;

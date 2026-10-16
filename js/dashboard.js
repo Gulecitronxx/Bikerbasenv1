@@ -1,5 +1,5 @@
 /* ============ Forhandler dashboard ============
-   Visninger og henvendelser kommer fra listing_stats (migration 004) —
+   Visninger og telefonvisninger (event contact) kommer fra listing_stats (migration 004) —
    dagstotaler pr. annonce, uden IP eller cookie bag sig. Gemte annoncer
    tælles via my_listing_saves(), fordi favorites-politikken kun lader en
    bruger se sine egne favoritter. */
@@ -27,33 +27,72 @@ function dashDays(){
   return ud;
 }
 
+/* Hentning, der fejlede, må ikke ligne et rigtigt nul: DASH_FEJL husker det, og siden siger det
+   (se visDashFejl). */
+const DASH_FEJL = { stats: false, ekstern: false };
+
+/* Et kald mod backend kan KASTE (netværket er væk) i stedet for at returnere { error }. */
+async function sikkertKald(fn){
+  try { return (await fn()) || { data: null, error: new Error('Intet svar') }; }
+  catch (err){ return { data: null, error: err || new Error('Failed to fetch') }; }
+}
+
 async function hentStatistik(){
   STATS_BY_LISTING = new Map();
   SAVES_BY_LISTING = new Map();
+  DASH_FEJL.stats = false;
   if (!db.enabled) return;
 
-  const [{ data: raekker }, { data: gemte }] = await Promise.all([
-    db.myListingStats(DASH_DAYS * 2),   // 60 dage: de seneste 30 + de 30 før
-    db.myListingSaves(),
+  const [st, sv] = await Promise.all([
+    sikkertKald(() => db.myListingStats(DASH_DAYS * 2)),   // 60 dage: de seneste 30 + de 30 før
+    sikkertKald(() => db.myListingSaves()),
   ]);
+  if (st.error || sv.error) DASH_FEJL.stats = true;
+  const raekker = st.data, gemte = sv.data;
 
-  (raekker || []).forEach(r => {
+  (Array.isArray(raekker) ? raekker : []).forEach(r => {
     if (!STATS_BY_LISTING.has(r.listing_id)) STATS_BY_LISTING.set(r.listing_id, new Map());
     STATS_BY_LISTING.get(r.listing_id).set(String(r.stat_day).slice(0, 10), r);
   });
   // my_listing_saves kalder udgangskolonnen "listing", ikke "listing_id".
-  (gemte || []).forEach(r => SAVES_BY_LISTING.set(r.listing, Number(r.saves) || 0));
+  (Array.isArray(gemte) ? gemte : []).forEach(r => SAVES_BY_LISTING.set(r.listing, Number(r.saves) || 0));
 }
 
 async function hentEkstern(){
   EKSTERN_EJET = []; MINE_KRAV = [];
+  DASH_FEJL.ekstern = false;
   if (!db.enabled) return;
-  const [{ data: ejet }, { data: krav }] = await Promise.all([
-    db.myClaimedExternal(),
-    db.myKrav(),
+  const [ej, kr] = await Promise.all([
+    sikkertKald(() => db.myClaimedExternal()),
+    sikkertKald(() => db.myKrav()),
   ]);
-  EKSTERN_EJET = ejet || [];
-  MINE_KRAV = krav || [];
+  if (ej.error || kr.error) DASH_FEJL.ekstern = true;
+  EKSTERN_EJET = Array.isArray(ej.data) ? ej.data : [];
+  MINE_KRAV = Array.isArray(kr.data) ? kr.data : [];
+}
+
+/* Fejlboksen øverst (#dash-error, role="alert"): siger højt, hvad der ikke kunne hentes, i
+   stedet for at lade nuller og tomme lister stå som sandhed. */
+function dashFejlTekst(){
+  const dele = [];
+  if (DASH_FEJL.stats) dele.push('tallene for visninger, telefonvisninger og gemte');
+  if (DASH_FEJL.ekstern) dele.push('dine krav og indekserede annoncer');
+  return dele.length ? `Vi kunne ikke hente ${dele.join(' og ')}. Det du ser her, er ikke pålideligt — nuller betyder ikke, at der ikke er nogen.` : '';
+}
+
+function visDashFejl(){
+  const el = document.getElementById('dash-error');
+  if (!el) return;
+  const tekst = dashFejlTekst();
+  el.hidden = !tekst;
+  if (!tekst){ el.innerHTML = ''; return; }
+  el.innerHTML = `${Icon.alertTriangle}<span><b>Noget kunne ikke hentes.</b> ${escapeHTML(tekst)}</span><button type="button" class="btn btn-outline btn-sm" id="dash-retry">Prøv igen</button>`;
+  document.getElementById('dash-retry').addEventListener('click', async (e) => {
+    e.currentTarget.disabled = true;
+    await hentStatistik();
+    await hentEkstern();
+    renderDashboard(Store.getUser());
+  });
 }
 
 function statsForListing(listing){
@@ -262,6 +301,17 @@ function renderPlanStrip(user){
     return;
   }
 
+  /* Betaling er ikke bygget (BETALING_BYGGET i js/store.js): ingen "Opgradér"/"Administrér
+     abonnement"-links, som ville føre til et køb, der ikke findes. */
+  if (typeof BETALING_BYGGET === 'undefined' || BETALING_BYGGET !== true){
+    mount.innerHTML = `
+      <div class="plan-strip">
+        <span class="plan-strip-badge is-free">${Icon.info}Betaling er ikke åben endnu</span>
+        <span class="plan-strip-note">Bikerbasen opkræver ikke betaling i øjeblikket.</span>
+      </div>`;
+    return;
+  }
+
   const erAktiv = user.plan === 'dealer';
   mount.innerHTML = `
     <div class="plan-strip">
@@ -378,14 +428,23 @@ function aabnEksternRedigering(id){
     const nyPris = document.getElementById(`ekstern-edit-pris-${id}`).value;
     const nyStatus = document.getElementById(`ekstern-edit-status-${id}`).value;
 
+    /* Prisen skal være et tal på 0 eller mere (feltet er type=number, men en minus-værdi eller
+       et "e" kan stadig komme igennem). */
+    if (nyPris !== '' && !(Number.isFinite(Number(nyPris)) && Number(nyPris) >= 0)){
+      toast('Prisen skal være et tal på 0 kr. eller mere.', { type: 'error' });
+      btn.disabled = false; btn.textContent = 'Gem';
+      document.getElementById(`ekstern-edit-pris-${id}`).focus();
+      return;
+    }
+
     const kald = [];
-    if (String(nyPris) !== String(data.pris_dkk ?? '')) kald.push(db.retExternalField(id, 'pris_dkk', nyPris));
-    if (nyStatus !== data.status) kald.push(db.retExternalField(id, 'status', nyStatus));
+    if (String(nyPris) !== String(data.pris_dkk ?? '')) kald.push(sikkertKald(() => db.retExternalField(id, 'pris_dkk', nyPris)));
+    if (nyStatus !== data.status) kald.push(sikkertKald(() => db.retExternalField(id, 'status', nyStatus)));
 
     const svar = await Promise.all(kald);
     const fejl = svar.find(s => s?.error);
     if (fejl){
-      toast('Kunne ikke gemme ændringen: ' + fejl.error.message, { type: 'error' });
+      toast('Kunne ikke gemme ændringen: ' + escapeHTML(fejlTekst(fejl.error)), { type: 'error' });
       btn.disabled = false; btn.textContent = 'Gem';
       return;
     }
@@ -494,7 +553,7 @@ function wireKravUI(){
     const q = document.getElementById('krav-search-input').value;
     const hint = document.getElementById('krav-search-hint');
     hint.textContent = 'Søger…';
-    const { data, error } = await db.searchUnclaimedExternal({ q });
+    const { data, error } = await sikkertKald(() => db.searchUnclaimedExternal({ q }));
     if (error){ hint.textContent = 'Søgningen fejlede. Prøv igen.'; return; }
     KRAV_SOEG_RESULTAT = data || [];
     renderKravResults(KRAV_SOEG_RESULTAT, true);
@@ -523,13 +582,13 @@ function wireKravUI(){
     const doku = document.getElementById('krav-dialog-doku').value.trim();
     btn.disabled = true; btn.textContent = 'Sender…';
 
-    const { error } = await db.submitKrav(AKTUEL_KRAV_ANNONCE.id, doku);
+    const { error } = await sikkertKald(() => db.submitKrav(AKTUEL_KRAV_ANNONCE.id, doku));
     btn.disabled = false; btn.textContent = 'Send krav';
 
     if (error){
-      const m = error.message || '';
+      const m = (error && error.message) || '';
       if (m.includes('duplicate key')) toast('Du har allerede sendt et krav på denne annonce.');
-      else toast('Kravet kunne ikke sendes: ' + m, { type: 'error' });
+      else toast('Kravet kunne ikke sendes: ' + escapeHTML(fejlTekst(error)), { type: 'error' });
       return;
     }
 
@@ -559,14 +618,14 @@ function renderDashboard(user){
   const totalAktive = mine.length + kravAktive;
 
   document.getElementById('dash-subtitle').textContent =
-    `${user.company || user.name} · ${totalAktive} ${totalAktive === 1 ? 'aktiv annonce' : 'aktive annoncer'}` +
+    `${user.company || user.name || 'Din konto'} · ${totalAktive} ${totalAktive === 1 ? 'aktiv annonce' : 'aktive annoncer'}` +
     (kravAktive ? ` (${mine.length} oprettet her, ${kravAktive} via krav)` : '');
 
   document.getElementById('kpi-row').innerHTML = [
     kpiTile('Aktive annoncer', totalAktive, Object.assign({ icon: Icon.bike, tone: 'is-ok' }, kravAktive ? { sub: `${mine.length} oprettet · ${kravAktive} via krav` } : {})),
-    kpiTile('Visninger (30 dage)', compactNumber(totalViews), { delta: viewsDelta, icon: Icon.eye }),
-    kpiTile('Henvendelser (30 dage)', compactNumber(totalInquiries), { icon: Icon.phone, tone: 'is-blue' }),
-    kpiTile('Gemt af købere', compactNumber(totalSaves), { icon: Icon.heart, tone: 'is-heart' }),
+    kpiTile('Visninger (30 dage)', DASH_FEJL.stats ? 'Ikke hentet' : compactNumber(totalViews), { delta: DASH_FEJL.stats ? null : viewsDelta, icon: Icon.eye }),
+    kpiTile('Telefonvisninger (30 dage)', DASH_FEJL.stats ? 'Ikke hentet' : compactNumber(totalInquiries), { icon: Icon.phone, tone: 'is-blue' }),
+    kpiTile('Gemt af købere', DASH_FEJL.stats ? 'Ikke hentet' : compactNumber(totalSaves), { icon: Icon.heart, tone: 'is-heart' }),
     /* Stregen er væk. En sælgerprofil-builder efterlod netop den her linje
        som en note i work/DECISIONS.md ("den, der ejer dashboardet, bør
        fjerne stregen som på profilen") — et "–" i feltet Bedømmelse ligner
@@ -613,7 +672,7 @@ function renderDashboard(user){
         </div>
         <div class="db-status">
           <span class="db-badge is-active">Aktiv</span>
-          <div class="db-nums">${tal(x.views, 'Visninger')}${tal(x.saves, 'Gemt')}${tal(x.inquiries, 'Henvendelser')}</div>
+          <div class="db-nums">${tal(x.views, 'Visninger')}${tal(x.saves, 'Gemt')}${tal(x.inquiries, 'Telefonvisninger')}</div>
         </div>
         <div class="db-actions">
           <a href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}" class="btn btn-outline btn-sm">${Icon.edit}Rediger</a>
@@ -630,10 +689,10 @@ function renderDashboard(user){
         // så sletningen ramte kun localStorage og annoncen blev i databasen.
         if (isUuid(id)){
           btn.disabled = true;
-          const { error } = await db.deleteListing(id);
+          const { error } = await sikkertKald(() => db.deleteListing(id));
           if (error){
             btn.disabled = false;
-            toast('Annoncen kunne ikke slettes: ' + error.message, { type: 'error' });
+            toast('Annoncen kunne ikke slettes: ' + escapeHTML(fejlTekst(error)), { type: 'error' });
             return;
           }
           window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(l => l.id !== id);
@@ -665,8 +724,10 @@ function renderDashboard(user){
     });
   });
 
+  visDashFejl();
   renderPlanStrip(user);
-  renderKickoff(mine.length > 0 || EKSTERN_EJET.length > 0);
+  /* Fejlede hentningen af krav, ved vi ikke, at kontoen er tom — så ingen "Kom godt i gang". */
+  renderKickoff(mine.length > 0 || EKSTERN_EJET.length > 0 || DASH_FEJL.ekstern);
   renderEksternTable();
   renderKravStatusList();
 }
