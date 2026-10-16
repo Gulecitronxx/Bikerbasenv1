@@ -63,7 +63,7 @@ test('V2-003: annonceside reserverer rækken efter den hydrerede højde og skjul
   assert.match(ANNONCE, /\.an-crumbrow\{[^}]*min-height:96px;/);
   assert.match(ANNONCE, /@media \(min-width:621px\)\{ \.an-crumbrow\{ min-height:102px; \} \}/);
   assert.match(ANNONCE, /@media \(min-width:900px\)\{ \.an-crumbrow\{ min-height:46px; \} \}/);
-  assert.match(ANNONCE, /\.container:has\(\.prerender-gallery\) > #listing-h1\{[^}]*clip-path:inset\(50%\)/);
+  assert.match(ANNONCE, /\.container > #listing-h1\{[^}]*clip-path:inset\(50%\)/);
   /* én række af handlinger på mobil */
   assert.match(ANNONCE, /\.an-actions\{[^}]*flex-wrap:nowrap;/);
 });

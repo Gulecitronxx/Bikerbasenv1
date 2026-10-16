@@ -452,6 +452,11 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .header-fav:hover, .header-login:hover{ background: var(--color-surface-2); }
 .header-fav svg, .header-login svg{ width:20px; height:20px; flex:none; }
 .header-fav .fav-count{ position:static; }
+/* W7-5: indgangen til gemte annoncer vises kun, når der ER noget gemt (js/components.js: updateFavCount sætter a.hidden). Markuppen
+   står dog synlig i HTML'en med data-count="0", og på annoncesider, der hydrerer sent, blev linjen først skjult ved hydrering:
+   header-actions sprang 120 px (CLS-kilde). Nu er den skjult fra første maling, så længe tælleren står på 0. Højrejusteringen
+   (margin-left:auto) gør, at et tilkommet led ikke flytter de andre. */
+.header-actions .header-fav:has(.fav-count[data-count="0"]){ display:none; }
 .header-cta{ display:none; }
 
 .icon-btn{
