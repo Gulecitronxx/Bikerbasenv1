@@ -13,7 +13,7 @@ Branch `gauntlet/w9-frontend` fra 4378bba. Mål: billede 1 (forside) + header/fo
 | F5 | Fælles lag | Komponentkatalog i DESIGN_DNA.md, kun klasser der findes (verificeret med grep). |
 | Generelt | alle | scrollWidth == clientWidth ved 320/390/768/1440 lys+mørk; CLS < 0,05 (smoke-browser --cls 0.05 på index); kontrast >= 4,5:1 på nye tekster; tastatur-fokus synligt; `node --check` og `npm test` grønt; CRLF/LF bevaret pr. fil. |
 
-## Resultat (før = 4378bba, efter = HEAD; screenshots  / , 1440+390, lys+mørk, normal/tom/fejl)
+## Resultat (før = 4378bba, efter = HEAD; screenshots i %TEMP%w9-frontend (fore-* før, efter-* efter), 1440+390, lys+mørk, normal/tom/fejl)
 
 | Id | Status | Før | Efter |
 |---|---|---|---|
@@ -22,16 +22,10 @@ Branch `gauntlet/w9-frontend` fra 4378bba. Mål: billede 1 (forside) + header/fo
 | F3 | opfyldt | nummercirkel oven på ikon | stablet; 0 overlap ved 320/390/768/1440 lys+mørk (boundingbox-test) |
 | F4 | delvist | tom/fejl: "0 annoncer"-tal i kolonner, tom typeoverskrift, 1000 px bredt sælg-panel, sammenpresset region-kolonne, banner øverst: CLS 0,16-0,18 på 390 | ingen tal/typesektion, kompakt sælg-bånd, 2 kolonner; CLS 0 på 390 (lys+mørk) og 1440 mørk. 1440 lys flakker 0-0,246: banneret skubber "Udvalgte" 106 px, fordi der med vilje ikke reserveres plads til en fejltilstand (CSS-kommentar ved .data-afbrud) |
 | F5 | opfyldt | – | Komponentkatalog i DESIGN_DNA.md |
-| Generelt | opfyldt | – | smoke-browser (6 sider x 320/390/768/1440 x lys+mørk, --cls 0.05 --strikt): 0 fejl; scrollWidth==clientWidth; Tab-rækkefølge/fokusring i header OK; Unknown command: "test"
-
-
-Did you mean this?
-  npm test # Test a package
-To see a list of supported npm commands, run:
-  npm help 921 grøn;  rent. Header/footer-HTML uændret, så  er IKKE kørt |
+| Generelt | opfyldt | – | smoke-browser (6 sider x 320/390/768/1440 x lys+mørk, --cls 0.05 --strikt): 0 fejl; scrollWidth==clientWidth; Tab-rækkefølge/fokusring i header OK; npm test 921 grøn; node --check rent. Header/footer-HTML uændret, så synk-header.js er IKKE kørt |
 
 ## Ændret
- (Favoritter-regel fjernet, .saadan-*, .sk-frisk, body.lager-tomt, .tre-kol:has, #data-afbrud på forsiden),  (tomtLager),  (updateFavCount rører ikke .header-fav),  (W7-5-testen af skjult Favoritter erstattet bevidst: billede 1 viser linjen altid), .
+`css/styles.css` (Favoritter-regel fjernet, .saadan-*, .sk-frisk, body.lager-tomt, .tre-kol:has, #data-afbrud på forsiden), `js/home.js` (tomtLager), `js/components.js` (updateFavCount rører ikke .header-fav), `js/w7-visuel-kort.test.js` (W7-5-testen af skjult Favoritter erstattet bevidst: billede 1 viser linjen altid), `DESIGN_DNA.md`.
 
 ## DELT-ØNSKER / påvirker andre strømme
 - Favoritter vises nu altid i desktopheaderen på ALLE sider (css + components.js); skuffens "Gemte annoncer" skjules stadig ved 0. Ingen annoncekort-funktioner rørt.
