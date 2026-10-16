@@ -52,7 +52,15 @@ function cleanUrl(file){
   return file === 'index.html' ? BASE : `${BASE}/${file.replace(/\.html$/, '')}`;
 }
 
-function metaBlock(file, title, description){
+/* Guiderne har article:published_time / article:modified_time. Datoerne hentes fra sidens EGEN Article-JSON-LD
+   (scripts/build-guides.js skriver dem ud fra guides-data.js), så meta og JSON-LD aldrig siger to forskellige ting,
+   og ingen dato opfindes her. Uden en Article-blok udelades tagsene. */
+function artikelDatoer(html){
+  const a = html.match(/"datePublished":"(d{4}-d{2}-d{2})"/), m = html.match(/"dateModified":"(d{4}-d{2}-d{2})"/);
+  return a && m ? { published: a[1], modified: m[1] } : null;
+}
+
+function metaBlock(file, title, description, datoer){
   const url = cleanUrl(file);
   const lines = [
     START,
@@ -70,6 +78,8 @@ function metaBlock(file, title, description){
     '<meta property="og:image:width" content="1200">',
     '<meta property="og:image:height" content="630">',
     '<meta property="og:image:alt" content="Bikerbasen — motorcykler til salg i Danmark, samlet fra danske forhandlere og markedspladser">',
+    datoer ? `<meta property="article:published_time" content="${datoer.published}">` : null,
+    datoer ? `<meta property="article:modified_time" content="${datoer.modified}">` : null,
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:title" content="${attr(title)}">`,
     `<meta name="twitter:description" content="${attr(description)}">`,
@@ -135,7 +145,7 @@ for (const file of fs.readdirSync(ROOT).sort()){
   const description = (html.match(/<meta name="description" content="([^"]*)"/) || [])[1];
   if (!title || !description){ skipped.push(file); continue; }
 
-  const block = metaBlock(file, title.trim(), description);
+  const block = metaBlock(file, title.trim(), description, /^guide-/.test(file) ? artikelDatoer(html) : null);
 
   // Riv den gamle blok ud først, så håndskrevne canonicals udenfor kan fjernes
   // uden at ramme den vi selv er ved at skrive. Blokken er eneste kilde til
