@@ -104,7 +104,8 @@ function injectDealerNav(current){
    uændret tilgængelig fra mine-annoncer.html's egne faneblade. */
 function updateFavCount(){
   const n = Store.getFavorites().length;
-  const skjul = el => { const a = el.closest && el.closest('a'); if (a) a.hidden = n === 0; };
+  /* W9: desktopheaderens "Favoritter" står altid (billede 1); kun skuffens "Gemte annoncer (0)" skjules ved 0. */
+  const skjul = el => { const a = el.closest && el.closest('a'); if (a && !a.classList.contains('header-fav')) a.hidden = n === 0; };
   document.querySelectorAll('[data-fav-count]').forEach(el => {
     el.textContent = n; el.setAttribute('data-count', n); skjul(el);
   });
