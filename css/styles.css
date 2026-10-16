@@ -3843,22 +3843,22 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    Ingen tal, ingen tomme overskrifter. Sælg-panelet bliver et kompakt bånd, og de to tilbageværende kolonner deler pladsen. */
 .tre-kol:has(> .kol[hidden]){ grid-template-columns: minmax(0,1fr); }
 @media (min-width:1100px){ .tre-kol:has(> .kol[hidden]){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
-/* Fejlbanneret (#data-afbrud) indsættes øverst i <main> af js/backend-bridge.js, men js/home.js flytter det under søgekortet. Indtil det
-   er flyttet, vises det ikke — ellers skubber det hele siden ned i et billede, før det flyttes (CLS). */
-body.home #data-afbrud{ display:none; }
-body.home .hero-sok ~ #data-afbrud{ display:block; margin: var(--space-4) auto 0; max-width: calc(var(--site-w) - 2 * var(--gutter)); width: calc(100% - 2 * var(--gutter)); }
-.lager-tomt .udvalg-grid{ grid-template-columns: minmax(0,1fr); }
-.lager-tomt .saelg-panel{
-  display:grid; grid-template-columns: minmax(0,1fr) auto; grid-template-areas: "tekst knap"; align-items:center;
-  column-gap: var(--space-5); padding: var(--space-4) var(--space-5);
-}
-.lager-tomt .saelg-foto{ display:none; }
-.lager-tomt .saelg-indhold{ grid-area: tekst; }
-.lager-tomt .saelg-knap{ grid-area: knap; width:auto; }
-@media (max-width:599px){
-  .lager-tomt .saelg-panel{ grid-template-columns: minmax(0,1fr); grid-template-areas: "tekst" "knap"; }
-  .lager-tomt .saelg-knap{ width:100%; }
-}
+/* W9 P3: modigere forside-h1 på desktop (billede 1 har en stor overskrift); kun forsiden, kun >= 1100 px, ingen nye assets. */
+@media (min-width:1100px){ body.home .hero h1{ font-size: clamp(54px, 4.3vw, 62px); max-width: none; } }
+
+/* Fejlbanneret (.data-afbrud) indsættes øverst i <main> af js/backend-bridge.js. På forsiden flytter js/home.js det derfra, og indtil
+   da vises det ikke (ellers skubber det hele siden ned før flytningen: CLS).
+   Tomt/fejlet lager: banneret flyttes IND i annoncerækkens pladsholder (.kort-raekke har allerede min-height 330/360 px fra første
+   maling, før lageret har svaret), så siden ikke flytter sig, når svaret kommer: pladsen er reserveret af skelettet, ikke af en
+   ekstra blok. Sælg-panelet og alt andet står som før. Titlen over rækken skjules med visibility, så dens højde bevares. */
+body.home .data-afbrud{ display:none; }
+body.home .hero-sok ~ .data-afbrud{ display:block; margin: var(--space-4) auto 0; max-width: calc(var(--site-w) - 2 * var(--gutter)); width: calc(100% - 2 * var(--gutter)); }
+body.home .kort-raekke > .data-afbrud{ display:block; flex:1 1 100%; grid-column:1 / -1; align-self:start; margin:0; }
+.lager-tomt .kort-raekke{ min-height:330px; align-items:start; }
+@media (min-width:768px){ .lager-tomt .kort-raekke{ min-height:360px; } }
+.lager-tomt .udvalg-hoved .sek-hoved{ visibility:hidden; }
+.tre-kol:has(> .kol[hidden]){ grid-template-columns: minmax(0,1fr); }
+@media (min-width:1100px){ .tre-kol:has(> .kol[hidden]){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
 
 /* ===== forhandler-vaerktoej ===== */
 /* dashboard.html/js/dashboard.js: kontostatus, kom-godt-i-gang, og

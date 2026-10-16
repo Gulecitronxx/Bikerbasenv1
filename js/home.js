@@ -250,7 +250,12 @@ async function buildForside(){
   document.body.classList.toggle('lager-tomt', tomtLager);
   const afbrud = document.querySelector('.data-afbrud');
   const heroSok = document.querySelector('.hero-sok');
-  if (afbrud && heroSok) heroSok.after(afbrud);
+  if (afbrud){
+    /* Tomt lager: ind i annoncerækkens reserverede plads (ingen flytning af indhold). Ellers under søgekortet. */
+    const slot = document.getElementById('udvalg-kort');
+    if (tomtLager && slot) slot.append(afbrud);
+    else if (heroSok) heroSok.after(afbrud);
+  }
 
   const harFoto = (l) => (l.photoUrls || []).length > 0;
   const harModel = (l) => {
@@ -452,7 +457,7 @@ async function buildForside(){
   const saelgPanel = featuredSection && featuredSection.querySelector('.saelg-panel');
   // En overskrift uden indhold under ser i stykker ud — men sælg-panelet skal blive stående.
   const udvalgHoved = featuredMount.closest('.udvalg-hoved');
-  if (udvalgHoved) udvalgHoved.hidden = kandidater.length === 0;
+  if (udvalgHoved) udvalgHoved.hidden = kandidater.length === 0 && !tomtLager;
   if (featuredSection && kandidater.length === 0 && !saelgPanel) featuredSection.hidden = true;
 
   /* Antallet af kort følger antallet af spalter (ellers står der en enlig efternøler): målt på
