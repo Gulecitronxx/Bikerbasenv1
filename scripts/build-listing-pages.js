@@ -29,6 +29,31 @@ const VERSION = (fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')
   .match(/css\/styles\.css\?v=([a-z0-9]+)/) || [, ''])[1];
 const v = VERSION ? `?v=${VERSION}` : '';
 
+/* Ikonerne er de samme som js/annonce.js bruger (js/icons.js), så markup før JS = markup efter JS. */
+const Icon = (() => { const src = fs.readFileSync(path.join(ROOT, 'js/icons.js'), 'utf8'); return new Function(src + ';return Icon;')(); })();
+
+/* Brødkrumme og handlingsrække skrives her med PRÆCIS samme markup som anBrodkrumme()/anAktioner() i
+   js/annonce.js, så siden ikke skifter udseende eller flytter sig, når scriptet hydrerer. "Ukendt" er
+   ikke et mærke man kan søge på, så leddet udelades (samme regel som i js/annonce.js). */
+function brodkrumme(l){
+  const maerkeOK = l.brand && l.brand !== 'Ukendt';
+  const enc = encodeURIComponent;
+  const led = [['index.html', 'Forside'], ['soegning.html', 'Motorcykler']];
+  if (maerkeOK) led.push([`soegning.html?brands=${enc(l.brand)}`, l.brand]);
+  if (maerkeOK && l.model) led.push([`soegning.html?brands=${enc(l.brand)}&model=${enc(l.model)}`, l.model]);
+  const sidste = [maerkeOK ? l.brand : '', l.model].filter(Boolean).join(' ') || 'Annonce';
+  return led.map(([h, t]) => `<a href="${esc(h)}">${esc(t)}</a><span class="bc-sep">${Icon.chevronRight}</span>`).join('')
+    + `<span id="bc-current" aria-current="page">${esc(sidste)}${l.year ? ` (${esc(String(l.year))})` : ''}</span>`;
+}
+
+function aktioner(l){
+  const id = esc(String(l.id));
+  return `
+    <button type="button" class="an-act" id="share-listing-btn">${Icon.share}<span>Del annonce</span></button>
+    <button type="button" class="an-act" data-compare-toggle="${id}" aria-pressed="false">${Icon.compare}<span>Sammenlign</span></button>
+    ${l.isExternal ? '' : `<button type="button" class="an-act an-fav " aria-pressed="false" data-fav-toggle="${id}">${Icon.heart}<span class="an-fav-off">Gem som favorit</span><span class="an-fav-on">Gemt som favorit</span></button>`}`;
+}
+
 function specRow(label, value){
   return value == null || value === '' ? ''
     : `        <div class="spec-item"><span class="spec-icon">${esc(label)}</span><b>${esc(value)}</b></div>`;
@@ -179,13 +204,9 @@ ${header}
   <div class="container">
     <div class="an-crumbrow">
       <nav class="breadcrumb" id="bc-nav" aria-label="Brødkrumme">
-        <a href="index.html">Forside</a><span class="bc-sep"></span>
-        <a href="soegning.html">Motorcykler</a><span class="bc-sep"></span>
-        <a href="soegning.html?brands=${encodeURIComponent(l.brand)}">${esc(l.brand)}</a><span class="bc-sep"></span>
-        <a href="soegning.html?brands=${encodeURIComponent(l.brand)}&amp;model=${encodeURIComponent(l.model)}">${esc(l.model)}</a><span class="bc-sep"></span>
-        <span id="bc-current">${esc(navn)} (${esc(l.year)})</span>
+        ${brodkrumme(l)}
       </nav>
-      <div class="an-actions" id="an-actions"></div>
+      <div class="an-actions" id="an-actions">${aktioner(l)}</div>
     </div>
 
     <h1 id="listing-h1">${esc(navn)}</h1>
@@ -296,7 +317,7 @@ ${contactModal}
 `;
 }
 
-(async () => {
+if (require.main === module) (async () => {
   /* S-005: kraevDatabase => en fejlet hentning kaster i stedet for at give js/data.js'
      tomme liste, og tjekAntal() nedenfor stopper et drastisk fald (< 50 % af de
      committede annonce-*.html) FØR en eneste fil slettes. */
@@ -326,3 +347,5 @@ ${contactModal}
   }
   console.log(`Byggede ${bygget} annoncesider.`);
 })().catch(e => require('./seo-vagt').afslut(e));
+
+module.exports = { side, brodkrumme, aktioner };
