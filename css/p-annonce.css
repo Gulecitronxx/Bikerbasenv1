@@ -262,6 +262,13 @@
   .an-kk-badge{ grid-column: 1 / -1; max-width:none; }
 }
 
+/* Samlet-Critic P1: balanceringen kan lægge kørekortkortet i sidekolonnen (300–330 px) eller kolonne B. Dér er der ikke plads til
+   ikon + tekst + badge ved siden af hinanden (teksten blev 22–76 px bred og brød ét ord pr. linje) — stak badgen under teksten,
+   som på mobil. Kortet tåler derfor enhver kolonne. */
+.an-col .an-kk, .an-side .an-kk{ grid-template-columns: auto minmax(0,1fr); }
+.an-col .an-kk .an-kk-badge, .an-side .an-kk .an-kk-badge{ grid-column: 1 / -1; max-width:none; }
+.an-col .an-kk .an-kk-ico svg, .an-side .an-kk .an-kk-ico svg{ width:44px; height:44px; }
+
 /* ---------- Tjekliste ---------- */
 .an-tjek{
   display:grid; grid-template-columns: auto minmax(0,1fr); gap: var(--space-4); align-items:start;
