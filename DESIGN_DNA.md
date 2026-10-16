@@ -74,3 +74,26 @@ opret-annonce-trin · dashboard · mærke-/type-/region-/kørekortsider (generer
 4. Hver sidefamilie (type / mærke / region / kørekort / guide) deler skabelon: hero → søg → udvalgte annoncer → "Sådan virker" / forklaring → cross-links → FAQ.
 5. SEO: én h1, unik title/description, canonical, JSON-LD hvor data findes, intern linkning til søsterfamilier.
 6. Hver ændring: Builder tester selv → blind Critic med frisk kontekst → først da "verificeret".
+
+## Komponentkatalog (kun hvad der findes i `css/styles.css` — verificeret 17.10.2026, w9-frontend)
+
+**Tokens** (`:root` + `:root[data-theme="dark"]`): farver `--color-bg/-surface/-surface-2/-border/-input-border/-fg/-fg-muted/-primary/-primary-hover/-on-primary/-primary-tint/-success(-tint)/-danger(-tint)/-ring`; `--shadow-sm/-md/-lg`; `--radius-sm/-md/-lg/-pill`; `--font-display/-body`; `--space-1…9`; `--site-w`, `--gutter`, `--header-h`, `--h1-hero`. Grøn (`--color-success`) kun til ✓/verificeret, rød kun til fejl.
+
+| Komponent | Klasser | Bruges til |
+|---|---|---|
+| Layout | `.container`, `.container--wide`, `.section`, `.sek-hoved` (titel + `.section-link`), `.sek-note` | sektionsramme, titel med "Se alle"-link, fodnote under sektion |
+| Knapper | `.btn` + `.btn-primary` (brandfarve) / `.btn-outline`, `.btn-lg`, `.icon-btn` | alle handlinger; primær CTA er altid kobber/orange |
+| Felter | `.field`, `.input`, `.input-icon-wrap[data-icon]`, `.kk-seg` (radioer som pille-segment) | søgekort og formularer |
+| Søgekort | `.hero-sok` (overlap), `.search-panel`, `.sk-grid`, `.sk-cta`, `.sk-antal` (+ `.sk-frisk`) | hero-søgning; antal kun når lageret har svaret |
+| Tillidsrække | `.trust-band`, `.trust-row` | fire sande løfter under hero |
+| Annoncekort | `.kort-raekke` (gitter/skinne), `.card` (se `listingCardHTML` i `js/components.js`) | udvalgte, senest sete, søgning |
+| Typeflise | `.tiles-raekke`, `.tile`, `.tile-media`, `.tile-label`, `.tile-count`, `.typer-pil` | foto + antal pr. type; skjules uden annoncer |
+| Sælg-panel | `.saelg-panel`, `.saelg-foto`, `.check-liste` + `.check-ikon`; `body.lager-tomt` giver kompakt bånd | CTA ved annoncerækken |
+| Sådan virker | `.saadan-strip`, `.saadan-hoved`, `.saadan-trin` > `.saadan-trin-punkt` (`.saadan-nr`, `.saadan-ico`, pil via `::after` ≥ 1000 px), `.guide-boks` | 4 trin med pile + guide-boks |
+| Tre kolonner | `.tre-kol` > `.kol` (`.kol-hoved`, `.kol-link`, `.kol-note`), `.maerke-flise`, `.tal-grid(-3/-5)` | mærker, kørekort, region |
+| Tekst | `.hvorfor`, `.hvorfor-grid`, `<details class="hvorfor-mere">` | ærlig forklaring |
+| Links-bånd | `.seo-links` > `.seo-gruppe` | interne links over footer |
+| Header/footer | `.site-header`, `.main-nav`, `.header-actions` (`.header-fav` + `.fav-count`, `.header-login`, `.header-cta`), `.site-footer`, `.footer-grid` | på alle sider (synkroniseres med `scripts/synk-header.js`) |
+| Tilstande | `.data-afbrud` (fejl/tomt lager; på forsiden flyttes den under søgekortet af `js/home.js`), `body.lager-tomt` | ærlige tomme/fejlede tilstande — aldrig 0-tal |
+
+Regel for tomme data: tal tegnes kun fra lageret; er lageret tomt eller hentningen fejlet, tegnes hverken antal, typefliser eller "0 annoncer" (se `tomtLager` i `js/home.js`).
