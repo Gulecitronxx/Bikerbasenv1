@@ -39,4 +39,28 @@ Funktionelle
 - X-3 Lys tilstand ligner billederne mest; mørk virker. AA-kontrast på nye elementer.
 
 ## Status / bevis
-(udfyldes løbende nedenfor)
+
+Skærmbilleder (udenfor repo): `%TEMP%\w9-marketplace` - `before-*.png` / `after-*.png` (søgning 1440/390/320 mørk, annonce egen/ekstern/48 hk).
+Harness: `h.js`, `f-srp.js`, `f-ann.js` samme mappe (Playwright, lokal mock, ingen produktion).
+
+Bygget (kun w9-ændringer; søgesiden var allerede tæt på billedet fra tidligere runder)
+- A-V1 annonce: kørekortkort flyttet ind i midterkolonnen, "Det bør du tjekke" ind i venstre kolonne under faktatabellen: kolonnebundene ligger nu ca. 165 px fra hinanden (før ca. 450 px tomt hul under faktatabellen). Tjek-kortets foto er et pseudo-element, så teksten aldrig overlapper.
+- A-V4: statuspille MULIG / KRÆVER / IKKE AFGJORT / KAN IKKE AFGØRES; 48-49 hk viser "kW?" + "Tjek kW i registreringsattesten"; "Ikke bekræftet" på MULIG. Aldrig "bekræftet".
+- A-V6: "Gå til annoncen hos X" på højst to linjer, også i mobilbjælken (var tre, klippet).
+- Bug (fra Orchestrator): galleriets `toggle('active', undefined)` flippede alle miniaturer; nu `!!(...)`.
+- S-V2: prischip "Maks. 60.000 kr." / "Fra X" i stedet for "0 kr. - X".
+
+Måling (Playwright, 5 bredder 320-1440 x lys/mørk x 10 annoncetyper)
+- Ingen vandret overflow, ingen null/undefined/NaN, 1 h1, kørekort + tjek + fakta altid til stede, højst én aktiv miniature, ingen konsolfejl (bortset fra mock-401).
+- Søgning: type, pris, kørekort, fritekst, sortering, gitter/liste, ryd alle, tom-tilstand, favorit (overlever reload), søgning->annonce->tilbage (filter og scroll 1400->1400) bestået.
+- node --check OK. `npm test`: 6 crawler-tests fejler fordi `@supabase/supabase-js` ikke kan findes via junction, og 1 guides-datotest (seo-schema) fejler; begge fejler identisk uden mine ændringer.
+
+Hvad ligner IKKE billederne endnu
+- Foto-tæller (1/12), galleri med flere thumbnails og "+10" på eksterne: forbudt (CLAUDE.md: ét thumbnail). Egne annoncer har dem.
+- Sælgerboks med stjerner/anmeldelser/svartid/adresse/ring op/besked, finansieringsforslag, "Autoriseret forhandler": opdigtet eller ikke bygget.
+- Søgesiden: tre små hjælpelinjer (kildefordeling, bekræftelsesdato, blandet udbud) er stadig tre linjer under overskriften; de bærer ærlige data og er pinned af tests, så de er kun tonet, ikke slået sammen.
+- Mobil 320: w7-visuels 2-kolonne-gitter afkorter sted/kildelinje på kortene ("R...") - hører under kort/w7.
+- Kort viser ikke grønne A2-chips (brand: mulig A2 = orange, kræver A = sort).
+
+DELT-ØNSKE: ingen (components.js urørt). Nye tests: js/w9-marketplace-galleri.test.js, js/w9-marketplace-kk.test.js.
+Commits: se `git log gauntlet/w9-marketplace`; master (w7-visuel) er merget ind uden konflikter.
