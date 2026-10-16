@@ -28,6 +28,20 @@ async function saetIndIPortioner(mount, dele, portion = 3){
   }
 }
 
+/* V2-006: et kort uden for første skærmbillede i en vandret skinne får sit foto-src først, når det nærmer sig. Native
+   loading="lazy" duer ikke dér: Chromes tærskel er 1250 px (2500 på langsom forbindelse) i ALLE retninger, så alle seks
+   kort i en skinne på 390 px blev hentet ved første load. Uden IntersectionObserver hentes alt med det samme. */
+const udskydFotoHTML = html => html.replace(/<img src=("[^"]*"[^>]*class="card-photo")/, '<img data-src=$1');
+function hentUdskudteFotos(rod){
+  const billeder = rod.querySelectorAll('img.card-photo[data-src]');
+  const hent = img => { img.src = img.dataset.src; img.removeAttribute('data-src'); };
+  if (!('IntersectionObserver' in window)){ billeder.forEach(hent); return; }
+  const io = new IntersectionObserver(poster => {
+    poster.forEach(p => { if (p.isIntersecting){ io.unobserve(p.target); hent(p.target); } });
+  }, { rootMargin: '200px 200px' });
+  billeder.forEach(img => io.observe(img));
+}
+
 document.addEventListener('DOMContentLoaded', () => { buildForside(); });
 
 async function buildForside(){
@@ -440,12 +454,21 @@ async function buildForside(){
     const antal = maal();
     featured = vaelgFeatured(antal);
     if (!featured.length){ featuredMount.replaceChildren(); skrivFeaturedSub(0, []); return; }
-    await saetIndIPortioner(featuredMount, featured.map(kortHTML));
-    /* Første række hentes med det samme (lazy → eager udløser hentningen); prioriteten er stadig lav,
-       hero-fotoet er LCP. */
+    /* På mobil er rækken en vandret skinne med to synlige kort: de øvrige får deres foto-src først, når de nærmer sig
+       skærmen (V2-006). Kun de to første er "første række" dér. */
+    const skinne = getComputedStyle(featuredMount).display !== 'grid';
+    await saetIndIPortioner(featuredMount, featured.map((l, i) => {
+      const html = kortHTML(l, i);
+      return skinne && i >= 2 ? udskydFotoHTML(html) : html;
+    }));
+    /* Kun de kort, der faktisk er i første skærmbillede, hentes med det samme (lazy → eager udløser hentningen);
+       prioriteten er stadig lav, hero-fotoet er LCP. V2-006: på mobil er rækken en vandret skinne, og de skjulte
+       kort (3-6) lå inden for Chromes egen lazy-tærskel og blev hentet alligevel (6 x ca. 170 KB = ca. 1 MB, hvor
+       to er synlige). De får derfor først deres src, når de nærmer sig skærmen. */
     featuredMount.querySelectorAll('.card').forEach((c, i) => {
-      if (i < antal){ const img = c.querySelector('img.card-photo'); if (img) img.loading = 'eager'; }
+      if (i < (skinne ? 2 : antal)){ const img = c.querySelector('img.card-photo'); if (img) img.loading = 'eager'; }
     });
+    hentUdskudteFotos(featuredMount);
     skrivFeaturedSub(featured.length, featured);
     wireFavoriteButtons(featuredMount);
   };

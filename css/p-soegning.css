@@ -150,7 +150,9 @@
   .so-chiprow-actions .mobile-filter-btn{ order:-1; justify-content:center; }
 }
 @media (max-width:620px){
-  .so-chips-area{ min-height:0; }
+  /* V2-005: aktive filter-piller kommer først efter data (en pillerække er ca. 41 px). Rækken reserverer 28 px, så en
+     søgning med ?q= kun flytter resten ca. 13 px i stedet for 41 (CLS 0,039 -> under 0,015 ved 320 px). */
+  .so-chips-area{ min-height:28px; }
   .so-chiprow{ min-height:0; }
 }
 
