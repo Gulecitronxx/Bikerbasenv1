@@ -50,5 +50,5 @@ test('trinnet er registreret i build.js og filen er i udgiv.js allowlist', () =>
   assert.match(build, /'build-llms\.js'/);
   assert.ok(fs.existsSync(path.join(__dirname, 'build-llms.js')));
   const udgiv = fs.readFileSync(path.join(__dirname, 'udgiv.js'), 'utf8');
-  assert.ok(udgiv.includes(String.raw`/^llms.txt$/,`));
+  assert.ok(udgiv.includes(String.raw`/^llms\.txt$/,`));
 });
