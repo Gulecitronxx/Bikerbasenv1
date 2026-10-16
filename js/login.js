@@ -39,7 +39,7 @@ const AUTH_KONTEKST = {
    indfriet (phone er null paa alt fra databasen). Kun det, der sker. */
 const AUTH_ANNONCE = {
   titel: 'Kontakt sælgeren',
-  tekst: 'Log ind for at se sælgerens navn og markere, at du vil i kontakt. Det beskytter både køber og sælger.',
+  tekst: 'Log ind for at se sælgerens navn og de kontaktoplysninger, sælgeren har oplyst. Det beskytter både køber og sælger.',
 };
 
 function anvendAuthKontekst(){

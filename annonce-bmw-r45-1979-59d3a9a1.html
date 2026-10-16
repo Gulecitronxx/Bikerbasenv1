@@ -56,8 +56,8 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/35fd8dde-c3b1-44ce-8796-924902dbf35a/59d3a9a1-9e64-4ad3-a6c8-6f17554c7707/68dd655e-c540-4899-b30e-bb8babf28162.webp" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css?v=ef964cab">
-<link rel="stylesheet" href="css/p-annonce.css?v=ef964cab">
+<link rel="stylesheet" href="css/styles.css?v=71c94135">
+<link rel="stylesheet" href="css/p-annonce.css?v=71c94135">
 <script type="application/ld+json" id="jsonld-vehicle">
 {"@context":"https://schema.org","@type":["Product","Motorcycle"],"name":"BMW R45","brand":{"@type":"Brand","name":"BMW"},"model":"R45","vehicleModelDate":"1979","productionDate":"1979","itemCondition":"https://schema.org/UsedCondition","url":"https://bikerbasen.dk/annonce-bmw-r45-1979-59d3a9a1.html","image":["https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/35fd8dde-c3b1-44ce-8796-924902dbf35a/59d3a9a1-9e64-4ad3-a6c8-6f17554c7707/68dd655e-c540-4899-b30e-bb8babf28162.webp","https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/35fd8dde-c3b1-44ce-8796-924902dbf35a/59d3a9a1-9e64-4ad3-a6c8-6f17554c7707/27c31b3c-2623-4fb6-981c-604b1d3dca65.webp","https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/35fd8dde-c3b1-44ce-8796-924902dbf35a/59d3a9a1-9e64-4ad3-a6c8-6f17554c7707/f6d15a86-52fe-484d-b6ea-eefbf722ce33.webp","https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/35fd8dde-c3b1-44ce-8796-924902dbf35a/59d3a9a1-9e64-4ad3-a6c8-6f17554c7707/9a13f4db-764f-4c4d-83ad-f688d29946ba.webp","https://hkcjrwglwurdjnobewzb.supabase.co/storage/v1/object/public/listing-photos/35fd8dde-c3b1-44ce-8796-924902dbf35a/59d3a9a1-9e64-4ad3-a6c8-6f17554c7707/1ad15caf-0f43-46a4-aaab-fa070ec192f3.webp"],"description":"The bike has been well maintained and recently serviced at Jan Neemann / BMW Rødovre. The inspection has also been completed.\n\nRecently replaced:\n\n* Air filter\n* Oil filter\n* Front brake fluid\n* General service and maintenance\n91.300 km\n\nThe bike runs well and, to my knowledge, has no major issues.\n\nI’m selling it because I’m moving away from Copenhagen and unfortunately don’t currently have a storage space or a suitable place to keep the motorcycle at my new location.\n\nA great classic BMW for someone who appreciates older motorcycles.\n\nSerious inquiries are welcome. Feel free to send me a message if you’re interested or would like to come and see the bike.","mileageFromOdometer":{"@type":"QuantitativeValue","value":91350,"unitCode":"KMT"},"vehicleEngine":{"@type":"EngineSpecification","engineDisplacement":{"@type":"QuantitativeValue","value":450,"unitCode":"CMQ"},"enginePower":{"@type":"QuantitativeValue","value":30,"unitText":"hk"}},"offers":{"@type":"Offer","price":24000,"priceCurrency":"DKK","availability":"https://schema.org/InStock","itemCondition":"https://schema.org/UsedCondition","url":"https://bikerbasen.dk/annonce-bmw-r45-1979-59d3a9a1.html","areaServed":{"@type":"Country","name":"Danmark"},"seller":{"@type":"Person","address":{"@type":"PostalAddress","addressLocality":"Valby","addressCountry":"DK"}}},"fuelType":"Benzin","color":"Rød"}
 </script>
@@ -219,7 +219,6 @@ Serious inquiries are welcome. Feel free to send me a message if you’re intere
      maling; js/annonce.js kobler knapperne paa de samme handlinger som
      kortet i sidebjaelken. position:fixed => skubber intet (ingen CLS). -->
 <div class="listing-actionbar" id="listing-actionbar" hidden>
-  <button type="button" class="btn btn-primary" id="bar-contact">Skriv til sælger</button>
   <button type="button" class="btn btn-outline" id="bar-phone">Vis nummer</button>
 </div>
 
@@ -272,86 +271,24 @@ Serious inquiries are welcome. Feel free to send me a message if you’re intere
   </div>
 </footer>
 
-<div class="modal-overlay" id="contact-modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h2 id="contact-modal-title">Skriv til sælger</h2>
-      <button type="button" class="icon-btn" data-modal-close aria-label="Luk"></button>
-    </div>
-    <form id="contact-form">
-      <!-- Hensigterne lader sælger se med det samme, hvad henvendelsen
-           handler om — og køber slipper for at formulere det selv. -->
-      <div class="contact-intents">
-        <label class="checkbox-row"><input type="checkbox" id="cf-ring" value="Jeg ønsker at blive ringet op">Jeg ønsker at blive ringet op</label>
-        <label class="checkbox-row"><input type="checkbox" id="cf-proevetur" value="Jeg ønsker en prøvetur">Jeg ønsker en prøvetur</label>
-        <label class="checkbox-row"><input type="checkbox" id="cf-bytte" value="Min nuværende motorcykel kan indgå i handlen">Min nuværende motorcykel kan indgå i handlen</label>
-      </div>
-
-      <div class="form-grid">
-        <div class="field field-full">
-          <label for="cf-message">Besked til sælger <span class="required-mark">*</span></label>
-          <textarea class="input" id="cf-message" required maxlength="500" rows="5" placeholder="Skriv din besked til sælgeren her"></textarea>
-          <span class="char-counter" id="cf-counter" aria-live="polite">0/500</span>
-        </div>
-        <div class="field">
-          <label for="cf-firstname">Fornavn <span class="required-mark">*</span></label>
-          <input class="input" id="cf-firstname" required autocomplete="given-name">
-        </div>
-        <div class="field">
-          <label for="cf-lastname">Efternavn <span class="required-mark">*</span></label>
-          <input class="input" id="cf-lastname" required autocomplete="family-name">
-        </div>
-        <div class="field field-full">
-          <label for="cf-email">E-mail <span class="required-mark">*</span></label>
-          <input class="input" id="cf-email" type="email" required autocomplete="email">
-        </div>
-        <div class="field field-full">
-          <label for="cf-phone">Telefonnummer</label>
-          <input class="input" id="cf-phone" type="tel" autocomplete="tel">
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px;">Send</button>
-      <p class="contact-consent">Når du trykker på "Send", accepterer du, at vi overfører dine oplysninger til sælgeren af motorcyklen. Læs om behandlingen af dine personoplysninger i vores <a href="privatlivspolitik.html" target="_blank">privatlivspolitik</a>.</p>
-    </form>
-
-    <!-- Kvitteringen efter afsendelse.
-         Her stod foer en toast: "Din besked er sendt til saelgeren." Det var
-         ikke sandt. Der findes ingen beskedtabel i basen (se supabase/ — der
-         er listings, favorites, reviews, reports og statistik, og ikke andet),
-         saa teksten blev ingen steder af. Vi taeller henvendelsen paa
-         annoncen (record_listing_event, 004b), og DET kan saelgeren faktisk
-         se. Kvitteringen siger praecis saa meget og giver koeberen den vej,
-         der virker i dag: telefonnummeret.
-
-         Staar i markuppen frem for at blive bygget af JS, saa den ikke skal
-         hentes eller males om, naar den skal bruges. -->
-    <div class="contact-receipt" id="contact-receipt" hidden>
-      <p class="contact-receipt-title" id="contact-receipt-title">Din henvendelse er registreret</p>
-      <p class="contact-receipt-body" id="contact-receipt-body"></p>
-      <!-- Det koeberen krydsede af, gentaget. Tom og hidden indtil der ER
-           krydset noget af — se js/annonce.js. -->
-      <div class="contact-receipt-intents" id="contact-receipt-intents" hidden></div>
-      <div class="contact-receipt-actions" id="contact-receipt-actions"></div>
-    </div>
-  </div>
-</div>
+<div class="modal-overlay" id="contact-modal"></div>
 
 
-<script defer src="js/security.js?v=ef964cab"></script>
-<script defer src="js/vendor/supabase.js?v=ef964cab"></script>
-<script defer src="js/supabase-config.js?v=ef964cab"></script>
-<script defer src="js/supabase-api.js?v=ef964cab"></script>
-<script defer src="js/icons.js?v=ef964cab"></script>
-<script defer src="js/bike-art.js?v=ef964cab"></script>
-<script defer src="js/postnumre.js?v=ef964cab"></script>
-<script defer src="js/data.js?v=ef964cab"></script>
-<script defer src="js/filtrering.js?v=ef964cab"></script>
-<script defer src="js/store.js?v=ef964cab"></script>
-<script defer src="js/maaling.js?v=ef964cab"></script>
-<script defer src="js/backend-bridge.js?v=ef964cab"></script>
-<script defer src="js/components.js?v=ef964cab"></script>
-<script defer src="js/seo.js?v=ef964cab"></script>
-<script defer src="js/annonce.js?v=ef964cab"></script>
+<script defer src="js/security.js?v=71c94135"></script>
+<script defer src="js/vendor/supabase.js?v=71c94135"></script>
+<script defer src="js/supabase-config.js?v=71c94135"></script>
+<script defer src="js/supabase-api.js?v=71c94135"></script>
+<script defer src="js/icons.js?v=71c94135"></script>
+<script defer src="js/bike-art.js?v=71c94135"></script>
+<script defer src="js/postnumre.js?v=71c94135"></script>
+<script defer src="js/data.js?v=71c94135"></script>
+<script defer src="js/filtrering.js?v=71c94135"></script>
+<script defer src="js/store.js?v=71c94135"></script>
+<script defer src="js/maaling.js?v=71c94135"></script>
+<script defer src="js/backend-bridge.js?v=71c94135"></script>
+<script defer src="js/components.js?v=71c94135"></script>
+<script defer src="js/seo.js?v=71c94135"></script>
+<script defer src="js/annonce.js?v=71c94135"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">

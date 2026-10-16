@@ -145,10 +145,11 @@ const IkonKilde = new Function(fs.readFileSync(path.join(ROOT, 'js/icons.js'), '
 // i stedet for at læses direkte efter eval-kaldet.
 const dataSrc = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
 eval(dataSrc + '\nglobal.__L = LISTINGS; global.__T = TYPES; global.__R = REGIONS; '
-  + 'global.__A1CCM = A1_MAX_CCM; global.__A1HK = A1_MAX_HK; global.__A2HK = A2_MAX_HK;');
+  + 'global.__A1CCM = A1_MAX_CCM; global.__A1HK = A1_MAX_HK; global.__A2HK = A2_MAX_HK; global.__HKU = HK_UBESTEMT_TIL;');
 const TYPES = global.__T;
 const REGIONS = global.__R;
 const A1_MAX_CCM = global.__A1CCM, A1_MAX_HK = global.__A1HK, A2_MAX_HK = global.__A2HK;
+const A_MIN_HK = global.__HKU;   // 50 hk: først her er "kræver A" afgjort (48-49 hk er "ikke afgjort", se a2Status i js/data.js)
 
 /* Samme cleanUrl() som build-meta.js og build-brand-pages.js: canonical uden
    ".html" (GitHub Pages løser den om), forsiden undtaget. Duplikeret med
@@ -345,7 +346,7 @@ const KOEREKORT_FACETS = [
    dem, der kraever A. Annoncer uden oplyst effekt kan hverken bekraeftes eller
    afvises og er ikke med ("vi gaetter aldrig"). Soegekortets hkMin-parameter
    goer, at "Soeg"-knappen giver samme udsnit. */
-const kraeverA = l => { const hk = hkEllerNull(l.power); return hk != null && hk > A2_MAX_HK && !l.kanNedsaettesA2; };
+const kraeverA = l => koerekortForListing(l) === 'A' && !l.kanNedsaettesA2;   // samme funktion som klientens maerkat (F2-001/C-01)
 KOEREKORT_FACETS.push({
   id: 'A', slug: 'koerekort-a',
   titel: 'Kørekort A',
@@ -510,7 +511,7 @@ function buildFacetList(alle){
   const kkFacets = KOEREKORT_FACETS.map(k => ({
     kind: 'koerekort', id: k.id, slug: k.slug, label: k.titel,
     titel: k.titel, frase: k.frase, forklaring: k.forklaring,
-    soeg: k.id === 'A' ? { koerekort: 'A', hkMin: A2_MAX_HK + 1 } : { koerekort: k.id },
+    soeg: k.id === 'A' ? { koerekort: 'A', hkMin: A_MIN_HK } : { koerekort: k.id },
     match: k.match || (l => passerKoerekort(l, k.id)),
   }));
   const regionFacets = REGIONS.map(r => ({
@@ -1063,7 +1064,7 @@ function soegekort(facet, items){
   f.push(faSelect('fa-aar', 'yearMin', 'Årgang', [['', 'Alle årgange'], ...AAR_TRIN.map(y => [y, `${y} og nyere`])], ''));
   if (isModel || isKombi) f.push(faSelect('fa-km', 'kmMax', 'Maks. km', [['', 'Alle'], ...[10000, 30000, 60000].map(k => [k, `Op til ${tal(k)} km`])], ''));
   const skjult = [];
-  if (isKk){ skjult.push(['koerekort', facet.id]); if (facet.id === 'A') skjult.push(['hkMin', A2_MAX_HK + 1]); }
+  if (isKk){ skjult.push(['koerekort', facet.id]); if (facet.id === 'A') skjult.push(['hkMin', A_MIN_HK]); }
   if (isRegion) skjult.push(['regions', facet.id]);
   if (isModel) skjult.push(['brands', facet.brand], ['model', facet.model]);
   if (isBudget) skjult.push(['maxPrice', facet.max]);
@@ -1716,7 +1717,7 @@ ${footer}
     : kind === 'budget' ? alle.filter(l => Number(l.price) > 0 && Number(l.price) <= Number(mount.dataset.facetMax))
     : kind === 'by' ? alle.filter(l => (mount.dataset.facetPostnr || '').split(',').includes(String(l.postnr || '').trim()))
     : kind === 'kombi' ? alle.filter(l => norm(l.brand) === norm(mount.dataset.facetBrand) && l.type === mount.dataset.facetType)
-    : id === 'A' ? alle.filter(l => { const hk = hkEllerNull(l.power); return hk != null && hk > A2_MAX_HK && !l.kanNedsaettesA2; })
+    : id === 'A' ? alle.filter(l => koerekortForListing(l) === 'A' && !l.kanNedsaettesA2)
     : alle.filter(l => passerKoerekort(l, id)))
     ;
   /* Samme raekkefoelge som bygget og som soegesiden: kilde-rundgang inden for

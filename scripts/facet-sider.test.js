@@ -41,12 +41,15 @@ test('alle otte typer har fire redaktionelle bokse uden tal om lageret', () => {
 test('kategori A: kun oplyst effekt over A2-grænsen, aldrig ukendt effekt', () => {
   assert.strictEqual(kraeverA(l(1, { power: 100 })), true);
   assert.strictEqual(kraeverA(l(2, { power: 47 })), false);
+  assert.strictEqual(kraeverA(l(6, { power: 48 })), false, '48 hk er ikke afgjort, ikke A');
+  assert.strictEqual(kraeverA(l(7, { power: 49 })), false);
+  assert.strictEqual(kraeverA(l(8, { power: 50 })), true);
   assert.strictEqual(kraeverA(l(3, { power: null })), false, 'ukendt effekt er ikke A');
   assert.strictEqual(kraeverA(l(4, { power: 100, kanNedsaettesA2: true })), false);
   const a = buildFacetList([]).find(f => f.slug === 'koerekort-a');
   assert.ok(a && a.match(l(5, { power: 120 })) && !a.match(l(6, { power: null })));
   assert.strictEqual(uoplystAntal(a, [l(1, { power: null }), l(2, { power: 90 })]), 1);
-  assert.match(facetSearchUrl(a), /koerekort=A/); assert.match(facetSearchUrl(a), /hkMin=48/);
+  assert.match(facetSearchUrl(a), /koerekort=A/); assert.match(facetSearchUrl(a), /hkMin=50/);
 });
 
 test('side: type over tærsklen er indekserbar, har én h1, canonical og alle faste links', () => {

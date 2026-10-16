@@ -269,7 +269,6 @@ ${udstyr.map(e => `            <li>${esc(equipmentLabel(e))}</li>`).join('\n')}
      maling; js/annonce.js kobler knapperne paa de samme handlinger som
      kortet i sidebjaelken. position:fixed => skubber intet (ingen CLS). -->
 <div class="listing-actionbar" id="listing-actionbar" hidden>
-  <button type="button" class="btn btn-primary" id="bar-contact">Skriv til sælger</button>
   <button type="button" class="btn btn-outline" id="bar-phone">Vis nummer</button>
 </div>
 

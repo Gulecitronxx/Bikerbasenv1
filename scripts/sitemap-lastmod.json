@@ -4,9 +4,9 @@
   "brandUrls": 21,
   "egne": 2,
   "eksterne": 602,
-  "maerkesider": 25,
-  "efterFacetUrls": 52,
-  "facetSider": 31,
+  "maerkesider": 27,
+  "efterFacetUrls": 55,
+  "facetSider": 34,
   "perKilde": {
    "rydbergsmc.dk": 74,
    "mcsyd.dk": 345,
@@ -16,19 +16,19 @@
  },
  "sider": {
   "budget-under-100000": {
-   "h": "e21582ad1160",
+   "h": "10959ba32ab6",
    "d": "2026-10-16"
   },
   "budget-under-30000": {
-   "h": "1fdc5728273a",
+   "h": "28a58201a6af",
    "d": "2026-10-16"
   },
   "budget-under-50000": {
-   "h": "73591011de36",
+   "h": "3e491eb17fdf",
    "d": "2026-10-16"
   },
   "budget-under-75000": {
-   "h": "6cceaac0fc7c",
+   "h": "2f68a64261db",
    "d": "2026-10-16"
   },
   "by-farum": {
@@ -36,7 +36,7 @@
    "d": "2026-10-16"
   },
   "by-horsens": {
-   "h": "b8bc4ec500b0",
+   "h": "b2bf161c8cb8",
    "d": "2026-10-16"
   },
   "by-noerresundby": {
@@ -44,19 +44,19 @@
    "d": "2026-10-16"
   },
   "by-skive": {
-   "h": "79a164624ca2",
+   "h": "8f71ea1db3c1",
    "d": "2026-10-16"
   },
   "by-thorsoe": {
-   "h": "a9909b3c2798",
+   "h": "7368abeb5568",
    "d": "2026-10-16"
   },
   "index": {
-   "h": "2b1aa6721a5a",
+   "h": "2519aebe7442",
    "d": "2026-10-16"
   },
   "koerekort-a": {
-   "h": "472022d093ed",
+   "h": "e88f47dedeff",
    "d": "2026-10-16"
   },
   "koerekort-a1": {
@@ -64,67 +64,67 @@
    "d": "2026-10-16"
   },
   "koerekort-a2": {
-   "h": "8f651401898d",
+   "h": "23b3c0cc1474",
    "d": "2026-10-16"
   },
   "maerke-aprilia": {
-   "h": "eaf67699e8bc",
-   "d": null
+   "h": "f1f649e0c24e",
+   "d": "2026-10-16"
   },
   "maerke-bmw": {
-   "h": "f8990ef659b7",
+   "h": "e75878de5a96",
    "d": "2026-10-16"
   },
   "maerke-harley-davidson": {
-   "h": "4ec7ce53035c",
-   "d": null
+   "h": "d2b0e2069fb9",
+   "d": "2026-10-16"
   },
   "maerke-honda": {
-   "h": "eae9abf11918",
+   "h": "386a0163d756",
    "d": "2026-10-16"
   },
   "maerke-kawasaki": {
-   "h": "49fff7a88636",
-   "d": null
+   "h": "14f92a9c4326",
+   "d": "2026-10-16"
   },
   "maerke-ktm": {
-   "h": "b324594025c8",
-   "d": null
+   "h": "2c62c3109c72",
+   "d": "2026-10-16"
   },
   "maerke-royal-enfield": {
-   "h": "a664e987ff98",
+   "h": "0a12d2b5d0cc",
    "d": "2026-10-16"
   },
   "maerke-suzuki": {
-   "h": "799163966de9",
+   "h": "3cf271f9dd5e",
    "d": "2026-10-16"
   },
   "maerke-triumph": {
-   "h": "204b1e4185ae",
+   "h": "c2436c12976d",
    "d": "2026-10-16"
   },
   "maerke-yamaha": {
-   "h": "1e53d289912f",
+   "h": "9ab86d0b8fa7",
    "d": "2026-10-16"
   },
   "maerker": {
-   "h": "28e3e7d6addd",
+   "h": "9ff806d158c6",
    "d": "2026-10-16"
   },
   "mc-harley-davidson-cruiser": {
-   "h": "010b243ec0fa",
+   "h": "2d34c3207bc3",
    "d": "2026-10-16"
   },
   "mc-honda-cruiser": {
-   "h": "74e9a8bee8aa",
+   "h": "3f92f9b68c2e",
    "d": "2026-10-16"
   },
   "mc-honda-naked": {
-   "h": "7ed4cce3f4d4",
+   "h": "81b4b1aec8ba",
    "d": "2026-10-16"
   },
   "mc-honda-touring": {
-   "h": "08a310cee745",
+   "h": "46095c73349f",
    "d": "2026-10-16"
   },
   "model-harley-davidson-flstc-heritage-softail-classic": {
@@ -132,11 +132,11 @@
    "d": "2026-10-16"
   },
   "model-honda-cb-1000-hornet": {
-   "h": "7686c079709d",
+   "h": "94f67c4adac0",
    "d": "2026-10-16"
   },
   "model-honda-cb-1000-r": {
-   "h": "d30b17160d03",
+   "h": "179987db47e4",
    "d": "2026-10-16"
   },
   "model-honda-cb-650-r": {
@@ -148,23 +148,23 @@
    "d": "2026-10-16"
   },
   "model-honda-cl-500-a": {
-   "h": "af29b39c9878",
+   "h": "2fb85250c337",
    "d": "2026-10-16"
   },
   "model-honda-cmx-1100-d-rebel": {
-   "h": "a17896396ae7",
+   "h": "6d3f72c33e57",
    "d": "2026-10-16"
   },
   "model-honda-cmx-500-rebel": {
-   "h": "75aaf76607d2",
+   "h": "5ecb948e906f",
    "d": "2026-10-16"
   },
   "model-honda-crf-1100-l-africa": {
-   "h": "6e1630910a6c",
+   "h": "fab7e9fe9a62",
    "d": "2026-10-16"
   },
   "model-honda-gl-1800-gold-wing": {
-   "h": "953d90dfc715",
+   "h": "1a28c8a2afe0",
    "d": "2026-10-16"
   },
   "model-honda-nc-750-x": {
@@ -172,7 +172,7 @@
    "d": "2026-10-16"
   },
   "model-honda-nt-1100-a": {
-   "h": "440a5583786f",
+   "h": "bf5398fe0d61",
    "d": "2026-10-16"
   },
   "model-honda-nx-500": {
@@ -180,7 +180,7 @@
    "d": "2026-10-16"
   },
   "model-honda-xl-750-transalp": {
-   "h": "1eeed02dc9c1",
+   "h": "ab023f4e9d9d",
    "d": "2026-10-16"
   },
   "model-suzuki-vlr-1800": {
@@ -208,15 +208,15 @@
    "d": "2026-10-16"
   },
   "region-midtjylland": {
-   "h": "c2a422ec56b9",
+   "h": "701af0109c29",
    "d": "2026-10-16"
   },
   "region-nordjylland": {
-   "h": "f96852d46a70",
+   "h": "e8226b60ab4e",
    "d": "2026-10-16"
   },
   "region-syddanmark": {
-   "h": "fe1ffe981eaa",
+   "h": "ac69c551620c",
    "d": "2026-10-16"
   },
   "sikkerhed": {
@@ -224,27 +224,27 @@
    "d": null
   },
   "soegning": {
-   "h": "661707232266",
+   "h": "d29003aa3535",
    "d": "2026-10-16"
   },
   "type-adventure": {
-   "h": "c5db14fc3343",
+   "h": "15bab0c81664",
    "d": "2026-10-16"
   },
   "type-cruiser": {
-   "h": "10283d70bd44",
+   "h": "54fc2ba05129",
    "d": "2026-10-16"
   },
   "type-naked": {
-   "h": "b878d5a44105",
+   "h": "4e54824ed03f",
    "d": "2026-10-16"
   },
   "type-sport": {
-   "h": "0d933b4c7543",
+   "h": "59ba16059061",
    "d": "2026-10-16"
   },
   "type-touring": {
-   "h": "4bab499f5685",
+   "h": "88e4155ba913",
    "d": "2026-10-16"
   },
   "vilkaar": {
