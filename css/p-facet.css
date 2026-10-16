@@ -195,7 +195,7 @@
 .fa-mf-gitter{ display:grid; gap: var(--space-4); grid-template-columns: 1fr; }
 @media (min-width:900px){ .fa-mf-gitter{ grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); gap: var(--space-5); align-items:start; } }
 .fa-dl{ margin:0; border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-sm); overflow:hidden; }
-.fa-dl > div{ display:grid; grid-template-columns: minmax(96px, 150px) minmax(0,1fr); gap: var(--space-3); padding: 12px var(--space-4); border-top:1px solid var(--color-border); }
+.fa-dl > div{ display:grid; grid-template-columns: minmax(96px, 150px) minmax(0,1fr); gap: var(--space-3); padding: 9px var(--space-4); border-top:1px solid var(--color-border); }
 .fa-dl > div:first-child{ border-top:0; }
 .fa-dl dt{ font-size:13.5px; color: var(--color-fg-muted); }
 .fa-dl dd{ margin:0; font-weight:600; font-size:15px; line-height:1.4; overflow-wrap:anywhere; }

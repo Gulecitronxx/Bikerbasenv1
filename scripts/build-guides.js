@@ -473,7 +473,7 @@ function findBlok(ctx){
       <h2 id="gd-find-h">Fra guide til søgning</h2>
       <p class="gd-find-lede">Har du læst dig til, hvad du leder efter? Start her.</p>
       <div class="gd-find-grid">
-        ${kol('Efter kørekort', 'Se annoncer, der ikke er udelukket til dit kørekort ud fra de oplyste tal.', kk.map(([f, t, b]) => li(f, t, b)), '')}
+        ${kol('Efter kørekort', 'Se annoncer, der ikke er udelukket til dit kørekort ud fra de oplyste tal.', kk.map(([f, t, b]) => li(f, t, b)), `<a class="gd-find-alle" href="guide-a2-koerekort.html">Læs om kørekortreglerne ${Icon.arrowRight}</a>`)}
         ${kol('Efter type', 'Fra naked til touring. Typen siger noget om kørestilling og brug.', typer.map(([id, t]) => li(`type-${id}.html`, t, '')), `<a class="gd-find-alle" href="guide-mc-typer.html">Sådan vælger du type ${Icon.arrowRight}</a>`)}
         ${kol('Efter mærke', 'De mærker, der har flest annoncer på Bikerbasen lige nu.', maerker.map(b => li(`maerke-${slugify(b)}.html`, b, '')), `<a class="gd-find-alle" href="maerker.html">Alle mærker ${Icon.arrowRight}</a>`)}
       </div>
