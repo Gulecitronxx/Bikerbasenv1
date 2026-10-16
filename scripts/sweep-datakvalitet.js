@@ -84,7 +84,7 @@ function tekst(r){
     `F-010  rækker med ENGROS: ${r.jargon}`,
     `F-011  mærker rettet: ${r.stavning.maerkerRettet} | modeller rettet: ${r.stavning.modellerRettet}`,
     r.stavning.eksempler.length ? lst(r.stavning.eksempler) : '',
-    r.friskhed ? `F-003  seneste bekræftelse ${r.friskhed.seneste}, ældste ${r.friskhed.aeldste}, ${r.friskhed.dageSiden} dage siden${r.friskhed.gammel ? ' (over 14 dage: "kan være ændret siden")' : ''}` : 'F-003  ingen sidst_set i snapshottet',
+    r.friskhed ? `F-003  median-bekræftelse ${r.friskhed.seneste}, ældste ${r.friskhed.aeldste}, ${r.friskhed.dageSiden} dage siden${r.friskhed.gammel ? ' (over 14 dage: "kan være ændret siden")' : ''}` : 'F-003  ingen sidst_set i snapshottet',
   ].filter(Boolean).join('\n');
 }
 

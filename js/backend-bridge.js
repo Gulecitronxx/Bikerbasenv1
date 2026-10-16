@@ -501,7 +501,8 @@ const MAERKE_AKRONYM = { bsa: 'BSA', ajs: 'AJS', mz: 'MZ', ktm: 'KTM', bmw: 'BMW
   'andet maerke': 'Ukendt', 'andet mærke': 'Ukendt',
   /* F-011 (w3-data): samme mærke, to skrivemåder. Lageret har "Sym"/"Fb Mondial",
      opret-annonce og mærkesiderne "SYM"/"FB Mondial", og ?brands=SYM gav 0. */
-  'sym': 'SYM', 'fb mondial': 'FB Mondial', 'fb-mondial': 'FB Mondial' };
+  'sym': 'SYM', 'fb mondial': 'FB Mondial', 'fb-mondial': 'FB Mondial',
+  'hd': 'Harley-Davidson' };
 function maerkeAkronym(m){
   if (!m) return m;
   const k = String(m).trim().toLowerCase().replace(/\s+/g, ' ');
@@ -668,7 +669,12 @@ function modelFraDeeplink(url, maerke){
   const re = new RegExp('^' + ord.join('[\\s-]+') + '\\s+', 'i');
   if (!re.test(t)) return null;
   t = t.replace(re, '').trim();
-  t = rensModelStoej(t, null) || '';
+  /* Små bogstaver i stien ("mt-07") er ikke kildens skrivemåde: korte/tal-ord i versaler, øvrige
+     med stort begyndelsesbogstav. Kilden egen skrivemåde fra titlen foretrækkes af kalderen. */
+  if (t === t.toLowerCase()){
+    t = t.split(' ').map(w => (/\d/.test(w) || w.replace(/[^a-zæøå]/gi, '').length <= 3) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+  t = fjernMaerkeDublet(b, rensModelStoej(t, null) || '');
   return t || null;
 }
 let _kendteMaerker = null;
@@ -702,7 +708,8 @@ function maerkeFraDeeplink(url){
    med mellemrum, derefter alfabetisk (så resultatet ikke afhænger af rækkefølgen). Rører kun streng-
    formen: ingen model flettes sammen med en anden. */
 function harmoniserStavning(liste){
-  const noegle = s => String(s || '').toLowerCase().replace(/[\s\-.]+/g, '');
+  // Punktum mellem to cifre er en decimal (CB 12.5 er ikke CB 125) og bevares.
+  const noegle = s => String(s || '').toLowerCase().replace(/[\s\-]+/g, '').replace(/(?<!\d)\.|\.(?!\d)/g, '');
   const versaler = s => (s.match(/[A-ZÆØÅ]/g) || []).length;
   const bedst = (taelling, kendt) => {
     const kand = [...taelling.entries()];
@@ -723,7 +730,7 @@ function harmoniserStavning(liste){
     return g;
   };
   const maerker = grupper(l => noegle(l.brand), 'brand');
-  const kendte = new Map(Object.keys(BRANDS_BY_MODEL).map(b => [noegle(b), b]));
+  const kendte = new Map([...Object.keys(BRANDS_BY_MODEL), ...Object.values(MAERKE_AKRONYM).filter(v => v !== 'Ukendt')].map(b => [noegle(b), b]));
   const vinderM = new Map([...maerker].map(([k, t]) => [k, bedst(t, kendte.get(k))]));
   for (const l of liste) if (l.brand) l.brand = vinderM.get(noegle(l.brand)) || l.brand;
   const modeller = grupper(l => noegle(l.brand) + '|' + noegle(l.model), 'model');
@@ -766,7 +773,12 @@ function normalizeExternalListing(row){
       const ren = t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() && t.toLowerCase() !== brand.toLowerCase() ? t : '';
       const fraTitel = fjernOrdDublet(fjernMaerkeDublet(maerke, rensModelStoej(ren, row.aargang) || ''));
       // Titlen var kun mærket: deeplinkets sti kan have modellen (F-008).
-      return fraTitel || modelFraDeeplink(row.url, brand) || '';
+      if (fraTitel) return fraTitel;
+      const sti = modelFraDeeplink(row.url, brand);
+      if (!sti) return '';
+      // Kildens egen skrivemåde i titlen slår stiens (MT-07, ikke Mt-07).
+      const hit = String(row.titel || '').match(new RegExp(sti.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[\s-]+/g, '[\\s-]*'), 'i'));
+      return hit ? hit[0] : sti;
     })(),
 
     /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og

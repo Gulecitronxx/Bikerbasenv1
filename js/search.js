@@ -963,19 +963,32 @@ function renderResultsCount(list){
    annoncerne kan være ændret siden. Egne annoncer har ingen dato, og så står der
    intet. Bygges i JS med tokens inline, som #uoplyst-note: resultatlinjen (#results-mix)
    er på mobil én klippet linje, og datoen skal kunne ombrydes. */
-function renderFriskNote(list){
+function sikFriskNote(){
   let el = document.getElementById('frisk-note');
+  if (el) return el;
+  const anker = document.getElementById('so-results-head');
+  if (!anker) return null;
+  el = document.createElement('p');
+  el.id = 'frisk-note';
+  const linjer = window.innerWidth < 640 ? 2 : 1;
+  el.style.cssText = 'margin:0 0 var(--space-3); color:var(--color-fg-muted); font-size:13px; line-height:1.4;'
+    + `min-height:${(linjer * 1.4).toFixed(1)}em;`;
+  anker.after(el);
+  return el;
+}
+
+function renderFriskNote(list){
+  let el = sikFriskNote();
   const frisk = senesteBekraeftet(list);
-  if (!el){
-    if (!frisk) return;
-    const anker = document.getElementById('so-results-head');
-    if (!anker) return;
-    el = document.createElement('p');
-    el.id = 'frisk-note';
-    el.style.cssText = 'margin:0 0 var(--space-3); color:var(--color-fg-muted); font-size:13px; line-height:1.4;';
-    anker.after(el);
+  /* Pladsen RESERVERES, så linjen ikke skubber kortene, når de indekserede annoncer er hentet (CLS):
+     to linjer på smal skærm, én på bred. Er de indekserede hentet (eller fejlet) og der ingen dato er,
+     skjules pladsen igen. */
+  const hentet = !!(window.DATA_STATUS && ['ok', 'fejlet'].includes(window.DATA_STATUS.eksterne));
+  if (!el) return;
+  if (!frisk){
+    if (hentet){ el.hidden = true; el.textContent = ''; }
+    return;
   }
-  if (!frisk){ el.hidden = true; el.textContent = ''; return; }
   el.hidden = false;
   el.title = frisk.aeldsteTekst === frisk.datoTekst ? '' : `Ældste bekræftelse: ${frisk.aeldsteTekst}`;
   el.textContent = frisk.samlet;
@@ -2503,6 +2516,7 @@ function wireMobileFilterDialog(){
 const nextTask = () => new Promise(r => setTimeout(r, 0));
 
 async function boot(){
+  sikFriskNote();   // pladsen reserveres FØR lageret er hentet, så resultaterne ikke hopper (CLS)
   await backendReady();
 
   // Etape 1: værktøjslinjens ikoner og de kontroller der står i HTML'en.

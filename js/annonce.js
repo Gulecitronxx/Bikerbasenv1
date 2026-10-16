@@ -807,6 +807,12 @@ function renderExternalListing(listing){
      med for eksterne annoncer (se noten ved sellerTypeNoteHTML nedenfor). */
   /* Noten siger kun "kilometerstanden er ikke oplyst", når den faktisk ikke er det (w3-data). */
   const kmIkkeOplyst = listing.km == null;
+  /* "Katalog over nye motorcykler" er kun sandt for en forhandlers katalogsti (MC Syds /Ny/). En privat
+     annonce er ikke et katalog: der siger noten kun, hvad kilden selv markerer. */
+  const iKatalog = /\/ny\//i.test(String(listing.externalUrl || ''));
+  const nyKilde = iKatalog
+    ? `Annoncen ligger i ${kilde}s katalog over nye motorcykler, ikke blandt de brugte${kmIkkeOplyst ? ', og kilometerstanden er derfor ikke oplyst' : ''}.`
+    : `Kilden markerer annoncen som ny${kmIkkeOplyst ? '' : ', og kilometertallet passer til det'}.`;
   const fabriksnyNote = erNy === true
     ? (listing.isDealer
         ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
@@ -816,14 +822,12 @@ function renderExternalListing(listing){
                 + ` og kilometerstanden er derfor ikke oplyst.`
               : (VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret.' : ''))
         : listing.saelgertype === 'privat'
-          ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-            + `over nye motorcykler, ikke blandt de brugte${kmIkkeOplyst ? ', og kilometerstanden er derfor ikke oplyst' : ''}. `
+          ? `<b>Kilden markerer den som ny.</b> ${nyKilde} `
             + `Sælgeren er privat — reklamationsret gælder ikke mellem private, `
             + `heller ikke når motorcyklen er ny (se nedenfor).`
           /* Runde 7 (D7-A1): saelgertypen er ikke oplyst af kilden — ingen paastand
              om reklamationsret den ene eller anden vej. */
-          : `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-            + `over nye motorcykler, ikke blandt de brugte${kmIkkeOplyst ? ', og kilometerstanden er derfor ikke oplyst' : ''}. `
+          : `<b>Kilden markerer den som ny.</b> ${nyKilde} `
             + `Spørg sælgeren om garanti- og reklamationsvilkår (se nedenfor).`)
     : null;
 

@@ -132,20 +132,23 @@ const FILTER_CONDITIONS = ['Ny', ...CONDITIONS];
    vi blindt på det og skrev "Fabriksny" på en Suzuki VZR1800 fra 2007 med 53.000 km.
    BESLUTNING (tærsklerne er ejerens at ændre, her og kun her):
 
-     NY_SIKKER_KM     = 50    til og med 50 km kaldes den fabriksny
-     NY_MAX_KM        = 500   over 500 km er en "ny" modsagt (= brugt); 51-500 km er
+     NY_SIKKER_KM     = 50    til og med 50 km kan den kaldes fabriksny
+     NY_MAX_KM        = 500   over 500 km er en "ny" modsagt (= Brugt); 51-500 km er
                               en demo-/forevisningsmaskine: intet mærke, ingen påstand
-     NY_MAX_ALDER_AAR = 3     årgang skal være >= indeværende år - 3
+     NY_MAX_ALDER_AAR = 3     ukendt km: kun en FORHANDLER med årgang >= i år - 3 kaldes ny
+     ALDER ALENE MODSIGER ALDRIG "ny" (en ubrugt lagermaskine fra 2021 er stadig ny): den
+     giver intet mærke, aldrig "Brugt" — og derfor flipper intet 1. januar.
      årgang under 1885 (fejldata som 0 og 1) tæller som ukendt
 
    Svar:
-     true   kilden siger ny, og ingen tal modsiger det, km er højst 50, og mindst ét
-            tal (eller kildens egen /Ny/-sti) bekræfter det
-     false  kilden siger brugt — ELLER siger ny, men km > 500 / årgang for gammel
-            (en modsagt 'ny' er en brugt motorcykel)
-     null   kilden siger ny, men vi hverken har km, årgang eller katalogsti at
-            bekræfte det med (Gul og Gratis uden tal), eller km er 51-500 (demomaskine):
-            intet mærke, ingen påstand, og ikke "Brugt" heller, for det ved vi ikke.
+     true   kilden siger ny, og
+              - km er kendt og højst 50, og årgangen (hvis kendt) er >= i år - 3, ELLER
+              - km er ukendt, og kilden er en katalog-kilde: MC Syds /Ny/-sti, eller en
+                forhandler med årgang >= i år - 3
+     false  kilden siger brugt — ELLER siger ny, men km > 500 (en modsagt 'ny')
+     null   alt andet, hvor kilden siger ny: demomaskine (51-500 km), gammel årgang,
+            eller en privat/ukendt sælger (Gul og Gratis) uden km — intet mærke, ingen
+            påstand om "katalog", og ikke "Brugt" heller, for det ved vi ikke.
 
    Rene tal ind, ingen DOM: bruges af kortet, annoncesiden, SEO og generatorerne
    via eksternErNy() i js/components.js. `nu` (årstal) kan gives i tests; ellers i år. */
@@ -176,10 +179,15 @@ function kildeNyStatus(l, nu){
   const km = tal(l.km);
   const a = tal(l.year);
   const aargang = (a != null && a >= 1885 && a <= 2100) ? a : null;   // 0 og 1 er fejldata, ikke en årgang
-  if (km != null && km > NY_MAX_KM) return false;
-  if (aargang != null && aargang < aar - NY_MAX_ALDER_AAR) return false;
+  if (km != null && km > NY_MAX_KM) return false;                       // kun km modsiger "ny"
   if (km != null && km > NY_SIKKER_KM) return null;                     // demomaskine
-  return (km != null || aargang != null || vedSti === true) ? true : null;
+  const ung = aargang != null && aargang >= aar - NY_MAX_ALDER_AAR;
+  const gammel = aargang != null && aargang < aar - NY_MAX_ALDER_AAR;
+  if (km != null) return gammel ? null : true;                          // km 0-50
+  // km ukendt: kun en katalog-kilde bekræfter
+  const forhandler = !!l && (l.saelgertype === 'forhandler' || (l.saelgertype === undefined && l.isDealer === true));
+  if (vedSti === true) return true;
+  return (forhandler && ung) ? true : null;
 }
 
 /* ---------- Tal, der er læst forkert af titlen (F-007) ----------
@@ -192,9 +200,12 @@ function kildeNyStatus(l, nu){
    fejler, hvis de to kopier driver):
      ccm < 45                           -> ukendt (findes ikke som motorcykel)
      ccm == annoncens årgang            -> ukendt (årstallet læst som kubik)
-     ccm == tallet efter "årg"          -> ukendt ("årg 90") — MEDMINDRE tallet også
-                                           står i titlen uden for "årg …" (Honda XR 80
-                                           årg 80, C90 årg 90: modellen hedder tallet)
+     ccm == tallet efter "årg"          -> ukendt ("årg 90") KUN MED BEVIS: et større tal
+                                           i titlen begynder med ccm-cifrene (XJ 900 årg 90),
+                                           eller årgangen er selv 19NN og tallet ikke står i
+                                           modelnavnet og hk ikke bakker ccm op. Uden bevis
+                                           bevares tallet (Puch Maxi S årg 50, XR 80 årg 80)
+     ccm > 6000                         -> ukendt (fejl; ægte store 2458/2600 bevares)
      hk/ccm over grænsen                -> det urealistiske nulstilles: hk > 250
                                            er det mistænkelige tal, ellers ccm
    Grænsen afhænger af størrelsen: op til 125 ccm 0,50 (RS125 racer 55 hk), 126-499 ccm
@@ -204,6 +215,7 @@ function kildeNyStatus(l, nu){
 function urimeligHkPrCcm(ccm){ return ccm <= 125 ? 0.50 : ccm < 500 ? 0.40 : 0.35; }
 const MIN_CCM = 45;
 const MAKS_HK = 250;
+const MAKS_CCM = 6000;   // over det er det en fejl (dokumenterede ægte store: 2458 Triumph Rocket, 2600 Boss Hoss)
 function saniterTal(t){
   const tal = v => (v == null || v === '' || !Number.isFinite(Number(v)) || Number(v) <= 0) ? null : Number(v);
   let ccm = tal(t && t.ccm);
@@ -213,11 +225,18 @@ function saniterTal(t){
   const am = tekst.match(/(?<![\p{L}\d])[aå]rg\.?\s*(\d{2,4})(?!\d)/iu);
   const aargTal = am ? Number(am[1]) : null;
   const udenAarg = am ? tekst.replace(am[0], ' ') : tekst;
-  const stdIModel = ccm != null && new RegExp('(?<!\\d)' + ccm + '(?!\\d)').test(udenAarg);
   if (ccm != null){
-    if (ccm < MIN_CCM) ccm = null;
+    const hkStoetter = hk != null && hk / ccm <= urimeligHkPrCcm(ccm);   // et realistisk hk-tal bakker ccm op
+    const stdIModel = new RegExp('(?<!\\d)' + ccm + '(?!\\d)').test(udenAarg);
+    /* "årg NN"-reglen kræver BEVIS for, at ccm er årstallet: et større tal i titlen, der
+       begynder med ccm-cifrene (XJ 900 årg 90), eller en årgang der selv er 19NN. Uden bevis
+       bevares tallet (Puch Maxi S årg 50, Honda Super Cub årg 90). */
+    const arg = aargTal != null && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal));
+    const storreTal = arg && new RegExp('(?<!\\d)' + ccm + '\\d+(?!\\d)').test(udenAarg);
+    const aargangEns = arg && aargang != null && (aargang === aargTal || aargang === 1900 + aargTal);
+    if (ccm < MIN_CCM || ccm > MAKS_CCM) ccm = null;
     else if (aargang != null && ccm === aargang) ccm = null;
-    else if (aargTal != null && !stdIModel && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal))) ccm = null;
+    else if (storreTal || (aargangEns && !stdIModel && !hkStoetter)) ccm = null;
   }
   if (ccm != null && hk != null && hk / ccm > urimeligHkPrCcm(ccm)){
     if (hk > MAKS_HK) hk = null; else ccm = null;
@@ -228,18 +247,21 @@ function saniterTal(t){
 /* ---------- Efterspørgsel er ikke et udbud (F-009) ----------
    "BSA / Triumph / Norton købes" lå som til salg under BSA. Kun entydige ord:
    "søger" er med vilje IKKE med ("søger ny ejer" er et salg). */
-const EFT_ORD = '(?:købes|søges|ønskes\\s+købt|køb\\s+ønskes)';
-const EFT_START = new RegExp('^[\\s"\'(]*' + EFT_ORD + '(?![\\p{L}\\d])(?!\\s+(?:ny|nyt)\\b)', 'iu');
-const EFT_SLUT = new RegExp('(?<![\\p{L}\\d])' + EFT_ORD + '[\\s.!)"\']*$', 'iu');
-const EFT_FORBEHOLD = /(?:^|\s)(?:kan|må|skal|ikke|evt|bør|vil|som)\s*$/iu;
-/* Kun når ordet er titlens START ("Købes: Honda CBR") eller SLUT ("BSA / Norton købes"), og
-   ikke når det følger kan/må/skal/ikke/evt ("kan købes med garanti" er et salg), og ikke
-   "søges ny ejer/nyt hjem". Midt i titlen er det aldrig en efterspørgsel. */
+/* REGEL: en annonce skjules KUN når titlen STARTER med en efterspørgselsfrase. Står ordet midt i
+   eller til sidst ("ny ejer søges", "bytte søges", "kan købes", "hurtig handel købes"), er det
+   et salg og beholdes: hellere ét efterspørgsels-opslag for meget i søgningen end et ægte salg
+   skjult. "Søger/Søges + ny/nyt/køber/ejer/hjem" er et salg ("Søger nyt hjem til min Honda"). */
+const EFT_START = new RegExp('^[\\s"\'(]*(?:'
+  + 'købes(?![\\p{L}\\d])(?!\\s+og\\s+sælges)'
+  + '|køb\\s*:'
+  + '|(?:søges|søger)(?![\\p{L}\\d])(?!\\s+(?:et\\s+|en\\s+)?(?:ny|nyt|nye|køber|ejer|hjem|kærlig|god|passende|liv)(?![\\p{L}\\d]))'
+  + '|ønskes\\s+købt(?![\\p{L}\\d])'
+  + '|vil\\s+købe(?![\\p{L}\\d])'
+  + '|leder\\s+efter(?![\\p{L}\\d])'
+  + '|efterlyses(?![\\p{L}\\d])'
+  + ')', 'iu');
 function erEfterspoergsel(titel){
-  const t = String(titel || '').trim();
-  if (EFT_START.test(t)) return true;
-  const m = EFT_SLUT.exec(t);
-  return !!m && !EFT_FORBEHOLD.test(t.slice(0, m.index));
+  return EFT_START.test(String(titel || '').trim());
 }
 
 /* ---------- Salgsmærkater (F-010) ----------
@@ -262,15 +284,18 @@ const GAMMEL_EFTER_DAGE = 14;
 const DA_MD = ['jan.', 'feb.', 'mar.', 'apr.', 'maj', 'jun.', 'jul.', 'aug.', 'sep.', 'okt.', 'nov.', 'dec.'];
 function senesteBekraeftet(liste, nu){
   const slut = nu instanceof Date ? nu : new Date();
-  let max = null, min = null;
+  const tider = [];
   for (const l of (liste || [])){
     const t = l && l.sidstSet ? Date.parse(l.sidstSet) : NaN;
     if (!Number.isFinite(t)) continue;
     if (t > slut.getTime() + 86400000) continue;   // en dato i fremtiden er ukendt, ikke "friskt"
-    if (max == null || t > max) max = t;
-    if (min == null || t < min) min = t;
+    tider.push(t);
   }
-  if (max == null) return null;
+  if (!tider.length) return null;
+  /* MEDIANEN, ikke maksimum: ét friskt opslag må ikke skjule et gammelt lager. */
+  tider.sort((a, b) => a - b);
+  const max = tider[Math.floor((tider.length - 1) / 2)];
+  const min = tider[0], nyeste = tider[tider.length - 1];
   const tekstFor = ms => {
     const d = new Date(ms);
     return `${d.getDate()}. ${DA_MD[d.getMonth()]}${d.getFullYear() !== slut.getFullYear() ? ' ' + d.getFullYear() : ''}`;
@@ -279,10 +304,10 @@ function senesteBekraeftet(liste, nu){
   const gammel = dage > GAMMEL_EFTER_DAGE;
   const datoTekst = tekstFor(max);
   return {
-    datoTekst, aeldsteTekst: tekstFor(min), dage, gammel,
-    tekst: `Senest bekræftet hos kilderne ${datoTekst}`,
+    datoTekst, aeldsteTekst: tekstFor(min), nyesteTekst: tekstFor(nyeste), dage, gammel,
+    tekst: `De fleste annoncer er bekræftet senest ${datoTekst}`,
     advarsel: gammel ? 'Annoncerne kan være ændret siden.' : '',
-    samlet: `Senest bekræftet hos kilderne ${datoTekst}${datoTekst.endsWith('.') ? '' : '.'}` + (gammel ? ' Annoncerne kan være ændret siden.' : ''),
+    samlet: `De fleste annoncer er bekræftet senest ${datoTekst}${datoTekst.endsWith('.') ? '' : '.'}` + (gammel ? ' Annoncerne kan være ændret siden.' : ''),
   };
 }
 
