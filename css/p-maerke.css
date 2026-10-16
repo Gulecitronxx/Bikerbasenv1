@@ -433,3 +433,26 @@
 
 .mk-cta-bar .btn{ width:auto; align-self:flex-start; }
 @media (min-width:700px) and (max-width:1099px){ .mk-cta .btn{ width:auto; align-self:flex-start; } }
+
+/* w7-visuel: etiketterne står i samme højde. Rækken var bundjusteret, og kørekortvælgeren er et par px højere end felterne
+   (3 px ramme + 2 x 4 px luft), så "Kørekort" stod 5 px lavere end de andre etiketter (forsiden bruger start-justering). */
+@media (min-width:1100px){ .mk-search{ align-items:start; } }
+.mk-search .kk-seg label{ min-height:37px; }
+/* w7-visuel (CLS): panelet står altid i sidste kolonne på række 1, uanset hvor mange kort JS lægger ind. Før fulgte det
+   kortene (display:contents + grid-column:auto): var den statiske række længere end den hydrerede, sprang panelet fra
+   x 1171 til x 257 (CLS 0,05-0,07 på mærker med få annoncer). 1-2 annoncer har deres egne skabeloner ovenfor. */
+@media (min-width:1100px){
+  .mk-featured:not([data-n="1"]):not([data-n="2"]) .mk-cta{ grid-column:-2 / -1; grid-row:1; }
+}
+/* Ingen annoncer (tomt lager eller offline): JS lægger "Ingen ... til salg"-feltet ind i kortenes plads. Det skal ikke
+   spænde over hele rækken og skubbe panelet ned/til siden (CLS 0,05-0,07 på aprilia, benelli, cagiva, cfmoto, hyosung, kymco,
+   rewaco, royal-enfield, sym, victory ved 1440): feltet tager kortenes kolonner, panelet bliver i sin. */
+@media (min-width:700px){
+  .mk-featured[data-n="1"] .mk-featured-kort > .empty-state{ grid-column:1; grid-row:1; }
+  .mk-featured[data-n="1"] .mk-cta{ grid-column:2; grid-row:1; }
+}
+@media (min-width:1100px){
+  .mk-featured[data-n="2"] .mk-featured-kort > .empty-state{ grid-column:1 / span 2; grid-row:1; }
+  .mk-featured[data-n="2"] .mk-cta{ grid-column:3; grid-row:1; }
+  .mk-featured:not([data-n="1"]):not([data-n="2"]) .mk-featured-kort > .empty-state{ grid-column:1 / -2; grid-row:1; }
+}
