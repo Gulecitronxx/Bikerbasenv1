@@ -99,7 +99,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { siteUrl, fetchListings, fetchExternalListings, siteParts, esc, browserModules, listingSlug } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, markerTvaerkildeDubletter, Sortering } = browserModules();
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, markerTvaerkildeDubletter, Sortering, eksternErNy } = browserModules();
 const BASE = siteUrl();
 const { KILDE_URL, KK_FAKTA, KK_BOKSE, TYPE_VIDEN, REGION_VIDEN, GUIDE, EGNE_IKONER } = require('./facet-indhold');
 // js/icons.js er en ren const-erklaering uden DOM-afhaengighed i toppen — samme
@@ -198,7 +198,7 @@ function sorterSubstans(items){
    91 kort "Ny"-mærkat, og modelsiden skrev "Brugte Honda CMX 500 Rebel" over
    en tekst, der selv sagde "12 af dem sælges som nye". Mærkesiden har længe
    haft den rigtige regel (D7-M1); den flyttes hertil. */
-const erNyVare = l => l.condition === 'ny' || l.kildeStand === 'ny';
+const erNyVare = l => eksternErNy(l) === true;   // F-002: den fælles ny-test (js/data.js kildeNyStatus)
 function brugtOrd(items, ental, flertal){
   const nye = items.filter(erNyVare).length;
   const en = items.length === 1;
@@ -525,7 +525,7 @@ function introForModel(facet, items){
   const km = items.map(l => tilTal(l.km)).filter(k => k !== null && k >= 0).sort((a, b) => a - b);
   let s = `Der er <strong id="facet-intro-antal">${items.length}</strong> ${esc(facet.brand)} ${esc(facet.model)} til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen${tekst}`;
   if (km.length > 1 && km[0] !== km[km.length - 1]) s += ` Kilometertal fra ${tal(km[0])} til ${tal(km[km.length - 1])} km${km.length < items.length ? ` (${items.length - km.length} uden oplyst km)` : ''}.`;
-  const nye = items.filter(l => l.condition === 'ny' || l.kildeStand === 'ny').length;
+  const nye = items.filter(erNyVare).length;
   if (nye) s += ` ${nye === items.length ? (en ? 'Den' : 'Alle') : nye} ${nye === items.length ? 'sælges som ny' : `af dem sælges som nye`}.`;
   s += kildeSaetning(items);
   return s;

@@ -397,7 +397,7 @@ function populateFilterUI(){
   document.getElementById('filter-regions').innerHTML = REGIONS.map(r =>
     `<label class="checkbox-row"><input type="checkbox" data-region="${r}"><span>${r}</span>${FACET_SLOT}</label>`).join('');
 
-  document.getElementById('filter-conditions').innerHTML = CONDITIONS.map(c =>
+  document.getElementById('filter-conditions').innerHTML = FILTER_CONDITIONS.map(c =>   // F-006: "Ny" er en filterværdi (ikke en del af CONDITIONS)
     `<label class="checkbox-row"><input type="checkbox" data-condition="${c}"><span>${c}</span>${FACET_SLOT}</label>`).join('');
 
   document.getElementById('filter-age').innerHTML =
@@ -903,6 +903,7 @@ function forklarIndekseret(){
 
 function renderResultsCount(list){
   const total = list.length;
+  renderFriskNote(list);
   /* Runde 9 (D9-S2): en delt ?page=7 skal sige, hvor man staar — over folden,
      ikke kun ved sideinddelingen i bunden. */
   const totalSider = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -955,6 +956,29 @@ function renderResultsCount(list){
     `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>` +
     `</span>`;
   mix.querySelector('#mix-info-btn').addEventListener('click', forklarIndekseret);
+}
+
+/* F-003: hvor frisk er det, vi viser? Dato = nyeste sidst_set i resultatet, hos
+   kilderne; over 14 dage (GAMMEL_EFTER_DAGE i js/data.js) siger linjen også, at
+   annoncerne kan være ændret siden. Egne annoncer har ingen dato, og så står der
+   intet. Bygges i JS med tokens inline, som #uoplyst-note: resultatlinjen (#results-mix)
+   er på mobil én klippet linje, og datoen skal kunne ombrydes. */
+function renderFriskNote(list){
+  let el = document.getElementById('frisk-note');
+  const frisk = senesteBekraeftet(list);
+  if (!el){
+    if (!frisk) return;
+    const anker = document.getElementById('so-results-head');
+    if (!anker) return;
+    el = document.createElement('p');
+    el.id = 'frisk-note';
+    el.style.cssText = 'margin:0 0 var(--space-3); color:var(--color-fg-muted); font-size:13px; line-height:1.4;';
+    anker.after(el);
+  }
+  if (!frisk){ el.hidden = true; el.textContent = ''; return; }
+  el.hidden = false;
+  el.title = frisk.aeldsteTekst === frisk.datoTekst ? '' : `Ældste bekræftelse: ${frisk.aeldsteTekst}`;
+  el.textContent = frisk.samlet;
 }
 
 /* ============ Swipe-visning (mobil-first, à la 123mc-appen) ============ */

@@ -144,17 +144,22 @@ async function buildForside(){
       uoplystHint.hidden = !tekst;
     }
 
+    /* F-003: ærlig alder på det viste. Nyeste sidst_set blandt de annoncer, tallet gælder. */
+    const frisk = dataKlar && n ? senesteBekraeftet(list) : null;
+    const friskTekst = frisk
+      ? ` <span class="sk-frisk" title="${frisk.aeldsteTekst === frisk.datoTekst ? '' : 'Ældste bekræftelse: ' + frisk.aeldsteTekst}">· ${frisk.samlet}</span>`
+      : '';
     if (!dataKlar){
       countHint.textContent = '';
     } else if (harSøgt){
       countHint.innerHTML = n
-        ? `Din søgning matcher <b>${daTal(n)}</b> ${ord}`
+        ? `Din søgning matcher <b>${daTal(n)}</b> ${ord}${friskTekst}`
         : `Ingen annoncer matcher lige nu — prøv at udvide søgningen`;
     } else {
       /* Det præcise tal, ikke et afrundet "380+". Under 10 annoncer skriver vi det ikke — så
          reklamerer vi for en tom markedsplads. "i dag" er udeladt med vilje: vi kender ikke
          annoncernes alder hos kilden. */
-      countHint.innerHTML = n >= 10 ? `<b>${daTal(n)}</b> annoncer i Danmark` : '';
+      countHint.innerHTML = n >= 10 ? `<b>${daTal(n)}</b> annoncer i Danmark${friskTekst}` : '';
     }
     if (resetBtn) resetBtn.hidden = !harSøgt;
   };

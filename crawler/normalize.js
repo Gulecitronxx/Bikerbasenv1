@@ -92,6 +92,40 @@ function parseCcm(raa){
   return v;
 }
 
+/* ---------- Urealistiske tal (F-007, w3-data) ----------
+   SPEJL af saniterTal() i js/data.js — browseren kan ikke require() crawleren,
+   og crawleren kan ikke require() js/data.js. Holdes i sync i SAMME commit;
+   js/data-kvalitet.test.js sammenligner de to kopier på tusindvis af kombinationer
+   og fejler, hvis de driver.
+
+   En REN funktion: den er endnu IKKE koblet ind i parse.js/run.js, så crawlerens
+   adfærd og de gemte felter er uændrede. Kobles den på, gemmes ccm/hk rensede ved
+   kilden, i stedet for kun at blive renset ved visning (ejerens beslutning).
+
+     ccm < 45                 -> null
+     ccm == årgang            -> null
+     ccm == tallet efter årg  -> null  ("Yamaha xj 900 årg 90")
+     hk/ccm > 0,30            -> hk > 250 nulstilles, ellers ccm.
+   Ægte store motorer bevares (GL1800 1832 ccm, Harley 1923 ccm). */
+function renseUrealistiskeTal(t){
+  const tal = v => (v == null || v === '' || !Number.isFinite(Number(v)) || Number(v) <= 0) ? null : Number(v);
+  let ccm = tal(t && t.ccm);
+  let hk = tal(t && t.hk);
+  const aargang = tal(t && t.aargang);
+  const tekst = String((t && t.tekst) || '');
+  const am = tekst.match(/(?<![\p{L}\d])[aå]rg\.?\s*(\d{2,4})(?!\d)/iu);
+  const aargTal = am ? Number(am[1]) : null;
+  if (ccm != null){
+    if (ccm < 45) ccm = null;
+    else if (aargang != null && ccm === aargang) ccm = null;
+    else if (aargTal != null && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal))) ccm = null;
+  }
+  if (ccm != null && hk != null && hk / ccm > 0.30){
+    if (hk > 250) hk = null; else ccm = null;
+  }
+  return { ccm, hk };
+}
+
 /* ---------- Kubik udledt af modelnavnet ----------
    109 af MC Syds 332 annoncer har ingen ccm i kortet. Konsekvensen er ikke et
    tomt felt: koerekortForListing() i js/data.js svarer null, når både hk og
@@ -734,6 +768,7 @@ function erKildensPladsholder(url){
 
 module.exports = {
   parsePris, parseKm, parseAargang, parseCcm, parsePostnr, parseHk,
+  renseUrealistiskeTal,
   erKildensPladsholder,
   udledCcmFraModel, MINDSTE_UDLEDTE_CCM,
   normaliserMaerke, normaliserSaelgertype, normaliserType, normaliserStand,

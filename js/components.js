@@ -554,7 +554,10 @@ function eksternSalgsmarkoerer(l){
     .map(s => String(s || '').trim())
     .filter(Boolean);
   if (!alle.length) return { tekst: '', alle };
-  return { tekst: alle[0] + (alle.length > 1 ? ` +${alle.length - 1}` : ''), alle };
+  /* F-010: kortet viser en neutral tekst ("Handelspris" i stedet for ENGROS);
+     kildens eget ord står stadig i `kilde` og i chippens title. */
+  const pene = alle.map(salgsmarkoerLabel);
+  return { tekst: pene[0] + (pene.length > 1 ? ` +${pene.length - 1}` : ''), alle: pene, kilde: alle };
 }
 
 /* ============ CVR: modulus 11 ============
@@ -750,15 +753,11 @@ function eksternPrisTekst(price){
    Vi opfinder ingenting. Kan hverken feltet eller adressen læses, svarer
    funktionen null, og der står ingenting. Se work/DECISIONS.md. */
 function eksternErNy(l){
-  const kildensOrd = String(l.kildeStand || '').toLowerCase().trim();
-  if (kildensOrd === 'ny' || kildensOrd === 'new') return true;
-  if (kildensOrd === 'brugt' || kildensOrd === 'used') return false;
-
-  const url = String(l.externalUrl || '');
-  if (!url) return null;
-  const m = url.match(/\/(ny|brugt)\//i);
-  if (!m) return null;
-  return m[1].toLowerCase() === 'ny';
+  /* F-002 (w3-data): kildens ord er IKKE længere nok. "ny" gælder kun, når km og
+     årgang ikke modsiger det; en modsagt "ny" er false (brugt), en ubevist er null.
+     Reglen og tærsklerne bor i kildeNyStatus() i js/data.js — ét sted for kort,
+     annonceside, SEO og alle generatorer. */
+  return kildeNyStatus(l);
 }
 
 /* ============ Annoncekortet — ÉT kort på alle flader ============
@@ -835,7 +834,7 @@ function listingCardHTML(l, i){
   /* Fabriksnye motorcykler hos forhandleren (kildens eget ord eller adressen). "Ny" står først i
      linjen: det er også et juridisk vilkår (garanti frem for reklamationsret). */
   const nyTitel = f.ny
-    ? `Annoncen ligger i ${kildenavn}s katalog over NYE motorcykler. Den er ikke brugt${f.saelgerType === 'Forhandler' ? ': du køber med garanti frem for reklamationsret, og kilometerstanden er derfor ikke oplyst' : ' — spørg sælgeren om garanti- og reklamationsvilkår'}.`
+    ? `Annoncen ligger i ${kildenavn}s katalog over NYE motorcykler. Den er ikke brugt${f.saelgerType === 'Forhandler' ? ': du køber med garanti frem for reklamationsret' + (f.km == null ? ', og kilometerstanden er derfor ikke oplyst' : '') : ' — spørg sælgeren om garanti- og reklamationsvilkår'}.`
     : '';
   const linje = [];
   if (f.ny) linje.push(`<span class="rk-ny" title="${escapeHTML(nyTitel)}">Ny</span>`);

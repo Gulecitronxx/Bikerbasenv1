@@ -498,7 +498,10 @@ const MAERKE_AKRONYM = { bsa: 'BSA', ajs: 'AJS', mz: 'MZ', ktm: 'KTM', bmw: 'BMW
                       maerkeChips springer den over). Vi gaetter ikke paa, hvad
                       der stod i stedet. */
   'royal-enfield': 'Royal Enfield', 'lauge': 'Lauge Jensen',
-  'andet maerke': 'Ukendt', 'andet mærke': 'Ukendt' };
+  'andet maerke': 'Ukendt', 'andet mærke': 'Ukendt',
+  /* F-011 (w3-data): samme mærke, to skrivemåder. Lageret har "Sym"/"Fb Mondial",
+     opret-annonce og mærkesiderne "SYM"/"FB Mondial", og ?brands=SYM gav 0. */
+  'sym': 'SYM', 'fb mondial': 'FB Mondial', 'fb-mondial': 'FB Mondial' };
 function maerkeAkronym(m){
   if (!m) return m;
   const k = String(m).trim().toLowerCase().replace(/\s+/g, ' ');
@@ -610,6 +613,12 @@ function rensModelStoej(model, p_aargang){
    databasen; en direkte adresse til kopien virker stadig (EXTERNAL_DUBLETTER).
    To private annoncer med samme tal roeres ikke — de kan vaere to maskiner. */
 function markerTvaerkildeDubletter(liste){
+  /* F-009: "BSA / Triumph / Norton købes" er en efterspørgsel, ikke et udbud. De
+     tæller ikke med i lageret, men en direkte adresse virker (de ligger i
+     `dubletter`, som opslag på id slår op i) — og de ligger separat i `efterspoergsler`. */
+  const efterspoergsler = liste.filter(l => erEfterspoergsel(l.kildeTitel) || erEfterspoergsel(l.model));
+  if (efterspoergsler.length) liste = liste.filter(l => !efterspoergsler.includes(l));
+  harmoniserStavning(liste);   // F-011
   const noegle = l => (l.year && l.price && l.postnr)
     ? [String(l.brand || '').toLowerCase(), l.year, l.price, l.postnr].join('|') : null;
   const grupper = new Map();
@@ -627,17 +636,110 @@ function markerTvaerkildeDubletter(liste){
       (vaert.ogsaaHos = vaert.ogsaaHos || []).push({ navn: k.source && k.source.navn, domaene: k.source && k.source.domaene, url: k.externalUrl, id: k.id });
     }
   }
-  return { beholdt: liste.filter(l => !vaek.has(l)), dubletter: liste.filter(l => vaek.has(l)) };
+  return { beholdt: liste.filter(l => !vaek.has(l)), dubletter: [...liste.filter(l => vaek.has(l)), ...efterspoergsler], efterspoergsler };
+}
+
+/* ---------- Deeplinkets sti som kilde til model og mærke (F-008) ----------
+   MC Syd skriver titlen i stien: .../Brugt/Honda%20GL%201800%20Gold%20Wing/165233.
+   Når titlen kun er mærket ("Honda"), eller mærket er "Ukendt", står svaret i
+   deeplinket, som vi allerede har gemt (CLAUDE.md regel 2). Kun stier af den form
+   (titel-segment efterfulgt af et rent tal) læses; alt andet giver null — ingen gæt. */
+function deeplinkTitel(url){
+  let u;
+  try { u = new URL(String(url || '')); } catch (e){ return null; }
+  const dele = u.pathname.split('/').filter(Boolean);
+  if (dele.length < 2 || !/^\d+$/.test(dele[dele.length - 1])) return null;
+  let t;
+  try { t = decodeURIComponent(dele[dele.length - 2]); } catch (e){ return null; }
+  t = t.replace(/\s+/g, ' ').trim();
+  if (!t || /^(ny|brugt|new|used)$/i.test(t)) return null;
+  return t;
+}
+function modelFraDeeplink(url, maerke){
+  let t = deeplinkTitel(url);
+  if (!t) return null;
+  const b = String(maerke || '').trim();
+  if (b && t.toLowerCase() === b.toLowerCase()) return null;
+  if (b && t.toLowerCase().startsWith(b.toLowerCase() + ' ')) t = t.slice(b.length).trim();
+  t = rensModelStoej(t, null) || '';
+  return t || null;
+}
+let _kendteMaerker = null;
+function kendteMaerker(){
+  if (_kendteMaerker) return _kendteMaerker;
+  const m = new Map();
+  const nok = s => String(s).toLowerCase().replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+  Object.keys(BRANDS_BY_MODEL).forEach(b => m.set(nok(b), b));
+  Object.keys(MAERKE_AKRONYM).forEach(k => { const v = MAERKE_AKRONYM[k]; if (v !== 'Ukendt') m.set(nok(v), v); m.set(nok(k), v === 'Ukendt' ? null : v); });
+  _kendteMaerker = { m, nok };
+  return _kendteMaerker;
+}
+function maerkeFraDeeplink(url){
+  const t = deeplinkTitel(url);
+  if (!t) return null;
+  const { m, nok } = kendteMaerker();
+  const ord = nok(t).split(' ');
+  for (const n of [2, 1]){
+    if (ord.length < n) continue;
+    const hit = m.get(ord.slice(0, n).join(' '));
+    if (hit) return hit;
+  }
+  return null;
+}
+
+/* ---------- Samme mærke og model, forskellig stavemåde (F-011) ----------
+   NT 1100 D / Nt 1100 d, XV 750 Virago / Xv 750 virago, CBF 1000 A / CBF 1000A.
+   Hver stavemåde var en facetværdi for sig. Nøglen er små bogstaver uden
+   mellemrum, bindestreg og punktum; den stavemåde, der er flest af, vinder —
+   ved lighed den med flest versaler, derefter den med mellemrum, derefter
+   alfabetisk (så resultatet ikke afhænger af rækkefølgen). Rører kun streng-
+   formen: ingen model flettes sammen med en anden. */
+function harmoniserStavning(liste){
+  const noegle = s => String(s || '').toLowerCase().replace(/[\s\-.]+/g, '');
+  const versaler = s => (s.match(/[A-ZÆØÅ]/g) || []).length;
+  const bedst = (taelling, kendt) => {
+    const kand = [...taelling.entries()];
+    if (kendt){ const k = kand.find(([v]) => v === kendt); if (k) return k[0]; }
+    kand.sort((a, b) => b[1] - a[1] || versaler(b[0]) - versaler(a[0]) || b[0].length - a[0].length || (a[0] < b[0] ? -1 : 1));
+    return kand[0][0];
+  };
+  const grupper = (nogleFn, felt, filter) => {
+    const g = new Map();
+    for (const l of liste){
+      if (!l[felt] || (filter && !filter(l))) continue;
+      const k = nogleFn(l);
+      if (!g.has(k)) g.set(k, new Map());
+      g.get(k).set(l[felt], (g.get(k).get(l[felt]) || 0) + 1);
+    }
+    return g;
+  };
+  const maerker = grupper(l => noegle(l.brand), 'brand');
+  const kendte = new Map(Object.keys(BRANDS_BY_MODEL).map(b => [noegle(b), b]));
+  const vinderM = new Map([...maerker].map(([k, t]) => [k, bedst(t, kendte.get(k))]));
+  for (const l of liste) if (l.brand) l.brand = vinderM.get(noegle(l.brand)) || l.brand;
+  const modeller = grupper(l => noegle(l.brand) + '|' + noegle(l.model), 'model');
+  const vinderMod = new Map([...modeller].map(([k, t]) => [k, bedst(t)]));
+  for (const l of liste) if (l.model) l.model = vinderMod.get(noegle(l.brand) + '|' + noegle(l.model)) || l.model;
+  return liste;
 }
 
 function normalizeExternalListing(row){
   const kilde = row.kilde || {};
+  /* F-008: er mærket "Ukendt", kan deeplinkets sti nævne et kendt mærke. */
+  const brand = (() => {
+    const b = maerkeAkronym(row.maerke) || 'Ukendt';
+    return b === 'Ukendt' ? (maerkeFraDeeplink(row.url) || 'Ukendt') : b;
+  })();
+  /* F-007: tal læst forkert af titlen (ccm = årstal, 1200 læst som 120). */
+  const tal = saniterTal({ ccm: row.ccm, hk: row.hk, aargang: row.aargang, tekst: [row.titel, row.model].filter(Boolean).join(' ') });
+  /* F-002/F-006: "ny" kun når tallene ikke modsiger kilden; en modsagt ny er brugt. */
+  const nyStatus = kildeNyStatus({ kildeStand: row.stand, externalUrl: row.url, km: row.km, year: row.aargang });
   return {
     id: row.id,
     /* Runde 6 (D6-F7): akronymer, kilden skrev med smaa bogstaver og crawleren
        gav stort forbogstav ("Bsa"). Rammer de raekker, der allerede ligger;
        crawler/normalize.js har samme opslag for nye. */
-    brand: maerkeAkronym(row.maerke) || 'Ukendt',
+    brand,
     /* Falder tilbage på titlen, når kilden ikke har en model — MEN ikke når
        titlen bare ER mærket. Seks af MC Syds annoncer har kun "Honda" eller
        "BMW" som titel (deres egen URL-slug siger det samme, så det er ikke
@@ -648,11 +750,14 @@ function normalizeExternalListing(row){
     model: (() => {
       // Runde 7 (D7-S4): stoej klippes ogsaa af de raekker, der ligger.
       // Runde 13 (R13-5): og maerket fjernes, hvis modellen gentager det.
-      const maerke = maerkeAkronym(row.maerke) || '';
+      const maerke = brand === 'Ukendt' ? (maerkeAkronym(row.maerke) || '') : brand;
       if (row.model) return fjernOrdDublet(fjernMaerkeDublet(maerke, rensModelStoej(row.model, row.aargang) || ''));
-      const t = String(row.titel || '').trim();
-      const ren = t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() ? t : '';
-      return fjernOrdDublet(fjernMaerkeDublet(maerke, rensModelStoej(ren, row.aargang) || ''));
+      // F-008: "Ukendt MTX800" -> "MTX800" ("Ukendt" er sentinelen, ikke en del af modellen).
+      const t = String(row.titel || '').trim().replace(/^ukendt\s+/i, '');
+      const ren = t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() && t.toLowerCase() !== brand.toLowerCase() ? t : '';
+      const fraTitel = fjernOrdDublet(fjernMaerkeDublet(maerke, rensModelStoej(ren, row.aargang) || ''));
+      // Titlen var kun mærket: deeplinkets sti kan have modellen (F-008).
+      return fraTitel || modelFraDeeplink(row.url, brand) || '';
     })(),
 
     /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og
@@ -683,7 +788,7 @@ function normalizeExternalListing(row){
 
     year: row.aargang,
     km: row.km,
-    ccm: row.ccm,
+    ccm: tal.ccm,
 
     /* MC Syds kort har fire specrækker — årgang, km, HK, ccm. Hestekræfterne
        stod der hele tiden og blev tabt, fordi kolonnen manglede. Med `hk`
@@ -691,7 +796,7 @@ function normalizeExternalListing(row){
        får en kategori mod 9 før. De sidste 111 er over 125 ccm uden oplyst
        effekt, hvor kategorien ikke KAN afgøres — og efter e29c381 lyver
        js/data.js ikke længere om dem. */
-    power: row.hk ?? null,
+    power: tal.hk,
 
     price: row.pris_dkk,
     postnr: row.postnr,
@@ -700,7 +805,7 @@ function normalizeExternalListing(row){
     // Kildens stand (migration 015) OVERSAT til vores ordliste. Se
     // ordlisten ovenfor: "brugt" oversættes, "ny" har endnu ingen plads i
     // CONDITIONS og bliver derfor null.
-    condition: conditionFraStand(row.stand),
+    condition: nyStatus === true ? 'Ny' : nyStatus === false ? 'Brugt' : conditionFraStand(row.stand),
 
     /* ---------- Kildens EGNE ord, ubearbejdet ----------
 

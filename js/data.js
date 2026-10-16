@@ -116,6 +116,150 @@ const TYPES = [
 
 const CONDITIONS = ['Som ny', 'God stand', 'Brugt', 'Defekt/Projekt'];
 
+/* ---------- Stand-filteret har ét ord mere end annoncens stand (F-006) ----------
+
+   CONDITIONS er de fire værdier, `listings.condition` må have (check constraint
+   i supabase/008_haerdning.sql), og js/opret-annonce.js bygger sin dropdown af
+   den. 'Ny' må IKKE ind i den: en privat sælger skal ikke kunne vælge 'Ny', og
+   databasen ville afvise det. Søgningens stand-facet bygges derfor af
+   FILTER_CONDITIONS, og kun indekserede annoncer kan få 'Ny' som condition —
+   når kildeNyStatus() nedenfor kan bekræfte det. */
+const FILTER_CONDITIONS = ['Ny', ...CONDITIONS];
+
+/* ---------- Hvornår er en annonce "ny"? (F-002) ----------
+
+   Kilden siger 'ny' (MC Syds /Ny/-katalog, Gul og Gratis' stand-felt). Før stolede
+   vi blindt på det og skrev "Fabriksny" på en Suzuki VZR1800 fra 2007 med 53.000 km.
+   BESLUTNING (tærsklerne er ejerens at ændre, her og kun her):
+
+     NY_MAX_KM        = 500   en ny motorcykel har kørt til/fra forhandler, ikke mere
+     NY_MAX_ALDER_AAR = 3     årgang skal være >= indeværende år - 3
+
+   Svar:
+     true   kilden siger ny, og ingen tal modsiger det, og mindst ét tal (eller
+            kildens egen /Ny/-sti) bekræfter det
+     false  kilden siger brugt — ELLER siger ny, men km > 500 / årgang for gammel
+            (en modsagt 'ny' er en brugt motorcykel)
+     null   kilden siger ny, men vi hverken har km, årgang eller katalogsti at
+            bekræfte det med (Gul og Gratis uden tal): intet mærke, ingen påstand,
+            og ikke "Brugt" heller, for det ved vi heller ikke.
+
+   Rene tal ind, ingen DOM: bruges af kortet, annoncesiden, SEO og generatorerne
+   via eksternErNy() i js/components.js. `nu` (årstal) kan gives i tests; ellers i år. */
+const NY_MAX_KM = 500;
+const NY_MAX_ALDER_AAR = 3;
+function kildeNyStatus(l, nu){
+  const aar = nu == null ? new Date().getFullYear() : nu;
+  const ord = String((l && l.kildeStand) || '').toLowerCase().trim();
+  const m = String((l && l.externalUrl) || '').match(/\/(ny|brugt)\//i);
+  const vedSti = m ? m[1].toLowerCase() === 'ny' : null;
+  let kilde = null;
+  if (ord === 'ny' || ord === 'new') kilde = true;
+  else if (ord === 'brugt' || ord === 'used') kilde = false;
+  else kilde = vedSti;               // nødudgang for rækker uden stand-felt
+  if (kilde !== true) return kilde;  // false eller null
+  const tal = v => (v == null || v === '' || !Number.isFinite(Number(v))) ? null : Number(v);
+  const km = tal(l.km);
+  const aargang = tal(l.year);
+  if (km != null && km > NY_MAX_KM) return false;
+  if (aargang != null && aargang < aar - NY_MAX_ALDER_AAR) return false;
+  return (km != null || aargang != null || vedSti === true) ? true : null;
+}
+
+/* ---------- Tal, der er læst forkert af titlen (F-007) ----------
+
+   GoG-titler som "Kawasaki GPZ 500S årg 1992" endte med ccm 1992 (årstallet),
+   "Yamaha xj 900 årg 90" med ccm 90, og "Triumph Bonneville T 120" med ccm 120
+   (1200 læst som 120). Kørekortsvaret og "Lignende" bygger på tallene.
+
+   Reglerne (spejlet i crawler/normalize.js renseUrealistiskeTal(); en test
+   fejler, hvis de to kopier driver):
+     ccm < 45                           -> ukendt (findes ikke som motorcykel)
+     ccm == annoncens årgang            -> ukendt (årstallet læst som kubik)
+     ccm == tallet efter "årg"          -> ukendt ("årg 90")
+     hk/ccm > 0,30                      -> det urealistiske nulstilles: hk > 250
+                                           er det mistænkelige tal, ellers ccm
+   Ægte store motorer bevares (GL1800 1832 ccm, Harley 1923 ccm, Hayabusa 190 hk
+   på 1340 ccm = 0,14). Grænsen 0,30 ligger over de hurtigste serie-motorer (en
+   125 2-takt giver ~0,30). Intet tal opfindes; det eneste svar er "ikke oplyst". */
+const URIMELIG_HK_PR_CCM = 0.30;
+const MIN_CCM = 45;
+const MAKS_HK = 250;
+function saniterTal(t){
+  const tal = v => (v == null || v === '' || !Number.isFinite(Number(v)) || Number(v) <= 0) ? null : Number(v);
+  let ccm = tal(t && t.ccm);
+  let hk = tal(t && t.hk);
+  const aargang = tal(t && t.aargang);
+  const tekst = String((t && t.tekst) || '');
+  const am = tekst.match(/(?<![\p{L}\d])[aå]rg\.?\s*(\d{2,4})(?!\d)/iu);
+  const aargTal = am ? Number(am[1]) : null;
+  if (ccm != null){
+    if (ccm < MIN_CCM) ccm = null;
+    else if (aargang != null && ccm === aargang) ccm = null;
+    else if (aargTal != null && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal))) ccm = null;
+  }
+  if (ccm != null && hk != null && hk / ccm > URIMELIG_HK_PR_CCM){
+    if (hk > MAKS_HK) hk = null; else ccm = null;
+  }
+  return { ccm, hk };
+}
+
+/* ---------- Efterspørgsel er ikke et udbud (F-009) ----------
+   "BSA / Triumph / Norton købes" lå som til salg under BSA. Kun entydige ord:
+   "søger" er med vilje IKKE med ("søger ny ejer" er et salg). */
+const EFTERSPOERGSEL = /(?<![\p{L}\d])(købes|søges|ønskes\s+købt|køb\s+ønskes)(?![\p{L}\d])/iu;
+function erEfterspoergsel(titel){
+  return EFTERSPOERGSEL.test(String(titel || ''));
+}
+
+/* ---------- Forhandlerjargon på forbrugerens skærm (F-010) ----------
+   Kilderne mærker annoncer med forhandlerens egne ord. "ENGROS" siger intet til
+   en privatkøber og er råbt med versaler. Kortet viser en neutral tekst; kildens
+   eget ord bevares i salgsmarkoerer og annoncesidens datagrundlag. */
+const SALGSMARKOER_ORD = {
+  'engros': 'Handelspris',
+};
+function salgsmarkoerLabel(m){
+  const s = String(m == null ? '' : m).trim();
+  if (!s) return '';
+  const k = s.toLowerCase();
+  if (SALGSMARKOER_ORD[k]) return SALGSMARKOER_ORD[k];
+  // Versaler er kildens formatering, ikke en oplysning.
+  return s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
+}
+
+/* ---------- Hvor frisk er lageret? (F-003) ----------
+   `sidstSet` er den dag, crawleren sidst så annoncen hos kilden. Forside og
+   søgning viser den nyeste dato i det viste udsnit og, over GAMMEL_EFTER_DAGE,
+   at annoncerne kan være ændret siden. BESLUTNING: 14 dage. Egne annoncer har
+   ingen sidstSet; er der ingen dato, svares null og der vises intet. */
+const GAMMEL_EFTER_DAGE = 14;
+const DA_MD = ['jan.', 'feb.', 'mar.', 'apr.', 'maj', 'jun.', 'jul.', 'aug.', 'sep.', 'okt.', 'nov.', 'dec.'];
+function senesteBekraeftet(liste, nu){
+  const slut = nu instanceof Date ? nu : new Date();
+  let max = null, min = null;
+  for (const l of (liste || [])){
+    const t = l && l.sidstSet ? Date.parse(l.sidstSet) : NaN;
+    if (!Number.isFinite(t)) continue;
+    if (max == null || t > max) max = t;
+    if (min == null || t < min) min = t;
+  }
+  if (max == null) return null;
+  const tekstFor = ms => {
+    const d = new Date(ms);
+    return `${d.getDate()}. ${DA_MD[d.getMonth()]}${d.getFullYear() !== slut.getFullYear() ? ' ' + d.getFullYear() : ''}`;
+  };
+  const dage = Math.max(0, Math.floor((slut.getTime() - max) / 86400000));
+  const gammel = dage > GAMMEL_EFTER_DAGE;
+  const datoTekst = tekstFor(max);
+  return {
+    datoTekst, aeldsteTekst: tekstFor(min), dage, gammel,
+    tekst: `Senest bekræftet hos kilderne ${datoTekst}`,
+    advarsel: gammel ? 'Annoncerne kan være ændret siden.' : '',
+    samlet: `Senest bekræftet hos kilderne ${datoTekst}${datoTekst.endsWith('.') ? '' : '.'}` + (gammel ? ' Annoncerne kan være ændret siden.' : ''),
+  };
+}
+
 const BRANDS_BY_MODEL = {
   Yamaha: ['MT-03', 'MT-07', 'MT-09', 'MT-10', 'YZF-R3', 'YZF-R6', 'YZF-R1', 'YZF-R7', 'Ténéré 700', 'XSR700', 'XSR900', 'Tracer 7', 'Tracer 9 GT', 'NMAX 125', 'XMAX 300', 'TMAX 560', 'WR250F', 'YZ450F', 'Niken', 'Virago 250', 'Virago 535', 'Virago 1100', 'V-Max', 'Fazer 600', 'FZ6', 'FZ1', 'RD350', 'DT125', 'XT250', 'XT660', 'Drag Star 650', 'Majesty 400', 'Seca II', 'SR400', 'MT-125', 'YZF-R125', 'XSR125', 'Tracer 900', 'Tracer 900 GT', 'Super Ténéré 1200', 'FJR1300', 'XJR1300', 'XJ6', 'FZ8', 'TDM900', 'WR450F', 'WR125R', 'MT-15', 'Aerox 155', 'Bolt'],
   Honda: ['CB125R', 'CB300R', 'CB500F', 'CB500X', 'CB650R', 'CB1000R', 'CBR500R', 'CBR600RR', 'CBR650R', 'CBR1000RR-R', 'Africa Twin', 'Africa Twin Adventure Sports', 'Rebel 300', 'Rebel 500', 'Rebel 1100', 'Forza 350', 'PCX 125', 'SH125i', 'Gold Wing', 'Gold Wing Tour', 'CRF250L', 'CRF450R', 'CRF450RL', 'Monkey', 'Super Cub C125', 'X-ADV', 'CB750 Four', 'CB400 Super Four', 'Hornet 600', 'Hornet 900', 'VFR800', 'Shadow 750', 'VTX1800', 'Transalp 750', 'Varadero 1000', 'Deauville 700', 'NC750X', 'Grom', 'CBX1000', 'CB1300', 'CBR125R', 'CBR300R', 'CB125F', 'CBR600F', 'CBR900RR Fireblade', 'CBR1000RR', 'VTR1000 Firestorm', 'VFR750', 'CBF600', 'CBF1000', 'NC700X', 'CB650F', 'Dominator NX650', 'CRF300L', 'Forza 750', 'Dax ST125'],

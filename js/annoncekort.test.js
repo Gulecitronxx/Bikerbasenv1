@@ -107,7 +107,8 @@ test('"Kørekort Kørekort A": kørekortbadgen siger "Kræver A", ikke en dobbel
 
 test('salgsmarkør vises fuldt som chip — aldrig klippet til "EN…" — og uden pris står der "Pris ved henvendelse"', () => {
   const html = listingCardHTML(ekstern({ price: null, salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'] }), 1);
-  assert.match(html, /<li class="rk-chip rk-chip-note" title="ENGROS · UDEN KLARGØRING">ENGROS \+1<\/li>/);
+  // F-010 (w3-data): "ENGROS" er forhandlerjargon og vises som neutral tekst.
+  assert.match(html, /<li class="rk-chip rk-chip-note" title="Handelspris · Uden klargøring">Handelspris \+1<\/li>/);
   assert.match(html, /class="rk-pris pris-mangler">Pris ved henvendelse</);
   assert.ok(!/…|&hellip;|\.\.\./.test(html.replace(/<svg[\s\S]*?<\/svg>/g, '')), 'ingen afkortning skrevet ind i markup');
 });
