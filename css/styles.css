@@ -4067,3 +4067,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .footer-theme{ min-height:40px; }
 .section-link, .mk-link{ min-height:32px; }
 .brand-intro-mere > summary, .fa-mere-intro > summary{ padding-block:10px; }
+.breadcrumb a{ padding-inline:3px; }
+/* Et link, der er hele afsnittets/punktets indhold, er en selvstændig trykflade (ikke et inline-link midt i en sætning): >= 24 px. */
+main p > a:only-child, main ul:not([class]) > li > a:only-child, .gd-pop-all, .gd-sources li > a:only-child{ display:inline-block; padding-block:4px; }
