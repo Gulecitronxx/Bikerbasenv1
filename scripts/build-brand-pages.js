@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const SEO = require('./seo-vagt');
 
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
@@ -124,9 +125,12 @@ async function hentAnnoncer(){
   const cfg = fs.readFileSync(path.join(ROOT, 'js/supabase-config.js'), 'utf8');
   const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1];
   const key = (cfg.match(/anonKey:\s*'([^']+)'/) || [])[1];
+  /* S-005: js/data.js har 0 annoncer. Falder vi tilbage på det efter en forbigående
+     fejl, slettes alle egne annoncer fra mærkesiderne og sitemappet uden at buildet
+     fejler (beskyttelsen i hentAlt() kræver, at BÅDE egne og eksterne er tomme).
+     Derfor kastes fejlen, så buildet kan ses at fejle. */
   if (!url || !key){
-    console.warn('Ingen Supabase-konfiguration — bruger annoncer fra js/data.js.');
-    return global.__L;
+    throw new Error('Ingen Supabase-konfiguration — egne annoncer kan ikke hentes. Build afbrudt (S-005).');
   }
   try {
     // Fotos og saelger skal med: maerkesidens kort tegnes nu i byggeriet, og
@@ -139,8 +143,8 @@ async function hentAnnoncer(){
     console.log(`Hentede ${rows.length} annoncer fra databasen.`);
     return rows.map(normalizeRemoteListing);
   } catch (e) {
-    console.warn('Kunne ikke hente fra databasen (' + e.message + ') — bruger js/data.js.');
-    return global.__L;
+    throw new Error('Kunne ikke hente egne annoncer fra databasen (' + e.message + '). '
+      + 'Build afbrudt frem for at skrive mærkesider og sitemap uden dem (S-005).');
   }
 }
 
@@ -1051,6 +1055,7 @@ function naermesteMedianBrand(brand, brandMedian){
    indhold, når det sidste eksemplar af et mærke er solgt — og den ville
    stadig kunne findes via Google. */
 const forventede = new Set(brands.map(b => `maerke-${slugify(b)}.html`));
+SEO.tjekAntal('Mærkesider', brands.length, SEO.taelMaerkeSider(ROOT));
 let slettet = 0;
 for (const f of fs.readdirSync(ROOT)){
   if (/^maerke-.+\.html$/.test(f) && !forventede.has(f)){
@@ -1453,7 +1458,8 @@ const staticPages = ['index.html','soegning.html','maerker.html','opret-annonce.
    harEgenSide() er den samme regel, som holder dem ude af ItemList'et. */
 const listingUrls = LISTINGS.filter(harEgenSide).map(l => ({
   loc: listingSlug(l),
-  lastmod: String(l.updated_at || l.createdAt || '').slice(0, 10),
+  /* Annoncens ægte ændringsdato (updated_at, ellers oprettelsen) — aldrig byggedatoen. */
+  lastmod: SEO.renDato(l.updated_at || l.createdAt),
 }));
 
 /* Forhandlerprofiler har ingen statisk side som annoncerne — forhandler.html?id=
@@ -1469,7 +1475,7 @@ const dealerLastmod = new Map();
 for (const l of LISTINGS){
   if (!harEgenSide(l)) continue;
   if (!l.seller?.isDealer || !l.seller?.id) continue;
-  const dato = String(l.updated_at || l.createdAt || '').slice(0, 10);
+  const dato = SEO.renDato(l.updated_at || l.createdAt) || '';
   const gammel = dealerLastmod.get(l.seller.id);
   if (!gammel || dato > gammel) dealerLastmod.set(l.seller.id, dato);
 }
@@ -1489,25 +1495,41 @@ const dealerUrls = [...dealerLastmod.entries()].map(([id, lastmod]) => ({
    skriver filstien. At "rense" dem her uden at rense kilden ville give et
    sitemap, der er PÆNERE end den side, det peger på — samme fejlklasse som
    findingen C-015 (en påstand sitemappet ikke kan bakke op). */
+/* S-011: lastmod er sidens ÆGTE ændringsdato, ikke byggedatoen. Hashet af sidens
+   synlige indhold ligger i scripts/sitemap-lastmod.json; datoen rykkes kun, når
+   hashet ændrer sig (se scripts/seo-vagt.js). Ukendt => ingen lastmod. */
 const today = new Date().toISOString().slice(0,10);
+const ledger = SEO.laesLedger(ROOT);
+const sideLastmod = file => {
+  const p = path.join(ROOT, file);
+  if (!fs.existsSync(p)) return null;
+  return SEO.lastmodFor(ledger, file.replace(/\.html$/, ''), SEO.indholdsHash(fs.readFileSync(p, 'utf8')), today);
+};
 const entries = [
-  ...staticPages.map(u => ({ loc: cleanUrl(u), lastmod: today })),
+  ...staticPages.map(u => ({ loc: cleanUrl(u), lastmod: sideLastmod(u) })),
   /* Kun mærkesider, der faktisk er indekserbare. En noindex-side i sitemappet
      er et modsat signal (se noten linje ~1029) — og præcis den regel, facet-
      scriptet allerede følger med sit `qualifies`-filter. Tærsklen er den
      samme, der afgør noindex på selve siden. */
   ...brands.filter(b => (byBrand[b] || []).length >= MIN_LISTINGS_FULD_TEKST)
-    .map(b => ({ loc: cleanUrl(`maerke-${slugify(b)}.html`), lastmod: today })),
+    .map(b => ({ loc: cleanUrl(`maerke-${slugify(b)}.html`), lastmod: sideLastmod(`maerke-${slugify(b)}.html`) })),
   ...listingUrls.map(e => ({ loc: `${base}/${e.loc}`, lastmod: e.lastmod })),
   ...dealerUrls.map(e => ({ loc: `${base}/${e.loc}`, lastmod: e.lastmod })),
 ];
 const urls = entries;
+/* S-005: et sitemap, der skrumper drastisk, er næsten altid en fejlet hentning. */
+SEO.tjekAntal('Sitemap-poster (mærketrinnet)', entries.length, ledger.meta.brandUrls);
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'),
 `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${entries.map(e => `  <url><loc>${esc(e.loc)}</loc><lastmod>${e.lastmod || today}</lastmod></url>`).join('\n')}
+${entries.map(e => SEO.urlLinje(e.loc, e.lastmod, esc)).join('\n')}
 </urlset>
 `, 'utf8');
+ledger.meta.brandUrls = entries.length;
+ledger.meta.egne = LISTINGS.filter(harEgenSide).length;
+ledger.meta.eksterne = LISTINGS.length - ledger.meta.egne;
+ledger.meta.maerkesider = brands.length;
+SEO.skrivLedger(ROOT, ledger);
 
 fs.writeFileSync(path.join(ROOT, 'robots.txt'),
 `User-agent: *
@@ -1544,6 +1566,11 @@ console.log(`  heraf ${listingUrls.length} annoncesider og ${brands.length} maer
 async function hentAlt(){
   const egne = await hentAnnoncer();
   const eksterne = await hentEksterne();
+  /* S-005: tomt eller drastisk faldet i forhold til det sidst kendte gode — de
+     committede annonce-*.html og tallet fra forrige vellykkede byg. */
+  const baseline = SEO.laesLedger(ROOT).meta;
+  SEO.tjekAntal('Egne annoncer', egne.length, SEO.taelAnnonceSider(ROOT));
+  SEO.tjekAntal('Indekserede annoncer', eksterne.length, baseline.eksterne);
   if (!egne.length && !eksterne.length){
     throw new Error('Nul annoncer i alt — hverken egne eller indekserede. Build afbrudt: '
       + 'byg videre ville slette alle maerkesider og skrive et sitemap uden long-tail. '

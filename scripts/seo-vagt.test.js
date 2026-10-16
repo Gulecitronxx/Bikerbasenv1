@@ -1,0 +1,151 @@
+/* Tests for scripts/seo-vagt.js og fail-safe-hentningen i scripts/shared.js.
+   Kør: node --test scripts/seo-vagt.test.js
+
+   Låser to findings:
+   S-005: en tom eller fejlet hentning må aldrig kunne slette annoncesider og sitemap-poster.
+   S-011: sitemap-lastmod følger sidens ægte indhold, ikke byggedatoen. */
+const test = require('node:test');
+const assert = require('node:assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const V = require('./seo-vagt');
+const shared = require('./shared');
+
+/* ---------- S-005: antal-vagten ---------- */
+
+test('vurderAntal: faldet under halvdelen af det sidst kendte gode er ikke ok', () => {
+  assert.strictEqual(V.vurderAntal('Egne', 100, 100).ok, true);
+  assert.strictEqual(V.vurderAntal('Egne', 50, 100).ok, true, 'præcis 50 % er stadig ok');
+  assert.strictEqual(V.vurderAntal('Egne', 49, 100).ok, false);
+  assert.strictEqual(V.vurderAntal('Egne', 0, 2).ok, false, 'to annoncer -> nul er en tom hentning');
+  assert.strictEqual(V.vurderAntal('Egne', 1, 2).ok, true);
+  assert.match(V.vurderAntal('Egne', 0, 300).besked, /Egne: kun 0 nu mod 300/);
+});
+
+test('vurderAntal: første byg og vækst giver aldrig falsk alarm', () => {
+  assert.strictEqual(V.vurderAntal('x', 0, 0).ok, true, 'intet at miste');
+  assert.strictEqual(V.vurderAntal('x', 0, undefined).ok, true);
+  assert.strictEqual(V.vurderAntal('x', 5, null).ok, true);
+  assert.strictEqual(V.vurderAntal('x', 700, 300).ok, true);
+  assert.strictEqual(V.vurderAntal('x', -1, 300).ok, false, 'ugyldigt antal');
+  assert.strictEqual(V.vurderAntal('x', NaN, 300).ok, false);
+});
+
+test('tjekAntal: kaster med klar besked, og BB_TILLAD_FALD er den eneste vej udenom', () => {
+  assert.throws(() => V.tjekAntal('Mærkesider', 3, 25, { tillad: false }), e => e.code === 'SEO_FALD' && /build afbrudt/.test(e.message) && /BB_TILLAD_FALD=1/.test(e.message));
+  assert.doesNotThrow(() => V.tjekAntal('Mærkesider', 20, 25, { tillad: false }));
+  const advarsler = [];
+  const orig = console.warn; console.warn = m => advarsler.push(m);
+  try { assert.strictEqual(V.tjekAntal('Mærkesider', 3, 25, { tillad: true }).tilladt, true); } finally { console.warn = orig; }
+  assert.strictEqual(advarsler.length, 1, 'et bevidst fald logges stadig');
+});
+
+test('en fejlet hentning bliver en fejl, ikke et tomt array (shared.fetchListings)', async () => {
+  const origFetch = global.fetch, origWarn = console.warn;
+  console.warn = () => {};
+  try {
+    global.fetch = async () => { throw new Error('ECONNRESET'); };
+    assert.deepStrictEqual(await shared.fetchListings(['fallback']), ['fallback'], 'gammel adfærd uden flag');
+    await assert.rejects(() => shared.fetchListings([], { kraevDatabase: true }), /Build afbrudt.*S-005/s);
+    global.fetch = async () => ({ ok: false, status: 503, json: async () => [] });
+    await assert.rejects(() => shared.fetchListings([], { kraevDatabase: true }), /HTTP 503/);
+  } finally { global.fetch = origFetch; console.warn = origWarn; }
+});
+
+test('taelAnnonceSider og taelMaerkeSider tæller kun de rigtige filer', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'seo-vagt-'));
+  try {
+    for (const f of ['annonce-a-1.html', 'annonce-b-2.html', 'annonce.html', 'maerke-honda.html', 'maerker.html', 'model-x.html']) fs.writeFileSync(path.join(dir, f), '');
+    assert.strictEqual(V.taelAnnonceSider(dir), 2, 'annonce.html er skabelonen, ikke en annoncesiden');
+    assert.strictEqual(V.taelMaerkeSider(dir), 1, 'maerker.html er indekset');
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  assert.strictEqual(V.taelAnnonceSider(path.join(os.tmpdir(), 'findes-ikke-' + Date.now())), 0);
+});
+
+test('taelSitemapUrls', () => {
+  assert.strictEqual(V.taelSitemapUrls('<urlset><url><loc>a</loc></url><url><loc>b</loc></url></urlset>'), 2);
+  assert.strictEqual(V.taelSitemapUrls(''), 0);
+});
+
+/* ---------- S-011: lastmod ---------- */
+
+const side = (tekst, ekstra = '') => `<!doctype html><html><head><title>T</title><meta name="description" content="D">
+<link rel="stylesheet" href="css/styles.css?v=${ekstra || 'aaa'}"><style>.x{color:red}</style></head><body>
+<header>Menu</header><main><h1>Honda</h1><p>${tekst}</p><script>var x=1</script></main><footer>F</footer></body></html>`;
+
+test('indholdsHash: ?v=, CSS, scripts og "Senest bekræftet" flytter ikke hashet, indhold gør', () => {
+  const a = V.indholdsHash(side('Der er 41 til salg.'));
+  assert.strictEqual(a, V.indholdsHash(side('Der er 41 til salg.', 'bbb')), '?v=-stempel');
+  assert.strictEqual(a, V.indholdsHash(side('Der er 41 til salg. Senest bekræftet hos kilderne 24. aug. 2026.')), 'crawl-dato');
+  assert.strictEqual(V.indholdsHash(side('Der er 41 til salg. Bekræftet 24. aug. 2026')), a, 'tillidsrækken');
+  assert.notStrictEqual(a, V.indholdsHash(side('Der er 42 til salg.')), 'antal');
+  assert.notStrictEqual(a, V.indholdsHash(side('Der er 41 til salg.').replace('<title>T', '<title>U')), 'titel');
+  assert.notStrictEqual(a, V.indholdsHash(side('Der er 41 til salg.').replace('content="D"', 'content="E"')), 'beskrivelse');
+  assert.strictEqual(a, V.indholdsHash(side('Der er 41 til salg.').replace('<header>Menu', '<header>Anden menu')), 'header/footer uden for <main> tæller ikke');
+});
+
+test('lastmodFor: ny ledger udelader datoen, ændring flytter den, uændret beholder den', () => {
+  const led = { ny: true, meta: {}, sider: {} };
+  assert.strictEqual(V.lastmodFor(led, 'vilkaar', 'h1', '2026-10-16'), null, 'første gang ledgeren oprettes: vi ved det ikke');
+  assert.deepStrictEqual(led.sider.vilkaar, { h: 'h1', d: null });
+  assert.strictEqual(V.lastmodFor(led, 'vilkaar', 'h1', '2026-10-20'), null, 'uændret => stadig ukendt, ikke byggedatoen');
+  assert.strictEqual(V.lastmodFor(led, 'vilkaar', 'h2', '2026-10-21'), '2026-10-21', 'ændret => datoen rykker');
+  assert.strictEqual(V.lastmodFor(led, 'vilkaar', 'h2', '2026-11-01'), '2026-10-21', 'uændret => samme dato');
+  const eksisterende = { ny: false, meta: {}, sider: {} };
+  assert.strictEqual(V.lastmodFor(eksisterende, 'budget-under-50000', 'x', '2026-10-16'), '2026-10-16', 'en ny side i en kendt ledger er ny i dag');
+});
+
+test('urlLinje udelader lastmod hvor den ikke er ægte', () => {
+  assert.strictEqual(V.urlLinje('https://x.dk/a', null), '  <url><loc>https://x.dk/a</loc></url>');
+  assert.strictEqual(V.urlLinje('https://x.dk/a', '2026-10-16'), '  <url><loc>https://x.dk/a</loc><lastmod>2026-10-16</lastmod></url>');
+  assert.strictEqual(V.urlLinje('https://x.dk/a?x=1&y=2', null, s => s.replace(/&/g, '&amp;')), '  <url><loc>https://x.dk/a?x=1&amp;y=2</loc></url>');
+});
+
+test('renDato: kun gyldige W3C-datoer', () => {
+  assert.strictEqual(V.renDato('2026-10-08T12:00:00Z'), '2026-10-08');
+  assert.strictEqual(V.renDato('2026-10-08'), '2026-10-08');
+  assert.strictEqual(V.renDato(''), null);
+  assert.strictEqual(V.renDato(null), null);
+  assert.strictEqual(V.renDato('2026-13-45'), null);
+  assert.strictEqual(V.renDato('I går'), null);
+});
+
+test('genberegnLastmod: kun sider i roden regnes om, annoncer/guides/forhandlere røres ikke', () => {
+  const base = 'https://bikerbasen.dk';
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8"?>', '<urlset>',
+    `  <url><loc>${base}</loc><lastmod>2026-10-15</lastmod></url>`,
+    `  <url><loc>${base}/vilkaar</loc><lastmod>2026-10-15</lastmod></url>`,
+    `  <url><loc>${base}/annonce-bmw-r45-1979-59d3a9a1.html</loc><lastmod>2026-10-08</lastmod></url>`,
+    `  <url><loc>${base}/forhandler.html?id=1</loc><lastmod>2026-09-01</lastmod></url>`,
+    `  <url><loc>${base}/guide-a2-koerekort</loc><lastmod>2026-10-10</lastmod></url>`,
+    `  <url><loc>${base}/guides</loc><lastmod>2026-10-10</lastmod></url>`,
+    `  <url><loc>${base}/findes-ikke</loc><lastmod>2026-10-01</lastmod></url>`,
+    '</urlset>', '',
+  ].join('\n');
+  const sider = { 'index.html': side('forside'), 'vilkaar.html': side('vilkaar') };
+  const led = { ny: false, meta: {}, sider: { vilkaar: { h: V.indholdsHash(sider['vilkaar.html']), d: '2026-09-20' } } };
+  const ud = V.genberegnLastmod(xml, base, f => sider[f] ?? null, led, '2026-10-16');
+  assert.match(ud, /<loc>https:\/\/bikerbasen\.dk\/vilkaar<\/loc><lastmod>2026-09-20<\/lastmod>/, 'uændret side beholder sin ægte dato');
+  assert.match(ud, /<loc>https:\/\/bikerbasen\.dk<\/loc><lastmod>2026-10-16<\/lastmod>/, 'ny side i kendt ledger: i dag');
+  assert.match(ud, /annonce-bmw-r45-1979-59d3a9a1\.html<\/loc><lastmod>2026-10-08</);
+  assert.match(ud, /forhandler\.html\?id=1<\/loc><lastmod>2026-09-01</);
+  assert.match(ud, /guide-a2-koerekort<\/loc><lastmod>2026-10-10</);
+  assert.match(ud, /<loc>https:\/\/bikerbasen\.dk\/guides<\/loc><lastmod>2026-10-10</);
+  assert.match(ud, /findes-ikke<\/loc><lastmod>2026-10-01</, 'fil mangler => linjen uændret');
+  assert.ok(ud.startsWith('<?xml') && ud.endsWith('</urlset>\n'));
+  // Idempotent: kører vi igen på samme sider, rykker intet.
+  assert.strictEqual(V.genberegnLastmod(ud, base, f => sider[f] ?? null, led, '2026-12-24'), ud);
+});
+
+/* ---------- html-fakta (bruges af audit og seo-krav) ---------- */
+
+test('sideFakta: h1 i kommentarer og scripts tæller ikke', () => {
+  const html = '<title>A &amp; B</title><meta name="description" content="Se &quot;x&quot;"><meta name="robots" content="noindex, follow"><!-- <h1>skjult</h1> --><h1 class="a">Én</h1><script>"<h1>"</script>';
+  const f = V.sideFakta(html);
+  assert.strictEqual(f.h1, 1);
+  assert.strictEqual(f.titel, 'A & B');
+  assert.strictEqual(f.beskrivelse, 'Se "x"');
+  assert.strictEqual(f.noindex, true);
+});

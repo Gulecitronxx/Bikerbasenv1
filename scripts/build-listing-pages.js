@@ -17,6 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 const { ROOT, siteUrl, listingSlug, fetchListings, siteParts, esc } = require('./shared');
+const { tjekAntal, taelAnnonceSider } = require('./seo-vagt');
 
 // data.js giver os formatPrice, typeLabel, equipmentLabel osv.
 const dataSrc = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
@@ -297,7 +298,11 @@ ${contactModal}
 }
 
 (async () => {
-  const listings = await fetchListings(global.__L);
+  /* S-005: kraevDatabase => en fejlet hentning kaster i stedet for at give js/data.js'
+     tomme liste, og tjekAntal() nedenfor stopper et drastisk fald (< 50 % af de
+     committede annonce-*.html) FØR en eneste fil slettes. */
+  const listings = await fetchListings(global.__L, { kraevDatabase: true });
+  tjekAntal('Egne annoncesider', listings.length, taelAnnonceSider(ROOT));
 
   const forventede = new Set(listings.map(listingSlug));
   let slettet = 0;
