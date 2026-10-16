@@ -114,11 +114,13 @@ test('ItemList udelader annoncer uden egen side — og bortfalder, når ingen ha
   assert.equal(brandItemListLd('Honda', [ekstern(), ekstern()]), null,
     'et ItemList over sider, der ikke findes, er værre end intet ItemList');
 
-  const blandet = brandItemListLd('Suzuki', [ekstern(), egen(), ekstern()]);
-  assert.equal(blandet.numberOfItems, 1, 'numberOfItems skal tælle det, listen faktisk indeholder');
-  assert.equal(blandet.itemListElement.length, 1);
-  assert.equal(blandet.itemListElement[0].position, 1, 'positionerne skal være sammenhængende');
-  assert.match(blandet.itemListElement[0].url, /\/annonce-suzuki-gsx-r750-2017-1017\.html$/);
+  // T-007: en delmængde (1 af 3) er en misvisende ItemList — kun en liste, der dækker alle, skrives.
+  assert.equal(brandItemListLd('Suzuki', [ekstern(), egen(), ekstern()]), null);
+  const alleEgne = brandItemListLd('Suzuki', [egen()]);
+  assert.equal(alleEgne.numberOfItems, 1, 'numberOfItems skal tælle det, listen faktisk indeholder');
+  assert.equal(alleEgne.itemListElement.length, 1);
+  assert.equal(alleEgne.itemListElement[0].position, 1);
+  assert.match(alleEgne.itemListElement[0].url, /\/annonce-suzuki-gsx-r750-2017-1017\.html$/);
 });
 
 /* ---- Mærkeindekset: intet link uden noget for enden (D-010) ---- */

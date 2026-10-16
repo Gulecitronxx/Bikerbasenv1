@@ -250,7 +250,9 @@ function breadcrumbLd(items){
    sider, den peger på. */
 function brandItemListLd(brand, items){
   const medSide = items.filter(harEgenSide);
-  if (!medSide.length) return null;
+  /* T-007: en ItemList er en påstand om, hvad siden viser. Dækker den kun de få annoncer med egen side (1 af
+     262), er påstanden misvisende — så kun en liste, der dækker ALLE annoncer, skrives. */
+  if (!medSide.length || medSide.length !== items.length) return null;
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',

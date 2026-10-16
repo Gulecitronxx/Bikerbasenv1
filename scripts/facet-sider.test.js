@@ -217,3 +217,23 @@ test('T-004/T-006: budgetsiden viser eget interval først og beskriver det med d
   assert.ok(!beskr.includes('fra ca.'));
   assert.ok(!/Interval/.test(side(f.find(x => x.slug === 'budget-under-30000'), alle)), 'første trin har intet eget interval');
 });
+
+test('T-007: JSON-LD på alle facetsider parser; ItemList kun hvis den dækker alle annoncer; intet breadcrumb-led peger på /soegning', () => {
+  const alle = CHIP.lagerFixture();
+  global.ALLE_LISTINGS = alle;
+  let blokke = 0;
+  for (const facet of forberedFacetter(alle)){
+    const html = side(facet, alle);
+    for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)){
+      const o = JSON.parse(m[1].replace(/\\u003c/g, '<'));
+      blokke++;
+      if (o['@type'] === 'ItemList'){
+        const n = alle.filter(facet.match).length;
+        assert.ok(o.itemListElement.length === n, facet.slug + ': ItemList dækker ikke alle ' + n);
+        assert.strictEqual(o.numberOfItems, n);
+      }
+      if (o['@type'] === 'BreadcrumbList') for (const li of o.itemListElement) assert.ok(!li.item.endsWith('/soegning'), facet.slug + ': breadcrumb peger på /soegning');
+    }
+  }
+  assert.ok(blokke > 40);
+});

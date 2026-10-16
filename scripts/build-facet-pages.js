@@ -293,13 +293,13 @@ function breadcrumbLd(items){
 }
 function itemListLd(name, items){
   const medSide = items.filter(harEgenSide);
-  if (!medSide.length) return null;
+  /* T-007: kun en liste, der dækker ALLE annoncer på siden, ellers er ItemList'en en misvisende delmængde. */
+  if (!medSide.length || medSide.length !== items.length) return null;
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name,
-    // numberOfItems kun naar listen daekker ALLE viste annoncer — ellers lover tallet mere/mindre end siden viser (S-012)
-    ...(medSide.length === items.length ? { numberOfItems: medSide.length } : {}),
+    numberOfItems: medSide.length,
     itemListElement: medSide.map((l, i) => ({
       '@type': 'ListItem', position: i + 1,
       url: `${BASE}/${listingSlug(l)}`,
@@ -1537,8 +1537,9 @@ ${jsonLdBlock([
       ? [{ name: 'Forside', path: 'index.html' }, { name: facet.region, path: regionFil }, { name: facet.by, path: fil }]
     : (facet.kind === 'model' || facet.kind === 'kombi') && brandFindes
       ? [{ name: 'Forside', path: 'index.html' }, { name: 'Mærker', path: 'maerker.html' }, { name: facet.brand, path: brandFil }, { name: facet.kind === 'kombi' ? facet.typeLabel : facet.mv, path: fil }]
+      /* T-007: mellemleddet ("Budget", "Type" …) pegede på /soegning, der er noindex og ikke er oversiden. Uden en
+         indekserbar overside udelades leddet. */
       : [{ name: 'Forside', path: 'index.html' },
-         { name: facet.kind === 'type' ? 'Type' : facet.kind === 'region' ? 'Landsdel' : facet.kind === 'model' ? 'Modeller' : facet.kind === 'budget' ? 'Budget' : facet.kind === 'by' ? 'By' : 'Kørekort', path: 'soegning.html' },
          { name: facet.titel, path: fil }]),
   itemListLd(`${facet.titel} — Bikerbasen`, items),
   faqData,
