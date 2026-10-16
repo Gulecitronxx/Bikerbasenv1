@@ -65,6 +65,54 @@ function renderGallery(){
   document.querySelectorAll('.gallery-thumbs button').forEach(b => b.classList.toggle('active', !!(Number(b.dataset.thumb) === currentPhotoIndex || (b.dataset.more && currentPhotoIndex >= 5))));
 }
 
+/* Tastaturnavigation: ArrowLeft/Right bladrer, Home/End hopper til første/sidste. Galleriet er en fokuserbar gruppe
+   (tabindex=0 kun ved flere fotos), og tælleren er et aria-live-felt, så skærmlæseren hører "2 / 3". */
+function anGalleriTastatur(el){
+  if (!el || currentPhotos.length < 2) return;
+  el.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowLeft') shiftPhoto(-1);
+    else if (e.key === 'ArrowRight') shiftPhoto(1);
+    else if (e.key === 'Home') { currentPhotoIndex = 0; renderGallery(); }
+    else if (e.key === 'End') { currentPhotoIndex = currentPhotos.length - 1; renderGallery(); }
+    else return;
+    e.preventDefault();
+  });
+}
+
+/* Balancerer kolonnerne ved 1180+: "Kan du køre denne?", "Det bør du tjekke" og "Handl trygt" er flytbare kort. Alle 27
+   placeringer prøves i den rigtige DOM, og den med mindst forskel mellem højeste og laveste kolonne bliver stående. Den
+   sidste boks i hver kortere kolonne får .an-strak og strækkes til kolonnens bund (se p-annonce.css), så bundkanterne
+   flugter. Under 1180 er kolonnerne display:contents (grid-areas styrer), så der gøres intet. Kører igen, hvis vinduet
+   krydser grænsen. */
+let anBalanceLytter = false;
+function anBalancerKolonner(){
+  const g = document.querySelector('.an-grid');
+  if (!g || typeof window.matchMedia !== 'function') return;
+  const mq = window.matchMedia('(min-width:1180px)');
+  const koer = () => {
+    g.querySelectorAll('.an-strak').forEach(e => e.classList.remove('an-strak'));
+    if (!mq.matches) return;
+    const kol = [g.querySelector('.an-col-a'), g.querySelector('.an-col-b'), g.querySelector('.an-side')];
+    const kort = [g.querySelector('.an-kk'), g.querySelector('.an-tjek'), g.querySelector('.an-trygt-wrap')];
+    if (kol.some(k => !k) || kort.some(k => !k)) return;
+    g.classList.add('an-maal');   // naturlig højde: ingen strækning, mens der måles
+    let bedst = null;
+    for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) for (let c = 0; c < 3; c++){
+      const valg = [a, b, c];
+      kort.forEach((k, n) => kol[valg[n]].appendChild(k));
+      const h = kol.map(k => k.getBoundingClientRect().height);
+      const spredning = Math.max(...h) - Math.min(...h);
+      if (!bedst || spredning < bedst.spredning - 1) bedst = { valg, spredning };
+    }
+    kort.forEach((k, n) => kol[bedst.valg[n]].appendChild(k));
+    g.classList.remove('an-maal');
+    kol.forEach(k => { const sidste = k.lastElementChild; if (sidste) sidste.classList.add('an-strak'); });
+  };
+  koer();
+  if (!anBalanceLytter){ anBalanceLytter = true; mq.addEventListener('change', koer); }
+}
+
 function shiftPhoto(dir){
   // Ét billede er ikke en karrusel — så findes pilene heller ikke.
   if (currentPhotos.length < 2) return;
@@ -408,7 +456,15 @@ function anBrodkrumme(l){
   const nav = document.getElementById('bc-nav');
   if (!nav) return;
   const maerkeOK = l.brand && l.brand !== 'Ukendt';
-  const led = [['index.html', 'Forside'], ['soegning.html', 'Motorcykler']];
+  /* "Motorcykler" fører tilbage til den søgning, annoncen blev åbnet fra (samme sessionStorage-nøgle som søgesidens
+     scroll-hukommelse, bb_srp_position; den bærer søgestreng, scrollposition og annonce-id). Kun hvis id'et er DENNE
+     annonce - ellers er den gemte søgning en andens. Søgesiden ruller selv til den gemte position. */
+  let soegHref = 'soegning.html';
+  try {
+    const gemt = JSON.parse(sessionStorage.getItem('bb_srp_position') || 'null');
+    if (gemt && String(gemt.id) === String(l.id) && /^\?[^#]*$/.test(gemt.soeg || '')) soegHref += gemt.soeg;
+  } catch (e) { /* privat tilstand: bart link */ }
+  const led = [['index.html', 'Forside'], [soegHref, 'Motorcykler']];
   if (maerkeOK) led.push([`soegning.html?brands=${anEnc(l.brand)}`, l.brand]);
   if (maerkeOK && l.model) led.push([`soegning.html?brands=${anEnc(l.brand)}&model=${anEnc(l.model)}`, l.model]);
   const sidste = [maerkeOK ? l.brand : '', l.model].filter(Boolean).join(' ') || 'Annonce';
@@ -1003,7 +1059,8 @@ function renderExternalListing(listing){
       </div>
     </div>`;
 
-  anFlytH1(fuldTitel);
+  anFlytH1(fuldTitel);
+  anBalancerKolonner();
   anAktioner(listing, false);
   anVirkDel(listing);
   anFyldLignende(listing);
@@ -1180,11 +1237,11 @@ function renderListing(){
        nul fotos   → ét felt, der siger det. Ingen tegning i stedet. */
   const synligeThumbs = fotoAntal > 6 ? 5 : fotoAntal;
   const galleriHTML = fotoAntal ? `
-      <div class="gallery">
+      <div class="gallery" id="an-galleri" role="group" aria-roledescription="galleri" aria-label="Billeder af motorcyklen. Brug venstre og højre piletast" ${fotoAntal > 1 ? 'tabindex="0"' : ''}>
         <div class="gallery-main">
           <div id="gallery-main-img"></div>
           ${fotoAntal > 1 ? `
-          <div class="gallery-counter" id="gallery-counter"></div>
+          <div class="gallery-counter" id="gallery-counter" role="status" aria-live="polite" aria-atomic="true"></div>
           <button type="button" class="gallery-nav prev" aria-label="Forrige billede">${Icon.chevronLeft}</button>
           <button type="button" class="gallery-nav next" aria-label="Næste billede">${Icon.chevronRight}</button>` : ''}
         </div>
@@ -1307,7 +1364,8 @@ function renderListing(){
       dMere.setAttribute('aria-expanded', String(aaben));
     });
   }
-  anFlytH1(`${listing.brand} ${listing.model}`);
+  anFlytH1(`${listing.brand} ${listing.model}`);
+  anBalancerKolonner();
   anAktioner(listing, isOwnListing(listing));
   anVirkDel(listing);
   anFyldVidere(listing, kk);
@@ -1317,6 +1375,7 @@ function renderListing(){
      hop over hele blokken, så rækkefølgen står ét sted. */
   document.querySelector('.gallery-nav.prev')?.addEventListener('click', () => shiftPhoto(-1));
   document.querySelector('.gallery-nav.next')?.addEventListener('click', () => shiftPhoto(1));
+  anGalleriTastatur(document.getElementById('an-galleri'));
   document.querySelectorAll('.gallery-thumbs [data-thumb]').forEach(btn => {
     btn.addEventListener('click', () => { currentPhotoIndex = Number(btn.dataset.thumb); renderGallery(); });
   });

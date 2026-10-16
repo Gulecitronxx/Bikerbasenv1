@@ -75,12 +75,12 @@
     grid-template-columns: minmax(0,1.7fr) minmax(0,1.45fr) minmax(300px,1fr);
     grid-template-areas: "a b side";
   }
-  .an-col{ display:flex; flex-direction:column; gap: var(--space-5); align-self:start; }
+  .an-col{ display:flex; flex-direction:column; gap: var(--space-5); align-self:stretch; }
   .an-col-a{ grid-area: a; }
   .an-col-b{ grid-area: b; }
   .an-side{
     display:flex; flex-direction:column; gap: var(--space-4); grid-area: side;
-    align-self:start;
+    align-self:stretch;
   }
 }
 
@@ -338,3 +338,15 @@
 .an-seller-wrap .seller-stats{ gap: var(--space-5); }
 .an-seller-wrap .seller-stat b{ font-size:15px; }
 .an-seller-wrap .contact-actions .btn{ min-height:48px; }
+
+/* Galleri: synlig fokusring, når gruppen tabbes til (piletaster bladrer). */
+.an-gallery .gallery:focus-visible{ outline:3px solid var(--color-primary); outline-offset:3px; border-radius: var(--radius-md); }
+
+/* Sidste kort i en kortere kolonne strækkes til kolonnens bund, så bundkanterne flugter (se anBalancerKolonner). */
+@media (min-width:1180px){
+  .an-col > .an-strak, .an-side > .an-strak{ flex:1 1 auto; }
+  .an-trygt-wrap.an-strak{ display:flex; flex-direction:column; }
+  .an-trygt-wrap.an-strak > *{ flex:1 1 auto; }
+  .an-kk.an-strak, .an-tjek.an-strak{ align-content:center; }
+}
+@media (min-width:1180px){ .an-grid.an-maal > .an-col, .an-grid.an-maal > .an-side{ align-self:start; } }
