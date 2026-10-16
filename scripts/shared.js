@@ -372,6 +372,44 @@ function minifyCSS(src){
     .trim(), depot);
 }
 
+/* F-019: HTML-kommentarer ("RUNDE 12: ...") er udviklernoter og hører ikke i den
+   udgivne HTML. Bruges af scripts/udgiv.js på _site-siderne (ikke på kilde-HTML,
+   hvor byggescripts bruger markører som <!--cookie:start-->). Rører aldrig indhold
+   i script/style/pre/textarea; betingede kommentarer og ulukkede kommentarer
+   bevares. En kommentar alene på sin linje tager linjen med. */
+function fjernHtmlKommentarer(html){
+  const s = String(html);
+  const raa = /<(script|style|textarea|pre)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
+  let ud = '', pos = 0;
+  while (pos < s.length){
+    const kom = s.indexOf('<!--', pos);
+    raa.lastIndex = pos;
+    const r = raa.exec(s);
+    if (kom === -1 && !r){ ud += s.slice(pos); break; }
+    if (r && (kom === -1 || r.index < kom)){
+      ud += s.slice(pos, r.index) + r[0];
+      pos = r.index + r[0].length;
+      continue;
+    }
+    const slut = s.indexOf('-->', kom + 4);
+    if (slut === -1){ ud += s.slice(pos); break; }
+    if (s.startsWith('<!--[if', kom)){
+      ud += s.slice(pos, slut + 3);
+      pos = slut + 3;
+      continue;
+    }
+    ud += s.slice(pos, kom);
+    pos = slut + 3;
+    const linjeStart = ud.lastIndexOf('\n') + 1;
+    const efter = s.slice(pos).match(/^[ \t]*(\r?\n)/);
+    if (efter && /^[ \t]*$/.test(ud.slice(linjeStart))){
+      ud = ud.slice(0, linjeStart);
+      pos += efter[0].length;
+    }
+  }
+  return ud;
+}
+
 function browserModules(){
   const cfg = fs.readFileSync(path.join(ROOT, 'js/supabase-config.js'), 'utf8');
   const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1] || '';
@@ -399,8 +437,8 @@ function browserModules(){
     .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n;\n');
 
   return new Function('document', 'Store', 'window', 'db',
-    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering };')(doc, store, {}, db);
+    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering, CONDITIONS, FILTER_CONDITIONS, kildeNyStatus, erUbevistNy, standOpgoerelse, fabriksnyNoteTekst, erKatalogSti, saniterTal, erEfterspoergsel, harmoniserStavning, modelFraDeeplink, maerkeFraDeeplink, senesteBekraeftet, salgsmarkoerLabel, eksternSalgsmarkoerer, maerkeAkronym };')(doc, store, {}, db);
 }
 
-module.exports = { ROOT, siteUrl, slugify, listingSlug, fetchListings, fetchExternalListings,
+module.exports = { fjernHtmlKommentarer, ROOT, siteUrl, slugify, listingSlug, fetchListings, fetchExternalListings,
   siteParts, esc, browserModules, minifyJS, minifyCSS };

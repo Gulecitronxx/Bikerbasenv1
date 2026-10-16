@@ -397,7 +397,7 @@ function populateFilterUI(){
   document.getElementById('filter-regions').innerHTML = REGIONS.map(r =>
     `<label class="checkbox-row"><input type="checkbox" data-region="${r}"><span>${r}</span>${FACET_SLOT}</label>`).join('');
 
-  document.getElementById('filter-conditions').innerHTML = CONDITIONS.map(c =>
+  document.getElementById('filter-conditions').innerHTML = FILTER_CONDITIONS.map(c =>   // F-006: "Ny" er en filterværdi (ikke en del af CONDITIONS)
     `<label class="checkbox-row"><input type="checkbox" data-condition="${c}"><span>${c}</span>${FACET_SLOT}</label>`).join('');
 
   document.getElementById('filter-age').innerHTML =
@@ -779,7 +779,7 @@ function rowSpecsHTML(l){
 function rowMarkersHTML(markers){
   if (!markers || !markers.length) return '';
   return `<span class="row-markers">${markers.slice(0, 2).map(m =>
-    `<span class="row-marker">${escapeHTML(m.toLowerCase())}</span>`).join('')}</span>`;
+    `<span class="row-marker">${escapeHTML(salgsmarkoerLabel(m))}</span>`).join('')}</span>`;
 }
 
 /* Indekseret annonce som listerække.
@@ -903,6 +903,7 @@ function forklarIndekseret(){
 
 function renderResultsCount(list){
   const total = list.length;
+  renderFriskNote(list);
   /* Runde 9 (D9-S2): en delt ?page=7 skal sige, hvor man staar — over folden,
      ikke kun ved sideinddelingen i bunden. */
   const totalSider = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -955,6 +956,42 @@ function renderResultsCount(list){
     `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>` +
     `</span>`;
   mix.querySelector('#mix-info-btn').addEventListener('click', forklarIndekseret);
+}
+
+/* F-003: hvor frisk er det, vi viser? Dato = nyeste sidst_set i resultatet, hos
+   kilderne; over 14 dage (GAMMEL_EFTER_DAGE i js/data.js) siger linjen også, at
+   annoncerne kan være ændret siden. Egne annoncer har ingen dato, og så står der
+   intet. Bygges i JS med tokens inline, som #uoplyst-note: resultatlinjen (#results-mix)
+   er på mobil én klippet linje, og datoen skal kunne ombrydes. */
+function sikFriskNote(){
+  let el = document.getElementById('frisk-note');
+  if (el) return el;
+  const anker = document.getElementById('so-results-head');
+  if (!anker) return null;
+  el = document.createElement('p');
+  el.id = 'frisk-note';
+  const linjer = window.innerWidth < 640 ? 2 : 1;
+  el.style.cssText = 'margin:0 0 var(--space-3); color:var(--color-fg-muted); font-size:13px; line-height:1.4;'
+    + `min-height:${(linjer * 1.4).toFixed(1)}em;`;
+  anker.after(el);
+  return el;
+}
+
+function renderFriskNote(list){
+  let el = sikFriskNote();
+  const frisk = senesteBekraeftet(list);
+  /* Pladsen RESERVERES, så linjen ikke skubber kortene, når de indekserede annoncer er hentet (CLS):
+     to linjer på smal skærm, én på bred. Er de indekserede hentet (eller fejlet) og der ingen dato er,
+     skjules pladsen igen. */
+  const hentet = !!(window.DATA_STATUS && ['ok', 'fejlet'].includes(window.DATA_STATUS.eksterne));
+  if (!el) return;
+  if (!frisk){
+    if (hentet){ el.hidden = true; el.textContent = ''; }
+    return;
+  }
+  el.hidden = false;
+  el.title = frisk.aeldsteTekst === frisk.datoTekst ? '' : `Ældste bekræftelse: ${frisk.aeldsteTekst}`;
+  el.textContent = frisk.samlet;
 }
 
 /* ============ Swipe-visning (mobil-first, à la 123mc-appen) ============ */
@@ -2479,6 +2516,7 @@ function wireMobileFilterDialog(){
 const nextTask = () => new Promise(r => setTimeout(r, 0));
 
 async function boot(){
+  sikFriskNote();   // pladsen reserveres FØR lageret er hentet, så resultaterne ikke hopper (CLS)
   await backendReady();
 
   // Etape 1: værktøjslinjens ikoner og de kontroller der står i HTML'en.

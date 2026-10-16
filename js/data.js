@@ -116,6 +116,239 @@ const TYPES = [
 
 const CONDITIONS = ['Som ny', 'God stand', 'Brugt', 'Defekt/Projekt'];
 
+/* ---------- Stand-filteret har ét ord mere end annoncens stand (F-006) ----------
+
+   CONDITIONS er de fire værdier, `listings.condition` må have (check constraint
+   i supabase/008_haerdning.sql), og js/opret-annonce.js bygger sin dropdown af
+   den. 'Ny' må IKKE ind i den: en privat sælger skal ikke kunne vælge 'Ny', og
+   databasen ville afvise det. Søgningens stand-facet bygges derfor af
+   FILTER_CONDITIONS, og kun indekserede annoncer kan få 'Ny' som condition —
+   når kildeNyStatus() nedenfor kan bekræfte det. */
+const FILTER_CONDITIONS = ['Ny', ...CONDITIONS];
+
+/* ---------- Hvornår er en annonce "ny"? (F-002) ----------
+
+   Kilden siger 'ny' (MC Syds /Ny/-katalog, Gul og Gratis' stand-felt). Før stolede
+   vi blindt på det og skrev "Fabriksny" på en Suzuki VZR1800 fra 2007 med 53.000 km.
+   BESLUTNING (tærsklerne er ejerens at ændre, her og kun her):
+
+     NY_SIKKER_KM     = 50    til og med 50 km kan den kaldes fabriksny
+     NY_MAX_KM        = 500   over 500 km er en "ny" modsagt (= Brugt); 51-500 km er
+                              en demo-/forevisningsmaskine: intet mærke, ingen påstand
+     NY_MAX_ALDER_AAR = 3     ukendt km: kun en FORHANDLER med årgang >= i år - 3 kaldes ny
+     ALDER ALENE MODSIGER ALDRIG "ny" (en ubrugt lagermaskine fra 2021 er stadig ny): den
+     giver intet mærke, aldrig "Brugt" — og derfor flipper intet 1. januar.
+     årgang under 1885 (fejldata som 0 og 1) tæller som ukendt
+
+   Svar:
+     true   kilden siger ny, og
+              - km er kendt og højst 50, og årgangen (hvis kendt) er >= i år - 3, ELLER
+              - km er ukendt, og kilden er en katalog-kilde: MC Syds /Ny/-sti, eller en
+                forhandler med årgang >= i år - 3
+     false  kilden siger brugt — ELLER siger ny, men km > 500 (en modsagt 'ny')
+     null   alt andet, hvor kilden siger ny: demomaskine (51-500 km), gammel årgang,
+            eller en privat/ukendt sælger (Gul og Gratis) uden km — intet mærke, ingen
+            påstand om "katalog", og ikke "Brugt" heller, for det ved vi ikke.
+
+   Rene tal ind, ingen DOM: bruges af kortet, annoncesiden, SEO og generatorerne
+   via eksternErNy() i js/components.js. `nu` (årstal) kan gives i tests; ellers i år. */
+const NY_SIKKER_KM = 50;
+const NY_MAX_KM = 500;
+const NY_MAX_ALDER_AAR = 3;
+/* Kilden siger ny, men vi kan ikke bekræfte det: bruges af generatorerne, så "brugte" ikke
+   skrives over et lager, hvor nogle annoncer blot er ubeviste. */
+function erUbevistNy(l){
+  const ord = String((l && l.kildeStand) || '').toLowerCase().trim();
+  return (ord === 'ny' || ord === 'new') && kildeNyStatus(l) === null;
+}
+/* Er stien MC Syds katalogsti (/Produkter/…/Ny/…)? Kun DEN er et "katalog over nye motorcykler". */
+function erKatalogSti(l){
+  return /^https?:\/\/(www\.)?mcsyd\.dk\/.*\/ny\//i.test(String((l && l.externalUrl) || ''));
+}
+function kildeNyStatus(l, nu){
+  const aar = nu == null ? new Date().getFullYear() : nu;
+  const ord = String((l && l.kildeStand) || '').toLowerCase().trim();
+  const url = String((l && l.externalUrl) || '');
+  const vedSti = /^https?:\/\/(www\.)?mcsyd\.dk\//i.test(url)
+    ? (/\/ny\//i.test(url) ? true : (/\/brugt\//i.test(url) ? false : null))
+    : null;                          // kun MC Syds sti kendes (andre kilders /ny/ er ikke et katalog)
+  let kilde = null;
+  if (ord === 'ny' || ord === 'new') kilde = true;
+  else if (ord === 'brugt' || ord === 'used') kilde = false;
+  else kilde = vedSti;               // nødudgang for rækker uden stand-felt
+  if (kilde !== true) return kilde;  // false eller null
+  const tal = v => {
+    if (v == null || v === '') return null;
+    const n = typeof v === 'string' ? Number(v.replace(/\s*km$/i, '').replace(/\./g, '').replace(',', '.')) : Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const km = tal(l.km);
+  const a = tal(l.year);
+  const aargang = (a != null && a >= 1885 && a <= 2100) ? a : null;   // 0 og 1 er fejldata, ikke en årgang
+  if (km != null && km > NY_MAX_KM) return false;                       // kun km modsiger "ny"
+  if (km != null && km > NY_SIKKER_KM) return null;                     // demomaskine
+  const ung = aargang != null && aargang >= aar - NY_MAX_ALDER_AAR;
+  const gammel = aargang != null && aargang < aar - NY_MAX_ALDER_AAR;
+  if (km != null) return gammel ? null : true;                          // km 0-50
+  // km ukendt: kun en katalog-kilde bekræfter
+  const forhandler = !!l && (l.saelgertype === 'forhandler' || (l.saelgertype === undefined && l.isDealer === true));
+  if (vedSti === true) return true;
+  return (forhandler && ung) ? true : null;
+}
+
+/* ÉN opgørelse af nye/ubeviste i en liste annoncer, brugt af begge generatorer (mærke- og facetsider),
+   så "brugte" aldrig skrives over et lager med ubeviste "ny". Kaldes på de FÆRDIGE normaliserede annoncer. */
+function standOpgoerelse(items){
+  const liste = items || [];
+  const nye = liste.filter(l => kildeNyStatus(l) === true).length;
+  const ubeviste = liste.filter(erUbevistNy).length;
+  return { antal: liste.length, nye, ubeviste, renBrugt: !nye && !ubeviste, alleNye: liste.length > 0 && nye === liste.length };
+}
+
+/* Annoncesidens note om "ny" — ÉN funktion, så noten, kortet og SEO aldrig er uenige. `erNy` er svaret fra
+   eksternErNy(). "Katalog over nye motorcykler" står KUN ved MC Syds /Ny/-sti; ellers siger noten blot, hvad
+   kilden selv markerer. "Kilometerstanden er ikke oplyst" står kun når den faktisk ikke er det. */
+function fabriksnyNoteTekst(listing, erNy, kilde, visReklamationsret){
+  if (erNy !== true) return null;
+  const kmIkkeOplyst = listing.km == null;
+  const iKatalog = erKatalogSti(listing);
+  const nyKilde = iKatalog
+    ? `Annoncen ligger i ${kilde}s katalog over nye motorcykler, ikke blandt de brugte${kmIkkeOplyst ? ', og kilometerstanden er derfor ikke oplyst' : ''}.`
+    : `Kilden markerer annoncen som ny${kmIkkeOplyst ? '' : ', og kilometertallet passer til det'}.`;
+  const overskrift = iKatalog ? 'Det her er en fabriksny motorcykel.' : 'Kilden markerer den som ny.';
+  if (listing.isDealer && iKatalog){
+    return `<b>${overskrift}</b> ${nyKilde}`
+      + (visReklamationsret ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret.' : '');
+  }
+  if (listing.isDealer) return `<b>${overskrift}</b> ${nyKilde} Spørg forhandleren om garanti- og reklamationsvilkår (se nedenfor).`;
+  if (listing.saelgertype === 'privat'){
+    return `<b>${overskrift}</b> ${nyKilde} Sælgeren er privat — reklamationsret gælder ikke mellem private, heller ikke når motorcyklen er ny (se nedenfor).`;
+  }
+  // Sælgertypen er ikke oplyst af kilden: ingen påstand om reklamationsret den ene eller anden vej.
+  return `<b>${overskrift}</b> ${nyKilde} Spørg sælgeren om garanti- og reklamationsvilkår (se nedenfor).`;
+}
+
+/* ---------- Tal, der er læst forkert af titlen (F-007) ----------
+
+   GoG-titler som "Kawasaki GPZ 500S årg 1992" endte med ccm 1992 (årstallet),
+   "Yamaha xj 900 årg 90" med ccm 90, og "Triumph Bonneville T 120" med ccm 120
+   (1200 læst som 120). Kørekortsvaret og "Lignende" bygger på tallene.
+
+   Reglerne (spejlet i crawler/normalize.js renseUrealistiskeTal(); en test
+   fejler, hvis de to kopier driver):
+     ccm < 45                           -> ukendt (findes ikke som motorcykel)
+     ccm == annoncens årgang            -> ukendt (årstallet læst som kubik)
+     ccm == tallet efter "årg"          -> ukendt ("årg 90") KUN MED BEVIS: et større tal
+                                           i titlen begynder med ccm-cifrene (XJ 900 årg 90),
+                                           eller årgangen er selv 19NN og tallet ikke står i
+                                           modelnavnet og hk ikke bakker ccm op. Uden bevis
+                                           bevares tallet (Puch Maxi S årg 50, XR 80 årg 80). KENDT AFVEJNING: er `aargang` udfyldt og lig tallet
+                                           (Super Cub årg 90 + aargang 1990), er det tvetydigt og tallet nulstilles
+     ccm > 6000                         -> ukendt (fejl; ægte store 2458/2600 bevares)
+     hk/ccm over grænsen                -> det urealistiske nulstilles: hk > 250
+                                           er det mistænkelige tal, ellers ccm
+   Grænsen afhænger af størrelsen: op til 125 ccm 0,50 (RS125 racer 55 hk), 126-499 ccm
+   0,40, fra 500 ccm 0,35 (Kawasaki H2R 310 hk / 998 ccm = 0,31 bevares). Ægte store
+   motorer bevares (GL1800 1832 ccm, Harley 1923 ccm, Hayabusa 190 hk). Intet tal
+   opfindes; ved tvivl bevares tallet. */
+function urimeligHkPrCcm(ccm){ return ccm <= 125 ? 0.50 : ccm < 500 ? 0.40 : 0.35; }
+const MIN_CCM = 45;
+const MAKS_HK = 250;
+const MAKS_CCM = 6000;   // over det er det en fejl (ægte store 2458 Triumph Rocket, 2600 Boss Hoss bevares; en Boss Hoss på 6200-8300 ccm nulstilles bevidst — kendt afvejning)
+function saniterTal(t){
+  const tal = v => (v == null || v === '' || !Number.isFinite(Number(v)) || Number(v) <= 0) ? null : Number(v);
+  let ccm = tal(t && t.ccm);
+  let hk = tal(t && t.hk);
+  const aargang = tal(t && t.aargang);
+  const tekst = String((t && t.tekst) || '');
+  const am = tekst.match(/(?<![\p{L}\d])[aå]rg\.?\s*(\d{2,4})(?!\d)/iu);
+  const aargTal = am ? Number(am[1]) : null;
+  const udenAarg = am ? tekst.replace(am[0], ' ') : tekst;
+  if (ccm != null){
+    const hkStoetter = hk != null && hk / ccm <= urimeligHkPrCcm(ccm);   // et realistisk hk-tal bakker ccm op
+    const stdIModel = new RegExp('(?<!\\d)' + ccm + '(?!\\d)').test(udenAarg);
+    /* "årg NN"-reglen kræver BEVIS for, at ccm er årstallet: et større tal i titlen, der
+       begynder med ccm-cifrene (XJ 900 årg 90), eller en årgang der selv er 19NN. Uden bevis
+       bevares tallet (Puch Maxi S årg 50, Honda Super Cub årg 90). */
+    const arg = aargTal != null && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal));
+    const storreTal = arg && new RegExp('(?<!\\d)' + ccm + '\\d+(?!\\d)').test(udenAarg);
+    const aargangEns = arg && aargang != null && (aargang === aargTal || aargang === 1900 + aargTal);
+    if (ccm < MIN_CCM || ccm > MAKS_CCM) ccm = null;
+    else if (aargang != null && ccm === aargang) ccm = null;
+    else if (storreTal || (aargangEns && !stdIModel && !hkStoetter)) ccm = null;
+  }
+  if (ccm != null && hk != null && hk / ccm > urimeligHkPrCcm(ccm)){
+    if (hk > MAKS_HK) hk = null; else ccm = null;
+  }
+  if (hk != null && hk > 1000) hk = null;   // ingen motorcykel har over 1000 hk (også uden ccm)
+  return { ccm, hk };
+}
+
+/* ---------- Efterspørgsel er ikke et udbud (F-009) ----------
+   "BSA / Triumph / Norton købes" lå som til salg under BSA. Kun entydige ord:
+   "søger" er med vilje IKKE med ("søger ny ejer" er et salg). */
+/* REGEL (forenklet — reglerne selv var risikoen): en annonce skjules KUN når titlen STARTER med
+   købes, ønskes købt, vil købe eller efterlyses (ordgrænse, evt. efter citationstegn/parentes). Alt andet beholdes,
+   også "BSA / Triumph / Norton købes", "Søges: …", "Søger …", "Køb: …" og "Leder efter …": falske negativer er
+   accepteret — hellere ét efterspørgsels-opslag for meget i søgningen end et ægte salg skjult. Der er ingen
+   undtagelsesliste. "Vil købe" kræver desuden, at titlen hverken har "?" eller "her er" ("Vil købe? Her er min Honda"). */
+const EFT_START = new RegExp('^[\\s"\'(]*(?:købes|ønskes\\s+købt|efterlyses|vil\\s+købe)(?![\\p{L}\\d])', 'iu');
+function erEfterspoergsel(titel){
+  const t = String(titel || '').trim();
+  if (!EFT_START.test(t)) return false;
+  if (/^[\s"'(]*vil\s+købe/i.test(t) && (/\?/.test(t) || /\bher\s+er\b/i.test(t))) return false;
+  return true;
+}
+
+/* ---------- Salgsmærkater (F-010) ----------
+   BESLUTNING: kildens eget ord vises ALLE steder (kort, annonceside) — vi opfinder ikke et
+   nyt ord ("Handelspris" kunne læses som "fair pris"). Eneste ændring er formatering:
+   versaler er kildens formatering, så "ENGROS" skrives "Engros". */
+function salgsmarkoerLabel(m){
+  const s = String(m == null ? '' : m).trim();
+  if (!s) return '';
+  // Versaler er kildens formatering, ikke en oplysning.
+  return s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
+}
+
+/* ---------- Hvor frisk er lageret? (F-003) ----------
+   `sidstSet` er den dag, crawleren sidst så annoncen hos kilden. Forside og
+   søgning viser den nyeste dato i det viste udsnit og, over GAMMEL_EFTER_DAGE,
+   at annoncerne kan være ændret siden. BESLUTNING: 14 dage. Egne annoncer har
+   ingen sidstSet; er der ingen dato, svares null og der vises intet. */
+const GAMMEL_EFTER_DAGE = 14;
+const DA_MD = ['jan.', 'feb.', 'mar.', 'apr.', 'maj', 'jun.', 'jul.', 'aug.', 'sep.', 'okt.', 'nov.', 'dec.'];
+function senesteBekraeftet(liste, nu){
+  const slut = nu instanceof Date ? nu : new Date();
+  const tider = [];
+  for (const l of (liste || [])){
+    const t = l && l.sidstSet ? Date.parse(l.sidstSet) : NaN;
+    if (!Number.isFinite(t)) continue;
+    if (t > slut.getTime() + 86400000) continue;   // en dato i fremtiden er ukendt, ikke "friskt"
+    if (new Date(t).getFullYear() < 2000) continue; // Date.parse('0000') og lignende junk
+    tider.push(t);
+  }
+  if (!tider.length) return null;
+  /* MEDIANEN, ikke maksimum: ét friskt opslag må ikke skjule et gammelt lager. */
+  tider.sort((a, b) => a - b);
+  const faa = tider.length <= 2;                 // 1-2 annoncer: den ÆLDSTE dato (ingen "de fleste")
+  const max = faa ? tider[0] : tider[Math.floor((tider.length - 1) / 2)];
+  const min = tider[0], nyeste = tider[tider.length - 1];
+  const tekstFor = ms => {
+    const d = new Date(ms);
+    return `${d.getDate()}. ${DA_MD[d.getMonth()]}${d.getFullYear() !== slut.getFullYear() ? ' ' + d.getFullYear() : ''}`;
+  };
+  const dage = Math.max(0, Math.floor((slut.getTime() - max) / 86400000));
+  const gammel = dage > GAMMEL_EFTER_DAGE;
+  const datoTekst = tekstFor(max);
+  return {
+    datoTekst, aeldsteTekst: tekstFor(min), nyesteTekst: tekstFor(nyeste), dage, gammel,
+    tekst: `${faa ? (tider.length === 1 ? 'Annoncen er' : 'Annoncerne er') : 'De fleste annoncer er'} bekræftet senest ${datoTekst}`,
+    advarsel: gammel ? 'Annoncerne kan være ændret siden.' : '',
+    samlet: `${faa ? (tider.length === 1 ? 'Annoncen er' : 'Annoncerne er') : 'De fleste annoncer er'} bekræftet senest ${datoTekst}${datoTekst.endsWith('.') ? '' : '.'}` + (gammel ? ' Annoncerne kan være ændret siden.' : ''),
+  };
+}
+
 const BRANDS_BY_MODEL = {
   Yamaha: ['MT-03', 'MT-07', 'MT-09', 'MT-10', 'YZF-R3', 'YZF-R6', 'YZF-R1', 'YZF-R7', 'Ténéré 700', 'XSR700', 'XSR900', 'Tracer 7', 'Tracer 9 GT', 'NMAX 125', 'XMAX 300', 'TMAX 560', 'WR250F', 'YZ450F', 'Niken', 'Virago 250', 'Virago 535', 'Virago 1100', 'V-Max', 'Fazer 600', 'FZ6', 'FZ1', 'RD350', 'DT125', 'XT250', 'XT660', 'Drag Star 650', 'Majesty 400', 'Seca II', 'SR400', 'MT-125', 'YZF-R125', 'XSR125', 'Tracer 900', 'Tracer 900 GT', 'Super Ténéré 1200', 'FJR1300', 'XJR1300', 'XJ6', 'FZ8', 'TDM900', 'WR450F', 'WR125R', 'MT-15', 'Aerox 155', 'Bolt'],
   Honda: ['CB125R', 'CB300R', 'CB500F', 'CB500X', 'CB650R', 'CB1000R', 'CBR500R', 'CBR600RR', 'CBR650R', 'CBR1000RR-R', 'Africa Twin', 'Africa Twin Adventure Sports', 'Rebel 300', 'Rebel 500', 'Rebel 1100', 'Forza 350', 'PCX 125', 'SH125i', 'Gold Wing', 'Gold Wing Tour', 'CRF250L', 'CRF450R', 'CRF450RL', 'Monkey', 'Super Cub C125', 'X-ADV', 'CB750 Four', 'CB400 Super Four', 'Hornet 600', 'Hornet 900', 'VFR800', 'Shadow 750', 'VTX1800', 'Transalp 750', 'Varadero 1000', 'Deauville 700', 'NC750X', 'Grom', 'CBX1000', 'CB1300', 'CBR125R', 'CBR300R', 'CB125F', 'CBR600F', 'CBR900RR Fireblade', 'CBR1000RR', 'VTR1000 Firestorm', 'VFR750', 'CBF600', 'CBF1000', 'NC700X', 'CB650F', 'Dominator NX650', 'CRF300L', 'Forza 750', 'Dax ST125'],

@@ -107,7 +107,8 @@ test('"Kørekort Kørekort A": kørekortbadgen siger "Kræver A", ikke en dobbel
 
 test('salgsmarkør vises fuldt som chip — aldrig klippet til "EN…" — og uden pris står der "Pris ved henvendelse"', () => {
   const html = listingCardHTML(ekstern({ price: null, salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'] }), 1);
-  assert.match(html, /<li class="rk-chip rk-chip-note" title="ENGROS · UDEN KLARGØRING">ENGROS \+1<\/li>/);
+  // F-010 (w3-data): kildens ord vises, kun versalerne pænnes ("ENGROS" -> "Engros").
+  assert.match(html, /<li class="rk-chip rk-chip-note" title="Engros · Uden klargøring">Engros \+1<\/li>/);
   assert.match(html, /class="rk-pris pris-mangler">Pris ved henvendelse</);
   assert.ok(!/…|&hellip;|\.\.\./.test(html.replace(/<svg[\s\S]*?<\/svg>/g, '')), 'ingen afkortning skrevet ind i markup');
 });
@@ -131,9 +132,14 @@ test('ikoner: sammenlign på alle kort, hjerte KUN hvor det virker (egne annonce
 });
 
 test('"Ny" (fabriksny hos forhandler) står først i linjen og forklarer garanti — og savnet km tælles ikke som hul', () => {
-  const html = listingCardHTML(ekstern({ km: null, kildeStand: 'ny' }), 1);
-  assert.match(html, /<p class="rk-linje"><span class="rk-ny" title="[^"]*garanti frem for reklamationsret[^"]*">Ny<\/span>/);
+  // Katalogsti (MC Syds /Ny/): "katalog over NYE motorcykler" og garantisætningen.
+  const html = listingCardHTML(ekstern({ km: null, kildeStand: 'ny', externalUrl: 'https://mcsyd.dk/Produkter/Motorcykel/Ny/Honda%20CB%201000/1' }), 1);
+  assert.match(html, /<p class="rk-linje"><span class="rk-ny" title="[^"]*katalog over NYE motorcykler[^"]*garanti frem for reklamationsret[^"]*">Ny<\/span>/);
   assert.ok(!/Km ikke oplyst/.test(html), 'en ny motorcykel har ingen km — det er ikke et hul');
+  // Ingen katalogsti: kortet siger kun, hvad kilden markerer — aldrig "katalog".
+  const uden = listingCardHTML(ekstern({ km: null, kildeStand: 'ny' }), 1);
+  assert.match(uden, /<span class="rk-ny" title="Kilden markerer annoncen som ny[^"]*">Ny<\/span>/);
+  assert.ok(!/katalog/.test(uden));
 });
 
 /* ---------- uden foto ---------- */

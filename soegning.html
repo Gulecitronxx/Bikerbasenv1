@@ -107,6 +107,9 @@ try{
    fra. Da den blev vist, voksede vaerktoejslinjen 22px og skubbede hele
    resultatgitteret ned. */
 .results-headline{min-height:49px}
+.so-frisk{margin:0 0 var(--space-3);color:var(--color-fg-muted);font-size:13px;line-height:1.4;min-height:1.4em}
+.so-frisk[hidden]{display:none}
+@media (max-width:639px){.so-frisk{min-height:2.8em}}
 @media (max-width:620px){
   /* Runde 6 (D6-S2): én linje — "548 annoncer · fra 4 kilder (i)". */
   .srp .results-headline{min-height:24px;display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap}
@@ -693,6 +696,11 @@ try{
             </div>
           </div>
         </div>
+
+        <!-- Lagerets alder (F-003). Pladsen står i MARKUPPEN (som "Blandet udbud" nedenfor): en linje, der først
+             kommer, når annoncerne er hentet, skubber hele resultatgitteret ned (CLS). js/search.js fylder den
+             med "De fleste annoncer er bekræftet senest <dato>" og skjuler den, hvis der ingen dato er. -->
+        <p class="so-frisk" id="frisk-note"></p>
 
         <!-- Hvad "Blandet udbud" betyder, skrevet ud. Sætningen står i
              MARKUPPEN og ikke kun i js/search.js: den ligger over kortene, og

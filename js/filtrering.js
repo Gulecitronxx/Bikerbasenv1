@@ -174,8 +174,15 @@ const Filtrering = (() => {
     }
 
     // Mærke, model og titel kender vi altid — de kommer med annoncen fra kilden.
-    if (brug('brands') && state.brands.length) list = list.filter(l => state.brands.includes(l.brand));
-    if (brug('models') && state.models.length) list = list.filter(l => state.models.includes(l.model));
+    // F-011: "SYM" og "Sym" er ét mærke; store/små bogstaver afgør ikke et træf.
+    if (brug('brands') && state.brands.length){
+      const maerker = new Set(state.brands.map(b => String(b).toLowerCase()));
+      list = list.filter(l => maerker.has(String(l.brand).toLowerCase()));
+    }
+    if (brug('models') && state.models.length){
+      const modeller = new Set(state.models.map(m => String(m).toLowerCase()));
+      list = list.filter(l => modeller.has(String(l.model).toLowerCase()));
+    }
 
     // Kategorifiltre: værdien er enten oplyst, eller også er den det ikke.
     if (brug('types') && state.types.length)

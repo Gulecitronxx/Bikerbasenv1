@@ -8,7 +8,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering } = browserModules();
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering, standOpgoerelse: standOpg } = browserModules();
 
 /* Sidens egne ikoner (js/icons.js) som markup — samme SVG'er som resten af
    sitet, ikke en ny ikonpakke. Filen er et almindeligt script med en
@@ -95,8 +95,9 @@ function facetLinksFor(brand, items){
    eksternErNy()). Ordet "brugte" bruges kun, naar ALLE annoncer er brugte;
    ellers hedder det "Honda-motorcykler til salg", og tallene skrives ud hver
    for sig ("97 brugte og 165 fabriksnye"). */
-function nyeAf(items){ return items.filter(l => eksternErNy(l) === true).length; }
-function brugtOrd(items){ return nyeAf(items) ? '' : 'brugte '; }
+function nyeAf(items){ return standOpg(items).nye; }
+// w3-data: ubeviste "ny" (kilden siger ny, tallene hverken bekræfter eller afviser) er hverken nye eller brugte.
+function brugtOrd(items){ return standOpg(items).renBrugt ? 'brugte ' : ''; }
 /* Runde 7 (D7-M4): "Gul og Gratis, Rydbergs MC, Jensens Motorcykler og MC Syd". */
 function listeJoin(navne){
   const n = navne.map(esc);
@@ -1564,4 +1565,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede };
+module.exports = { typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd };

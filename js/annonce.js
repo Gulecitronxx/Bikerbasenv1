@@ -767,10 +767,10 @@ function renderExternalListing(listing){
   const salgsmarkoerer = (() => {
     const raa = listing.salgsmarkoerer ?? listing.salgsmarkører ?? listing.markoerer ?? null;
     const liste = Array.isArray(raa) ? raa : (raa ? String(raa).split(/\s*[\/,;]\s*/) : []);
-    // "ENGROS" råbt med versaler er kildens formatering, ikke en oplysning.
+    // Samme label-funktion som kortet og listerækken (salgsmarkoerLabel i js/data.js): "Engros" overalt.
     return liste.map(m => String(m).trim())
       .filter(Boolean)
-      .map(m => m.charAt(0).toUpperCase() + m.slice(1).toLowerCase())
+      .map(salgsmarkoerLabel)
       .slice(0, 4);
   })();
 
@@ -805,23 +805,8 @@ function renderExternalListing(listing){
      stedet at motorcyklen er fabriksny AF DEN GRUND km ikke er oplyst, og
      henviser til privatsalgs-noten længere nede — den var før slet ikke
      med for eksterne annoncer (se noten ved sellerTypeNoteHTML nedenfor). */
-  const fabriksnyNote = erNy === true
-    ? (listing.isDealer
-        ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-          + `over nye motorcykler, ikke blandt de brugte.`
-          + `${VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret,' : ','}`
-          + ` og kilometerstanden er derfor ikke oplyst.`
-        : listing.saelgertype === 'privat'
-          ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-            + `over nye motorcykler, ikke blandt de brugte, og kilometerstanden er derfor `
-            + `ikke oplyst. Sælgeren er privat — reklamationsret gælder ikke mellem private, `
-            + `heller ikke når motorcyklen er ny (se nedenfor).`
-          /* Runde 7 (D7-A1): saelgertypen er ikke oplyst af kilden — ingen paastand
-             om reklamationsret den ene eller anden vej. */
-          : `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-            + `over nye motorcykler, ikke blandt de brugte, og kilometerstanden er derfor `
-            + `ikke oplyst. Spørg sælgeren om garanti- og reklamationsvilkår (se nedenfor).`)
-    : null;
+  /* Noten bygges af fabriksnyNoteTekst() i js/data.js (samme erNy som kortet og SEO). */
+  const fabriksnyNote = fabriksnyNoteTekst(listing, erNy, kilde, VIS_REKLAMATIONSRET);
 
   const hk  = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;
