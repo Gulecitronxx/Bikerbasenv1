@@ -136,7 +136,7 @@ function chipRevision(){
   for (const facet of facetter){
     const html = side(facet, alle);
     for (const chip of CHIP.udtraekChips(html)){
-      if (!/^(soegning.html?|(?!annonce)[a-z0-9-]+.html$)/.test(chip.href)) continue;
+      if (!/^(soegning\.html\?|(?!annonce)[a-z0-9-]+\.html$)/.test(chip.href)) continue;
       const d = /^soegning/.test(chip.href) ? CHIP.dubletNoegler(chip.href) : [];
       if (d.length) dubletter.push(`${facet.slug}: ${chip.href} gentager ${d.join(', ')}`);
       if (chip.tal === null) continue;
@@ -159,4 +159,13 @@ test('F2-004/F2-005: hver chip på hver facetside lover præcis det antal, linke
 test('F2-004: intet søgelink gentager en query-parameter (budgetsiderne havde to maxPrice)', () => {
   const { dubletter } = chipRevision();
   assert.deepEqual(dubletter, []);
+});
+
+test('T-001: kørekortsiden koerekort-a2 beholder den kommercielle titel og H1', () => {
+  const alle = CHIP.lagerFixture();
+  global.ALLE_LISTINGS = alle;
+  const f = forberedFacetter(alle).find(x => x.slug === 'koerekort-a2');
+  const html = side(f, alle);
+  assert.match(html, /<title>Motorcykler til A2-kørekort — Bikerbasen<\/title>/);
+  assert.match(html, /<h1>Motorcykler til A2-kørekort<\/h1>/);
 });

@@ -490,11 +490,21 @@ function topModeller(items, n){
   return [...antal.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'da')).slice(0, n);
 }
 
-/* TITLE — "{Brand} brugt – X til salg | Bikerbasen", maks 60 tegn. Kun
-   kaldt for mærker med fuld tekst; se MIN_LISTINGS_FULD_TEKST. */
+/* TITLE (T-002) — ÉN formel for alle mærkesider: "{Brugte }{Mærke}-motorcykler til salg — Bikerbasen".
+   Søgningen er "bmw motorcykler til salg", ikke "bmw brugt – 31 til salg"; antal og pris står i beskrivelsen
+   (metaBeskrivelseFor), så titlen ikke ændrer sig, hver gang et lager rykker. "Brugte" kun når ALLE er
+   bevist brugte (standOpgoerelse.renBrugt). Maks 60 tegn: er navnet for langt, falder først
+   " — Bikerbasen", så "Brugte" — mærke og "motorcykler til salg" bevares, og intet afkortes midt i et ord.
+   Parametrene n og nye bruges ikke længere til ordlyden; nye > 0 betyder blot, at lageret ikke er rent brugt. */
+const TITEL_MAX = 60;
 function titelFor(brand, n, nye, rent = true){
-  return nye ? `${brand} – ${n} til salg, nye og brugte | Bikerbasen`
-    : rent ? `${brand} brugt – ${n} til salg | Bikerbasen` : `${brand} – ${n} til salg | Bikerbasen`;
+  const b = rent && !nye ? 'Brugte ' : '';
+  const kandidater = [
+    `${b}${brand}-motorcykler til salg — Bikerbasen`,
+    `${b}${brand}-motorcykler til salg`,
+    `${brand}-motorcykler til salg`,
+  ];
+  return kandidater.find(k => k.length <= TITEL_MAX) || kandidater[kandidater.length - 1];
 }
 
 /* META DESCRIPTION — 140-155 tegn, rigtigt antal, rigtigt prisspænd, én
@@ -1137,8 +1147,7 @@ for (const brand of brands){
 
   const nye = nyeAf(items);
   const standN = standOpg(items);
-  const titelRaa = kvalificeret ? titelFor(brand, items.length, nye, standN.renBrugt)
-    : `${standN.renBrugt ? 'Brugte ' : ''}${brand} motorcykler til salg — Bikerbasen`;
+  const titelRaa = titelFor(brand, items.length, nye, standN.renBrugt);
   const metaDescRaa = kvalificeret ? metaBeskrivelseFor(brand, items.length, stats, nye, standN.renBrugt, standN.ubeviste) : beskrivelse;
   const arvSaetning = kvalificeret ? BRAND_ARV[brand] : null;
   const introTekst = arvSaetning ? `${arvSaetning} ${introFor(brand, items)}` : introFor(brand, items);

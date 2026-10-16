@@ -266,7 +266,7 @@ test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
 
   test('titel og beskrivelse siger kun "brugt", når ALLE er bevist brugte', () => {
     // rent brugt (default) — som før
-    assert.match(titelFor('Kawasaki', 51, 0), /Kawasaki brugt – 51 til salg/);
+    assert.equal(titelFor('Kawasaki', 51, 0), 'Brugte Kawasaki-motorcykler til salg — Bikerbasen');
     assert.match(metaBeskrivelseFor('Kawasaki', 51, stats, 0), /51 brugte Kawasaki/);
     // ubeviste "ny" blandt dem: ingen påstand om "brugt"
     assert.ok(!/brugt/.test(titelFor('Kawasaki', 51, 0, false)), 'titlen må ikke sige brugt');
@@ -298,7 +298,7 @@ test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
       const fakta = maerkeFakta(brand, items);
       const html = facetLinksFor(brand, items) + treKolonnerHTML(brand, fakta, items) + typeFlisersHTML(brand, fakta);
       for (const chip of CHIP.udtraekChips(html)){
-        if (!/^soegning.html?/.test(chip.href)) continue;
+        if (!/^soegning\.html\?/.test(chip.href)) continue;
         const d = CHIP.dubletNoegler(chip.href);
         if (d.length) dubletter.push(`${brand}: ${chip.href} gentager ${d.join(', ')}`);
         if (chip.tal === null) continue;
@@ -322,5 +322,38 @@ test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
     assert.equal(tal['CRF 1100 L Africa'], 24);
     assert.equal(tal['CB 1000'], 8);
     assert.equal(tal['CBR 1000 F'], 3);
+  });
+}
+
+/* ---------- T-002: én titelformel for alle mærkesider ---------- */
+{
+  const { titelFor, metaBeskrivelseFor } = require('./build-brand-pages.js');
+  const MAERKER = ['BMW', 'Honda', 'Yamaha', 'KTM', 'Harley-Davidson', 'Royal Enfield', 'Moto Guzzi', 'MV Agusta', 'FB Mondial', 'Lauge Jensen', 'Husqvarna', 'Triumph', 'Hyosung', 'Kawasaki'];
+
+  test('T-002: titlen er "{Brugte }{Mærke}-motorcykler til salg — Bikerbasen" for alle mærker, højst 60 tegn', () => {
+    for (const m of MAERKER){
+      const rent = titelFor(m, 31, 0, true), blandet = titelFor(m, 31, 4, false), ubevist = titelFor(m, 31, 0, false);
+      assert.equal(rent, `Brugte ${m}-motorcykler til salg — Bikerbasen`);
+      assert.equal(blandet, `${m}-motorcykler til salg — Bikerbasen`, 'nye imellem: intet "brugte"');
+      assert.equal(ubevist, blandet, 'ubevist "ny" er hverken ny eller brugt: intet "brugte"');
+      for (const t of [rent, blandet]) assert.ok(t.length <= 60, `${t} er ${t.length} tegn`);
+      assert.ok(!/[0-9]/.test(rent), 'antal og pris står i beskrivelsen, ikke i titlen');
+    }
+  });
+
+  test('T-002: et meget langt mærkenavn afkortes pænt — først " — Bikerbasen", så "Brugte", aldrig midt i et ord', () => {
+    const langt = 'Zundapp Spezialmotorenwerke';   // 27 tegn
+    const t = titelFor(langt, 12, 0, true);
+    assert.ok(t.length <= 60, t);
+    assert.match(t, /Zundapp Spezialmotorenwerke-motorcykler til salg/);
+    assert.ok(!/ —$/.test(t) && !/-$/.test(t), 'ingen hængende tegnsætning: ' + t);
+    // Selv det længste navn giver en hel titel, ikke en afkortet streng.
+    assert.ok(titelFor('Et Meget Langt Fabrikantnavn Som Ingen Kender', 3, 0, true).endsWith('motorcykler til salg'));
+  });
+
+  test('T-002: beskrivelsen bærer antal og pris (flyttet fra titlen)', () => {
+    const d = metaBeskrivelseFor('BMW', 31, { min: 20000, max: 190000 }, 0, true, 0);
+    assert.match(d, /31 brugte BMW/);
+    assert.ok(d.includes('fra 20.000 kr. til 190.000 kr.'), d);
   });
 }

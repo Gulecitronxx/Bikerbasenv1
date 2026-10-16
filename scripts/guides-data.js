@@ -184,9 +184,12 @@ const GUIDES = [
   {
     file: 'guide-a2-koerekort.html',
     slug: 'guide-a2-koerekort',
-    navn: 'Motorcykler til A2-kørekort — regler og gode valg',
-    h1: 'Motorcykler til A2-kørekort — regler og gode valg',
-    title: 'Motorcykler til A2-kørekort — regler og krav',
+    /* T-001: guiden har informationsintention. "Motorcykler til A2-kørekort" er den kommercielle side
+       (koerekort-a2.html); begge sider konkurrerede om samme søgning med næsten ens title og H1.
+       Én tekst i title, H1, breadcrumb, oversigtskort og Article-headline. */
+    navn: 'A2-kørekort: regler, alder og krav',
+    h1: 'A2-kørekort: regler, alder og krav',
+    title: 'A2-kørekort: regler, alder og krav',
     description: 'A2-kørekort forklaret: 35 kW, 0,2 kW/kg, afledningsreglen, alder og vejen til A. Sådan tjekker du, om en motorcykel passer. Med kilder.',
     ingress: 'A2 er for mange vejen ind i motorcykelverdenen, men reglerne handler om mere end cm³. Her gennemgår vi grænserne for effekt og vægt, hvordan du kommer fra A1 til A2 til A, og hvordan du vælger en motorcykel, der faktisk kan dokumenteres som A2.',
     cardImage: 'img/type/naked.webp',
