@@ -113,3 +113,127 @@ test('kørekortsiden har foto-guidekort til de reserverede guide-adresser', () =
   const html = side(buildFacetList(alle).find(f => f.slug === 'koerekort-a2'), alle);
   for (const g of [GUIDE.a2, GUIDE.foerste, GUIDE.brugt]) assert.match(html, new RegExp(`<a href="${g.replace('.', '\.')}"><img src="img/`));
 });
+
+/* ---------- F2-004 + F2-005: chippens tal = linkets resultat ----------
+   Detective runde 2 fandt 5 budgetchips med to `maxPrice` i linket ("Under 30.000 kr. · 55" -> 104 træf)
+   og 16+ modelchips, hvis tal og link talte forskellige ting (q= er en delstrengssøgning).
+   Testen bygger SIDERNE (side()) for hver facet over et fixturelager og kører hver chip, der bærer et
+   tal, gennem søgesidens egen URL-læser (readStateFromURL klippet ud af js/search.js) og
+   Filtrering.anvendFiltre — det, browseren gør, når man klikker. Linkene til statiske sider
+   (slug.html) regnes med sidens egen match. Ingen streng-søgning efter et bestemt link. */
+const { forberedFacetter } = require('./build-facet-pages.js');
+const CHIP = require('./seo-chip-tjek.js');
+const { Filtrering: FiltreringChip } = require('./shared').browserModules();
+
+function chipRevision(){
+  const alle = CHIP.lagerFixture();
+  global.ALLE_LISTINGS = alle;
+  const facetter = forberedFacetter(alle);
+  const ctx = { alle, facetter, Filtrering: FiltreringChip };
+  const fejl = [], dubletter = [];
+  let tjekket = 0;
+  const pr = new Map();
+  for (const facet of facetter){
+    const html = side(facet, alle);
+    for (const chip of CHIP.udtraekChips(html)){
+      if (!/^(soegning\.html\?|(?!annonce)[a-z0-9-]+\.html$)/.test(chip.href)) continue;
+      const d = /^soegning/.test(chip.href) ? CHIP.dubletNoegler(chip.href) : [];
+      if (d.length) dubletter.push(`${facet.slug}: ${chip.href} gentager ${d.join(', ')}`);
+      if (chip.tal === null) continue;
+      tjekket++;
+      pr.set(facet.kind, (pr.get(facet.kind) || 0) + 1);
+      const n = CHIP.traefFraHref(chip.href, ctx);
+      if (n !== chip.tal) fejl.push(`${facet.slug}: "${chip.tekst}" lover ${chip.tal}, ${chip.href} giver ${n}`);
+    }
+  }
+  return { fejl, dubletter, tjekket, pr, facetter };
+}
+
+test('F2-004/F2-005: hver chip på hver facetside lover præcis det antal, linket giver', () => {
+  const { fejl, tjekket, pr } = chipRevision();
+  assert.ok(tjekket >= 150, `kun ${tjekket} chips blev tjekket — fixture eller parser rammer ikke siderne`);
+  for (const k of ['type', 'region', 'koerekort', 'budget', 'model']) assert.ok(pr.get(k) > 0, `ingen chips tjekket på ${k}-sider`);
+  assert.deepEqual(fejl, []);
+});
+
+test('F2-004: intet søgelink gentager en query-parameter (budgetsiderne havde to maxPrice)', () => {
+  const { dubletter } = chipRevision();
+  assert.deepEqual(dubletter, []);
+});
+
+test('T-001: kørekortsiden koerekort-a2 beholder den kommercielle titel og H1', () => {
+  const alle = CHIP.lagerFixture();
+  global.ALLE_LISTINGS = alle;
+  const f = forberedFacetter(alle).find(x => x.slug === 'koerekort-a2');
+  const html = side(f, alle);
+  assert.match(html, /<title>Motorcykler til A2-kørekort — Bikerbasen<\/title>/);
+  assert.match(html, /<h1>Motorcykler til A2-kørekort<\/h1>/);
+});
+
+test('T-003: 10 identiske dealerenheder = 1 distinkt = noindex; en model med dubletter viser dem som ét kort', () => {
+  const kilde = { navn: 'MC Syd', domaene: 'mcsyd.dk' };
+  const alleKort = html => (html.slice(0, html.indexOf('<ul class="brand-noscript">')).match(/data-listing-id=/g) || []).length;
+  // (a) NX 500: 10 ens fra samme forhandler (committet model-side findes på disken, så facetten bygges).
+  const ens = Array.from({ length: 10 }, (_, i) => l(i + 1, { brand: 'Honda', model: 'NX 500', price: 89995, year: 2024, km: 0, source: kilde, type: 'adventure', externalUrl: 'https://mcsyd.dk/ny/nx500' }));
+  global.ALLE_LISTINGS = ens;
+  const nx = forberedFacetter(ens).find(f => f.slug === 'model-honda-nx-500');
+  assert.ok(nx, 'model-honda-nx-500 findes som facet');
+  assert.strictEqual(nx.qualifies, false, '1 distinkt annonce kan ikke være en indekserbar side');
+  const html = side(nx, ens);
+  assert.match(html, /<meta name="robots" content="noindex, follow">/);
+  assert.strictEqual(alleKort(html), 1, 'ét kort, ikke ti');
+  assert.match(html, /9 af de 10 annoncer er identiske lagerenheder/);
+  // (b) 4 ens + 2 forskellige = 3 distinkte: kvalificerer, men viser 3 kort, og antallet er stadig 6.
+  const blandet = [
+    ...Array.from({ length: 4 }, (_, i) => l(i + 1, { brand: 'Kawasaki', model: 'Ninja 650', price: 59995, year: 2023, km: 0, source: kilde, type: 'sport', externalUrl: 'https://mcsyd.dk/ny/ninja' })),
+    l(5, { brand: 'Kawasaki', model: 'Ninja 650', price: 49000, year: 2021, km: 12000, type: 'sport', externalUrl: 'https://test.dk/5' }),
+    l(6, { brand: 'Kawasaki', model: 'Ninja 650', price: 44000, year: 2019, km: 30000, type: 'sport', externalUrl: 'https://test.dk/6' }),
+  ];
+  global.ALLE_LISTINGS = blandet;
+  const ninja = forberedFacetter(blandet).find(f => f.slug === 'model-kawasaki-ninja-650');
+  assert.ok(ninja && ninja.qualifies, '3 forskellige annoncer med pris og årgang er en side');
+  const h2 = side(ninja, blandet);
+  assert.ok(!/name="robots"/.test(h2));
+  assert.strictEqual(alleKort(h2), 3);
+  assert.match(h2, /3 af de 6 annoncer er identiske lagerenheder/);
+  assert.match(h2, /id="facet-antal">6 annoncer</, 'overskriften tæller stadig alle annoncer');
+});
+
+test('T-004/T-006: budgetsiden viser eget interval først og beskriver det med data; description og side siger samme "fra"', () => {
+  const alle = CHIP.lagerFixture();
+  global.ALLE_LISTINGS = alle;
+  const f = forberedFacetter(alle);
+  const b75 = f.find(x => x.slug === 'budget-under-75000');
+  assert.strictEqual(b75.lo, 50000);
+  const html = side(b75, alle);
+  assert.ok(html.includes('Interval 50.001 kr. til 75.000 kr.: ') && html.includes('medianpris'), 'intervalafsnit fra data');
+  assert.ok(html.includes('data-facet-lo="50000"'));
+  // Første viste kort tilhører intervallet (pris > 50.000): kortets pris står i teksten før de første kort.
+  const priser = alle.map(l => l.price).filter(p => p > 0 && p <= 75000);
+  const fra = Math.min(...priser).toLocaleString('da-DK');
+  const beskr = html.match(/<meta name="description" content="([^"]*)"/)[1];
+  assert.ok(beskr.includes('Priser fra ' + fra + ' kr.'), beskr);
+  assert.ok(html.includes('fra ' + fra + ' kr.'), 'sidens egen tekst bruger samme laveste pris');
+  assert.ok(!beskr.includes('fra ca.'));
+  assert.ok(!/Interval/.test(side(f.find(x => x.slug === 'budget-under-30000'), alle)), 'første trin har intet eget interval');
+});
+
+test('T-007: JSON-LD på alle facetsider parser; ItemList kun hvis den dækker alle annoncer; intet breadcrumb-led peger på /soegning', () => {
+  const alle = CHIP.lagerFixture();
+  global.ALLE_LISTINGS = alle;
+  let blokke = 0;
+  for (const facet of forberedFacetter(alle)){
+    const html = side(facet, alle);
+    for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)){
+      const o = JSON.parse(m[1].replace(/\\u003c/g, '<'));
+      blokke++;
+      if (o['@type'] === 'ItemList'){
+        const n = alle.filter(facet.match).length;
+        assert.ok(o.itemListElement.length === n, facet.slug + ': ItemList dækker ikke alle ' + n);
+        assert.strictEqual(o.numberOfItems, n);
+      }
+      if (o['@type'] === 'BreadcrumbList') for (const li of o.itemListElement) assert.ok(!li.item.endsWith('/soegning'), facet.slug + ': breadcrumb peger på /soegning');
+    }
+  }
+  assert.ok(blokke > 40);
+});

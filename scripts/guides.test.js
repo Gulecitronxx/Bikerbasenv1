@@ -171,3 +171,21 @@ test('sidebjælken: maxi-scootere og el-crossere udelukkes; privatkøb nævner y
   assert.ok(!/§ 19/.test(html), '§ 19 er ikke "som beset"-paragraffen');
   assert.match(html, /eli\/lta\/2021\/1853/);
 });
+
+test('T-001: A2-guiden har informationsintention — én tekst overalt, og den kommercielle titel ligger kun på kørekortsiden', () => {
+  const g = GUIDES.find(x => x.file === 'guide-a2-koerekort.html');
+  const side = sider.find(s => s.navn === 'guide-a2-koerekort.html').html;
+  const tekst = 'A2-kørekort: regler, alder og krav';
+  assert.strictEqual(g.title, tekst);
+  assert.strictEqual(g.h1, tekst);
+  assert.strictEqual(g.navn, tekst);
+  const title = side.match(/<title>([^<]+)<\/title>/)[1];
+  assert.ok(title.length <= 60, `title ${title.length} tegn`);
+  assert.ok(!/Motorcykler til A2-kørekort/.test(title + g.h1 + g.navn), 'den kommercielle titel hører til koerekort-a2');
+  assert.strictEqual(side.match(/<h1[^>]*>([^<]+)<\/h1>/)[1], tekst, 'H1 = title-stammen');
+  const art = ldBlokke(side).find(o => o['@type'] === 'Article');
+  assert.strictEqual(art.headline, tekst, 'Article-headline = H1 = title-stammen');
+  assert.match(side, new RegExp('<meta property="og:title" content="' + tekst));
+  // Oversigtens kort bruger samme tekst.
+  assert.match(sider.find(s => s.navn === 'guides.html').html, new RegExp('gd-card-title">' + tekst));
+});

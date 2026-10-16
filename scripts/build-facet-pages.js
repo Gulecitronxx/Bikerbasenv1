@@ -124,10 +124,11 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { siteUrl, fetchListings, fetchExternalListings, siteParts, esc, browserModules, listingSlug } = require('./shared');
-const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, markerTvaerkildeDubletter, Sortering, eksternErNy, standOpgoerelse: standOpg } = browserModules();
+const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, markerTvaerkildeDubletter, Sortering, eksternErNy, standOpgoerelse: standOpg, Filtrering } = browserModules();
 const BASE = siteUrl();
 const SEO = require('./seo-vagt');
 const SIDER = require('./seo-sider');
+const LINK = require('./seo-soeglink');   // F2-004/F2-005: ét sted bygger søgelinks, og chippens tal regnes af samme filter
 const { KILDE_URL, KK_FAKTA, KK_BOKSE, TYPE_VIDEN, REGION_VIDEN, GUIDE, EGNE_IKONER } = require('./facet-indhold');
 // js/icons.js er en ren const-erklaering uden DOM-afhaengighed i toppen — samme
 // eval-moenster som js/data.js ovenfor, bare via new Function.
@@ -183,13 +184,13 @@ const THRESHOLD = 10;
    - og, for de nye familier, har et ÆGTE indhold: oplyst pris og årgang på mindst 3
      annoncer. Ellers er "prisniveau" og "årgange" tomme ord. */
 const facetTaerskel = facet => facet.taerskel || THRESHOLD;
-/* Modelsider: fra 10 annoncer gælder den gamle regel uændret (siderne, der allerede er indekseret).
-   I det sænkede område (5-9) tæller kun DISTINKTE annoncer — identiske dealer-lagerenheder (samme pris,
-   årgang, km, kilde) er én annonce — ellers er en side på 7 annoncer, hvoraf 4 er samme vare, tynd. */
-const antalTilTaerskel = (facet, items) => facet.distinkt && items.length < THRESHOLD ? SIDER.distinkte(items).length : items.length;
+/* Modelsider (T-003): identiske dealer-lagerenheder (samme pris, årgang, km, kilde) er ÉN annonce. Siden skal have
+   mindst 3 forskellige annoncer med pris og årgang (SIDER.modelKvalificerer) — ikke 10 kort, der er den samme
+   vare. Gælder fra første annonce, ikke kun under 10: model-honda-nx-500 havde 10 kort og 2 forskellige. */
 function erIndekserbar(facet, items){
-  if (antalTilTaerskel(facet, items) < facetTaerskel(facet)) return false;
   if (facet.udvalgt === false) return false;
+  if (facet.distinkt) return SIDER.modelKvalificerer(items);
+  if (items.length < facetTaerskel(facet)) return false;
   if (facet.kraevIndhold && !SIDER.harIndhold(items)) return false;
   return true;
 }
@@ -292,13 +293,13 @@ function breadcrumbLd(items){
 }
 function itemListLd(name, items){
   const medSide = items.filter(harEgenSide);
-  if (!medSide.length) return null;
+  /* T-007: kun en liste, der dækker ALLE annoncer på siden, ellers er ItemList'en en misvisende delmængde. */
+  if (!medSide.length || medSide.length !== items.length) return null;
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name,
-    // numberOfItems kun naar listen daekker ALLE viste annoncer — ellers lover tallet mere/mindre end siden viser (S-012)
-    ...(medSide.length === items.length ? { numberOfItems: medSide.length } : {}),
+    numberOfItems: medSide.length,
     itemListElement: medSide.map((l, i) => ({
       '@type': 'ListItem', position: i + 1,
       url: `${BASE}/${listingSlug(l)}`,
@@ -430,7 +431,7 @@ function modelFacets(alle){
   }
   const valgte = new Map(); // slug -> { brand, model }
   for (const g of grupper.values()){
-    if (antalTilTaerskel({ distinkt: true }, g.items) >= SIDER.TAERSKLER.model && SIDER.harIndhold(g.items)) valgte.set(modelSlug(g.brand, g.model), { brand: g.brand, model: g.model });
+    if (SIDER.modelKvalificerer(g.items)) valgte.set(modelSlug(g.brand, g.model), { brand: g.brand, model: g.model });
   }
   for (const [slug, e] of eksisterendeSider(/^model-.*\.html$/)) if (!valgte.has(slug) && e.brand && e.model) valgte.set(slug, { brand: e.brand, model: e.model });
   return [...valgte.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([slug, { brand, model }]) => {
@@ -438,6 +439,7 @@ function modelFacets(alle){
     return {
       kind: 'model', id: `${brand} ${model}`, slug, label: `${brand} ${mv}`, brand, model, mv,
       titel: `${brand} ${mv}`, taerskel: SIDER.TAERSKLER.model, kraevIndhold: true, distinkt: true,
+      soeg: { brands: [brand], models: [model] },
       match: l => modelNoegle(l) === `${brand}\u0000${model}`,
     };
   });
@@ -445,9 +447,13 @@ function modelFacets(alle){
 /* PRISINTERVALLER (S-015): en lukket, redaktionel liste (SIDER.BUDGET_TRIN), som typerne —
    alle trin skrives ved hvert byg, og et trin under taersklen bliver noindex, aldrig 404. */
 function budgetFacets(){
-  return SIDER.BUDGET_TRIN.map(max => ({
-    kind: 'budget', id: String(max), slug: SIDER.budgetSlug(max), label: `Under ${tal(max)} kr.`, max,
+  return SIDER.BUDGET_TRIN.map((max, i) => ({
+    /* lo: forrige trins grænse. Siden dækker stadig alt "under max" (titel, tal og søgning), men det er KUN
+       dens eget interval (lo, max], der er sidens særlige tilbud (T-004): kortlisten viser det først, og introen
+       beskriver det med tal fra data. */
+    kind: 'budget', id: String(max), slug: SIDER.budgetSlug(max), label: `Under ${tal(max)} kr.`, max, lo: i > 0 ? SIDER.BUDGET_TRIN[i - 1] : 0,
     titel: `Motorcykler under ${tal(max)} kr.`, taerskel: SIDER.TAERSKLER.budget, kraevIndhold: true,
+    soeg: { priceMax: max },
     match: l => { const p = SIDER.medPris(l); return p !== null && p <= max; },
   }));
 }
@@ -488,6 +494,7 @@ function kombiFacets(alle){
     return {
       kind: 'kombi', layout: 'type', id: `${k.brand}|${k.typeId}`, slug, label: `${k.brand} ${typeLabel}`, brand: k.brand, typeId: k.typeId, typeLabel,
       titel: `${k.brand} ${String(typeLabel).toLowerCase()}-motorcykler`, taerskel: SIDER.TAERSKLER.kombi, kraevIndhold: true, udvalgt: k.udvalgt,
+      soeg: { brands: [k.brand], types: [k.typeId] },
       match: l => String(l.brand || '').trim() === k.brand && l.type === k.typeId,
     };
   });
@@ -497,16 +504,19 @@ function buildFacetList(alle){
   const typeFacets = TYPES.map(t => ({
     kind: 'type', id: t.id, slug: `type-${t.id}`, label: t.label,
     titel: `${t.label}-motorcykler`,
+    soeg: { types: [t.id] },
     match: l => l.type === t.id,
   }));
   const kkFacets = KOEREKORT_FACETS.map(k => ({
     kind: 'koerekort', id: k.id, slug: k.slug, label: k.titel,
     titel: k.titel, frase: k.frase, forklaring: k.forklaring,
+    soeg: k.id === 'A' ? { koerekort: 'A', hkMin: A2_MAX_HK + 1 } : { koerekort: k.id },
     match: k.match || (l => passerKoerekort(l, k.id)),
   }));
   const regionFacets = REGIONS.map(r => ({
     kind: 'region', id: r, slug: `region-${slugify(r)}`, label: r,
     titel: `Motorcykler til salg i ${r}`,
+    soeg: { regions: [r] },
     match: l => l.region === r,
   }));
   const liste = alle || global.ALLE_LISTINGS || [];
@@ -719,6 +729,26 @@ const dominerendeRegion = items => {
 };
 
 /* Intro til de nye familier. Samme regler som de gamle: kun tal, der kan tælles efter paa siden. */
+/* T-004: det, der kun gælder dette trin — annoncerne over forrige trins grænse. Kun tal regnet af data; under 5
+   annoncer i intervallet eller uden oplyst pris siger siden intet om det (hellere intet end et tal på for lidt). */
+function budgetBand(facet, items){
+  return facet.lo ? items.filter(l => { const p = SIDER.medPris(l); return p !== null && p > facet.lo; }) : items;
+}
+function bandSaetning(facet, items){
+  if (!facet.lo) return '';
+  const band = budgetBand(facet, items);
+  if (band.length < 5) return '';
+  const priser = aggregatPriser(band);
+  const aar = band.map(l => tilTal(l.year)).filter(troværdigtAar).sort((a, b) => a - b);
+  let s = ` Interval ${dkk(facet.lo + 1)} til ${dkk(facet.max)}: ${band.length} annoncer, medianpris ${dkk(SIDER.median(priser))}`;
+  if (aar.length >= 3) s += `, medianårgang ${SIDER.median(aar)}`;
+  s += '.';
+  const typer = typerMedDaekning(band, 2);
+  if (typer.length) s += ` Mest udbudte typer i intervallet: ${typer.map(typeOrd).join(' og ')}.`;
+  const maerker = maerkeChips(facet, band).slice(0, 3);
+  if (maerker.length) s += ` Flest mærker: ${maerker.map(([b, n]) => `${esc(b)} (${n})`).join(', ')}.`;
+  return s;
+}
 function introForBudget(facet, items, alle){
   const { tekst, priser } = prisOgAargang(items);
   const typer = typerMedDaekning(items, 2);
@@ -726,6 +756,7 @@ function introForBudget(facet, items, alle){
   let s = `Der er <strong id="facet-intro-antal">${items.length}</strong> ${brugtOrd(items, 'motorcykel', 'motorcykler')} til salg til højst ${dkk(facet.max)} hos danske forhandlere og markedspladser, indekseret på Bikerbasen${tekst}`;
   if (priser.length > 2) s += ` Medianprisen er ${dkk(SIDER.median(priser))}`;   // dkk() bærer selv punktummet
   if (typer.length) s += ` Flest er ${typer.map(typeOrd).join(' og ')}.`;
+  s += bandSaetning(facet, items);
   s += kildeSaetning(items);
   if (udenPris) s += ` ${udenPris} ${udenPris === 1 ? 'annonce' : 'annoncer'} i hele lageret oplyser ingen pris og er ikke med her.`;
   return s;
@@ -855,16 +886,9 @@ function maerkeChips(facet, items){
   return [...antal.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'da')).slice(0, 12);
 }
 function facetSearchUrl(facet, extra){
-  const p = new URLSearchParams();
-  if (facet.kind === 'type') p.set('type', facet.id);
-  else if (facet.kind === 'region') p.set('regions', facet.id);
-  else if (facet.kind === 'model'){ p.set('brands', facet.brand); p.set('model', facet.model); }
-  else if (facet.kind === 'budget') p.set('maxPrice', String(facet.max));
-  else if (facet.kind === 'by'){ if (facet.region) p.set('regions', facet.region); }   // soegningen kender landsdel, ikke by
-  else if (facet.kind === 'kombi'){ p.set('brands', facet.brand); p.set('type', facet.typeId); }
-  else { p.set('koerekort', facet.id); if (facet.id === 'A') p.set('hkMin', String(A2_MAX_HK + 1)); }
-  if (extra) p.set('brands', extra);
-  return `soegning.html?${p.toString()}`;
+  /* Facetten kender selv sit søgefilter (facet.soeg); by-siderne har intet — søgningen kender landsdel, ikke by. */
+  const grund = facet.kind === 'by' ? (facet.region ? { regions: [facet.region] } : {}) : facet.soeg;
+  return LINK.soegHref(LINK.og(grund, extra ? { brands: [extra] } : null), { html: false });
 }
 
 /* RUNDE 12 (R12-D-13 + R11-KK-6): facetsiderne havde NUL vaerktoejer — ingen
@@ -880,19 +904,20 @@ function facetSearchUrl(facet, extra){
    Samme fold, samme link-sortering som maerkesiderne (ingen inline-JS af hensyn
    til CSP, og en crawler kan foelge dem). Prisspring vises kun, naar de faktisk
    deler lageret — et filter, der rammer alt eller intet, er stoej. */
-function facetVaerktoejer(facet, items){
+function facetVaerktoejer(facet, items, ctx){
   /* By-siderne: soegningen kan ikke filtrere paa by, kun paa landsdel. Et "Under 30.000 · 5"-link ville
      vise byens tal og lande paa landsdelens. Hellere ingen filterfold end et tal, der ikke kan staa. */
   if (facet.kind === 'by') return '';
-  const base = facetSearchUrl(facet);
-  const q = ekstra => `${base}&amp;${ekstra}`;
+  /* Linket og tallet kommer fra SAMME filter (ctx.link): n er det antal, søgningen viser, eller null
+     (ingen tal), hvis facetten ikke kan udtrykkes præcist i søgningen. */
+  const lk = (tekst, extra, key) => { const l = ctx.link(extra); return { tekst, n: l.n, key, href: l.href }; };
   const raekker = [];
 
   const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0);
   const pris = [[30000, 'Under 30.000'], [60000, 'Under 60.000'], [100000, 'Under 100.000']]
     .map(([max, tekst]) => ({ tekst, max, n: priser.filter(p => p <= max).length }))
     .filter(x => x.n > 0 && x.n < priser.length);
-  if (pris.length) raekker.push({ navn: 'Pris', links: pris.map(x => ({ tekst: `${x.tekst} kr.`, n: x.n, key: `pris:${x.max}`, href: q(`maxPrice=${x.max}`) })) });
+  if (pris.length) raekker.push({ navn: 'Pris', links: pris.map(x => lk(`${x.tekst} kr.`, { priceMax: x.max }, `pris:${x.max}`)) });
 
   /* RUNDE 13: den blinde dommer holdt siden op mod AutoScout24 og kaldte deres
      filterskinne "feltets bedste" — femten filtre mod vores to. Vi bygger ikke
@@ -906,19 +931,19 @@ function facetVaerktoejer(facet, items){
     const aarSpring = [[nu - 2, `${nu - 2} og nyere`], [nu - 5, `${nu - 5} og nyere`], [nu - 10, `${nu - 10} og nyere`]]
       .map(([min, tekst]) => ({ tekst, min, n: aar.filter(y => y >= min).length }))
       .filter(x => x.n > 0 && x.n < aar.length);
-    if (aarSpring.length) raekker.push({ navn: 'Årgang', links: aarSpring.map(x => ({ tekst: x.tekst, n: x.n, key: `aar:${x.min}`, href: q(`yearMin=${x.min}`) })) });
+    if (aarSpring.length) raekker.push({ navn: 'Årgang', links: aarSpring.map(x => lk(x.tekst, { yearMin: x.min }, `aar:${x.min}`)) });
   }
 
   const km = items.map(l => tilTal(l.km)).filter(k => k !== null && k >= 0);
   const kmSpring = [[10000, 'Under 10.000'], [30000, 'Under 30.000'], [60000, 'Under 60.000']]
     .map(([max, tekst]) => ({ tekst, max, n: km.filter(v => v <= max).length }))
     .filter(x => x.n > 0 && x.n < km.length);
-  if (kmSpring.length) raekker.push({ navn: 'Km', links: kmSpring.map(x => ({ tekst: `${x.tekst} km`, n: x.n, key: `km:${x.max}`, href: q(`kmMax=${x.max}`) })) });
+  if (kmSpring.length) raekker.push({ navn: 'Km', links: kmSpring.map(x => lk(`${x.tekst} km`, { kmMax: x.max }, `km:${x.max}`)) });
 
   raekker.push({ navn: 'Sortér i søgningen', klasse: ' brand-facet-sorter', links: [
-    { tekst: 'Pris: lav → høj', href: q('sort=price-asc') },
-    { tekst: 'Pris: høj → lav', href: q('sort=price-desc') },
-    { tekst: 'Årgang: nyeste', href: q('sort=year-desc') },
+    lk('Pris: lav → høj', { sort: 'price-asc' }),
+    lk('Pris: høj → lav', { sort: 'price-desc' }),
+    lk('Årgang: nyeste', { sort: 'year-desc' }),
   ] });
 
   if (!raekker.length) return '';
@@ -935,7 +960,7 @@ function facetVaerktoejer(facet, items){
         <input type="checkbox" class="brand-facet-check" id="${foldId}" aria-controls="${foldId}-panel">
         <label class="brand-facet-greb" for="${foldId}">Filtrér og sortér<span class="visually-hidden fold-vis"> — vis</span><span class="visually-hidden fold-skjul"> — skjul</span><span class="chev"></span></label>
         <div class="brand-facetter" id="${foldId}-panel">
-        ${raekker.map(r => `<div class="brand-facet-raekke${r.klasse || ''}"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}"><span>${l.tekst}${l.key ? ` · ${nSpan(l.key, l.n)}` : ''}</span></a>`).join('\n          ')}</div>`).join('\n        ')}
+        ${raekker.map(r => `<div class="brand-facet-raekke${r.klasse || ''}"><span class="brand-facet-navn">${r.navn}:</span> ${r.links.map(l => `<a class="popular-chip popular-chip-sm" href="${l.href}"><span>${l.tekst}${l.key && l.n !== null ? ` · ${nSpan(l.key, l.n)}` : ''}</span></a>`).join('\n          ')}</div>`).join('\n        ')}
         </div>
       </div>`;
 }
@@ -963,25 +988,29 @@ function fraseEt(facet){
 }
 const IKON = n => `<span class="fa-ik" aria-hidden="true">${EGNE_IKONER[n] || IkonKilde[n] || ''}</span>`;
 const stort = s => s.charAt(0).toUpperCase() + s.slice(1);
-const faSoeg = (facet, extra) => {
-  const p = new URLSearchParams();
-  if (facet.kind === 'type') p.set('type', facet.id);
-  else if (facet.kind === 'region') p.set('regions', facet.id);
-  else if (facet.kind === 'model'){ p.set('brands', facet.brand); p.set('model', facet.model); }
-  else if (facet.kind === 'budget') p.set('maxPrice', String(facet.max));
-  else if (facet.kind === 'by'){ if (facet.region) p.set('regions', facet.region); }
-  else if (facet.kind === 'kombi'){ p.set('brands', facet.brand); p.set('type', facet.typeId); }
-  else { p.set('koerekort', facet.id); if (facet.id === 'A') p.set('hkMin', String(A2_MAX_HK + 1)); }
-  for (const [k, v] of Object.entries(extra || {})) p.set(k, v);
-  return `soegning.html?${p.toString()}`.replace(/&/g, '&amp;');
-};
+
 const PRIS_TRIN = [30000, 60000, 100000, 200000];
 const AAR_TRIN = [2, 5, 10, 20].map(n => I_AAR - n);
+
+/* Modelchippens link og tal (F2-005). Tallet e.n er antallet i UDVALGET (regionen, typen, prisklassen …).
+   Linket skal vise præcis det: er hele modellen i udvalget (modelsidens antal = e.n), er modelsiden
+   det bedste mål; ellers søges der med facettens filter OG eksakt model (model=, aldrig q=, der er en
+   delstrengssøgning). Kan facetten ikke udtrykkes i søgningen (by-sider, kategori A), får chippen
+   ingen tal, og linkes kun til modelsiden, hvis den findes. null = intet ærligt link, drop chippen. */
+const modelOrd = () => 'Se annoncerne';
+function modelChip(e, ctx, modelSider){
+  const slug = modelSlug(e.brand, e.model);
+  const side = modelSider.get(slug);
+  if (side && ctx.alle.filter(side.match).length === e.n) return { href: `${slug}.html`, n: e.n };
+  const l = ctx.link({ brands: [e.brand], models: [e.model] });
+  if (ctx.praecis && LINK.kanStaaIUrl(l.filtre)) return { href: l.href, n: l.n === e.n ? e.n : null };
+  return side ? { href: `${slug}.html`, n: null } : null;
+}
 
 /* Mest udbudte modeller i udvalget (kun dem med mindst to annoncer — en række
    af modeller med "1 til salg" er støj). Peger på modelsiden, når den findes og
    er indekserbar, ellers på søgningen. */
-function topModeller(items, n = 6){
+function topModeller(items, n = 6, ctx = null){
   const m = new Map();
   for (const l of items){
     const k = modelNoegle(l);
@@ -1001,9 +1030,7 @@ function topModeller(items, n = 6){
     .sort((a, b) => b.n - a.n || `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`, 'da'))
     .slice(0, n)
     .map(e => {
-      const slug = modelSlug(e.brand, e.model);
-      return Object.assign(e, { href: modelSider.has(slug) ? `${slug}.html`
-        : `soegning.html?${new URLSearchParams({ brands: e.brand, model: e.model }).toString().replace(/&/g, '&amp;')}` });
+      return ctx ? Object.assign(e, { chip: modelChip(e, ctx, modelSider) }) : e;
     });
 }
 function antalPrTypeOgRegion(items){
@@ -1158,30 +1185,30 @@ function ctaPanel(facet, foto){
       </aside>`;
 }
 
-function typeFliser(facet, typer){
+function typeFliser(facet, typer, ctx){
   const t = TYPES.filter(x => typer.get(x.id)).sort((a, b) => typer.get(b.id) - typer.get(a.id));
   if (!t.length) return '';
   const hvad = facet.kind === 'koerekort' ? `${esc(facet.id)}-motorcykler` : frase(facet);
   const hvadEt = facet.kind === 'koerekort' ? `${esc(facet.id)}-motorcykel` : fraseEt(facet);
   return `<section class="section fa-sektion">
       <h2 class="fa-h2">Populære typer ${hvad}</h2>
-      <ul class="fa-typer">${t.map(x => `<li><a href="${faSoeg(facet, { type: x.id })}">
+      <ul class="fa-typer">${t.map(x => { const l = ctx.link({ types: [x.id] }); return `<li><a href="${l.href}">
           <img src="img/type/${x.id}.webp" alt="" width="456" height="342" loading="lazy" decoding="async">
-          <span class="fa-type-tekst"><strong>${esc(x.label)}</strong><span>${nSpan(`type:${x.id}`, typer.get(x.id))} ${ordSpan(typer.get(x.id), hvadEt, hvad)}</span></span>
-          <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a></li>`).join('')}</ul>
+          <span class="fa-type-tekst"><strong>${esc(x.label)}</strong><span>${l.n !== null ? `${nSpan(`type:${x.id}`, l.n)} ` : ''}${ordSpan(typer.get(x.id), hvadEt, hvad)}</span></span>
+          <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a></li>`; }).join('')}</ul>
     </section>`;
 }
-function modelRaekke(facet, items){
-  const m = facet.kind === 'model' ? [] : topModeller(items);
+function modelRaekke(facet, items, ctx){
+  const m = facet.kind === 'model' ? [] : topModeller(items, 6, ctx).filter(e => e.chip);
   if (!m.length) return '';
   const hvad = facet.kind === 'type' ? `${esc(String(facet.label).toLowerCase())}-modeller` : facet.kind === 'koerekort' ? `${esc(facet.id)}-modeller`
     : facet.kind === 'budget' ? `modeller under ${tal(facet.max)} kr.` : facet.kind === 'by' ? `modeller i ${esc(facet.by)}`
     : facet.kind === 'kombi' ? `${esc(facet.brand)} ${esc(String(facet.typeLabel).toLowerCase())}-modeller` : `modeller i ${esc(facet.id)}`;
   return `<section class="section fa-sektion">
       <h2 class="fa-h2">Populære ${hvad}</h2>
-      <ul class="fa-modeller">${m.map(e => `<li><a href="${e.href}">
+      <ul class="fa-modeller">${m.map(e => `<li><a href="${e.chip.href}">
           ${e.foto ? `<img src="${esc(e.foto)}" alt="" width="96" height="72" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : `<span class="fa-model-ikon">${IKON('bike')}</span>`}
-          <span class="fa-model-tekst"><strong>${esc(e.brand)} ${esc(e.model)}</strong><span>${nSpan(`model:${e.brand}|${e.model}`, e.n)} indekseret</span></span></a></li>`).join('')}</ul>
+          <span class="fa-model-tekst"><strong>${esc(e.brand)} ${esc(e.model)}</strong><span>${e.chip.n !== null ? `${nSpan(`model:${e.brand}|${e.model}`, e.chip.n)} indekseret` : esc(modelOrd(e))}</span></span></a></li>`).join('')}</ul>
     </section>`;
 }
 /* Kørekortsidernes tre info-bokse + "næste skridt"-boks (billede 7). */
@@ -1231,29 +1258,34 @@ function videnBokse(facet, items){
       <div class="fa-bokse fa-bokse-4">${liste.map(boks).join('')}</div>
     </section>`;
 }
-function relaterede(facet, items){
+function relaterede(facet, items, ctx){
   if (facet.kind === 'by') return '';   // samme grund som facetVaerktoejer: tal for byen, link til landsdelen
   const c = [];
   const n = fn => items.filter(fn).length;
   const tot = items.length;
   const frs = facet.kind === 'koerekort' ? 'motorcykler' : frase(facet);
-  const add = (tekst, href, antal, noegle) => { if (antal > 0) c.push(`<a class="popular-chip popular-chip-sm fa-rel-chip" href="${href}"><span>${tekst} <span class="fa-n">${nSpan(noegle, antal)}</span></span></a>`); };
+  /* antal (talt på udvalget) afgør kun, OM chippen er med; det VISTE tal er det, linket giver (ctx.link). */
+  const add = (tekst, extra, antal, noegle) => {
+    if (antal <= 0) return;
+    const l = ctx.link(extra);
+    c.push(`<a class="popular-chip popular-chip-sm fa-rel-chip" href="${l.href}"><span>${tekst}${l.n !== null ? ` <span class="fa-n">${nSpan(noegle, l.n)}</span>` : ''}</span></a>`);
+  };
   if (facet.kind !== 'koerekort'){
-    add(`A1 ${frs}`, faSoeg(facet, { koerekort: 'A1' }), n(l => passerKoerekort(l, 'A1')), 'kk:A1');
-    add(`A2 ${frs}`, faSoeg(facet, { koerekort: 'A2' }), n(l => passerKoerekort(l, 'A2')), 'kk:A2');
+    add(`A1 ${frs}`, { koerekort: 'A1' }, n(l => passerKoerekort(l, 'A1')), 'kk:A1');
+    add(`A2 ${frs}`, { koerekort: 'A2' }, n(l => passerKoerekort(l, 'A2')), 'kk:A2');
   }
   const priser = items.map(l => tilTal(l.price)).filter(p => p !== null && p > 0);
-  for (const p of (facet.kind === 'budget' ? [] : PRIS_TRIN.slice(0, 3))){ const a = priser.filter(x => x <= p).length; if (a < tot) add(`${stort(frs)} under ${tal(p)} kr.`, faSoeg(facet, { maxPrice: p }), a, `pris:${p}`); }
+  for (const p of (facet.kind === 'budget' ? [] : PRIS_TRIN.slice(0, 3))){ const a = priser.filter(x => x <= p).length; if (a < tot) add(`${stort(frs)} under ${tal(p)} kr.`, { priceMax: p }, a, `pris:${p}`); }
   const aar = items.map(l => tilTal(l.year)).filter(y => y !== null && y > 1900);
-  for (const y of AAR_TRIN.slice(0, 2)){ const a = aar.filter(x => x >= y).length; if (a < tot) add(`${stort(frs)} fra ${y}`, faSoeg(facet, { yearMin: y }), a, `aar:${y}`); }
+  for (const y of AAR_TRIN.slice(0, 2)){ const a = aar.filter(x => x >= y).length; if (a < tot) add(`${stort(frs)} fra ${y}`, { yearMin: y }, a, `aar:${y}`); }
   return c.length ? `<div class="fa-rel"><h2 class="fa-h3">Relaterede søgninger</h2><div class="fa-chips">${c.join('')}</div></div>` : '';
 }
-function regionChips(facet, regioner){
+function regionChips(facet, regioner, ctx){
   if (facet.kind === 'region' || facet.kind === 'by') return '';
   const r = REGIONS.filter(x => regioner.get(x));
   if (!r.length) return '';
   const hvad = facet.kind === 'type' ? `${esc(String(facet.label).toLowerCase())}-motorcykler` : facet.kind === 'koerekort' ? `${esc(facet.id)}-motorcykler` : facet.kind === 'budget' || facet.kind === 'kombi' ? frase(facet) : esc(facet.titel);
-  return `<div class="fa-rel"><h2 class="fa-h3">Se ${hvad} i din region</h2><div class="fa-chips">${r.map(x => `<a class="popular-chip popular-chip-sm" href="${faSoeg(facet, { regions: x })}">${IKON('pin')}<span>${esc(x)} <span class="fa-n">${nSpan(`region:${x}`, regioner.get(x))}</span></span></a>`).join('')}</div></div>`;
+  return `<div class="fa-rel"><h2 class="fa-h3">Se ${hvad} i din region</h2><div class="fa-chips">${r.map(x => { const l = ctx.link({ regions: [x] }); return `<a class="popular-chip popular-chip-sm" href="${l.href}">${IKON('pin')}<span>${esc(x)}${l.n !== null ? ` <span class="fa-n">${nSpan(`region:${x}`, l.n)}</span>` : ''}</span></a>`; }).join('')}</div></div>`;
 }
 /* Prisintervaller og byer er nye veje IND til de eksisterende sider — kun de, der er indekserbare,
    faar et link (et link er en paastand om, at der er noget for enden, D-010). Ingen tal paa
@@ -1306,8 +1338,10 @@ function nyFamilieMeta(facet, items, qualifies){
   /* 5. percentil, rundet til nærmeste tusinde — ikke laveste pris: en enkelt fejlpris (1.900 kr.) må ikke
      blive sidens salgsløfte. Under 20 priser: ingen "fra". */
   const pr = aggregatPriser(items);
-  const fra = pr.length >= 20 ? Math.max(1000, Math.round(SIDER.percentil(pr, 0.05) / 1000) * 1000) : null;
-  const pris = fra != null ? ` Priser fra ca. ${dkk(fra)}` : '';
+  /* T-006: samme tal som sidens egen "fra {laveste pris}" (prisOgAargang) — ikke en afrundet 5. percentil, der
+     stod som "fra ca. 35.000" i beskrivelsen mod "fra 14.995" på siden. */
+  const fra = pr.length ? pr[0] : null;
+  const pris = fra != null ? ` Priser fra ${dkk(fra)}` : '';
   const slut = ' Sammenlign årgang, km og type på Bikerbasen.';
   const n = items.length;
   if (facet.kind === 'budget'){
@@ -1326,9 +1360,10 @@ function nyFamilieMeta(facet, items, qualifies){
 }
 
 /* "Se alle N i soegningen" — undtagen paa by-sider, hvor soegningen viser hele landsdelen. */
-function seAlle(facet, items){
+function seAlle(facet, items, ctx){
   if (facet.kind === 'by') return facet.region ? `Se hele ${esc(facet.region)} i søgningen` : 'Søg i alle motorcykler';
-  return `Se alle ${nSpan('all', items.length)} i søgningen`;
+  const l = ctx.link({});
+  return l.n !== null ? `Se alle ${nSpan('all', l.n)} i søgningen` : 'Se alle i søgningen';
 }
 
 /* data-attributter paa kort-mounten: hydreringen i browseren og eksisterendeSider() (naeste byg)
@@ -1337,7 +1372,7 @@ function facetAttrs(facet){
   if (facet.kind === 'model') return ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"`;
   if (facet.kind === 'by') return ` data-facet-by="${esc(facet.by)}" data-facet-postnr="${esc((facet.postnumre || []).join(','))}"`;
   if (facet.kind === 'kombi') return ` data-facet-brand="${esc(facet.brand)}" data-facet-type="${esc(facet.typeId)}"`;
-  if (facet.kind === 'budget') return ` data-facet-max="${facet.max}"`;
+  if (facet.kind === 'budget') return ` data-facet-max="${facet.max}" data-facet-lo="${facet.lo || 0}"`;
   return '';
 }
 
@@ -1348,11 +1383,21 @@ function side(facet, alle){
   const ny = nyFamilieMeta(facet, items, qualifies);
   const uoplyst = uoplystAntal(facet, alle);
   const fil = `${facet.slug}.html`;
-  const viste = items.slice(0, FACET_KORT);
+  /* T-003: på modelsider vises identiske lagerenheder som ÉT kort; antallet i overskrift og intro er stadig
+     alle annoncer (det er sandt), og en linje siger, at de er samlet. */
+  /* Budgetsider (T-004): eget interval først, så de 24 viste kort ikke er de samme på alle fire trin. */
+  const band = facet.kind === 'budget' && facet.lo ? budgetBand(facet, items) : null;
+  const bandFoerst = arr => band ? [...arr.filter(l => band.includes(l)), ...arr.filter(l => !band.includes(l))] : arr;
+  const liste = facet.kind === 'model' ? SIDER.distinkte(items) : bandFoerst(items);
+  const samlet = items.length - liste.length;
+  const samletTekst = n => `${n} af de ${items.length} annoncer er identiske lagerenheder (samme pris, årgang, km og forhandler) og vises som ét kort.`;
+  const viste = liste.slice(0, FACET_KORT);
   const kort1 = viste.slice(0, UDVALGTE).map((l, i) => listingCardHTML(l, i)).join('\n      ');
   const kort2 = viste.slice(UDVALGTE).map((l, i) => listingCardHTML(l, i + UDVALGTE)).join('\n      ');
   const senestOpdateret = senestBekraeftet(items);
   const { typer, regioner } = antalPrTypeOgRegion(items);
+  /* Alle søgelinks og chip-tal på siden kommer herfra (F2-004/F2-005). */
+  const ctx = LINK.lavKontekst(Filtrering, alle, facet);
   const erKk = facet.kind === 'koerekort';
 
   const intro = facet.kind === 'type' ? introForType(facet, items)
@@ -1490,8 +1535,9 @@ ${jsonLdBlock([
       ? [{ name: 'Forside', path: 'index.html' }, { name: facet.region, path: regionFil }, { name: facet.by, path: fil }]
     : (facet.kind === 'model' || facet.kind === 'kombi') && brandFindes
       ? [{ name: 'Forside', path: 'index.html' }, { name: 'Mærker', path: 'maerker.html' }, { name: facet.brand, path: brandFil }, { name: facet.kind === 'kombi' ? facet.typeLabel : facet.mv, path: fil }]
+      /* T-007: mellemleddet ("Budget", "Type" …) pegede på /soegning, der er noindex og ikke er oversiden. Uden en
+         indekserbar overside udelades leddet. */
       : [{ name: 'Forside', path: 'index.html' },
-         { name: facet.kind === 'type' ? 'Type' : facet.kind === 'region' ? 'Landsdel' : facet.kind === 'model' ? 'Modeller' : facet.kind === 'budget' ? 'Budget' : facet.kind === 'by' ? 'By' : 'Kørekort', path: 'soegning.html' },
          { name: facet.titel, path: fil }]),
   itemListLd(`${facet.titel} — Bikerbasen`, items),
   faqData,
@@ -1529,11 +1575,11 @@ ${header}
     ${erKk ? '' : tillidsraekke(senestOpdateret)}
 
     <section class="section facet-liste-sektion fa-udvalgte">
-      <div class="fa-h2-raekke"><h2 class="fa-h2">Udvalgte ${frase(facet)} på Bikerbasen</h2>${items.length ? `<a class="fa-mere" href="${facetSearchUrl(facet)}"><span>${seAlle(facet, items)}</span> <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a>` : ''}</div>
+      <div class="fa-h2-raekke"><h2 class="fa-h2">Udvalgte ${frase(facet)} på Bikerbasen</h2>${items.length ? `<a class="fa-mere" href="${facetSearchUrl(facet)}"><span>${seAlle(facet, items, ctx)}</span> <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a>` : ''}</div>
       ${items.length ? `<div class="fa-udvalgte-gitter">
         <div class="listings-grid fa-kortraekke" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}" data-udvalgte="${UDVALGTE}" data-facet-frase="${frase(facet)}"${facetAttrs(facet)}>${kort1}</div>
         ${ctaPanel(facet, ctaFoto(facet, items))}
-      </div>` : `<div class="empty-state" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}"${facetAttrs(facet)}>
+      </div>${facet.kind === 'model' ? `<p class="brand-facet-note" id="facet-dubletter"${samlet ? '' : ' hidden'}>${samlet ? samletTekst(samlet) : ''}</p>` : ''}` : `<div class="empty-state" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}"${facetAttrs(facet)}>
         <h3>Ingen ${frase(facet)} til salg lige nu</h3>
         <p>Vi har ingen annoncer, der matcher denne kategori i øjeblikket. Adressen bliver stående —
            kig forbi igen, eller søg i hele udvalget.</p>
@@ -1542,9 +1588,9 @@ ${header}
       </div>`}
     </section>
 
-    ${erKk || ['region', 'budget'].includes(facet.kind) ? typeFliser(facet, typer) : ''}
+    ${erKk || ['region', 'budget'].includes(facet.kind) ? typeFliser(facet, typer, ctx) : ''}
     ${boksKk}
-    ${facet.kind === 'by' ? '' : modelRaekke(facet, items)}
+    ${facet.kind === 'by' ? '' : modelRaekke(facet, items, ctx)}
 
     ${maerker.length && !['model', 'kombi', 'by'].includes(facet.kind) ? `<section class="section brand-maerkerow-sektion fa-maerker" aria-labelledby="fa-maerker-h">
       <!-- Samme regel som maerke-*.html's modelchips: kun maerker der reelt
@@ -1556,18 +1602,18 @@ ${header}
       </div>
     </section>` : ''}
 
-    ${items.length > UDVALGTE ? `<section class="section fa-flere">
+    ${liste.length > UDVALGTE ? `<section class="section fa-flere">
       <!-- "lige nu" er væk (R11-I-10): tallet bages ved byg og opdateres ikke
            ved visning. Datoen under siger i stedet, hvornaar lageret sidst blev
            bekraeftet — samme linje som maerkesiden (D9-M2). -->
-      <div class="fa-h2-raekke"><div><h2 class="fa-h2" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="facet-note">${items.length > FACET_KORT ? `De første ${FACET_KORT} vises her.` : ''}</p>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div></div>
-      ${facetVaerktoejer(facet, items)}
+      <div class="fa-h2-raekke"><div><h2 class="fa-h2" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="facet-note">${liste.length > FACET_KORT ? `De første ${FACET_KORT} vises her.` : ''}</p>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div></div>
+      ${facetVaerktoejer(facet, items, ctx)}
       <div class="listings-grid" id="facet-listings-flere">${kort2}</div>
-      ${items.length > FACET_KORT ? `<p class="brand-mere"><a href="${facetSearchUrl(facet)}" class="btn btn-primary"><span>${seAlle(facet, items)}</span></a></p>` : ''}
-    </section>` : `<h2 class="visually-hidden" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="visually-hidden" id="facet-note"></p>${items.length ? `<section class="section fa-flere">${facetVaerktoejer(facet, items)}</section>` : ''}`}
+      ${liste.length > FACET_KORT ? `<p class="brand-mere"><a href="${facetSearchUrl(facet)}" class="btn btn-primary"><span>${seAlle(facet, items, ctx)}</span></a></p>` : ''}
+    </section>` : `<h2 class="visually-hidden" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="visually-hidden" id="facet-note"></p>${items.length ? `<section class="section fa-flere">${facetVaerktoejer(facet, items, ctx)}</section>` : ''}`}
     ${items.length ? `<noscript>
       <ul class="brand-noscript">
-        ${items.map(l => `<li>${harEgenSide(l) ? `<a href="${esc(listingSlug(l))}">${noscriptLinje(l)}</a>` : noscriptLinje(l)}</li>`).join('\n        ')}
+        ${liste.map(l => `<li>${harEgenSide(l) ? `<a href="${esc(listingSlug(l))}">${noscriptLinje(l)}</a>` : noscriptLinje(l)}</li>`).join('\n        ')}
       </ul>
     </noscript>` : ''}
 
@@ -1577,8 +1623,8 @@ ${header}
 
     <section class="section fa-sektion fa-rel-vrap">
       <div class="fa-rel-grid">
-        ${relaterede(facet, items)}
-        ${regionChips(facet, regioner)}
+        ${relaterede(facet, items, ctx)}
+        ${regionChips(facet, regioner, ctx)}
         ${byChips(facet)}
         ${budgetChips(facet)}
       </div>
@@ -1677,10 +1723,23 @@ ${footer}
      hver oplysthedsklasse (js/sortering.js). */
   const traefSorteret = (typeof Sortering !== 'undefined')
     ? Sortering.sorter(traef.slice(), 'blandet') : traef;
+  /* T-003: modelsider viser identiske lagerenheder (samme pris, årgang, km, kilde) som ét kort — samme nøgle som
+     scripts/seo-sider.js distinkte(). Tallene i overskrift og intro er stadig ALLE annoncer. */
+  const dnum = v => (v === null || v === undefined || v === '') ? '' : (Number.isFinite(Number(v)) ? Number(v) : '');
+  const lo = kind === 'budget' ? Number(mount.dataset.facetLo) || 0 : 0;
+  const prisT = l => Number(l.price) > 0 ? Number(l.price) : null;
+  const visListe = kind === 'budget' && lo ? traefSorteret.filter(l => prisT(l) > lo).concat(traefSorteret.filter(l => !(prisT(l) > lo))) : kind !== 'model' ? traefSorteret : (() => {
+    const set = new Map();
+    for (const l of traefSorteret){
+      const k = [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
+      if (!set.has(k)) set.set(k, l);
+    }
+    return [...set.values()];
+  })();
   /* RUNDE 13 (R13-7): TOTALEN foer udsnittet — tallet i overskrift og intro
      bages ved bygget og skal opdateres, hvis lageret har aendret sig. */
   const alleTraef = traefSorteret.length;
-  const items = traefSorteret.slice(0, viste);
+  const items = visListe.slice(0, viste);
   const frase = mount.dataset.facetFrase || 'motorcykler';
   if (!items.length){
     mount.className = 'empty-state';
@@ -1731,7 +1790,13 @@ ${footer}
     if (maal) maal.hidden = n === 0;
   });
   const note = document.getElementById('facet-note');
-  if (note) note.textContent = alleTraef > viste ? 'De første ' + viste + ' vises her.' : '';
+  if (note) note.textContent = visListe.length > viste ? 'De første ' + viste + ' vises her.' : '';
+  const dubl = document.getElementById('facet-dubletter');
+  if (dubl){
+    const samlet = alleTraef - visListe.length;
+    dubl.hidden = !samlet;
+    dubl.textContent = samlet ? samlet + ' af de ' + alleTraef + ' annoncer er identiske lagerenheder (samme pris, årgang, km og forhandler) og vises som ét kort.' : '';
+  }
   wireFavoriteButtons(mount);
   if (mount2) wireFavoriteButtons(mount2);
   document.documentElement.setAttribute('data-fa-hydreret', '1');
@@ -1907,11 +1972,14 @@ function skrivFacetLinks(resultater){
 }
 
 /* ---------- D1: maerkesidernes modelchips peger paa modelsiden, naar den findes ----------
-   build-brand-pages.js (trin 2) skriver chips som soegning.html?brands=X&q=Y.
+   build-brand-pages.js (trin 2) skriver modelfliserne som soegning.html?brands=X&model=Y (eksakt model).
    Findes model-x-y.html og kvalificerer den, er DEN det bedre maal — ellers
    er modelsiden en orphan (D-010 igen). Kun kvalificerende sider; en
    noindex-side skal ikke have interne links. Maerkesiden skrives her, fordi
-   trin 2 loeber FOER taersklen er regnet. */
+   trin 2 loeber FOER taersklen er regnet.
+
+   F2-005: flisens tal er soegningens tal. Modelsiden viser facet.match-antallet, og kun er de to ens
+   (samme annoncer) flyttes linket dertil; ellers bliver den eksakte soegning staaende. */
 function relinkMaerkesider(facetter){
   const modelFacetter = facetter.filter(f => f.kind === 'model');
   let sider = 0, links = 0;
@@ -1922,7 +1990,15 @@ function relinkMaerkesider(facetter){
     const fil = path.join(ROOT, `maerke-${slugify(f.brand)}.html`);
     if (!fs.existsSync(fil)) continue;
     const foer = fs.readFileSync(fil, 'utf8');
-    const efter = foer.split(`href="soegning.html?brands=${encodeURIComponent(f.brand)}&amp;type=${f.typeId}"`).join(`href="${f.slug}.html"`);
+    /* Samme regel som modelfliserne: flisens tal (soegningens) skal vaere kombi-sidens antal. */
+    const gammel = `href="${LINK.soegHref({ brands: [f.brand], types: [f.typeId] })}" class="tile">`;
+    const dele = foer.split(gammel);
+    let efter = dele[0];
+    for (let i = 1; i < dele.length; i++){
+      const m = /^[\s\S]*?<span class="mk-tile-n">([\d.]+) annonce/.exec(dele[i]);
+      const samme = m && Number(m[1].replace(/\./g, '')) === f.antal;
+      efter += (samme ? `href="${f.slug}.html" class="tile">` : gammel) + dele[i];
+    }
     if (efter !== foer){ fs.writeFileSync(fil, efter, 'utf8'); kombiLinks++; }
   }
   if (kombiLinks) console.log(`Maerkesider: ${kombiLinks} type-fliser peger nu paa maerke+type-sider.`);
@@ -1933,9 +2009,15 @@ function relinkMaerkesider(facetter){
     if (!fs.existsSync(fil)) continue;
     let html = fs.readFileSync(fil, 'utf8'), foer = html;
     for (const f of facets){
-      const gammel = `href="soegning.html?brands=${encodeURIComponent(brand)}&amp;q=${encodeURIComponent(f.model)}"`;
-      const ny = `href="${f.slug}.html"`;
-      html = html.split(gammel).join(ny);
+      const gammel = `href="${LINK.soegHref({ brands: [brand], models: [f.model] })}"><strong>`;
+      const dele = html.split(gammel);
+      let ud = dele[0];
+      for (let i = 1; i < dele.length; i++){
+        const m = /^[^<]*<\/strong><span>([\d.]+) annonce/.exec(dele[i]);
+        const samme = m && Number(m[1].replace(/\./g, '')) === f.antal;
+        ud += (samme ? `href="${f.slug}.html"><strong>` : gammel) + dele[i];
+      }
+      html = ud;
       if (html !== foer){ links++; foer = html; }
     }
     if (html !== fs.readFileSync(fil, 'utf8')){ fs.writeFileSync(fil, html, 'utf8'); sider++; }
@@ -1943,12 +2025,12 @@ function relinkMaerkesider(facetter){
   if (sider) console.log(`Maerkesider: ${links} modelchips peger nu paa modelsider (${sider} sider).`);
 }
 
-function byg(){
-  const alle = global.ALLE_LISTINGS;
+/* Alle facetter kender hinandens status FØR en eneste side skrives (chips imellem siderne:
+   "Andre byer", "Andre modeller", budget- og bylinks), og det er den samme boolean, der afgør
+   om siden selv er noindex og om den kommer i sitemappet. Eget trin, så testene kan bygge
+   siderne under præcis de samme forudsætninger som byggekæden. */
+function forberedFacetter(alle){
   const facets = buildFacetList(alle);
-  /* Alle facetter kender hinandens status FØR en eneste side skrives (chips imellem siderne:
-     "Andre byer", "Andre modeller", budget- og bylinks), og det er den samme boolean, der afgør
-     om siden selv er noindex og om den kommer i sitemappet. */
   for (const f of facets){
     const items = alle.filter(f.match);
     f.antal = items.length;
@@ -1958,6 +2040,12 @@ function byg(){
   }
   global.__FACETTER = facets;
   global.__MODELFACETTER = facets.filter(f => f.kind === 'model');
+  return facets;
+}
+
+function byg(){
+  const alle = global.ALLE_LISTINGS;
+  const facets = forberedFacetter(alle);
   const resultater = [];
   for (const facet of facets){
     fs.writeFileSync(path.join(ROOT, `${facet.slug}.html`), side(facet, alle), 'utf8');
@@ -2050,4 +2138,4 @@ if (require.main === module){
   })().catch(e => SEO.afslut(e));
 }
 
-module.exports = { THRESHOLD, buildFacetList, uoplystAntal, cleanUrl, facetLinksBlock, side, facetSearchUrl, kraeverA, topModeller, brugtOrd, erIndekserbar, faqLdFor, nyFamilieMeta };
+module.exports = { THRESHOLD, forberedFacetter, buildFacetList, uoplystAntal, cleanUrl, facetLinksBlock, side, facetSearchUrl, kraeverA, topModeller, brugtOrd, erIndekserbar, faqLdFor, nyFamilieMeta };

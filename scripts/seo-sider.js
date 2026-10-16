@@ -24,6 +24,10 @@ const TAERSKLER = {
      kilometerspænd — men KUN hvis der er oplyst pris og årgang på mindst 3 af dem
      (harIndhold). Under 5 er et prisspænd en enkelt tilfældig annonce. */
   model: 5,
+  /* T-003: en modelside skal vise mindst 3 FORSKELLIGE annoncer (distinkte(): samme pris, årgang, km og kilde er
+     én). model-honda-nx-500 havde 10 kort, men kun 2 forskellige — 10 identiske lagerenheder hos MC Syd. Under 3 er
+     siden en enkelt vare med et antal ved siden af og er noindex, ikke i sitemap. */
+  modelDistinkt: 3,
   /* Byer: en NY side kræver 20 annoncer, eller 15 fra mindst to kilder (en by, hvor alt kommer fra én
      privatannonce-kilde, er flygtig: annoncerne forsvinder, når de sælges). Har siden allerede været
      indekseret (den committede fil findes uden noindex), beholdes den til lageret er under 8 —
@@ -103,6 +107,14 @@ function harIndhold(items){
   const priser = items.map(medPris).filter(p => p !== null);
   const aar = items.map(l => tilTal(l.year)).filter(troevaerdigtAar);
   return priser.length >= 3 && aar.length >= 3;
+}
+
+/* Kan en modelside indekseres? Mindst 5 annoncer (tærsklen), men KUN de distinkte tæller for indholdet:
+   mindst 3 forskellige annoncer, og pris + årgang oplyst på mindst 3 af dem. (Tidligere talte tærsklen rå annoncer
+   fra 10 og op, og harIndhold tællede dubletter med.) */
+function modelKvalificerer(items){
+  const d = distinkte(items);
+  return items.length >= TAERSKLER.model && d.length >= TAERSKLER.modelDistinkt && harIndhold(d);
 }
 
 /* ---------- Modelnavne (S-007a) ---------- */
@@ -214,6 +226,6 @@ const underGraense = (alle, max) => alle.filter(l => { const p = medPris(l); ret
 
 module.exports = {
   TAERSKLER, BUDGET_TRIN, BY_OVERLAP_MAX, KOMBI_ANDEL_AF_TYPE_MAX, MODEL_ALIAS,
-  slugify, budgetSlug, bySlug, kombiSlug, tilTal, medPris, median, distinkte, percentil, troevaerdigtAar, harIndhold,
+  slugify, budgetSlug, bySlug, kombiSlug, tilTal, medPris, median, distinkte, percentil, troevaerdigtAar, harIndhold, modelKvalificerer,
   visModel, laesPostnumre, renBynavn, byNavn, byGrupper, vaelgByer, vaelgKombi, underGraense,
 };

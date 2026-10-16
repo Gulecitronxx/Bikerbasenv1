@@ -6,6 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const SEO = require('./seo-vagt');
+const LINK = require('./seo-soeglink');   // F2-004/F2-005: ét sted bygger søgelinks, og chippens tal regnes af samme filter
 
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
@@ -24,32 +25,33 @@ const ICON = new Function(fs.readFileSync(path.join(ROOT, 'js/icons.js'), 'utf8'
    saa tallet paa linket ER tallet paa resultatsiden. Links med 0 tegnes ikke
    (D-009/D-010: et link er en paastand om, at der er noget for enden). */
 function facetLinksFor(brand, items){
-  const q = (ekstra) => `soegning.html?brands=${encodeURIComponent(brand)}&amp;${ekstra}`;
-  const tael = (filtre) => Filtrering.anvendFiltre(items, filtre, null, null).length;
+  /* Ét filterobjekt pr. chip: linket og tallet kommer begge af det (F2-004/F2-005). */
+  const tael = (filtre) => Filtrering.anvendFiltre(items, LINK.og({ brands: [brand] }, filtre), null, null).length;
+  const q = (filtre) => sogHref(brand, filtre);
   const raekker = [];
 
-  const kk = ['A1', 'A2', 'A'].map(k => ({ k, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
-  if (kk.length > 1) raekker.push({ navn: 'Kørekort', links: kk.map(x => ({ tekst: `${x.k} · ${x.n}`, href: q(`koerekort=${x.k}`) })) });
+  const kk = ['A1', 'A2', 'A'].map(k => ({ k, f: { koerekort: k }, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
+  if (kk.length > 1) raekker.push({ navn: 'Kørekort', links: kk.map(x => ({ tekst: `${x.k} · ${x.n}`, href: q(x.f) })) });
 
   const pris = [[30000, 'Under 30.000 kr.'], [60000, 'Under 60.000 kr.'], [100000, 'Under 100.000 kr.']]
-    .map(([max, tekst]) => ({ tekst, max, n: tael({ priceMax: max }) })).filter(x => x.n > 0);
-  if (pris.length) raekker.push({ navn: 'Pris', links: pris.map(x => ({ tekst: `${x.tekst.replace(' kr.', '')} · ${x.n}`, href: q(`maxPrice=${x.max}`) })) });
+    .map(([max, tekst]) => ({ tekst, f: { priceMax: max }, n: tael({ priceMax: max }) })).filter(x => x.n > 0);
+  if (pris.length) raekker.push({ navn: 'Pris', links: pris.map(x => ({ tekst: `${x.tekst.replace(' kr.', '')} · ${x.n}`, href: q(x.f) })) });
 
   const typer = [...new Set(items.map(l => l.type).filter(Boolean))]
-    .map(t => ({ t, label: ((global.__T || []).find(x => x.id === t) || {}).label || t, n: tael({ types: [t] }) }))
+    .map(t => ({ t, f: { types: [t] }, label: ((global.__T || []).find(x => x.id === t) || {}).label || t, n: tael({ types: [t] }) }))
     .filter(x => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 6);
-  if (typer.length > 1) raekker.push({ navn: 'Type', links: typer.map(x => ({ tekst: `${esc(x.label)} · ${x.n}`, href: q(`type=${x.t}`) })) });
+  if (typer.length > 1) raekker.push({ navn: 'Type', links: typer.map(x => ({ tekst: `${esc(x.label)} · ${x.n}`, href: q(x.f) })) });
   /* Runde 9 (D9-M3): de typeloese skal naevnes — forsiden goer det, maerkesiden
      gjorde ikke. */
   const udenType = items.filter(l => !l.type).length;
   const typeNote = (typer.length > 1 && udenType)
-    ? `<p class="brand-facet-note">${udenType} uden oplyst type — dem finder du i <a href="soegning.html?brands=${encodeURIComponent(brand)}">den fulde søgning</a>.</p>` : '';
+    ? `<p class="brand-facet-note">${udenType} uden oplyst type — dem finder du i <a href="${sogHref(brand)}">den fulde søgning</a>.</p>` : '';
 
   // Sortering som links — ingen inline-JS (CSP), og en crawler kan foelge dem.
   raekker.push({ navn: 'Sortér i søgningen', klasse: ' brand-facet-sorter', links: [
-    { tekst: 'Pris: lav → høj', href: q('sort=price-asc') },
-    { tekst: 'Pris: høj → lav', href: q('sort=price-desc') },
-    { tekst: 'Årgang: nyeste', href: q('sort=year-desc') },
+    { tekst: 'Pris: lav → høj', href: q({ sort: 'price-asc' }) },
+    { tekst: 'Pris: høj → lav', href: q({ sort: 'price-desc' }) },
+    { tekst: 'Årgang: nyeste', href: q({ sort: 'year-desc' }) },
   ] });
 
   if (!raekker.length) return '';
@@ -246,7 +248,9 @@ function breadcrumbLd(items){
    sider, den peger på. */
 function brandItemListLd(brand, items){
   const medSide = items.filter(harEgenSide);
-  if (!medSide.length) return null;
+  /* T-007: en ItemList er en påstand om, hvad siden viser. Dækker den kun de få annoncer med egen side (1 af
+     262), er påstanden misvisende — så kun en liste, der dækker ALLE annoncer, skrives. */
+  if (!medSide.length || medSide.length !== items.length) return null;
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -486,11 +490,21 @@ function topModeller(items, n){
   return [...antal.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'da')).slice(0, n);
 }
 
-/* TITLE — "{Brand} brugt – X til salg | Bikerbasen", maks 60 tegn. Kun
-   kaldt for mærker med fuld tekst; se MIN_LISTINGS_FULD_TEKST. */
+/* TITLE (T-002) — ÉN formel for alle mærkesider: "{Brugte }{Mærke}-motorcykler til salg — Bikerbasen".
+   Søgningen er "bmw motorcykler til salg", ikke "bmw brugt – 31 til salg"; antal og pris står i beskrivelsen
+   (metaBeskrivelseFor), så titlen ikke ændrer sig, hver gang et lager rykker. "Brugte" kun når ALLE er
+   bevist brugte (standOpgoerelse.renBrugt). Maks 60 tegn: er navnet for langt, falder først
+   " — Bikerbasen", så "Brugte" — mærke og "motorcykler til salg" bevares, og intet afkortes midt i et ord.
+   Parametrene n og nye bruges ikke længere til ordlyden; nye > 0 betyder blot, at lageret ikke er rent brugt. */
+const TITEL_MAX = 60;
 function titelFor(brand, n, nye, rent = true){
-  return nye ? `${brand} – ${n} til salg, nye og brugte | Bikerbasen`
-    : rent ? `${brand} brugt – ${n} til salg | Bikerbasen` : `${brand} – ${n} til salg | Bikerbasen`;
+  const b = rent && !nye ? 'Brugte ' : '';
+  const kandidater = [
+    `${b}${brand}-motorcykler til salg — Bikerbasen`,
+    `${b}${brand}-motorcykler til salg`,
+    `${brand}-motorcykler til salg`,
+  ];
+  return kandidater.find(k => k.length <= TITEL_MAX) || kandidater[kandidater.length - 1];
 }
 
 /* META DESCRIPTION — 140-155 tegn, rigtigt antal, rigtigt prisspænd, én
@@ -639,7 +653,10 @@ function bundIndholdFor(brand, slug, items, stats, kk, domType, andetBrand){
       p += ` De resterende ${kk.ukendt} ${kk.ukendt === 1 ? 'annonce' : 'annoncer'} mangler effektoplysningen hos kilden og vises uden kategori.`;
     }
     if (a1a2){
-      p += ` <a href="soegning.html?brands=${encodeURIComponent(brand)}&amp;koerekort=A2">Se de ${a1a2} ${esc(brand)}, der holder sig inden for A2-loftet</a>.`;
+      /* Tallet i linkteksten er det antal, søgningen viser (koerekort=A2) — ikke kategoriopgørelsen ovenfor,
+         der også tæller annoncer, hvis kategori afgøres på anden måde. */
+      const a2Soeg = Filtrering.anvendFiltre(items, { brands: [brand], koerekort: 'A2' }, null, null).length;
+      if (a2Soeg) p += ` <a href="${sogHref(brand, { koerekort: 'A2' })}">Se de ${a2Soeg} ${esc(brand)}, der holder sig inden for A2-loftet</a>.`;
     }
     dele.push(`<p>${p}</p>`);
     /* Krydslink til de faktiske A1/A2-facetsider (koerekort-a1.html,
@@ -723,15 +740,19 @@ function erModelnavn(m){
   return smaa.length <= 1;
 }
 
-/* P2-2: tallet på en modelflise er det antal, soegesiden viser, når man
-   klikker (soegning.html?brands=X&q=model): q-filteret er en
-   delstrengssoegning ("K 1200" finder også K 1200 GT), så flisen taeller med
-   SAMME regel — Filtrering.anvendFiltre({ q }) — og ikke "annoncer med netop
-   dette modelnavn". Linket er uaendret, saa build-facet-pages kan relinke det. */
+/* P2-2 / F2-005: tallet på en modelflise er det antal, soegesiden viser, når man klikker. Linket
+   bruger den EKSAKTE model (soegning.html?brands=X&model=Y, som søgesidens modelfilter), ikke q=: q er
+   en ordsøgning over "mærke model" og gav "CRF 110 F · 25" (1 CRF 110 F + 24 Africa Twin). Tallet regnes
+   af samme filterobjekt (x.f) som linket. Stavevarianter ("Cb 500"/"CB 500") er ét filter og dermed én flise;
+   et modelnavn med komma kan ikke stå i en URL (søgesiden deler på komma) og får ingen flise. */
 function modelTal(items){
-  const navne = [...new Set(items.map(l => String(l.model || '').trim()).filter(erModelnavn))];
-  return navne
-    .map(m => ({ m, n: Filtrering.anvendFiltre(items, { q: m }, null, null).length }))
+  const navne = new Map();   // lille-bogstaver -> første stavemåde
+  for (const l of items){
+    const m = String(l.model || '').trim();
+    if (erModelnavn(m) && !m.includes(',') && !navne.has(m.toLowerCase())) navne.set(m.toLowerCase(), m);
+  }
+  return [...navne.values()]
+    .map(m => { const f = { models: [m] }; return { m, f, n: Filtrering.anvendFiltre(items, f, null, null).length }; })
     .filter(x => x.n > 0)
     .sort((a, b) => b.n - a.n || a.m.localeCompare(b.m, 'da'));
 }
@@ -772,20 +793,20 @@ function typeFoto(items, typeId){
 function maerkeFakta(brand, items){
   const tael = f => Filtrering.anvendFiltre(items, f, null, null).length;
   const typer = (global.__T || []).map(t => ({
-    id: t.id, label: t.label, n: tael({ types: [t.id] }),
+    id: t.id, label: t.label, f: { types: [t.id] }, n: tael({ types: [t.id] }),
     foto: typeFoto(items, t.id),
   })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
   const modeller = modelTal(items).slice(0, 30);
-  const kk = ['A1', 'A2', 'A'].map(k => ({ k, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
+  const kk = ['A1', 'A2', 'A'].map(k => ({ k, f: { koerekort: k }, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
   const regioner = [...new Set(items.map(l => l.region).filter(Boolean))]
-    .map(r => ({ r, n: tael({ regions: [r] }) })).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.r.localeCompare(b.r, 'da'));
+    .map(r => ({ r, f: { regions: [r] }, n: tael({ regions: [r] }) })).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.r.localeCompare(b.r, 'da'));
   const priser = [30000, 60000, 100000, 200000].filter(max => tael({ priceMax: max }) > 0);
   return { typer, modeller, kk, regioner, priser, udenRegion: items.filter(l => !l.region).length };
 }
 
 const talTekst = n => tal(n);
 const antalTekst = (n, ental, flertal) => `${tal(n)} ${n === 1 ? ental : flertal}`;
-const sogHref = (brand, ekstra) => `soegning.html?brands=${encodeURIComponent(brand)}${ekstra ? '&amp;' + ekstra : ''}`;
+const sogHref = (brand, filtre) => LINK.soegHref(LINK.og({ brands: [brand] }, filtre));
 
 function heroSoegHTML(brand, slug, items, fakta){
   const b = esc(brand);
@@ -886,7 +907,7 @@ function typeFlisersHTML(brand, fakta){
     <div class="container">
       <div class="mk-sek-head"><h2 id="mk-typer-h">Udforsk ${b} efter type</h2></div>
       <div class="tiles-grid mk-tiles">
-        ${fakta.typer.map(t => `<a href="${sogHref(brand, 'type=' + t.id)}" class="tile">
+        ${fakta.typer.map(t => `<a href="${sogHref(brand, t.f)}" class="tile">
           <span class="tile-media"><img src="${t.foto ? esc(t.foto) : `img/type/${t.id}.webp`}" alt="" width="456" height="342" loading="lazy" decoding="async"${t.foto ? ' referrerpolicy="no-referrer"' : ''}></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>${esc(t.label).replace('/', '/<wbr>')}</span><span class="mk-tile-n">${antalTekst(t.n, 'annonce', 'annoncer')}</span></span><span class="tile-go" aria-hidden="true">${ICON.arrowRight}</span></span>
         </a>`).join('\n        ')}
@@ -944,7 +965,7 @@ function saadanHTML(){
    annoncer, og siden måler ikke popularitet (jf. runde 8, D8-M5). */
 function treKolonnerHTML(brand, fakta, items){
   const b = esc(brand);
-  const modelFlise = x => `<li><a href="${sogHref(brand, 'q=' + encodeURIComponent(x.m))}"><strong>${esc(x.m)}</strong><span>${antalTekst(x.n, 'annonce', 'annoncer')}</span></a></li>`;
+  const modelFlise = x => `<li><a href="${sogHref(brand, x.f)}"><strong>${esc(x.m)}</strong><span>${antalTekst(x.n, 'annonce', 'annoncer')}</span></a></li>`;
   const kolonner = [];
   if (fakta.modeller.length){
     kolonner.push(`<section class="mk-col" aria-labelledby="mk-mod-h">
@@ -964,7 +985,7 @@ function treKolonnerHTML(brand, fakta, items){
     kolonner.push(`<section class="mk-col" aria-labelledby="mk-kk-h">
         <div class="mk-col-head"><h2 id="mk-kk-h">Udforsk ${b} efter kørekort</h2></div>
         <ul class="mk-mini mk-mini-kk">
-          ${fakta.kk.map(x => `<li><a href="${sogHref(brand, 'koerekort=' + x.k)}"><strong>${x.k}</strong><span>${tal(x.n)} ${b}</span></a></li>`).join('\n          ')}
+          ${fakta.kk.map(x => `<li><a href="${sogHref(brand, x.f)}"><strong>${x.k}</strong><span>${tal(x.n)} ${b}</span></a></li>`).join('\n          ')}
         </ul>
         <ul class="mk-links">
           <li><a href="koerekort-a2.html">Hvad må du køre på A2?${ICON.arrowRight}</a></li>
@@ -978,7 +999,7 @@ function treKolonnerHTML(brand, fakta, items){
     kolonner.push(`<section class="mk-col" aria-labelledby="mk-reg-h">
         <div class="mk-col-head"><h2 id="mk-reg-h">Find ${b} i din region</h2></div>
         <ul class="mk-mini mk-mini-reg">
-          ${fakta.regioner.map(x => `<li><a href="${sogHref(brand, 'regions=' + encodeURIComponent(x.r))}"><strong>${esc(x.r)}</strong><span>${tal(x.n)}</span></a></li>`).join('\n          ')}
+          ${fakta.regioner.map(x => `<li><a href="${sogHref(brand, x.f)}"><strong>${esc(x.r)}</strong><span>${tal(x.n)}</span></a></li>`).join('\n          ')}
         </ul>
         ${fakta.udenRegion ? `<p class="mk-col-note">${antalTekst(fakta.udenRegion, 'annonce oplyser', 'annoncer oplyser')} ikke landsdel.</p>` : ''}
       </section>`);
@@ -1126,8 +1147,7 @@ for (const brand of brands){
 
   const nye = nyeAf(items);
   const standN = standOpg(items);
-  const titelRaa = kvalificeret ? titelFor(brand, items.length, nye, standN.renBrugt)
-    : `${standN.renBrugt ? 'Brugte ' : ''}${brand} motorcykler til salg — Bikerbasen`;
+  const titelRaa = titelFor(brand, items.length, nye, standN.renBrugt);
   const metaDescRaa = kvalificeret ? metaBeskrivelseFor(brand, items.length, stats, nye, standN.renBrugt, standN.ubeviste) : beskrivelse;
   const arvSaetning = kvalificeret ? BRAND_ARV[brand] : null;
   const introTekst = arvSaetning ? `${arvSaetning} ${introFor(brand, items)}` : introFor(brand, items);
@@ -1597,4 +1617,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };
+module.exports = { facetLinksFor, treKolonnerHTML, typeFlisersHTML, typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };

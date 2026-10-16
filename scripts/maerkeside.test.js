@@ -114,11 +114,13 @@ test('ItemList udelader annoncer uden egen side — og bortfalder, når ingen ha
   assert.equal(brandItemListLd('Honda', [ekstern(), ekstern()]), null,
     'et ItemList over sider, der ikke findes, er værre end intet ItemList');
 
-  const blandet = brandItemListLd('Suzuki', [ekstern(), egen(), ekstern()]);
-  assert.equal(blandet.numberOfItems, 1, 'numberOfItems skal tælle det, listen faktisk indeholder');
-  assert.equal(blandet.itemListElement.length, 1);
-  assert.equal(blandet.itemListElement[0].position, 1, 'positionerne skal være sammenhængende');
-  assert.match(blandet.itemListElement[0].url, /\/annonce-suzuki-gsx-r750-2017-1017\.html$/);
+  // T-007: en delmængde (1 af 3) er en misvisende ItemList — kun en liste, der dækker alle, skrives.
+  assert.equal(brandItemListLd('Suzuki', [ekstern(), egen(), ekstern()]), null);
+  const alleEgne = brandItemListLd('Suzuki', [egen()]);
+  assert.equal(alleEgne.numberOfItems, 1, 'numberOfItems skal tælle det, listen faktisk indeholder');
+  assert.equal(alleEgne.itemListElement.length, 1);
+  assert.equal(alleEgne.itemListElement[0].position, 1);
+  assert.match(alleEgne.itemListElement[0].url, /\/annonce-suzuki-gsx-r750-2017-1017\.html$/);
 });
 
 /* ---- Mærkeindekset: intet link uden noget for enden (D-010) ---- */
@@ -210,15 +212,18 @@ test('P2-3: en sælgertitel er ikke et modelnavn — ægte modeller består', ()
   assert.equal(erModelnavn(null), false);
 });
 
-test('P2-2: modelflisens tal er præcis det antal, soegningen viser (samme q-filter)', () => {
+test('P2-2 / F2-005: modelflisens tal er præcis det antal, soegningen viser (eksakt model, ikke delstreng)', () => {
   const m = (id, model) => ekstern({ id: `x${id}`, brand: 'BMW', model, type: 'touring' });
-  // "K 1200" er en delstreng af "K 1200 GT" og "K 1200 RS": søgningen q=K 1200 finder alle fire.
-  const items = [m(1, 'K 1200'), m(2, 'K 1200 GT'), m(3, 'K 1200 GT'), m(4, 'K 1200 RS'), m(5, 'R 1200'), m(6, 'God velkørende custom med lav. KM')];
+  // "K 1200" er en delstreng af "K 1200 GT" og "K 1200 RS" — men en eksakt model er kun sig selv.
+  const items = [m(1, 'K 1200'), m(2, 'K 1200 GT'), m(3, 'K 1200 GT'), m(4, 'K 1200 RS'), m(5, 'R 1200'), m(6, 'God velkørende custom med lav. KM'), m(7, 'Cb 500'), m(8, 'CB 500')];
   const liste = modelTal(items);
   for (const { m: navn, n } of liste){
-    assert.equal(n, Filtrering.anvendFiltre(items, { q: navn }, null, null).length, `${navn}: flisen og soegningen er uenige`);
+    assert.equal(n, Filtrering.anvendFiltre(items, { models: [navn] }, null, null).length, `${navn}: flisen og soegningen er uenige`);
   }
-  assert.equal(liste.find(x => x.m === 'K 1200').n, 4, 'K 1200 taeller de tre K 1200 GT/RS med, ligesom soegningen');
+  assert.equal(liste.find(x => x.m === 'K 1200').n, 1, 'K 1200 er kun de annoncer, der hedder K 1200');
+  assert.equal(liste.find(x => x.m === 'K 1200 GT').n, 2);
+  assert.equal(liste.filter(x => x.m.toLowerCase() === 'cb 500').length, 1, 'Cb 500 og CB 500 er ét søgefilter og dermed én flise');
+  assert.equal(liste.find(x => x.m.toLowerCase() === 'cb 500').n, 2);
   assert.ok(!liste.some(x => x.m.startsWith('God velkørende')), 'sælgertitlen kom med som model');
   // Samme tal findes i det genererede markup.
   const fakta = maerkeFakta('BMW', items);
@@ -263,7 +268,7 @@ test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
 
   test('titel og beskrivelse siger kun "brugt", når ALLE er bevist brugte', () => {
     // rent brugt (default) — som før
-    assert.match(titelFor('Kawasaki', 51, 0), /Kawasaki brugt – 51 til salg/);
+    assert.equal(titelFor('Kawasaki', 51, 0), 'Brugte Kawasaki-motorcykler til salg — Bikerbasen');
     assert.match(metaBeskrivelseFor('Kawasaki', 51, stats, 0), /51 brugte Kawasaki/);
     // ubeviste "ny" blandt dem: ingen påstand om "brugt"
     assert.ok(!/brugt/.test(titelFor('Kawasaki', 51, 0, false)), 'titlen må ikke sige brugt');
@@ -273,5 +278,84 @@ test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
   test('"N brugte" i beskrivelsen tæller ikke ubeviste "ny" med', () => {
     const tekst = metaBeskrivelseFor('KTM', 21, stats, 7, false, 3);
     assert.match(tekst, /7 fabriksnye og 11 brugte/, 'brugte = 21 − 7 nye − 3 ubeviste');
+  });
+}
+
+/* ---------- F2-004 / F2-005: mærkesidens chips lover præcis det, linket giver ----------
+   Detective runde 2: "CRF 110 F · 25" (1 CRF 110 F + 24 Africa Twin), "CB 1000 · 29" (Fireblade/CBR med).
+   Rod: modelfliserne linkede `q=` (ordsøgning over "mærke model"). Nu linkes `model=` (eksakt), og
+   tallet regnes af samme filterobjekt som linket. Testen bygger mærkesidens link-blokke over fixturelageret og kører
+   hver chip gennem søgesidens egen URL-læser og Filtrering.anvendFiltre mod HELE lageret. */
+{
+  const CHIP = require('./seo-chip-tjek.js');
+  const { facetLinksFor, treKolonnerHTML, typeFlisersHTML } = require('./build-brand-pages.js');
+
+  test('F2-005: hver chip og flise på mærkesiden lover præcis det antal, dens link giver', () => {
+    const alle = CHIP.lagerFixture();
+    const ctx = { alle, facetter: [], Filtrering };
+    const fejl = [], dubletter = [];
+    let tjekket = 0, modelfliser = 0;
+    for (const brand of [...new Set(alle.map(l => l.brand))]){
+      const items = alle.filter(l => l.brand === brand);
+      const fakta = maerkeFakta(brand, items);
+      const html = facetLinksFor(brand, items) + treKolonnerHTML(brand, fakta, items) + typeFlisersHTML(brand, fakta);
+      for (const chip of CHIP.udtraekChips(html)){
+        if (!/^soegning\.html\?/.test(chip.href)) continue;
+        const d = CHIP.dubletNoegler(chip.href);
+        if (d.length) dubletter.push(`${brand}: ${chip.href} gentager ${d.join(', ')}`);
+        if (chip.tal === null) continue;
+        tjekket++;
+        if (/model=/.test(chip.href)) modelfliser++;
+        const n = CHIP.traefFraHref(chip.href, ctx);
+        if (n !== chip.tal) fejl.push(`${brand}: "${chip.tekst}" lover ${chip.tal}, ${chip.href} giver ${n}`);
+      }
+    }
+    assert.ok(tjekket >= 80, `kun ${tjekket} chips tjekket`);
+    assert.ok(modelfliser >= 15, `kun ${modelfliser} modelfliser tjekket`);
+    assert.deepEqual(dubletter, []);
+    assert.deepEqual(fejl, []);
+  });
+
+  test('F2-005: Honda-fliserne i fixturen — CRF 110 F er 1, Africa Twin 24, CB 1000 er ikke Fireblade', () => {
+    const alle = CHIP.lagerFixture();
+    const honda = alle.filter(l => l.brand === 'Honda');
+    const tal = Object.fromEntries(modelTal(honda).map(x => [x.m, x.n]));
+    assert.equal(tal['CRF 110 F'], 1);
+    assert.equal(tal['CRF 1100 L Africa'], 24);
+    assert.equal(tal['CB 1000'], 8);
+    assert.equal(tal['CBR 1000 F'], 3);
+  });
+}
+
+/* ---------- T-002: én titelformel for alle mærkesider ---------- */
+{
+  const { titelFor, metaBeskrivelseFor } = require('./build-brand-pages.js');
+  const MAERKER = ['BMW', 'Honda', 'Yamaha', 'KTM', 'Harley-Davidson', 'Royal Enfield', 'Moto Guzzi', 'MV Agusta', 'FB Mondial', 'Lauge Jensen', 'Husqvarna', 'Triumph', 'Hyosung', 'Kawasaki'];
+
+  test('T-002: titlen er "{Brugte }{Mærke}-motorcykler til salg — Bikerbasen" for alle mærker, højst 60 tegn', () => {
+    for (const m of MAERKER){
+      const rent = titelFor(m, 31, 0, true), blandet = titelFor(m, 31, 4, false), ubevist = titelFor(m, 31, 0, false);
+      assert.equal(rent, `Brugte ${m}-motorcykler til salg — Bikerbasen`);
+      assert.equal(blandet, `${m}-motorcykler til salg — Bikerbasen`, 'nye imellem: intet "brugte"');
+      assert.equal(ubevist, blandet, 'ubevist "ny" er hverken ny eller brugt: intet "brugte"');
+      for (const t of [rent, blandet]) assert.ok(t.length <= 60, `${t} er ${t.length} tegn`);
+      assert.ok(!/[0-9]/.test(rent), 'antal og pris står i beskrivelsen, ikke i titlen');
+    }
+  });
+
+  test('T-002: et meget langt mærkenavn afkortes pænt — først " — Bikerbasen", så "Brugte", aldrig midt i et ord', () => {
+    const langt = 'Zundapp Spezialmotorenwerke';   // 27 tegn
+    const t = titelFor(langt, 12, 0, true);
+    assert.ok(t.length <= 60, t);
+    assert.match(t, /Zundapp Spezialmotorenwerke-motorcykler til salg/);
+    assert.ok(!/ —$/.test(t) && !/-$/.test(t), 'ingen hængende tegnsætning: ' + t);
+    // Selv det længste navn giver en hel titel, ikke en afkortet streng.
+    assert.ok(titelFor('Et Meget Langt Fabrikantnavn Som Ingen Kender', 3, 0, true).endsWith('motorcykler til salg'));
+  });
+
+  test('T-002: beskrivelsen bærer antal og pris (flyttet fra titlen)', () => {
+    const d = metaBeskrivelseFor('BMW', 31, { min: 20000, max: 190000 }, 0, true, 0);
+    assert.match(d, /31 brugte BMW/);
+    assert.ok(d.includes('fra 20.000 kr. til 190.000 kr.'), d);
   });
 }

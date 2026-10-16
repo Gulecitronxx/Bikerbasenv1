@@ -189,3 +189,15 @@ test('median', () => {
   assert.strictEqual(S.median([1, 3]), 2);
   assert.strictEqual(S.median([1, 2, 10]), 2);
 });
+
+test('T-003 modelKvalificerer: kun distinkte annoncer tæller — 10 identiske dealerenheder er IKKE en side', () => {
+  const ens = mange(10, { price: 89995, year: 2024, km: 0, ...KILDE('mcsyd.dk') });
+  assert.strictEqual(S.distinkte(ens).length, 1);
+  assert.strictEqual(S.modelKvalificerer(ens), false, '10 ens = 1 distinkt');
+  const toForskellige = [...mange(8, { price: 89995, year: 2024, km: 0, ...KILDE('mcsyd.dk') }), l({ price: 79995, year: 2023, km: 5000, ...KILDE('mcsyd.dk') }), l({ price: 85000, year: 2022, km: 100, ...KILDE('guloggratis.dk') })];
+  assert.strictEqual(S.distinkte(toForskellige).length, 3);
+  assert.strictEqual(S.modelKvalificerer(toForskellige), true, '3 forskellige med pris og årgang er nok');
+  assert.strictEqual(S.modelKvalificerer(toForskellige.slice(0, 7)), false, 'under 3 forskellige');
+  assert.strictEqual(S.modelKvalificerer(mange(4)), false, 'under tærsklen på 5 annoncer');
+  assert.strictEqual(S.TAERSKLER.modelDistinkt, 3);
+});
