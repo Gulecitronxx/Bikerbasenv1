@@ -1680,7 +1680,7 @@ ${header}
     ${erKk ? faktaRaekke(facet) : ''}
     <div class="fa-soeg-vrap">
       ${soegekort(facet, items)}
-      <p class="fa-agent"><a href="${facetSearchUrl(facet)}&amp;agent=1">Få besked om nye annoncer${facet.kind === 'by' ? ' i landsdelen' : ''}</a></p>
+      <p class="fa-agent"><a href="${facetSearchUrl(facet)}${facetSearchUrl(facet).includes('?') ? '&amp;' : '?'}agent=1">Få besked om nye annoncer${facet.kind === 'by' ? ' i landsdelen' : ''}</a></p>
     </div>
     ${erKk ? '' : tillidsraekke(senestOpdateret)}
 

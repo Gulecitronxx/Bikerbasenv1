@@ -173,7 +173,7 @@ const GUIDES = [
 <p>Det her er ikke statistik, men en række fælder, der er nemme at falde i, når man køber sin første motorcykel:</p>
 <ol>
 <li><strong>At købe efter datablad frem for efter kørsel.</strong> Flere hestekræfter gør ikke en motorcykel nemmere at lære på.</li>
-<li><strong>At glemme udstyr og forsikring i budgettet.</strong> Prisen på motorcyklen er kun en del af regnskabet.</li>
+<li><strong>At glemme udstyr og forsikring i budgettet.</strong> Prisen på motorcyklen er kun en del af regnskabet. Læs om <a href="guide-mc-udstyr.html">udstyr</a> og <a href="guide-mc-forsikring.html">forsikring</a>.</li>
 <li><strong>At købe på billeder alene.</strong> Se motorcyklen, hvis du overhovedet kan, og få en prøvetur.</li>
 <li><strong>At springe papirerne over.</strong> Registreringsattest, servicehistorik og eventuel gæld skal på bordet, før du betaler.</li>
 <li><strong>At stoppe ved første motorcykel.</strong> Sammenlign flere annoncer af samme model, så du kan se, hvad der er rimeligt.</li>
