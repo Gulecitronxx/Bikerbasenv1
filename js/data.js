@@ -1060,7 +1060,50 @@ function isNewListing(iso){
   const now = Date.now();
   return (now - then) >= 0 && (now - then) < 4 * 86400000;
 }
+/* F2-014: det brugerrettede navn på en annonce. "Ukendt" er sentinellen for et mærke, kilden ikke kunne
+   læses, og en tom model er en model, kilden ikke oplyste — begge dele siges, og der opfindes intet.
+     Honda + CB 500            -> "Honda CB 500"
+     Honda + (ingen model)     -> "Honda (model ikke oplyst)"
+     Ukendt + MTX800           -> "Ukendt mærke MTX800"
+     (ingen af dem)            -> "Mærke og model ikke oplyst" */
+function maerkeTekst(brand){
+  const b = String(brand == null ? '' : brand).trim();
+  return /^(ukendt|null|undefined)?$/i.test(b) ? '' : b;
+}
+function annonceNavn(l){
+  const b = maerkeTekst(l && l.brand);
+  let m = String((l && l.model) == null ? '' : l.model).trim();
+  if (/^(null|undefined)$/i.test(m)) m = '';
+  if (b && m.toLowerCase() === b.toLowerCase()) m = '';
+  if (b && m) return `${b} ${m}`;
+  if (b) return `${b} (model ikke oplyst)`;
+  if (m) return `Ukendt mærke ${m}`;
+  return 'Mærke og model ikke oplyst';
+}
+
+/* F2-008: typen af de modeller, hvis navn indeholder et kategoriord ("Street"). Typen kommer herfra (mærkets
+   egen modelserie), ikke fra ordet i navnet: Street Triple er naked, Street Glide er touring, Street Bob cruiser.
+   Slås kun op, når kilden ikke selv har en type, og kun for navne i listen — alt andet er ukendt. */
+const TYPE_FOR_MODELNAVN = [
+  ['Street Triple', 'naked'], ['Street Twin', 'classic'], ['Street Scrambler', 'classic'], ['Street Cup', 'classic'],
+  ['Street Glide', 'touring'], ['Road Glide', 'touring'], ['Electra Glide', 'touring'], ['Ultra Glide', 'touring'],
+  ['Super Glide', 'cruiser'], ['Sport Glide', 'cruiser'], ['Street Bob', 'cruiser'], ['Street Rod', 'cruiser'],
+  ['Street 750', 'cruiser'], ['Street 500', 'cruiser'],
+];
+function typeFraStreetModel(tekst){
+  const t = String(tekst || '').toLowerCase().replace(/\s+/g, ' ');
+  const hit = TYPE_FOR_MODELNAVN.find(([navn]) => t.includes(navn.toLowerCase()));
+  return hit ? hit[1] : null;
+}
+/* F2-003: "Nyt opslag" (oprettet for under 4 dage siden) er IKKE "Ny" (fabriksny). Samme ord om to ting
+   fik en 1979 BMW R45 til at stå med grøn "NY". Opslagsmærket har eget ord og neutral (hvid) stil;
+   "Ny" bruges kun om standen, og kun via kildeNyStatus() (kortets .rk-ny, annoncesidens "Stand: Fabriksny"). */
+function nytOpslagBadgeHTML(){
+  return '<span class="badge badge-neutral badge-nyt-opslag" title="Opslaget er oprettet for under 4 dage siden. Det siger intet om motorcyklens stand.">Nyt opslag</span>';
+}
 function typeLabel(id){
+  // F2-011: aldrig strengen "null"/"undefined" i en celle — uden type siger vi det.
+  if (id == null || id === '') return 'Ikke oplyst';
   return (TYPES.find(t=>t.id===id) || {}).label || id;
 }
 
@@ -1081,6 +1124,16 @@ function typeLabel(id){
 
    A1's 15 hk er derimod rigtig. 11 kW er 14,96 hk, så 15 er den samme grænse
    skrevet i hele tal — og det er også det tal, en dansk køber genkender.
+
+   RETTET w5 (F2-001): 48 OG 49 HK ER IKKE "KRÆVER A". Afsnittet ovenfor har ret i, at
+   48,0 hk er 35,30 kW. Men kilderne oplyser HELE hk, og MC Syd runder 35 kW (47,6 hk) OP til 48.
+   Et heltal på 48 eller 49 uden kW kan derfor være en lovlig A2-maskine (Honda CMX 500 Rebel,
+   NX 500, CB 500 …) — og at stemple dem "Kræver A" var en lige så forkert påstand som det
+   gamle "A2", bare den modsatte vej. Reglen er nu ÉN funktion (a2Status() nedenfor):
+     kW oplyst   <= 35 kW -> A2 (mulig) · > 35 kW -> A
+     kun hk      <= 47 -> A2 (mulig) · 48-49 -> IKKE AFGJORT (tjek kW) · >= 50 -> A
+   "Ikke afgjort" er hverken ja eller nej: A2-filteret udelukker dem ikke (de er ikke bevist for
+   kraftige), og mærkatet lover ikke A2 — det beder køberen tjekke kW i registreringsattesten.
 
    BEMÆRK, at effekten kun er den ene af to grænser. A2 kræver også maks.
    0,2 kW/kg køreklar vægt, og at mc'en ikke er afledt af en model med over
@@ -1126,11 +1179,14 @@ function typeLabel(id){
    må køre alt og skal se alt. Regn ikke om; skriv rigtigt. */
 const KOEREKORT = [
   { id: 'A1', label: 'A1 (lille mc)',      hint: 'Maks. 125 cm³ og 15 hk' },
-  { id: 'A2', label: 'A2 (mellem mc)',     hint: 'Maks. 35 kW (47 hk). A2 dækker også A1-motorcykler, så de er talt med.' },
+  { id: 'A2', label: 'A2 (mellem mc)',     hint: 'Maks. 35 kW (47 hk). A2 dækker også A1-motorcykler, så de er talt med. 48-49 hk uden oplyst kW er med, men markeret "ikke afgjort".' },
   { id: 'A',  label: 'A (alle mc)',        hint: 'A har ingen effektgrænse og dækker hele lageret — også de annoncer, hvor effekten ikke er oplyst.' },
 ];
 
 const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 47;
+/* kW er lovens enhed. A1: 11 kW, A2: 35 kW. HK_UBESTEMT_TIL er første hk-værdi, der SIKKERT er over
+   A2: 35 kW = 47,6 hk, så 48 og 49 (afrundet af kilden) kan stadig være 35 kW. */
+const A1_MAX_KW = 11, A2_MAX_KW = 35, HK_UBESTEMT_TIL = 50;
 
 /* Ukendt effekt har mange stavemåder, og de betyder alle det samme:
      null      databasen (eksterne_annoncer.hk er tom for alle 332)
@@ -1147,6 +1203,38 @@ const A1_MAX_HK = 15, A1_MAX_CCM = 125, A2_MAX_HK = 47;
 function hkEllerNull(power){
   const v = Number(power);
   return Number.isFinite(v) && v > 0 ? v : null;
+}
+
+/* Oplyst kW (valgfrit felt `kw`/`powerKw`; ingen kilde leverer det endnu). Samme stavemåder som hk. */
+function kwEllerNull(listing){
+  const v = Number(listing.kw != null ? listing.kw : listing.powerKw);
+  return Number.isFinite(v) && v > 0 ? v : null;
+}
+
+/* ÉT svar på spørgsmålet "hvor ligger effekten i forhold til A2?" — bruges af filteret
+   (passerKoerekort), mærkatet (koerekortForListing/koerekortMaerkat) og dermed kort, annonceside,
+   sammenlign, forside og facettal.
+     'ja'      under eller på grænsen (mulig A2)
+     'graense' 48-49 hk uden kW: kan være 35 kW afrundet op — IKKE afgjort
+     'nej'     sikkert over (> 35 kW, eller >= 50 hk)
+     null      effekten kendes ikke */
+function a2Status(listing){
+  const kw = kwEllerNull(listing);
+  if (kw != null) return kw <= A2_MAX_KW ? 'ja' : 'nej';
+  const hk = hkEllerNull(listing.power);
+  if (hk == null) return null;
+  if (hk <= A2_MAX_HK) return 'ja';
+  return hk < HK_UBESTEMT_TIL ? 'graense' : 'nej';
+}
+
+/* A1 kræver kendt effekt: kW hvis oplyst, ellers hk. */
+function erA1(listing){
+  const ccm = Number(listing.ccm) || 0;
+  if (!(ccm > 0 && ccm <= A1_MAX_CCM)) return false;
+  const kw = kwEllerNull(listing);
+  if (kw != null) return kw <= A1_MAX_KW;
+  const hk = hkEllerNull(listing.power);
+  return hk != null && hk <= A1_MAX_HK;
 }
 
 /* Må en mc med denne effekt/slagvolumen føres på det valgte kørekort?
@@ -1181,15 +1269,16 @@ function passerKoerekort(listing, kat){
      slagvolumen er ingen garanti for lav effekt. Uden hk kan vi kun sige
      "ikke A1, fordi ccm er for høj" — aldrig "ja, A1". Derfor kræver
      grenen nu et KENDT hk, ligesom A2-grenen nedenfor allerede gør. */
-  if (kat === 'A1') return ccm > 0 && ccm <= A1_MAX_CCM && hk != null && hk <= A1_MAX_HK;
+  if (kat === 'A1') return erA1(listing);
 
   if (kat === 'A2'){
     // En stærkere mc tæller også med, hvis den kan effektbegrænses.
     if (listing.kanNedsaettesA2) return true;
     // Uden effekt kan vi ikke svare. At vise den ville være et løfte om, at
     // den er lovlig — og det er den påstand, der koster kørekortet.
-    if (hk == null) return false;
-    return hk <= A2_MAX_HK;
+    // 'ja' og 'graense' (48-49 hk uden kW) udelukkes ikke; se a2Status().
+    const s = a2Status(listing);
+    return s === 'ja' || s === 'graense';
   }
   return true; // A dækker alt
 }
@@ -1200,7 +1289,7 @@ function passerKoerekort(listing, kat){
 function koerekortForListing(listing){
   const hk = hkEllerNull(listing.power);
   const ccm = Number(listing.ccm) || 0;
-  if (hk == null && !ccm) return null;
+  if (hk == null && kwEllerNull(listing) == null && !ccm) return null;
 
   /* RETTET runde 4: linjen herunder lød `(hk == null || hk <= A1_MAX_HK)` —
      samme fejl som i passerKoerekort() ovenfor, og de to funktioner delte
@@ -1214,10 +1303,18 @@ function koerekortForListing(listing){
      stole på.
      Nu kræver A1 et kendt hk, ligesom A2 gør nedenfor: kender vi kun ccm,
      er svaret null — "kan ikke afgøres", ikke et gæt. */
-  if (ccm > 0 && ccm <= A1_MAX_CCM && hk != null && hk <= A1_MAX_HK) return 'A1';
-  if (hk == null) return null;   // hk ukendt — ccm alene rækker ikke, hverken ≤125 eller derover
-  if (hk <= A2_MAX_HK) return 'A2';
+  if (erA1(listing)) return 'A1';
+  const s = a2Status(listing);
+  if (s === null) return null;   // effekt ukendt — ccm alene rækker ikke, hverken ≤125 eller derover
+  if (s === 'ja') return 'A2';
+  if (s === 'graense') return null;   // 48-49 hk: hverken "A2" eller "A" — se koerekortTvivl()
   return 'A';
+}
+
+/* 48-49 hk uden kW: kategorien kan ikke afgøres, fordi kilden har rundet 35 kW (47,6 hk) op.
+   Mærkatet siger "Kørekort ikke afgjort — tjek kW". */
+function koerekortTvivl(listing){
+  return !erA1(listing) && a2Status(listing) === 'graense';
 }
 
 /* ============ Udstyr og teknik ============

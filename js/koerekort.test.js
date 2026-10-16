@@ -111,8 +111,10 @@ test('kendt effekt afgør kategorien', () => {
   assert.equal(koerekortForListing({ power: 14, ccm: 125 }), 'A1');
   assert.equal(koerekortForListing({ power: 44, ccm: 650 }), 'A2');
   assert.equal(koerekortForListing({ power: 47, ccm: 750 }), 'A2');  // 34,57 kW
-  assert.equal(koerekortForListing({ power: 48, ccm: 883 }), 'A');   // 35,30 kW — Iron 883
-  assert.equal(koerekortForListing({ power: 49, ccm: 750 }), 'A');
+  // w5 (F2-001): 48-49 hk er hverken A2 eller A — kilden runder 35 kW (47,6 hk) op. Se js/w5-koerekort.test.js.
+  assert.equal(koerekortForListing({ power: 48, ccm: 883 }), null);
+  assert.equal(koerekortForListing({ power: 49, ccm: 750 }), null);
+  assert.equal(koerekortForListing({ power: 50, ccm: 883 }), 'A');
   assert.equal(koerekortForListing({ power: 95, ccm: 900 }), 'A');
   assert.equal(koerekortForListing({ power: '44', ccm: 650 }), 'A2'); // tal som tekst fra databasen
   assert.equal(koerekortForListing({ power: '53', ccm: 650 }), 'A');
@@ -338,9 +340,12 @@ test('Honda MSX 125: egen annonce (ikke ekstern) får den anden ordlyd', () => {
   assert.ok(!/hos kilden/.test(m.forklaring), 'egen annonce må ikke sige "hos kilden"');
 });
 
-test('Iron 883: 48 hk er over A2-loftet, 47 er under', () => {
-  // Kritikerens tal: 48 hk = 35,30 kW, og loftet er 35 kW.
-  assert.equal(koerekortMaerkat({ ...IRON883, power:48 }).kode, 'A');
+test('Iron 883: 47 hk er under A2-loftet, 48 er ikke afgjort (w5), 50 kræver A', () => {
+  // 48 hk kan være 35 kW afrundet op (F2-001): hverken "Mulig A2" eller "Kræver A".
+  const m48 = koerekortMaerkat({ ...IRON883, power:48 });
+  assert.equal(m48.kode, null);
+  assert.match(m48.tekst, /ikke afgjort/);
+  assert.equal(koerekortMaerkat({ ...IRON883, power:50 }).kode, 'A');
   assert.equal(koerekortMaerkat({ ...IRON883, power:47 }).kode, 'A2');
   // Og tallet, der står i lageret i dag:
   assert.equal(koerekortMaerkat(IRON883).kode, 'A');

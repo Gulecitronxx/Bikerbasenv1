@@ -532,7 +532,7 @@ function eksternTitel(l){
      klienten er vaek — crawlerens rensModelStoej har allerede fjernet
      salgsstoejen fra modellen. */
   return {
-    primaer: [brand, model].filter(Boolean).join(' ').trim() || 'Motorcykel',
+    primaer: annonceNavn({ brand, model }),   // F2-014: "Honda (model ikke oplyst)" / "Ukendt mærke MTX800"
     variant: l.type ? typeLabel(l.type) : '',
   };
 }
@@ -676,6 +676,15 @@ function koerekortMaerkat(l){
       `Ikke udelukket til ${kode} ud fra ${grundlag}. ${kode} kræver også en grænse for effekt pr. kilo${kode === 'A2' ? ', og at maskinen ikke er afledt af en model med over dobbelt effekt' : ''} — det står ikke i annoncen, så tjek registreringsattesten.` };
   }
 
+  /* 2b. 48-49 hk uden kW (F2-001). 35 kW er 47,6 hk, og kilderne runder op til 48, så tallet kan
+        ikke bruges til at sige "kræver A" — og heller ikke "A2". Samme begreb som "mangler tal":
+        kørekortet er ikke afgjort, og vejen til svaret er kW i registreringsattesten. */
+  if (!kode && koerekortTvivl(l)){
+    return { kode: null, graense: true, tekst: KK_UAFGJORT + ' — tjek kW', forklaring:
+      `Annoncen oplyser ${formatPower(hk)} (${formatCcm(ccm) || 'ccm ikke oplyst'}). A2-grænsen er 35 kW, og 35 kW er 47,6 hk — kilderne runder det op til 48. ` +
+      'Derfor kan vi ikke afgøre, om den kræver A eller kan køres på A2. Tjek kW i registreringsattesten, eller spørg sælgeren.' };
+  }
+
   // 3. Ccm ≤ 125, men effekten ikke oplyst: A1 kræver begge, vi har kun det ene.
   if (ccm > 0 && ccm <= A1_MAX_CCM && hk == null){
     return { kode: null, tekst: KK_UAFGJORT,
@@ -795,7 +804,7 @@ function kortFakta(l){
   const ext = !!l.isExternal;
   const titel = ext
     ? eksternTitel(l).primaer
-    : [l.brand, l.model].filter(Boolean).join(' ').trim() || 'Motorcykel';
+    : annonceNavn(l);
   const hk = hkEllerNull(l.power);
   const ccm = Number(l.ccm) > 0 ? Number(l.ccm) : null;
   const by = String(l.city || '').trim();
@@ -869,7 +878,7 @@ function listingCardHTML(l, i){
       ? `Prisen er under 45 % af medianen for ${prisBasis.antal} andre ${l.brand} ${l.model} fra ${prisBasis.aarFra}-${prisBasis.aarTil} på Bikerbasen (median ${formatPrice(prisBasis.median)}). Bed om ekstra dokumentation, og betal aldrig forud.`
       : '';
     const dele = [
-      isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : '',
+      isNewListing(l.createdAt) ? nytOpslagBadgeHTML() : '',
       l.isDealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : '',
       mistaenkt ? `<span class="badge badge-warning" title="${escapeHTML(prisTitel)}">${Icon.alertTriangle}Under markedspris</span>` : '',
     ].filter(Boolean);
@@ -1194,6 +1203,53 @@ function wireFavoriteButtons(root){
 }
 
 
+/* ============ Sammenlign-tabellens indhold (rene funktioner, testbare uden DOM) ============
+
+   Står uden for initCompare() i stedet for inde i den, så en test kan rendere hoved og rækker for annoncer,
+   hvor alle felter er null (js/w5-null.test.js). Reglen (F2-009/F2-011): aldrig "null"/"undefined" i en celle —
+   et felt uden værdi hedder "Ikke oplyst". */
+function sammenlignHoved(bikes){
+  return `<tr><th></th>${bikes.map(b => `<th scope="col"><a href="annonce.html?id=${encodeURIComponent(b.id)}">${escapeHTML(annonceNavn(b))}</a></th>`).join('')}</tr>`;
+}
+
+function sammenlignRaekker(bikes){
+  const ikkeOplyst = 'Ikke oplyst';
+  const rows = [
+    ['Pris', b => formatPrice(b.price)],
+    ['Årgang', b => b.year == null ? ikkeOplyst : b.year],
+    ['Kilometer', b => formatKm(b.km)],
+    ['Motorstørrelse', b => formatCcm(b.ccm)],
+    ['Effekt', b => formatPower(b.power)],
+    /* Fem tankestreger stod her, i den samme tabel hvor rækkerne over
+       sagde "Pris ikke oplyst" og "Km ikke oplyst". Sammenligningen er
+       lige præcis det sted, hvor to annoncer stilles op ved siden af
+       hinanden — og et "—" over for en udfyldt celle læses som en
+       dårligere motorcykel, ikke som en oplysning, kilden ikke har.
+       Kørekort er dog UDLEDT, ikke oplyst: kan reglen ikke afgøre
+       kategorien, er svaret "Kan ikke afgøres", ikke "Ikke oplyst" —
+       samme skel som kørekortmærkatet på kortene i js/components.js. */
+    // Samme ene udregning som kortene og filteret, jf. koerekortMaerkat().
+    ['Kørekort', b => { const k = koerekortMaerkat(b); return k.kode || (k.graense ? 'Ikke afgjort — tjek kW' : 'Kan ikke afgøres'); }],
+    ['Type', b => typeLabel(b.type)],
+    ['Drivlinje', b => b.drive || ikkeOplyst],
+    // Stand er indekseret (migration 015 + kildeNyStatus), så den står også for kilde-annoncer (F2-011).
+    ['Stand', b => b.condition || ikkeOplyst],
+    ['Servicehistorik', b => b.serviceHistorik || ikkeOplyst],
+    ['Antal ejere', b => b.antalEjere || ikkeOplyst],
+    ['Sidste syn', b => b.sidsteSyn || ikkeOplyst],
+  ];
+  /* Runde 7 (D7-S6): Drivlinje, Servicehistorik, Antal ejere og Sidste syn indekserer vi ikke (CLAUDE.md
+     regel 2). "Ikke oplyst" ville vaere en paastand om saelgeren; kilden KAN have oplyst dem. Er alle
+     annoncer indekserede, falder raekkerne vaek og én linje siger hvorfor; i blandede saet staar "Se hos
+     kilden" i de eksterne celler. */
+  const alleEksterne = bikes.every(b => b.isExternal);
+  const kunEgne = new Set(['Drivlinje', 'Servicehistorik', 'Antal ejere', 'Sidste syn']);
+  const synlige = alleEksterne ? rows.filter(([label]) => !kunEgne.has(label)) : rows;
+  return synlige.map(([label, fn]) =>
+    `<tr><th scope="row">${label}</th>${bikes.map(b => `<td>${(b.isExternal && kunEgne.has(label)) ? 'Se hos kilden' : escapeHTML(String(fn(b)))}</td>`).join('')}</tr>`).join('')
+    + (alleEksterne ? `<tr><td colspan="${bikes.length + 1}" class="compare-note">Udstyr, ejere og syn står i annoncen hos kilden — Bikerbasen indekserer dem ikke.</td></tr>` : '');
+}
+
 /* ============ Sammenlign-system (bjælke + modal) ============
    Global og selvstændig: virker på alle sider via event-delegation, så de
    enkelte siders JS ikke skal røres. Op til 3 annoncer, tilstand i localStorage. */
@@ -1222,42 +1278,6 @@ function wireFavoriteButtons(root){
           <button type="button" class="btn btn-primary btn-sm" data-compare-open ${ids.length < 2 ? 'disabled' : ''}>Sammenlign${ids.length >= 2 ? ` (${ids.length})` : ''}</button>
         </div>`;
     }
-    function specRows(bikes){
-      const rows = [
-        ['Pris', b => formatPrice(b.price)],
-        ['Årgang', b => b.year],
-        ['Kilometer', b => formatKm(b.km)],
-        ['Motorstørrelse', b => formatCcm(b.ccm)],
-        ['Effekt', b => formatPower(b.power)],
-        /* Fem tankestreger stod her, i den samme tabel hvor rækkerne over
-           sagde "Pris ikke oplyst" og "Km ikke oplyst". Sammenligningen er
-           lige præcis det sted, hvor to annoncer stilles op ved siden af
-           hinanden — og et "—" over for en udfyldt celle læses som en
-           dårligere motorcykel, ikke som en oplysning, kilden ikke har.
-           Kørekort er dog UDLEDT, ikke oplyst: kan reglen ikke afgøre
-           kategorien, er svaret "Kan ikke afgøres", ikke "Ikke oplyst" —
-           samme skel som kørekortmærkatet på kortene i js/components.js. */
-        // Samme ene udregning som kortene og filteret, jf. koerekortMaerkat().
-        ['Kørekort', b => koerekortMaerkat(b).kode || 'Kan ikke afgøres'],
-        ['Type', b => typeLabel(b.type)],
-        ['Drivlinje', b => b.drive || 'Ikke oplyst'],
-        ['Stand', b => b.condition || 'Ikke oplyst'],
-        ['Servicehistorik', b => b.serviceHistorik || 'Ikke oplyst'],
-        ['Antal ejere', b => b.antalEjere || 'Ikke oplyst'],
-        ['Sidste syn', b => b.sidsteSyn || 'Ikke oplyst'],
-      ];
-      /* Runde 7 (D7-S6): Drivlinje, Stand, Servicehistorik, Antal ejere og
-         Sidste syn indekserer vi ikke (CLAUDE.md regel 2). "Ikke oplyst" ville
-         vaere en paastand om saelgeren; kilden KAN have oplyst dem. Er alle
-         annoncer indekserede, falder raekkerne vaek og én linje siger hvorfor;
-         i blandede saet staar "Se hos kilden" i de eksterne celler. */
-      const alleEksterne = bikes.every(b => b.isExternal);
-      const kunEgne = new Set(['Drivlinje', 'Stand', 'Servicehistorik', 'Antal ejere', 'Sidste syn']);
-      const synlige = alleEksterne ? rows.filter(([label]) => !kunEgne.has(label)) : rows;
-      return synlige.map(([label, fn]) =>
-        `<tr><th scope="row">${label}</th>${bikes.map(b => `<td>${(b.isExternal && kunEgne.has(label)) ? 'Se hos kilden' : escapeHTML(String(fn(b)))}</td>`).join('')}</tr>`).join('')
-        + (alleEksterne ? `<tr><td colspan="${bikes.length + 1}" class="compare-note">Udstyr, stand, ejere og syn står i annoncen hos kilden — Bikerbasen indekserer dem ikke.</td></tr>` : '');
-    }
     function openModal(){
       const bikes = Store.getCompare().map(id => Store.getListingById(id)).filter(Boolean);
       if (bikes.length < 2) return;
@@ -1270,8 +1290,8 @@ function wireFavoriteButtons(root){
           </div>
           <div class="compare-table-wrap">
             <table class="compare-table">
-              <thead><tr><th></th>${bikes.map(b => `<th scope="col"><a href="annonce.html?id=${encodeURIComponent(b.id)}">${escapeHTML(b.brand + ' ' + b.model)}</a></th>`).join('')}</tr></thead>
-              <tbody>${specRows(bikes)}</tbody>
+              <thead>${sammenlignHoved(bikes)}</thead>
+              <tbody>${sammenlignRaekker(bikes)}</tbody>
             </table>
           </div>
         </div>`;

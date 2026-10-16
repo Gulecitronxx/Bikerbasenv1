@@ -213,8 +213,10 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
     return `
       <div class="sidebar-card">
         ${identitet}
+        <!-- F2-006: ingen besked kan sendes via os — det siges FØR enhver handling. -->
+        <p class="seller-locked-note">${Icon.info}<span><b>Beskeder til sælger kan endnu ikke sendes via Bikerbasen.</b> Log ind for at se, om sælgeren har valgt at vise sit telefonnummer.</span></p>
         <div class="contact-actions">
-          <a href="login.html?redirect=${redirect}" class="btn btn-primary btn-block">${Icon.mail}Log ind og skriv til sælger</a>
+          <a href="login.html?redirect=${redirect}" class="btn btn-primary btn-block">${Icon.user}Log ind for at se sælgeren</a>
           ${erForhandler ? profilKnapHTML : `<a href="login.html?redirect=${redirect}" class="btn btn-outline btn-block">${Icon.user}Opret gratis profil</a>`}
         </div>
         <!-- Siger hvad login giver, og hvorfor — ikke bare at der er en mur. -->
@@ -231,13 +233,12 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
   return `
       <div class="sidebar-card">
         ${identitet}
+        <!-- F2-006: den ærlige tekst står FØR enhver handling; der er ingen besked-formular. -->
+        <p class="seller-locked-note">${Icon.info}<span><b>Beskeder til sælger kan endnu ikke sendes via Bikerbasen.</b> ${telefon || telefonMulig ? 'Har sælgeren valgt at vise sit telefonnummer, kan du se det med knappen nedenfor.' : 'Sælgeren har ikke valgt at vise et telefonnummer, så der er ingen kontaktvej via Bikerbasen på denne annonce.'}</span></p>
         <div class="contact-actions">
-          <button type="button" class="btn btn-primary btn-block" id="open-contact-modal">${Icon.mail}Skriv til sælger</button>
-          ${telefon || telefonMulig ? `<button type="button" class="btn btn-outline btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
-          <button type="button" class="btn btn-outline btn-block" id="open-payment-modal">${Icon.lock}Betal sikkert (MobilePay)</button>
+          ${telefon || telefonMulig ? `<button type="button" class="btn btn-primary btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
           ${profilKnapHTML}
         </div>
-        ${telefon || telefonMulig ? '' : `<p class="seller-locked-note">${Icon.info}<span>Sælgeren har ikke oplyst et telefonnummer. Skriv i stedet — så får du svaret på skrift.</span></p>`}
         ${raad}
       </div>
 
@@ -477,9 +478,10 @@ function anFakta(rader){
    fstyr.dk/privat/koerekort/udvidelse-af-koerekort/koerekort-til-motorcykel. */
 function anKoerekortKort(l, kkM, uvisA2A){
   const kk = kkM.kode;
-  const badge = kk ? kk : (uvisA2A ? 'A2/A' : '?');
+  const badge = kk ? kk : (kkM.graense ? '?' : uvisA2A ? 'A2/A' : '?');
   const badgeTekst = kk === 'A' ? 'Kræver A-kørekort'
-    : kk ? `Ikke udelukket ud fra de oplyste tal` : 'Kan ikke afgøres';
+    : kk ? `Ikke udelukket ud fra de oplyste tal`
+    : kkM.graense ? 'Ikke afgjort — tjek kW' : 'Kan ikke afgøres';
   const ekstra = (kk === 'A' && l.kanNedsaettesA2) ? ' Sælgeren oplyser, at den kan effektbegrænses til A2.' : '';
   const side = kk === 'A1' ? 'koerekort-a1.html' : 'koerekort-a2.html';
   return `
@@ -756,7 +758,7 @@ function renderExternalListing(listing){
      <title> ("Honda GL 1100 Gold Wing Klassiker"), hvor den læses som en del
      af modelnavnet — og et delt link i en MC-gruppe bar altså et ord, kilden
      havde fundet på. En kategori hører i en kategorilinje. */
-  const fuldTitel = [listing.brand, listing.model].filter(Boolean).join(' ');
+  const fuldTitel = annonceNavn(listing);   // F2-014: "Honda (model ikke oplyst)", aldrig et tomt eller opfundet navn
   /* <title> sættes nu af seoExternalListingPage() ovenfor — mærke, model,
      kilde OG pris ("X hos Y — 45.000 kr. — Bikerbasen"), hvor det før kun
      var mærke og model uden pris. h1'en er en separat, kortere ting: den
@@ -826,7 +828,7 @@ function renderExternalListing(listing){
     [Icon.bike, 'Type', listing.type ? escapeHTML(typeLabel(listing.type)) : IO],
     [Icon.engine, 'Motorstørrelse', ccm > 0 ? formatCcm(ccm) : IO],
     [AN_IKON.bolt, 'Ydelse', hk ? formatPower(hk) : IO],
-    [Icon.shieldCheck, 'Kørekort', kk ? escapeHTML(kkM.tekst) : (kkUvis ? 'A2 eller A — kan ikke afgøres' : 'Kan ikke afgøres')],
+    [Icon.shieldCheck, 'Kørekort', kk ? escapeHTML(kkM.tekst) : (kkM.graense ? 'Ikke afgjort — tjek kW' : kkUvis ? 'A2 eller A — kan ikke afgøres' : 'Kan ikke afgøres')],
     erNy === true ? [Icon.checkCircle, 'Stand', 'Fabriksny'] : (erNy === false ? [Icon.checkCircle, 'Stand', 'Brugt'] : null),
     salgsmarkoerer.length ? [AN_IKON.tag, 'Salgsvilkår', salgsmarkoerer.map(escapeHTML).join(' · ')] : null,
     listing.isDealer ? [Icon.store, 'Sælger', `Forhandler · ${kilde}`] : (listing.saelgertype === 'privat' ? [Icon.user, 'Sælger', 'Privat sælger'] : null),
@@ -1013,6 +1015,27 @@ function renderListing(){
 
   // Slettet annonce, forkert id eller tom database: vis en ærlig tom tilstand
   // frem for at falde tilbage på en tilfældig anden annonce.
+  /* F2-010: kunne lageret slet ikke hentes (fejl, eller begge kilder svarede tomt), ved vi ikke, om annoncen
+     findes. "Annoncen findes ikke — den er måske solgt" ville være en påstand om noget, vi ikke har set. */
+  const hentSt = window.DATA_STATUS || {};
+  const hentefejl = !listing && (hentSt.egne === 'fejlet' || hentSt.eksterne === 'fejlet'
+    || (Store.getAllListings().length === 0 && (hentSt.egne === 'ok' || hentSt.eksterne === 'ok')));
+  if (hentefejl){
+    document.title = 'Vi kunne ikke hente annoncen — Bikerbasen';
+    document.getElementById('bc-current').textContent = 'Kunne ikke hentes';
+    document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
+    document.getElementById('listing-detail').innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1; padding-top:var(--space-8);">
+        ${Icon.search}
+        <h2>Vi kunne ikke hente annoncen lige nu</h2>
+        <p>Det er ikke ensbetydende med, at den er solgt. Prøv igen om lidt.</p>
+        <button type="button" class="btn btn-primary" id="annonce-proev-igen" style="margin-top:16px;">Prøv igen</button>
+      </div>`;
+    document.getElementById('annonce-proev-igen').addEventListener('click', () => location.reload());
+    const lignende = document.querySelector('.similar-strip');
+    if (lignende) lignende.style.display = 'none';
+    return;
+  }
   if (!listing){
     document.title = 'Annoncen findes ikke — Bikerbasen';
     // Solgte og slettede annoncer skal ikke ligge tilbage i Googles indeks.
@@ -1273,13 +1296,16 @@ function renderListing(){
     openReportModal('listing', `${listing.brand} ${listing.model}`, listing.id);
   });
 
-  /* Kontaktbjælken i bunden (mobil). Den vises for alle andre end sælgeren
-     selv — også når man ikke er logget ind, for dér er handlingen "log ind
-     for at skrive", ikke "ingenting". Bilbasen lægger de samme knapper
-     øverst, hvor de ruller væk; vores følger med ned gennem specs og
-     beskrivelse, hvor beslutningen faktisk træffes. */
+  /* Kontaktbjælken i bunden (mobil). F2-006 (w5): "Skriv til sælger" er fjernet — Bikerbasen leverer ingen
+     beskeder. Bjælken har kun "Vis nummer" og vises derfor kun, når der er et nummer at vise (eller når man
+     skal logge ind for at se, om der er et). Gamle statiske annoncesider har stadig #bar-contact og
+     #contact-modal i markup'en; de fjernes her, så der aldrig står en formular, der ikke leverer. */
+  document.getElementById('bar-contact')?.remove();
+  document.getElementById('contact-modal')?.remove();
   const bar = document.getElementById('listing-actionbar');
-  if (bar && !isOwnListing(listing)){
+  const harNummer = !!(telefon || telefonMulig);
+  if (bar && !isOwnListing(listing) && loggedIn && !harNummer) bar.remove();
+  else if (bar && !isOwnListing(listing)){
     bar.hidden = false;
     document.body.classList.add('har-actionbar');
     const spring = (id, rulHen) => {
@@ -1293,27 +1319,14 @@ function renderListing(){
       mål.click();
       // Telefonnummeret afsløres nede i sælgerkortet — flyt øjnene derhen,
       // ellers trykker man på en knap og ser tilsyneladende ingenting ske.
-      // (Beskeden åbner en modal og skal ikke rulle noget.)
       if (rulHen) mål.closest('.sidebar-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
-    document.getElementById('bar-contact').addEventListener('click', () => spring('open-contact-modal', false));
-
-    /* "Ring op" må kun stå der, når der ER et nummer at ringe til.
-       spring() sender til login, når målknappen mangler — rigtigt for en
-       udlogget bruger, men for en indlogget uden sælgertelefon betød det, at
-       et tryk på "Ring op" smed ham ud på login-siden fra en side, han
-       allerede var logget ind på. Nu forsvinder knappen i stedet, og
-       "Skriv til sælger" fylder bjælken alene.
-       Bemærk: [hidden] alene er ikke nok — .btn sætter display, og en
-       klasseregel slår browserens hidden-regel. Se .listing-actionbar
-       [hidden] i css/styles.css. */
+    /* Enlig knap i bjælken: den er nu handlingen, så den er primær. spring() sender til login, når
+       målknappen mangler (udlogget). */
     const barPhone = document.getElementById('bar-phone');
     if (barPhone){
-      if (loggedIn && !telefon && !telefonMulig){
-        barPhone.hidden = true;
-      } else {
-        barPhone.addEventListener('click', () => spring('reveal-phone-btn', true));
-      }
+      barPhone.classList.replace('btn-outline', 'btn-primary');
+      barPhone.addEventListener('click', () => spring('reveal-phone-btn', true));
     }
   }
 
@@ -1343,183 +1356,19 @@ function renderListing(){
       if (!error && nr){ visNummer(nr); return; }
       const note = document.createElement('p');
       note.className = 'seller-locked-note';
-      note.innerHTML = `${Icon.info}<span>Sælgeren viser ikke sit telefonnummer her. Skriv i stedet — så får du svaret på skrift.</span>`;
+      note.innerHTML = `${Icon.info}<span>Sælgeren viser ikke sit telefonnummer her. Bikerbasen kan endnu ikke sende beskeder til sælgeren, så der er ingen kontaktvej via os på denne annonce.</span>`;
       revealBtn.replaceWith(note);
     });
 
-    document.getElementById('open-payment-modal').addEventListener('click', () => {
-      /* HER STOD DEN TJENESTE, VORES EGEN SIKKERHEDSSIDE KALDER ET
-         SVINDELTEGN.
-
-         Teksten tilbod "Bikerbasens sikker betaling: en ekstern,
-         PCI-certificeret betalingspartner holder pengene". Den findes ikke.
-         sikkerhed.html siger ordret: "Bikerbasen tilbyder i dag intet 'sikker
-         betaling'- eller escrowflow ... Henviser en saelger til 'Bikerbasens
-         sikre betaling' eller lignende, er det et advarselstegn: den tjeneste
-         findes ikke."
-
-         Det var altsaa ikke bare en opdigtet funktion — det var en, der
-         gjorde koeberen MODTAGELIG for praecis det nummer, sitet advarer mod.
-         En svindler kunne skrive "lad os bruge Bikerbasens sikre betaling",
-         og koeberen ville have laest det paa annoncesiden selv.
-
-         Modalen siger nu det samme som sikkerhed.html. Hvis der en dag
-         kommer et escrowflow, skal BEGGE steder rettes samtidig. */
-      openInfoModal('Sådan betaler I hinanden', `
-        <p>Du betaler direkte til sælger — typisk via MobilePay eller bankoverførsel — når I mødes, og du har set motorcyklen og godkendt den.</p>
-        <p><strong>Bikerbasen har ingen betalingsløsning og rører aldrig pengene.</strong> Henviser nogen til &ldquo;Bikerbasens sikre betaling&rdquo; eller et depositum via os, er det et advarselstegn: den tjeneste findes ikke.</p>
-        <p style="margin-bottom:0;">Se <a href="sikkerhed.html">rådene om tryg handel</a>, før du kører af sted.</p>
-      `);
-    });
-
-    const modal = document.getElementById('contact-modal');
-    // Sælgers navn i titlen, så man kan se, hvem beskeden går til —
-    // "Skriv til sælger" føles anonymt, når navnet står lige ved siden af.
-    document.getElementById('contact-modal-title').textContent = `Skriv til ${listing.seller.name}`;
-    /* Tilgængelig dialog: fokus ind ved åbning, tilbage til udløseren ved
-       lukning, Escape lukker, Tab bliver inde i dialogen. Modalen bor i
-       annonce.html og styres kun her, så løsningen er lokal. */
-    let udloeser = null;
-    const aabnKontakt = () => { udloeser = document.activeElement; modal.classList.add('open'); };
-    const lukKontakt = () => modal.classList.remove('open');
-    new MutationObserver(() => {
-      if (modal.classList.contains('open')){
-        modal.querySelector('[role="dialog"]') || modal.querySelector('.modal-box')?.setAttribute('role', 'dialog');
-        modal.querySelector('.modal-box')?.setAttribute('aria-modal', 'true');
-        modal.querySelector('.modal-box')?.setAttribute('aria-labelledby', 'contact-modal-title');
-        const mal = modal.querySelector('#cf-message:not([hidden])') || modal.querySelector('#contact-receipt:not([hidden])') || modal.querySelector('.modal-box');
-        if (mal) mal.focus();
-      } else if (udloeser && document.contains(udloeser)){
-        udloeser.focus(); udloeser = null;
-      }
-    }).observe(modal, { attributes: true, attributeFilter: ['class'] });
-    document.addEventListener('keydown', (e) => {
-      if (!modal.classList.contains('open')) return;
-      if (e.key === 'Escape'){ e.preventDefault(); lukKontakt(); return; }
-      if (e.key !== 'Tab') return;
-      const fokus = [...modal.querySelectorAll('button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled && el.offsetParent !== null);
-      if (!fokus.length) return;
-      const foerste = fokus[0], sidste = fokus[fokus.length - 1];
-      if (e.shiftKey && (document.activeElement === foerste || !modal.contains(document.activeElement))){ e.preventDefault(); sidste.focus(); }
-      else if (!e.shiftKey && document.activeElement === sidste){ e.preventDefault(); foerste.focus(); }
-    });
-    document.getElementById('open-contact-modal').addEventListener('click', aabnKontakt);
-    modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', lukKontakt));
-    modal.addEventListener('click', (e) => { if (e.target === modal) lukKontakt(); });
-
-    const besked = document.getElementById('cf-message');
-    const taeller = document.getElementById('cf-counter');
-    // Oplægget står som en konstant, fordi formularen nulstilles efter
-    // afsendelse: uden den mødte man et tomt felt anden gang, man åbnede
-    // modalen, og skulle selv finde på begyndelsen igen.
-    const standardBesked = `Hej, jeg er interesseret i din ${listing.brand} ${listing.model} fra ${listing.year}. Er den stadig til salg?`;
-    besked.value = standardBesked;
-    const opdaterTaeller = () => { taeller.textContent = `${besked.value.length}/500`; };
-    besked.addEventListener('input', opdaterTaeller);
-    opdaterTaeller();
-
-    // Navn og e-mail er kendt fra profilen — spar indtastningen.
-    const bruger = Store.getUser();
-    if (bruger){
-      const [fornavn, ...rest] = String(bruger.name || '').split(' ');
-      if (fornavn) document.getElementById('cf-firstname').value = fornavn;
-      if (rest.length) document.getElementById('cf-lastname').value = rest.join(' ');
-      if (bruger.email) document.getElementById('cf-email').value = bruger.email;
-      if (bruger.phone) document.getElementById('cf-phone').value = bruger.phone;
-    }
-
-    /* ---------- Afsendelse og kvittering ----------
-       Modalen skifter fra formular til kvittering i stedet for at lukke sig
-       selv med en toast. To grunde:
-
-       1. Toasten sagde "Din besked er sendt til sælgeren". Den blev ikke
-          sendt nogen steder — der er ingen beskedtabel i basen (se
-          supabase/). Det er den slags påstand, tillidskategorien straffer
-          hårdest: køberen sidder og venter på et svar, der aldrig kan komme.
-       2. En toast forsvinder efter et par sekunder. Det, der faktisk virker i
-          dag — telefonnummeret — skal blive stående, til køberen har brugt
-          det.
-
-       Det, vi KAN bakke op, er tællingen: record_listing_event registrerer
-       henvendelsen på annoncen, og det tal ser sælgeren i sit dashboard.
-       Kvitteringen siger præcis så meget og ikke mere. */
-    const kvittering = document.getElementById('contact-receipt');
-    const formular = document.getElementById('contact-form');
-
-    // Formularen skal tilbage, næste gang modalen åbnes — ellers møder man
-    // sin egen kvittering fra sidste gang i stedet for et skrivefelt.
-    const nulstilKontakt = () => {
-      if (!kvittering || !formular) return;
-      kvittering.hidden = true;
-      formular.hidden = false;
-    };
-    modal.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', nulstilKontakt));
-    modal.addEventListener('click', (e) => { if (e.target === modal) nulstilKontakt(); });
-
-    formular.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      /* Hensigterne blev før plukket ud og smidt væk igen (`void hensigter`).
-         Så stod der tre afkrydsningsfelter, der ikke gjorde noget som helst —
-         og når beskeden alligevel ikke leveres, var de rent teater.
-         Nu gentages de i kvitteringen: køberen kan se, hvad han bad om, og
-         har det med, når han ringer. Det er det eneste sted, de kan gøre
-         gavn, før der findes en beskedlevering at sende dem med. */
-      const hensigter = [...modal.querySelectorAll('.contact-intents input:checked')].map(cb => cb.value);
-      // C3: generate_lead — kun at det skete, aldrig hvad der stod i beskeden.
-      if (typeof Maaling !== 'undefined') Maaling.kontakt(currentListing);
-
-      // Det ene, vi faktisk kan: tælle henvendelsen på annoncen.
-      db.recordListingEvent?.(listing.id, 'contact');
-
-      const krop = document.getElementById('contact-receipt-body');
-      const handlinger = document.getElementById('contact-receipt-actions');
-
-      if (krop){
-        krop.textContent = telefon
-          ? 'Sælgeren kan se antallet af henvendelser under Mine annoncer. Vi videresender ikke selve teksten endnu, så vil du have svar i dag, er telefonen den hurtigste vej.'
-          : 'Sælgeren kan se antallet af henvendelser under Mine annoncer. Vi videresender ikke selve teksten endnu — gem annoncen, så du kan finde den igen.';
-      }
-
-      /* Det, køberen krydsede af, skrevet tilbage til ham. Listen bygges kun,
-         når der ER krydset noget af — en tom overskrift ser i stykker ud. */
-      const kvitHensigter = document.getElementById('contact-receipt-intents');
-      if (kvitHensigter){
-        kvitHensigter.innerHTML = hensigter.length
-          ? `<p class="contact-receipt-intents-title">Du har bedt om:</p>
-             <ul>${hensigter.map(h => `<li>${escapeHTML(h)}</li>`).join('')}</ul>`
-          : '';
-        kvitHensigter.hidden = !hensigter.length;
-      }
-
-      /* Telefonlinket er den vej, der virker. tel: fordi kvitteringen oftest
-         læses på en telefon; på desktop er nummeret stadig læsbart som tekst. */
-      if (handlinger){
-        handlinger.innerHTML = telefon
-          ? `<a href="tel:${escapeHTML(telefon.replace(/\s+/g, ''))}" class="btn btn-primary btn-block">${Icon.phone}Ring til sælger på ${escapeHTML(telefon)}</a>
-             <button type="button" class="btn btn-outline btn-block" data-modal-close>Luk</button>`
-          : `<button type="button" class="btn btn-primary btn-block" data-modal-close>Luk</button>`;
-        handlinger.querySelectorAll('[data-modal-close]').forEach(el => el.addEventListener('click', () => {
-          modal.classList.remove('open');
-          nulstilKontakt();
-        }));
-      }
-
-      if (kvittering){
-        formular.hidden = true;
-        kvittering.hidden = false;
-        // Skærmlæseren skal have at vide, at der skete noget — modalen ser
-        // ellers bare ud til at være blevet tom.
-        kvittering.setAttribute('tabindex', '-1');
-        kvittering.focus();
-      } else {
-        modal.classList.remove('open');
-      }
-
-      formular.reset();
-      besked.value = standardBesked;
-      opdaterTaeller();
-    });
+    /* F2-002 / F2-006 (w5): HER STOD EN BETALINGSKNAP OG EN KONTAKTFORMULAR.
+       Knappen lovede en betaling, Bikerbasen ikke har (sikkerhed.html kalder præcis den slags et
+       svindeltegn), og formularen indsamlede navn, e-mail og telefon til en besked, der aldrig blev
+       leveret — samtykket sagde "vi overfører dine oplysninger til sælgeren", og først EFTER Send stod
+       der, at teksten ikke blev videresendt. Begge dele er fjernet med rod og gren: ingen personoplysninger
+       indsamles til noget, vi ikke leverer, og ingen tæller stiger af et tryk på "Send".
+       Det eneste, der virker, er sælgerens eget telefonnummer, hvis sælgeren har valgt at vise det
+       (knappen ovenfor). Skal der en dag leveres beskeder, er det en ejerbeslutning — se
+       docs/review/gauntlet/builder-w5-funktion.md. */
   }
 
   anFyldLignende(listing);

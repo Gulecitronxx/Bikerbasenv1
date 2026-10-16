@@ -243,7 +243,8 @@ function parseHk(raa){
    parserfejl, en forkert kasse er en taksonomifejl. */
 function normaliserType(raa, vokabular){
   if (!raa || !Array.isArray(vokabular) || !vokabular.length) return null;
-  const t = String(raa);
+  // "Street Glide" / "Street Bob" / "Sport Glide" er modelnavne, ikke kategoriord (F2-008).
+  const t = String(raa).replace(BESKYTTET_MODELNAVN, ' ');
   for (const ord of [...vokabular].sort((a, b) => String(b).length - String(a).length)){
     const m = String(ord).trim();
     if (!m) continue;
@@ -433,6 +434,14 @@ const TYPE_ALIAS = {
 };
 
 // Ordet, som det står i en titel, renset til en opslagsnøgle.
+/* F2-008 (w5): modelnavne, hvor et kategoriord ER en del af navnet. "Street" i FLHX Street Glide /
+   FXBB Street Bob / Street Triple og "Sport" i Sport Glide er ikke MC Syds kategori "Street" (naked) eller
+   "Sport": ordet blev klippet ud af modellen ("FLHX Glide") og typen blev Naked. Navnet beskyttes som
+   helhed. Det er en liste over NAVNE (som MODELLER i data.js), ikke et gæt på type. Spejlet i
+   js/backend-bridge.js MODEL_MED_TYPEORD — holdes i sync i SAMME commit. */
+const BESKYTTET_MODELNAVN = /\b(?:street\s+(?:glide|bob|triple|rod|twin|scrambler|cup|750|500)|(?:sport|road)\s+glide)\b/giu;
+const BESKYTTET_PAR = /^(?:street\s+(?:glide|bob|triple|rod|twin|scrambler|cup|750|500)|(?:sport|road)\s+glide)$/iu;
+
 function typeNoegle(raa){
   return String(raa == null ? '' : raa).toLowerCase().replace(/[^\p{L}]/gu, '');
 }
@@ -533,6 +542,10 @@ function delModelOgVariant(raa){
   if (!ord.length) return { model: null, variant: null, salgsmarkoerer };
 
   const type = ord.map(o => KARROSSERITYPER[o.toLowerCase().replace(/[^\p{L}]/gu, '')] || null);
+  // F2-008: "Street" i Street Glide/Bob/Triple og "Sport" i Sport Glide er en del af modelnavnet.
+  for (let i = 0; i < ord.length - 1; i++){
+    if (type[i] && BESKYTTET_PAR.test(ord[i] + ' ' + ord[i + 1])) type[i] = null;
+  }
 
   /* Et typeord som FØRSTE ord er en del af modelnavnet, ikke en type: MC Syd
      sætter altid typen EFTER modellen. Uden den regel ville "Ducati Sport
