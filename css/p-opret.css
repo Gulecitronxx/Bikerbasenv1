@@ -398,3 +398,10 @@
 .op-form .preview-note{ background: var(--color-surface-2); color: var(--color-fg); border:1px solid var(--color-border); }
 :root[data-theme="dark"] .op-form .preview-note{ color: var(--color-fg); }
 .op-form .preview-note svg{ color: var(--color-fg-muted); }
+
+/* w7-visuel (CLS): ved 1024+ står forhåndsvisningen i sidekolonnen over "Sikker handel". JS fylder den ved hydrering
+   (live-kortet 0 -> 186 px) og stepperen vokser 66 -> 78 px; "Sikker handel" sprang 198 px (CLS 0,07). Højderne er reserveret. */
+@media (min-width:1024px){
+  .op-stepper-card{ min-height:78px; }
+  .op-side .op-live-card{ min-height:186px; }
+}

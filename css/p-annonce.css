@@ -13,8 +13,10 @@
 @media (min-width:900px){ .an-crumbrow{ min-height:46px; } }
 /* Den statiske forhåndsvisning har sin synlige titel (.listing-title) nede ved galleriet; den øverste h1 ligger i DOM'en for
    crawlere og skærmlæsere, men fylder ingen højde, før JS har lagt den ind i midterkolonnen. Så starter .listing-detail på
-   samme y før og efter hydrering. (:has(.prerender-gallery) findes kun i de statiske sider og forsvinder ved hydrering.) */
-.container:has(.prerender-gallery) > #listing-h1{
+   samme y før og efter hydrering. W7-5: gælder nu ALLE statiske sider, også dem uden forhåndsvist galleri (Harley FLHX: 37 px
+   forskydning ved 1440, 74 px ved 320 = CLS 0,07 ved sen hydrering). Selektoren er "h1 som direkte barn af containeren":
+   JS lægger den ind i midterkolonnen ved hydrering, og så holder reglen op med at gælde. */
+.container > #listing-h1{
   position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap;
 }
 .an-crumbrow .breadcrumb{ min-width:0; flex:1 1 320px; }
