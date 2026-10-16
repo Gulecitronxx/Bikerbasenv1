@@ -9,6 +9,10 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 
+/* Fejl ved hentning af annoncer: koden SEO_HENT får scripts/build.js til at behandle den fail-soft
+   (bevar de committede sider, fortsæt og udgiv resten med en advarsel) i stedet for at låse udgivelsen. */
+const hentFejl = m => Object.assign(new Error(m), { code: 'SEO_HENT' });
+
 function siteUrl(){
   return require('./site-url')(ROOT);
 }
@@ -41,7 +45,7 @@ async function fetchListings(fallback = [], opts = {}){
   const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1];
   const key = (cfg.match(/anonKey:\s*'([^']+)'/) || [])[1];
   if (!url || !key){
-    if (opts.kraevDatabase) throw new Error('Ingen Supabase-konfiguration — egne annoncer kan ikke hentes. Build afbrudt, '
+    if (opts.kraevDatabase) throw hentFejl('Ingen Supabase-konfiguration — egne annoncer kan ikke hentes. Build afbrudt, '
       + 'så der ikke slettes annoncesider (S-005).');
     console.warn('Ingen Supabase-konfiguration — bruger annoncer fra js/data.js.');
     return fallback;
@@ -66,7 +70,7 @@ async function fetchListings(fallback = [], opts = {}){
        egne annoncesider og deres sitemap-poster uden at buildet fejlede. Trin der
        skriver (listing-, brand- og facet-generatoren) beder derfor om
        kraevDatabase og får en klar fejl i stedet. */
-    if (opts.kraevDatabase) throw new Error('Kunne ikke hente egne annoncer fra databasen (' + e.message + '). '
+    if (opts.kraevDatabase) throw hentFejl('Kunne ikke hente egne annoncer fra databasen (' + e.message + '). '
       + 'Build afbrudt frem for at slette annoncesider og sitemap-poster på et tomt grundlag (S-005).');
     console.warn('Kunne ikke hente fra databasen (' + e.message + ') — bruger js/data.js.');
     return fallback;
@@ -105,7 +109,7 @@ async function fetchExternalListings(){
   const url = (cfg.match(/url:\s*'([^']+)'/) || [])[1];
   const key = (cfg.match(/anonKey:\s*'([^']+)'/) || [])[1];
   if (!url || !key){
-    throw new Error('Ingen Supabase-konfiguration — de indekserede annoncer kan ikke hentes, '
+    throw hentFejl('Ingen Supabase-konfiguration — de indekserede annoncer kan ikke hentes, '
       + 'og et maerkeindeks bygget uden dem ville vaere tomt. Build afbrudt.');
   }
   // Samme raekkefoelge som klienten (js/backend-bridge.js loadExternalListings):
@@ -124,7 +128,7 @@ async function fetchExternalListings(){
       + `&status=eq.aktiv&order=sidst_set.desc,id.asc&limit=${SIDE}&offset=${fra}`,
       { headers: { apikey: key } });
     if (!r.ok){
-      throw new Error(`Kunne ikke hente eksterne_annoncer (HTTP ${r.status}: ${await r.text()}). `
+      throw hentFejl(`Kunne ikke hente eksterne_annoncer (HTTP ${r.status}: ${await r.text()}). `
         + 'Build afbrudt frem for at skrive et sitemap uden annoncer.');
     }
     const side = await r.json();

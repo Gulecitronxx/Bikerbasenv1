@@ -27,29 +27,45 @@ const path = require('path');
 const crypto = require('crypto');
 
 const MIN_ANDEL = 0.5;
+/* Absolut gulv: sammenlignes baseline under dette tal, giver små tal (0 af 2, 1 af 3) ingen
+   mening som "drastisk fald" — to egne annoncer, der sælges, må ikke kunne låse en deploy. */
+const GULV = 20;
+/* Hele eksterne lageret og de egne annoncer skal holde 70 %; en enkelt kilde 50 % (en kilde
+   kan lovligt flytte sig meget, men en kilde, der pludselig mangler, er en delvis hentning). */
+const MIN_ANDEL_KATEGORI = 0.7;
+/* Exit-kode, generatorerne bruger ved et fald/en fejlet hentning, så scripts/build.js kan bevare de
+   committede sider og fortsætte (fail-soft) i stedet for at låse hele udgivelsen. */
+const EXIT_FALD = 3;
 const LEDGER_FIL = 'sitemap-lastmod.json';
 
 /* ---------- Fail-safe antal ---------- */
 
 /* Er `nu` rimeligt i forhold til `forrige`? forrige ukendt eller 0 => ja (første
    byg, eller der var intet at miste). Lig med grænsen er stadig ok. */
-function vurderAntal(navn, nu, forrige, minAndel = MIN_ANDEL){
+function vurderAntal(navn, nu, forrige, minAndel = MIN_ANDEL, nulErFejl = false){
   const n = Number(nu), f = Number(forrige);
+  if (nulErFejl && n === 0 && f > 0){
+    return { ok: false, nu: n, forrige: f, besked: `${navn}: 0 nu mod ${f} sidst. Nul er signaturen på en tom/fejlet hentning, så der slettes ingen sider — `
+      + 'dette byggetrin afbrudt. I CI (scripts/build.js) beholdes de committede sider, og resten udgives med en advarsel. '
+      + 'Er alle annoncer bevidst fjernet, er der to udveje: kør lokalt med BB_TILLAD_FALD=1, eller start workflowet "Byg og udgiv" manuelt med tillad_fald = true.' };
+  }
   if (!Number.isFinite(n) || n < 0) return { ok: false, nu: n, forrige: f, besked: `${navn}: ugyldigt antal (${nu}).` };
-  if (!Number.isFinite(f) || f <= 0) return { ok: true, nu: n, forrige: f, besked: '' };
+  if (!Number.isFinite(f) || f < GULV) return { ok: true, nu: n, forrige: f, besked: '' };
   if (n >= f * minAndel) return { ok: true, nu: n, forrige: f, besked: '' };
   return {
     ok: false, nu: n, forrige: f,
     besked: `${navn}: kun ${n} nu mod ${f} sidst (under ${Math.round(minAndel * 100)} %). `
-      + 'Det ligner en fejlet eller tom hentning, ikke en rigtig ændring — build afbrudt, før der slettes '
-      + 'eller overskrives noget. Er faldet bevidst (fx alle annoncer er solgt), kør igen med BB_TILLAD_FALD=1.',
+      + 'Det ligner en fejlet eller tom hentning, ikke en rigtig ændring — dette byggetrin afbrudt, før der slettes '
+      + 'eller overskrives noget. I CI (scripts/build.js) beholdes de committede sider, og resten udgives med en '
+      + 'advarsel. Er faldet bevidst (fx en kilde er fravalgt, regel 5), er der to udveje: kør lokalt med '
+      + 'BB_TILLAD_FALD=1, eller start workflowet "Byg og udgiv" manuelt med tillad_fald = true.',
   };
 }
 
 /* Kaster ved et drastisk fald. BB_TILLAD_FALD=1 er den eneste vej udenom, og den
    skal vælges bevidst; faldet logges stadig. */
 function tjekAntal(navn, nu, forrige, opts = {}){
-  const v = vurderAntal(navn, nu, forrige, opts.minAndel);
+  const v = vurderAntal(navn, nu, forrige, opts.minAndel, opts.nulErFejl);
   if (v.ok) return v;
   const tillad = opts.tillad !== undefined ? opts.tillad : process.env.BB_TILLAD_FALD === '1';
   if (tillad){
@@ -59,6 +75,53 @@ function tjekAntal(navn, nu, forrige, opts = {}){
   const e = new Error(v.besked);
   e.code = 'SEO_FALD';
   throw e;
+}
+
+/* Kilder, YAML'en selv har sat til aktiv: false (opt-out, CLAUDE.md regel 5), tæller ikke med i
+   baseline: en bevidst fravalgt kilde må ikke blive et "fald" der blokerer. Kun YAML læses; flaget
+   i databasen (kilder.aktiv) kan byggekæden ikke se, så et fravalg DER skal også stå i YAML'en
+   (eller udgivelsen startes med tillad_fald). Ren funktion: tager filtekster. */
+function inaktiveDomaener(yamlTekster){
+  const ud = new Set();
+  for (const t of yamlTekster){
+    const dom = (String(t).match(/^domaene:\s*['"]?([^\s'"#]+)/m) || [])[1];
+    const aktiv = (String(t).match(/^aktiv:\s*(\S+)/m) || [])[1];
+    if (dom && aktiv === 'false') ud.add(dom);
+  }
+  return ud;
+}
+function laesInaktiveDomaener(root){
+  const dir = path.join(root, 'sources');
+  try {
+    return inaktiveDomaener(fs.readdirSync(dir).filter(f => /\.ya?ml$/.test(f)).map(f => fs.readFileSync(path.join(dir, f), 'utf8')));
+  } catch { return new Set(); }
+}
+
+/* Antal pr. kilde-domæne (kun indekserede annoncer har en kilde). */
+function taelPrKilde(items){
+  const m = {};
+  for (const l of items){ const d = l.source && l.source.domaene; if (d) m[d] = (m[d] || 0) + 1; }
+  return m;
+}
+
+/* Tjekker hver kategori for sig: egne, eksterne i alt, og hver kilde. Kilder i `inaktive` er
+   trukket ud af baseline. Kaster ved første fald (via tjekAntal). */
+function tjekLager({ egne, eksterne, perKilde, baseline, inaktive = new Set(), egneSider }){
+  tjekAntal('Egne annoncer', egne, egneSider, { minAndel: MIN_ANDEL_KATEGORI });
+  const bKilder = baseline.perKilde || {};
+  const fravalgt = Object.entries(bKilder).filter(([d]) => inaktive.has(d)).reduce((s, [, n]) => s + n, 0);
+  tjekAntal('Indekserede annoncer', eksterne, (baseline.eksterne || 0) - fravalgt, { minAndel: MIN_ANDEL_KATEGORI });
+  for (const [d, n] of Object.entries(bKilder)){
+    if (inaktive.has(d)) continue;
+    tjekAntal(`Kilde ${d}`, (perKilde || {})[d] || 0, n);
+  }
+}
+
+/* Skal fejlen behandles fail-soft (bevar committede sider, fortsæt)? */
+const erFaldFejl = e => !!e && (e.code === 'SEO_FALD' || e.code === 'SEO_HENT');
+function afslut(e){
+  console.error(e.message);
+  process.exit(erFaldFejl(e) ? EXIT_FALD : 1);
 }
 
 function taelFiler(root, re){
@@ -181,6 +244,6 @@ function sideFakta(html){
 }
 
 module.exports = {
-  MIN_ANDEL, LEDGER_FIL, vurderAntal, tjekAntal, taelAnnonceSider, taelMaerkeSider, taelSitemapUrls,
+  MIN_ANDEL, MIN_ANDEL_KATEGORI, GULV, EXIT_FALD, LEDGER_FIL, inaktiveDomaener, laesInaktiveDomaener, taelPrKilde, tjekLager, erFaldFejl, afslut, vurderAntal, tjekAntal, taelAnnonceSider, taelMaerkeSider, taelSitemapUrls,
   laesLedger, skrivLedger, indholdsHash, lastmodFor, genberegnLastmod, urlLinje, renDato, sideFakta, taelSitemapUrls,
 };

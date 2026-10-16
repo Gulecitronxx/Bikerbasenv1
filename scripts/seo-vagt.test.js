@@ -18,9 +18,89 @@ test('vurderAntal: faldet under halvdelen af det sidst kendte gode er ikke ok', 
   assert.strictEqual(V.vurderAntal('Egne', 100, 100).ok, true);
   assert.strictEqual(V.vurderAntal('Egne', 50, 100).ok, true, 'præcis 50 % er stadig ok');
   assert.strictEqual(V.vurderAntal('Egne', 49, 100).ok, false);
-  assert.strictEqual(V.vurderAntal('Egne', 0, 2).ok, false, 'to annoncer -> nul er en tom hentning');
-  assert.strictEqual(V.vurderAntal('Egne', 1, 2).ok, true);
   assert.match(V.vurderAntal('Egne', 0, 300).besked, /Egne: kun 0 nu mod 300/);
+  assert.match(V.vurderAntal('Egne', 0, 300).besked, /CI/, 'beskeden nævner CI');
+  assert.match(V.vurderAntal('Egne', 0, 300).besked, /BB_TILLAD_FALD=1/);
+  assert.match(V.vurderAntal('Egne', 0, 300).besked, /tillad_fald/, 'og workflow-inputtet');
+});
+
+test('vurderAntal: absolut gulv — små tal sammenlignes ikke (P1-1: to annoncer må ikke låse en deploy)', () => {
+  assert.strictEqual(V.GULV, 20);
+  for (const [nu, f] of [[0, 1], [0, 2], [1, 3], [2, 5], [0, 19]]) assert.strictEqual(V.vurderAntal('x', nu, f).ok, true, `${nu} af ${f}`);
+  assert.strictEqual(V.vurderAntal('x', 9, 20).ok, false, 'fra gulvet og op gælder reglen');
+  assert.strictEqual(V.vurderAntal('x', 10, 20).ok, true);
+});
+
+test('vurderAntal: nulErFejl — 0 med committede sider er en tom hentning, uanset gulvet', () => {
+  assert.strictEqual(V.vurderAntal('Egne', 0, 2, 0.5, true).ok, false);
+  assert.strictEqual(V.vurderAntal('Egne', 1, 2, 0.5, true).ok, true);
+  assert.strictEqual(V.vurderAntal('Egne', 0, 0, 0.5, true).ok, true, 'intet at miste');
+  assert.match(V.vurderAntal('Egne', 0, 2, 0.5, true).besked, /tillad_fald/);
+});
+
+test('vurderAntal: eget minAndel (70 % for kategorier)', () => {
+  assert.strictEqual(V.vurderAntal('x', 69, 100, V.MIN_ANDEL_KATEGORI).ok, false);
+  assert.strictEqual(V.vurderAntal('x', 70, 100, V.MIN_ANDEL_KATEGORI).ok, true);
+  assert.strictEqual(V.vurderAntal('x', 60, 100).ok, true, 'standarden er stadig 50 %');
+});
+
+test('inaktiveDomaener: kilder med aktiv: false i YAML er opt-out og læses kun', () => {
+  const y1 = "navn: A\ndomaene: guloggratis.dk\naktiv: false   # fravalgt\n";
+  const y2 = "navn: B\ndomaene: 'mcsyd.dk'\naktiv: true\n";
+  const y3 = "navn: C\ndomaene: x.dk\n";
+  const s = V.inaktiveDomaener([y1, y2, y3]);
+  assert.deepStrictEqual([...s], ['guloggratis.dk']);
+  assert.strictEqual(V.laesInaktiveDomaener(path.join(os.tmpdir(), 'findes-ikke-' + Date.now())).size, 0);
+  assert.ok(V.laesInaktiveDomaener(path.join(__dirname, '..')) instanceof Set, 'kan læse repoets egne sources/');
+});
+
+test('tjekLager: kategorier og kilder tjekkes hver for sig, opt-out-kilder trækkes ud af baseline', () => {
+  const baseline = { eksterne: 600, perKilde: { 'a.dk': 400, 'b.dk': 200 } };
+  const ok = { egne: 30, eksterne: 600, perKilde: { 'a.dk': 400, 'b.dk': 200 }, baseline, egneSider: 30 };
+  assert.doesNotThrow(() => V.tjekLager(ok));
+  // 60 % delvis hentning: passerede før, fanges nu (70 % pr. kategori)
+  assert.throws(() => V.tjekLager({ ...ok, eksterne: 360, perKilde: { 'a.dk': 240, 'b.dk': 120 } }), e => e.code === 'SEO_FALD');
+  // én kilde mangler helt, selvom totalen holder 70 %
+  assert.throws(() => V.tjekLager({ ...ok, eksterne: 490, perKilde: { 'a.dk': 400, 'b.dk': 90 } }), /Kilde b\.dk/);
+  // b.dk er fravalgt i YAML: den mangler uden at det er et fald, og baseline for totalen mindskes
+  assert.doesNotThrow(() => V.tjekLager({ ...ok, eksterne: 400, perKilde: { 'a.dk': 400 }, inaktive: new Set(['b.dk']) }));
+  // egne annoncer under gulvet røres ikke
+  assert.doesNotThrow(() => V.tjekLager({ ...ok, egne: 0, egneSider: 2 }));
+  assert.throws(() => V.tjekLager({ ...ok, egne: 5, egneSider: 30 }), /Egne annoncer/);
+});
+
+test('erFaldFejl/afslut: fejlkoderne SEO_FALD og SEO_HENT giver exit 3 (fail-soft), alt andet 1', () => {
+  assert.strictEqual(V.EXIT_FALD, 3);
+  assert.strictEqual(V.erFaldFejl(Object.assign(new Error('x'), { code: 'SEO_FALD' })), true);
+  assert.strictEqual(V.erFaldFejl(Object.assign(new Error('x'), { code: 'SEO_HENT' })), true);
+  assert.strictEqual(V.erFaldFejl(new Error('x')), false);
+  assert.strictEqual(V.erFaldFejl(null), false);
+});
+
+test('build.js: et datatrin med exit 3 beholder de committede sider og fortsætter; andre fejl stopper (simuleret)', () => {
+  const { spawnSync } = require('child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'build-failsoft-'));
+  try {
+    fs.mkdirSync(path.join(dir, 'scripts'));
+    for (const f of ['build.js', 'seo-vagt.js']) fs.copyFileSync(path.join(__dirname, f), path.join(dir, 'scripts', f));
+    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
+    const lav = (kode) => { for (const t of trin) fs.writeFileSync(path.join(dir, 'scripts', t), `require('fs').appendFileSync(${JSON.stringify(path.join(dir, 'log.txt'))}, ${JSON.stringify(t)} + '\\n'); process.exit(${t === 'build-brand-pages.js' ? kode : 0});`); };
+    lav(3);
+    let r = spawnSync('node', [path.join(dir, 'scripts', 'build.js')], { encoding: 'utf8', env: { ...process.env, BB_TILLAD_FALD: '' } });
+    assert.strictEqual(r.status, 0, 'fail-soft: buildet fuldføres');
+    assert.deepStrictEqual(fs.readFileSync(path.join(dir, 'log.txt'), 'utf8').trim().split('\n'), trin.filter(t => t !== 'build-srp.js'),
+      'alle trin kører efter faldet — på nær build-srp, som ville skrive et tomt gitter ind');
+    assert.match(r.stdout, /build-srp\.js sprunget over/);
+    assert.match(r.stdout, /::warning title=SEO-vagt::build-brand-pages\.js afbrudt/);
+    assert.match(r.stdout, /SEO_FALD-MARKØR/);
+    assert.match(r.stdout, /tillad_fald/);
+    assert.ok(!/Byg færdig\.\n/.test(r.stdout), 'ikke en ren "Byg færdig"');
+    fs.unlinkSync(path.join(dir, 'log.txt'));
+    lav(1);
+    r = spawnSync('node', [path.join(dir, 'scripts', 'build.js')], { encoding: 'utf8' });
+    assert.strictEqual(r.status, 1, 'en almindelig fejl stopper stadig');
+    assert.deepStrictEqual(fs.readFileSync(path.join(dir, 'log.txt'), 'utf8').trim().split('\n'), trin.slice(0, 2));
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('vurderAntal: første byg og vækst giver aldrig falsk alarm', () => {
@@ -33,7 +113,7 @@ test('vurderAntal: første byg og vækst giver aldrig falsk alarm', () => {
 });
 
 test('tjekAntal: kaster med klar besked, og BB_TILLAD_FALD er den eneste vej udenom', () => {
-  assert.throws(() => V.tjekAntal('Mærkesider', 3, 25, { tillad: false }), e => e.code === 'SEO_FALD' && /build afbrudt/.test(e.message) && /BB_TILLAD_FALD=1/.test(e.message));
+  assert.throws(() => V.tjekAntal('Mærkesider', 3, 25, { tillad: false }), e => e.code === 'SEO_FALD' && /afbrudt/.test(e.message) && /BB_TILLAD_FALD=1/.test(e.message));
   assert.doesNotThrow(() => V.tjekAntal('Mærkesider', 20, 25, { tillad: false }));
   const advarsler = [];
   const orig = console.warn; console.warn = m => advarsler.push(m);

@@ -302,7 +302,9 @@ ${contactModal}
      tomme liste, og tjekAntal() nedenfor stopper et drastisk fald (< 50 % af de
      committede annonce-*.html) FØR en eneste fil slettes. */
   const listings = await fetchListings(global.__L, { kraevDatabase: true });
-  tjekAntal('Egne annoncesider', listings.length, taelAnnonceSider(ROOT));
+  // nulErFejl: 0 egne annoncer med committede sider er signaturen på en tom hentning (gulvet på 20 gælder
+  // ellers ikke for så få sider) — så slettes intet.
+  tjekAntal('Egne annoncesider', listings.length, taelAnnonceSider(ROOT), { nulErFejl: true });
 
   const forventede = new Set(listings.map(listingSlug));
   let slettet = 0;
@@ -320,4 +322,4 @@ ${contactModal}
     bygget++;
   }
   console.log(`Byggede ${bygget} annoncesider.`);
-})().catch(e => { console.error(e.message); process.exit(1); });
+})().catch(e => require('./seo-vagt').afslut(e));
