@@ -1,0 +1,29 @@
+# Bikerbasen
+
+> Bikerbasen er en dansk side for brugte motorcykler. Her samles annoncer fra danske forhandlere og markedspladser på ét sted, så man kan søge på tværs af dem. Kilden står på hvert annoncekort, og kortet linker videre til den oprindelige annonce.
+
+Bikerbasen hoster ikke de indekserede annoncer: titel, pris, nøgletal og ét billede vises, og købet sker hos kilden. Oplysninger, vi ikke har, vises som ikke oplyst og gættes aldrig. Antal og priser på annoncer skifter løbende og står derfor ikke her; se søgningen for det aktuelle udvalg.
+
+## Find motorcykler
+
+- [Søg motorcykler til salg](https://bikerbasen.dk/soegning.html): Søgning på mærke, model, pris, årgang, kilometer og kørekort (A1, A2, A).
+- [Alle mærker](https://bikerbasen.dk/maerker.html): Oversigt over de motorcykelmærker, der har annoncer.
+
+## Guides
+
+- [Alle guides](https://bikerbasen.dk/guides.html): Redaktionelle guides med kilder.
+- [Din første motorcykel](https://bikerbasen.dk/guide-foerste-motorcykel.html): Hvordan man vælger type og tjekker, hvad kørekortet giver ret til.
+- [A2-kørekort](https://bikerbasen.dk/guide-a2-koerekort.html): Regler, alder og krav for A2.
+- [Køb brugt motorcykel](https://bikerbasen.dk/guide-brugt-motorcykel.html): Tjekliste til køb af en brugt motorcykel.
+
+## Om Bikerbasen
+
+- [Om Bikerbasen](https://bikerbasen.dk/om-bikerbasen.html): Hvem vi er, og hvordan siden virker.
+- [Om vores indeksering](https://bikerbasen.dk/om-indeksering.html): Hvordan vi henter og viser annoncer fra andre sider, og hvordan en kilde fravælger det.
+- [Privatlivspolitik](https://bikerbasen.dk/privatlivspolitik.html): Behandling af personoplysninger.
+- [Vilkår](https://bikerbasen.dk/vilkaar.html): Brugsvilkår.
+
+## Teknisk
+
+- [Sitemap](https://bikerbasen.dk/sitemap.xml): alle sider, der kan indekseres.
+- Kontakt: kontakt@bikerbasen.dk

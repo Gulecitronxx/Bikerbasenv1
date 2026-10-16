@@ -44,7 +44,7 @@ const fs = require('fs');
 const path = require('path');
 const { EXIT_FALD } = require('./seo-vagt');
 
-const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
+const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'build-llms.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
 
 /* FAIL-SOFT for datatrinnene (S-005, blind Critic P1-1).
    De tre generatorer, der HENTER annoncer og kan slette sider, afslutter med EXIT_FALD (3), hvis
