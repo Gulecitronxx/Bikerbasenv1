@@ -88,9 +88,12 @@ test('W7-5: statisk annonceside — øverste h1 hverken fylder eller flytter nog
   assert.ok(!/:has\(\.prerender-gallery\) > #listing-h1/.test(ANNONCE), 'reglen må ikke kræve galleri');
 });
 
-test('W7-5: Favoritter i headeren er skjult fra første maling, når tælleren står på 0 (ingen 120 px spring ved hydrering)', () => {
-  assert.match(STYLES, /\.header-actions \.header-fav:has\(\.fav-count\[data-count="0"\]\)\{ display:none; \}/);
-  /* markuppen i de statiske sider står med data-count="0", så reglen virker uden JS */
+test('W9 (afløser W7-5-reglen): Favoritter står altid i desktopheaderen, så der intet er at skjule/vise ved hydrering (ingen CLS), og kun tælleren er skjult ved 0', () => {
+  /* Bevidst ændring: billede 1 viser Favoritter i headeren uanset antal. W7 løste CLS ved at skjule linjen; W9 løser det ved at vise den fra første maling. */
+  assert.ok(!/\.header-fav:has\(\.fav-count\[data-count="0"\]\)\{ display:none; \}/.test(STYLES), 'linjen må ikke skjules ved 0');
+  assert.match(STYLES, /\.fav-count\[data-count="0"\]\{ display:none; \}/);
+  const komp = fs.readFileSync(path.join(__dirname, 'components.js'), 'utf8');
+  assert.match(komp, /classList\.contains\('header-fav'\)/);
   const side = fs.readFileSync(path.join(__dirname, '..', 'annonce-harley-davidson-flhx-2007-541ad405.html'), 'utf8');
   assert.match(side, /class="fav-count" data-fav-count data-count="0"/);
 });

@@ -452,11 +452,9 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .header-fav:hover, .header-login:hover{ background: var(--color-surface-2); }
 .header-fav svg, .header-login svg{ width:20px; height:20px; flex:none; }
 .header-fav .fav-count{ position:static; }
-/* W7-5: indgangen til gemte annoncer vises kun, når der ER noget gemt (js/components.js: updateFavCount sætter a.hidden). Markuppen
-   står dog synlig i HTML'en med data-count="0", og på annoncesider, der hydrerer sent, blev linjen først skjult ved hydrering:
-   header-actions sprang 120 px (CLS-kilde). Nu er den skjult fra første maling, så længe tælleren står på 0. Højrejusteringen
-   (margin-left:auto) gør, at et tilkommet led ikke flytter de andre. */
-.header-actions .header-fav:has(.fav-count[data-count="0"]){ display:none; }
+/* W9: "Favoritter" står altid i desktopheaderen (som billede 1). Før blev linjen skjult ved 0 og dukkede op ved hydrering
+   (W7-5: CLS). Nu er den der fra første maling; kun tælleren (.fav-count) tegnes først ved > 0, og den står til højre i
+   linjen — højrejusteringen (margin-left:auto) betyder, at intet andet led flytter sig. */
 .header-cta{ display:none; }
 
 .icon-btn{
@@ -700,6 +698,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .sk-ico svg{ width:20px; height:20px; }
 .sk-antal{ margin:0; text-align:center; font-size:13px; line-height:1.3; color: var(--color-fg-muted); min-height:1.3em; }
 .sk-antal b{ color: var(--color-fg); font-weight:600; }
+/* W9: friskhedsangivelsen er sekundær: egen, mindre linje, så antallet står rent som på billedet og kortet ikke får død luft. */
+.sk-antal .sk-frisk{ display:block; margin-top:2px; font-size:11px; line-height:1.3; text-wrap:balance; }
 
 /* Kørekortvælgeren — vores strukturelle fordel, i selve søgekortet. Rigtige radioknapper, så piletaster,
    formularnulstilling og skærmlæser virker af sig selv; pillerne er kun labels ovenpå. Inputtet skjules
@@ -941,7 +941,9 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   background: var(--color-primary); color: var(--color-on-primary);
   font-family: var(--font-display); font-weight:700; font-size:13px; line-height:1;
 }
-.saadan-ico{ grid-column:1; grid-row:1; display:inline-flex; width:34px; height:34px; margin:8px 0 0 10px; color: var(--color-fg); }
+/* W9: nummer og ikon stod oven i hinanden. Nu: nummer øverst, ikon under, teksten til højre over begge rækker. */
+.saadan-ico{ grid-column:1; grid-row:2; display:inline-flex; width:34px; height:34px; margin:6px 0 0 0; color: var(--color-fg); }
+.saadan-trin-punkt > div{ grid-column:2; grid-row:1 / span 2; }
 .saadan-ico svg{ width:34px; height:34px; stroke-width:1.5; }
 .saadan-trin-punkt strong{ display:block; font-family: var(--font-display); font-size:14.5px; line-height:1.25; }
 .saadan-trin-punkt div span{ display:block; margin-top:3px; font-size:12.5px; line-height:1.4; color: var(--color-fg-muted); }
@@ -3836,6 +3838,27 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   cursor: pointer;
 }
 .data-afbrud-igen:hover{ background: var(--color-surface); }
+
+/* ============ W9: ærlig tom/fejlet forside (body.lager-tomt, sat af js/home.js når lageret er tomt) ============
+   Ingen tal, ingen tomme overskrifter. Sælg-panelet bliver et kompakt bånd, og de to tilbageværende kolonner deler pladsen. */
+.tre-kol:has(> .kol[hidden]){ grid-template-columns: minmax(0,1fr); }
+@media (min-width:1100px){ .tre-kol:has(> .kol[hidden]){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+/* W9 P3: modigere forside-h1 på desktop (billede 1 har en stor overskrift); kun forsiden, kun >= 1100 px, ingen nye assets. */
+@media (min-width:1100px){ body.home .hero h1{ font-size: clamp(54px, 4.3vw, 62px); max-width: none; } }
+
+/* Fejlbanneret (.data-afbrud) indsættes øverst i <main> af js/backend-bridge.js. På forsiden flytter js/home.js det derfra, og indtil
+   da vises det ikke (ellers skubber det hele siden ned før flytningen: CLS).
+   Tomt/fejlet lager: banneret flyttes IND i annoncerækkens pladsholder (.kort-raekke har allerede min-height 330/360 px fra første
+   maling, før lageret har svaret), så siden ikke flytter sig, når svaret kommer: pladsen er reserveret af skelettet, ikke af en
+   ekstra blok. Sælg-panelet og alt andet står som før. Titlen over rækken skjules med visibility, så dens højde bevares. */
+body.home .data-afbrud{ display:none; }
+body.home .hero-sok ~ .data-afbrud{ display:block; margin: var(--space-4) auto 0; max-width: calc(var(--site-w) - 2 * var(--gutter)); width: calc(100% - 2 * var(--gutter)); }
+body.home .kort-raekke > .data-afbrud{ display:block; flex:1 1 100%; grid-column:1 / -1; align-self:start; margin:0; }
+.lager-tomt .kort-raekke{ min-height:330px; align-items:start; }
+@media (min-width:768px){ .lager-tomt .kort-raekke{ min-height:360px; } }
+.lager-tomt .udvalg-hoved .sek-hoved{ visibility:hidden; }
+.tre-kol:has(> .kol[hidden]){ grid-template-columns: minmax(0,1fr); }
+@media (min-width:1100px){ .tre-kol:has(> .kol[hidden]){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
 
 /* ===== forhandler-vaerktoej ===== */
 /* dashboard.html/js/dashboard.js: kontostatus, kom-godt-i-gang, og

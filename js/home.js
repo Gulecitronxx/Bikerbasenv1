@@ -161,7 +161,7 @@ async function buildForside(){
     /* F-003: ærlig alder på det viste. Nyeste sidst_set blandt de annoncer, tallet gælder. */
     const frisk = dataKlar && n ? senesteBekraeftet(list) : null;
     const friskTekst = frisk
-      ? ` <span class="sk-frisk" title="${frisk.aeldsteTekst === frisk.datoTekst ? '' : 'Ældste bekræftelse: ' + frisk.aeldsteTekst}">· ${frisk.samlet}</span>`
+      ? ` <span class="sk-frisk" title="${frisk.aeldsteTekst === frisk.datoTekst ? '' : 'Ældste bekræftelse: ' + frisk.aeldsteTekst}">${frisk.samlet}</span>`
       : '';
     if (!dataKlar){
       countHint.textContent = '';
@@ -243,6 +243,20 @@ async function buildForside(){
   dataKlar = true;                       // først NU må forsiden nævne et antal
   opdaterHero();                         // nu med de rigtige tal fra databasen
 
+  /* W9: tomt eller fejlet lager. Så findes der intet at tælle: ingen "0 annoncer" på fliser, kolonner eller
+     hero, ingen tom typeoverskrift. Fejlbanneret (js/backend-bridge.js, #data-afbrud) lå øverst i <main> og
+     skubbede hele siden ned (CLS 0,16-0,18 på 390): det (klassen .data-afbrud, indsat af backend-bridge) flyttes under tillidsrækken i samme billede. */
+  const tomtLager = ALLE.length === 0;
+  document.body.classList.toggle('lager-tomt', tomtLager);
+  const afbrud = document.querySelector('.data-afbrud');
+  const heroSok = document.querySelector('.hero-sok');
+  if (afbrud){
+    /* Tomt lager: ind i annoncerækkens reserverede plads (ingen flytning af indhold). Ellers under søgekortet. */
+    const slot = document.getElementById('udvalg-kort');
+    if (tomtLager && slot) slot.append(afbrud);
+    else if (heroSok) heroSok.after(afbrud);
+  }
+
   const harFoto = (l) => (l.photoUrls || []).length > 0;
   const harModel = (l) => {
     const m = String(l.model || '').trim();
@@ -270,6 +284,8 @@ async function buildForside(){
      siger de uoplyste højt: 48 af 383 annoncer har ingen type hos kilden, og vi gætter den ikke
      (typeFraTitel() i js/backend-bridge.js holder op, når kildens kategoriord mangler). */
   const fyldTypeAntal = () => {
+    const typerSektion = tilesMount.closest('.typer');
+    if (typerSektion) typerSektion.hidden = ALLE.length === 0;
     let udenType = 0;
     for (const l of ALLE) if (l.type == null) udenType++;
     tilesMount.querySelectorAll('.tile-count').forEach(el => {
@@ -345,7 +361,7 @@ async function buildForside(){
        viser dem med OPLYST effekt over A2-grænsen — to forskellige tal bag samme flise. */
     if (side && id !== 'A') a.setAttribute('href', side);
     const n = Filtrering.anvendFiltre(ALLE, { koerekort: id }, null, null).length;
-    a.querySelector('[data-antal]').textContent = `${daTal(n)} ${n === 1 ? 'annonce' : 'annoncer'}`;
+    a.querySelector('[data-antal]').textContent = tomtLager ? '' : `${daTal(n)} ${n === 1 ? 'annonce' : 'annoncer'}`;
   });
   /* Regioner: fast landsdelsside, hvis den findes, ellers søgningen med regionsfilter. */
   document.querySelectorAll('.tal-grid a[data-region]').forEach(a => {
@@ -353,8 +369,12 @@ async function buildForside(){
     const side = facetSider.get(`region:${r}`);
     if (side) a.setAttribute('href', side);
     const n = Filtrering.anvendFiltre(ALLE, { regions: [r] }, null, null).length;
-    a.querySelector('[data-antal]').textContent = `${daTal(n)} ${n === 1 ? 'annonce' : 'annoncer'}`;
+    a.querySelector('[data-antal]').textContent = tomtLager ? '' : `${daTal(n)} ${n === 1 ? 'annonce' : 'annoncer'}`;
   });
+  if (tomtLager){
+    /* Kolonnerne uden tal er kun links: kørekort- og regionkolonnen beholdes (de fører til søgningen), men uden "0". */
+    document.querySelectorAll('.tre-kol .kol-note').forEach(el => { el.hidden = true; });
+  }
 
   await yieldToMain();
 
@@ -437,7 +457,7 @@ async function buildForside(){
   const saelgPanel = featuredSection && featuredSection.querySelector('.saelg-panel');
   // En overskrift uden indhold under ser i stykker ud — men sælg-panelet skal blive stående.
   const udvalgHoved = featuredMount.closest('.udvalg-hoved');
-  if (udvalgHoved) udvalgHoved.hidden = kandidater.length === 0;
+  if (udvalgHoved) udvalgHoved.hidden = kandidater.length === 0 && !tomtLager;
   if (featuredSection && kandidater.length === 0 && !saelgPanel) featuredSection.hidden = true;
 
   /* Antallet af kort følger antallet af spalter (ellers står der en enlig efternøler): målt på
