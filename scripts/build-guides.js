@@ -21,7 +21,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const { siteUrl, fetchListings, fetchExternalListings, siteParts, esc, browserModules, listingSlug } = require('./shared');
-const { GUIDES, SRC, PUBLISHED, MODIFIED } = require('./guides-data');
+const { GUIDES, SRC, PUBLISHED, MODIFIED, publiceret, aendret } = require('./guides-data');
 const BASE = siteUrl();
 
 /* Samme cleanUrl() som build-meta.js og build-facet-pages.js. */
@@ -177,7 +177,7 @@ const HERO_URL = `${BASE}/img/hero-1600.webp`;
 
 /* Samme markører som scripts/build-meta.js: kører den bagefter, erstatter den
    blokken med sin egen (og skriver da og:type "website"; se rapporten). */
-function metaBlok(file, title, description, artikel){
+function metaBlok(file, title, description, artikel, pub = PUBLISHED, mod = MODIFIED){
   const url = cleanUrl(file);
   return [
     '<!-- meta:start (genereret af scripts/build-meta.js) -->',
@@ -194,8 +194,8 @@ function metaBlok(file, title, description, artikel){
     '<meta property="og:image:width" content="1200">',
     '<meta property="og:image:height" content="630">',
     '<meta property="og:image:alt" content="Bikerbasen — motorcykler til salg i Danmark, samlet fra danske forhandlere og markedspladser">',
-    artikel ? `<meta property="article:published_time" content="${PUBLISHED}">` : null,
-    artikel ? `<meta property="article:modified_time" content="${MODIFIED}">` : null,
+    artikel ? `<meta property="article:published_time" content="${pub}">` : null,
+    artikel ? `<meta property="article:modified_time" content="${mod}">` : null,
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:title" content="${attr(title)}">`,
     `<meta name="twitter:description" content="${attr(description)}">`,
@@ -204,7 +204,7 @@ function metaBlok(file, title, description, artikel){
   ].filter(Boolean).join('\n');
 }
 
-function head({ csp, file, title, description, artikel, ld }){
+function head({ csp, file, title, description, artikel, ld, pub, mod }){
   return `<!doctype html>
 <html lang="da">
 <head>
@@ -214,7 +214,7 @@ ${csp}
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>${esc(title)} | Bikerbasen</title>
 <meta name="description" content="${attr(description)}">
-${metaBlok(file, `${title} | Bikerbasen`, description, artikel)}
+${metaBlok(file, `${title} | Bikerbasen`, description, artikel, pub, mod)}
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
@@ -261,8 +261,32 @@ function hero({ crumbs, kicker, h1, ingress, meta, lille }){
   </header>`;
 }
 
+/* ---------- Læs også ----------
+   Højst 3 andre guides, som hører til i emnet: kun guides, der findes, aldrig siden selv. Ærlige indlink
+   fra guide til guide, ikke en linkfarm. */
+const MAX_RELATEREDE = 3;
+function relateredeGuides(g){
+  const ud = [];
+  for (const slug of (g.related || [])){
+    const r = GUIDES.find(x => x.slug === slug);
+    if (r && r.slug !== g.slug && !ud.includes(r)) ud.push(r);
+  }
+  return ud.slice(0, MAX_RELATEREDE);
+}
+function relateretBlok(g){
+  const r = relateredeGuides(g);
+  if (!r.length) return '';
+  return `<section class="gd-sources gd-related" id="laes-ogsaa" aria-labelledby="laes-ogsaa-h">
+        <h2 id="laes-ogsaa-h">Læs også</h2>
+        <ul>
+          ${r.map(x => `<li><a href="${x.file}">${esc(x.navn)}</a></li>`).join('\n          ')}
+        </ul>
+      </section>`;
+}
+
 /* ---------- Guideside ---------- */
 function renderGuide(g, ctx){
+  const PUB = publiceret(g), MOD = aendret(g);
   const sektioner = g.sections.map(s => ({ ...s, html: fyldBidder(s.html) }));
   const ord = sektioner.reduce((n, s) => n + antalOrd(s.html) + antalOrd(s.title), 0);
   const min = laesetid(ord);
@@ -276,7 +300,7 @@ function renderGuide(g, ctx){
 
   const meta = `<ul class="gd-meta">
         <li class="gd-meta-by"><img src="logo-mark.png" alt="" width="44" height="44" loading="eager"><span><strong>Af Bikerbasen</strong><span>Redaktionel guide med kilder</span></span></li>
-        <li class="gd-meta-item"><span class="gd-meta-ic" aria-hidden="true">${Icon.calendar}</span><span><span class="gd-meta-label">Opdateret</span><time datetime="${MODIFIED}">${datoDa(MODIFIED)}</time></span></li>
+        <li class="gd-meta-item"><span class="gd-meta-ic" aria-hidden="true">${Icon.calendar}</span><span><span class="gd-meta-label">Opdateret</span><time datetime="${MOD}">${datoDa(MOD)}</time></span></li>
         <li class="gd-meta-item"><span class="gd-meta-ic" aria-hidden="true">${Icon.clock}</span><span><span class="gd-meta-label">Læsetid</span>${minutterTekst(min)}</span></li>
       </ul>`;
 
@@ -288,8 +312,8 @@ function renderGuide(g, ctx){
       headline: g.h1,
       description: g.description,
       inLanguage: 'da-DK',
-      datePublished: PUBLISHED,
-      dateModified: MODIFIED,
+      datePublished: PUB,
+      dateModified: MOD,
       mainEntityOfPage: { '@type': 'WebPage', '@id': cleanUrl(g.file) },
       image: [HERO_URL],
       author: { '@type': 'Organization', name: 'Bikerbasen', url: `${BASE}/` },
@@ -311,7 +335,7 @@ function renderGuide(g, ctx){
       <a class="btn btn-outline gd-dark-btn" href="koerekort-a2.html">Læs om kørekort ${Icon.arrowRight}</a>
     </section>`;
 
-  return `${head({ csp: ctx.csp, file: g.file, title: g.title, description: g.description, artikel: true, ld })}
+  return `${head({ csp: ctx.csp, file: g.file, title: g.title, description: g.description, artikel: true, ld, pub: PUB, mod: MOD })}
 <body class="gd-page">
 ${ctx.header}
 
@@ -330,12 +354,14 @@ ${ctx.header}
       <article class="gd-article">
       ${artikel}
 
+      ${relateretBlok(g)}
+
       <section class="gd-sources" id="kilder" aria-labelledby="kilder-h">
         <h2 id="kilder-h">Kilder</h2>
         <ul>
           ${kilder.map(k => `<li><a href="${esc(k.url)}" rel="noopener noreferrer">${esc(k.label)}</a></li>`).join('\n          ')}
         </ul>
-        <p class="gd-sources-note">Reglerne er læst i de officielle tekster den ${datoDa(MODIFIED)}. Regler og beløb kan ændre sig. Tjek altid den aktuelle tekst hos myndighederne, og se din motorcykels registreringsattest, før du køber. Bikerbasen er et indeks over annoncer og giver ikke juridisk rådgivning.</p>
+        <p class="gd-sources-note">Reglerne er læst i de officielle tekster den ${datoDa(MOD)}. Regler og beløb kan ændre sig. Tjek altid den aktuelle tekst hos myndighederne, og se din motorcykels registreringsattest, før du køber. Bikerbasen er et indeks over annoncer og giver ikke juridisk rådgivning.</p>
       </section>
       </article>
     </div>
@@ -356,11 +382,14 @@ ${SCRIPTS}
 `;
 }
 
+/* Oversigtssiden ændres, når en guide tilføjes eller ændres: dens lastmod er den seneste guide-dato. */
+const SENEST_AENDRET = GUIDES.map(aendret).sort().pop();
+
 /* ---------- Oversigt ---------- */
 const OVERSIGT = {
   file: 'guides.html',
   title: 'Artikler & guides om motorcykler',
-  description: 'Redaktionelle guides fra Bikerbasen: din første motorcykel, motorcykler til A2-kørekort og tjekliste til køb af brugt motorcykel. Med kilder.',
+  description: 'Redaktionelle guides fra Bikerbasen: første motorcykel, A2-kørekort, køb af brugt motorcykel, MC-forsikring og udstyr til nye motorcyklister. Med kilder.',
   h1: 'Artikler & guides',
   ingress: 'Jordnære guides til dig, der skal vælge, købe eller køre motorcykel. Reglerne er læst i officielle danske kilder, og kilderne står nederst i hver guide.',
 };
@@ -433,13 +462,14 @@ ${SCRIPTS}
 
 /* ---------- Sitemap: samme mekanisme som build-facet-pages.js ---------- */
 function udvidSitemap(filer){
+  const lastmodAf = f => { const g = GUIDES.find(x => x.file === f); return g ? aendret(g) : SENEST_AENDRET; };
   const p = path.join(ROOT, 'sitemap.xml');
   if (!fs.existsSync(p)) throw new Error('build-guides: sitemap.xml findes ikke. Kør efter build-brand-pages.js (se scripts/build.js).');
   let xml = fs.readFileSync(p, 'utf8');
   if (!/<\/urlset>/.test(xml)) throw new Error('build-guides: sitemap.xml har ikke </urlset>.');
   // Idempotent: fjern tidligere guide-linjer, før de skrives igen.
   xml = xml.split('\n').filter(l => !/<loc>[^<]*\/(guides|guide-[^<]*)<\/loc>/.test(l)).join('\n');
-  const nye = filer.map(f => `  <url><loc>${cleanUrl(f)}</loc><lastmod>${MODIFIED}</lastmod></url>`);
+  const nye = filer.map(f => `  <url><loc>${cleanUrl(f)}</loc><lastmod>${lastmodAf(f)}</lastmod></url>`);
   xml = xml.replace(/\n*<\/urlset>\s*$/, '\n' + nye.join('\n') + '\n</urlset>\n');
   fs.writeFileSync(p, xml, 'utf8');
   return nye.length;
@@ -486,4 +516,4 @@ if (require.main === module){
   })().catch(e => { console.error(e.message); process.exit(1); });
 }
 
-module.exports = { populaerModul, byg, renderGuide, renderOversigt, udvalgTilSidebjaelke, laesetid, antalOrd, guideMinutter, OVERSIGT, cleanUrl, udvidSitemap };
+module.exports = { relateredeGuides, relateretBlok, MAX_RELATEREDE, SENEST_AENDRET, populaerModul, byg, renderGuide, renderOversigt, udvalgTilSidebjaelke, laesetid, antalOrd, guideMinutter, OVERSIGT, cleanUrl, udvidSitemap };

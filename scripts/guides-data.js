@@ -67,12 +67,34 @@ const SRC = {
     label: 'Køb af brugt bil: fejl og rettigheder (forskellen på forhandler og privatkøb) — Forbrugerstyrelsen (forbrug.dk)',
     url: 'https://forbrug.dk/emner/biler/koeb-af-brugt-bil',
   },
+  finanstilsynet: {
+    label: 'Finanstilsynet — tilsyn med forsikringsselskaber (finanstilsynet.dk)',
+    url: 'https://www.finanstilsynet.dk',
+  },
+  ankenaevn: {
+    label: 'Ankenævnet for Forsikring — klager over forsikringsselskaber (ankeforsikring.dk)',
+    url: 'https://www.ankeforsikring.dk',
+  },
+  forbrugerombudsmanden: {
+    label: 'Forbrugerombudsmanden — markedsføring over for forbrugere (forbrugerombudsmanden.dk)',
+    url: 'https://www.forbrugerombudsmanden.dk',
+  },
+  faerdselsstyrelsen: {
+    label: 'Færdselsstyrelsen — regler for færdsel og køretøjer (fstyr.dk)',
+    url: 'https://fstyr.dk',
+  },
+  sikkertrafik: {
+    label: 'Rådet for Sikker Trafik — råd om sikkerhed og udstyr (sikkertrafik.dk)',
+    url: 'https://www.sikkertrafik.dk',
+  },
   brugtevarer: {
     label: 'Brugte varer generelt — Forbrugerstyrelsen (forbrug.dk)',
     url: 'https://forbrug.dk/emner/nye-og-brugte-varer/brugte-varer-generelt',
   },
 };
 
+/* Standarddatoer for de tre første guides. En guide kan have egne `published`/`modified` (de to nyeste har).
+   Datoerne er dagen, teksten faktisk blev skrevet eller rettet — aldrig tilbagedateret. */
 const PUBLISHED = '2026-10-15';
 const MODIFIED = '2026-10-15';
 
@@ -81,6 +103,7 @@ const GUIDES = [
   {
     file: 'guide-foerste-motorcykel.html',
     slug: 'guide-foerste-motorcykel',
+    related: ['guide-brugt-motorcykel', 'guide-mc-forsikring', 'guide-mc-udstyr'],
     navn: 'Sådan vælger du din første motorcykel',
     h1: 'Sådan vælger du din første motorcykel',
     title: 'Sådan vælger du din første motorcykel',
@@ -184,6 +207,7 @@ const GUIDES = [
   {
     file: 'guide-a2-koerekort.html',
     slug: 'guide-a2-koerekort',
+    related: ['guide-foerste-motorcykel', 'guide-brugt-motorcykel'],
     /* T-001: guiden har informationsintention. "Motorcykler til A2-kørekort" er den kommercielle side
        (koerekort-a2.html); begge sider konkurrerede om samme søgning med næsten ens title og H1.
        Én tekst i title, H1, breadcrumb, oversigtskort og Article-headline. */
@@ -294,6 +318,7 @@ const GUIDES = [
   {
     file: 'guide-brugt-motorcykel.html',
     slug: 'guide-brugt-motorcykel',
+    related: ['guide-mc-forsikring', 'guide-foerste-motorcykel', 'guide-a2-koerekort'],
     navn: 'Køb brugt motorcykel — det skal du tjekke',
     h1: 'Køb brugt motorcykel — det skal du tjekke',
     title: 'Køb brugt motorcykel — det skal du tjekke',
@@ -407,6 +432,259 @@ const GUIDES = [
       },
     ],
   },
+  /* ------------------------------------------------------------------ 4 */
+  {
+    file: 'guide-mc-forsikring.html',
+    slug: 'guide-mc-forsikring',
+    published: '2026-10-16',
+    modified: '2026-10-16',
+    related: ['guide-foerste-motorcykel', 'guide-brugt-motorcykel', 'guide-mc-udstyr'],
+    navn: 'MC-forsikring: det skal du vide som ny motorcyklist',
+    h1: 'MC-forsikring: det skal du vide som ny motorcyklist',
+    title: 'MC-forsikring: det skal du vide som nybegynder',
+    description: 'MC-forsikring for nye motorcyklister: hvad loven kræver, forskellen på ansvar og kasko, og hvad du bør spørge om, før du vælger. Med kilder.',
+    ingress: 'Forsikring er det kedelige punkt i budgettet, indtil du får brug for den. Her får du de generelle fakta: hvad loven kræver, hvad der er frivilligt, og hvilke spørgsmål du bør stille, før du skriver under.',
+    cardImage: 'img/type/touring.webp',
+    cardPos: 'center',
+    tldr: [
+      'Ansvarsforsikring er et lovkrav (færdselsloven § 105). Den dækker skader på andre, ikke på din egen motorcykel.',
+      'Vil du have din egen motorcykel dækket ved fx tyveri eller eget uheld, kræver det en kaskoforsikring. Den er frivillig.',
+      'Sammenlign dækning, selvrisiko og vilkår, ikke kun prisen.',
+      'Afklar forsikringen, før du kører hjem fra købet, og få tilbud i god tid.',
+    ],
+    sources: ['faerdsel', 'finanstilsynet', 'ankenaevn', 'forbrugerombudsmanden', 'ejerskifte'],
+    sections: [
+      {
+        id: 'krav',
+        title: 'Hvad kræver loven?',
+        toc: 'Hvad kræver loven?',
+        html: `
+<p>Motordrevne køretøjer skal være dækket af en ansvarsforsikring i et selskab med Finanstilsynets tilladelse (færdselsloven § 105). Det er dit ansvar som ejer at sørge for, at motorcyklen er forsikret. Ansvarsforsikringen dækker den skade, du er juridisk ansvarlig for over for andre, når du kører: skade på andre personer og på andres ting.</p>
+<p>Den dækker ikke skader på din egen motorcykel, og den er ikke en ulykkesforsikring for dig selv. Det er to vigtige forskelle, som mange nye opdager sent.</p>
+<p>Gælder spørgsmålet et ualmindeligt køretøj, for eksempel en motorcykel, der skal importeres eller først registreres, så spørg både forsikringsselskabet og Motorstyrelsen, hvad der gælder. Lovkravet er ikke et råd om, hvilket selskab eller hvilken dækning der passer til dig. Det er blot gulvet.</p>`,
+      },
+      {
+        id: 'typer',
+        title: 'Ansvar, kasko og andre dækninger',
+        toc: 'Ansvar, kasko og andre dækninger',
+        html: `
+<ul>
+<li><strong>Ansvarsforsikring (lovkrav):</strong> dækker skader, du forvolder på andre. Det er minimum, og den skal du have for at køre lovligt.</li>
+<li><strong>Kaskoforsikring (frivillig):</strong> dækker skader på din egen motorcykel. Selskaberne bruger forskellige betegnelser, for eksempel delkasko og fuld kasko, og indholdet kan være forskelligt fra selskab til selskab. Find selv svar på, om tyveri, brand, hærværk, eget uheld og skader under transport er med.</li>
+<li><strong>Tillægsdækninger:</strong> nogle selskaber tilbyder for eksempel dækning af hjelm og beklædning, assistance eller en erstatningsmotorcykel. Hvad der findes, og hvad det koster, varierer. Spørg.</li>
+<li><strong>Personforsikringer:</strong> ulykkes-, sundheds- og indboforsikring dækker dig som person og dine ting. Tjek i dine egne betingelser, om motorcykelkørsel er med, eller om det kræver et tillæg.</li>
+</ul>
+<p>Er motorcyklen købt på lån eller leasing, kan långiveren stille krav om kasko. Det står i aftalen, så læs den.</p>`,
+      },
+      {
+        id: 'pris',
+        title: 'Hvad kan påvirke prisen?',
+        toc: 'Hvad kan påvirke prisen?',
+        html: `
+<p>Bikerbasen er ikke et forsikringsselskab, og vi nævner ingen priser. De afhænger af dig, motorcyklen og selskabet. Det, selskaberne typisk spørger til, er:</p>
+<ul>
+<li>din alder og din erfaring som fører,</li>
+<li>din skadehistorik,</li>
+<li>motorcyklens model, effekt og værdi,</li>
+<li>hvor du bor, og hvor motorcyklen står om natten,</li>
+<li>hvor meget du regner med at køre,</li>
+<li>hvilken dækning og hvilken selvrisiko du vælger.</li>
+</ul>
+<p>Har du ikke en skadehistorik på motorcykel, så spørg selskabet, hvordan det indgår i tilbuddet, og om du kan ændre dækningen senere. Forsikring er en del af de løbende udgifter, og det er klogt at kende dem, før du vælger motorcykel. Der er mere om budgettet i <a href="guide-foerste-motorcykel.html">guiden til din første motorcykel</a>.</p>`,
+      },
+      {
+        id: 'sammenlign',
+        title: 'Sådan sammenligner du tilbud',
+        toc: 'Sådan sammenligner du tilbud',
+        html: `
+<p>Den laveste pris er sjældent hele billedet. Få tilbuddene skriftligt, og stil de samme spørgsmål til alle:</p>
+<ol>
+<li>Hvad er selvrisikoen, og er den den samme for alle skadetyper?</li>
+<li>Hvad dækker kaskoen helt konkret, og hvad er undtaget?</li>
+<li>Stiller selskabet krav til sikring mod tyveri, for eksempel lås, kæde eller alarm, eller til hvor motorcyklen opbevares?</li>
+<li>Hvilke krav gælder for føreren, og må andre låne motorcyklen?</li>
+<li>Gælder forsikringen i udlandet, og i hvilke lande?</li>
+<li>Er banekørsel, løb og træningsdage dækket? Det er ofte undtaget.</li>
+<li>Hvad gælder, hvis motorcyklen står stille om vinteren? Findes der en sæsonordning?</li>
+<li>Hvordan ændrer eller opsiger du aftalen, og hvilken binding er der?</li>
+</ol>
+<p>Læs betingelserne, ikke kun forsiden af tilbuddet. Det er i betingelserne, at undtagelserne står.</p>`,
+      },
+      {
+        id: 'vilkaar',
+        title: 'Vilkår, der kan overraske',
+        toc: 'Vilkår, der kan overraske',
+        html: `
+<p>Det er sjældent selve prisen, der giver problemer, men et vilkår, man ikke havde læst. Tjek især disse punkter i betingelserne:</p>
+<ul>
+<li><strong>Sikringskrav:</strong> dækning ved tyveri kan være betinget af, at motorcyklen var låst og sikret på en bestemt måde.</li>
+<li><strong>Udlån:</strong> hvis du lader en ven køre din motorcykel, er det ikke sikkert, at dækningen er den samme.</li>
+<li><strong>Brug og område:</strong> bane, løb og kørsel uden for Danmark er ofte særlige emner.</li>
+<li><strong>Ændringer:</strong> er motorcyklen ændret i forhold til fabriksudgaven, for eksempel udstødning eller effekt, så fortæl det. Oplysningerne, du giver, når du tegner forsikringen, skal være rigtige, og forkerte oplysninger kan få betydning for, hvad du får udbetalt.</li>
+</ul>
+<p>Er du i tvivl om, hvad en formulering betyder, så bed selskabet forklare det skriftligt, før du accepterer.</p>`,
+      },
+      {
+        id: 'koeb',
+        title: 'Når du køber motorcykel: rækkefølgen',
+        toc: 'Når du køber motorcykel: rækkefølgen',
+        html: `
+<ol>
+<li><strong>Før du aftaler købet:</strong> få et tilbud på forsikring til netop den motorcykel, så du kender de løbende udgifter.</li>
+<li><strong>Når I har aftalt købet:</strong> sørg for, at ansvarsforsikringen er på plads, før du kører hjem. Afklar med sælger og dit selskab, hvordan overgangen sker, hvis motorcyklen allerede er registreret og forsikret hos sælger.</li>
+<li><strong>Efter købet:</strong> omregistrer motorcyklen. Fristen og fremgangsmåden står i <a href="guide-brugt-motorcykel.html">guiden til køb af brugt motorcykel</a> og på borger.dk.</li>
+<li><strong>Sælger du senere:</strong> giv forsikringsselskabet besked om salget.</li>
+</ol>
+<p>Leder du stadig efter motorcykel, kan du bruge <a href="soegning.html">søgningen</a> og se, hvad der er til salg, så du har en konkret model at bede om tilbud på.</p>`,
+      },
+      {
+        id: 'skade',
+        title: 'Hvis uheldet er ude, og hvis I er uenige',
+        toc: 'Hvis uheldet er ude, og hvis I er uenige',
+        html: `
+<p>Meld skaden til selskabet hurtigst muligt, og gem dokumentationen: fotos, navne og kontaktoplysninger på de involverede og eventuelle vidner. Ved tyveri skal tyveriet normalt anmeldes til politiet, og selskabet vil bede om anmeldelsen.</p>
+<p>Er du uenig i selskabets afgørelse, kan du først klage til selskabet og derefter til Ankenævnet for Forsikring. Mener du, at et selskab har brugt vildledende markedsføring, kan du kontakte Forbrugerombudsmanden. Finanstilsynet fører tilsyn med forsikringsselskaberne og kan oplyse, om et selskab har tilladelse.</p>`,
+      },
+      {
+        id: 'raad',
+        title: 'Vores råd',
+        toc: 'Vores råd',
+        html: `
+<p>Vi anbefaler ikke bestemte selskaber eller produkter. Vi kan pege på en fremgangsmåde, der virker for de fleste nye: kend lovkravet, beslut om du vil have din egen motorcykel dækket, sammenlign mindst to tilbud på de samme spørgsmål, og læs betingelserne, før du skriver under.</p>
+<p>Det her er generelle oplysninger og ikke forsikringsrådgivning. Din situation og dit selskabs betingelser afgør, hvad der gælder for dig.</p>
+<p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
+      },
+    ],
+  },
+
+  /* ------------------------------------------------------------------ 5 */
+  {
+    file: 'guide-mc-udstyr.html',
+    slug: 'guide-mc-udstyr',
+    published: '2026-10-16',
+    modified: '2026-10-16',
+    related: ['guide-foerste-motorcykel', 'guide-mc-forsikring', 'guide-brugt-motorcykel'],
+    navn: 'MC-udstyr til ny motorcyklist: hjelm og tøj',
+    h1: 'MC-udstyr til ny motorcyklist: hjelm og tøj',
+    title: 'MC-udstyr til nybegyndere: hjelm og tøj',
+    description: 'MC-udstyr til nye motorcyklister: hjelmpligten, pasform, beklædning, hvad du prioriterer først, og hvad du ikke bør købe brugt. Med kilder.',
+    ingress: 'Udstyret er det, der sidder mellem dig og asfalten. Her får du en jordnær gennemgang af hjelm, jakke, handsker og støvler: hvad loven kræver, hvad du bør kigge efter, og hvordan du prioriterer, når pengene er begrænsede.',
+    cardImage: 'img/type/sport.webp',
+    cardPos: 'center',
+    tldr: [
+      'Styrthjelm er lovpligtig for føreren (færdselsloven § 81). Den skal sidde tæt og passe til din hovedform.',
+      'Mange prioriterer hjelm, handsker og støvler først. Jakke og bukser med beskyttere hører med.',
+      'Se efter mærkning på udstyret, og prøv det i kørestilling.',
+      'Køb ikke en brugt hjelm med ukendt historik.',
+    ],
+    sources: ['faerdsel', 'faerdselsstyrelsen', 'sikkertrafik'],
+    sections: [
+      {
+        id: 'hjelm',
+        title: 'Hjelmen: lov og pasform',
+        toc: 'Hjelmen: lov og pasform',
+        html: `
+<p>Styrthjelm er lovpligtig for føreren og for passagerer fra 15 år, og føreren skal sørge for, at passagerer fra 5 til 15 år bruger den, medmindre passagersædet har sikkerhedssele. Pligten gælder ikke på fx en parkeringsplads (færdselsloven § 81). Er du i tvivl om, hvad loven kræver af hjelmens godkendelse, så spørg Færdselsstyrelsen.</p>
+<h3>Typer</h3>
+<p>De mest almindelige typer er den lukkede integralhjelm, den åbne jethjelm og klaphjelmen, hvor fronten kan åbnes. En lukket hjelm dækker mest af hoved og ansigt. De øvrige giver andre fordele i komfort og i, hvor nemt det er at tage på og af. Vælg efter din kørsel og efter, hvad du faktisk vil bruge.</p>
+<h3>Pasform</h3>
+<ul>
+<li>Hjelmen skal sidde fast uden at give pressede punkter. Prøv den i butikken i en rum tid, ikke kun nogle sekunder.</li>
+<li>Ryst på hovedet: hjelmen må ikke glide rundt.</li>
+<li>Med stroppen spændt skal du ikke kunne trække hjelmen af forover.</li>
+<li>Bruger du briller, så prøv hjelmen med dem på.</li>
+</ul>
+<h3>Mærkning og levetid</h3>
+<p>Kig efter godkendelsesmærkningen i hjelmen, og bed forhandleren fortælle, hvilken standard den er godkendt efter. Producenterne anbefaler normalt, at en hjelm skiftes efter et hårdt slag, selv om den ser hel ud, og at den udskiftes efter nogle års brug. Følg altid producentens anvisning.</p>`,
+      },
+      {
+        id: 'beklaedning',
+        title: 'Jakke, bukser, handsker og støvler',
+        toc: 'Jakke, bukser, handsker og støvler',
+        html: `
+<p>Loven kræver hjelm, men ikke resten. Det betyder ikke, at resten er valgfrit, hvis du vil beskytte dig selv. Almindeligt hverdagstøj, for eksempel jeans, er normalt ikke bygget til at tåle et glid hen ad asfalten.</p>
+<ul>
+<li><strong>Jakke og bukser:</strong> vælg tøj med indbyggede beskyttere i skuldre, albuer og knæ. Rygbeskytter er i mange jakker et tilkøb, så spørg, hvad der følger med.</li>
+<li><strong>Handsker:</strong> hænderne rammer jorden tidligt, når man falder. Vælg handsker, der dækker håndleddet og sidder fast.</li>
+<li><strong>Støvler:</strong> de skal støtte anklen og være stive nok til ikke at bøje uden for deres normale bevægelse. Almindelige kondisko er ikke støvler.</li>
+<li><strong>Mærkning:</strong> motorcykelbeklædning kan være testet efter standarden EN 17092 og mærket med en klasse. Spørg forhandleren, hvad klassen betyder for netop det tøj og for din kørsel.</li>
+</ul>
+<h3>Vejr og synlighed</h3>
+<p>Du bliver kold, våd og træt hurtigere på en motorcykel end i en bil. Tænk i lag, og overvej regntøj. Komfort holder dig opmærksom. Lyse farver og reflekser gør dig nemmere at se for andre trafikanter.</p>`,
+      },
+      {
+        id: 'prioritering',
+        title: 'Prioritér, når pengene er begrænsede',
+        toc: 'Prioritér, når pengene er begrænsede',
+        html: `
+<p>Vi nævner ingen priser, fordi de varierer meget mellem mærker og forhandlere. Til gengæld kan du vælge rækkefølge. Mange vælger at starte her:</p>
+<ol>
+<li>Hjelm, der passer.</li>
+<li>Handsker.</li>
+<li>Støvler.</li>
+<li>Jakke med beskyttere.</li>
+<li>Bukser med beskyttere.</li>
+<li>Regntøj og tilbehør.</li>
+</ol>
+<p>Husk, at udstyr er en del af budgettet ved siden af købsprisen, forsikring og de løbende udgifter. Læs mere i <a href="guide-foerste-motorcykel.html">guiden til din første motorcykel</a> og i <a href="guide-mc-forsikring.html">guiden til MC-forsikring</a>.</p>`,
+      },
+      {
+        id: 'proev',
+        title: 'Sådan prøver du udstyr',
+        toc: 'Sådan prøver du udstyr',
+        html: `
+<p>Udstyr skal prøves i kørestilling, ikke kun stående foran et spejl.</p>
+<ul>
+<li>Sæt dig på en motorcykel i butikken, hvis forhandleren tillader det, og tag fat i styret. Strammer jakken over skuldrene? Flytter beskytterne sig?</li>
+<li>Gå, bøj knæene og stræk armene. Støvler og bukser skal kunne følge med.</li>
+<li>Prøv handskerne med fingrene bøjet om et greb. Sømme må ikke trykke.</li>
+<li>Prøv tøjet over det, du ellers har på om efteråret og foråret.</li>
+</ul>
+<p>Få returret og byttevilkår oplyst, før du køber, især hvis du bestiller på nettet.</p>
+<p>Tag dig tid. Udstyr, der føles næsten godt i butikken, bliver sjældent bedre efter en lang tur. Hellere en times prøvning nu end en sæson med en hjelm, der trykker, eller handsker, der gnaver. Bed gerne en medarbejder om at hjælpe med at justere stropper, ærmer og snøre, så du kan mærke forskel på det, der sidder rigtigt, og det, du bare vænner dig til.</p>`,
+      },
+      {
+        id: 'brugt',
+        title: 'Brugt udstyr',
+        toc: 'Brugt udstyr',
+        html: `
+<p>Brugt udstyr kan spare penge, men ikke alt egner sig:</p>
+<ul>
+<li><strong>Hjelm:</strong> køb ikke en brugt hjelm, hvis du ikke kender dens historik. Skader kan være usynlige udefra.</li>
+<li><strong>Beklædning:</strong> tjek sømme, lynlåse, lædertilstand og beskyttere. Tøj, der har været med i et styrt, kan have mistet noget af sin beskyttelse.</li>
+<li><strong>Beskyttere:</strong> er de gamle, stive eller revnede, så udskift dem.</li>
+</ul>
+<p>Følger der udstyr med en brugt motorcykel, så vurder det med samme kritiske øjne. Se vores <a href="guide-brugt-motorcykel.html">tjekliste til køb af brugt motorcykel</a>.</p>`,
+      },
+      {
+        id: 'fejl',
+        title: 'Fejl du let kan undgå',
+        toc: 'Typiske fejl du kan undgå',
+        html: `
+<ol>
+<li><strong>At vælge efter udseende alene.</strong> Pasform og beskyttelse kommer først.</li>
+<li><strong>En hjelm, der er for stor.</strong> Den kan flytte sig i et fald.</li>
+<li><strong>At spare på handsker og støvler.</strong> De bruges hver gang og rammer ofte først.</li>
+<li><strong>At lade udstyret blive på hylden.</strong> Det beskytter kun, når det er på, også på korte ture.</li>
+<li><strong>At glemme at tjekke mærkningen.</strong> Spørg efter standard og klasse, og få det forklaret.</li>
+</ol>`,
+      },
+      {
+        id: 'raad',
+        title: 'Sådan går du til det',
+        toc: 'Sådan går du til det — vores råd',
+        html: `
+<p>Bikerbasen er et indeks over annoncer og sælger ikke udstyr, så vi anbefaler ingen mærker. Gå ind i en butik, få målt og prøvet, og stil spørgsmål om mærkning. Sæt penge af til udstyr, før du kigger på motorcyklen.</p>
+<p>Er du i tvivl om, hvad du kan vente med, så start med det, der sidder tættest på kroppen og rammer først: hjelm, handsker og støvler. Resten kan du bygge op over tid, efterhånden som du lærer din egen kørsel at kende.</p>
+<p>Oplysningerne her er generelle. Følg altid producentens anvisning og de aktuelle regler hos Færdselsstyrelsen.</p>
+<p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
+      },
+    ],
+  },
 ];
 
-module.exports = { GUIDES, SRC, PUBLISHED, MODIFIED };
+/* Datoer for en guide, med standarden som reserve. */
+const publiceret = g => g.published || PUBLISHED;
+const aendret = g => g.modified || MODIFIED;
+
+module.exports = { GUIDES, SRC, PUBLISHED, MODIFIED, publiceret, aendret };

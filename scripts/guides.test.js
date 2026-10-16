@@ -132,9 +132,9 @@ test('sidebjælkens udvalg: kun kendt effekt under A2-grænsen, og tomt uden dat
   assert.deepStrictEqual(udvalgTilSidebjaelke([mk(1, 40)]), [], 'under to kort udelades modulet');
 });
 
-test('reserverede adresser findes og er de fire, andre strømme linker til', () => {
+test('guide-adresserne: de tre reserverede findes stadig, og to nye er kommet til', () => {
   assert.deepStrictEqual(GUIDES.map(g => g.file).sort(),
-    ['guide-a2-koerekort.html', 'guide-brugt-motorcykel.html', 'guide-foerste-motorcykel.html']);
+    ['guide-a2-koerekort.html', 'guide-brugt-motorcykel.html', 'guide-foerste-motorcykel.html', 'guide-mc-forsikring.html', 'guide-mc-udstyr.html']);
   assert.ok(sider.some(s => s.navn === 'guides.html'));
 });
 
@@ -188,4 +188,62 @@ test('T-001: A2-guiden har informationsintention — én tekst overalt, og den k
   assert.match(side, new RegExp('<meta property="og:title" content="' + tekst));
   // Oversigtens kort bruger samme tekst.
   assert.match(sider.find(s => s.navn === 'guides.html').html, new RegExp('gd-card-title">' + tekst));
+});
+
+test('W7: nye guides har egne, ikke-opdigtede datoer, og oversigten tæller alle guides', () => {
+  for (const g of GUIDES){
+    const html = sider.find(x => x.navn === g.file).html;
+    const pub = g.published || '2026-10-15', mod = g.modified || '2026-10-15';
+    assert.ok(mod >= pub, g.file + ': modified >= published');
+    const art = ldBlokke(html).find(o => o['@type'] === 'Article');
+    assert.strictEqual(art.datePublished, pub);
+    assert.strictEqual(art.dateModified, mod);
+    assert.match(html, new RegExp('<meta property="article:published_time" content="' + pub + '">'));
+    assert.match(html, new RegExp('<meta property="article:modified_time" content="' + mod + '">'));
+  }
+  const nye = GUIDES.filter(g => g.published === '2026-10-16');
+  assert.strictEqual(nye.length, 2);
+  const over = sider.find(s => s.navn === 'guides.html').html;
+  for (const g of GUIDES) assert.ok(over.includes('href="' + g.file + '"'), g.file + ' mangler i oversigten');
+  assert.strictEqual(ldBlokke(over).find(o => o['@type'] === 'CollectionPage').mainEntity.numberOfItems, GUIDES.length);
+});
+
+test('W7: "Læs også" er højst 3 ægte guides, aldrig siden selv, og alle guides har mindst ét indlink fra en anden guide', () => {
+  const { relateredeGuides, MAX_RELATEREDE } = require('./build-guides');
+  const indgaaende = new Map(GUIDES.map(g => [g.slug, 0]));
+  for (const g of GUIDES){
+    const r = relateredeGuides(g);
+    assert.ok(r.length <= MAX_RELATEREDE && MAX_RELATEREDE === 3);
+    assert.ok(!r.includes(g), g.slug + ' linker til sig selv');
+    for (const x of r) indgaaende.set(x.slug, indgaaende.get(x.slug) + 1);
+    for (const x of (g.related || [])) assert.ok(GUIDES.some(y => y.slug === x), g.slug + ': ukendt relateret guide ' + x);
+    const html = sider.find(x => x.navn === g.file).html;
+    assert.strictEqual(tael(html, /class="gd-sources gd-related"/g), r.length ? 1 : 0);
+  }
+  for (const [slug, n] of indgaaende) assert.ok(n >= 1, slug + ' har intet indlink fra en anden guide');
+});
+
+test('W7: forsikrings- og udstyrsguiden holder sig til sikre fakta — ingen tal, ingen anbefalede selskaber', () => {
+  for (const f of ['guide-mc-forsikring.html', 'guide-mc-udstyr.html']){
+    const g = GUIDES.find(x => x.file === f);
+    const tekst = JSON.stringify(g.sections.map(s => s.html)) + g.tldr.join(' ');
+    assert.ok(!/d[d.]*s?(kr|kr.|procent|%|DKK)/i.test(tekst), f + ': ingen beløb eller procenter');
+    assert.ok(!/(Tryg|Alka|Topdanmark|Codan|Gjensidige|If Skadeforsikring|Lærerstandens|Købstædernes)/.test(tekst), f + ': ingen navngivne selskaber');
+    assert.ok(g.sources.length >= 3, f + ': kilder');
+  }
+  const f = GUIDES.find(x => x.slug === 'guide-mc-forsikring');
+  assert.ok(f.sources.includes('faerdsel') && f.sources.includes('ankenaevn') && f.sources.includes('forbrugerombudsmanden'));
+  const html = sider.find(x => x.navn === 'guide-mc-forsikring.html').html;
+  assert.match(html, /§ 105/);
+  assert.match(html, /ikke forsikringsrådgivning/);
+});
+
+test('W7: sitemap-linjerne bruger hver guides egen dato', () => {
+  const { udvidSitemap } = require('./build-guides');
+  const os = require('node:os');
+  assert.strictEqual(typeof udvidSitemap, 'function');
+  const xml = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+  for (const g of GUIDES){
+    assert.ok(xml.includes('<loc>' + cleanUrl(g.file) + '</loc><lastmod>' + (g.modified || '2026-10-15') + '</lastmod>'), g.file + ' mangler i sitemap.xml med rigtig lastmod');
+  }
 });
