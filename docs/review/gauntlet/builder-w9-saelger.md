@@ -48,3 +48,33 @@ ingen rigtige konti) + screenshots i `%TEMP%\w9-saelger\{foer,efter}`. Test spri
 
 ## K10 Billedlighed (se rapportens bund for ærlig afvigelsesliste)
 - Opret: trin-bjælke, felt-sektion + tips-boks, billedrække, live-forhåndsvisning, "Sælg trygt". Mine annoncer: hero, faner, statkort, rækker med handlinger, Min konto, "Sælg hurtigere", Hjælp. Login: to-kolonne. Ingen beskeder/betaling/avanceret statistik/opdigtede tal.
+
+---
+# Resultat
+
+**Bevis:** `js/w9-saelger.test.js` — 31 tests (K1a–K9e), alle grønne, kører rigtig Chromium mod lokal mock (`scripts/w9-saelger-mock.js`, ingen produktionskald; lys OG mørk, 320/390). Screenshots udenfor repoet: `%TEMP%\w9-saelger\foer` (før), `\efter` (efter, 1440+390, lys+mørk), `\it1` (rediger/dashboard), `\tst` (testskærme).
+
+## Fundet og rettet (reelle fejl, alle først påvist af en rød test)
+1. **Dobbeltklik/Enter to gange på Udgiv oprettede to annoncer** (tjek før `disabled` er asynkrone). Lås i `publishListing` (`js/opret-annonce.js`), slippes ved fejl.
+2. **Pausede annoncer kunne ikke redigeres** (kendt mangel fra dashboard-runden): `startEditing` fandt kun aktive. Henter nu egne rækker via `db.myListings()`; Rediger-knap vises på pausede (`js/mine-annoncer.js`); efter gem går man til Mine annoncer (en pauset annonce har ingen offentlig side); hero-teksten siger at den er skjult.
+3. **Pausede annoncer uden foto**: det delte "Ingen fotos"-felt (titel + chips) bristede i 96 px-miniaturen — nu kun kameraikon (`css/p-dashboard.css`). Pauserække siger "Skjult for købere, indtil du aktiverer den".
+4. **Login-tekst**: "Se sælgerens navn — Markér, at du vil i kontakt" (beskeder findes ikke) → "Se, hvem der sælger — indloggede ser navnet og kan få vist telefonnummeret, hvis sælgeren har slået det til".
+5. Mock/test-hygiejne: temaet blev først sat forkert (mørk-testene kørte lyst) — rettet, og 320/390 × lys/mørk er kørt igen på ægte mørk.
+
+## Verificeret OK uden ændring (w7/opret/dashboard-arbejdet holdt)
+Alle trin inkl. Tilbage, billedupload (resize til webp/jpeg, 12-grænse, ikke-billede/for stor/ødelagt), POST 500 / netværksafbrud / storage-fejl (præcis besked, ingen dublet, intet tab), redigering (PATCH, ingen POST), slet (confirm, storage ryddet), hentefejl-banner + Prøv igen, tomme tilstande, kladder, favoritter, login-fejl, ingen vandret overflow 320/390, ingen null/undefined/NaN, aria-invalid/fokus, mobil-ark med Escape, konsol ren.
+
+## Matcher IKKE billederne endnu (og hvorfor)
+- **Opret**: 4 trin mod billedets 5 (ingen "Sælgeroplysninger"; navn/telefon bor på profilen). Billeder er trin 3 efter side 1+2, ikke midt på siden (login-gaten: blob-fotos overlever ikke en login-omvej). Intet titelfelt (titel udledes af mærke/model/årgang), ingen rig-tekst-værktøjslinje, ingen "Vælg model"-dropdown (frit felt + forslag), ingen "Vis eksempel på fuld annonce"/"Hjælp hele vejen"; ingen "3x flere henvendelser". Hero er mørk/forsidens foto uden rytter; motorcyklen delvist bag tillidsboksen ved 1440.
+- **Mine annoncer**: ingen beskeder-fane/-tal, ingen "+24 %"/visningsgraf, ingen "Udløber om N dage"/"Udløbet"/"Forlæng" (annoncer har ingen udløbsdato i databasen), kun ægte kolonner (visninger, favoritter, telefonvisninger). CTA er brandfarven, ikke grøn. "Sælg hurtigere"-boksen er varm tint, ingen "3x"-tal. Rytterfoto i hero findes ikke i repoet.
+- **Login**: ingen Google/Facebook/Apple, ingen "120.000+", ingen håndskrevne tagline-ikoner; header er sitets egen; fotoet er sportscykel uden rytter.
+
+## DELT-ØNSKER / åbne punkter (ikke mine filer)
+1. `js/store.js` `toggleFavorite`: databasefejl ved gem/fjern favorit logges kun (`console.warn`); sælgeren får ingen besked og UI ender uenigt med databasen indtil næste synk.
+2. `package.json`: tilføj `js/w9-saelger.test.js` til `npm test` (kræver Playwright+Chromium; springer tydeligt over ellers; ~100 s). `scripts/w9-saelger-mock.js` er hjælpefil, ikke test.
+3. `css/p-dashboard.css` skal stemples/allowlistes som før. (Intet nyt stempel/CSP-hash rørt af mig.)
+4. Bestående før mig: `npm test` har 1 rød test (`scripts/guides.test.js` "Article: datoerne stammer fra guides-data…") på denne dato (2026-10-17) — urelateret til sælger-filerne.
+5. `K9d` springer mobil-ark-delen over, hvis pillen bevidst er skjult ved siden af kortet (kun label-/Escape-tjek garanteret).
+
+## Selv-score (0–5, mod billederne)
+Opret ≈ 4,2 · Mine annoncer ≈ 4,4 · Login ≈ 4,0 · Gemte/kladder ≈ 4,3 (uændret visuelt; fokus var funktion/robusthed).

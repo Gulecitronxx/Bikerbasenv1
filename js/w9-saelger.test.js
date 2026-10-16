@@ -365,7 +365,7 @@ test('K6a Statuskort beregnes af data, rækker viser status og handlinger; pause
     await s.page.waitForSelector('.db-row');
     assert.strictEqual(await s.page.locator('#stat-aktive').innerText(), '2');
     assert.strictEqual(await s.page.locator('.db-row').count(), 3);
-    assert.match(await raekke(s.page, TRE()[2].id).innerText(), /På pause/);
+    assert.match(await raekke(s.page, TRE()[2].id).innerText(), /På pause[\s\S]*Skjult for købere/);
     assert.strictEqual(await raekke(s.page, TRE()[2].id).locator('a:has-text("Rediger")').count(), 1, 'rediger findes på pausede');
     assert.match(await raekke(s.page, TRE()[0].id).innerText(), /99\.900 kr/);
     await ingenNul(s.page, 'mine annoncer');

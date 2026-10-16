@@ -131,6 +131,9 @@
 .db-thumb img, .db-thumb svg{ width: 100%; height: 100%; object-fit: cover; display: block; }
 .db-thumb-draft{ display: grid; place-items: center; }
 .db-thumb-draft svg{ width: 32px; height: 32px; }
+/* Uden foto: det delte "Ingen fotos"-felt har titel og fakta-chips, som ikke er plads til i en 96 px miniature. Kun kameraikonet bliver; rækken siger selv, at der ikke er fotos (aria-label på linket). */
+.db-thumb .foto-tom{ height: 100%; display: grid; place-items: center; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.db-thumb .foto-tom > :not(.foto-tom-ikon){ display: none; }
 .db-photos{
   position: absolute; left: 6px; bottom: 6px; display: inline-flex; align-items: center; gap: 4px;
   background: rgba(14,12,10,.78); color: #fff; font-size: 12px; font-weight: 700; line-height: 1;

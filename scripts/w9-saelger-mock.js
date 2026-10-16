@@ -257,7 +257,7 @@ function lavBackend(opts = {}){
           if (cookie) localStorage.setItem('bb_cookie_consent', JSON.stringify({ level: 'necessary', date: new Date().toISOString() }));
           if (ses && !sessionStorage.getItem('__w9seed')){ sessionStorage.setItem('__w9seed', '1'); localStorage.setItem(`sb-${ref}-auth-token`, JSON.stringify(ses)); }
         } catch (e) { /* blokeret lager */ }
-      }, { ref: REF, ses: tilstand.loggetInd ? session() : null, tema, cookie });
+      }, { ref: REF, ses: tilstand.loggetInd ? session() : null, tema: ({ lys: 'light', light: 'light', moerk: 'dark', mørk: 'dark', dark: 'dark' })[tema] || tema, cookie });
     },
     lavAnnonce,
   };
