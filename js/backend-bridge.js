@@ -388,7 +388,12 @@ const MCSYD_KATEGORI = {
 };
 // Se fælde 2 ovenfor: kun gyldig som allersidste ord.
 const KATEGORI_KUN_SIDST = new Set(['sport']);
-const HD_GLIDE = /\b(Sport|Street|Road|Super|Electra|Ultra)\s+Glide\b/gi;
+/* Modelnavne, hvor et kategoriord er en del af NAVNET (F2-008): Harleys "… Glide"-navne og Street Bob /
+   Street Triple / Street Rod / Street Twin / Street 750. Maskeres før titlen scannes for et kategoriord, og
+   bruges til at genskabe en model, der er mistet ordet i databasen ("FLHX Glide" -> "FLHX Street Glide").
+   Spejl af BESKYTTET_MODELNAVN i crawler/normalize.js. */
+const MODEL_MED_TYPEORD = /\b(?:(?:Sport|Street|Road|Super|Electra|Ultra)\s+Glide|Street\s+(?:Bob|Triple|Rod|Twin|Scrambler|Cup|750|500))\b/gi;
+const HD_GLIDE = MODEL_MED_TYPEORD;
 const TITEL_STOEJ = /\b(BYTTER GERNE|UDEN KLARGØRING|ENGROS|\d+\s*ÅRS FABRIKS GARANTI|FABRIKS GARANTI|NYSYNET|SOLGT)\b/gi;
 
 /* Kildens kategoriord -> vores type-id. Kender vi ikke ordet, siger vi det
@@ -414,6 +419,28 @@ function typeFraTitel(titel){
     return MCSYD_KATEGORI[o];
   }
   return null;
+}
+
+const noeglen = s => String(s || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+
+/* Det beskyttede modelnavn i titlen ("Street Glide"), eller null. */
+function modelMedTypeord(titel){
+  const m = String(titel || '').match(new RegExp(MODEL_MED_TYPEORD.source, 'i'));
+  return m ? m[0] : null;
+}
+
+/* Har databasen mistet kategoriordet fra modellen? ("FLHX Glide" mens titlen siger "FLHX Street Glide".) */
+function modelMistetTypeord(row){
+  const navn = modelMedTypeord(row.titel);
+  return !!(navn && row.model && !noeglen(row.model).includes(noeglen(navn)));
+}
+
+/* Står "Street" kun i titlen som del af et modelnavn? Så er kildens `type: Street` en fejllæsning. */
+function streetErModelnavn(row){
+  if (typeFraKategoriord(row.type) !== 'naked' || noeglen(row.type) !== 'street') return false;
+  const navn = modelMedTypeord(row.titel);
+  if (!navn || !/\bstreet\b/i.test(navn)) return false;
+  return !/\bstreet\b/i.test(String(row.titel).replace(new RegExp(MODEL_MED_TYPEORD.source, 'gi'), ' '));
 }
 
 /* ---------- Kildens stand -> vores CONDITIONS ----------
@@ -688,7 +715,11 @@ function kendteMaerker(){
   return _kendteMaerker;
 }
 function maerkeFraDeeplink(url){
-  const t = deeplinkTitel(url);
+  return maerkeFraTekst(deeplinkTitel(url));
+}
+/* Mærket, når en tekst (deeplinkets titel eller annoncens egen titel) STARTER med et kendt mærke efterfulgt af
+   mindst ét ord mere. Kun et ægte mærkenavn læses; alt andet giver null — ingen gæt (F2-014: "CFMOTO MTX800"). */
+function maerkeFraTekst(t){
   if (!t) return null;
   const { m, nok } = kendteMaerker();
   const ord = nok(t).split(' ');
@@ -754,7 +785,10 @@ function byggEksternAnnonce(row){
   /* F-008: er mærket "Ukendt", kan deeplinkets sti nævne et kendt mærke. */
   const brand = (() => {
     const b = maerkeAkronym(row.maerke) || 'Ukendt';
-    return b === 'Ukendt' ? (maerkeFraDeeplink(row.url) || 'Ukendt') : b;
+    if (b !== 'Ukendt') return b;
+    // Titlen starter med mærket ("CFMOTO MTX800"), også når kilden ikke er MC Syd og der ingen sti er at læse.
+    const fraTitel = /^ukendt\b/i.test(String(row.titel || '').trim()) ? null : maerkeFraTekst(String(row.titel || '').trim());
+    return maerkeFraDeeplink(row.url) || fraTitel || 'Ukendt';
   })();
   /* F-007: tal læst forkert af titlen (ccm = årstal, 1200 læst som 120). */
   const tal = saniterTal({ ccm: row.ccm, hk: row.hk, aargang: row.aargang, tekst: [row.titel, row.model].filter(Boolean).join(' ') });
@@ -775,7 +809,7 @@ function byggEksternAnnonce(row){
       // Runde 7 (D7-S4): stoej klippes ogsaa af de raekker, der ligger.
       // Runde 13 (R13-5): og maerket fjernes, hvis modellen gentager det.
       const maerke = brand === 'Ukendt' ? (maerkeAkronym(row.maerke) || '') : brand;
-      if (row.model) return fjernOrdDublet(fjernMaerkeDublet(maerke, rensModelStoej(row.model, row.aargang) || ''));
+      if (row.model && !modelMistetTypeord(row)) return fjernOrdDublet(fjernMaerkeDublet(maerke, rensModelStoej(row.model, row.aargang) || ''));
       // F-008: "Ukendt MTX800" -> "MTX800" ("Ukendt" er sentinelen, ikke en del af modellen).
       const t = String(row.titel || '').trim().replace(/^ukendt\s+/i, '');
       const ren = t && t.toLowerCase() !== String(row.maerke || '').trim().toLowerCase() && t.toLowerCase() !== brand.toLowerCase() ? t : '';
@@ -795,7 +829,9 @@ function byggEksternAnnonce(row){
        fallbacken bare stille. Kildens felt slår en scanner, også når de
        dækker næsten lige mange (285 mod 283): hans kommer fra kilden, min
        gætter sig frem fra en tekststreng. */
-    type: typeFraKategoriord(row.type) || typeFraTitel(row.titel || row.model),
+    type: typeFraKategoriord(streetErModelnavn(row) ? null : row.type) || typeFraTitel(row.titel || row.model)
+      // F2-008: er "Street" en del af modelnavnet, kommer typen fra model-tabellen (data.js), ikke fra ordet.
+      || (modelMedTypeord(row.titel) ? typeFraStreetModel(row.titel) : null),
 
     /* Titlens anden linje — Bilbasens "54 Altitude 5d" under "Jeep Avenger".
        Hos os "Cruiser" under "Yamaha XV 750 Virago". 285 af 332 rækker har

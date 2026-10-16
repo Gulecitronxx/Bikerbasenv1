@@ -159,7 +159,6 @@ try{
      maling; js/annonce.js kobler knapperne paa de samme handlinger som
      kortet i sidebjaelken. position:fixed => skubber intet (ingen CLS). -->
 <div class="listing-actionbar" id="listing-actionbar" hidden>
-  <button type="button" class="btn btn-primary" id="bar-contact">Skriv til sælger</button>
   <!-- Knappen hed "Ring op" og havde aria-label="Vis telefonnummer".
        To fejl i ét element: en skaermlaeser laeste et andet navn op, end
        oejet kunne se (Lighthouse a11y faldt til 96 paa netop den), og
@@ -219,69 +218,8 @@ try{
   </div>
 </footer>
 
-<div class="modal-overlay" id="contact-modal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h2 id="contact-modal-title">Skriv til sælger</h2>
-      <button type="button" class="icon-btn" data-modal-close aria-label="Luk"></button>
-    </div>
-    <form id="contact-form">
-      <!-- Hensigterne lader sælger se med det samme, hvad henvendelsen
-           handler om — og køber slipper for at formulere det selv. -->
-      <div class="contact-intents">
-        <label class="checkbox-row"><input type="checkbox" id="cf-ring" value="Jeg ønsker at blive ringet op">Jeg ønsker at blive ringet op</label>
-        <label class="checkbox-row"><input type="checkbox" id="cf-proevetur" value="Jeg ønsker en prøvetur">Jeg ønsker en prøvetur</label>
-        <label class="checkbox-row"><input type="checkbox" id="cf-bytte" value="Min nuværende motorcykel kan indgå i handlen">Min nuværende motorcykel kan indgå i handlen</label>
-      </div>
-
-      <div class="form-grid">
-        <div class="field field-full">
-          <label for="cf-message">Besked til sælger <span class="required-mark">*</span></label>
-          <textarea class="input" id="cf-message" required maxlength="500" rows="5" placeholder="Skriv din besked til sælgeren her"></textarea>
-          <span class="char-counter" id="cf-counter" aria-live="polite">0/500</span>
-        </div>
-        <div class="field">
-          <label for="cf-firstname">Fornavn <span class="required-mark">*</span></label>
-          <input class="input" id="cf-firstname" required autocomplete="given-name">
-        </div>
-        <div class="field">
-          <label for="cf-lastname">Efternavn <span class="required-mark">*</span></label>
-          <input class="input" id="cf-lastname" required autocomplete="family-name">
-        </div>
-        <div class="field field-full">
-          <label for="cf-email">E-mail <span class="required-mark">*</span></label>
-          <input class="input" id="cf-email" type="email" required autocomplete="email">
-        </div>
-        <div class="field field-full">
-          <label for="cf-phone">Telefonnummer</label>
-          <input class="input" id="cf-phone" type="tel" autocomplete="tel">
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" style="margin-top:16px;">Send</button>
-      <p class="contact-consent">Når du trykker på "Send", accepterer du, at vi overfører dine oplysninger til sælgeren af motorcyklen. Læs om behandlingen af dine personoplysninger i vores <a href="privatlivspolitik.html" target="_blank">privatlivspolitik</a>.</p>
-    </form>
-
-    <!-- Kvitteringen efter afsendelse.
-         Her stod foer en toast: "Din besked er sendt til saelgeren." Det var
-         ikke sandt. Der findes ingen beskedtabel i basen (se supabase/ — der
-         er listings, favorites, reviews, reports og statistik, og ikke andet),
-         saa teksten blev ingen steder af. Vi taeller henvendelsen paa
-         annoncen (record_listing_event, 004b), og DET kan saelgeren faktisk
-         se. Kvitteringen siger praecis saa meget og giver koeberen den vej,
-         der virker i dag: telefonnummeret.
-
-         Staar i markuppen frem for at blive bygget af JS, saa den ikke skal
-         hentes eller males om, naar den skal bruges. -->
-    <div class="contact-receipt" id="contact-receipt" hidden>
-      <p class="contact-receipt-title" id="contact-receipt-title">Din henvendelse er registreret</p>
-      <p class="contact-receipt-body" id="contact-receipt-body"></p>
-      <!-- Det koeberen krydsede af, gentaget. Tom og hidden indtil der ER
-           krydset noget af — se js/annonce.js. -->
-      <div class="contact-receipt-intents" id="contact-receipt-intents" hidden></div>
-      <div class="contact-receipt-actions" id="contact-receipt-actions"></div>
-    </div>
-  </div>
-</div>
+<!-- F2-006 (w5): kontaktformularen er fjernet. Bikerbasen leverer ingen beskeder, og vi indsamler ikke navn, e-mail eller telefon til noget, der ikke leveres (se js/annonce.js). Den tomme beholder herunder findes kun, fordi scripts/shared.js stadig udtraekker et kontaktmodal-blok herfra til de statiske annoncesider; js/annonce.js fjerner den ved indlaesning. -->
+<div class="modal-overlay" id="contact-modal"></div>
 
 <script defer src="js/security.js?v=ef964cab"></script>
 <script defer src="js/vendor/supabase.js?v=ef964cab"></script>

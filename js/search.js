@@ -682,8 +682,17 @@ const SALGSMARKOERER = [
    fordi det er sådan mc-modelnavne er skruet sammen: CBR 1000 F, R 1200 GS,
    XL 1200 N. Uden bogstavet ville "CBR 1000" og "CBR 1000 F" ligne det
    samme, og det er to forskellige motorcykler. */
+/* F2-014: titlen går gennem annonceNavn(), så en tom model siger "model ikke oplyst" og "Ukendt" bliver til
+   "Ukendt mærke" i stedet for at stå som et mærkenavn. */
 function deltTitel(l){
-  const brand = String(l.brand || '').trim();
+  const r = deltTitelRaa(l);
+  const brand = maerkeTekst(l.brand);
+  const modelDel = brand && r.model.toLowerCase().startsWith(brand.toLowerCase()) ? r.model.slice(brand.length).trim() : r.model.trim();
+  return Object.assign({}, r, { model: annonceNavn({ brand: l.brand, model: modelDel }) });
+}
+
+function deltTitelRaa(l){
+  const brand = maerkeTekst(l.brand);
   let rest = String(l.model || '').trim();
 
   // Kilden gentager tit mærket i titlen: "Yamaha Yamaha XV 750".
@@ -839,7 +848,7 @@ function listingRowHTML(l, i){
     <div class="row-media">${listingMediaHTML(l, t.model, i === 0)}</div>
     <div class="row-head">
       <div class="row-flags">
-        ${isNewListing(l.createdAt) ? `<span class="badge badge-new">Ny</span>` : ''}
+        ${isNewListing(l.createdAt) ? nytOpslagBadgeHTML() : ''}
         ${dealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : ''}
         ${isSuspiciouslyCheap(l) ? `<span class="badge badge-warning" title="Prisen ligger væsentligt under markedsniveau for den type og årgang — bed om ekstra dokumentation, og betal aldrig forud">${Icon.alertTriangle}Under markedspris</span>` : ''}
         ${l.serviceHistorik === 'Fuld' ? `<span class="badge badge-verified">${Icon.shieldCheck}Fuld servicehistorik</span>` : ''}
@@ -908,8 +917,10 @@ function renderResultsCount(list){
      ikke kun ved sideinddelingen i bunden. */
   const totalSider = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const sideLed = state.page > 1 ? ` <span class="results-side">· side ${state.page} af ${totalSider}</span>` : '';
-  document.getElementById('results-count').innerHTML =
-    `${total} <span>${total === 1 ? 'motorcykel' : 'motorcykler'}<span class="results-count-fundet"> fundet</span>${sideLed}</span>`;
+  // F2-010: er hele lageret tomt, er "0 motorcykler fundet" en hentefejl, ikke et resultat.
+  document.getElementById('results-count').innerHTML = (total === 0 && Store.getAllListings().length === 0)
+    ? '<span>Annoncerne kunne ikke hentes</span>'
+    : `${total} <span>${total === 1 ? 'motorcykel' : 'motorcykler'}<span class="results-count-fundet"> fundet</span>${sideLed}</span>`;
   // (Sidetallet i document.title saettes i js/seo.js, som ejer titlen.)
 
   const mix = document.getElementById('results-mix');
@@ -1778,12 +1789,9 @@ function render(){
        knap, der ikke gjorde noget som helst. Præcis den tilstand er den, et
        nyt site møder brugerne med hver eneste dag, indtil lageret vokser. */
     const intetLager = Store.getAllListings().length === 0;
-    document.getElementById('empty-title').textContent = intetLager
-      ? 'Der er ingen annoncer endnu'
-      : 'Ingen annoncer matcher dine filtre';
-    document.getElementById('empty-text').textContent = intetLager
-      ? 'Bikerbasen er helt nyt. Bliv den første til at sætte en motorcykel til salg — eller gem søgningen og kig forbi igen.'
-      : tomtilstandsRaad(pills);
+    const tom = tomtilstandsIndhold(intetLager, pills);
+    document.getElementById('empty-title').textContent = tom.titel;
+    document.getElementById('empty-text').textContent = tom.tekst;
 
     // Nulstil-knappen giver kun mening, når der ER noget at nulstille.
     const nulstil = document.getElementById('empty-clear-btn');
@@ -1793,6 +1801,16 @@ function render(){
     nulstil.classList.toggle('btn-primary', !nulstil.hidden);
     saelg.classList.toggle('btn-primary', nulstil.hidden);
     saelg.classList.toggle('btn-outline', !nulstil.hidden);
+    // F2-010: hentningen gav ingenting — "Prøv igen" er den hjælpsomme handling, ikke "Sælg din motorcykel".
+    let igen = document.getElementById('empty-retry-btn');
+    if (tom.fejl && !igen){
+      igen = document.createElement('button');
+      igen.type = 'button'; igen.id = 'empty-retry-btn'; igen.className = 'btn btn-primary'; igen.textContent = 'Prøv igen';
+      igen.addEventListener('click', () => location.reload());
+      saelg.before(igen);
+    }
+    if (igen) igen.hidden = !tom.fejl;
+    if (tom.fejl){ saelg.hidden = true; } else { saelg.hidden = false; }
   }
 
   clearTimeout(secondaryHandle);
@@ -1830,6 +1848,20 @@ function soegeoverskrift(state, listings){
    af, så rådet og det, skærmen viser, ikke kan komme fra hinanden.
    `state.q` fylder altid præcis én chip (activeFilterPills(), øverst), så
    "kun frisøgningen" er `state.q` sat OG nøjagtig én chip. */
+/* F2-010: tomtilstandens ord. Er HELE lageret tomt (hentningen fejlede, eller gav [] fra begge kilder), er det
+   en hentefejl — aldrig "Bikerbasen er helt nyt": fejlet og tomt er to forskellige ting, og et tomt
+   marked må ikke være det svar, siden giver, når den i virkeligheden ikke fik svar. */
+function tomtilstandsIndhold(intetLager, pills){
+  if (intetLager){
+    return {
+      fejl: true,
+      titel: 'Vi kunne ikke hente annoncerne lige nu — prøv igen',
+      tekst: 'Hentningen gav ingen annoncer, og vi ved ikke hvorfor. Prøv igen om lidt.',
+    };
+  }
+  return { fejl: false, titel: 'Ingen annoncer matcher dine filtre', tekst: tomtilstandsRaad(pills) };
+}
+
 function tomtilstandsRaad(pills){
   const kunSoegeord = !!state.q && pills.length === 1;
   const harPris = state.priceMin != null || state.priceMax != null;

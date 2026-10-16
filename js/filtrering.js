@@ -150,6 +150,13 @@ const Filtrering = (() => {
      stadig, men fordelingen på feltnavne skifter — og feltnavnene er
      præcis dét, begge sider skriver ud i deres forklaringslinje. */
   const SOEGE_ALIAS = { hd: 'harleydavidson' };
+  /* F2-009: et typeord i søgefeltet ("cruiser", "touring", "naked") finder annoncer af den type, ikke kun
+     dem, hvor ordet tilfældigvis står i modelnavnet. Hele ordet skal være typeordet (efter normalisering);
+     typen læses af annoncens type-id — samme felt som Type-filteret bruger. */
+  const SOEGE_TYPEORD = {
+    cruiser: 'cruiser', touring: 'touring', naked: 'naked', sport: 'sport', adventure: 'adventure', enduro: 'adventure',
+    scooter: 'scooter', classic: 'classic', klassiker: 'classic', veteran: 'classic', cross: 'cross', motocross: 'cross',
+  };
   function soegeNoegle(s){
     return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9æøå]+/g, '');
   }
@@ -168,8 +175,9 @@ const Filtrering = (() => {
     const ord = soegeOrd(state.q);
     if (brug('q') && ord.length){
       list = list.filter(l => {
-        const hø = soegeNoegle(`${l.brand} ${l.model}`);
-        return ord.every(o => hø.includes(o));
+        // ?? '': et felt uden værdi må aldrig blive til ordet "null" i høstakken (F2-009).
+        const hø = soegeNoegle(`${l.brand ?? ''} ${l.model ?? ''}`);
+        return ord.every(o => hø.includes(o) || (l.type != null && SOEGE_TYPEORD[o] === l.type));
       });
     }
 
