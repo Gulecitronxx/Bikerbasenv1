@@ -4081,6 +4081,12 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-badges{ top:6px; left:6px; right:42px; gap:4px; }
 }
 
+/* W7-1: ved 320 px er fotoet i 2-kolonne-gitteret kun ca. 86 px højt, så hjertet (44 px) og sammenlign-knappen (34 px + 5 px usynlig
+   kant) overlappede ca. 12 px, og hjertets trykflade blev 34 px høj. Et højere foto (4:3) rydder overlappet. */
+@media (max-width:349px){
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-rich .card-media{ aspect-ratio:4/3; }
+}
+
 /* ============ w5-visuel: trykflader (V2-007) ============ */
 /* Sidetal og pile er <a> siden D8-S2, men kun <button> var stylet: linkene var 10 px brede. Samme udtryk som knapperne. */
 .pagination a{
