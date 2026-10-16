@@ -201,3 +201,24 @@ test('T-003 modelKvalificerer: kun distinkte annoncer tæller — 10 identiske d
   assert.strictEqual(S.modelKvalificerer(mange(4)), false, 'under tærsklen på 5 annoncer');
   assert.strictEqual(S.TAERSKLER.modelDistinkt, 3);
 });
+
+test('W6 P3a: annoncer uden pris/årgang fra samme kilde er IKKE identiske lagerenheder', () => {
+  const tomme = [1, 2, 3, 4, 5].map(id => ({ id, price: null, year: null, km: null, source: { domaene: 'mcsyd.dk' } }));
+  assert.strictEqual(S.distinkte(tomme).length, 5, 'fem ukendte er fem, ikke én');
+  const udenPris = [1, 2, 3].map(id => ({ id, price: null, year: 2019, km: 100, source: { domaene: 'mcsyd.dk' } }));
+  assert.strictEqual(S.distinkte(udenPris).length, 3, 'uden pris kan vi ikke kalde dem ens');
+  // stadig ens, når pris og årgang er oplyst og ens (km må mangle)
+  const ens = [1, 2, 3].map(id => ({ id, price: 49995, year: 2024, km: null, source: { domaene: 'mcsyd.dk' } }));
+  assert.strictEqual(S.distinkte(ens).length, 1);
+  // samme annonce to gange (samme id) tæller stadig én
+  assert.strictEqual(S.distinkte([tomme[0], tomme[0]]).length, 1);
+});
+
+test('W6 P3c: medianårgang rundes ikke skjult op (2015,5 bliver aldrig 2016)', () => {
+  assert.strictEqual(S.medianAarTekst([2014, 2015, 2016, 2018]), '2015–2016');
+  assert.strictEqual(S.medianAarTekst([2015, 2016]), '2015–2016');
+  assert.strictEqual(S.medianAarTekst([2015, 2016, 2017]), '2016');
+  assert.strictEqual(S.medianAarTekst([2016, 2016, 2016, 2018]), '2016');
+  assert.strictEqual(S.medianAarTekst([]), null);
+  assert.doesNotMatch(S.medianAarTekst([2015, 2016]), /,/);
+});

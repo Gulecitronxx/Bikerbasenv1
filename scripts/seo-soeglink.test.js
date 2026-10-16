@@ -14,3 +14,9 @@ test('almindeligt modelnavn står uændret i model=', () => {
   assert.match(h, /model=CB%20500/);
   assert.doesNotMatch(h, /q=/);
 });
+
+test('W6 P3b: href til brug i HTML har &amp; mellem parametrene, kun html:false har rå &', () => {
+  const f = { brands: ['Honda'], models: ['CB 1000 R'] };
+  assert.strictEqual(soegHref(f), 'soegning.html?brands=Honda&amp;model=CB%201000%20R');
+  assert.strictEqual(soegHref(f, { html: false }), 'soegning.html?brands=Honda&model=CB%201000%20R');
+});
