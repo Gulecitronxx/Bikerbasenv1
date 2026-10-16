@@ -38,9 +38,9 @@ const sessionStorage = { getItem:()=>null, setItem:noop, removeItem:noop };
 const Store = { isComparing:()=>false, isFavorite:()=>false, getUser:()=>null };
 `;
 
-const { listingCardHTML, markerFotoFejl, fotoFejlHTML } = new Function(
+const { listingCardHTML, markerFotoFejl, fotoFejlHTML, swipeCardHTML, listingRowHTML, kkVisTekst } = new Function(
   STUB + KILDER.map(læs).join('\n') +
-  '\nreturn { listingCardHTML, markerFotoFejl, fotoFejlHTML };')();
+  '\nreturn { listingCardHTML, markerFotoFejl, fotoFejlHTML, swipeCardHTML, listingRowHTML, kkVisTekst };')();
 
 const KILDE_URL = 'https://mcsyd.dk/Produkter/Motorcykel/Brugt/Honda?p=180898&m=1489';
 function ekstern(extra){
@@ -216,4 +216,79 @@ test('footeren er ens på tværs af håndskrevne sider (synk-header.js synkronis
   assert.ok(facit);
   for (const f of ['soegning.html', 'annonce.html', 'login.html', 'dashboard.html', 'opret-annonce.html', 'guides.html', 'maerke-honda.html', 'type-sport.html'])
     assert.equal(grid(læsRod(f)), facit, `${f}: footerens link-gitter afviger fra index.html`);
+});
+
+/* ---------- w4-smaating: samme annonce, samme påstand i gitter, liste og swipe ---------- */
+
+const synlig = html => html.replace(/<span class="visually-hidden">[\s\S]*?<\/span>/g, '').replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+const kkGitter = l => (lister(listingCardHTML(l, 1))[0].match(/<span>([^<]*)<\/span>/) || [, ''])[1];
+const kkListe = l => (listingRowHTML(l, 1).match(/<dt>Kørekort<\/dt><dd>([\s\S]*?)<\/dd>/) || [, ''])[1].replace(/<[^>]+>/g, '').trim();
+const kkSwipe = l => (swipeCardHTML(l, 0).match(/<span class="card-koerekort swipe-card-kk"[^>]*>([\s\S]*?)<\/span>/) || [, ''])[1];
+
+test('kørekorttekst: gitterkort, listerække og swipe-kort siger det samme om samme annonce', () => {
+  const sæt = [
+    ekstern(), ekstern({ power: 10, ccm: 125 }), ekstern({ power: 44, ccm: 373 }), ekstern({ power: null, ccm: 800 }),
+    ekstern({ power: null, ccm: 125 }), ekstern({ power: null, ccm: null }), ekstern({ power: 200, ccm: 300 }),
+    egen(), egen({ ccm: 125, power: 12 }), egen({ ccm: 1000, power: 120 }),
+  ];
+  for (const l of sæt){
+    const gitter = kkGitter(l);
+    assert.ok(gitter, 'gitterkortet har en tekst');
+    assert.equal(kkSwipe(l), gitter, `swipe afviger fra gitter for ${l.ccm}/${l.power}`);
+    // Listen står under overskriften "Kørekort" og må derfor droppe ordet foran — resten er ens.
+    assert.equal(kkListe(l).toLowerCase(), gitter.replace(/^Kørekort /, '').toLowerCase(), `liste afviger fra gitter for ${l.ccm}/${l.power}`);
+  }
+  assert.equal(kkGitter(ekstern({ power: 44, ccm: 373 })), 'Mulig A2');
+  assert.equal(kkListe(ekstern({ power: 44, ccm: 373 })), 'Mulig A2');
+  assert.equal(kkSwipe(ekstern({ power: 44, ccm: 373 })), 'Mulig A2');
+  assert.equal(kkListe(ekstern({ power: 150, ccm: 1000 })), 'Kræver A');
+});
+
+test('swipe-kortet viser kilde og sælgertype som gitterkortets bundlinje (kun tilladte felter)', () => {
+  const e = swipeCardHTML(ekstern(), 0);
+  assert.match(e, /class="swipe-card-fod"/);
+  assert.match(e, /class="rk-kilde"[\s\S]*?<span class="rk-saelgertype">Forhandler · <\/span>mcsyd\.dk/);
+  assert.match(synlig(swipeCardHTML(ekstern({ saelgertype: 'privat', isDealer: false }), 0)), /Privat · mcsyd\.dk/);
+  // Kilden oplyser ingen sælgertype: domænet alene, intet gættet "Privat".
+  assert.ok(!/rk-saelgertype/.test(swipeCardHTML(ekstern({ isDealer: false, saelgertype: null }), 0)));
+  assert.match(swipeCardHTML(egen(), 0), /class="rk-kilde"[\s\S]*?<span>Privat sælger<\/span>/);
+  assert.match(swipeCardHTML(egen({ isDealer: true, seller: { name: 'Roskilde MC ApS' } }), 0), /Roskilde MC ApS/);
+  // Samme markup som gitterkortets kildedel.
+  const kildedel = h => (h.match(/<span class="rk-kilde"[^>]*>([\s\S]*?)<\/span><\/span>/) || [, ''])[1];
+  assert.equal(kildedel(swipeCardHTML(ekstern(), 0)), kildedel(listingCardHTML(ekstern(), 1)));
+  // Regel 2: ingen telefon/mail i kortets tekst.
+  assert.ok(!/@|\b\d{8}\b/.test(synlig(e)));
+});
+
+test('swipe-kortets badge siger også noget, når kategorien ikke kan afgøres (ingen tavs hullet badge)', () => {
+  assert.match(swipeCardHTML(ekstern({ power: null, ccm: 800 }), 0), /swipe-card-kk"[^>]*>Kørekort ikke afgjort</);
+  assert.equal(kkListe(ekstern({ power: null, ccm: 800 })), 'Ikke afgjort');
+  assert.equal(kkListe(ekstern({ power: null, ccm: null })), 'Ukendt');
+});
+
+test('kkVisTekst er den ene funktion bag badge-teksten', () => {
+  assert.equal(kkVisTekst({ kode: 'A', tekst: 'Kørekort A' }), 'Kræver A');
+  assert.equal(kkVisTekst({ kode: 'A2', tekst: 'Mulig A2' }), 'Mulig A2');
+  assert.equal(kkVisTekst({ kode: null, tekst: 'Kørekort ukendt' }), 'Kørekort ukendt');
+});
+
+test('mislykket foto rettes også i listerækken og swipe-kortet (ikke kun gitterkortet)', () => {
+  for (const klasse of ['.row-media', '.swipe-card-media']){
+    let indsat = '';
+    const media = { closest: () => null };
+    const img = {
+      tagName: 'IMG', dataset: {}, classList: { contains: c => c === 'card-photo' },
+      closest: s => (s === klasse ? media : null),
+      insertAdjacentHTML: (_p, h) => { indsat = h; }, remove: () => {},
+    };
+    assert.equal(markerFotoFejl(img), true, klasse);
+    assert.match(indsat, /foto-tom foto-fejl/);
+  }
+});
+
+test('mislykket foto: ét felt med én sætning, og CSS lader den stå på én linje', () => {
+  const html = fotoFejlHTML('sport');
+  assert.equal((html.match(/<p /g) || []).length, 1, 'én tekst');
+  assert.match(html, /Fotoet kunne ikke hentes hos kilden/);
+  assert.match(læsRod('css/styles.css'), /\.foto-fejl \.foto-tom-titel\{ max-width:none;/);
 });

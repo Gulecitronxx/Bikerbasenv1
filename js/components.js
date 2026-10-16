@@ -388,7 +388,9 @@ function fotoFejlHTML(typ){
 function markerFotoFejl(img){
   if (!img || img.tagName !== 'IMG' || !img.classList.contains('card-photo')) return false;
   if (img.dataset.fotoFejl) return false;
-  const media = img.closest('.card-media');
+  /* Kortet (.card-media), listerækken (.row-media) og swipe-kortet (.swipe-card-media) bruger alle listingMediaHTML();
+     før blev kun gitterkortet rettet, og de to andre viste browserens knækkede ikon + alt-tekst. */
+  const media = img.closest('.card-media') || img.closest('.row-media') || img.closest('.swipe-card-media');
   if (!media) return false;
   img.dataset.fotoFejl = '1';
   const kort = media.closest ? media.closest('.card') : null;
@@ -822,6 +824,28 @@ function kortFakta(l){
   };
 }
 
+/* Kørekortmærkatets synlige tekst — ÉN funktion til gitterkort, listerække og swipe-kort, så samme annonce
+   aldrig siger "Mulig A2" det ene sted og rå "A2" det andet (w4-smaating, Critic P2-3). "Kørekort A" er den
+   eneste tekst, der skrives om: kortet er smalt, og "Kørekort Kørekort A" var en dobbelt label. */
+function kkVisTekst(kk){
+  return kk.kode === 'A' ? 'Kræver A' : kk.tekst;
+}
+/* Samme tekst som kkVisTekst, men til en celle under overskriften "Kørekort" (listerækken): ordet foran
+   droppes, resten er ens ("Mulig A2", "Kræver A", "Ikke afgjort", "Ukendt"). */
+function kkCelleTekst(kk){
+  const t = kkVisTekst(kk).replace(/^Kørekort\s+/, '');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+/* Bundlinjens kildedel (ikon + "Forhandler · mcsyd.dk" / "Privat sælger" / forhandlerens navn). Delt mellem
+   gitterkortets .rk-fod og swipe-kortets .swipe-card-fod, så de to ikke kan skilles ad. */
+function kortKildeHTML(l, f){
+  const ikon = f.ext ? Icon.externalLink : (l.isDealer ? Icon.store : Icon.user);
+  const tekst = f.ext
+    ? `${f.saelgerType ? `<span class="rk-saelgertype">${f.saelgerType} · </span>` : ''}${escapeHTML(f.kilde)}`
+    : escapeHTML(f.kilde);
+  return { ikon, tekst };
+}
+
 function listingCardHTML(l, i){
   const f = kortFakta(l);
   if (f.ext && !sikkerUrl(l.externalUrl)) return '';   // en annonce uden brugbar kilde-URL vises ikke
@@ -847,7 +871,7 @@ function listingCardHTML(l, i){
 
   const kk = f.kk;
   const kkKlasse = kk.kode ? ` kk-${String(kk.kode).toLowerCase()}` : ' kk-ukendt';
-  const kkTekst = kk.kode === 'A' ? 'Kræver A' : kk.tekst;
+  const kkTekst = kkVisTekst(kk);
   const chips = [
     `<li class="rk-chip rk-kk${kkKlasse}" title="${escapeHTML(kk.forklaring)}">${Icon.idCard}<span>${escapeHTML(kkTekst)}</span><span class="visually-hidden">. ${kk.kode === 'A' ? 'Kørekort A. ' : ''}${escapeHTML(kk.forklaring)}</span></li>`,
   ];
@@ -883,10 +907,7 @@ function listingCardHTML(l, i){
     : 'Annoncen ligger på Bikerbasen.';
   /* Bunden: sted til venstre, sælgertype + kilde til højre. Sælgertypen ligger i eget span, som smalle
      kort skjuler (container query) — domænet er det eneste, køberen selv kan slå op, og det vinder pladsen. */
-  const kildeIkon = f.ext ? Icon.externalLink : (l.isDealer ? Icon.store : Icon.user);
-  const kildeHTML = f.ext
-    ? `${f.saelgerType ? `<span class="rk-saelgertype">${f.saelgerType} · </span>` : ''}${escapeHTML(f.kilde)}`
-    : escapeHTML(f.kilde);
+  const { ikon: kildeIkon, tekst: kildeHTML } = kortKildeHTML(l, f);
 
   return `
   <article class="card card-rich${f.ext ? '' : ' rk-egen'}" data-listing-id="${l.id}"${f.ext ? ' data-external="1"' : ''}${l.type ? ` data-type="${escapeHTML(l.type)}"` : ''}>

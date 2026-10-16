@@ -816,7 +816,13 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .card-rich .foto-tom{ padding: var(--space-2); }
 .rk-body{ display:flex; flex-direction:column; gap:8px; flex:1; padding: 12px 12px 11px; min-width:0; }
 .rk-top{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
-/* Smalle kort (forsidens fem-række, mærkesidens kortrække): prisen står under titlen i stedet for at presse den. */
+/* Smalle kort (forsidens fem-række, mærkesidens kortrække): prisen står under titlen i stedet for at presse den.
+   ÉT klart knækpunkt på KORTETS egen bredde (container query, ikke skærmbredden): ≤262 px = stablet, >262 px = side om
+   side. Målt på renderet side (w4-smaating, 390 og 1440 px): 212, 240, 254 og 256 px (forsidens fem-række, søgningens
+   tre kolonner, mærkesidens kortrække) = stablet; 279, 289, 332 og 358 px = side om side. Ingen kort ligger i
+   nærheden af grænsen, så det er to tilstande, ikke et glidende spring, og to kort på samme række har altid samme tilstand (alle kort i en
+   række er lige brede). Et glidende alternativ (flex-wrap) ville lade titlens længde afgøre placeringen kort for kort
+   og give en ujævn række. Grænsen er derfor lavet med vilje og står kun her. */
 @container (max-width: 262px){
   .rk-top{ flex-direction:column; align-items:flex-start; gap:2px; }
   .rk-pris.pris-mangler{ text-align:left; }
@@ -876,7 +882,10 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .tile:hover .tile-media img{ transform: scale(1.05); }
 .tile::after{
   content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
-  background: linear-gradient(to top, rgba(10,8,6,.92) 0%, rgba(10,8,6,.84) 34%, rgba(10,8,6,.28) 62%, transparent 82%);
+  /* Målt pixelvis med et helt hvidt foto (værste tilfælde): navnet (16 px/700, ikke "stor tekst") nåede kun 3,45:1,
+     fordi scrimmen allerede var nede på ~.46 dér, hvor øverste tekstlinje starter (~53 % fra bunden). Scrimmen holdes
+     nu på .8+ til 58 % og fades først derefter; navn og antal ligger i den dækkede del (se scripts/smaating.test.js). */
+  background: linear-gradient(to top, rgba(10,8,6,.92) 0%, rgba(10,8,6,.86) 42%, rgba(10,8,6,.8) 60%, rgba(10,8,6,.3) 80%, transparent 96%);
 }
 .tile .tile-label{
   position:absolute; left:12px; right:10px; bottom:9px; z-index:2;
@@ -1362,7 +1371,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .swipe-card-media img{ width:100%; height:100%; object-fit:cover; }
 .swipe-card-media::after{ content:""; position:absolute; inset:0; background: linear-gradient(to top, rgba(10,8,6,.28), transparent 40%); pointer-events:none; }
 .swipe-card-flag{ position:absolute; top:12px; left:12px; }
-.swipe-card-kk{ position:absolute; top:12px; right:12px; left:auto; bottom:auto; } /* .card-koerekort saetter left/bottom: uden auto spaendtes badgen ud over hele fotoet */
+.swipe-card-kk::before{ content:none; } /* teksten er allerede "Mulig A2" / "Kræver A" (kkVisTekst) — ingen ekstra "Kørekort"-label */
+.swipe-card-kk{ position:absolute; top:12px; right:12px; left:auto; bottom:auto; max-width:calc(100% - 130px); } /* .card-koerekort saetter left/bottom: uden auto spaendtes badgen ud over hele fotoet */
 .swipe-stamp{
   position:absolute; top:22px; font-family:var(--font-display); font-weight:700; font-size:26px; letter-spacing:.04em;
   text-transform:uppercase; padding:6px 14px; border-radius:10px; border:3px solid currentColor; opacity:0;
@@ -1378,7 +1388,11 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .swipe-card-meta{ display:flex; flex-wrap:wrap; gap:14px; color: var(--color-fg-muted); font-size:14px; }
 .swipe-card-meta span, .swipe-card-loc{ display:inline-flex; align-items:center; gap:5px; }
 .swipe-card-meta svg, .swipe-card-loc svg{ width:16px; height:16px; }
-.swipe-card-loc{ color: var(--color-fg-muted); font-size:14px; margin-top:8px; }
+.swipe-card-loc{ color: var(--color-fg-muted); font-size:14px; min-width:0; }
+.swipe-card-loc > span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Bunden: sted til venstre, sælgertype + kilde til højre — samme grammatik som gitterkortets .rk-fod. */
+.swipe-card-fod{ margin-top:10px; padding-top:10px; border-top:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; gap: var(--space-2); }
+.swipe-card-fod .rk-kilde{ font-size:13px; color: var(--color-fg-muted); }
 .swipe-actions{ display:flex; align-items:center; justify-content:center; gap: var(--space-5); margin-top: var(--space-5); }
 .swipe-act{ display:inline-flex; align-items:center; justify-content:center; border-radius:50%; border:1.5px solid var(--color-border); background: var(--color-surface); cursor:pointer; box-shadow: var(--shadow-sm); transition: transform .12s var(--ease-out), border-color .12s; }
 .swipe-act:hover{ transform: scale(1.06); }
@@ -3347,6 +3361,9 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   font-size:12.5px; font-weight:600; line-height:1.35;
   color: var(--color-fg-muted);
 }
+/* Mislykket kildefoto: ÉN tydelig, ærlig sætning på én linje (22ch tvang den på to linjer i 254 px-kort).
+   Er feltet for smalt, brydes den jævnt (balance) i stedet for at efterlade et enkelt ord på anden linje. */
+.foto-fejl .foto-tom-titel{ max-width:none; text-wrap:balance; }
 /* Listevisningens miniature er 136x102 px. Samme sætning, mindre skrift —
    ordene forkortes ikke, for så var der to formuleringer af det samme. */
 .row-media .foto-tom{ padding:6px; gap:4px; }

@@ -763,7 +763,7 @@ const UOPLYST_CELLE = '<span class="row-unknown">Ikke oplyst</span>';
    den samme regel, og en fjerde indpakning er praecis maaden, de 99
    opstod paa. */
 function rowSpecsHTML(l){
-  const kk = koerekortMaerkat(l).kode;
+  const kk = koerekortMaerkat(l);
   const motor = l.ccm == null
     ? UOPLYST_CELLE
     : escapeHTML(formatCcm(l.ccm)) + (l.power ? ` <span class="row-hk">· ${escapeHTML(formatPower(l.power))}</span>` : '');
@@ -772,7 +772,7 @@ function rowSpecsHTML(l){
     ${celle('Årgang', l.year == null ? UOPLYST_CELLE : escapeHTML(String(l.year)))}
     ${celle('Kilometer', l.km == null ? UOPLYST_CELLE : escapeHTML(formatKm(l.km)))}
     ${celle('Motor', motor)}
-    ${celle('Kørekort', kk ? `<span class="row-kk">${kk}</span>` : UOPLYST_CELLE)}
+    ${celle('Kørekort', `<span class="${kk.kode ? 'row-kk' : 'row-unknown'}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kkCelleTekst(kk))}</span>`)}
   </dl>`;
 }
 
@@ -1000,8 +1000,9 @@ let swipeIndex = 0;
 
 function swipeCardHTML(l, stackPos){
   const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
-  const loc = escapeHTML(l.city || l.region || '');
-  const k = koerekortMaerkat(l).kode;
+  const kk = koerekortMaerkat(l);
+  const f = kortFakta(l);
+  const kilde = kortKildeHTML(l, f);
   return `
   <article class="swipe-card" data-stack="${stackPos}" style="--stack:${stackPos}">
     <div class="swipe-card-media">
@@ -1009,13 +1010,16 @@ function swipeCardHTML(l, stackPos){
       <span class="swipe-stamp swipe-stamp-fav">Gem</span>
       <span class="swipe-stamp swipe-stamp-skip">Spring over</span>
       ${l.isDealer ? `<span class="badge badge-dealer swipe-card-flag">${Icon.shieldCheck}Forhandler</span>` : ''}
-      ${k ? `<span class="card-koerekort swipe-card-kk">${k}</span>` : ''}
+      <span class="card-koerekort swipe-card-kk" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kkVisTekst(kk))}</span>
     </div>
     <div class="swipe-card-body">
       <div class="swipe-card-price">${formatPrice(l.price)}</div>
       <h3 class="swipe-card-title">${brand} ${model}</h3>
       <div class="swipe-card-meta"><span>${Icon.calendar}${l.year}</span><span>${Icon.gauge}${formatKm(l.km)}</span><span>${Icon.engine}${formatCcm(l.ccm)}</span></div>
-      <div class="swipe-card-loc">${Icon.mapPin}${loc}</div>
+      <div class="swipe-card-fod">
+        <span class="swipe-card-loc">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
+        <span class="rk-kilde" title="${f.ext ? 'Annoncen ligger hos ' + escapeHTML(f.kilde) + '. Bikerbasen viser den, men handlen sker hos kilden.' : 'Annoncen ligger på Bikerbasen.'}">${kilde.ikon}<span>${kilde.tekst}</span></span>
+      </div>
     </div>
   </article>`;
 }
