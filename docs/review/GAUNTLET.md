@@ -61,6 +61,15 @@ S-004 crawl udløser ikke deploy · S-011 sitemap lastmod = byggedato · S-007/0
 - Ejerens favoritter at undersøge særligt: hero + søgekort + tillidsrække, mellemsektionens hierarki, "Sådan virker Bikerbasen"-modul.
 - SEO-Routine (cloud, kontinuerlig) er et **separat driftsspor**: opgave og rammer er skrevet i [`docs/seo-routine.md`](../seo-routine.md); selve cloud-routinen er endnu ikke oprettet (kræver ejerens godkendelse af adgang/interval).
 
+## STATUS 16.10.2026 (læs først ved genoptagelse)
+
+**Live på main (`2f9a1dd`, deploy grønt):** alle 10 designbilleder implementeret (forside, søgning, annonce, opret, mine annoncer/dashboard, login, kørekort A1/A2/A, typer/regioner/modeller, mærker, guides) + tekstsiderne/404 i guide-stil + ens containerskala + ét annoncekort. Bølge 3: datakvalitet/ærlighed (js/data.js), fail-soft byggekæde (scripts/build.js, seo-vagt.js), 22 nye SEO-sider (4 budget, 3 by, 4 mc, 2 modeller; sitemap 56 URL'er), ægte lastmod, kommentarfjerner i udgivelsen. 645 tests grønne; seo-audit 0 fund.
+**Læring:** (1) regler med mange stier (datafiltre) blev afvist 3× — forenkling + integrationstests virkede; (2) Critics må aldrig køre build/generatorer i hovedmappen; (3) fail-soft i CI betyder at datalaget kan fryse uden rød status.
+
+**Åbne beslutninger (ejeren):** favorit-hjerte på indekserede kort (D-008, oplæg i builder-w3-data.md) · koble talrensning ind i crawleren (ændrer gemte felter) · deploy rød ved frosset datalag (CI-ændring) · opret cloud-SEO-routine (`docs/seo-routine.md`) · el-motorcykler kan ikke oprettes (DB: ccm>0) · trg_listing_limit er kun before insert · lagerets alder / crawl udløser ikke deploy · Cloudflare-regel for to URL'er pr. side · kør `node scripts/sweep-datakvalitet.js <snapshot.json>` på rigtigt snapshot.
+**Kendte rester (P2/P3):** liste-/swipe-visning bruger 'A2' vs gitterkortets 'Mulig A2'; login-strip 32 px for bred ved 1920; afmeld.html uden footer; tekstsider har smalle kolonner; heroer uden rytter/mærkelogoer (ingen licenserede billeder); Boss Hoss >6000 cc nulstilles (bevidst); 'Super Cub årg 90' med udfyldt aargang nulstilles (kendt afvejning).
+**Praktisk:** hovedmappen skal være ren før integration (`git status`); en stash 'mock-build-artefakter' kan droppes; mock-build-rester ligger i `Desktop\rod\mock-build-rester`; worktrees i `Desktop\rod\wt\*` kan fjernes med `git worktree remove`.
+
 ## PARALLEL DESIGN GAUNTLET (startet 15.10.2026)
 
 Koordinering: [gauntlet/PARALLEL.md](gauntlet/PARALLEL.md). Design: `/DESIGN_DNA.md` (override: billederne er målet).
