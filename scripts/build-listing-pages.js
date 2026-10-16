@@ -17,7 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 const { ROOT, siteUrl, listingSlug, fetchListings, siteParts, esc } = require('./shared');
-const { tjekAntal, taelAnnonceSider } = require('./seo-vagt');
+const { tjekAntal, tjekSletninger, taelAnnonceSider } = require('./seo-vagt');
 
 // data.js giver os formatPrice, typeLabel, equipmentLabel osv.
 const dataSrc = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
@@ -307,14 +307,11 @@ ${contactModal}
   tjekAntal('Egne annoncesider', listings.length, taelAnnonceSider(ROOT), { nulErFejl: true });
 
   const forventede = new Set(listings.map(listingSlug));
+  const tilSletning = fs.readdirSync(ROOT).filter(f => /^annonce-.+\.html$/.test(f) && !forventede.has(f));
+  tjekSletninger('Annoncesider', tilSletning.length, taelAnnonceSider(ROOT));
   let slettet = 0;
-  for (const f of fs.readdirSync(ROOT)){
-    if (/^annonce-.+\.html$/.test(f) && !forventede.has(f)){
-      fs.unlinkSync(path.join(ROOT, f));
-      slettet++;
-    }
-  }
-  if (slettet) console.log(`Fjernede ${slettet} foraeldede annoncesider.`);
+  for (const f of tilSletning){ fs.unlinkSync(path.join(ROOT, f)); slettet++; }
+  if (slettet) console.log(`Fjernede ${slettet} foraeldede annoncesider: ${tilSletning.join(', ')}.\n::warning title=Sider fjernet::${slettet} annonceside(r) slettet (${tilSletning.join(', ')}).`);
 
   let bygget = 0;
   for (const l of listings){

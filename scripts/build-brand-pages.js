@@ -1056,14 +1056,11 @@ function naermesteMedianBrand(brand, brandMedian){
    stadig kunne findes via Google. */
 const forventede = new Set(brands.map(b => `maerke-${slugify(b)}.html`));
 SEO.tjekAntal('Mærkesider', brands.length, SEO.taelMaerkeSider(ROOT));
+const tilSletning = fs.readdirSync(ROOT).filter(f => /^maerke-.+\.html$/.test(f) && !forventede.has(f));
+SEO.tjekSletninger('Mærkesider', tilSletning.length, SEO.taelMaerkeSider(ROOT));
 let slettet = 0;
-for (const f of fs.readdirSync(ROOT)){
-  if (/^maerke-.+\.html$/.test(f) && !forventede.has(f)){
-    fs.unlinkSync(path.join(ROOT, f));
-    slettet++;
-  }
-}
-if (slettet) console.log(`Fjernede ${slettet} forældede mærkesider.`);
+for (const f of tilSletning){ fs.unlinkSync(path.join(ROOT, f)); slettet++; }
+if (slettet) console.log(`Fjernede ${slettet} forældede mærkesider: ${tilSletning.join(', ')}.\n::warning title=Sider fjernet::${slettet} mærkeside(r) slettet (${tilSletning.join(', ')}) — mærket findes ikke længere i lageret.`);
 
 let built = 0;
 for (const brand of brands){

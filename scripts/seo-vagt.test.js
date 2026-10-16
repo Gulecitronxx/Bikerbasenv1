@@ -38,9 +38,10 @@ test('vurderAntal: nulErFejl — 0 med committede sider er en tom hentning, uans
   assert.match(V.vurderAntal('Egne', 0, 2, 0.5, true).besked, /tillad_fald/);
 });
 
-test('vurderAntal: eget minAndel (70 % for kategorier)', () => {
-  assert.strictEqual(V.vurderAntal('x', 69, 100, V.MIN_ANDEL_KATEGORI).ok, false);
-  assert.strictEqual(V.vurderAntal('x', 70, 100, V.MIN_ANDEL_KATEGORI).ok, true);
+test('vurderAntal: eget minAndel (85 % for kategorier)', () => {
+  assert.strictEqual(V.MIN_ANDEL_KATEGORI, 0.85);
+  assert.strictEqual(V.vurderAntal('x', 84, 100, V.MIN_ANDEL_KATEGORI).ok, false);
+  assert.strictEqual(V.vurderAntal('x', 85, 100, V.MIN_ANDEL_KATEGORI).ok, true);
   assert.strictEqual(V.vurderAntal('x', 60, 100).ok, true, 'standarden er stadig 50 %');
 });
 
@@ -61,12 +62,63 @@ test('tjekLager: kategorier og kilder tjekkes hver for sig, opt-out-kilder træk
   // 60 % delvis hentning: passerede før, fanges nu (70 % pr. kategori)
   assert.throws(() => V.tjekLager({ ...ok, eksterne: 360, perKilde: { 'a.dk': 240, 'b.dk': 120 } }), e => e.code === 'SEO_FALD');
   // én kilde mangler helt, selvom totalen holder 70 %
-  assert.throws(() => V.tjekLager({ ...ok, eksterne: 490, perKilde: { 'a.dk': 400, 'b.dk': 90 } }), /Kilde b\.dk/);
+  assert.throws(() => V.tjekLager({ ...ok, eksterne: 520, perKilde: { 'a.dk': 430, 'b.dk': 90 } }), /Kilde b\.dk/);
+  // 75 % og 90 % delvis hentning: 75 % stoppes nu (kategorigulv 85 %)
+  assert.throws(() => V.tjekLager({ ...ok, eksterne: 450, perKilde: { 'a.dk': 300, 'b.dk': 150 } }), /Indekserede annoncer/);
   // b.dk er fravalgt i YAML: den mangler uden at det er et fald, og baseline for totalen mindskes
   assert.doesNotThrow(() => V.tjekLager({ ...ok, eksterne: 400, perKilde: { 'a.dk': 400 }, inaktive: new Set(['b.dk']) }));
-  // egne annoncer under gulvet røres ikke
-  assert.doesNotThrow(() => V.tjekLager({ ...ok, egne: 0, egneSider: 2 }));
+  // 0 egne med committede annoncesider er en tom hentning (sitemap og sider skal blive konsistente) ...
+  assert.throws(() => V.tjekLager({ ...ok, egne: 0, egneSider: 2 }), /Egne annoncer: 0 nu mod 2/);
+  // ... men er der slet ingen committede sider, er der intet at miste
+  assert.doesNotThrow(() => V.tjekLager({ ...ok, egne: 0, egneSider: 0 }));
+  // 1 af 3 egne (under gulvet) er stadig ikke en alarm
+  assert.doesNotThrow(() => V.tjekLager({ ...ok, egne: 1, egneSider: 3 }));
   assert.throws(() => V.tjekLager({ ...ok, egne: 5, egneSider: 30 }), /Egne annoncer/);
+});
+
+test('besked er handlingsorienteret: de to udveje med kommandoer, og at ledgeren skal committes', () => {
+  const b = V.vurderAntal('x', 0, 100).besked;
+  assert.match(b, /BB_TILLAD_FALD=1 node scripts\/build\.js/);
+  assert.match(b, /commit scripts\/sitemap-lastmod\.json/);
+  assert.match(b, /tillad_fald = true/);
+  assert.match(b, /springes trinnet over igen ved næste push/);
+  assert.strictEqual(b.includes(V.UDVEJE), true);
+});
+
+test('tjekSletninger: loft på 3 sider eller 5 % af sidemængden (P2-1)', () => {
+  assert.doesNotThrow(() => V.tjekSletninger('Mærkesider', 3, 25, { tillad: false }));
+  assert.throws(() => V.tjekSletninger('Mærkesider', 4, 25, { tillad: false }), e => e.code === 'SEO_FALD' && /loft 3/.test(e.message) && /BB_TILLAD_FALD=1/.test(e.message));
+  assert.doesNotThrow(() => V.tjekSletninger('Annoncesider', 30, 600, { tillad: false }), '5 % af 600 = 30');
+  assert.throws(() => V.tjekSletninger('Annoncesider', 31, 600, { tillad: false }), /loft 30/);
+  assert.strictEqual(V.tjekSletninger('x', 0, 0, { tillad: false }).ok, true);
+  const orig = console.warn; console.warn = () => {};
+  try { assert.strictEqual(V.tjekSletninger('x', 99, 25, { tillad: true }).tilladt, true); } finally { console.warn = orig; }
+});
+
+test('lastmod i CI: kun en committet dato kan bevidnes, ellers ingen lastmod, og ledgeren skrives ikke (P1-2)', () => {
+  const gammel = process.env.GITHUB_ACTIONS;
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'seo-ci-'));
+  fs.mkdirSync(path.join(dir, 'scripts'));
+  try {
+    process.env.GITHUB_ACTIONS = 'true';
+    const led = { ny: false, meta: {}, sider: { a: { h: 'H1', d: '2026-09-20' }, b: { h: 'H2', d: null } } };
+    assert.strictEqual(V.lastmodFor(led, 'a', 'H1', '2026-10-17'), '2026-09-20', 'uændret data beholder den committede dato');
+    assert.strictEqual(V.lastmodFor(led, 'a', 'H1', '2026-12-24'), '2026-09-20', 'også dagen efter — datoen er ændringens, ikke deployets');
+    assert.strictEqual(V.lastmodFor(led, 'a', 'ANDET', '2026-10-17'), null, 'ændret data: lastmod udelades, aldrig byggedagen');
+    assert.strictEqual(V.lastmodFor(led, 'b', 'H2', '2026-10-17'), null, 'ukendt dato forbliver ukendt');
+    assert.strictEqual(V.lastmodFor(led, 'ny-side', 'X', '2026-10-17'), null, 'ny side i CI: udelades');
+    assert.deepStrictEqual(led.sider.a, { h: 'H1', d: '2026-09-20' }, 'CI rører ikke ledger-posten');
+    assert.ok(!('ny-side' in led.sider));
+    V.skrivLedger(dir, { meta: { x: 1 }, sider: { a: { h: 'H', d: null } } });
+    assert.ok(!fs.existsSync(path.join(dir, 'scripts', V.LEDGER_FIL)), 'CI skriver ikke ledgeren');
+    delete process.env.GITHUB_ACTIONS;
+    assert.strictEqual(V.lastmodFor({ ny: false, meta: {}, sider: { a: { h: 'H1', d: '2026-09-20' } } }, 'a', 'ANDET', '2026-10-17'), '2026-10-17', 'lokalt: som før');
+    V.skrivLedger(dir, { meta: { x: 1 }, sider: { a: { h: 'H', d: null } } });
+    assert.ok(fs.existsSync(path.join(dir, 'scripts', V.LEDGER_FIL)), 'lokalt skrives ledgeren');
+  } finally {
+    if (gammel === undefined) delete process.env.GITHUB_ACTIONS; else process.env.GITHUB_ACTIONS = gammel;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('erFaldFejl/afslut: fejlkoderne SEO_FALD og SEO_HENT giver exit 3 (fail-soft), alt andet 1', () => {
@@ -75,6 +127,37 @@ test('erFaldFejl/afslut: fejlkoderne SEO_FALD og SEO_HENT giver exit 3 (fail-sof
   assert.strictEqual(V.erFaldFejl(Object.assign(new Error('x'), { code: 'SEO_HENT' })), true);
   assert.strictEqual(V.erFaldFejl(new Error('x')), false);
   assert.strictEqual(V.erFaldFejl(null), false);
+});
+
+test('build.js: faldet i ÉT datatrin gendanner hele sitemappet og ledgeren fra før buildet (P1-1)', () => {
+  const { spawnSync } = require('child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'build-snap-'));
+  try {
+    fs.mkdirSync(path.join(dir, 'scripts'));
+    for (const f of ['build.js', 'seo-vagt.js']) fs.copyFileSync(path.join(__dirname, f), path.join(dir, 'scripts', f));
+    fs.writeFileSync(path.join(dir, 'sitemap.xml'), 'FULDT-SITEMAP-FRA-FOER');
+    fs.writeFileSync(path.join(dir, 'scripts', 'sitemap-lastmod.json'), 'LEDGER-FRA-FOER');
+    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
+    const sm = JSON.stringify(path.join(dir, 'sitemap.xml')), le = JSON.stringify(path.join(dir, 'scripts', 'sitemap-lastmod.json'));
+    for (const t of trin){
+      // brand skriver et sitemap UDEN facet-poster og en ny ledger; facet fejler derefter (exit 3)
+      const krop = t === 'build-brand-pages.js' ? `require('fs').writeFileSync(${sm}, 'HALVT-SITEMAP'); require('fs').writeFileSync(${le}, 'NY-LEDGER');`
+        : t === 'build-facet-pages.js' ? 'process.exit(3);' : '';
+      fs.writeFileSync(path.join(dir, 'scripts', t), krop);
+    }
+    const r = spawnSync('node', [path.join(dir, 'scripts', 'build.js')], { encoding: 'utf8' });
+    assert.strictEqual(r.status, 0);
+    assert.strictEqual(fs.readFileSync(path.join(dir, 'sitemap.xml'), 'utf8'), 'FULDT-SITEMAP-FRA-FOER', 'hele sitemappet er gendannet, ikke det halve');
+    assert.strictEqual(fs.readFileSync(path.join(dir, 'scripts', 'sitemap-lastmod.json'), 'utf8'), 'LEDGER-FRA-FOER');
+    assert.match(r.stdout, /sitemap\.xml og scripts\/sitemap-lastmod\.json gendannet/);
+    assert.match(r.stdout, /HELE det committede sitemap gendannes/, 'advarselsteksten er sand');
+    assert.match(r.stdout, /BB_TILLAD_FALD=1 node scripts\/build\.js/);
+    // uden fald: intet gendannes
+    for (const t of trin) fs.writeFileSync(path.join(dir, 'scripts', t), t === 'build-brand-pages.js' ? `require('fs').writeFileSync(${sm}, 'NYT-SITEMAP');` : '');
+    const ok = spawnSync('node', [path.join(dir, 'scripts', 'build.js')], { encoding: 'utf8' });
+    assert.strictEqual(ok.status, 0);
+    assert.strictEqual(fs.readFileSync(path.join(dir, 'sitemap.xml'), 'utf8'), 'NYT-SITEMAP');
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('build.js: et datatrin med exit 3 beholder de committede sider og fortsætter; andre fejl stopper (simuleret)', () => {

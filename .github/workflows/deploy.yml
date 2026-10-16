@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       tillad_fald:
-        description: 'Tillad bevidst fald i antal annoncer/kilder (fx en kilde er fravalgt, CLAUDE.md regel 5). Saetter BB_TILLAD_FALD=1.'
+        description: 'Tillad bevidst fald i antal annoncer/kilder (fx en kilde er fravalgt, CLAUDE.md regel 5). Saetter BB_TILLAD_FALD=1 for denne udgivelse. Baseline skifter foerst, naar en lokal build (BB_TILLAD_FALD=1 node scripts/build.js) er committet med scripts/sitemap-lastmod.json.'
         type: boolean
         default: false
 
@@ -56,11 +56,6 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-      # Den opdaterede lastmod-ledger gemmes til commit-jobbet nedenfor (S-011).
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sitemap-lastmod
-          path: scripts/sitemap-lastmod.json
 
   deploy:
     needs: build
@@ -71,36 +66,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-
-  # Efter en vellykket udgivelse committes den opdaterede lastmod-ledger tilbage til main, saa sitemap-
-  # lastmod kun rykker, naar en sides indhold er aendret — ikke ved hver udgivelse (S-011, blind
-  # Critic P1-2). Kun filen scripts/sitemap-lastmod.json, kun hvis den er aendret. [skip ci] og
-  # GITHUB_TOKEN-pushes udloeser ikke nye workflow-koersler, saa der er aldrig en loekke.
-  # Moenster som en almindelig bot-commit; kraever at main tillader github-actions[bot] at pushe.
-  lastmod:
-    needs: deploy
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-      - uses: actions/download-artifact@v4
-        with:
-          name: sitemap-lastmod
-          path: ${{ runner.temp }}/lastmod
-      - name: Commit sitemap-lastmod.json hvis den er aendret
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
-          cp "$RUNNER_TEMP/lastmod/sitemap-lastmod.json" scripts/sitemap-lastmod.json
-          if git diff --quiet -- scripts/sitemap-lastmod.json; then
-            echo "sitemap-lastmod.json uaendret - intet at committe."
-            exit 0
-          fi
-          git add scripts/sitemap-lastmod.json
-          git commit -m "chore: sitemap-lastmod [skip ci]"
-          git push origin HEAD:main

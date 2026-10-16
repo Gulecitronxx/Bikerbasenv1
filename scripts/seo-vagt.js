@@ -32,7 +32,7 @@ const MIN_ANDEL = 0.5;
 const GULV = 20;
 /* Hele eksterne lageret og de egne annoncer skal holde 70 %; en enkelt kilde 50 % (en kilde
    kan lovligt flytte sig meget, men en kilde, der pludselig mangler, er en delvis hentning). */
-const MIN_ANDEL_KATEGORI = 0.7;
+const MIN_ANDEL_KATEGORI = 0.85;
 /* Exit-kode, generatorerne bruger ved et fald/en fejlet hentning, så scripts/build.js kan bevare de
    committede sider og fortsætte (fail-soft) i stedet for at låse hele udgivelsen. */
 const EXIT_FALD = 3;
@@ -40,14 +40,22 @@ const LEDGER_FIL = 'sitemap-lastmod.json';
 
 /* ---------- Fail-safe antal ---------- */
 
+/* Handlingsorienteret udvej, fælles for alle fejlbeskeder. "Sticky": CI skriver aldrig ledgeren, så
+   baseline (scripts/sitemap-lastmod.json) skifter først, når en LOKAL build er committet. Uden det
+   springes brand/facet/srp over igen ved næste push. */
+const UDVEJE = 'Er faldet bevidst (fx en kilde er fravalgt, regel 5): '
+  + '(1) kør LOKALT `BB_TILLAD_FALD=1 node scripts/build.js` og commit scripts/sitemap-lastmod.json + de berørte sider '
+  + '(uden den commit springes trinnet over igen ved næste push), eller (2) start workflowet "Byg og udgiv" manuelt med '
+  + 'tillad_fald = true (engangsudgivelse — kør derefter punkt 1, ellers er baseline stadig den gamle).';
+
 /* Er `nu` rimeligt i forhold til `forrige`? forrige ukendt eller 0 => ja (første
    byg, eller der var intet at miste). Lig med grænsen er stadig ok. */
 function vurderAntal(navn, nu, forrige, minAndel = MIN_ANDEL, nulErFejl = false){
   const n = Number(nu), f = Number(forrige);
   if (nulErFejl && n === 0 && f > 0){
     return { ok: false, nu: n, forrige: f, besked: `${navn}: 0 nu mod ${f} sidst. Nul er signaturen på en tom/fejlet hentning, så der slettes ingen sider — `
-      + 'dette byggetrin afbrudt. I CI (scripts/build.js) beholdes de committede sider, og resten udgives med en advarsel. '
-      + 'Er alle annoncer bevidst fjernet, er der to udveje: kør lokalt med BB_TILLAD_FALD=1, eller start workflowet "Byg og udgiv" manuelt med tillad_fald = true.' };
+      + 'dette byggetrin afbrudt. I CI (scripts/build.js) beholdes de committede sider og hele sitemappet, og resten udgives med en advarsel. '
+      + UDVEJE };
   }
   if (!Number.isFinite(n) || n < 0) return { ok: false, nu: n, forrige: f, besked: `${navn}: ugyldigt antal (${nu}).` };
   if (!Number.isFinite(f) || f < GULV) return { ok: true, nu: n, forrige: f, besked: '' };
@@ -56,10 +64,22 @@ function vurderAntal(navn, nu, forrige, minAndel = MIN_ANDEL, nulErFejl = false)
     ok: false, nu: n, forrige: f,
     besked: `${navn}: kun ${n} nu mod ${f} sidst (under ${Math.round(minAndel * 100)} %). `
       + 'Det ligner en fejlet eller tom hentning, ikke en rigtig ændring — dette byggetrin afbrudt, før der slettes '
-      + 'eller overskrives noget. I CI (scripts/build.js) beholdes de committede sider, og resten udgives med en '
-      + 'advarsel. Er faldet bevidst (fx en kilde er fravalgt, regel 5), er der to udveje: kør lokalt med '
-      + 'BB_TILLAD_FALD=1, eller start workflowet "Byg og udgiv" manuelt med tillad_fald = true.',
+      + 'eller overskrives noget. I CI (scripts/build.js) beholdes de committede sider og hele sitemappet, og resten '
+      + 'udgives med en advarsel. ' + UDVEJE,
   };
+}
+
+/* Loft for antal SLETTEDE sider pr. byg (mærke-/annoncesider). En delvis hentning over procentgulvet kan
+   ellers fjerne sjældne mærkers sider uden en lyd. Loft: 3 sider, eller 5 % af sidemængden, hvis det er
+   mere. Derover afbrydes trinnet (fail-soft). BB_TILLAD_FALD=1 omgår loftet. */
+function tjekSletninger(navn, antal, total, opts = {}){
+  const loft = Math.max(3, Math.floor((Number(total) || 0) * 0.05));
+  if (antal <= loft) return { ok: true, loft };
+  const tillad = opts.tillad !== undefined ? opts.tillad : process.env.BB_TILLAD_FALD === '1';
+  const besked = `${navn}: ${antal} sider ville blive slettet i ét byg (loft ${loft}). Det ligner en delvis hentning, ikke en rigtig ændring — `
+    + 'dette byggetrin afbrudt, før noget slettes. ' + UDVEJE;
+  if (tillad){ console.warn(`ADVARSEL (BB_TILLAD_FALD=1): ${besked}`); return { ok: true, loft, tilladt: true }; }
+  throw Object.assign(new Error(besked), { code: 'SEO_FALD' });
 }
 
 /* Kaster ved et drastisk fald. BB_TILLAD_FALD=1 er den eneste vej udenom, og den
@@ -107,7 +127,9 @@ function taelPrKilde(items){
 /* Tjekker hver kategori for sig: egne, eksterne i alt, og hver kilde. Kilder i `inaktive` er
    trukket ud af baseline. Kaster ved første fald (via tjekAntal). */
 function tjekLager({ egne, eksterne, perKilde, baseline, inaktive = new Set(), egneSider }){
-  tjekAntal('Egne annoncer', egne, egneSider, { minAndel: MIN_ANDEL_KATEGORI });
+  // nulErFejl: 0 egne med committede annoncesider er en tom hentning — ellers ville sitemappet miste annonce-
+  // poster, mens siderne blev stående (inkonsistent). Siden hele sitemappet gendannes ved et sprunget trin.
+  tjekAntal('Egne annoncer', egne, egneSider, { minAndel: MIN_ANDEL_KATEGORI, nulErFejl: true });
   const bKilder = baseline.perKilde || {};
   const fravalgt = Object.entries(bKilder).filter(([d]) => inaktive.has(d)).reduce((s, [, n]) => s + n, 0);
   tjekAntal('Indekserede annoncer', eksterne, (baseline.eksterne || 0) - fravalgt, { minAndel: MIN_ANDEL_KATEGORI });
@@ -153,6 +175,7 @@ function laesLedger(root){
 }
 
 function skrivLedger(root, ledger){
+  if (process.env.GITHUB_ACTIONS) return;   // CI ændrer aldrig ledgeren — se lastmodFor
   const sider = {};
   for (const k of Object.keys(ledger.sider).sort()) sider[k] = ledger.sider[k];
   const ud = { version: 1, meta: ledger.meta || {}, sider };
@@ -187,6 +210,10 @@ function indholdsHash(html){
    - Ukendt side, når ledgeren lige er oprettet     => null (vi ved det ikke). */
 function lastmodFor(ledger, nøgle, hash, idag){
   const e = ledger.sider[nøgle];
+  /* I CI committes ledgeren ikke (ingen bot-commit), så CI kan kun BEVIDNE en committet dato: er hashet lig
+     det committede, bruges dens dato; ellers udelades lastmod. Byggedagen opfindes aldrig (S-011), og CI
+     ændrer ikke ledgeren (skrivLedger). Lokale builds, der committes, flytter datoerne. */
+  if (process.env.GITHUB_ACTIONS) return e && e.h === hash ? (e.d || null) : null;
   if (!e){
     const d = ledger.ny ? null : idag;
     ledger.sider[nøgle] = { h: hash, d };
@@ -244,6 +271,6 @@ function sideFakta(html){
 }
 
 module.exports = {
-  MIN_ANDEL, MIN_ANDEL_KATEGORI, GULV, EXIT_FALD, LEDGER_FIL, inaktiveDomaener, laesInaktiveDomaener, taelPrKilde, tjekLager, erFaldFejl, afslut, vurderAntal, tjekAntal, taelAnnonceSider, taelMaerkeSider, taelSitemapUrls,
+  MIN_ANDEL, MIN_ANDEL_KATEGORI, GULV, EXIT_FALD, LEDGER_FIL, UDVEJE, tjekSletninger, inaktiveDomaener, laesInaktiveDomaener, taelPrKilde, tjekLager, erFaldFejl, afslut, vurderAntal, tjekAntal, taelAnnonceSider, taelMaerkeSider, taelSitemapUrls,
   laesLedger, skrivLedger, indholdsHash, lastmodFor, genberegnLastmod, urlLinje, renDato, sideFakta, taelSitemapUrls,
 };
