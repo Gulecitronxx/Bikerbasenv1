@@ -432,3 +432,7 @@
   .so-infoband{ padding:8px 12px; font-size:12px; }
   .so-infoband > :not([hidden]) ~ :not([hidden]){ border-left:0; margin-left:0 !important; padding-left:0; flex:1 1 100%; }
 }
+
+/* Tap-mål (w9): sammenlign-knap og info-knapper er mindst 40 x 40 (hit-feltet var 44 via ::before, men selve boksen var 34/24). */
+.so-results .card-compare{ width:40px; height:40px; right:4px; bottom:4px; }
+.so-infoband .mix-info, .so-toolbar .sortering-info{ width:40px; height:40px; min-width:40px; min-height:40px; margin-block:-10px; }

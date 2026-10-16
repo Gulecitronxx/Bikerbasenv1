@@ -350,3 +350,5 @@
   .an-kk.an-strak, .an-tjek.an-strak{ align-content:center; }
 }
 @media (min-width:1180px){ .an-grid.an-maal > .an-col, .an-grid.an-maal > .an-side{ align-self:start; } }
+
+.similar-strip .card-compare{ width:40px; height:40px; right:4px; bottom:4px; }

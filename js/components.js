@@ -683,7 +683,7 @@ function koerekortMaerkat(l){
         kørekortet er ikke afgjort, og vejen til svaret er kW i registreringsattesten. */
   if (!kode && koerekortTvivl(l)){
     return { kode: null, graense: true, tekst: KK_UAFGJORT + ' — tjek kW', forklaring:
-      `Annoncen oplyser ${formatPower(hk)} (${formatCcm(ccm) || 'ccm ikke oplyst'}). A2-grænsen er 35 kW, og 35 kW er 47,6 hk — kilderne runder det op til 48. ` +
+      `Annoncen oplyser ${formatPower(hk)} (${formatCcm(ccm) || 'ccm ikke oplyst'}). A2-grænsen er 35 kW, og 35 kW er 47,6 hk, så et oplyst 48 kan være afrundet. ` +
       'Derfor kan vi ikke afgøre, om den kræver A eller kan køres på A2. Tjek kW i registreringsattesten, eller spørg sælgeren.' };
   }
 

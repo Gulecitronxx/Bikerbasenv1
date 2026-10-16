@@ -64,3 +64,14 @@ Hvad ligner IKKE billederne endnu
 
 DELT-ØNSKE: ingen (components.js urørt). Nye tests: js/w9-marketplace-galleri.test.js, js/w9-marketplace-kk.test.js.
 Commits: se `git log gauntlet/w9-marketplace`; master (w7-visuel) er merget ind uden konflikter.
+
+## Runde 2 (efter Critic: ACCEPTER, 5 P2)
+- A-V1 kolonner: kort-placeringen søges (27 kombinationer af "Kan du køre", "Det bør du tjekke", "Handl trygt" i den rigtige DOM), og sidste kort i hver kortere kolonne strækkes: de tre kolonners bundkanter flugter (forskel 0 px, målt på egen 3/1/0 fotos og ekstern 48 hk/uden foto ved 1440). Pris: det sidste kort kan have luft indeni.
+- Galleri: fokuserbar gruppe, ArrowLeft/Right, Home/End, aria-live-tæller; test i js/w9-marketplace-r2.test.js; Playwright: 1/3 -> 3/3 -> 1/3 -> 2/3.
+- Brødkrumme "Motorcykler": genbruger eksisterende nøgle `bb_srp_position` (ingen ny nøgle, privatlivspolitikken uændret), kun hvis gemt id = denne annonce. Målt: sport + sort=price-desc + scroll 500 bevaret; direkte besøg giver `soegning.html`.
+- Søgning ved backend 500/tomt: ingen levende annoncer + fejlet/ok-tomt => ærlig fejltilstand ("Vi kunne ikke hente annoncerne lige nu", "Prøv igen"), "Lageret kunne ikke hentes" i stedet for "51 motorcykler fundet", intet tal i hero, ingen snapshot-kort. Rest: facettallene i sidebaren viser stadig snapshot-tal i den tilstand.
+- Info-bånd: kildefordeling, lagerets alder og sorteringsregel i ÉT bånd (id'er uændrede; skjules, hvis alt er skjult).
+- CLS efter merge med master: 0,0000 på 9 søgevarianter (390 lys/mørk, 1440, med filter-URL); smoke --cls 0.05 --strikt: 20 målinger, 0 fejl/advarsler.
+- P3: sammenlign- og info-knapper 40x40; 48-49 hk-tekst "kan være afrundet" (DELT: js/components.js koerekortMaerkat, én streng); dobbelt "Gå til annoncen": ikke reproducerbar - 0 af alle scrollpositioner (60 px-trin, 390 px) har to synlige CTA'er; formodet fuldside-screenshot-artefakt.
+- npm test: 798 tests, 6 røde = crawler-tests (`@supabase/supabase-js` mangler i junction), uændret. Ny test: js/w9-marketplace-r2.test.js.
+- Ikke gjort: større omlægning af søgesidens komposition ud over info-båndet (sidebar, hero, chips, resultathoved lå allerede i billedets rækkefølge).
