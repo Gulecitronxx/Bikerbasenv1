@@ -309,3 +309,14 @@
   main.fa-side.fa-koerekort > .container.fa-krop > .fa-soeg-vrap{ order:-1 !important; }
   .fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-4); }
 }
+
+/* ============ w7-visuel: kompaktere heroer på desktop (billede 7 og 8) ============
+   Billede 8 (type): overskrift, foto og faktapanel står i ÉN række på ca. 260 px, og "Udvalgte" begynder under 45 % af
+   skærmhøjden. Vores typehero var 550 px høj (430 px bred fotokolonne, 32 px luft over rækken, 88 px bundpolstring) og skubbede
+   "Udvalgte" til 862 px. Billede 7 (kørekort): kompakt hero uden den tomme række over overskriften. */
+@media (min-width:1100px){
+  .fa-type .fa-hero-grid, .fa-model .fa-hero-grid{ grid-template-columns: minmax(0,1fr) 320px 300px; padding-top: var(--space-4); }
+  .fa-type .fa-hero-bike, .fa-model .fa-hero-bike{ margin:0 -20px; }
+  .fa-type .fa-hero, .fa-model .fa-hero{ padding-bottom: calc(var(--space-8) + var(--space-2)); }
+  .fa-koerekort .fa-hero-grid{ padding-top: var(--space-4); }
+}

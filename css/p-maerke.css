@@ -433,3 +433,8 @@
 
 .mk-cta-bar .btn{ width:auto; align-self:flex-start; }
 @media (min-width:700px) and (max-width:1099px){ .mk-cta .btn{ width:auto; align-self:flex-start; } }
+
+/* w7-visuel: etiketterne står i samme højde. Rækken var bundjusteret, og kørekortvælgeren er et par px højere end felterne
+   (3 px ramme + 2 x 4 px luft), så "Kørekort" stod 5 px lavere end de andre etiketter (forsiden bruger start-justering). */
+@media (min-width:1100px){ .mk-search{ align-items:start; } }
+.mk-search .kk-seg label{ min-height:37px; }
