@@ -75,7 +75,8 @@
   padding: var(--space-4) var(--space-5);
 }
 .op-page .stepper{ margin:0; overflow:visible; gap: var(--space-3); align-items:center; min-height:44px; }
-.op-page .step-item{ gap: var(--space-3); flex-shrink:1; min-width:0; }
+.op-page .step-item{ gap: var(--space-3); flex-shrink:1; min-width:40px; min-height:44px; align-items:center; }
+.op-page .step-dot{ flex:0 0 auto; }
 .op-page .step-dot{ width:40px; height:40px; font-size:16px; font-family: var(--font-display); }
 .op-page .step-dot svg{ width:20px; height:20px; }
 .op-page .step-item:not(.active):not(.done) .step-dot{ background: var(--color-surface-2); }
@@ -210,6 +211,8 @@
 }
 .op-form .photo-thumb .cover-tag.new{ background: var(--color-primary); color: var(--color-on-primary); }
 .op-form .photo-thumb .remove-photo{ width:28px; height:28px; top:6px; right:6px; }
+.op-form .photo-thumb .remove-photo::after, .op-form .photo-thumb .photo-move::after, .op-form .photo-thumb .photo-cover::after{ content:""; position:absolute; inset:-6px; }
+.op-form .photo-actions button{ position:relative; }
 .photo-add{
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
   aspect-ratio:4/3; border:2px dashed var(--color-input-border); border-radius: var(--radius-sm);
@@ -321,6 +324,7 @@
 }
 .op-form .photo-thumb .cover-tag.new{ padding:2px 6px; font-size:10.5px; }
 .op-form .photo-thumb .remove-photo{ width:26px; height:26px; top:4px; right:4px; }
+.op-form .photo-thumb .remove-photo::after{ inset:-7px; }
 .photo-add{ aspect-ratio:1; font-size:12px; }
 .photo-add svg{ width:20px; height:20px; }
 

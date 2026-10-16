@@ -118,7 +118,10 @@ function wireAnkerSpy(){
       travl = false;
       const h = document.querySelector('.form-step[data-step="2"] h2');
       if (!h) return;
-      const nyt = h.getBoundingClientRect().top < window.innerHeight * 0.45 ? 2 : 1;
+      /* Trin 2 er aktivt først, når dets overskrift er nået op under toppen (eller siden er scrollet i bund) —
+         ellers viser bjælken 2, mens "1. Motorcyklens detaljer" stadig står øverst på skærmen. */
+      const bund = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      const nyt = (h.getBoundingClientRect().top < window.innerHeight * 0.22 || bund) ? 2 : 1;
       if (nyt !== ankerTrin){ ankerTrin = nyt; renderStepper(); }
     });
   }, { passive: true });

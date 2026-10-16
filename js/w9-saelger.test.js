@@ -659,3 +659,68 @@ test('K9e Hele flowet uden konsolfejl og uden uhåndterede promise-afvisninger',
     assert.deepStrictEqual(s.fund.konsol, []);
   } finally { await s.luk(); }
 });
+
+/* ---------------- Runde 2 ---------------- */
+
+test('R2a Favorit: databasefejl ruller hjertet tilbage og viser ærlig besked (gem og fjern)', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true, annoncer: [FREMMED] });
+  try {
+    s.t.tabeller.favorites.push({ user_id: BRUGER_ID, listing_id: FREMMED.id });
+    await s.page.goto(URL('mine-annoncer.html?tab=favoritter'), { waitUntil: 'networkidle' });
+    await s.page.waitForSelector('#fav-grid .db-row');
+    s.t.fejl['DELETE favorites'] = { status: 500, besked: 'nede' };
+    await s.page.locator('#fav-grid [data-fav-toggle]').click();
+    await s.page.waitForFunction(() => /Kunne ikke gemme favoritten/.test(document.body.innerText), null, { timeout: 6000 });
+    assert.strictEqual(s.t.tabeller.favorites.length, 1, 'databasen uændret');
+    await s.page.waitForSelector('#fav-grid .db-row [data-fav-toggle][aria-pressed="true"]');   // hjertet tilbage som gemt
+    const lokalt = await s.page.evaluate(() => JSON.parse(localStorage.getItem(Store.KEYS.favorites)));
+    assert.deepStrictEqual(lokalt.map(String), [FREMMED.id]);
+    // gem-retningen
+    s.t.tabeller.favorites.length = 0;
+    await s.page.goto(URL('mine-annoncer.html?tab=favoritter'), { waitUntil: 'networkidle' });
+    await s.page.evaluate(() => localStorage.setItem(Store.KEYS.favorites, '[]'));
+    s.t.fejl['POST favorites'] = { status: 500, besked: 'nede' };
+    await s.page.evaluate(id => Store.toggleFavorite(id), FREMMED.id);
+    await s.page.waitForFunction(() => /Kunne ikke gemme favoritten/.test(document.body.innerText), null, { timeout: 6000 });
+    assert.deepStrictEqual(await s.page.evaluate(() => JSON.parse(localStorage.getItem(Store.KEYS.favorites))), []);
+  } finally { await s.luk(); }
+});
+
+test('R2b Trinbjælken viser trin 1, så længe "1. Motorcyklens detaljer" er øverst; tap-mål ≥ 40 px', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const bredde of [1280, 390]){
+    const s = await aabn({ loggetInd: true, viewport: { width: bredde, height: 800 } }, 'opret-annonce.html');
+    try {
+      const aktiv = () => s.page.locator('#stepper .step-item.active .step-label').innerText();
+      assert.strictEqual(await aktiv(), 'Type & specs');
+      // scroll så h2 for sektion 2 står i nedre halvdel af skærmen: stadig trin 1
+      await s.page.evaluate(() => { const h = document.querySelector('.form-step[data-step="2"] h2'); window.scrollTo(0, h.getBoundingClientRect().top + scrollY - innerHeight * 0.6); });
+      await s.page.waitForTimeout(250);
+      assert.strictEqual(await aktiv(), 'Type & specs', 'overskrift 2 ligger endnu nede på skærmen');
+      await s.page.evaluate(() => { const h = document.querySelector('.form-step[data-step="2"] h2'); window.scrollTo(0, h.getBoundingClientRect().top + scrollY - 40); });
+      await s.page.waitForTimeout(250);
+      assert.strictEqual(await aktiv(), 'Pris & beskrivelse');
+      await udfylSide1(s.page); await naeste(s.page);
+      await vaelgBilleder(s.page, 2);
+      await s.page.waitForFunction(() => document.querySelectorAll('#photo-grid .photo-thumb').length === 2);
+      const maal = await s.page.evaluate(() => {
+        const ud = [];
+        const boks = (el, pseudo) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el, pseudo); const ins = pseudo ? ['top', 'right', 'bottom', 'left'].map(k => parseFloat(cs[k]) || 0) : [0, 0, 0, 0]; return { b: r.width - (ins[1] + ins[3]), h: r.height - (ins[0] + ins[2]) }; };
+        document.querySelectorAll('#stepper .step-item, #photo-grid .remove-photo, #photo-grid .photo-move, #photo-grid .photo-cover').forEach(el => {
+          if (!el.offsetParent) return;
+          const b = boks(el), p = getComputedStyle(el, '::after');
+          const harFlade = p.content !== 'none' && p.position === 'absolute';
+          const w = b.b + (harFlade ? -2 * parseFloat(p.left) * -1 * -1 : 0);
+          const r = el.getBoundingClientRect();
+          const ekstra = harFlade ? -2 * parseFloat(p.top) : 0;       // inset negativ → ekstra = 2*|inset|
+          ud.push({ klasse: el.className.split(' ')[0], w: r.width + ekstra, h: r.height + ekstra });
+        });
+        return ud;
+      });
+      assert.ok(maal.length >= 5, 'fandt knapper: ' + maal.length);
+      for (const m of maal) assert.ok(m.w >= 39.5 && m.h >= 39.5, `${m.klasse} tap-mål ${m.w}x${m.h} ved ${bredde}`);
+      assert.ok((await overflow(s.page)) <= 0);
+    } finally { await s.luk(); }
+  }
+});
