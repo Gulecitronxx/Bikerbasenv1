@@ -71,6 +71,12 @@ const SNAP = ['sitemap.xml', 'scripts/sitemap-lastmod.json'].map(f => path.join(
 const AFHAENGIGE = new Set(['build-srp.js']);
 const faldTrin = [];
 
+/* Annoncesider, der skal væk, slettes først SIDST og kun hvis intet datatrin er sprunget (listing-generatoren
+   skriver listen hertil i stedet for at slette). Ellers ville et gendannet sitemap, og de ikke-opdaterede
+   mærke-/budgetsider, pege på slettede sider (404). */
+const SLETTELISTE = path.join(require('os').tmpdir(), `bb-slet-${process.pid}.json`);
+process.env.BB_SLETTELISTE = SLETTELISTE;
+
 for (const script of trin){
   console.log(`\n--- ${script} ---`);
   if (faldTrin.length && AFHAENGIGE.has(script)){
@@ -88,6 +94,16 @@ for (const script of trin){
     console.error(`\n${script} fejlede (exit ${r.status === null ? 'signal ' + r.signal : r.status}).`);
     process.exit(r.status || 1);
   }
+}
+
+let tilSletning = [];
+try { tilSletning = JSON.parse(fs.readFileSync(SLETTELISTE, 'utf8')); } catch { /* listing-trinnet kørte ikke / intet at slette */ }
+try { fs.unlinkSync(SLETTELISTE); } catch { /* ingen liste */ }
+if (!faldTrin.length && tilSletning.length){
+  for (const f of tilSletning) fs.unlinkSync(path.join(__dirname, '..', f));
+  console.log(`Fjernede ${tilSletning.length} foraeldede annoncesider: ${tilSletning.join(', ')}.\n::warning title=Sider fjernet::${tilSletning.length} annonceside(r) slettet (${tilSletning.join(', ')}).`);
+} else if (tilSletning.length){
+  console.log(`[SEO_FALD-MARKØR] Sletning af ${tilSletning.length} annoncesider (${tilSletning.join(', ')}) UDSKUDT, fordi et datatrin blev sprunget over — siderne og det gamle sitemap er konsistente. Sletningen sker i næste vellykkede byg.`);
 }
 
 if (faldTrin.length){

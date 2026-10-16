@@ -87,7 +87,10 @@ function tjekSletninger(navn, antal, total, opts = {}){
 function tjekAntal(navn, nu, forrige, opts = {}){
   const v = vurderAntal(navn, nu, forrige, opts.minAndel, opts.nulErFejl);
   if (v.ok) return v;
-  const tillad = opts.tillad !== undefined ? opts.tillad : process.env.BB_TILLAD_FALD === '1';
+  /* nulAltidFejl: 0 mod en kendt baseline er en tom hentning, også under BB_TILLAD_FALD (som kun omgår
+     procent-/kildegulvene). Ellers kunne ét trin med `[]` på eksterne bygge facetter uden eksterne. */
+  const tillad = opts.nulAltidFejl && Number(nu) === 0 ? false
+    : opts.tillad !== undefined ? opts.tillad : process.env.BB_TILLAD_FALD === '1';
   if (tillad){
     console.warn(`ADVARSEL (BB_TILLAD_FALD=1): ${v.besked}`);
     return Object.assign({}, v, { ok: true, tilladt: true });
@@ -132,7 +135,7 @@ function tjekLager({ egne, eksterne, perKilde, baseline, inaktive = new Set(), e
   tjekAntal('Egne annoncer', egne, egneSider, { minAndel: MIN_ANDEL_KATEGORI, nulErFejl: true });
   const bKilder = baseline.perKilde || {};
   const fravalgt = Object.entries(bKilder).filter(([d]) => inaktive.has(d)).reduce((s, [, n]) => s + n, 0);
-  tjekAntal('Indekserede annoncer', eksterne, (baseline.eksterne || 0) - fravalgt, { minAndel: MIN_ANDEL_KATEGORI });
+  tjekAntal('Indekserede annoncer', eksterne, (baseline.eksterne || 0) - fravalgt, { minAndel: MIN_ANDEL_KATEGORI, nulErFejl: true, nulAltidFejl: true });
   for (const [d, n] of Object.entries(bKilder)){
     if (inaktive.has(d)) continue;
     tjekAntal(`Kilde ${d}`, (perKilde || {})[d] || 0, n);
@@ -143,7 +146,10 @@ function tjekLager({ egne, eksterne, perKilde, baseline, inaktive = new Set(), e
 const erFaldFejl = e => !!e && (e.code === 'SEO_FALD' || e.code === 'SEO_HENT');
 function afslut(e){
   console.error(e.message);
-  process.exit(erFaldFejl(e) ? EXIT_FALD : 1);
+  const kode = erFaldFejl(e) ? EXIT_FALD : 1;
+  // Et kort udsættelse: process.exit() lige efter en afbrudt fetch giver en libuv-assertion paa Windows (exit 3221226505).
+  process.exitCode = kode;
+  setTimeout(() => process.exit(kode), 50);
 }
 
 function taelFiler(root, re){

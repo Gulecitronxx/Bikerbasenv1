@@ -160,6 +160,37 @@ test('build.js: faldet i ÉT datatrin gendanner hele sitemappet og ledgeren fra 
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('build.js: annoncesider slettes først sidst — og slet ikke hvis et trin er sprunget (P2-1)', () => {
+  const { spawnSync } = require('child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'build-slet-'));
+  try {
+    fs.mkdirSync(path.join(dir, 'scripts'));
+    for (const f of ['build.js', 'seo-vagt.js']) fs.copyFileSync(path.join(__dirname, f), path.join(dir, 'scripts', f));
+    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
+    const opsaet = (brandKode) => {
+      for (const f of ['annonce-a-1.html', 'annonce-b-2.html', 'annonce-c-3.html']) fs.writeFileSync(path.join(dir, f), 'side');
+      for (const t of trin){
+        // listing "sletter" to sider: den skriver listen til BB_SLETTELISTE (som den rigtige gør), sletter intet selv
+        const krop = t === 'build-listing-pages.js' ? `require('fs').writeFileSync(process.env.BB_SLETTELISTE, JSON.stringify(['annonce-a-1.html', 'annonce-b-2.html']));`
+          : t === 'build-brand-pages.js' ? `process.exit(${brandKode});` : '';
+        fs.writeFileSync(path.join(dir, 'scripts', t), krop);
+      }
+    };
+    opsaet(3);   // brand springes over
+    let r = spawnSync('node', [path.join(dir, 'scripts', 'build.js')], { encoding: 'utf8' });
+    assert.strictEqual(r.status, 0);
+    assert.deepStrictEqual(fs.readdirSync(dir).filter(f => /^annonce-/.test(f)).sort(), ['annonce-a-1.html', 'annonce-b-2.html', 'annonce-c-3.html'], 'ingen annoncesider slettet, når et trin er sprunget');
+    assert.match(r.stdout, /UDSKUDT/);
+    assert.strictEqual(fs.readdirSync(os.tmpdir()).filter(f => /^bb-slet-.*\.json$/.test(f) && fs.readFileSync(path.join(os.tmpdir(), f), 'utf8').includes('annonce-a-1.html')).length, 0, 'ingen efterladt sletteliste');
+    for (const f of fs.readdirSync(dir).filter(f => /^annonce-/.test(f))) fs.unlinkSync(path.join(dir, f));
+    opsaet(0);   // alle trin lykkes
+    r = spawnSync('node', [path.join(dir, 'scripts', 'build.js')], { encoding: 'utf8' });
+    assert.strictEqual(r.status, 0);
+    assert.deepStrictEqual(fs.readdirSync(dir).filter(f => /^annonce-/.test(f)), ['annonce-c-3.html'], 'sletningen sker, når alle trin er lykkedes');
+    assert.match(r.stdout, /::warning title=Sider fjernet::2 annonceside\(r\) slettet/);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('build.js: et datatrin med exit 3 beholder de committede sider og fortsætter; andre fejl stopper (simuleret)', () => {
   const { spawnSync } = require('child_process');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'build-failsoft-'));
@@ -214,6 +245,29 @@ test('en fejlet hentning bliver en fejl, ikke et tomt array (shared.fetchListing
     global.fetch = async () => ({ ok: false, status: 503, json: async () => [] });
     await assert.rejects(() => shared.fetchListings([], { kraevDatabase: true }), /HTTP 503/);
   } finally { global.fetch = origFetch; console.warn = origWarn; }
+});
+
+test('en kastet netværksfejl på eksterne_annoncer er fail-soft (SEO_HENT), som en HTTP-fejl (P2-2)', async () => {
+  const origFetch = global.fetch;
+  try {
+    global.fetch = async () => { const e = new Error('ECONNRESET'); e.code = 'ECONNRESET'; throw e; };
+    await assert.rejects(() => shared.fetchExternalListings(), e => V.erFaldFejl(e) && /netværk: ECONNRESET/.test(e.message));
+    global.fetch = async () => ({ ok: false, status: 502, text: async () => 'Bad gateway' });
+    await assert.rejects(() => shared.fetchExternalListings(), e => V.erFaldFejl(e) && /HTTP 502/.test(e.message));
+  } finally { global.fetch = origFetch; }
+});
+
+test('nul eksterne er en fejl, selv under tillad_fald (P2-3); procentgulvene omgås', () => {
+  const baseline = { eksterne: 600, perKilde: { 'a.dk': 600 } };
+  const orig = console.warn; console.warn = () => {};
+  const gammel = process.env.BB_TILLAD_FALD;
+  process.env.BB_TILLAD_FALD = '1';
+  try {
+    assert.throws(() => V.tjekLager({ egne: 30, eksterne: 0, perKilde: {}, baseline, egneSider: 30 }), e => e.code === 'SEO_FALD' && /Indekserede annoncer: 0 nu mod 600/.test(e.message));
+    assert.doesNotThrow(() => V.tjekLager({ egne: 30, eksterne: 100, perKilde: { 'a.dk': 100 }, baseline, egneSider: 30 }), 'et bevidst stort fald (men ikke nul) omgås');
+    assert.doesNotThrow(() => V.tjekLager({ egne: 0, eksterne: 600, perKilde: { 'a.dk': 600 }, baseline, egneSider: 2 }), 'sidste egne annonce solgt omgås stadig');
+    assert.throws(() => V.tjekAntal('x', 0, 100, { nulErFejl: true, nulAltidFejl: true }), /0 nu mod 100/);
+  } finally { console.warn = orig; if (gammel === undefined) delete process.env.BB_TILLAD_FALD; else process.env.BB_TILLAD_FALD = gammel; }
 });
 
 test('taelAnnonceSider og taelMaerkeSider tæller kun de rigtige filer', () => {

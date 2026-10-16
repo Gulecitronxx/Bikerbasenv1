@@ -114,4 +114,4 @@ const PRERENDER_COUNT = 12;
   console.log(`build-srp: ${page.length} kort (af ${total}: ${egne.length} egne + ${eksterne.length} indekserede) `
     + `skrevet ind i soegning.html i blandet rækkefølge — ${udenFoto} af dem uden foto`
     + (firstPhoto ? `, LCP-foto preloadet.` : `, intet foto at preloade.`));
-})().catch(e => { console.error('build-srp AFBRUDT:', e.message); process.exit(SEO.erFaldFejl(e) ? SEO.EXIT_FALD : 1); });
+})().catch(e => { e.message = 'build-srp AFBRUDT: ' + e.message; SEO.afslut(e); });

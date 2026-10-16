@@ -123,10 +123,17 @@ async function fetchExternalListings(){
   const SIDE = 1000;
   const rows = [];
   for (let fra = 0; ; fra += SIDE){
-    const r = await fetch(
-      `${url}/rest/v1/eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
-      + `&status=eq.aktiv&order=sidst_set.desc,id.asc&limit=${SIDE}&offset=${fra}`,
-      { headers: { apikey: key } });
+    let r;
+    try {
+      r = await fetch(
+        `${url}/rest/v1/eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
+        + `&status=eq.aktiv&order=sidst_set.desc,id.asc&limit=${SIDE}&offset=${fra}`,
+        { headers: { apikey: key } });
+    } catch (e) {
+      // En kastet netværksfejl (ECONNRESET, timeout) er lige så forbigående som en HTTP-fejl: fail-soft.
+      throw hentFejl(`Kunne ikke hente eksterne_annoncer (netværk: ${e.message}). `
+        + 'Build afbrudt frem for at skrive et sitemap uden annoncer.');
+    }
     if (!r.ok){
       throw hentFejl(`Kunne ikke hente eksterne_annoncer (HTTP ${r.status}: ${await r.text()}). `
         + 'Build afbrudt frem for at skrive et sitemap uden annoncer.');
