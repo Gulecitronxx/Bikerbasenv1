@@ -5,18 +5,35 @@
 
 
 /* ---------- Brødkrumme + handlinger ---------- */
-.an-crumbrow{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); flex-wrap:wrap; }
+.an-crumbrow{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); flex-wrap:wrap; min-height:96px; }
+/* V2-003: JS bygger brødkrumme og handlinger om (27 -> 52 px og tre knapper), og det flyttede galleriet (CLS 0,07-0,10).
+   Rækkens højde er derfor reserveret efter den hydrerede tilstand: brødkrumme (40) + mellemrum (12) + knaprække (44) under 900 px,
+   begge ved siden af hinanden (46) derover. Knaprækken er én række (se nedenfor), så højden er altid den samme. */
+@media (min-width:621px){ .an-crumbrow{ min-height:102px; } }
+@media (min-width:900px){ .an-crumbrow{ min-height:46px; } }
+/* Den statiske forhåndsvisning har sin synlige titel (.listing-title) nede ved galleriet; den øverste h1 ligger i DOM'en for
+   crawlere og skærmlæsere, men fylder ingen højde, før JS har lagt den ind i midterkolonnen. Så starter .listing-detail på
+   samme y før og efter hydrering. (:has(.prerender-gallery) findes kun i de statiske sider og forsvinder ved hydrering.) */
+.container:has(.prerender-gallery) > #listing-h1{
+  position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap;
+}
 .an-crumbrow .breadcrumb{ min-width:0; flex:1 1 320px; }
 .an-crumbrow .breadcrumb > *{ min-width:0; }
 .an-crumbrow .breadcrumb #bc-current{ color: var(--color-fg); font-weight:600; overflow-wrap:anywhere; }
-.an-actions{ display:flex; align-items:center; gap: var(--space-1); flex-wrap:wrap; padding-top: var(--space-3); }
+.an-actions{ display:flex; align-items:center; gap: var(--space-1); flex-wrap:wrap; padding-top:0; }
 .an-act{
   display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 12px;
   background:none; border:0; border-radius: var(--radius-pill); cursor:pointer;
   font: 600 14px var(--font-body); color: var(--color-fg);
 }
 .an-act:hover{ background: var(--color-surface-2); }
-@media (max-width:559px){ .an-act{ padding:0 8px; font-size:13px; gap:6px; } .an-actions{ gap:0; margin-left:-8px; } }
+@media (max-width:559px){ .an-act{ padding:0 8px; font-size:13px; gap:6px; } .an-actions{ gap:0; margin-left:-8px; flex-wrap:nowrap; flex:1 1 100%; } }
+/* Smalle telefoner: "Del" og "Sammenlign" bliver ikon-knapper (navnet står stadig i DOM'en for skærmlæsere), så de tre
+   knapper altid står på én række: 44 px, aldrig 2-3 rækker. */
+@media (max-width:421px){
+  .an-act:not(.an-fav) span{ position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  .an-act:not(.an-fav){ min-width:44px; justify-content:center; }
+}
 .an-act svg{ width:20px; height:20px; flex:0 0 auto; }
 .an-act[aria-pressed="true"]:not(.an-fav){ color: var(--color-primary-hover); }
 :root[data-theme="dark"] .an-act[aria-pressed="true"]:not(.an-fav){ color: var(--color-primary); }
