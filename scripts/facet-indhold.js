@@ -127,6 +127,8 @@ const GUIDE = {
   foerste: 'guide-foerste-motorcykel.html',
   a2: 'guide-a2-koerekort.html',
   brugt: 'guide-brugt-motorcykel.html',
+  typer: 'guide-mc-typer.html',
+  ordliste: 'guide-mc-ordliste.html',
   alle: 'guides.html',
 };
 

@@ -184,7 +184,7 @@
 }
 @media (min-width:1280px){
   .mk-featured{ grid-template-columns: repeat(5, minmax(0,1fr)) minmax(0,1.1fr); }
-  .mk-featured-kort > :nth-child(n+4){ display:block; }
+  .mk-featured-kort > :nth-child(n+4){ display:flex; }   /* w9: kortet er en flex-kolonne; display:block lod 4.-5. kort miste bundlinjen */
 }
 /* 1-2 annoncer: kortene står som de er, og panelet fylder resten som en bred
    bjælke i stedet for at stå alene i et tomt gitter. */
@@ -218,7 +218,7 @@
 .mk-ok svg{ width:12px; height:12px; stroke-width:3; }
 .mk-cta .btn{ width:100%; white-space:normal; text-align:center; line-height:1.25; }
 .mk-cta-img{
-  display:block; width:100%; height:0; flex:1 1 0; min-height:120px; object-fit:cover; object-position: 50% 78%;
+  display:block; width:100%; height:0; flex:1 1 0; min-height:72px; object-fit:cover; object-position: 50% 78%;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 42%);
           mask-image: linear-gradient(to bottom, transparent 0%, #000 42%);
 }

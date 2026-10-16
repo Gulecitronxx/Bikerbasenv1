@@ -191,6 +191,25 @@
 .fa-udforsk-link{ margin-top:auto; padding-top:6px; display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color: var(--color-primary); }
 .fa-udforsk-link .fa-pil{ width:16px; height:16px; }
 
+/* Fakta om modellen (billede 3's faktatabel + "Kan du køre denne?") — w9-discovery */
+.fa-mf-gitter{ display:grid; gap: var(--space-4); grid-template-columns: 1fr; }
+@media (min-width:900px){ .fa-mf-gitter{ grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); gap: var(--space-5); align-items:start; } }
+.fa-dl{ margin:0; border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-sm); overflow:hidden; }
+.fa-dl > div{ display:grid; grid-template-columns: minmax(96px, 150px) minmax(0,1fr); gap: var(--space-3); padding: 12px var(--space-4); border-top:1px solid var(--color-border); }
+.fa-dl > div:first-child{ border-top:0; }
+.fa-dl dt{ font-size:13.5px; color: var(--color-fg-muted); }
+.fa-dl dd{ margin:0; font-weight:600; font-size:15px; line-height:1.4; overflow-wrap:anywhere; }
+.fa-dl dd small{ display:block; font-weight:400; font-size:12.5px; color: var(--color-fg-muted); margin-top:2px; }
+.fa-mf-kk{ border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-sm); padding: var(--space-4); }
+.fa-mf-kk h3{ font-size:17px; margin:0 0 var(--space-3); }
+.fa-mf-kk ul{ list-style:none; margin:0 0 var(--space-3); padding:0; display:grid; gap:8px; }
+.fa-mf-kk li{ display:flex; justify-content:space-between; gap: var(--space-3); font-size:14.5px; padding-bottom:8px; border-bottom:1px solid var(--color-border); }
+.fa-mf-kk li:last-child{ border-bottom:0; padding-bottom:0; }
+.fa-kk-n{ font-weight:700; white-space:nowrap; }
+.fa-mf-kk p{ margin:0; font-size:13px; line-height:1.5; color: var(--color-fg-muted); }
+.fa-mf-kk p a{ color: var(--color-primary); text-decoration:underline; text-underline-offset:2px; }
+.fa-mf-note{ margin: var(--space-3) 0 0; font-size:12.5px; color: var(--color-fg-muted); }
+
 /* Info-bokse */
 .fa-bokse{ display:grid; gap: var(--space-3); }
 .fa-bokse-kk{ padding-top: var(--space-5); grid-template-columns: 1fr; }
@@ -218,6 +237,8 @@
 /* Guides */
 .fa-guides{ list-style:none; margin:0; padding:0; display:grid; gap: var(--space-3); grid-template-columns: 1fr; }
 @media (min-width:760px){ .fa-guides{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (min-width:760px) and (max-width:1099px){ .fa-guides:has(> li:nth-child(4)){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width:1100px){ .fa-guides:has(> li:nth-child(4)){ grid-template-columns: repeat(4, minmax(0,1fr)); } }
 .fa-guides a{ display:flex; align-items:center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); min-height:64px; }
 .fa-guides a:hover{ border-color: var(--color-primary); }
 .fa-guides strong{ font-size:14.5px; line-height:1.35; }
