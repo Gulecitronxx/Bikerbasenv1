@@ -2,6 +2,7 @@
 
    Kør:  node scripts/verificer-site.js            (alle trin)
          node scripts/verificer-site.js --hurtig   (springer npm test over)
+         node scripts/verificer-site.js --med-browser   (tilvalg: trin 8, offline browser-smoketest --hurtig)
 
    Exit 0 = alt grønt, exit 1 = mindst ét trin fejlede. Scriptet verificerer KUN det, der ligger
    på disken: det kører hverken build.js, udgiv.js, stamp-version.js eller andet, der rammer netværk
@@ -138,7 +139,17 @@ function tjekTestListe(root){
   return { navn: 'package.json "test" indeholder alle *.test.js', ok: !fund.length, fund };
 }
 
-function koer(root, { hurtig = false } = {}){
+/* (8) VALGFRIT (--med-browser): scripts/smoke-browser.js --hurtig mod roden. Offline (al trafik blokeres, Supabase
+   mockes), men starter en headless Chromium, så den er ikke med som standard. Exit 2 = Playwright mangler → FEJL. */
+function tjekBrowserSmoke(root){
+  const navn = 'smoke (valgfrit, --med-browser)';
+  const script = path.join(__dirname, 'smoke-browser.js');
+  const r = spawnSync(process.execPath, [script, '--hurtig', '--stille', '--rod', root], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, timeout: 600000 });
+  const ok = r.status === 0;
+  return { navn, ok, fund: ok ? [] : [`exit ${r.status}`, ...uddrag((r.stdout || '') + String.fromCharCode(10) + (r.stderr || '')).split(String.fromCharCode(10))] };
+}
+
+function koer(root, { hurtig = false, medBrowser = false } = {}){
   const trin = [
     () => tjekSyntaks(root),
     () => hurtig ? { navn: 'npm test', ok: true, sprunget: true, fund: [] } : tjekTests(root),
@@ -147,6 +158,7 @@ function koer(root, { hurtig = false } = {}){
     () => tjekSitemap(root),
     () => tjekDoedeLinks(root),
     () => tjekTestListe(root),
+    ...(medBrowser ? [() => tjekBrowserSmoke(root)] : []),
   ];
   return trin.map(t => {
     try { return t(); } catch (e) { return { navn: 'trin kastede fejl', ok: false, fund: [String((e && e.message) || e)] }; }
@@ -166,9 +178,9 @@ function rapport(resultater){
 }
 
 if (require.main === module){
-  const { tekst, fejl } = rapport(koer(REPO, { hurtig: process.argv.includes('--hurtig') }));
+  const { tekst, fejl } = rapport(koer(REPO, { hurtig: process.argv.includes('--hurtig'), medBrowser: process.argv.includes('--med-browser') }));
   console.log(tekst);
   process.exit(fejl ? 1 : 0);
 }
 
-module.exports = { tjekSyntaks, tjekTests, tjekHeader, tjekSeoAudit, tjekSitemap, tjekDoedeLinks, tjekTestListe, manglendeTests, interneLinks, koer, rapport };
+module.exports = { tjekSyntaks, tjekTests, tjekHeader, tjekSeoAudit, tjekSitemap, tjekDoedeLinks, tjekTestListe, tjekBrowserSmoke, manglendeTests, interneLinks, koer, rapport };

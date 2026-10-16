@@ -159,3 +159,13 @@ test('CLI: exit 0 på grønt site, exit 1 når et trin fejler', () => {
     assert.match(b.stdout, /FEJLEDE/);
   } finally { fs.rmSync(root, { recursive: true, force: true }); }
 });
+
+test('(8) valgfrit smoke-trin: ikke med som standard; --med-browser tilføjer det og kan fejle', () => medSite(root => {
+  const standard = v.koer(root, { hurtig: true });
+  assert.strictEqual(standard.length, 7, 'standardadfærden er uændret: 7 trin');
+  assert.ok(!standard.some(r => /smoke/.test(r.navn)));
+  const r = v.tjekBrowserSmoke(path.join(root, 'findes-ikke'));
+  assert.strictEqual(r.ok, false, 'en rod uden sider (eller uden Playwright) giver FEJL, ikke grøn');
+  assert.match(r.navn, /smoke/);
+  assert.ok(r.fund.length);
+}));
