@@ -24,6 +24,8 @@ const AFSNIT = [
     ['guide-foerste-motorcykel.html', 'Din første motorcykel', 'Hvordan man vælger type og tjekker, hvad kørekortet giver ret til.'],
     ['guide-a2-koerekort.html', 'A2-kørekort', 'Regler, alder og krav for A2.'],
     ['guide-brugt-motorcykel.html', 'Køb brugt motorcykel', 'Tjekliste til køb af en brugt motorcykel.'],
+    ['guide-mc-forsikring.html', 'MC-forsikring', 'Ansvar mod kasko og spørgsmål at stille, når du får et tilbud.'],
+    ['guide-mc-udstyr.html', 'MC-udstyr', 'Hjelm, tøj og pasform: hvad du bør vide, før du køber udstyr.'],
   ]],
   ['Om Bikerbasen', [
     ['om-bikerbasen.html', 'Om Bikerbasen', 'Hvem vi er, og hvordan siden virker.'],
