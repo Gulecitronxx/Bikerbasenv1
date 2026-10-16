@@ -104,8 +104,24 @@ const Store = {
     document.dispatchEvent(new CustomEvent('bb:favorites-changed', { detail: favs }));
 
     if (isUuid(id) && typeof db !== 'undefined' && db.enabled && this.getUser()?.remote){
-      (nowFavorite ? db.addFavorite(id) : db.removeFavorite(id))
-        .then(r => { if (r?.error) console.warn('Favorit blev ikke gemt i databasen:', r.error.message); });
+      const rulTilbage = (fejl) => {
+        console.warn('Favorit blev ikke gemt i databasen:', fejl && fejl.message);
+        /* Databasen er sandheden: rul det lokale valg tilbage, så hjertet ikke lover noget, der ikke er gemt. */
+        let nu = this.getFavorites().filter(f => String(f) !== String(id));
+        if (!nowFavorite) nu = [...nu, id];
+        localStorage.setItem(this.KEYS.favorites, JSON.stringify(nu));
+        document.dispatchEvent(new CustomEvent('bb:favorites-changed', { detail: nu }));
+        try {
+          document.querySelectorAll('[data-fav-toggle]').forEach(b => {
+            if (String(b.getAttribute('data-fav-toggle')) !== String(id)) return;
+            b.classList.toggle('active', !nowFavorite);
+            b.setAttribute('aria-pressed', String(!nowFavorite));
+          });
+        } catch (e) { /* DOM mangler */ }
+        if (typeof toast === 'function') toast('Kunne ikke gemme favoritten — prøv igen', { type: 'error' });
+      };
+      Promise.resolve().then(() => (nowFavorite ? db.addFavorite(id) : db.removeFavorite(id)))
+        .then(r => { if (r?.error) rulTilbage(r.error); }, rulTilbage);
     }
     return nowFavorite;
   },

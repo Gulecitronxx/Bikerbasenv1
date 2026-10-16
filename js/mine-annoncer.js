@@ -155,7 +155,7 @@ function ownRowHTML(l){
   const v = statusVisning(status);
   const kanSkifte = isUuid(String(l.id));
   const naeste = naesteStatus(status);
-  const kanRedigere = status === 'active';
+  const kanRedigere = status === 'active' || status === 'paused';   // på pause kan også rettes (opret-annonce.js henter egne rækker)
   return `
   <article class="db-row ${status !== 'active' ? 'is-' + status : ''}" data-listing-id="${l.id}" data-status="${status}">
     ${rowThumb(l, url, brand, model)}
@@ -163,6 +163,7 @@ function ownRowHTML(l){
     <div class="db-status">
       <span class="db-badge ${v.cls}">${v.label}</span>
       ${l.createdAt ? `<span class="db-when">${Icon.clock}Oprettet ${escapeHTML(timeAgoDa(l.createdAt))}</span>` : ''}
+      ${status === 'paused' ? `<span class="db-when">${Icon.eye}Skjult for købere, indtil du aktiverer den</span>` : ''}
     </div>
     <div class="db-actions">
       ${kanRedigere ? `<a class="btn btn-outline btn-sm" href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}">${Icon.edit}Rediger</a>` : ''}
