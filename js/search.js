@@ -999,14 +999,14 @@ let swipeItems = [];
 let swipeIndex = 0;
 
 function swipeCardHTML(l, stackPos){
-  const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
   const kk = koerekortMaerkat(l);
   const f = kortFakta(l);
+  const titel = escapeHTML(f.titel);   // samme titel som gitterkortet (aldrig "null null" ved manglende mærke/model)
   const kilde = kortKildeHTML(l, f);
   return `
   <article class="swipe-card" data-stack="${stackPos}" style="--stack:${stackPos}">
     <div class="swipe-card-media">
-      ${listingMediaHTML(l, `${brand} ${model}`)}
+      ${listingMediaHTML(l, f.titel)}
       <span class="swipe-stamp swipe-stamp-fav">Gem</span>
       <span class="swipe-stamp swipe-stamp-skip">Spring over</span>
       ${l.isDealer ? `<span class="badge badge-dealer swipe-card-flag">${Icon.shieldCheck}Forhandler</span>` : ''}
@@ -1014,8 +1014,8 @@ function swipeCardHTML(l, stackPos){
     </div>
     <div class="swipe-card-body">
       <div class="swipe-card-price">${formatPrice(l.price)}</div>
-      <h3 class="swipe-card-title">${brand} ${model}</h3>
-      <div class="swipe-card-meta"><span>${Icon.calendar}${l.year}</span><span>${Icon.gauge}${formatKm(l.km)}</span><span>${Icon.engine}${formatCcm(l.ccm)}</span></div>
+      <h3 class="swipe-card-title">${titel}</h3>
+      <div class="swipe-card-meta"><span>${Icon.calendar}${l.year == null ? 'Årgang ikke oplyst' : escapeHTML(String(l.year))}</span><span>${Icon.gauge}${formatKm(l.km)}</span><span>${Icon.engine}${formatCcm(l.ccm)}</span></div>
       <div class="swipe-card-fod">
         <span class="swipe-card-loc">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
         <span class="rk-kilde" title="${f.ext ? 'Annoncen ligger hos ' + escapeHTML(f.kilde) + '. Bikerbasen viser den, men handlen sker hos kilden.' : 'Annoncen ligger på Bikerbasen.'}">${kilde.ikon}<span>${kilde.tekst}</span></span>

@@ -292,3 +292,42 @@ test('mislykket foto: ét felt med én sætning, og CSS lader den stå på én l
   assert.match(html, /Fotoet kunne ikke hentes hos kilden/);
   assert.match(læsRod('css/styles.css'), /\.foto-fejl \.foto-tom-titel\{ max-width:none;/);
 });
+
+/* ---------- w4 runde 2: aldrig 'null'/'undefined'/'NaN' i brugerrettet tekst ---------- */
+
+const synligTekst = html => html
+  .replace(/<svg[\s\S]*?<\/svg>/g, ' ').replace(/<script[\s\S]*?<\/script>/g, ' ')
+  .replace(/(?:title|aria-label|alt)="([^"]*)"/g, ' $1 ')   // også tilgængelighedstekster
+  .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+
+test('kort uden felter: ingen "null"/"undefined"/"NaN" i gitter, liste eller swipe (ekstern og egen)', () => {
+  const tom = {
+    id: 'x1', brand: null, model: null, type: null, price: null, year: null, km: null, ccm: null, power: null,
+    city: null, region: null, postnr: null, isDealer: null, seller: null, photoUrls: [], createdAt: null,
+  };
+  const eksterne = [
+    Object.assign({}, tom, { isExternal: true, externalUrl: KILDE_URL, source: { navn: 'MC Syd', domaene: 'mcsyd.dk' } }),
+    Object.assign({}, tom, { isExternal: true, externalUrl: KILDE_URL, source: null, brand: undefined, model: undefined, year: undefined, km: undefined, ccm: undefined, price: undefined }),
+  ];
+  const egne = [Object.assign({}, tom, { id: 77 }), Object.assign({}, tom, { id: 78, brand: undefined, model: undefined, year: undefined, km: undefined, ccm: undefined, price: undefined, power: undefined })];
+  for (const l of [...eksterne, ...egne]){
+    for (const [navn, html] of [['gitter', listingCardHTML(l, 1)], ['liste', listingRowHTML(l, 1)], ['swipe', swipeCardHTML(l, 0)]]){
+      assert.ok(html.length > 0 || navn === 'gitter', `${navn} tegnede intet`);
+      const t = synligTekst(html);
+      assert.ok(!/\b(null|undefined|NaN)\b/.test(t), `${navn}: "${(t.match(/.{0,25}\b(null|undefined|NaN)\b.{0,25}/) || [''])[0]}"`);
+    }
+  }
+});
+
+test('swipe-kortet siger "Årgang ikke oplyst" for manglende årgang', () => {
+  assert.match(swipeCardHTML(ekstern({ year: null }), 0), /Årgang ikke oplyst/);
+  assert.match(synligTekst(swipeCardHTML(ekstern({ year: 1999 }), 0)), /1999/);
+});
+
+test('titel/pris stabler ved ≤300 px kortbredde (ét knækpunkt, container query) — ikke lige under søgesidens 266 px', () => {
+  const css = læsRod('css/styles.css');
+  const m = css.match(/@container \(max-width: (\d+)px\)\{\s*\.rk-top\{ flex-direction:column;/);
+  assert.ok(m, 'container query for .rk-top findes');
+  assert.equal(Number(m[1]), 300);
+  assert.ok(Number(m[1]) >= 290, 'søgesidens kort er 266 px ved 1480–1920: de skal stable (Critic w4 P2-1)');
+});

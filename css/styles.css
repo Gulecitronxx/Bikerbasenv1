@@ -816,14 +816,15 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .card-rich .foto-tom{ padding: var(--space-2); }
 .rk-body{ display:flex; flex-direction:column; gap:8px; flex:1; padding: 12px 12px 11px; min-width:0; }
 .rk-top{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
-/* Smalle kort (forsidens fem-række, mærkesidens kortrække): prisen står under titlen i stedet for at presse den.
-   ÉT klart knækpunkt på KORTETS egen bredde (container query, ikke skærmbredden): ≤262 px = stablet, >262 px = side om
-   side. Målt på renderet side (w4-smaating, 390 og 1440 px): 212, 240, 254 og 256 px (forsidens fem-række, søgningens
-   tre kolonner, mærkesidens kortrække) = stablet; 279, 289, 332 og 358 px = side om side. Ingen kort ligger i
-   nærheden af grænsen, så det er to tilstande, ikke et glidende spring, og to kort på samme række har altid samme tilstand (alle kort i en
-   række er lige brede). Et glidende alternativ (flex-wrap) ville lade titlens længde afgøre placeringen kort for kort
-   og give en ujævn række. Grænsen er derfor lavet med vilje og står kun her. */
-@container (max-width: 262px){
+/* Smalle kort (forsidens fem-række, mærkesidens kortrække, søgningens tre kolonner): prisen står under titlen i stedet
+   for at presse den. ÉT knækpunkt på KORTETS egen bredde (container query, ikke skærmbredden), så alle kort i en række
+   altid har samme tilstand: ≤300 px = stablet, >300 px = side om side.
+   Hvorfor 300 og ikke 262 (blind Critic w4, P2-1): søgesidens kort er 266 px ved ALLE viewports 1480–1920, altså 4 px over
+   den gamle grænse. Det gav et synligt spring ved små viewportændringer og en titel på kun ~85 px (to linjer, ujævne
+   rækker) — dårligere end stablet. Side om side kræver pris (~85 px) + mellemrum (8) + kortets padding (24) + en titel på
+   mindst 120 px = ~237 px, og 300 giver en sikker margin: titlen får altid ≥ 180 px. Sweep 320–1920 i trin à 8 px står i
+   docs/review/gauntlet/builder-w4.md (runde 2). */
+@container (max-width: 300px){
   .rk-top{ flex-direction:column; align-items:flex-start; gap:2px; }
   .rk-pris.pris-mangler{ text-align:left; }
 }
@@ -1393,6 +1394,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Bunden: sted til venstre, sælgertype + kilde til højre — samme grammatik som gitterkortets .rk-fod. */
 .swipe-card-fod{ margin-top:10px; padding-top:10px; border-top:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; gap: var(--space-2); }
 .swipe-card-fod .rk-kilde{ font-size:13px; color: var(--color-fg-muted); }
+/* Kun det forreste kort viser bundlinjen: de to næste kigger frem under det og skal ikke vise en kant med sted/kilde. */
+.swipe-card:not([data-stack="0"]) .swipe-card-fod{ visibility:hidden; }
 .swipe-actions{ display:flex; align-items:center; justify-content:center; gap: var(--space-5); margin-top: var(--space-5); }
 .swipe-act{ display:inline-flex; align-items:center; justify-content:center; border-radius:50%; border:1.5px solid var(--color-border); background: var(--color-surface); cursor:pointer; box-shadow: var(--shadow-sm); transition: transform .12s var(--ease-out), border-color .12s; }
 .swipe-act:hover{ transform: scale(1.06); }
