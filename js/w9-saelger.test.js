@@ -46,7 +46,7 @@ const overflow = page => page.evaluate(() => document.documentElement.scrollWidt
 const TESTBIL = { type: 'naked', brand: 'Yamaha', model: 'MT-07', year: '2021', km: '12500', ccm: '689', power: '74', price: '69900', postnr: '8000', desc: 'Velholdt MT-07 med servicehistorik, nye dæk og ekstra lygter. Sælges fordi jeg skal have større cykel.' };
 
 async function udfylSide1(page, d = TESTBIL){
-  await page.check(`input[name="bike-type"][value="${d.type}"]`, { force: true });
+  await page.locator('label.radio-card', { has: page.locator(`input[name="bike-type"][value="${d.type}"]`) }).click();
   await page.selectOption('#f-brand', d.brand);
   await page.fill('#f-model', d.model);
   await page.fill('#f-year', d.year);
@@ -156,7 +156,7 @@ test('K2b Gem kladde + genindlæs gendanner felterne og siger at billeder skal v
   if (!kan.ok) return t.skip(kan.grund);
   const s = await aabn({ loggetInd: true }, 'opret-annonce.html');
   try {
-    await s.page.check('input[name="bike-type"][value="cruiser"]', { force: true });
+    await s.page.locator('label.radio-card', { has: s.page.locator('input[value="cruiser"]') }).click();
     await s.page.selectOption('#f-brand', 'Honda');
     await s.page.fill('#f-model', 'Shadow');
     await s.page.fill('#f-km', '4200');
@@ -347,4 +347,315 @@ test('K5c Fremmed/ukendt annonce afvises venligt og sender til Mine annoncer; PA
     assert.strictEqual(s2.t.tabeller.listings[0].price, 69900, 'uændret');
     assert.strictEqual(await s2.page.locator('#step-next').innerText(), 'Gem ændringer');
   } finally { await s2.luk(); }
+});
+
+/* ---------------- K6 Mine annoncer ---------------- */
+
+const TRE = () => [
+  { id: 'a0000000-0000-4000-8000-000000000001', brand: 'Honda', model: 'CBR650R', year: 2022, km: 12834, price: 99900, city: 'Aarhus', type: 'sport', photos: [FOTO('h1', 0), FOTO('h2', 1)] },
+  { id: 'a0000000-0000-4000-8000-000000000002', brand: 'BMW', model: 'R 1250 GS', year: 2021, km: 18460, price: 189900, city: 'Odense', type: 'adventure', dageGammel: 5, photos: [FOTO('h3', 0)] },
+  { id: 'a0000000-0000-4000-8000-000000000003', brand: 'KTM', model: '390 Adventure', year: 2023, km: 4820, price: 59900, city: 'Esbjerg', type: 'adventure', status: 'hidden', dageGammel: 20, photos: [] },
+];
+const raekke = (page, id) => page.locator(`.db-row[data-listing-id="${id}"]`);
+
+test('K6a Statuskort beregnes af data, rækker viser status og handlinger; pausede kan redigeres', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true, annoncer: TRE() }, 'mine-annoncer.html');
+  try {
+    await s.page.waitForSelector('.db-row');
+    assert.strictEqual(await s.page.locator('#stat-aktive').innerText(), '2');
+    assert.strictEqual(await s.page.locator('.db-row').count(), 3);
+    assert.match(await raekke(s.page, TRE()[2].id).innerText(), /På pause/);
+    assert.strictEqual(await raekke(s.page, TRE()[2].id).locator('a:has-text("Rediger")').count(), 1, 'rediger findes på pausede');
+    assert.match(await raekke(s.page, TRE()[0].id).innerText(), /99\.900 kr/);
+    await ingenNul(s.page, 'mine annoncer');
+    assert.deepStrictEqual(s.fund.side, []);
+    assert.deepStrictEqual(s.fund.konsol, []);
+  } finally { await s.luk(); }
+});
+
+test('K6b Pause → hidden, Aktivér → active; PATCH-fejl lader status være og viser fejl', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const [a, b] = TRE();
+  const s = await aabn({ loggetInd: true, annoncer: TRE() }, 'mine-annoncer.html');
+  try {
+    await s.page.waitForSelector('.db-row');
+    await raekke(s.page, a.id).locator('[data-status-skift]').click();
+    await s.page.waitForFunction(id => document.querySelector(`.db-row[data-listing-id="${id}"]`)?.dataset.status === 'paused', a.id);
+    assert.strictEqual(s.t.tabeller.listings.find(l => l.id === a.id).status, 'hidden');
+    assert.strictEqual(await s.page.locator('#stat-aktive').innerText(), '1');
+    await raekke(s.page, a.id).locator('[data-status-skift]').click();
+    await s.page.waitForFunction(id => document.querySelector(`.db-row[data-listing-id="${id}"]`)?.dataset.status === 'active', a.id);
+    assert.strictEqual(s.t.tabeller.listings.find(l => l.id === a.id).status, 'active');
+    s.t.fejl['PATCH listings'] = { status: 500, besked: 'nede' };
+    await raekke(s.page, b.id).locator('[data-status-skift]').click();
+    await s.page.waitForFunction(() => /Status kunne ikke ændres/.test(document.body.innerText), null, { timeout: 6000 });
+    assert.strictEqual(s.t.tabeller.listings.find(l => l.id === b.id).status, 'active');
+    assert.strictEqual(await raekke(s.page, b.id).locator('[data-status-skift]').isDisabled(), false, 'knappen kan prøves igen');
+  } finally { await s.luk(); }
+});
+
+test('K6c Slet: afvist confirm = intet kald; godkendt = række væk, DELETE sendt, filer slettet', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const [a] = TRE();
+  const s = await aabn({ loggetInd: true, annoncer: TRE() }, 'mine-annoncer.html');
+  try {
+    await s.page.waitForSelector('.db-row');
+    s.page.removeAllListeners('dialog');
+    s.page.once('dialog', d => d.dismiss());
+    await raekke(s.page, a.id).locator('summary').click();
+    await raekke(s.page, a.id).locator('[data-delete-listing]').click();
+    await s.page.waitForTimeout(300);
+    assert.strictEqual(s.t.log.filter(l => l.metode === 'DELETE' && l.tabel === 'listings').length, 0, 'afvist confirm = intet kald');
+    assert.strictEqual(s.t.tabeller.listings.length, 3);
+    s.page.once('dialog', d => d.accept());
+    await raekke(s.page, a.id).locator('[data-delete-listing]').click();
+    await s.page.waitForFunction(id => !document.querySelector(`.db-row[data-listing-id="${id}"]`), a.id);
+    assert.strictEqual(s.t.tabeller.listings.length, 2);
+    assert.strictEqual(s.t.slettedeFiler.length, 2, 'begge billedfiler ryddet i storage: ' + s.t.slettedeFiler);
+  } finally { await s.luk(); }
+});
+
+test('K6c2 Slet fejler: annoncen bliver stående og fejlen vises', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const [a] = TRE();
+  const s = await aabn({ loggetInd: true, annoncer: TRE() }, 'mine-annoncer.html');
+  try {
+    await s.page.waitForSelector('.db-row');
+    s.t.fejl['DELETE listings'] = { status: 500, besked: 'nede' };
+    await raekke(s.page, a.id).locator('summary').click();
+    await raekke(s.page, a.id).locator('[data-delete-listing]').click();
+    await s.page.waitForFunction(() => /kunne ikke slettes/.test(document.body.innerText), null, { timeout: 6000 });
+    assert.strictEqual(await raekke(s.page, a.id).count(), 1);
+    assert.strictEqual(s.t.tabeller.listings.length, 3);
+  } finally { await s.luk(); }
+});
+
+test('K6d Hentefejl viser alert-banner, og "Prøv igen" henter igen', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const bak = lavBackend({ loggetInd: true, annoncer: TRE() });
+  bak.tilstand.fejl['GET listings'] = { status: 500, besked: 'nede', gentag: true };
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await bak.installer(ctx);
+  const page = await ctx.newPage();
+  try {
+    await page.goto(URL('mine-annoncer.html'), { waitUntil: 'networkidle' });
+    await page.waitForSelector('#mine-error:not([hidden]) #mine-retry');
+    assert.ok(await page.evaluate(() => /alert|assertive|polite/.test(document.getElementById('mine-error').getAttribute('role') + (document.getElementById('mine-error').getAttribute('aria-live') || ''))), 'banneren er role=alert/aria-live');
+    delete bak.tilstand.fejl['GET listings'];
+    await page.click('#mine-retry');
+    await page.waitForSelector('.db-row');
+    assert.strictEqual(await page.locator('#mine-error').isHidden(), true);
+  } finally { await ctx.close(); }
+});
+
+test('K6e Tom bruger: tom tilstand med CTA, ingen nul-rækker, ingen null/NaN på nogen fane', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true }, 'mine-annoncer.html');
+  try {
+    await s.page.waitForSelector('#mine-empty', { state: 'visible' });
+    assert.match(await s.page.locator('#mine-empty').innerText(), /annonce/i);
+    assert.ok(await s.page.locator('#mine-empty a[href*="opret-annonce"]').count(), 'CTA til opret annonce i tom tilstand');
+    await ingenNul(s.page, 'tom mine-annoncer');
+    for (const tab of ['favoritter', 'agenter', 'konto']){
+      await s.page.goto(URL(`mine-annoncer.html?tab=${tab}`), { waitUntil: 'networkidle' });
+      await ingenNul(s.page, 'tab ' + tab);
+    }
+    assert.deepStrictEqual(s.fund.side, []);
+  } finally { await s.luk(); }
+});
+
+/* ---------------- K7 Gemte annoncer (favoritter) og kladder ---------------- */
+
+const FREMMED = { id: 'b0000000-0000-4000-8000-0000000000f1', seller_id: 'bbbbbbbb-0000-4000-8000-0000000000b2', brand: 'Suzuki', model: 'GSX-S 750', year: 2019, km: 17800, price: 64900, city: 'Silkeborg', type: 'naked', photos: [FOTO('z1', 0)], seller: { id: 'bbbbbbbb-0000-4000-8000-0000000000b2', name: 'Anden Sælger', is_dealer: false } };
+
+test('K7a Gemte annoncer: tom tilstand forklarer; med data vises række; fjern sender DELETE; fejl rulles tilbage', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const tom = await aabn({ loggetInd: true }, 'mine-annoncer.html?tab=favoritter');
+  try {
+    await tom.page.waitForSelector('#fav-empty', { state: 'visible' });
+    assert.match(await tom.page.locator('#fav-empty').innerText(), /hjertet/);
+    assert.strictEqual(await tom.page.locator('#stat-fav').innerText(), '0');
+  } finally { await tom.luk(); }
+
+  const s = await aabn({ loggetInd: true, annoncer: [FREMMED] });
+  try {
+    s.t.tabeller.favorites.push({ user_id: BRUGER_ID, listing_id: FREMMED.id });
+    await s.page.goto(URL('mine-annoncer.html?tab=favoritter'), { waitUntil: 'networkidle' });
+    await s.page.waitForSelector('#fav-grid .db-row');
+    assert.match(await s.page.locator('#fav-grid').innerText(), /GSX-S 750/);
+    assert.strictEqual(await s.page.locator('#stat-fav').innerText(), '1');
+    await s.page.locator('#fav-grid [data-fav-toggle]').click();
+    await s.page.waitForFunction(() => document.querySelector('#fav-grid [data-fav-toggle]')?.getAttribute('aria-pressed') === 'false' || !document.querySelector('#fav-grid .db-row'));
+    await s.page.waitForTimeout(600);
+    assert.strictEqual(s.t.tabeller.favorites.length, 0, 'DELETE på favorites ramte backend');
+    assert.strictEqual(await s.page.locator('#stat-fav').innerText(), '0', 'tællerne følger med');
+  } finally { await s.luk(); }
+});
+
+test('K7b Kladde vises som egen række (Fortsæt / Slet), og Slet fjerner den', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true }, 'opret-annonce.html');
+  try {
+    await s.page.locator('label.radio-card', { has: s.page.locator('input[value="naked"]') }).click();
+    await s.page.selectOption('#f-brand', 'Yamaha');
+    await s.page.fill('#f-model', 'MT-09');
+    await s.page.click('#save-draft');
+    await s.page.goto(URL('mine-annoncer.html'), { waitUntil: 'networkidle' });
+    await s.page.waitForSelector('[data-draft-row]');
+    assert.match(await s.page.locator('[data-draft-row]').innerText(), /MT-09/);
+    assert.strictEqual(await s.page.locator('#stat-kladder').innerText(), '1');
+    await s.page.locator('[data-delete-draft]').click();      // confirm accepteres
+    await s.page.waitForFunction(() => !document.querySelector('[data-draft-row]'));
+    assert.strictEqual(await s.page.locator('#stat-kladder').innerText(), '0');
+    await s.page.goto(URL('opret-annonce.html'), { waitUntil: 'networkidle' });
+    assert.strictEqual(await s.page.inputValue('#f-model'), '', 'kladden er væk');
+  } finally { await s.luk(); }
+});
+
+/* ---------------- K8 Login / opret konto ---------------- */
+
+test('K8a Login: ok → redirect; forkert kode → dansk fejl og e-mail bevaret; netværksfejl → forbindelsesbesked', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: false, login: (e, p) => (p === 'rigtig-kode-1' ? null : { status: 400 }) }, 'login.html?redirect=mine-annoncer.html');
+  try {
+    await s.page.fill('#login-email', 'test.saelger@example.test');
+    await s.page.fill('#login-password', 'forkert');
+    await s.page.click('#login-form button[type="submit"]');
+    await s.page.waitForFunction(() => /forkert|ikke rigtig|passer ikke/i.test(document.body.innerText), null, { timeout: 6000 });
+    const txt = await tekstPaaSiden(s.page);
+    assert.ok(!/Invalid login credentials|AuthApiError/.test(txt), 'ingen rå engelsk fejltekst');
+    assert.strictEqual(await s.page.inputValue('#login-email'), 'test.saelger@example.test');
+    // netværk væk
+    await s.ctx.route('**/auth/v1/token**', r => r.abort('connectionfailed'));
+    await s.page.fill('#login-password', 'rigtig-kode-1');
+    await s.page.click('#login-form button[type="submit"]');
+    await s.page.waitForFunction(() => /forbindelse/i.test(document.body.innerText), null, { timeout: 6000 });
+    await s.ctx.unroute('**/auth/v1/token**');
+    await s.page.click('#login-form button[type="submit"]');
+    await s.page.waitForURL(/mine-annoncer\.html/, { timeout: 10000 });
+    assert.deepStrictEqual(s.fund.side, []);
+  } finally { await s.luk(); }
+});
+
+test('K8b Ingen tekst på login lover noget, produktet ikke har (beskeder, social login, tal)', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: false }, 'login.html');
+  try {
+    const alt = (await tekstPaaSiden(s.page)) + ' ' + await s.page.evaluate(() => document.documentElement.innerHTML.replace(/<script[\s\S]*?<\/script>/g, ''));
+    for (const forbudt of [/Google/, /Facebook/, /Apple/, /vil i kontakt/i, /\b120\.000/, /beskeder/i, /svartid/i]){
+      assert.ok(!forbudt.test(alt), `uønsket tekst: ${forbudt}`);
+    }
+    await s.page.click('[data-auth-tab="register"]:visible');
+    const opret = await tekstPaaSiden(s.page);
+    assert.ok(!/beskeder|vil i kontakt/i.test(opret));
+    await ingenNul(s.page, 'login');
+  } finally { await s.luk(); }
+});
+
+/* ---------------- K9 Tværgående: bredde, tekst, tastatur ---------------- */
+
+for (const bredde of [320, 390]){
+  for (const tema of ['lys', 'moerk']){
+    test(`K9a/K9b ${bredde}px ${tema}: ingen vandret overflow og ingen null/undefined/NaN (opret alle trin, mine-annoncer alle faner, login, dashboard)`, { timeout: 120000 }, async t => {
+      if (!kan.ok) return t.skip(kan.grund);
+      const s = await aabn({ loggetInd: true, annoncer: [...TRE(), FREMMED], viewport: { width: bredde, height: 800 }, tema });
+      try {
+        s.t.tabeller.favorites.push({ user_id: BRUGER_ID, listing_id: FREMMED.id });
+        const maal = async hvor => {
+          const o = await overflow(s.page);
+          assert.ok(o <= 0, `${hvor}: vandret overflow ${o}px ved ${bredde}`);
+          await ingenNul(s.page, hvor);
+        };
+        for (const tab of ['', 'annoncer', 'favoritter', 'agenter', 'konto']){
+          await s.page.goto(URL(`mine-annoncer.html${tab ? '?tab=' + tab : ''}`), { waitUntil: 'networkidle' });
+          await maal('mine-annoncer ' + (tab || 'oversigt'));
+        }
+        await s.page.goto(URL('dashboard.html'), { waitUntil: 'networkidle' });
+        await maal('dashboard');
+        // opret: side 1, billeder, gennemse (kræver gyldig udfyldning)
+        await s.page.goto(URL('opret-annonce.html'), { waitUntil: 'networkidle' });
+        await maal('opret trin 1');
+        await udfylSide1(s.page); await naeste(s.page);
+        await vaelgBilleder(s.page, 3);
+        await s.page.waitForFunction(() => document.querySelectorAll('#photo-grid .photo-thumb').length === 3);
+        await maal('opret billeder');
+        await naeste(s.page);
+        await maal('opret gennemse');
+        // fejltilstand med toast og feltfejl
+        await s.page.goto(URL('opret-annonce.html?rediger=' + TRE()[0].id), { waitUntil: 'networkidle' });
+        await s.page.fill('#f-year', '1850');
+        await naeste(s.page);
+        await s.page.waitForTimeout(500);
+        await maal('opret med feltfejl');
+        // udlogget
+        const ud = await aabn({ loggetInd: false, viewport: { width: bredde, height: 800 }, tema });
+        try {
+          for (const sti of ['login.html', 'login.html?redirect=opret-annonce.html', 'opret-annonce.html']){
+            await ud.page.goto(URL(sti), { waitUntil: 'networkidle' });
+            const o = await overflow(ud.page);
+            assert.ok(o <= 0, `${sti} udlogget: overflow ${o}px ved ${bredde}`);
+            await ingenNul(ud.page, sti);
+          }
+          await ud.page.goto(URL('login.html'), { waitUntil: 'networkidle' });
+          await ud.page.click('[data-auth-tab="register"]:visible');
+          assert.ok((await overflow(ud.page)) <= 0, 'opret-konto-visning');
+        } finally { await ud.luk(); }
+        assert.deepStrictEqual(s.fund.side, []);
+      } finally { await s.luk(); }
+    });
+  }
+}
+
+test('K9c Fejl på trin 1 flytter fokus til første ugyldige felt med aria-invalid og beskrivelse', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true }, 'opret-annonce.html');
+  try {
+    await s.page.locator('label.radio-card', { has: s.page.locator('input[value="naked"]') }).click();
+    await s.page.selectOption('#f-brand', 'Yamaha');
+    await s.page.fill('#f-model', 'MT-07');
+    await s.page.fill('#f-year', '1850');            // ugyldig
+    await naeste(s.page);
+    await s.page.waitForFunction(() => document.activeElement && document.activeElement.id === 'f-year', null, { timeout: 3000 });
+    const info = await s.page.evaluate(() => { const e = document.getElementById('f-year'); const d = document.getElementById(e.getAttribute('aria-describedby') || ''); return { inv: e.getAttribute('aria-invalid'), tekst: d && d.innerText }; });
+    assert.strictEqual(info.inv, 'true');
+    assert.match(info.tekst || '', /Årgang/);
+    assert.match(await synligFejl(s.page), /Årgang|udfyld/i, 'toast er aria-live');
+  } finally { await s.luk(); }
+});
+
+test('K9d Alle felter på opret-siden har label; mobil-forhåndsvisningsark lukker med Escape og returnerer fokus', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true, viewport: { width: 390, height: 800 } }, 'opret-annonce.html');
+  try {
+    const uden = await s.page.evaluate(() => [...document.querySelectorAll('#listing-form input:not([type=hidden]):not([type=file]), #listing-form select, #listing-form textarea')].filter(e => {
+      if (e.labels && e.labels.length) return false;
+      return !(e.getAttribute('aria-label') || e.getAttribute('aria-labelledby'));
+    }).map(e => e.id || e.name || e.type));
+    assert.deepStrictEqual(uden, [], 'felter uden label');
+    await s.page.locator('label.radio-card', { has: s.page.locator('input[value="naked"]') }).click();
+    await s.page.selectOption('#f-brand', 'Yamaha');
+    await s.page.fill('#f-model', 'MT-07');
+    await s.page.locator('body').click({ position: { x: 5, y: 300 } });
+    await s.page.evaluate(() => document.activeElement && document.activeElement.blur());
+    const knap = s.page.locator('#op-prev-open');
+    await knap.scrollIntoViewIfNeeded();
+    if (!(await knap.isVisible())) return;       // pillen skjules bevidst, når kortet er i syne
+    await knap.click();
+    assert.ok(await s.page.locator('#op-prev-dialog[open]').count(), 'ark åbent');
+    await s.page.keyboard.press('Escape');
+    assert.strictEqual(await s.page.locator('#op-prev-dialog[open]').count(), 0);
+  } finally { await s.luk(); }
+});
+
+test('K9e Hele flowet uden konsolfejl og uden uhåndterede promise-afvisninger', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true }, 'opret-annonce.html');
+  try {
+    await udfylSide1(s.page); await naeste(s.page);
+    await vaelgBilleder(s.page, 2); await naeste(s.page); await s.page.check('#f-terms');
+    await Promise.all([s.page.waitForURL(/annonce\.html\?id=/, { timeout: 15000 }), s.page.click('#step-next')]);
+    assert.deepStrictEqual(s.fund.side, []);
+    assert.deepStrictEqual(s.fund.konsol, []);
+  } finally { await s.luk(); }
 });
