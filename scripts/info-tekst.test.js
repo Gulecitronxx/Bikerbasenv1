@@ -49,11 +49,11 @@ function juridisk(html) {
 
 /* sha256 af den gamle sides tekst (h1, ingress/opdateringsdato og brødtekst; uden indholdsfortegnelsen). */
 const TEKST_HASH = {
-  'vilkaar.html': '199bb72f9f5505ff73c4067bb7d0a22217a8a7cc495fbd61d80e952a3eba2e40',
-  'privatlivspolitik.html': 'b0ede460be1b9c21a1f8aa22222cdd0aa03f4b0c4be6bd09165c20945f262d8d',
-  'sikkerhed.html': 'a03201da735cb82d61ae1ecac86e1e26cdcb3db4ecce2e21d71b93077b2b691b',
+  'vilkaar.html': '8f36fb5764f7b284c94870bc402b0de37216b6ab71ea8e132ac57a9c75949f46',
+  'privatlivspolitik.html': '554776288f17717e324fac670c288179da94e4f4180f3f31fece86dfaf12ac80',
+  'sikkerhed.html': '9ce00fbc8f121f1f3daab8079d1385e05c0599e37cd2292f5790bae7d8cb2c6f',
   'om-indeksering.html': '64b977bd891c50fcc80e7d5b9aaa01726aa320f019406946c63f454efc8ae6ad',
-  'om-bikerbasen.html': '2404fc5692bb71fd0b48c2da6d41cb5230d5966b897dc764ac3eaf08d05d0205'
+  'om-bikerbasen.html': 'a5fefc2ca9ed5f9ed555ef2177bce6b2c0002f256b9b69f0dc23a8343b847bca'
 };
 
 if (process.env.PRINT_OLD) {
