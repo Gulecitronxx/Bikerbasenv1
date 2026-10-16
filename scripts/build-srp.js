@@ -32,6 +32,7 @@
 const fs = require('fs');
 const path = require('path');
 const { ROOT, fetchListings, fetchExternalListings, browserModules } = require('./shared');
+const SEO = require('./seo-vagt');
 
 /* Hvor mange kort der forudtegnes i markuppen — IKKE sidestørrelsen.
    js/search.js viser 24 pr. side; de første 12 er dem, der kan nå at være
@@ -46,10 +47,16 @@ const PRERENDER_COUNT = 12;
 
   // Rækkerne skal gennem sidens egne oversættere, ellers mangler kortene
   // forhandler-badge, variant, kilde osv. i forhold til det, klienten tegner.
-  const egne = (await fetchListings([]))
+  const egne = (await fetchListings([], { kraevDatabase: true }))
     .map(l => l.created_at ? normalizeRemoteListing(l) : l);
   const eksterne = markerTvaerkildeDubletter((await fetchExternalListings()).map(normalizeExternalListing)).beholdt;   // Runde 7 (D7-F2)
   const alle = egne.concat(eksterne);
+
+  /* Egen vagt (blind Critic P2-4): en tom eller drastisk faldet hentning må ikke overskrive sidens
+     eksisterende forudtegnede kort og "N annoncer fundet" — samme regler som de øvrige datatrin, mod
+     tallene fra det sidste vellykkede byg. Ved fald beholdes soegning.html som den er (exit 3). */
+  SEO.tjekLager({ egne: egne.length, eksterne: eksterne.length, perKilde: SEO.taelPrKilde(eksterne), baseline: SEO.laesLedger(ROOT).meta,
+    inaktive: SEO.laesInaktiveDomaener(ROOT), egneSider: SEO.taelAnnonceSider(ROOT) });
 
   // Samme rækkefølge som search.js' standard ('blandet'): js/sortering.js,
   // som også er den, browseren kører. Determinismen er låst af
@@ -107,4 +114,4 @@ const PRERENDER_COUNT = 12;
   console.log(`build-srp: ${page.length} kort (af ${total}: ${egne.length} egne + ${eksterne.length} indekserede) `
     + `skrevet ind i soegning.html i blandet rækkefølge — ${udenFoto} af dem uden foto`
     + (firstPhoto ? `, LCP-foto preloadet.` : `, intet foto at preloade.`));
-})().catch(e => { console.error('build-srp AFBRUDT:', e.message); process.exit(1); });
+})().catch(e => { e.message = 'build-srp AFBRUDT: ' + e.message; SEO.afslut(e); });

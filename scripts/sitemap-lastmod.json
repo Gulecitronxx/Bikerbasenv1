@@ -1,0 +1,255 @@
+{
+ "version": 1,
+ "meta": {
+  "brandUrls": 21,
+  "egne": 2,
+  "eksterne": 602,
+  "maerkesider": 25,
+  "efterFacetUrls": 52,
+  "facetSider": 31,
+  "perKilde": {
+   "rydbergsmc.dk": 74,
+   "mcsyd.dk": 345,
+   "jensensmc.dk": 28,
+   "guloggratis.dk": 155
+  }
+ },
+ "sider": {
+  "budget-under-100000": {
+   "h": "f39b7acdc218",
+   "d": "2026-10-16"
+  },
+  "budget-under-30000": {
+   "h": "4717afc20117",
+   "d": "2026-10-16"
+  },
+  "budget-under-50000": {
+   "h": "594ceb6b0799",
+   "d": "2026-10-16"
+  },
+  "budget-under-75000": {
+   "h": "ab9f27c538e7",
+   "d": "2026-10-16"
+  },
+  "by-farum": {
+   "h": "4c5538fcb05a",
+   "d": "2026-10-16"
+  },
+  "by-horsens": {
+   "h": "b8bc4ec500b0",
+   "d": "2026-10-16"
+  },
+  "by-noerresundby": {
+   "h": "bbaf42b64519",
+   "d": "2026-10-16"
+  },
+  "by-skive": {
+   "h": "47d777128c23",
+   "d": "2026-10-16"
+  },
+  "by-thorsoe": {
+   "h": "a9909b3c2798",
+   "d": "2026-10-16"
+  },
+  "index": {
+   "h": "2b1aa6721a5a",
+   "d": "2026-10-16"
+  },
+  "koerekort-a": {
+   "h": "744b405fe5c3",
+   "d": "2026-10-16"
+  },
+  "koerekort-a1": {
+   "h": "5e8a9ff0eb7a",
+   "d": "2026-10-16"
+  },
+  "koerekort-a2": {
+   "h": "577f475c09c8",
+   "d": "2026-10-16"
+  },
+  "maerke-aprilia": {
+   "h": "eaf67699e8bc",
+   "d": null
+  },
+  "maerke-bmw": {
+   "h": "374ac8da7f79",
+   "d": null
+  },
+  "maerke-harley-davidson": {
+   "h": "4ec7ce53035c",
+   "d": null
+  },
+  "maerke-honda": {
+   "h": "3ad1a10029c9",
+   "d": null
+  },
+  "maerke-kawasaki": {
+   "h": "49fff7a88636",
+   "d": null
+  },
+  "maerke-ktm": {
+   "h": "b324594025c8",
+   "d": null
+  },
+  "maerke-royal-enfield": {
+   "h": "a0223ca11deb",
+   "d": null
+  },
+  "maerke-suzuki": {
+   "h": "ad94d1bbef62",
+   "d": null
+  },
+  "maerke-triumph": {
+   "h": "04028d1c06ef",
+   "d": null
+  },
+  "maerke-yamaha": {
+   "h": "1383306aba7b",
+   "d": null
+  },
+  "maerker": {
+   "h": "ed46cc8062ba",
+   "d": null
+  },
+  "mc-harley-davidson-cruiser": {
+   "h": "afce78dc21d9",
+   "d": "2026-10-16"
+  },
+  "mc-honda-cruiser": {
+   "h": "6522c34d7fea",
+   "d": "2026-10-16"
+  },
+  "mc-honda-naked": {
+   "h": "7ed4cce3f4d4",
+   "d": "2026-10-16"
+  },
+  "mc-honda-touring": {
+   "h": "e18b607690a8",
+   "d": "2026-10-16"
+  },
+  "model-harley-davidson-flstc-heritage-softail-classic": {
+   "h": "65ff34359b02",
+   "d": "2026-10-16"
+  },
+  "model-honda-cb-1000-hornet": {
+   "h": "7686c079709d",
+   "d": "2026-10-16"
+  },
+  "model-honda-cb-1000-r": {
+   "h": "d30b17160d03",
+   "d": "2026-10-16"
+  },
+  "model-honda-cb-650-r": {
+   "h": "6a0de3200692",
+   "d": "2026-10-16"
+  },
+  "model-honda-cbr-650-r": {
+   "h": "a04b0bfe9561",
+   "d": "2026-10-16"
+  },
+  "model-honda-cl-500-a": {
+   "h": "af29b39c9878",
+   "d": "2026-10-16"
+  },
+  "model-honda-cmx-1100-d-rebel": {
+   "h": "a17896396ae7",
+   "d": "2026-10-16"
+  },
+  "model-honda-cmx-500-rebel": {
+   "h": "e442c1a7f46c",
+   "d": "2026-10-16"
+  },
+  "model-honda-crf-1100-l-africa": {
+   "h": "6e1630910a6c",
+   "d": "2026-10-16"
+  },
+  "model-honda-gl-1800-gold-wing": {
+   "h": "ccee4dedcafe",
+   "d": "2026-10-16"
+  },
+  "model-honda-nc-750-x": {
+   "h": "4f3c5b0e1213",
+   "d": "2026-10-16"
+  },
+  "model-honda-nt-1100-a": {
+   "h": "dbd34c34e834",
+   "d": "2026-10-16"
+  },
+  "model-honda-nx-500": {
+   "h": "d2760e3b059a",
+   "d": "2026-10-16"
+  },
+  "model-honda-xl-750-transalp": {
+   "h": "1eeed02dc9c1",
+   "d": "2026-10-16"
+  },
+  "model-suzuki-vlr-1800": {
+   "h": "725b2ecb4584",
+   "d": "2026-10-16"
+  },
+  "om-bikerbasen": {
+   "h": "6388b91dd5e0",
+   "d": null
+  },
+  "om-indeksering": {
+   "h": "9f1176341e81",
+   "d": null
+  },
+  "opret-annonce": {
+   "h": "884cbcb0b04f",
+   "d": null
+  },
+  "privatlivspolitik": {
+   "h": "d0ef09c2d728",
+   "d": null
+  },
+  "region-hovedstaden": {
+   "h": "7e852eb6610a",
+   "d": "2026-10-16"
+  },
+  "region-midtjylland": {
+   "h": "7da003774a0a",
+   "d": "2026-10-16"
+  },
+  "region-nordjylland": {
+   "h": "fd3229b56cc1",
+   "d": "2026-10-16"
+  },
+  "region-syddanmark": {
+   "h": "4eef7edd88fd",
+   "d": "2026-10-16"
+  },
+  "sikkerhed": {
+   "h": "652d5c49954c",
+   "d": null
+  },
+  "soegning": {
+   "h": "1a1705340ef3",
+   "d": "2026-10-16"
+  },
+  "type-adventure": {
+   "h": "5cb221b59c5f",
+   "d": "2026-10-16"
+  },
+  "type-cruiser": {
+   "h": "10283d70bd44",
+   "d": "2026-10-16"
+  },
+  "type-naked": {
+   "h": "1df122b72a36",
+   "d": "2026-10-16"
+  },
+  "type-sport": {
+   "h": "0d933b4c7543",
+   "d": "2026-10-16"
+  },
+  "type-touring": {
+   "h": "7fa279eb7428",
+   "d": "2026-10-16"
+  },
+  "vilkaar": {
+   "h": "700d580e2810",
+   "d": null
+  }
+ }
+}

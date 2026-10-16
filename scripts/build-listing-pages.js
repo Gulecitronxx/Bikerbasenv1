@@ -17,6 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 const { ROOT, siteUrl, listingSlug, fetchListings, siteParts, esc } = require('./shared');
+const { tjekAntal, tjekSletninger, taelAnnonceSider } = require('./seo-vagt');
 
 // data.js giver os formatPrice, typeLabel, equipmentLabel osv.
 const dataSrc = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
@@ -297,17 +298,27 @@ ${contactModal}
 }
 
 (async () => {
-  const listings = await fetchListings(global.__L);
+  /* S-005: kraevDatabase => en fejlet hentning kaster i stedet for at give js/data.js'
+     tomme liste, og tjekAntal() nedenfor stopper et drastisk fald (< 50 % af de
+     committede annonce-*.html) FØR en eneste fil slettes. */
+  const listings = await fetchListings(global.__L, { kraevDatabase: true });
+  // nulErFejl: 0 egne annoncer med committede sider er signaturen på en tom hentning (gulvet på 20 gælder
+  // ellers ikke for så få sider) — så slettes intet.
+  tjekAntal('Egne annoncesider', listings.length, taelAnnonceSider(ROOT), { nulErFejl: true });
 
   const forventede = new Set(listings.map(listingSlug));
-  let slettet = 0;
-  for (const f of fs.readdirSync(ROOT)){
-    if (/^annonce-.+\.html$/.test(f) && !forventede.has(f)){
-      fs.unlinkSync(path.join(ROOT, f));
-      slettet++;
-    }
+  const tilSletning = fs.readdirSync(ROOT).filter(f => /^annonce-.+\.html$/.test(f) && !forventede.has(f));
+  tjekSletninger('Annoncesider', tilSletning.length, taelAnnonceSider(ROOT));
+  /* Kaldes den fra scripts/build.js, SLETTES intet her: listen skrives til BB_SLETTELISTE, og build.js sletter
+     først, når ALLE datatrin er lykkedes. Springes et senere trin over, gendannes det gamle sitemap — og
+     det (samt de ikke-opdaterede mærke-/budgetsider) ville ellers pege på sider, der var slettet (404). */
+  if (process.env.BB_SLETTELISTE){
+    fs.writeFileSync(process.env.BB_SLETTELISTE, JSON.stringify(tilSletning));
+    if (tilSletning.length) console.log(`Udskyder sletning af ${tilSletning.length} annoncesider til alle datatrin er lykkedes: ${tilSletning.join(', ')}.`);
   }
-  if (slettet) console.log(`Fjernede ${slettet} foraeldede annoncesider.`);
+  let slettet = 0;
+  if (!process.env.BB_SLETTELISTE) for (const f of tilSletning){ fs.unlinkSync(path.join(ROOT, f)); slettet++; }
+  if (slettet) console.log(`Fjernede ${slettet} foraeldede annoncesider: ${tilSletning.join(', ')}.\n::warning title=Sider fjernet::${slettet} annonceside(r) slettet (${tilSletning.join(', ')}).`);
 
   let bygget = 0;
   for (const l of listings){
@@ -315,4 +326,4 @@ ${contactModal}
     bygget++;
   }
   console.log(`Byggede ${bygget} annoncesider.`);
-})().catch(e => { console.error(e.message); process.exit(1); });
+})().catch(e => require('./seo-vagt').afslut(e));

@@ -16,6 +16,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      tillad_fald:
+        description: 'Tillad bevidst fald i antal annoncer/kilder (fx en kilde er fravalgt, CLAUDE.md regel 5). Saetter BB_TILLAD_FALD=1 for denne udgivelse. Baseline skifter foerst, naar en lokal build (BB_TILLAD_FALD=1 node scripts/build.js) er committet med scripts/sitemap-lastmod.json.'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -37,6 +42,9 @@ jobs:
         with:
           node-version: 20
       - name: Byg annonce- og maerkesider, metatags og versionsstempel
+        env:
+          # Kun ved manuel start med tillad_fald = true (scripts/seo-vagt.js).
+          BB_TILLAD_FALD: ${{ inputs.tillad_fald && '1' || '' }}
         run: node scripts/build.js
       # Samler _site fra en allowlist og afbryder, hvis en side peger paa en
       # fil, der ikke kom med. Hvorfor allowlist frem for `path: .` staar i
