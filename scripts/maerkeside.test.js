@@ -255,3 +255,23 @@ test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
   assert.equal(monogram('Royal Enfield'), 'RE');
   assert.equal(monogram('Moto Guzzi'), 'MG');
 });
+
+/* ---------- samlet Critic P2: ubevist "ny" er hverken ny eller brugt ---------- */
+{
+  const { titelFor, metaBeskrivelseFor } = require('./build-brand-pages.js');
+  const stats = { min: 20000, max: 90000 };
+
+  test('titel og beskrivelse siger kun "brugt", når ALLE er bevist brugte', () => {
+    // rent brugt (default) — som før
+    assert.match(titelFor('Kawasaki', 51, 0), /Kawasaki brugt – 51 til salg/);
+    assert.match(metaBeskrivelseFor('Kawasaki', 51, stats, 0), /51 brugte Kawasaki/);
+    // ubeviste "ny" blandt dem: ingen påstand om "brugt"
+    assert.ok(!/brugt/.test(titelFor('Kawasaki', 51, 0, false)), 'titlen må ikke sige brugt');
+    assert.ok(!/brugte/.test(metaBeskrivelseFor('Kawasaki', 51, stats, 0, false, 28)), 'beskrivelsen må ikke sige brugte');
+  });
+
+  test('"N brugte" i beskrivelsen tæller ikke ubeviste "ny" med', () => {
+    const tekst = metaBeskrivelseFor('KTM', 21, stats, 7, false, 3);
+    assert.match(tekst, /7 fabriksnye og 11 brugte/, 'brugte = 21 − 7 nye − 3 ubeviste');
+  });
+}

@@ -338,12 +338,14 @@ function introFor(brand, items){
 
   const en = items.length === 1;
   const nye = nyeAf(items);
+  const ubevN = standOpg(items).ubeviste;          // ubevist "ny" er hverken ny eller brugt (samlet Critic P2)
+  const renBrugtN = standOpg(items).renBrugt;
   /* Runde 8 (D8-F2/M4): "lige nu" (friskhed, vi ikke kan love) og "til salg
      paa Bikerbasen" (de er til salg hos kilderne — vi hoster ingen) er ude. */
   const dele = nye
     ? [`Der er <strong>${items.length}</strong> ${esc(brand)} ${en ? 'motorcykel' : 'motorcykler'} til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen `
-      + `— <strong>${items.length - nye}</strong> ${items.length - nye === 1 ? 'brugt' : 'brugte'} og <strong>${nye}</strong> ${nye === 1 ? 'fabriksny' : 'fabriksnye'}`]
-    : [`Der er <strong>${items.length}</strong> ${en ? 'brugt' : 'brugte'} ${esc(brand)} `
+      + `— <strong>${items.length - nye - ubevN}</strong> ${items.length - nye - ubevN === 1 ? 'brugt' : 'brugte'}, <strong>${nye}</strong> ${nye === 1 ? 'fabriksny' : 'fabriksnye'}${ubevN ? ` og <strong>${ubevN}</strong> med uoplyst stand` : ''}`]
+    : [`Der er <strong>${items.length}</strong> ${renBrugtN ? (en ? 'brugt' : 'brugte') + ' ' : ''}${esc(brand)} `
       + `${en ? 'motorcykel' : 'motorcykler'} til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen`];
 
   if (priser.length > 1 && priser[0] !== priser[priser.length - 1]){
@@ -488,8 +490,9 @@ function topModeller(items, n){
 
 /* TITLE — "{Brand} brugt – X til salg | Bikerbasen", maks 60 tegn. Kun
    kaldt for mærker med fuld tekst; se MIN_LISTINGS_FULD_TEKST. */
-function titelFor(brand, n, nye){
-  return nye ? `${brand} – ${n} til salg, nye og brugte | Bikerbasen` : `${brand} brugt – ${n} til salg | Bikerbasen`;
+function titelFor(brand, n, nye, rent = true){
+  return nye ? `${brand} – ${n} til salg, nye og brugte | Bikerbasen`
+    : rent ? `${brand} brugt – ${n} til salg | Bikerbasen` : `${brand} – ${n} til salg | Bikerbasen`;
 }
 
 /* META DESCRIPTION — 140-155 tegn, rigtigt antal, rigtigt prisspænd, én
@@ -498,16 +501,16 @@ function titelFor(brand, n, nye){
    opfundet her. Sætningerne vælges i prioriteret rækkefølge, indtil
    længden lander i vinduet; det holder teksten sand for både et mærke med
    ét kort prisord (Royal Enfield) og et med et langt (Harley-Davidson). */
-function metaBeskrivelseFor(brand, n, stats, nye){
-  // Runde 7 (D7-M1): "brugte" kun naar alle er brugte.
-  const b = nye ? '' : 'brugte ';
+function metaBeskrivelseFor(brand, n, stats, nye, rent = true, ubev = 0){
+  // Runde 7 (D7-M1): "brugte" kun naar alle er BEVIST brugte (ubevist "ny" er hverken ny eller brugt).
+  const b = !nye && rent ? 'brugte ' : '';
   const prisled = stats.min == null
     ? ''
     : stats.min === stats.max
       ? ` til ${dkk(stats.min)}`
       : ` fra ${dkk(stats.min)} til ${dkk(stats.max)}`;
   const kandidater = [
-    `Se ${n} ${b}${brand}${prisled} på Bikerbasen${nye ? ` — ${nye} fabriksnye og ${n - nye} brugte` : ''}. Ingen kommission af salget.`
+    `Se ${n} ${b}${brand}${prisled} på Bikerbasen${nye ? ` — ${nye} fabriksnye og ${n - nye - ubev} brugte` : ''}. Ingen kommission af salget.`
       + ' Sammenlign pris, årgang og km i hele Danmark.',
     `Se ${n} ${b}${brand}${prisled} på Bikerbasen. Ingen kommission af salget.`
       + ' Sammenlign pris og årgang i hele Danmark.',
@@ -1124,9 +1127,10 @@ for (const brand of brands){
   const andetBrand = kvalificeret ? naermesteMedianBrand(brand, stats.median) : null;
 
   const nye = nyeAf(items);
-  const titelRaa = kvalificeret ? titelFor(brand, items.length, nye)
-    : `${nye ? '' : 'Brugte '}${brand} motorcykler til salg — Bikerbasen`;
-  const metaDescRaa = kvalificeret ? metaBeskrivelseFor(brand, items.length, stats, nye) : beskrivelse;
+  const standN = standOpg(items);
+  const titelRaa = kvalificeret ? titelFor(brand, items.length, nye, standN.renBrugt)
+    : `${standN.renBrugt ? 'Brugte ' : ''}${brand} motorcykler til salg — Bikerbasen`;
+  const metaDescRaa = kvalificeret ? metaBeskrivelseFor(brand, items.length, stats, nye, standN.renBrugt, standN.ubeviste) : beskrivelse;
   const arvSaetning = kvalificeret ? BRAND_ARV[brand] : null;
   const introTekst = arvSaetning ? `${arvSaetning} ${introFor(brand, items)}` : introFor(brand, items);
   /* Runde 7 (D7-M3): tallet ("Der er lige nu …") foerst og synligt; arven og
@@ -1209,7 +1213,7 @@ ${header}
         <span>${esc(brand)}</span>
       </nav>
       <p class="mk-wordmark${brand.length > 11 ? ' mk-wordmark-lang' : ''}" aria-hidden="true"><span class="mk-mono">${esc(monogram(brand))}</span><span>${esc(brand)}</span></p>
-      <h1>${nye ? '' : 'Brugte '}${esc(brand)}-motorcykler til salg i Danmark</h1>
+      <h1>${standN.renBrugt ? 'Brugte ' : ''}${esc(brand)}-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">${introFoerste}</p>
       ${introRest ? `<details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
     </div>
@@ -1590,4 +1594,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd };
+module.exports = { typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };
