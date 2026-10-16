@@ -137,7 +137,7 @@ test('build.js: faldet i ÉT datatrin gendanner hele sitemappet og ledgeren fra 
     for (const f of ['build.js', 'seo-vagt.js']) fs.copyFileSync(path.join(__dirname, f), path.join(dir, 'scripts', f));
     fs.writeFileSync(path.join(dir, 'sitemap.xml'), 'FULDT-SITEMAP-FRA-FOER');
     fs.writeFileSync(path.join(dir, 'scripts', 'sitemap-lastmod.json'), 'LEDGER-FRA-FOER');
-    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
+    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'build-llms.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
     const sm = JSON.stringify(path.join(dir, 'sitemap.xml')), le = JSON.stringify(path.join(dir, 'scripts', 'sitemap-lastmod.json'));
     for (const t of trin){
       // brand skriver et sitemap UDEN facet-poster og en ny ledger; facet fejler derefter (exit 3)
@@ -166,7 +166,7 @@ test('build.js: annoncesider slettes først sidst — og slet ikke hvis et trin 
   try {
     fs.mkdirSync(path.join(dir, 'scripts'));
     for (const f of ['build.js', 'seo-vagt.js']) fs.copyFileSync(path.join(__dirname, f), path.join(dir, 'scripts', f));
-    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
+    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'build-llms.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
     const opsaet = (brandKode) => {
       for (const f of ['annonce-a-1.html', 'annonce-b-2.html', 'annonce-c-3.html']) fs.writeFileSync(path.join(dir, f), 'side');
       for (const t of trin){
@@ -197,7 +197,7 @@ test('build.js: et datatrin med exit 3 beholder de committede sider og fortsætt
   try {
     fs.mkdirSync(path.join(dir, 'scripts'));
     for (const f of ['build.js', 'seo-vagt.js']) fs.copyFileSync(path.join(__dirname, f), path.join(dir, 'scripts', f));
-    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
+    const trin = ['build-listing-pages.js', 'build-brand-pages.js', 'build-facet-pages.js', 'build-guides.js', 'build-srp.js', 'build-meta.js', 'build-llms.js', 'stamp-version.js', 'inline-boot.js', 'inline-cookie.js', 'inline-analytics.js', 'inline-critical.js', 'csp-hashes.js'];
     const lav = (kode) => { for (const t of trin) fs.writeFileSync(path.join(dir, 'scripts', t), `require('fs').appendFileSync(${JSON.stringify(path.join(dir, 'log.txt'))}, ${JSON.stringify(t)} + '\\n'); process.exit(${t === 'build-brand-pages.js' ? kode : 0});`); };
     lav(3);
     let r = spawnSync('node', [path.join(dir, 'scripts', 'build.js')], { encoding: 'utf8', env: { ...process.env, BB_TILLAD_FALD: '' } });

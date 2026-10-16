@@ -21,3 +21,18 @@
 
 ## Bevis
 Tilføjes pr. kriterium nedenfor efterhånden.
+
+## Bevis (alle kørt i worktreen)
+- K1a-e: `scripts/annonce-statisk.test.js` (4 tests grønne) — pile, aria-current, `&amp;`, handlingsrække og identitet med `anBrodkrumme`/`anAktioner` kørt i stub-DOM, 3 fixtures (inkl. "Ukendt" mærke og manglende model/årgang). `side()` eksporteres; generatoren kører kun ved direkte kald.
+  Overflødige CSS-regler: ingen eksplicit reservation for brødkrumme/handlingsrække fundet i css/ (kun `.an-crumbrow`/`.an-actions` layout, som stadig skal stå). `.breadcrumb svg{14px}` bruges nu også af server-markup. Forsiden/andre sider med `.bc-sep` er urørt.
+- K2: `scripts/llms.test.js` (5 grønne): deterministisk (to kørsler = samme bytes), ingen antal/pris/"verificeret", links findes, registreret i build.js (efter build-meta) og `/^llms\.txt$/,` i udgiv.js. `scripts/seo-vagt.test.js`s tre hårdkodede trinlister opdateret.
+- K3a: `distinkte()` i seo-sider.js kræver pris+årgang oplyst; ellers egen nøgle (id). Test i seo-sider.test.js.
+- K3c: ny `medianAarTekst()` (2015–2016, aldrig 2016). Test.
+- K3b: se åbne punkter (fix ligger i build-facet-pages.js, ikke mine filer). `soegHref` default er allerede `&amp;` (låst af test).
+
+## Åbne punkter til Orchestrator / facet-strømmen (filer uden for mine)
+1. build-facet-pages.js:892 `facetSearchUrl` bruger `{ html: false }` men bruges kun i HTML-hrefs (l.1574/1579/1588/1602/1613) -> rå `&` i modelsiders "Se alle"-link. Fix: `{ html: true }` (l.1574 har allerede `&amp;agent=1` efter). Committede model-*.html skal genbygges.
+2. build-facet-pages.js:745 `medianårgang ${SIDER.median(aar)}` -> `SIDER.medianAarTekst(aar)`.
+3. build-facet-pages.js:~1732 (browser-hydrering) har egen kopi af distinkt-nøglen; skal følge `distinktNoegle` (kræv pris+årgang, ellers unik pr. id).
+4. Nye testfiler til `npm test`: scripts/annonce-statisk.test.js, scripts/llms.test.js (seo-sider/seo-soeglink/seo-vagt tests er allerede med).
+5. `npm test` i worktreen: 7 fejl er præ-eksisterende (manglende moduler @supabase/supabase-js, yaml, playwright i crawler/*-tests + 1 seo-vagt P2-1); identisk med e5eaa90.
