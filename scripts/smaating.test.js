@@ -103,11 +103,11 @@ test('swipe-kortet: ingen ekstra "Kørekort"-label foran teksten, og en bundlinj
   assert.match(css, /\.swipe-card-fod\{[^}]*display:flex;[^}]*justify-content:space-between;/);
 });
 
-test('kortets titel/pris: ét knækpunkt (kortets egen bredde), ikke flere', () => {
+test('kortets titel/pris: ingen container query styrer .rk-top; pris står under titlen i alle bredder', () => {
   const css = læs('css/styles.css');
   const blokke = [...css.matchAll(/@container \(max-width: (\d+)px\)\{([^}]*\{[^}]*\}[^}]*)\}/g)].filter(m => /\.rk-top\{/.test(m[2]));
-  assert.equal(blokke.length, 1, 'præcis én container query styrer .rk-top');
-  assert.equal(blokke[0][1], '300', 'knækpunktet er 300 px (Critic w4 P2-1: 266 px-kort på søgesiden må ikke ligge lige over grænsen)');
+  assert.equal(blokke.length, 0, 'ingen container query styrer .rk-top');
+  assert.match(css, /\n\.rk-top\{ flex-direction:column; align-items:flex-start;/);
 });
 
 test('swipe-stakken: kun det forreste kort viser bundlinjen', () => {

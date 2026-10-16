@@ -324,10 +324,8 @@ test('swipe-kortet siger "Årgang ikke oplyst" for manglende årgang', () => {
   assert.match(synligTekst(swipeCardHTML(ekstern({ year: 1999 }), 0)), /1999/);
 });
 
-test('titel/pris stabler ved ≤300 px kortbredde (ét knækpunkt, container query) — ikke lige under søgesidens 266 px', () => {
+test('titel/pris: pris under titel i alle kortbredder (w5-visuel V2-008), ingen container query', () => {
   const css = læsRod('css/styles.css');
-  const m = css.match(/@container \(max-width: (\d+)px\)\{\s*\.rk-top\{ flex-direction:column;/);
-  assert.ok(m, 'container query for .rk-top findes');
-  assert.equal(Number(m[1]), 300);
-  assert.ok(Number(m[1]) >= 290, 'søgesidens kort er 266 px ved 1480–1920: de skal stable (Critic w4 P2-1)');
+  assert.doesNotMatch(css, /@container \(max-width: \d+px\)\{\s*\.rk-top\{/);
+  assert.match(css, /\n\.rk-top\{ flex-direction:column; align-items:flex-start;/);
 });

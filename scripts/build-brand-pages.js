@@ -1007,7 +1007,7 @@ function treKolonnerHTML(brand, fakta, items){
   if (!kolonner.length) return '';
   return `<section class="section mk-sektion">
     <div class="container">
-      <div class="mk-cols mk-cols-${kolonner.length}">
+      <div class="mk-cols mk-cols-${kolonner.length}" role="region" aria-label="Find mere hos mærket" tabindex="0">
         ${kolonner.join('\n        ')}
       </div>
     </div>

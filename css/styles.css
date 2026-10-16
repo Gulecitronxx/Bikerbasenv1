@@ -818,16 +818,13 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .rk-top{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
 /* Smalle kort (forsidens fem-række, mærkesidens kortrække, søgningens tre kolonner): prisen står under titlen i stedet
    for at presse den. ÉT knækpunkt på KORTETS egen bredde (container query, ikke skærmbredden), så alle kort i en række
-   altid har samme tilstand: ≤300 px = stablet, >300 px = side om side.
+   altid har samme tilstand: pris under titel (stablet) i alle bredder.
    Hvorfor 300 og ikke 262 (blind Critic w4, P2-1): søgesidens kort er 266 px ved ALLE viewports 1480–1920, altså 4 px over
    den gamle grænse. Det gav et synligt spring ved små viewportændringer og en titel på kun ~85 px (to linjer, ujævne
    rækker) — dårligere end stablet. Side om side kræver pris (~85 px) + mellemrum (8) + kortets padding (24) + en titel på
    mindst 120 px = ~237 px, og 300 giver en sikker margin: titlen får altid ≥ 180 px. Sweep 320–1920 i trin à 8 px står i
    docs/review/gauntlet/builder-w4.md (runde 2). */
-@container (max-width: 300px){
-  .rk-top{ flex-direction:column; align-items:flex-start; gap:2px; }
-  .rk-pris.pris-mangler{ text-align:left; }
-}
+/* (w5-visuel: pris under titel i alle kortbredder — se .rk-top længere nede; den tidligere container query ved 300 px er fjernet.) */
 .rk-titel{ font-family: var(--font-display); font-size:15px; font-weight:700; line-height:1.25; margin:0; min-width:0; overflow-wrap:anywhere; }
 .rk-pris{ flex:none; font-family: var(--font-display); font-size:15px; font-weight:700; white-space:nowrap; }
 .rk-pris.pris-mangler{ white-space:normal; text-align:right; font-size:12.5px; font-weight:600; color: var(--color-fg-muted); }
