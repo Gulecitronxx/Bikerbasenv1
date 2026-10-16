@@ -56,7 +56,7 @@ function cleanUrl(file){
    (scripts/build-guides.js skriver dem ud fra guides-data.js), så meta og JSON-LD aldrig siger to forskellige ting,
    og ingen dato opfindes her. Uden en Article-blok udelades tagsene. */
 function artikelDatoer(html){
-  const a = html.match(/"datePublished":"(d{4}-d{2}-d{2})"/), m = html.match(/"dateModified":"(d{4}-d{2}-d{2})"/);
+  const a = html.match(/"datePublished":"(\d{4}-\d{2}-\d{2})"/), m = html.match(/"dateModified":"(\d{4}-\d{2}-\d{2})"/);
   return a && m ? { published: a[1], modified: m[1] } : null;
 }
 

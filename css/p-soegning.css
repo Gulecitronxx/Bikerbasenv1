@@ -311,6 +311,9 @@
 @media (min-width:1100px){ #results-grid:not(.list-view){ grid-template-columns: repeat(3, minmax(0,1fr)); } }
 @media (min-width:1280px){ #results-grid:not(.list-view){ grid-template-columns: repeat(4, minmax(0,1fr)); } }
 #results-grid:not(.list-view) .card{ min-width:0; }
+/* w7-visuel (W7-1): under 560 px samme kompakte 2-kolonne som landingssidernes .fa-flere/.brand-liste-sektion
+   (kortets indre regler står i styles.css, hvor :is() også rammer #results-grid). Listevisning er urørt. */
+@media (max-width:559px){ #results-grid:not(.list-view){ grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; } }
 .so-results{ min-width:0; }
 .so-results{ scroll-margin-top: calc(var(--header-h) + 12px); }
 
@@ -411,3 +414,25 @@
   body.srp .results-mix .mix-tekst{ white-space:normal; overflow:visible; text-overflow:clip; }
   body.srp .results-mix .mix-ord{ position:static; width:auto; height:auto; overflow:visible; clip:auto; }
 }
+
+/* ---------- Info-bånd (w9) ----------
+   Kildefordeling (#results-mix), lagerets alder (#frisk-note) og sorteringsreglen (#sortering-note) i ÉT roligt bånd under
+   resultathovedet, i stedet for tre spredte linjer. Indholdet og id'erne er uændrede; kun rammen er ny. */
+.so-infoband{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 0; margin:0 0 var(--space-4); padding:10px 14px;
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
+  font-size:13px; line-height:1.45; color: var(--color-fg-muted);
+}
+.so-infoband:not(:has(> :not([hidden]))){ display:none; }
+.so-infoband > *{ margin:0 !important; min-width:0; max-width:none; font-size:13px; }
+.so-infoband > :not([hidden]) ~ :not([hidden]){ border-left:1px solid var(--color-border); margin-left:12px !important; padding-left:12px; }
+.so-infoband .results-mix{ white-space:normal !important; flex-wrap:wrap !important; overflow:visible !important; }
+.so-infoband .results-mix .mix-tekst{ white-space:normal; overflow:visible; text-overflow:clip; }
+@media (max-width:639px){
+  .so-infoband{ padding:8px 12px; font-size:12px; }
+  .so-infoband > :not([hidden]) ~ :not([hidden]){ border-left:0; margin-left:0 !important; padding-left:0; flex:1 1 100%; }
+}
+
+/* Tap-mål (w9): sammenlign-knap og info-knapper er mindst 40 x 40 (hit-feltet var 44 via ::before, men selve boksen var 34/24). */
+.so-results .card-compare{ width:40px; height:40px; right:4px; bottom:4px; }
+.so-infoband .mix-info, .so-toolbar .sortering-info{ width:40px; height:40px; min-width:40px; min-height:40px; margin-block:-10px; }

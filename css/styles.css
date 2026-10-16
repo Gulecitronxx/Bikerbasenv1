@@ -452,6 +452,11 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .header-fav:hover, .header-login:hover{ background: var(--color-surface-2); }
 .header-fav svg, .header-login svg{ width:20px; height:20px; flex:none; }
 .header-fav .fav-count{ position:static; }
+/* W7-5: indgangen til gemte annoncer vises kun, når der ER noget gemt (js/components.js: updateFavCount sætter a.hidden). Markuppen
+   står dog synlig i HTML'en med data-count="0", og på annoncesider, der hydrerer sent, blev linjen først skjult ved hydrering:
+   header-actions sprang 120 px (CLS-kilde). Nu er den skjult fra første maling, så længe tælleren står på 0. Højrejusteringen
+   (margin-left:auto) gør, at et tilkommet led ikke flytter de andre. */
+.header-actions .header-fav:has(.fav-count[data-count="0"]){ display:none; }
 .header-cta{ display:none; }
 
 .icon-btn{
@@ -583,7 +588,9 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   color:#fff;
   padding: var(--space-6) 0 calc(var(--space-8) + 16px);
 }
-@media (min-width:768px){ .hero{ padding: var(--space-6) 0 calc(var(--space-8) + 24px); } }
+/* W7-4: 56 px højere hero fra 768 px og fotoet forskudt nedad (70 %), så motorcyklen står hel mellem overskrift og søgekort
+   (før: søgekortet skjulte hjul og underramme). Søgekortets overlap er uændret (-72 px). */
+@media (min-width:768px){ .hero{ padding: var(--space-6) 0 calc(var(--space-8) + 24px + 56px); } .hero-photo{ object-position: 72% 70%; } }
 
 /* Fuldflade-foto: motorcyklen står i højre side, vej og hav løber mod venstre, hvor overskriften ligger. */
 .hero-media{ position:absolute; inset:0; z-index:0; overflow:hidden; background: var(--color-dark); }
@@ -603,30 +610,34 @@ main > .container > .section:last-child{ padding-bottom: 0; }
     linear-gradient(90deg,
       color-mix(in srgb, var(--color-dark) 80%, transparent) 0%,
       color-mix(in srgb, var(--color-dark) 66%, transparent) 30%,
-      color-mix(in srgb, var(--color-dark) 38%, transparent) max(640px, 42% + 100px),
-      transparent calc(max(640px, 42% + 100px) + 260px)),
+      color-mix(in srgb, var(--color-dark) 32%, transparent) max(640px, 42% + 100px),
+      transparent calc(max(640px, 42% + 100px) + 220px)),
     linear-gradient(0deg,
-      color-mix(in srgb, var(--color-dark) 30%, transparent) 0%,
-      transparent 36%);
+      color-mix(in srgb, var(--color-dark) 16%, transparent) 0%,
+      transparent 30%);
 }
 @media (min-width:761px) and (max-width:1100px){
-  /* Tablet: teksten fylder mere af bredden, så scrim'en holder længere ud. */
+  /* Tablet: teksten fylder mere af bredden, så scrim'en følger tekstkolonnen i px (ingressen ligger ca. 32-640 px ude). */
   .hero::after{ background:
     linear-gradient(90deg,
-      color-mix(in srgb, var(--color-dark) 82%, transparent) 0%,
-      color-mix(in srgb, var(--color-dark) 66%, transparent) 62%,
-      color-mix(in srgb, var(--color-dark) 30%, transparent) 100%),
-    linear-gradient(0deg, color-mix(in srgb, var(--color-dark) 30%, transparent) 0%, transparent 36%); }
+      color-mix(in srgb, var(--color-dark) 84%, transparent) 0%,
+      color-mix(in srgb, var(--color-dark) 78%, transparent) 480px,
+      color-mix(in srgb, var(--color-dark) 52%, transparent) 680px,
+      color-mix(in srgb, var(--color-dark) 22%, transparent) 100%),
+    linear-gradient(0deg, color-mix(in srgb, var(--color-dark) 24%, transparent) 0%, transparent 36%); }
 }
 @media (max-width: 760px){
-  .hero-photo{ object-position: 76% center; }
-  /* Bundvægtet scrim, så teksten bevarer fuld kontrast (målt: fotoets himmel har luminans 166-241). */
+  /* W7-4: heroen er 56 px højere på mobil, så motorcyklen står under overskriften i stedet for bag den (fotoet skaleres
+     efter højden). Scrimmen er TEKSTVÆGTET: tæt bag eyebrow + h1 øverst, tyndere ned over motorcyklen. Måling (pixelmetode,
+     90. percentil af luminansen bag hver tekstlinje): se docs/review/gauntlet/builder-w7-visuel.md. */
+  .hero{ padding-bottom: calc(var(--space-8) + 16px + 56px); }
+  .hero-photo{ object-position: 78% center; }
   .hero::after{
     background: linear-gradient(180deg,
-      color-mix(in srgb, var(--color-dark) 70%, transparent) 0%,
-      color-mix(in srgb, var(--color-dark) 66%, transparent) 30%,
-      color-mix(in srgb, var(--color-dark) 72%, transparent) 74%,
-      color-mix(in srgb, var(--color-dark) 94%, transparent) 100%);
+      color-mix(in srgb, var(--color-dark) 80%, transparent) 0%,
+      color-mix(in srgb, var(--color-dark) 70%, transparent) 38%,
+      color-mix(in srgb, var(--color-dark) 30%, transparent) 62%,
+      color-mix(in srgb, var(--color-dark) 22%, transparent) 100%);
   }
   /* Brødteksten gentager kun det, søgekortet selv viser — den ryger på mobil, så kortet kommer op. */
   .hero p.lead{ display:none; }
@@ -828,8 +839,12 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .rk-titel{ font-family: var(--font-display); font-size:15px; font-weight:700; line-height:1.25; margin:0; min-width:0; overflow-wrap:anywhere; }
 .rk-pris{ flex:none; font-family: var(--font-display); font-size:15px; font-weight:700; white-space:nowrap; }
 .rk-pris.pris-mangler{ white-space:normal; text-align:right; font-size:12.5px; font-weight:600; color: var(--color-fg-muted); }
-.rk-linje{ display:flex; flex-wrap:wrap; margin:0; font-size:12.5px; line-height:1.3; color: var(--color-fg-muted); row-gap:2px; }
-.rk-linje span + span{ margin-left:8px; padding-left:8px; border-left:1px solid var(--color-border); }
+/* W7-3: skillestregen er hvert leds egen border-left. Leddet trækkes 9 px (1 streg + 8 luft) ud til venstre, og linjen
+   skærer kun VANDRET (overflow-x:clip) i sin egen kant, så stregen først på en ombrudt linje ligger uden for det synlige,
+   mens teksten står præcis i kanten. Ingen negativ margin på linjen selv, ingen clip-path, ingen skæring lodret. */
+.rk-linje{ display:flex; flex-wrap:wrap; margin:0; font-size:12.5px; line-height:1.3; color: var(--color-fg-muted); row-gap:2px; overflow-x:clip; }
+.rk-linje > span{ margin:0 17px 0 -9px; padding-left:8px; border-left:1px solid var(--color-border); }
+.rk-linje > span:last-child{ margin-right:0; }
 .rk-mangler{ font-style:normal; }
 .rk-ny{ font-weight:700; color: var(--color-primary-hover); }
 .rk-chips{ display:flex; flex-wrap:wrap; gap:5px; list-style:none; margin:0; padding:0; }
@@ -4049,24 +4064,27 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Kort i samme række får ens chip-række-y: chips og fod holdes i bunden, så en to-linjers titel ikke forskyder dem. */
 .rk-chips{ margin-top:auto; }
 .rk-chips + .rk-fod{ margin-top:0; }
-/* V2-009: ingen enlig "|" først på en ombrudt linje. Hvert led har sin streg til VENSTRE; linjen er skubbet 9 px ud og
-   klippet 9 px ind, så stregen først på hver linje ligger uden for det synlige. */
-.rk-linje{ margin-left:-9px; width:calc(100% + 9px); clip-path:inset(0 0 0 9px); }
-.rk-linje > span, .rk-linje > span + span{ margin:0 8px 0 0; padding:0 0 0 8px; border-left:1px solid var(--color-border); }
+/* V2-009 / W7-3: ingen enlig "|" først på en ombrudt linje — se .rk-linje ovenfor (den gamle margin-left:-9px + clip-path er væk). */
 
 /* V2-014: kortlisterne på landingssider (kørekort, type, region, mærke ...) er en kompakt 2-kolonne under 560 px i stedet
    for én kolonne af 375 px høje kort (sidens længde ved 390 px falder ca. 30-45 %). "Udvalgte" er allerede en skinne med peek. */
 @media (max-width:559px){
   :is(.fa-flere, .brand-liste-sektion) .listings-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-body{ padding:9px 9px 8px; gap:6px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-titel{ font-size:13.5px; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden; }
-  :is(.fa-flere, .brand-liste-sektion) .card-rich .card-media{ aspect-ratio:16/10; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-pris{ font-size:14px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-linje{ font-size:11.5px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-chips{ gap:4px; min-height:50px; align-content:flex-start; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-chip{ font-size:11px; padding:5px 6px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-fod{ font-size:11px; padding-top:6px; }
-  :is(.fa-flere, .brand-liste-sektion) .card-badges{ top:6px; left:6px; right:42px; gap:4px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-body{ padding:9px 9px 8px; gap:6px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-titel{ font-size:13.5px; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-rich .card-media{ aspect-ratio:16/10; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-pris{ font-size:14px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-linje{ font-size:11.5px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-chips{ gap:4px; min-height:50px; align-content:flex-start; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-chip{ font-size:11px; padding:5px 6px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-fod{ font-size:11px; padding-top:6px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-badges{ top:6px; left:6px; right:42px; gap:4px; }
+}
+
+/* W7-1: ved 320 px er fotoet i 2-kolonne-gitteret kun ca. 86 px højt, så hjertet (44 px) og sammenlign-knappen (34 px + 5 px usynlig
+   kant) overlappede ca. 12 px, og hjertets trykflade blev 34 px høj. Et højere foto (4:3) rydder overlappet. */
+@media (max-width:349px){
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-rich .card-media{ aspect-ratio:4/3; }
 }
 
 /* ============ w5-visuel: trykflader (V2-007) ============ */

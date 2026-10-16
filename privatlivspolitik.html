@@ -56,8 +56,8 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 
-<link rel="stylesheet" href="css/styles.css?v=8a085a60">
-<link rel="stylesheet" href="css/p-info.css?v=8a085a60">
+<link rel="stylesheet" href="css/styles.css?v=75bc939c">
+<link rel="stylesheet" href="css/p-info.css?v=75bc939c">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Privatlivspolitik","item":"https://bikerbasen.dk/privatlivspolitik"}]}</script>
 </head>
 <body class="if-page" data-aktiv="privatlivspolitik.html">
@@ -147,7 +147,7 @@ try{
         <li><strong>Kontooplysninger:</strong> navn, e-mail, telefonnummer, og for forhandlere: CVR-nummer og virksomhedsnavn.</li>
         <li><strong>Verificeringsdata:</strong> om din e-mailadresse er bekræftet. Vi tilbyder ikke sms- eller MitID-verificering, og ingen profiler er identitetsverificerede.</li>
         <li><strong>Annoncedata:</strong> oplysninger om motorcykler du opretter til salg, herunder billeder.</li>
-        <li><strong>Visninger og henvendelser (kun tal):</strong> åbner du en oprettet annonce, tæller vi højst én visning pr. annonce pr. browsersession; trykker du som indlogget på "Vis telefonnummer", tæller vi én henvendelse. For ikke at tælle den samme person flere gange om dagen sender din browser en forespørgsel til en funktion hos Supabase, som ser din IP-adresse, udregner en hash (SHA-256) af IP-adresse, dagens dato og et hemmeligt salt, og kun bruger hashen sammen med annoncens id som nøgle. Er nøglen set i dag, tælles der ikke igen. Funktionen gemmer og logger ikke selve IP-adressen. Hashen ligger i en tabel, som ingen browser kan læse, og rækker fra før i går slettes automatisk (oprydningen kører tilfældigt ca. hver 100. tælling, så en række kan blive liggende lidt længere). En hash er stadig en personoplysning, derfor nævner vi den. Sælgeren ser kun tallene — ikke hvem du er. Bikerbasen kan endnu ikke sende beskeder til sælgere, og der findes ingen kontaktformular på annoncer: ingen besked fra dig sendes eller gemmes.</li>
+        <li><strong>Visninger og henvendelser (kun tal):</strong> åbner du en oprettet annonce, tæller vi højst én visning pr. annonce pr. browsersession; trykker du som indlogget på "Vis telefonnummer", tæller vi én henvendelse. For ikke at tælle den samme person flere gange om dagen sender din browser en forespørgsel til en funktion hos Supabase, som ser din IP-adresse, udregner en hash (SHA-256) af IP-adresse, dagens dato og et hemmeligt salt, og kun bruger hashen sammen med annoncens id som nøgle. Er nøglen set i dag, tælles der ikke igen. Funktionen gemmer ikke selve IP-adressen; Supabases infrastruktur kan dog som en del af driften logge forespørgsler, som Supabase beskriver i sin egen dokumentation. Hashen ligger i en tabel, som ingen browser kan læse, og rækker fra før i går slettes automatisk (oprydningen kører tilfældigt ca. hver 100. tælling, så en række kan blive liggende lidt længere). En hash er stadig en personoplysning, derfor nævner vi den. Sælgeren ser kun tallene — ikke hvem du er. Bikerbasen kan endnu ikke sende beskeder til sælgere, og der findes ingen kontaktformular på annoncer: ingen besked fra dig sendes eller gemmes.</li>
         <li><strong>Anmeldelser og bedømmelser:</strong> tekst og vurderinger du skriver om sælgere.</li>
         <li><strong>Indekserede annoncer fra andre sider:</strong> Bikerbasen viser også annoncer, vi indekserer hos forhandlere og markedspladser. Om dem gemmer vi kun titel, mærke/model, årgang, km, kubik, effekt, pris, postnummer/by, om sælgeren er privat eller forhandler, et link til annoncen og et link til ét miniaturebillede hos kilden. Telefonnumre, e-mailadresser og adresser fjernes automatisk, før noget gemmes. Hvordan og hvor ofte står på <a href="om-indeksering.html">Om vores indeksering</a> — dér står også, hvordan en annonce fjernes.</li>
         <li><strong>Statistik (kun med dit samtykke):</strong> vælger du "Accepter alle" i cookiebanneret, måler Google Analytics 4 hvilke sider der besøges, hvad der søges efter (mærke, type, pris, kørekort og de søgeord, du selv taster i søgefeltet, op til 80 tegn, som sendes til Google som "search_term") og hvilke annoncer der åbnes — aldrig hvem du er, og aldrig det, du skriver til en sælger. Skriv derfor ikke personlige oplysninger i søgefeltet, hvis du har sagt ja til statistik.</li>
@@ -285,13 +285,13 @@ try{
      scriptsaet som sikkerhed.html — uden supabase-js (52 KB gzip), supabase-api,
      postnumre og backend-bridge, som ingenting her kaldte. Login-status i
      headeren laeses fra browserens lager som paa sikkerhed.html. -->
-<script defer src="js/security.js?v=8a085a60"></script>
-<script defer src="js/icons.js?v=8a085a60"></script>
-<script defer src="js/data.js?v=8a085a60"></script>
-<script defer src="js/store.js?v=8a085a60"></script>
-<script defer src="js/maaling.js?v=8a085a60"></script>
-<script defer src="js/components.js?v=8a085a60"></script>
-<script defer src="js/info.js?v=8a085a60"></script>
+<script defer src="js/security.js?v=75bc939c"></script>
+<script defer src="js/icons.js?v=75bc939c"></script>
+<script defer src="js/data.js?v=75bc939c"></script>
+<script defer src="js/store.js?v=75bc939c"></script>
+<script defer src="js/maaling.js?v=75bc939c"></script>
+<script defer src="js/components.js?v=75bc939c"></script>
+<script defer src="js/info.js?v=75bc939c"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
   <div class="cookie-modal-indhold">
