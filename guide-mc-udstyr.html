@@ -21,8 +21,6 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Bikerbasen — motorcykler til salg i Danmark, samlet fra danske forhandlere og markedspladser">
-<meta property="article:published_time" content="2026-10-16">
-<meta property="article:modified_time" content="2026-10-16">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="MC-udstyr til nybegyndere: hjelm og tøj | Bikerbasen">
 <meta name="twitter:description" content="MC-udstyr til nye motorcyklister: hjelmpligten, pasform, beklædning, hvad du prioriterer først, og hvad du ikke bør købe brugt. Med kilder.">
@@ -31,6 +29,24 @@
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<script id="ga4">/* GA4 bag samtykke — se scripts/inline-analytics.js */
+window.bbStartAnalytics=function(){
+  if(window.__ga4Startet)return; window.__ga4Startet=true;
+  var s=document.createElement("script");
+  s.async=true; s.src="https://www.googletagmanager.com/gtag/js?id=G-RWJZ8NJB0C";
+  document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag=gtag;
+  gtag("js",new Date());
+  // anonymize_ip: vi har ikke brug for praecise adresser til at taelle besoeg.
+  gtag("config","G-RWJZ8NJB0C",{anonymize_ip:true});
+};
+try{
+  var c=JSON.parse(localStorage.getItem("bb_cookie_consent"));
+  if(c&&c.level==="all")window.bbStartAnalytics();
+}catch(e){}
+</script>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
@@ -38,8 +54,8 @@
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/p-guides.css">
+<link rel="stylesheet" href="css/styles.css?v=8a085a60">
+<link rel="stylesheet" href="css/p-guides.css?v=8a085a60">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"MC-udstyr til ny motorcyklist: hjelm og tøj","description":"MC-udstyr til nye motorcyklister: hjelmpligten, pasform, beklædning, hvad du prioriterer først, og hvad du ikke bør købe brugt. Med kilder.","inLanguage":"da-DK","datePublished":"2026-10-16","dateModified":"2026-10-16","mainEntityOfPage":{"@type":"WebPage","@id":"https://bikerbasen.dk/guide-mc-udstyr"},"image":["https://bikerbasen.dk/img/hero-1600.webp"],"author":{"@type":"Organization","name":"Bikerbasen","url":"https://bikerbasen.dk/"},"publisher":{"@type":"Organization","name":"Bikerbasen","url":"https://bikerbasen.dk/","logo":{"@type":"ImageObject","url":"https://bikerbasen.dk/og-image.png"}}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Artikler & guides","item":"https://bikerbasen.dk/guides"},{"@type":"ListItem","position":3,"name":"MC-udstyr til ny motorcyklist: hjelm og tøj","item":"https://bikerbasen.dk/guide-mc-udstyr"}]}</script>
 </head>
@@ -336,16 +352,31 @@
   </div>
 </footer>
 
-<script defer src="js/security.js"></script>
-<script defer src="js/supabase-config.js"></script>
-<script defer src="js/supabase-api.js"></script>
-<script defer src="js/icons.js"></script>
-<script defer src="js/bike-art.js"></script>
-<script defer src="js/data.js"></script>
-<script defer src="js/store.js"></script>
-<script defer src="js/maaling.js"></script>
-<script defer src="js/backend-bridge.js"></script>
-<script defer src="js/components.js"></script>
-<script defer src="js/guides.js"></script>
+<script defer src="js/security.js?v=8a085a60"></script>
+<script defer src="js/supabase-config.js?v=8a085a60"></script>
+<script defer src="js/supabase-api.js?v=8a085a60"></script>
+<script defer src="js/icons.js?v=8a085a60"></script>
+<script defer src="js/bike-art.js?v=8a085a60"></script>
+<script defer src="js/data.js?v=8a085a60"></script>
+<script defer src="js/store.js?v=8a085a60"></script>
+<script defer src="js/maaling.js?v=8a085a60"></script>
+<script defer src="js/backend-bridge.js?v=8a085a60"></script>
+<script defer src="js/components.js?v=8a085a60"></script>
+<script defer src="js/guides.js?v=8a085a60"></script>
+<!--cookie:start-->
+<dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
+  <div class="cookie-modal-indhold">
+    <h2 id="cookie-modal-titel">Vi bruger cookies</h2>
+    <p>Bikerbasen bruger <strong>nødvendige cookies</strong> for at få siden til at fungere — dem kan du ikke fravælge, og de bruges ikke til at følge dig.</p>
+    <p>Vi vil desuden gerne bruge <strong>valgfrie cookies til statistik</strong>, så vi kan se, hvad der virker på siden. Dem starter vi kun, hvis du siger ja.</p>
+    <p class="cookie-modal-note">Du kan altid skifte mening. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+    <div class="cookie-modal-actions">
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-necessary-only" autofocus>Kun nødvendige</button>
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-accept-all">Accepter alle</button>
+    </div>
+  </div>
+</dialog>
+<script>try{if(!localStorage.getItem("bb_cookie_consent")){var d=document.getElementById("cookie-banner");if(d&&d.showModal){d.showModal();}else if(d){d.setAttribute("open","");}}}catch(e){}</script>
+<!--cookie:end-->
 </body>
 </html>
