@@ -198,3 +198,22 @@ test('T-003: 10 identiske dealerenheder = 1 distinkt = noindex; en model med dub
   assert.match(h2, /3 af de 6 annoncer er identiske lagerenheder/);
   assert.match(h2, /id="facet-antal">6 annoncer</, 'overskriften tæller stadig alle annoncer');
 });
+
+test('T-004/T-006: budgetsiden viser eget interval først og beskriver det med data; description og side siger samme "fra"', () => {
+  const alle = CHIP.lagerFixture();
+  global.ALLE_LISTINGS = alle;
+  const f = forberedFacetter(alle);
+  const b75 = f.find(x => x.slug === 'budget-under-75000');
+  assert.strictEqual(b75.lo, 50000);
+  const html = side(b75, alle);
+  assert.ok(html.includes('Interval 50.001 kr. til 75.000 kr.: ') && html.includes('medianpris'), 'intervalafsnit fra data');
+  assert.ok(html.includes('data-facet-lo="50000"'));
+  // Første viste kort tilhører intervallet (pris > 50.000): kortets pris står i teksten før de første kort.
+  const priser = alle.map(l => l.price).filter(p => p > 0 && p <= 75000);
+  const fra = Math.min(...priser).toLocaleString('da-DK');
+  const beskr = html.match(/<meta name="description" content="([^"]*)"/)[1];
+  assert.ok(beskr.includes('Priser fra ' + fra + ' kr.'), beskr);
+  assert.ok(html.includes('fra ' + fra + ' kr.'), 'sidens egen tekst bruger samme laveste pris');
+  assert.ok(!beskr.includes('fra ca.'));
+  assert.ok(!/Interval/.test(side(f.find(x => x.slug === 'budget-under-30000'), alle)), 'første trin har intet eget interval');
+});

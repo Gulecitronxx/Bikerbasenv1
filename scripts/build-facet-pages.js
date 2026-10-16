@@ -449,8 +449,11 @@ function modelFacets(alle){
 /* PRISINTERVALLER (S-015): en lukket, redaktionel liste (SIDER.BUDGET_TRIN), som typerne —
    alle trin skrives ved hvert byg, og et trin under taersklen bliver noindex, aldrig 404. */
 function budgetFacets(){
-  return SIDER.BUDGET_TRIN.map(max => ({
-    kind: 'budget', id: String(max), slug: SIDER.budgetSlug(max), label: `Under ${tal(max)} kr.`, max,
+  return SIDER.BUDGET_TRIN.map((max, i) => ({
+    /* lo: forrige trins grænse. Siden dækker stadig alt "under max" (titel, tal og søgning), men det er KUN
+       dens eget interval (lo, max], der er sidens særlige tilbud (T-004): kortlisten viser det først, og introen
+       beskriver det med tal fra data. */
+    kind: 'budget', id: String(max), slug: SIDER.budgetSlug(max), label: `Under ${tal(max)} kr.`, max, lo: i > 0 ? SIDER.BUDGET_TRIN[i - 1] : 0,
     titel: `Motorcykler under ${tal(max)} kr.`, taerskel: SIDER.TAERSKLER.budget, kraevIndhold: true,
     soeg: { priceMax: max },
     match: l => { const p = SIDER.medPris(l); return p !== null && p <= max; },
@@ -728,6 +731,26 @@ const dominerendeRegion = items => {
 };
 
 /* Intro til de nye familier. Samme regler som de gamle: kun tal, der kan tælles efter paa siden. */
+/* T-004: det, der kun gælder dette trin — annoncerne over forrige trins grænse. Kun tal regnet af data; under 5
+   annoncer i intervallet eller uden oplyst pris siger siden intet om det (hellere intet end et tal på for lidt). */
+function budgetBand(facet, items){
+  return facet.lo ? items.filter(l => { const p = SIDER.medPris(l); return p !== null && p > facet.lo; }) : items;
+}
+function bandSaetning(facet, items){
+  if (!facet.lo) return '';
+  const band = budgetBand(facet, items);
+  if (band.length < 5) return '';
+  const priser = aggregatPriser(band);
+  const aar = band.map(l => tilTal(l.year)).filter(troværdigtAar).sort((a, b) => a - b);
+  let s = ` Interval ${dkk(facet.lo + 1)} til ${dkk(facet.max)}: ${band.length} annoncer, medianpris ${dkk(SIDER.median(priser))}`;
+  if (aar.length >= 3) s += `, medianårgang ${SIDER.median(aar)}`;
+  s += '.';
+  const typer = typerMedDaekning(band, 2);
+  if (typer.length) s += ` Mest udbudte typer i intervallet: ${typer.map(typeOrd).join(' og ')}.`;
+  const maerker = maerkeChips(facet, band).slice(0, 3);
+  if (maerker.length) s += ` Flest mærker: ${maerker.map(([b, n]) => `${esc(b)} (${n})`).join(', ')}.`;
+  return s;
+}
 function introForBudget(facet, items, alle){
   const { tekst, priser } = prisOgAargang(items);
   const typer = typerMedDaekning(items, 2);
@@ -735,6 +758,7 @@ function introForBudget(facet, items, alle){
   let s = `Der er <strong id="facet-intro-antal">${items.length}</strong> ${brugtOrd(items, 'motorcykel', 'motorcykler')} til salg til højst ${dkk(facet.max)} hos danske forhandlere og markedspladser, indekseret på Bikerbasen${tekst}`;
   if (priser.length > 2) s += ` Medianprisen er ${dkk(SIDER.median(priser))}`;   // dkk() bærer selv punktummet
   if (typer.length) s += ` Flest er ${typer.map(typeOrd).join(' og ')}.`;
+  s += bandSaetning(facet, items);
   s += kildeSaetning(items);
   if (udenPris) s += ` ${udenPris} ${udenPris === 1 ? 'annonce' : 'annoncer'} i hele lageret oplyser ingen pris og er ikke med her.`;
   return s;
@@ -1316,8 +1340,10 @@ function nyFamilieMeta(facet, items, qualifies){
   /* 5. percentil, rundet til nærmeste tusinde — ikke laveste pris: en enkelt fejlpris (1.900 kr.) må ikke
      blive sidens salgsløfte. Under 20 priser: ingen "fra". */
   const pr = aggregatPriser(items);
-  const fra = pr.length >= 20 ? Math.max(1000, Math.round(SIDER.percentil(pr, 0.05) / 1000) * 1000) : null;
-  const pris = fra != null ? ` Priser fra ca. ${dkk(fra)}` : '';
+  /* T-006: samme tal som sidens egen "fra {laveste pris}" (prisOgAargang) — ikke en afrundet 5. percentil, der
+     stod som "fra ca. 35.000" i beskrivelsen mod "fra 14.995" på siden. */
+  const fra = pr.length ? pr[0] : null;
+  const pris = fra != null ? ` Priser fra ${dkk(fra)}` : '';
   const slut = ' Sammenlign årgang, km og type på Bikerbasen.';
   const n = items.length;
   if (facet.kind === 'budget'){
@@ -1348,7 +1374,7 @@ function facetAttrs(facet){
   if (facet.kind === 'model') return ` data-facet-brand="${esc(facet.brand)}" data-facet-model="${esc(facet.model)}"`;
   if (facet.kind === 'by') return ` data-facet-by="${esc(facet.by)}" data-facet-postnr="${esc((facet.postnumre || []).join(','))}"`;
   if (facet.kind === 'kombi') return ` data-facet-brand="${esc(facet.brand)}" data-facet-type="${esc(facet.typeId)}"`;
-  if (facet.kind === 'budget') return ` data-facet-max="${facet.max}"`;
+  if (facet.kind === 'budget') return ` data-facet-max="${facet.max}" data-facet-lo="${facet.lo || 0}"`;
   return '';
 }
 
@@ -1361,7 +1387,10 @@ function side(facet, alle){
   const fil = `${facet.slug}.html`;
   /* T-003: på modelsider vises identiske lagerenheder som ÉT kort; antallet i overskrift og intro er stadig
      alle annoncer (det er sandt), og en linje siger, at de er samlet. */
-  const liste = facet.kind === 'model' ? SIDER.distinkte(items) : items;
+  /* Budgetsider (T-004): eget interval først, så de 24 viste kort ikke er de samme på alle fire trin. */
+  const band = facet.kind === 'budget' && facet.lo ? budgetBand(facet, items) : null;
+  const bandFoerst = arr => band ? [...arr.filter(l => band.includes(l)), ...arr.filter(l => !band.includes(l))] : arr;
+  const liste = facet.kind === 'model' ? SIDER.distinkte(items) : bandFoerst(items);
   const samlet = items.length - liste.length;
   const samletTekst = n => `${n} af de ${items.length} annoncer er identiske lagerenheder (samme pris, årgang, km og forhandler) og vises som ét kort.`;
   const viste = liste.slice(0, FACET_KORT);
@@ -1698,7 +1727,9 @@ ${footer}
   /* T-003: modelsider viser identiske lagerenheder (samme pris, årgang, km, kilde) som ét kort — samme nøgle som
      scripts/seo-sider.js distinkte(). Tallene i overskrift og intro er stadig ALLE annoncer. */
   const dnum = v => (v === null || v === undefined || v === '') ? '' : (Number.isFinite(Number(v)) ? Number(v) : '');
-  const visListe = kind !== 'model' ? traefSorteret : (() => {
+  const lo = kind === 'budget' ? Number(mount.dataset.facetLo) || 0 : 0;
+  const prisT = l => Number(l.price) > 0 ? Number(l.price) : null;
+  const visListe = kind === 'budget' && lo ? traefSorteret.filter(l => prisT(l) > lo).concat(traefSorteret.filter(l => !(prisT(l) > lo))) : kind !== 'model' ? traefSorteret : (() => {
     const set = new Map();
     for (const l of traefSorteret){
       const k = [dnum(l.price), dnum(l.year), dnum(l.km), (l.source && l.source.domaene) || 'egen'].join('|');
