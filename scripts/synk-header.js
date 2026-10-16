@@ -13,7 +13,10 @@
      node scripts/synk-header.js --tjek   (skriver intet, afbryder med kode 1 ved afvigelse)
 
    Linjeskift bevares: mange sider har BLANDEDE linjeskift (CRLF og LF), så kun de udskiftede stykker skrives om —
-   resten af filen røres ikke byte for byte. Sider uden .site-header (404.html, afmeld.html) springes over. */
+   resten af filen røres ikke byte for byte. Sider uden .site-header (404.html) springes over.
+
+   FOOTER_KUN: sider med vilje UDEN menu (kun logoet i toppen) men MED footer. Her synkroniseres kun footerens
+   link-gitter, aldrig headeren. afmeld.html: man lander dér fra en mail, uden menu, men skal ikke ende i en blindgyde. */
 
 const fs = require('fs');
 const path = require('path');
@@ -71,12 +74,22 @@ const fr = udtraekFooter(kilde);
 if (!fr) throw new Error('synk-header: fandt ikke footerens link-gitter i index.html');
 const footerGitter = kilde.slice(fr.a, fr.b);
 
+const FOOTER_KUN = ['afmeld.html'];
+
 const tjek = process.argv.includes('--tjek');
 let skrevet = 0, afvigende = [];
 for (const fil of fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && f !== 'index.html').sort()){
   const raa = fs.readFileSync(path.join(ROOT, fil), 'utf8');
   const { norm: s, map } = normKort(raa);
-  if (!/<header class="site-header">/.test(s) || !/class="main-nav"/.test(s)) continue;   // afmeld.html har med vilje kun logoet
+  if (FOOTER_KUN.includes(fil)){
+    const sf = udtraekFooter(s);
+    if (!sf) throw new Error(`synk-header: ${fil} står i FOOTER_KUN, men har ingen footer med link-gitter`);
+    if (s.slice(sf.a, sf.b) === footerGitter) continue;
+    afvigende.push(fil);
+    if (!tjek){ fs.writeFileSync(path.join(ROOT, fil), udskift(raa, map, sf.a, sf.b, footerGitter), 'utf8'); skrevet++; }
+    continue;
+  }
+  if (!/<header class="site-header">/.test(s) || !/class="main-nav"/.test(s)) continue;   // 404.html har sin egen header
   const r = udtraek(s);
   if (!r) throw new Error(`synk-header: ${fil} har en header, men ikke den forventede afslutning`);
   const sf = udtraekFooter(s);
