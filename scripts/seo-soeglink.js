@@ -47,7 +47,19 @@ function kanStaaIUrl(filtre){
 }
 
 /* 'soegning.html?brands=Honda&amp;model=CB%20500' — html: & skrives som &amp; til brug i markup. */
+/* Et modelnavn med komma ("XSR 700, Legacy") kan ikke stå i model= (søgesiden deler på komma og finder 0).
+   Så bliver modellen til fritekst q=: et lidt bredere, men ikke tomt resultat. */
+function tilUrlFilter(filtre){
+  const modeller = (filtre && filtre.models) || [];
+  if (!modeller.some(v => String(v).includes(','))) return filtre;
+  const { models, ...rest } = filtre;
+  const heleNavne = modeller.filter(v => String(v).includes(','));
+  const resten = modeller.filter(v => !String(v).includes(','));
+  return { ...rest, ...(resten.length ? { models: resten } : {}), q: rest.q || heleNavne[0] };
+}
+
 function soegHref(filtre, { html = true } = {}){
+  filtre = tilUrlFilter(filtre);
   const dele = [];
   for (const [navn, param] of PARAMETRE){
     const v = filtre && filtre[navn];
