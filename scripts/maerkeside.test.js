@@ -210,15 +210,18 @@ test('P2-3: en sælgertitel er ikke et modelnavn — ægte modeller består', ()
   assert.equal(erModelnavn(null), false);
 });
 
-test('P2-2: modelflisens tal er præcis det antal, soegningen viser (samme q-filter)', () => {
+test('P2-2 / F2-005: modelflisens tal er præcis det antal, soegningen viser (eksakt model, ikke delstreng)', () => {
   const m = (id, model) => ekstern({ id: `x${id}`, brand: 'BMW', model, type: 'touring' });
-  // "K 1200" er en delstreng af "K 1200 GT" og "K 1200 RS": søgningen q=K 1200 finder alle fire.
-  const items = [m(1, 'K 1200'), m(2, 'K 1200 GT'), m(3, 'K 1200 GT'), m(4, 'K 1200 RS'), m(5, 'R 1200'), m(6, 'God velkørende custom med lav. KM')];
+  // "K 1200" er en delstreng af "K 1200 GT" og "K 1200 RS" — men en eksakt model er kun sig selv.
+  const items = [m(1, 'K 1200'), m(2, 'K 1200 GT'), m(3, 'K 1200 GT'), m(4, 'K 1200 RS'), m(5, 'R 1200'), m(6, 'God velkørende custom med lav. KM'), m(7, 'Cb 500'), m(8, 'CB 500')];
   const liste = modelTal(items);
   for (const { m: navn, n } of liste){
-    assert.equal(n, Filtrering.anvendFiltre(items, { q: navn }, null, null).length, `${navn}: flisen og soegningen er uenige`);
+    assert.equal(n, Filtrering.anvendFiltre(items, { models: [navn] }, null, null).length, `${navn}: flisen og soegningen er uenige`);
   }
-  assert.equal(liste.find(x => x.m === 'K 1200').n, 4, 'K 1200 taeller de tre K 1200 GT/RS med, ligesom soegningen');
+  assert.equal(liste.find(x => x.m === 'K 1200').n, 1, 'K 1200 er kun de annoncer, der hedder K 1200');
+  assert.equal(liste.find(x => x.m === 'K 1200 GT').n, 2);
+  assert.equal(liste.filter(x => x.m.toLowerCase() === 'cb 500').length, 1, 'Cb 500 og CB 500 er ét søgefilter og dermed én flise');
+  assert.equal(liste.find(x => x.m.toLowerCase() === 'cb 500').n, 2);
   assert.ok(!liste.some(x => x.m.startsWith('God velkørende')), 'sælgertitlen kom med som model');
   // Samme tal findes i det genererede markup.
   const fakta = maerkeFakta('BMW', items);
@@ -273,5 +276,51 @@ test('monogram: første bogstav, to for sammensatte mærkenavne', () => {
   test('"N brugte" i beskrivelsen tæller ikke ubeviste "ny" med', () => {
     const tekst = metaBeskrivelseFor('KTM', 21, stats, 7, false, 3);
     assert.match(tekst, /7 fabriksnye og 11 brugte/, 'brugte = 21 − 7 nye − 3 ubeviste');
+  });
+}
+
+/* ---------- F2-004 / F2-005: mærkesidens chips lover præcis det, linket giver ----------
+   Detective runde 2: "CRF 110 F · 25" (1 CRF 110 F + 24 Africa Twin), "CB 1000 · 29" (Fireblade/CBR med).
+   Rod: modelfliserne linkede `q=` (ordsøgning over "mærke model"). Nu linkes `model=` (eksakt), og
+   tallet regnes af samme filterobjekt som linket. Testen bygger mærkesidens link-blokke over fixturelageret og kører
+   hver chip gennem søgesidens egen URL-læser og Filtrering.anvendFiltre mod HELE lageret. */
+{
+  const CHIP = require('./seo-chip-tjek.js');
+  const { facetLinksFor, treKolonnerHTML, typeFlisersHTML } = require('./build-brand-pages.js');
+
+  test('F2-005: hver chip og flise på mærkesiden lover præcis det antal, dens link giver', () => {
+    const alle = CHIP.lagerFixture();
+    const ctx = { alle, facetter: [], Filtrering };
+    const fejl = [], dubletter = [];
+    let tjekket = 0, modelfliser = 0;
+    for (const brand of [...new Set(alle.map(l => l.brand))]){
+      const items = alle.filter(l => l.brand === brand);
+      const fakta = maerkeFakta(brand, items);
+      const html = facetLinksFor(brand, items) + treKolonnerHTML(brand, fakta, items) + typeFlisersHTML(brand, fakta);
+      for (const chip of CHIP.udtraekChips(html)){
+        if (!/^soegning.html?/.test(chip.href)) continue;
+        const d = CHIP.dubletNoegler(chip.href);
+        if (d.length) dubletter.push(`${brand}: ${chip.href} gentager ${d.join(', ')}`);
+        if (chip.tal === null) continue;
+        tjekket++;
+        if (/model=/.test(chip.href)) modelfliser++;
+        const n = CHIP.traefFraHref(chip.href, ctx);
+        if (n !== chip.tal) fejl.push(`${brand}: "${chip.tekst}" lover ${chip.tal}, ${chip.href} giver ${n}`);
+      }
+    }
+    assert.ok(tjekket >= 80, `kun ${tjekket} chips tjekket`);
+    assert.ok(modelfliser >= 15, `kun ${modelfliser} modelfliser tjekket`);
+    assert.deepEqual(dubletter, []);
+    assert.deepEqual(fejl, []);
+  });
+
+  test('F2-005: Honda-fliserne i fixturen — CRF 110 F er 1, Africa Twin 24, CB 1000 er ikke Fireblade', () => {
+    const alle = CHIP.lagerFixture();
+    const honda = alle.filter(l => l.brand === 'Honda');
+    const tal = Object.fromEntries(modelTal(honda).map(x => [x.m, x.n]));
+    assert.equal(tal['CRF 110 F'], 1);
+    assert.equal(tal['CRF 1100 L Africa'], 24);
+    assert.equal(tal['CB 1000'], 8);
+    assert.equal(tal['CBR 1000 F'], 3);
   });
 }

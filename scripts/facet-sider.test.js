@@ -113,3 +113,50 @@ test('kørekortsiden har foto-guidekort til de reserverede guide-adresser', () =
   const html = side(buildFacetList(alle).find(f => f.slug === 'koerekort-a2'), alle);
   for (const g of [GUIDE.a2, GUIDE.foerste, GUIDE.brugt]) assert.match(html, new RegExp(`<a href="${g.replace('.', '\.')}"><img src="img/`));
 });
+
+/* ---------- F2-004 + F2-005: chippens tal = linkets resultat ----------
+   Detective runde 2 fandt 5 budgetchips med to `maxPrice` i linket ("Under 30.000 kr. · 55" -> 104 træf)
+   og 16+ modelchips, hvis tal og link talte forskellige ting (q= er en delstrengssøgning).
+   Testen bygger SIDERNE (side()) for hver facet over et fixturelager og kører hver chip, der bærer et
+   tal, gennem søgesidens egen URL-læser (readStateFromURL klippet ud af js/search.js) og
+   Filtrering.anvendFiltre — det, browseren gør, når man klikker. Linkene til statiske sider
+   (slug.html) regnes med sidens egen match. Ingen streng-søgning efter et bestemt link. */
+const { forberedFacetter } = require('./build-facet-pages.js');
+const CHIP = require('./seo-chip-tjek.js');
+const { Filtrering: FiltreringChip } = require('./shared').browserModules();
+
+function chipRevision(){
+  const alle = CHIP.lagerFixture();
+  global.ALLE_LISTINGS = alle;
+  const facetter = forberedFacetter(alle);
+  const ctx = { alle, facetter, Filtrering: FiltreringChip };
+  const fejl = [], dubletter = [];
+  let tjekket = 0;
+  const pr = new Map();
+  for (const facet of facetter){
+    const html = side(facet, alle);
+    for (const chip of CHIP.udtraekChips(html)){
+      if (!/^(soegning.html?|(?!annonce)[a-z0-9-]+.html$)/.test(chip.href)) continue;
+      const d = /^soegning/.test(chip.href) ? CHIP.dubletNoegler(chip.href) : [];
+      if (d.length) dubletter.push(`${facet.slug}: ${chip.href} gentager ${d.join(', ')}`);
+      if (chip.tal === null) continue;
+      tjekket++;
+      pr.set(facet.kind, (pr.get(facet.kind) || 0) + 1);
+      const n = CHIP.traefFraHref(chip.href, ctx);
+      if (n !== chip.tal) fejl.push(`${facet.slug}: "${chip.tekst}" lover ${chip.tal}, ${chip.href} giver ${n}`);
+    }
+  }
+  return { fejl, dubletter, tjekket, pr, facetter };
+}
+
+test('F2-004/F2-005: hver chip på hver facetside lover præcis det antal, linket giver', () => {
+  const { fejl, tjekket, pr } = chipRevision();
+  assert.ok(tjekket >= 150, `kun ${tjekket} chips blev tjekket — fixture eller parser rammer ikke siderne`);
+  for (const k of ['type', 'region', 'koerekort', 'budget', 'model']) assert.ok(pr.get(k) > 0, `ingen chips tjekket på ${k}-sider`);
+  assert.deepEqual(fejl, []);
+});
+
+test('F2-004: intet søgelink gentager en query-parameter (budgetsiderne havde to maxPrice)', () => {
+  const { dubletter } = chipRevision();
+  assert.deepEqual(dubletter, []);
+});
