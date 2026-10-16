@@ -507,10 +507,15 @@ function anFakta(rader){
    fstyr.dk/privat/koerekort/udvidelse-af-koerekort/koerekort-til-motorcykel. */
 function anKoerekortKort(l, kkM, uvisA2A){
   const kk = kkM.kode;
-  const badge = kk ? kk : (kkM.graense ? '?' : uvisA2A ? 'A2/A' : '?');
-  const badgeTekst = kk === 'A' ? 'Kræver A-kørekort'
-    : kk ? `Ikke udelukket ud fra de oplyste tal`
-    : kkM.graense ? 'Ikke afgjort — tjek kW' : 'Kan ikke afgøres';
+  /* Fire tilstande, og kun de fire: MULIG (A1/A2: ikke udelukket, aldrig bekræftet), KRÆVER A (følger af
+     effekten alene), IKKE AFGJORT (48-49 hk uden kW) og KAN IKKE AFGØRES (tal mangler eller modsiger sig).
+     Pillen står FØRST i badgen, så ingen læser "A2" som en bekræftelse. */
+  const tilstand = kk === 'A' ? 'kraever' : kk ? 'mulig' : kkM.graense ? 'uafgjort' : 'ukendt';
+  const pille = { kraever: 'Kræver', mulig: 'Mulig', uafgjort: 'Ikke afgjort', ukendt: 'Kan ikke afgøres' }[tilstand];
+  const badge = kk ? kk : (kkM.graense ? 'kW?' : uvisA2A ? 'A2/A' : '?');
+  const badgeTekst = kk === 'A' ? 'Følger af den oplyste effekt'
+    : kk ? 'Ikke bekræftet. Tjek registreringsattesten'
+    : kkM.graense ? 'Tjek kW i registreringsattesten' : 'Spørg sælgeren';
   const ekstra = (kk === 'A' && l.kanNedsaettesA2) ? ' Sælgeren oplyser, at den kan effektbegrænses til A2.' : '';
   const side = kk === 'A1' ? 'koerekort-a1.html' : 'koerekort-a2.html';
   return `
@@ -521,7 +526,7 @@ function anKoerekortKort(l, kkM, uvisA2A){
         <p>${escapeHTML(kkM.forklaring)}${ekstra}</p>
         <a class="an-link" href="${side}">Læs mere om kørekort og regler${Icon.arrowRight}</a>
       </div>
-      <div class="an-kk-badge" role="img" aria-label="${escapeHTML(badge)}: ${escapeHTML(badgeTekst)}"><b>${escapeHTML(badge)}</b><small>${escapeHTML(badgeTekst)}</small></div>
+      <div class="an-kk-badge an-kk-${tilstand}" role="img" aria-label="${escapeHTML(pille)} ${escapeHTML(badge)}: ${escapeHTML(badgeTekst)}"><span class="an-kk-pille">${escapeHTML(pille)}</span><b>${escapeHTML(badge)}</b><small>${escapeHTML(badgeTekst)}</small></div>
     </section>`;
 }
 
@@ -965,6 +970,7 @@ function renderExternalListing(listing){
       <div class="an-gallery">${fotoHTMLext}</div>
 
       ${anFakta(faktaRader)}
+      ${anTjekKort()}
 
       </div>
       <div class="an-col an-col-b">
@@ -988,14 +994,13 @@ function renderExternalListing(listing){
         ${beskrivelseHTML}
         ${saelgerNote}
       </div>
+      ${anKoerekortKort(listing, kkM, kkUvis)}
 
       </div>
       <div class="an-side">
         <div class="an-seller-wrap">${saelgerKort}</div>
         <div class="an-trygt-wrap">${anTrygtKort(true, kilde)}</div>
       </div>
-      ${anKoerekortKort(listing, kkM, kkUvis)}
-      ${anTjekKort()}
     </div>`;
 
   anFlytH1(fuldTitel);
@@ -1254,6 +1259,7 @@ function renderListing(){
       <div class="an-gallery">${galleriHTML}</div>
 
       ${anFakta(faktaRader)}
+      ${anTjekKort()}
 
       </div>
       <div class="an-col an-col-b">
@@ -1276,6 +1282,7 @@ function renderListing(){
         ${beskrivelseHTML}
         ${sellerTypeNoteHTML(listing.isDealer)}
       </div>
+      ${anKoerekortKort(listing, kkM, false)}
 
       </div>
       <div class="an-side">
@@ -1285,8 +1292,6 @@ function renderListing(){
         </div>
         <div class="an-trygt-wrap">${anTrygtKort(false)}</div>
       </div>
-      ${anKoerekortKort(listing, kkM, false)}
-      ${anTjekKort()}
     </div>
   `;
 

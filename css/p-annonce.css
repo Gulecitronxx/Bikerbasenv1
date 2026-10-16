@@ -71,7 +71,7 @@
 @media (min-width:1180px){
   .an-grid{
     grid-template-columns: minmax(0,1.7fr) minmax(0,1.45fr) minmax(300px,1fr);
-    grid-template-areas: "a b side" "kk tip tip";
+    grid-template-areas: "a b side";
   }
   .an-col{ display:flex; flex-direction:column; gap: var(--space-5); align-self:start; }
   .an-col-a{ grid-area: a; }
@@ -180,7 +180,10 @@
 .an-seller-sub{ margin:2px 0 6px; font-size:13px; color: var(--color-fg-muted); overflow-wrap:anywhere; }
 .an-seller-loc{ display:flex; gap:8px; align-items:flex-start; margin: var(--space-3) 0; padding-top: var(--space-3); border-top:1px solid var(--color-border); font-size:14px; }
 .an-seller-loc svg{ width:18px; height:18px; flex:0 0 auto; margin-top:1px; color: var(--color-fg-muted); }
-.an-cta{ min-height:52px; font-size:16px; margin: var(--space-2) 0 var(--space-3); white-space:normal; text-align:center; }
+/* Knappen er .btn (inline-flex): tekst og navn blev hver sin flex-boks og brækkede over tre linjer. Som blok løber teksten som
+   én sætning (max to linjer), og pilen sidder i slutningen af den sidste linje. */
+.an-cta{ display:block; min-height:52px; padding:13px 18px; font-size:16px; line-height:1.3; margin: var(--space-2) 0 var(--space-3); white-space:normal; text-align:center; }
+.an-cta svg{ display:inline-block; vertical-align:-3px; margin-left:8px; }
 .an-seller-body{ font-size:13px; line-height:1.6; color: var(--color-fg-muted); margin: var(--space-3) 0 0; }
 .an-meta{ display:flex; gap:8px; align-items:flex-start; margin:10px 0 0; font-size:12.5px; line-height:1.5; color: var(--color-fg-muted); }
 .an-meta svg{ width:15px; height:15px; flex:0 0 auto; margin-top:2px; }
@@ -238,7 +241,18 @@
   min-width:112px; max-width:140px; text-align:center; padding: var(--space-3); border-radius: var(--radius-md);
   background: var(--color-surface); border:1px solid var(--color-border);
 }
-.an-kk-badge b{ display:block; font: 700 30px/1.1 var(--font-display); color: var(--color-primary-hover); }
+.an-kk-badge b{ display:block; font: 700 30px/1.1 var(--font-display); color: var(--color-primary-hover); margin-top:6px; }
+/* Statuspille: MULIG / KRÆVER / IKKE AFGJORT / KAN IKKE AFGØRES. Aldrig "bekræftet" - ingen annonce kan bekræfte A1/A2. */
+.an-kk-pille{
+  display:inline-block; padding:3px 9px; border-radius: var(--radius-pill); font: 700 11px/1.3 var(--font-body);
+  letter-spacing:.04em; text-transform:uppercase; background: var(--color-primary-tint); color: var(--color-primary-hover);
+}
+:root[data-theme="dark"] .an-kk-pille{ color: var(--color-primary); }
+.an-kk-kraever .an-kk-pille{ background: var(--color-fg); color: var(--color-surface); }
+.an-kk-kraever b{ color: var(--color-fg); }
+.an-kk-uafgjort, .an-kk-ukendt{ border-style:dashed; }
+.an-kk-uafgjort .an-kk-pille, .an-kk-ukendt .an-kk-pille{ background: var(--color-surface-2); color: var(--color-fg-muted); }
+.an-kk-uafgjort b, .an-kk-ukendt b{ color: var(--color-fg-muted); font-size:24px; }
 :root[data-theme="dark"] .an-kk-badge b{ color: var(--color-primary); }
 .an-kk-badge small{ display:block; margin-top:4px; font-size:11.5px; line-height:1.35; color: var(--color-fg-muted); }
 @media (max-width:559px){
@@ -294,25 +308,20 @@
 .an-clamp{ display:-webkit-box; -webkit-line-clamp:12; -webkit-box-orient:vertical; overflow:hidden; }
 .an-mere{ background:none; border:0; cursor:pointer; padding:0; font-family:inherit; }
 
-/* "Det bør du tjekke": motorcykelfoto i boksens højre side (img/sell-cruiser.webp,
-   dekorativt — ikke et annoncefoto), tonet ind i kortet så teksten står på ro. */
+/* "Det bør du tjekke": motorcykelfoto i boksens højre side (img/sell-cruiser.webp, dekorativt - ikke et annoncefoto).
+   Fotoet er et tonet pseudo-element i 34 % af kortets bredde, og teksten holder sig uden for det, så de aldrig overlapper,
+   uanset om kortet står i den smalle venstre kolonne (1180+), i en halvbredde eller i fuld bredde. */
 @media (min-width:700px){
-  .an-tjek{
-    background:
-      linear-gradient(90deg, color-mix(in srgb, var(--color-success) 7%, var(--color-surface)) 0%, color-mix(in srgb, var(--color-success) 7%, var(--color-surface)) 48%, transparent 82%),
-      url("../img/sell-cruiser.webp") right center / auto 100% no-repeat,
-      color-mix(in srgb, var(--color-success) 7%, var(--color-surface));
+  .an-tjek{ position:relative; overflow:hidden; }
+  .an-tjek::after{
+    content:""; position:absolute; top:0; right:0; bottom:0; width:34%; pointer-events:none;
+    background: url("../img/sell-cruiser.webp") 62% center / cover no-repeat;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 45%); mask-image: linear-gradient(90deg, transparent 0%, #000 45%);
   }
-  .an-tjek > div{ max-width:min(100%, 440px); }
+  .an-tjek > div{ padding-right:30%; position:relative; z-index:1; }
 }
 @media (min-width:700px){
-  :root[data-theme="dark"] .an-tjek{
-    background:
-      linear-gradient(90deg, color-mix(in srgb, var(--color-success) 7%, var(--color-surface)) 0%, color-mix(in srgb, var(--color-success) 7%, var(--color-surface)) 48%, transparent 82%),
-      linear-gradient(rgba(15,13,10,.55), rgba(15,13,10,.55)),
-      url("../img/sell-cruiser.webp") right center / auto 100% no-repeat,
-      color-mix(in srgb, var(--color-success) 7%, var(--color-surface));
-  }
+  :root[data-theme="dark"] .an-tjek::after{ filter:brightness(.55); }
 }
 
 /* Lignende: kortet er det samme som overalt ellers; stripen må kun ikke lade det vokse ud af sin spalte. */
