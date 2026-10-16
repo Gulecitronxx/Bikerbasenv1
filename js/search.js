@@ -1468,7 +1468,7 @@ function activeFilterPills(){
   state.brands.forEach(b => pills.push({ label: b, clear: () => state.brands = state.brands.filter(x=>x!==b) }));
   state.models.forEach(m => pills.push({ label: m, clear: () => state.models = state.models.filter(x=>x!==m) }));
   if (state.priceMin != null || state.priceMax != null){
-    pills.push({ label: `${state.priceMin?formatPrice(state.priceMin):'0 kr.'} – ${state.priceMax?formatPrice(state.priceMax):'∞'}`, clear: () => { state.priceMin=null; state.priceMax=null; } });
+    pills.push({ label: state.priceMax == null ? `Fra ${formatPrice(state.priceMin)}` : (state.priceMin ? `${formatPrice(state.priceMin)} – ${formatPrice(state.priceMax)}` : `Maks. ${formatPrice(state.priceMax)}`), clear: () => { state.priceMin=null; state.priceMax=null; } });
   }
   if (state.yearMin != null || state.yearMax != null){
     pills.push({ label: `Årgang ${state.yearMin||'…'} – ${state.yearMax||'…'}`, clear: () => { state.yearMin=null; state.yearMax=null; } });

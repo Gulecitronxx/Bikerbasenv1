@@ -62,7 +62,7 @@ function renderGallery(){
   main.innerHTML = fotoHTML(currentPhotoIndex);
   const taeller = document.getElementById('gallery-counter');
   if (taeller) taeller.textContent = `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
-  document.querySelectorAll('.gallery-thumbs button').forEach(b => b.classList.toggle('active', Number(b.dataset.thumb) === currentPhotoIndex || (b.dataset.more && currentPhotoIndex >= 5)));
+  document.querySelectorAll('.gallery-thumbs button').forEach(b => b.classList.toggle('active', !!(Number(b.dataset.thumb) === currentPhotoIndex || (b.dataset.more && currentPhotoIndex >= 5))));
 }
 
 function shiftPhoto(dir){
