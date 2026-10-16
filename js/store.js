@@ -17,6 +17,23 @@
   try { Object.defineProperty(window, 'localStorage', { value: shim, configurable: true }); } catch(e){}
 })();
 
+/* Er betaling (forhandler-abonnement) reelt bygget? Nej: der findes ingen aftale, ingen
+   kvitteringer og privatlivspolitikken siger, at Stripe ikke er i brug. Så længe dette er
+   false, må ingen side vise betalingstekst, betalingsknapper eller links til checkout/portal
+   — uanset FRI_ADGANG. Sæt kun til true, når betalingen er bygget OG privatlivspolitikken
+   er rettet. */
+const BETALING_BYGGET = false;
+
+/* Fejltekst til brugeren ud fra en fejl fra backend eller netværket. Aldrig "undefined",
+   aldrig rå browsertekst ("Failed to fetch"). Teksten sættes ind i toasts (innerHTML), så
+   kaldere skal køre den gennem escapeHTML(). */
+function fejlTekst(err){
+  const m = String((err && err.message) || (typeof err === 'string' ? err : '') || '').trim();
+  if (!m || /^(undefined|null|\[object Object\])$/.test(m)) return 'Der opstod en fejl. Prøv igen om lidt.';
+  if (/failed to fetch|networkerror|load failed|network request failed/i.test(m)) return 'Kunne ikke nå serveren. Tjek din forbindelse og prøv igen.';
+  return m;
+}
+
 const Store = {
   KEYS: {
     favorites: 'bb_favorites', myListings: 'bb_my_listings', theme: 'bb_theme', user: 'bb_user', draft: 'bb_draft',

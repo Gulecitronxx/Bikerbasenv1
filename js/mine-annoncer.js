@@ -79,10 +79,21 @@ function oversigtTal(egne, draft, favAntal, agentAntal){
 /* Sorterer efter valget i værktøjslinjen. */
 function sortListings(list, mode){
   const arr = list.slice();
-  if (mode === 'price-desc') arr.sort((a, b) => b.price - a.price);
-  else if (mode === 'price-asc') arr.sort((a, b) => a.price - b.price);
-  else if (mode === 'year-desc') arr.sort((a, b) => b.year - a.year);
-  else arr.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  /* Manglende pris/år/dato må ikke give NaN i sammenligningen (så er rækkefølgen udefineret):
+     manglende tal sorteres sidst. */
+  const tal = v => (v == null || v === '' || isNaN(Number(v))) ? null : Number(v);
+  const dato = v => { const t = new Date(v || '').getTime(); return isNaN(t) ? null : t; };
+  const efter = (hent, retning) => (a, b) => {
+    const x = hent(a), y = hent(b);
+    if (x == null && y == null) return 0;
+    if (x == null) return 1;
+    if (y == null) return -1;
+    return retning * (x - y);
+  };
+  if (mode === 'price-desc') arr.sort(efter(l => tal(l.price), -1));
+  else if (mode === 'price-asc') arr.sort(efter(l => tal(l.price), 1));
+  else if (mode === 'year-desc') arr.sort(efter(l => tal(l.year), -1));
+  else arr.sort(efter(l => dato(l.createdAt), -1));
   return arr;
 }
 
@@ -103,7 +114,10 @@ async function hentEgneAlle(){
   const bruger = Store.getUser();
   EGNE_FEJL = false;
   if (!bruger?.remote || typeof db === 'undefined' || !db.enabled){ EGNE_ALLE = null; return; }
-  const { data, error } = await db.myListings();
+  let svar;
+  try { svar = await db.myListings(); }
+  catch (err){ svar = { data: null, error: err }; }
+  const { data, error } = svar || {};
   /* Fejler hentningen, falder siden tilbage til de aktive annoncer — men siger
      det højt (se #mine-error), så pausede og solgte ikke forsvinder tavst. */
   if (error || !Array.isArray(data)){ EGNE_ALLE = null; EGNE_FEJL = true; return; }
@@ -225,7 +239,7 @@ async function visAnnonceStatistik(grid){
     const blok = document.createElement('div');
     blok.className = 'db-nums db-nums-row';
     blok.title = 'Seneste 30 dage';
-    blok.innerHTML = kol(s.views, 'Visninger') + (harGemt ? kol(gemt.get(row.dataset.listingId) || 0, 'Favoritter') : '') + kol(s.contacts, 'Henvendelser');
+    blok.innerHTML = kol(s.views, 'Visninger') + (harGemt ? kol(gemt.get(row.dataset.listingId) || 0, 'Favoritter') : '') + kol(s.contacts, 'Telefonvisninger');
     row.querySelector('.db-status')?.appendChild(blok);
   });
 }
@@ -245,14 +259,17 @@ async function skiftStatus(id, btn){
   if (!l) return;
   const naeste = naesteStatus(listingStatus(l));
   if (naeste.status === 'active' && overGraense(egneListe(), Store.getUser(), typeof FRI_ADGANG !== 'undefined' && FRI_ADGANG)){
-    toast('Du har allerede 3 aktive annoncer. Sæt en anden på pause eller bliv forhandler, før du aktiverer denne.', { type: 'error' });
+    toast('Du har allerede 3 aktive annoncer. Sæt en anden på pause, før du aktiverer denne.' + (betalingAaben() ? ' Eller bliv forhandler.' : ''), { type: 'error' });
     return;
   }
   btn.disabled = true;
-  const { error } = await db.updateListing(id, { status: naeste.status });
+  let svar;
+  try { svar = await db.updateListing(id, { status: naeste.status }); }
+  catch (err){ svar = { error: err }; }
+  const error = svar && svar.error;
   if (error){
     btn.disabled = false;
-    toast('Status kunne ikke ændres: ' + error.message, { type: 'error' });
+    toast('Status kunne ikke ændres: ' + escapeHTML(fejlTekst(error)), { type: 'error' });
     return;
   }
   l.status = naeste.status;
@@ -268,10 +285,13 @@ async function sletAnnonce(id, btn){
   // ramte kun localStorage og annoncen blev liggende i databasen.
   if (isUuid(id)){
     btn.disabled = true;
-    const { error } = await db.deleteListing(id);
+    let svar;
+    try { svar = await db.deleteListing(id); }
+    catch (err){ svar = { error: err }; }
+    const error = svar && svar.error;
     if (error){
       btn.disabled = false;
-      toast('Annoncen kunne ikke slettes: ' + error.message, { type: 'error' });
+      toast('Annoncen kunne ikke slettes: ' + escapeHTML(fejlTekst(error)), { type: 'error' });
       return;
     }
     window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(l => l.id !== id);
@@ -318,7 +338,7 @@ function renderMine(){
   grid.style.display = '';
   empty.style.display = 'none';
   grid.innerHTML = (kladde ? draftRowHTML(kladde) : '') + mine.map(ownRowHTML).join('');
-  visAnnonceStatistik(grid);
+  visAnnonceStatistik(grid).catch(() => { /* tal er pynt; fejler kaldet, står der intet */ });
   grid.querySelectorAll('[data-delete-listing]').forEach(btn => {
     btn.addEventListener('click', () => sletAnnonce(btn.dataset.deleteListing, btn));
   });
@@ -354,7 +374,10 @@ async function renderFavorites(){
   if (manglende.length && typeof db !== 'undefined' && db.enabled){
     for (const id of manglende){
       if (!isUuid(String(id))){ forældede.push(id); continue; } // gamle demo-id'er
-      const { data, error } = await db.getListing(id);
+      let svar;
+      try { svar = await db.getListing(id); }
+      catch (err){ svar = { data: null, error: err }; }   // netværksfejl: behold favoritten
+      const { data, error } = svar || {};
       if (data){ favs.push(normalizeRemoteListing(data)); }
       // Kun "findes ikke" (PGRST116) prunes — en netværksfejl må ikke slette
       // en favorit, brugeren stadig har.
@@ -420,6 +443,13 @@ function matchesForSavedSearch(search){
   });
 }
 
+/* " · oprettet 16. aug. 2026" — eller intet, hvis datoen mangler (aldrig "Invalid Date"). */
+function agentDato(iso){
+  const t = new Date(iso || '').getTime();
+  if (!iso || isNaN(t)) return '';
+  return ' · oprettet ' + new Date(t).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 function renderAgents(){
   const agents = Store.getSavedSearches();
   setCount('stat-agenter', agents.length);
@@ -450,7 +480,7 @@ function renderAgents(){
              Datoen stod desuden som 16.08.2026, mens annoncesiden og
              sælgerprofilen skriver 16. aug. 2026: samme dato, to
              skrivemåder, og den korte er repoets regel. -->
-        <div class="agent-meta">${matches.length} ${matches.length === 1 ? 'annonce' : 'annoncer'} i alt · oprettet ${new Date(a.createdAt).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+        <div class="agent-meta">${matches.length} ${matches.length === 1 ? 'annonce' : 'annoncer'} i alt${agentDato(a.createdAt)}</div>
       </div>
       <div class="agent-actions">
         <a href="soegning.html?${escapeHTML(a.query)}" class="btn btn-outline btn-sm">Vis</a>
@@ -473,14 +503,18 @@ function renderAgents(){
   }));
 }
 
-function renderPlanCard(){
-  const card = document.getElementById('plan-card');
-  if (!card) return;
-  const user = Store.getUser();
+/* Er betaling reelt bygget? Flaget BETALING_BYGGET (js/store.js) er false, indtil
+   der findes en aftale og privatlivspolitikken er rettet. Uanset FRI_ADGANG. */
+function betalingAaben(){
+  return typeof BETALING_BYGGET !== 'undefined' && BETALING_BYGGET === true
+    && !(typeof FRI_ADGANG !== 'undefined' && FRI_ADGANG);
+}
 
+/* Kontokortets markup som ren funktion (testes). */
+function planKortHTML(user){
   // Gratis-tilstand: ingen paywall. Alle har ubegrænset adgang lige nu.
   if (typeof FRI_ADGANG !== 'undefined' && FRI_ADGANG){
-    card.innerHTML = `
+    return `
       <h3 style="margin-bottom:6px;">Adgang</h3>
       <p class="plan-badge">${Icon.checkCircle} Ubegrænset · gratis</p>
       <ul class="plan-perks" style="margin-top:12px;">
@@ -489,13 +523,21 @@ function renderPlanCard(){
         <li>${Icon.checkCircle} Se sælgerens telefonnummer, når sælgeren har valgt at vise det</li>
       </ul>
       <p style="font-size:13px; color:var(--color-fg-muted); margin:12px 0 0;">Bikerbasen er gratis for alle i øjeblikket — både private og forhandlere.</p>`;
-    return;
+  }
+
+  // Betaling er ikke bygget: ærlig besked, ingen knapper, intet om Stripe.
+  if (!betalingAaben()){
+    return `
+      <h3 style="margin-bottom:6px;">Abonnement</h3>
+      <p class="plan-badge">${Icon.info} Betaling er ikke åben endnu</p>
+      <p style="color:var(--color-fg-muted); font-size:14px; margin:10px 0 0;">
+        Der kan ikke tegnes eller betales for abonnementer på Bikerbasen i øjeblikket. Du bliver ikke opkrævet noget.</p>`;
   }
 
   const erForhandler = user?.plan === 'dealer';
 
   if (erForhandler){
-    card.innerHTML = `
+    return `
       <h3 style="margin-bottom:6px;">Dit abonnement</h3>
       <p class="plan-badge">${Icon.shieldCheck} Forhandler · aktivt</p>
       <p style="color:var(--color-fg-muted); font-size:14px; margin:10px 0 0;">
@@ -503,7 +545,7 @@ function renderPlanCard(){
       <button type="button" class="btn btn-outline btn-block" id="plan-portal" style="margin-top:14px;">Administrér abonnement</button>
       <p style="font-size:12px; color:var(--color-fg-muted); margin:10px 0 0;">Opsig, skift betalingskort eller se kvitteringer via Stripes sikre kundeportal.</p>`;
   } else {
-    card.innerHTML = `
+    return `
       <h3 style="margin-bottom:6px;">Bliv forhandler</h3>
       <p style="color:var(--color-fg-muted); font-size:14px; margin-bottom:12px;">
         Private konti kan have 3 aktive annoncer gratis. Som forhandler får du:</p>
@@ -515,6 +557,13 @@ function renderPlanCard(){
       <button type="button" class="btn btn-primary btn-block" id="plan-upgrade" style="margin-top:14px;">Bliv forhandler</button>
       <p style="font-size:12px; color:var(--color-fg-muted); margin:10px 0 0;">Betaling via Stripe. Du kan opsige når som helst.</p>`;
   }
+}
+
+function renderPlanCard(){
+  const card = document.getElementById('plan-card');
+  if (!card) return;
+  card.innerHTML = planKortHTML(Store.getUser());
+  if (!betalingAaben()) return;
 
   // Rigtig betaling: send brugeren til Stripes checkout. Webhooken saetter
   // planen, naar betalingen er gaaet igennem.
@@ -547,21 +596,32 @@ function renderPlanCard(){
   document.getElementById('plan-portal')?.addEventListener('click', (e) => åbnPortal(e.currentTarget));
 }
 
+/* Rækkerne i "Bekræftelser". MitID er ikke sat op (login.html siger det), så identitetsrækken
+   viser aldrig "Bekræftet" og aldrig "Ikke bekræftet", som om brugeren kunne gøre noget ved det —
+   uanset hvad en gammel lokal session måtte have i user.mitIdVerified. */
+function kontoRaekker(user){
+  const rows = [
+    { label: 'E-mail', done: !!user?.emailVerified, icon: 'mail' },
+    { label: 'Telefonnummer', done: !!user?.phoneVerified, icon: 'phone' },
+    { label: 'Identitetsbekræftelse', done: false, icon: 'fingerprint', note: 'Ikke åben endnu' },
+  ];
+  if (user?.isDealer) rows.push({ label: `Virksomhed (CVR${user.cvr ? ' · ' + user.cvr : ''})`, done: !!user.cvrVerified, icon: 'shieldCheck' });
+  return rows;
+}
+
+function kontoRaekkerHTML(user){
+  return kontoRaekker(user).map(r => `
+    <div class="verify-row ${r.done ? 'done' : ''}">
+      <div class="verify-row-info">${Icon[r.icon]}<span>${escapeHTML(r.label)}</span></div>
+      ${r.done ? `<span class="verify-status-done">${Icon.checkCircle}Bekræftet</span>` : `<span style="font-size:13px; color:var(--color-fg-muted);">${r.note || 'Ikke bekræftet'}</span>`}
+    </div>`).join('');
+}
+
 function renderAccountTab(){
   renderProfileCard();
   renderPlanCard();
   const user = Store.getUser();
-  const rows = [
-    { label: 'E-mail', done: !!user.emailVerified, icon: 'mail' },
-    { label: 'Telefonnummer', done: !!user.phoneVerified, icon: 'phone' },
-    { label: 'Identitet (MitID)', done: !!user.mitIdVerified, icon: 'fingerprint' },
-  ];
-  if (user.isDealer) rows.push({ label: `Virksomhed (CVR${user.cvr ? ' · ' + user.cvr : ''})`, done: !!user.cvrVerified, icon: 'shieldCheck' });
-  document.getElementById('account-verify-rows').innerHTML = rows.map(r => `
-    <div class="verify-row ${r.done ? 'done' : ''}">
-      <div class="verify-row-info">${Icon[r.icon]}<span>${r.label}</span></div>
-      ${r.done ? `<span class="verify-status-done">${Icon.checkCircle}Bekræftet</span>` : `<span style="font-size:13px; color:var(--color-fg-muted);">Ikke bekræftet</span>`}
-    </div>`).join('');
+  document.getElementById('account-verify-rows').innerHTML = kontoRaekkerHTML(user);
 }
 
 /* Oplysningerne fra sessionen. Der er ingen redigeringsformular — det, der
@@ -585,7 +645,7 @@ function renderProfileCard(){
     ${kanSamtykke ? `
     <form class="db-profile-form" id="vis-telefon-form">
       <label class="db-check"><input type="checkbox" id="pf-vis-telefon" disabled><span>Vis mit telefonnummer for indloggede købere på mine annoncer</span></label>
-      <p class="field-hint" id="pf-hint">Henter dit valg…</p>
+      <p class="field-hint" id="pf-hint" aria-live="polite">Henter dit valg…</p>
       <button type="submit" class="btn btn-outline btn-sm" id="pf-gem" disabled>Gem valg</button>
     </form>` : ''}
     <p style="font-size:13px; color:var(--color-fg-muted); margin:12px 0 0;">Vil du rette navn eller e-mail, så skriv til <a href="mailto:kontakt@bikerbasen.dk" style="color:var(--color-primary);">kontakt@bikerbasen.dk</a>.</p>`;
@@ -598,9 +658,11 @@ function renderProfileCard(){
   document.getElementById('vis-telefon-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     gem.disabled = true;
-    const { error } = await db.saetVisTelefon(boks.checked);
+    let svar;
+    try { svar = await db.saetVisTelefon(boks.checked); }
+    catch (err){ svar = { error: err }; }
     gem.disabled = false;
-    if (error) toast('Valget kunne ikke gemmes: ' + error.message, { type: 'error' });
+    if (svar && svar.error) toast('Valget kunne ikke gemmes: ' + escapeHTML(fejlTekst(svar.error)), { type: 'error' });
     else toast('Dit valg er gemt');
   });
 }
@@ -726,7 +788,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Retur fra Stripe efter gennemført betaling. Webhooken sætter planen, men
   // kan være et øjeblik undervejs — hent sessionen igen og opdater kortet.
-  if (params.get('abonnement') === 'ok'){
+  if (params.get('abonnement') === 'ok' && betalingAaben()){
     toast('Tak! Din betaling er modtaget.');
     for (let i = 0; i < 5; i++){
       await syncSessionToStore();

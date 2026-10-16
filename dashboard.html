@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Forhandler-dashboard — Bikerbasen</title>
-<meta name="description" content="Overblik over dine annoncer, visninger, henvendelser og bedømmelser som forhandler på Bikerbasen.">
+<meta name="description" content="Overblik over dine annoncer, visninger, telefonvisninger og bedømmelser som forhandler på Bikerbasen.">
 <!-- meta:start (genereret af scripts/build-meta.js) -->
 <link rel="canonical" href="https://bikerbasen.dk/dashboard">
 <meta name="robots" content="noindex, follow">
@@ -17,14 +17,14 @@
 <meta property="og:locale" content="da_DK">
 <meta property="og:url" content="https://bikerbasen.dk/dashboard">
 <meta property="og:title" content="Forhandler-dashboard — Bikerbasen">
-<meta property="og:description" content="Overblik over dine annoncer, visninger, henvendelser og bedømmelser som forhandler på Bikerbasen.">
+<meta property="og:description" content="Overblik over dine annoncer, visninger, telefonvisninger og bedømmelser som forhandler på Bikerbasen.">
 <meta property="og:image" content="https://bikerbasen.dk/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Bikerbasen — motorcykler til salg i Danmark, samlet fra danske forhandlere og markedspladser">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Forhandler-dashboard — Bikerbasen">
-<meta name="twitter:description" content="Overblik over dine annoncer, visninger, henvendelser og bedømmelser som forhandler på Bikerbasen.">
+<meta name="twitter:description" content="Overblik over dine annoncer, visninger, telefonvisninger og bedømmelser som forhandler på Bikerbasen.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
 <!-- meta:end -->
 
@@ -150,6 +150,7 @@ try{
 
       <div id="dash-content" style="display:none;">
         <div id="dash-plan-strip"></div>
+        <div id="dash-error" class="db-alert" role="alert" hidden></div>
         <div id="dash-kickoff" style="display:none;"></div>
 
         <div id="dpanel-oversigt" role="tabpanel" aria-labelledby="dtab-oversigt" class="db-main">
@@ -157,7 +158,7 @@ try{
             <h2 id="kpi-heading" class="visually-hidden">Nøgletal</h2>
             <div class="db-stats db-stats--5" id="kpi-row"></div>
           </section>
-          <p class="demo-note"><span data-icon="info"></span>Visninger tælles én gang pr. besøgende pr. session. Henvendelser er antallet af gange nogen har fået vist dit telefonnummer. Begge dele findes kun for annoncer, du har oprettet direkte på Bikerbasen — ikke for indekserede annoncer, du har gjort krav på (se fanen Krav på annoncer).</p>
+          <p class="demo-note"><span data-icon="info"></span>Visninger tælles én gang pr. besøgende pr. session. Telefonvisninger er antallet af gange nogen har fået vist dit telefonnummer — det er ikke beskeder, og Bikerbasen videresender ingen beskeder. Begge dele findes kun for annoncer, du har oprettet direkte på Bikerbasen — ikke for indekserede annoncer, du har gjort krav på (se fanen Krav på annoncer).</p>
           <section class="dash-grid">
             <div class="panel">
               <div class="panel-head">
@@ -238,7 +239,7 @@ try{
               <input class="input" id="krav-search-input" type="search" placeholder="Søg efter mærke, model eller by, fx “Honda” eller “Kolding”" autocomplete="off">
               <button type="submit" class="btn btn-outline"><span data-icon="search"></span>Søg</button>
             </form>
-            <div id="krav-search-hint" class="krav-search-hint"></div>
+            <div id="krav-search-hint" class="krav-search-hint" aria-live="polite"></div>
             <div id="krav-results" class="krav-results"></div>
 
             <div id="krav-status-wrap" style="display:none;">

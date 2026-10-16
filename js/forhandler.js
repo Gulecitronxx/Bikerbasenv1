@@ -95,11 +95,16 @@ function starsHTML(rating){
 /* ---------- Anmeldelser ----------
    Databaseanmeldelser når sælgeren er en rigtig bruger; ellers de lokale
    demoanmeldelser, så profilsiderne for demodata stadig ser levende ud. */
+let ANMELDELSER_FEJL = false;
 async function loadReviews(){
   const seller = currentSeller;
+  ANMELDELSER_FEJL = false;
   if (db.enabled && seller.id){
-    const { data, error } = await db.listReviews(seller.id);
-    if (!error && data){
+    let svar;
+    try { svar = await db.listReviews(seller.id); }
+    catch (err){ svar = { data: null, error: err || new Error('Failed to fetch') }; }
+    const { data, error } = svar || {};
+    if (!error && Array.isArray(data)){
       return data.map(r => ({
         author: r.author?.name || 'Bruger',
         rating: Number(r.rating),
@@ -111,6 +116,7 @@ async function loadReviews(){
     // demoanmeldelser hører til en anden sælger med samme navn. Før faldt
     // koden tilbage på dem og viste fremmede menneskers ros på en rigtig
     // profil.
+    ANMELDELSER_FEJL = true;
     return [];
   }
   return Store.getReviews(seller.name);
@@ -199,7 +205,10 @@ async function renderAnmeldelser(){
      linjen, hvor mange der er, og hvorfor der ikke står et snit. Antallet
      står altså tydeligt, uanset om tallet gør. */
   const antalOrd = `${reviews.length} ${reviews.length === 1 ? 'anmeldelse' : 'anmeldelser'}`;
-  const hoved = !reviews.length
+  const hoved = ANMELDELSER_FEJL
+    ? `<h2>Anmeldelser</h2>
+       <p class="profil-anmeld-snit" role="alert"><span>Vi kunne ikke hente anmeldelserne lige nu. Det betyder ikke, at sælgeren ingen har — prøv at genindlæse siden.</span></p>`
+    : !reviews.length
     ? `<h2>Anmeldelser</h2>
        <p class="profil-anmeld-snit"><span>Ingen har bedømt denne sælger endnu. En profil uden anmeldelser er ikke en advarsel — den er bare ubeskrevet. Bed om at se motorcyklen, som du ville gøre uanset hvad.</span></p>`
     : avg != null
@@ -243,13 +252,19 @@ function wireAnmeldelsesForm(){
     if (!pickedStars){ toast('Vælg et antal stjerner først'); return; }
 
     if (db.enabled && seller.id){
-      const { error } = await db.addReview(seller.id, pickedStars, comment);
+      const knap = form.querySelector('button[type="submit"]');
+      if (knap) knap.disabled = true;
+      let svar;
+      try { svar = await db.addReview(seller.id, pickedStars, comment); }
+      catch (err){ svar = { error: err || new Error('Failed to fetch') }; }
+      const error = svar && svar.error;
       if (error){
+        if (knap) knap.disabled = false;
         // Databasen håndhæver selv "én anmeldelse pr. sælger" og "ikke dig selv".
         const m = error.message || '';
         if (m.includes('no_self_review') || m.includes('duplicate key')) toast('Du har allerede bedømt denne sælger');
         else if (m.includes('not_own_profile')) toast('Du kan ikke bedømme dig selv');
-        else toast(error.message, { type: 'error' });
+        else toast('Din bedømmelse kunne ikke gemmes: ' + escapeHTML(fejlTekst(error)), { type: 'error' });
         return;
       }
     } else {
@@ -304,6 +319,23 @@ function opdaterBedoemmelse({ reviews, avg }){
    Før faldt siden tilbage på den første sælger i listen, når id'et ikke gav
    et hit. Man kunne altså klikke ind på én sælger og få en helt anden
    persons profil, badges og annoncer serveret som om den var rigtig. */
+/* Backend svarede ikke: sig det, og lad brugeren prøve igen. Ikke "findes ikke", for det er ikke sandt. */
+function renderProfileFejl(){
+  document.title = 'Profilen kunne ikke hentes — Bikerbasen';
+  Seo.setMeta('meta[name="robots"]', 'name', 'robots', 'noindex, follow');
+  document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
+  document.getElementById('profile-top').innerHTML = `
+    <div class="empty-state" style="width:100%;" role="alert">
+      ${Icon.alertTriangle}
+      <h2>Vi kunne ikke hente profilen</h2>
+      <p>Det er en fejl hos os eller på din forbindelse — sælgeren er ikke væk. Prøv igen om lidt.</p>
+      <button type="button" class="btn btn-primary" id="profil-proev-igen" style="margin-top:16px;">Prøv igen</button>
+    </div>`;
+  document.getElementById('profil-proev-igen').addEventListener('click', () => window.location.reload());
+  document.getElementById('profil-krop')?.remove();
+  document.getElementById('profil-anmeldelser')?.remove();
+}
+
 function renderProfileNotFound(){
   document.title = 'Sælgeren findes ikke — Bikerbasen';
   Seo.setMeta('meta[name="robots"]', 'name', 'robots', 'noindex, follow');
@@ -395,10 +427,13 @@ async function hentSaelger(sellerId){
      opdigtet nøgle giver stadig "findes ikke" — som den skal. */
   if (!isUuid(sellerId)) return hentSaelgerLokalt(sellerId);
 
-  const [{ data: profil }, { data: annoncer }] = await Promise.all([
-    db.getPublicProfile(sellerId),
-    db.listingsBySeller(sellerId),
+  const sikkert = async fn => { try { return (await fn()) || { data: null, error: new Error('Intet svar') }; } catch (err){ return { data: null, error: err || new Error('Failed to fetch') }; } };
+  const [{ data: profil, error: profilFejl }, { data: annoncer, error: annoncerFejl }] = await Promise.all([
+    sikkert(() => db.getPublicProfile(sellerId)),
+    sikkert(() => db.listingsBySeller(sellerId)),
   ]);
+  /* Et fejlet opslag er ikke det samme som "sælgeren findes ikke" — det første kan prøves igen. */
+  if ((profilFejl && !profil) || (profil && annoncerFejl)) return { seller: null, listings: [], fejl: true };
   if (!profil) return { seller: null, listings: [] };
   return {
     /* Præcis de syv kolonner public_profiles har. Der stod før `phone: null`
@@ -701,8 +736,11 @@ async function renderProfile(){
   // værdi, et manipuleret link) videre til databasen, afviser Postgres det med
   // en 400 — og det er profil-id-kolonnen der er uuid. hentSaelger() holder
   // den vagt: er nøglen ikke en uuid, slår den kun op lokalt.
-  const decoded = decodeURIComponent(sellerId);
-  const { seller, listings } = await hentSaelger(decoded);
+  let decoded;
+  try { decoded = decodeURIComponent(sellerId); }
+  catch (e){ renderProfileNotFound(); return; }   // ?id=%E0%A4%A — ugyldig kodning, ikke et nedbrud
+  const { seller, listings, fejl } = await hentSaelger(decoded);
+  if (fejl){ renderProfileFejl(); return; }
   if (!seller){ renderProfileNotFound(); return; }
 
   currentSeller = seller;
