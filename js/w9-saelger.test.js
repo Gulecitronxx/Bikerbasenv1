@@ -287,3 +287,64 @@ test('K4b Ødelagt billedfil (ikke afkodbar) fjernes igen med besked, før Udgiv
     assert.strictEqual(await s.page.locator('#photo-grid .photo-thumb').count(), 0);
   } finally { await s.luk(); }
 });
+
+/* ---------------- K5 Redigering ---------------- */
+
+const FOTO = (id, pos) => ({ id, storage_path: `${BRUGER_ID}/x/${id}.webp`, position: pos });
+
+test('K5a Rediger aktiv annonce: forudfyldt, PATCH ikke POST, gammelt billede bevaret, ét fjernet', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const ann = { id: '11111111-1111-4111-8111-111111111111', photos: [FOTO('f1', 0), FOTO('f2', 1)] };
+  const s = await aabn({ loggetInd: true, annoncer: [ann] }, `opret-annonce.html?rediger=${ann.id}`);
+  try {
+    assert.strictEqual(await s.page.inputValue('#f-model'), 'MT-07');
+    assert.strictEqual(await s.page.inputValue('#f-price'), '69900');
+    assert.strictEqual(await s.page.locator('#photo-grid .photo-thumb').count(), 2);
+    await s.page.fill('#f-price', '64900');
+    await naeste(s.page);                                            // → billeder
+    await s.page.locator('[data-remove-existing="f2"]').click();     // confirm accepteres af dialog-handler
+    await naeste(s.page);
+    await s.page.check('#f-terms');
+    await Promise.all([s.page.waitForURL(/annonce\.html\?id=/, { timeout: 15000 }), s.page.click('#step-next')]);
+    assert.strictEqual(s.t.tabeller.listings.length, 1, 'ingen dublet');
+    assert.strictEqual(s.t.tabeller.listings[0].price, 64900);
+    assert.deepStrictEqual(s.t.tabeller.listings[0].photos.map(p => p.id), ['f1']);
+    assert.strictEqual(s.t.log.filter(l => l.metode === 'POST' && l.tabel === 'listings').length, 0, 'ingen POST ved redigering');
+    assert.strictEqual(s.t.log.filter(l => l.metode === 'PATCH' && l.tabel === 'listings').length, 1);
+  } finally { await s.luk(); }
+});
+
+test('K5b En annonce på pause (hidden) kan redigeres', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const ann = { id: '22222222-2222-4222-8222-222222222222', status: 'hidden', photos: [FOTO('g1', 0)] };
+  const s = await aabn({ loggetInd: true, annoncer: [ann] }, `opret-annonce.html?rediger=${ann.id}`);
+  try {
+    await s.page.waitForFunction(() => /Rediger annonce/.test(document.querySelector('.op-hero h1')?.textContent || '') || /mine-annoncer/.test(location.href), null, { timeout: 6000 });
+    assert.match(await s.page.locator('.op-hero h1').innerText(), /Rediger annonce/, 'pausede annoncer åbner i redigering');
+    assert.strictEqual(await s.page.inputValue('#f-model'), 'MT-07');
+    await s.page.fill('#f-price', '59900');
+    await naeste(s.page); await naeste(s.page); await s.page.check('#f-terms');
+    await Promise.all([s.page.waitForURL(/mine-annoncer\.html/, { timeout: 15000 }), s.page.click('#step-next')]);   // ikke til en offentlig side, annoncen ikke har
+    assert.strictEqual(s.t.tabeller.listings[0].price, 59900);
+    assert.strictEqual(s.t.tabeller.listings[0].status, 'hidden', 'redigering ændrer ikke status');
+  } finally { await s.luk(); }
+});
+
+test('K5c Fremmed/ukendt annonce afvises venligt og sender til Mine annoncer; PATCH-fejl efterlader annoncen uændret', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true }, 'opret-annonce.html?rediger=33333333-3333-4333-8333-333333333333');
+  try {
+    await s.page.waitForFunction(() => /mine-annoncer/.test(location.href), null, { timeout: 8000 });
+  } finally { await s.luk(); }
+  const ann = { id: '44444444-4444-4444-8444-444444444444' };
+  const s2 = await aabn({ loggetInd: true, annoncer: [ann] }, `opret-annonce.html?rediger=${ann.id}`);
+  try {
+    await s2.page.fill('#f-price', '1000');
+    await naeste(s2.page); await naeste(s2.page); await s2.page.check('#f-terms');
+    s2.t.fejl['PATCH listings'] = { status: 500, besked: 'nede' };
+    await s2.page.click('#step-next');
+    await s2.page.waitForFunction(() => /kunne ikke gemmes/i.test(document.body.innerText), null, { timeout: 8000 });
+    assert.strictEqual(s2.t.tabeller.listings[0].price, 69900, 'uændret');
+    assert.strictEqual(await s2.page.locator('#step-next').innerText(), 'Gem ændringer');
+  } finally { await s2.luk(); }
+});

@@ -8,6 +8,7 @@ let formData = {};
 /* Sat når siden åbnes som ?rediger=<id>. Så gemmer formularen oven i den
    eksisterende annonce i stedet for at oprette en ny. */
 let editingId = null;
+let editingStatus = 'active';   // en annonce på pause er ikke offentlig: efter gem går man til Mine annoncer, ikke til en side, der ikke findes for andre
 /* Billeder der allerede ligger på annoncen: { id, path, position, url }. De
    bevares ved redigering og fjernes kun, hvis brugeren selv trykker på
    krydset. `position` bruges til at lægge nye billeder BAGEFTER dem, der
@@ -1101,6 +1102,11 @@ async function sikkertKald(fn){
   catch (err){ return { data: null, error: err || new Error('Failed to fetch') }; }
 }
 
+function efterGemUrl(id, nyAnnonce){
+  if (editingId && editingStatus !== 'active') return 'mine-annoncer.html';
+  return `annonce.html?id=${id}${nyAnnonce ? '&udgivet=1' : ''}`;
+}
+
 let _lokalUdgivet = false;
 let _udgiver = false;   // dobbeltklik / Enter to gange må ikke give to annoncer (tjekkene før `disabled` er asynkrone)
 
@@ -1115,7 +1121,7 @@ async function publishListing(){
     if (_oprettetId){
       // Annoncen findes allerede — send brugeren til den i stedet for at lade dem udgive igen.
       toast('Annoncen er gemt, men noget gik galt bagefter: ' + escapeHTML(fejlTekst(err)) + ' Tjek den under "Rediger annonce".', { type: 'error', duration: 5000 });
-      setTimeout(() => { forlad(`annonce.html?id=${_oprettetId}`); }, 4500);
+      setTimeout(() => { forlad(efterGemUrl(_oprettetId)); }, 4500);
       return;
     }
     if (nextBtn){
@@ -1259,7 +1265,7 @@ async function udgivTrin(){
     // Beskeden får længere tid på skærmen, netop fordi den skal læses.
     toast(`Annoncen er gemt, men ${failed.length} af ${withFiles.length} billeder kunne ikke uploades: `
       + `${escapeHTML(failed[0].grund)} Du kan prøve igen under "Rediger annonce".`, { type: 'error' });
-    setTimeout(() => { forlad(`annonce.html?id=${created.id}`); }, 4500);
+    setTimeout(() => { forlad(efterGemUrl(created.id)); }, 4500);
     return;
   }
   /* O3-1b: samtykket gemmes sammen med udgivelsen — kun hvis feltet var
@@ -1273,7 +1279,7 @@ async function udgivTrin(){
   if (typeof Maaling !== 'undefined') Maaling.opretAnnonce(created, !!editingId);
   // O3-6: toasten naar ikke at blive laest paa 1 sekund — annoncesiden viser
   // et lukbart banner ved ?udgivet=1, i det oejeblik saelgeren er mest modtagelig.
-  setTimeout(() => { forlad(`annonce.html?id=${created.id}${editingId ? '' : '&udgivet=1'}`); }, 1000);
+  setTimeout(() => { forlad(efterGemUrl(created.id, !editingId)); }, 1000);
 }
 
 /* Fylder formularen med data i samme form som collectFormData returnerer.
@@ -1323,8 +1329,19 @@ function restoreDraft(){
 /* Åbner en eksisterende annonce til redigering. Returnerer false hvis id'et
    ikke findes eller ikke tilhører den bruger, der er logget ind — RLS ville
    alligevel afvise gemmet, og det er bedre at sige det med det samme. */
-function startEditing(id){
-  const listing = Store.getAllListings().find(l => String(l.id) === String(id));
+async function findEgenAnnonce(id){
+  const l = Store.getAllListings().find(x => String(x.id) === String(id));
+  if (l || !db.enabled || !isUuid(String(id))) return l || null;
+  /* Lageret (Store) indeholder kun AKTIVE annoncer. En annonce på pause eller markeret solgt
+     findes derfor kun i brugerens egne rækker — hent dem, så pausede annoncer kan rettes uden
+     først at blive aktiveret. RLS giver kun egne rækker; ejertjekket nedenfor gælder stadig. */
+  const res = await sikkertKald(() => db.myListings());
+  const raekke = (res.data || []).find(r => String(r.id) === String(id));
+  return raekke ? Object.assign(normalizeRemoteListing(raekke), { status: raekke.status }) : null;
+}
+
+async function startEditing(id){
+  const listing = await findEgenAnnonce(id);
   if (!listing){
     toast('Annoncen blev ikke fundet');
     return false;
@@ -1337,6 +1354,7 @@ function startEditing(id){
   }
 
   editingId = listing.id;
+  editingStatus = listing.status || 'active';
   editingCreatedAt = listing.createdAt || null;
   fillForm(listing);
 
@@ -1349,7 +1367,8 @@ function startEditing(id){
   document.title = 'Rediger annonce — Bikerbasen';
   document.querySelector('.op-hero h1').textContent = 'Rediger annonce';
   const lead = document.querySelector('.op-hero-lead');
-  if (lead) lead.textContent = 'Ret oplysningerne og gem. Billederne bliver på annoncen, medmindre du selv fjerner dem.';
+  if (lead) lead.textContent = 'Ret oplysningerne og gem. Billederne bliver på annoncen, medmindre du selv fjerner dem.'
+    + (editingStatus === 'hidden' ? ' Annoncen er på pause og vises ikke for købere, før du aktiverer den under Mine annoncer.' : '');
   return true;
 }
 
@@ -1399,7 +1418,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let draftUgyldig = false;
   const redigerId = new URLSearchParams(window.location.search).get('rediger');
   if (redigerId){
-    if (!startEditing(redigerId)){
+    if (!(await startEditing(redigerId))){
       setTimeout(() => { forlad('mine-annoncer.html'); }, 1500);
       return;
     }

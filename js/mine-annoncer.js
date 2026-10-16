@@ -155,7 +155,7 @@ function ownRowHTML(l){
   const v = statusVisning(status);
   const kanSkifte = isUuid(String(l.id));
   const naeste = naesteStatus(status);
-  const kanRedigere = status === 'active';
+  const kanRedigere = status === 'active' || status === 'hidden';   // på pause kan også rettes (opret-annonce.js henter egne rækker)
   return `
   <article class="db-row ${status !== 'active' ? 'is-' + status : ''}" data-listing-id="${l.id}" data-status="${status}">
     ${rowThumb(l, url, brand, model)}
