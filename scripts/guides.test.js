@@ -132,9 +132,9 @@ test('sidebjælkens udvalg: kun kendt effekt under A2-grænsen, og tomt uden dat
   assert.deepStrictEqual(udvalgTilSidebjaelke([mk(1, 40)]), [], 'under to kort udelades modulet');
 });
 
-test('guide-adresserne: de tre reserverede findes stadig, og to nye er kommet til', () => {
+test('guide-adresserne: de tre reserverede findes stadig, og fire nye er kommet til (to i W7, to i W9)', () => {
   assert.deepStrictEqual(GUIDES.map(g => g.file).sort(),
-    ['guide-a2-koerekort.html', 'guide-brugt-motorcykel.html', 'guide-foerste-motorcykel.html', 'guide-mc-forsikring.html', 'guide-mc-udstyr.html']);
+    ['guide-a2-koerekort.html', 'guide-brugt-motorcykel.html', 'guide-foerste-motorcykel.html', 'guide-mc-forsikring.html', 'guide-mc-ordliste.html', 'guide-mc-typer.html', 'guide-mc-udstyr.html']);
   assert.ok(sider.some(s => s.navn === 'guides.html'));
 });
 
@@ -202,7 +202,7 @@ test('W7: nye guides har egne, ikke-opdigtede datoer, og oversigten tæller alle
     assert.match(html, new RegExp('<meta property="article:modified_time" content="' + mod + '">'));
   }
   const nye = GUIDES.filter(g => g.published === '2026-10-16');
-  assert.strictEqual(nye.length, 2);
+  assert.strictEqual(nye.length, 4, 'to fra W7 og to fra W9');
   const over = sider.find(s => s.navn === 'guides.html').html;
   for (const g of GUIDES) assert.ok(over.includes('href="' + g.file + '"'), g.file + ' mangler i oversigten');
   assert.strictEqual(ldBlokke(over).find(o => o['@type'] === 'CollectionPage').mainEntity.numberOfItems, GUIDES.length);

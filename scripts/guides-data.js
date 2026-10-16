@@ -103,7 +103,7 @@ const GUIDES = [
   {
     file: 'guide-foerste-motorcykel.html',
     slug: 'guide-foerste-motorcykel',
-    related: ['guide-brugt-motorcykel', 'guide-mc-forsikring', 'guide-mc-udstyr'],
+    related: ['guide-mc-typer', 'guide-brugt-motorcykel', 'guide-mc-forsikring'],
     navn: 'Sådan vælger du din første motorcykel',
     h1: 'Sådan vælger du din første motorcykel',
     title: 'Sådan vælger du din første motorcykel',
@@ -207,7 +207,7 @@ const GUIDES = [
   {
     file: 'guide-a2-koerekort.html',
     slug: 'guide-a2-koerekort',
-    related: ['guide-foerste-motorcykel', 'guide-brugt-motorcykel'],
+    related: ['guide-foerste-motorcykel', 'guide-mc-ordliste', 'guide-brugt-motorcykel'],
     /* T-001: guiden har informationsintention. "Motorcykler til A2-kørekort" er den kommercielle side
        (koerekort-a2.html); begge sider konkurrerede om samme søgning med næsten ens title og H1.
        Én tekst i title, H1, breadcrumb, oversigtskort og Article-headline. */
@@ -677,6 +677,251 @@ const GUIDES = [
 <p>Bikerbasen er et indeks over annoncer og sælger ikke udstyr, så vi anbefaler ingen mærker. Gå ind i en butik, få målt og prøvet, og stil spørgsmål om mærkning. Sæt penge af til udstyr, før du kigger på motorcyklen.</p>
 <p>Er du i tvivl om, hvad du kan vente med, så start med det, der sidder tættest på kroppen og rammer først: hjelm, handsker og støvler. Resten kan du bygge op over tid, efterhånden som du lærer din egen kørsel at kende.</p>
 <p>Oplysningerne her er generelle. Følg altid producentens anvisning og de aktuelle regler hos Færdselsstyrelsen.</p>
+<p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------ 6 (w9-discovery) */
+  {
+    file: 'guide-mc-typer.html',
+    slug: 'guide-mc-typer',
+    published: '2026-10-16',
+    modified: '2026-10-16',
+    related: ['guide-foerste-motorcykel', 'guide-mc-ordliste', 'guide-a2-koerekort'],
+    navn: 'Motorcykeltyper: hvilken passer til dig?',
+    h1: 'Motorcykeltyper: hvilken passer til dig?',
+    title: 'Motorcykeltyper: hvilken passer til dig?',
+    description: 'Naked, sport, adventure, touring, cruiser, classic, scooter og cross: sådan skiller motorcykeltyperne sig ud, og hvordan du vælger efter din kørsel. Med kilder.',
+    ingress: 'Typen fortæller, hvordan en motorcykel er bygget til at blive brugt: kørestilling, vindbeskyttelse, affjedring og bagage. Her er en jordnær gennemgang af de typer, du møder i annoncerne, og de spørgsmål, der hjælper dig til den rigtige.',
+    cardImage: 'img/type/adventure.webp',
+    cardPos: 'center',
+    tldr: [
+      'Typen siger noget om kørestilling og brug, ikke om kørekort. Det gør effekten.',
+      'Start med, hvor og hvor langt du kører, og om du skal have bagage eller passager med.',
+      'Sæt dig på flere typer: sædehøjde og kørestilling mærker du kun på selve motorcyklen.',
+      'Typerne er brede. Der er stor forskel på modeller inden for samme type.',
+    ],
+    sources: ['kkbek', 'kkborger'],
+    sections: [
+      {
+        id: 'overblik',
+        title: 'Fire spørgsmål, før du vælger type',
+        toc: 'Fire spørgsmål, før du vælger type',
+        html: `
+<p>En motorcykeltype er en kategori, ikke en garanti. Inden for samme type kan modellerne være meget forskellige, men typen er et godt sted at starte, fordi den indsnævrer feltet. Stil dig selv fire spørgsmål:</p>
+<ol>
+<li><strong>Hvor kører du mest?</strong> By og pendling, landevej, motorvej eller grusveje?</li>
+<li><strong>Hvor langt kører du ad gangen?</strong> En time om søndagen eller flere dage i træk?</li>
+<li><strong>Skal der bagage eller passager med?</strong></li>
+<li><strong>Hvordan sidder du?</strong> Din højde og dine ben afgør, hvor høj en motorcykel du kan have det godt med.</li>
+</ol>
+<p>Her er de fem typer, der oftest dukker op, når man søger efter sin første eller næste motorcykel:</p>
+{{TYPE_TILES}}`,
+      },
+      {
+        id: 'naked',
+        title: 'Naked',
+        toc: 'Naked: alsidig og ligefrem',
+        html: `
+<p>En naked er en motorcykel uden store skærme omkring forhjul og instrumenter. Motor og stel er synlige, kørestillingen er som regel oprejst, og styret sidder bredt. Det gør dem lette at overskue og alsidige: de bruges til pendling, landevejsture og leg i svingene.</p>
+<p>Tilbagesiden er vinden. Uden vindskærm tager den fat i overkroppen, når farten stiger, så lange motorvejsture kan blive anstrengende. Mange kører alligevel naked på lange ture og tilføjer et lille skjold.</p>
+<p>Se annoncerne under <a href="type-naked.html">naked-motorcykler</a>.</p>`,
+      },
+      {
+        id: 'sport',
+        title: 'Sport',
+        toc: 'Sport: præcision og fart',
+        html: `
+<p>Sportsmotorcykler har kåbe, en fremadlænet kørestilling og som regel stram affjedring. De er bygget til præcision, stærke bremser og fart, og de er skabt til godt asfalt og gerne bane.</p>
+<p>Prisen for præcisionen er komforten: hænder, håndled og nakke bærer mere af din vægt, og passager og bagage er sjældent en del af tanken. Mange sportsmodeller har høj effekt, så tjek altid effekten i registreringsattesten, hvis du kører på A1 eller A2. Der findes dog også lettere sportsmodeller med lavere effekt.</p>
+<p>Se annoncerne under <a href="type-sport.html">sportsmotorcykler</a>.</p>`,
+      },
+      {
+        id: 'adventure',
+        title: 'Adventure og enduro',
+        toc: 'Adventure og enduro: højt og alsidigt',
+        html: `
+<p>Adventure- og enduromodeller sidder højt, har lang fjedring og en oprejst kørestilling. De er bygget til at kunne tage både asfalt og grusveje, ofte med plads til bagage og en stor tank. Det gør dem populære til rejser.</p>
+<p>Den høje sædehøjde betyder noget for, om du kan nå jorden, når du holder stille. Prøv at sidde på motorcyklen, og vær ærlig om, hvordan den føles, især når den er fyldt med bagage. Vægten kan også mærkes ved lav fart.</p>
+<p>Se annoncerne under <a href="type-adventure.html">adventure- og enduromodeller</a>.</p>`,
+      },
+      {
+        id: 'touring',
+        title: 'Touring',
+        toc: 'Touring: komfort på lange ture',
+        html: `
+<p>Touringmotorcykler er bygget til afstand: stor vindskærm eller kåbe, komfortabelt sæde, plads til bagage i kufferter og ofte plads til en passager. De kan gøre lange dage i sadlen behagelige.</p>
+<p>Til gengæld er de ofte store og tunge, og de fylder mere i garagen. Vægten mærkes, når du rangerer eller kører langsomt, så tag en prøvetur, hvor du også vender om på stedet.</p>
+<p>Se annoncerne under <a href="type-touring.html">touringmotorcykler</a>.</p>`,
+      },
+      {
+        id: 'cruiser',
+        title: 'Cruiser',
+        toc: 'Cruiser: afslappet og klassisk',
+        html: `
+<p>På en cruiser sidder du lavt, med fødderne frem og ryggen afslappet. Stilen er klassisk, og tempoet er roligt. Mange føler sig hurtigt godt tilpas, fordi sædet er lavt.</p>
+<p>Den lave stil har en pris i svingene: på mange cruisere rører fodhvilerne eller udstødningen asfalten, før dækkene er færdige. Prøv derfor den konkrete motorcykel og kør i dit eget tempo. Kørekort og effekt skal tjekkes på den enkelte model, også her.</p>
+<p>Se annoncerne under <a href="type-cruiser.html">cruisere</a>.</p>`,
+      },
+      {
+        id: 'andre',
+        title: 'Classic, scooter og cross',
+        toc: 'Classic, scooter og cross',
+        html: `
+<p><strong>Classic</strong> er motorcykler i retrostil eller ægte klassikere. De er ofte enkle at forstå og have med at gøre, men moderne hjælpemidler som ABS findes ikke på alle. Tjek, hvad der faktisk sidder på den motorcykel, du kigger på. Se <a href="type-classic.html">klassikere</a>.</p>
+<p><strong>Scootere</strong> har automatgear og ofte plads under sædet. Store scootere kan have samme effekt som motorcykler. Kørekortreglerne handler om køretøjets art og effekt, ikke om modellens navn, så tjek registreringsattesten. Se <a href="type-scooter.html">scootere</a>.</p>
+<p><strong>Cross</strong> er bygget til terræn og bane. Mange crossmotorcykler er ikke bygget til almindelig vejkørsel, så få bekræftet, at motorcyklen er godkendt til vej, før du køber. Se <a href="type-cross.html">crossmotorcykler</a>.</p>`,
+      },
+      {
+        id: 'koerekort',
+        title: 'Type og kørekort er to forskellige ting',
+        toc: 'Type og kørekort er to forskellige ting',
+        html: `
+<p>Typen afgør ikke, hvilket kørekort du skal bruge. Det gør motorcyklens effekt og, for A1 og A2, forholdet mellem effekt og vægt. Derfor kan en naked være til A2, mens en anden naked kræver A.</p>
+{{KK_TABLE}}
+<p>Står effekten ikke i annoncen, kan hverken vi eller du afgøre det ud fra typen. Læs mere i <a href="guide-a2-koerekort.html">guiden til A2-kørekort</a>, eller se <a href="koerekort-a2.html">motorcykler til A2-kørekort</a>.</p>`,
+      },
+      {
+        id: 'valg',
+        title: 'Sådan vælger du',
+        toc: 'Sådan vælger du: vores råd',
+        html: `
+<p>Brug dine svar fra første afsnit som en tjekliste:</p>
+<ul>
+<li>Mest by og landevej, og du vil have noget alsidigt: kig på <a href="type-naked.html">naked</a>.</li>
+<li>Du vil have præcision og kan leve med en fremadlænet stilling: kig på <a href="type-sport.html">sport</a>.</li>
+<li>Du vil på langtur med bagage eller passager: kig på <a href="type-touring.html">touring</a> og <a href="type-adventure.html">adventure</a>.</li>
+<li>Du vil sidde afslappet og cruise: kig på <a href="type-cruiser.html">cruiser</a>.</li>
+</ul>
+<p>Sæt dig på flere motorcykler, før du bestemmer dig, og tag en prøvetur, hvis du kan. Se også vores <a href="guide-brugt-motorcykel.html">tjekliste til køb af brugt motorcykel</a> og <a href="guide-mc-udstyr.html">guiden til udstyr</a>.</p>
+<p>Bikerbasen er et indeks over annoncer og anbefaler ikke bestemte modeller. Beskrivelserne her er generelle og gælder ikke alle modeller inden for en type.</p>
+<p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------ 7 (w9-discovery) */
+  {
+    file: 'guide-mc-ordliste.html',
+    slug: 'guide-mc-ordliste',
+    published: '2026-10-16',
+    modified: '2026-10-16',
+    related: ['guide-a2-koerekort', 'guide-brugt-motorcykel', 'guide-mc-typer'],
+    navn: 'MC-ordliste: ccm, kW, hk og andre begreber',
+    h1: 'MC-ordliste: ccm, kW, hk og andre begreber',
+    title: 'MC-ordliste: ccm, kW, hk og andre begreber',
+    description: 'Hvad betyder ccm, kW, hk og kW/kg? Ordliste over begreberne i en motorcykelannonce, og hvordan du læser kørekortmærkerne på Bikerbasen. Med kilder.',
+    ingress: 'En motorcykelannonce er fuld af forkortelser. Her forklarer vi de vigtigste, hvordan de hænger sammen med kørekortreglerne, og hvad der står på et annoncekort på Bikerbasen, og hvad der ikke gør.',
+    cardImage: 'img/type/classic.webp',
+    cardPos: 'center',
+    tldr: [
+      'ccm er motorens størrelse. kW og hk er effekten. 35 kW svarer til cirka 47 hk.',
+      'Kørekortet afgøres af effekt og vægt, ikke af ccm alene.',
+      'Står et tal ikke i annoncen, skriver vi "ikke oplyst". Vi gætter ikke.',
+      'Registreringsattesten er det dokument, der gælder. Annoncen er ikke et bevis.',
+    ],
+    sources: ['kkbek', 'ejerskifte', 'kkborger', 'bilbogen', 'brugtbil'],
+    sections: [
+      {
+        id: 'motor',
+        title: 'Motor og effekt',
+        toc: 'Motor og effekt: ccm, kW og hk',
+        html: `
+<dl class="gd-dl">
+<dt>ccm eller cm³</dt>
+<dd>Motorens slagvolumen, altså det samlede rumfang, som stemplerne fejer i cylindrene. Skrives som cm³ (kubikcentimeter), men i daglig tale og i annoncer som ccm. Et højere tal betyder ikke altid mere effekt.</dd>
+<dt>kW og hk</dt>
+<dd>Begge er mål for motorens effekt. kW er det officielle mål, og det er det, kørekortreglerne bruger. Hk (hestekræfter) er det mål, de fleste annoncer bruger. Cirka 0,74 kW svarer til 1 hk. Derfor er 35 kW cirka 47 hk, og 11 kW cirka 15 hk.</dd>
+<dt>kW pr. kg</dt>
+<dd>Forholdet mellem effekt og vægt. A1 kræver højst 0,1 kW pr. kg og A2 højst 0,2 kW pr. kg. Det er derfor, vægten også betyder noget for kørekortet.</dd>
+<dt>Effektbegrænsning og afledt model</dt>
+<dd>En motorcykel kan være effektbegrænset, så den ligger under en grænse. For A2 gælder desuden, at den ikke må være afledt af en model med mere end dobbelt så høj effekt. Om en motorcykel er afledt, står ikke i annoncen.</dd>
+</dl>`,
+      },
+      {
+        id: 'vaegt',
+        title: 'Vægt',
+        toc: 'Vægt: egenvægt og køreklar vægt',
+        html: `
+<dl class="gd-dl">
+<dt>Køreklar vægt</dt>
+<dd>Den vægt, reglerne for A1 og A2 regner med, når de sætter en grænse for kW pr. kg. Den står sjældent i annoncer.</dd>
+<dt>Egenvægt</dt>
+<dd>Den vægt, der står i registreringsattesten. Oplyses køreklar vægt ikke, bruger kørekortbekendtgørelsen egenvægten plus 15 kg (§ 12 stk. 2).</dd>
+</dl>
+<p>Det betyder, at du ikke kan afgøre kørekortet ud fra en annonce alene. Du skal se papirerne.</p>`,
+      },
+      {
+        id: 'papirer',
+        title: 'Papirer og køb',
+        toc: 'Papirer og køb',
+        html: `
+<dl class="gd-dl">
+<dt>Registreringsattest</dt>
+<dd>Dokumentet, der beskriver køretøjet og dets ejer i motorregistret. Det er her, du kan tjekke effekt, vægt og identifikation.</dd>
+<dt>Stelnummer</dt>
+<dd>Motorcyklens unikke identifikationsnummer. Sammenlign det på motorcyklen med det, der står i papirerne.</dd>
+<dt>Årgang og første registrering</dt>
+<dd>Årgang er som regel produktionsåret. Første registreringsdato kan ligge senere. Spørg, hvis det betyder noget for dig.</dd>
+<dt>Ejerskifte</dt>
+<dd>Når motorcyklen skifter ejer, skal den omregistreres. Se <a href="guide-brugt-motorcykel.html">guiden til køb af brugt motorcykel</a>.</dd>
+</dl>`,
+      },
+      {
+        id: 'koerekort',
+        title: 'Kørekortkategorier',
+        toc: 'Kørekortkategorier: A1, A2 og A',
+        html: `
+<p>Kørekort til motorcykel er delt i tre kategorier. Et højere kørekort dækker også de lavere:</p>
+{{KK_TABLE}}
+<p>Læs mere i <a href="guide-a2-koerekort.html">guiden til A2-kørekort</a>.</p>`,
+      },
+      {
+        id: 'tal',
+        title: 'Tal, der ikke passer, og 48-hk-faldgruben',
+        toc: 'Tal, der ikke passer sammen',
+        html: `
+<p>Ikke alle annoncer er skrevet omhyggeligt. To fejl går igen:</p>
+<ul>
+<li><strong>Effekt og ccm, der ikke kan passe sammen.</strong> En lille motor kan ikke yde hvad som helst. Når en annonce oplyser en effekt, der er urealistisk høj for den oplyste slagvolumen, viser Bikerbasen ikke en kørekortkategori. Vi retter ikke tallet og gætter ikke på, hvilket der er forkert. Spørg sælgeren, og se registreringsattesten.</li>
+<li><strong>48 eller 49 hk uden kW.</strong> 35 kW er 47,6 hk, og mange kilder runder op til 48. Står der 48 eller 49 hk uden kW, kan vi derfor hverken sige, at motorcyklen kræver A, eller at den kan køres på A2. Så skriver vi "kørekort ikke afgjort" og beder dig tjekke kW i registreringsattesten.</li>
+</ul>
+<p>Tommelfingerreglen er den samme begge steder: et tal i en annonce er et udsagn fra sælgeren, ikke en dokumentation. Papirerne afgør.</p>`,
+      },
+      {
+        id: 'saelger',
+        title: 'Sælger, kilde og pris',
+        toc: 'Sælger, kilde og pris',
+        html: `
+<dl class="gd-dl">
+<dt>Kilde</dt>
+<dd>Det sted, annoncen oprindeligt står: en forhandlers side eller en markedsplads. Bikerbasen samler annoncerne og linker til kilden. Vi sælger ikke selv, og handlen sker mellem dig og sælgeren.</dd>
+<dt>Forhandler og privat sælger</dt>
+<dd>Forhandler er en virksomhed, privat sælger er en person. Reglerne for reklamation er forskellige, så det betyder noget for dig som køber. Se <a href="guide-brugt-motorcykel.html">guiden til køb af brugt motorcykel</a>.</dd>
+<dt>Pris ved henvendelse</dt>
+<dd>Annoncen oplyser ingen pris. Det betyder ikke, at motorcyklen er gratis eller dyr, kun at prisen skal spørges om hos sælgeren.</dd>
+<dt>Pant og ejendomsforbehold</dt>
+<dd>Den digitale Bilbog viser, om der er tinglyst pant eller ejendomsforbehold i en motorcykel. Det er et af de ting, du bør slå op, før du betaler.</dd>
+</dl>`,
+      },
+      {
+        id: 'annonce',
+        title: 'Sådan læser du et annoncekort',
+        toc: 'Sådan læser du et annoncekort',
+        html: `
+<p>Bikerbasen viser kun det, annoncen selv oplyser. Hvad står der på et kort?</p>
+<dl class="gd-dl">
+<dt>Mulig A2</dt>
+<dd>Effekten og slagvolumen udelukker ikke A2. Det er ikke en garanti, for vægt og afledning står ikke i annoncen.</dd>
+<dt>Kræver A</dt>
+<dd>Den oplyste effekt ligger over A2-grænsen på 35 kW (47 hk).</dd>
+<dt>Kørekort ikke afgjort</dt>
+<dd>Tallene i annoncen mangler eller passer ikke sammen, så kategorien kan ikke afgøres. Tjek registreringsattesten, eller spørg sælgeren.</dd>
+<dt>Kilde og sælgertype</dt>
+<dd>Kortet viser, hvor annoncen står, og om sælgeren er forhandler eller privat, når kilden oplyser det. Handlen sker hos sælgeren, ikke hos os.</dd>
+<dt>Ikke oplyst</dt>
+<dd>Det felt, kilden ikke oplyser, står som "ikke oplyst". Vi gætter ikke.</dd>
+</dl>
+<p>Når du er klar, så kig på <a href="koerekort-a2.html">motorcykler til A2-kørekort</a> eller søg på hele udvalget.</p>
 <p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
       },
     ],

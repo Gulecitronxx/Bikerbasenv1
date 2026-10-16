@@ -23,6 +23,7 @@ const ROOT = path.join(__dirname, '..');
 const { siteUrl, fetchListings, fetchExternalListings, siteParts, esc, browserModules, listingSlug } = require('./shared');
 const { GUIDES, SRC, PUBLISHED, MODIFIED, publiceret, aendret } = require('./guides-data');
 const BASE = siteUrl();
+const { slugify } = require('./slug');
 
 /* Samme cleanUrl() som build-meta.js og build-facet-pages.js. */
 function cleanUrl(file){
@@ -73,7 +74,7 @@ function typeTiles(){
           <span class="gd-type-body">
             <strong class="gd-type-name">${esc(t.label).split('/').join('/<wbr>')}</strong>
             <span class="gd-type-text">${TYPE_TEKST[id]}</span>
-            <span class="gd-type-go">Se ${esc(navn)} motorcykler ${Icon.arrowRight}</span>
+            <span class="gd-type-go"><span>Se ${esc(navn)} motorcykler</span>${Icon.arrowRight}</span>
           </span>
         </a>
       </li>`;
@@ -278,8 +279,55 @@ function relateretBlok(g){
   if (!r.length) return '';
   return `<section class="gd-sources gd-related" id="laes-ogsaa" aria-labelledby="laes-ogsaa-h">
         <h2 id="laes-ogsaa-h">Læs også</h2>
-        <ul>
-          ${r.map(x => `<li><a href="${x.file}">${esc(x.navn)}</a></li>`).join('\n          ')}
+        <ul class="gd-rel-list">
+          ${r.map(x => `<li><a class="gd-rel-card" href="${x.file}">
+            <span class="gd-rel-media"><img src="${x.cardImage}" alt="" style="object-position:${x.cardPos}" width="240" height="180" loading="lazy" decoding="async"></span>
+            <span class="gd-rel-body"><strong>${esc(x.navn)}</strong><span class="gd-rel-meta">Læsetid ${minutterTekst(guideMinutter(x))}</span></span>
+          </a></li>`).join('\n          ')}
+        </ul>
+      </section>`;
+}
+
+/* ---------- "Klar til næste skridt?" ----------
+   Hver guide slutter med tre veje videre: ind i søgningen, til en søsterguide eller til en kategoriside.
+   Kun adresser, der findes (testen låser det). Ingen tal: siderne hydreres ikke, så et tal ville ælde. */
+const NAESTE = {
+  'guide-foerste-motorcykel': { h: 'Klar til at finde din første motorcykel?', p: 'Brug det, du har læst, som filter, når du søger.', links: [
+    ['Motorcykler til A2-kørekort', 'Annoncer, der ikke er udelukket til A2 ud fra de oplyste tal.', 'koerekort-a2.html'],
+    ['Sammenlign typerne', 'Naked, sport, adventure, touring, cruiser og flere.', 'guide-mc-typer.html'],
+    ['Søg i hele udvalget', 'Filtrér efter pris, årgang, km og kørekort.', 'soegning.html'] ] },
+  'guide-a2-koerekort': { h: 'Fra regler til annoncer', p: 'Nu ved du, hvad grænserne er. Næste skridt er at se, hvad der ligger inden for dem.', links: [
+    ['Motorcykler til A2-kørekort', 'Se annoncer, der ikke er udelukket til A2.', 'koerekort-a2.html'],
+    ['Vil du videre til A?', 'Annoncer, hvis oplyste effekt kræver kategori A.', 'koerekort-a.html'],
+    ['Forstå begreberne', 'kW, hk, kW pr. kg og køreklar vægt forklaret.', 'guide-mc-ordliste.html'] ] },
+  'guide-brugt-motorcykel': { h: 'Klar til at kigge på brugte motorcykler?', p: 'Tag tjeklisten med, når du går til besigtigelse.', links: [
+    ['Søg i hele udvalget', 'Alle annoncer med kilden på kortet.', 'soegning.html'],
+    ['Husk forsikringen', 'Hvad loven kræver, og hvad du bør spørge om.', 'guide-mc-forsikring.html'],
+    ['Se mærkerne', 'Se, hvilke mærker der står i annoncerne.', 'maerker.html'] ] },
+  'guide-mc-forsikring': { h: 'Forsikring er på plads. Hvad nu?', p: 'Næste skridt er motorcyklen og udstyret.', links: [
+    ['Søg motorcykler', 'Filtrér efter pris, årgang, km og kørekort.', 'soegning.html'],
+    ['Udstyr til nye motorcyklister', 'Hjelm, jakke, handsker og støvler.', 'guide-mc-udstyr.html'],
+    ['Køb brugt: tjekliste', 'Papirer, pant, stand og handel.', 'guide-brugt-motorcykel.html'] ] },
+  'guide-mc-udstyr': { h: 'Udstyret er på plads. Hvad nu?', p: 'Næste skridt er selve motorcyklen.', links: [
+    ['Søg motorcykler', 'Filtrér efter pris, årgang, km og kørekort.', 'soegning.html'],
+    ['Vælg din første motorcykel', 'Type, kørekort, nyt eller brugt.', 'guide-foerste-motorcykel.html'],
+    ['MC-forsikring', 'Hvad loven kræver, og hvad du bør spørge om.', 'guide-mc-forsikring.html'] ] },
+  'guide-mc-typer': { h: 'Fandt du en type, der passer til dig?', p: 'Se annoncerne, eller læs videre om kørekort og køb.', links: [
+    ['Søg i hele udvalget', 'Filtrér efter type, pris, årgang og kørekort.', 'soegning.html'],
+    ['Motorcykler til A2-kørekort', 'Annoncer, der ikke er udelukket til A2.', 'koerekort-a2.html'],
+    ['Se mærkerne', 'Se, hvilke mærker der står i annoncerne.', 'maerker.html'] ] },
+  'guide-mc-ordliste': { h: 'Klar til at læse annoncerne?', p: 'Nu kan du læse tallene. Se, hvad der ligger inden for dit kørekort.', links: [
+    ['Motorcykler til A2-kørekort', 'Annoncer, der ikke er udelukket til A2.', 'koerekort-a2.html'],
+    ['Hvad kræver A?', 'Annoncer, hvis oplyste effekt kræver kategori A.', 'koerekort-a.html'],
+    ['Sammenlign typerne', 'Naked, sport, adventure, touring, cruiser og flere.', 'guide-mc-typer.html'] ] },
+};
+function naesteBlok(g){
+  const n = NAESTE[g.slug];
+  if (!n) return '';
+  return `<section class="gd-next" aria-labelledby="gd-next-h">
+        <div class="gd-next-tekst"><h2 id="gd-next-h">${esc(n.h)}</h2><p>${esc(n.p)}</p></div>
+        <ul class="gd-next-links">
+          ${n.links.map(([t, b, h]) => `<li><a class="gd-next-link" href="${h}"><span class="gd-next-t">${esc(t)}</span><span class="gd-next-b">${esc(b)}</span><span class="gd-next-pil" aria-hidden="true">${Icon.arrowRight}</span></a></li>`).join('\n          ')}
         </ul>
       </section>`;
 }
@@ -354,7 +402,7 @@ ${ctx.header}
       <article class="gd-article">
       ${artikel}
 
-      ${relateretBlok(g)}
+      ${naesteBlok(g)}
 
       <section class="gd-sources" id="kilder" aria-labelledby="kilder-h">
         <h2 id="kilder-h">Kilder</h2>
@@ -364,6 +412,8 @@ ${ctx.header}
         <p class="gd-sources-note">Reglerne er læst i de officielle tekster den ${datoDa(MOD)}. Regler og beløb kan ændre sig. Tjek altid den aktuelle tekst hos myndighederne, og se din motorcykels registreringsattest, før du køber. Bikerbasen er et indeks over annoncer og giver ikke juridisk rådgivning.</p>
       </section>
       </article>
+
+      ${relateretBlok(g)}
     </div>
 
     <aside class="gd-side" aria-label="Kort fortalt og genveje">
@@ -397,11 +447,43 @@ function guideMinutter(g){
   const ord = g.sections.reduce((n, s) => n + antalOrd(fyldBidder(s.html)) + antalOrd(s.title), 0);
   return laesetid(ord);
 }
-function renderOversigt(ctx){
-  const crumbs = [{ name: 'Forside', file: 'index.html' }, { name: 'Artikler & guides', file: OVERSIGT.file }];
-  const kort = GUIDES.map(g => `<li class="gd-card">
+/* Oversigtens vej fra guide til søgning: tre kolonner (kørekort, type, mærke). Kun adresser, der findes. Ingen
+   tal: siden hydreres ikke. Mærkerne kommer af lageret ved build (flest annoncer først), ellers vises kun
+   "Alle mærker". */
+const TYPE_LINKS = [['naked', 'Naked'], ['sport', 'Sport'], ['adventure', 'Adventure/Enduro'], ['touring', 'Touring'], ['cruiser', 'Cruiser'], ['classic', 'Classic'], ['scooter', 'Scooter'], ['cross', 'Cross']];
+const KK_LINKS = [['koerekort-a1.html', 'Kørekort A1', 'Små motorcykler'], ['koerekort-a2.html', 'Kørekort A2', 'Mellemstore motorcykler'], ['koerekort-a.html', 'Kørekort A', 'Over A2-grænsen']];
+const filFindes = f => fs.existsSync(path.join(ROOT, f));
+function topMaerker(alle, n = 6){
+  const m = new Map();
+  for (const l of alle || []){
+    const b = String(l.brand || '').trim();
+    if (!b || b === 'Ukendt') continue;
+    m.set(b, (m.get(b) || 0) + 1);
+  }
+  return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'da')).map(([b]) => b)
+    .filter(b => filFindes(`maerke-${slugify(b)}.html`)).slice(0, n);
+}
+function findBlok(ctx){
+  const kk = KK_LINKS.filter(([f]) => filFindes(f));
+  const typer = TYPE_LINKS.filter(([id]) => filFindes(`type-${id}.html`));
+  const maerker = (ctx.maerker || []).filter(b => filFindes(`maerke-${slugify(b)}.html`));
+  const kol = (h, p, liste, alle) => `<div class="gd-find-kol"><h3>${h}</h3><p>${p}</p><ul class="gd-find-list">${liste.join('')}</ul>${alle}</div>`;
+  const li = (href, t, b) => `<li><a href="${href}"><span>${esc(t)}</span>${b ? `<small>${esc(b)}</small>` : ''}${Icon.arrowRight}</a></li>`;
+  return `<section class="gd-find" aria-labelledby="gd-find-h">
+      <h2 id="gd-find-h">Fra guide til søgning</h2>
+      <p class="gd-find-lede">Har du læst dig til, hvad du leder efter? Start her.</p>
+      <div class="gd-find-grid">
+        ${kol('Efter kørekort', 'Se annoncer, der ikke er udelukket til dit kørekort ud fra de oplyste tal.', kk.map(([f, t, b]) => li(f, t, b)), '')}
+        ${kol('Efter type', 'Fra naked til touring. Typen siger noget om kørestilling og brug.', typer.map(([id, t]) => li(`type-${id}.html`, t, '')), `<a class="gd-find-alle" href="guide-mc-typer.html">Sådan vælger du type ${Icon.arrowRight}</a>`)}
+        ${kol('Efter mærke', 'De mærker, der har flest annoncer på Bikerbasen lige nu.', maerker.map(b => li(`maerke-${slugify(b)}.html`, b, '')), `<a class="gd-find-alle" href="maerker.html">Alle mærker ${Icon.arrowRight}</a>`)}
+      </div>
+    </section>`;
+}
+
+function guideKort(g, cls){
+  return `<li class="gd-card ${cls}">
         <a class="gd-card-link" href="${g.file}">
-          <span class="gd-card-media"><img src="${g.cardImage}" alt="" style="object-position:${g.cardPos}" width="480" height="360" loading="lazy" decoding="async"></span>
+          <span class="gd-card-media"><img src="${g.cardImage}" alt="" style="object-position:${g.cardPos}" width="480" height="360" loading="${cls === 'gd-card-stor' ? 'eager' : 'lazy'}" decoding="async"></span>
           <span class="gd-card-body">
             <span class="gd-card-kicker">Guide</span>
             <h2 class="gd-card-title">${esc(g.navn)}</h2>
@@ -409,7 +491,21 @@ function renderOversigt(ctx){
             <span class="gd-card-foot"><span class="gd-card-time"><span class="gd-meta-ic" aria-hidden="true">${Icon.clock}</span>Læsetid ${minutterTekst(guideMinutter(g))}</span><span class="gd-card-go">Læs guiden ${Icon.arrowRight}</span></span>
           </span>
         </a>
-      </li>`).join('\n      ');
+      </li>`;
+}
+function renderOversigt(ctx){
+  const crumbs = [{ name: 'Forside', file: 'index.html' }, { name: 'Artikler & guides', file: OVERSIGT.file }];
+  /* Magasinopsætning: én stor guide og to ved siden af (begynd her), derefter resten som kompakte kort. */
+  const [g0, g1, g2, ...resten] = GUIDES;
+  const top = `<ul class="gd-feat">
+      ${guideKort(g0, 'gd-card-stor')}
+      ${g1 ? guideKort(g1, 'gd-card-side') : ''}
+      ${g2 ? guideKort(g2, 'gd-card-side') : ''}
+    </ul>`;
+  const flere = resten.length ? `<h2 class="gd-flere-h" id="gd-flere-h">Flere guides</h2>
+    <ul class="gd-cards" aria-labelledby="gd-flere-h">
+      ${resten.map(g => guideKort(g, 'gd-card-lille')).join('\n      ')}
+    </ul>` : '';
   const ld = jsonLd([
     {
       '@context': 'https://schema.org',
@@ -435,9 +531,9 @@ ${ctx.header}
   ${hero({ crumbs, kicker: 'ARTIKLER & GUIDES', h1: OVERSIGT.h1, ingress: OVERSIGT.ingress, lille: true })}
 
   <div class="container gd-overview">
-    <ul class="gd-cards">
-      ${kort}
-    </ul>
+    ${top}
+    ${flere}
+    ${findBlok(ctx)}
 
     <section class="gd-more" aria-labelledby="gd-more-h">
       <h2 id="gd-more-h">Mere hjælp til købet</h2>
@@ -492,7 +588,7 @@ function senest(items){
 function byg(alle){
   const { header, footer, csp } = siteParts();
   const udvalg = udvalgTilSidebjaelke(alle);
-  const ctx = { header, footer, csp, populaer: populaerModul(udvalg, alle && alle.length ? senest(alle) : null) };
+  const ctx = { header, footer, csp, populaer: populaerModul(udvalg, alle && alle.length ? senest(alle) : null), maerker: topMaerker(alle) };
   const skrevet = [];
   for (const g of GUIDES){
     fs.writeFileSync(path.join(ROOT, g.file), renderGuide(g, ctx), 'utf8');
