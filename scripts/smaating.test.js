@@ -107,5 +107,9 @@ test('kortets titel/pris: ét knækpunkt (kortets egen bredde), ikke flere', () 
   const css = læs('css/styles.css');
   const blokke = [...css.matchAll(/@container \(max-width: (\d+)px\)\{([^}]*\{[^}]*\}[^}]*)\}/g)].filter(m => /\.rk-top\{/.test(m[2]));
   assert.equal(blokke.length, 1, 'præcis én container query styrer .rk-top');
-  assert.equal(blokke[0][1], '262');
+  assert.equal(blokke[0][1], '300', 'knækpunktet er 300 px (Critic w4 P2-1: 266 px-kort på søgesiden må ikke ligge lige over grænsen)');
+});
+
+test('swipe-stakken: kun det forreste kort viser bundlinjen', () => {
+  assert.match(læs('css/styles.css'), /\.swipe-card:not\(\[data-stack="0"\]\) \.swipe-card-fod\{ visibility:hidden; \}/);
 });

@@ -98,3 +98,36 @@ test('klientens kopier (js/seo.js, js/home.js) giver samme adresser som serveren
   const homeSlug = new Function('name', 'return ' + m[1] + ';');
   for (const n of ['Zündapp', 'Moto Guzzi', 'Royal-enfield', 'Æbelø', 'Café Racer']) assert.equal(homeSlug(n), slugify(n), n);
 });
+
+/* ---- runde 2 (blind Critic w4, P3): ł/þ/œ/ı og klientens mærkefilter ---- */
+test('ł, Ł, þ, œ, ı foldes i stedet for at forsvinde', () => {
+  assert.equal(slugify('Łódź Motor'), 'lodz-motor');
+  assert.equal(slugify('Þór'), 'thor');
+  assert.equal(slugify('Cœur'), 'coeur');
+  assert.equal(slugify('Işık'), 'isik');
+  assert.equal(slugify('ł'), 'l');
+});
+
+test('klientens kopier foldes ens, også for ł/þ/œ/ı', () => {
+  const home = fs.readFileSync(path.join(ROD, 'js/home.js'), 'utf8');
+  const m = home.match(/const slugify = \(name\) => ([\s\S]*?);\s*\n/);
+  const homeSlug = new Function('name', 'return ' + m[1] + ';');
+  const seoSrc = fs.readFileSync(path.join(ROD, 'js/seo.js'), 'utf8');
+  const { listingPageUrl } = new Function('document', 'console', 'formatKm', 'formatCcm', 'formatPrice', 'typeLabel',
+    seoSrc + '\n;return { listingPageUrl };')({}, console, String, String, String, String);
+  for (const n of ['Łódź', 'Þór', 'Cœur', 'Işık', 'Zündapp', 'Æbelø']){
+    assert.equal(homeSlug(n), slugify(n), `home.js: ${n}`);
+    assert.ok(listingPageUrl({ id: 'abcdef12', brand: n, model: 'X', year: 2000 }).includes(`annonce-${slugify(n + ' X 2000')}-`), `seo.js: ${n}`);
+  }
+});
+
+test('js/maerke.js mkNorm slår de samme mærker sammen som generatorens slug (Zündapp = Zundapp)', () => {
+  const src = fs.readFileSync(path.join(ROD, 'js/maerke.js'), 'utf8');
+  const m = src.match(/function mkNorm\(s\)\{[\s\S]*?\n\}/);
+  assert.ok(m, 'fandt mkNorm');
+  const mkNorm = new Function(m[0] + '\nreturn mkNorm;')();
+  assert.equal(mkNorm('Zündapp'), mkNorm('Zundapp'));
+  const navne = ['Zündapp', 'Zundapp', 'Harley-Davidson', 'Harley Davidson', 'Royal Enfield', 'Royal-enfield', 'Moto Guzzi', 'Æbelø', 'Åben', 'Łódź', 'Þór', 'Cœur', 'Işık', 'MV Agusta', 'FB Mondial', 'Citroën', 'Straße', '', null];
+  for (const a of navne) for (const b of navne)
+    assert.equal(mkNorm(a) === mkNorm(b), slugify(a ?? '').replace(/-/g, '') === slugify(b ?? '').replace(/-/g, ''), `${a} / ${b}`);
+});

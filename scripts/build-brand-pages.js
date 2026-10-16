@@ -1464,7 +1464,9 @@ const listingUrls = LISTINGS.filter(harEgenSide).map(l => ({
 
 /* Forhandlerprofiler har ingen statisk side som annoncerne — forhandler.html?id=
    ER den kanoniske adresse. Uden et link herind udefra kan den kun findes ved
-   at klikke gennem en af forhandlerens annoncer, så den hører til i sitemappet.
+   at klikke gennem en af forhandlerens annoncer. De står IKKE i sitemappet (forhandler.html er noindex og
+   canonicaliserer til den bare /forhandler; se noten ved entries nedenfor), så listen herunder beregnes kun, hvis
+   profilerne en dag får en statisk, indekserbar side.
    Kun forhandlere (offentlig virksomhed), aldrig private sælgere — samme grænse
    som i JSON-LD'et, hvor en privat sælgers navn heller aldrig eksponeres.
 

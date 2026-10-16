@@ -5,14 +5,15 @@
    bliver en bindestreg". Nu foldes accenter til grundbogstavet FØR bindestregsreglen.
 
    Dansk praksis bevares uændret: ø -> oe, æ -> ae, å -> aa (de tre står først, ellers ville Unicode-foldningen
-   nå at tage "å" til "a"). Derefter: ü -> u, ä -> a, ö -> o, é -> e osv., og ß -> ss.
+   nå at tage "å" til "a"). Derefter: ü -> u, ä -> a, ö -> o, é -> e osv., og ß -> ss, ł -> l, þ -> th, œ -> oe, ı -> i (de sidste fire har ingen
+   Unicode-dekomposition og forsvandt før helt).
 
    Eksisterende adresser må ikke flytte sig: kun tegn, der før blev til en bindestreg, får et andet svar. Det
    er låst i scripts/slug.test.js mod alle committede model-/maerke-/by-/mc-/budget-/region-filnavne. */
 function slugify(name){
   return String(name).normalize('NFC').toLowerCase()
     .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
-    .replace(/ß/g, 'ss')
+    .replace(/ß/g, 'ss').replace(/ł/g, 'l').replace(/þ/g, 'th').replace(/œ/g, 'oe').replace(/ı/g, 'i')   // ikke foldet af Unicode (ingen kombinerende tegn)
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }

@@ -136,7 +136,7 @@ function listingPageUrl(listing){
   // Samme slugify som scripts/slug.js (accenter foldes), ellers peger adressen forbi den statiske side.
   const slug = `${listing.brand} ${listing.model} ${listing.year}`
     .normalize('NFC').toLowerCase()
-    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/ß/g, 'ss')
+    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/ß/g, 'ss').replace(/ł/g, 'l').replace(/þ/g, 'th').replace(/œ/g, 'oe').replace(/ı/g, 'i')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   return `${SITE_URL}/annonce-${slug}-${String(listing.id).slice(0, 8)}.html`;

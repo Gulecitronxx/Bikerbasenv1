@@ -281,7 +281,7 @@ async function buildForside(){
   /* ============ Tre kolonner: mærker, kørekort, regioner ============ */
   /* Skal give de samme adresser som scripts/slug.js (accenter foldes: Zündapp -> zundapp). */
   const slugify = (name) => String(name).normalize('NFC').toLowerCase()
-    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/ß/g, 'ss')
+    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/ß/g, 'ss').replace(/ł/g, 'l').replace(/þ/g, 'th').replace(/œ/g, 'oe').replace(/ı/g, 'i')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 

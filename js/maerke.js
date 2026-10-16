@@ -19,7 +19,16 @@ const MK_FREMHAEVET = 5;
 
 /* Mærkenavne sammenlignes uden versaler og tegnsætning: byggetrinnet slår
    "Royal Enfield" og "Royal-enfield" sammen på slug, så siden gør det også. */
-function mkNorm(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9æøå]+/g, ''); }
+/* Samme foldning som scripts/slug.js (generatoren slår Zündapp/Zundapp sammen til én side, så klientens mærkefilter
+   skal gøre det samme): ø/æ/å -> oe/ae/aa først, så accenter og ß/ł/þ/œ/ı, til sidst kun bogstaver og tal.
+   Låst mod slugify i scripts/slug.test.js. */
+function mkNorm(s){
+  return String(s || '').normalize('NFC').toLowerCase()
+    .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
+    .replace(/ß/g, 'ss').replace(/ł/g, 'l').replace(/þ/g, 'th').replace(/œ/g, 'oe').replace(/ı/g, 'i')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+}
 function mkHarFoto(l){ return !!(l.photoUrls && l.photoUrls.length); }
 /* Skal være identisk med vaelgFremhaevede() i scripts/build-brand-pages.js. */
 function mkVaelgFremhaevede(sorteret, n){

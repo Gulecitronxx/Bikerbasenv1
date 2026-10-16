@@ -62,3 +62,23 @@ Målt (computed `font-size` for synlig h1, 1440 / 390):
 - `?v=`-/CSP-hash-stempling er ikke rørt (ingen inline-scripts ændret).
 - Typebillede-fund (P2-2) er allerede løst i w3 (tomt felt med kameraikon); intet gjort her.
 - Swipe-kortets `${l.year}` kan skrive "null" for en indekseret annonce uden årgang (findes i dag); ikke i opgaven, ikke rettet.
+
+---
+
+# Runde 2 (efter blind Critic w4: ACCEPTER, P2/P3 taget før integration)
+
+Kilde: `docs/review/gauntlet/critic-w4.md`. Samme regler (mocks, ingen build/generatorer, ingen produktionslæsning). Runde 1's pkt. 2 ("ingen adfærdsændring, knækpunkt 262") er erstattet af P2-1 nedenfor.
+
+| Fund | Rettelse | Bevis |
+|---|---|---|
+| **P2-1** knækpunkt 262 lå 4 px under søgesidens 266 px-kort ved ALLE viewports 1480–1920 (spring 1472/1480, titel kun ~85 px side om side) | **Én regel ændret:** `css/styles.css`, `@container (max-width: 262px){ .rk-top{…} }` -> `300px` (+ omskrevet kommentar lige over; ingen anden kortregel rørt, så konflikten med w5/V2-008 er mindst mulig). Stadig container query på kortets EGEN bredde: alle kort i en række har altid samme tilstand. | Sweep: 4 sider (søgning, forside, mærke, type) × 201 viewportbredder (320–1920, trin à 8 px) = **804 målinger**, alle kort: **0 rækker med blandede tilstande**; mindste side-om-side-kort 304 px, største stablede 302 px; **mindste titelplads side om side 191 px** (≥120 kræves; måles som kortbredde − padding − prisbredde − gap). Søgesidens 266 px-kort er nu stablet ved hele 1480–1920. Zoner, hvor et kort passerer 300 px, findes stadig (ved f.eks. vp 648/656 på søgning) men er per række konsistente. Test: `js/annoncekort.test.js` + `scripts/smaating.test.js` låser 300. |
+| **P2-2** swipe viste 'null' for manglende årgang | `js/search.js swipeCardHTML`: "Årgang ikke oplyst"; titel og foto-alt bruger nu `kortFakta().titel` (som gitterkortet) i stedet for `brand model` | Ny test renderer gitter, liste og swipe (ekstern + egen, `null` og `undefined` på ALLE felter) og kræver ingen `null/undefined/NaN` i synlig tekst + title/aria-label/alt. "Lignende" bruger gitterkortet (dækket). Sammenlign-dialogen dækkes af w5. |
+| P3 forældet sitemap-kommentar | `scripts/build-brand-pages.js` (~1465) omskrevet: profilerne står ikke i sitemappet | læst |
+| P3 `mkNorm` i `js/maerke.js` foldede ikke accenter | Samme foldning som `scripts/slug.js` (ø/æ/å først, så accenter, ß/ł/þ/œ/ı, kun bogstaver/tal). Klienten kan ikke nå `slug.js`, så en lille kopi | `scripts/slug.test.js`: udtrækker `mkNorm` fra kilden og kræver, at to mærkenavne er ens under `mkNorm` netop når de er ens under `slugify` (19×19 navne inkl. Zündapp/Zundapp, null, tom) |
+| P3 swipe-stakken viste næste korts bundlinje | `.swipe-card:not([data-stack="0"]) .swipe-card-fod{ visibility:hidden }` | CSS-test; kun forreste kort viser sted/kilde |
+| P3 ł/Ł/þ/œ/ı foldes ikke | `scripts/slug.js` + de to klientkopier (`js/home.js`, `js/seo.js`): ł→l, þ→th, œ→oe, ı→i (Ł via lowercase) | `slug.test.js`: Łódź→lodz, Þór→thor, Cœur→coeur, Işık→isik; klientkopierne lig serverens; testen af ALLE committede model-/maerke-/by-/mc-/budget-/region-adresser er uændret og grøn (0 flyttede adresser) |
+
+Ikke taget (bevidst): P3-3 (nye testfiler i `npm test` — package.json er Orchestratorens; nu 3 testfiler: `scripts/slug.test.js` 9 tests, `scripts/smaating.test.js` 10 tests), P3-5 (tekstside-h1 28 px ved 768, token-kurven), P3-6 (`A2_MAX_HK` 47 vs 47,6, før-eksisterende, kørekortlogik må ikke ændres uden beslutning).
+
+Verifikation runde 2: `npm test` **654 pass / 0 fail** (651 + 3 nye i `annoncekort.test.js`), `node --test scripts/slug.test.js scripts/smaating.test.js` 19 pass, `node --check` alle js/crawler/scripts rent, `synk-header --tjek` rent, `seo-audit` 0 fund. Overflow/konsol på berørte sider: se afsnit nedenfor.
+Overflow/konsol runde 2: **0 afvigelser og 0 konsolfejl i 90 målinger** (forside, søgning gitter/liste/swipe, mærke, mærker, type, kørekort, annonce × 320/390/768/1280/1920 × lys+mørk, mocks).
