@@ -12,7 +12,7 @@ altså ikke i stykker af at vente.
 
 1. Gå til [supabase.com](https://supabase.com) og opret en konto.
 2. Klik **New project**.
-3. **Vælg region: `Central EU (Frankfurt)`** — dine brugeres data bliver
+3. **Vælg region: `West EU (Ireland)` (`eu-west-1`)** — dine brugeres data bliver
    dermed i EU, hvilket er det, privatlivspolitikken på siden lover.
 4. Vælg et databasekodeord og gem det et sikkert sted (fx en password manager).
    Du får ikke brug for det i koden, kun hvis du skal forbinde direkte til databasen.

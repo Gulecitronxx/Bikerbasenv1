@@ -145,18 +145,12 @@ try{
       <h2 id="data">2. Hvilke data vi behandler</h2>
       <ul>
         <li><strong>Kontooplysninger:</strong> navn, e-mail, telefonnummer, og for forhandlere: CVR-nummer og virksomhedsnavn.</li>
-        <!-- 23.08.2026 (C4): her stod "e-mail-, sms- og MitID-bekræftelse". Kun
-             e-mailbekræftelsen findes (login.html: "Ingen profiler på Bikerbasen
-             er identitetsverificerede"). "Beskeder sendt via kontaktformularen"
-             stod også her — men teksten sendes og gemmes ikke endnu (js/annonce.js:
-             "Vi videresender ikke selve teksten endnu"); vi tæller kun henvendelsen.
-             Punkterne om indekserede annoncer og statistik manglede helt. -->
         <li><strong>Verificeringsdata:</strong> om din e-mailadresse er bekræftet. Vi tilbyder ikke sms- eller MitID-verificering, og ingen profiler er identitetsverificerede.</li>
         <li><strong>Annoncedata:</strong> oplysninger om motorcykler du opretter til salg, herunder billeder.</li>
-        <li><strong>Visninger og henvendelser (kun tal):</strong> åbner du en oprettet annonce, tæller vi én visning pr. annonce pr. browsersession; trykker du som indlogget på "Vis telefonnummer", tæller vi én henvendelse. Sælgeren ser kun tallene — ikke hvem du er. Bikerbasen kan endnu ikke sende beskeder til sælgere, og der findes ingen kontaktformular på annoncer: ingen besked fra dig sendes eller gemmes.</li>
+        <li><strong>Visninger og henvendelser (kun tal):</strong> åbner du en oprettet annonce, tæller vi højst én visning pr. annonce pr. browsersession; trykker du som indlogget på "Vis telefonnummer", tæller vi én henvendelse. For ikke at tælle den samme person flere gange om dagen sender din browser en forespørgsel til en funktion hos Supabase, som ser din IP-adresse, udregner en hash (SHA-256) af IP-adresse, dagens dato og et hemmeligt salt, og kun bruger hashen sammen med annoncens id som nøgle. Er nøglen set i dag, tælles der ikke igen. Funktionen gemmer og logger ikke selve IP-adressen. Hashen ligger i en tabel, som ingen browser kan læse, og rækker fra før i går slettes automatisk (oprydningen kører tilfældigt ca. hver 100. tælling, så en række kan blive liggende lidt længere). En hash er stadig en personoplysning, derfor nævner vi den. Sælgeren ser kun tallene — ikke hvem du er. Bikerbasen kan endnu ikke sende beskeder til sælgere, og der findes ingen kontaktformular på annoncer: ingen besked fra dig sendes eller gemmes.</li>
         <li><strong>Anmeldelser og bedømmelser:</strong> tekst og vurderinger du skriver om sælgere.</li>
         <li><strong>Indekserede annoncer fra andre sider:</strong> Bikerbasen viser også annoncer, vi indekserer hos forhandlere og markedspladser. Om dem gemmer vi kun titel, mærke/model, årgang, km, kubik, effekt, pris, postnummer/by, om sælgeren er privat eller forhandler, et link til annoncen og et link til ét miniaturebillede hos kilden. Telefonnumre, e-mailadresser og adresser fjernes automatisk, før noget gemmes. Hvordan og hvor ofte står på <a href="om-indeksering.html">Om vores indeksering</a> — dér står også, hvordan en annonce fjernes.</li>
-        <li><strong>Statistik (kun med dit samtykke):</strong> vælger du "Accepter alle" i cookiebanneret, måler Google Analytics 4 hvilke sider der besøges, hvad der søges efter (mærke, type, pris, kørekort) og hvilke annoncer der åbnes — aldrig hvem du er, og aldrig det, du skriver til en sælger.</li>
+        <li><strong>Statistik (kun med dit samtykke):</strong> vælger du "Accepter alle" i cookiebanneret, måler Google Analytics 4 hvilke sider der besøges, hvad der søges efter (mærke, type, pris, kørekort og de søgeord, du selv taster i søgefeltet, op til 80 tegn, som sendes til Google som "search_term") og hvilke annoncer der åbnes — aldrig hvem du er, og aldrig det, du skriver til en sælger. Skriv derfor ikke personlige oplysninger i søgefeltet, hvis du har sagt ja til statistik.</li>
         <li><strong>Teknisk data:</strong> lokal lagring i din browser til favoritter, søgeagenter, valgt tema, cookievalg og din login-session (se listen under punkt 4).</li>
       </ul>
 
@@ -164,7 +158,7 @@ try{
       <p>Vi behandler dine data for at kunne levere platformens funktioner: oprette og vise annoncer, formidle kontakt mellem købere og sælgere, bekræfte e-mailadresser og forebygge svindel. Retsgrundlaget er opfyldelse af kontrakt (aftalen om at bruge platformen) samt legitim interesse i at holde platformen sikker og troværdig. Statistik behandles alene på grundlag af dit samtykke, som du kan trække tilbage når som helst.</p>
 
       <h2 id="cookies">4. Cookies</h2>
-      <p>Vi bruger nødvendig lokal lagring for at platformen kan fungere (login-status, favoritter, søgeagenter, tema og dit cookievalg). Statistik kræver dit samtykke: vælger du "Kun nødvendige", indlæses Google overhovedet ikke; vælger du "Accepter alle", indlæses Google Analytics 4 (Google Ireland Ltd.), som sætter cookies til at tælle besøg. Du kan til enhver tid ændre dit valg ved at rydde sidens data i din browser — så vises banneret igen. Bikerbasen sætter ikke selv cookies; det er Google Analytics, der (kun efter "Accepter alle") sætter sine egne målecookies.</p>
+      <p>Vi bruger nødvendig lokal lagring for at platformen kan fungere (login-status, favoritter, søgeagenter, tema og dit cookievalg). Statistik kræver dit samtykke: vælger du "Kun nødvendige", indlæses Google overhovedet ikke; vælger du "Accepter alle", indlæses Google Analytics 4 (Google Ireland Ltd.), som sætter cookies til at tælle besøg. Der er endnu ingen indstillingsknap til at ændre valget senere, men du kan trække et samtykke tilbage når som helst: tryk på "Ryd mine data i denne browser" under kontoindstillinger (det nulstiller også dit cookievalg) eller ryd sidens data i browserens indstillinger. Så vises banneret igen ved næste sideindlæsning, og Google indlæses ikke, før du vælger igen. Målecookies, Google allerede har sat, fjernes først, når du sletter sidens cookies i din browser. Bikerbasen sætter ikke selv cookies; det er Google Analytics, der (kun efter "Accepter alle") sætter sine egne målecookies.</p>
       <p>Det gemmer siden i din browser (localStorage), alt sammen på din egen enhed og uden at blive sendt til os, medmindre andet er nævnt:</p>
       <ul>
         <li><code>bb_cookie_consent</code> — dit cookievalg. <code>bb_theme</code> — lyst/mørkt tema. <code>bb_view_mode</code> — liste- eller gittervisning.</li>
@@ -175,30 +169,26 @@ try{
       </ul>
 
       <h2 id="deling">5. Deling af data</h2>
-      <!-- 23.08.2026 (C4): her stod "Ved brug af 'sikker betaling' deles nødvendige
-           oplysninger med vores PCI-certificerede betalingspartner". Der findes intet
-           betalingsflow (se vilkaar.html §8 og sikkerhed.html, rettet samme sted), så
-           sætningen er fjernet. Databehandlerne manglede helt; de står her nu. -->
       <p>Dit navn og telefonnummer på en annonce vises kun for indloggede brugere — ikke for udloggede besøgende, søgemaskiner eller robotter. Vi sælger eller deler ikke dine data med tredjeparter til markedsføring, og Bikerbasen håndterer ingen betalinger mellem købere og sælgere.</p>
       <h3>Databehandlere</h3>
       <p>Følgende leverandører behandler data på vores vegne og efter vores instruks:</p>
       <ul>
         <li><strong>Supabase</strong> (Supabase Inc., USA) — database, login og billedlagring. Vores projekt ligger i Supabases EU-region (Irland), så dine oplysninger opbevares i EU. Supabase behandler oplysningerne som databehandler på vores vegne.</li>
-        <li><strong>GitHub Pages</strong> (GitHub Inc., USA) med <strong>Fastly</strong> som CDN — leverer selve hjemmesidens filer. Der gemmes ingen personoplysninger her; som ved enhver webserver ser leverandøren din IP-adresse, når siderne hentes. GitHub er tilsluttet EU-U.S. Data Privacy Framework.</li>
+        <li><strong>GitHub Pages</strong> (GitHub Inc., USA) med <strong>Fastly</strong> som CDN — leverer selve hjemmesidens filer. Der gemmes ingen personoplysninger her; som ved enhver webserver ser leverandøren din IP-adresse, når siderne hentes.</li>
         <li><strong>Google Analytics 4</strong> (Google Ireland Ltd.) — statistik, kun med dit samtykke (se punkt 4).</li>
+        <li><strong>Resend</strong> — udsendelse af mails om søgeagenter. Resend får kun din e-mailadresse og mailens indhold, og kun hvis en sådan mail sendes (se nedenfor).</li>
       </ul>
       <p>Annoncer, vi indekserer fra andre sider, bliver hos kilden: vi henter dem kun efter kildens skriftlige tilladelse og følger robots.txt. En annoncør eller forhandler kan til enhver tid bede os stoppe eller fjerne annoncer — skriv til <a href="mailto:kontakt@bikerbasen.dk">kontakt@bikerbasen.dk</a>; se <a href="om-indeksering.html">Om vores indeksering</a>. Ønsker du at gøre krav på en indekseret annonce, kræver det verificeret ejerskab; kravet godkendes manuelt af os, og indtil da ændres intet.</p>
-      <p>Planlagt, men ikke i brug endnu: betaling af forhandlerabonnement via Stripe og mails om søgeagenter via Resend. Vi opdaterer dette punkt, før de tages i brug.</p>
+      <h3>Billeder fra annoncernes kilder</h3>
+      <p>Miniaturebilleder på indekserede annoncer hentes af din browser direkte fra kildens egen billedserver — i dag images.danbase.dk og assets.guloggratis.dk. Kildens server kan derfor se din IP-adresse og browsertype, når billedet hentes, som ved ethvert billede på nettet. Vi sender dem ikke andet, og det sker, uanset om du har sagt ja til statistik. Billeder fra annoncer oprettet på Bikerbasen ligger hos Supabase.</p>
+      <h3>Søgeagenter og mails</h3>
+      <p>Gemmer du en søgning som indlogget, gemmes søgningens filtre og en overskrift på din konto, så den kan tælle nye annoncer under Mine annoncer. Vi har bygget en funktion, der via Resend kan sende en mail til din kontos e-mailadresse, når en ny annonce oprettet direkte på Bikerbasen matcher en af dine søgeagenter; indekserede annoncer udløser den ikke. Hver sådan mail har et afmeldingslink, der virker uden login og kun stopper den ene søgeagent. Matcher en søgeagent ingen ny annonce, sendes der ingen mail.</p>
+      <p>Planlagt, men ikke i brug endnu: betaling af forhandlerabonnement via Stripe. Vi opdaterer dette punkt, før den tages i brug.</p>
 
       <h2 id="opbevaring">6. Opbevaringsperiode (dataminimering)</h2>
       <p>Vi opbevarer kun data, så længe det er nødvendigt for at levere platformens funktioner, eller så længe loven kræver det (f.eks. bogføringsregler for forhandlere). Indekserede annoncer fjernes, når kilden fjerner dem eller beder os om det. Slettede annoncer og konti fjernes fra vores systemer inden for rimelig tid, jf. dataminimeringsprincippet i GDPR.</p>
 
       <h2 id="rettigheder">7. Dine rettigheder</h2>
-      <!-- 23.08.2026 (C4): her stod, at ét klik i kontoindstillingerne "fjerner dine
-           annoncer, favoritter, beskeder og profil permanent". Knappen rydder kun det,
-           der ligger i browseren (Store.deleteAllData() i js/store.js) — kontoen og
-           annoncerne i databasen bliver stående. Indtil sletningen er bygget på
-           serveren, sker den ved henvendelse, og det skal stå her. -->
       <p>Du har efter GDPR ret til at få indsigt i, rette, begrænse eller slette dine data, samt ret til dataportabilitet. Dine annoncer kan du selv rette og slette under <a href="mine-annoncer.html">Mine annoncer</a>. Du har også ret til at gøre indsigelse mod behandling, der bygger på legitim interesse, og til at trække samtykke til statistik tilbage. Skriv til <a href="mailto:kontakt@bikerbasen.dk">kontakt@bikerbasen.dk</a> for at få din konto og alle tilknyttede oplysninger slettet eller udleveret — vi svarer inden for en måned, som loven kræver. Knappen "Ryd mine data i denne browser" under <a href="mine-annoncer.html?tab=konto">kontoindstillinger</a> fjerner favoritter, søgeagenter og login-session fra din browser, men ikke kontoen i databasen.</p>
 
       <h2 id="sikkerhed">8. Datasikkerhed</h2>
