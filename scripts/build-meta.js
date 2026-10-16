@@ -22,7 +22,10 @@ const OG_IMAGE = `${BASE}/og-image.png`;
 /* Sider bag login eller uden selvstændig værdi i et søgeresultat. */
 // annonce.html er skabelonen til ?id=… — js/annonce.js sætter altid noindex, men en crawler
 // uden JS skal ikke se en indekserbar skabelon (S-006).
-const NOINDEX = new Set(['dashboard.html', 'mine-annoncer.html', 'login.html', 'annonce.html']);
+// forhandler.html er ligeledes en skabelon (?id=…, canonical = den bare /forhandler, ingen titel pr. profil, og siden
+// får sit indhold fra JS): en crawler uden JS skal ikke se en indekserbar skabelon (w4-smaating). Den står
+// heller ikke i sitemappet (se noten om dealerUrls i scripts/build-brand-pages.js), og intet statisk link peger på den.
+const NOINDEX = new Set(['dashboard.html', 'mine-annoncer.html', 'login.html', 'annonce.html', 'forhandler.html']);
 
 const START = '<!-- meta:start (genereret af scripts/build-meta.js) -->';
 const END = '<!-- meta:end -->';

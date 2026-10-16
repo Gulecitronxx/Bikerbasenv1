@@ -9,6 +9,7 @@ const SEO = require('./seo-vagt');
 
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
+const { slugify: slugifyFælles } = require('./slug');
 const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering, standOpgoerelse: standOpg } = browserModules();
 
 /* Sidens egne ikoner (js/icons.js) som markup — samme SVG'er som resten af
@@ -171,11 +172,8 @@ const harEgenSide = l => !l.isExternal;
    viser kildeoplysning, prislabel og kørekortdommen — den er bare noindex. */
 const internAdresse = l => harEgenSide(l) ? listingSlug(l) : `annonce.html?id=${l.id}`;
 
-function slugify(name){
-  return name.toLowerCase()
-    .replace(/ø/g,'oe').replace(/æ/g,'ae').replace(/å/g,'aa')
-    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-}
+/* ÉN slugify til alle sideadresser (accenter foldes, se scripts/slug.js). Funktionserklæringen er hejst som før. */
+function slugify(name){ return slugifyFælles(name); }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* Den rene adresse, en side kanonicaliserer til — samme regel som
@@ -868,7 +866,7 @@ function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
           ${foto ? `<img class="mk-cta-img" src="${esc(foto)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
         </aside>`;
   return `<section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
-    <div class="container mk-wide">
+    <div class="container">
       <div class="mk-sek-head">
         <h2 id="mk-featured-h">${b} motorcykler på Bikerbasen</h2>
         <a class="mk-link" href="${sogHref(brand)}">Se alle ${b} motorcykler${ICON.arrowRight}</a>
@@ -885,7 +883,7 @@ function typeFlisersHTML(brand, fakta){
   if (!fakta.typer.length) return '';
   const b = esc(brand);
   return `<section class="section mk-sektion" aria-labelledby="mk-typer-h">
-    <div class="container mk-wide">
+    <div class="container">
       <div class="mk-sek-head"><h2 id="mk-typer-h">Udforsk ${b} efter type</h2></div>
       <div class="tiles-grid mk-tiles">
         ${fakta.typer.map(t => `<a href="${sogHref(brand, 'type=' + t.id)}" class="tile">
@@ -917,7 +915,7 @@ function saadanHTML(){
     ['4', ICON.externalLink, 'Gå videre til sælger', 'Annoncesiden fører dig videre til kilden.'],
   ];
   return `<section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
-    <div class="container mk-wide">
+    <div class="container">
       <div class="saadan-strip">
         <div class="saadan-hoved">
           <h2 id="saadan-titel">Sådan virker Bikerbasen</h2>
@@ -987,7 +985,7 @@ function treKolonnerHTML(brand, fakta, items){
   }
   if (!kolonner.length) return '';
   return `<section class="section mk-sektion">
-    <div class="container mk-wide">
+    <div class="container">
       <div class="mk-cols mk-cols-${kolonner.length}">
         ${kolonner.join('\n        ')}
       </div>
@@ -1232,7 +1230,7 @@ ${header}
 
   ${treKolonnerHTML(brand, fakta, items)}
 
-  <div class="container mk-wide">
+  <div class="container">
     <section class="section brand-liste-sektion mk-liste" style="padding-top:var(--space-4);" aria-labelledby="brand-antal">
       <div class="section-head">
         <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
@@ -1516,7 +1514,10 @@ const entries = [
   ...brands.filter(b => (byBrand[b] || []).length >= MIN_LISTINGS_FULD_TEKST)
     .map(b => ({ loc: cleanUrl(`maerke-${slugify(b)}.html`), lastmod: sideLastmod(`maerke-${slugify(b)}.html`) })),
   ...listingUrls.map(e => ({ loc: `${base}/${e.loc}`, lastmod: e.lastmod })),
-  ...dealerUrls.map(e => ({ loc: `${base}/${e.loc}`, lastmod: e.lastmod })),
+  /* Forhandlerprofiler (dealerUrls) står IKKE her mere: forhandler.html er noindex (scripts/build-meta.js NOINDEX)
+     og canonicaliserer til den bare /forhandler, så en ?id=-adresse i sitemappet ville være et modsat signal
+     (scripts/seo-krav.test.js afviser det). Listen beregnes stadig, så profilerne kan komme tilbage, hvis de
+     en dag får en statisk, indekserbar side med egen titel. */
 ];
 const urls = entries;
 /* S-005: et sitemap, der skrumper drastisk, er næsten altid en fejlet hentning. */

@@ -79,8 +79,6 @@
 .mk-intro-mere summary{ color:#fff; font-weight:600; text-decoration:underline; text-underline-offset:3px; }
 .mk-intro-mere > .brand-intro{ color:#ECE7DD; }
 
-/* Billedets sektioner er bredere end headeren (billede 9: kort fra x=43). */
-/* .mk-wide er et alias for .container (samme bredde som headeren). */
 
 /* ---------- Søgekort (over fotoets underkant) ---------- */
 .mk-soeg-wrap{ position:relative; z-index:3; margin-top: -56px; }
