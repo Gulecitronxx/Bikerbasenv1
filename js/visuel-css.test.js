@@ -83,8 +83,9 @@ test('V2-008/009: ét kortlayout, chips i bunden, og ingen enlig | først på en
   assert.match(sidst, /\.rk-top\{ flex-direction:column;/);
   assert.match(sidst, /\.rk-chips\{ margin-top:auto; \}/);
   assert.match(sidst, /\.rk-chips \+ \.rk-fod\{ margin-top:0; \}/);
-  assert.match(sidst, /\.rk-linje\{[^}]*clip-path:inset\(0 0 0 9px\);/);
-  assert.match(sidst, /\.rk-linje > span, \.rk-linje > span \+ span\{[^}]*border-left:1px solid/);
+  /* W7-3: skillestregen er hvert leds egen border, ikke en negativ margin + clip-path på linjen (se js/w7-visuel-kort.test.js). */
+  assert.ok(!/\.rk-linje\{[^}]*clip-path/.test(STYLES), '.rk-linje må ikke bruge clip-path');
+  assert.match(STYLES, /\.rk-linje > span\{[^}]*border-left:1px solid/);
 });
 
 test('V2-014: kortlister på landingssider er kompakt 2-kolonne og mærkesidens kolonner en skinne med peek under 560 px', () => {

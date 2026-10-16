@@ -828,8 +828,12 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .rk-titel{ font-family: var(--font-display); font-size:15px; font-weight:700; line-height:1.25; margin:0; min-width:0; overflow-wrap:anywhere; }
 .rk-pris{ flex:none; font-family: var(--font-display); font-size:15px; font-weight:700; white-space:nowrap; }
 .rk-pris.pris-mangler{ white-space:normal; text-align:right; font-size:12.5px; font-weight:600; color: var(--color-fg-muted); }
-.rk-linje{ display:flex; flex-wrap:wrap; margin:0; font-size:12.5px; line-height:1.3; color: var(--color-fg-muted); row-gap:2px; }
-.rk-linje span + span{ margin-left:8px; padding-left:8px; border-left:1px solid var(--color-border); }
+/* W7-3: skillestregen er hvert leds egen border-left. Leddet trækkes 9 px (1 streg + 8 luft) ud til venstre, og linjen
+   skærer kun VANDRET (overflow-x:clip) i sin egen kant, så stregen først på en ombrudt linje ligger uden for det synlige,
+   mens teksten står præcis i kanten. Ingen negativ margin på linjen selv, ingen clip-path, ingen skæring lodret. */
+.rk-linje{ display:flex; flex-wrap:wrap; margin:0; font-size:12.5px; line-height:1.3; color: var(--color-fg-muted); row-gap:2px; overflow-x:clip; }
+.rk-linje > span{ margin:0 17px 0 -9px; padding-left:8px; border-left:1px solid var(--color-border); }
+.rk-linje > span:last-child{ margin-right:0; }
 .rk-mangler{ font-style:normal; }
 .rk-ny{ font-weight:700; color: var(--color-primary-hover); }
 .rk-chips{ display:flex; flex-wrap:wrap; gap:5px; list-style:none; margin:0; padding:0; }
@@ -4049,24 +4053,21 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Kort i samme række får ens chip-række-y: chips og fod holdes i bunden, så en to-linjers titel ikke forskyder dem. */
 .rk-chips{ margin-top:auto; }
 .rk-chips + .rk-fod{ margin-top:0; }
-/* V2-009: ingen enlig "|" først på en ombrudt linje. Hvert led har sin streg til VENSTRE; linjen er skubbet 9 px ud og
-   klippet 9 px ind, så stregen først på hver linje ligger uden for det synlige. */
-.rk-linje{ margin-left:-9px; width:calc(100% + 9px); clip-path:inset(0 0 0 9px); }
-.rk-linje > span, .rk-linje > span + span{ margin:0 8px 0 0; padding:0 0 0 8px; border-left:1px solid var(--color-border); }
+/* V2-009 / W7-3: ingen enlig "|" først på en ombrudt linje — se .rk-linje ovenfor (den gamle margin-left:-9px + clip-path er væk). */
 
 /* V2-014: kortlisterne på landingssider (kørekort, type, region, mærke ...) er en kompakt 2-kolonne under 560 px i stedet
    for én kolonne af 375 px høje kort (sidens længde ved 390 px falder ca. 30-45 %). "Udvalgte" er allerede en skinne med peek. */
 @media (max-width:559px){
   :is(.fa-flere, .brand-liste-sektion) .listings-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-body{ padding:9px 9px 8px; gap:6px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-titel{ font-size:13.5px; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden; }
-  :is(.fa-flere, .brand-liste-sektion) .card-rich .card-media{ aspect-ratio:16/10; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-pris{ font-size:14px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-linje{ font-size:11.5px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-chips{ gap:4px; min-height:50px; align-content:flex-start; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-chip{ font-size:11px; padding:5px 6px; }
-  :is(.fa-flere, .brand-liste-sektion) .rk-fod{ font-size:11px; padding-top:6px; }
-  :is(.fa-flere, .brand-liste-sektion) .card-badges{ top:6px; left:6px; right:42px; gap:4px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-body{ padding:9px 9px 8px; gap:6px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-titel{ font-size:13.5px; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-rich .card-media{ aspect-ratio:16/10; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-pris{ font-size:14px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-linje{ font-size:11.5px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-chips{ gap:4px; min-height:50px; align-content:flex-start; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-chip{ font-size:11px; padding:5px 6px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-fod{ font-size:11px; padding-top:6px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-badges{ top:6px; left:6px; right:42px; gap:4px; }
 }
 
 /* ============ w5-visuel: trykflader (V2-007) ============ */

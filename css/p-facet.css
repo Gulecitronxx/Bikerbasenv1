@@ -282,3 +282,30 @@
 
 /* Chips: hover må ikke ligne et valgt filter (ingen tint, ingen løft). */
 .fa-side .popular-chip:hover{ background: var(--color-surface-2); border-color: var(--color-fg-muted); transform:none; }
+
+/* ============ w7-visuel (W7-2): søgekortet tilbage over folden på 390 x 844 ============
+   Kritikerens fund: efter w5 lå Type og Maks. pris under folden på facetsiderne. Årsager (målt, type-sport 390 px): 240 px højt
+   motorcykelfoto i heroen, et 231 px højt faktapanel med ikon-over-tekst, 88 px bundpolstring og (kørekort) 488 px faktarække
+   FØR søgekortet. Mobilreglerne herunder tager ca. 235 px af typesiderne og flytter søgekortet øverst på kørekortsiderne.
+   Trykflader røres ikke: brødkrumme-led er stadig >= 40 px, felter 48 px, knapper >= 44 px. Indhold skjules ikke. */
+@media (max-width:640px){
+  .fa-hero{ padding-bottom: calc(var(--space-8) + var(--space-2)); }
+  .fa-koerekort .fa-hero{ padding-bottom: var(--space-5); }
+  .fa-hero-grid{ gap: var(--space-3); padding-top: var(--space-3); }
+  .fa-hero-bike{ max-width:176px; }
+  /* Faktapanelet: ikon + tekst i løbende linjer i stedet for ikon-over-tekst-kolonner. */
+  .fa-panel{ padding: var(--space-2) var(--space-3); }
+  .fa-panel li{ padding:7px 0; gap:10px; align-items:flex-start; }
+  .fa-panel .fa-ik{ width:20px; height:20px; margin-top:1px; }
+  .fa-panel li > div{ min-width:0; }
+  .fa-panel strong, .fa-panel span:not(.fa-ik){ display:inline; font-size:13.5px; line-height:1.4; }
+  .fa-panel strong::after{ content:" "; }
+  .fa-panel li:not(:first-child) strong::after{ content:": "; }
+  .fa-soeg{ padding: var(--space-3) var(--space-4); }
+  .fa-soeg-titel{ font-size:17px; margin-bottom: var(--space-2); }
+  .fa-soeg-felter{ gap: var(--space-2) var(--space-3); }
+  /* Kørekortsider: søgekortet lige under heroen, fakta (krav, guide, kilde) derefter. */
+  main.fa-side.fa-koerekort > .container.fa-krop{ display:flex; flex-direction:column; }
+  main.fa-side.fa-koerekort > .container.fa-krop > .fa-soeg-vrap{ order:-1 !important; }
+  .fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-4); }
+}

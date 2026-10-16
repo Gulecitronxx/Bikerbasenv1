@@ -311,6 +311,9 @@
 @media (min-width:1100px){ #results-grid:not(.list-view){ grid-template-columns: repeat(3, minmax(0,1fr)); } }
 @media (min-width:1280px){ #results-grid:not(.list-view){ grid-template-columns: repeat(4, minmax(0,1fr)); } }
 #results-grid:not(.list-view) .card{ min-width:0; }
+/* w7-visuel (W7-1): under 560 px samme kompakte 2-kolonne som landingssidernes .fa-flere/.brand-liste-sektion
+   (kortets indre regler står i styles.css, hvor :is() også rammer #results-grid). Listevisning er urørt. */
+@media (max-width:559px){ #results-grid:not(.list-view){ grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; } }
 .so-results{ min-width:0; }
 .so-results{ scroll-margin-top: calc(var(--header-h) + 12px); }
 
