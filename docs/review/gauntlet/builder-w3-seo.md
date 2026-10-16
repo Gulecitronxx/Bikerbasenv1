@@ -76,3 +76,27 @@ Valgt: workflowet committer. Nyt job `lastmod` (`needs: deploy`, kun `main`, `pe
 7. **Indlink:** modelsider har nu sektionen "Se også" med lignende modeller af samme hovedtype fra andre mærker og mærkets mærke+type-sider. mc-harley-davidson-cruiser: 2 indlink (model-FLSTC, type-cruiser); model-suzuki-vlr-1800: 5 (forside, 3 modelsider, type-cruiser).
 
 **Måling runde 2:** `npm test` 525/525; nye testfiler 45/45 (seo-vagt 19, seo-sider 17, seo-krav 9) — Orchestrator tilføjer dem til package.json; `seo-audit`: 82 sider, 57 indekserbare, 0 fund; render (budget-under-30000, by-skive, mc-harley, model-suzuki x 1440/390 x lys/mørk) 0 overflow/konsolfejl/kontrastfund; SEO før/efter mod main: ingen ændring i robots/canonical/h1/JSON-LD/OG, eneste tabte links er de bevidst udskiftede links til noindex-sider.
+
+---
+
+## Runde 3 — rettelser efter anden blind Critic (AFVIST runde 2)
+
+**deploy.yml er nu KUN `tillad_fald`-inputtet + `BB_TILLAD_FALD`-env på build-trinnet** (diff mod main: 7 linjer). `lastmod`-jobbet og `upload-artifact`-trinnet fra runde 2 er fjernet (ingen bot-commit til main). Runde 2-afsnittet om dem er hermed erstattet af nedenstående.
+
+### P1-1 skadet sitemap
+`scripts/build.js` tager snapshot af `sitemap.xml` og `scripts/sitemap-lastmod.json` FØR trinløkken og gendanner begge, hvis et datatrin er sprunget (alt eller intet — hele det committede sitemap, ikke et halvt). Advarslen er rettet: "De committede sider er beholdt, og HELE det committede sitemap gendannes". Test (seo-vagt.test.js): stub-brand skriver et halvt sitemap + ny ledger, stub-facet exit 3 -> begge filer er byte-identiske med før. Kørt på kopi med kun facet-hentningen fejlende: sitemap 56 urørt, srp sprunget over.
+
+### P1-2 lastmod uden bot-commit
+`lastmodFor` i CI (`GITHUB_ACTIONS`): er hashet lig det committede, bruges den committede dato; ellers UDELADES lastmod (byggedagen opfindes aldrig). `skrivLedger` returnerer tidligt i CI (CI ændrer aldrig ledgeren). Lokalt uændret. Arbejdsgang: kør `node scripts/build.js` lokalt og commit `scripts/sitemap-lastmod.json` sammen med siderne før push. Bivirkning: efter en crawl står datadrevne sider uden lastmod, til en lokal build committes (sandt og harmløst); `soegning` står oftest uden (hash skifter med blandet sortering). Tests: uændret data beholder datoen (også dagen efter), ændret/ny side -> ingen lastmod, ledger urørt, lokalt som før.
+
+### P1-3 "sticky" efter bevidst fald/opt-out
+Præcist: CI skriver aldrig ledgeren, så baseline er den committede. Efter `tillad_fald` (engangsudgivelse) eller en opt-out SKAL du køre lokalt `BB_TILLAD_FALD=1 node scripts/build.js` og committe `scripts/sitemap-lastmod.json` + de berørte sider; ellers springes brand/facet/srp over igen ved næste almindelige push (grøn pipeline, frosne data). Står i alle fejlbeskeder (`UDVEJE` i seo-vagt.js), i build.js-advarslen, i en kommentar i build.js og i inputbeskrivelsen. (Opt-out med `aktiv:false` i YAML trækkes ud af baseline automatisk, men ledgeren skal stadig committes efter første lokale build.)
+
+### P2
+- **P2-1:** (a) loft på slettede sider pr. byg (`tjekSletninger`): max 3 eller 5 % af sidemængden pr. familie (mærke-/annoncesider); derover SEO_FALD (fail-soft, siderne bevares) medmindre BB_TILLAD_FALD=1; (b) enhver sletning logges som `::warning title=Sider fjernet::` med filnavnene; (c) kategorigulv egne/eksterne hævet til 85 % (per kilde 50 %, sitemap 70 %). Kørt på kopi: 3 sjældne mærker droppet -> 3 sider slettet med warning; 8 droppet -> brand afbrudt, 25 mærkesider bevaret.
+- **P2-2:** 0 egne annoncer med committede annoncesider er nu fejl i alle datatrin (`nulErFejl` også i brand/facet/srp), så annoncesider og sitemap-poster bevares sammen; hele sitemappet gendannes hvis ét trin springes. Når den sidste egne annonce bevidst fjernes: BB_TILLAD_FALD (se P1-3).
+- **P2-4:** `build-srp.js` har egen vagt (`tjekLager` mod ledgerens tal; bruger nu `kraevDatabase`; exit 3 ved fald/hentefejl, også transiente fejl -> fail-soft i stedet for exit 1). Kørt: kun 100 eksterne rækker -> soegning.html bevares. build.js behandler srp som datatrin.
+- **P2-3 (ÅBENT BESLUTNINGSOPLÆG, ikke implementeret):** fail-soft er "grøn" — kun en annotation. Forslag: et job efter `deploy` i deploy.yml, der fejler (rødt, mail) hvis build-loggen indeholder `[SEO_FALD-MARKØR]`, evt. plus skriv til `$GITHUB_STEP_SUMMARY`. Kræver at build-trinnet gemmer loggen (`tee`) og et lille grep-job; det er en CI-konfigurationsændring og ejerens beslutning.
+- **P3:** model-tærsklen ≥10 tæller RÅT (kun området 5-9 tæller distinkte) — bevaret bevidst, så de seks eksisterende indekserede modelsider ikke ændrer status; ≥10 identiske lagerenheder kunne give en tynd side (notér). De tre testfiler (49 tests) tilføjes af Orchestrator til `npm test`. By-hysterese hviler på de committede sider: i CI uden commit er den et simpelt snit ved 8. Committede facetsider kan have forældede CSP-hashes; CI kører csp-hashes, men kør en fuld lokal build før merge.
+
+**Måling:** `npm test` 525/525; `node --test` seo-vagt+seo-sider+seo-krav 49/49; `node --check` ok; `seo-audit` 82 sider/57 indekserbare/0 fund. Alle simuleringer kørt på kopier i scratch (`cd` + `pwd` kontrolleret), aldrig i hovedmappen.
