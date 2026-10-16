@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-9LLOKz71gT3U+n1bPasUCNceU36kP9JVOAgux+UNrD4=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Brugte motorcykler under 30.000 kr. — Bikerbasen</title>
 <meta name="description" content="Se 55 brugte motorcykler til salg under 30.000 kr. Priser fra ca. 5.000 kr. Sammenlign årgang, km og type på Bikerbasen.">
@@ -33,6 +33,24 @@
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<script id="ga4">/* GA4 bag samtykke — se scripts/inline-analytics.js */
+window.bbStartAnalytics=function(){
+  if(window.__ga4Startet)return; window.__ga4Startet=true;
+  var s=document.createElement("script");
+  s.async=true; s.src="https://www.googletagmanager.com/gtag/js?id=G-RWJZ8NJB0C";
+  document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag=gtag;
+  gtag("js",new Date());
+  // anonymize_ip: vi har ikke brug for praecise adresser til at taelle besoeg.
+  gtag("config","G-RWJZ8NJB0C",{anonymize_ip:true});
+};
+try{
+  var c=JSON.parse(localStorage.getItem("bb_cookie_consent"));
+  if(c&&c.level==="all")window.bbStartAnalytics();
+}catch(e){}
+</script>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
@@ -41,8 +59,8 @@
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="img/hero-1600.webp" imagesrcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" imagesizes="100vw" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/p-facet.css">
+<link rel="stylesheet" href="css/styles.css?v=75d404c8">
+<link rel="stylesheet" href="css/p-facet.css?v=75d404c8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Budget","item":"https://bikerbasen.dk/soegning"},{"@type":"ListItem","position":3,"name":"Motorcykler under 30.000 kr.","item":"https://bikerbasen.dk/budget-under-30000"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Motorcykler under 30.000 kr. — Bikerbasen","itemListElement":[{"@type":"ListItem","position":1,"url":"https://bikerbasen.dk/annonce-bmw-r45-1979-59d3a9a1.html","name":"BMW R45 1979"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad får man for en motorcykel til højst 30.000 kr.?","acceptedAnswer":{"@type":"Answer","text":"Der er 55 annoncer til højst 30.000 kr. Medianprisen er 19.900 kr. Årgangene ligger mellem 1956 og 2026. Prisen afspejler årgang, kilometertal og stand — tjek altid servicehistorik og stand på den konkrete motorcykel."}},{"@type":"Question","name":"Hvilket kørekort kræver en motorcykel til højst 30.000 kr.?","acceptedAnswer":{"@type":"Answer","text":"Ud fra den oplyste effekt og slagvolumen er 3 af de 55 annoncer ikke udelukket til kørekort A1, og 8 er ikke udelukket til A2. Resten ligger over grænserne eller mangler en oplyst effekt. Reglerne stiller også krav, der ikke står i annoncerne — tjek altid registreringsattesten."}}]}</script>
@@ -182,14 +200,14 @@
       
   <article class="card card-rich" data-listing-id="42410d86-c150-4ce9-8e0f-8ca744bb4e0c" data-external="1">
     <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/181552/Sym_XS_125_0_2.jpg?v=1" alt="Sym XS 125" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://images.danbase.dk/Content/Resellers/321/181552/Sym_XS_125_0_2.jpg?v=1" alt="SYM XS 125" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
       <button type="button" class="card-compare " data-compare-toggle="42410d86-c150-4ce9-8e0f-8ca744bb4e0c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Sym XS 125</h3>
+        <h3 class="rk-titel">SYM XS 125</h3>
         <span class="rk-pris">5.000 kr.</span>
       </div>
       <p class="rk-linje"><span>2010</span><span>4.500 km</span></p>
@@ -199,7 +217,7 @@
         <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=42410d86-c150-4ce9-8e0f-8ca744bb4e0c" class="card-link" aria-label="Se annonce: Sym XS 125, 5.000 kr. — hos MC Syd"></a>
+    <a href="annonce.html?id=42410d86-c150-4ce9-8e0f-8ca744bb4e0c" class="card-link" aria-label="Se annonce: SYM XS 125, 5.000 kr. — hos MC Syd"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="177253b4-d0b3-4d5c-894f-dede65565a17" data-external="1">
@@ -319,7 +337,7 @@
         <a class="popular-chip" href="soegning.html?maxPrice=30000&brands=Kawasaki">Kawasaki</a>
         <a class="popular-chip" href="soegning.html?maxPrice=30000&brands=BMW">BMW</a>
         <a class="popular-chip" href="soegning.html?maxPrice=30000&brands=Hyosung">Hyosung</a>
-        <a class="popular-chip" href="soegning.html?maxPrice=30000&brands=Sym">Sym</a>
+        <a class="popular-chip" href="soegning.html?maxPrice=30000&brands=SYM">SYM</a>
       </div>
     </section>
 
@@ -464,14 +482,14 @@
       
   <article class="card card-rich" data-listing-id="693dd0a0-dc20-4381-a542-ff4b7eb6073b" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/14fc64b5-ee86-4950-acf9-b801070f7495/14fc64b5-ee86-4950-acf9-b801070f7495-320x240.webp" alt="Yamaha Xv 750 virago" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/14fc64b5-ee86-4950-acf9-b801070f7495/14fc64b5-ee86-4950-acf9-b801070f7495-320x240.webp" alt="Yamaha XV 750 Virago" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
       <button type="button" class="card-compare " data-compare-toggle="693dd0a0-dc20-4381-a542-ff4b7eb6073b" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Yamaha Xv 750 virago</h3>
+        <h3 class="rk-titel">Yamaha XV 750 Virago</h3>
         <span class="rk-pris">18.000 kr.</span>
       </div>
       <p class="rk-linje"><span>1991</span><span>33.000 km</span></p>
@@ -481,7 +499,7 @@
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=693dd0a0-dc20-4381-a542-ff4b7eb6073b" class="card-link" aria-label="Se annonce: Yamaha Xv 750 virago, 18.000 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=693dd0a0-dc20-4381-a542-ff4b7eb6073b" class="card-link" aria-label="Se annonce: Yamaha XV 750 Virago, 18.000 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="bb2275e2-15e3-4b36-b73e-2de1db4804b5" data-external="1" data-type="touring">
@@ -704,26 +722,26 @@
     <a href="annonce.html?id=a1cfbbe0-af22-413a-aea1-f3766d7be5d5" class="card-link" aria-label="Se annonce: Yamaha YZF R3, 29.995 kr. — hos Rydbergs MC"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="26f3c9c6-4623-42c6-bf25-32ce24773a68" data-external="1">
+  <article class="card card-rich" data-listing-id="145cf1b2-de77-47bd-b155-849cb903a685" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/ac366a20-5355-48ef-a999-8dbe6614ab97/ac366a20-5355-48ef-a999-8dbe6614ab97-320x240.webp" alt="Honda CBF125 2009 Projekt mekaniker" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/9d87126f-67fc-40a0-b5c2-d7a08536b504/9d87126f-67fc-40a0-b5c2-d7a08536b504-320x240.webp" alt="Yamaha Xj 900 årg 90" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="26f3c9c6-4623-42c6-bf25-32ce24773a68" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="145cf1b2-de77-47bd-b155-849cb903a685" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Honda CBF125 2009 Projekt mekaniker</h3>
-        <span class="rk-pris">4.000 kr.</span>
+        <h3 class="rk-titel">Yamaha Xj 900 årg 90</h3>
+        <span class="rk-pris">8.500 kr.</span>
       </div>
-      <p class="rk-linje"><span>2009</span><span>63.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a1" title="Ikke udelukket til A1 ud fra 125 ccm og 12 hk. A1 kræver også en grænse for effekt pr. kilo — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Mulig A1</span><span class="visually-hidden">. Ikke udelukket til A1 ud fra 125 ccm og 12 hk. A1 kræver også en grænse for effekt pr. kilo — det står ikke i annoncen, så tjek registreringsattesten.</span></li><li class="rk-chip">125 ccm</li><li class="rk-chip">12 hk</li></ul>
+      <p class="rk-linje"><span>1990</span><span>79.736 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">98 hk</li><li class="rk-chip rk-chip-mangler">ccm ikke oplyst</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Aalborg, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Aalborg</span></span>
+        <span class="rk-sted" title="Tjele, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Tjele</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=26f3c9c6-4623-42c6-bf25-32ce24773a68" class="card-link" aria-label="Se annonce: Honda CBF125 2009 Projekt mekaniker, 4.000 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=145cf1b2-de77-47bd-b155-849cb903a685" class="card-link" aria-label="Se annonce: Yamaha Xj 900 årg 90, 8.500 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="ad9700e3-d151-4b83-bd3f-2db81116fee0" data-external="1">
@@ -748,33 +766,33 @@
     <a href="annonce.html?id=ad9700e3-d151-4b83-bd3f-2db81116fee0" class="card-link" aria-label="Se annonce: Yamaha XJ 600 Diversion, 14.995 kr. — hos Rydbergs MC"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="d8640c16-3af5-4647-b8a3-eccb909cab8b" data-external="1">
+  <article class="card card-rich" data-listing-id="26f3c9c6-4623-42c6-bf25-32ce24773a68" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/1706d8f6-6a35-48c4-86bd-f007713cc66a/1706d8f6-6a35-48c4-86bd-f007713cc66a-320x240.webp" alt="Hyosung God velkørende custom med lav. KM" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/ac366a20-5355-48ef-a999-8dbe6614ab97/ac366a20-5355-48ef-a999-8dbe6614ab97-320x240.webp" alt="Honda CBF125 2009 Projekt mekaniker" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="d8640c16-3af5-4647-b8a3-eccb909cab8b" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="26f3c9c6-4623-42c6-bf25-32ce24773a68" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Hyosung God velkørende custom med lav. KM</h3>
-        <span class="rk-pris">27.800 kr.</span>
+        <h3 class="rk-titel">Honda CBF125 2009 Projekt mekaniker</h3>
+        <span class="rk-pris">4.000 kr.</span>
       </div>
-      <p class="rk-linje"><span class="rk-mangler">Årgang ikke oplyst</span><span>6.100 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 700 ccm og 64 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 700 ccm og 64 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">700 ccm</li><li class="rk-chip">64 hk</li></ul>
+      <p class="rk-linje"><span>2009</span><span>63.000 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a1" title="Ikke udelukket til A1 ud fra 125 ccm og 12 hk. A1 kræver også en grænse for effekt pr. kilo — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Mulig A1</span><span class="visually-hidden">. Ikke udelukket til A1 ud fra 125 ccm og 12 hk. A1 kræver også en grænse for effekt pr. kilo — det står ikke i annoncen, så tjek registreringsattesten.</span></li><li class="rk-chip">125 ccm</li><li class="rk-chip">12 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Løgstør, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Løgstør</span></span>
+        <span class="rk-sted" title="Aalborg, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Aalborg</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=d8640c16-3af5-4647-b8a3-eccb909cab8b" class="card-link" aria-label="Se annonce: Hyosung God velkørende custom med lav. KM, 27.800 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=26f3c9c6-4623-42c6-bf25-32ce24773a68" class="card-link" aria-label="Se annonce: Honda CBF125 2009 Projekt mekaniker, 4.000 kr. — hos Gul og Gratis"></a>
   </article></div>
       <p class="brand-mere"><a href="soegning.html?maxPrice=30000" class="btn btn-primary"><span>Se alle <span data-fa-n="all">55</span> i søgningen</span></a></p>
     </section>
     <noscript>
       <ul class="brand-noscript">
         <li>Honda CX 650 E (Eurosport) — 1983, 20.000 kr., 74.250 km (Svendborg)</li>
-        <li>Sym XS 125 — 2010, 5.000 kr., 4.500 km (Rødding)</li>
+        <li>SYM XS 125 — 2010, 5.000 kr., 4.500 km (Rødding)</li>
         <li>Suzuki — 2007, 30.000 kr., 48.700 km (Hedensted)</li>
         <li>Honda CBR 1000 F — 1992, 25.000 kr., 81.000 km (Rødding)</li>
         <li>Honda Vf750f — 1983, 10.000 kr., 59 km (Thisted)</li>
@@ -783,7 +801,7 @@
         <li>Honda CBR 250 R — 2011, 29.800 kr., 31.000 km (Rødding)</li>
         <li>Honda Gl 1200 Aspencade — 1984, 24.900 kr., 69.000 km (Vrå)</li>
         <li>Suzuki GSX 750 F — 1990, 20.000 kr., 38.000 km (Rødding)</li>
-        <li>Yamaha Xv 750 virago — 1991, 18.000 kr., 33.000 km (Borup)</li>
+        <li>Yamaha XV 750 Virago — 1991, 18.000 kr., 33.000 km (Borup)</li>
         <li>Honda VF 1000 F — 1985, 17.500 kr., 96.000 km (Rødding)</li>
         <li>Kawasaki Zzr 1200 — 2002, 13.000 kr., 50.000 km (Rødekro)</li>
         <li>Yamaha XV 750 — 1990, 22.000 kr., 37.000 km (Rødding)</li>
@@ -794,10 +812,10 @@
         <li>Honda CBR 1000 F — 1991, 22.500 kr., 136.000 km (Rødding)</li>
         <li>Suzuki Ls650 — 1997, 18.500 kr., 16.700 km (Randers SV)</li>
         <li>Yamaha YZF R3 — 2015, 29.995 kr., 23.694 km (Thorsø)</li>
-        <li>Honda CBF125 2009 Projekt mekaniker — 2009, 4.000 kr., 63.000 km (Aalborg)</li>
-        <li>Yamaha XJ 600 Diversion — 1997, 14.995 kr., 50.324 km (Thorsø)</li>
-        <li>Hyosung God velkørende custom med lav. KM — 27.800 kr., 6.100 km (Løgstør)</li>
         <li>Yamaha Xj 900 årg 90 — 1990, 8.500 kr., 79.736 km (Tjele)</li>
+        <li>Yamaha XJ 600 Diversion — 1997, 14.995 kr., 50.324 km (Thorsø)</li>
+        <li>Honda CBF125 2009 Projekt mekaniker — 2009, 4.000 kr., 63.000 km (Aalborg)</li>
+        <li>Hyosung God velkørende custom med lav. KM — 27.800 kr., 6.100 km (Løgstør)</li>
         <li>Kawasaki ZZR600 — 1991, 15.999 kr. (Holbæk)</li>
         <li>Suzuki VS 400 Intruder — 1994, 20.000 kr., 80.000 km (Rødding)</li>
         <li><a href="annonce-bmw-r45-1979-59d3a9a1.html">BMW R45 — 1979, 24.000 kr., 91.350 km (Valby)</a></li>
@@ -813,10 +831,10 @@
         <li>Suzuki GSX 750 F — 1990, 18.000 kr., 92.000 km (Rødding)</li>
         <li>Suzuki GSX 600 F — 2000, 19.900 kr. (Skive)</li>
         <li>Yamaha XT 250 — 1985, 24.995 kr., 35.600 km (Vejle)</li>
-        <li>Suzuki Gsf 1200 bandit — 2008, 25.000 kr., 86.000 km (Ikast)</li>
-        <li>Kawasaki GPZ 500S — 1992, 1.900 kr., 66.421 km (Hadsund)</li>
+        <li>Suzuki GSF 1200 Bandit — 2008, 25.000 kr., 86.000 km (Ikast)</li>
         <li>Honda Café’ ræser — 1979, 17.500 kr. (Holbæk)</li>
         <li>Honda CB400 N — 1984, 8.500 kr. (Juelsminde)</li>
+        <li>Kawasaki GPZ 500S — 1992, 1.900 kr., 66.421 km (Hadsund)</li>
         <li>Ukendt DKW 250 — 1956, 18.000 kr. (Hornslet)</li>
         <li>Kawasaki ZL600 lav sædehøjde — 1987, 19.000 kr. (Glejbjerg)</li>
         <li>Honda CRF 110 F — 2026, 24.995 kr. (Horsens)</li>
@@ -932,17 +950,17 @@
   </div>
 </footer>
 
-<script defer src="js/security.js"></script>
-<script defer src="js/supabase-config.js"></script>
-<script defer src="js/supabase-api.js"></script>
-<script defer src="js/icons.js"></script>
-<script defer src="js/bike-art.js"></script>
-<script defer src="js/data.js"></script>
-<script defer src="js/store.js"></script>
-<script defer src="js/maaling.js"></script>
-<script defer src="js/backend-bridge.js"></script>
-<script defer src="js/sortering.js"></script>
-<script defer src="js/components.js"></script>
+<script defer src="js/security.js?v=75d404c8"></script>
+<script defer src="js/supabase-config.js?v=75d404c8"></script>
+<script defer src="js/supabase-api.js?v=75d404c8"></script>
+<script defer src="js/icons.js?v=75d404c8"></script>
+<script defer src="js/bike-art.js?v=75d404c8"></script>
+<script defer src="js/data.js?v=75d404c8"></script>
+<script defer src="js/store.js?v=75d404c8"></script>
+<script defer src="js/maaling.js?v=75d404c8"></script>
+<script defer src="js/backend-bridge.js?v=75d404c8"></script>
+<script defer src="js/sortering.js?v=75d404c8"></script>
+<script defer src="js/components.js?v=75d404c8"></script>
 <!-- Ingen separat js/facet.js: siden hydrerer sig selv med samme moenster som
      js/maerke.js bruger til maerke-*.html, bare filtreret paa type/koerekort/
      landsdel/model i stedet for maerke. koerekortForListing/passerKoerekort
@@ -1037,5 +1055,20 @@
   if (mount2) wireFavoriteButtons(mount2);
   document.documentElement.setAttribute('data-fa-hydreret', '1');
 });</script>
+<!--cookie:start-->
+<dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
+  <div class="cookie-modal-indhold">
+    <h2 id="cookie-modal-titel">Vi bruger cookies</h2>
+    <p>Bikerbasen bruger <strong>nødvendige cookies</strong> for at få siden til at fungere — dem kan du ikke fravælge, og de bruges ikke til at følge dig.</p>
+    <p>Vi vil desuden gerne bruge <strong>valgfrie cookies til statistik</strong>, så vi kan se, hvad der virker på siden. Dem starter vi kun, hvis du siger ja.</p>
+    <p class="cookie-modal-note">Du kan altid skifte mening. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+    <div class="cookie-modal-actions">
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-necessary-only" autofocus>Kun nødvendige</button>
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-accept-all">Accepter alle</button>
+    </div>
+  </div>
+</dialog>
+<script>try{if(!localStorage.getItem("bb_cookie_consent")){var d=document.getElementById("cookie-banner");if(d&&d.showModal){d.showModal();}else if(d){d.setAttribute("open","");}}}catch(e){}</script>
+<!--cookie:end-->
 </body>
 </html>

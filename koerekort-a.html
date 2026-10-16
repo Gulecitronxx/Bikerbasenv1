@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-9LLOKz71gT3U+n1bPasUCNceU36kP9JVOAgux+UNrD4=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Motorcykler til A-kørekort — Bikerbasen</title>
 <meta name="description" content="Se 383 motorcykler, hvis oplyste effekt er over A2-grænsen (kræver kørekort A). Sammenlign pris, årgang, km-stand og ccm på Bikerbasen.">
@@ -33,6 +33,24 @@
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<script id="ga4">/* GA4 bag samtykke — se scripts/inline-analytics.js */
+window.bbStartAnalytics=function(){
+  if(window.__ga4Startet)return; window.__ga4Startet=true;
+  var s=document.createElement("script");
+  s.async=true; s.src="https://www.googletagmanager.com/gtag/js?id=G-RWJZ8NJB0C";
+  document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag=gtag;
+  gtag("js",new Date());
+  // anonymize_ip: vi har ikke brug for praecise adresser til at taelle besoeg.
+  gtag("config","G-RWJZ8NJB0C",{anonymize_ip:true});
+};
+try{
+  var c=JSON.parse(localStorage.getItem("bb_cookie_consent"));
+  if(c&&c.level==="all")window.bbStartAnalytics();
+}catch(e){}
+</script>
 <link rel="preconnect" href="https://hkcjrwglwurdjnobewzb.supabase.co" crossorigin>
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibmplexsans.woff2?v=1" as="font" type="font/woff2" crossorigin>
@@ -41,8 +59,8 @@
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 <link rel="preload" as="image" href="img/hero-1600.webp" imagesrcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" imagesizes="100vw" fetchpriority="high">
-<link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/p-facet.css">
+<link rel="stylesheet" href="css/styles.css?v=75d404c8">
+<link rel="stylesheet" href="css/p-facet.css?v=75d404c8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Kørekort","item":"https://bikerbasen.dk/soegning"},{"@type":"ListItem","position":3,"name":"Kørekort A","item":"https://bikerbasen.dk/koerekort-a"}]}</script>
 </head>
 <body>
@@ -234,26 +252,26 @@
     <a href="annonce.html?id=028653e2-985c-4210-9153-5337cf20ed3d" class="card-link" aria-label="Se annonce: Honda F6 Valkyrie, 99.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="177253b4-d0b3-4d5c-894f-dede65565a17" data-external="1">
+  <article class="card card-rich" data-listing-id="0b126c5e-b305-47c0-a3a1-3ae807f9cfb9" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/c73303ca-ce20-47a7-9e01-ebd963c8c7d6/c73303ca-ce20-47a7-9e01-ebd963c8c7d6-320x240.webp" alt="Suzuki" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/4365a9ca-10e3-4974-b8f7-edf0fa99691e/4365a9ca-10e3-4974-b8f7-edf0fa99691e-320x240.webp" alt="Honda NT 1100 D" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="177253b4-d0b3-4d5c-894f-dede65565a17" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="0b126c5e-b305-47c0-a3a1-3ae807f9cfb9" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Suzuki</h3>
-        <span class="rk-pris">30.000 kr.</span>
+        <h3 class="rk-titel">Honda NT 1100 D</h3>
+        <span class="rk-pris">175.000 kr.</span>
       </div>
-      <p class="rk-linje"><span>2007</span><span>48.700 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 750 ccm og 93 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 750 ccm og 93 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">750 ccm</li><li class="rk-chip">93 hk</li></ul>
+      <p class="rk-linje"><span>2024</span><span>9.000 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.100 ccm og 102 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.100 ccm og 102 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.100 ccm</li><li class="rk-chip">102 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Hedensted, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Hedensted</span></span>
+        <span class="rk-sted" title="Lemvig, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Lemvig</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=177253b4-d0b3-4d5c-894f-dede65565a17" class="card-link" aria-label="Se annonce: Suzuki, 30.000 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=0b126c5e-b305-47c0-a3a1-3ae807f9cfb9" class="card-link" aria-label="Se annonce: Honda NT 1100 D, 175.000 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="03178f5a-e8b0-40af-a6fc-1eb566975860" data-external="1" data-type="naked">
@@ -381,26 +399,26 @@
         </div>
       </div>
       <div class="listings-grid" id="facet-listings-flere">
-  <article class="card card-rich" data-listing-id="1b56a4ee-fa0a-41ad-87d7-8ad5b4130d5a" data-external="1">
+  <article class="card card-rich" data-listing-id="177253b4-d0b3-4d5c-894f-dede65565a17" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/16433982-d2fb-4baa-8f46-77f189afc479/16433982-d2fb-4baa-8f46-77f189afc479-320x240.webp" alt="Honda Vf750f" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/c73303ca-ce20-47a7-9e01-ebd963c8c7d6/c73303ca-ce20-47a7-9e01-ebd963c8c7d6-320x240.webp" alt="Suzuki" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="1b56a4ee-fa0a-41ad-87d7-8ad5b4130d5a" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="177253b4-d0b3-4d5c-894f-dede65565a17" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Honda Vf750f</h3>
-        <span class="rk-pris">10.000 kr.</span>
+        <h3 class="rk-titel">Suzuki</h3>
+        <span class="rk-pris">30.000 kr.</span>
       </div>
-      <p class="rk-linje"><span>1983</span><span>59 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 750 ccm og 95 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 750 ccm og 95 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">750 ccm</li><li class="rk-chip">95 hk</li></ul>
+      <p class="rk-linje"><span>2007</span><span>48.700 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 750 ccm og 93 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 750 ccm og 93 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">750 ccm</li><li class="rk-chip">93 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Thisted, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thisted</span></span>
+        <span class="rk-sted" title="Hedensted, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Hedensted</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=1b56a4ee-fa0a-41ad-87d7-8ad5b4130d5a" class="card-link" aria-label="Se annonce: Honda Vf750f, 10.000 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=177253b4-d0b3-4d5c-894f-dede65565a17" class="card-link" aria-label="Se annonce: Suzuki, 30.000 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="037f14e6-c2a7-4256-984b-2a289d32a1ff" data-external="1" data-type="sport">
@@ -425,26 +443,26 @@
     <a href="annonce.html?id=037f14e6-c2a7-4256-984b-2a289d32a1ff" class="card-link" aria-label="Se annonce: Aprilia RSV 1000, 84.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="4d439521-fe9d-49e1-aa36-db3a8bec272d" data-external="1">
+  <article class="card card-rich" data-listing-id="1b56a4ee-fa0a-41ad-87d7-8ad5b4130d5a" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/7a999753-e4f2-4340-97b9-99d7b5176910/7a999753-e4f2-4340-97b9-99d7b5176910-320x240.webp" alt="Honda CBF 1000A" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/16433982-d2fb-4baa-8f46-77f189afc479/16433982-d2fb-4baa-8f46-77f189afc479-320x240.webp" alt="Honda Vf750f" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="4d439521-fe9d-49e1-aa36-db3a8bec272d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="1b56a4ee-fa0a-41ad-87d7-8ad5b4130d5a" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Honda CBF 1000A</h3>
-        <span class="rk-pris">39.800 kr.</span>
+        <h3 class="rk-titel">Honda Vf750f</h3>
+        <span class="rk-pris">10.000 kr.</span>
       </div>
-      <p class="rk-linje"><span>2009</span><span>53.200 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.000 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.000 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.000 ccm</li><li class="rk-chip">98 hk</li></ul>
+      <p class="rk-linje"><span>1983</span><span>59 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 750 ccm og 95 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 750 ccm og 95 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">750 ccm</li><li class="rk-chip">95 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Låsby, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Låsby</span></span>
+        <span class="rk-sted" title="Thisted, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thisted</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=4d439521-fe9d-49e1-aa36-db3a8bec272d" class="card-link" aria-label="Se annonce: Honda CBF 1000A, 39.800 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=1b56a4ee-fa0a-41ad-87d7-8ad5b4130d5a" class="card-link" aria-label="Se annonce: Honda Vf750f, 10.000 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="03817804-ada6-4e2f-9950-ae787e91b0c9" data-external="1" data-type="touring">
@@ -469,26 +487,26 @@
     <a href="annonce.html?id=03817804-ada6-4e2f-9950-ae787e91b0c9" class="card-link" aria-label="Se annonce: BMW K 1200 S, 69.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="598066ab-5b9d-4e9d-9eea-8474fb92c60f" data-external="1">
+  <article class="card card-rich" data-listing-id="4d439521-fe9d-49e1-aa36-db3a8bec272d" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/5993b450-8d11-46b0-b1d8-0f7270345db0/5993b450-8d11-46b0-b1d8-0f7270345db0-320x240.webp" alt="Suzuki Gs katana" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/7a999753-e4f2-4340-97b9-99d7b5176910/7a999753-e4f2-4340-97b9-99d7b5176910-320x240.webp" alt="Honda CBF 1000 A" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="598066ab-5b9d-4e9d-9eea-8474fb92c60f" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="4d439521-fe9d-49e1-aa36-db3a8bec272d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Suzuki Gs katana</h3>
-        <span class="rk-pris">12.500 kr.</span>
+        <h3 class="rk-titel">Honda CBF 1000 A</h3>
+        <span class="rk-pris">39.800 kr.</span>
       </div>
-      <p class="rk-linje"><span>1985</span><span>65.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 650 ccm og 72 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 650 ccm og 72 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">650 ccm</li><li class="rk-chip">72 hk</li></ul>
+      <p class="rk-linje"><span>2009</span><span>53.200 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.000 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.000 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.000 ccm</li><li class="rk-chip">98 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Esbjerg, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Esbjerg</span></span>
+        <span class="rk-sted" title="Låsby, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Låsby</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=598066ab-5b9d-4e9d-9eea-8474fb92c60f" class="card-link" aria-label="Se annonce: Suzuki Gs katana, 12.500 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=4d439521-fe9d-49e1-aa36-db3a8bec272d" class="card-link" aria-label="Se annonce: Honda CBF 1000 A, 39.800 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="04217c68-57e4-4487-b48a-a1eefdcd85b8" data-external="1" data-type="naked">
@@ -513,26 +531,26 @@
     <a href="annonce.html?id=04217c68-57e4-4487-b48a-a1eefdcd85b8" class="card-link" aria-label="Se annonce: Triumph Speed Triple, 74.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="64beec12-7e0a-41d7-95cc-b0115776408c" data-external="1">
+  <article class="card card-rich" data-listing-id="598066ab-5b9d-4e9d-9eea-8474fb92c60f" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/6ea63164-2229-4769-a300-c161d38fbd64/6ea63164-2229-4769-a300-c161d38fbd64-320x240.webp" alt="Kawasaki ER6" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/5993b450-8d11-46b0-b1d8-0f7270345db0/5993b450-8d11-46b0-b1d8-0f7270345db0-320x240.webp" alt="Suzuki Gs katana" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="64beec12-7e0a-41d7-95cc-b0115776408c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="598066ab-5b9d-4e9d-9eea-8474fb92c60f" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Kawasaki ER6</h3>
-        <span class="rk-pris">31.500 kr.</span>
+        <h3 class="rk-titel">Suzuki Gs katana</h3>
+        <span class="rk-pris">12.500 kr.</span>
       </div>
-      <p class="rk-linje"><span>2007</span><span>40.842 km</span></p>
+      <p class="rk-linje"><span>1985</span><span>65.000 km</span></p>
       <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 650 ccm og 72 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 650 ccm og 72 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">650 ccm</li><li class="rk-chip">72 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Frederikshavn, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Frederikshavn</span></span>
+        <span class="rk-sted" title="Esbjerg, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Esbjerg</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=64beec12-7e0a-41d7-95cc-b0115776408c" class="card-link" aria-label="Se annonce: Kawasaki ER6, 31.500 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=598066ab-5b9d-4e9d-9eea-8474fb92c60f" class="card-link" aria-label="Se annonce: Suzuki Gs katana, 12.500 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="053178da-3a43-4913-b49f-b586c10dc1c5" data-external="1" data-type="adventure">
@@ -557,26 +575,26 @@
     <a href="annonce.html?id=053178da-3a43-4913-b49f-b586c10dc1c5" class="card-link" aria-label="Se annonce: Triumph Tiger 1050, 99.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="68e21b91-6026-4d95-8399-834762ef18ed" data-external="1">
+  <article class="card card-rich" data-listing-id="64beec12-7e0a-41d7-95cc-b0115776408c" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/1d963ed9-d14b-4b4f-bf66-6d167f1a2eea/1d963ed9-d14b-4b4f-bf66-6d167f1a2eea-320x240.webp" alt="Honda Gl 1200 Aspencade" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/6ea63164-2229-4769-a300-c161d38fbd64/6ea63164-2229-4769-a300-c161d38fbd64-320x240.webp" alt="Kawasaki ER6" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="68e21b91-6026-4d95-8399-834762ef18ed" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="64beec12-7e0a-41d7-95cc-b0115776408c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Honda Gl 1200 Aspencade</h3>
-        <span class="rk-pris">24.900 kr.</span>
+        <h3 class="rk-titel">Kawasaki ER6</h3>
+        <span class="rk-pris">31.500 kr.</span>
       </div>
-      <p class="rk-linje"><span>1984</span><span>69.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.200 ccm og 94 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.200 ccm og 94 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.200 ccm</li><li class="rk-chip">94 hk</li></ul>
+      <p class="rk-linje"><span>2007</span><span>40.842 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 650 ccm og 72 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 650 ccm og 72 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">650 ccm</li><li class="rk-chip">72 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Vrå, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Vrå</span></span>
+        <span class="rk-sted" title="Frederikshavn, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Frederikshavn</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=68e21b91-6026-4d95-8399-834762ef18ed" class="card-link" aria-label="Se annonce: Honda Gl 1200 Aspencade, 24.900 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=64beec12-7e0a-41d7-95cc-b0115776408c" class="card-link" aria-label="Se annonce: Kawasaki ER6, 31.500 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="05999335-7845-4f99-884b-017d4a66e63d" data-external="1" data-type="touring">
@@ -601,26 +619,26 @@
     <a href="annonce.html?id=05999335-7845-4f99-884b-017d4a66e63d" class="card-link" aria-label="Se annonce: BMW K 1600, 204.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="693dd0a0-dc20-4381-a542-ff4b7eb6073b" data-external="1">
+  <article class="card card-rich" data-listing-id="68e21b91-6026-4d95-8399-834762ef18ed" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/14fc64b5-ee86-4950-acf9-b801070f7495/14fc64b5-ee86-4950-acf9-b801070f7495-320x240.webp" alt="Yamaha Xv 750 virago" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/1d963ed9-d14b-4b4f-bf66-6d167f1a2eea/1d963ed9-d14b-4b4f-bf66-6d167f1a2eea-320x240.webp" alt="Honda Gl 1200 Aspencade" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="693dd0a0-dc20-4381-a542-ff4b7eb6073b" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="68e21b91-6026-4d95-8399-834762ef18ed" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Yamaha Xv 750 virago</h3>
-        <span class="rk-pris">18.000 kr.</span>
+        <h3 class="rk-titel">Honda Gl 1200 Aspencade</h3>
+        <span class="rk-pris">24.900 kr.</span>
       </div>
-      <p class="rk-linje"><span>1991</span><span>33.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 750 ccm og 55 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 750 ccm og 55 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">750 ccm</li><li class="rk-chip">55 hk</li></ul>
+      <p class="rk-linje"><span>1984</span><span>69.000 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.200 ccm og 94 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.200 ccm og 94 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.200 ccm</li><li class="rk-chip">94 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Borup, Sjælland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Borup</span></span>
+        <span class="rk-sted" title="Vrå, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Vrå</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=693dd0a0-dc20-4381-a542-ff4b7eb6073b" class="card-link" aria-label="Se annonce: Yamaha Xv 750 virago, 18.000 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=68e21b91-6026-4d95-8399-834762ef18ed" class="card-link" aria-label="Se annonce: Honda Gl 1200 Aspencade, 24.900 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="0616a1ef-79b8-46b7-9727-1d46e76cd276" data-external="1" data-type="cruiser">
@@ -645,26 +663,26 @@
     <a href="annonce.html?id=0616a1ef-79b8-46b7-9727-1d46e76cd276" class="card-link" aria-label="Se annonce: Suzuki VLR 1800, 139.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="6bfa83a5-64ab-4fc9-9a76-7cfe6b65183e" data-external="1">
+  <article class="card card-rich" data-listing-id="693dd0a0-dc20-4381-a542-ff4b7eb6073b" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/d3eac254-5e82-41ed-8525-9d9b16aec88a/d3eac254-5e82-41ed-8525-9d9b16aec88a-320x240.webp" alt="Kawasaki Zzr 1200" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/14fc64b5-ee86-4950-acf9-b801070f7495/14fc64b5-ee86-4950-acf9-b801070f7495-320x240.webp" alt="Yamaha XV 750 Virago" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="6bfa83a5-64ab-4fc9-9a76-7cfe6b65183e" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="693dd0a0-dc20-4381-a542-ff4b7eb6073b" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Kawasaki Zzr 1200</h3>
-        <span class="rk-pris">13.000 kr.</span>
+        <h3 class="rk-titel">Yamaha XV 750 Virago</h3>
+        <span class="rk-pris">18.000 kr.</span>
       </div>
-      <p class="rk-linje"><span>2002</span><span>50.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.200 ccm og 155 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.200 ccm og 155 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.200 ccm</li><li class="rk-chip">155 hk</li></ul>
+      <p class="rk-linje"><span>1991</span><span>33.000 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 750 ccm og 55 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 750 ccm og 55 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">750 ccm</li><li class="rk-chip">55 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Rødekro, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødekro</span></span>
+        <span class="rk-sted" title="Borup, Sjælland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Borup</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=6bfa83a5-64ab-4fc9-9a76-7cfe6b65183e" class="card-link" aria-label="Se annonce: Kawasaki Zzr 1200, 13.000 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=693dd0a0-dc20-4381-a542-ff4b7eb6073b" class="card-link" aria-label="Se annonce: Yamaha XV 750 Virago, 18.000 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="0884700d-bfee-4fb5-a491-383e65c0ab9d" data-external="1" data-type="naked">
@@ -689,26 +707,26 @@
     <a href="annonce.html?id=0884700d-bfee-4fb5-a491-383e65c0ab9d" class="card-link" aria-label="Se annonce: Ducati Scrambler, 94.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="6f787624-df9f-4f91-9e9f-d6e271e15179" data-external="1">
+  <article class="card card-rich" data-listing-id="6bfa83a5-64ab-4fc9-9a76-7cfe6b65183e" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/c41c2a3b-d26b-4cd2-b320-4bea6422be98/c41c2a3b-d26b-4cd2-b320-4bea6422be98-320x240.webp" alt="Honda Cb500 1996 a2" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/d3eac254-5e82-41ed-8525-9d9b16aec88a/d3eac254-5e82-41ed-8525-9d9b16aec88a-320x240.webp" alt="Kawasaki Zzr 1200" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="6f787624-df9f-4f91-9e9f-d6e271e15179" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="6bfa83a5-64ab-4fc9-9a76-7cfe6b65183e" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Honda Cb500 1996 a2</h3>
-        <span class="rk-pris">12.000 kr.</span>
+        <h3 class="rk-titel">Kawasaki Zzr 1200</h3>
+        <span class="rk-pris">13.000 kr.</span>
       </div>
-      <p class="rk-linje"><span>1997</span><span>47.600 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 500 ccm og 48 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 500 ccm og 48 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">500 ccm</li><li class="rk-chip">48 hk</li></ul>
+      <p class="rk-linje"><span>2002</span><span>50.000 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.200 ccm og 155 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.200 ccm og 155 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.200 ccm</li><li class="rk-chip">155 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Kjellerup, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Kjellerup</span></span>
+        <span class="rk-sted" title="Rødekro, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødekro</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=6f787624-df9f-4f91-9e9f-d6e271e15179" class="card-link" aria-label="Se annonce: Honda Cb500 1996 a2, 12.000 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=6bfa83a5-64ab-4fc9-9a76-7cfe6b65183e" class="card-link" aria-label="Se annonce: Kawasaki Zzr 1200, 13.000 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="0a72f9c3-a044-4377-958a-574021090a5f" data-external="1" data-type="touring">
@@ -733,26 +751,26 @@
     <a href="annonce.html?id=0a72f9c3-a044-4377-958a-574021090a5f" class="card-link" aria-label="Se annonce: Honda NT 1100 A, 149.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="a078ebf2-b1c7-4597-b3a2-4b8e0a9dcd6b" data-external="1">
+  <article class="card card-rich" data-listing-id="6f787624-df9f-4f91-9e9f-d6e271e15179" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/6594d712-f944-42d9-9f62-d6909663fc40/6594d712-f944-42d9-9f62-d6909663fc40-320x240.webp" alt="Kawasaki Zephyr" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/c41c2a3b-d26b-4cd2-b320-4bea6422be98/c41c2a3b-d26b-4cd2-b320-4bea6422be98-320x240.webp" alt="Honda Cb500 1996 a2" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="a078ebf2-b1c7-4597-b3a2-4b8e0a9dcd6b" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="6f787624-df9f-4f91-9e9f-d6e271e15179" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Kawasaki Zephyr</h3>
-        <span class="rk-pris">27.000 kr.</span>
+        <h3 class="rk-titel">Honda Cb500 1996 a2</h3>
+        <span class="rk-pris">12.000 kr.</span>
       </div>
-      <p class="rk-linje"><span>1991</span><span>79.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 750 ccm og 72 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 750 ccm og 72 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">750 ccm</li><li class="rk-chip">72 hk</li></ul>
+      <p class="rk-linje"><span>1997</span><span>47.600 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 500 ccm og 48 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 500 ccm og 48 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">500 ccm</li><li class="rk-chip">48 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Brøndby, Hovedstaden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Brøndby</span></span>
+        <span class="rk-sted" title="Kjellerup, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Kjellerup</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=a078ebf2-b1c7-4597-b3a2-4b8e0a9dcd6b" class="card-link" aria-label="Se annonce: Kawasaki Zephyr, 27.000 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=6f787624-df9f-4f91-9e9f-d6e271e15179" class="card-link" aria-label="Se annonce: Honda Cb500 1996 a2, 12.000 kr. — hos Gul og Gratis"></a>
   </article>
       
   <article class="card card-rich" data-listing-id="0bf92063-7b31-4cdf-a008-ee05a6ee9a7d" data-external="1" data-type="adventure">
@@ -777,26 +795,26 @@
     <a href="annonce.html?id=0bf92063-7b31-4cdf-a008-ee05a6ee9a7d" class="card-link" aria-label="Se annonce: Honda CRF 1000 L Africa Twin, 154.800 kr. — hos MC Syd"></a>
   </article>
       
-  <article class="card card-rich" data-listing-id="a442afde-8360-48ed-90bc-4442cee82546" data-external="1" data-type="sport">
+  <article class="card card-rich" data-listing-id="966dfe55-f49f-4e4f-8919-8fc36a79e3af" data-external="1">
     <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/7c1837ac-1077-4fb5-9ea1-c3233cb4ee8a/7c1837ac-1077-4fb5-9ea1-c3233cb4ee8a-320x240.webp" alt="Triumph Tiger 850" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
+      <img src="https://assets.guloggratis.dk/images/66f3d294-42cf-4f5c-86ac-67cf1ae4ec83/66f3d294-42cf-4f5c-86ac-67cf1ae4ec83-320x240.webp" alt="Suzuki VZR1800" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
       
       
-      <button type="button" class="card-compare " data-compare-toggle="a442afde-8360-48ed-90bc-4442cee82546" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
+      <button type="button" class="card-compare " data-compare-toggle="966dfe55-f49f-4e4f-8919-8fc36a79e3af" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">Triumph Tiger 850</h3>
-        <span class="rk-pris">92.500 kr.</span>
+        <h3 class="rk-titel">Suzuki VZR1800</h3>
+        <span class="rk-pris">189.000 kr.</span>
       </div>
-      <p class="rk-linje"><span>2021</span><span>23.500 km</span><span>Sport</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 900 ccm og 85 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 900 ccm og 85 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">900 ccm</li><li class="rk-chip">85 hk</li></ul>
+      <p class="rk-linje"><span>2007</span><span>53.000 km</span></p>
+      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.800 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.800 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.800 ccm</li><li class="rk-chip">125 hk</li></ul>
       <div class="rk-fod">
-        <span class="rk-sted" title="Ballerup, Hovedstaden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Ballerup</span></span>
+        <span class="rk-sted" title="Varde, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Varde</span></span>
         <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
       </div>
     </div>
-    <a href="annonce.html?id=a442afde-8360-48ed-90bc-4442cee82546" class="card-link" aria-label="Se annonce: Triumph Tiger 850, 92.500 kr. — hos Gul og Gratis"></a>
+    <a href="annonce.html?id=966dfe55-f49f-4e4f-8919-8fc36a79e3af" class="card-link" aria-label="Se annonce: Suzuki VZR1800, 189.000 kr. — hos Gul og Gratis"></a>
   </article></div>
       <p class="brand-mere"><a href="soegning.html?koerekort=A&hkMin=48" class="btn btn-primary"><span>Se alle <span data-fa-n="all">383</span> i søgningen</span></a></p>
     </section>
@@ -805,34 +823,39 @@
         <li>Honda CB 1000 — 2025, 124.800 kr., 5.500 km (Rødding)</li>
         <li>Honda CX 650 E (Eurosport) — 1983, 20.000 kr., 74.250 km (Svendborg)</li>
         <li>Honda F6 Valkyrie — 1997, 99.800 kr., 36.000 km (Rødding)</li>
-        <li>Suzuki — 2007, 30.000 kr., 48.700 km (Hedensted)</li>
+        <li>Honda NT 1100 D — 2024, 175.000 kr., 9.000 km (Lemvig)</li>
         <li>Kawasaki ZR-7 — 2000, 34.800 kr., 41.000 km (Rødding)</li>
-        <li>Honda Vf750f — 1983, 10.000 kr., 59 km (Thisted)</li>
+        <li>Suzuki — 2007, 30.000 kr., 48.700 km (Hedensted)</li>
         <li>Aprilia RSV 1000 — 2006, 84.800 kr., 31.000 km (Rødding)</li>
-        <li>Honda CBF 1000A — 2009, 39.800 kr., 53.200 km (Låsby)</li>
+        <li>Honda Vf750f — 1983, 10.000 kr., 59 km (Thisted)</li>
         <li>BMW K 1200 S — 2006, 69.800 kr., 71.000 km (Rødding)</li>
-        <li>Suzuki Gs katana — 1985, 12.500 kr., 65.000 km (Esbjerg)</li>
+        <li>Honda CBF 1000 A — 2009, 39.800 kr., 53.200 km (Låsby)</li>
         <li>Triumph Speed Triple — 2005, 74.800 kr., 23.000 km (Rødding)</li>
-        <li>Kawasaki ER6 — 2007, 31.500 kr., 40.842 km (Frederikshavn)</li>
+        <li>Suzuki Gs katana — 1985, 12.500 kr., 65.000 km (Esbjerg)</li>
         <li>Triumph Tiger 1050 — 2013, 99.800 kr., 60.000 km (Rødding)</li>
-        <li>Honda Gl 1200 Aspencade — 1984, 24.900 kr., 69.000 km (Vrå)</li>
+        <li>Kawasaki ER6 — 2007, 31.500 kr., 40.842 km (Frederikshavn)</li>
         <li>BMW K 1600 — 2016, 204.800 kr., 61.000 km (Rødding)</li>
-        <li>Yamaha Xv 750 virago — 1991, 18.000 kr., 33.000 km (Borup)</li>
+        <li>Honda Gl 1200 Aspencade — 1984, 24.900 kr., 69.000 km (Vrå)</li>
         <li>Suzuki VLR 1800 — 2009, 139.800 kr., 47.000 km (Rødding)</li>
-        <li>Kawasaki Zzr 1200 — 2002, 13.000 kr., 50.000 km (Rødekro)</li>
+        <li>Yamaha XV 750 Virago — 1991, 18.000 kr., 33.000 km (Borup)</li>
         <li>Ducati Scrambler — 2021, 94.800 kr., 10.000 km (Rødding)</li>
-        <li>Honda Cb500 1996 a2 — 1997, 12.000 kr., 47.600 km (Kjellerup)</li>
+        <li>Kawasaki Zzr 1200 — 2002, 13.000 kr., 50.000 km (Rødekro)</li>
         <li>Honda NT 1100 A — 2025, 149.800 kr., 600 km (Rødding)</li>
-        <li>Kawasaki Zephyr — 1991, 27.000 kr., 79.000 km (Brøndby)</li>
+        <li>Honda Cb500 1996 a2 — 1997, 12.000 kr., 47.600 km (Kjellerup)</li>
         <li>Honda CRF 1000 L Africa Twin — 2016, 154.800 kr., 23.000 km (Rødding)</li>
-        <li>Triumph Tiger 850 — 2021, 92.500 kr., 23.500 km (Ballerup)</li>
+        <li>Suzuki VZR1800 — 2007, 189.000 kr., 53.000 km (Varde)</li>
         <li>Harley-Davidson FXBR Breakout — 2020, 374.800 kr., 13.000 km (Rødding)</li>
-        <li>Yamaha XVS 1100 DragStar Classic — 2000, 54.900 kr., 69.000 km (Højbjerg)</li>
+        <li>Kawasaki Zephyr — 1991, 27.000 kr., 79.000 km (Brøndby)</li>
         <li>Honda VF 1000 — 1985, 64.800 kr., 78.000 km (Rødding)</li>
+        <li>Triumph Tiger 850 — 2021, 92.500 kr., 23.500 km (Ballerup)</li>
         <li>Yamaha FJR 1300 — 2012, 164.800 kr., 72.000 km (Rødding)</li>
+        <li>BMW K 100 RT — 1985, 39.800 kr., 122.000 km (Fjerritslev)</li>
         <li>Harley-Davidson FLSB Glide — 2019, 249.800 kr., 47.000 km (Rødding)</li>
+        <li>Honda CB 500 Hornet — 2025, 70.000 kr., 987 km (Klarup)</li>
         <li>Harley-Davidson FXS Softail Blackline — 2011, 199.800 kr., 45.000 km (Rødding)</li>
+        <li>Triumph Thruxton 1200 — 2017, 120.000 kr., 12.300 km (Ringkøbing)</li>
         <li>Harley-Davidson FXST Softail — 2021, 224.800 kr., 17.000 km (Rødding)</li>
+        <li>Yamaha XVS 1100 DragStar Classic — 2000, 54.900 kr., 69.000 km (Højbjerg)</li>
         <li>KTM 890 R — 2022, 169.800 kr., 11.200 km (Rødding)</li>
         <li>Victory Highball — 2017, 199.800 kr., 24.000 km (Rødding)</li>
         <li>BMW R 1200 — 2017, 189.800 kr., 64.000 km (Rødding)</li>
@@ -860,12 +883,12 @@
         <li>Honda CBF 1000 — 2009, 64.800 kr., 50.000 km (Rødding)</li>
         <li>Suzuki GSF 650 S Bandit — 2007, 44.800 kr., 29.000 km (Rødding)</li>
         <li>Honda CRF 1100 L Africa — 2026, 239.800 kr., 300 km (Rødding)</li>
+        <li>Yamaha XVS 950 A — 2014, 109.800 kr., 22.000 km (Rødding)</li>
         <li>Kawasaki ZX6R — 2008, 79.800 kr., 51.000 km (Rødding)</li>
         <li>Ducati Scrambler Full — 2019, 99.800 kr., 19.000 km (Rødding)</li>
         <li>Honda NT 1100 A — 2022, 149.800 kr., 20.000 km (Rødding)</li>
         <li>Harley-Davidson FXBB Bob — 2013, 194.800 kr., 14.000 km (Rødding)</li>
         <li>Indian Challenger Dark Horse — 2021, 459.800 kr., 14.000 km (Rødding)</li>
-        <li>Yamaha XVS 950 A — 2014, 109.800 kr., 22.000 km (Rødding)</li>
         <li>Yamaha MT-09 — 2024, 129.800 kr., 7.500 km (Rødding)</li>
         <li>KTM 1290 Super — 2017, 154.800 kr., 46.000 km (Rødding)</li>
         <li>Honda CMX 1100 Rebel — 2023, 119.800 kr., 15.000 km (Rødding)</li>
@@ -931,25 +954,21 @@
         <li>Suzuki GSX 1400 — 2007, 74.800 kr., 58.000 km (Rødding)</li>
         <li>Harley-Davidson FLHTCUI Electra Glide Ultra Classic — 2005, 199.900 kr., 88.000 km (Thorsø)</li>
         <li>Honda CMX 1100 DT Rebel — 2024, 169.999 kr., 15.000 km (Horsens)</li>
-        <li>Honda Nt 1100 d — 2024, 175.000 kr., 9.000 km (Lemvig)</li>
+        <li>Yamaha Xj 900 årg 90 — 1990, 8.500 kr., 79.736 km (Tjele)</li>
         <li>Harley-Davidson FLS Softail Slim — 2012, 259.900 kr., 36.000 km (Thorsø)</li>
         <li>Triumph Sprint ST 1050 — 2008, 52.999 kr., 80.300 km (Horsens)</li>
-        <li>Suzuki VZR1800 — 2007, 189.000 kr., 53.000 km (Varde)</li>
+        <li>Hyosung God velkørende custom med lav. KM — 27.800 kr., 6.100 km (Løgstør)</li>
         <li>Harley-Davidson FLHRXS Road King Special — 2019, 329.990 kr., 78.000 km (Thorsø)</li>
         <li>Yamaha XV 1900 — 2006, 139.999 kr., 54.000 km (Horsens)</li>
-        <li>BMW K 100 RT — 1985, 39.800 kr., 122.000 km (Fjerritslev)</li>
+        <li>Suzuki Gsf 650 bandit — 2008, 35.000 kr., 42.000 km (Aabenraa)</li>
         <li>Harley-Davidson FLHC Heritage Classic — 2018, 339.900 kr., 24.000 km (Thorsø)</li>
         <li>Honda GL 1800 Gold Wing — 2007, 129.999 kr., 152.600 km (Horsens)</li>
-        <li>Honda CB 500 Hornet — 2025, 70.000 kr., 987 km (Klarup)</li>
         <li>Suzuki GSF 1200 Bandit — 2000, 34.995 kr., 35.000 km (Thorsø)</li>
         <li>Honda NT 1100 A — 2023, 134.999 kr., 12.000 km (Horsens)</li>
-        <li>Triumph Thruxton 1200 — 2017, 120.000 kr., 12.300 km (Ringkøbing)</li>
         <li>Yamaha FJR 1300 A — 2011, 129.995 kr., 70.267 km (Thorsø)</li>
         <li>Honda XRV 750 Africa Twin — 1996, 57.999 kr., 80.000 km (Horsens)</li>
-        <li>Hyosung God velkørende custom med lav. KM — 27.800 kr., 6.100 km (Løgstør)</li>
         <li>Harley-Davidson VRSCAW V-Rod — 2006, 169.990 kr., 44.554 km (Thorsø)</li>
         <li>Suzuki GSX 1300 R Hayabusa — 2003, 49.999 kr., 56.800 km (Horsens)</li>
-        <li>Suzuki Gsf 650 bandit — 2008, 35.000 kr., 42.000 km (Aabenraa)</li>
         <li>Triumph Rocket lll — 2006, 149.995 kr., 38.000 km (Thorsø)</li>
         <li>Honda NC 700 XA — 2013, 57.999 kr., 11.600 km (Horsens)</li>
         <li>Honda CMX 1100 D Rebel — 2024, 164.995 kr., 0 km (Thorsø)</li>
@@ -992,8 +1011,8 @@
         <li>Harley-Davidson XL1200N Nightster — 2010, 142.990 kr., 24.000 km (Thorsø)</li>
         <li>Harley-Davidson FLFBS Fat Boy — 2018, 359.900 kr., 19.000 km (Thorsø)</li>
         <li>Kawasaki GTR 1400 — 2010, 104.995 kr., 124.000 km (Thorsø)</li>
-        <li>Triumph Tiger 800 — 2015, 89.995 kr., 58.000 km (Thorsø)</li>
         <li>Honda NC 700 — 2012, pris ved henvendelse, 36.000 km (Rødding)</li>
+        <li>Triumph Tiger 800 — 2015, 89.995 kr., 58.000 km (Thorsø)</li>
         <li>Harley-Davidson FXST Softail Standard — 2021, 229.990 kr., 13.000 km (Thorsø)</li>
         <li>Honda CBR 1100 XX — 1999, 39.995 kr., 114.000 km (Thorsø)</li>
         <li>Yamaha FZ6 S — 2007, 34.995 kr., 48.000 km (Thorsø)</li>
@@ -1022,130 +1041,72 @@
         <li>Kawasaki GTR 1400 — 2011, 119.900 kr., 72.314 km (Thorsø)</li>
         <li>Harley-Davidson FXLRS Low Rider S — 2025, 339.900 kr., 2.000 km (Thorsø)</li>
         <li>Yamaha YZF R7 — 2022, 99.995 kr., 29.000 km (Thorsø)</li>
-        <li>Yamaha Xj 900 årg 90 — 1990, 8.500 kr., 79.736 km (Tjele)</li>
-        <li>Honda F6 Valkyrie — 1998, pris ved henvendelse, 30.000 km (Rødding)</li>
-        <li>Kawasaki ZX9R — 2004, 59.995 kr., 39.000 km (Thorsø)</li>
+        <li>Honda CMX 500 Rebel — 2022, 84.995 kr. (Rødding)</li>
         <li>Kawasaki ZZR600 — 1991, 15.999 kr. (Holbæk)</li>
+        <li>Kawasaki ZX9R — 2004, 59.995 kr., 39.000 km (Thorsø)</li>
+        <li>Honda CB 650 R — 2023, 114.995 kr. (Rødding)</li>
+        <li>Honda CMX 500 Rebel — 2022, 84.995 kr. (Rødding)</li>
+        <li>Honda CMX 500 Rebel — 2024, 84.995 kr. (Rødding)</li>
+        <li>Honda — 2025, 609.995 kr. (Rødding)</li>
+        <li>Honda — 2025, 609.995 kr. (Rødding)</li>
+        <li>Honda F6 Valkyrie — 1998, pris ved henvendelse, 30.000 km (Rødding)</li>
         <li>Benelli Tre-K 1130 — 2008, pris ved henvendelse, 70.000 km (Rødding)</li>
+        <li>Honda — 2025, 609.995 kr. (Rødding)</li>
+        <li>Honda NT 1100 D — 2024, 189.800 kr. (Rødding)</li>
         <li>Honda VT 1100 — 1992, pris ved henvendelse, 95.000 km (Rødding)</li>
         <li>Harley-Davidson FLSTF Fat Boy — 2004, 299.800 kr. (Rødding)</li>
-        <li>Yamaha XV 750 Virago — 1995, pris ved henvendelse, 49.000 km (Rødding)</li>
-        <li>Harley-Davidson FLD Switchback — 2013, pris ved henvendelse, 56.000 km (Rødding)</li>
-        <li>Suzuki GSR 750 — 2016, pris ved henvendelse, 25.000 km (Rødding)</li>
-        <li>Triumph Street Triple RS — 2025, pris ved henvendelse, 2.900 km (Rødding)</li>
-        <li>Honda GL 1800 Gold Wing — 2026, pris ved henvendelse, 800 km (Rødding)</li>
-        <li>Harley-Davidson FLHTC Electra Glide Classic — 2012, pris ved henvendelse, 51.000 km (Rødding)</li>
-        <li>Suzuki GSX 1300 R Hayabusa — 2021, pris ved henvendelse, 31.000 km (Rødding)</li>
-        <li>BMW R 1200 — 2005, pris ved henvendelse, 98.000 km (Rødding)</li>
-        <li>Harley-Davidson FXBB Bob — 2019, pris ved henvendelse, 19.000 km (Rødding)</li>
-        <li>Honda CBR 650 R E-Clutch — 2026, 129.995 kr. (Farum)</li>
-        <li>BMW K 1200 LT — 2003, pris ved henvendelse, 75.761 km (Thorsø)</li>
-        <li>Honda CMX 500 Rebel — 2022, 84.995 kr. (Rødding)</li>
-        <li>Yamaha Ténéré 700 World Raid T7 — 2026, 179.990 kr. (Roskilde)</li>
-        <li>Kawasaki VN 650 Vulcan S — 2022, pris ved henvendelse, 20.000 km (Thorsø)</li>
-        <li>Honda CB 650 R — 2023, 114.995 kr. (Rødding)</li>
-        <li>BMW S 1000 R — 2020, 159.900 kr. (Farum)</li>
-        <li>Kawasaki VN 2000 — 2007, pris ved henvendelse, 82.800 km (Thorsø)</li>
-        <li>Honda CMX 500 Rebel — 2022, 84.995 kr. (Rødding)</li>
-        <li>Triumph Daytona 955i bike — 2005, 64.995 kr. (Horsens)</li>
-        <li>Honda CRF 1100 L Africa Twin — 2023, pris ved henvendelse, 13.000 km (Thorsø)</li>
-        <li>Honda CMX 500 Rebel — 2024, 84.995 kr. (Rødding)</li>
-        <li>BMW R 1300 GS — 2024, 269.900 kr. (Ølgod)</li>
-        <li>Harley-Davidson FXSTBI Night Train — 2004, pris ved henvendelse, 26.000 km (Thorsø)</li>
-        <li>Honda — 2025, 609.995 kr. (Rødding)</li>
-        <li>Aprilia RS 457 — 2024, 94.995 kr. (Nørresundby)</li>
-        <li>Honda — 2025, 609.995 kr. (Rødding)</li>
-        <li>Honda CB 1000 R — 2010, 74.900 kr. (Skive)</li>
-        <li>Honda — 2025, 609.995 kr. (Rødding)</li>
-        <li>MV Agusta Turismo Velose 800 Lusso — 2021, 149.900 kr. (Svenstrup J)</li>
-        <li>Honda NT 1100 D — 2024, 189.800 kr. (Rødding)</li>
-        <li>Suzuki VZ 1600 Marauder — 2005, 109.900 kr. (Herning)</li>
         <li>Honda GL 1800 Gold Wing — 2023, 575.000 kr. (Rødding)</li>
-        <li>Kawasaki Z 650 — 1979, 53.780 kr. (Tylstrup)</li>
         <li>Honda CBR 1000 RR Fireblade — 2024, 369.995 kr. (Rødding)</li>
-        <li>Triumph Trident 660 Cosmic Yellow — 2026, 104.495 kr. (Nørresundby)</li>
         <li>Honda CBR 650 R — 2024, 124.995 kr. (Rødding)</li>
-        <li>Kawasaki ZX6R — 1996, 27.900 kr. (Skive)</li>
         <li>Honda NX 500 — 2024, 89.995 kr. (Rødding)</li>
-        <li>Aprilia Tuono 660 Factory — 2023, 149.995 kr. (Nørresundby)</li>
         <li>Honda CMX 1100 T Rebel — 2024, 179.995 kr. (Rødding)</li>
-        <li>Royal Enfield Continental GT 650 Apex Grey — 2024, 86.999 kr. (Sæby)</li>
         <li>Honda CRF 1000 L Africa Twin DCT — 2024, 204.995 kr. (Rødding)</li>
-        <li>Yamaha XV 1900 — 2016, 239.900 kr. (Svenstrup J)</li>
         <li>Honda CB 650 R — 2023, 114.995 kr. (Rødding)</li>
-        <li>Triumph Tiger 800 XCX Lucerne Blue — 2019, 94.900 kr. (Nørresundby)</li>
         <li>Honda CMX 500 Rebel — 2024, 84.995 kr. (Rødding)</li>
-        <li>Kawasaki Z 900 — 2026, 129.600 kr. (Skive)</li>
         <li>Honda CB 500 — 2024, 84.995 kr. (Rødding)</li>
-        <li>Triumph Trident 660 Stone Gray — 2026, 99.995 kr. (Nørresundby)</li>
+        <li>Yamaha XV 750 Virago — 1995, pris ved henvendelse, 49.000 km (Rødding)</li>
         <li>Honda — 2025, 609.995 kr. (Rødding)</li>
-        <li>Honda CB 650 RC — 2026, 119.995 kr. (Skive)</li>
         <li>Honda CMX 500 Rebel — 2024, 84.995 kr. (Rødding)</li>
-        <li>Suzuki GSX 750 F — 1998, 28.990 kr. (Horsens)</li>
         <li>Honda CMX 500 Rebel — 2024, 84.995 kr. (Rødding)</li>
-        <li>Ducati Monster 821 — 2017, 89.900 kr. (Ølgod)</li>
         <li>Honda CMX 1100 D Rebel — 2024, 184.995 kr. (Rødding)</li>
-        <li>Kawasaki Versys 1100 — 2026, 194.995 kr. (Skive)</li>
+        <li>Harley-Davidson FLD Switchback — 2013, pris ved henvendelse, 56.000 km (Rødding)</li>
         <li>Honda CMX 1100 D Rebel — 2024, 184.995 kr. (Rødding)</li>
-        <li>Suzuki DL 1000 V-Strom — 2018, 79.900 kr. (Farum)</li>
         <li>Honda XL 750 Transalp — 2024, 144.995 kr. (Rødding)</li>
-        <li>Triumph Daytona 660 — 2026, 129.995 kr. (Nørresundby)</li>
         <li>Honda NT 1100 A — 2024, 169.800 kr. (Rødding)</li>
-        <li>Suzuki GSR 750 — 2014, 71.900 kr. (Skive)</li>
         <li>Honda NT 1100 A — 2024, 169.800 kr. (Rødding)</li>
-        <li>Yamaha Tracer 700 — 2018, 59.900 kr. (Nørresundby)</li>
         <li>Honda CBR 600 RR — 2026, 179.995 kr. (Rødding)</li>
-        <li>Suzuki GSX 600 F — 2000, 19.900 kr. (Skive)</li>
         <li>Honda GL 1800 Gold Wing — 2023, 575.000 kr. (Rødding)</li>
-        <li>Suzuki GSX 1300 R Hayabusa — 2012, 116.900 kr. (Svenstrup J)</li>
         <li>Honda CMX 1100 D Rebel — 2024, 184.995 kr. (Rødding)</li>
-        <li>Yamaha Ténéré 700 — 2025, 142.990 kr. (Roskilde)</li>
         <li>Honda GL 1800 Gold Wing — 2025, 609.995 kr. (Rødding)</li>
-        <li>Yamaha Ténéré 700 World Raid T7 — 2026, 179.990 kr. (Roskilde)</li>
         <li>Honda CBR 650 R — 2024, 124.995 kr. (Rødding)</li>
-        <li>Suzuki DL 650 V-Strom — 2025, 92.500 kr. (Skive)</li>
         <li>Honda NT 1100 A — 2024, 169.800 kr. (Rødding)</li>
-        <li>BMW K 1200 GT — 2006, 99.800 kr. (Tylstrup)</li>
         <li>Honda CRF 1100 L — 2026, 269.995 kr. (Rødding)</li>
-        <li>Honda XL 750 Transalp E-Clutch — 2026, 149.995 kr. (Skive)</li>
         <li>Honda CMX 500 Rebel — 2024, 84.995 kr. (Rødding)</li>
-        <li>Honda CB 1000 GT — 2026, 199.995 kr. (Skive)</li>
+        <li>Suzuki GSR 750 — 2016, pris ved henvendelse, 25.000 km (Rødding)</li>
         <li>Honda CMX 1100 D Rebel — 2024, 184.995 kr. (Rødding)</li>
-        <li>Royal Enfield Continental GT 650 Dux Deluxe — 2024, 86.999 kr. (Sæby)</li>
         <li>Honda CMX 1100 D Rebel — 2024, 184.995 kr. (Rødding)</li>
-        <li>Kawasaki VN 650 Vulcan S — 2026, 107.900 kr. (Skive)</li>
         <li>Honda NX 500 — 2024, 89.995 kr. (Rødding)</li>
-        <li>Kawasaki Z 650 RS — 2024, 87.500 kr. (Skive)</li>
         <li>Honda XL 750 Transalp — 2024, 139.995 kr. (Rødding)</li>
-        <li>Kawasaki Z 1000 R — 2019, 129.990 kr. (Sunds)</li>
         <li>Honda CRF 1100 L — 2026, 259.995 kr. (Rødding)</li>
-        <li>Triumph Scrambler 900 — 2026, 159.900 kr. (Nørresundby)</li>
         <li>Honda NC 750 XA — 2024, 105.000 kr. (Rødding)</li>
-        <li>Honda CBR 1000 RR Fireblade — 2007, 99.900 kr. (Herning)</li>
-        <li>Honda NT 1100 A — 2023, 164.995 kr. (Farum)</li>
         <li>Honda NC 750 XA — 2024, 105.000 kr. (Rødding)</li>
-        <li>BMW R 1200 R — 2015, 124.900 kr. (Farum)</li>
+        <li>Triumph Street Triple RS — 2025, pris ved henvendelse, 2.900 km (Rødding)</li>
         <li>Honda NX 500 — 2024, 89.995 kr. (Rødding)</li>
-        <li>Honda NC 750 XAD — 2023, 96.900 kr. (Svenstrup J)</li>
         <li>Honda CBR 650 R — 2024, 124.995 kr. (Rødding)</li>
-        <li>Yamaha Ténéré 700 — 2026, 142.990 kr. (Roskilde)</li>
         <li>Honda CMX 1100 T Rebel — 2024, 179.995 kr. (Rødding)</li>
-        <li>Triumph Daytona 660 Cosmic Yellow Sapphire Black — 2026, 129.995 kr. (Nørresundby)</li>
+        <li>Honda GL 1800 Gold Wing — 2026, pris ved henvendelse, 800 km (Rødding)</li>
         <li>Honda CRF 1100 L Africa — 2024, 224.995 kr. (Rødding)</li>
-        <li>Suzuki GSX-8S — 2026, 95.999 kr. (Skive)</li>
         <li>Honda CBR 650 R — 2024, 124.995 kr. (Rødding)</li>
-        <li>BMW F 800 ST — 2012, 59.500 kr. (Skive)</li>
         <li>Honda NT 1100 D — 2024, 189.800 kr. (Rødding)</li>
-        <li>BMW S 1000 R — 2017, 129.900 kr. (Ølgod)</li>
         <li>Honda NC 750 XA — 2024, 105.000 kr. (Rødding)</li>
-        <li>Honda CB 1000 Hornet — 2026, 139.995 kr. (Skive)</li>
         <li>Honda NC 750 X — 2024, 105.000 kr. (Rødding)</li>
-        <li>BSA Lightning 650 Classic Bike — 1969, 115.000 kr. (Horsens)</li>
         <li>Honda NT 1100 A — 2023, 169.800 kr. (Rødding)</li>
         <li>Honda — 2025, 609.995 kr. (Rødding)</li>
+        <li>Harley-Davidson FLHTC Electra Glide Classic — 2012, pris ved henvendelse, 51.000 km (Rødding)</li>
         <li>Honda CBR 1000 RR-R — 2024, 444.995 kr. (Rødding)</li>
         <li>Honda NX 500 — 2024, 89.995 kr. (Rødding)</li>
         <li>Honda NC 750 — 2024, 84.995 kr. (Rødding)</li>
+        <li>Suzuki GSX 1300 R Hayabusa — 2021, pris ved henvendelse, 31.000 km (Rødding)</li>
         <li>Honda GL 1800 Gold Wing — 2024, 599.995 kr. (Rødding)</li>
         <li>Honda CBR 650 R — 2024, 124.995 kr. (Rødding)</li>
         <li>Honda GL 1800 Gold Wing — 2025, 609.995 kr. (Rødding)</li>
@@ -1153,6 +1114,7 @@
         <li>Honda NX 500 — 2024, 89.995 kr. (Rødding)</li>
         <li>Honda CMX 1100 D Rebel — 2024, 184.995 kr. (Rødding)</li>
         <li>Honda CB 500 XA — 2024, 79.995 kr. (Rødding)</li>
+        <li>BMW R 1200 — 2005, pris ved henvendelse, 98.000 km (Rødding)</li>
         <li>Honda CMX 500 Rebel — 2022, 84.995 kr. (Rødding)</li>
         <li>Honda NT 1100 A — 2023, 169.800 kr. (Rødding)</li>
         <li>Honda CB 1000 R — 2024, 199.995 kr. (Rødding)</li>
@@ -1165,9 +1127,66 @@
         <li>Honda XL 750 Transalp — 2024, 139.995 kr. (Rødding)</li>
         <li>Honda NX 500 — 2024, 89.995 kr. (Rødding)</li>
         <li>Honda CB 650 R — 2023, 114.995 kr. (Rødding)</li>
+        <li>Harley-Davidson FXBB Bob — 2019, pris ved henvendelse, 19.000 km (Rødding)</li>
         <li>Honda CMX 1100 Rebel — 2024, 164.995 kr. (Rødding)</li>
         <li>Honda CB 650 R — 2023, 114.995 kr. (Rødding)</li>
+        <li>Honda CBR 650 R E-Clutch — 2026, 129.995 kr. (Farum)</li>
+        <li>BMW K 1200 LT — 2003, pris ved henvendelse, 75.761 km (Thorsø)</li>
         <li>Honda CRF 1100 LD Africa Twin — 2020, pris ved henvendelse, 200 km (Rødding)</li>
+        <li>Yamaha Ténéré 700 World Raid T7 — 2026, 179.990 kr. (Roskilde)</li>
+        <li>Kawasaki VN 650 Vulcan S — 2022, pris ved henvendelse, 20.000 km (Thorsø)</li>
+        <li>BMW S 1000 R — 2020, 159.900 kr. (Farum)</li>
+        <li>Kawasaki VN 2000 — 2007, pris ved henvendelse, 82.800 km (Thorsø)</li>
+        <li>Triumph Daytona 955i bike — 2005, 64.995 kr. (Horsens)</li>
+        <li>Honda CRF 1100 L Africa Twin — 2023, pris ved henvendelse, 13.000 km (Thorsø)</li>
+        <li>Honda CBR 1000 RR Fireblade — 2007, 99.900 kr. (Herning)</li>
+        <li>BMW R 1300 GS — 2024, 269.900 kr. (Ølgod)</li>
+        <li>Harley-Davidson FXSTBI Night Train — 2004, pris ved henvendelse, 26.000 km (Thorsø)</li>
+        <li>Aprilia RS 457 — 2024, 94.995 kr. (Nørresundby)</li>
+        <li>Honda CB 1000 R — 2010, 74.900 kr. (Skive)</li>
+        <li>MV Agusta Turismo Velose 800 Lusso — 2021, 149.900 kr. (Svenstrup J)</li>
+        <li>Suzuki VZ 1600 Marauder — 2005, 109.900 kr. (Herning)</li>
+        <li>Kawasaki Z 650 — 1979, 53.780 kr. (Tylstrup)</li>
+        <li>Triumph Trident 660 Cosmic Yellow — 2026, 104.495 kr. (Nørresundby)</li>
+        <li>Kawasaki ZX6R — 1996, 27.900 kr. (Skive)</li>
+        <li>Aprilia Tuono 660 Factory — 2023, 149.995 kr. (Nørresundby)</li>
+        <li>Royal Enfield Continental GT 650 Apex Grey — 2024, 86.999 kr. (Sæby)</li>
+        <li>Yamaha XV 1900 — 2016, 239.900 kr. (Svenstrup J)</li>
+        <li>Triumph Tiger 800 XCX Lucerne Blue — 2019, 94.900 kr. (Nørresundby)</li>
+        <li>Kawasaki Z 900 — 2026, 129.600 kr. (Skive)</li>
+        <li>Triumph Trident 660 Stone Gray — 2026, 99.995 kr. (Nørresundby)</li>
+        <li>Honda CB 650 RC — 2026, 119.995 kr. (Skive)</li>
+        <li>Suzuki GSX 750 F — 1998, 28.990 kr. (Horsens)</li>
+        <li>Ducati Monster 821 — 2017, 89.900 kr. (Ølgod)</li>
+        <li>Kawasaki Versys 1100 — 2026, 194.995 kr. (Skive)</li>
+        <li>Suzuki DL 1000 V-Strom — 2018, 79.900 kr. (Farum)</li>
+        <li>Triumph Daytona 660 — 2026, 129.995 kr. (Nørresundby)</li>
+        <li>Suzuki GSR 750 — 2014, 71.900 kr. (Skive)</li>
+        <li>Yamaha Tracer 700 — 2018, 59.900 kr. (Nørresundby)</li>
+        <li>Suzuki GSX 600 F — 2000, 19.900 kr. (Skive)</li>
+        <li>Suzuki GSX 1300 R Hayabusa — 2012, 116.900 kr. (Svenstrup J)</li>
+        <li>Yamaha Ténéré 700 — 2025, 142.990 kr. (Roskilde)</li>
+        <li>Yamaha Ténéré 700 World Raid T7 — 2026, 179.990 kr. (Roskilde)</li>
+        <li>Suzuki DL 650 V-Strom — 2025, 92.500 kr. (Skive)</li>
+        <li>BMW K 1200 GT — 2006, 99.800 kr. (Tylstrup)</li>
+        <li>Honda XL 750 Transalp E-Clutch — 2026, 149.995 kr. (Skive)</li>
+        <li>Honda CB 1000 GT — 2026, 199.995 kr. (Skive)</li>
+        <li>Royal Enfield Continental GT 650 Dux Deluxe — 2024, 86.999 kr. (Sæby)</li>
+        <li>Kawasaki VN 650 Vulcan S — 2026, 107.900 kr. (Skive)</li>
+        <li>Kawasaki Z 650 RS — 2024, 87.500 kr. (Skive)</li>
+        <li>Kawasaki Z 1000 R — 2019, 129.990 kr. (Sunds)</li>
+        <li>Triumph Scrambler 900 — 2026, 159.900 kr. (Nørresundby)</li>
+        <li>Honda NT 1100 A — 2023, 164.995 kr. (Farum)</li>
+        <li>BMW R 1200 R — 2015, 124.900 kr. (Farum)</li>
+        <li>Honda NC 750 XAD — 2023, 96.900 kr. (Svenstrup J)</li>
+        <li>Yamaha Ténéré 700 — 2026, 142.990 kr. (Roskilde)</li>
+        <li>Triumph Daytona 660 Cosmic Yellow Sapphire Black — 2026, 129.995 kr. (Nørresundby)</li>
+        <li>Suzuki GSX-8S — 2026, 95.999 kr. (Skive)</li>
+        <li>BMW F 800 ST — 2012, 59.500 kr. (Skive)</li>
+        <li>BMW S 1000 R — 2017, 129.900 kr. (Ølgod)</li>
+        <li>Honda CB 1000 Hornet — 2026, 139.995 kr. (Skive)</li>
+        <li>BSA Lightning 650 Classic Bike — 1969, 115.000 kr. (Horsens)</li>
+        <li>Triumph Bonneville T 120 Black Jet Black — 2027, 189.900 kr. (Nørresundby)</li>
         <li>Harley-Davidson FLHX Glide — 2007, 219.400 kr. (Tylstrup)</li>
         <li>Harley-Davidson FLTRXS Road Glide Special — 2017, 349.400 kr. (Tylstrup)</li>
         <li>BSA A65 Hornet Classic Bike — 1967, 100.000 kr. (Horsens)</li>
@@ -1178,7 +1197,6 @@
         <li>Suzuki GSX-8R — 2026, 109.999 kr. (Svenstrup J)</li>
         <li>Triumph Street Triple RS — 2017, 79.900 kr. (Ølgod)</li>
         <li>Suzuki SV-7 GX — 2026, 99.995 kr. (Ølgod)</li>
-        <li>Triumph Bonneville T 120 Black Jet Black — 2027, 189.900 kr. (Nørresundby)</li>
         <li>Honda NT 1100 A — 2023, pris ved henvendelse (Horsens)</li>
         <li>Triumph Bonneville T 120 C Classic Bike — 1964, 130.000 kr. (Horsens)</li>
         <li>Honda XL 1000 VA — 2007, pris ved henvendelse (Næstved)</li>
@@ -1278,17 +1296,17 @@
   </div>
 </footer>
 
-<script defer src="js/security.js"></script>
-<script defer src="js/supabase-config.js"></script>
-<script defer src="js/supabase-api.js"></script>
-<script defer src="js/icons.js"></script>
-<script defer src="js/bike-art.js"></script>
-<script defer src="js/data.js"></script>
-<script defer src="js/store.js"></script>
-<script defer src="js/maaling.js"></script>
-<script defer src="js/backend-bridge.js"></script>
-<script defer src="js/sortering.js"></script>
-<script defer src="js/components.js"></script>
+<script defer src="js/security.js?v=75d404c8"></script>
+<script defer src="js/supabase-config.js?v=75d404c8"></script>
+<script defer src="js/supabase-api.js?v=75d404c8"></script>
+<script defer src="js/icons.js?v=75d404c8"></script>
+<script defer src="js/bike-art.js?v=75d404c8"></script>
+<script defer src="js/data.js?v=75d404c8"></script>
+<script defer src="js/store.js?v=75d404c8"></script>
+<script defer src="js/maaling.js?v=75d404c8"></script>
+<script defer src="js/backend-bridge.js?v=75d404c8"></script>
+<script defer src="js/sortering.js?v=75d404c8"></script>
+<script defer src="js/components.js?v=75d404c8"></script>
 <!-- Ingen separat js/facet.js: siden hydrerer sig selv med samme moenster som
      js/maerke.js bruger til maerke-*.html, bare filtreret paa type/koerekort/
      landsdel/model i stedet for maerke. koerekortForListing/passerKoerekort
@@ -1383,5 +1401,20 @@
   if (mount2) wireFavoriteButtons(mount2);
   document.documentElement.setAttribute('data-fa-hydreret', '1');
 });</script>
+<!--cookie:start-->
+<dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
+  <div class="cookie-modal-indhold">
+    <h2 id="cookie-modal-titel">Vi bruger cookies</h2>
+    <p>Bikerbasen bruger <strong>nødvendige cookies</strong> for at få siden til at fungere — dem kan du ikke fravælge, og de bruges ikke til at følge dig.</p>
+    <p>Vi vil desuden gerne bruge <strong>valgfrie cookies til statistik</strong>, så vi kan se, hvad der virker på siden. Dem starter vi kun, hvis du siger ja.</p>
+    <p class="cookie-modal-note">Du kan altid skifte mening. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+    <div class="cookie-modal-actions">
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-necessary-only" autofocus>Kun nødvendige</button>
+      <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-accept-all">Accepter alle</button>
+    </div>
+  </div>
+</dialog>
+<script>try{if(!localStorage.getItem("bb_cookie_consent")){var d=document.getElementById("cookie-banner");if(d&&d.showModal){d.showModal();}else if(d){d.setAttribute("open","");}}}catch(e){}</script>
+<!--cookie:end-->
 </body>
 </html>
