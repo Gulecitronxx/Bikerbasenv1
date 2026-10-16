@@ -1212,6 +1212,57 @@ function modelRaekke(facet, items, ctx){
           <span class="fa-model-tekst"><strong>${esc(e.brand)} ${esc(e.model)}</strong><span>${e.chip.n !== null ? `${nSpan(`model:${e.brand}|${e.model}`, e.chip.n)} indekseret` : esc(modelOrd(e))}</span></span></a></li>`).join('')}</ul>
     </section>`;
 }
+/* "Udforsk <type> efter behov" (billede 8: "Udforsk typer inden for sport-motorcykler").
+   Billedet deler Sport op i undertyper. Dem har data ikke (type er ét felt), så kortene deles i
+   stedet efter ÆGTE søgeintentioner, der kan måles: kørekort, pris, årgang, kilometer, landsdel.
+   Hvert kort: foto fra en annonce i netop det udsnit (ellers typeillustrationen), ét tal og ét link,
+   begge fra samme filter (ctx.link). Et kort, der ikke deler udvalget (n = 0 eller alle), udelades,
+   og kommer der under to kort, udelades hele sektionen. */
+function udforskBehov(facet, items, ctx){
+  if (!['type', 'region', 'kombi'].includes(facet.kind) || items.length < 4) return '';
+  const tot = items.length;
+  const foto = sub => {
+    const m = sub.filter(l => l.photoUrls && l.photoUrls[0]);
+    const f = m.find(l => l.source?.domaene !== 'mcsyd.dk') || m[0];
+    return f ? f.photoUrls[0] : null;
+  };
+  const fallback = facet.kind === 'type' ? facet.id : facet.kind === 'kombi' ? facet.typeId : null;
+  const kort = [];
+  const tilfoej = (titel, tekst, extra, noegle, sub) => {
+    if (sub.length < 1 || sub.length >= tot) return;
+    const l = ctx.link(extra);
+    kort.push({ titel, tekst, noegle, href: l.href, n: l.n, antal: sub.length, foto: foto(sub) });
+  };
+  const nyereAar = I_AAR - 5;
+  tilfoej('Til A2-kørekort', `Oplyst effekt inden for A2-grænsen på 35 kW (ca. ${A2_MAX_HK} hk). Tjek altid vægt og registreringsattest.`,
+    { koerekort: 'A2' }, 'kk:A2', items.filter(l => passerKoerekort(l, 'A2')));
+  const priser = items.filter(l => { const p = tilTal(l.price); return p !== null && p > 0; });
+  const trin = PRIS_TRIN.find(p => { const a = priser.filter(l => tilTal(l.price) <= p).length; return a >= 2 && a < tot; });
+  if (trin) tilfoej(`Under ${tal(trin)} kr.`, `Annoncer med en oplyst pris på højst ${tal(trin)} kr. Annoncer uden pris er ikke med.`,
+    { priceMax: trin }, `pris:${trin}`, priser.filter(l => tilTal(l.price) <= trin));
+  tilfoej(`Fra ${nyereAar} og nyere`, `Årgang ${nyereAar} eller nyere ud fra det, annoncen oplyser.`,
+    { yearMin: nyereAar }, `aar:${nyereAar}`, items.filter(l => { const y = tilTal(l.year); return y !== null && y > 1900 && y >= nyereAar; }));
+  const kmTrin = [10000, 30000].find(k => { const a = items.filter(l => { const v = tilTal(l.km); return v !== null && v >= 0 && v <= k; }).length; return a >= 2 && a < tot; });
+  if (kmTrin) tilfoej(`Under ${tal(kmTrin)} km`, 'Annoncer med en oplyst kilometerstand under grænsen. Annoncer uden km er ikke med.',
+    { kmMax: kmTrin }, `km:${kmTrin}`, items.filter(l => { const v = tilTal(l.km); return v !== null && v >= 0 && v <= kmTrin; }));
+  if (facet.kind !== 'region'){
+    const pr = new Map(); for (const l of items) if (l.region) pr.set(l.region, (pr.get(l.region) || 0) + 1);
+    const top = [...pr.entries()].sort((a, b) => b[1] - a[1])[0];
+    if (top && pr.size > 1) tilfoej(`I ${top[0]}`, 'Den landsdel, hvor flest af annoncerne står.', { regions: [top[0]] }, `region:${top[0]}`, items.filter(l => l.region === top[0]));
+  }
+  if (kort.length < 2) return '';
+  const hvadEt = facet.kind === 'type' ? fraseEt(facet) : 'annonce';
+  const hvad = facet.kind === 'type' ? frase(facet) : 'annoncer';
+  const h = facet.kind === 'type' ? `Udforsk ${esc(String(facet.label).toLowerCase())}-motorcykler efter behov` : `Udforsk ${frase(facet)} efter behov`;
+  return `<section class="section fa-sektion fa-udforsk-vrap">
+      <h2 class="fa-h2">${h}</h2>
+      <ul class="fa-udforsk">${kort.slice(0, 4).map(k => `<li><a href="${k.href}">
+          <span class="fa-udforsk-foto">${k.foto ? `<img src="${esc(k.foto)}" alt="" width="240" height="180" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
+            : fallback ? `<img src="img/type/${esc(fallback)}.webp" alt="" width="456" height="342" loading="lazy" decoding="async">` : `<span class="fa-model-ikon">${IKON('bike')}</span>`}</span>
+          <span class="fa-udforsk-tekst"><strong>${k.titel}</strong><span>${k.tekst}</span>
+            <span class="fa-udforsk-link">${k.n !== null ? `Se ${nSpan(k.noegle, k.n)} ${ordSpan(k.n, hvadEt, hvad)}` : 'Se i søgningen'} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></span></span></a></li>`).join('')}</ul>
+    </section>`;
+}
 /* Kørekortsidernes tre info-bokse + "næste skridt"-boks (billede 7). */
 function kkBokse(facet){
   const k = KK_BOKSE[facet.id];
@@ -1596,6 +1647,7 @@ ${header}
       </div>`}
     </section>
 
+    ${udforskBehov(facet, items, ctx)}
     ${erKk || ['region', 'budget'].includes(facet.kind) ? typeFliser(facet, typer, ctx) : ''}
     ${boksKk}
     ${facet.kind === 'by' ? '' : modelRaekke(facet, items, ctx)}
@@ -1801,7 +1853,7 @@ ${footer}
     el.textContent = n.toLocaleString('da-DK');
     const ord = el.parentElement && el.parentElement.querySelector('[data-fa-ord]');
     if (ord) ord.textContent = n === 1 ? ord.dataset.faEt : ord.dataset.faFl;
-    const maal = el.closest('.fa-rel-chip, .fa-typer li, .fa-modeller li, .brand-facet-raekke a');
+    const maal = el.closest('.fa-rel-chip, .fa-typer li, .fa-modeller li, .fa-udforsk li, .brand-facet-raekke a');
     if (maal) maal.hidden = n === 0;
   });
   const note = document.getElementById('facet-note');
