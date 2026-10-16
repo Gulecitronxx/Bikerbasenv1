@@ -230,7 +230,9 @@ function lavBackend(opts = {}){
         return json(route, 200, []);
       }
       const sti = p.replace('/storage/v1/object/', '');
-      tilstand.uploads.push({ sti, stoerrelse: (req.postDataBuffer() || Buffer.alloc(0)).length, type: req.headers()['content-type'] });
+      const raa = req.postDataBuffer() || Buffer.alloc(0);
+      const del = /content-type:\s*(image\/[a-z0-9.+-]+)/i.exec(raa.toString('latin1', 0, Math.min(raa.length, 600)));
+      tilstand.uploads.push({ sti, stoerrelse: raa.length, type: del ? del[1].toLowerCase() : req.headers()['content-type'] });
       return json(route, 200, { Key: sti, Id: uuid() });
     }
     if (p.startsWith('/functions/v1/')) return json(route, 200, { talt: true });

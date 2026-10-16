@@ -1101,7 +1101,12 @@ async function sikkertKald(fn){
   catch (err){ return { data: null, error: err || new Error('Failed to fetch') }; }
 }
 
+let _lokalUdgivet = false;
+let _udgiver = false;   // dobbeltklik / Enter to gange må ikke give to annoncer (tjekkene før `disabled` er asynkrone)
+
 async function publishListing(){
+  if (_udgiver) return;
+  _udgiver = true;
   _oprettetId = null;
   try {
     await udgivTrin();
@@ -1118,6 +1123,9 @@ async function publishListing(){
       nextBtn.textContent = editingId ? 'Gem ændringer' : 'Udgiv annonce';
     }
     toast('Annoncen kunne ikke gemmes: ' + escapeHTML(fejlTekst(err)), { type: 'error' });
+  } finally {
+    /* Låsen slippes kun, hvis intet blev oprettet — ellers venter vi på videresendelsen. */
+    if (!_oprettetId && !_lokalUdgivet) _udgiver = false;
   }
 }
 
@@ -1148,6 +1156,7 @@ async function udgivTrin(){
       photos: Math.max(3, uploadedPhotos.length || 4),
       seller: sellerFromUser(user),
     };
+    _lokalUdgivet = true;
     Store.addMyListing(newListing);
     Store.clearDraft();
     toast('Din annonce er udgivet (gemt lokalt)');
