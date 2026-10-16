@@ -225,11 +225,12 @@ const facetReserveStil = tom => ` style="min-height:${FACET_RESERVE_H}px${tom ? 
 
 function facetTomMarkup(frase, soegUrl){
   const h = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const Q = String.fromCharCode(34);   // udgiv.js tolker attributter med dobbelt anførselstegn i alle sider som statiske referencer; en dynamisk værdi i scriptet må ikke ligne en
   return '<div class="empty-state" style="flex:1 0 100%;grid-column:1/-1;min-width:0">'
     + '<h3>Ingen ' + h(frase) + ' til salg lige nu</h3>'
     + '<p>Vi har ingen annoncer, der matcher denne kategori i øjeblikket. Adressen bliver stående — kig forbi igen, eller søg i hele udvalget.</p>'
     + '<a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg alle motorcykler</a>'
-    + (soegUrl ? '<a href="' + h(soegUrl) + '" class="btn btn-outline" style="margin-top:16px;">Søg i alle ' + h(frase) + '</a>' : '')
+    + (soegUrl ? '<a href=' + Q + h(soegUrl) + Q + ' class=' + Q + 'btn btn-outline' + Q + ' style=' + Q + 'margin-top:16px;' + Q + '>Søg i alle ' + h(frase) + '</a>' : '')
     + '</div>';
 }
 

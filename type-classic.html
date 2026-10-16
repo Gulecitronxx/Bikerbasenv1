@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-wrVmuxyfF7Uo7tA2+RaySl0+uU57BdwBhzJoVt7EeUA=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-YVTwEm/La1/QB2ln1nAdRHqwjVJzKObQCT7mRouzQCU=' 'sha256-DmWzSOMpkIcOy4VA9EHok9gtcl4t61dxlOLlzosE9xU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Classic/Veteran-motorcykler — Bikerbasen</title>
 <meta name="description" content="6 annoncer — se hele udvalget af motorcykler på Bikerbasen i stedet.">
@@ -515,11 +515,12 @@ try{
   const reserveretH = mount.getBoundingClientRect().height;
   const facetTomMarkup = function facetTomMarkup(frase, soegUrl){
   const h = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const Q = String.fromCharCode(34);   // udgiv.js tolker attributter med dobbelt anførselstegn i alle sider som statiske referencer; en dynamisk værdi i scriptet må ikke ligne en
   return '<div class="empty-state" style="flex:1 0 100%;grid-column:1/-1;min-width:0">'
     + '<h3>Ingen ' + h(frase) + ' til salg lige nu</h3>'
     + '<p>Vi har ingen annoncer, der matcher denne kategori i øjeblikket. Adressen bliver stående — kig forbi igen, eller søg i hele udvalget.</p>'
     + '<a href="soegning.html" class="btn btn-primary" style="margin-top:16px;">Søg alle motorcykler</a>'
-    + (soegUrl ? '<a href="' + h(soegUrl) + '" class="btn btn-outline" style="margin-top:16px;">Søg i alle ' + h(frase) + '</a>' : '')
+    + (soegUrl ? '<a href=' + Q + h(soegUrl) + Q + ' class=' + Q + 'btn btn-outline' + Q + ' style=' + Q + 'margin-top:16px;' + Q + '>Søg i alle ' + h(frase) + '</a>' : '')
     + '</div>';
 };
   const reserver = () => { mount.style.minHeight = Math.max(340, Math.ceil(reserveretH)) + 'px'; };
