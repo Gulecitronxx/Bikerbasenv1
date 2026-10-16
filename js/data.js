@@ -1017,11 +1017,18 @@ const LISTINGS = SHOW_DEMO_DATA ? buildListings() : [];
    det ene kort — den stoppede hele render-løkken, så en side med 383
    annoncer viste to. Den slags fejl ligner et tomt katalog, ikke en
    undtagelse. */
+/* W6: "ikke oplyst" er også NaN, Infinity og tekst, der ikke er et tal. `n == null` lod NaN slippe igennem
+   til "NaN kr." — det samme tomrum, som null siger ærligt. erTal() er den ene port. */
+function erTal(n){
+  if (typeof n === 'number') return Number.isFinite(n);
+  if (typeof n === 'string') return n.trim() !== '' && Number.isFinite(Number(n));
+  return false;
+}
 function formatPrice(n){
-  return n == null ? 'Pris ikke oplyst' : n.toLocaleString('da-DK') + ' kr.';
+  return !erTal(n) ? 'Pris ikke oplyst' : Number(n).toLocaleString('da-DK') + ' kr.';
 }
 function formatKm(n){
-  return n == null ? 'Km ikke oplyst' : n.toLocaleString('da-DK') + ' km';
+  return !erTal(n) ? 'Km ikke oplyst' : Number(n).toLocaleString('da-DK') + ' km';
 }
 /* De to her sagde "— ccm" og "—", mens naboerne tre linjer oppe sagde
    "Pris ikke oplyst" og "Km ikke oplyst" om nøjagtig det samme tomrum. På
@@ -1033,13 +1040,18 @@ function formatKm(n){
    de også bruges alene på et kort, hvor der ikke står nogen etiket ved
    siden af — disse to gør ikke. */
 function formatCcm(n){
-  return n == null ? 'Ikke oplyst' : n.toLocaleString('da-DK') + ' ccm';
+  return !erTal(n) ? 'Ikke oplyst' : Number(n).toLocaleString('da-DK') + ' ccm';
 }
 function formatPower(hk){
-  return hk ? hk + ' hk' : 'Ikke oplyst';
+  return erTal(hk) && Number(hk) > 0 ? Number(hk) + ' hk' : 'Ikke oplyst';
 }
+/* W6: en annonce uden dato (egne annoncer uden createdAt, indekserede uden første-set) får INGEN tekst her — tom
+   streng, så kaldstedet lader linjen falde væk. `new Date(null)` er 1970 ("674 måneder siden") og
+   `new Date('ugyldig')` er NaN ("NaN måneder siden"); begge er opdigtet tekst om en dato, vi ikke har. */
 function timeAgoDa(iso){
+  if (iso == null || iso === '') return '';
   const then = new Date(iso).getTime();
+  if (!Number.isFinite(then)) return '';
   const now = Date.now();
   const diffMs = Math.max(0, now - then);
   const mins = Math.floor(diffMs / 60000);

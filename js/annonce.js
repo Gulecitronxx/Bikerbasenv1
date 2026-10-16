@@ -108,6 +108,35 @@ function talDa(n){
                     annoncen), navnet gør ikke.
    Telefonnummer og kontaktflade er stadig bag login for begge — det er DÉR
    skrabning og uønskede henvendelser kommer fra, ikke fra sælgertypen. */
+/* W6: ÉN note om telefonen pr. tilstand — aldrig to, der siger hver sit.
+     knap    der er (eller kan være) et nummer bag knappen "Vis telefonnummer"
+     intet   sælgeren har ikke oplyst telefon (ingen knap)
+     afvist  vi spurgte, og svaret var null: sælgeren viser ikke sit nummer (skellet mellem "intet" og "vil ikke
+             vise" er sælgerens privatsag, derfor tales der ikke om, hvilket af dem det er)
+   Ingen af dem lover en besked: Bikerbasen leverer ingen beskeder endnu. */
+function telefonNoteHTML(tilstand){
+  if (tilstand === 'knap'){
+    return '<b>Beskeder til sælger kan endnu ikke sendes via Bikerbasen.</b> Har sælgeren valgt at vise sit telefonnummer, kan du se det med knappen nedenfor.';
+  }
+  if (tilstand === 'afvist'){
+    return '<b>Sælgeren viser ikke sit telefonnummer.</b> Annoncen kan ikke kontaktes via Bikerbasen endnu.';
+  }
+  return '<b>Sælgeren har ikke oplyst telefon.</b> Annoncen kan ikke kontaktes via Bikerbasen endnu.';
+}
+/* Efter et null-svar fra backend: noten OMSKRIVES (ikke endnu en note ved siden af), knappen fjernes, og
+   handlingsbjælken fjernes, fordi dens eneste knap peger på den fjernede "Vis telefonnummer". */
+function telefonAfvist(note, knap, bjaelke){
+  if (note){
+    const span = note.querySelector ? note.querySelector('span') : null;
+    if (span) span.innerHTML = telefonNoteHTML('afvist'); else note.innerHTML = Icon.info + '<span>' + telefonNoteHTML('afvist') + '</span>';
+  }
+  if (knap) knap.remove();
+  if (bjaelke){
+    bjaelke.remove();
+    if (typeof document !== 'undefined' && document.body && document.body.classList) document.body.classList.remove('har-actionbar');
+  }
+}
+
 function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig }){
   const s = listing.seller || {};
   const erForhandler = !!s.isDealer;
@@ -234,7 +263,7 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
       <div class="sidebar-card">
         ${identitet}
         <!-- F2-006: den ærlige tekst står FØR enhver handling; der er ingen besked-formular. -->
-        <p class="seller-locked-note">${Icon.info}<span><b>Beskeder til sælger kan endnu ikke sendes via Bikerbasen.</b> ${telefon || telefonMulig ? 'Har sælgeren valgt at vise sit telefonnummer, kan du se det med knappen nedenfor.' : 'Sælgeren har ikke valgt at vise et telefonnummer, så der er ingen kontaktvej via Bikerbasen på denne annonce.'}</span></p>
+        <p class="seller-locked-note" id="seller-telefon-note">${Icon.info}<span>${telefonNoteHTML(telefon || telefonMulig ? 'knap' : 'intet')}</span></p>
         <div class="contact-actions">
           ${telefon || telefonMulig ? `<button type="button" class="btn btn-primary btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
           ${profilKnapHTML}
@@ -449,7 +478,7 @@ const anChips = (liste) => liste.filter(Boolean).map(c => `<span class="an-chip"
 function anNoegletal(l, hk){
   const felter = [
     l.km != null   ? [Icon.gauge,    formatKm(l.km), 'Kørt'] : null,
-    l.year != null ? [Icon.calendar, String(l.year), 'Årgang'] : null,
+    erTal(l.year) ? [Icon.calendar, String(l.year), 'Årgang'] : null,
     Number(l.ccm) > 0 ? [Icon.engine, formatCcm(l.ccm), 'Motor'] : null,
     hk ? [AN_IKON.bolt, formatPower(hk), 'Effekt'] : null,
   ].filter(Boolean);
@@ -1354,10 +1383,7 @@ function renderListing(){
       const { data, error } = await db.hentSaelgerTelefon(listing.id);
       const nr = String(data || '').trim();
       if (!error && nr){ visNummer(nr); return; }
-      const note = document.createElement('p');
-      note.className = 'seller-locked-note';
-      note.innerHTML = `${Icon.info}<span>Sælgeren viser ikke sit telefonnummer her. Bikerbasen kan endnu ikke sende beskeder til sælgeren, så der er ingen kontaktvej via os på denne annonce.</span>`;
-      revealBtn.replaceWith(note);
+      telefonAfvist(document.getElementById('seller-telefon-note'), revealBtn, document.getElementById('listing-actionbar'));
     });
 
     /* F2-002 / F2-006 (w5): HER STOD EN BETALINGSKNAP OG EN KONTAKTFORMULAR.

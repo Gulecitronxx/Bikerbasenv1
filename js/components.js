@@ -824,8 +824,8 @@ function kortFakta(l){
     : (l.isDealer ? ((l.seller && l.seller.name) || 'Forhandler') : 'Privat sælger');
   return {
     ext, titel, hk, ccm, sted, stedTitle, kilde, domaene, saelgerType,
-    aar: l.year == null ? null : l.year,
-    km: l.km == null ? null : l.km,
+    aar: erTal(l.year) ? Number(l.year) : null,   // W6: NaN/tekst er "ikke oplyst", ikke "NaN"
+    km: erTal(l.km) ? Number(l.km) : null,
     type: l.type ? typeLabel(l.type).split('/')[0] : '',   // "Classic/Veteran" -> "Classic": kortet er smalt
     kk: koerekortMaerkat(l),
     ny: ext ? eksternErNy(l) : null,

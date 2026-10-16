@@ -435,12 +435,32 @@ function modelMistetTypeord(row){
   return !!(navn && row.model && !noeglen(row.model).includes(noeglen(navn)));
 }
 
-/* Står "Street" kun i titlen som del af et modelnavn? Så er kildens `type: Street` en fejllæsning. */
-function streetErModelnavn(row){
-  if (typeFraKategoriord(row.type) !== 'naked' || noeglen(row.type) !== 'street') return false;
+/* Står kildens typeord ("Street", "Sport") kun i titlen som del af et beskyttet modelnavn (Street Glide, Sport
+   Glide …)? Så er kildens `type` en fejllæsning af modelnavnet. W6: gjaldt før kun "Street"; en DB-række med
+   `type: Sport` fra "FLSB Sport Glide" blev ved med at være en sportscykel (Critic C-05). */
+function kildetypeErModelnavn(row){
+  const ordet = noeglen(row.type);
+  if (ordet !== 'street' && ordet !== 'sport') return false;
   const navn = modelMedTypeord(row.titel);
-  if (!navn || !/\bstreet\b/i.test(navn)) return false;
-  return !/\bstreet\b/i.test(String(row.titel).replace(new RegExp(MODEL_MED_TYPEORD.source, 'gi'), ' '));
+  const re = new RegExp('\\b' + ordet + '\\b', 'i');
+  if (!navn || !re.test(navn)) return false;
+  return !re.test(String(row.titel).replace(new RegExp(MODEL_MED_TYPEORD.source, 'gi'), ' '));
+}
+const streetErModelnavn = kildetypeErModelnavn;
+
+/* W6: modellen er ikke stedet for typen. "FLHX Street Glide Touring" + type Touring viser typen to gange, og
+   modelnavnet får et suffiks, som ingen kalder modellen. Det SIDSTE ord fjernes, når det er et kategoriord, som
+   rækken allerede viser som sin type (samme type-id). "Sport" og "Street" røres ikke: de er også ægte modelord
+   (ZR-7 Street, MSX 125 Street), og typeFraTitel() tæller dem kun som type til sidst. */
+function fjernTypeSuffiks(model, type){
+  const m = String(model == null ? '' : model).trim();
+  if (!m || !type) return model;
+  const ord = m.split(/\s+/);
+  if (ord.length < 2) return model;
+  const sidste = ord[ord.length - 1].toLowerCase().replace(/[^\p{L}]/gu, '');
+  if (sidste === 'sport' || sidste === 'street') return model;
+  if (typeFraKategoriord(sidste) !== type) return model;
+  return ord.slice(0, -1).join(' ');
 }
 
 /* ---------- Kildens stand -> vores CONDITIONS ----------
@@ -792,6 +812,12 @@ function byggEksternAnnonce(row){
   })();
   /* F-007: tal læst forkert af titlen (ccm = årstal, 1200 læst som 120). */
   const tal = saniterTal({ ccm: row.ccm, hk: row.hk, aargang: row.aargang, tekst: [row.titel, row.model].filter(Boolean).join(' ') });
+  /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og vinder ALTID, undtagen når den er en
+     fejllæsning af et modelnavn (Street/Sport Glide); så kommer typen fra titlen eller model-tabellen (data.js),
+     ikke fra ordet. Beregnes FØR modellen, fordi et gentaget typeord i modelnavnet fjernes mod den. */
+  const typen = typeFraKategoriord(kildetypeErModelnavn(row) ? null : row.type) || typeFraTitel(row.titel || row.model)
+    // F2-008: er "Street" en del af modelnavnet, kommer typen fra model-tabellen (data.js), ikke fra ordet.
+    || (modelMedTypeord(row.titel) ? typeFraStreetModel(row.titel) : null);
   return {
     id: row.id,
     /* Runde 6 (D6-F7): akronymer, kilden skrev med smaa bogstaver og crawleren
@@ -805,7 +831,7 @@ function byggEksternAnnonce(row){
 
        Er der intet modelnavn, står der kun mærket. Det er sandt, og det er
        kildens hul — ikke noget vi skal fylde ud. */
-    model: (() => {
+    model: fjernTypeSuffiks((() => {
       // Runde 7 (D7-S4): stoej klippes ogsaa af de raekker, der ligger.
       // Runde 13 (R13-5): og maerket fjernes, hvis modellen gentager det.
       const maerke = brand === 'Ukendt' ? (maerkeAkronym(row.maerke) || '') : brand;
@@ -821,7 +847,7 @@ function byggEksternAnnonce(row){
       // Kildens egen skrivemåde i titlen slår stiens (MT-07, ikke Mt-07).
       const hit = String(row.titel || '').match(new RegExp(sti.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[\s-]+/g, '[\\s-]*'), 'i'));
       return hit ? hit[0] : sti;
-    })(),
+    })(), typen),
 
     /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og
        vinder ALTID. Titel-scanneren nedenunder er kun nødudgangen for rækker,
@@ -829,9 +855,7 @@ function byggEksternAnnonce(row){
        fallbacken bare stille. Kildens felt slår en scanner, også når de
        dækker næsten lige mange (285 mod 283): hans kommer fra kilden, min
        gætter sig frem fra en tekststreng. */
-    type: typeFraKategoriord(streetErModelnavn(row) ? null : row.type) || typeFraTitel(row.titel || row.model)
-      // F2-008: er "Street" en del af modelnavnet, kommer typen fra model-tabellen (data.js), ikke fra ordet.
-      || (modelMedTypeord(row.titel) ? typeFraStreetModel(row.titel) : null),
+    type: typen,
 
     /* Titlens anden linje — Bilbasens "54 Altitude 5d" under "Jeep Avenger".
        Hos os "Cruiser" under "Yamaha XV 750 Virago". 285 af 332 rækker har
@@ -1156,25 +1180,54 @@ function harBrugForEksterne(){
    Vi skriver ikke, HVOR mange der mangler. Det ved vi ikke — det er hele
    pointen med, at hentningen fejlede. Et gættet tal ville være den samme fejl
    én gang til, bare med flere decimaler. */
+/* W6: et TOMT svar er også et afbrud. Databasen svarede "ok", men uden en eneste annonce — det ser fra siden ud
+   som et tomt marked ("Ingen Honda til salg", nul på hver flise), men Bikerbasen har hundredvis. Sider med egen
+   ærlig fejltilstand (soegning.html, annonce.html) tegner den selv; her får resten (forside, mærke-, type-,
+   region-, model-, kørekort-, budget- og byside) den samme: sig det, og tilbyd "Prøv igen". */
+const SIDER_MED_LAGERLISTE = /^(?:index|(?:maerke|type|region|model|koerekort|budget|by|kombi)-[^/]+)$/;
+// Cloudflare serverer maerke-honda.html som /maerke-honda — med eller uden .html er samme side.
+function erSideMedLagerliste(navn){ return SIDER_MED_LAGERLISTE.test(String(navn || '').replace(/\.html$/, '')); }
+function lagerErTomt(status, antal){
+  const s = status || {};
+  const svaret = [s.egne, s.eksterne].filter(v => v === 'ok');
+  const ingenFejl = [s.egne, s.eksterne].every(v => v === 'ok' || v === 'sprunget-over');
+  return ingenFejl && svaret.length > 0 && !(antal > 0);
+}
+function dataafbrudIndhold(status, tomt){
+  if (tomt){
+    return {
+      hvad: 'Vi fik ingen annoncer fra databasen.',
+      resten: 'Det kan være en midlertidig fejl, og det betyder ikke, at der ingen motorcykler er til salg. '
+        + 'Tallene og listerne på siden dækker derfor ikke det, der faktisk er til salg.',
+    };
+  }
+  const hvad = status.eksterne === 'fejlet' && status.egne === 'fejlet'
+    ? 'Vi kunne ikke hente annoncerne fra databasen.'
+    : status.eksterne === 'fejlet'
+      ? 'Vi kunne ikke hente de annoncer, Bikerbasen har indekseret hos andre forhandlere.'
+      : 'Vi kunne ikke hente de annoncer, Bikerbasen selv hoster.';
+  return {
+    hvad,
+    resten: 'Du ser derfor ikke hele lageret, og hverken antallet af annoncer eller '
+      + 'tallene ved filtrene dækker det, der faktisk er til salg.',
+  };
+}
 function meldDataafbrud(){
-  const fejlet = window.DATA_STATUS.eksterne === 'fejlet' || window.DATA_STATUS.egne === 'fejlet';
+  const status = window.DATA_STATUS;
+  const fejlet = status.eksterne === 'fejlet' || status.egne === 'fejlet';
+  const tomt = !fejlet && erSideMedLagerliste(sidensNavn())
+    && lagerErTomt(status, typeof Store !== 'undefined' && Store.getAllListings ? Store.getAllListings().length : 1);
   const vaert = document.getElementById('main-content') || document.querySelector('main');
   const gammel = document.getElementById('data-afbrud');
-  if (!fejlet || !vaert){ gammel?.remove(); return; }
+  if (!(fejlet || tomt) || !vaert){ gammel?.remove(); return; }
   if (gammel) return;
 
   const p = document.createElement('div');
   p.id = 'data-afbrud';
   p.className = 'data-afbrud';
   p.setAttribute('role', 'status');
-  const hvad = window.DATA_STATUS.eksterne === 'fejlet' && window.DATA_STATUS.egne === 'fejlet'
-    ? 'Vi kunne ikke hente annoncerne fra databasen.'
-    : window.DATA_STATUS.eksterne === 'fejlet'
-      ? 'Vi kunne ikke hente de annoncer, Bikerbasen har indekseret hos andre forhandlere.'
-      : 'Vi kunne ikke hente de annoncer, Bikerbasen selv hoster.';
-  p.innerHTML = `<strong>${hvad}</strong> `
-    + 'Du ser derfor ikke hele lageret, og hverken antallet af annoncer eller '
-    + 'tallene ved filtrene dækker det, der faktisk er til salg. '
+  const { hvad, resten } = dataafbrudIndhold(status, tomt);
+  p.innerHTML = `<strong>${hvad}</strong> ${resten} `
     + '<button type="button" class="data-afbrud-igen">Prøv igen</button>';
   p.querySelector('.data-afbrud-igen').addEventListener('click', () => location.reload());
   vaert.prepend(p);

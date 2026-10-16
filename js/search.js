@@ -778,7 +778,7 @@ function rowSpecsHTML(l){
     : escapeHTML(formatCcm(l.ccm)) + (l.power ? ` <span class="row-hk">· ${escapeHTML(formatPower(l.power))}</span>` : '');
   const celle = (label, vaerdi) => `<div class="row-spec"><dt>${label}</dt><dd>${vaerdi}</dd></div>`;
   return `<dl class="row-specs">
-    ${celle('Årgang', l.year == null ? UOPLYST_CELLE : escapeHTML(String(l.year)))}
+    ${celle('Årgang', !erTal(l.year) ? UOPLYST_CELLE : escapeHTML(String(l.year)))}
     ${celle('Kilometer', l.km == null ? UOPLYST_CELLE : escapeHTML(formatKm(l.km)))}
     ${celle('Motor', motor)}
     ${celle('Kørekort', `<span class="${kk.kode ? 'row-kk' : 'row-unknown'}" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kkCelleTekst(kk))}</span>`)}
@@ -862,7 +862,7 @@ function listingRowHTML(l, i){
     ${rowSpecsHTML(l)}
     <div class="row-end">
       <p class="row-price">${escapeHTML(formatPrice(l.price))}</p>
-      <p class="row-when">${escapeHTML(timeAgoDa(l.createdAt))}</p>
+      ${timeAgoDa(l.createdAt) ? `<p class="row-when">${escapeHTML(timeAgoDa(l.createdAt))}</p>` : ''}
       <div class="row-tools">
         ${isOwnListing(l) ? '' : `<button type="button" class="row-tool row-fav ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
         <button type="button" class="row-tool ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
@@ -1026,7 +1026,7 @@ function swipeCardHTML(l, stackPos){
     <div class="swipe-card-body">
       <div class="swipe-card-price">${formatPrice(l.price)}</div>
       <h3 class="swipe-card-title">${titel}</h3>
-      <div class="swipe-card-meta"><span>${Icon.calendar}${l.year == null ? 'Årgang ikke oplyst' : escapeHTML(String(l.year))}</span><span>${Icon.gauge}${formatKm(l.km)}</span><span>${Icon.engine}${formatCcm(l.ccm)}</span></div>
+      <div class="swipe-card-meta"><span>${Icon.calendar}${!erTal(l.year) ? 'Årgang ikke oplyst' : escapeHTML(String(l.year))}</span><span>${Icon.gauge}${formatKm(l.km)}</span><span>${Icon.engine}${formatCcm(l.ccm)}</span></div>
       <div class="swipe-card-fod">
         <span class="swipe-card-loc">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
         <span class="rk-kilde" title="${f.ext ? 'Annoncen ligger hos ' + escapeHTML(f.kilde) + '. Bikerbasen viser den, men handlen sker hos kilden.' : 'Annoncen ligger på Bikerbasen.'}">${kilde.ikon}<span>${kilde.tekst}</span></span>

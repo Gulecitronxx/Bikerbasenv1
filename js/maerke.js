@@ -81,7 +81,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* Lokalt (SHOW_DEMO_DATA) ligger der demoannoncer i lageret; de findes
        ikke i drift og tæller ikke med — byggetrinnet kender dem heller ikke. */
     const demoIder = new Set((typeof LISTINGS !== 'undefined' ? LISTINGS : []).map(l => String(l.id)));
-    const alle = Store.getAllListings().filter(l => mkNorm(l.brand) === maerke && !demoIder.has(String(l.id)));
+    const ikkeDemo = Store.getAllListings().filter(l => !demoIder.has(String(l.id)));
+    const alle = ikkeDemo.filter(l => mkNorm(l.brand) === maerke);
+    /* W6: er HELE lageret tomt (databasen svarede, men uden en eneste annonce), ved vi ikke, om der er nogen
+       <mærket> — "Ingen <mærket> til salg lige nu" ville være en påstand om noget, vi ikke har set. Den
+       forudtegnede side står urørt, og backend-broen skriver den ærlige fejl med "Prøv igen" øverst
+       (meldDataafbrud i js/backend-bridge.js). */
+    const lagerTomt = ikkeDemo.length === 0;
     const sorteret = typeof Sortering !== 'undefined' ? Sortering.sorter(alle.slice(), 'blandet') : alle;
     const frem = mkVaelgFremhaevede(sorteret, MK_FREMHAEVET);
     const fremIder = new Set(frem.map(l => String(l.id)));
@@ -97,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       gridMount.innerHTML = resten.map((l, i) => listingCardHTML(l, i + frem.length)).join('');
       gridMount.hidden = !resten.length;
     }
-    if (!alle.length && fremMount){
+    if (!alle.length && !lagerTomt && fremMount){
       fremMount.innerHTML = `<div class="empty-state">${Icon.search}<h3>Ingen ${escapeHTML(brand)} til salg lige nu</h3>
         <p>Gem en søgning på ${escapeHTML(brand)}, så tæller den nye annoncer, næste gang du kigger.</p>
         <a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary" style="margin-top:16px;">Søg motorcykler</a></div>`;

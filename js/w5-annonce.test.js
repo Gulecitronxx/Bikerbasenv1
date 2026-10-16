@@ -66,7 +66,8 @@ test('indlogget sælgerkort: ingen betalingsknap, ingen kontaktformular, ærlig 
   for (const opts of [{}, { telefon: '12345678' }, { telefonMulig: true }]){
     const html = saelger(egen(), opts);
     for (const re of FORBUDT) assert.doesNotMatch(html, re, `${re} i sælgerkortet (${JSON.stringify(opts)})`);
-    assert.match(html, /Beskeder til sælger kan endnu ikke sendes via Bikerbasen/);
+    // W6: ÉN ærlig tekst pr. tilstand — med knap: ingen besked kan sendes; uden telefon: ikke oplyst, ingen kontaktvej.
+    assert.match(html, opts.telefon || opts.telefonMulig ? /Beskeder til sælger kan endnu ikke sendes via Bikerbasen/ : /Annoncen kan ikke kontaktes via Bikerbasen endnu/);
     // Teksten står FØR første knap/link (handlingerne).
     assert.ok(html.indexOf('Beskeder til sælger kan endnu ikke') < html.indexOf('contact-actions'), 'teksten skal stå før handlingerne');
   }
@@ -78,7 +79,7 @@ test('telefonknap kun når sælgeren har et nummer / kan have valgt at vise det'
   assert.match(saelger(egen(), { telefonMulig: true }), /id="reveal-phone-btn"/);
   // Uden nummer siges det ærligt, og der lokkes ikke med "skriv i stedet".
   const uden = saelger(egen());
-  assert.match(uden, /ingen kontaktvej/);
+  assert.match(uden, /Sælgeren har ikke oplyst telefon\.<\/b> Annoncen kan ikke kontaktes via Bikerbasen endnu\./);
   assert.doesNotMatch(uden, /Skriv i stedet/i);
 });
 

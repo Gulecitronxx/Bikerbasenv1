@@ -456,7 +456,7 @@ function renderAgents(){
         <a href="soegning.html?${escapeHTML(a.query)}" class="btn btn-outline btn-sm">Vis</a>
         <button type="button" class="icon-btn ${a.notify ? '' : 'muted'}" data-notify="${a.id}"
                 aria-label="${a.notify ? 'Slå notifikationer fra' : 'Slå notifikationer til'}"
-                title="${a.notify ? 'Notifikationer slået til' : 'Notifikationer slået fra'}">${a.notify ? Icon.bell : Icon.bellOff}</button>
+                title="${a.notify ? 'Markeret til besked. Der sendes endnu ingen e-mails om nye indekserede annoncer.' : 'Ikke markeret til besked'}">${a.notify ? Icon.bell : Icon.bellOff}</button>
         <button type="button" class="icon-btn" data-del-agent="${a.id}" aria-label="Slet søgeagent">${Icon.trash}</button>
       </div>
     </div>`;
@@ -486,7 +486,7 @@ function renderPlanCard(){
       <ul class="plan-perks" style="margin-top:12px;">
         <li>${Icon.checkCircle} Opret så mange annoncer du vil</li>
         <li>${Icon.checkCircle} Gem favoritter og søgeagenter</li>
-        <li>${Icon.checkCircle} Skriv direkte til sælgere</li>
+        <li>${Icon.checkCircle} Se sælgerens telefonnummer, når sælgeren har valgt at vise det</li>
       </ul>
       <p style="font-size:13px; color:var(--color-fg-muted); margin:12px 0 0;">Bikerbasen er gratis for alle i øjeblikket — både private og forhandlere.</p>`;
     return;
@@ -513,7 +513,7 @@ function renderPlanCard(){
         <li>${Icon.checkCircle} Forhandler-badge og fremhævet placering</li>
       </ul>
       <button type="button" class="btn btn-primary btn-block" id="plan-upgrade" style="margin-top:14px;">Bliv forhandler</button>
-      <p style="font-size:12px; color:var(--color-fg-muted); margin:10px 0 0;">Sikker betaling via Stripe. Du kan opsige når som helst.</p>`;
+      <p style="font-size:12px; color:var(--color-fg-muted); margin:10px 0 0;">Betaling via Stripe. Du kan opsige når som helst.</p>`;
   }
 
   // Rigtig betaling: send brugeren til Stripes checkout. Webhooken saetter
