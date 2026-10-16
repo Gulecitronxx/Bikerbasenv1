@@ -41,7 +41,13 @@ test('F-002: "ny" gælder kun, når tallene ikke modsiger det', () => {
   // Kilden siger ny, tallene er enige eller tavse.
   assert.equal(ny({ kildeStand: 'ny', km: null, year: 2026 }), true);
   assert.equal(ny({ kildeStand: 'ny', km: 0, year: 2026 }), true);
-  assert.equal(ny({ kildeStand: 'ny', km: 500, year: 2023 }), true, 'grænsen: 500 km og 2023 (= i år − 3) tæller stadig');
+  assert.equal(ny({ kildeStand: 'ny', km: 50, year: 2023 }), true, 'grænsen: 50 km og 2023 (= i år − 3) tæller stadig som ny');
+  assert.equal(ny({ kildeStand: 'ny', km: 51, year: 2025 }), null, '51-500 km: demomaskine, intet mærke');
+  assert.equal(ny({ kildeStand: 'ny', km: 420, year: 2025 }), null, 'demomaskine med 420 km får hverken Fabriksny eller Brugt');
+  assert.equal(ny({ kildeStand: 'ny', km: 500, year: 2025 }), null);
+  assert.equal(ny({ kildeStand: 'ny', km: 0, year: 0 }), true, 'årgang 0 er fejldata (ukendt), ikke en modsigelse');
+  assert.equal(ny({ kildeStand: 'ny', km: null, year: 1 }), null, 'årgang 1 er ukendt, så intet bevis');
+  assert.equal(ny({ kildeStand: 'ny', km: '4.500', year: 2026 }), false, '"4.500" er 4500 km');
   assert.equal(ny({ kildeStand: 'ny', km: null, year: 2023 }), true, 'MC Syds 2023-lager');
   // Modsagt: Suzuki VZR1800 2007 med 53.000 km, BMW K 100 RT 1985 med 122.000 km, Triumph Daytona T100R 1971.
   assert.equal(ny({ kildeStand: 'ny', km: 53000, year: 2007 }), false);
@@ -116,7 +122,15 @@ const TAL_CASES = [
   ['Harley 1923 ccm bevares', { ccm: 1923, hk: 90, aargang: 2022, tekst: 'Harley-Davidson Road King' }, 1923, 90],
   ['Hayabusa 1340/190 bevares', { ccm: 1340, hk: 190, aargang: 2015, tekst: 'Suzuki Hayabusa' }, 1340, 190],
   ['2-takt 125 cm3 med 37 hk (0,296) bevares', { ccm: 125, hk: 37, aargang: 1998, tekst: 'x' }, 125, 37],
-  ['hk/ccm > 0,30 med urealistisk hk nulstiller hk', { ccm: 600, hk: 400, aargang: 2010, tekst: 'x' }, 600, null],
+  ['hk/ccm over grænsen med urealistisk hk nulstiller hk', { ccm: 600, hk: 400, aargang: 2010, tekst: 'x' }, 600, null],
+  ['Honda XR 80 årg 80 bevares (modellen hedder tallet)', { ccm: 80, hk: 6, aargang: 1980, tekst: 'Honda XR 80 årg 80' }, 80, 6],
+  ['Honda C90 årg 90 bevares', { ccm: 90, hk: 7, aargang: 1990, tekst: 'Honda C90 årg 90' }, 90, 7],
+  ['Honda CB 50 årg 50 bevares', { ccm: 50, hk: 4, aargang: 1975, tekst: 'Honda CB 50 årg 50' }, 50, 4],
+  ['Honda Monkey 125 bevares', { ccm: 125, hk: 9, aargang: 2020, tekst: 'Honda Monkey 125' }, 125, 9],
+  ['RS125 racer 125 ccm / 55 hk bevares', { ccm: 125, hk: 55, aargang: 2003, tekst: 'Aprilia RS 125' }, 125, 55],
+  ['NSR50 50 ccm / 20 hk bevares', { ccm: 50, hk: 20, aargang: 1995, tekst: 'Honda NSR 50' }, 50, 20],
+  ['Kawasaki H2R 998 ccm / 310 hk bevares', { ccm: 998, hk: 310, aargang: 2019, tekst: 'Kawasaki Ninja H2R' }, 998, 310],
+  ['125 ccm med 70 hk (0,56) er urealistisk: ccm nulstilles', { ccm: 125, hk: 70, aargang: 2005, tekst: 'x' }, null, 70],
   ['ukendte tal er stadig ukendte', { ccm: null, hk: null, aargang: null, tekst: '' }, null, null],
 ];
 for (const [navn, inp, ccm, hk] of TAL_CASES){
@@ -142,10 +156,10 @@ test('F-007: normalizeExternalListing bruger reglerne på de tre navngivne rækk
 
 test('F-007: crawlerens spejl og browserens regel giver det samme svar (drift-test)', () => {
   assert.equal(typeof crawler.renseUrealistiskeTal, 'function');
-  const ccms = [null, 0, 12, 44, 45, 50, 90, 120, 125, 399, 500, 600, 749, 1200, 1340, 1832, 1923, 1990, 1992, 2000, 2026, 2458];
-  const hks = [null, 0, 3, 14, 35, 47, 80, 98, 125, 190, 250, 251, 400];
+  const ccms = [null, 0, 12, 44, 45, 50, 80, 90, 120, 125, 399, 500, 600, 749, 1200, 1340, 1832, 1923, 1990, 1992, 2000, 2026, 2458];
+  const hks = [null, 0, 3, 14, 35, 47, 55, 80, 98, 125, 190, 250, 251, 310, 400];
   const aar = [null, 1990, 1992, 2000, 2027];
-  const tekster = ['', 'Yamaha xj 900 årg 90', 'Kawasaki GPZ 500S årg 1992', 'Triumph Bonneville T 120', 'Honda CB 500 årg. 1992'];
+  const tekster = ['', 'Yamaha xj 900 årg 90', 'Kawasaki GPZ 500S årg 1992', 'Triumph Bonneville T 120', 'Honda CB 500 årg. 1992', 'Honda XR 80 årg 80', 'Honda C90 årg 90', 'Honda CB 50 årg 50'];
   let n = 0;
   for (const ccm of ccms) for (const hk of hks) for (const aargang of aar) for (const tekst of tekster){
     const a = M.saniterTal({ ccm, hk, aargang, tekst });
@@ -163,6 +177,13 @@ test('F-008: model udledes af deeplink-stien, når titlen kun er mærket', () =>
   assert.equal(M.modelFraDeeplink('https://www.guloggratis.dk/annonce/abc/en-flot-mc', 'Honda'), null);
   const l = norm({ titel: 'Honda', maerke: 'Honda', model: null, url: 'https://mcsyd.dk/Produkter/Motorcykel/Brugt/Honda%20GL%201800%20Gold%20Wing/165233' });
   assert.equal(l.model, 'GL 1800 Gold Wing');
+  // Kun MC Syds sti, og stiens mærke skal være rækkens mærke.
+  assert.equal(M.modelFraDeeplink('https://www.guloggratis.dk/annonce/123456', 'Honda'), null);
+  assert.equal(norm({ titel: 'Honda', maerke: 'Honda', model: null, url: 'https://www.guloggratis.dk/annonce/123456' }).model, '');
+  assert.equal(M.modelFraDeeplink('https://mcsyd.dk/Produkter/Motorcykel/Brugt/Suzuki%20GSX%20750/1', 'Honda'), null, 'en Suzuki-sti under mærket Honda');
+  assert.equal(M.modelFraDeeplink('https://mcsyd.dk/Produkter/Motorcykel/Demo/Honda%20VFR%20800/7', 'Honda'), 'VFR 800');
+  assert.equal(M.modelFraDeeplink('https://evil.example/Produkter/Motorcykel/Brugt/Honda%20VFR%20800/7', 'Honda'), null);
+  assert.equal(M.modelFraDeeplink('https://mcsyd.dk/Produkter/Motorcykel/Brugt/Harley%20Davidson%20FLH/7', 'Harley-Davidson'), 'FLH');
   const tom = norm({ titel: 'Honda', maerke: 'Honda', model: null, url: 'https://mcsyd.dk/Produkter/Motorcykel/Brugt/Honda?p=1&m=2' });
   assert.equal(tom.model, '');
 });
@@ -180,9 +201,10 @@ test('F-008: mærket "Ukendt" afledes af stien, når den nævner et kendt mærke
 });
 
 test('F-009: købes/søges-annoncer er ikke til salg', () => {
-  for (const t of ['BSA / Triumph / Norton købes', 'Søges: Honda CB 750', 'Ønskes købt: Kawasaki Z1', 'MC købes kontant'])
+  for (const t of ['BSA / Triumph / Norton købes', 'Søges: Honda CB 750', 'Ønskes købt: Kawasaki Z1', 'Købes: Honda CBR', 'Søges: MT-07', 'Suzuki GSX købes'])
     assert.equal(M.erEfterspoergsel(t), true, t);
-  for (const t of ['Honda CB 500', 'Yamaha XV 750 Virago', 'Triumph Bonneville søger ny ejer', 'Kawasaki Z1 sælges, køber betaler omregistrering', 'Suzuki Intruder'])
+  for (const t of ['Honda CB 500', 'Yamaha XV 750 Virago', 'Triumph Bonneville søger ny ejer', 'Kawasaki Z1 sælges, køber betaler omregistrering', 'Suzuki Intruder',
+                'Honda CBR 600 kan købes med 12 mdr garanti', 'Honda VFR - søges nyt hjem', 'Honda VFR søges ny ejer', 'Søges ny ejer: Honda VFR', 'Honda CBR kan købes', 'MC købes kontant og bytter'])
     assert.equal(M.erEfterspoergsel(t), false, t);
   const liste = [
     norm({ id: 'k', titel: 'BSA / Triumph / Norton købes', maerke: 'BSA', model: null, pris_dkk: null }),
@@ -215,6 +237,15 @@ test('F-011: modeller, der kun adskiller sig på store/små bogstaver og mellemr
   assert.deepEqual([...new Set(omvendt.map(l => l.model))].sort(), modeller);
 });
 
+test('F-011: ved lige antal vinder stavemåden med bindestreg (MT-07), stabilt', () => {
+  const rk = (id, model) => ({ id, brand: 'Yamaha', model });
+  for (const orden of [['MT-07', 'MT 07', 'MT07', 'Mt-07'], ['Mt-07', 'MT07', 'MT 07', 'MT-07']]){
+    const liste = orden.map((m, i) => rk(String(i), m));
+    M.harmoniserStavning(liste);
+    assert.deepEqual([...new Set(liste.map(l => l.model))], ['MT-07']);
+  }
+});
+
 test('F-011: filteret sammenligner mærke og model uden forskel på store/små bogstaver', () => {
   const liste = [norm({ id: 'a', maerke: 'Sym', model: 'Jet 14' }), norm({ id: 'b', maerke: 'Honda', model: 'CB 500' })];
   assert.deepEqual(M.Filtrering.anvendFiltre(liste, { brands: ['SYM'] }).map(l => l.id), ['a']);
@@ -223,18 +254,17 @@ test('F-011: filteret sammenligner mærke og model uden forskel på store/små b
 });
 
 /* ---------------------------------------------------------------- F-010 */
-test('F-010: forhandlerjargon vises som neutral tekst på kortet', () => {
-  assert.equal(M.salgsmarkoerLabel('ENGROS'), 'Handelspris');
+test('F-010: kildens ord vises overalt — kun versalerne pænnes (ENGROS -> Engros), intet nyt ord', () => {
+  assert.equal(M.salgsmarkoerLabel('ENGROS'), 'Engros');
   assert.equal(M.salgsmarkoerLabel('UDEN KLARGØRING'), 'Uden klargøring');
   assert.equal(M.salgsmarkoerLabel('BYTTER GERNE'), 'Bytter gerne');
   assert.equal(M.salgsmarkoerLabel('MED GARANTI'), 'Med garanti');
   const l = norm({ salgsmarkoerer: ['ENGROS', 'UDEN KLARGØRING'], url: 'https://mcsyd.dk/a/1', saelgertype: 'forhandler' });
   const m = M.eksternSalgsmarkoerer(l);
-  assert.equal(m.tekst, 'Handelspris +1');
-  assert.ok(!/ENGROS/.test(m.tekst));
+  assert.equal(m.tekst, 'Engros +1');
   const html = M.listingCardHTML(l, 0);
-  assert.ok(!/ENGROS/.test(html), 'ordet engros står ikke på kortet');
-  assert.match(html, /Handelspris/);
+  assert.ok(!/Handelspris/.test(html), 'ingen opfundet omskrivning');
+  assert.match(html, />Engros \+1</);
 });
 
 /* ---------------------------------------------------------------- F-003 */
@@ -258,6 +288,30 @@ test('F-003: seneste bekræftelse regnes af sidstSet, og lageret kaldes gammelt 
   // Egne annoncer har ingen sidstSet: så står der ingenting (ingen opfundet dato).
   assert.equal(M.senesteBekraeftet([{ id: 'egen' }], nu), null);
   assert.equal(M.senesteBekraeftet([], nu), null);
+});
+
+test('F-003: en sidstSet i fremtiden er ukendt, ikke friskt', () => {
+  const nu = new Date('2026-10-16T12:00:00Z');
+  assert.equal(M.senesteBekraeftet([{ sidstSet: '2026-12-01T12:00:00Z' }], nu), null);
+  assert.equal(M.senesteBekraeftet([{ sidstSet: '2026-12-01T12:00:00Z' }, { sidstSet: '2026-10-10T12:00:00Z' }], nu).datoTekst, '10. okt.');
+});
+
+test('generatorerne: ubevist ny (kilde siger ny, tal hverken bekræfter eller afviser) er hverken ny eller brugt', () => {
+  assert.equal(M.erUbevistNy({ kildeStand: 'ny', km: null, year: null }), true);
+  assert.equal(M.erUbevistNy({ kildeStand: 'ny', km: 420, year: 2025 }), true);
+  assert.equal(M.erUbevistNy({ kildeStand: 'ny', km: 0, year: 2026 }), false);
+  assert.equal(M.erUbevistNy({ kildeStand: 'ny', km: 99000, year: 2007 }), false, 'modsagt = brugt');
+  assert.equal(M.erUbevistNy({ kildeStand: 'brugt' }), false);
+  for (const f of ['build-brand-pages.js', 'build-facet-pages.js']){
+    assert.match(fs.readFileSync(path.join(__dirname, '..', 'scripts', f), 'utf8'), /erUbevistNy/, f);
+  }
+});
+
+test('annoncesidens fabriksny-note siger kun "kilometerstanden er ikke oplyst", når km mangler', () => {
+  const src = fs.readFileSync(path.join(__dirname, 'annonce.js'), 'utf8');
+  assert.match(src, /const kmIkkeOplyst = listing\.km == null/);
+  assert.equal((src.match(/kilometerstanden er derfor ikke oplyst/g) || []).length, 3);
+  assert.equal((src.match(/kmIkkeOplyst/g) || []).length, 4, 'definition + de tre noter');
 });
 
 test('F-003: forside og søgning viser datoen (kildekode-kontrakt)', () => {

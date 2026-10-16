@@ -11,11 +11,11 @@ const FIXTURE = path.join(__dirname, 'fixtures', 'eksterne-raekker-eksempel.json
 
 test('sweep tæller fundene på fixturen', () => {
   const r = sweep(laes(FIXTURE), new Date('2026-10-16T12:00:00Z'));
-  assert.equal(r.antal, 22);
-  assert.equal(r.ny.sigerNy, 5);
+  assert.equal(r.antal, 25);
+  assert.equal(r.ny.sigerNy, 6);
   assert.equal(r.ny.bekraeftet, 2, 'CB 650 R 2026 (MC Syd /Ny/) og CMX 500 Rebel 2023');
   assert.equal(r.ny.modsagt.length, 2, 'VZR1800 2007 og K 100 RT 1985');
-  assert.equal(r.ny.ubevist.length, 1, 'MT-07 uden km og årgang');
+  assert.equal(r.ny.ubevist.length, 2, "MT-07 uden km og årgang, og demomaskinen med 420 km");
   assert.equal(r.tal.ccmNulstillet.length, 3, 'GPZ 500S, XJ 900, T 120');
   assert.equal(r.efterspoergsel.length, 1);
   assert.equal(r.deeplink.maerkeFraStien.length, 1);

@@ -202,7 +202,7 @@ const erNyVare = l => eksternErNy(l) === true;   // F-002: den fælles ny-test (
 function brugtOrd(items, ental, flertal){
   const nye = items.filter(erNyVare).length;
   const en = items.length === 1;
-  if (!nye) return `brugt${en ? ` ${ental}` : `e ${flertal}`}`;
+  if (!nye && !items.some(erUbevistNy)) return `brugt${en ? ` ${ental}` : `e ${flertal}`}`;
   if (nye === items.length) return `fabriksny${en ? ` ${ental}` : `e ${flertal}`}`;
   return en ? ental : flertal;   // blandet lager: intet adjektiv, tallene står i introen
 }

@@ -647,20 +647,27 @@ function markerTvaerkildeDubletter(liste){
 function deeplinkTitel(url){
   let u;
   try { u = new URL(String(url || '')); } catch (e){ return null; }
+  /* Kun MC Syds sti: /Produkter/<x>/(Ny|Brugt|Demo)/<titel>/<id>. Andre kilders stier
+     (fx Gul og Gratis' /annonce/123456) kender vi ikke formen på, og læses ikke. */
+  if (!/^(www\.)?mcsyd\.dk$/i.test(u.hostname)) return null;
   const dele = u.pathname.split('/').filter(Boolean);
-  if (dele.length < 2 || !/^\d+$/.test(dele[dele.length - 1])) return null;
+  if (dele.length !== 5 || !/^produkter$/i.test(dele[0]) || !/^(ny|brugt|demo)$/i.test(dele[2]) || !/^\d+$/.test(dele[4])) return null;
   let t;
-  try { t = decodeURIComponent(dele[dele.length - 2]); } catch (e){ return null; }
+  try { t = decodeURIComponent(dele[3]); } catch (e){ return null; }
   t = t.replace(/\s+/g, ' ').trim();
-  if (!t || /^(ny|brugt|new|used)$/i.test(t)) return null;
-  return t;
+  return t || null;
 }
 function modelFraDeeplink(url, maerke){
   let t = deeplinkTitel(url);
   if (!t) return null;
   const b = String(maerke || '').trim();
-  if (b && t.toLowerCase() === b.toLowerCase()) return null;
-  if (b && t.toLowerCase().startsWith(b.toLowerCase() + ' ')) t = t.slice(b.length).trim();
+  if (!b) return null;
+  /* Stiens mærke skal være rækkens mærke (bindestreg = mellemrum, store/små ens); ellers ingen
+     afledning: en Suzuki-sti under mærket Honda er ikke en Honda-model. */
+  const ord = b.split(/[\s-]+/).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const re = new RegExp('^' + ord.join('[\\s-]+') + '\\s+', 'i');
+  if (!re.test(t)) return null;
+  t = t.replace(re, '').trim();
   t = rensModelStoej(t, null) || '';
   return t || null;
 }
@@ -680,7 +687,7 @@ function maerkeFraDeeplink(url){
   const { m, nok } = kendteMaerker();
   const ord = nok(t).split(' ');
   for (const n of [2, 1]){
-    if (ord.length < n) continue;
+    if (ord.length < n + 1) continue;   // kræver også en model efter mærket
     const hit = m.get(ord.slice(0, n).join(' '));
     if (hit) return hit;
   }
@@ -691,8 +698,8 @@ function maerkeFraDeeplink(url){
    NT 1100 D / Nt 1100 d, XV 750 Virago / Xv 750 virago, CBF 1000 A / CBF 1000A.
    Hver stavemåde var en facetværdi for sig. Nøglen er små bogstaver uden
    mellemrum, bindestreg og punktum; den stavemåde, der er flest af, vinder —
-   ved lighed den med flest versaler, derefter den med mellemrum, derefter
-   alfabetisk (så resultatet ikke afhænger af rækkefølgen). Rører kun streng-
+   ved lighed den med bindestreg (MT-07), derefter flest versaler, derefter den
+   med mellemrum, derefter alfabetisk (så resultatet ikke afhænger af rækkefølgen). Rører kun streng-
    formen: ingen model flettes sammen med en anden. */
 function harmoniserStavning(liste){
   const noegle = s => String(s || '').toLowerCase().replace(/[\s\-.]+/g, '');
@@ -700,7 +707,9 @@ function harmoniserStavning(liste){
   const bedst = (taelling, kendt) => {
     const kand = [...taelling.entries()];
     if (kendt){ const k = kand.find(([v]) => v === kendt); if (k) return k[0]; }
-    kand.sort((a, b) => b[1] - a[1] || versaler(b[0]) - versaler(a[0]) || b[0].length - a[0].length || (a[0] < b[0] ? -1 : 1));
+    const bind = s => (s.includes('-') ? 1 : 0);
+    // Ved lige antal: stavemåden med bindestreg (MT-07), så versaler, så mellemrum, så alfabet.
+    kand.sort((a, b) => b[1] - a[1] || bind(b[0]) - bind(a[0]) || versaler(b[0]) - versaler(a[0]) || b[0].length - a[0].length || (a[0] < b[0] ? -1 : 1));
     return kand[0][0];
   };
   const grupper = (nogleFn, felt, filter) => {

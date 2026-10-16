@@ -805,22 +805,26 @@ function renderExternalListing(listing){
      stedet at motorcyklen er fabriksny AF DEN GRUND km ikke er oplyst, og
      henviser til privatsalgs-noten længere nede — den var før slet ikke
      med for eksterne annoncer (se noten ved sellerTypeNoteHTML nedenfor). */
+  /* Noten siger kun "kilometerstanden er ikke oplyst", når den faktisk ikke er det (w3-data). */
+  const kmIkkeOplyst = listing.km == null;
   const fabriksnyNote = erNy === true
     ? (listing.isDealer
         ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
           + `over nye motorcykler, ikke blandt de brugte.`
-          + `${VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret,' : ','}`
-          + ` og kilometerstanden er derfor ikke oplyst.`
+          + (kmIkkeOplyst
+              ? `${VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret,' : ','}`
+                + ` og kilometerstanden er derfor ikke oplyst.`
+              : (VIS_REKLAMATIONSRET ? ' Du køber med garanti frem for forbrugerkøbelovens reklamationsret.' : ''))
         : listing.saelgertype === 'privat'
           ? `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-            + `over nye motorcykler, ikke blandt de brugte, og kilometerstanden er derfor `
-            + `ikke oplyst. Sælgeren er privat — reklamationsret gælder ikke mellem private, `
+            + `over nye motorcykler, ikke blandt de brugte${kmIkkeOplyst ? ', og kilometerstanden er derfor ikke oplyst' : ''}. `
+            + `Sælgeren er privat — reklamationsret gælder ikke mellem private, `
             + `heller ikke når motorcyklen er ny (se nedenfor).`
           /* Runde 7 (D7-A1): saelgertypen er ikke oplyst af kilden — ingen paastand
              om reklamationsret den ene eller anden vej. */
           : `<b>Det her er en fabriksny motorcykel.</b> Annoncen ligger i ${kilde}s katalog `
-            + `over nye motorcykler, ikke blandt de brugte, og kilometerstanden er derfor `
-            + `ikke oplyst. Spørg sælgeren om garanti- og reklamationsvilkår (se nedenfor).`)
+            + `over nye motorcykler, ikke blandt de brugte${kmIkkeOplyst ? ', og kilometerstanden er derfor ikke oplyst' : ''}. `
+            + `Spørg sælgeren om garanti- og reklamationsvilkår (se nedenfor).`)
     : null;
 
   const hk  = hkEllerNull(listing.power);

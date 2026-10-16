@@ -96,7 +96,8 @@ function facetLinksFor(brand, items){
    ellers hedder det "Honda-motorcykler til salg", og tallene skrives ud hver
    for sig ("97 brugte og 165 fabriksnye"). */
 function nyeAf(items){ return items.filter(l => eksternErNy(l) === true).length; }
-function brugtOrd(items){ return nyeAf(items) ? '' : 'brugte '; }
+// w3-data: ubeviste "ny" (kilden siger ny, tallene hverken bekræfter eller afviser) er hverken nye eller brugte.
+function brugtOrd(items){ return (nyeAf(items) || items.some(erUbevistNy)) ? '' : 'brugte '; }
 /* Runde 7 (D7-M4): "Gul og Gratis, Rydbergs MC, Jensens Motorcykler og MC Syd". */
 function listeJoin(navne){
   const n = navne.map(esc);

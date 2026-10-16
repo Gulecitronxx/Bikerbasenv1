@@ -39,3 +39,24 @@ D-008 afviser det, og det kræver filer uden for mit område. Forslag til ejeren
 
 ## Filer
 Ændret: `js/data.js`, `js/backend-bridge.js` (kun `normalizeExternalListing` og hjælpere), `js/components.js` (kun ny-test, ny-tooltip, salgsmærkat-tekst), `js/filtrering.js`, `js/home.js`, `js/search.js`, `crawler/normalize.js`, `scripts/shared.js`, `scripts/udgiv.js`, `scripts/build-facet-pages.js` (3 linjer), 2 eksisterende tests. Nye: `js/data-kvalitet.test.js`, `scripts/udgiv-kommentarer.test.js`, `scripts/sweep-datakvalitet.js` (+ `.test.js`), `scripts/fixtures/eksterne-raekker-eksempel.json`. Ingen HTML, CSS, package.json eller ?v=/CSP-ændringer. Målt i browser (1440 og 390, lys): 0 overflow på søgning, forside og annonce, ingen konsolfejl.
+
+## Runde 2: rettelser efter Blind Critic (critic-w3-data.md, AFVIS)
+
+| Critic | Rettelse | Bevis |
+|---|---|---|
+| P1-a XR 80 / C90 mistede ccm | "årg NN"-reglen springes over, når ccm-tallet også står i titlen uden for "årg …" (`(?<!\d)NN(?!\d)`): XR 80 årg 80, C90 årg 90, CB 50 bevares; GPZ 500S årg 1992, XJ 900 årg 90 (900 indeholder ikke 90 som selvstændigt tal), T 120 nulstilles stadig. Spejlet i `crawler/normalize.js` (stadig kun ren, ikke-tilkoblet funktion; drift-test over flere tekster/tal). | Tests; browser: "Honda XR 80" viser 80 ccm, 6 hk og **Mulig A1**. |
+| P1/P2-b købes skjulte salg | `erEfterspoergsel`: kun når ordet er titlens start eller slut; afvises efter kan/må/skal/ikke/evt/bør/vil/som og ved "søges ny/nyt ejer/hjem". | Tests: "kan købes med 12 mdr garanti", "søges nyt hjem/ny ejer" = salg; "Købes: Honda CBR", "Søges: MT-07", "Suzuki GSX købes" = efterspørgsel. Browser: CBR 600-annoncen vises i søgningen. |
+| P2-c annonceside-note | `js/annonce.js`: "kilometerstanden er derfor ikke oplyst" står kun når `listing.km == null` (alle tre noter). | Test på kilden (3 forekomster, alle bag `kmIkkeOplyst`). |
+| P2-d "Handelspris" | Omskrivningen er fjernet. Kildens ord vises overalt; kun versaler pænnes (ENGROS -> Engros, samme som annoncesiden altid gjorde). | Test + `annoncekort.test.js` ("Engros +1"); browser: ingen "Handelspris". |
+| P2-e deeplink | Kun `mcsyd.dk/Produkter/*/(Ny|Brugt|Demo)/<titel>/<id>`, og stiens mærke skal være rækkens mærke (bindestreg = mellemrum). | Tests: GoG `/annonce/123456` giver ingen model; Suzuki-sti under Honda giver ingen model; Demo-sti og Harley Davidson/Harley-Davidson virker. |
+| P3 hk/ccm | Grænsen afhænger af størrelse: <=125 ccm 0,50; <500 ccm 0,40; >=500 ccm 0,35. Ved overskridelse som før (hk > 250 nulstilles, ellers ccm). | RS125 55 hk, NSR50 20 hk og H2R 998/310 bevares; 125 cc/70 hk og T 120 nulstilles stadig. |
+| P3 demo | Ny = km <= 50 (`NY_SIKKER_KM`); 51-500 km giver `null` (intet mærke, ingen garanti-note); > 500 = Brugt. | 420 km-maskine: ingen Ny-badge i browser. |
+| P3 årgang 0/1 | Årgang < 1885 er ukendt og indgår hverken som bevis eller modsigelse. | Test. |
+| P3 fremtidig sidstSet | Datoer mere end 1 døgn ude i fremtiden ignoreres (ukendt, aldrig "friskt"). | Test. |
+| P3 modelfoldning | Ved lige antal vinder stavemåden med bindestreg (MT-07), derefter versaler, mellemrum, alfabet; rækkefølgeuafhængigt. | Test med to rækkefølger. |
+| P3 brugte-tal | `erUbevistNy` (data.js); mærke- og facetgeneratorerne skriver ikke "brugte" over et lager med ubeviste "ny" (neutralt ord i stedet). Genererede sider skal stadig genbygges af Orchestratoren. | Test (+ generatorerne refererer funktionen). |
+| P3 "4.500" som streng | km-strenge læses som 4500 ("4.500", "500 km"). | Test. |
+
+`crawler/normalize.js`: kun den rene, ikke-tilkoblede `renseUrealistiskeTal` + drift-testen; crawlerens adfærd og gemte felter er uændrede (ejeren bør vide, at filen er rørt, jf. CLAUDE.md).
+
+Nye bevistal: `npm test` 525/525; `js/data-kvalitet.test.js` 39, `scripts/udgiv-kommentarer.test.js` 9, `scripts/sweep-datakvalitet.test.js` 2 (alle grønne; sweep-fixturen har nu 25 rækker: 6 siger ny, 2 bekræftet, 2 modsagt, 2 ubevist, 3 ccm nulstillet). Browser mod fixture, lys og mørk, 1440 og 390: forside, søgning (inkl. XR 80, CBR 600, Africa Twin demo, MC Syd, SYM, Ny-filter), annonce (VZR1800 = Brugt) og `maerke-honda.html`: 0 overflow (documentElement), 0 konsolfejl. Åbent: `fabriksnyNote` er nu rettet; resten af "åbne punkter" ovenfor gælder uændret (genbyg genererede sider, inline `RUNDE`-noter, Ukendt-facet sidst).

@@ -437,7 +437,7 @@ function browserModules(){
     .map(f => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n;\n');
 
   return new Function('document', 'Store', 'window', 'db',
-    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering, CONDITIONS, FILTER_CONDITIONS, kildeNyStatus, saniterTal, erEfterspoergsel, harmoniserStavning, modelFraDeeplink, maerkeFraDeeplink, senesteBekraeftet, salgsmarkoerLabel, eksternSalgsmarkoerer, maerkeAkronym };')(doc, store, {}, db);
+    src + '\n;return { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering, CONDITIONS, FILTER_CONDITIONS, kildeNyStatus, erUbevistNy, saniterTal, erEfterspoergsel, harmoniserStavning, modelFraDeeplink, maerkeFraDeeplink, senesteBekraeftet, salgsmarkoerLabel, eksternSalgsmarkoerer, maerkeAkronym };')(doc, store, {}, db);
 }
 
 module.exports = { fjernHtmlKommentarer, ROOT, siteUrl, slugify, listingSlug, fetchListings, fetchExternalListings,

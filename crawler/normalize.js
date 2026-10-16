@@ -104,8 +104,10 @@ function parseCcm(raa){
 
      ccm < 45                 -> null
      ccm == årgang            -> null
-     ccm == tallet efter årg  -> null  ("Yamaha xj 900 årg 90")
-     hk/ccm > 0,30            -> hk > 250 nulstilles, ellers ccm.
+     ccm == tallet efter årg  -> null  ("Yamaha xj 900 årg 90"), medmindre tallet også står
+                                 i titlen uden for "årg" (XR 80 årg 80 bevares)
+     hk/ccm > grænse          -> grænse 0,50 (<=125 ccm), 0,40 (<500), 0,35 (>=500);
+                                 hk > 250 nulstilles, ellers ccm.
    Ægte store motorer bevares (GL1800 1832 ccm, Harley 1923 ccm). */
 function renseUrealistiskeTal(t){
   const tal = v => (v == null || v === '' || !Number.isFinite(Number(v)) || Number(v) <= 0) ? null : Number(v);
@@ -115,12 +117,14 @@ function renseUrealistiskeTal(t){
   const tekst = String((t && t.tekst) || '');
   const am = tekst.match(/(?<![\p{L}\d])[aå]rg\.?\s*(\d{2,4})(?!\d)/iu);
   const aargTal = am ? Number(am[1]) : null;
+  const udenAarg = am ? tekst.replace(am[0], ' ') : tekst;
+  const stdIModel = ccm != null && new RegExp('(?<!\\d)' + ccm + '(?!\\d)').test(udenAarg);
   if (ccm != null){
     if (ccm < 45) ccm = null;
     else if (aargang != null && ccm === aargang) ccm = null;
-    else if (aargTal != null && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal))) ccm = null;
+    else if (aargTal != null && !stdIModel && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal))) ccm = null;
   }
-  if (ccm != null && hk != null && hk / ccm > 0.30){
+  if (ccm != null && hk != null && hk / ccm > (ccm <= 125 ? 0.50 : ccm < 500 ? 0.40 : 0.35)){
     if (hk > 250) hk = null; else ccm = null;
   }
   return { ccm, hk };

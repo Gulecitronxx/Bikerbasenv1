@@ -132,22 +132,32 @@ const FILTER_CONDITIONS = ['Ny', ...CONDITIONS];
    vi blindt på det og skrev "Fabriksny" på en Suzuki VZR1800 fra 2007 med 53.000 km.
    BESLUTNING (tærsklerne er ejerens at ændre, her og kun her):
 
-     NY_MAX_KM        = 500   en ny motorcykel har kørt til/fra forhandler, ikke mere
+     NY_SIKKER_KM     = 50    til og med 50 km kaldes den fabriksny
+     NY_MAX_KM        = 500   over 500 km er en "ny" modsagt (= brugt); 51-500 km er
+                              en demo-/forevisningsmaskine: intet mærke, ingen påstand
      NY_MAX_ALDER_AAR = 3     årgang skal være >= indeværende år - 3
+     årgang under 1885 (fejldata som 0 og 1) tæller som ukendt
 
    Svar:
-     true   kilden siger ny, og ingen tal modsiger det, og mindst ét tal (eller
-            kildens egen /Ny/-sti) bekræfter det
+     true   kilden siger ny, og ingen tal modsiger det, km er højst 50, og mindst ét
+            tal (eller kildens egen /Ny/-sti) bekræfter det
      false  kilden siger brugt — ELLER siger ny, men km > 500 / årgang for gammel
             (en modsagt 'ny' er en brugt motorcykel)
      null   kilden siger ny, men vi hverken har km, årgang eller katalogsti at
-            bekræfte det med (Gul og Gratis uden tal): intet mærke, ingen påstand,
-            og ikke "Brugt" heller, for det ved vi heller ikke.
+            bekræfte det med (Gul og Gratis uden tal), eller km er 51-500 (demomaskine):
+            intet mærke, ingen påstand, og ikke "Brugt" heller, for det ved vi ikke.
 
    Rene tal ind, ingen DOM: bruges af kortet, annoncesiden, SEO og generatorerne
    via eksternErNy() i js/components.js. `nu` (årstal) kan gives i tests; ellers i år. */
+const NY_SIKKER_KM = 50;
 const NY_MAX_KM = 500;
 const NY_MAX_ALDER_AAR = 3;
+/* Kilden siger ny, men vi kan ikke bekræfte det: bruges af generatorerne, så "brugte" ikke
+   skrives over et lager, hvor nogle annoncer blot er ubeviste. */
+function erUbevistNy(l){
+  const ord = String((l && l.kildeStand) || '').toLowerCase().trim();
+  return (ord === 'ny' || ord === 'new') && kildeNyStatus(l) === null;
+}
 function kildeNyStatus(l, nu){
   const aar = nu == null ? new Date().getFullYear() : nu;
   const ord = String((l && l.kildeStand) || '').toLowerCase().trim();
@@ -158,11 +168,17 @@ function kildeNyStatus(l, nu){
   else if (ord === 'brugt' || ord === 'used') kilde = false;
   else kilde = vedSti;               // nødudgang for rækker uden stand-felt
   if (kilde !== true) return kilde;  // false eller null
-  const tal = v => (v == null || v === '' || !Number.isFinite(Number(v))) ? null : Number(v);
+  const tal = v => {
+    if (v == null || v === '') return null;
+    const n = typeof v === 'string' ? Number(v.replace(/\s*km$/i, '').replace(/\./g, '').replace(',', '.')) : Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
   const km = tal(l.km);
-  const aargang = tal(l.year);
+  const a = tal(l.year);
+  const aargang = (a != null && a >= 1885 && a <= 2100) ? a : null;   // 0 og 1 er fejldata, ikke en årgang
   if (km != null && km > NY_MAX_KM) return false;
   if (aargang != null && aargang < aar - NY_MAX_ALDER_AAR) return false;
+  if (km != null && km > NY_SIKKER_KM) return null;                     // demomaskine
   return (km != null || aargang != null || vedSti === true) ? true : null;
 }
 
@@ -176,13 +192,16 @@ function kildeNyStatus(l, nu){
    fejler, hvis de to kopier driver):
      ccm < 45                           -> ukendt (findes ikke som motorcykel)
      ccm == annoncens årgang            -> ukendt (årstallet læst som kubik)
-     ccm == tallet efter "årg"          -> ukendt ("årg 90")
-     hk/ccm > 0,30                      -> det urealistiske nulstilles: hk > 250
+     ccm == tallet efter "årg"          -> ukendt ("årg 90") — MEDMINDRE tallet også
+                                           står i titlen uden for "årg …" (Honda XR 80
+                                           årg 80, C90 årg 90: modellen hedder tallet)
+     hk/ccm over grænsen                -> det urealistiske nulstilles: hk > 250
                                            er det mistænkelige tal, ellers ccm
-   Ægte store motorer bevares (GL1800 1832 ccm, Harley 1923 ccm, Hayabusa 190 hk
-   på 1340 ccm = 0,14). Grænsen 0,30 ligger over de hurtigste serie-motorer (en
-   125 2-takt giver ~0,30). Intet tal opfindes; det eneste svar er "ikke oplyst". */
-const URIMELIG_HK_PR_CCM = 0.30;
+   Grænsen afhænger af størrelsen: op til 125 ccm 0,50 (RS125 racer 55 hk), 126-499 ccm
+   0,40, fra 500 ccm 0,35 (Kawasaki H2R 310 hk / 998 ccm = 0,31 bevares). Ægte store
+   motorer bevares (GL1800 1832 ccm, Harley 1923 ccm, Hayabusa 190 hk). Intet tal
+   opfindes; ved tvivl bevares tallet. */
+function urimeligHkPrCcm(ccm){ return ccm <= 125 ? 0.50 : ccm < 500 ? 0.40 : 0.35; }
 const MIN_CCM = 45;
 const MAKS_HK = 250;
 function saniterTal(t){
@@ -193,12 +212,14 @@ function saniterTal(t){
   const tekst = String((t && t.tekst) || '');
   const am = tekst.match(/(?<![\p{L}\d])[aå]rg\.?\s*(\d{2,4})(?!\d)/iu);
   const aargTal = am ? Number(am[1]) : null;
+  const udenAarg = am ? tekst.replace(am[0], ' ') : tekst;
+  const stdIModel = ccm != null && new RegExp('(?<!\\d)' + ccm + '(?!\\d)').test(udenAarg);
   if (ccm != null){
     if (ccm < MIN_CCM) ccm = null;
     else if (aargang != null && ccm === aargang) ccm = null;
-    else if (aargTal != null && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal))) ccm = null;
+    else if (aargTal != null && !stdIModel && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal))) ccm = null;
   }
-  if (ccm != null && hk != null && hk / ccm > URIMELIG_HK_PR_CCM){
+  if (ccm != null && hk != null && hk / ccm > urimeligHkPrCcm(ccm)){
     if (hk > MAKS_HK) hk = null; else ccm = null;
   }
   return { ccm, hk };
@@ -207,23 +228,27 @@ function saniterTal(t){
 /* ---------- Efterspørgsel er ikke et udbud (F-009) ----------
    "BSA / Triumph / Norton købes" lå som til salg under BSA. Kun entydige ord:
    "søger" er med vilje IKKE med ("søger ny ejer" er et salg). */
-const EFTERSPOERGSEL = /(?<![\p{L}\d])(købes|søges|ønskes\s+købt|køb\s+ønskes)(?![\p{L}\d])/iu;
+const EFT_ORD = '(?:købes|søges|ønskes\\s+købt|køb\\s+ønskes)';
+const EFT_START = new RegExp('^[\\s"\'(]*' + EFT_ORD + '(?![\\p{L}\\d])(?!\\s+(?:ny|nyt)\\b)', 'iu');
+const EFT_SLUT = new RegExp('(?<![\\p{L}\\d])' + EFT_ORD + '[\\s.!)"\']*$', 'iu');
+const EFT_FORBEHOLD = /(?:^|\s)(?:kan|må|skal|ikke|evt|bør|vil|som)\s*$/iu;
+/* Kun når ordet er titlens START ("Købes: Honda CBR") eller SLUT ("BSA / Norton købes"), og
+   ikke når det følger kan/må/skal/ikke/evt ("kan købes med garanti" er et salg), og ikke
+   "søges ny ejer/nyt hjem". Midt i titlen er det aldrig en efterspørgsel. */
 function erEfterspoergsel(titel){
-  return EFTERSPOERGSEL.test(String(titel || ''));
+  const t = String(titel || '').trim();
+  if (EFT_START.test(t)) return true;
+  const m = EFT_SLUT.exec(t);
+  return !!m && !EFT_FORBEHOLD.test(t.slice(0, m.index));
 }
 
-/* ---------- Forhandlerjargon på forbrugerens skærm (F-010) ----------
-   Kilderne mærker annoncer med forhandlerens egne ord. "ENGROS" siger intet til
-   en privatkøber og er råbt med versaler. Kortet viser en neutral tekst; kildens
-   eget ord bevares i salgsmarkoerer og annoncesidens datagrundlag. */
-const SALGSMARKOER_ORD = {
-  'engros': 'Handelspris',
-};
+/* ---------- Salgsmærkater (F-010) ----------
+   BESLUTNING: kildens eget ord vises ALLE steder (kort, annonceside) — vi opfinder ikke et
+   nyt ord ("Handelspris" kunne læses som "fair pris"). Eneste ændring er formatering:
+   versaler er kildens formatering, så "ENGROS" skrives "Engros". */
 function salgsmarkoerLabel(m){
   const s = String(m == null ? '' : m).trim();
   if (!s) return '';
-  const k = s.toLowerCase();
-  if (SALGSMARKOER_ORD[k]) return SALGSMARKOER_ORD[k];
   // Versaler er kildens formatering, ikke en oplysning.
   return s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s;
 }
@@ -241,6 +266,7 @@ function senesteBekraeftet(liste, nu){
   for (const l of (liste || [])){
     const t = l && l.sidstSet ? Date.parse(l.sidstSet) : NaN;
     if (!Number.isFinite(t)) continue;
+    if (t > slut.getTime() + 86400000) continue;   // en dato i fremtiden er ukendt, ikke "friskt"
     if (max == null || t > max) max = t;
     if (min == null || t < min) min = t;
   }
