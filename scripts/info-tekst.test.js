@@ -50,7 +50,7 @@ function juridisk(html) {
 /* sha256 af den gamle sides tekst (h1, ingress/opdateringsdato og brødtekst; uden indholdsfortegnelsen). */
 const TEKST_HASH = {
   'vilkaar.html': '8f36fb5764f7b284c94870bc402b0de37216b6ab71ea8e132ac57a9c75949f46',
-  'privatlivspolitik.html': 'bf95dac76d6e6ef458e90ffef4f3e90e38b72b94f056fd67fafd8b4ea6354b8f',
+  'privatlivspolitik.html': '1a9aec6c2200c36dbc3af3dad89d7a4b2b28c839f805c531d2ea701e5032dd7f',
   'sikkerhed.html': '9ce00fbc8f121f1f3daab8079d1385e05c0599e37cd2292f5790bae7d8cb2c6f',
   'om-indeksering.html': '64b977bd891c50fcc80e7d5b9aaa01726aa320f019406946c63f454efc8ae6ad',
   'om-bikerbasen.html': 'a5fefc2ca9ed5f9ed555ef2177bce6b2c0002f256b9b69f0dc23a8343b847bca'

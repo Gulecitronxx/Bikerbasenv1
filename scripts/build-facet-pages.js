@@ -1744,6 +1744,11 @@ ${footer}
   const alleTraef = traefSorteret.length;
   const items = visListe.slice(0, viste);
   const frase = mount.dataset.facetFrase || 'motorcykler';
+  /* w6-funktion: er HELE lageret tomt (backend-svar uden annoncer), står bannerets "Prøv igen" alene — siden må ikke også påstå, at kategorien er tom. */
+  if (!items.length && Store.getAllListings().length === 0){
+    document.documentElement.setAttribute('data-fa-hydreret', '1');
+    return;
+  }
   if (!items.length){
     mount.className = 'empty-state';
     mount.innerHTML = '<h3>Ingen ' + frase + ' til salg lige nu</h3>'
