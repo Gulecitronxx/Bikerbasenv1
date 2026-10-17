@@ -318,7 +318,7 @@ const GUIDES = [
   {
     file: 'guide-brugt-motorcykel.html',
     slug: 'guide-brugt-motorcykel',
-    related: ['guide-mc-forsikring', 'guide-foerste-motorcykel', 'guide-a2-koerekort'],
+    related: ['guide-mc-forsikring', 'guide-mc-ordliste', 'guide-foerste-motorcykel'],
     navn: 'Køb brugt motorcykel — det skal du tjekke',
     h1: 'Køb brugt motorcykel — det skal du tjekke',
     title: 'Køb brugt motorcykel — det skal du tjekke',
@@ -811,7 +811,7 @@ const GUIDES = [
     title: 'MC-ordliste: ccm, kW, hk og andre begreber',
     description: 'Hvad betyder ccm, kW, hk og kW/kg? Ordliste over begreberne i en motorcykelannonce, og hvordan du læser kørekortmærkerne på Bikerbasen. Med kilder.',
     ingress: 'En motorcykelannonce er fuld af forkortelser. Her forklarer vi de vigtigste, hvordan de hænger sammen med kørekortreglerne, og hvad der står på et annoncekort på Bikerbasen, og hvad der ikke gør.',
-    cardImage: 'img/type/classic.webp',
+    cardImage: 'img/type/cruiser.webp',
     cardPos: 'center',
     tldr: [
       'ccm er motorens størrelse. kW og hk er effekten. 35 kW svarer til cirka 47 hk.',

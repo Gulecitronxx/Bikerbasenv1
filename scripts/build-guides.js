@@ -377,6 +377,18 @@ function renderGuide(g, ctx){
       </ul>
       <a class="btn btn-primary gd-cta" href="soegning.html">Søg motorcykler på Bikerbasen ${Icon.arrowRight}</a>
     </section>`;
+  /* Indholdsfortegnelsen er ÉT element. Desktop: sticky i højre spalte under "Kort fortalt", altid åben
+     (css tvinger indholdet frem; js/guides.js åbner den i ældre browsere). Mobil: sammenklappelig <details>,
+     lukket, og lagt lige efter "Kort fortalt", før artiklen (flex-order i p-guides.css). */
+  const tocBlok = `<nav class="gd-toc" aria-labelledby="gd-toc-h">
+        <details class="gd-toc-det">
+          <summary><h2 id="gd-toc-h"><span class="gd-toc-ic" aria-hidden="true">${Icon.list}</span>Indholdsfortegnelse</h2><span class="gd-toc-chev" aria-hidden="true">${Icon.chevronDown}</span></summary>
+          <ol style="--gd-toc-rows:${Math.ceil(sektioner.length / 2)}">
+          ${toc}
+          </ol>
+        </details>
+      </nav>`;
+
   const tvivl = `<section class="gd-dark" aria-labelledby="gd-dark-h">
       <h2 id="gd-dark-h">Er du i tvivl om, hvad du må køre?</h2>
       <p>Se grænserne for effekt og alder, og hvordan kørekortkategorierne hænger sammen.</p>
@@ -392,13 +404,6 @@ ${ctx.header}
 
   <div class="container gd-layout">
     <div class="gd-main">
-      <nav class="gd-toc" aria-labelledby="gd-toc-h">
-        <h2 id="gd-toc-h"><span class="gd-toc-ic" aria-hidden="true">${Icon.list}</span>Indholdsfortegnelse</h2>
-        <ol style="--gd-toc-rows:${Math.ceil(sektioner.length / 2)}">
-          ${toc}
-        </ol>
-      </nav>
-
       <article class="gd-article">
       ${artikel}
 
@@ -413,13 +418,17 @@ ${ctx.header}
       </section>
       </article>
 
+      <div class="gd-extras">
+        ${tvivl}
+        ${ctx.populaer}
+      </div>
+
       ${relateretBlok(g)}
     </div>
 
-    <aside class="gd-side" aria-label="Kort fortalt og genveje">
+    <aside class="gd-side" aria-label="Kort fortalt og indhold">
       ${tldr}
-      ${tvivl}
-      ${ctx.populaer}
+      ${tocBlok}
     </aside>
   </div>
 </main>

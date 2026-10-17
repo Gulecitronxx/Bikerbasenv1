@@ -869,6 +869,40 @@ function tillidsraekkeHTML(){
       </ul>`;
 }
 
+/* "Kort fortalt" (billede 9/10): 3-4 sande punkter, alle udledt af mærkets egne annoncer. Antallet står i [data-mk-n]
+   (js/maerke.js regner det om, hvis lageret har ændret sig); resten er regnet ved byg, som sidens øvrige tal.
+   Et punkt uden data udelades; fjerde punkt falder tilbage til sidens faste løfte, så der altid er tre eller fire.
+   Ingen hårdkodede tal og ingen kvalitetspåstande om mærket. */
+const BULB_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg>';
+function kortFortaltPunkter(brand, items, fakta, stats){
+  const N = items.length;
+  if (!N) return [];
+  const b = esc(brand);
+  const p = [];
+  p.push(`<span class="mk-kf-t"><span data-mk-n>${tal(N)}</span> ${b}-${N === 1 ? 'motorcykel' : 'motorcykler'}</span> er indekseret fra danske forhandlere og markedspladser.`);
+  const typet = fakta.typer.reduce((s, t) => s + t.n, 0);
+  if (fakta.typer.length && typet >= N * 0.5){
+    p.push(`Mest udbudte typer: ${listeJoin(fakta.typer.slice(0, 3).map(t => `${String(t.label).toLowerCase()} (${t.n})`))}.`);
+  }
+  if (stats.antal){
+    const hvor = stats.antal === N ? '' : ' (ikke alle annoncer oplyser en pris)';
+    const t = stats.min === stats.max ? `Den oplyste pris er ${dkk(stats.min)}${hvor}` : `Oplyste priser fra ${dkk(stats.min)} til ${dkk(stats.max)}${hvor}`;
+    p.push(t.endsWith('.') ? t : `${t}.`);   // dkk() slutter selv på "kr."
+  }
+  const a2 = (fakta.kk.find(x => x.k === 'A2') || {}).n || 0;
+  if (a2 > 0 && p.length < 4) p.push(`${tal(a2)} af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.`);
+  if (p.length < 4) p.push('Kilden står på hvert kort, og handlen sker hos sælger. Mangler et tal, står der "Ikke oplyst".');
+  return p.slice(0, 4);
+}
+function kortFortaltHTML(brand, items, fakta, stats){
+  const p = kortFortaltPunkter(brand, items, fakta, stats);
+  if (p.length < 3) return '';
+  return `<section class="mk-kf" aria-labelledby="mk-kf-h">
+      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true">${BULB_SVG}</span>Kort fortalt</h2>
+      <ul class="mk-kf-liste">${p.map(t => `<li><span class="mk-kf-ok" aria-hidden="true">${ICON.check}</span><span>${t}</span></li>`).join('')}</ul>
+    </section>`;
+}
+
 function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
   const b = esc(brand);
   const foto = ctaFoto(fremhaevede);
@@ -1240,6 +1274,7 @@ ${header}
   <div class="container mk-soeg-wrap">
     ${heroSoegHTML(brand, slug, items, fakta)}
     ${tillidsraekkeHTML()}
+    ${kortFortaltHTML(brand, items, fakta, stats)}
   </div>
 
   ${fremhaevetHTML(brand, items, fremhaevede, fremKort)}
@@ -1617,4 +1652,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { facetLinksFor, treKolonnerHTML, typeFlisersHTML, typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };
+module.exports = { kortFortaltPunkter, kortFortaltHTML, prisStatistik, facetLinksFor, treKolonnerHTML, typeFlisersHTML, typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };
