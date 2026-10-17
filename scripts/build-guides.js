@@ -244,13 +244,13 @@ const SCRIPTS = `<script defer src="js/security.js"></script>
 <script defer src="js/components.js"></script>
 <script defer src="js/guides.js"></script>`;
 
-function hero({ crumbs, kicker, h1, ingress, meta, lille }){
+function hero({ crumbs, kicker, h1, ingress, meta, lille, pos }){
   const sti = crumbs.map((c, i) => i === crumbs.length - 1
     ? `<span aria-current="page">${esc(c.name)}</span>`
     : `<a href="${c.file}">${esc(c.name)}</a><span class="bc-sep">${Icon.chevronRight}</span>`).join('');
   return `<header class="gd-hero${lille ? ' gd-hero-lille' : ''}">
     <div class="gd-hero-media" aria-hidden="true">
-      <img class="gd-hero-photo" src="img/hero-1600.webp" srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="1600" height="679" fetchpriority="high" decoding="async">
+      <img class="gd-hero-photo" src="img/hero-1600.webp" srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="1600" height="679"${pos ? ` style="object-position:${pos}"` : ''} fetchpriority="high" decoding="async">
     </div>
     <div class="container gd-hero-inner">
       <nav class="breadcrumb gd-crumb" aria-label="Brødkrumme">${sti.replace(/<span class="bc-sep">/g, '<span class="bc-sep" aria-hidden="true">')}</nav>
@@ -344,6 +344,75 @@ function naesteBlok(g){
       </section>`;
 }
 
+/* ---------- Informationsbokse og typefliser i artiklen (billede 10) ----------
+   Callouts (Vigtigt/Tip) er IKKE kopier af "Kort fortalt": hver er én sætning FLYTTET ud af guidens egen brødtekst
+   (den fjernes fra afsnittet, så den ikke står to gange), valgt fordi den indeholder en regel eller et råd
+   (skal/bør/aldrig/undgå/kræver/tjek) og ikke ligner et Kort fortalt-punkt. Intet er opfundet eller omskrevet.
+   Reglen om læsetid/ordtal rører det ikke: ordtallet beregnes af sektionerne FØR flytningen. */
+const ORD = t => new Set(String(t).toLowerCase().replace(/<[^>]+>/g, ' ').match(/[a-zæøå]{5,}/g) || []);
+const CALLOUT_IKON = {
+  Vigtigt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg>',
+  Tip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2.2h5c.1-1 .5-1.7 1.1-2.2A6 6 0 0 0 12 3Z"/></svg>',
+};
+const STAERK = /\b(aldrig|undgå|må ikke|kræver|ikke gyldig|advarsel|svindel)\b/i;
+const SVAG = /\b(skal|bør|husk|tjek|pas på|overvej)\b/i;
+function jaccard(a, b){ let n = 0; a.forEach(w => { if (b.has(w)) n++; }); return n / (a.size + b.size - n || 1); }
+/* Finder den bedste sætning i sektionens rene afsnit. Returnerer { html (uden sætningen), saetning, staerk } eller null. */
+function traekSaetning(html, tldrOrd){
+  let bedst = null;
+  const afsnit = [...html.matchAll(/<p>([\s\S]*?)<\/p>/g)];
+  for (const m of afsnit){
+    const tekst = m[1];
+    if (/</.test(tekst)) continue;                       // kun rene afsnit (ingen links/fed/kode)
+    const saet = tekst.split(/(?<=[.!?])\s+(?=[A-ZÆØÅ"])/);
+    if (saet.length < 2) continue;                       // afsnittet skal beholde mindst én sætning
+    saet.forEach(s => {
+      if (s.length < 50 || s.length > 230) return;
+      const st = STAERK.test(s), sv = SVAG.test(s);
+      if (!st && !sv) return;
+      const o = ORD(s);
+      if (tldrOrd.some(t => jaccard(o, t) >= 0.4)) return;   // ligner et Kort fortalt-punkt: spring over
+      const score = (st ? 2 : 1) + (s.length > 80 && s.length < 180 ? 0.5 : 0);
+      if (!bedst || score > bedst.score) bedst = { score, afsnit: m[0], tekst, s, staerk: st };
+    });
+  }
+  if (!bedst) return null;
+  const rest = bedst.tekst.replace(bedst.s, '').replace(/\s{2,}/g, ' ').replace(/\s+$/, '').replace(/^\s+/, '');
+  if (!rest) return null;
+  return { html: html.replace(bedst.afsnit, `<p>${rest}</p>`), saetning: bedst.s, staerk: bedst.staerk };
+}
+function guideTillaeg(g, sektioner){
+  const ud = sektioner.map(() => '');
+  if (sektioner.length < 4) return ud;
+  const tldrOrd = (g.tldr || []).map(ORD);
+  const valg = [];
+  for (let si = 1; si < sektioner.length - 1 && valg.length < 2; si += (valg.length ? 2 : 1)){
+    const r = traekSaetning(sektioner[si].html, tldrOrd);
+    if (r){ sektioner[si].html = r.html; valg.push({ si, ...r }); }
+  }
+  valg.forEach(v => {
+    const type = v.staerk ? 'Vigtigt' : 'Tip';
+    ud[v.si] += `\n        <aside class="gd-callout gd-callout-${type.toLowerCase()}" aria-label="${type}"><span class="gd-callout-ic">${CALLOUT_IKON[type]}</span><div><strong>${type}</strong><p>${esc(v.saetning)}</p></div></aside>`;
+  });
+  // ét foto i artiklen: guidens eget kortbillede, men aldrig forsidefotoet (heroen) og aldrig et foto, der også står i typeflisernes række
+  const tiles = new Set(Object.keys(TYPE_TEKST).map(id => `img/type/${id}.webp`));
+  if (g.cardImage && !/^img\/hero/.test(g.cardImage) && !tiles.has(g.cardImage) && sektioner.length > 3){
+    ud[2] += `\n        <figure class="gd-fig"><img src="${g.cardImage}" alt="" style="object-position:${g.cardPos || '50% 50%'}" width="960" height="540" loading="lazy" decoding="async"></figure>`;
+  }
+  return ud;
+}
+/* "Find motorcykler efter type": fem typefliser med foto og link til typesiderne (som i billede 10), under artiklen. Guider, der
+   allerede har rækken i brødteksten (første motorcykel), får den ikke to gange. */
+function typeBlok(g, sektioner){
+  if (sektioner.some(s => /class="gd-types"/.test(s.html))) return '';
+  return `<section class="gd-findtype" aria-labelledby="gd-findtype-h">
+        <h2 id="gd-findtype-h">Find motorcykler efter type</h2>
+        <p>Vælg en type, og se de annoncer, der er indekseret på Bikerbasen.</p>
+        ${typeTiles()}
+      </section>`;
+}
+const HERO_POS = ['72% 55%', '58% 42%', '82% 62%', '66% 48%', '76% 70%'];
+
 /* ---------- Guideside ---------- */
 function renderGuide(g, ctx){
   const PUB = publiceret(g), MOD = aendret(g);
@@ -353,10 +422,17 @@ function renderGuide(g, ctx){
   const kilder = g.sources.map(k => SRC[k]);
 
   const toc = sektioner.map(s => `<li><a href="#${s.id}">${esc(s.toc || s.title)}</a></li>`).join('\n          ');
-  const artikel = sektioner.map(s => `<section class="gd-sec" id="${s.id}" aria-labelledby="${s.id}-h">
+  const tillaeg = guideTillaeg(g, sektioner);
+  const artikel = sektioner.map((s, i) => `<section class="gd-sec" id="${s.id}" aria-labelledby="${s.id}-h">
         <h2 id="${s.id}-h">${esc(s.title)}</h2>
-        ${s.html.trim()}
+        ${s.html.trim()}${tillaeg[i] || ''}
       </section>`).join('\n      ');
+  const miniToc = `<nav class="gd-minitoc" aria-labelledby="gd-minitoc-h">
+      <h2 id="gd-minitoc-h">I denne guide</h2>
+      <ol>
+        ${sektioner.map(s => `<li><a href="#${s.id}">${esc(s.toc || s.title)}</a></li>`).join('\n        ')}
+      </ol>
+    </nav>`;
 
   const meta = `<ul class="gd-meta">
         <li class="gd-meta-by"><img src="logo-mark.png?v=logo1" alt="" width="44" height="44" loading="eager"><span><strong>Af Bikerbasen</strong><span>Redaktionel guide med kilder</span></span></li>
@@ -412,10 +488,11 @@ function renderGuide(g, ctx){
 ${ctx.header}
 
 <main id="main-content">
-  ${hero({ crumbs, kicker: 'GUIDE', h1: g.h1, ingress: g.ingress, meta })}
+  ${hero({ crumbs, kicker: 'GUIDE', h1: g.h1, ingress: g.ingress, meta, pos: HERO_POS[Math.max(0, GUIDES.indexOf(g)) % HERO_POS.length] })}
 
   <div class="container gd-layout">
     <div class="gd-main">
+      ${tocBlok}
       <article class="gd-article">
       ${artikel}
 
@@ -430,17 +507,16 @@ ${ctx.header}
       </section>
       </article>
 
-      <div class="gd-extras">
-        ${tvivl}
-        ${ctx.populaer}
-      </div>
+      ${typeBlok(g, sektioner)}
 
       ${relateretBlok(g)}
     </div>
 
-    <aside class="gd-side" aria-label="Kort fortalt og indhold">
+    <aside class="gd-side" aria-label="Kort fortalt og genveje">
       ${tldr}
-      ${tocBlok}
+      ${tvivl}
+      ${ctx.populaer}
+      ${miniToc}
     </aside>
   </div>
 </main>

@@ -88,8 +88,15 @@ function authError(msg, resendEmail){
     el.id = 'auth-error';
     el.className = 'auth-error';
     el.setAttribute('role', 'alert');
-    document.getElementById('auth-head').insertAdjacentElement('afterend', el);
   }
+  /* W14: fejlen må ikke skubbe formularen ned (layout shift). I login-/opret-visningen lægges den som et overlay øverst i
+     området under knappen (der er reserveret plads til det via position:absolute); i nulstil-trinnene, hvor området er skjult,
+     står den som før efter overskriften. */
+  const ex = document.getElementById('auth-primary-extras');
+  const overlay = !!ex && typeof ex.prepend === 'function' && ex.style.display !== 'none';
+  el.classList.toggle('auth-error-overlay', overlay);
+  if (overlay){ if (el.parentElement !== ex) ex.prepend(el); }
+  else if (el.parentElement === null || el.parentElement === ex) document.getElementById('auth-head').insertAdjacentElement('afterend', el);
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
 

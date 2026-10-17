@@ -165,6 +165,11 @@ try{
           <button type="button" class="db-stat-link" data-tab-go="favoritter">Se favoritter<span data-icon="arrowRight"></span></button>
         </article>
         <article class="db-stat">
+          <span class="db-stat-icon is-paused" data-icon="pause"></span>
+          <div class="db-stat-body"><b class="db-stat-num" id="stat-pause">0</b><span class="db-stat-label">På pause</span></div>
+          <button type="button" class="db-stat-link" data-tab-go="mine">Se pausede<span data-icon="arrowRight"></span></button>
+        </article>
+        <article class="db-stat">
           <span class="db-stat-icon is-blue" data-icon="bell"></span>
           <div class="db-stat-body"><b class="db-stat-num" id="stat-agenter">0</b><span class="db-stat-label">Søgeagenter</span></div>
           <button type="button" class="db-stat-link" data-tab-go="agenter">Se søgeagenter<span data-icon="arrowRight"></span></button>
@@ -279,7 +284,11 @@ try{
       <section class="db-card db-tip" aria-labelledby="db-tip-h">
         <div class="db-tip-body">
           <h2 id="db-tip-h">Sælg hurtigere</h2>
-          <p>En komplet annonce med gode billeder er lettere at sige ja til. Felter, du ikke udfylder, står som "Ikke oplyst" for køberen.</p>
+          <ul class="db-tip-list">
+            <li><span class="db-tip-ck" data-icon="check"></span>Billeder i dagslys og fra flere sider</li>
+            <li><span class="db-tip-ck" data-icon="check"></span>Ærlig tekst om stand og service</li>
+            <li><span class="db-tip-ck" data-icon="check"></span>Udfyld felterne: tomme står som "Ikke oplyst"</li>
+          </ul>
           <a href="sikkerhed.html" class="db-link">Se vores gode råd<span data-icon="arrowRight"></span></a>
         </div>
       </section>

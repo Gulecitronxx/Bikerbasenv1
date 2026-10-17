@@ -257,7 +257,7 @@ html[data-lgmode="register"] .lg-only-login{ display:none; }
   }
 }
 @media (min-width:1280px){
-  .lg-form-pane{ padding: 64px 64px 48px; }
+  .lg-form-pane{ padding: 48px 64px 36px; }
   .lg-promo{ padding: 56px 64px 48px; }
 }
 
@@ -331,8 +331,14 @@ body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
   .lg-promo-body{
     max-width:470px; padding: 28px 28px 24px; margin:-28px 0 0 -28px;
     border-radius: var(--radius-lg);
-    background: color-mix(in srgb, var(--color-surface-2) 88%, transparent);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    background: none; isolation:isolate;
+  }
+  /* Fladen bag teksten fader ud mod fotoet uden synlig kant (billede 6: teksten ligger på en jævn tone) */
+  .lg-promo-body::before{
+    content:""; position:absolute; z-index:-1; inset:-36px -150px -36px -36px; border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-surface-2) 90%, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 60% 66% at 34% 46%, #000 62%, transparent 100%);
+    mask-image: radial-gradient(ellipse 60% 66% at 34% 46%, #000 62%, transparent 100%);
   }
   .lg-promo > *{ max-width:none; }
   .lg-benefits{ max-width:none; }
@@ -363,7 +369,7 @@ body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
 
 /* Runde 2c */
 @media (min-width:960px){
-  .lg-promo > .lg-promo-body{ max-width:450px; background: color-mix(in srgb, var(--color-surface-2) 86%, transparent); }
+  .lg-promo > .lg-promo-body{ max-width:450px; }
   .lg-bg-photo{ right:-14%; width:114%; }
 }
 @media (min-width:960px) and (max-width:1279px){ .lg-bg-photo{ right:-22%; width:122%; } }
@@ -372,4 +378,64 @@ body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
 .lg-promo-body .lg-promo-lead, .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#55504B; }
 :root[data-theme="dark"] .lg-promo-body .lg-promo-lead, :root[data-theme="dark"] .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#CFC8BE; }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .lg-promo-body .lg-promo-lead, :root:not([data-theme="light"]) .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#CFC8BE; } }
-@media (min-width:960px){ .lg-promo > .lg-promo-body{ background: color-mix(in srgb, var(--color-surface-2) 93%, transparent); } }
+@media (min-width:960px){ .lg-promo > .lg-promo-body::before{ background: color-mix(in srgb, var(--color-surface-2) 93%, transparent); } }
+
+/* ---------- "eller": ærligt alternativ til social login (findes ikke) ---------- */
+p.lg-or{ display:flex; align-items:center; gap: var(--space-4); margin: var(--space-4) 0 var(--space-3); color: var(--color-fg-muted); font-size:14px; }
+.lg-or::before, .lg-or::after{ content:""; flex:1; height:1px; background: var(--color-border); }
+.lg-guest{ width:100%; justify-content:center; min-height:48px; }
+
+/* Billede 6: formularens overskrift står på én linje (ca. 37 px ved 1440), så kortet bliver lavere og fordelsstrimlen kommer ind i første skærm */
+@media (min-width:960px){ .lg-head h1{ font-size: clamp(30px, 2.6vw, 38px); } }
+@media (min-width:1100px){ .lg-head h1{ white-space: nowrap; } }
+
+/* ===== W14 iteration 2 (billede 6): hele kortet + fordelsstrimlen i første skærm ved 1440x900, skarpt foto, fed titel ===== */
+@media (min-width:960px){
+  .lg-stage{ padding: var(--space-5) var(--space-6); }
+  .lg-bg-photo{ top:0; height:100%; right:-4%; width:104%; object-position: 86% 62%; }
+  .lg-strip-list{ padding: var(--space-3) 0; }
+  .lg-strip-list li{ padding-block: var(--space-1); }
+  .lg-form-pane{ padding: 36px 56px 28px; }
+  .lg-head{ margin-bottom: var(--space-4); }
+  .lg-head h1{ font-weight: 700; letter-spacing: -.03em; }
+  .lg-head p{ margin-top: 8px; }
+  .lg-fields{ gap: var(--space-4); }
+  .lg-cta{ margin-top: var(--space-4); min-height: 54px; }
+  .lg-extras{ margin-top: var(--space-4); }
+  p.lg-or{ margin: var(--space-3) 0 var(--space-2); }
+  .lg-legal{ margin-top: var(--space-2); }
+  .lg-promo{ padding: 36px 48px 28px; }
+  .lg-promo h2{ font-size: clamp(30px, 2.8vw, 40px); font-weight: 700; letter-spacing: -.03em; }
+  .lg-benefits{ gap: 14px; margin: var(--space-4) 0; }
+  .lg-promo-cta{ min-height: 52px; }
+  .lg-member{ margin-top: var(--space-2); }
+}
+@media (min-width:1280px){ .lg-form-pane{ padding: 36px 64px 28px; } .lg-promo{ padding: 36px 64px 28px; } }
+
+/* ===== W14 iteration 3 ===== */
+/* opret-visning: højre kolonne får de tre trin (ærlige, i den rækkefølge det sker) i stedet for at stå næsten tom */
+.lg-steps{ list-style:none; margin: var(--space-4) 0 0; padding:0; gap: var(--space-2); }
+html[data-authtab="register"] .lg-steps, html[data-lgmode="register"] .lg-steps{ display:grid; }
+.lg-steps li{ display:flex; align-items:center; gap: var(--space-3); font-size:15px; font-weight:500; }
+.lg-steps b{ flex:none; width:30px; height:30px; border-radius:50%; background: var(--color-primary); color: var(--color-on-primary); display:inline-flex; align-items:center; justify-content:center; font-size:14px; }
+/* fejlboks: overlay, intet layout shift */
+.lg-extras{ position: relative; }
+.auth-error.auth-error-overlay{
+  position:absolute; left:0; right:0; top:0; z-index:3; margin:0; font-size:14.5px; line-height:1.4; font-weight:500;
+  box-shadow: var(--shadow-md);
+}
+/* fordelstekst: fast, kraftigere flade bag teksten, så motorens kromdele aldrig svækker læsbarheden (>= 4,5:1) */
+@media (min-width:960px){
+  .lg-promo > .lg-promo-body::before{
+    background: color-mix(in srgb, var(--color-surface-2) 96%, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 66% 70% at 34% 46%, #000 70%, transparent 100%);
+    mask-image: radial-gradient(ellipse 66% 70% at 34% 46%, #000 70%, transparent 100%);
+  }
+  .lg-bg-photo{ object-position: 100% 62%; }
+}
+
+/* tap-mål: logo-linket i headeren er 30 px højt; hit-area >= 44 px uden at flytte noget */
+.site-header .brand{ min-height: 44px; }
+.auth-error{ color: #9B1C14; }
+:root[data-theme="dark"] .auth-error{ color: var(--color-danger); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .auth-error{ color: var(--color-danger); } }

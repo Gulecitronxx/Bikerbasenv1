@@ -801,9 +801,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   fyldDashKonto(user);
 
   if (!user.isDealer){
-    document.getElementById('gate-icon').innerHTML = Icon.shieldCheck;
-    document.getElementById('dash-gate').style.display = '';
-    document.getElementById('dash-subtitle').textContent = 'Kun for forhandlere.';
+    /* W14: private brugere endte i en blindgyde ("er for forhandlere"). Deres overblik er Mine annoncer. */
+    window.location.replace('mine-annoncer.html');
     return;
   }
   document.getElementById('dash-content').style.display = '';

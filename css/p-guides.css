@@ -9,7 +9,7 @@
 .gd-hero{
   position: relative; isolation: isolate; overflow: hidden;
   background: var(--color-dark); color: #fff;
-  padding-bottom: var(--space-7);
+  padding-bottom: var(--space-5);
 }
 .gd-hero-media{ position:absolute; inset:0; z-index:-1; }
 .gd-hero-photo{ width:100%; height:100%; object-fit:cover; object-position: 72% 55%; display:block; }
@@ -18,8 +18,8 @@
   background:
     /* V2-002: scrimmen følger tekstkolonnen (px-stop), ikke fotoets bredde: bag h1/kicker/ingress >= .62 også ved 390 px,
        hvor kolonnen fylder hele bredden; motorcyklen til højre står stadig frem på brede skærme. */
-    linear-gradient(90deg, rgba(15,13,10,.9) 0%, rgba(15,13,10,.78) min(40%, 560px), rgba(15,13,10,.64) min(100%, 840px), rgba(15,13,10,.16) min(100%, 1320px)),
-    linear-gradient(0deg, rgba(15,13,10,.35), rgba(15,13,10,0) 40%);
+    linear-gradient(90deg, rgba(15,13,10,.86) 0%, rgba(15,13,10,.7) min(40%, 560px), rgba(15,13,10,.52) min(100%, 760px), rgba(15,13,10,.04) min(100%, 1200px)),
+    linear-gradient(0deg, rgba(15,13,10,.3), rgba(15,13,10,0) 40%);
 }
 .gd-hero-inner{ max-width: var(--site-w); }
 .gd-hero .breadcrumb{ color: rgba(255,255,255,.82); padding-top: 4px; }
@@ -27,21 +27,21 @@
 .gd-hero .breadcrumb a:hover{ color:#fff; text-decoration: underline; }
 .gd-hero .breadcrumb [aria-current]{ color: rgba(255,255,255,.82); }
 .gd-kicker{
-  margin: var(--space-5) 0 var(--space-2);
+  margin: var(--space-4) 0 var(--space-1);
   font-size: 13px; font-weight: 700; letter-spacing: .12em; color:#fff;
 }
 .gd-hero h1{
-  color:#fff; font-size: var(--h1-hero); line-height: 1.06; letter-spacing: -0.02em;
-  max-width: 24ch; text-wrap: balance;
+  color:#fff; font-size: clamp(32px, 3.5vw, 46px); line-height: 1.04; letter-spacing: -0.02em;
+  max-width: 16ch; text-wrap: balance; text-shadow: 0 2px 18px rgba(0,0,0,.35);
 }
 .gd-hero-lille h1{ max-width: 22ch; }
 .gd-lede{
-  margin: var(--space-4) 0 0; max-width: 40em;
-  font-size: clamp(16px, 1.8vw, 19px); line-height: 1.55; color: rgba(255,255,255,.94);
+  margin: var(--space-3) 0 0; max-width: 34em;
+  font-size: clamp(16px, 1.45vw, 18px); line-height: 1.5; color: rgba(255,255,255,.95); text-shadow: 0 1px 12px rgba(0,0,0,.4);
 }
 .gd-hero-lille{ padding-bottom: var(--space-6); }
 .gd-meta{
-  list-style:none; margin: var(--space-5) 0 0; padding:0;
+  list-style:none; margin: var(--space-4) 0 0; padding:0;
   display:flex; flex-wrap:wrap; align-items:center; gap: var(--space-4) var(--space-6);
   font-size: 13px; color: rgba(255,255,255,.9);
 }
@@ -74,19 +74,18 @@
   .gd-layout > .gd-main{ order:0; padding-top: var(--space-5); }
   .gd-side{
     display:flex; flex-direction:column; gap: var(--space-4);
-    margin-top: -132px; position:relative; z-index:2; align-self:stretch;
+    margin-top: -44px; position:relative; z-index:2; align-self:stretch;
   }
   .gd-side > *{ order:0; }
-  .gd-side > .gd-toc{
-    position:sticky; top: calc(var(--header-h) + var(--space-4));
-    max-height: calc(100vh - var(--header-h) - var(--space-6)); overflow-y:auto; overscroll-behavior:contain;
-  }
 }
+.gd-side > .gd-dark{ order:4; }
+.gd-side > .gd-pop{ order:5; }
+@media (min-width:1024px){ .gd-side > .gd-dark{ order:2; } .gd-side > .gd-pop{ order:3; } }
 
 /* ---------- Indholdsfortegnelse ---------- */
 .gd-toc{
   background: var(--color-surface-2); border:1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-md); margin-bottom: var(--space-6);
 }
 .gd-toc-det > summary{
   list-style:none; display:flex; align-items:center; justify-content:space-between; gap: var(--space-3);
@@ -101,8 +100,8 @@
 .gd-toc-chev svg{ width:100%; height:100%; }
 .gd-toc-det[open] .gd-toc-chev{ transform: rotate(180deg); }
 .gd-toc ol{ margin:0; padding: 0 var(--space-5) var(--space-4) calc(var(--space-5) + 1.6em); display:grid; gap: 0 40px; font-size:15px; }
-@media (min-width:700px) and (max-width:1023px){ .gd-toc ol{ grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(var(--gd-toc-rows, 4), auto); } }
-.gd-toc li::marker{ color: var(--color-fg-muted); font-weight:600; }
+@media (min-width:700px){ .gd-toc ol{ grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(var(--gd-toc-rows, 4), auto); } }
+.gd-toc li::marker{ color: var(--color-primary-hover); font-weight:700; }
 .gd-toc a{ color: var(--color-fg); text-decoration:none; display:flex; align-items:center; min-height:40px; }
 .gd-toc a:hover{ color: var(--color-primary); text-decoration: underline; }
 .gd-toc a[aria-current="location"]{ color: var(--color-primary-hover); font-weight:600; }
@@ -112,13 +111,14 @@
   .gd-toc-det::details-content{ content-visibility:visible; display:block; }
   .gd-toc-det > summary{ cursor:default; pointer-events:none; padding-bottom: var(--space-3); }
   .gd-toc-chev{ display:none; }
-  .gd-toc h2{ font-size:18px; }
-  .gd-toc ol{ font-size:14.5px; padding-right: var(--space-4); }
+  .gd-toc h2{ font-size:20px; }
+  .gd-toc-det > summary{ padding: var(--space-5) var(--space-6) var(--space-2); }
+  .gd-toc ol{ font-size:15px; padding: 0 var(--space-6) var(--space-5) calc(var(--space-6) + 2.1em); gap: 0 48px; }
   .gd-toc a{ min-height:34px; }
 }
 
 /* ---------- Artikel ---------- */
-.gd-article{ counter-reset: gd-sec; font-size: 17px; line-height: 1.7; color: var(--color-fg); max-width: 760px; }
+.gd-article{ counter-reset: gd-sec; font-size: 17px; line-height: 1.7; color: var(--color-fg); max-width: 800px; }
 .gd-sec{ counter-increment: gd-sec; margin-bottom: var(--space-7); }
 .gd-sec h2, .gd-sources h2{
   font-size: clamp(24px, 3.2vw, 32px); line-height:1.15; margin: 0 0 var(--space-4); letter-spacing:-0.015em;
@@ -217,6 +217,7 @@
   box-shadow: var(--shadow-sm); overflow:hidden; color: var(--color-fg); text-decoration:none;
   transition: box-shadow .2s ease, border-color .2s ease;
 }
+.gd-pop-card{ position:relative; }   /* gør det skjulte "ny fane"-spans indeslutning lille og stabil (ellers afhænger dens bottom af sidebjælkens stretch-højde) */
 .gd-pop-card:hover{ box-shadow: var(--shadow-md); border-color: var(--color-primary); }
 .gd-pop-media{ display:block; width:84px; height:68px; background: var(--color-surface-2); }
 .gd-pop-media img{ width:100%; height:100%; object-fit:cover; display:block; }
@@ -381,3 +382,98 @@
 .gd-find-alle:hover{ text-decoration:underline; }
 
 .gd-sec, .gd-sources, .gd-toc{ scroll-margin-top: calc(var(--header-h) + var(--space-4)); }
+
+/* Iteration 2 (billede 10): kompaktere hero og indholdsfortegnelse */
+.gd-hero h1{ font-size: clamp(32px, 3.2vw, 42px); }
+.gd-hero{ padding-bottom: var(--space-4); }
+.gd-lede{ font-size: clamp(16px, 1.3vw, 17px); }
+@media (min-width:1024px){
+  .gd-toc-det > summary{ padding: var(--space-4) var(--space-6) var(--space-1); min-height: 0; }
+  .gd-toc ol{ padding-bottom: var(--space-4); }
+  .gd-toc a{ min-height:30px; }
+}
+.gd-pop-all{ min-height:40px; align-items:center; }
+
+/* ===== W14 iteration 2 (billede 10: lys, varm hero med fed titel) ===== */
+.gd-hero-photo{ filter: brightness(1.2) saturate(1.1) contrast(1.02); }
+.gd-hero-media::after{
+  background:
+    linear-gradient(90deg, rgba(15,13,10,.74) 0%, rgba(15,13,10,.56) min(40%, 560px), rgba(15,13,10,.3) min(100%, 760px), rgba(15,13,10,0) min(100%, 1150px)),
+    linear-gradient(0deg, rgba(15,13,10,.22), rgba(15,13,10,0) 40%);
+}
+.gd-hero h1{ font-weight: 700; font-size: clamp(34px, 3.5vw, 48px); max-width: 15ch; }
+.gd-meta, .gd-meta-by span span, .gd-meta-label{ text-shadow: 0 1px 8px rgba(0,0,0,.45); }
+.gd-meta-label{ opacity: 1; }
+
+/* Brødtekst og indholdsfortegnelse flugter (billede 10: samme kolonnebredde) */
+.gd-article{ max-width: none; font-size: 17.5px; }
+.gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 72ch; }
+@media (min-width:1100px){ .gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 76ch; } }
+
+/* Informationsbokse (callouts) og fotos i artiklen */
+.gd-callout{
+  display:grid; grid-template-columns: 40px minmax(0,1fr); gap: var(--space-3); align-items:start;
+  margin: var(--space-5) 0 0; padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg);
+  background: var(--color-success-tint); border:1px solid color-mix(in srgb, var(--color-success) 28%, transparent);
+}
+.gd-callout-tip{ background: var(--color-primary-tint); border-color: color-mix(in srgb, var(--color-primary) 26%, transparent); }
+.gd-callout-ic{ display:inline-flex; width:36px; height:36px; border-radius:50%; background: var(--color-surface); color: var(--color-fg); align-items:center; justify-content:center; box-shadow: var(--shadow-sm); }
+.gd-callout-ic svg{ width:20px; height:20px; }
+.gd-callout strong{ display:block; font-family: var(--font-display); font-size: 17px; margin-bottom: 2px; }
+.gd-callout p{ margin:0; max-width:none; font-size:16px; line-height:1.55; }
+.gd-fig{ margin: var(--space-5) 0 0; border-radius: var(--radius-lg); overflow:hidden; background: var(--color-surface-2); }
+.gd-fig img{ display:block; width:100%; height: clamp(180px, 22vw, 280px); object-fit:cover; }
+.gd-fig-bred img{ object-position: 70% 60%; height: clamp(150px, 16vw, 210px); }
+
+/* Sticky mini-indholdsfortegnelse i højre spalte (kun desktop; mobil bruger den sammenklappelige boks) */
+.gd-minitoc{ display:none; }
+@media (min-width:1024px){
+  .gd-minitoc{
+    display:block; position:sticky; top: calc(var(--header-h, 68px) + var(--space-4)); order:9;
+    background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg);
+    padding: var(--space-4); box-shadow: var(--shadow-sm); max-height: calc(100vh - var(--header-h, 68px) - var(--space-6)); overflow:auto;
+  }
+  .gd-minitoc h2{ font-size:16px; margin:0 0 var(--space-2); }
+  .gd-minitoc ol{ list-style:none; margin:0; padding:0; display:grid; gap:0; counter-reset: mt; font-size:14px; }
+  .gd-minitoc li{ counter-increment: mt; }
+  .gd-minitoc a{
+    display:flex; gap:8px; align-items:flex-start; padding:7px 10px; border-radius:8px; color: var(--color-fg); text-decoration:none; line-height:1.3;
+    border-left:3px solid transparent;
+  }
+  .gd-minitoc a::before{ content: counter(mt) "."; color: var(--color-fg-muted); font-weight:700; min-width:1.4em; }
+  .gd-minitoc a:hover{ background: var(--color-surface-2); }
+  .gd-minitoc a[aria-current="location"]{ background: var(--color-primary-tint); border-left-color: var(--color-primary); font-weight:600; }
+  .gd-minitoc a[aria-current="location"]::before{ color: var(--color-primary-hover); }
+}
+@media (max-width: 700px){
+  .gd-hero-photo{ filter: brightness(1.05); }
+  .gd-hero-media::after{ background: linear-gradient(90deg, rgba(15,13,10,.86) 0%, rgba(15,13,10,.7) 60%, rgba(15,13,10,.5) 100%), linear-gradient(0deg, rgba(15,13,10,.3), rgba(15,13,10,0) 40%); }
+}
+
+/* ===== W14 iteration 3 ===== */
+/* hero <= ca. 310 px: H1 højst to linjer, ingress tre */
+.gd-hero h1{ max-width: min(100%, 820px); font-size: clamp(30px, 2.9vw, 40px); line-height: 1.06; }
+.gd-lede{ max-width: 46em; font-size: clamp(15.5px, 1.2vw, 17px); line-height: 1.45; }
+.gd-kicker{ margin-top: var(--space-3); }
+.gd-meta{ margin-top: var(--space-3); }
+.gd-hero{ padding-bottom: var(--space-4); }
+/* linjelængde: højst ca. 75 tegn */
+.gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 60ch; }
+@media (min-width:1100px){ .gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 60ch; } }
+/* typefliser under artiklen */
+.gd-findtype{ margin-top: var(--space-7); padding-top: var(--space-6); border-top: 1px solid var(--color-border); }
+.gd-findtype h2{ font-size: clamp(22px, 2.6vw, 28px); margin: 0 0 var(--space-1); }
+.gd-findtype > p{ margin: 0 0 var(--space-3); color: var(--color-fg-muted); font-size: 15px; }
+.gd-findtype .gd-types{ margin-top: var(--space-3); }
+.gd-findtype a.gd-type-link{
+  display:flex; flex-direction:column; height:100%; background: var(--color-surface); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); overflow:hidden; color: var(--color-fg); text-decoration:none; box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+.gd-findtype a.gd-type-link:hover{ box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--color-primary); }
+.gd-findtype .gd-type-go{ margin-top:auto; display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; color: var(--color-primary); }
+.gd-findtype .gd-type-go svg{ width:14px; height:14px; }
+.gd-findtype .gd-type{ margin:0; }
+
+/* tap-mål: logo-linket i headeren er 30 px højt; hit-area >= 44 px uden at flytte noget */
+.site-header .brand{ min-height: 44px; }
