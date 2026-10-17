@@ -63,9 +63,9 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=c0781ea2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=d8b4e62d) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css?v=594a0c5c">
-<link rel="stylesheet" href="css/p-maerke.css?v=594a0c5c">
-<link rel="stylesheet" href="css/p-brand-logo.css?v=594a0c5c">
+<link rel="stylesheet" href="css/styles.css?v=c0d860c9">
+<link rel="stylesheet" href="css/p-maerke.css?v=c0d860c9">
+<link rel="stylesheet" href="css/p-brand-logo.css?v=c0d860c9">
 <noscript><style>.bl--logo>.bl-fb{display:inline-flex}.bl--logo>.bl-mark{display:none}</style></noscript>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Yamaha","item":"https://bikerbasen.dk/maerke-yamaha"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en brugt Yamaha-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"66 af de 68 Yamaha-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 4.500 kr. til 239.900 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 62.450 kr. De resterende 2 annoncer oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre Yamaha på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"6 af 49 Yamaha-annoncer med kendt effekt er ikke udelukket på effekt til A2 — de holder sig under loftet på 47 hk (35 kW), heraf 1 også inden for A1-grænsen — mens 43 kræver stort kørekort. A2 stiller også krav om maks. 0,2 kW pr. kg og om, at maskinen ikke er afledt af en model med over dobbelt effekt; det står ikke i annoncerne, så tjek registreringsattesten. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra. De resterende 19 annoncer mangler effektoplysningen hos kilden."}},{"@type":"Question","name":"Hvilke Yamaha-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 68 Yamaha-annoncer går XV 750 Virago (4 stk.), MT-09 (3 stk.), XV 1900 (3 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Yamaha-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
@@ -125,7 +125,8 @@ try{
        liste, facetter, prisniveau, FAQ og andre mærker (SEO).
        Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
        reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
-  <section class="mk-hero">
+  <section class="mk-hero mk-hero-flad">
+    <!-- w14: landskabsfotoet (neutralt, ingen annonce) fylder højre side; aldrig et fremmed mærkes typefoto. Faktapanelet har ægte tal. -->
     <div class="mk-hero-media" aria-hidden="true">
       <img class="mk-hero-photo" src="img/hero-1600.webp"
            srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
@@ -137,10 +138,10 @@ try{
         <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
         <span>Yamaha</span>
       </nav>
-      <p class="mk-wordmark mk-wordmark--logo" aria-hidden="true"><span class="bl bl--hero bl--logo" data-bl="yamaha" style="--bl-ar:1.011;--bl-sa:1.005" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/yamaha.svg"></span><img class="bl-ref" src="img/brands/yamaha.svg" alt="" width="73" height="72" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">Y</span></span></p>
+      <p class="mk-wordmark mk-wordmark--logo mk-wordmark--lockup" aria-hidden="true"><span class="bl bl--hero bl--logo bl--emblem" data-bl="yamaha" style="--bl-ar:1.001;--bl-sa:1" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/yamaha-emblem.svg"></span><img class="bl-ref" src="img/brands/yamaha-emblem.svg" alt="" width="72" height="72" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">Y</span></span><span class="bl bl--wm bl--logo" data-bl="yamaha" style="--bl-ar:3.484;--bl-sa:1.867" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/yamaha-ordmaerke.svg"></span><img class="bl-ref" src="img/brands/yamaha-ordmaerke.svg" alt="" width="153" height="44" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">Y</span></span></p>
       <h1>Brugte Yamaha-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">Der er <strong>68</strong> brugte Yamaha motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 4.500 kr. til 239.900 kr., med årgange mellem 1973 og 2027.</p>
-      <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Yamaha spænder fra MT-seriens nakede gadecykler og R-seriens sportscykler til klassiske cruisere og tourere — et bredt japansk program med et solidt ry for holdbarhed. Udvalget dækker Touring, Naked, Cruiser m.fl. 2 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Jensens Motorcykler og Rydbergs MC, og handlen sker hos kilden.</p></details>
+      <ul class="mk-panel" aria-label="Fakta om udvalget"><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg></span><div><strong><span data-mk-n>68</span> Yamaha-motorcykler</strong><span>indekseret</span></div></li><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.8l2.9 6 6.5.7-4.9 4.4 1.3 6.4L12 17l-5.8 3.3 1.3-6.4-4.9-4.4 6.5-.7Z"/></svg></span><div><strong>Mest udbudte typer</strong><span>Cruiser, Touring, Naked</span></div></li><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg></span><div><strong>Prisniveau</strong><span>fra 4.500 kr. til 239.900 kr.</span></div></li></ul>
     </div>
   </section>
 
@@ -151,7 +152,7 @@ try{
           <label for="mk-q">Mærke eller model</label>
           <div class="input-icon-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Yamaha (fx XV 750 Virago …)" aria-describedby="mk-q-hint">
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Fx XV 750 Virago" aria-describedby="mk-q-hint">
           </div>
           <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til Yamaha. Skriv en model for at snævre ind.</span>
         </div>
@@ -190,7 +191,7 @@ try{
           </div>
         </fieldset>
         <div class="mk-f-go">
-          <button type="submit" class="btn btn-primary btn-lg">Søg Yamaha motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
+          <button type="submit" class="btn btn-primary btn-lg">Søg Yamaha<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
           <p class="mk-count"><span data-mk-n>68</span> Yamaha motorcykler i Danmark</p>
         </div>
       </form>
@@ -200,10 +201,6 @@ try{
         <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg></span><span><strong>Ikke oplyst frem for gæt</strong><span class="mk-trust-sub">Mangler et tal, står der "Ikke oplyst" i stedet for et skøn.</span></span></li>
         <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span><span><strong>Handlen sker hos sælger</strong><span class="mk-trust-sub">Vi er et indeks og tager ingen kommission af salget.</span></span></li>
       </ul>
-    <section class="mk-kf" aria-labelledby="mk-kf-h">
-      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
-      <ul class="mk-kf-liste"><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><span class="mk-kf-t"><span data-mk-n>68</span> Yamaha-motorcykler</span> er indekseret fra danske forhandlere og markedspladser.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Oplyste priser fra 4.500 kr. til 239.900 kr. (ikke alle annoncer oplyser en pris).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>6 af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Kilden står på hvert kort, og handlen sker hos sælger. Mangler et tal, står der "Ikke oplyst".</span></li></ul>
-    </section>
   </div>
 
   <section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
@@ -332,7 +329,7 @@ try{
               <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Kilden står på hvert kort</li>
               <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Filtrér på dit kørekort</li>
             </ul>
-            <a class="btn btn-primary" href="soegning.html?brands=Yamaha">Søg Yamaha motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+            <a class="btn btn-primary" href="soegning.html?brands=Yamaha">Søg Yamaha<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
           </div>
           <img class="mk-cta-img" src="https://assets.guloggratis.dk/images/14fc64b5-ee86-4950-acf9-b801070f7495/14fc64b5-ee86-4950-acf9-b801070f7495-320x240.webp" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         </aside>
@@ -367,6 +364,10 @@ try{
       </div>
     </div>
   </section>
+
+  <div class="container mk-kf-vrap">
+    <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Yamaha spænder fra MT-seriens nakede gadecykler og R-seriens sportscykler til klassiske cruisere og tourere — et bredt japansk program med et solidt ry for holdbarhed. Udvalget dækker Touring, Naked, Cruiser m.fl. 2 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Jensens Motorcykler og Rydbergs MC, og handlen sker hos kilden.</p></details>
+  </div>
 
   <section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
     <div class="container">
@@ -414,39 +415,39 @@ try{
         <section class="mk-col" aria-labelledby="mk-mod-h">
         <div class="mk-col-head"><h2 id="mk-mod-h">Yamaha-modeller med flest annoncer</h2></div>
         <ul class="mk-mini">
-          <li><a href="soegning.html?brands=Yamaha&amp;model=XV%20750%20Virago"><strong>XV 750 Virago</strong><span>4 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Yamaha&amp;model=MT-09"><strong>MT-09</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Yamaha&amp;model=XV%201900"><strong>XV 1900</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Yamaha&amp;model=FJR%201300%20A"><strong>FJR 1300 A</strong><span>2 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Yamaha&amp;model=T%C3%A9n%C3%A9r%C3%A9%20700"><strong>Ténéré 700</strong><span>2 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Yamaha&amp;model=T%C3%A9n%C3%A9r%C3%A9%20700%20World%20Raid%20T7"><strong>Ténéré 700 World Raid T7</strong><span>2 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Yamaha&amp;model=XV%20750%20Virago" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/14fc64b5-ee86-4950-acf9-b801070f7495/14fc64b5-ee86-4950-acf9-b801070f7495-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>XV 750 Virago</strong><span>4 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Yamaha&amp;model=MT-09" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_311741_O6ZT_1786102601.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>MT-09</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Yamaha&amp;model=XV%201900" class="mk-mini-foto"><img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_311332_W65Z_1785498417-cropresize-768x540.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>XV 1900</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Yamaha&amp;model=FJR%201300%20A" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_251538_5R8S_1682753968.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>FJR 1300 A</strong><span>2 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Yamaha&amp;model=T%C3%A9n%C3%A9r%C3%A9%20700" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/33112ae8-fa1b-4425-8c0f-32a6729ef536/33112ae8-fa1b-4425-8c0f-32a6729ef536-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Ténéré 700</strong><span>2 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Yamaha&amp;model=T%C3%A9n%C3%A9r%C3%A9%20700%20World%20Raid%20T7" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/fef2886f-1557-486a-a130-dc2e3620423b/fef2886f-1557-486a-a130-dc2e3620423b-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Ténéré 700 World Raid T7</strong><span>2 annoncer</span></a></li>
         </ul>
         <details class="mk-mere"><summary>Flere Yamaha-modeller (24)</summary>
           <ul class="mk-mini">
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Tracer%20900"><strong>Tracer 900</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Tricity%20300"><strong>Tricity 300</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=XVS%201100"><strong>XVS 1100</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=FJ%201200"><strong>FJ 1200</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=FJR%201300"><strong>FJR 1300</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=FJR%201300%20AS"><strong>FJR 1300 AS</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=FZ6%20S"><strong>FZ6 S</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Fzr%20600"><strong>Fzr 600</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Moto%20yamaha"><strong>Moto yamaha</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=MT-07"><strong>MT-07</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=MT-09%20Y-AMT"><strong>MT-09 Y-AMT</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Tracer%207%20GT"><strong>Tracer 7 GT</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Tracer%20700"><strong>Tracer 700</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Tracer%209%20GT"><strong>Tracer 9 GT</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=TT%20110%20R"><strong>TT 110 R</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=TT%20R50E"><strong>TT R50E</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Tw200"><strong>Tw200</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=TX%20750"><strong>TX 750</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=XJ%20600%20Diversion"><strong>XJ 600 Diversion</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=XJ%20600%20S%20Diversion"><strong>XJ 600 S Diversion</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=XJ%20900%20S%20Diversion"><strong>XJ 900 S Diversion</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=Xj%20900%20%C3%A5rg%2090"><strong>Xj 900 årg 90</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=XJ600"><strong>XJ600</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Yamaha&amp;model=XJR%201300"><strong>XJR 1300</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Tracer%20900" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_311510_MGIE_1785824272.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Tracer 900</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Tricity%20300" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/36a57cb1-449e-41bb-967d-3cd116220950/36a57cb1-449e-41bb-967d-3cd116220950-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Tricity 300</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=XVS%201100" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/4efb0dae-e2fb-4ace-9f41-748898b49078/4efb0dae-e2fb-4ace-9f41-748898b49078-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>XVS 1100</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=FJ%201200" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/7694c1b1-c5dd-46c0-9995-e4cc9197da13/7694c1b1-c5dd-46c0-9995-e4cc9197da13-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>FJ 1200</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=FJR%201300" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/182213/Yamaha_FJR_1300_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>FJR 1300</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=FJR%201300%20AS" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/183320/Yamaha_FJR_1300_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>FJR 1300 AS</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=FZ6%20S" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_284040_EP11_1741619342.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>FZ6 S</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Fzr%20600" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/4a71af26-acba-4c85-8914-b9a9f08c2e66/4a71af26-acba-4c85-8914-b9a9f08c2e66-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Fzr 600</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Moto%20yamaha" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/7fb1e460-866f-4b22-b3e5-bfd6b90eb58d/7fb1e460-866f-4b22-b3e5-bfd6b90eb58d-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Moto yamaha</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=MT-07" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/99020b83-610e-4fcc-8d89-ce2edc687cb8/99020b83-610e-4fcc-8d89-ce2edc687cb8-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>MT-07</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=MT-09%20Y-AMT" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/5e17ce4f-d779-4399-b2d5-6538f491a5c6/5e17ce4f-d779-4399-b2d5-6538f491a5c6-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>MT-09 Y-AMT</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Tracer%207%20GT" class="mk-mini-foto"><img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_312657_6G4J_1787387129-cropresize-768x540.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Tracer 7 GT</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Tracer%20700" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/7f3ed2f6-366d-4e61-8a77-ca8efde930ee/7f3ed2f6-366d-4e61-8a77-ca8efde930ee-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Tracer 700</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Tracer%209%20GT" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/a1b09db2-80c2-40bc-8085-8640f127165c/a1b09db2-80c2-40bc-8085-8640f127165c-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Tracer 9 GT</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=TT%20110%20R" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/950a0af8-32f9-4d2f-afee-baac66cf0122/950a0af8-32f9-4d2f-afee-baac66cf0122-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>TT 110 R</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=TT%20R50E" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/af0531d2-8fba-49c0-9f27-7e030ad24fda/af0531d2-8fba-49c0-9f27-7e030ad24fda-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>TT R50E</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Tw200" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/9688be32-916d-4b36-831d-f0c7de218670/9688be32-916d-4b36-831d-f0c7de218670-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Tw200</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=TX%20750" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/151002/Yamaha_TX_750_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>TX 750</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=XJ%20600%20Diversion" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_270410_52IC_1715774410.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>XJ 600 Diversion</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=XJ%20600%20S%20Diversion" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/184397/Yamaha_XJ_600_S_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>XJ 600 S Diversion</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=XJ%20900%20S%20Diversion" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/182663/Yamaha_XJ_900_S_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>XJ 900 S Diversion</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=Xj%20900%20%C3%A5rg%2090" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/9d87126f-67fc-40a0-b5c2-d7a08536b504/9d87126f-67fc-40a0-b5c2-d7a08536b504-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Xj 900 årg 90</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=XJ600" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/579b1f15-976c-43db-9867-ac56f044c2f0/579b1f15-976c-43db-9867-ac56f044c2f0-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>XJ600</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Yamaha&amp;model=XJR%201300" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/70659/Yamaha_XJR_1300_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>XJR 1300</strong><span>1 annonce</span></a></li>
           </ul>
         </details>
         <p class="mk-col-foot"><a class="mk-link" href="soegning.html?brands=Yamaha">Se alle Yamaha-annoncer<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
@@ -486,7 +487,7 @@ try{
         <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
              FAQ. js/maerke.js opdaterer alle [data-mk-n] samlet, hvis lageret
              har ændret sig siden bygget — aldrig kun ét af dem. -->
-        <div><h2 class="brand-sub" id="brand-antal">Flere Yamaha-annoncer</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>68</span> annoncer i alt. De første 24 af resten vises her. Senest bekræftet hos kilderne 17. okt. 2026.</p></div>
+        <div><h2 class="brand-sub" id="brand-antal">Flere Yamaha-annoncer</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>68</span> annoncer i alt. De første 8 af resten vises her. Senest bekræftet hos kilderne 17. okt. 2026.</p></div>
         <a class="section-link" href="soegning.html?brands=Yamaha">Alle <span data-mk-n>68</span> i søgningen<span aria-hidden="true"></span></a>
       </div>
       
@@ -517,7 +518,7 @@ try{
           <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Yamaha&amp;sort=year-desc">Årgang: nyeste</a></div>
         <p class="brand-facet-note">47 uden oplyst type — dem finder du i <a href="soegning.html?brands=Yamaha">den fulde søgning</a>.</p></div>
       </div>
-      <div class="listings-grid" id="brand-listings" data-brand="Yamaha" data-viste="24">
+      <div class="listings-grid" id="brand-listings" data-brand="Yamaha" data-viste="8">
   <article class="card card-rich" data-listing-id="d6a66841-e0ff-4ed5-96b8-9d945295d7ae" data-external="1">
     <div class="card-media">
       <img src="https://assets.guloggratis.dk/images/36a57cb1-449e-41bb-967d-3cd116220950/36a57cb1-449e-41bb-967d-3cd116220950-320x240.webp" alt="Yamaha Tricity 300" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -692,360 +693,8 @@ try{
       </div>
     </div>
     <a href="annonce.html?id=d114bf37-bc3a-4205-90ad-9207fea0534f" class="card-link" aria-label="Se annonce: Yamaha FJR 1300 AS, 199.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="d741f235-bd3e-4537-87a6-77d7d2207435" data-external="1" data-type="classic">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/151277/Yamaha_XS_650_0_2.jpg?v=1" alt="Yamaha XS 650" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="d741f235-bd3e-4537-87a6-77d7d2207435" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha XS 650">Yamaha XS 650</h3>
-        <span class="rk-pris">40.000 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1973</span><span>39.000 km</span><span>Classic</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a2" title="Ikke udelukket til A2 ud fra 653 ccm og 46 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Mulig A2</span><span class="visually-hidden">. Ikke udelukket til A2 ud fra 653 ccm og 46 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten.</span></li><li class="rk-chip">653 ccm</li><li class="rk-chip">46 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=d741f235-bd3e-4537-87a6-77d7d2207435" class="card-link" aria-label="Se annonce: Yamaha XS 650, 40.000 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="da90d2f3-4d44-4784-9a69-68933998262a" data-external="1" data-type="touring">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/183111/Yamaha_FJR_1300_0_2.jpg?v=1" alt="Yamaha FJR 1300 A" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="da90d2f3-4d44-4784-9a69-68933998262a" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha FJR 1300 A">Yamaha FJR 1300 A</h3>
-        <span class="rk-pris">189.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2017</span><span>50.000 km</span><span>Touring</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.298 ccm og 147 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.298 ccm og 147 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.298 ccm</li><li class="rk-chip">147 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=da90d2f3-4d44-4784-9a69-68933998262a" class="card-link" aria-label="Se annonce: Yamaha FJR 1300 A, 189.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="edce6195-f120-45a1-b547-90061239fe35" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/183200/Yamaha_XVZ_1200_0_2.jpg?v=1" alt="Yamaha XVZ 1200" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="edce6195-f120-45a1-b547-90061239fe35" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha XVZ 1200">Yamaha XVZ 1200</h3>
-        <span class="rk-pris">25.000 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1987</span><span>50.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.198 ccm og 97 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.198 ccm og 97 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.198 ccm</li><li class="rk-chip">97 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=edce6195-f120-45a1-b547-90061239fe35" class="card-link" aria-label="Se annonce: Yamaha XVZ 1200, 25.000 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="f1f540ee-20cc-4e1a-847e-f7d50f8bcf0c" data-external="1" data-type="cruiser">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/185277/Yamaha_XVS_650_Drag_Star_0_2.jpg?v=1" alt="Yamaha XVS 650 Drag Star" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="f1f540ee-20cc-4e1a-847e-f7d50f8bcf0c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha XVS 650 Drag Star">Yamaha XVS 650 Drag Star</h3>
-        <span class="rk-pris">54.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2003</span><span>37.000 km</span><span>Cruiser</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a2" title="Ikke udelukket til A2 ud fra 649 ccm og 39 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Mulig A2</span><span class="visually-hidden">. Ikke udelukket til A2 ud fra 649 ccm og 39 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten.</span></li><li class="rk-chip">649 ccm</li><li class="rk-chip">39 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=f1f540ee-20cc-4e1a-847e-f7d50f8bcf0c" class="card-link" aria-label="Se annonce: Yamaha XVS 650 Drag Star, 54.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="df250ff6-326a-4047-98c2-cde8f281b3b6" data-external="1" data-type="cruiser">
-    <div class="card-media">
-      <div class="foto-tom"><span class="foto-tom-ikon" style="width:26px;height:26px;display:block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.3A2.3 2.3 0 0 1 6.3 6h1.4l1-1.7A1.3 1.3 0 0 1 9.8 3.6h4.4a1.3 1.3 0 0 1 1.1.7l1 1.7h1.4A2.3 2.3 0 0 1 20 8.3v9.4A2.3 2.3 0 0 1 17.7 20H6.3A2.3 2.3 0 0 1 4 17.7Z"/><circle cx="12" cy="13" r="3.6"/></svg></span><p class="foto-tom-titel">Ingen fotos i denne annonce</p><p class="foto-tom-fakta"><span>Cruiser</span><span>Brugt</span></p></div>
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="df250ff6-326a-4047-98c2-cde8f281b3b6" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha XVS 950 A">Yamaha XVS 950 A</h3>
-        <span class="rk-pris">109.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2014</span><span>22.000 km</span><span>Cruiser</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 950 ccm og 53 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 950 ccm og 53 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">950 ccm</li><li class="rk-chip">53 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=df250ff6-326a-4047-98c2-cde8f281b3b6" class="card-link" aria-label="Se annonce: Yamaha XVS 950 A, 109.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="145cf1b2-de77-47bd-b155-849cb903a685" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/9d87126f-67fc-40a0-b5c2-d7a08536b504/9d87126f-67fc-40a0-b5c2-d7a08536b504-320x240.webp" alt="Yamaha Xj 900 årg 90" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="145cf1b2-de77-47bd-b155-849cb903a685" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha Xj 900 årg 90">Yamaha Xj 900 årg 90</h3>
-        <span class="rk-pris">8.500 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1990</span><span>79.736 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">98 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Tjele, Midtjylland" role="group" aria-label="Sted: Tjele, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Tjele</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=145cf1b2-de77-47bd-b155-849cb903a685" class="card-link" aria-label="Se annonce: Yamaha Xj 900 årg 90, 8.500 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="16e47e35-859e-44fa-805e-f3d81eb43e20" data-external="1">
-    <div class="card-media">
-      <img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_311332_W65Z_1785498417-cropresize-768x540.webp" alt="Yamaha XV 1900" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="16e47e35-859e-44fa-805e-f3d81eb43e20" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha XV 1900">Yamaha XV 1900</h3>
-        <span class="rk-pris">139.999 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2006</span><span>54.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.854 ccm og 90 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.854 ccm og 90 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.854 ccm</li><li class="rk-chip">90 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Horsens, Midtjylland" role="group" aria-label="Sted: Horsens, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Horsens</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Jensens Motorcykler (jensensmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · jensensmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>jensensmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=16e47e35-859e-44fa-805e-f3d81eb43e20" class="card-link" aria-label="Se annonce: Yamaha XV 1900, 139.999 kr. — hos Jensens Motorcykler"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="174894d3-94e2-4ba0-9f6c-e9bb90589345" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_251538_5R8S_1682753968.jpeg" alt="Yamaha FJR 1300 A" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="174894d3-94e2-4ba0-9f6c-e9bb90589345" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha FJR 1300 A">Yamaha FJR 1300 A</h3>
-        <span class="rk-pris">129.995 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2011</span><span>70.267 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.298 ccm og 143 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.298 ccm og 143 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.298 ccm</li><li class="rk-chip">143 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=174894d3-94e2-4ba0-9f6c-e9bb90589345" class="card-link" aria-label="Se annonce: Yamaha FJR 1300 A, 129.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="2ed6e7d1-a453-4333-8ca4-4e4737b82b4d" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/579b1f15-976c-43db-9867-ac56f044c2f0/579b1f15-976c-43db-9867-ac56f044c2f0-320x240.webp" alt="Yamaha XJ600" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="2ed6e7d1-a453-4333-8ca4-4e4737b82b4d" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha XJ600">Yamaha XJ600</h3>
-        <span class="rk-pris">9.900 kr.</span>
-      </div>
-      <p class="rk-linje"><span class="rk-mangler">Årgang ikke oplyst</span><span>57.700 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 600 ccm og 92 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 600 ccm og 92 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">600 ccm</li><li class="rk-chip">92 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thisted, Nordjylland" role="group" aria-label="Sted: Thisted, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thisted</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=2ed6e7d1-a453-4333-8ca4-4e4737b82b4d" class="card-link" aria-label="Se annonce: Yamaha XJ600, 9.900 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="78dac832-dac7-473e-8e6d-5eef611276c6" data-external="1">
-    <div class="card-media">
-      <img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_312657_6G4J_1787387129-cropresize-768x540.webp" alt="Yamaha Tracer 7 GT" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="78dac832-dac7-473e-8e6d-5eef611276c6" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha Tracer 7 GT">Yamaha Tracer 7 GT</h3>
-        <span class="rk-pris">94.999 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2022</span><span>7.450 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 689 ccm og 73 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 689 ccm og 73 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">689 ccm</li><li class="rk-chip">73 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Horsens, Midtjylland" role="group" aria-label="Sted: Horsens, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Horsens</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Jensens Motorcykler (jensensmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · jensensmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>jensensmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=78dac832-dac7-473e-8e6d-5eef611276c6" class="card-link" aria-label="Se annonce: Yamaha Tracer 7 GT, 94.999 kr. — hos Jensens Motorcykler"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="6f8cc9e0-e2c2-4eeb-829a-57f2b4ce71cb" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_311510_MGIE_1785824272.jpeg" alt="Yamaha Tracer 900" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="6f8cc9e0-e2c2-4eeb-829a-57f2b4ce71cb" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha Tracer 900">Yamaha Tracer 900</h3>
-        <span class="rk-pris">84.900 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2016</span><span>59.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 847 ccm og 115 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 847 ccm og 115 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">847 ccm</li><li class="rk-chip">115 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=6f8cc9e0-e2c2-4eeb-829a-57f2b4ce71cb" class="card-link" aria-label="Se annonce: Yamaha Tracer 900, 84.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="e5522b2a-8bbf-4d27-8a5d-df08a3d818ea" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/570ceaa1-9952-46f8-968f-d3ff477c4399/570ceaa1-9952-46f8-968f-d3ff477c4399-320x240.webp" alt="Yamaha XV 1000 Gold" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="e5522b2a-8bbf-4d27-8a5d-df08a3d818ea" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha XV 1000 Gold">Yamaha XV 1000 Gold</h3>
-        <span class="rk-pris">26.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1986</span><span>81.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.000 ccm og 63 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.000 ccm og 63 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.000 ccm</li><li class="rk-chip">63 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Ålbæk, Nordjylland" role="group" aria-label="Sted: Ålbæk, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Ålbæk</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=e5522b2a-8bbf-4d27-8a5d-df08a3d818ea" class="card-link" aria-label="Se annonce: Yamaha XV 1000 Gold, 26.800 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="e163c290-c896-4c16-93f5-49b10d64af2c" data-external="1">
-    <div class="card-media">
-      <img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_311895_P3DD_1786365048-cropresize-768x540.webp" alt="Yamaha Tricity 300" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="e163c290-c896-4c16-93f5-49b10d64af2c" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha Tricity 300">Yamaha Tricity 300</h3>
-        <span class="rk-pris">89.999 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2025</span><span>3.900 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a2" title="Ikke udelukket til A2 ud fra 292 ccm og 28 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Mulig A2</span><span class="visually-hidden">. Ikke udelukket til A2 ud fra 292 ccm og 28 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten.</span></li><li class="rk-chip">292 ccm</li><li class="rk-chip">28 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Horsens, Midtjylland" role="group" aria-label="Sted: Horsens, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Horsens</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Jensens Motorcykler (jensensmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · jensensmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>jensensmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=e163c290-c896-4c16-93f5-49b10d64af2c" class="card-link" aria-label="Se annonce: Yamaha Tricity 300, 89.999 kr. — hos Jensens Motorcykler"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="8e9484f9-97f3-4e79-bc8a-128e167f34b4" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_284040_EP11_1741619342.jpeg" alt="Yamaha FZ6 S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="8e9484f9-97f3-4e79-bc8a-128e167f34b4" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha FZ6 S">Yamaha FZ6 S</h3>
-        <span class="rk-pris">34.995 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2007</span><span>48.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 600 ccm og 77 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 600 ccm og 77 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">600 ccm</li><li class="rk-chip">77 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=8e9484f9-97f3-4e79-bc8a-128e167f34b4" class="card-link" aria-label="Se annonce: Yamaha FZ6 S, 34.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="a1cfbbe0-af22-413a-aea1-f3766d7be5d5" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_312401_ZQ0W_1787047138.jpeg" alt="Yamaha YZF R3" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="a1cfbbe0-af22-413a-aea1-f3766d7be5d5" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha YZF R3">Yamaha YZF R3</h3>
-        <span class="rk-pris">29.995 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2015</span><span>23.694 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a2" title="Ikke udelukket til A2 ud fra 321 ccm og 42 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Mulig A2</span><span class="visually-hidden">. Ikke udelukket til A2 ud fra 321 ccm og 42 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten.</span></li><li class="rk-chip">321 ccm</li><li class="rk-chip">42 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=a1cfbbe0-af22-413a-aea1-f3766d7be5d5" class="card-link" aria-label="Se annonce: Yamaha YZF R3, 29.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="ad9700e3-d151-4b83-bd3f-2db81116fee0" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_270410_52IC_1715774410.jpeg" alt="Yamaha XJ 600 Diversion" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="ad9700e3-d151-4b83-bd3f-2db81116fee0" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Yamaha XJ 600 Diversion">Yamaha XJ 600 Diversion</h3>
-        <span class="rk-pris">14.995 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1997</span><span>50.324 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 599 ccm og 60 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 599 ccm og 60 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">599 ccm</li><li class="rk-chip">60 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=ad9700e3-d151-4b83-bd3f-2db81116fee0" class="card-link" aria-label="Se annonce: Yamaha XJ 600 Diversion, 14.995 kr. — hos Rydbergs MC"></a>
   </article></div>
-      <p class="brand-mere"><a href="soegning.html?brands=Yamaha" class="btn btn-primary">Se alle 68 Yamaha i søgningen</a></p>
+      <p class="mk-mere-lille"><a class="mk-link" href="soegning.html?brands=Yamaha">Se alle <span data-mk-n>68</span> Yamaha i søgningen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
       <div class="brand-actions">
         <a href="opret-annonce.html" class="btn btn-outline">Sælg din Yamaha</a>
       </div>
@@ -1149,6 +798,13 @@ try{
       </details>
     </section>
 
+    <section class="section mk-kf-bund" style="padding-top:0;">
+      <section class="mk-kf" aria-labelledby="mk-kf-h">
+      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
+      <ul class="mk-kf-liste"><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><span class="mk-kf-t"><span data-mk-n>68</span> Yamaha-motorcykler</span> er indekseret fra danske forhandlere og markedspladser.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Oplyste priser fra 4.500 kr. til 239.900 kr. (ikke alle annoncer oplyser en pris).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>6 af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Kilden står på hvert kort, og handlen sker hos sælger. Mangler et tal, står der "Ikke oplyst".</span></li></ul>
+    </section>
+    </section>
+
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre mærker</h2>
       <div class="popular-row">
@@ -1237,25 +893,25 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=594a0c5c"></script>
-<script defer src="js/supabase-config.js?v=594a0c5c"></script>
-<script defer src="js/supabase-api.js?v=594a0c5c"></script>
-<script defer src="js/icons.js?v=594a0c5c"></script>
-<script defer src="js/bike-art.js?v=594a0c5c"></script>
+<script defer src="js/security.js?v=c0d860c9"></script>
+<script defer src="js/supabase-config.js?v=c0d860c9"></script>
+<script defer src="js/supabase-api.js?v=c0d860c9"></script>
+<script defer src="js/icons.js?v=c0d860c9"></script>
+<script defer src="js/bike-art.js?v=c0d860c9"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=594a0c5c"></script>
-<script defer src="js/store.js?v=594a0c5c"></script>
-<script defer src="js/maaling.js?v=594a0c5c"></script>
-<script defer src="js/backend-bridge.js?v=594a0c5c"></script>
-<script defer src="js/components.js?v=594a0c5c"></script>
+<script defer src="js/data.js?v=c0d860c9"></script>
+<script defer src="js/store.js?v=c0d860c9"></script>
+<script defer src="js/maaling.js?v=c0d860c9"></script>
+<script defer src="js/backend-bridge.js?v=c0d860c9"></script>
+<script defer src="js/components.js?v=c0d860c9"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=594a0c5c"></script>
-<script defer src="js/brand-logos-data.js?v=594a0c5c"></script>
-<script defer src="js/brand-logos.js?v=594a0c5c"></script>
-<script defer src="js/maerke.js?v=594a0c5c"></script>
+<script defer src="js/sortering.js?v=c0d860c9"></script>
+<script defer src="js/brand-logos-data.js?v=c0d860c9"></script>
+<script defer src="js/brand-logos.js?v=c0d860c9"></script>
+<script defer src="js/maerke.js?v=c0d860c9"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">

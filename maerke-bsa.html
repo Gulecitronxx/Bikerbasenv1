@@ -63,8 +63,8 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=c0781ea2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=d8b4e62d) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css?v=594a0c5c">
-<link rel="stylesheet" href="css/p-maerke.css?v=594a0c5c">
+<link rel="stylesheet" href="css/styles.css?v=c0d860c9">
+<link rel="stylesheet" href="css/p-maerke.css?v=c0d860c9">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"BSA","item":"https://bikerbasen.dk/maerke-bsa"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en BSA-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"7 af de 8 BSA-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 100.000 kr. til 115.000 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 110.000 kr. De resterende 1 annonce oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre BSA på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"2 af 4 BSA-annoncer med kendt effekt er ikke udelukket på effekt til A2 — de holder sig under loftet på 47 hk (35 kW) — mens 2 kræver stort kørekort. A2 stiller også krav om maks. 0,2 kW pr. kg og om, at maskinen ikke er afledt af en model med over dobbelt effekt; det står ikke i annoncerne, så tjek registreringsattesten. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra. De resterende 4 annoncer mangler effektoplysningen hos kilden."}},{"@type":"Question","name":"Hvilke BSA-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 8 BSA-annoncer går A65 Hornet Classic Bike (1 stk.), A65 Lightning Rocket Classic Bike (1 stk.), A65 Thunderbolt Classic Bike (1 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle BSA-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
 </head>
@@ -123,9 +123,12 @@ try{
        liste, facetter, prisniveau, FAQ og andre mærker (SEO).
        Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
        reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
-  <section class="mk-hero mk-hero-type">
+  <section class="mk-hero mk-hero-flad">
+    <!-- w14: landskabsfotoet (neutralt, ingen annonce) fylder højre side; aldrig et fremmed mærkes typefoto. Faktapanelet har ægte tal. -->
     <div class="mk-hero-media" aria-hidden="true">
-      
+      <img class="mk-hero-photo" src="img/hero-1600.webp"
+           srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
+           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
     </div>
     <div class="container mk-hero-inner">
       <nav class="breadcrumb" aria-label="Brødkrumme">
@@ -136,7 +139,7 @@ try{
       <p class="mk-wordmark" aria-hidden="true"><span class="mk-mono">B</span><span>BSA</span></p>
       <h1>BSA-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">Der er <strong>8</strong> BSA motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 100.000 kr. til 115.000 kr., med årgange mellem 1964 og 2025.</p>
-      <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">1 annonce oplyser pris ved henvendelse. Annoncerne er indekseret fra Gul og Gratis, og handlen sker hos kilden.</p></details>
+      <ul class="mk-panel" aria-label="Fakta om udvalget"><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg></span><div><strong><span data-mk-n>8</span> BSA-motorcykler</strong><span>indekseret</span></div></li><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg></span><div><strong>Prisniveau</strong><span>fra 100.000 kr. til 115.000 kr.</span></div></li></ul>
     </div>
   </section>
 
@@ -147,7 +150,7 @@ try{
           <label for="mk-q">Mærke eller model</label>
           <div class="input-icon-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="BSA (fx A65 Hornet Classic Bike …)" aria-describedby="mk-q-hint">
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Model, fx …" aria-describedby="mk-q-hint">
           </div>
           <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til BSA. Skriv en model for at snævre ind.</span>
         </div>
@@ -180,7 +183,7 @@ try{
           </div>
         </fieldset>
         <div class="mk-f-go">
-          <button type="submit" class="btn btn-primary btn-lg">Søg BSA motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
+          <button type="submit" class="btn btn-primary btn-lg">Søg BSA<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
           <p class="mk-count"><span data-mk-n>8</span> BSA motorcykler i Danmark</p>
         </div>
       </form>
@@ -190,10 +193,6 @@ try{
         <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg></span><span><strong>Ikke oplyst frem for gæt</strong><span class="mk-trust-sub">Mangler et tal, står der "Ikke oplyst" i stedet for et skøn.</span></span></li>
         <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span><span><strong>Handlen sker hos sælger</strong><span class="mk-trust-sub">Vi er et indeks og tager ingen kommission af salget.</span></span></li>
       </ul>
-    <section class="mk-kf" aria-labelledby="mk-kf-h">
-      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
-      <ul class="mk-kf-liste"><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><span class="mk-kf-t"><span data-mk-n>8</span> BSA-motorcykler</span> er indekseret fra danske forhandlere og markedspladser.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Oplyste priser fra 100.000 kr. til 115.000 kr. (ikke alle annoncer oplyser en pris).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>4 af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Kilden står på hvert kort, og handlen sker hos sælger. Mangler et tal, står der "Ikke oplyst".</span></li></ul>
-    </section>
   </div>
 
   <section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
@@ -322,7 +321,7 @@ try{
               <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Kilden står på hvert kort</li>
               <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Filtrér på dit kørekort</li>
             </ul>
-            <a class="btn btn-primary" href="soegning.html?brands=BSA">Søg BSA motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+            <a class="btn btn-primary" href="soegning.html?brands=BSA">Søg BSA<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
           </div>
           <img class="mk-cta-img" src="https://assets.guloggratis.dk/images/07c20273-d8d9-4f2b-b0e9-855bb8976525/07c20273-d8d9-4f2b-b0e9-855bb8976525-320x240.webp" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         </aside>
@@ -331,6 +330,10 @@ try{
   </section>
 
   
+
+  <div class="container mk-kf-vrap">
+    <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">1 annonce oplyser pris ved henvendelse. Annoncerne er indekseret fra Gul og Gratis, og handlen sker hos kilden.</p></details>
+  </div>
 
   <section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
     <div class="container">
@@ -378,17 +381,17 @@ try{
         <section class="mk-col" aria-labelledby="mk-mod-h">
         <div class="mk-col-head"><h2 id="mk-mod-h">BSA-modeller med flest annoncer</h2></div>
         <ul class="mk-mini">
-          <li><a href="soegning.html?brands=BSA&amp;model=A65%20Hornet%20Classic%20Bike"><strong>A65 Hornet Classic Bike</strong><span>1 annonce</span></a></li>
-          <li><a href="soegning.html?brands=BSA&amp;model=A65%20Lightning%20Rocket%20Classic%20Bike"><strong>A65 Lightning Rocket Classic Bike</strong><span>1 annonce</span></a></li>
-          <li><a href="soegning.html?brands=BSA&amp;model=A65%20Thunderbolt%20Classic%20Bike"><strong>A65 Thunderbolt Classic Bike</strong><span>1 annonce</span></a></li>
-          <li><a href="soegning.html?brands=BSA&amp;model=Gold%20star%20650%20Legacy%20Edition"><strong>Gold star 650 Legacy Edition</strong><span>1 annonce</span></a></li>
-          <li><a href="soegning.html?brands=BSA&amp;model=Lightning%20650%20Classic%20Bike"><strong>Lightning 650 Classic Bike</strong><span>1 annonce</span></a></li>
-          <li><a href="soegning.html?brands=BSA&amp;model=Lightning%20Clubman%20Classic%20Bike"><strong>Lightning Clubman Classic Bike</strong><span>1 annonce</span></a></li>
+          <li><a href="soegning.html?brands=BSA&amp;model=A65%20Hornet%20Classic%20Bike" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/ff84a633-0dfb-41e0-9b76-3eaaa0ec5217/ff84a633-0dfb-41e0-9b76-3eaaa0ec5217-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>A65 Hornet Classic Bike</strong><span>1 annonce</span></a></li>
+          <li><a href="soegning.html?brands=BSA&amp;model=A65%20Lightning%20Rocket%20Classic%20Bike" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/424d4b91-b3a3-4de8-bcbc-87881d9b08f8/424d4b91-b3a3-4de8-bcbc-87881d9b08f8-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>A65 Lightning Rocket Classic Bike</strong><span>1 annonce</span></a></li>
+          <li><a href="soegning.html?brands=BSA&amp;model=A65%20Thunderbolt%20Classic%20Bike" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/786abdef-6d12-442f-96d3-cc5cda6cb199/786abdef-6d12-442f-96d3-cc5cda6cb199-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>A65 Thunderbolt Classic Bike</strong><span>1 annonce</span></a></li>
+          <li><a href="soegning.html?brands=BSA&amp;model=Gold%20star%20650%20Legacy%20Edition" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/dc707ede-5bd0-47e4-b3f3-e6a7545c514c/dc707ede-5bd0-47e4-b3f3-e6a7545c514c-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Gold star 650 Legacy Edition</strong><span>1 annonce</span></a></li>
+          <li><a href="soegning.html?brands=BSA&amp;model=Lightning%20650%20Classic%20Bike" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/939403db-930c-402a-8565-0604e2edfd20/939403db-930c-402a-8565-0604e2edfd20-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Lightning 650 Classic Bike</strong><span>1 annonce</span></a></li>
+          <li><a href="soegning.html?brands=BSA&amp;model=Lightning%20Clubman%20Classic%20Bike" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/ec51eadc-5b14-4053-8f42-ff9526b9b9ec/ec51eadc-5b14-4053-8f42-ff9526b9b9ec-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Lightning Clubman Classic Bike</strong><span>1 annonce</span></a></li>
         </ul>
         <details class="mk-mere"><summary>Flere BSA-modeller (2)</summary>
           <ul class="mk-mini">
-            <li><a href="soegning.html?brands=BSA&amp;model=Spitfire%20650%20Classic%20Bike"><strong>Spitfire 650 Classic Bike</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BSA&amp;model=Triumph%20Norton%20k%C3%B8bes"><strong>Triumph Norton købes</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BSA&amp;model=Spitfire%20650%20Classic%20Bike" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/07c20273-d8d9-4f2b-b0e9-855bb8976525/07c20273-d8d9-4f2b-b0e9-855bb8976525-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Spitfire 650 Classic Bike</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BSA&amp;model=Triumph%20Norton%20k%C3%B8bes" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/f53794d1-ec8f-4b22-90db-585e221ba91f/f53794d1-ec8f-4b22-90db-585e221ba91f-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Triumph Norton købes</strong><span>1 annonce</span></a></li>
           </ul>
         </details>
         <p class="mk-col-foot"><a class="mk-link" href="soegning.html?brands=BSA">Se alle BSA-annoncer<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
@@ -447,7 +450,7 @@ try{
           <a class="popular-chip popular-chip-sm" href="soegning.html?brands=BSA&amp;sort=year-desc">Årgang: nyeste</a></div>
         </div>
       </div>
-      <div class="listings-grid" id="brand-listings" data-brand="BSA" data-viste="24">
+      <div class="listings-grid" id="brand-listings" data-brand="BSA" data-viste="8">
   <article class="card card-rich" data-listing-id="b353eb75-3cc9-4f28-be1b-fe17add42c78" data-external="1">
     <div class="card-media">
       <img src="https://assets.guloggratis.dk/images/424d4b91-b3a3-4de8-bcbc-87881d9b08f8/424d4b91-b3a3-4de8-bcbc-87881d9b08f8-320x240.webp" alt="BSA A65 Lightning Rocket Classic Bike" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -557,6 +560,13 @@ try{
       </details>
     </section>
 
+    <section class="section mk-kf-bund" style="padding-top:0;">
+      <section class="mk-kf" aria-labelledby="mk-kf-h">
+      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
+      <ul class="mk-kf-liste"><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><span class="mk-kf-t"><span data-mk-n>8</span> BSA-motorcykler</span> er indekseret fra danske forhandlere og markedspladser.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Oplyste priser fra 100.000 kr. til 115.000 kr. (ikke alle annoncer oplyser en pris).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>4 af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Kilden står på hvert kort, og handlen sker hos sælger. Mangler et tal, står der "Ikke oplyst".</span></li></ul>
+    </section>
+    </section>
+
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre mærker</h2>
       <div class="popular-row">
@@ -645,23 +655,23 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=594a0c5c"></script>
-<script defer src="js/supabase-config.js?v=594a0c5c"></script>
-<script defer src="js/supabase-api.js?v=594a0c5c"></script>
-<script defer src="js/icons.js?v=594a0c5c"></script>
-<script defer src="js/bike-art.js?v=594a0c5c"></script>
+<script defer src="js/security.js?v=c0d860c9"></script>
+<script defer src="js/supabase-config.js?v=c0d860c9"></script>
+<script defer src="js/supabase-api.js?v=c0d860c9"></script>
+<script defer src="js/icons.js?v=c0d860c9"></script>
+<script defer src="js/bike-art.js?v=c0d860c9"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=594a0c5c"></script>
-<script defer src="js/store.js?v=594a0c5c"></script>
-<script defer src="js/maaling.js?v=594a0c5c"></script>
-<script defer src="js/backend-bridge.js?v=594a0c5c"></script>
-<script defer src="js/components.js?v=594a0c5c"></script>
+<script defer src="js/data.js?v=c0d860c9"></script>
+<script defer src="js/store.js?v=c0d860c9"></script>
+<script defer src="js/maaling.js?v=c0d860c9"></script>
+<script defer src="js/backend-bridge.js?v=c0d860c9"></script>
+<script defer src="js/components.js?v=c0d860c9"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=594a0c5c"></script>
-<script defer src="js/maerke.js?v=594a0c5c"></script>
+<script defer src="js/sortering.js?v=c0d860c9"></script>
+<script defer src="js/maerke.js?v=c0d860c9"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">

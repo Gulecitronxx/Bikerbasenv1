@@ -63,9 +63,9 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=c0781ea2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=d8b4e62d) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css?v=594a0c5c">
-<link rel="stylesheet" href="css/p-maerke.css?v=594a0c5c">
-<link rel="stylesheet" href="css/p-brand-logo.css?v=594a0c5c">
+<link rel="stylesheet" href="css/styles.css?v=c0d860c9">
+<link rel="stylesheet" href="css/p-maerke.css?v=c0d860c9">
+<link rel="stylesheet" href="css/p-brand-logo.css?v=c0d860c9">
 <noscript><style>.bl--logo>.bl-fb{display:inline-flex}.bl--logo>.bl-mark{display:none}</style></noscript>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"BMW","item":"https://bikerbasen.dk/maerke-bmw"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en brugt BMW-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"44 af de 47 BMW-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 24.000 kr. til 426.195 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 74.850 kr. De resterende 3 annoncer oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre BMW på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"4 af 38 BMW-annoncer med kendt effekt er ikke udelukket på effekt til A2 — de holder sig under loftet på 47 hk (35 kW) — mens 34 kræver stort kørekort. A2 stiller også krav om maks. 0,2 kW pr. kg og om, at maskinen ikke er afledt af en model med over dobbelt effekt; det står ikke i annoncerne, så tjek registreringsattesten. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra. De resterende 9 annoncer mangler effektoplysningen hos kilden."}},{"@type":"Question","name":"Hvilke BMW-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 47 BMW-annoncer går K 1200 (5 stk.), K 1200 GT (3 stk.), K 1200 S (3 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle BMW-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
@@ -125,9 +125,12 @@ try{
        liste, facetter, prisniveau, FAQ og andre mærker (SEO).
        Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
        reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
-  <section class="mk-hero mk-hero-type">
+  <section class="mk-hero mk-hero-flad">
+    <!-- w14: landskabsfotoet (neutralt, ingen annonce) fylder højre side; aldrig et fremmed mærkes typefoto. Faktapanelet har ægte tal. -->
     <div class="mk-hero-media" aria-hidden="true">
-      <img class="mk-hero-typeimg" src="img/type/touring.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async">
+      <img class="mk-hero-photo" src="img/hero-1600.webp"
+           srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
+           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
     </div>
     <div class="container mk-hero-inner">
       <nav class="breadcrumb" aria-label="Brødkrumme">
@@ -135,10 +138,10 @@ try{
         <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
         <span>BMW</span>
       </nav>
-      <p class="mk-wordmark mk-wordmark--logo" aria-hidden="true"><span class="bl bl--hero bl--logo" data-bl="bmw" style="--bl-ar:1.049;--bl-sa:1.024" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/bmw.svg"></span><img class="bl-ref" src="img/brands/bmw.svg" alt="" width="76" height="72" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span></p>
+      <p class="mk-wordmark mk-wordmark--logo mk-wordmark--lockup" aria-hidden="true"><span class="bl bl--hero bl--logo bl--emblem" data-bl="bmw" style="--bl-ar:0.996;--bl-sa:0.998" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/bmw-emblem.svg"></span><img class="bl-ref" src="img/brands/bmw-emblem.svg" alt="" width="72" height="72" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span><span class="bl bl--wm bl--logo" data-bl="bmw" style="--bl-ar:3.279;--bl-sa:1.811" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/bmw-ordmaerke.svg"></span><img class="bl-ref" src="img/brands/bmw-ordmaerke.svg" alt="" width="144" height="44" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span></p>
       <h1>Brugte BMW-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">Der er <strong>47</strong> brugte BMW motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 24.000 kr. til 426.195 kr., med årgange mellem 1979 og 2026.</p>
-      <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">BMW er tæt knyttet til GS-seriens adventure-touring og den karakteristiske boxermotor — historisk et mærke for lange distancer og solidt udstyr. Udvalget dækker Touring, Adventure/Enduro, Naked m.fl. 3 annoncer oplyser pris ved henvendelse. 46 af annoncerne er indekseret fra MC Syd, Gul og Gratis, Rydbergs MC og Jensens Motorcykler, og handlen sker hos kilden. Alle annoncer er mærket som enten privat sælger eller forhandler, så du kan se dine rettigheder før du køber.</p></details>
+      <ul class="mk-panel" aria-label="Fakta om udvalget"><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg></span><div><strong><span data-mk-n>47</span> BMW-motorcykler</strong><span>indekseret</span></div></li><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.8l2.9 6 6.5.7-4.9 4.4 1.3 6.4L12 17l-5.8 3.3 1.3-6.4-4.9-4.4 6.5-.7Z"/></svg></span><div><strong>Mest udbudte typer</strong><span>Touring, Adventure/Enduro, Naked</span></div></li><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg></span><div><strong>Prisniveau</strong><span>fra 24.000 kr. til 426.195 kr.</span></div></li></ul>
     </div>
   </section>
 
@@ -149,7 +152,7 @@ try{
           <label for="mk-q">Mærke eller model</label>
           <div class="input-icon-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="BMW (fx K 1200 …)" aria-describedby="mk-q-hint">
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Fx K 1200" aria-describedby="mk-q-hint">
           </div>
           <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til BMW. Skriv en model for at snævre ind.</span>
         </div>
@@ -187,7 +190,7 @@ try{
           </div>
         </fieldset>
         <div class="mk-f-go">
-          <button type="submit" class="btn btn-primary btn-lg">Søg BMW motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
+          <button type="submit" class="btn btn-primary btn-lg">Søg BMW<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
           <p class="mk-count"><span data-mk-n>47</span> BMW motorcykler i Danmark</p>
         </div>
       </form>
@@ -197,10 +200,6 @@ try{
         <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg></span><span><strong>Ikke oplyst frem for gæt</strong><span class="mk-trust-sub">Mangler et tal, står der "Ikke oplyst" i stedet for et skøn.</span></span></li>
         <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span><span><strong>Handlen sker hos sælger</strong><span class="mk-trust-sub">Vi er et indeks og tager ingen kommission af salget.</span></span></li>
       </ul>
-    <section class="mk-kf" aria-labelledby="mk-kf-h">
-      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
-      <ul class="mk-kf-liste"><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><span class="mk-kf-t"><span data-mk-n>47</span> BMW-motorcykler</span> er indekseret fra danske forhandlere og markedspladser.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Mest udbudte typer: touring (20), adventure/enduro (3) og naked (2).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Oplyste priser fra 24.000 kr. til 426.195 kr. (ikke alle annoncer oplyser en pris).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>5 af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.</span></li></ul>
-    </section>
   </div>
 
   <section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
@@ -329,7 +328,7 @@ try{
               <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Kilden står på hvert kort</li>
               <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Filtrér på dit kørekort</li>
             </ul>
-            <a class="btn btn-primary" href="soegning.html?brands=BMW">Søg BMW motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+            <a class="btn btn-primary" href="soegning.html?brands=BMW">Søg BMW<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
           </div>
           <img class="mk-cta-img" src="https://assets.guloggratis.dk/images/0215cda0-732f-40d8-b4e0-265752322d54/0215cda0-732f-40d8-b4e0-265752322d54-320x240.webp" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         </aside>
@@ -360,6 +359,10 @@ try{
       </div>
     </div>
   </section>
+
+  <div class="container mk-kf-vrap">
+    <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">BMW er tæt knyttet til GS-seriens adventure-touring og den karakteristiske boxermotor — historisk et mærke for lange distancer og solidt udstyr. Udvalget dækker Touring, Adventure/Enduro, Naked m.fl. 3 annoncer oplyser pris ved henvendelse. 46 af annoncerne er indekseret fra MC Syd, Gul og Gratis, Rydbergs MC og Jensens Motorcykler, og handlen sker hos kilden. Alle annoncer er mærket som enten privat sælger eller forhandler, så du kan se dine rettigheder før du køber.</p></details>
+  </div>
 
   <section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
     <div class="container">
@@ -407,37 +410,37 @@ try{
         <section class="mk-col" aria-labelledby="mk-mod-h">
         <div class="mk-col-head"><h2 id="mk-mod-h">BMW-modeller med flest annoncer</h2></div>
         <ul class="mk-mini">
-          <li><a href="model-bmw-k-1200.html"><strong>K 1200</strong><span>5 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=BMW&amp;model=K%201200%20GT"><strong>K 1200 GT</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=BMW&amp;model=K%201200%20S"><strong>K 1200 S</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=BMW&amp;model=R%201300%20GS"><strong>R 1300 GS</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=BMW&amp;model=S%201000%20R"><strong>S 1000 R</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=BMW&amp;model=F%20800%20ST"><strong>F 800 ST</strong><span>2 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=BMW&amp;model=K%201200" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/179692/BMW_K_1200_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 1200</strong><span>5 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=BMW&amp;model=K%201200%20GT" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_270152_9DHS_1715413916.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 1200 GT</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=BMW&amp;model=K%201200%20S" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_310938_WIAI_1784893813.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 1200 S</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=BMW&amp;model=R%201300%20GS" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_311634_L0KU_1785945115.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1300 GS</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=BMW&amp;model=S%201000%20R" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_292326_MH6Y_1752751164.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>S 1000 R</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=BMW&amp;model=F%20800%20ST" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/dd69049a-5337-46e7-8d91-0af5a7669b5a/dd69049a-5337-46e7-8d91-0af5a7669b5a-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>F 800 ST</strong><span>2 annoncer</span></a></li>
         </ul>
         <details class="mk-mere"><summary>Flere BMW-modeller (23)</summary>
           <ul class="mk-mini">
-            <li><a href="soegning.html?brands=BMW&amp;model=K%201200%20LT"><strong>K 1200 LT</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=K%201600%20GT"><strong>K 1600 GT</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%201200"><strong>R 1200</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%201200%20RT"><strong>R 1200 RT</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=C%20400%20GT"><strong>C 400 GT</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=F%20450%20GS"><strong>F 450 GS</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=F%20800%20R"><strong>F 800 R</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=F%20800%20S"><strong>F 800 S</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=G%20310%20GS"><strong>G 310 GS</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=G%20310%20R"><strong>G 310 R</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=K%20100"><strong>K 100</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=K%20100%20RT"><strong>K 100 RT</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=K%201200%20RS"><strong>K 1200 RS</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=K%201300"><strong>K 1300</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=K%201600"><strong>K 1600</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%201100%20S"><strong>R 1100 S</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%201150%20RT"><strong>R 1150 RT</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%201200%20CL"><strong>R 1200 CL</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%201200%20R"><strong>R 1200 R</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%201250%20GS"><strong>R 1250 GS</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%201300%20RS"><strong>R 1300 RS</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=BMW&amp;model=R%20850%20RT"><strong>R 850 RT</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=K%201200%20LT" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_309719_GIR7_1782991438.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 1200 LT</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=K%201600%20GT" class="mk-mini-foto"><img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_312226_AVOD_1787126744-cropresize-768x540.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 1600 GT</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%201200" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/165548/BMW_R_1200_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1200</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%201200%20RT" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/1e4eaa8e-c582-4e21-9a2f-24c3f5a4c87f/1e4eaa8e-c582-4e21-9a2f-24c3f5a4c87f-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1200 RT</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=C%20400%20GT" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/e4f5bc7b-d71b-4ae2-a832-62d7b7dc8e4b/e4f5bc7b-d71b-4ae2-a832-62d7b7dc8e4b-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>C 400 GT</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=F%20450%20GS" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/b2de63bd-a9d2-4b48-85dc-3b42baa3bb53/b2de63bd-a9d2-4b48-85dc-3b42baa3bb53-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>F 450 GS</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=F%20800%20R" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/176800/BMW_F_800_R_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>F 800 R</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=F%20800%20S" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/184639/BMW_F_800_S_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>F 800 S</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=G%20310%20GS" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/178057/BMW_G_310_GS_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>G 310 GS</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=G%20310%20R" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/e7866cd7-bbf2-4e1d-a216-a4418a0ad53b/e7866cd7-bbf2-4e1d-a216-a4418a0ad53b-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>G 310 R</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=K%20100" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/d46844f7-b867-4367-84b8-cf320a56854f/d46844f7-b867-4367-84b8-cf320a56854f-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 100</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=K%20100%20RT" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/0215cda0-732f-40d8-b4e0-265752322d54/0215cda0-732f-40d8-b4e0-265752322d54-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 100 RT</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=K%201200%20RS" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/183972/BMW_K_1200_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 1200 RS</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=K%201300" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/184641/BMW_K_1300_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 1300</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=K%201600" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/180896/BMW_K_1600_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>K 1600</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%201100%20S" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/184969/BMW_R_1100_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1100 S</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%201150%20RT" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/183910/BMW_R_1150_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1150 RT</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%201200%20CL" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/76347/BMW_R_1200_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1200 CL</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%201200%20R" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/4798f42d-9f4f-42f2-ab28-28aecb8f7f6b/4798f42d-9f4f-42f2-ab28-28aecb8f7f6b-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1200 R</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%201250%20GS" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/de460a87-62db-4561-b3f9-095794949215/de460a87-62db-4561-b3f9-095794949215-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1250 GS</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%201300%20RS" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/185083/BMW_R_1300_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 1300 RS</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=BMW&amp;model=R%20850%20RT" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/173153/BMW_R_850_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>R 850 RT</strong><span>1 annonce</span></a></li>
             <li><a href="soegning.html?brands=BMW&amp;model=R45"><strong>R45</strong><span>1 annonce</span></a></li>
           </ul>
         </details>
@@ -477,7 +480,7 @@ try{
         <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
              FAQ. js/maerke.js opdaterer alle [data-mk-n] samlet, hvis lageret
              har ændret sig siden bygget — aldrig kun ét af dem. -->
-        <div><h2 class="brand-sub" id="brand-antal">Flere BMW-annoncer</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>47</span> annoncer i alt. De første 24 af resten vises her. Senest bekræftet hos kilderne 17. okt. 2026.</p></div>
+        <div><h2 class="brand-sub" id="brand-antal">Flere BMW-annoncer</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>47</span> annoncer i alt. De første 8 af resten vises her. Senest bekræftet hos kilderne 17. okt. 2026.</p></div>
         <a class="section-link" href="soegning.html?brands=BMW">Alle <span data-mk-n>47</span> i søgningen<span aria-hidden="true"></span></a>
       </div>
       
@@ -506,7 +509,7 @@ try{
           <a class="popular-chip popular-chip-sm" href="soegning.html?brands=BMW&amp;sort=year-desc">Årgang: nyeste</a></div>
         <p class="brand-facet-note">21 uden oplyst type — dem finder du i <a href="soegning.html?brands=BMW">den fulde søgning</a>.</p></div>
       </div>
-      <div class="listings-grid" id="brand-listings" data-brand="BMW" data-viste="24">
+      <div class="listings-grid" id="brand-listings" data-brand="BMW" data-viste="8">
   <article class="card card-rich" data-listing-id="241df2de-759e-4604-afc1-d7a870449867" data-external="1" data-type="adventure">
     <div class="card-media">
       <img src="https://images.danbase.dk/Content/Resellers/321/165548/BMW_R_1200_0_2.jpg?v=1" alt="BMW R 1200" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -681,360 +684,8 @@ try{
       </div>
     </div>
     <a href="annonce.html?id=c242f563-7f96-4e7f-9211-60647c35e88e" class="card-link" aria-label="Se annonce: BMW (model ikke oplyst), 139.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="e1cb6a54-e093-42ad-bbb9-7ba14c7cb977" data-external="1" data-type="touring">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/183274/BMW_K_1200_S_0_2.jpg?v=1" alt="BMW K 1200 S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="e1cb6a54-e093-42ad-bbb9-7ba14c7cb977" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 1200 S">BMW K 1200 S</h3>
-        <span class="rk-pris">55.000 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2006</span><span>74.000 km</span><span>Touring</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.157 ccm og 167 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.157 ccm og 167 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.157 ccm</li><li class="rk-chip">167 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=e1cb6a54-e093-42ad-bbb9-7ba14c7cb977" class="card-link" aria-label="Se annonce: BMW K 1200 S, 55.000 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="ec6a77d2-aa62-4ff6-abc0-c2e1a8642b1a" data-external="1" data-type="touring">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/179692/BMW_K_1200_0_2.jpg?v=1" alt="BMW K 1200" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="ec6a77d2-aa62-4ff6-abc0-c2e1a8642b1a" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 1200">BMW K 1200</h3>
-        <span class="rk-pris">74.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1999</span><span>46.000 km</span><span>Touring</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.171 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.171 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.171 ccm</li><li class="rk-chip">98 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=ec6a77d2-aa62-4ff6-abc0-c2e1a8642b1a" class="card-link" aria-label="Se annonce: BMW K 1200, 74.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="f3b77c39-8cde-47fc-8fd2-a4e97c2bd86f" data-external="1" data-type="touring">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/184969/BMW_R_1100_0_2.jpg?v=1" alt="BMW R 1100 S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="f3b77c39-8cde-47fc-8fd2-a4e97c2bd86f" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW R 1100 S">BMW R 1100 S</h3>
-        <span class="rk-pris">59.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1999</span><span>25.000 km</span><span>Touring</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.085 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.085 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.085 ccm</li><li class="rk-chip">98 hk</li><li class="rk-chip rk-chip-note" title="Bytter gerne">Bytter gerne</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=f3b77c39-8cde-47fc-8fd2-a4e97c2bd86f" class="card-link" aria-label="Se annonce: BMW R 1100 S, 59.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="f815165e-3d60-49aa-b91e-f2896c4ed5c5" data-external="1" data-type="touring">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/184639/BMW_F_800_S_0_2.jpg?v=1" alt="BMW F 800 S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="f815165e-3d60-49aa-b91e-f2896c4ed5c5" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW F 800 S">BMW F 800 S</h3>
-        <span class="rk-pris">59.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2007</span><span>38.000 km</span><span>Touring</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 798 ccm og 84 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 798 ccm og 84 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">798 ccm</li><li class="rk-chip">84 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=f815165e-3d60-49aa-b91e-f2896c4ed5c5" class="card-link" aria-label="Se annonce: BMW F 800 S, 59.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="33e979eb-8650-4232-8928-28aa806976b7" data-external="1" data-type="adventure">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_311634_L0KU_1785945115.jpeg" alt="BMW R 1300 GS" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="33e979eb-8650-4232-8928-28aa806976b7" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW R 1300 GS">BMW R 1300 GS</h3>
-        <span class="rk-pris">409.900 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2025</span><span>15.000 km</span><span>Adventure</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.301 ccm og 145 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.301 ccm og 145 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.301 ccm</li><li class="rk-chip">145 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=33e979eb-8650-4232-8928-28aa806976b7" class="card-link" aria-label="Se annonce: BMW R 1300 GS, 409.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="d72c5524-65e4-4344-acf2-5f243fc02227" data-external="1">
-    <div class="card-media">
-      <img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_312226_AVOD_1787126744-cropresize-768x540.webp" alt="BMW K 1600 GT" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="d72c5524-65e4-4344-acf2-5f243fc02227" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 1600 GT">BMW K 1600 GT</h3>
-        <span class="rk-pris">274.999 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2020</span><span>44.275 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.649 ccm og 160 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.649 ccm og 160 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.649 ccm</li><li class="rk-chip">160 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Horsens, Midtjylland" role="group" aria-label="Sted: Horsens, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Horsens</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Jensens Motorcykler (jensensmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · jensensmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>jensensmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=d72c5524-65e4-4344-acf2-5f243fc02227" class="card-link" aria-label="Se annonce: BMW K 1600 GT, 274.999 kr. — hos Jensens Motorcykler"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="603b4951-8ea3-47fa-8fb7-eb02ec82b062" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_310938_WIAI_1784893813.jpeg" alt="BMW K 1200 S" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="603b4951-8ea3-47fa-8fb7-eb02ec82b062" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 1200 S">BMW K 1200 S</h3>
-        <span class="rk-pris">67.500 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2007</span><span>48.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.157 ccm og 166 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.157 ccm og 166 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.157 ccm</li><li class="rk-chip">166 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=603b4951-8ea3-47fa-8fb7-eb02ec82b062" class="card-link" aria-label="Se annonce: BMW K 1200 S, 67.500 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="749311b6-ab0d-4fe9-8349-9a97aae1ccb2" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_292326_MH6Y_1752751164.jpeg" alt="BMW S 1000 R" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="749311b6-ab0d-4fe9-8349-9a97aae1ccb2" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW S 1000 R">BMW S 1000 R</h3>
-        <span class="rk-pris">99.995 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2014</span><span>60.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 999 ccm og 160 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 999 ccm og 160 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">999 ccm</li><li class="rk-chip">160 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=749311b6-ab0d-4fe9-8349-9a97aae1ccb2" class="card-link" aria-label="Se annonce: BMW S 1000 R, 99.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="74ecf956-31f4-4764-af46-2befd2337592" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_270152_9DHS_1715413916.jpeg" alt="BMW K 1200 GT" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="74ecf956-31f4-4764-af46-2befd2337592" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 1200 GT">BMW K 1200 GT</h3>
-        <span class="rk-pris">99.995 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2006</span><span>69.099 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.157 ccm og 152 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.157 ccm og 152 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.157 ccm</li><li class="rk-chip">152 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=74ecf956-31f4-4764-af46-2befd2337592" class="card-link" aria-label="Se annonce: BMW K 1200 GT, 99.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="53404862-236f-4920-833d-ed3eda7a30e6" data-external="1" data-type="touring">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/183815/BMW_K_1200_0_2.jpg?v=1" alt="BMW K 1200 LT" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="53404862-236f-4920-833d-ed3eda7a30e6" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 1200 LT">BMW K 1200 LT</h3>
-        <span class="rk-pris pris-mangler">Pris ved henvendelse</span>
-      </div>
-      <p class="rk-linje"><span>2005</span><span>52.000 km</span><span>Touring</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.171 ccm og 116 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.171 ccm og 116 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.171 ccm</li><li class="rk-chip">116 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=53404862-236f-4920-833d-ed3eda7a30e6" class="card-link" aria-label="Se annonce: BMW K 1200 LT, Pris ved henvendelse — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich rk-egen" data-listing-id="59d3a9a1-9e64-4ad3-a6c8-6f17554c7707" data-type="classic">
-    <div class="card-media">
-      <div class="foto-tom"><span class="foto-tom-ikon" style="width:26px;height:26px;display:block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.3A2.3 2.3 0 0 1 6.3 6h1.4l1-1.7A1.3 1.3 0 0 1 9.8 3.6h4.4a1.3 1.3 0 0 1 1.1.7l1 1.7h1.4A2.3 2.3 0 0 1 20 8.3v9.4A2.3 2.3 0 0 1 17.7 20H6.3A2.3 2.3 0 0 1 4 17.7Z"/><circle cx="12" cy="13" r="3.6"/></svg></span><p class="foto-tom-titel">Ingen fotos i denne annonce</p><p class="foto-tom-fakta"><span>30 hk</span><span>Classic/Veteran</span><span>Brugt</span></p></div>
-      
-      <button type="button" class="fav-btn " aria-pressed="false" aria-label="Gem annonce" data-fav-toggle="59d3a9a1-9e64-4ad3-a6c8-6f17554c7707"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg></button>
-      <button type="button" class="card-compare " data-compare-toggle="59d3a9a1-9e64-4ad3-a6c8-6f17554c7707" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW R45">BMW R45</h3>
-        <span class="rk-pris">24.000 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1979</span><span>91.350 km</span><span>Classic</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a2" title="Ikke udelukket til A2 ud fra 450 ccm og 30 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Mulig A2</span><span class="visually-hidden">. Ikke udelukket til A2 ud fra 450 ccm og 30 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten.</span></li><li class="rk-chip">450 ccm</li><li class="rk-chip">30 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Valby, Hovedstaden" role="group" aria-label="Sted: Valby, Hovedstaden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Valby</span></span>
-        <span class="rk-kilde" title="Annoncen ligger på Bikerbasen." role="group" aria-label="Kilde: Privat sælger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg><span>Privat sælger</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=59d3a9a1-9e64-4ad3-a6c8-6f17554c7707" class="card-link" aria-label="Se annonce: BMW R45, 24.000 kr."></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="6631c09b-f3cf-4e8b-9a95-fd9ec1fcb040" data-external="1" data-type="naked">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/d46844f7-b867-4367-84b8-cf320a56854f/d46844f7-b867-4367-84b8-cf320a56854f-320x240.webp" alt="BMW K 100" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="6631c09b-f3cf-4e8b-9a95-fd9ec1fcb040" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 100">BMW K 100</h3>
-        <span class="rk-pris">27.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1988</span><span>81.000 km</span><span>Naked</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 90 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 90 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">90 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Ålbæk, Nordjylland" role="group" aria-label="Sted: Ålbæk, Nordjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Ålbæk</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=6631c09b-f3cf-4e8b-9a95-fd9ec1fcb040" class="card-link" aria-label="Se annonce: BMW K 100, 27.800 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="c3159401-7dd5-4947-bfc1-51172a5c5e5f" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/181270/BMW_R_1200_0_2.jpg?v=1" alt="BMW R 1200" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="c3159401-7dd5-4947-bfc1-51172a5c5e5f" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW R 1200">BMW R 1200</h3>
-        <span class="rk-pris pris-mangler">Pris ved henvendelse</span>
-      </div>
-      <p class="rk-linje"><span>2005</span><span>98.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.200 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.200 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.200 ccm</li><li class="rk-chip">98 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=c3159401-7dd5-4947-bfc1-51172a5c5e5f" class="card-link" aria-label="Se annonce: BMW R 1200, Pris ved henvendelse — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="016e78a9-851b-4038-ad04-6b4935bbacb2" data-external="1" data-type="touring">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/142081/BMW_K_1200_0_2.jpg?v=1" alt="BMW K 1200" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="016e78a9-851b-4038-ad04-6b4935bbacb2" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 1200">BMW K 1200</h3>
-        <span class="rk-pris">59.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1997</span><span>79.000 km</span><span>Touring</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-ukendt" title="Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kørekort ikke afgjort</span><span class="visually-hidden">. Over 125 ccm kræver mindst A2. Effekten står ikke i annoncen hos kilden, så vi kan ikke afgøre, om den også kan køres på A2.</span></li><li class="rk-chip">1.200 ccm</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=016e78a9-851b-4038-ad04-6b4935bbacb2" class="card-link" aria-label="Se annonce: BMW K 1200, 59.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="021b4f7f-f02a-4fc6-95ea-5dbe9c38f910" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_309719_GIR7_1782991438.jpeg" alt="BMW K 1200 LT" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="021b4f7f-f02a-4fc6-95ea-5dbe9c38f910" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW K 1200 LT">BMW K 1200 LT</h3>
-        <span class="rk-pris pris-mangler">Pris ved henvendelse</span>
-      </div>
-      <p class="rk-linje"><span>2003</span><span>75.761 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.171 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.171 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.171 ccm</li><li class="rk-chip">98 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=021b4f7f-f02a-4fc6-95ea-5dbe9c38f910" class="card-link" aria-label="Se annonce: BMW K 1200 LT, Pris ved henvendelse — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="0a16ada6-ba0c-4dd6-b480-ff755d16a855" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/244a7352-55e7-47d5-a220-5cd37435a174/244a7352-55e7-47d5-a220-5cd37435a174-320x240.webp" alt="BMW S 1000 R" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="0a16ada6-ba0c-4dd6-b480-ff755d16a855" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="BMW S 1000 R">BMW S 1000 R</h3>
-        <span class="rk-pris">159.900 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2020</span><span class="rk-mangler">Km ikke oplyst</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.000 ccm og 165 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.000 ccm og 165 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.000 ccm</li><li class="rk-chip">165 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Farum, Hovedstaden" role="group" aria-label="Sted: Farum, Hovedstaden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Farum</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=0a16ada6-ba0c-4dd6-b480-ff755d16a855" class="card-link" aria-label="Se annonce: BMW S 1000 R, 159.900 kr. — hos Gul og Gratis"></a>
   </article></div>
-      <p class="brand-mere"><a href="soegning.html?brands=BMW" class="btn btn-primary">Se alle 47 BMW i søgningen</a></p>
+      <p class="mk-mere-lille"><a class="mk-link" href="soegning.html?brands=BMW">Se alle <span data-mk-n>47</span> BMW i søgningen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
       <div class="brand-actions">
         <a href="opret-annonce.html" class="btn btn-outline">Sælg din BMW</a>
       </div>
@@ -1115,6 +766,13 @@ try{
         <summary>Hvilke BMW-modeller kan jeg finde på Bikerbasen?</summary>
         <p class="brand-intro">Blandt de 47 BMW-annoncer går K 1200 (5 stk.), K 1200 GT (3 stk.), K 1200 S (3 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle BMW-annoncer for at se præcis, hvad der er til salg i dag.</p>
       </details>
+    </section>
+
+    <section class="section mk-kf-bund" style="padding-top:0;">
+      <section class="mk-kf" aria-labelledby="mk-kf-h">
+      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
+      <ul class="mk-kf-liste"><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><span class="mk-kf-t"><span data-mk-n>47</span> BMW-motorcykler</span> er indekseret fra danske forhandlere og markedspladser.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Mest udbudte typer: touring (20), adventure/enduro (3) og naked (2).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Oplyste priser fra 24.000 kr. til 426.195 kr. (ikke alle annoncer oplyser en pris).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>5 af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.</span></li></ul>
+    </section>
     </section>
 
     <section class="section" style="padding-top:0;">
@@ -1205,25 +863,25 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=594a0c5c"></script>
-<script defer src="js/supabase-config.js?v=594a0c5c"></script>
-<script defer src="js/supabase-api.js?v=594a0c5c"></script>
-<script defer src="js/icons.js?v=594a0c5c"></script>
-<script defer src="js/bike-art.js?v=594a0c5c"></script>
+<script defer src="js/security.js?v=c0d860c9"></script>
+<script defer src="js/supabase-config.js?v=c0d860c9"></script>
+<script defer src="js/supabase-api.js?v=c0d860c9"></script>
+<script defer src="js/icons.js?v=c0d860c9"></script>
+<script defer src="js/bike-art.js?v=c0d860c9"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=594a0c5c"></script>
-<script defer src="js/store.js?v=594a0c5c"></script>
-<script defer src="js/maaling.js?v=594a0c5c"></script>
-<script defer src="js/backend-bridge.js?v=594a0c5c"></script>
-<script defer src="js/components.js?v=594a0c5c"></script>
+<script defer src="js/data.js?v=c0d860c9"></script>
+<script defer src="js/store.js?v=c0d860c9"></script>
+<script defer src="js/maaling.js?v=c0d860c9"></script>
+<script defer src="js/backend-bridge.js?v=c0d860c9"></script>
+<script defer src="js/components.js?v=c0d860c9"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=594a0c5c"></script>
-<script defer src="js/brand-logos-data.js?v=594a0c5c"></script>
-<script defer src="js/brand-logos.js?v=594a0c5c"></script>
-<script defer src="js/maerke.js?v=594a0c5c"></script>
+<script defer src="js/sortering.js?v=c0d860c9"></script>
+<script defer src="js/brand-logos-data.js?v=c0d860c9"></script>
+<script defer src="js/brand-logos.js?v=c0d860c9"></script>
+<script defer src="js/maerke.js?v=c0d860c9"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">

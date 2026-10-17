@@ -63,9 +63,9 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=c0781ea2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=d8b4e62d) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css?v=594a0c5c">
-<link rel="stylesheet" href="css/p-maerke.css?v=594a0c5c">
-<link rel="stylesheet" href="css/p-brand-logo.css?v=594a0c5c">
+<link rel="stylesheet" href="css/styles.css?v=c0d860c9">
+<link rel="stylesheet" href="css/p-maerke.css?v=c0d860c9">
+<link rel="stylesheet" href="css/p-brand-logo.css?v=c0d860c9">
 <noscript><style>.bl--logo>.bl-fb{display:inline-flex}.bl--logo>.bl-mark{display:none}</style></noscript>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"Suzuki","item":"https://bikerbasen.dk/maerke-suzuki"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en brugt Suzuki-motorcykel?","acceptedAnswer":{"@type":"Answer","text":"60 af de 63 Suzuki-annoncer på Bikerbasen har opgivet en pris. Den spænder fra 12.500 kr. til 189.000 kr., og medianen — det midterste beløb, hvis alle priserne blev stillet på række — ligger på 65.000 kr. De resterende 3 annoncer oplyser i stedet pris ved henvendelse."}},{"@type":"Question","name":"Kan man køre Suzuki på A2-kørekort?","acceptedAnswer":{"@type":"Answer","text":"2 af 47 Suzuki-annoncer med kendt effekt er ikke udelukket på effekt til A2 — de holder sig under loftet på 47 hk (35 kW) — mens 45 kræver stort kørekort. A2 stiller også krav om maks. 0,2 kW pr. kg og om, at maskinen ikke er afledt af en model med over dobbelt effekt; det står ikke i annoncerne, så tjek registreringsattesten. Du kan filtrere direkte på kørekort i søgningen på Bikerbasen, så alt, der er udelukket på de oplyste tal, er sorteret fra. De resterende 16 annoncer mangler effektoplysningen hos kilden."}},{"@type":"Question","name":"Hvilke Suzuki-modeller kan jeg finde på Bikerbasen?","acceptedAnswer":{"@type":"Answer","text":"Blandt de 63 Suzuki-annoncer går VLR 1800 (5 stk.), GSX 750 F (4 stk.), DL 1000 V-Strom (3 stk.) igen flest gange lige nu. Udvalget skifter løbende i takt med nye annoncer, så søg i alle Suzuki-annoncer for at se præcis, hvad der er til salg i dag."}}]}</script>
@@ -125,7 +125,8 @@ try{
        liste, facetter, prisniveau, FAQ og andre mærker (SEO).
        Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
        reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
-  <section class="mk-hero">
+  <section class="mk-hero mk-hero-flad">
+    <!-- w14: landskabsfotoet (neutralt, ingen annonce) fylder højre side; aldrig et fremmed mærkes typefoto. Faktapanelet har ægte tal. -->
     <div class="mk-hero-media" aria-hidden="true">
       <img class="mk-hero-photo" src="img/hero-1600.webp"
            srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
@@ -137,10 +138,10 @@ try{
         <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
         <span>Suzuki</span>
       </nav>
-      <p class="mk-wordmark mk-wordmark--logo" aria-hidden="true"><span class="bl bl--hero bl--logo" data-bl="suzuki" style="--bl-ar:1.253;--bl-sa:1.119" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/suzuki.svg"></span><img class="bl-ref" src="img/brands/suzuki.svg" alt="" width="90" height="72" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">S</span></span></p>
+      <p class="mk-wordmark mk-wordmark--logo mk-wordmark--lockup" aria-hidden="true"><span class="bl bl--hero bl--logo bl--emblem" data-bl="suzuki" style="--bl-ar:1.006;--bl-sa:1.003" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/suzuki-emblem.svg"></span><img class="bl-ref" src="img/brands/suzuki-emblem.svg" alt="" width="72" height="72" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">S</span></span><span class="bl bl--wm bl--logo" data-bl="suzuki" style="--bl-ar:5.102;--bl-sa:2.259" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/suzuki-ordmaerke.svg"></span><img class="bl-ref" src="img/brands/suzuki-ordmaerke.svg" alt="" width="224" height="44" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">S</span></span></p>
       <h1>Brugte Suzuki-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">Der er <strong>63</strong> brugte Suzuki motorcykler til salg hos danske forhandlere og markedspladser, indekseret på Bikerbasen — fra 12.500 kr. til 189.000 kr., med årgange mellem 1981 og 2026.</p>
-      <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Suzuki er kendt for GSX-R-sportscyklerne og alsidige mellemklassemodeller som Bandit og V-Strom — japansk teknik med et langt ry for at holde. Udvalget dækker Cruiser, Adventure/Enduro, Naked m.fl. 3 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Rydbergs MC og Jensens Motorcykler, og handlen sker hos kilden.</p></details>
+      <ul class="mk-panel" aria-label="Fakta om udvalget"><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 10h5l3 4.2M9 10 7.7 7h-2M13 14.2l1.6-4.2M15 7h3l1 3.5"/></svg></span><div><strong><span data-mk-n>63</span> Suzuki-motorcykler</strong><span>indekseret</span></div></li><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.8l2.9 6 6.5.7-4.9 4.4 1.3 6.4L12 17l-5.8 3.3 1.3-6.4-4.9-4.4 6.5-.7Z"/></svg></span><div><strong>Mest udbudte typer</strong><span>Cruiser, Adventure/Enduro, Touring</span></div></li><li><span class="mk-panel-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg></span><div><strong>Prisniveau</strong><span>fra 12.500 kr. til 189.000 kr.</span></div></li></ul>
     </div>
   </section>
 
@@ -151,7 +152,7 @@ try{
           <label for="mk-q">Mærke eller model</label>
           <div class="input-icon-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Suzuki (fx VLR 1800 …)" aria-describedby="mk-q-hint">
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="Fx VLR 1800" aria-describedby="mk-q-hint">
           </div>
           <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til Suzuki. Skriv en model for at snævre ind.</span>
         </div>
@@ -190,7 +191,7 @@ try{
           </div>
         </fieldset>
         <div class="mk-f-go">
-          <button type="submit" class="btn btn-primary btn-lg">Søg Suzuki motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
+          <button type="submit" class="btn btn-primary btn-lg">Søg Suzuki<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
           <p class="mk-count"><span data-mk-n>63</span> Suzuki motorcykler i Danmark</p>
         </div>
       </form>
@@ -200,10 +201,6 @@ try{
         <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 8v.01"/></svg></span><span><strong>Ikke oplyst frem for gæt</strong><span class="mk-trust-sub">Mangler et tal, står der "Ikke oplyst" i stedet for et skøn.</span></span></li>
         <li class="mk-trust-item"><span class="mk-trust-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg></span><span><strong>Handlen sker hos sælger</strong><span class="mk-trust-sub">Vi er et indeks og tager ingen kommission af salget.</span></span></li>
       </ul>
-    <section class="mk-kf" aria-labelledby="mk-kf-h">
-      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
-      <ul class="mk-kf-liste"><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><span class="mk-kf-t"><span data-mk-n>63</span> Suzuki-motorcykler</span> er indekseret fra danske forhandlere og markedspladser.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Oplyste priser fra 12.500 kr. til 189.000 kr. (ikke alle annoncer oplyser en pris).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>4 af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Kilden står på hvert kort, og handlen sker hos sælger. Mangler et tal, står der "Ikke oplyst".</span></li></ul>
-    </section>
   </div>
 
   <section class="section mk-sektion mk-featured-sektion" aria-labelledby="mk-featured-h">
@@ -332,7 +329,7 @@ try{
               <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Kilden står på hvert kort</li>
               <li><span class="mk-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span>Filtrér på dit kørekort</li>
             </ul>
-            <a class="btn btn-primary" href="soegning.html?brands=Suzuki">Søg Suzuki motorcykler<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+            <a class="btn btn-primary" href="soegning.html?brands=Suzuki">Søg Suzuki<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
           </div>
           <img class="mk-cta-img" src="https://assets.guloggratis.dk/images/c73303ca-ce20-47a7-9e01-ebd963c8c7d6/c73303ca-ce20-47a7-9e01-ebd963c8c7d6-320x240.webp" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
         </aside>
@@ -367,6 +364,10 @@ try{
       </div>
     </div>
   </section>
+
+  <div class="container mk-kf-vrap">
+    <details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">Suzuki er kendt for GSX-R-sportscyklerne og alsidige mellemklassemodeller som Bandit og V-Strom — japansk teknik med et langt ry for at holde. Udvalget dækker Cruiser, Adventure/Enduro, Naked m.fl. 3 annoncer oplyser pris ved henvendelse. Annoncerne er indekseret fra MC Syd, Gul og Gratis, Rydbergs MC og Jensens Motorcykler, og handlen sker hos kilden.</p></details>
+  </div>
 
   <section class="section mk-sektion mk-saadan saadan-section" aria-labelledby="saadan-titel">
     <div class="container">
@@ -414,39 +415,39 @@ try{
         <section class="mk-col" aria-labelledby="mk-mod-h">
         <div class="mk-col-head"><h2 id="mk-mod-h">Suzuki-modeller med flest annoncer</h2></div>
         <ul class="mk-mini">
-          <li><a href="model-suzuki-vlr-1800.html"><strong>VLR 1800</strong><span>5 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%20750%20F"><strong>GSX 750 F</strong><span>4 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Suzuki&amp;model=DL%201000%20V-Strom"><strong>DL 1000 V-Strom</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Suzuki&amp;model=DL%20650%20V-Strom"><strong>DL 650 V-Strom</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%201300%20R%20Hayabusa"><strong>GSX 1300 R Hayabusa</strong><span>3 annoncer</span></a></li>
-          <li><a href="soegning.html?brands=Suzuki&amp;model=VZR%201800%20Intruder"><strong>VZR 1800 Intruder</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Suzuki&amp;model=VLR%201800" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/139337/Suzuki_VLR_1800_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>VLR 1800</strong><span>5 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%20750%20F" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/23589921-45cb-42ea-ad39-8f7177124f79/23589921-45cb-42ea-ad39-8f7177124f79-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX 750 F</strong><span>4 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Suzuki&amp;model=DL%201000%20V-Strom" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/1ee9e8d9-2e17-4eeb-866e-f94f5b12b365/1ee9e8d9-2e17-4eeb-866e-f94f5b12b365-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>DL 1000 V-Strom</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Suzuki&amp;model=DL%20650%20V-Strom" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/05cca72b-193a-40cf-af51-2c0a8a8b4023/05cca72b-193a-40cf-af51-2c0a8a8b4023-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>DL 650 V-Strom</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%201300%20R%20Hayabusa" class="mk-mini-foto"><img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_312235_TMXJ_1786790302-cropresize-768x540.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX 1300 R Hayabusa</strong><span>3 annoncer</span></a></li>
+          <li><a href="soegning.html?brands=Suzuki&amp;model=VZR%201800%20Intruder" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_259832_SXOZ_1694100183.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>VZR 1800 Intruder</strong><span>3 annoncer</span></a></li>
         </ul>
         <details class="mk-mere"><summary>Flere Suzuki-modeller (24)</summary>
           <ul class="mk-mini">
-            <li><a href="soegning.html?brands=Suzuki&amp;model=DL%20650%20XT%20V-strom"><strong>DL 650 XT V-strom</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSF%201200%20Bandit"><strong>GSF 1200 Bandit</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSF%20600%20S%20Bandit"><strong>GSF 600 S Bandit</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSR%20750"><strong>GSR 750</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%201400"><strong>GSX 1400</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSXS%201000%20GT"><strong>GSXS 1000 GT</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=VL%201500%20Intruder"><strong>VL 1500 Intruder</strong><span>2 annoncer</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=AN%20400%20Burgman"><strong>AN 400 Burgman</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=DL%20800%20DE%20V-Strom"><strong>DL 800 DE V-Strom</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GS%20550"><strong>GS 550</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=Gs%20katana"><strong>Gs katana</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=Gsf%20650%20bandit"><strong>Gsf 650 bandit</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSF%20650%20S%20Bandit"><strong>GSF 650 S Bandit</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%201100%20E"><strong>GSX 1100 E</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%201100%20EF"><strong>GSX 1100 EF</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%20600%20F"><strong>GSX 600 F</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%20750%20ES"><strong>GSX 750 ES</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8R"><strong>GSX-8R</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8R%20776%2083HK%206g"><strong>GSX-8R 776 83HK 6g</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8S"><strong>GSX-8S</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8T"><strong>GSX-8T</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8T%20776%2083HK%206g"><strong>GSX-8T 776 83HK 6g</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=Gsxr%201100w"><strong>Gsxr 1100w</strong><span>1 annonce</span></a></li>
-            <li><a href="soegning.html?brands=Suzuki&amp;model=GZ%20250%20Marauder"><strong>GZ 250 Marauder</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=DL%20650%20XT%20V-strom" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/185435/Suzuki_DL_650_XT_V-Strom_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>DL 650 XT V-strom</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSF%201200%20Bandit" class="mk-mini-foto"><img src="https://www.123mc.dk/large-mcimgs-400_292407_8TXJ_1752916033.jpeg" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSF 1200 Bandit</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSF%20600%20S%20Bandit" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/172420/Suzuki_GSF_600_S_Bandit_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSF 600 S Bandit</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSR%20750" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/5df40807-35c4-4b8d-80be-685ff18a0401/5df40807-35c4-4b8d-80be-685ff18a0401-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSR 750</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%201400" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/181087/Suzuki_GSX_1400_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX 1400</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSXS%201000%20GT" class="mk-mini-foto"><img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_311335_P2FC_1785499751-cropresize-768x540.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSXS 1000 GT</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=VL%201500%20Intruder" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/3d5ef784-be7d-4229-a721-6e260717ae48/3d5ef784-be7d-4229-a721-6e260717ae48-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>VL 1500 Intruder</strong><span>2 annoncer</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=AN%20400%20Burgman" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/7586aeb8-1436-40af-a9df-1a6115c37e91/7586aeb8-1436-40af-a9df-1a6115c37e91-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>AN 400 Burgman</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=DL%20800%20DE%20V-Strom" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/e3ffc62e-e0cb-416a-b469-c4f92d324c6d/e3ffc62e-e0cb-416a-b469-c4f92d324c6d-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>DL 800 DE V-Strom</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GS%20550" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/90ec56a9-deed-4fc3-975e-d761b0e25b56/90ec56a9-deed-4fc3-975e-d761b0e25b56-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GS 550</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=Gs%20katana" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/5993b450-8d11-46b0-b1d8-0f7270345db0/5993b450-8d11-46b0-b1d8-0f7270345db0-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Gs katana</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=Gsf%20650%20bandit" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/73ec0399-7d0e-43a0-858c-9c8cd05883f6/73ec0399-7d0e-43a0-858c-9c8cd05883f6-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Gsf 650 bandit</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSF%20650%20S%20Bandit" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/181413/Suzuki_GSF_650_S_Bandit_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSF 650 S Bandit</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%201100%20E" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/309dcf61-2ed0-466d-930a-8737829fda3c/309dcf61-2ed0-466d-930a-8737829fda3c-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX 1100 E</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%201100%20EF" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/145145/Suzuki_GSX_1100_EF_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX 1100 EF</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%20600%20F" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/50cd9fc8-553e-47f1-bba8-605e6d834722/50cd9fc8-553e-47f1-bba8-605e6d834722-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX 600 F</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX%20750%20ES" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/182767/Suzuki_GSX_750_ES_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX 750 ES</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8R" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/e1335b2e-ac74-41cd-8c75-04048117b3b5/e1335b2e-ac74-41cd-8c75-04048117b3b5-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX-8R</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8R%20776%2083HK%206g" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/82e33a6b-c4b5-46fb-9e79-c68db9322b2a/82e33a6b-c4b5-46fb-9e79-c68db9322b2a-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX-8R 776 83HK 6g</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8S" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/8d280a39-7b6d-4b1f-b252-c2c38fe627d7/8d280a39-7b6d-4b1f-b252-c2c38fe627d7-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX-8S</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8T" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/8a2908ed-2625-47e2-ab82-9f6316c356b7/8a2908ed-2625-47e2-ab82-9f6316c356b7-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX-8T</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GSX-8T%20776%2083HK%206g" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/f257f903-ceaf-429b-88f8-e69006ed3720/f257f903-ceaf-429b-88f8-e69006ed3720-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GSX-8T 776 83HK 6g</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=Gsxr%201100w" class="mk-mini-foto"><img src="https://assets.guloggratis.dk/images/f9e48a7f-4664-447a-9fb7-eb12323c0db4/f9e48a7f-4664-447a-9fb7-eb12323c0db4-320x240.webp" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>Gsxr 1100w</strong><span>1 annonce</span></a></li>
+            <li><a href="soegning.html?brands=Suzuki&amp;model=GZ%20250%20Marauder" class="mk-mini-foto"><img src="https://images.danbase.dk/Content/Resellers/321/183394/Suzuki_GZ_250_Marauder_0_2.jpg?v=1" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>GZ 250 Marauder</strong><span>1 annonce</span></a></li>
           </ul>
         </details>
         <p class="mk-col-foot"><a class="mk-link" href="soegning.html?brands=Suzuki">Se alle Suzuki-annoncer<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
@@ -484,7 +485,7 @@ try{
         <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
              FAQ. js/maerke.js opdaterer alle [data-mk-n] samlet, hvis lageret
              har ændret sig siden bygget — aldrig kun ét af dem. -->
-        <div><h2 class="brand-sub" id="brand-antal">Flere Suzuki-annoncer</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>63</span> annoncer i alt. De første 24 af resten vises her. Senest bekræftet hos kilderne 17. okt. 2026.</p></div>
+        <div><h2 class="brand-sub" id="brand-antal">Flere Suzuki-annoncer</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>63</span> annoncer i alt. De første 8 af resten vises her. Senest bekræftet hos kilderne 17. okt. 2026.</p></div>
         <a class="section-link" href="soegning.html?brands=Suzuki">Alle <span data-mk-n>63</span> i søgningen<span aria-hidden="true"></span></a>
       </div>
       
@@ -514,7 +515,7 @@ try{
           <a class="popular-chip popular-chip-sm" href="soegning.html?brands=Suzuki&amp;sort=year-desc">Årgang: nyeste</a></div>
         <p class="brand-facet-note">37 uden oplyst type — dem finder du i <a href="soegning.html?brands=Suzuki">den fulde søgning</a>.</p></div>
       </div>
-      <div class="listings-grid" id="brand-listings" data-brand="Suzuki" data-viste="24">
+      <div class="listings-grid" id="brand-listings" data-brand="Suzuki" data-viste="8">
   <article class="card card-rich" data-listing-id="966dfe55-f49f-4e4f-8919-8fc36a79e3af" data-external="1">
     <div class="card-media">
       <img src="https://assets.guloggratis.dk/images/66f3d294-42cf-4f5c-86ac-67cf1ae4ec83/66f3d294-42cf-4f5c-86ac-67cf1ae4ec83-320x240.webp" alt="Suzuki VZR1800" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
@@ -689,360 +690,8 @@ try{
       </div>
     </div>
     <a href="annonce.html?id=71442ac7-c6ff-4cfc-ba92-335d82ce24ee" class="card-link" aria-label="Se annonce: Suzuki VL 800 Z Voluzia, 35.000 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="74908e75-6e2f-49a0-8622-adf2779bf973" data-external="1" data-type="adventure">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/185435/Suzuki_DL_650_XT_V-Strom_0_2.jpg?v=1" alt="Suzuki DL 650 XT V-strom" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="74908e75-6e2f-49a0-8622-adf2779bf973" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki DL 650 XT V-strom">Suzuki DL 650 XT V-strom</h3>
-        <span class="rk-pris">79.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2023</span><span>11.000 km</span><span>Adventure</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 645 ccm og 71 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 645 ccm og 71 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">645 ccm</li><li class="rk-chip">71 hk</li><li class="rk-chip rk-chip-note" title="Bytter gerne">Bytter gerne</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=74908e75-6e2f-49a0-8622-adf2779bf973" class="card-link" aria-label="Se annonce: Suzuki DL 650 XT V-strom, 79.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="7588d688-8c78-49fe-8118-4f091bae7d2e" data-external="1" data-type="touring">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/185174/Suzuki_GSXS_1000_0_2.jpg?v=1" alt="Suzuki GSXS 1000 GT" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="7588d688-8c78-49fe-8118-4f091bae7d2e" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki GSXS 1000 GT">Suzuki GSXS 1000 GT</h3>
-        <span class="rk-pris">129.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2023</span><span>25.000 km</span><span>Touring</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 999 ccm og 150 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 999 ccm og 150 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">999 ccm</li><li class="rk-chip">150 hk</li><li class="rk-chip rk-chip-note" title="Bytter gerne">Bytter gerne</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=7588d688-8c78-49fe-8118-4f091bae7d2e" class="card-link" aria-label="Se annonce: Suzuki GSXS 1000 GT, 129.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="86071c38-2767-405b-aab9-42e22a856b26" data-external="1" data-type="sport">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/106982/Suzuki_GSX_750_F_0_2.jpg?v=1" alt="Suzuki GSX 750 F" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="86071c38-2767-405b-aab9-42e22a856b26" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki GSX 750 F">Suzuki GSX 750 F</h3>
-        <span class="rk-pris">20.000 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1990</span><span>38.000 km</span><span>Sport</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 748 ccm og 106 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 748 ccm og 106 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">748 ccm</li><li class="rk-chip">106 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=86071c38-2767-405b-aab9-42e22a856b26" class="card-link" aria-label="Se annonce: Suzuki GSX 750 F, 20.000 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="a408c46e-7477-4da0-87d5-d93679e9a2b8" data-external="1" data-type="cruiser">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/137481/Suzuki_VLR_1800_0_2.jpg?v=1" alt="Suzuki VLR 1800" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="a408c46e-7477-4da0-87d5-d93679e9a2b8" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki VLR 1800">Suzuki VLR 1800</h3>
-        <span class="rk-pris">134.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2008</span><span>50.000 km</span><span>Cruiser</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.783 ccm og 114 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.783 ccm og 114 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.783 ccm</li><li class="rk-chip">114 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=a408c46e-7477-4da0-87d5-d93679e9a2b8" class="card-link" aria-label="Se annonce: Suzuki VLR 1800, 134.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="de7f1174-a373-4e8e-bcd0-a9b7bc9285f6" data-external="1" data-type="cruiser">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/106427/Suzuki_VLR_1800_0_2.jpg?v=1" alt="Suzuki VLR 1800" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="de7f1174-a373-4e8e-bcd0-a9b7bc9285f6" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki VLR 1800">Suzuki VLR 1800</h3>
-        <span class="rk-pris">159.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2009</span><span>5.000 km</span><span>Cruiser</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.783 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.783 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.783 ccm</li><li class="rk-chip">125 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=de7f1174-a373-4e8e-bcd0-a9b7bc9285f6" class="card-link" aria-label="Se annonce: Suzuki VLR 1800, 159.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="f61431f7-7fd6-40f7-8fb2-e1ac4d75a7d0" data-external="1" data-type="cruiser">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/99163/Suzuki_VLR_1800_0_2.jpg?v=1" alt="Suzuki VLR 1800" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="f61431f7-7fd6-40f7-8fb2-e1ac4d75a7d0" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki VLR 1800">Suzuki VLR 1800</h3>
-        <span class="rk-pris">139.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2009</span><span>37.000 km</span><span>Cruiser</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.783 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.783 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.783 ccm</li><li class="rk-chip">125 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=f61431f7-7fd6-40f7-8fb2-e1ac4d75a7d0" class="card-link" aria-label="Se annonce: Suzuki VLR 1800, 139.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="aada7189-be07-4d98-8f95-99b5f624c7a7" data-external="1">
-    <div class="card-media">
-      <img src="https://images.danbase.dk/Content/Resellers/321/181087/Suzuki_GSX_1400_0_2.jpg?v=1" alt="Suzuki GSX 1400" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="aada7189-be07-4d98-8f95-99b5f624c7a7" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki GSX 1400">Suzuki GSX 1400</h3>
-        <span class="rk-pris">74.800 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2007</span><span>58.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.402 ccm og 106 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.402 ccm og 106 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.402 ccm</li><li class="rk-chip">106 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Rødding, Syddanmark" role="group" aria-label="Sted: Rødding, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Rødding</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos MC Syd (mcsyd.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · mcsyd.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>mcsyd.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=aada7189-be07-4d98-8f95-99b5f624c7a7" class="card-link" aria-label="Se annonce: Suzuki GSX 1400, 74.800 kr. — hos MC Syd"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="0cd27dea-40e4-4abc-8c75-71f6b296d9a0" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/f257f903-ceaf-429b-88f8-e69006ed3720/f257f903-ceaf-429b-88f8-e69006ed3720-320x240.webp" alt="Suzuki GSX-8T 776 83HK 6g" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="0cd27dea-40e4-4abc-8c75-71f6b296d9a0" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki GSX-8T 776 83HK 6g">Suzuki GSX-8T 776 83HK 6g</h3>
-        <span class="rk-pris">119.900 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2026</span><span>0 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 776 ccm og 83 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 776 ccm og 83 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">776 ccm</li><li class="rk-chip">83 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Haderslev, Syddanmark" role="group" aria-label="Sted: Haderslev, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Haderslev</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=0cd27dea-40e4-4abc-8c75-71f6b296d9a0" class="card-link" aria-label="Se annonce: Suzuki GSX-8T 776 83HK 6g, 119.900 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="0f1050b4-fafb-4614-9da8-f7b57856ca77" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_292407_8TXJ_1752916033.jpeg" alt="Suzuki GSF 1200 Bandit" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="0f1050b4-fafb-4614-9da8-f7b57856ca77" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki GSF 1200 Bandit">Suzuki GSF 1200 Bandit</h3>
-        <span class="rk-pris">34.995 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2000</span><span>35.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.157 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.157 ccm og 98 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.157 ccm</li><li class="rk-chip">98 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=0f1050b4-fafb-4614-9da8-f7b57856ca77" class="card-link" aria-label="Se annonce: Suzuki GSF 1200 Bandit, 34.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="5d09deda-8c16-47c4-939f-ba42e4f813dd" data-external="1">
-    <div class="card-media">
-      <img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_312235_TMXJ_1786790302-cropresize-768x540.webp" alt="Suzuki GSX 1300 R Hayabusa" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="5d09deda-8c16-47c4-939f-ba42e4f813dd" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki GSX 1300 R Hayabusa">Suzuki GSX 1300 R Hayabusa</h3>
-        <span class="rk-pris">49.999 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2003</span><span>56.800 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.298 ccm og 175 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.298 ccm og 175 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.298 ccm</li><li class="rk-chip">175 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Horsens, Midtjylland" role="group" aria-label="Sted: Horsens, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Horsens</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Jensens Motorcykler (jensensmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · jensensmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>jensensmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=5d09deda-8c16-47c4-939f-ba42e4f813dd" class="card-link" aria-label="Se annonce: Suzuki GSX 1300 R Hayabusa, 49.999 kr. — hos Jensens Motorcykler"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="0cf6bb88-cc48-4c65-847f-faa4ee700acf" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/01ec9753-dabb-44b0-899e-bbda6afca2ea/01ec9753-dabb-44b0-899e-bbda6afca2ea-320x240.webp" alt="Suzuki Ls650" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="0cf6bb88-cc48-4c65-847f-faa4ee700acf" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki Ls650">Suzuki Ls650</h3>
-        <span class="rk-pris">18.500 kr.</span>
-      </div>
-      <p class="rk-linje"><span>1997</span><span>16.700 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a2" title="Ikke udelukket til A2 ud fra 650 ccm og 32 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Mulig A2</span><span class="visually-hidden">. Ikke udelukket til A2 ud fra 650 ccm og 32 hk. A2 kræver også en grænse for effekt pr. kilo, og at maskinen ikke er afledt af en model med over dobbelt effekt — det står ikke i annoncen, så tjek registreringsattesten.</span></li><li class="rk-chip">650 ccm</li><li class="rk-chip">32 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Randers SV, Midtjylland" role="group" aria-label="Sted: Randers SV, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Randers SV</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=0cf6bb88-cc48-4c65-847f-faa4ee700acf" class="card-link" aria-label="Se annonce: Suzuki Ls650, 18.500 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="6bebca05-ab2a-49a9-b6b9-a85147ce394e" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_259832_SXOZ_1694100183.jpeg" alt="Suzuki VZR 1800 Intruder" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="6bebca05-ab2a-49a9-b6b9-a85147ce394e" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki VZR 1800 Intruder">Suzuki VZR 1800 Intruder</h3>
-        <span class="rk-pris">139.995 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2008</span><span>70.870 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.783 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.783 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.783 ccm</li><li class="rk-chip">125 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=6bebca05-ab2a-49a9-b6b9-a85147ce394e" class="card-link" aria-label="Se annonce: Suzuki VZR 1800 Intruder, 139.995 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="e4a1f438-19f6-4e0a-a208-2595d6218be8" data-external="1">
-    <div class="card-media">
-      <img src="https://www.jensensmc.dk/image/cachewebp/catalog/123mc_images/large-mcimgs-2400_311335_P2FC_1785499751-cropresize-768x540.webp" alt="Suzuki GSXS 1000 GT" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="e4a1f438-19f6-4e0a-a208-2595d6218be8" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki GSXS 1000 GT">Suzuki GSXS 1000 GT</h3>
-        <span class="rk-pris">137.999 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2023</span><span>11.300 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 999 ccm og 150 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 999 ccm og 150 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">999 ccm</li><li class="rk-chip">150 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Horsens, Midtjylland" role="group" aria-label="Sted: Horsens, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Horsens</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Jensens Motorcykler (jensensmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · jensensmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>jensensmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=e4a1f438-19f6-4e0a-a208-2595d6218be8" class="card-link" aria-label="Se annonce: Suzuki GSXS 1000 GT, 137.999 kr. — hos Jensens Motorcykler"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="482022a9-f511-48c6-b1f8-ce940d0a8029" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/82e33a6b-c4b5-46fb-9e79-c68db9322b2a/82e33a6b-c4b5-46fb-9e79-c68db9322b2a-320x240.webp" alt="Suzuki GSX-8R 776 83HK 6g" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="482022a9-f511-48c6-b1f8-ce940d0a8029" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki GSX-8R 776 83HK 6g">Suzuki GSX-8R 776 83HK 6g</h3>
-        <span class="rk-pris">109.999 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2026</span><span>0 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 776 ccm og 83 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 776 ccm og 83 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">776 ccm</li><li class="rk-chip">83 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Haderslev, Syddanmark" role="group" aria-label="Sted: Haderslev, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Haderslev</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=482022a9-f511-48c6-b1f8-ce940d0a8029" class="card-link" aria-label="Se annonce: Suzuki GSX-8R 776 83HK 6g, 109.999 kr. — hos Gul og Gratis"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="c1515aee-2be3-4f93-b722-e94deb710de9" data-external="1">
-    <div class="card-media">
-      <img src="https://www.123mc.dk/large-mcimgs-400_309134_2OSS_1782210593.jpeg" alt="Suzuki VZR 1800 Intruder" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="c1515aee-2be3-4f93-b722-e94deb710de9" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki VZR 1800 Intruder">Suzuki VZR 1800 Intruder</h3>
-        <span class="rk-pris">149.900 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2006</span><span>59.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 1.783 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 1.783 ccm og 125 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">1.783 ccm</li><li class="rk-chip">125 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Thorsø, Midtjylland" role="group" aria-label="Sted: Thorsø, Midtjylland"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Thorsø</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Rydbergs MC (rydbergsmc.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: Forhandler · rydbergsmc.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span><span class="rk-saelgertype">Forhandler · </span>rydbergsmc.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=c1515aee-2be3-4f93-b722-e94deb710de9" class="card-link" aria-label="Se annonce: Suzuki VZR 1800 Intruder, 149.900 kr. — hos Rydbergs MC"></a>
-  </article>
-      
-  <article class="card card-rich" data-listing-id="e44716df-1c5f-46fb-b568-5fa014b2d4c9" data-external="1">
-    <div class="card-media">
-      <img src="https://assets.guloggratis.dk/images/73ec0399-7d0e-43a0-858c-9c8cd05883f6/73ec0399-7d0e-43a0-858c-9c8cd05883f6-320x240.webp" alt="Suzuki Gsf 650 bandit" loading="lazy" fetchpriority="low" decoding="async" class="card-photo">
-      
-      
-      <button type="button" class="card-compare " data-compare-toggle="e44716df-1c5f-46fb-b568-5fa014b2d4c9" aria-pressed="false" title="Sammenlign" aria-label="Tilføj til sammenligning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13M13 4l4 4-4 4"/><path d="M20 16H7M11 12l-4 4 4 4"/></svg></button>
-    </div>
-    <div class="rk-body">
-      <div class="rk-top">
-        <h3 class="rk-titel" title="Suzuki Gsf 650 bandit">Suzuki Gsf 650 bandit</h3>
-        <span class="rk-pris">35.000 kr.</span>
-      </div>
-      <p class="rk-linje"><span>2008</span><span>42.000 km</span></p>
-      <ul class="rk-chips"><li class="rk-chip rk-kk kk-a" title="Kræver A-kørekort: 650 ccm og 78 hk er over A2-grænsen på 47 hk (35 kW)."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.3"/><circle cx="8.6" cy="11" r="1.9"/><path d="M5.8 16c.5-1.5 1.7-2.2 2.8-2.2s2.3.7 2.8 2.2M14 10h4.5M14 13.5h3.5"/></svg><span>Kræver A</span><span class="visually-hidden">. Kørekort A. Kræver A-kørekort: 650 ccm og 78 hk er over A2-grænsen på 47 hk (35 kW).</span></li><li class="rk-chip">650 ccm</li><li class="rk-chip">78 hk</li></ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="Aabenraa, Syddanmark" role="group" aria-label="Sted: Aabenraa, Syddanmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>Aabenraa</span></span>
-        <span class="rk-kilde" title="Annoncen ligger hos Gul og Gratis (guloggratis.dk). Bikerbasen viser den, men handlen sker hos kilden." role="group" aria-label="Kilde: guloggratis.dk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14.5v4a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6h4"/></svg><span>guloggratis.dk</span></span>
-      </div>
-    </div>
-    <a href="annonce.html?id=e44716df-1c5f-46fb-b568-5fa014b2d4c9" class="card-link" aria-label="Se annonce: Suzuki Gsf 650 bandit, 35.000 kr. — hos Gul og Gratis"></a>
   </article></div>
-      <p class="brand-mere"><a href="soegning.html?brands=Suzuki" class="btn btn-primary">Se alle 63 Suzuki i søgningen</a></p>
+      <p class="mk-mere-lille"><a class="mk-link" href="soegning.html?brands=Suzuki">Se alle <span data-mk-n>63</span> Suzuki i søgningen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a></p>
       <div class="brand-actions">
         <a href="opret-annonce.html" class="btn btn-outline">Sælg din Suzuki</a>
       </div>
@@ -1141,6 +790,13 @@ try{
       </details>
     </section>
 
+    <section class="section mk-kf-bund" style="padding-top:0;">
+      <section class="mk-kf" aria-labelledby="mk-kf-h">
+      <h2 id="mk-kf-h"><span class="mk-kf-ik" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>Kort fortalt</h2>
+      <ul class="mk-kf-liste"><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><span class="mk-kf-t"><span data-mk-n>63</span> Suzuki-motorcykler</span> er indekseret fra danske forhandlere og markedspladser.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Oplyste priser fra 12.500 kr. til 189.000 kr. (ikke alle annoncer oplyser en pris).</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>4 af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.</span></li><li><span class="mk-kf-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span>Kilden står på hvert kort, og handlen sker hos sælger. Mangler et tal, står der "Ikke oplyst".</span></li></ul>
+    </section>
+    </section>
+
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre mærker</h2>
       <div class="popular-row">
@@ -1229,25 +885,25 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=594a0c5c"></script>
-<script defer src="js/supabase-config.js?v=594a0c5c"></script>
-<script defer src="js/supabase-api.js?v=594a0c5c"></script>
-<script defer src="js/icons.js?v=594a0c5c"></script>
-<script defer src="js/bike-art.js?v=594a0c5c"></script>
+<script defer src="js/security.js?v=c0d860c9"></script>
+<script defer src="js/supabase-config.js?v=c0d860c9"></script>
+<script defer src="js/supabase-api.js?v=c0d860c9"></script>
+<script defer src="js/icons.js?v=c0d860c9"></script>
+<script defer src="js/bike-art.js?v=c0d860c9"></script>
 <!-- js/postnumre.js (40.050 B rå / 7.482 B gzip) er væk: findPostnr() kaldes
      kun fra js/annonce.js og js/opret-annonce.js, og en mærkeside har nul
      formularfelter. Den lå i den samme kø som fonte og css og forsinkede
      første maling uden at nogen på siden spurgte efter den. -->
-<script defer src="js/data.js?v=594a0c5c"></script>
-<script defer src="js/store.js?v=594a0c5c"></script>
-<script defer src="js/maaling.js?v=594a0c5c"></script>
-<script defer src="js/backend-bridge.js?v=594a0c5c"></script>
-<script defer src="js/components.js?v=594a0c5c"></script>
+<script defer src="js/data.js?v=c0d860c9"></script>
+<script defer src="js/store.js?v=c0d860c9"></script>
+<script defer src="js/maaling.js?v=c0d860c9"></script>
+<script defer src="js/backend-bridge.js?v=c0d860c9"></script>
+<script defer src="js/components.js?v=c0d860c9"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
-<script defer src="js/sortering.js?v=594a0c5c"></script>
-<script defer src="js/brand-logos-data.js?v=594a0c5c"></script>
-<script defer src="js/brand-logos.js?v=594a0c5c"></script>
-<script defer src="js/maerke.js?v=594a0c5c"></script>
+<script defer src="js/sortering.js?v=c0d860c9"></script>
+<script defer src="js/brand-logos-data.js?v=c0d860c9"></script>
+<script defer src="js/brand-logos.js?v=c0d860c9"></script>
+<script defer src="js/maerke.js?v=c0d860c9"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">
