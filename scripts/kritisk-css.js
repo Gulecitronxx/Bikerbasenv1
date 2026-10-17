@@ -186,7 +186,6 @@ function udsnit(traeer, krit, kendt){
   const kritisk = n => krit.has(n.noegle) || !kendt.has(n.noegle);
   const flad = traeer.flatMap(t => fladRegler(t));
   const brugteTekster = [];
-  const iAlt = [];
   const behold = n => {
     if (n.type === 'regel') return kritisk(n);
     if (n.navn === 'font-face' || n.navn === 'property') return true;
@@ -202,7 +201,6 @@ function udsnit(traeer, krit, kendt){
     }
     return behold(n);
   };
-  void iAlt;
   return minifyCSS(traeer.map(t => skriv(t, medKeyframes)).join(''));
 }
 

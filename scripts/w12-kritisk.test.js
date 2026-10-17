@@ -223,15 +223,22 @@ async function browserKlar(){
 function snapshot(zoneFaktor){
   const vh = innerHeight * zoneFaktor;
   const ud = [];
-  const sti = e => { const s = []; for (let n = e; n && n.nodeType === 1; n = n.parentElement) s.push(n.tagName.toLowerCase() + (n.id ? '#' + n.id : '') + ':' + (Array.prototype.indexOf.call(n.parentElement ? n.parentElement.children : [], n))); return s.reverse().join('>'); };
+  const sti = e => { const s = []; for (let n = e; n && n.nodeType === 1; n = n.parentElement) s.push(n.tagName.toLowerCase() + (n.id ? '#' + n.id : '') + ':' + (Array.prototype.filter.call(n.parentElement ? n.parentElement.children : [], c => !/^(LINK|SCRIPT|STYLE|NOSCRIPT)$/.test(c.tagName)).indexOf(n))); return s.reverse().join('>'); };
   for (const e of document.body.querySelectorAll('*')){
-    if (e.closest('script,style,noscript,template')) continue;
+    if (e.closest('script,style,noscript,template') || e.tagName === 'LINK') continue;
     const r = e.getBoundingClientRect();
-    if (r.top + scrollY > vh && e.getClientRects().length) continue;
+    if (!e.getClientRects().length || r.top + scrollY > vh) continue;   // boksloese (display:none) er ikke 'over folden'; et element der ER skjult i det fulde ark men ikke i udsnittet dukker op som ekstra element
     const cs = getComputedStyle(e);
-    let tekst = '';
-    for (let i = 0; i < cs.length; i++){ const p = cs[i]; tekst += p + ':' + cs.getPropertyValue(p) + ';'; }
-    ud.push({ sti: sti(e), r: [Math.round(r.x * 10) / 10, Math.round((r.y + scrollY) * 10) / 10, Math.round(r.width * 10) / 10, Math.round(r.height * 10) / 10].join(','), css: tekst });
+    const par = [];
+    // Et element der raekker ned under zonen faar sin hoejde af indhold, udsnittet med vilje ikke styler: hoejde-afledte egenskaber springes over.
+    const nedUnder = r.bottom + scrollY > vh;
+    for (let i = 0; i < cs.length; i++){
+      const p = cs[i];
+      if (nedUnder && /^(height|block-size|perspective-origin|transform-origin|grid-template-rows)$/.test(p)) continue;
+      par.push(p + ':' + cs.getPropertyValue(p) + ';');
+    }
+    const tekst = par.sort().join('');   // egendefinerede egenskaber kommer i deklarationsraekkefoelge; sorter
+    ud.push({ sti: sti(e), r: [Math.round(r.x * 10) / 10, Math.round((r.y + scrollY) * 10) / 10, Math.round(r.width * 10) / 10, (r.bottom + scrollY > vh ? '*' : Math.round(r.height * 10) / 10)].join(','), css: tekst });
   }
   return ud;
 }
@@ -249,7 +256,7 @@ async function tagSnapshot(pw, { rod, side, vp, blokerSenere, tema }){
     await page.goto(`http://127.0.0.1:${port}/${side}`, { waitUntil: 'load', timeout: 20000 });
     await page.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {});
     await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
-    await page.addStyleTag({ content: '*,*::before,*::after{transition:none!important;animation:none!important;caret-color:transparent!important}' });
+    await page.addStyleTag({ content: 'html *,html *::before,html *::after{transition:none!important;animation:none!important;caret-color:transparent!important}'   /* hoejere specificitet end sidens *{...!important} i reduced-motion, saa raekkefoelgen i dokumentet ikke afgoer */ });
     await page.waitForTimeout(300);
     return await page.evaluate(snapshot, 1.5);
   } finally {
@@ -260,15 +267,23 @@ async function tagSnapshot(pw, { rod, side, vp, blokerSenere, tema }){
 
 function sammenlign(a, b){
   const fejl = [];
-  if (a.length !== b.length) fejl.push(`antal elementer ${a.length} != ${b.length}`);
+  if (a.length !== b.length){
+    const sa = new Set(a.map(x => x.sti)), sb2 = new Set(b.map(x => x.sti));
+    const kun = (x, y) => [...x].filter(s => !y.has(s)).slice(0, 4).join(' ; ');
+    fejl.push(`antal elementer ${a.length} != ${b.length}; kun i fuld: [${kun(sa, sb2)}]; kun i kritisk: [${kun(sb2, sa)}]`);
+  }
+  // Egendefinerede egenskaber (--x) gemmer tokens ordret; det fulde ark er uminificeret i kilden, udsnittet minificeret.
+  const norm = t => t.replace(/127[.]0[.]0[.]1:\d+/g, 'vaert').replace(/\s*,\s*/g, ',').replace(/\s*([(){}:;])\s*/g, '$1');
+  a = a.map(x => ({ ...x, css: norm(x.css) })); b = b.map(x => ({ ...x, css: norm(x.css) }));
   for (let i = 0; i < Math.min(a.length, b.length); i++){
     if (a[i].sti !== b[i].sti){ fejl.push(`raekkefoelge ${a[i].sti} != ${b[i].sti}`); break; }
     if (a[i].r !== b[i].r) fejl.push(`${a[i].sti}: boks ${a[i].r} != ${b[i].r}`);
     else if (a[i].css !== b[i].css){
       const pa = Object.fromEntries(a[i].css.split(';').filter(Boolean).map(x => [x.slice(0, x.indexOf(':')), x.slice(x.indexOf(':') + 1)]));
       const pb = Object.fromEntries(b[i].css.split(';').filter(Boolean).map(x => [x.slice(0, x.indexOf(':')), x.slice(x.indexOf(':') + 1)]));
-      const d = Object.keys(pa).filter(k => pa[k] !== pb[k]).slice(0, 3).map(k => `${k}: ${pa[k]} != ${pb[k]}`);
-      fejl.push(`${a[i].sti}: ${d.join(' | ')}`);
+      const d = [...new Set([...Object.keys(pa), ...Object.keys(pb)])].filter(k => pa[k] !== pb[k]).slice(0, 4).map(k => `${k}: ${pa[k]} != ${pb[k]}`);
+      let o = 0; while (o < a[i].css.length && a[i].css[o] === b[i].css[o]) o++;
+      fejl.push(`${a[i].sti}: ${d.join(' | ')} [forskel ved tegn ${o}: «${a[i].css.slice(Math.max(0, o - 40), o + 60)}» != «${b[i].css.slice(Math.max(0, o - 40), o + 60)}»]`);
     }
     if (fejl.length > 6) break;
   }
@@ -306,7 +321,7 @@ test('generator: zonen tager det synlige + skjulte skjul-regler med, og lader de
   assert.ok(krit.includes('.hero{display:flex;height:50px}') && krit.includes('.hero{background:#eee}'), krit);
   assert.ok(krit.includes('.nede{'), 'element i zonen');
   assert.ok(krit.includes('.skjult{display:none}'), 'skjul-regel tages med');
-  assert.ok(krit.includes('@media (min-width:700px){.hero{height:70px}}'), 'media-omslag bevaret for kritisk del');
+  assert.ok(krit.includes('@media (min-width:700px){.hero{height:70px}}'), 'media-omslag bevaret for kritisk del: ' + krit);
   assert.ok(!krit.includes('.langt'), '3000px under folden hoerer ikke til udsnittet: ' + krit);
   assert.ok(m.familier.koerekort.krit.length >= 5);
 });

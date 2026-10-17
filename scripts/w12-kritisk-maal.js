@@ -20,9 +20,12 @@ const http = require('http');
 const zlib = require('zlib');
 const { spawnSync } = require('child_process');
 const sb = require('./smoke-browser');
+const { lavBackend } = require('./w9-saelger-mock');
 const { uuid } = require('./smoke-fixtures');
 
 const REPO = path.join(__dirname, '..');
+/* Sider bag login rendres med en fiktiv indlogget forhandler (scripts/w9-saelger-mock.js). */
+const LOGGET_IND = new Set(['dashboard', 'mine-annoncer', 'opret-annonce']);
 const MAPPER = ['css', 'js', 'fonts', 'img', 'scripts'];
 
 /* Kopierer repoets udgivelsesrelevante filer til `maal` (overskriver; sletter intet) og koerer trinene. */
@@ -91,7 +94,8 @@ async function maalEn({ browser, base, port, side, profil, friske, blokeret }){
     deviceScaleFactor: mobil ? 2 : 1, isMobile: mobil, hasTouch: mobil, locale: 'da-DK', serviceWorkers: 'block', colorScheme: 'light',
   });
   await context.addInitScript(INIT, { friske });
-  await sb.installerMock(context, port, blokeret);
+  if (LOGGET_IND.has(side)) await lavBackend({ loggetInd: true, forhandler: true, annoncer: [{}, {}, {}] }).installer(context, { tema: null, cookie: !friske });
+  else await sb.installerMock(context, port, blokeret);
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   const bytes = { html: 0, css: 0, js: 0, font: 0, img: 0, andet: 0 };
@@ -133,6 +137,7 @@ async function maal({ varianter, sider, kor = 5, profiler = ['mobil'], friske = 
     for (const side of sider){
       for (const profil of profiler){
         const celler = Object.fromEntries(varianter.map(v => [v.navn, []]));
+        for (const v of varianter) await maalEn({ browser, base: v.base, port: v.port, side, profil, friske, blokeret });   // opvarmning (kasseret): gzip-cache + kold JIT
         for (let i = 0; i < kor; i++){
           for (const v of (i % 2 ? varianter.slice().reverse() : varianter)){
             celler[v.navn].push(await maalEn({ browser, base: v.base, port: v.port, side, profil, friske, blokeret }));

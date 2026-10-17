@@ -160,7 +160,10 @@ async function koer(opt = {}){
             const maalSaet = [];
             const snap = async () => {
               for (let fors = 0; ; fors++){
-                try { maalSaet.push(await page.evaluate(iSiden, { vaelgere, skjulVaelgere, zone, temaer: [null, 'dark', 'light'] })); return; }
+                try {
+                  // Maal foerst naar de fulde ark er anvendt — DCL kan fyres foer css'en er hentet (siden har ofte intet script, der venter paa den).
+                  await page.waitForFunction(() => [...document.querySelectorAll('link[rel=stylesheet]')].every(l => l.sheet), null, { timeout: 20000 });
+                  maalSaet.push(await page.evaluate(iSiden, { vaelgere, skjulVaelgere, zone, temaer: [null, 'dark', 'light'] })); return; }
                 catch (e) { if (fors >= 3 || !/context was destroyed|navigat/i.test(String(e.message))) throw e; await page.waitForLoadState('load', { timeout: 20000 }).catch(() => {}); await page.waitForTimeout(300); }
               }
             };
@@ -169,6 +172,8 @@ async function koer(opt = {}){
             await page.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {});
             await page.evaluate(() => document.fonts && document.fonts.ready).catch(() => {});
             await page.waitForTimeout(600);
+            // Rolig DOM: ingen aendringer i 500 ms (hydrering/mock-svar kan komme sent paa en belastet maskine), max 10 s.
+            await page.evaluate(() => new Promise(ok => { let t = setTimeout(ok, 500); const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(ok, 500); }); mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true }); setTimeout(ok, 10000); })).catch(() => {});
             await snap();
             for (const m of maalSaet){
               for (const i of m.rammer) for (const r of unikke.get(vaelgere[i])) krit.add(r.noegle);
