@@ -63,7 +63,7 @@ Bygget (kun p-soegning.css, soegning.html, js/search.js; ingen delte filer rørt
 
 Målt
 - X1 overflow: 0 ved 320/390/768/1024/1440 x lys/mørk x {standard, side 2 af 140, tom, filter-URL}: 40 kombinationer + 503 ved 390/1440.
-- X2 CLS: `smoke-browser --sider soegning --cls 0.05 --strikt`, 10 målinger, 0 fejl, 0 advarsler (største CLS 0,017; før dette arbejde 0,03 uden min. 0,07 efter første version, derfor reservationen). Filter-URL ved 390 lys: 0,0000.
+- X2 CLS: `smoke-browser --sider soegning --cls 0.05 --strikt`, 10 målinger, 0 fejl, 0 advarsler (største CLS 0,017; basislinjen 15c229c: 0,03; min første version gav op til 0,07 under parallel belastning, derfor reservationen af info-linjen og sen visning af Viser/panel). Filter-URL ved 390 lys: 0,0000.
 - X3 tap-mål: alle målte kontroller >= 40 px (chips, x, Ryd alle, sortér, Gitter/Liste, Gem søgning, panelknap, sidetal, typerækker, Flere valg) ved 1440 og 390, lys og mørk.
 - X4 kontrast: 0 tekstklasser under 4,5:1 (getComputedStyle mod nærmeste opake baggrund, lys + mørk, 1440/390).
 - X5 tastatur: Tab-orden skip-link, header, søgekort, chips, Ryd alle, Gem søgning, sidebar; fokusring på alle undtagen de to skyderhåndtag (`dr-thumb`, eksisterende komponent); Enter på chip-x fjerner filtret.
