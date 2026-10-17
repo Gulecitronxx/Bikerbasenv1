@@ -3878,6 +3878,9 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Fra tablet og op: kompakt kort i højre side (over fotoet, ikke over forsidens overskrift). */
 @media (min-width:1024px){ .data-afbrud{ left:auto; right: var(--gutter); width: 440px; margin: 0; } }
 .data-afbrud[hidden]{ display:none; }
+/* W12: på søgesiden under 1024 px ligger banneret i flowet (øverst i resultatområdet), ikke som overlay over hero-overskriften. */
+.data-afbrud.data-afbrud-flow{ position:static; max-width:none; margin:0 0 var(--space-3); z-index:auto; box-shadow:none; transition:none; }
+@media (max-width:1023px){ .data-afbrud.data-afbrud-flow .data-afbrud-igen, .data-afbrud.data-afbrud-flow .data-afbrud-luk{ min-height:40px; } }
 .data-afbrud strong{ display:block; }
 .data-afbrud-kort{ display:none; }
 .data-afbrud{ transition: transform .2s ease, opacity .2s ease, visibility 0s; }
