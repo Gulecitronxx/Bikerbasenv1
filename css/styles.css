@@ -3880,7 +3880,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .data-afbrud[hidden]{ display:none; }
 /* W12: på søgesiden under 1024 px ligger banneret i flowet (øverst i resultatområdet), ikke som overlay over hero-overskriften. */
 .data-afbrud.data-afbrud-flow{ position:static; max-width:none; margin:0 0 var(--space-3); z-index:auto; box-shadow:none; transition:none; }
-@media (max-width:1023px){ .data-afbrud.data-afbrud-flow .data-afbrud-igen, .data-afbrud.data-afbrud-flow .data-afbrud-luk{ min-height:40px; } }
+/* Blokken er kun 46 px høj (knapper 36 px): jo lavere, jo mindre flytter den resultatområdet under sig, når svaret kommer (CLS). */
+@media (max-width:1023px){ .data-afbrud.data-afbrud-flow{ padding-top:4px; padding-bottom:4px; } .data-afbrud.data-afbrud-flow .data-afbrud-igen, .data-afbrud.data-afbrud-flow .data-afbrud-luk{ min-height:36px; } }
 .data-afbrud strong{ display:block; }
 .data-afbrud-kort{ display:none; }
 .data-afbrud{ transition: transform .2s ease, opacity .2s ease, visibility 0s; }
