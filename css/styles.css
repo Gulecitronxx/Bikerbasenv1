@@ -552,7 +552,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   display:grid; gap: var(--space-6);
   grid-template-columns: 1fr; padding: var(--space-8) 0 var(--space-6);
 }
-@media (min-width:768px){ .footer-grid{ grid-template-columns: 1.4fr 1fr 1fr 1fr; } }
+/* Kolonner: se w10-footer-blokken nederst (to kolonner på telefon, 4+brand fra 768, 5 kolonner fra 1100 px). */
 .footer-brand{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:20px; color:#fff; margin-bottom:var(--space-3); }
 .footer-brand .brand-logo{ width:30px; height:30px; }
 /* Runde 25 (sidefund fra runde 21, flat-type-hierarchy): 14px var IKKE
@@ -4128,3 +4128,41 @@ body.home .kort-raekke > .data-afbrud{ display:block; flex:1 1 100%; grid-column
 .breadcrumb a{ padding-inline:3px; }
 /* Et link, der er hele afsnittets/punktets indhold, er en selvstændig trykflade (ikke et inline-link midt i en sætning): >= 24 px. */
 main p > a:only-child, main ul:not([class]) > li > a:only-child, .gd-pop-all, .gd-sources li > a:only-child{ display:inline-block; padding-block:4px; }
+
+/* ============ w10-footer: footer efter billedets kolonner, tap-mål, skip-link og fokus ============ */
+/* Kolonner (billedet): Bikerbasen / Køb / Sælg / Guides & viden / Juridisk. Telefon: to kolonner, brandet over hele bredden.
+   768-1099: brandet over hele bredden, fire linkkolonner under. Fra 1100: brandet + fire kolonner på én række. */
+.footer-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); column-gap: var(--space-5); row-gap: var(--space-6); }
+.footer-grid > .footer-om{ grid-column: 1 / -1; }
+@media (min-width:768px){ .footer-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); column-gap: var(--space-6); } }
+@media (min-width:1100px){
+  .footer-grid{ grid-template-columns: minmax(0,1.5fr) repeat(4, minmax(0,1fr)); }
+  .footer-grid > .footer-om{ grid-column:auto; }
+}
+.footer-om{ display:flex; flex-direction:column; align-items:flex-start; }
+.footer-tekst, .footer-note{ font-size:14px; line-height:1.55; color:#C7C1B8; max-width:320px; margin:0 0 var(--space-3); }
+.footer-note{ font-size:14px; color:#C7C1B8; }
+.footer-kontakt{ margin:0 0 var(--space-2); font-size:14px; }
+.footer-tema{ list-style:none; margin:0; padding:0; font-size:14px; }
+.footer-col ul{ gap:0; }
+/* Hver linkrække er min. 40 px høj (trykflade), men rækkeafstanden holdes på 36 px med -2 px margen, så kolonnerne ikke
+   vokser mærkbart (før: 24 px + 10 px mellemrum = 34 px). Dobbeltrækkerne overlapper 4 px, den senere række vinder. */
+.footer-col ul li a{ min-height:40px; }
+.footer-col ul li{ margin-block:-2px; }
+@media (pointer:coarse){ .footer-col ul li a{ min-height:44px; } .footer-col ul li{ margin-block:0; } }
+.footer-kontakt a, .footer-bottom a{ display:inline-flex; align-items:center; min-height:40px; }
+.footer-theme{ min-height:40px; }
+/* Linkene i footeren var #C7C1B8 på #1C1A18 / #0F0D0A (AA ok); understregning vises ved hover og fokus, så de ikke kun adskilles af farve. */
+.site-footer a:hover, .site-footer a:focus-visible{ text-decoration:underline; text-underline-offset:3px; }
+/* Fokusring i footeren: orange (--color-ring) er for svag mod den mørke bund, så ringen er lys. */
+.site-footer :focus-visible, .footer-theme:focus-visible{ outline:2.5px solid #fff; outline-offset:2px; }
+
+/* Småtekst-links midt i en sætning (login "vilkår/privatlivspolitik", cookie-notens privatlivslink): linkets boks er min.
+   40 px høj (padding), men negative marginer holder linjehøjden uændret, så teksten ikke flytter sig. */
+main .lg-legal a, .cookie-modal-note a{ display:inline-block; padding:11px 2px; margin:-11px 0; }
+
+/* Skip-link: synlig ved fokus, lukker ikke inde bag headerens stacking. */
+.skip-link{ position:fixed; left:-9999px; top:8px; }
+.skip-link:focus, .skip-link:focus-visible{ left:8px; outline:3px solid #fff; outline-offset:2px; box-shadow:0 0 0 6px var(--color-primary); border-radius:8px; }
+/* Hovedindholdet er mål for skip-linket, men skal ikke selv tegne en ring, når det får programmatisk fokus. */
+main:focus{ outline:none; }

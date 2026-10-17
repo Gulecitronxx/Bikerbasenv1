@@ -227,7 +227,18 @@ function wireHeader(){
     });
   });
   // Runde 5 (D5-F7): to knapper — headerens (desktop) og skuffens (mobil).
-  document.querySelectorAll('.theme-toggle').forEach(b => b.addEventListener('click', toggleTheme));
+  /* Temaskifteren er en til/fra-knap, ikke en udvidelig: aria-pressed (true = mørk) følger det faktiske tema, også når
+     temaet skifter via systemindstillingen eller en anden knap (header, skuffe og footer er tre knapper). */
+  const temaKnapper = document.querySelectorAll('.theme-toggle');
+  const syncTemaAria = () => {
+    const sat = document.documentElement.getAttribute('data-theme');
+    const moerkt = sat ? sat === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    temaKnapper.forEach(b => b.setAttribute('aria-pressed', String(moerkt)));
+  };
+  temaKnapper.forEach(b => b.addEventListener('click', toggleTheme));
+  syncTemaAria();
+  new MutationObserver(syncTemaAria).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTemaAria);
   document.addEventListener('bb:favorites-changed', updateFavCount);
 }
 
