@@ -776,44 +776,61 @@ try{
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
-      <div>
+      <div class="footer-col footer-om">
         <div class="footer-brand"><img src="logo-mark.png?v=logo1" alt="" class="brand-logo" width="30" height="30"><span>Bikerbasen</span></div>
-        <p style="color:#B4AEA3; font-size:14px; max-width:320px;">Motorcykler til salg fra danske forhandlere og markedspladser — samlet ét sted.</p>
-      </div>
-      <div class="footer-col">
-        <h2 class="footer-col-title">Køb & salg</h2>
-        <ul>
-          <li><a href="soegning.html">Søg motorcykler</a></li>
-          <li><a href="opret-annonce.html">Opret annonce</a></li>
-          <li><a href="mine-annoncer.html">Mine annoncer</a></li>
-          <li><a href="guides.html">Artikler &amp; guides</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h2 class="footer-col-title">Kategorier</h2>
-        <ul>
-          <li><a href="type-sport.html">Sport</a></li>
-          <li><a href="type-touring.html">Touring</a></li>
-          <li><a href="type-cruiser.html">Cruiser</a></li>
-          <li><a href="type-naked.html">Naked</a></li>
-          <li><a href="type-adventure.html">Adventure/Enduro</a></li>
-          <li><a href="koerekort-a2.html">Kørekort A2</a></li>
-          <li><a href="koerekort-a1.html">Kørekort A1</a></li>
-          <li><a href="koerekort-a.html">Kørekort A</a></li>
-          <li><a href="maerker.html">Alle mærker</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h2 class="footer-col-title">Om Bikerbasen</h2>
-        <ul>
-          <li><a href="om-bikerbasen.html">Om Bikerbasen</a></li>
-          <li><a href="om-indeksering.html">Om indekseringen</a></li>
-          <li><a href="sikkerhed.html">Sikkerhed & gode råd</a></li>
-          <li><a href="vilkaar.html">Vilkår og betingelser</a></li>
-          <li><a href="privatlivspolitik.html">Privatlivspolitik</a></li>
+        <p class="footer-note">Annoncer samlet fra danske forhandlere og markedspladser — kilden står på hvert kort.</p>
+        <p class="footer-kontakt"><a href="mailto:kontakt@bikerbasen.dk">kontakt@bikerbasen.dk</a></p>
+        <ul class="footer-tema">
           <li><button type="button" class="theme-toggle footer-theme" aria-label="Skift mellem lys og mørk tilstand"><span class="icon-moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.7A8.3 8.3 0 1 1 9.3 3.5a6.7 6.7 0 0 0 11.2 11.2Z"/></svg></span><span class="icon-sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.5v2.3M12 19.2v2.3M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.3M19.2 12h2.3M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg></span>Lys / mørk tilstand</button></li>
         </ul>
       </div>
+      <nav class="footer-col" aria-labelledby="fk-koeb">
+        <h2 class="footer-col-title" id="fk-koeb">Køb</h2>
+        <ul>
+          <li><a href="soegning.html">Søg motorcykler</a></li>
+          <li><a href="maerker.html">Alle mærker</a></li>
+          <li><a href="type-naked.html">Naked</a></li>
+          <li><a href="type-sport.html">Sport</a></li>
+          <li><a href="type-touring.html">Touring</a></li>
+          <li><a href="type-cruiser.html">Cruiser</a></li>
+          <li><a href="type-adventure.html">Adventure/Enduro</a></li>
+          <li><a href="koerekort-a1.html">Kørekort A1</a></li>
+          <li><a href="koerekort-a2.html">Kørekort A2</a></li>
+          <li><a href="koerekort-a.html">Kørekort A</a></li>
+        </ul>
+      </nav>
+      <nav class="footer-col" aria-labelledby="fk-saelg">
+        <h2 class="footer-col-title" id="fk-saelg">Sælg</h2>
+        <ul>
+          <li><a href="opret-annonce.html">Opret annonce</a></li>
+          <li><a href="mine-annoncer.html">Mine annoncer</a></li>
+          <li><a href="mine-annoncer.html?tab=favoritter">Gemte annoncer</a></li>
+          <li><a href="login.html">Log ind / opret profil</a></li>
+        </ul>
+      </nav>
+      <nav class="footer-col" aria-labelledby="fk-guides">
+        <h2 class="footer-col-title" id="fk-guides">Guides &amp; viden</h2>
+        <ul>
+          <li><a href="guides.html">Alle artikler &amp; guides</a></li>
+          <li><a href="guide-foerste-motorcykel.html">Din første motorcykel</a></li>
+          <li><a href="guide-a2-koerekort.html">A2-kørekort</a></li>
+          <li><a href="guide-brugt-motorcykel.html">Køb brugt motorcykel</a></li>
+          <li><a href="guide-mc-typer.html">Motorcykeltyper</a></li>
+          <li><a href="guide-mc-forsikring.html">MC-forsikring</a></li>
+          <li><a href="guide-mc-udstyr.html">MC-udstyr</a></li>
+          <li><a href="guide-mc-ordliste.html">MC-ordliste</a></li>
+          <li><a href="sikkerhed.html">Sikkerhed &amp; gode råd</a></li>
+        </ul>
+      </nav>
+      <nav class="footer-col" aria-labelledby="fk-juridisk">
+        <h2 class="footer-col-title" id="fk-juridisk">Juridisk</h2>
+        <ul>
+          <li><a href="vilkaar.html">Vilkår og betingelser</a></li>
+          <li><a href="privatlivspolitik.html">Privatlivspolitik</a></li>
+          <li><a href="om-indeksering.html">Om indekseringen</a></li>
+          <li><a href="om-bikerbasen.html">Om Bikerbasen</a></li>
+        </ul>
+      </nav>
     </div>
     <div class="footer-bottom">
       <span>© 2026 Bikerbasen. Alle rettigheder forbeholdes.</span>
