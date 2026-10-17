@@ -76,8 +76,7 @@ test('K1a/K1c Opret: side 1+2 → billeder → gennemse → udgiv giver 1 annonc
   try {
     await udfylSide1(s.page);
     await skaerm(s.page, 'k1-side1');
-    await naeste(s.page);
-    await s.page.waitForSelector('#op-photos', { state: 'visible' });
+    await s.page.waitForSelector('#op-photos', { state: 'visible' });   // W14: billeder er sektion 2 på samme side
     await vaelgBilleder(s.page, 3);
     await s.page.waitForFunction(() => document.querySelectorAll('#photo-grid img').length >= 3);
     await skaerm(s.page, 'k1-billeder');
@@ -131,7 +130,7 @@ test('K2a Tilbage fra gennemse og billeder bevarer felter og billeder; fjern + f
   if (!kan.ok) return t.skip(kan.grund);
   const s = await aabn({ loggetInd: true }, 'opret-annonce.html');
   try {
-    await udfylSide1(s.page); await naeste(s.page);
+    await udfylSide1(s.page);
     await vaelgBilleder(s.page, 3);
     await s.page.waitForFunction(() => document.querySelectorAll('#photo-grid .photo-thumb').length === 3);
     // fjern andet billede
@@ -141,9 +140,8 @@ test('K2a Tilbage fra gennemse og billeder bevarer felter og billeder; fjern + f
     await s.page.locator('#photo-grid [data-cover="1"]').click();
     await naeste(s.page);                                       // gennemse
     assert.match(await s.page.locator('#preview-details').innerText(), /Velholdt MT-07/);
-    await s.page.click('#step-back');                           // → billeder
+    await s.page.click('#step-back');                           // → siden med detaljer, billeder og beskrivelse (W14: ét trin tilbage)
     assert.strictEqual(await s.page.locator('#photo-grid .photo-thumb').count(), 2, 'billeder bevaret efter Tilbage');
-    await s.page.click('#step-back');                           // → side 1
     assert.strictEqual(await s.page.inputValue('#f-model'), 'MT-07');
     assert.strictEqual(await s.page.inputValue('#f-price'), '69900');
     assert.strictEqual(await s.page.inputValue('#f-desc'), TESTBIL.desc);
@@ -181,8 +179,7 @@ test('K2c Udlogget: Fortsæt gemmer kladde og sender til login; efter login er f
     await s.page.fill('#login-password', 'testkode-123');
     await s.page.click('#login-form button[type="submit"], #login-submit');
     await s.page.waitForURL(/opret-annonce\.html/, { timeout: 10000 });
-    await s.page.waitForSelector('#op-photos', { state: 'visible', timeout: 5000 });   // lander direkte på billeder (trin 3)
-    await s.page.click('#step-back');
+    await s.page.waitForSelector('#op-photos', { state: 'visible', timeout: 5000 });   // W14: efter login er billedsektionen åben (før: gaten)
     assert.strictEqual(await s.page.inputValue('#f-model'), 'MT-07');
     assert.strictEqual(s.t.tabeller.listings.length, 0, 'intet oprettet før Udgiv');
   } finally { await s.luk(); }
@@ -191,7 +188,7 @@ test('K2c Udlogget: Fortsæt gemmer kladde og sender til login; efter login er f
 /* ---------------- K3 Fejl fra backend ---------------- */
 
 async function tilGennemse(s, antalBilleder = 2){
-  await udfylSide1(s.page); await naeste(s.page);
+  await udfylSide1(s.page);
   if (antalBilleder) await vaelgBilleder(s.page, antalBilleder);
   await naeste(s.page);
   await s.page.check('#f-terms');
@@ -301,7 +298,6 @@ test('K5a Rediger aktiv annonce: forudfyldt, PATCH ikke POST, gammelt billede be
     assert.strictEqual(await s.page.inputValue('#f-price'), '69900');
     assert.strictEqual(await s.page.locator('#photo-grid .photo-thumb').count(), 2);
     await s.page.fill('#f-price', '64900');
-    await naeste(s.page);                                            // → billeder
     await s.page.locator('[data-remove-existing="f2"]').click();     // confirm accepteres af dialog-handler
     await naeste(s.page);
     await s.page.check('#f-terms');
@@ -693,15 +689,18 @@ test('R2b Trinbjælken viser trin 1, så længe "1. Motorcyklens detaljer" er ø
     const s = await aabn({ loggetInd: true, viewport: { width: bredde, height: 800 } }, 'opret-annonce.html');
     try {
       const aktiv = () => s.page.locator('#stepper .step-item.active .step-label').innerText();
-      assert.strictEqual(await aktiv(), 'Type & specs');
+      assert.strictEqual(await aktiv(), 'Detaljer');
       // scroll så h2 for sektion 2 står i nedre halvdel af skærmen: stadig trin 1
       await s.page.evaluate(() => { const h = document.querySelector('.form-step[data-step="2"] h2'); window.scrollTo(0, h.getBoundingClientRect().top + scrollY - innerHeight * 0.6); });
       await s.page.waitForTimeout(250);
-      assert.strictEqual(await aktiv(), 'Type & specs', 'overskrift 2 ligger endnu nede på skærmen');
+      assert.strictEqual(await aktiv(), 'Detaljer', 'overskrift 2 ligger endnu nede på skærmen');
       await s.page.evaluate(() => { const h = document.querySelector('.form-step[data-step="2"] h2'); window.scrollTo(0, h.getBoundingClientRect().top + scrollY - 40); });
       await s.page.waitForTimeout(250);
-      assert.strictEqual(await aktiv(), 'Pris & beskrivelse');
-      await udfylSide1(s.page); await naeste(s.page);
+      assert.strictEqual(await aktiv(), 'Billeder');
+      await s.page.evaluate(() => { const h = document.querySelector('.form-step[data-step="3"] h2'); window.scrollTo(0, h.getBoundingClientRect().top + scrollY - 40); });
+      await s.page.waitForTimeout(250);
+      assert.strictEqual(await aktiv(), 'Beskrivelse & pris');
+      await udfylSide1(s.page);
       await vaelgBilleder(s.page, 2);
       await s.page.waitForFunction(() => document.querySelectorAll('#photo-grid .photo-thumb').length === 2);
       const maal = await s.page.evaluate(() => {

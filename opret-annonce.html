@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Sælg din motorcykel — gratis for private — Bikerbasen">
 <meta name="twitter:description" content="Opret en annonce for din motorcykel på Bikerbasen — gratis for private. Fire trin, kladde undervejs, og dit navn vises kun for indloggede.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -81,8 +81,8 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=d24834c0">
-<link rel="stylesheet" href="css/p-opret.css?v=d24834c0">
+<link rel="stylesheet" href="css/styles.css?v=0c0db914">
+<link rel="stylesheet" href="css/p-opret.css?v=0c0db914">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -140,12 +140,12 @@ try{
       <div class="op-hero-text">
         <a class="op-back" href="index.html"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>Tilbage til forsiden</a>
         <h1 id="op-h1">Opret annonce</h1>
-        <p class="op-hero-lead">Oplysninger og pris på én side, så billeder og gennemse. Gratis for private — og du kan gemme en kladde undervejs.</p>
+        <p class="op-hero-lead">Detaljer, billeder og beskrivelse på én side. Gratis for private — og du kan gemme en kladde.</p>
       </div>
       <ul class="op-trust" aria-label="Det her gælder, når du sælger på Bikerbasen">
         <li><span class="op-trust-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg></span><span><b>Gratis for private</b><small>Du betaler ikke for at annoncere.</small></span></li>
         <li><span class="op-trust-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4.2l10-10a2.1 2.1 0 0 0-3-3l-10 10Z"/><path d="M14.5 6.5 17.5 9.5"/></svg></span><span><b>Du styrer selv annoncen</b><small>Ret eller slet under Mine annoncer.</small></span></li>
-        <li><span class="op-trust-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.8v5.4c0 4.7 3 8 7 9.6 4-1.6 7-4.9 7-9.6V5.8Z"/><path d="m9 12 2.2 2.2L15.5 9.7"/></svg></span><span><b>Side om side med forhandlere og markedspladser</b><small>Samme søgning som deres annoncer.</small></span></li>
+        <li><span class="op-trust-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 5 5.8v5.4c0 4.7 3 8 7 9.6 4-1.6 7-4.9 7-9.6V5.8Z"/><path d="m9 12 2.2 2.2L15.5 9.7"/></svg></span><span><b>Side om side med forhandlere</b><small>Samme søgning som deres annoncer.</small></span></li>
       </ul>
     </div>
   </section>
@@ -171,20 +171,34 @@ try{
              af formularen skubbet ned (CLS). TYPES i js/data.js er stadig
              kilden: opret-annonce.js sammenligner og gentegner, hvis de
              afviger, så listen ikke kan drive fra hinanden. -->
-        <h3 class="op-label-h" id="type-overskrift">Motorcykeltype <span class="required-mark" aria-hidden="true">*</span></h3>
-        <div class="radio-card-group" id="type-radio-group" role="radiogroup" aria-labelledby="type-overskrift">
-          <label class="radio-card"><input type="radio" name="bike-type" value="sport"><span class="radio-card-inner"><span class="radio-card-label">Sport</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="touring"><span class="radio-card-inner"><span class="radio-card-label">Touring</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="cruiser"><span class="radio-card-inner"><span class="radio-card-label">Cruiser</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="naked"><span class="radio-card-inner"><span class="radio-card-label">Naked</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="adventure"><span class="radio-card-inner"><span class="radio-card-label">Adventure/Enduro</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="scooter"><span class="radio-card-inner"><span class="radio-card-label">Scooter</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="classic"><span class="radio-card-inner"><span class="radio-card-label">Classic/Veteran</span></span></label>
-          <label class="radio-card"><input type="radio" name="bike-type" value="cross"><span class="radio-card-inner"><span class="radio-card-label">Cross/MX</span></span></label>
-        </div>
+        <div class="op-split op-split-type">
+          <div>
+          <h3 class="op-label-h" id="type-overskrift">Motorcykeltype <span class="required-mark" aria-hidden="true">*</span></h3>
+          <div class="radio-card-group" id="type-radio-group" role="radiogroup" aria-labelledby="type-overskrift">
+            <label class="radio-card"><input type="radio" name="bike-type" value="sport"><span class="radio-card-inner"><span class="radio-card-label">Sport</span></span></label>
+            <label class="radio-card"><input type="radio" name="bike-type" value="touring"><span class="radio-card-inner"><span class="radio-card-label">Touring</span></span></label>
+            <label class="radio-card"><input type="radio" name="bike-type" value="cruiser"><span class="radio-card-inner"><span class="radio-card-label">Cruiser</span></span></label>
+            <label class="radio-card"><input type="radio" name="bike-type" value="naked"><span class="radio-card-inner"><span class="radio-card-label">Naked</span></span></label>
+            <label class="radio-card"><input type="radio" name="bike-type" value="adventure"><span class="radio-card-inner"><span class="radio-card-label">Adventure/Enduro</span></span></label>
+            <label class="radio-card"><input type="radio" name="bike-type" value="scooter"><span class="radio-card-inner"><span class="radio-card-label">Scooter</span></span></label>
+            <label class="radio-card"><input type="radio" name="bike-type" value="classic"><span class="radio-card-inner"><span class="radio-card-label">Classic/Veteran</span></span></label>
+            <label class="radio-card"><input type="radio" name="bike-type" value="cross"><span class="radio-card-inner"><span class="radio-card-label">Cross/MX</span></span></label>
+          </div>
 
-        <div class="op-split">
-          <div class="op-grid op-grid-2">
+          </div>
+          <aside class="op-tips" aria-labelledby="tips-titel-h">
+            <span class="op-tips-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>
+            <div>
+              <h3 id="tips-titel-h">Sådan udfylder du mærke og model</h3>
+              <ul>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Vælg mærket, og skriv modellen som i papirerne</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Mærke, model og årgang bliver overskriften</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Effekt (hk) viser, om den kan køres på A2</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+          <div class="op-grid op-grid-4 op-grid-id">
             <div class="field">
               <label for="f-brand">Mærke <span class="required-mark" aria-hidden="true">*</span></label>
               <select class="input" id="f-brand" required></select>
@@ -203,18 +217,6 @@ try{
               <div class="op-unit"><input class="input" id="f-km" type="number" inputmode="numeric" step="1" required placeholder="F.eks. 12500"><span class="op-unit-sfx" aria-hidden="true">km</span></div>
             </div>
           </div>
-          <aside class="op-tips" aria-labelledby="tips-titel-h">
-            <span class="op-tips-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>
-            <div>
-              <h3 id="tips-titel-h">Sådan udfylder du mærke og model</h3>
-              <ul>
-                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Vælg mærket, og skriv modellen som i papirerne</li>
-                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Mærke, model og årgang bliver overskriften</li>
-                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Effekt (hk) viser, om den kan køres på A2</li>
-              </ul>
-            </div>
-          </aside>
-        </div>
 
         <div class="op-grid op-grid-4">
           <div class="field">
@@ -301,11 +303,61 @@ try{
       </section>
 
       <!-- Step 2: Price, condition, location, description -->
-      <section class="form-step" data-step="2" hidden>
+      <section class="form-step" data-step="2">
         <header class="op-sec-head">
           <div>
-            <h2><span class="op-num">2.</span> Pris og beskrivelse</h2>
-            <p class="op-sec-sub">Sæt en pris, fortæl hvor motorcyklen står, og beskriv den ærligt.</p>
+            <h2><span class="op-num">2.</span> Billeder</h2>
+            <p class="op-sec-sub">Tilføj billeder af din motorcykel. Det første billede er forsidebilledet på kortet.</p>
+          </div>
+          <p class="op-req-note">Op til 12 billeder</p>
+        </header>
+        <!-- role/tabindex/aria: zonen var en div med kun en click-lytter, og
+             filfeltet er `hidden`, så tastatur og skærmlæser ikke kunne uploade
+             overhovedet. js/opret-annonce.js svarer på Enter og mellemrum. -->
+        <div class="op-photo-gate" id="op-photo-gate" hidden>
+          <p><b>Log ind for at tilføje billeder.</b> Billeder kan ikke gemmes i en kladde, så vi beder dig logge ind først. Det du har skrevet indtil nu gemmes på denne enhed, og du fortsætter her bagefter.</p>
+          <button type="button" class="btn btn-primary" id="op-photo-gate-btn">Log ind og fortsæt</button>
+        </div>
+        <div class="op-split op-split-photos" id="op-photo-sektion">
+          <div class="op-photos" id="op-photos">
+          <div class="upload-zone" id="upload-zone" role="button" tabindex="0" aria-labelledby="upload-titel" aria-describedby="upload-tekst">
+            <!-- accept: .heic/.heif står eksplicit ved siden af image/*, fordi
+                 Windows og Android ofte ikke kender MIME-typen for et
+                 iPhone-foto. Med image/* alene var filen grå i filvælgeren. -->
+            <input type="file" id="photo-input" accept="image/*,.heic,.heif" multiple hidden>
+            <div id="upload-icon-mount"></div>
+            <h3 id="upload-titel">Upload billeder</h3>
+            <p id="upload-tekst">Træk og slip billeder her, eller klik for at vælge. Op til 12 billeder — JPG, PNG eller HEIC, maks. 12 MB pr. billede.</p>
+          </div>
+          <div class="photo-grid" id="photo-grid"></div>
+        <div class="photo-ghosts" aria-hidden="true"><span><b>Primært billede</b></span><span></span><span></span><span></span></div>
+          </div>
+          <aside class="op-tips" aria-labelledby="tips-fotos-h">
+            <span class="op-tips-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>
+            <div>
+              <h3 id="tips-fotos-h">Gode billeder skaber tillid</h3>
+              <ul>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Tag hele motorcyklen fra siden og skråt forfra</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Vis km-tæller, udstyr og eventuelle skader</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Brug dagslys og en rolig baggrund</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Billederne skal vise netop den motorcykel, du sælger</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Det første billede er forsidebilledet — træk for at ombytte, eller vælg ★</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Undgå tydelig nummerplade eller husnummer, hvis du vil beskytte din lokation</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Servicehæfte, fakturaer eller synsrapport: nævn det i beskrivelsen</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+        <!-- Teksten skal være ORDRET den samme som renderPhotoGrid() skriver,
+             ellers skifter linjen under sælgerens øjne, når JS'en lander. -->
+        <p class="field-hint" id="photo-hint" style="margin-top:12px;">Ingen billeder valgt endnu — uden foto står dit kort som "Ingen fotos i denne annonce" i søgningen.</p>
+      </section>
+
+      <section class="form-step" data-step="3">
+        <header class="op-sec-head">
+          <div>
+            <h2><span class="op-num">3.</span> Beskrivelse og pris</h2>
+            <p class="op-sec-sub">Fortæl om motorcyklen, sæt en pris, og skriv hvor den står.</p>
           </div>
           
         </header>
@@ -375,41 +427,6 @@ try{
       </section>
 
       <!-- Step 3: Photos -->
-      <section class="form-step" data-step="3" hidden>
-        <header class="op-sec-head">
-          <div>
-            <h2><span class="op-num">3.</span> Billeder</h2>
-            <p class="op-sec-sub">Tilføj billeder af din motorcykel. Det første billede er forsidebilledet på kortet.</p>
-          </div>
-          <p class="op-req-note">Op til 12 billeder</p>
-        </header>
-        <!-- role/tabindex/aria: zonen var en div med kun en click-lytter, og
-             filfeltet er `hidden`, så tastatur og skærmlæser ikke kunne uploade
-             overhovedet. js/opret-annonce.js svarer på Enter og mellemrum. -->
-        <div class="op-photos" id="op-photos">
-        <div class="upload-zone" id="upload-zone" role="button" tabindex="0" aria-labelledby="upload-titel" aria-describedby="upload-tekst">
-          <!-- accept: .heic/.heif står eksplicit ved siden af image/*, fordi
-               Windows og Android ofte ikke kender MIME-typen for et
-               iPhone-foto. Med image/* alene var filen grå i filvælgeren. -->
-          <input type="file" id="photo-input" accept="image/*,.heic,.heif" multiple hidden>
-          <div id="upload-icon-mount"></div>
-          <h3 id="upload-titel">Upload billeder</h3>
-          <p id="upload-tekst">Træk og slip billeder her, eller klik for at vælge. Op til 12 billeder — JPG, PNG eller HEIC, maks. 12 MB pr. billede.</p>
-        </div>
-        <div class="photo-grid" id="photo-grid"></div>
-        </div>
-        <!-- Teksten skal være ORDRET den samme som renderPhotoGrid() skriver,
-             ellers skifter linjen under sælgerens øjne, når JS'en lander. -->
-        <p class="field-hint" id="photo-hint" style="margin-top:12px;">Ingen billeder valgt endnu — uden foto står dit kort som "Ingen fotos i denne annonce" i søgningen.</p>
-        <p class="field-hint" style="margin-top:6px;">Det første billede er forsidebilledet — træk for at ombytte, eller vælg ★ for at gøre et billede til forside.</p>
-        <p class="field-hint" style="margin-top:6px;">Tip: Undgå billeder hvor nummerplade eller husnummer er tydeligt, hvis du vil beskytte din lokation.</p>
-
-        <!-- O1-4: dokumentupload er FJERNET — filerne blev vist i et gitter og
-             derefter smidt vaek ved "Udgiv". Kommer der en bucket + tabel +
-             visning, kommer feltet igen. -->
-        <p class="field-hint" style="margin-top:24px;">Har du servicehæfte, fakturaer eller synsrapport, så nævn det i beskrivelsen — købere spørger efter det, og du kan vise papirerne ved fremvisningen.</p>
-      </section>
-
       <!-- Step 4: Preview -->
       <section class="form-step" data-step="4" hidden>
         <header class="op-sec-head">
@@ -426,7 +443,7 @@ try{
         <!-- O1-6: flowet sagde aldrig, hvordan en koeber naar saelgeren. Sig det
              SANDE foer udgivelsen. -->
         <div class="naa-koebere" id="naa-koebere">
-          <h3>Sådan når købere dig</h3>
+          <h3>Sælgeroplysninger — sådan når købere dig</h3>
           <ul>
             <li>Din annonce står i søgningen side om side med annoncer fra forhandlere og markedspladser.</li>
             <li>Indloggede købere kan se dit navn og se din annonce.</li>
@@ -553,19 +570,19 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=d24834c0"></script>
-<script defer src="js/vendor/supabase.js?v=d24834c0"></script>
-<script defer src="js/supabase-config.js?v=d24834c0"></script>
-<script defer src="js/supabase-api.js?v=d24834c0"></script>
-<script defer src="js/icons.js?v=d24834c0"></script>
-<script defer src="js/postnumre.js?v=d24834c0"></script>
-<script defer src="js/data.js?v=d24834c0"></script>
-<script defer src="js/store.js?v=d24834c0"></script>
-<script defer src="js/maaling.js?v=d24834c0"></script>
-<script defer src="js/backend-bridge.js?v=d24834c0"></script>
-<script defer src="js/components.js?v=d24834c0"></script>
-<script defer src="js/opret-validering.js?v=d24834c0"></script>
-<script defer src="js/opret-annonce.js?v=d24834c0"></script>
+<script defer src="js/security.js?v=0c0db914"></script>
+<script defer src="js/vendor/supabase.js?v=0c0db914"></script>
+<script defer src="js/supabase-config.js?v=0c0db914"></script>
+<script defer src="js/supabase-api.js?v=0c0db914"></script>
+<script defer src="js/icons.js?v=0c0db914"></script>
+<script defer src="js/postnumre.js?v=0c0db914"></script>
+<script defer src="js/data.js?v=0c0db914"></script>
+<script defer src="js/store.js?v=0c0db914"></script>
+<script defer src="js/maaling.js?v=0c0db914"></script>
+<script defer src="js/backend-bridge.js?v=0c0db914"></script>
+<script defer src="js/components.js?v=0c0db914"></script>
+<script defer src="js/opret-validering.js?v=0c0db914"></script>
+<script defer src="js/opret-annonce.js?v=0c0db914"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">

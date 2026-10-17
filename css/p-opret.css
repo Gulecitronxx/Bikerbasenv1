@@ -367,7 +367,7 @@
 :root[data-theme="dark"] .op-form .radio-card input:checked + .radio-card-inner .radio-card-label{ color: var(--color-primary); }
 
 /* Trin 1 og 2 står på samme side: tydelig adskillelse mellem sektionerne. */
-.op-form .form-step[data-step="2"]:not([hidden]){ margin-top: var(--space-6); padding-top: var(--space-6); border-top:1px solid var(--color-border); }
+.op-form .form-step[data-step="2"]:not([hidden]), .op-form .form-step[data-step="3"]:not([hidden]){ margin-top: var(--space-6); padding-top: var(--space-6); border-top:1px solid var(--color-border); }
 .op-form .form-step h2:focus:not(:focus-visible){ outline:none; }
 
 /* Trinbjælken er sektionsnavigation: knapper uden knap-udseende. */
@@ -471,4 +471,78 @@
 @media (min-width:1024px){
   .op-stepper-card{ min-height:78px; }
   .op-side .op-live-card{ min-height:186px; }
+}
+
+/* W14: billedtrinnet — dropzone og miniaturer får hele rækken (som billedet), tipsene står som bånd under. */
+@container opform (min-width: 700px){
+  .op-split-photos{ grid-template-columns: minmax(0,1fr); }
+  .op-split-photos .op-tips ul{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:6px var(--space-5); }
+  .op-photos.has-photos{ grid-template-columns: minmax(250px, 30%) minmax(0,1fr); }
+  .op-photos.has-photos .photo-grid{ grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+}
+.op-split-photos{ margin-top: var(--space-4); }
+
+/* W14 runde 2: tættere på billedets lave hero og kompakte første sektion. */
+@media (min-width:900px){
+  .op-hero{ padding: var(--space-4) 0 calc(var(--space-7, 40px) + var(--space-3)); }
+  .op-hero h1{ margin-bottom: var(--space-2); }
+  .op-trust{ padding: var(--space-3); gap: var(--space-2); }
+}
+/* Tips til mærke/model: bånd under typefliserne i stedet for en høj boks, så felterne rykker op. */
+@container opform (min-width: 700px){
+  .op-split-type{ grid-template-columns: minmax(0,1fr); }
+  .op-split-type .op-tips ul{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:6px var(--space-4); }
+}
+.op-split-type{ margin-top: var(--space-3); }
+.op-split-type .radio-card-group{ margin-bottom: var(--space-1); }
+
+/* ---------- W14 runde 3 ---------- */
+/* Forhåndsvisning: eksempelkort fra start, ærligt mærket. */
+.op-live-eksempel{ position:relative; }
+.op-live-eksempel::before{
+  content:"Eksempel"; position:absolute; z-index:3; top:10px; right:10px; padding:3px 10px; border-radius:var(--radius-pill);
+  background:rgba(20,18,15,.78); color:#fff; font:600 11.5px var(--font-body); letter-spacing:.03em; pointer-events:none;
+}
+/* Billeder: kompakt upload-flise + række af miniaturer (også før første upload: spøgelsesfelter). */
+.photo-ghosts{ display:none; }
+@container opform (min-width: 700px){
+  .op-photos{ grid-template-columns: minmax(220px, 250px) minmax(0,1fr); align-items:start; }
+  .op-photos .upload-zone{ padding:var(--space-3); display:flex; flex-direction:column; justify-content:center; min-height:0; height:132px; box-sizing:border-box; overflow:hidden; }
+  .op-photos .upload-zone svg{ width:26px; height:26px; margin-bottom:var(--space-1); }
+  .op-photos .upload-zone h3{ font-size:15px; margin-bottom:2px; }
+  .op-photos .upload-zone p{ font-size:11.5px; line-height:1.35; margin:0; }
+  .op-photos.has-photos{ grid-template-columns: minmax(220px, 250px) minmax(0,1fr); }
+  .op-photos:not(.has-photos) .photo-ghosts{ display:grid; grid-template-columns:repeat(auto-fill, minmax(112px,1fr)); gap:12px; }
+  .photo-ghosts span{ aspect-ratio:1; max-height:132px; border:1.5px dashed var(--color-border); border-radius:var(--radius-sm); background:var(--color-surface-2); display:flex; align-items:flex-end; justify-content:flex-start; padding:6px; }
+  .photo-ghosts b{ font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--color-fg-muted); font-weight:700; }
+}
+/* Gennemse: advarsler i brandfarve, ikke grøn (grøn kun ✓) og ikke rød. */
+.op-advarsel-ikon{ display:inline-flex; }
+.equipment-list li .op-advarsel-ikon svg{ color:var(--color-primary-hover); }
+:root[data-theme="dark"] .equipment-list li .op-advarsel-ikon svg{ color:var(--color-primary); }
+/* Hero: lavere og varmere. */
+@media (min-width:900px){
+  .op-hero{ padding: var(--space-3) 0 calc(var(--space-6) + var(--space-2)); }
+  .op-hero h1{ font-size:clamp(40px, 4vw, 54px); margin:0 0 var(--space-1); }
+  .op-hero-lead{ font-size:17px; max-width:600px; }
+  .op-back{ min-height:40px; }
+}
+.op-hero::after{
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, #2B1509 92%, transparent) 0%,
+      color-mix(in srgb, #2B1509 80%, transparent) 30%,
+      color-mix(in srgb, #3A1C0B 62%, transparent) max(780px, 54%),
+      transparent calc(max(780px, 54%) + 190px)),
+    linear-gradient(0deg, color-mix(in srgb, #2B1509 22%, transparent) 0%, transparent 30%);
+}
+@media (max-width:899px){
+  .op-hero::after{ background: linear-gradient(180deg, color-mix(in srgb, #2B1509 74%, transparent) 0%, color-mix(in srgb, #2B1509 84%, transparent) 100%); }
+}
+@media (min-width:900px){
+  .op-hero{ padding: var(--space-2) 0 calc(var(--space-6) + 2px); }
+  .op-hero h1{ font-size:clamp(38px, 3.6vw, 48px); }
+  .op-back{ min-height:34px; }
+  .op-trust{ padding: var(--space-2) var(--space-3); gap: 6px; }
+  .op-trust small{ font-size:12px; }
 }
