@@ -56,6 +56,46 @@ crawl_delay_ms: 3000
 liste_urler:
   - url: https://www.guloggratis.dk/kategori/biler-og-koeretoejer/motorcykler/motorcykel
 
+# ---------------------------------------------------------------------
+# Paginering — undersøgt i renderet DOM 17.10.2026
+# ---------------------------------------------------------------------
+# Kategorien har 3.489 annoncer fordelt på 59 sider à 60 kort (side 59 har
+# 9). Før denne blok hentede crawleren kun side 1 og fandt 59-60 — og
+# værnet mod forsvundne annoncer (db.js, grænse 60 %) greb med rette ind.
+#
+# Den lovlige vej er den, en besøgende ser:
+#   - nederst på siden: "Side: [2] af 59" med knapperne Forrige / Næste;
+#   - <link rel="next" href="…/motorcykel?page=2"> i <head> (SEO-paginering);
+#   - side N har canonical …?page=N, og siden efter den sidste (?page=60)
+#     svarer HTTP 200 med nul kort og uden rel="next".
+# robots.txt: "User-agent: * / Allow: /" — ?page= er ikke forbudt (modsat
+# jensensmc.dk). Vi bruger IKKE api.guloggratis.dk/graphql, som siden selv
+# kalder; det er et internt endpoint uden dokumenteret kontrakt (samme
+# begrundelse som i mcsyd.yaml).
+#
+# type: sidetal  -> ?page=N for N = 2, 3, …; hver URL robots-tjekkes og
+#                   hentes gennem hastighedskøen (3000 ms mellem kald).
+# naeste         -> findes selectoren, er der en side mere; mangler den,
+#                   er siden den sidste. Sammen med "af N" (antal_sider)
+#                   er det det, der gør en kørsel KOMPLET.
+# max_sider: 60  -> hårdt loft. 59 er det målte tal; 60 giver plads til én
+#                   ekstra, så den tomme side bekræfter enden. Absolut loft
+#                   i config.js er 100. Nås loftet før enden, er kørslen
+#                   ufuldstændig og markerer INTET som borte.
+#
+# PRIS: 59 listesider = ca. 3 min. Men 3.489 annoncer = 3.489 detaljesider
+# à 3000 ms = ca. 2 t 55 min. Vil man nøjes med en del, bruges
+# --maks-sider=<n> (delvis kørsel, markerer ikke borte).
+paginering:
+  type: sidetal
+  parameter: page
+  max_sider: 60
+  stop_ved_tom_side: true
+  naeste: 'link[rel="next"]'
+  antal_sider:
+    css: 'form fieldset + span'
+    udtraek: 'af\s*(\d+)'
+
 # Annoncens URL: /annonce/<uuid>/<slug>
 # Id'et er uuid'et. Slug'en er sælgerens overskrift skrevet om, og den ændrer
 # sig, hvis han retter overskriften — den må aldrig blive nøglen.
