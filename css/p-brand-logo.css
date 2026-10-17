@@ -10,8 +10,9 @@
    Bredden er min(maks. bredde, maks. højde · forhold, k · √forhold): ens max-højde, ens max-bredde og ens max-AREAL, så et smalt
    emblem, et kvadratisk skjold og et bredt ordmærke har samme visuelle vægt. --bl-ar og --bl-sa (= √forhold) står i markup.
 
-   Ensfarvet logo = CSS-mask. Masken sættes af js/brand-logos.js (--bl-u), når filen er hentet (ÉN hentning pr. fil); indtil da er
-   .bl-mark skjult (aldrig en massiv blok). Hentning fejler -> .bl--fejl -> fallback. */
+   Ensfarvet logo = CSS-mask. js/brand-logos.js henter filen (ÉN hentning pr. fil) og sætter masken som data-URI i en regel pr. fil
+   (--bl-u); indtil da er masken en tom SVG, så .bl-mark ikke tegner noget (aldrig en massiv blok). Samme computed style, hver gang
+   siden er faldet til ro. Hentning fejler -> .bl--fejl -> fallback. */
 
 .bl{
   --bl-maxh:30px; --bl-maxw:60px; --bl-k:34.6px; --bl-ar:1; --bl-sa:1;
@@ -35,13 +36,12 @@
   aspect-ratio: var(--bl-ar);
 }
 .bl-mark{
-  position:absolute; inset:0; background: currentColor; visibility:hidden;
-  -webkit-mask-image: var(--bl-u, none); mask-image: var(--bl-u, none);
+  position:absolute; inset:0; background: currentColor;
+  -webkit-mask-image: var(--bl-u, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E")); mask-image: var(--bl-u, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"));
   -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
   -webkit-mask-position:center; mask-position:center;
   -webkit-mask-size:contain; mask-size:contain;
 }
-.bl--klar > .bl-mark{ visibility:visible; }
 .bl-ref{ display:none; }
 .bl-img{ display:block; width:100%; height:100%; object-fit:contain; }
 @media (forced-colors:active){ .bl-mark{ background: CanvasText; } }

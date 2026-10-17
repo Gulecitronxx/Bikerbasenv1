@@ -342,8 +342,9 @@ test('A12 p-brand-logo.css: ingen hårdkodede farver, og slotmålene følger SLO
   assert.match(uden, /width: min\(var\(--bl-maxw\), calc\(var\(--bl-maxh\) \* var\(--bl-ar\)\), calc\(var\(--bl-k\) \* var\(--bl-sa\)\)\)/);
   assert.match(uden, /\.bl-spalte--sm\{ width:56px;/, 'den lille kolonne er lige så bred som sm-slotten');
   assert.equal(BL.SLOT.sm[1], 56);
-  // masken er skjult, til klienten har hentet filen (aldrig en massiv blok), og tegnes først med .bl--klar
-  assert.match(uden, /\.bl-mark\{[^}]*visibility:hidden/); assert.match(uden, /\.bl--klar > \.bl-mark\{ visibility:visible; \}/);
+  // før klienten har hentet filen er masken en TOM svg (aldrig en massiv blok), og computed style afhænger ikke af klasser, der sættes asynkront
+  assert.match(uden, /\.bl-mark\{[^}]*mask-image: var\(--bl-u, url\("data:image\/svg\+xml,%3Csvg xmlns='http:\/\/www\.w3\.org\/2000\/svg'\/%3E"\)\)/);
+  assert.doesNotMatch(uden, /visibility:\s*(hidden|visible)|bl--klar/);
   assert.doesNotMatch(uden, /bl-probe/);
   assert.match(uden, /var\(--color-fg\)/); assert.match(uden, /var\(--color-fg-muted\)/);
   assert.doesNotMatch(uden, /--color-success/, 'grøn bruges kun til ✓');

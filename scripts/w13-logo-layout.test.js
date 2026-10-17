@@ -71,7 +71,7 @@ test('A6/A9 slots: fallback og logo har areal > 0, ligger inden for slotten, og 
   // masken maler faktisk noget (logoet er ikke usynligt): mindst ét ikke-transparent område i .bl-mark
   const mal = await page.evaluate(() => [...document.querySelectorAll('.bl--logo.bl--klar .bl-mark')].map(m => ({ maske: getComputedStyle(m).webkitMaskImage || getComputedStyle(m).maskImage, synlig: getComputedStyle(m).visibility })));
   assert.ok(mal.length > 30, 'logoerne på siden er hentet og klar');
-  assert.ok(mal.every(x => /url\("blob:/.test(x.maske) && x.synlig === 'visible'));
+  assert.ok(mal.every(x => /url\("data:image\/svg\+xml,/.test(x.maske) && !/%3Csvg xmlns='http:\/\/www\.w3\.org\/2000\/svg'\/%3E/.test(x.maske)), 'maske = den hentede fil (ikke den tomme)');
   assert.equal(await page.evaluate(() => document.querySelectorAll('.bl--fejl').length), 0, 'ingen fejl når filerne leveres');
   // ens visuel vægt i ALLE slots (ens max-højde + max-bredde + max-areal): største/mindste areal ≤ 2,2 for logoer med forhold ≥ 0,85, og ingen uden for sin slot
   const SL = { sm: [22, 56], md: [30, 60], lg: [40, 120], xl: [64, 160], hero: [72, 280] };
@@ -357,4 +357,23 @@ test('P2-3 mærkesidens hero: fast ramme — logoet flytter ikke H1, CTA-logoet 
   // Honda (emblem + navn), Kawasaki (bredt ordmærke), Ducati (lockup) og BSA uden logo: H1 står samme sted ±1 px — kun mærker med logo har den faste 72 px-ramme
   const med = ['/maerke-honda.html', '/maerke-kawasaki.html', '/maerke-ducati.html'].map(u => h1Top[u]);
   assert.ok(Math.max(...med) - Math.min(...med) <= 10, `H1-top med logo: ${med}`);
+});
+
+test('overgang: allerede genereret ældre markup (maske med url() i style + probe-billede, uden --bl-sa) virker, til generatorerne har kørt igen — ét kald, korrekt slot, fallback ved 404', async t => {
+  if (skip(t)) return;
+  const gammelt = (fil, ar) => `<span class="bl bl--lg bl--logo" data-bl="x" style="--bl-ar:${ar}" aria-hidden="true"><span class="bl-mark" style="-webkit-mask-image:url('img/brands/${fil}');mask-image:url('img/brands/${fil}')"></span><img class="bl-probe" src="img/brands/${fil}" alt="" width="40" height="40" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">X</span></span>`;
+  for (const [tilst, forvent] of [['ok', 'klar'], ['404', 'fejl']]){
+    sv.tilstand.svg = tilst;
+    try {
+      sv.tilstand.forespoergsler.length = 0;
+      const { page, ctx } = await side(sv.url + '/t-uden.html');
+      await page.evaluate(h => { document.getElementById('indsaet').innerHTML = h; }, gammelt('fx-wide.svg', 3.5) + gammelt('fx-ring.svg', 1));
+      await page.waitForFunction(() => document.querySelectorAll('#indsaet .bl--klar, #indsaet .bl--fejl').length === 2, null, { timeout: 5000, polling: 50 });
+      const r = await page.evaluate(() => [...document.querySelectorAll('#indsaet .bl')].map(e => { const q = e.getBoundingClientRect(); return { w: q.width, h: q.height, klar: e.classList.contains('bl--klar'), fejl: e.classList.contains('bl--fejl'), probe: !!e.querySelector('.bl-probe') }; }));
+      assert.ok(r.every(x => x[forvent] && !x.probe), JSON.stringify(r));
+      assert.ok(Math.abs(r[0].w - 85.7) < 1.5 && (forvent === "fejl" || Math.abs(r[0].h - 85.7 / 3.5) < 1.5), `bredt logo: slot ${r[0].w}x${r[0].h} (areal-reglen k·√forhold = 85,7 px; uden --bl-sa ville det blive 45,8)`);
+      for (const [f, n] of Object.entries(taelPrFil(svgKald(sv)))) if (/fx-wide|fx-ring/.test(f)) assert.ok(n <= 3, `${f}: ${n}`);   // kun overgangsmarkup: maske-url + probe, som browseren når at sende, før scriptet oversætter dem, + ét kald fra klienten (nyt markup: 1)
+      await ctx.close();
+    } finally { sv.tilstand.svg = 'ok'; }
+  }
 });

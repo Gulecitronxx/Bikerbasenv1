@@ -209,9 +209,10 @@
 
      ÉN hentning pr. unik logofil pr. sideindlæsning: det ensfarvede logo er en CSS-mask, og en maske kan ikke selv melde "404".
      Før lå der derfor et skjult billede med samme URL som maske-elementet (to kald pr. logo). Nu henter klienten hver fil én gang
-     (HTTP-cachen gælder som normalt), lægger SVG'en som blob-URL og bruger den som maske på ALLE elementer med samme fil. Svarer filen
-     ikke 200 med en SVG, får alle elementer med filen bl--fejl, og ordmærket/monogrammet (som altid ligger i markup) tager over —
-     aldrig tom plads og aldrig en massiv blok (masken er skjult, til den er klar).
+     (HTTP-cachen gælder som normalt), lægger SVG'en som data-URI i ÉN CSS-regel pr. fil (--bl-u) og bruger den som maske på ALLE
+     elementer med samme fil (data-URI frem for blob: samme computed style ved hver indlæsning). Svarer filen ikke 200 med en SVG, får
+     alle elementer med filen bl--fejl, og ordmærket/monogrammet (som altid ligger i markup) tager over — aldrig tom plads og aldrig en
+     massiv blok (indtil filen er hentet er masken en tom SVG, så intet tegnes).
      Elementer, der er med i layoutet (også under folden), hentes straks — som en CSS-mask altid gjorde. Elementer, der ikke er det
      (et foldet filterpanel, display:none), hentes først, når de kommer til syne (IntersectionObserver): et skjult logo koster intet.
      Dynamisk indsat markup opdages af en MutationObserver. */
@@ -226,15 +227,21 @@
     doc.addEventListener('error', ev => { if (erLogoBillede(ev && ev.target)) markerFejl(ev.target); }, true);
 
     const FIL_OK = /^img\/brands\/[a-z0-9][a-z0-9-]*\.svg$/;
-    const hentet = new Map();   // fil -> Promise<blob-URL | null>
+    const hentet = new Map();   // fil -> Promise<boolean> (true = hentet og maske-reglen lagt ind)
+    let masker = null;          // <style>-elementet med én regel pr. hentet fil
+    function lavRegel(src, svg){
+      if (!masker){ masker = doc.createElement('style'); masker.setAttribute('data-bl-masker', ''); doc.head.appendChild(masker); }
+      const uri = 'data:image/svg+xml,' + encodeURIComponent(svg);
+      masker.appendChild(doc.createTextNode(`.bl-mark[data-bl-src="${src}"]{--bl-u:url("${uri}")}\n`));
+    }
     function hent(src){
       if (hentet.has(src)) return hentet.get(src);
-      const p = (typeof rod.fetch === 'function' && rod.Blob && rod.URL && rod.URL.createObjectURL)
+      const p = typeof rod.fetch === 'function'
         ? rod.fetch(src, { credentials: 'same-origin' })
           .then(r => r.ok ? r.text() : Promise.reject(new Error('status ' + r.status)))
-          .then(t => /<svg[\s>]/i.test(t) ? rod.URL.createObjectURL(new rod.Blob([t], { type: 'image/svg+xml' })) : Promise.reject(new Error('ikke svg')))
-          .catch(() => null)
-        : Promise.resolve(null);
+          .then(t => { if (!/<svg[\s>]/i.test(t)) throw new Error('ikke svg'); lavRegel(src, t); return true; })
+          .catch(() => false)
+        : Promise.resolve(false);
       hentet.set(src, p);
       return p;
     }
@@ -242,22 +249,33 @@
       const mark = bl.querySelector(':scope > .bl-mark');
       const src = mark && mark.getAttribute('data-bl-src');
       if (!mark || !src || !FIL_OK.test(src)){ if (mark) bl.classList.add('bl--fejl'); return; }
-      hent(src).then(url => {
-        if (!url){ bl.classList.add('bl--fejl'); return; }
-        mark.style.setProperty('--bl-u', `url("${url}")`);
-        bl.classList.add('bl--klar');
-      });
+      hent(src).then(ok => { bl.classList.add(ok ? 'bl--klar' : 'bl--fejl'); });
     }
     const io = typeof rod.IntersectionObserver === 'function'
       ? new rod.IntersectionObserver(poster => {
         for (const p of poster) if (p.isIntersecting){ io.unobserve(p.target); indlaes(p.target); }
       }, { rootMargin: '200px' })
       : null;
+    /* Ældre, allerede genereret markup (før scripts/build.js har kørt igen): maske med url() i style og et skjult probe-billede, uden --bl-sa.
+       Oversættes, så siden virker i overgangen: filen flyttes til data-bl-src, proben fjernes, og --bl-sa udledes af --bl-ar. */
+    const gammelt = bl => {
+      const mark = bl.querySelector(':scope > .bl-mark');
+      if (mark && !mark.hasAttribute('data-bl-src')){
+        const m = /url\(\s*['"]?([^'")]+)/.exec(mark.getAttribute('style') || '');
+        if (m){ mark.setAttribute('data-bl-src', m[1]); mark.removeAttribute('style'); }
+      }
+      for (const p of bl.querySelectorAll(':scope > img.bl-probe')) p.remove();
+      if (!bl.style.getPropertyValue('--bl-sa')){
+        const ar = parseFloat(bl.style.getPropertyValue('--bl-ar'));
+        if (ar > 0) bl.style.setProperty('--bl-sa', String(Math.round(Math.sqrt(ar) * 1000) / 1000));
+      }
+    };
     const gennemgaa = () => {
       const liste = doc.querySelectorAll ? doc.querySelectorAll('.bl--logo:not([data-bl-set])') : [];
       for (let i = 0; i < liste.length; i++){
         const bl = liste[i];
         bl.setAttribute('data-bl-set', '1');
+        gammelt(bl);
         if (bl.classList.contains('bl--img')){
           const im = bl.querySelector(':scope > img.bl-img');
           if (im && im.complete && im.naturalWidth === 0) markerFejl(im);
