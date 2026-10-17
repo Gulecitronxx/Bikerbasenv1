@@ -47,14 +47,14 @@ test('søgekortet har et ikon i hvert felt (søg, type, pris, årgang) og behold
   assert.ok(!/undefined|NaN/.test(form));
 });
 
-test('rækkefølgen følger billedet: udvalgte -> typefliser -> Kort fortalt -> info-bokse -> guides; Kort fortalt står ikke over annoncerne', () => {
+test('rækkefølgen følger billedet: udvalgte -> typefliser -> info-bokse -> guides -> Kort fortalt (nederst, ikke et ekstra modul midt på siden)', () => {
   const html = bygSide('koerekort-a2', lager());
   const udv = pos(html, 'class="section facet-liste-sektion fa-udvalgte"');
   const typer = pos(html, 'class="fa-typer"');
   const kf = pos(html, 'class="fa-kf"');
   const bokse = pos(html, 'fa-bokse fa-bokse-kk');
   const guides = pos(html, 'class="fa-guides"');
-  assert.ok(udv < typer && typer < kf && kf < bokse && bokse < guides, `rækkefølge ${[udv, typer, kf, bokse, guides]}`);
+  assert.ok(udv < typer && typer < bokse && bokse < guides && guides < kf, `rækkefølge ${[udv, typer, bokse, guides, kf]}`);
   const t = bygSide('type-naked', lager());
   assert.ok(pos(t, 'fa-udvalgte') < pos(t, 'class="fa-kf"'), 'typeside: Kort fortalt efter udvalgte');
 });
@@ -156,16 +156,16 @@ test('iteration 2: ingen sticker-hero og ingen fremmed motorcykel i mærke-/mode
   assert.ok(!t.slice(t.indexOf('class="fa-hero"'), heroSlut).includes('fa-mere-intro'), 'folden står ikke i heroen');
   const facets = forberedFacetter(global.ALLE_LISTINGS = alle);
   const k = facets.find(f => f.kind === 'model') || facets.find(f => f.kind === 'kombi');
-  if (k){ const h = side(k, alle); assert.match(h, /fa-hero-flad/); assert.doesNotMatch(h, /hero-1600/); }
+  if (k){ const h = side(k, alle); assert.doesNotMatch(h, /fa-hero-bike|fa-hero-studio|fa-hero-typefoto/); }
 });
 
-test('iteration 2: "Udforsk efter behov" har ikon i stedet for foto, og tal og link er det samme filter', () => {
+test('iteration 2/3: "Udforsk efter behov" har forskellige dekorative typefotos, og tal og link er det samme filter', () => {
   const alle = lager(30);
   const html = bygSide('type-naked', alle);
   const m = html.match(/<ul class="fa-udforsk">[\s\S]*?<\/ul>/);
   if (!m) return;   // intet udvalg at dele
-  assert.doesNotMatch(m[0], /<img/, 'ingen billeder (de blev det samme foto fire gange)');
-  assert.match(m[0], /fa-udforsk-ikon/);
+  const src = [...m[0].matchAll(/<img src="([^"]+)"/g)].map(x => x[1]);
+  assert.equal(new Set(src).size, src.length, 'aldrig samme foto to gange (dekorative, forskellige typefotos)');
   const links = [...m[0].matchAll(/href="([^"]+)"/g)].map(x => x[1]);
   assert.equal(new Set(links).size, links.length, 'ingen to kort peger det samme sted hen');
 });
@@ -182,14 +182,56 @@ test('iteration 2: annoncer med foto kommer først i udsnittet, og højst 5 + 8 
   assert.doesNotMatch(html, /<p class="brand-mere">/, 'ingen stor orange pille');
 });
 
-test('iteration 2: mærkesidens hero er flad med faktapanel; A1/A2/A er altid tre fliser; folden ligger under typefliserne', () => {
+test('iteration 2/3: mærkesidens kørekortfliser viser kun kategorier med annoncer; hero har faktapanel; MAERKE_KORT = 8', () => {
   const items = [l(1, { brand: 'Yamaha', model: 'MT-07', power: 70, ccm: 689 }), l(2, { brand: 'Yamaha', model: 'R7', power: 70, ccm: 689 })];
   const fakta = MK.maerkeFakta('Yamaha', items);
   const kol = MK.treKolonnerHTML('Yamaha', fakta, items);
   const kk = kol.match(/<ul class="mk-mini mk-mini-kk">[\s\S]*?<\/ul>/)[0];
-  assert.equal((kk.match(/<li>/g) || []).length, 3, 'A1, A2 og A');
-  assert.match(kk, /mk-mini-nul/, 'en kategori uden annoncer er en rolig 0-flise uden link');
+  assert.equal((kk.match(/<li>/g) || []).length, fakta.kk.length, 'kun kategorier med annoncer; ingen 0-flise');
+  assert.doesNotMatch(kk, /mk-mini-nul/);
   assert.match(les('css/p-maerke.css'), /\.mk-cols\{ align-items:start; \}/);
   assert.match(les('scripts/build-brand-pages.js'), /class="mk-hero mk-hero-flad"/);
+  assert.match(les('scripts/build-brand-pages.js'), /mkPanelHTML[(]brand, items, fakta, stats[)]/);
   assert.match(les('scripts/build-brand-pages.js'), /const MAERKE_KORT = 8;/);
+});
+
+/* ---------- Iteration 3 (blind Critic runde 2) ---------- */
+test('iteration 3: typesiderne har deres EGET typefoto som hero (sport != cruiser), øvrige sider landskabsfoto; ingen flad tom flade', () => {
+  const alle = lager(14).map((x, i) => Object.assign({}, x, { type: 'sport', power: 100 }));
+  const sport = bygSide('type-sport', alle);
+  const hero = sport.slice(sport.indexOf('class="fa-hero"'), sport.indexOf('</section>', sport.indexOf('class="fa-hero"')));
+  assert.match(hero, /fa-hero-type[^>]*><img class="fa-hero-typefoto" src="img\/type\/sport\.webp"/);
+  assert.doesNotMatch(hero, /hero-1600|cruiser/, 'sport-heroen er hverken landskabsfoto eller cruiser');
+  const typer = new Set();
+  for (const t of ['sport', 'naked', 'cruiser', 'touring']){ const h = bygSide(`type-${t}`, lager(14).map(x => Object.assign({}, x, { type: t }))); typer.add((h.match(/fa-hero-typefoto" src="([^"]+)"/) || [])[1]); }
+  assert.equal(typer.size, 4, 'forskellig hero-baggrund pr. type');
+  const a2 = bygSide('koerekort-a2', lager());
+  assert.match(a2, /<div class="fa-hero-media" aria-hidden="true">\s*<img src="img\/hero-1600\.webp"/);
+  const mk = les('scripts/build-brand-pages.js');
+  assert.match(mk, /class="mk-hero mk-hero-flad"[\s\S]{0,400}class="mk-hero-photo" src="img\/hero-1600\.webp"/, 'mærkehero: landskabsfoto, ingen fremmed motorcykel');
+  assert.match(les('css/p-maerke.css'), /\.mk-hero-flad \.mk-hero-photo\{[^}]*width:68%/, 'fotoet fylder >= 35 % af heroen');
+});
+
+test('iteration 3: søgeknappen står på én linje med kort label; ingen 0-fliser; behovskort har forskellige fotos; CTA uden foto-sliver', () => {
+  const mkHtml = MK.treKolonnerHTML('Yamaha', MK.maerkeFakta('Yamaha', [l(1, { brand: 'Yamaha', model: 'MT-07', power: 70, ccm: 689 })]), []);
+  assert.doesNotMatch(mkHtml, /mk-mini-nul|>0 Yamaha</, 'ingen flise med tallet 0');
+  for (const s of ['css/p-facet.css', 'css/p-maerke.css']) assert.match(les(s), /\.fa-soeg-knap, \.mk-f-go \.btn\{ white-space:nowrap; \}/);
+  const html = bygSide('type-naked', lager(30));
+  const knap = html.match(/class="btn btn-primary btn-lg fa-soeg-knap">([^<]*)</)[1].trim();
+  assert.ok(knap.length <= 28, `knaplabel "${knap}"`);
+  const m = html.match(/<ul class="fa-udforsk">[\s\S]*?<\/ul>/);
+  if (m){ const src = [...m[0].matchAll(/<img src="([^"]+)"/g)].map(x => x[1]); assert.ok(src.length >= 2); assert.equal(new Set(src).size, src.length, 'aldrig samme foto to gange'); assert.ok(!src.some(s => /naked\.webp/.test(s)), 'ikke sidens egen type'); }
+  assert.match(les('css/p-maerke.css'), /@media \(min-width:1100px\)\{ \.mk-cta-img\{ display:none; \} \}/, 'ingen klippet foto-sliver i mærke-CTA');
+  assert.match(html, /fa-cta-foto/, 'typesidens CTA har typefoto');
+});
+
+test('iteration 3: rækkens skabelon er den samme uanset antal bagte kort (CLS på små mærkesider), og knappen på mærkesider er kort', () => {
+  const css = les('css/p-maerke.css');
+  assert.match(css, /\.mk-featured\[data-n="1"\], \.mk-featured\[data-n="2"\]\{ grid-template-columns: repeat\(4, minmax\(0,1fr\)\); \}/);
+  assert.match(css, /\.mk-featured\[data-n\] \.mk-cta\{ grid-column: -2 \/ -1; grid-row:1; \}/);
+  assert.match(les('scripts/build-brand-pages.js'), /const faa = false;/);
+  assert.match(les('js/maerke.js'), /fm\.dataset\.n = String\(frem\.length\)/);
+  const hero = MK.heroOrdmaerkeHTML('Vespa');
+  assert.match(les('css/p-maerke.css'), /\.mk-wordmark:not\(\.mk-wordmark--logo\)\{[^}]*min-height:72px/, 'fallback-ordmærket (Vespa) har samme ramme som logoerne: H1 flytter sig ikke');
+  assert.doesNotMatch(hero, /bl--wm/);
 });

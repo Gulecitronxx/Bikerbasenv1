@@ -714,7 +714,7 @@
 .mk-search .kk-seg label{ min-height:40px; }
 
 /* w14: under lagerfejl (html[data-lager-fejl]) er de byggede tal ikke pålidelige: panelets pris- og typelinjer (bagt ved byg) skjules; antallet dæmpes af styles.css. */
-html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-panel li:not(:first-child){ display:none; }
+html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-panel li:not(:first-child){ visibility:hidden; }   /* skjul, men behold pladsen: ingen layoutflytning (CLS), når lagerfejl først meldes efter første maling */
 
 
 /* w14 iteration 3 (billedernes kort er ca. 205 px høje mod vores 350): kortene i udvalgs- og "flere"-rækkerne på disse sider får et bredere foto,
@@ -753,3 +753,77 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
   .mk-hero-flad .mk-hero-inner{ grid-template-rows: auto auto auto auto 1fr; }
   .mk-hero-flad .mk-hero-inner > .mk-panel{ grid-row: 2 / span 4; }
 }
+
+/* w14 iteration 3 (Critic runde 2: CLS 0,053-0,059 ved 1440 på små mærkesider): rækkens skabelon må ikke afhænge af, hvor mange kort der stod i det byggede
+   HTML. Havde siden bagt 1-2 annoncer og klienten tegnede 5, flyttede panelet fra bred bjælke til højre kolonne (og kortene ombrød). Nu har alle antal
+   samme skabelon: panelet står altid i sidste kolonne, og få kort efterlader blot tomme felter. */
+@media (min-width:700px){
+  .mk-featured[data-n="1"], .mk-featured[data-n="2"]{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .mk-featured[data-n] .mk-cta{ grid-column: 1 / -1; grid-row:auto; flex-direction:column; min-height:0; }
+  .mk-featured[data-n] .mk-featured-kort > .empty-state{ grid-column: 1 / -1; grid-row:auto; }
+  .mk-cta-bar .mk-cta-body{ max-width:none; }
+}
+@media (min-width:1100px){
+  .mk-featured[data-n="1"], .mk-featured[data-n="2"]{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .mk-featured[data-n] .mk-cta{ grid-column: -2 / -1; grid-row:1; }
+  .mk-featured[data-n] .mk-featured-kort > .empty-state{ grid-column: 1 / -2; grid-row:1; }
+}
+@media (min-width:1280px){
+  .mk-featured[data-n="1"], .mk-featured[data-n="2"]{ grid-template-columns: repeat(5, minmax(0,1fr)) minmax(0,1.1fr); }
+}
+
+/* ============ Iteration 3 (Critic runde 2): heroen er et foto igen ============ */
+/* Mærke-/model-sider: landskabsfotoet fylder højre ca. 65 % og toner ud mod teksten. */
+.mk-hero-flad .mk-hero-media{ background:#0f0d0a; }
+.mk-hero-flad .mk-hero-photo{ position:absolute; right:0; top:0; width:68%; height:100%; object-fit:cover; object-position:72% 52%;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 42%); mask-image: linear-gradient(to right, transparent 0%, #000 42%); }
+.mk-hero-flad .mk-hero-media::after{ background: linear-gradient(0deg, rgba(12,10,8,.55) 0%, transparent 45%); }
+@media (max-width:959px){ .mk-hero-flad .mk-hero-photo{ width:100%; opacity:.55; -webkit-mask-image:none; mask-image:none; } }
+/* Fallback-ordmærke (mærker uden logo, fx Vespa): højst ca. 44 px, så H1 ikke flyttes og vægten ligner de øvrige lockups. */
+.mk-wordmark:not(.mk-wordmark--logo){ font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.75rem); min-height:72px; align-items:center; }
+.mk-wordmark:not(.mk-wordmark--logo) .mk-mono{ font-size:.5em; }
+
+
+/* ============ Iteration 3 (Critic runde 2): moduler, knapper, kort ============ */
+/* Behovskort med (dekorativt) typefoto igen — ét forskelligt foto pr. kort. */
+.fa-udforsk-foto{ flex:0 0 34%; max-width:140px; }
+/* CTA-panel med typefoto nederst til højre (lyst panel, fotoet toner ind). */
+.fa-cta-studio{ background: linear-gradient(135deg, var(--color-primary-tint) 0%, var(--color-surface) 70%); }
+.fa-cta-foto{ right:-14%; bottom:-8%; width:80%; opacity:.95; mix-blend-mode:multiply; z-index:0;
+  -webkit-mask-image: radial-gradient(ellipse 58% 60% at 52% 52%, #000 48%, transparent 100%); mask-image: radial-gradient(ellipse 58% 60% at 52% 52%, #000 48%, transparent 100%); }
+:root[data-theme="dark"] .fa-cta-foto{ mix-blend-mode:normal; opacity:.5; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .fa-cta-foto{ mix-blend-mode:normal; opacity:.5; } }
+.fa-cta > *:not(.fa-cta-foto){ position:relative; z-index:1; }
+/* Mærke-CTA: panelets lille foto-sliver i bunden udgår på desktop (intet ærligt rytterfoto at vise). */
+@media (min-width:1100px){ .mk-cta-img{ display:none; } }
+/* Søgeknap på ÉN linje. */
+.fa-soeg-knap, .mk-f-go .btn{ white-space:nowrap; }
+.mk-f-go .btn{ min-width:0; }
+.fa-mere, .section-link{ white-space:nowrap; }
+/* Kort: titel og pris på én linje, når der er plads; titlen afkortes. */
+@container (min-width: 250px){
+  :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-top{ flex-direction:row; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
+  :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-titel{ flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+}
+/* Kort uden annoncefoto: typens eget foto som ærlig fallback (tydeligt mærket "Typefoto"), ingen stiplet fejlramme. */
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom{ border-style:solid; border-color: transparent; background-size:cover; background-position:center; background-repeat:no-repeat; color:#fff; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom-titel{ color:#fff; text-shadow:0 1px 6px rgba(0,0,0,.7); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom::after{ content:"Typefoto (illustration)"; position:absolute; left:8px; bottom:6px; font-size:10.5px; font-weight:600; color:#fff; background:rgba(0,0,0,.55); padding:2px 6px; border-radius:4px; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .card-media{ position:relative; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="sport"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/sport.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="naked"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/naked.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="touring"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/touring.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="adventure"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/adventure.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="cruiser"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/cruiser.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="scooter"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/scooter.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="classic"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/classic.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="cross"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/cross.webp"); }
+
+/* "Sådan virker": nummercirklen står til venstre for ikonet (ikke oven på det). */
+.mk-saadan .saadan-trin-punkt{ grid-template-columns: 26px 36px minmax(0,1fr); gap: var(--space-2); align-items:start; }
+.mk-saadan .saadan-nr{ grid-column:1; grid-row:1; align-self:start; }
+.mk-saadan .saadan-ico{ grid-column:2; grid-row:1; margin:0; }
+.mk-saadan .saadan-trin-punkt > div{ grid-column:3; grid-row:1; }
+@media (min-width:1000px){ .mk-saadan .saadan-trin-punkt:not(:last-child)::after{ right:-34px; } }
+
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom::before{ display:none; }

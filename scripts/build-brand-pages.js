@@ -886,7 +886,7 @@ function heroSoegHTML(brand, slug, items, fakta){
           <label for="mk-q">Mærke eller model</label>
           <div class="input-icon-wrap">
             ${ICON.search}
-            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="${b}${eks ? ` (fx ${esc(eks)} …)` : ''}" aria-describedby="mk-q-hint">
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="${eks && eks.length <= 16 ? `Fx ${esc(eks)}` : 'Model, fx …'}" aria-describedby="mk-q-hint">
           </div>
           <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til ${b}. Skriv en model for at snævre ind.</span>
         </div>
@@ -918,7 +918,7 @@ function heroSoegHTML(brand, slug, items, fakta){
           </div>
         </fieldset>
         <div class="mk-f-go">
-          <button type="submit" class="btn btn-primary btn-lg">Søg ${b} motorcykler${ICON.arrowRight}</button>
+          <button type="submit" class="btn btn-primary btn-lg">${brand.length <= 14 ? `Søg ${b}` : 'Søg motorcykler'}${ICON.arrowRight}</button>
           <p class="mk-count"><span data-mk-n>${tal(items.length)}</span> ${b} ${items.length === 1 ? 'motorcykel' : 'motorcykler'} i Danmark</p>
         </div>
       </form>`;
@@ -988,7 +988,7 @@ function mkPanelHTML(brand, items, fakta, stats){
 function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
   const b = esc(brand);
   const foto = ctaFoto(fremhaevede);
-  const faa = fremhaevede.length <= 2;
+  const faa = false;   // w14: ingen bred bjælke-variant ved 1-2 annoncer: panelets form skal være ens, uanset hvor mange kort der bages (CLS)
   const ctaHtml = `<aside class="mk-cta${faa ? ' mk-cta-bar' : ''}${foto ? '' : ' mk-cta-uden'}" aria-labelledby="mk-cta-h">
           <div class="mk-cta-body">
             ${ctaNavnHTML(brand)}
@@ -998,7 +998,7 @@ function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
               <li><span class="mk-ok" aria-hidden="true">${ICON.check}</span>Kilden står på hvert kort</li>
               <li><span class="mk-ok" aria-hidden="true">${ICON.check}</span>Filtrér på dit kørekort</li>
             </ul>
-            <a class="btn btn-primary" href="${sogHref(brand)}">Søg ${b} motorcykler${ICON.arrowRight}</a>
+            <a class="btn btn-primary" href="${sogHref(brand)}">${brand.length <= 12 ? `Søg ${b}` : 'Se alle'}${ICON.arrowRight}</a>
           </div>
           ${foto ? `<img class="mk-cta-img" src="${esc(foto)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
         </aside>`;
@@ -1101,7 +1101,7 @@ function treKolonnerHTML(brand, fakta, items){
     kolonner.push(`<section class="mk-col" aria-labelledby="mk-kk-h">
         <div class="mk-col-head"><h2 id="mk-kk-h">Udforsk ${b} efter kørekort</h2></div>
         <ul class="mk-mini mk-mini-kk">
-          ${['A1', 'A2', 'A'].map(k => { const x = fakta.kk.find(y => y.k === k); return x ? `<li><a href="${sogHref(brand, x.f)}"><strong>${x.k}</strong><span>${tal(x.n)} ${b}</span></a></li>` : `<li><span class="mk-mini-nul"><strong>${k}</strong><span>0 ${b}</span></span></li>`; }).join('\n          ')}
+          ${fakta.kk.map(x => `<li><a href="${sogHref(brand, x.f)}"><strong>${x.k}</strong><span>${tal(x.n)} ${b}</span></a></li>`).join('\n          ')}
         </ul>
         <ul class="mk-links">
           <li><a href="koerekort-a2.html">Hvad må du køre på A2?${ICON.arrowRight}</a></li>
@@ -1334,8 +1334,12 @@ ${header}
        Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
        reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
   <section class="mk-hero mk-hero-flad">
-    <!-- w14: ingen motorcykel i mærkets hero (et fremmed mærkes foto var synligt forkert): rolig flade + faktapanel med ægte tal. -->
-    <div class="mk-hero-media" aria-hidden="true"></div>
+    <!-- w14: landskabsfotoet (neutralt, ingen annonce) fylder højre side; aldrig et fremmed mærkes typefoto. Faktapanelet har ægte tal. -->
+    <div class="mk-hero-media" aria-hidden="true">
+      <img class="mk-hero-photo" src="img/hero-1600.webp"
+           srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
+           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
+    </div>
     <div class="container mk-hero-inner">
       <nav class="breadcrumb" aria-label="Brødkrumme">
         <a href="index.html">Forside</a><span class="bc-sep"></span>
@@ -1360,7 +1364,6 @@ ${header}
 
   <div class="container mk-kf-vrap">
     ${introRest ? `<details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
-    ${kortFortaltHTML(brand, items, fakta, stats)}
   </div>
 
   ${saadanHTML()}
@@ -1400,6 +1403,10 @@ ${header}
         <p class="brand-intro">${esc(f.a)}</p>
       </details>`).join('\n      ')}
     </section>` : ''}
+
+    <section class="section mk-kf-bund" style="padding-top:0;">
+      ${kortFortaltHTML(brand, items, fakta, stats)}
+    </section>
 
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre mærker</h2>

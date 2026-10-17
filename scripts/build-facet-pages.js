@@ -1103,14 +1103,16 @@ function soegekort(facet, items){
   if (isBy && facet.region) skjult.push(['regions', facet.region]);
   if (isKombi) skjult.push(['brands', facet.brand], ['type', facet.typeId]);
   const titel = isKk ? `Find motorcykler til ${esc(facet.id)}-kørekort` : null;
-  const knapTekst = isModel ? esc(facet.mv) : isType || isKombi ? frase(facet) : isRegion ? `i ${esc(facet.id)}`
-    : isBudget ? `under ${tal(facet.max)} kr.` : isBy ? (facet.region ? `i landsdelen ${esc(facet.region)}` : 'i hele landet') : `til ${esc(facet.id)}`;
+  /* Iteration 3: knappen står på ÉN linje på alle sider (kort label; lange navne giver blot "Søg"). Søgningens parametre er uændrede. */
+  const knapLabel = isModel ? (String(facet.mv).length <= 16 ? `Søg ${esc(facet.mv)}` : 'Søg')
+    : isType ? `Søg ${frase(facet)}` : isKombi ? 'Søg' : isRegion ? `Søg i ${esc(facet.id)}`
+    : isBudget ? `Søg under ${tal(facet.max)} kr.` : isBy ? (facet.region ? 'Søg i landsdelen' : 'Søg i hele landet') : `Søg motorcykler til ${esc(facet.id)}`;
   return `<form class="fa-soeg" action="soegning.html" method="get" aria-label="Søg ${frase(facet)}">
         ${titel ? `<h2 class="fa-soeg-titel">${titel}</h2>` : ''}
         <div class="fa-soeg-felter">
           ${f.join('\n          ')}
           ${skjult.map(([k, v]) => `<input type="hidden" name="${k}" value="${esc(v)}">`).join('')}
-          <button type="submit" class="btn btn-primary btn-lg fa-soeg-knap">Søg ${isType || isModel || isKombi ? '' : 'motorcykler '}${knapTekst} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></button>
+          <button type="submit" class="btn btn-primary btn-lg fa-soeg-knap">${knapLabel} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></button>
         </div>
         <p class="fa-soeg-antal">${nSpan('all', items.length)} ${ordSpan(items.length, fraseEt(facet), frase(facet))} indekseret på Bikerbasen${isBy && facet.region ? `. Søgningen filtrerer på landsdelen ${esc(facet.region)}` : ''}</p>
       </form>`;
@@ -1262,10 +1264,12 @@ function udforskBehov(facet, items, ctx){
   const kort = [];
   /* w14: kortene har et ikon i stedet for et foto. Et foto pr. kort blev i praksis det samme billede fire gange (kortene deler ofte annoncer),
      og det lignede en billedfejl. Tal og link er stadig det samme filter (ctx.link). */
+  /* Iteration 3: dekorative, FORSKELLIGE typefotos (aldrig det samme foto to gange side om side); fotoet er en illustration, ikke annoncernes billede. */
+  const fotoIder = TYPES.map(t => t.id).filter(i => i !== (facet.kind === 'type' ? facet.id : facet.kind === 'kombi' ? facet.typeId : ''));
   const tilfoej = (titel, tekst, extra, noegle, sub, ikon) => {
     if (sub.length < 1 || sub.length >= tot) return;
     const l = ctx.link(extra);
-    kort.push({ titel, tekst, noegle, href: l.href, n: l.n, antal: sub.length, ikon });
+    kort.push({ titel, tekst, noegle, href: l.href, n: l.n, antal: sub.length, ikon, foto: fotoIder[kort.length % fotoIder.length] });
   };
   const nyereAar = I_AAR - 5;
   tilfoej('Til A2-kørekort', `Oplyst effekt inden for A2-grænsen på 35 kW (ca. ${A2_MAX_HK} hk). Tjek altid vægt og registreringsattest.`,
@@ -1291,7 +1295,7 @@ function udforskBehov(facet, items, ctx){
   return `<section class="section fa-sektion fa-udforsk-vrap">
       <h2 class="fa-h2">${h}</h2>
       <ul class="fa-udforsk">${kort.slice(0, 4).map(k => `<li><a href="${k.href}">
-          <span class="fa-udforsk-ikon" aria-hidden="true">${IKON(k.ikon)}</span>
+          <span class="fa-udforsk-foto" aria-hidden="true"><img src="img/type/${esc(k.foto)}.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
           <span class="fa-udforsk-tekst"><strong>${k.titel}</strong><span>${k.tekst}</span>
             <span class="fa-udforsk-link">${k.n !== null ? `Se ${nSpan(k.noegle, k.n)} ${ordSpan(k.n, hvadEt, hvad)}` : 'Se i søgningen'} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></span></span></a></li>`).join('')}</ul>
     </section>`;
@@ -1859,7 +1863,10 @@ function side(facet, alle){
   /* w14: ingen frit stillet motorcykel i en radial glød ("sticker") og aldrig et fremmed mærkes motorcykel i et mærkes hero: sider om et mærke
      (model, mærke+type) får en rolig, flad hero; øvrige sider landskabsfotoet. Typens studiefoto bruges i fliserne, ikke i heroen. */
   const heroFoto = null;
-  const fladHero = facet.kind === 'model' || facet.kind === 'kombi';
+  /* Iteration 3 (Critic runde 2): typesiderne får DERES eget typefoto som hero-baggrund (sport -> sport, ikke cruiser); alle øvrige sider landskabsfotoet.
+     Sticker-looket er væk, fordi fotoet er en fuldbleed baggrund, der toner ud mod teksten. */
+  const typeHero = facet.kind === 'type' && TYPES.some(t => t.id === facet.id) ? facet.id : null;
+  const fladHero = false;
   const boksViden = erKk ? '' : videnBokse(facet, items);
 
   return `<!doctype html>
@@ -1886,7 +1893,7 @@ ${qualifies ? '' : '<meta name="robots" content="noindex, follow">\n'}<link rel=
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-${fladHero ? '' : `<link rel="preload" as="image" href="img/hero-1600.webp" imagesrcset="${heroSrcset}" imagesizes="100vw" fetchpriority="high">`}
+${fladHero || typeHero ? '' : `<link rel="preload" as="image" href="img/hero-1600.webp" imagesrcset="${heroSrcset}" imagesizes="100vw" fetchpriority="high">`}
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/p-facet.css">
 ${jsonLdBlock([
@@ -1908,7 +1915,7 @@ ${header}
 
 <main id="main-content" class="fa-side fa-${facet.kind}${facet.layout ? ` fa-${facet.layout}` : ''}">
   <section class="fa-hero">
-    ${fladHero ? `<div class="fa-hero-media fa-hero-flad" aria-hidden="true"></div>` : `<div class="fa-hero-media" aria-hidden="true">
+    ${typeHero ? `<div class="fa-hero-media fa-hero-type" aria-hidden="true"><img class="fa-hero-typefoto" src="img/type/${typeHero}.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async"></div>` : `<div class="fa-hero-media" aria-hidden="true">
       <img src="img/hero-1600.webp" srcset="${heroSrcset}" sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
     </div>`}
     <div class="container fa-hero-inner">
@@ -1936,13 +1943,12 @@ ${header}
       <div class="fa-h2-raekke"><h2 class="fa-h2">Udvalgte ${frase(facet)} på Bikerbasen</h2>${items.length ? `<a class="fa-mere" href="${facetSearchUrl(facet)}"><span>${seAlle(facet, items, ctx)}</span> <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a>` : ''}</div>
       ${items.length ? `<div class="fa-udvalgte-gitter">
         <div class="listings-grid fa-kortraekke" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}" data-udvalgte="${UDVALGTE}" data-facet-frase="${frase(facet)}" data-facet-soeg="${esc(facetSearchUrl(facet))}"${facetAttrs(facet)}${facetReserveStil()}>${kort1}</div>
-        ${ctaPanel(facet, null)}
+        ${ctaPanel(facet, facet.kind === 'type' ? facet.id : facet.kind === 'koerekort' ? ({ A1: 'scooter', A2: 'naked', A: 'sport' }[facet.id] || null) : ['region', 'budget', 'by'].includes(facet.kind) ? 'touring' : null)}
       </div>${facet.kind === 'model' ? `<p class="brand-facet-note" id="facet-dubletter"${samlet ? '' : ' hidden'}>${samlet ? samletTekst(samlet) : ''}</p>` : ''}` : `<div class="listings-grid fa-kortraekke" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}" data-udvalgte="${UDVALGTE}" data-facet-frase="${frase(facet)}" data-facet-soeg="${esc(facetSearchUrl(facet))}"${facetAttrs(facet)}${facetReserveStil(true)}>${facetTomMarkup(frase(facet), facetSearchUrl(facet))}</div>`}
     </section>
 
     ${introDelt.rest ? `<details class="brand-intro-mere fa-mere-intro fa-mere-under"><summary>${introFoldEtiket}</summary><p class="brand-intro">${introDelt.rest}</p></details>` : ''}
     ${erKk || ['region', 'budget'].includes(facet.kind) ? typeFliser(facet, typer, ctx) : ''}
-    ${kortFortalt(facet, items, uoplyst)}
     ${modelFakta(facet, items)}
     ${udforskBehov(facet, items, ctx)}
     ${byFliser(facet, ctx)}
@@ -1977,6 +1983,7 @@ ${header}
     ${faqHtml}
     ${boksViden}
     ${erKk || facet.kind === 'type' ? guideRaekke(facet) : ''}
+    ${kortFortalt(facet, items, uoplyst)}
 
     ${(() => {
       /* w14: alle linkgrupper nederst (relaterede søgninger, region, budget og "andre ...") står i ÉT gitter i stedet for 5-6 stablede
