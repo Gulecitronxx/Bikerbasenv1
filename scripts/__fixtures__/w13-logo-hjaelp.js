@@ -22,8 +22,18 @@ const TILDELING = {
 
 function svgTekst(fil){ return fs.readFileSync(path.join(FIX_DIR, fil), 'utf8'); }
 
-function testManifest(){
+/* Det rigtige manifest uden nogen godkendelser/filer: testenes "ingen logo"-tilstand, uanset hvad ejeren har slået til. */
+function renManifest(){
   const m = JSON.parse(fs.readFileSync(G.MANIFEST, 'utf8'));
+  for (const e of m.maerker){
+    Object.assign(e, { fil: null, godkendt: false, kilde: null, licens: null, hash: null, bredde: null, hoejde: null, variant: 'ordmaerke', ensfarvet: true });
+    delete e.godkendt_af; delete e.godkendt_dato;
+  }
+  return m;
+}
+
+function testManifest(){
+  const m = renManifest();
   for (const e of m.maerker){
     const t = TILDELING[e.slug];
     if (!t) continue;
@@ -67,19 +77,18 @@ function kopierRepo(maal){
   return maal;
 }
 
-module.exports = { TILDELING, FIX_DIR, ROOT, testManifest, kopierSvg, kopierRepo, svgTekst };
+module.exports = { renManifest, TILDELING, FIX_DIR, ROOT, testManifest, kopierSvg, kopierRepo, svgTekst };
 
 /* Bygger en kopi udenfor repoet og kører brand-sidegeneratoren på det syntetiske lager (ingen netværk, ingen produktion).
    logoer:true -> testmanifestet (placeholder-SVG, godkendt) skrives i kopien og data-filen regenereres dér. */
 function bygKopi(maal, { logoer }){
   const { spawnSync } = require('child_process');
   kopierRepo(maal);
-  if (logoer){
-    fs.writeFileSync(path.join(maal, 'img', 'brands', 'manifest.json'), JSON.stringify(testManifest(), null, 2) + '\n');
-    kopierSvg(maal);
-    const g = spawnSync(process.execPath, [path.join(maal, 'scripts', 'brand-logos-gen.js')], { cwd: maal, encoding: 'utf8' });
-    if (g.status !== 0) throw new Error('gen fejlede i kopien: ' + g.stderr);
-  }
+  /* Kopien får ALTID sit eget manifest: placeholder-logoer (logoer:true) eller ingen godkendte (logoer:false). */
+  fs.writeFileSync(path.join(maal, 'img', 'brands', 'manifest.json'), JSON.stringify(logoer ? testManifest() : renManifest(), null, 2) + '\n');
+  if (logoer) kopierSvg(maal);
+  const g = spawnSync(process.execPath, [path.join(maal, 'scripts', 'brand-logos-gen.js')], { cwd: maal, encoding: 'utf8' });
+  if (g.status !== 0) throw new Error('gen fejlede i kopien: ' + g.stderr);
   const env = { ...process.env, BB_TILLAD_FALD: '1' };
   const b = spawnSync(process.execPath, ['-r', path.join(maal, 'scripts', '__fixtures__', 'w13-lager-preload.js'), path.join(maal, 'scripts', 'build-brand-pages.js')],
     { cwd: maal, encoding: 'utf8', env, timeout: 120000 });

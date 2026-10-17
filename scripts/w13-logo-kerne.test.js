@@ -12,6 +12,9 @@ const G = require('./brand-logos-gen.js');
 const H = require('./__fixtures__/w13-logo-hjaelp.js');
 
 const manifest = JSON.parse(fs.readFileSync(G.MANIFEST, 'utf8'));
+/* Tests af ærlig default/fallback bruger et eget "rent" manifest (ingen godkendte), så de ikke ændrer sig, når ejeren slår logoer til/fra. */
+const ren = H.renManifest();
+const BLren = BL.opret(G.byggData(ren));
 const slugs = new Set(manifest.maerker.map(m => m.slug));
 
 /* ---------- A1/A2: manifest ---------- */
@@ -29,17 +32,33 @@ test('A1 manifestet dækker alle mærkesider, de tre udkast-mærker uden side og
   for (const n of noegler) assert.ok(slugs.has(BL.normaliser(n)), `${n} -> ${BL.normaliser(n)} er ikke i manifestet`);
 });
 
-test('A2 default er ærligt: intet godkendt, ingen rasterfiler, korrekt fallback og monogram', () => {
-  assert.equal(manifest.maerker.filter(m => m.godkendt).length, 0, 'ingen mærker må være godkendt, før ejeren har afgjort kilde/licens');
-  assert.equal(manifest.maerker.filter(m => m.fil).length, 0);
-  const filer = fs.readdirSync(path.join(ROOT, 'img', 'brands'));
-  assert.deepEqual(filer.filter(f => !/^manifest\.json$|\.svg$/.test(f)), [], 'kun manifest.json og SVG må ligge i img/brands/');
-  assert.deepEqual(filer.filter(f => /\.(png|jpe?g|webp|gif|avif)$/i.test(f)), []);
+test('A2 det RIGTIGE manifest er konsistent: godkendt -> fil findes, hash stemmer, < 6 KB, godkendt_af/dato; ingen rasterfiler', () => {
+  const laes = f => fs.readFileSync(path.join(ROOT, f));
   for (const m of manifest.maerker){
-    assert.equal(m.fallback, 'ordmaerke', m.slug);
     assert.ok(m.monogram.length >= 1 && m.monogram.length <= 3, `${m.slug} monogram`);
-    assert.equal(m.godkendt, false);
+    assert.equal(m.fallback, 'ordmaerke', m.slug);
+    if (!m.godkendt) continue;
+    assert.ok(m.fil, `${m.slug}: godkendt uden fil`);
+    assert.ok(fs.existsSync(path.join(ROOT, m.fil)), `${m.slug}: ${m.fil} findes ikke`);
+    const buf = laes(m.fil);
+    assert.equal(G.sha256(buf), m.hash, `${m.slug}: hash stemmer ikke`);
+    assert.ok(buf.length < 6 * 1024, `${m.slug}: ${buf.length} bytes`);
+    assert.deepEqual(G.tjekSvg(buf.toString('utf8')), [], m.slug);
+    const mm = G.maal(buf.toString('utf8'));
+    assert.ok(Math.abs(m.bredde / m.hoejde - mm.bredde / mm.hoejde) < 0.001, `${m.slug}: forhold`);
+    assert.equal(m.godkendt_af, 'ejer', `${m.slug}: godkendt_af`);
+    assert.match(String(m.godkendt_dato), /^\d{4}-\d{2}-\d{2}$/, `${m.slug}: godkendt_dato`);
+    assert.ok(m.kilde && m.licens, `${m.slug}: proveniens`);
   }
+  assert.deepEqual(G.valider(manifest, laes), [], 'manifestet består gen-scriptets validering');
+  const filer = fs.readdirSync(path.join(ROOT, 'img', 'brands'));
+  assert.deepEqual(filer.filter(f => /\.(png|jpe?g|webp|gif|avif)$/i.test(f)), [], 'ingen rasterfiler i img/brands/');
+});
+
+test('A2 ren default (eget manifest): ingen godkendte, ingen filer, korrekt fallback og monogram', () => {
+  assert.equal(ren.maerker.length, manifest.maerker.length);
+  for (const m of ren.maerker){ assert.equal(m.godkendt, false); assert.equal(m.fil, null); assert.equal(m.fallback, 'ordmaerke'); }
+  assert.doesNotMatch(G.datafilTekst(ren), /"l":/);
 });
 
 /* ---------- A3: gen-script ---------- */
@@ -56,10 +75,10 @@ test('A3 data-filen er genereret af manifestet (--tjek grøn) og gen er determin
 
 test('A3 valider afviser ugyldige poster og udfyld opdager forkert hash/forhold', () => {
   const laes = f => { if (f === 'img/brands/fx-ring.svg') return Buffer.from(H.svgTekst('fx-ring.svg')); throw new Error('findes ikke'); };
-  const ok = JSON.parse(JSON.stringify(manifest));
+  const ok = JSON.parse(JSON.stringify(ren));
   assert.deepEqual(G.valider(ok, laes), []);
   const prøv = (aendr, forvent) => {
-    const m = JSON.parse(JSON.stringify(manifest));
+    const m = JSON.parse(JSON.stringify(ren));
     aendr(m.maerker[0]);
     const f = G.valider(m, laes).join('\n');
     assert.match(f, forvent);
@@ -73,11 +92,11 @@ test('A3 valider afviser ugyldige poster og udfyld opdager forkert hash/forhold'
   prøv(m => { m.monogram = 'ABCD'; }, /monogram/);
   prøv(m => { m.slug = 'Store Bogstaver'; }, /slug/);
   prøv(m => { m.fallback = 'logo'; }, /fallback/);
-  const dobbelt = JSON.parse(JSON.stringify(manifest)); dobbelt.maerker[1].slug = dobbelt.maerker[0].slug;
+  const dobbelt = JSON.parse(JSON.stringify(ren)); dobbelt.maerker[1].slug = dobbelt.maerker[0].slug;
   assert.match(G.valider(dobbelt, laes).join('\n'), /to gange/);
 
   // hash/forhold udfyldes, og et ændret hash afvises uden --opdater
-  const m = JSON.parse(JSON.stringify(manifest));
+  const m = JSON.parse(JSON.stringify(ren));
   Object.assign(m.maerker[0], { fil: 'img/brands/fx-ring.svg', godkendt: true, kilde: 'x', licens: 'y' });
   const u = G.udfyld(m, laes, false);
   assert.equal(u.aendret, true);
@@ -128,25 +147,25 @@ test('A4 normalisering: aliaser, accenter, store bogstaver og sentinel', () => {
 });
 
 test('A4 logoFor: vist navn, monogram og ingen logo uden godkendelse', () => {
-  const l = BL.logoFor('bmw motorrad');
+  const l = BLren.logoFor('bmw motorrad');
   assert.equal(l.slug, 'bmw'); assert.equal(l.navn, 'BMW'); assert.equal(l.harLogo, false);
   assert.equal(l.src, null); assert.equal(l.bredde, null); assert.equal(l.hoejde, null);
-  assert.equal(BL.logoFor('CFMOTO').navn, 'CFMoto', 'visningsnavn fra manifestet, ikke fra kaldet');
-  assert.equal(BL.logoFor('Harley-Davidson').monogram, 'HD');
-  assert.equal(BL.logoFor('MV Agusta').monogram, 'MV');
-  assert.equal(BL.logoFor('Yamaha').monogram, 'Y');
-  assert.equal(BL.monogramFor('Ny Fabrik'), 'NF');
-  const ukendt = BL.logoFor('Ukendt');
+  assert.equal(BLren.logoFor('CFMOTO').navn, 'CFMoto', 'visningsnavn fra manifestet, ikke fra kaldet');
+  assert.equal(BLren.logoFor('Harley-Davidson').monogram, 'HD');
+  assert.equal(BLren.logoFor('MV Agusta').monogram, 'MV');
+  assert.equal(BLren.logoFor('Yamaha').monogram, 'Y');
+  assert.equal(BLren.monogramFor('Ny Fabrik'), 'NF');
+  const ukendt = BLren.logoFor('Ukendt');
   assert.equal(ukendt.slug, null); assert.equal(ukendt.harLogo, false);
-  assert.equal(BL.logoHTML('Ukendt'), '', 'Ukendt får ingen logo og ingen tom plads');
-  assert.equal(BL.logoHTML('andet mærke'), '');
+  assert.equal(BLren.logoHTML('Ukendt'), '', 'Ukendt får ingen logo og ingen tom plads');
+  assert.equal(BLren.logoHTML('andet mærke'), '');
 });
 
 /* ---------- fallback + markup ---------- */
 
 test('A6 fallback: alle mærker × alle størrelser × decorative giver markup med tekst; ingen <img> uden godkendt logo', () => {
-  for (const m of manifest.maerker) for (const storrelse of BL.STORRELSER) for (const decorative of [true, false]){
-    const h = BL.logoHTML(m.navn, { storrelse, decorative });
+  for (const m of ren.maerker) for (const storrelse of BLren.STORRELSER) for (const decorative of [true, false]){
+    const h = BLren.logoHTML(m.navn, { storrelse, decorative });
     assert.ok(h.length > 40, `${m.slug} ${storrelse}`);
     assert.match(h, new RegExp(`class="bl bl--${storrelse} bl--(mono|ord)"`));
     assert.doesNotMatch(h, /<img/, 'intet billede uden godkendelse');
@@ -156,13 +175,13 @@ test('A6 fallback: alle mærker × alle størrelser × decorative giver markup m
     if (decorative) assert.match(h, /aria-hidden="true"/);
   }
   // decorative (navnet står ved siden af) -> monogram; ikke decorative -> ordmærke; sm er altid monogram
-  assert.match(BL.logoHTML('BSA', { storrelse: 'md' }), /bl--mono/);
-  assert.match(BL.logoHTML('BSA', { storrelse: 'md', decorative: false }), /bl--ord/);
-  assert.match(BL.logoHTML('BSA', { storrelse: 'sm', decorative: false }), /bl--mono/);
-  assert.match(BL.logoHTML('FB Mondial', { storrelse: 'lg', decorative: false }), /bl-l">FB<\/span> <span class="bl-l">MONDIAL/);
-  assert.match(BL.logoHTML('Lauge Jensen', { storrelse: 'lg', decorative: false }), /--bl-nl:2/);
+  assert.match(BLren.logoHTML('BSA', { storrelse: 'md' }), /bl--mono/);
+  assert.match(BLren.logoHTML('BSA', { storrelse: 'md', decorative: false }), /bl--ord/);
+  assert.match(BLren.logoHTML('BSA', { storrelse: 'sm', decorative: false }), /bl--mono/);
+  assert.match(BLren.logoHTML('FB Mondial', { storrelse: 'lg', decorative: false }), /bl-l">FB<\/span> <span class="bl-l">MONDIAL/);
+  assert.match(BLren.logoHTML('Lauge Jensen', { storrelse: 'lg', decorative: false }), /--bl-nl:2/);
   // ukendt størrelse -> md
-  assert.match(BL.logoHTML('Honda', { storrelse: 'kæmpe' }), /bl--md/);
+  assert.match(BLren.logoHTML('Honda', { storrelse: 'kæmpe' }), /bl--md/);
 });
 
 test('A5 ingen HTML-injektion fra mærkenavne', () => {
