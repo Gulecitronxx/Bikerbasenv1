@@ -1528,13 +1528,52 @@ const FIRST_CARDS = 2;
 const CARD_CHUNK = 2;
 let cardChunkHandle = 0;
 
+/* W14: kort uden foto faar et AERLIGT typefoto (img/type/<type>.webp) med synligt label — aldrig som om det var annoncens eget billede.
+   Kun gitterkort; "Fotoet kunne ikke hentes" (foto-fejl) og raekker/swipe er uaendrede. Billedet er sidens egen illustration, intet hentes hos kilden. */
+const TYPEFOTO = ['adventure','classic','cross','cruiser','naked','scooter','sport','touring'];
+function typefotoKort(root){
+  if (!root || !root.querySelectorAll) return;
+  const kort = root.matches && root.matches('.card-rich') ? [root] : Array.from(root.querySelectorAll('.card-rich'));
+  kort.forEach(k => {
+    /* Fra 760 px staar sammenlign-knappen i kortets fod i stedet for oven i fotoet (css/p-soegning.css). */
+    const sam = k.querySelector('.card-media > .card-compare');
+    if (sam && window.innerWidth >= 760) k.appendChild(sam);
+    const tom = k.querySelector('.card-media > .foto-tom:not(.foto-fejl)');
+    if (!tom) return;
+    const t = String(k.dataset.type || '').toLowerCase();
+    const slug = TYPEFOTO.find(x => t.startsWith(x));
+    if (!slug) return;
+    const img = document.createElement('img');
+    img.className = 'card-photo card-photo-typefoto';
+    img.src = 'img/type/' + slug + '.webp';
+    img.alt = '';
+    img.loading = 'lazy'; img.decoding = 'async';
+    const label = document.createElement('span');
+    label.className = 'typefoto-label';
+    label.textContent = 'Typefoto, ikke annoncens';
+    label.title = 'Annoncen har ikke et billede. Fotoet er en illustration af typen ' + slug + '.';
+    const wrap = document.createElement('div');
+    wrap.className = 'typefoto';
+    wrap.append(img, label);
+    tom.replaceWith(wrap);
+  });
+}
+
 function paintCards(grid, pageItems, naarFaerdig){
   if (cardChunkHandle){ clearTimeout(cardChunkHandle); cardChunkHandle = 0; }
   // Renderer vælges ÉN gang pr. maling. Slås visningen om midt i en
   // portionsvis maling, ville halvdelen af siden ellers stå som kort og
   // halvdelen som rækker.
   const tegn = aktivKortRenderer();
+  /* W14: gitteret holder sin hoejde, mens kortene males portionsvis — ellers ligger sidens bund (links, footer) kortvarigt i billedet og
+     skubbes ned for hver portion (CLS ved 768). Slippes naar sidste portion er tegnet. */
+  const holdH = grid.offsetHeight;
+  if (holdH > 0 && window.innerWidth >= 760 && pageItems.length > FIRST_CARDS) grid.style.minHeight = holdH + 'px';
+  const slip = () => { grid.style.minHeight = ''; };
+  const faerdig0 = naarFaerdig;
+  naarFaerdig = () => { slip(); faerdig0?.(); };
   grid.innerHTML = pageItems.slice(0, FIRST_CARDS).map(tegn).join('');
+  typefotoKort(grid);
   wireFavoriteButtons(grid);
   if (pageItems.length <= FIRST_CARDS){ naarFaerdig?.(); return; }
 
@@ -1547,7 +1586,7 @@ function paintCards(grid, pageItems, naarFaerdig){
       pageItems.slice(from, to).map((l, k) => tegn(l, from + k)).join(''));
     // Kun de nye kort kobles på — kører wireFavoriteButtons over hele gitteret
     // igen, får de gamle hjerter to lyttere og slår sig selv fra igen.
-    for (let i = alreadyThere; i < grid.children.length; i++) wireFavoriteButtons(grid.children[i]);
+    for (let i = alreadyThere; i < grid.children.length; i++){ typefotoKort(grid.children[i]); wireFavoriteButtons(grid.children[i]); }
     next = to;
     if (next < pageItems.length) cardChunkHandle = setTimeout(step, 0);
     else naarFaerdig?.();
@@ -2051,7 +2090,9 @@ function renderPagination(totalPages){
       e.preventDefault();
       state.page = Number(btn.dataset.page);
       pushFilterState();
-      window.scrollTo({top:0, behavior:'smooth'});
+      const hoved = document.getElementById('so-results-head');
+      const y = hoved ? Math.max(0, hoved.getBoundingClientRect().top + window.pageYOffset - 84) : 0;
+      window.scrollTo({top:y, behavior:'smooth'});
     });
   });
 }

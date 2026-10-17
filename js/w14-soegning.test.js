@@ -86,7 +86,7 @@ test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet,
       return { ratio: med.width / med.height, chiprow: getComputedStyle(document.getElementById('so-chiprow')).display,
         knapI: !!knap.closest('#so-results-head'), cardBund: R('.so-card').bottom, toolbarTop: R('#so-results-head').top };
     });
-    assert.ok(m.ratio > 1.9 && m.ratio < 2.1, 'foto-format ' + m.ratio);
+    assert.ok(m.ratio > 2.2 && m.ratio < 2.4, 'foto-format ' + m.ratio);
     assert.equal(m.chiprow, 'none');
     assert.ok(m.knapI, 'Gem søgning i resultathovedet');
     assert.ok(m.cardBund <= 330, 'søgekortets underkant ' + m.cardBund);
@@ -99,12 +99,12 @@ test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet,
         kortH: R('#results-grid .card').height, kortBredde: R('#results-grid .card').width,
         kortIHero: R('.so-card').bottom <= R('.so-hero').bottom + 1 };
     });
-    assert.ok(n.heroH <= 225, 'hero ' + n.heroH);
+    assert.ok(n.heroH <= 190, 'hero ' + n.heroH);
     assert.ok(n.kortIHero, 'søgekortet ligger i bannerfotoet');
     assert.ok(n.band <= 44, 'info-bånd er én linje: ' + n.band);
     assert.ok(!n.bkSynlig, 'brødkrumme er kun for skærmlæsere i hero');
-    assert.equal(n.sorteringsnote, 'none', 'sorteringsreglen bor i (i) ved Sortér');
-    assert.ok(n.kortH <= 290, 'kort højde ' + n.kortH);
+    assert.equal(n.sorteringsnote, 'block', 'sorteringsreglen er synlig i info-linjen');
+    assert.ok(n.kortH >= 195 && n.kortH <= 215, 'kort højde ' + n.kortH);
     const [sw, cw] = await s.page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     assert.equal(sw, cw);
     assert.deepEqual(s.fejl, []);
@@ -122,5 +122,71 @@ test('filter-URL 1440: chip-rækken vises; under 1280 bliver Gem søgning i chip
     await s.page.setViewportSize({ width: 1440, height: 900 });
     await s.page.waitForTimeout(400);
     assert.ok(await s.page.evaluate(() => !!document.getElementById('save-search-btn').closest('#so-results-head')));
+  } finally { await s.luk(); }
+});
+
+test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme felter), sammenlign i kortets fod, titel på én linje', { skip }, async () => {
+  const s = await aabn({ w: 1440, n: 44 });
+  try {
+    await gaa(s, 'soegning.html');
+    const m = await s.page.evaluate(() => {
+      const kort = [...document.querySelectorAll('#results-grid .card-rich')];
+      return {
+        n: kort.length,
+        stiplet: kort.filter(k => k.querySelector('.card-media > .foto-tom:not(.foto-fejl)')).length,
+        typefoto: kort.filter(k => k.querySelector('.typefoto .typefoto-label')).length,
+        labelTekst: [...new Set([...document.querySelectorAll('.typefoto-label')].map(e => e.textContent))],
+        samIFoto: kort.filter(k => k.querySelector('.card-media .card-compare')).length,
+        titelLinjer: Math.max(...kort.map(k => { const t = k.querySelector('.rk-titel'); return Math.round(t.getBoundingClientRect().height / parseFloat(getComputedStyle(t).lineHeight)); })),
+        hoejder: [...new Set(kort.map(k => Math.round(k.getBoundingClientRect().height)))],
+        brodkrumme: document.querySelector('.so-hero .so-breadcrumb').getBoundingClientRect().width,
+        bundH: (() => { const c = document.querySelector('main > .container:last-of-type'); return c.getBoundingClientRect().height; })(),
+        info: (() => { const b = document.getElementById('so-infoband'); return [...b.querySelectorAll('*')].filter(e => e.offsetParent && e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== 'visible' && getComputedStyle(e).textOverflow === 'ellipsis').length; })(),
+      };
+    });
+    assert.ok(m.typefoto > 0 && m.labelTekst.every(t => /ikke annoncens/i.test(t)), 'typefoto med ærligt label');
+    assert.equal(m.stiplet, 0, 'ingen stiplede tomme fotofelter');
+    assert.equal(m.samIFoto, 0, 'sammenlign ligger ikke i fotoet');
+    assert.equal(m.titelLinjer, 1, 'titel på én linje');
+    assert.ok(Math.max(...m.hoejder) - Math.min(...m.hoejder) <= 4 && Math.max(...m.hoejder) <= 215, 'ens kort: ' + m.hoejder);
+    assert.ok(m.bundH <= 350, 'bundmoduler ' + m.bundH);
+    assert.equal(m.info, 0, 'info-linjen er ikke afkortet med ellipsis');
+  } finally { await s.luk(); }
+});
+
+test('503 ved 1440: fejlbanneret dækker ingen af søgekortets kontroller (elementFromPoint)', { skip }, async () => {
+  const s = await aabn({ w: 1440, n: 44, fail: 503 });
+  try {
+    await gaa(s, 'soegning.html');
+    await s.page.waitForSelector('.data-afbrud', { timeout: 8000 });
+    const r = await s.page.evaluate(() => {
+      const fejl = [];
+      for (const e of document.querySelectorAll('#srp-search input:not([type=hidden]), #srp-search select, #srp-search button, #srp-search label')) {
+        const b = e.getBoundingClientRect(); if (!b.width) continue;
+        const top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+        if (top && top.closest('.data-afbrud')) fejl.push(e.id || e.textContent.trim().slice(0, 12));
+      }
+      const ban = document.querySelector('.data-afbrud').getBoundingClientRect(), kort = document.getElementById('srp-search').getBoundingClientRect();
+      return { fejl, overlap: !(ban.right <= kort.left || ban.left >= kort.right || ban.bottom <= kort.top || ban.top >= kort.bottom) };
+    });
+    assert.deepEqual(r.fejl, []);
+    assert.equal(r.overlap, false, 'banneret overlapper ikke søgekortet');
+  } finally { await s.luk(); }
+});
+
+test('paginering scroller til resultathovedet og bevarer sortering; tilbage bevarer filter', { skip }, async () => {
+  const s = await aabn({ w: 1440, n: 140 });
+  try {
+    await gaa(s, 'soegning.html?sort=price-asc');
+    await s.page.evaluate(() => window.scrollTo(0, 2500));
+    await s.page.click('#pagination a[data-page="2"]');
+    await s.page.waitForTimeout(1500);
+    const y = await s.page.evaluate(() => document.getElementById('so-results-head').getBoundingClientRect().top);
+    assert.ok(y >= -20 && y <= 140, 'resultathovedet er øverst i billedet: ' + y);
+    assert.match(await s.page.evaluate(() => location.search), /sort=price-asc.*page=2|page=2.*sort=price-asc/);
+    await s.page.goBack();
+    await s.page.waitForTimeout(1200);
+    assert.doesNotMatch(await s.page.evaluate(() => location.search), /page=2/);
+    assert.match(await s.page.evaluate(() => location.search), /sort=price-asc/);
   } finally { await s.luk(); }
 });

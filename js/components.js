@@ -953,7 +953,7 @@ function listingCardHTML(l, i){
     </div>
     <div class="rk-body">
       <div class="rk-top">
-        <h3 class="rk-titel">${titel}</h3>
+        <h3 class="rk-titel" title="${titel}">${titel}</h3>
         <span class="rk-pris${l.price == null ? ' pris-mangler' : ''}">${escapeHTML(pris)}</span>
       </div>
       <p class="rk-linje">${linje.join('')}</p>

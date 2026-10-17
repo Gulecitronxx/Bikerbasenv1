@@ -110,7 +110,8 @@ test('desktop 1440: lav hero med overlappende kort, resultathoved på én linje,
     assert.ok(m.overlapTop && m.card_bund_i_hero, 'kortet ligger i bannerfotoet');
     assert.ok(m.h1 <= 44, `h1 ${m.h1}`);
     assert.ok(Math.max(...m.linje) - Math.min(...m.linje) < 8, 'tal, sortér og gitter/liste på samme linje ' + m.linje);
-    assert.ok(m.infoH <= 41, `info-linje ${m.infoH}`);
+    /* W14: ærlighedsteksten ombrydes i stedet for at blive afkortet (to rolige linjer, sorteringsnoten synlig). */
+    assert.ok(m.infoH <= 60, `info-linje ${m.infoH}`);
     assert.ok(m.titelPris, 'titel og pris på samme linje');
     assert.equal(m.kolonner, 4);
     assert.match(m.viser, /^Viser 1–24 af [\d.]+ motorcykler$/);

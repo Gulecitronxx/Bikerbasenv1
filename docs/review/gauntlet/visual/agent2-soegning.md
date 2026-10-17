@@ -44,12 +44,28 @@ Billeder: sek1 første skærm, sek2 kort, sek3 filtre/chips, sek4 mørk, sek5 mo
 
 Ærlig vurdering: ligner mockuppen 7,5/10.
 
+## Iteration 3-4 (efter blind Critic: AFVIS 6,5/10)
+Critic-punkter og status:
+1. Kort for højt -> LUKKET: 209 px @1440 (mål mockup ca. 189, Critic-krav <= 215; før 261), foto 2,3:1, titel på én linje (ellipsis, helt navn i title), pris til højre, ens højde (differens <= 3 px), kørekortpille "Kræver A" er outline i stedet for sort, chips på én linje. Sammenlign-knappen er flyttet fra fotoet til kortets fod (JS flytter knappen ved >= 760 px; delegeret handler uændret).
+2. Fotomangel -> LUKKET (designvalg efter Orchestrator): kort uden thumbnail i gitteret får sidens eget typefoto (img/type/<type>.webp) med synligt label "Typefoto, ikke annoncens" (title forklarer). Aldrig som annoncens eget foto; intet hentes hos kilden. "Fotoet kunne ikke hentes" og liste/swipe uændret. 0 stiplede tomme felter i gitteret (test).
+3. Hero -> LUKKET: 165 px @1440 (Critic: <= 180), titel og undertitel på én linje, object-position 74% 34% så motorcyklens styr/lygte læses i bannerets overkant (bagved søgekortet ligger resten; samme sammensætning som mockuppen).
+4. Infolinje -> LUKKET: ingen ellipsis; kilde-linjen og ærlighedsteksten (+ sorteringsnoten, nu synlig) ombrydes i to rolige linjer (42 px).
+5. 503-overlay -> LUKKET: .data-afbrud på søgesiden ligger nederst til højre (body.srp, >= 1024 px) og dækker intet af søgekortet; test med elementFromPoint på alle kontroller + ingen overlap. role=alert/Prøv igen/Luk uændret.
+6. Bundmoduler -> LUKKET (>= 1100 px): fem kompakte kolonne-kort, 3 linjer chips; sektion ca. 230 px (før 600+).
+7. Sidebar: lange mærke-/modellister scroller internt (176 px) så Type bliver på plads. 
+8. Småting: tap-mål >= 40 px for "Tilføj flere", prishurtigvalg, kørekortsegment og søge-x; paginering scroller til resultathovedet (test, sort bevares, tilbage bevarer filter). Resterende < 40 px er delt lag (header-logo/nav 39 px, footerlink, dr-thumb slider-inputs, 24 px x-knapper i chips med større hitfelt).
+- CLS: gitterets højde holdes under portionsvis maling ved >= 760 px (ellers lå sidens bund kortvarigt i billedet ved 768). 8/8 kørsler grønne i alle viewports (smoke --cls 0.05 --strikt). BEMÆRK: en mobil-kompaktering (mindre h1, mindre luft) gav intermitterende CLS ved 390 mørk og er derfor rullet tilbage; mobil er som iteration 1.
+- Visuel regression (index, maerke-honda, type-sport, koerekort-a2, annonce @390/1440): 0 forskel. w10/w11/w12/annoncekort/w14: 58/58.
+- Nye tests i js/w14-soegning.test.js: kort 195-215 px og ens, typefoto+label, sammenlign ikke i foto, én-linjes titel, bund <= 350 px, ingen ellipsis, 503 elementFromPoint, paginering scroll + sort + tilbage.
+
+Billeder (JPEG, ca. 1,4 MB): sek1 første skærm, sek2 kort, sek3 filtre/chips, sek4 mørk, sek5 mobil før/efter lys+mørk, sek6/sek7 liste og swipe 1440/390, foer/efter-1440, reference.
+
+Ærlig vurdering (min egen, blind Critic skal bekræfte): ligner mockuppen hero 7/10, filtre 8/10, kortgitter 7,5/10 (samlet ca. 7,5).
+
 ## Tilbageværende afvigelser ("ligner ikke endnu")
-- Foto-tæller, stjerner, "Autoriseret forhandler", kg-chip og tal i hero: opdigtet/ikke oplyst, udeladt.
-- Mockuppens A2-badge er grøn; vores er brand-kobber (mulig) / sort (kræver A).
-- Siden er varm creme (brand) mod mockuppens hvid/lyseblå; orange CTA mod grøn; brandfoto i hero.
-- Mockuppen viser chip-rækken altid; vi viser den kun med filtre (ingen opdigtet "aktiv" chip).
-- Kortenes skygge/hjørner og header er (delvist) Agent 1's lag; header er 68 px mod mockuppens ca. 34.
-- Vi har info-bånd (kilde/frisk) og sidetal under gitteret, som mockuppen ikke viser; begge er ærlig information/SEO.
-- Pris-slider i sidebar er lukket nedenfor første skærm ved 1440 pga. højere Type-liste (9 typer i vores data mod 8).
-- Mobil har ingen mockup; komposition er forbedret men første kortrække starter stadig først på halvdelen af skærmen.
+- Foto-tæller, stjerner, "Autoriseret forhandler", kg-chip, tal i hero: opdigtet/ikke oplyst. Typefoto-label og stiplet "Fotoet kunne ikke hentes" afviger fra mockuppens 100 % ægte fotos; vi kan ikke vise annoncens foto, hvis kilden ingen har.
+- Mockup har rytterfoto/bro i hero, grøn CTA og A2-badge, hvid/lyseblå flade; vi har brandfoto, orange CTA, kobber/outline-badge og creme.
+- Kilde/sted i kortfoden afkortes (ellipsis, full tekst i title) for at holde kortene lave og ens.
+- Chip-rækken vises kun med filtre (ingen opdigtet chip).
+- Header 68 px mod mockuppens ca. 34 (Agent 1).
+- Mobil (390) er uændret fra iteration 1: kortene starter først midt på første skærm.
