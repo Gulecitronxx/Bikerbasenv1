@@ -2022,7 +2022,7 @@ function renderPagination(totalPages){
      klikket afbrydes og gaar gennem pushFilterState(), saa Tilbage gaar én
      side tilbage med filtrene i behold. */
   const sideHref = (side) => {
-    const p = new URLSearchParams(currentQueryString());
+    const p = new URLSearchParams(currentQueryString(true));   // w10: med sortering, så "åbn i ny fane" giver samme rækkefølge
     if (side > 1) p.set('page', String(side)); else p.delete('page');
     const qs = p.toString();
     return 'soegning.html' + (qs ? '?' + qs : '');
