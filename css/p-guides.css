@@ -105,7 +105,7 @@
 .gd-toc li::marker{ color: var(--color-fg-muted); font-weight:600; }
 .gd-toc a{ color: var(--color-fg); text-decoration:none; display:flex; align-items:center; min-height:40px; }
 .gd-toc a:hover{ color: var(--color-primary); text-decoration: underline; }
-.gd-toc a[aria-current="location"]{ color: var(--color-primary); font-weight:600; }
+.gd-toc a[aria-current="location"]{ color: var(--color-primary-hover); font-weight:600; }
 @media (max-width:480px){ .gd-toc-det > summary{ padding: var(--space-3) var(--space-4); } .gd-toc ol{ padding-right: var(--space-4); padding-left: calc(var(--space-4) + 1.6em); } }
 /* Desktop: altid åben (Chromium/Safari/Firefox med ::details-content); ældre browsere åbnes af js/guides.js. */
 @media (min-width:1024px){

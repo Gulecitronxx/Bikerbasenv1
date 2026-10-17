@@ -103,7 +103,7 @@ test('by-fliser: kun byer med egen side, tallet er by-sidens eget, og nøglen ka
   const byer = facets.filter(f => f.kind === 'by' && f.qualifies && f.region === 'Midtjylland');
   assert.ok(byer.length >= 2, `byer med side: ${byer.map(b => b.slug)}`);
   const html = side(facets.find(f => f.slug === 'region-midtjylland'), alle);
-  const sek = (html.match(/<ul class="fa-by">[\s\S]*?<\/ul>/) || [''])[0];
+  const sek = (html.match(/<ul class="fa-by-liste">[\s\S]*?<\/ul>/) || [''])[0];
   assert.ok(sek, 'fliserne findes');
   const fliser = [...sek.matchAll(/<li><a href="([^"]+)">[\s\S]*?data-fa-n="by:([^"]+)">(\d+)<[\s\S]*?<\/li>/g)];
   assert.strictEqual(fliser.length, byer.length, 'én flise pr. by med side');
@@ -122,14 +122,14 @@ test('by-fliser: kun byer med egen side, tallet er by-sidens eget, og nøglen ka
 
 test('by-fliser: findes ikke uden byer med side, og kun på landsdelssider', () => {
   const alle = lager();
-  assert.ok(!/class="fa-by"/.test(bygSide('region-hovedstaden', alle)), 'ingen by med side -> ingen sektion');
-  assert.ok(!/class="fa-by"/.test(bygSide('type-naked', byLager())), 'ikke på typesider');
+  assert.ok(!/class="fa-by-liste"/.test(bygSide('region-hovedstaden', alle)), 'ingen by med side -> ingen sektion');
+  assert.ok(!/class="fa-by-liste"/.test(bygSide('type-naked', byLager())), 'ikke på typesider');
 });
 
 test('hydreringsscriptet: kan regne by-nøglen om, og indeholder ingen href=/src= (udgiv.js)', () => {
   const js = FA.hydreringsScript();
   assert.match(js, /t === 'by'/);
-  assert.match(js, /\.fa-by li/);
+  assert.match(js, /\.fa-by-liste li/);
   /* Den ene statiske reference (facetTomMarkup: <a href="soegning.html">) er en rigtig fil. Alt andet — især dynamiske værdier — skal
      bygges uden dobbelte anførselstegn (String.fromCharCode(34)), ellers tolker udgiv.js dem som statiske referencer. */
   const refs = [...js.matchAll(/(?:href|src|srcset)\s*=\s*\\?"([^"\\]*)/g)].map(m => m[1]);

@@ -1443,9 +1443,9 @@ ${header}
     </div>
   </section>
 
-  <section class="section mk-sektion" aria-labelledby="mk-az-h">
+  <section class="section mk-sektion" aria-labelledby="mk-az-titel">
     <div class="container">
-      <div class="mk-sek-head"><h2 id="mk-az-h">Alle mærker A–Z</h2></div>
+      <div class="mk-sek-head"><h2 id="mk-az-titel">Alle mærker A–Z</h2></div>
       <nav class="mk-bogstaver" aria-label="Spring til bogstav">
         ${bogstaver.map(([bogstav]) => `<a href="#mk-az-${bogstav.toLowerCase()}">${bogstav}</a>`).join('\n        ')}
       </nav>

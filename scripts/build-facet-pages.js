@@ -1620,7 +1620,7 @@ function hydreringsScript(){
     el.textContent = n.toLocaleString('da-DK');
     const ord = el.parentElement && el.parentElement.querySelector('[data-fa-ord]');
     if (ord) ord.textContent = n === 1 ? ord.dataset.faEt : ord.dataset.faFl;
-    const maal = el.closest('.fa-rel-chip, .fa-typer li, .fa-modeller li, .fa-by li, .brand-facet-raekke a');
+    const maal = el.closest('.fa-rel-chip, .fa-typer li, .fa-modeller li, .fa-by-liste li, .brand-facet-raekke a');
     if (maal) maal.hidden = n === 0;
   });
   const note = document.getElementById('facet-note');
@@ -1717,7 +1717,7 @@ function byFliser(facet, ctx){
   if (!byer.length) return '';
   return `<section class="section fa-sektion" aria-labelledby="fa-by-h">
       <h2 class="fa-h2" id="fa-by-h">Find motorcykler i byer i ${esc(facet.id)}</h2>
-      <ul class="fa-by">${byer.map(({ f, n }) => `<li><a href="${f.slug}.html">
+      <ul class="fa-by-liste">${byer.map(({ f, n }) => `<li><a href="${f.slug}.html">
           <span class="fa-by-ik" aria-hidden="true">${IKON('pin')}</span>
           <span class="fa-by-tekst"><strong>${esc(f.by)}</strong><span>${nSpan(`by:${f.postnumre.join(',')}`, n)} ${ordSpan(n, 'motorcykel', 'motorcykler')}</span></span>
           <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a></li>`).join('')}</ul>
