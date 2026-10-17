@@ -33,7 +33,7 @@
 
   const STORRELSER = ['sm', 'md', 'lg', 'hero'];
   /* [maks. højde, maks. bredde] i px — SKAL følge css/p-brand-logo.css (testet). Hero er desktop-målet; CSS formindsker på mobil. */
-  const SLOT = { sm: [18, 36], md: [30, 60], lg: [40, 120], hero: [54, 235] };
+  const SLOT = { sm: [18, 28], md: [30, 60], lg: [40, 120], hero: [54, 235] };
   const UKENDT = new Set(['ukendt', 'andet-maerke', 'andet', 'unknown', 'ukendt-maerke', 'andre-maerker', 'ikke-oplyst', 'ingen']);
 
   function esc(s){
@@ -171,14 +171,23 @@
   const api = opret(standardData);
 
   /* Klienten: et logo, der ikke kan hentes, bliver aldrig et brudt billede — .bl får bl--fejl, og ordmærket/monogrammet
-     (som allerede ligger i markup) tager over. Capture-lytteren fanger også billeder, der indsættes senere. */
-  if (rod && rod.document && rod.document.addEventListener){
-    rod.document.addEventListener('error', function (ev){
-      const t = ev && ev.target;
-      if (!t || t.tagName !== 'IMG' || !t.classList || !(t.classList.contains('bl-probe') || t.classList.contains('bl-img'))) return;
+     (som allerede ligger i markup) tager over. Capture-lytteren fanger også billeder, der indsættes senere; en kort
+     gennemgang ved DOMContentLoaded fanger dem, der allerede nåede at fejle, før scriptet kørte (SVG'er har altid width/
+     height — kræves af gen-scriptet — så naturalWidth 0 efter complete betyder en fejlet hentning, ikke et mål-løst billede). */
+  const doc = rod && rod.document;
+  if (doc && doc.addEventListener){
+    const markerFejl = t => {
       const bl = t.closest && t.closest('.bl');
       if (bl) bl.classList.add('bl--fejl');
-    }, true);
+    };
+    const erLogoBillede = t => t && t.tagName === 'IMG' && t.classList && (t.classList.contains('bl-probe') || t.classList.contains('bl-img'));
+    doc.addEventListener('error', ev => { if (erLogoBillede(ev && ev.target)) markerFejl(ev.target); }, true);
+    const gennemgaa = () => {
+      const liste = doc.querySelectorAll ? doc.querySelectorAll('.bl img.bl-probe, .bl img.bl-img') : [];
+      for (let i = 0; i < liste.length; i++){ const im = liste[i]; if (im.complete && im.naturalWidth === 0) markerFejl(im); }
+    };
+    if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', gennemgaa); else gennemgaa();
+    api.gennemgaa = gennemgaa;   // kan kaldes igen efter at markup er indsat dynamisk
   }
 
   return api;

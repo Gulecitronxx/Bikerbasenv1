@@ -5,7 +5,7 @@
    CSS-mask i currentColor: lys/mørk følger tokens uden filskift. Ingen hårdkodede farver; brandfarven bruges kun i
    monogrammet (som i dag), grøn aldrig.
 
-   Størrelser (SKAL være lig SLOT i js/brand-logos.js — testet):  sm 18x36 · md 30x60 · lg 40x120 · hero 54x235 (40x170 på mobil). */
+   Størrelser (SKAL være lig SLOT i js/brand-logos.js — testet):  sm 18x28 · md 30x60 · lg 40x120 · hero 54x235 (40x170 på mobil). */
 
 .bl{
   --bl-maxh:30px; --bl-maxw:60px; --bl-ar:1;
@@ -13,7 +13,7 @@
   box-sizing:border-box; vertical-align:middle; line-height:1;
   color: var(--bl-fg, var(--color-fg));
 }
-.bl--sm{ --bl-maxh:18px; --bl-maxw:36px; }
+.bl--sm{ --bl-maxh:18px; --bl-maxw:28px; }
 .bl--md{ --bl-maxh:30px; --bl-maxw:60px; }
 .bl--lg{ --bl-maxh:40px; --bl-maxw:120px; }
 .bl--hero{ --bl-maxh:40px; --bl-maxw:170px; }
@@ -22,6 +22,7 @@
 /* Logo: slottens mål følger logoets forhold, men aldrig ud over maks. højde/bredde (ensartet visuel vægt). */
 .bl--logo{
   width: min(var(--bl-maxw), calc(var(--bl-maxh) * var(--bl-ar)));
+  max-width:100%;   /* i en smal flise: bredden giver efter, forholdet bevares (aspect-ratio) */
   aspect-ratio: var(--bl-ar);
 }
 .bl-mark{
@@ -67,3 +68,8 @@
 
 /* Logoet i en link: følger linkens farve ved hover/fokus uden at flytte noget. */
 a:hover > .bl, a:focus-visible > .bl{ color: var(--bl-fg-hover, var(--bl-fg, var(--color-fg))); }
+
+/* Fast kolonne foran et navn (filterrække, A–Z): alle rækker får samme venstrekant, med eller uden logo. */
+.bl-spalte{ display:inline-flex; align-items:center; justify-content:center; flex:none; }
+.bl-spalte--sm{ width:28px; }
+.bl-spalte--md{ width:60px; }

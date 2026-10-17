@@ -20,7 +20,7 @@
       .replace(/[^a-z0-9]+/g, '');
   }
   var heynd = raekker.map(function (li) {
-    return li.getAttribute('data-mk-soeg').split(' ').map(fold).filter(Boolean);
+    return li.getAttribute('data-mk-soeg').split('|').map(fold).filter(Boolean);
   });
 
   function filtrer() {

@@ -57,7 +57,9 @@ function maal(tekst){
   return null;
 }
 
-const sha256 = buf => crypto.createHash('sha256').update(buf).digest('hex');
+/* Hash over indholdet med LF-linjeskift: repoet er blandet (autocrlf), og samme fil må ikke få to hash afhængigt af checkout. */
+const sha256 = buf => crypto.createHash('sha256')
+  .update(Buffer.from(Buffer.from(buf).toString('utf8').split('\r\n').join('\n'), 'utf8')).digest('hex');
 
 /* Rene funktioner: tager manifestet og en funktion, der læser en fil (relativt til repoets rod). */
 function valider(manifest, laes){

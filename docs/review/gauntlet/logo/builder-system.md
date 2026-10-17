@@ -16,7 +16,7 @@ ordmærke/monogram, indtil ejeren lægger en SVG i `img/brands/` og sætter `god
 | A6 | Fallback altid synlig | for alle 64 mærker × 4 størrelser × decorative/ikke: markup ikke tom; i browser har slot og fallback bredde > 0 og højde > 0; ingen `<img>` uden godkendt logo | w13-logo-layout |
 | A7 | CLS = 0 | Slot-mål identiske før og efter at logofilen er hentet (SVG forsinket 600 ms); `layout-shift` summerer til 0 ved indsættelse af et 6-flisers grid; fast højde også for tekstfallback | w13-logo-layout |
 | A8 | Aldrig brudt/tom | SVG svarer 404: `.bl` får `bl--fejl`, `.bl-mark` er `display:none` (ingen massiv blok), fallback har areal > 0; også for `<img>`-varianten | w13-logo-layout |
-| A9 | Ensartet visuel vægt | i `md`/`lg`-slot: største/mindste logoareal ≤ 2,2 over 8 placeholder-former (forhold 0,6–4,0); ingen overskrider slotten | w13-logo-layout |
+| A9 | Ensartet visuel vægt | i `md`/`lg`-slot: største/mindste logoareal ≤ 2,2 over placeholder-former med forhold 0,9–4,0 (smallere end 0,9 er højdebegrænset; de overskrider aldrig slotten); ingen overskrider slotten | w13-logo-layout |
 | A10 | Lys/mørk | maske-farve = `--color-fg` i begge temaer (og forskellig mellem dem); tekstfallback (ordmærke og monogram) kontrast ≥ 4,5:1 mod flisens baggrund i lys OG mørk; hero (hvid på mørkt foto-overlay) ≥ 4,5:1 | w13-logo-layout |
 | A11 | Responsivt | 320/390/768/1440: `scrollWidth ≤ clientWidth` på logo-testsiden (logo og uden logo) og på genereret `maerker.html` + en `maerke-*.html` | w13-logo-layout + generator |
 | A12 | Ingen hårdkodede farver | `css/p-brand-logo.css` har 0 hex/rgb/hsl-farver; CSS-slotmål = `SLOT` i `js/brand-logos.js` | w13-logo-kerne |

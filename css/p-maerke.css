@@ -557,7 +557,7 @@
 .mk-cta-navn--logo .bl{ --bl-fg: var(--color-fg); }
 .mk-brandtile-logo{ display:flex; align-items:center; min-height:40px; margin-bottom: var(--space-2); }
 .mk-az-navn{ display:inline-flex; align-items:center; gap: var(--space-2); min-width:0; }
-.mk-az-logo{ display:inline-flex; align-items:center; justify-content:center; flex:none; width:36px; }
+.mk-az-logo{ display:inline-flex; align-items:center; justify-content:center; flex:none; width:28px; }
 .mk-az-gruppe a:hover .mk-az-navn > span:last-child{ text-decoration:underline; }
 .mk-az-gruppe li[hidden], .mk-az-gruppe[hidden]{ display:none; }
 .mk-hurtigsoeg{ display:grid; gap: var(--space-1); max-width:420px; margin: 0 0 var(--space-4); }
