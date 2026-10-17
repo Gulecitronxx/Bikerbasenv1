@@ -1,6 +1,8 @@
 /* W13 logo-integration: forside, annoncedetalje og søgefilter MÅLT i rigtig headless Chromium (ikke streng-søgning).
-   Siderne serveres fra repoet med syntetiske annoncer (scripts/smoke-fixtures.js); alt udefra blokeres. Det rigtige manifest
-   bruges: 17 godkendte mærker, Harley-Davidson/Indian/Benelli bevidst IKKE (de viser ordmærke/monogram, i annoncen intet).
+   Siderne serveres fra repoet med syntetiske annoncer (scripts/smoke-fixtures.js); alt udefra blokeres. Testen bruger sit EGET
+   logo-data (scripts/__fixtures__/w13-integration-hjaelp.js: GODKENDT) og er derfor uafhængig af ejerens godkendelser i det
+   rigtige manifest: Honda, Yamaha, BMW, Kawasaki, Harley-Davidson, Indian og Benelli har logo; Suzuki, Lauge Jensen, BSA m.fl. har
+   det ikke (monogram i fliser/filter, intet i annoncens titelrække). SVG-filerne er de rigtige i img/brands/.
    Playwright/Chromium mangler -> springes over. */
 const test = require('node:test');
 const assert = require('node:assert');
@@ -8,7 +10,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const H = require('../scripts/__fixtures__/w13-integration-hjaelp.js');
 const { eksterneRaekker } = require('../scripts/smoke-fixtures.js');
-const BrandLogos = require('./brand-logos.js');
+const BrandLogos = require('./brand-logos.js').opret(H.fixtureData());   // testens eget data, ikke det rigtige manifest
 
 const ROOT = H.ROOT;
 let h = null;
@@ -34,7 +36,7 @@ async function forside(opt = {}){
   return r;
 }
 
-test('forside: godkendte mærker har logo, Harley-Davidson har monogram, fliserne linker til eksisterende mærkesider', async t => {
+test('forside: mærker med logo har logo, mærker uden (Suzuki) har monogram i samme slot, fliserne linker til eksisterende mærkesider', async t => {
   if (skip(t)) return;
   const { page, ctx } = await forside();
   const fliser = await page.evaluate(() => [...document.querySelectorAll('#brand-cloud .maerke-flise')].map(a => ({
@@ -44,8 +46,10 @@ test('forside: godkendte mærker har logo, Harley-Davidson har monogram, flisern
   })));
   assert.strictEqual(fliser.length, 6);
   const pr = Object.fromEntries(fliser.map(f => [f.navn, f]));
-  for (const n of ['Honda', 'Yamaha', 'Suzuki', 'BMW', 'Kawasaki']){ assert.ok(pr[n], n + ' mangler'); assert.ok(pr[n].logo, n + ' skal have logo'); }
-  assert.ok(pr['Harley-Davidson'].mono && !pr['Harley-Davidson'].logo, 'Harley-Davidson: monogram, intet logo');
+  for (const n of ['Honda', 'Yamaha', 'BMW', 'Kawasaki', 'Harley-Davidson']){ assert.ok(pr[n], n + ' mangler'); assert.ok(pr[n].logo && !pr[n].mono, n + ' skal have logo'); }
+  assert.ok(pr['Suzuki'].mono && !pr['Suzuki'].logo, 'Suzuki (uden logo i testdata): monogram i samme slot');
+  const slot = await page.evaluate(() => [...document.querySelectorAll('#brand-cloud .maerke-logo')].map(e => { const r = e.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }));
+  assert.strictEqual(new Set(slot).size, 1, 'logo-slotten er ens i alle fliser: ' + slot);
   for (const f of fliser){
     assert.match(f.href, /^maerke-[a-z0-9-]+\.html$/);
     assert.ok(fs.existsSync(path.join(ROOT, f.href)), `${f.href} findes ikke`);
@@ -108,13 +112,22 @@ test('annonce: logo kun for godkendte mærker, højrejusteret ved ≥1180, aria-
   await ctx.close();
 });
 
-test('annonce: INGEN logo (og ingen reserveret plads) for Harley-Davidson, Indian og Benelli; Indian/Harley/Benelli er ikke godkendt', async t => {
-  assert.strictEqual(BrandLogos.logoFor('Harley-Davidson').harLogo, false);
-  assert.strictEqual(BrandLogos.logoFor('Indian').harLogo, false);
-  assert.strictEqual(BrandLogos.logoFor('Benelli').harLogo, false);
-  assert.strictEqual(BrandLogos.logoFor('Honda').harLogo, true);
+test('annonce: logo i titelrækken for Harley-Davidson, Indian og Benelli (godkendt i testdata); INGEN række/plads for mærker uden logo (Suzuki, Lauge Jensen)', async t => {
+  for (const n of ['Honda', 'Harley-Davidson', 'Indian', 'Benelli']) assert.strictEqual(BrandLogos.logoFor(n).harLogo, true, n);
+  for (const n of ['Suzuki', 'Lauge Jensen', 'BSA', 'Cagiva', 'Kymco', 'Ukendt']) assert.strictEqual(BrandLogos.logoFor(n).harLogo, false, n);
   if (skip(t)) return;
   for (const mærke of ['Harley-Davidson', 'Indian']){
+    const { page, ctx } = await annonce(mærke, { w: 1440 });
+    const m = await page.evaluate(() => { const r = document.querySelector('.an-titelraekke'), l = document.querySelector('.an-maerkelogo .bl');
+      return { raekke: !!r, label: l && l.getAttribute('aria-label'), hoejre: r && l ? Math.abs(r.getBoundingClientRect().right - l.getBoundingClientRect().right) : 99, h1: document.querySelectorAll('h1').length }; });
+    assert.strictEqual(m.raekke, true, mærke);
+    assert.strictEqual(m.label, mærke + '-logo');
+    assert.ok(m.hoejre <= 1, mærke + ' højrejusteret');
+    assert.strictEqual(m.h1, 1);
+    await ctx.close();
+  }
+  // Benelli har ingen fixture-annonce: logoet testes via kernen (harLogo) og den statiske skabelon; hér kun mærker uden logo på siden
+  for (const mærke of ['Suzuki', 'Lauge Jensen']){
     const { page, ctx } = await annonce(mærke, { w: 1440 });
     const m = await page.evaluate(() => ({ raekke: document.querySelectorAll('.an-titelraekke').length, bl: document.querySelectorAll('.an-head .bl').length, h1: document.querySelectorAll('h1').length }));
     assert.deepStrictEqual(m, { raekke: 0, bl: 0, h1: 1 }, mærke);
@@ -247,14 +260,19 @@ test('statisk annonceskabelon: logo kun for godkendte mærker, aria-label, og ku
   const { side } = require('../scripts/build-listing-pages.js');
   const mk = b => ({ id: 'x', brand: b, model: 'Test', year: 2019, price: 59995, km: 12000, ccm: 689, city: 'Aarhus', postnr: '8000', region: 'Midtjylland',
     type: 'naked', condition: 'God', description: 'x', photoUrls: [], equipment: [], seller: { is_dealer: false } });
-  for (const b of ['Yamaha', 'Honda', 'BMW']){
+  /* Skabelonen bruger det rigtige manifest (build-tid): forventningen følger det, og mærker uden logo (Ukendt) tjekkes altid. */
+  const Rigtig = require('./brand-logos.js');
+  const med = ['Yamaha', 'Honda', 'BMW', 'Harley-Davidson', 'Indian', 'Benelli', 'Lauge Jensen', 'Suzuki'].filter(b => Rigtig.logoFor(b).harLogo);
+  const uden = ['Ukendt', 'Lauge Jensen', 'BSA', 'Cagiva', 'Kymco', 'Harley-Davidson', 'Indian', 'Benelli'].filter(b => !Rigtig.logoFor(b).harLogo);
+  assert.ok(med.length >= 3, 'mindst tre mærker med logo i manifestet');
+  for (const b of med){
     const s = side(mk(b));
-    assert.ok(s.includes('class="an-maerkelogo"') && s.includes(`aria-label="${b}-logo"`), b);
+    assert.ok(s.includes('class="an-maerkelogo"') && s.includes(`aria-label="${Rigtig.logoFor(b).navn}-logo"`), b);
     assert.ok(s.includes('css/p-brand-logo.css') && s.includes('js/brand-logos.js') && s.includes('js/brand-logos-data.js'), b);
     assert.ok(s.indexOf('<script defer src="js/brand-logos.js') < s.indexOf('<script defer src="js/annonce.js'), 'logo-scriptet før annonce.js');
     assert.strictEqual((s.match(/<h1 /g) || []).length, 1);
   }
-  for (const b of ['Harley-Davidson', 'Indian', 'Benelli', 'Ukendt']){
+  for (const b of uden){
     const s = side(mk(b));
     assert.ok(!s.includes('an-maerkelogo') && !s.includes('brand-logos') && !s.includes('p-brand-logo'), b);
   }
