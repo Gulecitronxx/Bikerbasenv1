@@ -36,7 +36,8 @@ async function aabn(side, { vp = 1440, tema = 'light', coarse = false } = {}){
 }
 
 const GUIDES = ['guide-foerste-motorcykel', 'guide-a2-koerekort', 'guide-brugt-motorcykel', 'guide-mc-typer',
-  'guide-mc-ordliste', 'guide-mc-forsikring', 'guide-mc-udstyr'];
+  'guide-mc-ordliste', 'guide-mc-forsikring', 'guide-mc-udstyr', 'guide-saelg-motorcykel', 'guide-mc-vinteropbevaring',
+  'guide-mc-foraar-tjekliste'];
 
 test('footer: kolonnerne fra billedet, alle guides, kontakt og kilde-note — intet opdigtet', async t => {
   if (!kan.ok) return t.skip(kan.grund);
