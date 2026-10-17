@@ -85,14 +85,50 @@ function anGalleriTastatur(el){
    sidste boks i hver kortere kolonne får .an-strak og strækkes til kolonnens bund (se p-annonce.css), så bundkanterne
    flugter. Under 1180 er kolonnerne display:contents (grid-areas styrer), så der gøres intet. Kører igen, hvis vinduet
    krydser grænsen. */
+/* W11 (tablet 760-1179): to rigtige kolonner i stedet for grid-areas. Venstre: galleri, beskrivelse, faktatabel. Højre
+   (sidebjælken): titel/pris/nøgletal, "Kan du køre denne?" og kilde/sælger. Under begge, i to kolonner: "Det bør du tjekke" og
+   "Handl trygt". Elementerne flyttes i DOM'en og sættes tilbage på deres oprindelige plads, når vinduet forlader intervallet
+   (hver flytning er en ren appendChild/insertBefore, så ingen elementer duplikeres). Mobil bruger grid-areas og rører intet. */
+const AN_FLYTBARE = '.an-desc, .an-fakta, .an-kk, .an-seller-wrap, .an-trygt-wrap, .an-tjek';
+function anGemOprindelig(g){
+  if (g._anOrig) return;
+  g._anOrig = Array.from(g.querySelectorAll(AN_FLYTBARE)).map(el => ({ el, parent: el.parentNode, next: el.nextSibling }));
+}
+function anGenopretOprindelig(g){
+  if (!g._anOrig) return;
+  for (let i = g._anOrig.length - 1; i >= 0; i--){
+    const { el, parent, next } = g._anOrig[i];
+    if (el.parentNode !== parent || el.nextSibling !== next) parent.insertBefore(el, next && next.parentNode === parent ? next : null);
+  }
+}
+function anTabletKolonner(g){
+  const a = g.querySelector('.an-col-a'), b = g.querySelector('.an-col-b');
+  const q = s => g.querySelector(s);
+  const [desc, fakta, kk, sel, trygt, tjek] = ['.an-desc', '.an-fakta', '.an-kk', '.an-seller-wrap', '.an-trygt-wrap', '.an-tjek'].map(q);
+  if (!a || !b || !desc || !fakta || !kk || !sel || !trygt || !tjek) return;
+  const gal = a.querySelector('.an-gallery');
+  if (gal) gal.after(desc); else a.prepend(desc);
+  desc.after(fakta);
+  const head = b.querySelector('.an-head');
+  if (head) head.after(kk); else b.prepend(kk);
+  kk.after(sel);
+  g.append(tjek, trygt);   // række 2: tjekliste (venstre), "Handl trygt" (højre)
+}
+
 let anBalanceLytter = false;
 function anBalancerKolonner(){
   const g = document.querySelector('.an-grid');
   if (!g || typeof window.matchMedia !== 'function') return;
-  const mq = window.matchMedia('(min-width:1180px)');
+  const mqBred = window.matchMedia('(min-width:1180px)');
+  const mqTablet = window.matchMedia('(min-width:760px) and (max-width:1179px)');
   const koer = () => {
+    const g = document.querySelector('.an-grid');
+    if (!g) return;
+    anGemOprindelig(g);
     g.querySelectorAll('.an-strak').forEach(e => e.classList.remove('an-strak'));
-    if (!mq.matches) return;
+    anGenopretOprindelig(g);
+    if (mqTablet.matches){ anTabletKolonner(g); return; }
+    if (!mqBred.matches) return;
     const kol = [g.querySelector('.an-col-a'), g.querySelector('.an-col-b'), g.querySelector('.an-side')];
     const kort = [g.querySelector('.an-kk'), g.querySelector('.an-tjek'), g.querySelector('.an-trygt-wrap')];
     if (kol.some(k => !k) || kort.some(k => !k)) return;
@@ -109,8 +145,10 @@ function anBalancerKolonner(){
     g.classList.remove('an-maal');
     kol.forEach(k => { const sidste = k.lastElementChild; if (sidste) sidste.classList.add('an-strak'); });
   };
+  /* Første kørsel på denne grid; lytterne er globale og slår grid'en op ved hver ændring (siden kan tegnes om). */
+  g._anOrig = null;
   koer();
-  if (!anBalanceLytter){ anBalanceLytter = true; mq.addEventListener('change', koer); }
+  if (!anBalanceLytter){ anBalanceLytter = true; mqBred.addEventListener('change', koer); mqTablet.addEventListener('change', koer); }
 }
 
 function shiftPhoto(dir){
@@ -1401,6 +1439,13 @@ function renderListing(){
   else if (bar && !isOwnListing(listing)){
     bar.hidden = false;
     document.body.classList.add('har-actionbar');
+    /* W11: bjælken viser prisen ved siden af handlingen (som den eksterne bjælke), så pris og CTA altid står sammen. */
+    if (listing.price != null && !bar.querySelector('.listing-actionbar-pris')){
+      const pris = document.createElement('span');
+      pris.className = 'listing-actionbar-pris';
+      pris.textContent = formatPrice(listing.price);
+      bar.prepend(pris);
+    }
     const spring = (id, rulHen) => {
       const mål = document.getElementById(id);
       if (!mål){

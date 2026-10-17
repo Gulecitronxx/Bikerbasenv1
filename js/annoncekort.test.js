@@ -93,7 +93,9 @@ test('chips: kun oplyste tal, aldrig kg — selv om en kilde en dag sender et v�
   assert.match(chips(html), /1\.000 ccm/);
   assert.match(chips(html), /150 hk/);
   const udenTal = listingCardHTML(ekstern({ ccm: null, power: null }), 1);
-  assert.match(chips(udenTal), /ccm og hk ikke oplyst/);
+  /* W11: ingen "ikke oplyst"-chip — chips vises kun for oplyste tal (kørekortchippen er den eneste, der altid står). */
+  assert.ok(!/ikke oplyst/.test(chips(udenTal).replace(/Kørekort ikke afgjort[^<]*/g, '')), 'ingen "ccm/hk ikke oplyst"-chip');
+  assert.ok(!/ccm|hk/.test(chips(udenTal).replace(/<li class="rk-chip rk-kk[\s\S]*?<\/li>/, '')), 'ingen ccm/hk-chip uden tal');
   assert.ok(!/ 0 ccm|0 hk|null|NaN|undefined/.test(udenTal));
 });
 

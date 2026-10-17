@@ -49,7 +49,8 @@
 .an-grid{
   display:grid; gap: var(--space-5);
   grid-template-columns: minmax(0,1fr);
-  grid-template-areas: "gallery" "head" "seller" "desc" "fakta" "kk" "trygt" "tip";
+  /* W11 mobil: galleri, titel+pris+nøgletal, kørekort, beskrivelse, faktatabel, kilde/sælger, handl trygt, tjekliste. */
+  grid-template-areas: "gallery" "head" "kk" "desc" "fakta" "seller" "trygt" "tip";
   align-items:start;
 }
 .an-grid > *, .an-side > *, .an-col > *{ min-width:0; }
@@ -64,11 +65,30 @@
 .an-kk{ grid-area: kk; }
 .an-tjek{ grid-area: tip; }
 
-@media (min-width:760px){
+/* W11 tablet (760-1179): to kolonner. js/annonce.js (anTabletKolonner) lægger galleri + beskrivelse + faktatabel i venstre og
+   titel/pris/nøgletal + kørekort + kilde i højre (sidebjælken); "Det bør du tjekke" og "Handl trygt" står under i to kolonner. */
+@media (min-width:760px) and (max-width:1179px){
   .an-grid{
-    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-    grid-template-areas: "gallery head" "seller trygt" "desc desc" "fakta fakta" "kk tip";
+    grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap: var(--space-5);
+    grid-template-areas: "a b" "tip trygt";
   }
+  .an-col{ display:flex; flex-direction:column; gap: var(--space-5); align-self:stretch; }
+  /* Den kortere kolonne strækker sit sidste kort, så bundkanterne flugter (ingen tomt hul under faktatabellen). */
+  .an-col > :last-child{ flex:1 1 auto; }
+  .an-col-a{ grid-area:a; }
+  .an-col-b{ grid-area:b; }
+  .an-tjek{ grid-area:tip; align-self:stretch; }
+  .an-trygt-wrap{ grid-area:trygt; align-self:stretch; display:flex; flex-direction:column; }
+  .an-trygt-wrap > *{ flex:1 1 auto; }
+  /* I den smalle højre kolonne: kørekortkortet og sælgerboksen stakkes (som i sidekolonnen ved 1180+). */
+  .an-col-b .an-kk{ grid-template-columns: auto minmax(0,1fr); }
+  .an-col-b .an-kk .an-kk-badge{ grid-column: 1 / -1; max-width:none; }
+  .an-col-b .an-kk .an-kk-ico svg{ width:44px; height:44px; }
+  .an-col-b .an-seller-wrap .sidebar-card{ position:static; }
+  .an-h1{ font-size: clamp(26px,3.4vw,34px); }
+  /* Mobilbjælken hører til < 760: her står kilden/sælgeren synligt i sidebjælken. */
+  .listing-actionbar{ display:none; }
+  body.har-actionbar{ padding-bottom:0; }
 }
 @media (min-width:1180px){
   .an-grid{

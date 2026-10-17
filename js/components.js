@@ -864,7 +864,25 @@ function kortKildeHTML(l, f){
   const tekst = f.ext
     ? `${f.saelgerType ? `<span class="rk-saelgertype">${f.saelgerType} · </span>` : ''}${escapeHTML(f.kilde)}`
     : escapeHTML(f.kilde);
-  return { ikon, tekst };
+  /* Fuld tekst til tooltip/aria-label (kortet er smalt og kan klippe synlig tekst). */
+  const lang = f.ext
+    ? `${f.saelgerType ? f.saelgerType + ' · ' : ''}${f.kilde}`
+    : f.kilde;
+  return { ikon, tekst, lang };
+}
+
+/* Kortets fod — ÉN funktion til gitter-, sammenlign-, lignende- og forsidekort. Sted står først, kilden som ikon + kort navn
+   (domæne / forhandlernavn). Synlig tekst kan klippes i smalle kort; den fulde tekst står i title og aria-label. */
+function kortFodHTML(l, f){
+  const { ikon, tekst, lang } = kortKildeHTML(l, f);
+  const kildenavn = f.ext ? ((l.source && l.source.navn) || f.kilde) : '';
+  const kildeTitel = f.ext
+    ? `Annoncen ligger hos ${kildenavn}${f.domaene ? ' (' + f.domaene + ')' : ''}. Bikerbasen viser den, men handlen sker hos kilden.`
+    : 'Annoncen ligger på Bikerbasen.';
+  return `<div class="rk-fod">
+        <span class="rk-sted" role="group" title="${escapeHTML(f.stedTitle)}" aria-label="Sted: ${escapeHTML(f.stedTitle)}">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
+        <span class="rk-kilde" role="group" title="${escapeHTML(kildeTitel)}" aria-label="Kilde: ${escapeHTML(lang)}">${ikon}<span>${tekst}</span></span>
+      </div>`;
 }
 
 function listingCardHTML(l, i){
@@ -898,8 +916,7 @@ function listingCardHTML(l, i){
   ];
   if (f.ccm) chips.push(`<li class="rk-chip">${escapeHTML(formatCcm(f.ccm))}</li>`);
   if (f.hk) chips.push(`<li class="rk-chip">${escapeHTML(formatPower(f.hk))}</li>`);
-  const mangler = [!f.ccm && 'ccm', !f.hk && 'hk'].filter(Boolean);
-  if (mangler.length) chips.push(`<li class="rk-chip rk-chip-mangler">${escapeHTML(opremsDa(mangler))} ikke oplyst</li>`);
+  /* W11: ingen "ccm/hk ikke oplyst"-chip — chips vises kun for oplyste tal (kørekortchippen siger selv, når hk mangler). */
   if (!f.ext && l.serviceHistorik === 'Fuld') chips.push(`<li class="rk-chip rk-chip-ok">${Icon.shieldCheck}<span>Fuld service</span></li>`);
   if (f.mark.tekst) chips.push(`<li class="rk-chip rk-chip-note" title="${escapeHTML(f.mark.alle.join(' · '))}">${escapeHTML(f.mark.tekst)}</li>`);
 
@@ -923,12 +940,8 @@ function listingCardHTML(l, i){
   const hjerte = fav
     ? `<button type="button" class="fav-btn ${erFav ? 'active' : ''}" aria-pressed="${erFav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`
     : '';
-  const kildeTitel = f.ext
-    ? `Annoncen ligger hos ${escapeHTML(kildenavn)}${f.domaene ? ' (' + escapeHTML(f.domaene) + ')' : ''}. Bikerbasen viser den, men handlen sker hos kilden.`
-    : 'Annoncen ligger på Bikerbasen.';
   /* Bunden: sted til venstre, sælgertype + kilde til højre. Sælgertypen ligger i eget span, som smalle
      kort skjuler (container query) — domænet er det eneste, køberen selv kan slå op, og det vinder pladsen. */
-  const { ikon: kildeIkon, tekst: kildeHTML } = kortKildeHTML(l, f);
 
   return `
   <article class="card card-rich${f.ext ? '' : ' rk-egen'}" data-listing-id="${l.id}"${f.ext ? ' data-external="1"' : ''}${l.type ? ` data-type="${escapeHTML(l.type)}"` : ''}>
@@ -945,10 +958,7 @@ function listingCardHTML(l, i){
       </div>
       <p class="rk-linje">${linje.join('')}</p>
       <ul class="rk-chips">${chips.join('')}</ul>
-      <div class="rk-fod">
-        <span class="rk-sted" title="${escapeHTML(f.stedTitle)}">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
-        <span class="rk-kilde" title="${kildeTitel}">${kildeIkon}<span>${kildeHTML}</span></span>
-      </div>
+      ${kortFodHTML(l, f)}
     </div>
     <a href="annonce.html?id=${l.id}" class="card-link" aria-label="Se annonce: ${titel}, ${escapeHTML(pris)}${f.ext ? ' — hos ' + escapeHTML(kildenavn) : ''}"></a>
   </article>`;
