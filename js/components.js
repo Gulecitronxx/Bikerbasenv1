@@ -932,7 +932,7 @@ function listingCardHTML(l, i){
       : '';
     const dele = [
       isNewListing(l.createdAt) ? nytOpslagBadgeHTML() : '',
-      l.isDealer ? `<span class="badge badge-dealer">${Icon.store}Forhandler</span>` : '',
+      l.isDealer ? `<span class="badge badge-dealer" title="Forhandler">${Icon.store}Forhandler</span>` : '',
       mistaenkt ? `<span class="badge badge-warning" title="${escapeHTML(prisTitel)}">${Icon.alertTriangle}Under markedspris</span>` : '',
     ].filter(Boolean);
     if (dele.length) badges = `<div class="card-badges">${dele.join('')}</div>`;

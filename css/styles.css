@@ -824,7 +824,13 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .card-rich .card-media{ aspect-ratio: 3/2; }
 /* Ingen foto: feltet må ikke vokse — fakta-linjen findes i kortets krop. */
 .card-rich .foto-tom-fakta{ display:none; }
-.card-rich .foto-tom{ padding: var(--space-2); }
+/* W12: hjerte (øverst til højre) og sammenlign (nederst til højre) har en reserveret kolonne på 50 px. Teksten "Ingen fotos i denne
+   annonce" og mærkaterne (.card-badges) flyder aldrig ind i den: ingen skæring ved 320-1440 px, heller ikke på kort uden foto. */
+.card-rich .foto-tom{ padding: 8px 52px 10px; gap:6px; }
+/* Meget smalle kort (2 kolonner ved 320 px): hjertet (44) og sammenlign (40) skal kunne stå over hinanden i fotoet. */
+@container (max-width:150px){ .card-rich .card-media{ aspect-ratio:4/3; } }
+/* Kort uden foto OG med mærkater: teksten lægges i bunden af feltet, så mærkaterne (øverst) har fri bane uanset antal rækker. */
+.card-rich .card-media:has(.card-badges) .foto-tom{ justify-content:flex-end; }
 .rk-body{ display:flex; flex-direction:column; gap:8px; flex:1; padding: 12px 12px 11px; min-width:0; }
 .rk-top{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
 /* Smalle kort (forsidens fem-række, mærkesidens kortrække, søgningens tre kolonner): prisen står under titlen i stedet
@@ -869,6 +875,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .rk-sted svg, .rk-kilde svg{ width:13px; height:13px; flex:none; }
 .rk-sted span, .rk-kilde span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .rk-kilde > span{ text-align:right; }
+/* Mærkater på kortets foto (.card-badges): sælgertype, nyt opslag, under markedspris. Højre kant holder hjertets kolonne fri. */
+.card-rich .card-badges{ right:54px; }
 /* Smalle kort: sælgertypen viger for domænet (den står stadig i title/aria-label). */
 @container (max-width: 300px){ .rk-saelgertype{ display:none; } }
 /* W11: i 2-kolonne-gitteret (kort 120-190 px) fik sted og kilde hver ~40 px og blev til "Ro…". Under 240 px kortbredde
@@ -878,6 +886,23 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   .rk-fod{ flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:3px; }
   .rk-sted, .rk-kilde{ flex:none; max-width:100%; justify-content:flex-start; }
   .rk-kilde > span{ text-align:left; }
+  /* W12: lange kildenavne må fylde op til 2 linjer ("Roskilde Motorcykel Center") i stedet for "Roskilde Motorcyk…". To linjer er reserveret
+     på ALLE kort, så foden har samme højde i hele rækken og chiprækkerne står i samme y. Fuld tekst står stadig i title/aria-label. */
+  .rk-kilde{ align-items:flex-start; min-height:calc(2 * 1.3em); line-height:1.3; }
+  .rk-kilde svg{ margin-top:.2em; }
+  .rk-kilde > span{ display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; white-space:normal; overflow:hidden; overflow-wrap:anywhere; text-overflow:clip; }
+  /* W12: smalle kort — mærkaterne bliver kompakte (10 px, sætningsstort), og et mærkat ved siden af andre er kun ikon (teksten står
+     stadig i markup og i title). Hjerte-kolonnen (52 px) holdes fri; kortet uden foto lægger teksten under mærkaterne. */
+  .card-rich .card-badges{ top:6px; left:6px; right:52px; gap:4px; }
+  .card-rich .card-badges .badge{ font-size:10px; letter-spacing:0; text-transform:none; padding:3px 6px; gap:3px; line-height:1.3; }
+  .card-rich .card-badges .badge svg{ width:11px; height:11px; flex:none; }
+  .card-rich .card-badges .badge:not(:only-child):not(.badge-nyt-opslag){ font-size:0; gap:0; padding:4px; }
+  .card-rich .card-badges .badge.badge-warning{ font-size:0; gap:0; padding:4px; }
+  .card-rich .foto-tom{ padding:6px 50px 8px 8px; gap:0; }
+  .card-rich .foto-tom-ikon{ display:none !important; }
+  /* "Kørekort ikke afgjort — tjek kW" (139 px kort) blev klippet af kortets kant: kørekortchippen ombrydes i stedet (højst 2 linjer). */
+  .rk-chip.rk-kk{ max-width:100%; white-space:normal; line-height:1.2; text-align:left; }
+  .card-rich .foto-tom-titel{ font-size:11px; line-height:1.3; max-width:none; text-wrap:balance; }
 }
 
 /* ============ Category tiles ============ */
@@ -4140,7 +4165,7 @@ html[data-lager-fejl] :is(.fa-kf-liste, .mk-kf-liste, .fa-panel, .brand-intro, .
   :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-chips{ gap:4px; min-height:50px; align-content:flex-start; }
   :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-chip{ font-size:11px; padding:5px 6px; }
   :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .rk-fod{ font-size:11px; padding-top:6px; }
-  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-badges{ top:6px; left:6px; right:42px; gap:4px; }
+  :is(.fa-flere, .brand-liste-sektion, #results-grid:not(.list-view)) .card-badges{ top:6px; left:6px; right:52px; gap:4px; }
 }
 
 /* W7-1: ved 320 px er fotoet i 2-kolonne-gitteret kun ca. 86 px højt, så hjertet (44 px) og sammenlign-knappen (34 px + 5 px usynlig
