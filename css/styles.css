@@ -38,7 +38,7 @@
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
   --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
 
-  --header-h: 68px;
+  --header-h: 60px;
   /* EN containerskala for hele sitet (header, hero, soegekort, filtre+resultater, annonce, maerke, kategori, guide,
      login, opret, dashboard, footer): indhold staar paa x = (viewport - site-w)/2 + gutter. */
   --site-w: 1480px;
@@ -497,7 +497,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Headeren kan ikke rumme hele menuen + favorit/profil/CTA under ~1180 px (P1 fra samlet Critic:
    73-301 px vandret overflow ved 1024). Under 1180 bruges menuskuffen; under 1500 skjules de
    to sekundære punkter (står stadig i footer og skuffe). */
-@media (max-width: 1499px){ .main-nav .nav-sek{ display:none; } }
+@media (max-width: 1279px){ .main-nav .nav-sek{ display:none; } }
 @media (min-width: 1180px){
   /* Nav'en står lige efter logoet; handlingerne skubbes til højre kant. */
   .main-nav{ display:flex; margin-left:var(--space-3); }
@@ -3014,3 +3014,6 @@ main .lg-legal a, .cookie-modal-note a{ display:inline-block; padding:11px 2px; 
 .skip-link:focus, .skip-link:focus-visible{ left:8px; outline:3px solid #fff; outline-offset:2px; box-shadow:0 0 0 6px var(--color-primary); border-radius:8px; }
 /* Hovedindholdet er mål for skip-linket, men skal ikke selv tegne en ring, når det får programmatisk fokus. */
 main:focus{ outline:none; }
+
+/* W14: slankere header paa desktop (referencebillederne har en lav topbar); overalt via --header-h. */
+@media (min-width:1100px){ :root{ --header-h: 54px; } }

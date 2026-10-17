@@ -1,4 +1,6 @@
-/* W11: forsiden modigere (billede 1). Målt i rigtig browser mod lokal mock (smoke-browser). Skippes uden Chromium.
+/* W14: taerskler for hero, CTA, felter, trinikon, fliser og sektionsluft er bevidst saenket (Visual Fidelity Gauntlet:
+   forsiden skal vaere lige saa kompakt som Forside.png); accentstregen over overskrifterne er fjernet. Se agent1-forside.md.
+   W11: forsiden modigere (billede 1). Målt i rigtig browser mod lokal mock (smoke-browser). Skippes uden Chromium.
    Dækker acceptkriterierne H1-H8 i docs/review/gauntlet/builder-w11-forside.md. Statiske tests kræver ikke browser. */
 const test = require('node:test');
 const assert = require('node:assert');
@@ -73,19 +75,18 @@ for (const [vp, tema] of [[1440, 'light'], [1440, 'dark'], [1024, 'light'], [768
     if (!kan.ok) return t.skip(kan.grund);
     const m = await aabn(vp, tema, p => p.evaluate(maal));
     assert.equal(m.overflow, 0, 'vandret overflow');
-    assert.ok(m.ctaH >= 56, 'CTA-højde ' + m.ctaH);
+    assert.ok(m.ctaH >= 44, 'CTA-højde ' + m.ctaH);
     assert.notStrictEqual(m.ctaBg, 'rgb(30, 142, 90)', 'CTA må ikke være grøn');
-    m.felter.forEach(h => assert.ok(h >= 44, 'felthøjde ' + h));
+    m.felter.forEach(h => assert.ok(h >= 40, 'felthøjde ' + h));
     assert.equal(m.trinOverlap, false, 'trinnummer overlapper ikon');
-    m.ikonH.forEach(h => assert.ok(h >= 48, 'trinikon ' + h));
-    m.tileH.forEach(h => assert.ok(h >= 112, 'flisehøjde ' + h));
-    m.streg.forEach(c => assert.ok(c && c !== 'rgba(0, 0, 0, 0)', 'accentstreg mangler'));
+    m.ikonH.forEach(h => assert.ok(h >= 32, 'trinikon ' + h));
+    m.tileH.forEach(h => assert.ok(h >= 72, 'flisehøjde ' + h));
     assert.equal(m.chips, 0, 'tap-mål under 40 px');
     if (vp >= 1100){
-      assert.ok(m.heroH >= 560, 'hero ' + m.heroH);
-      assert.ok(m.h1 >= 64, 'h1 ' + m.h1);
-      assert.ok(m.overlap >= 48, 'overlap ' + m.overlap);
-      m.sektionLuft.forEach(v => assert.ok(v >= 56, 'sektionsluft ' + v));
+      assert.ok(m.heroH >= 232, 'hero ' + m.heroH);
+      assert.ok(m.h1 >= 38, 'h1 ' + m.h1);
+      assert.ok(m.overlap >= 40, 'overlap ' + m.overlap);
+      m.sektionLuft.forEach(v => assert.ok(v >= 12, 'sektionsluft ' + v));
     }
     if (vp >= 1000) assert.notEqual(m.pil, 'none', 'pil mellem trin');
     if (vp <= 390) assert.ok(m.h1 >= 34, 'mobil-h1 ' + m.h1);
