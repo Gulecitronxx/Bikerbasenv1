@@ -1,54 +1,54 @@
-# Agent 3 — Annoncedetaljer og opret-flow (Visual Fidelity Gauntlet)
+# Agent 3 — Annoncedetaljer og opret-flow (Visual Fidelity Gauntlet) — iteration 3
 
-Branch `gauntlet/w14-annonce` (fra fefe1570). Mål: `Annonce.png` (Yamaha MT-07) og `Opret annonce.png`. Billeder i `agent3-annonce/` (JPEG, samlet ca. 4,9 MB).
+Branch `gauntlet/w14-annonce` (fra fefe1570). Mål: `Annonce.png` (Yamaha MT-07) og `Opret annonce.png`. Billeder i `agent3-annonce/` (JPEG, samlet ca. 5,3 MB).
 Testfotos i målingerne er udsnit af mockuppens eget motorcykelfoto (kun lokalt, aldrig i repoet), fordi mockens fotos ellers er flade farver. De indeholder
-mockuppens indbagte "1/14"-mærke og pile i hjørnerne; det er et testartefakt, ikke en fejl i siden.
+mockuppens indbagte "1/14"-mærke og pile i hjørnerne, og det andet foto (brugt i tjekbåndet) er et lavopløseligt udsnit; det er testartefakter, ikke fejl i siden.
+Historik: runde 1 AFVIS 6/10 + 5/10, runde 2 AFVIS 6,5/10 + 5,5/10 (se `critic-agent3.md`, `critic2-agent3.md`). Denne fil beskriver status efter iteration 3.
 
-## Acceptkriterier (skrevet før koden; runde 2 efter Critic AFVIS 6/10 + 5/10 tilføjer A8–A12)
-- A1 Galleriets hovedbillede fylder hele sin boks: billedhøjde = boxhøjde ±1 px ved 1440.
-- A2 (omskrevet i runde 2) INGEN strækning: intet kort har > 40 px tomt rum under sit sidste indholdselement ved 1440 (egen med 5 og 0 fotos). Kolonnerne må ende ujævnt; hvide felter i sidens bund er ikke et kort med tomt rum.
-- A3 Kørekortkortet står i midterkolonnen, lavt (≤ 240 px), med stor badge til højre for teksten ved ≥ 1180 px; grundlag/legende sammenfoldet; kun oplyste tal og offentlige grænser (A2: 35 kW ≈ 47 hk), "Mulig" aldrig "bekræftet".
-- A4 Faktatabellen: to lige kolonner, "Ikke oplyst" sidst, ulige antal giver en sidste række i fuld bredde (ingen enlig halv række).
-- A5 Opret: billedsektionen har dropzone og miniaturer (≥ 100 px) i samme række, tips som bånd, ingen overflow.
-- A6 Ingen dubletter/tab af elementer ved resize 1440→1024→768→390→1440; 0 vandret overflow 320/390/768/1024/1440 lys+mørk.
-- A7 CLS < 0,05 (`smoke-browser --cls 0.05 --strikt`) på alle `annonce*.html` og `opret-annonce` ved 320–1440; SEO uændret; ingen opdigtet data.
-- A8 "Det bør du tjekke" i sidekolonnen under "Handl trygt" (standard), brede kort, foto som bånd over teksten, aldrig under den.
-- A9 Galleri: fuldskærmsknap og lightbox (Esc/pile, fokus tilbage) hvor der er egne fotos; "+N"-tile ved > 6 fotos.
-- A10 Opret: sektionsrækkefølge som billedet (1 Detaljer, 2 Billeder, 3 Beskrivelse og pris) på ÉN side, 4 trin i bjælken (Detaljer, Billeder, Beskrivelse & pris, Gennemse), fire kolonner i første feltrække.
-- A11 Login-gate bevares uden tab: udlogget ser en login-port i stedet for dropzonen (billeder overlever ikke en login-omvej), kladden gemmes og man lander ved billederne efter login.
-- A12 Tap-mål ≥ 40 px og kontrast ≥ 4,5:1 (målt med canvas-afledt farve, også på color-mix-flader) på annoncesiden, 320–1440 lys+mørk.
-Bevis: `js/w14-annonce.test.js` (9 browsertests), `js/w9-saelger.test.js` (33), smoke, egne målescripts (kontrast/tap).
+## Acceptkriterier (målbare; A13–A20 er tilføjet i iteration 3 efter Critic runde 2)
+- A1 Galleriets hovedbillede fylder hele sin boks (±1 px). A9 Fuldskærmsknap + lightbox (Esc/pile/fokus tilbage); "+N"-flise ved > 6 fotos (14 fotos → 5 miniaturer + "+9"); 0/1 foto: ingen pile eller miniaturer.
+- A2 Intet kort har > 40 px tomt rum under sit sidste indholdselement ved 1440 (ingen strækning).
+- A13 KOLONNEBUND: ved 1440 er forskellen mellem venstre, midterste og højre kolonnes bund højst 100 px (egen med 5/1/0 fotos, ekstern med foto/48 hk/uden foto/uden pris). Mål: bund venstre/midt/side + spredning pr. fixture (se Målinger).
+- A14 "Det bør du tjekke" er et FULDBREDT bånd (≥ 98 % af gridbredden) under alle tre kolonner, med foto ved siden af tjeklisten (egen: annoncens eget foto; ekstern: kildens thumbnail eller typefoto med ærligt label "Typefoto … — ikke annoncens eget").
+- A15 "Kan du køre denne motorcykel?": bred, lav flade (højst 190 px ved 1440), titel på én linje, stor badge (≥ 110 px) til højre, grundlag på én linje med kun oplyste tal + offentlig A2-grænse; "Mulig" aldrig "bekræftet".
+- A4/A16 Faktatabel uden "Ikke oplyst"-rækker: uoplyste felter samles i én linje "Ikke oplyst: Afgift, …"; ulige antal → sidste række i fuld bredde.
+- A5/A17 Opret: sektionsrækkefølge 1 Detaljer, 2 Billeder, 3 Beskrivelse og pris på én side; 4 trin i bjælken; første feltrække = 4 felter.
+- A18 Opret: hero ≤ 200 px ved 1440; forhåndsvisningen viser et fuldt kort FRA START, mærket "Eksempel" til mærke og model er valgt; kompakt upload-flise ≤ 140 px med miniaturefelter i samme række (spøgelsesfelter før første upload, "Primært billede").
+- A11/A19 Login-gate uden tab: udlogget ser en login-port i stedet for dropzonen; port og toast siger eksplicit, at billeder ikke kan gemmes i kladden og skal vælges efter login (test).
+- A6 Ingen dubletter/tab ved resize 1440→1024→768→390→1440; 0 vandret overflow 320/390/768/1024/1440 lys+mørk. A7 CLS < 0,05 (strikt). A12 Tap-mål ≥ 40 px og kontrast ≥ 4,5:1.
+- A20 Telefon-reveal logget ind (mock): nummer via RPC; uden samtykke ærlig afvisning.
 
-## Afvigelsesliste (prioriteret, fra egne observationer og Critics)
-1. Moduler: tyndt kørekortmodul → LUKKET (bred flade, stor badge, sammenfoldet grundlag + legende). Galleri uden fuldskærm → LUKKET (knap + lightbox).
-2. Layout: kort strakt til 490 px med 200 px tomt rum (align-stretch) → LUKKET (strækning fjernet, fast komposition: kørekort i midten, "Handl trygt" + "Det bør du tjekke" i sidekolonnen; for høj sidekolonne (lange kildetekster) flyttes tjek til venstre hvis det sparer ≥ 80 px højdeforskel).
-3. Hierarki/billedbrug: galleribillede dækkede 87 % af boksen (fejl) → LUKKET.
-4. Panelopbygning: faktatabel med enlig række og én kolonne ved 510 px → LUKKET. "Det bør du tjekke" klemt, tekst over fotoflade → LUKKET (foto som bånd). Sælgerpanel for tungt udlogget → delvist (to noter beholdt af tests, tredje "Mød altid sælger…" fjernet udlogget).
-5. Opret: billeder som eget trin efter pris, to trin-sider → LUKKET (billeder = sektion 2 på samme side, review = trin 4); første række 4 felter; tips som bånd; hero lavere; skillelinje før sektion 3.
-6. CLS 0,298 på `annonce-harley-davidson-flhx-2007-541ad405.html` ved 1024 mørk → LUKKET. Årsag: brødkrummen brækkede over to linjer i den forrenderede side og én linje efter hydrering (fejltilstand i smoke, hvor id'et ikke findes i fixtures); nu `nowrap` + ellipsis ≥ 900 px, og højden låses, når en fejltilstand erstatter siden.
-7. Typografi/detaljer: tap-mål (32 px-links, miniaturer 43×32) og lav kontrast → LUKKET/målt rent.
-8. Mikrointeraktion: lightbox tilføjet; favorit/sammenlign/kilde-link/telefon-reveal testet (telefon: nummer via RPC; uden samtykke ærlig afvisning).
+## Afvigelsesliste (prioriteret) og status
+1. KOLONNEBUND (hvidt hul under kolonner): LUKKET. "Det bør du tjekke" er nu et fuldbredt bånd under kolonnerne; "Handl trygt" og "Kan du køre" placeres af en optimerer (kørekort venstre/midt, trygt venstre/midt/side, beskrivelsens klip 12/9/7/5 linjer), og en tættere sidekolonne (kortere sælger-/tryghedskort uden "Medlem siden"-blok udlogget) samt pladsholder i foto-format (16:10) uden foto trækker bunde sammen. Før: 280–420 px forskel; nu 12–93 px (se Målinger).
+2. KØREKORTKORT smalt/højt, lille badge: LUKKET (158–170 px, titel på én linje, badge 140 px; legende og detalje-boks fjernet; lang 48–49 hk-forklaring: første sætning + "Hvorfor ikke afgjort?" som detalje).
+3. TJEKKORT blegnet afskåret fotobånd: LUKKET (figur ved siden af tjeklisten, 220 px høj; egen annonce bruger annoncens eget foto, ellers typefoto med label).
+4. FAKTATABEL flere "Ikke oplyst": LUKKET (samlet linje). Favorit på eksterne: HOLDT UDE (produktregel); "Se på kort": ikke lavet (ville sende by/postnr til en tredjepart; ingen kortfunktion i mine filer — Agent 2).
+5. OPRET-PREVIEW tomt indtil mærke+model: LUKKET (eksempelkort fra start, mærket "Eksempel"). Karrusel/galleripile i selve kortet: IKKE LUKKET (delt kortkomponent, Agent 2's regler).
+6. OPRET-BILLEDSEKTION stor stiplet flade: LUKKET (flise ≤ 140 px + miniaturefelter i samme række; fodnoter flyttet ind i tipsboksen).
+7. OPRET-HERO høj/kold: LUKKET (186 px, varm brun overlay, kortere tekst); advarsler i gennemse nu i brandfarve (ikke grøn/rød); "Sælgeroplysninger" er titlen på kortet "Sælgeroplysninger — sådan når købere dig" (navn/telefon-valg), ikke et selvstændigt trin (4 trin).
+8. LOGIN-PORT-TEKST: LUKKET (port + toast: "Billeder kan ikke gemmes i kladden, så dem vælger du først, når du er logget ind"; test).
+9. 1920: containeren er allerede `--site-w` = 1480 px (indhold 1416 px, gutters ~250 px ved 1920). Ikke ændret (header/tokens er Agent 1's); Critics "1150 px" er ikke gengivet.
 
 ## Tilbageværende — ligner ikke endnu (ærligt)
-- Sælgerpanel udlogget er stadig højere end billedets (ingen avatar/stjerner/svartid/"Ring op"/"Send besked"/"autoriseret": må ikke opdigtes eller er ikke bygget). Derfor ender sidekolonnen ofte 150–300 px under de andre, og bunden af venstre/midterkolonne står hvid.
-- Beskrivelse uden grønne check-punkter for eksterne annoncer (ingen data); egne får dem kun når felterne er udfyldt.
-- Ingen finansieringsforslag, "+10 billeder", forhandlerlogo, kort-link (ingen data); eksterne har ét thumbnail uden fuldskærm.
-- Opret: ingen titelfelt (titlen udledes af mærke/model/årgang), ingen B/I-værktøjslinje, ingen model-dropdown, intet rytterfoto i hero (findes ikke i repoet), 4 trin mod billedets 5 ("Sælgeroplysninger" findes ikke som valg), ingen "Vis eksempel på fuld annonce" og ingen galleripile i forhåndsvisningen (delt kortkomponent, Agent 2).
-- Opret er lidt mindre kompakt end billedet (feltrækkerne er højere, trin 1 har 3 felt-rækker + fold).
-- Udlogget sælger kan ikke vælge billeder før login (bevidst, se A11); i billedet ligger upload frit.
-- Forhåndsvisningens første række i fejltilstand viser toast over felter (kun kosmetik).
+- Sælgerpanel udlogget: ingen avatar/stjerner/svartid/"Ring op"/"Send besked"/"autoriseret" (opdigtet eller ikke bygget). Panelet er kompaktere end før, men ikke mockuppens grønne kontaktkort.
+- Eksempelkortet i opret har ingen karrusel/prikker/"Vis eksempel på fuld annonce" (delt kortkomponent).
+- Opret: ingen titelfelt (titlen udledes), ingen B/I-værktøjslinje, ingen model-dropdown, intet rytterfoto i hero (findes ikke i repoet), 4 mod 5 trin, "Sælgeroplysninger" ikke som eget trin, udlogget kan ikke vælge billeder før login.
+- Kolonnebunde: spredning op til 93 px (egen 5 fotos 83, ekstern 48 hk 93) — over mockuppens næsten-nul, men under 100 px.
+- Ingen finansieringsforslag, "+10 billeder", forhandlerlogo, "Se på kort".
+- Tjekbåndets foto for eksterne uden thumbnail er et typefoto (ærligt mærket), ikke motorcyklen selv.
 
-## Målinger (runde 2)
-- `node --test js/w14-annonce.test.js`: 9/9. `js/w9-saelger.test.js`: 33/33 (5 tests opdateret bevidst: billeder er sektion 2 på samme side, trinnavne, ét tilbage-trin, login-port). `js/w9-marketplace-r2.test.js` opdateret bevidst (ingen strækning).
-- `smoke-browser --sider "annonce*.html,opret-annonce" --viewports 320,390,768,1024,1440 --cls 0.05 --strikt`: 40 målinger, 0 fejl, 0 advarsler.
-- Kontrast/tap (`annonce` egen + ekstern × 320/390/768/1024/1440 × lys/mørk, 20 sider): 0 fund under 4,5:1 (3:1 for stor tekst), 0 tap-mål < 40 px efter rettelse.
-- `kritisk-gen` + `scripts/w12-kritisk.test.js`: 18/18. `npm run gate` (uden build): node --check, hele `npm test`, synk-header, seo-audit, sitemap, døde links, udgiv = OK. Trin 7 rød, til Orchestratoren tilføjer `js/w14-annonce.test.js` til package.json "test".
+## Målinger (iteration 3)
+- Kolonnebunde ved 1440 (venstre/midt/side → forskel): egen 5 fotos 874/909/826 → 83; egen uden foto 759/787/826 → 67; egen 1 foto 802/777/826 → 49; ekstern med foto 854/893/925 → 71; ekstern 48 hk 859/862/952 → 93; ekstern uden foto 870/882/879 → 12; ekstern uden pris 854/873/832 → 41.
+- Kørekortflade 158–170 px, titel 18 px høj (én linje). Hero 186 px. Upload-flise 132 px.
+- `js/w14-annonce.test.js`: 13 tests (kolonnebunde, fuldbredt tjek, kørekortflade, uoplyst-linje, preview/upload/hero, login-port-tekst, "+N"-flise, telefon-reveal, resize, overflow m.m.). `js/w9-saelger.test.js` 33, `js/annonce-skal.test.js` opdateret bevidst (uoplyste felter samlet i én linje), `js/w9-marketplace-r2.test.js` opdateret bevidst (ingen strækning).
+- `smoke-browser --sider "annonce*.html,opret-annonce" --viewports 320,390,768,1024,1440 --cls 0.05 --strikt`: 40 målinger, 0 fejl, 0 advarsler. Kontrast/tap (egen+ekstern × 320–1440 × lys/mørk): 0 fund efter at "Hvorfor ikke afgjort?" fik 40 px højde.
+- `kritisk-gen` + `scripts/w12-kritisk.test.js` 18/18. `npm run gate` (uden build): se rapport; trin 7 rød indtil Orchestratoren tilføjer `js/w14-annonce.test.js` til package.json "test".
 
 ## Billeder (agent3-annonce/)
-reference-annonce/opret; foer-annonce 1440/390, foer-opret; efter-annonce 1440/768/390 lys og mørk; efter-ekstern (48 hk, lys; med foto, mørk); efter-opret 1440 lys/mørk, 768, 390, gennemse og fejl; side-om-side (mockup | efter) pr. nøglesektion: sbs-annonce-oeverst/nederst, sbs-opret-oeverst/nederst.
+reference-annonce/opret; foer-annonce 1440/390 og foer-opret; efter-annonce 1440/1920/768/390 lys, 1440/768/390 mørk, uden foto; efter-ekstern 48 hk (lys) og med foto (mørk); efter-opret 1440 (tom), udfyldt, mørk, 1920, 768, 390, gennemse, fejl; side-om-side (mockup | efter) pr. nøglesektion: sbs-annonce-oeverst/nederst, sbs-opret-oeverst/nederst.
 
 ## Ærlig score mod mockuppen (selvvurdering, ikke godkendelse)
-Annonce ca. 7/10, opret ca. 6,5/10. Komposition og sektionsrækkefølge følger billederne nu; den største rest er sælgerpanelet og at kolonnerne ender ujævnt.
+Annonce ca. 7,5/10, opret ca. 7/10.
 
 ## Nye testfiler (package.json er Orchestratorens)
 `js/w14-annonce.test.js`.
