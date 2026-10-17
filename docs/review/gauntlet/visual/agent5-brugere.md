@@ -75,3 +75,30 @@ K10 0 overflow 320-1440 lys+mørk, tap-mål >= 40, smoke strikt CLS < 0,05.
 - Artikel 7,3/10: komposition (hero + overlappende Kort fortalt, bred TOC, sektioner med moduler, tvivl-kort, sticky sidebjælke) er tæt; mangler lys rytterhero, forfatterfoto og type-kort på alle sektioner (fotos er guidens kortbillede + forsidefoto).
 - Login 8/10: kort + strimmel i første skærm, fade til foto, hel motorcykel, tillidsstrimmel; mangler rytter og håndskrevne captions, social login og 120.000+ (bevidst).
 - Mine annoncer 7,3/10: rigere kort med ikon og store tal, tællere med ikoner, opret-strimmel, hjælpekort, lavere lys hero; mangler Beskeder/visningsgraf/Udløber (findes ikke) og grøn farve (brand).
+
+---
+
+# Iteration 3 (efter Critic runde 2: artikel 6,5 / login 7,5 / mine annoncer 6,5)
+
+Critic: `critic2-agent5.md` (hovedrepoet). Billeder opdateret: `sbs-*` (mockup | efter), `efter-guide-*`, `efter-login-*`, `efter-mine-*` (lys, mørk, 390).
+
+## Acceptkriterier og resultat
+- Callouts må ikke gentage Kort fortalt eller stå to gange: hver callout er nu én regel-/råd-sætning FLYTTET ud af guidens egen brødtekst (fjernet fra afsnittet), valgt ud fra nøgleord (aldrig/undgå/kræver/skal/bør/tjek) og kun hvis den ikke ligner et Kort fortalt-punkt (Jaccard < 0,4). Guider uden egnet sætning har ingen callout (foerste, ordliste, udstyr). Testet pr. guide (10 guides).
+- Fem typefliser med foto og "Se X motorcykler" til `type-*.html` (>= 170 px) i alle 10 guides (rækken "Find motorcykler efter type" under artiklen, eller i brødteksten hvor den fandtes). Intet antal er bagt ind (generatoren har intet lager); ingen opdigtede tal.
+- Ingen foto to gange i artiklen (hero + artikelbilleder + fliser): inline-fotoet af forsidefotoet er fjernet; guidens kortbillede vises kun hvis det ikke er heroen eller en flise. Hero-crop varieres pr. guide (object-position), da kun ét heltefoto findes i repoet.
+- Hero <= 330 px (målt 282 px) og H1 <= 2 linjer, ingress 3 linjer; linjelængde <= 80 tegn (60 ch, målt ca. 69).
+- Mine annoncer: hero-crop viser forlygte og tank; blank flade over footer 160 -> ca. 40 px; "Ingen visninger endnu" i stedet for tre nuller (kun når alle tre er 0); ingen "Udløber" (findes ikke).
+- Login: opret-visningens højre kolonne har tre ærlige trin (opret, bekræft e-mail, gem/opret); fejlboksen er et overlay (ingen layout shift: e-mail-felt og knap har samme y før/efter fejl, testet); fejltekst >= 4,5:1 (målt); fordelstekstens flade er kraftigere/fastere.
+- Små ting: logo-link >= 44 px; favorit-badge skjult ved 0; footerens "Log ind / opret profil" bliver "Min profil" når man er logget ind (drawerens `data-auth-slot-mobile` skifter allerede til "Log ud"; "Log ind"-teksten Critic så var ikonets aria-label, som skifter til "Min profil").
+
+## Ikke gjort / ærligt
+- Mine annoncer: rækkens kolonner (foto | titel/pris | status | tællere | handlinger) er stadig sammenstøbt i status-kolonnen; fuld omstrukturering nåede jeg ikke.
+- Sælg-guidens sidebjælke: kortet "Oplyst effekt under A2" er en generator-funktion (data ved byg); uden lager er der kun Kort fortalt, tvivl-kort og mini-TOC (3 moduler).
+- Fotos pr. guide er stadig det samme heltefoto med forskelligt crop; typefotos er produktbilleder, ikke hero-egnede.
+- Critic nåede ikke om/vilkår/404/afmeld/dashboard-forhandler: kun overflow-, smoke- og tap-målt af mig (0 fund).
+
+## Måling
+`js/w14-brugere.test.js` 27/27, w7-funktion 34, w9-saelger 33, login-fejl, mine-annoncer, guides 85, w12-guides, w10-discovery, w12-kritisk 18, info-tekst 21.
+
+## Ærlig "ligner mockuppen: x/10"
+Artikel 7,6 · Login 8,3 · Mine annoncer 7,6.
