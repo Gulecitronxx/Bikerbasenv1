@@ -7,7 +7,8 @@
    kørsel med 0 fundne. */
 
 const { laesKilde } = require('./config');
-const { aabnBrowser, hentListeside, hentDetaljeside } = require('./hent');
+const { aabnBrowser, hentListeside, aabnKnapSession, hentDetaljeside } = require('./hent');
+const { gennemgaaSider, sideUrl } = require('./paginering');
 const { tilAnnonce, berigMedDetalje } = require('./parse');
 const { nyRobotsVagt } = require('./robots');
 const db = require('./db');
@@ -118,55 +119,42 @@ function nyAfvisningsvagt({ afvisninger = AFVISNINGER_FOER_STOP, ikkeFundet = IK
    ovenfor SKAL kunne efterprøves, og den eneste anden måde at fremkalde et
    403 på ville være at få kilden til at blokere os. Standardværdien er den
    rigtige funktion, så driften ikke går gennem en omvej. */
-async function indsamlAnnoncer(context, kilde, { limit, log, hent = hentListeside }){
+async function indsamlAnnoncer(context, kilde, {
+  limit, log, hent = hentListeside, robots = null, maksSider = null, aabnKnap = aabnKnapSession,
+}){
   const fundne = new Map();   // kilde_annonce_id -> { annonce, maerkeFraUrl }
   let kasseret = 0;
   const grunde = new Map();
+  const pag = kilde.paginering && kilde.paginering.type !== 'scroll' ? kilde.paginering : null;
 
-  for (const liste of kilde.liste_urler){
-    if (limit && fundne.size >= limit){
-      log.skriv(`grænse på ${limit} nået — springer resten af liste-URL'erne over`);
-      break;
-    }
+  /* KOMPLET: har vi set hele kataloget? Starter som sandt og falder på hver
+     eneste ting, der kan have skjult annoncer for os: en liste, der fejlede,
+     en paginering, der stoppede før enden, en grænse. Kun en komplet kørsel
+     må give markerBorte() lov til at køre (se koerKilde). */
+  let komplet = true;
+  const stopgrunde = [];
+  const sideTal = [];
 
-    let side;
-    try {
-      side = await hent(context, kilde, liste.url);
-    } catch (e){
-      /* Et afvisningssvar på en LISTESIDE tåler ingen tæller. Der er 1-8 af
-         dem, og de er hoveddøren: er den lukket, er der ingen mening i at
-         gå videre til de 332 detaljesider bagved. Detaljetrinet har en
-         tæller på fem, fordi der er hundredvis af døre og én af dem kan
-         være låst uden at huset er det. Her er huset lukket. */
-      const status = statusFra(e);
-      if (status !== null && AFVISNINGSKODER.has(status)){
-        throw afbrydelsesFejl(
-          `HTTP ${status} på listesiden ${liste.url} — kilden afviser os ved hoveddøren, `
-          + 'og kørslen stopper her frem for at gå videre til detaljesiderne',
-          status,
-        );
-      }
-      // En enkelt listeside, der fejler af andre grunde, må ikke tage de
-      // øvrige med sig: en timeout på én mærkeside er ikke et nej.
-      log.skriv(`FEJL på ${liste.url}: ${e.message}`);
-      continue;
-    }
+  /* --limit stopper normalt indsamlingen, så en delvis kørsel ikke bruger
+     kald, den ikke skal bruge. Er --maks-sider givet UDTRYKKELIGT, er
+     kørslen en undersøgelse af pagineringen: siderne hentes, og --limit
+     beskærer først bagefter, så der kan nøjes med få detaljekald. */
+  const limitStopperIndsamling = Boolean(limit) && maksSider == null;
+  const fuld = () => limitStopperIndsamling && fundne.size >= limit;
 
-    if (side.advarsel) log.skriv(`${liste.url}: ${side.advarsel}`);
-    log.skriv(`${liste.url}: ${side.kort.length} kort i DOM'en (mærke fra URL: ${liste.maerke || 'ukendt'})`);
-
+  function behandlKort(side, liste){
+    let nye = 0;
     for (const raa of side.kort){
-      if (limit && fundne.size >= limit) break;
-
+      if (fuld()) break;
       const r = tilAnnonce(raa, kilde, liste.maerke);
       if (!r.ok){
         kasseret++;
-        const noegle = r.grund.replace(/\d+/g, 'N');
+        const noegle = r.grund.replace(/d+/g, 'N');
         grunde.set(noegle, (grunde.get(noegle) || 0) + 1);
         continue;
       }
-
       const tidligere = fundne.get(r.annonce.kilde_annonce_id);
+      if (!tidligere) nye++;
       // Samme motorcykel står både på /alle-motorcykler/ og på sin mærkeside.
       // Mærkesiden vinder: dér er mærket kendt fra URL'en og ikke udledt af
       // titlen, og det er den hyppigste kilde til forkert mærke.
@@ -174,6 +162,82 @@ async function indsamlAnnoncer(context, kilde, { limit, log, hent = hentListesid
         fundne.set(r.annonce.kilde_annonce_id, { annonce: r.annonce, maerkeFraUrl: Boolean(liste.maerke) });
       }
     }
+    return nye;
+  }
+
+  /* Et afvisningssvar på en LISTESIDE tåler ingen tæller. Der er 1-8 af
+     dem, og de er hoveddøren: er den lukket, er der ingen mening i at
+     gå videre til de 332 detaljesider bagved. Detaljetrinet har en
+     tæller på fem, fordi der er hundredvis af døre og én af dem kan
+     være låst uden at huset er det. Her er huset lukket. */
+  function afvisningKaster(e, url){
+    const status = statusFra(e);
+    if (status !== null && AFVISNINGSKODER.has(status)){
+      throw afbrydelsesFejl(
+        `HTTP ${status} på listesiden ${url} — kilden afviser os ved hoveddøren, `
+        + 'og kørslen stopper her frem for at gå videre til detaljesiderne',
+        status,
+      );
+    }
+  }
+
+  for (const liste of kilde.liste_urler){
+    if (fuld()){
+      log.skriv(`grænse på ${limit} nået — springer resten af liste-URL'erne over`);
+      komplet = false;
+      break;
+    }
+
+    if (pag){
+      /* Paginering: side 1..N, serielt, hver gennem hastighedskøen (hent.js)
+         og hver mod robots.txt. Se crawler/paginering.js. */
+      let knapSession = null;
+      let hentSide, urlFor;
+      if (pag.type === 'knap'){
+        knapSession = aabnKnap(context, kilde, liste.url);
+        hentSide = nr => knapSession.side(nr);
+        urlFor = () => null;
+      } else {
+        urlFor = nr => sideUrl(liste.url, pag.parameter || 'page', nr);
+        hentSide = nr => hent(context, kilde, nr === 1 ? liste.url : urlFor(nr));
+      }
+      let r;
+      try {
+        r = await gennemgaaSider({
+          pag, url: liste.url, maksSider, hentSide, urlFor, robots, log,
+          taelNye: side => behandlKort(side, liste),
+          tilFejl: afvisningKaster,
+          stopNaar: fuld,
+        });
+      } finally {
+        if (knapSession) await knapSession.luk();
+      }
+      sideTal.push(...r.sider);
+      if (!r.komplet){
+        komplet = false;
+        stopgrunde.push(`${liste.url}: ${r.grund}`);
+      }
+      log.skriv(`${liste.url}: ${r.sider.length} sider gennemgået${r.antal_sider_kilde ? ` af ${r.antal_sider_kilde}` : ''} — ${r.grund || 'ok'}`);
+      continue;
+    }
+
+    let side;
+    try {
+      side = await hent(context, kilde, liste.url);
+    } catch (e){
+      afvisningKaster(e, liste.url);
+      // En enkelt listeside, der fejler af andre grunde, må ikke tage de
+      // øvrige med sig: en timeout på én mærkeside er ikke et nej. Men
+      // kataloget er ikke set i sin helhed.
+      log.skriv(`FEJL på ${liste.url}: ${e.message}`);
+      komplet = false;
+      stopgrunde.push(`${liste.url}: listesiden fejlede`);
+      continue;
+    }
+
+    if (side.advarsel) log.skriv(`${liste.url}: ${side.advarsel}`);
+    log.skriv(`${liste.url}: ${side.kort.length} kort i DOM'en (mærke fra URL: ${liste.maerke || 'ukendt'})`);
+    behandlKort(side, liste);
   }
 
   if (kasseret){
@@ -181,7 +245,17 @@ async function indsamlAnnoncer(context, kilde, { limit, log, hent = hentListesid
     for (const [grund, antal] of grunde) log.skriv(`   ${antal}x ${grund}`);
   }
 
-  return { annoncer: [...fundne.values()].map(v => v.annonce), kasseret };
+  let annoncer = [...fundne.values()].map(v => v.annonce);
+  if (limit && annoncer.length > limit){
+    annoncer = annoncer.slice(0, limit);
+    komplet = false;
+  }
+  if (limit || maksSider != null){
+    komplet = false;
+    stopgrunde.push(limit ? `--limit=${limit}` : `--maks-sider=${maksSider}`);
+  }
+
+  return { annoncer, kasseret, komplet, stopgrunde, sider: sideTal, fundet_i_alt: fundne.size };
 }
 
 /* ---------- Berig med detaljesiden ----------
@@ -277,7 +351,7 @@ async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDeta
    kunne efterprøves ved at få en rigtig forhandler til at svare 403 på
    hundredvis af kald i træk — altså ved at gøre præcis det, rettelsen er
    lavet for at undgå. */
-async function koerKilde(navn, { limit = null, toerloeb = false, stille = false, hentere = {} } = {}){
+async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = false, stille = false, hentere = {} } = {}){
   const log = nyLog(!stille);
   const kilde = laesKilde(navn);
 
@@ -287,6 +361,8 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false,
     return { navn, sprunget_over: true, log: log.tekst() };
   }
   if (limit) log.skriv(`DELVIS KØRSEL: højst ${limit} annoncer. Forsvundne annoncer markeres IKKE.`);
+  if (maksSider != null) log.skriv(`DELVIS KØRSEL: højst ${maksSider} listesider pr. liste-URL. Forsvundne annoncer markeres IKKE.`);
+  if (kilde.paginering) log.skriv(`paginering: ${kilde.paginering.type}, loft ${kilde.paginering.max_sider} sider pr. liste-URL`);
   if (toerloeb) log.skriv('TØRLØB: der skrives ikke til databasen.');
 
   /* ---------- robots.txt, hentet NU og ikke attesteret (C-013) ----------
@@ -349,8 +425,8 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false,
 
   try {
     browser = await (hentere.aabnBrowser || aabnBrowser)();
-    const { annoncer, kasseret } = await indsamlAnnoncer(browser.context, kilde, {
-      limit, log, hent: hentere.hentListeside,
+    const { annoncer, kasseret, komplet, stopgrunde } = await indsamlAnnoncer(browser.context, kilde, {
+      limit, log, hent: hentere.hentListeside, robots, maksSider, aabnKnap: hentere.aabnKnapSession,
     });
     tal.fundet = annoncer.length;
     tal.fejl = kasseret;
@@ -391,7 +467,15 @@ async function koerKilde(navn, { limit = null, toerloeb = false, stille = false,
        omdøbt CSS-navn hos kilden er nok til at udløse det. Værnet henter
        selv kildens aktive rækketal — pipelinen skal ikke sende det med, for
        så kunne de to komme til at se på hver sin mængde. */
-    if (!toerloeb && !limit){
+    /* Og ikke kun en kørsel uden --limit: ALLE de ting, der kan have skjult
+       annoncer for os, gør kørslen ufuldstændig — et paginerings-loft nået
+       før sidste side, en side der fejlede eller blev spærret af robots.txt,
+       en listeside der fejlede. `komplet` kommer fra indsamlAnnoncer() og
+       er kun sand, når enden af kataloget er set. */
+    if (!toerloeb && !komplet){
+      log.skriv(`ufuldstændig kørsel — forsvundne annoncer markeres IKKE (${stopgrunde.join('; ') || 'ukendt grund'})`);
+    }
+    if (!toerloeb && komplet){
       const b = await db.markerBorte(sb, kilde_id, tal.fundet);
       tal.borte = b.antal;
       if (b.sprunget_over){

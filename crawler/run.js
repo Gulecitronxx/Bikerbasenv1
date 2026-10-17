@@ -13,7 +13,7 @@ const { koerKilder } = require('./pipeline');
 const { alleKilder } = require('./config');
 
 function laesArgumenter(argv){
-  const a = { kilder: [], limit: null, toerloeb: false };
+  const a = { kilder: [], limit: null, maksSider: null, toerloeb: false };
   for (const arg of argv){
     const m = arg.match(/^--([^=]+)(?:=(.*))?$/);
     if (!m){ throw new Error(`Ukendt argument "${arg}"`); }
@@ -30,6 +30,12 @@ function laesArgumenter(argv){
         const n = Number(vaerdi);
         if (!Number.isInteger(n) || n < 1) throw new Error('--limit kræver et helt tal over 0');
         a.limit = n;
+        break;
+      }
+      case 'maks-sider': {
+        const n = Number(vaerdi);
+        if (!Number.isInteger(n) || n < 1) throw new Error('--maks-sider kræver et helt tal over 0');
+        a.maksSider = n;
         break;
       }
       case 'toerloeb': case 'dry-run':
@@ -52,6 +58,9 @@ Bikerbasen crawler
   npm run crawl -- --alle              kør alle kilder i sources/
   npm run crawl -- ... --limit=<n>     stop efter n annoncer (delvis kørsel:
                                        forsvundne annoncer markeres ikke)
+  npm run crawl -- ... --maks-sider=<n> hent højst n listesider pr. liste-URL
+                                       (delvis kørsel; --limit beskærer først bagefter,
+                                       så pagineringen kan undersøges med få detaljekald)
   npm run crawl -- ... --toerloeb      kør uden at skrive til databasen
 
 Kræver SUPABASE_SERVICE_ROLE_KEY i miljøet (ikke ved --toerloeb).
@@ -73,7 +82,7 @@ async function main(){
   if (a.hjaelp || !a.kilder.length){ console.log(HJAELP); process.exit(a.hjaelp ? 0 : 2); }
 
   const unikke = [...new Set(a.kilder)];
-  const resultater = await koerKilder(unikke, { limit: a.limit, toerloeb: a.toerloeb });
+  const resultater = await koerKilder(unikke, { limit: a.limit, maksSider: a.maksSider, toerloeb: a.toerloeb });
 
   console.log('\n--- opsummering ---');
   for (const r of resultater){
