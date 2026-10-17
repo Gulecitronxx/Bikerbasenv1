@@ -1983,20 +1983,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* (.hero-count-hint blev flyttet til Hero-sektionen som .hero-count — den skal
    med i den kritiske CSS, og "Popular searches" er ikke med på forsiden.) */
 
-/* ============ Brand landing pages ============ */
-.brand-hero{ padding: var(--space-6) 0 var(--space-5); max-width:760px; }
-.brand-hero h1{ font-size: clamp(26px,4vw,38px); margin-bottom: var(--space-3); }
 .brand-intro{ color: var(--color-fg-muted); line-height:1.7; font-size:16px; }
 .brand-intro strong{ color: var(--color-fg); }
-.brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
-/* RUNDE 12 (R12-D-1): halens h2'er ("Prisniveau for Honda", "Ofte stillede
-   spoergsmaal") stod 19 px mod broedtekstens 16 — forholdet 1,2. En overskrift,
-   der er samme stoerrelse som teksten under den, er ikke en overskrift.
-   Referencen koerer omkring 2,8. 22 px giver 1,4 uden at raabe.
-   Tael-etiketterne ("276 annoncer") er derimod IKKE sektionsoverskrifter, men
-   etiketter paa en liste, og de bliver staaende paa 19, saa h1'en bliver ved
-   med at vaere det ene dominerende hoved i foerste skaerm. */
-.brand-sub{ font-size:22px; margin-bottom: var(--space-4); }
 #brand-antal, #facet-antal{ font-size:19px; }
 /* O3-1b: samtykke-hint i telefonfeltet. */
 .field-hint-inline{ display:block; font-size:12.5px; color: var(--color-fg-muted); font-weight:400; margin-top:2px; }
@@ -2010,21 +1998,9 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .udgivet-banner > svg{ width:20px; height:20px; color: var(--color-success, #2e7d32); flex:0 0 auto; }
 .udgivet-banner span{ flex:1 1 auto; }
 .udgivet-banner .icon-btn{ width:32px; height:32px; flex:0 0 auto; }
-/* O3-3 */
-.page-title-note{ font-size:13.5px; color: var(--color-fg-muted); margin-top:6px; }
-/* O3-8: typefliserne kostede ≈1 300 px af trin 1 paa mobil — mindre foto, samme valg. */
-@media (max-width:480px){
-  #type-radio-group .radio-card-media{ aspect-ratio:2/1; }
-}
-
 /* O1-12: feltnaer fejltekst i opret-flowet. */
 .felt-fejl{ margin:6px 0 0; font-size:12.5px; color: var(--color-danger); }
 .field.has-error .felt-fejl{ display:block; }
-
-/* O2-1: statistiklinjen paa egne annoncer. */
-.lr-statistik{ display:flex; align-items:center; gap:6px; margin:6px 0 0; font-size:13px; color: var(--color-fg); font-weight:600; }
-.lr-statistik svg{ width:15px; height:15px; color: var(--color-fg-muted); }
-.lr-statistik span{ color: var(--color-fg-muted); font-weight:400; }
 
 /* O1 (opret-annonce, runde 1) */
 .valgfri-fold{ margin-top:28px; border:1px solid var(--color-border); border-radius: var(--radius-md); padding:0 16px 4px; }
@@ -2062,8 +2038,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .brand-intro-mere{ margin-top:8px; }
 .brand-intro-mere summary{ cursor:pointer; color: var(--color-primary); font-weight:500; font-size:14px; }
 .brand-intro-mere > .brand-intro{ margin-top:8px; }
-.brand-sub:not(:first-child){ margin-top: var(--space-6); }
-.section-head .brand-sub{ margin-top:0; }
 /* Runde 10 (D9-M1-rest): facetfolden. RUNDE 11: fra <details> til ren CSS —
    se den maalte begrundelse i scripts/build-brand-pages.js (200 px spring paa
    mobil, 124 px hvis man vender den om). Checkboxen holder tilstanden, labelen
@@ -2095,11 +2069,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    scripts/build-facet-pages.js) og skal derfor ikke baere en sektions
    bundluft oveni — ellers staar der bare et tomt hul, hvor h2'en var. */
 .brand-maerkerow-sektion{ padding-bottom: var(--space-4); }
-
-/* RUNDE 12: modelchipsene flyttede op i hero-blokken (se
-   scripts/build-brand-pages.js). De skal ligge taet paa introen, ikke baere
-   en hel sektions luft — raekken er navigation, ikke en sektion for sig. */
-.brand-modelrow{ margin-top: var(--space-4); }
 
 /* Runde 8 (D8-M3): facetlinks med tal over maerkesidens gitter.
    Runde 9 (D9-M1): raekkerne kostede ≈260 px og skubbede foerste kort til
@@ -2134,19 +2103,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Runde 8 (D8-M1): knappen var 422 px bred paa en 390 px skaerm — hele siden
    kunne trækkes sidelaens. Teksten er kortet i byggetrinnet; det her er baeltet. */
 .brand-mere .btn{ white-space:normal; text-align:center; max-width:100%; line-height:1.35; }
-.brand-hero .brand-intro{ max-width:60ch; }
-
-.brand-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
-@media (min-width:640px){ .brand-grid{ grid-template-columns: repeat(3,1fr); } }
-@media (min-width:1024px){ .brand-grid{ grid-template-columns: repeat(4,1fr); } }
-.brand-card{
-  display:flex; flex-direction:column; gap:4px; padding: var(--space-4);
-  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
-  transition: transform .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
-}
-.brand-card:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
-.brand-card-name{ font-family: var(--font-display); font-weight:700; font-size:17px; }
-.brand-card-count{ font-size:13px; color: var(--color-fg-muted); }
 /* Mærkesidernes noscript-liste. (Det komplette mærke-indeks — .brand-index
    og .brand-index-link — stod her indtil e8f2e60 fjernede markuppen: de 60
    links pegede på søgninger, hvoraf 44 gav nul træf. Se D-010.) */

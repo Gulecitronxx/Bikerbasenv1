@@ -14,6 +14,54 @@
    overlay), resten af siden følger temaet.
    ========================================================================== */
 
+/* ===== Flyttet fra styles.css (w12-perf2): Brand landing pages (kun maerke-eksklusive regler) =====
+   Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
+   saa rækkefølgen mod resten af denne fils regler er uændret. */
+/* ============ Brand landing pages ============ */
+.brand-hero{ padding: var(--space-6) 0 var(--space-5); max-width:760px; }
+.brand-hero h1{ font-size: clamp(26px,4vw,38px); margin-bottom: var(--space-3); }
+.brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
+/* RUNDE 12 (R12-D-1): halens h2'er ("Prisniveau for Honda", "Ofte stillede
+   spoergsmaal") stod 19 px mod broedtekstens 16 — forholdet 1,2. En overskrift,
+   der er samme stoerrelse som teksten under den, er ikke en overskrift.
+   Referencen koerer omkring 2,8. 22 px giver 1,4 uden at raabe.
+   Tael-etiketterne ("276 annoncer") er derimod IKKE sektionsoverskrifter, men
+   etiketter paa en liste, og de bliver staaende paa 19, saa h1'en bliver ved
+   med at vaere det ene dominerende hoved i foerste skaerm. */
+.brand-sub{ font-size:22px; margin-bottom: var(--space-4); }
+/* O3-3 */
+.page-title-note{ font-size:13.5px; color: var(--color-fg-muted); margin-top:6px; }
+/* O3-8: typefliserne kostede ≈1 300 px af trin 1 paa mobil — mindre foto, samme valg. */
+@media (max-width:480px){
+  #type-radio-group .radio-card-media{ aspect-ratio:2/1; }
+}
+
+/* O2-1: statistiklinjen paa egne annoncer. */
+.lr-statistik{ display:flex; align-items:center; gap:6px; margin:6px 0 0; font-size:13px; color: var(--color-fg); font-weight:600; }
+.lr-statistik svg{ width:15px; height:15px; color: var(--color-fg-muted); }
+.lr-statistik span{ color: var(--color-fg-muted); font-weight:400; }
+
+.brand-sub:not(:first-child){ margin-top: var(--space-6); }
+.section-head .brand-sub{ margin-top:0; }
+/* RUNDE 12: modelchipsene flyttede op i hero-blokken (se
+   scripts/build-brand-pages.js). De skal ligge taet paa introen, ikke baere
+   en hel sektions luft — raekken er navigation, ikke en sektion for sig. */
+.brand-modelrow{ margin-top: var(--space-4); }
+
+.brand-hero .brand-intro{ max-width:60ch; }
+
+.brand-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
+@media (min-width:640px){ .brand-grid{ grid-template-columns: repeat(3,1fr); } }
+@media (min-width:1024px){ .brand-grid{ grid-template-columns: repeat(4,1fr); } }
+.brand-card{
+  display:flex; flex-direction:column; gap:4px; padding: var(--space-4);
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
+  transition: transform .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+.brand-card:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
+.brand-card-name{ font-family: var(--font-display); font-weight:700; font-size:17px; }
+.brand-card-count{ font-size:13px; color: var(--color-fg-muted); }
+
 /* ---------- Hero ---------- */
 .mk-hero{
   position:relative; isolation:isolate; overflow:hidden;
