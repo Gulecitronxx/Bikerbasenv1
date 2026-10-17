@@ -36,6 +36,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const { minifyJS, minifyCSS, fjernHtmlKommentarer } = require('./shared');
+const { optimerHead } = require('./udgiv-head');
 
 const ROOT = path.join(__dirname, '..');
 const UD = path.join(ROOT, '_site');
@@ -164,7 +165,7 @@ for (const navn of fs.readdirSync(ROOT)){
   if (!fs.statSync(path.join(ROOT, navn)).isFile()) continue;
   if (!RODMOENSTRE.some(re => re.test(navn))) continue;
   /* F-019: udviklernoter i HTML-kommentarer ("RUNDE 12 ...") udgives ikke. Kun _site rørs; kilden beholder dem. */
-  if (/\.html$/.test(navn)) fs.writeFileSync(path.join(UD, navn), fjernHtmlKommentarer(fs.readFileSync(path.join(ROOT, navn), 'utf8')));
+  if (/\.html$/.test(navn)) fs.writeFileSync(path.join(UD, navn), optimerHead(fjernHtmlKommentarer(fs.readFileSync(path.join(ROOT, navn), 'utf8')), { beholdFontPreload: process.env.BB_FONT_PRELOAD === '1' }));
   else fs.copyFileSync(path.join(ROOT, navn), path.join(UD, navn));
   udgivet.push(navn);
 }

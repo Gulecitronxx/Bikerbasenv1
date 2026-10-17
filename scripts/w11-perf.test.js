@@ -49,3 +49,31 @@ test('stamp-version: idempotent, og hashen skifter kun naar fonten goer', () => 
   assert.ok(efter.includes(`woff2?v=${sha8('FONT-BYTES-2')}`));
   assert.ok(!efter.includes(sha8('FONT-BYTES-1')));
 });
+
+const { fjernFontPreload, traekWhitespace, optimerHead } = require('./udgiv-head');
+
+test('udgiv-head: fjerner kun font-preloads', () => {
+  const h = '<link rel="preload" href="fonts/x.woff2?v=1" as="font" type="font/woff2" crossorigin>\n'
+    + '<link rel="preload" as="image" href="img/hero-800.webp" fetchpriority="high">\n<link rel="stylesheet" href="css/styles.css">';
+  const u = fjernFontPreload(h);
+  assert.ok(!/as="font"/.test(u));
+  assert.ok(u.includes('as="image"') && u.includes('rel="stylesheet"'));
+});
+
+test('udgiv-head: inline-scripts, style og pre er byte-identiske (CSP-hash)', () => {
+  const script = '<script id="ga4">\n  var a = 1;\n\n\n    var b = 2;\n</script>';
+  const h = `<head>\n    <meta charset="UTF-8">\n\n\n    ${script}\n    <style>\n  a{b:c}\n\n  d{e:f}\n</style>\n<pre>\n  x\n\n  y</pre>\n</head>`;
+  const u = optimerHead(h);
+  for (const blok of [script, '<style>\n  a{b:c}\n\n  d{e:f}\n</style>', '<pre>\n  x\n\n  y</pre>']) assert.ok(u.includes(blok), blok);
+  assert.ok(u.includes('<meta charset="UTF-8">\n<script id="ga4">'), u);
+  assert.ok(u.length < h.length);
+});
+
+test('udgiv-head: beholdFontPreload slaar fjernelsen fra', () => {
+  const h = '<link rel="preload" href="fonts/x.woff2" as="font" crossorigin>\n';
+  assert.strictEqual(optimerHead(h, { beholdFontPreload: true }), h);
+});
+
+test('udgiv-head: tekst med < i indholdet overlever', () => {
+  assert.strictEqual(traekWhitespace('<p>a < b\n   c</p>'), '<p>a < b\nc</p>');
+});
