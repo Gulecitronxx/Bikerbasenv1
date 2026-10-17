@@ -384,3 +384,7 @@ body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
 p.lg-or{ display:flex; align-items:center; gap: var(--space-4); margin: var(--space-4) 0 var(--space-3); color: var(--color-fg-muted); font-size:14px; }
 .lg-or::before, .lg-or::after{ content:""; flex:1; height:1px; background: var(--color-border); }
 .lg-guest{ width:100%; justify-content:center; min-height:48px; }
+
+/* Billede 6: formularens overskrift står på én linje (ca. 37 px ved 1440), så kortet bliver lavere og fordelsstrimlen kommer ind i første skærm */
+@media (min-width:960px){ .lg-head h1{ font-size: clamp(30px, 2.6vw, 38px); } }
+@media (min-width:1100px){ .lg-head h1{ white-space: nowrap; } }
