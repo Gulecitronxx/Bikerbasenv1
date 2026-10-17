@@ -496,3 +496,7 @@
 .mk-trust-ik svg{ width:26px; height:26px; }
 @media (min-width:1000px){ .mk-trust-item + .mk-trust-item{ border-left:1px solid var(--color-border); padding-left: var(--space-5); } }
 @media (max-width:480px){ .mk-trust{ padding: var(--space-4); } }
+@media (max-width:400px){
+  .mk-trust{ grid-template-columns: 1fr; }
+  .mk-trust-ik{ width:40px; height:40px; }
+}
