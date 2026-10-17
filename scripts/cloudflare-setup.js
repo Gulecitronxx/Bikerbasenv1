@@ -34,7 +34,10 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const DRY = process.argv.includes('--dry-run');
 const TOKEN = process.env.CLOUDFLARE_API_TOKEN;
-if (!TOKEN){
+/* Token-kravet gaelder kun naar filen koeres direkte. require() (scripts/w12-perf2.test.js) maa kunne
+   laese regeludtrykkene uden token og uden netvaerk. */
+const KOERES = require.main === module;
+if (KOERES && !TOKEN){
   console.error('CLOUDFLARE_API_TOKEN mangler i miljoeet. Se hovedet af denne fil for rettighederne.\n' +
     '  PowerShell:  $env:CLOUDFLARE_API_TOKEN="..."; node scripts/cloudflare-setup.js');
   process.exit(2);
@@ -133,6 +136,11 @@ async function dns(zid){
    index.html), og to kopier af samme politik ville blive uenige. Begge
    haandhaeves samtidig, saa det her er en tilfoejelse, ikke en erstatning. */
 const VERSIONERET = '(http.request.uri.query contains "v=") and (http.request.uri.path.extension in {"css" "js" "woff2"})';
+/* Billeder er ikke ?v=-stemplede (filnavnet er stabilt: img/hero-800.webp), saa de maa ikke vaere immutable;
+   en uge i browseren + stale-while-revalidate tager max-age 600 (hvert 10. minut) ud af returbesoeg.
+   Udtrykket er bevidst uden udvidelsesliste: alt under /img/ er billeder. */
+const BILLEDER = '(starts_with(http.request.uri.path, "/img/"))';
+const BILLED_CACHE = 'public, max-age=604800, stale-while-revalidate=86400';
 const HEADER_RULES = [
   {
     description: 'Bikerbasen: sikkerhedsheadere paa alle svar (scripts/cloudflare-setup.js)',
@@ -152,6 +160,12 @@ const HEADER_RULES = [
     expression: VERSIONERET,
     action: 'rewrite',
     action_parameters: { headers: { 'Cache-Control': { operation: 'set', value: 'public, max-age=31536000, immutable' } } },
+  },
+  {
+    description: 'Bikerbasen: /img/* caches en uge i browseren (uden ?v= - ikke immutable)',
+    expression: BILLEDER,
+    action: 'rewrite',
+    action_parameters: { headers: { 'Cache-Control': { operation: 'set', value: BILLED_CACHE } } },
   },
 ];
 /* ---------- 5. Edge-cache paa de samme filer (Cache Rules) ---------- */
@@ -179,7 +193,9 @@ async function ruleset(zid, phase, rules, navn){
   await aendr(`${navn}: ${rules.length} regler`, () => cf('PUT', `/zones/${zid}/rulesets/phases/${phase}/entrypoint`, { rules }));
 }
 
-(async () => {
+module.exports = { VERSIONERET, BILLEDER, BILLED_CACHE, HEADER_RULES, CACHE_RULES };
+
+if (KOERES) (async () => {
   const zid = await findZone();
   log('\nZone-indstillinger:');      await zoneSettings(zid);
   log('\nDNS:');                      await dns(zid);
