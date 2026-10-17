@@ -426,3 +426,87 @@
 .fa-tillid strong{ font-size:15px; }
 @media (min-width:960px){ .fa-tillid li + li{ border-left:1px solid var(--color-border); padding-left: var(--space-5); } }
 @media (max-width:480px){ .fa-tillid{ padding: var(--space-4); } }
+
+
+/* ============ w14 (Visual Fidelity Gauntlet): tættere på billede 7 (kørekort) og 8 (type) ============
+   Afvigelser fundet i sammenligningen: heroerne var 430-465 px høje mod billedernes 175-260 px; h1 64 px mod ca. 40 px;
+   kortenes chips ombrød til to rækker (tom luft midt i kortet); typefliserne var 4-5 høje fliser mod billedets 7 slanke;
+   modelrækken og bundens linkgrupper fyldte langt mere end billedets ene række; søgefelterne havde ingen ikoner. */
+
+/* Hero: lavere og med en overskrift i billedets størrelse. */
+.fa-hero{ padding: var(--space-3) 0 calc(var(--space-7) + var(--space-3)); }
+.fa-koerekort .fa-hero{ padding-bottom: var(--space-5); }
+.fa-hero-grid{ padding-top: var(--space-3); gap: var(--space-4); }
+.fa-hero h1{ font-size: clamp(1.875rem, 1.1rem + 2.4vw, 3rem); line-height:1.06; letter-spacing:-0.02em; margin-bottom: var(--space-2); }
+.fa-hero h1::after{ width:56px; height:4px; margin-top: var(--space-2); }
+.fa-kicker{ margin-bottom: var(--space-2); padding:4px 11px; font-size:11.5px; }
+.fa-hero-intro{ font-size: clamp(15px, 1.2vw, 17px); line-height:1.55; }
+.fa-mere-intro{ margin-top: var(--space-2); }
+@media (min-width:960px){ .fa-hero-tekst{ max-width: 780px; } .fa-koerekort .fa-hero-tekst{ max-width: 880px; } }
+@media (min-width:1100px){
+  .fa-type .fa-hero-grid, .fa-model .fa-hero-grid{ grid-template-columns: minmax(0,1fr) 300px 300px; padding-top: var(--space-2); }
+  .fa-type .fa-hero-tekst, .fa-model .fa-hero-tekst{ max-width: 660px; }
+  .fa-type .fa-hero, .fa-model .fa-hero{ padding-bottom: calc(var(--space-7) + var(--space-2)); }
+}
+.fa-soeg-vrap{ margin-top: calc(-1 * var(--space-7)); }
+.fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-4); }
+@media (max-width:640px){ .fa-soeg-vrap{ margin-top: calc(-1 * var(--space-7)); } .fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-4); } }
+
+/* Søgekort: ikoner i felterne (som billedernes søg-, type-, pris- og årgangsfelter), fede etiketter. */
+.fa-soeg{ padding: var(--space-4) var(--space-5) var(--space-3); border-radius: var(--radius-lg); }
+.fa-felt > label{ font-size:13px; font-weight:700; }
+.fa-ikon-felt .input{ padding-left:42px; }
+.fa-ikon-felt svg{ left:13px; width:19px; height:19px; }
+
+/* Annoncekort: kørekort-, ccm- og hk-chip på ÉN række (billedets chiprække); kun den lange "ikke afgjort"/markør-chip må ombryde. */
+.fa-side .rk-chips:not(:has(.rk-chip-note)):not(:has(.kk-ukendt)){ flex-wrap:nowrap; gap:4px; }
+@container (max-width: 262px){
+  .rk-chips .rk-kk svg{ display:none; }
+  .rk-chips .rk-chip{ font-size:11px; padding:6px 6px; }
+}
+
+/* Typefliser: slanke fotofliser som forsidens og billedets (7 på en række), aldrig høje kort. */
+.fa-typer{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
+@media (min-width:1100px){ .fa-typer, .fa-typer:has(> li:nth-child(5)){ grid-template-columns: repeat(7, minmax(0,1fr)); } }
+.fa-typer a{ aspect-ratio: 2.1 / 1; }
+.fa-type-tekst{ left:10px; bottom:8px; right:36px; }
+.fa-type-tekst strong{ font-size:14.5px; }
+.fa-typer .fa-pil{ bottom:8px; }
+
+/* Populære modeller: kompakte fliser i op til 6 spalter. */
+.fa-modeller{ grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3); }
+.fa-modeller img, .fa-model-ikon{ width:72px; height:54px; border-radius:7px; }
+.fa-modeller a{ min-height:68px; padding: var(--space-2) var(--space-3); }
+.fa-model-tekst strong{ font-size:14px; line-height:1.25; }
+
+/* Rytmen mellem sektionerne: som billedernes (ca. 24 px). */
+.fa-side .section, .fa-sektion{ padding-top: var(--space-5); }
+.fa-kf{ margin: var(--space-5) 0 0; padding: var(--space-4) var(--space-5); }
+.fa-kf h2{ font-size:18px; margin-bottom: var(--space-2); }
+.fa-kf-liste li{ font-size:14.5px; line-height:1.45; }
+.fa-tillid{ margin-top: var(--space-4); padding: var(--space-3) var(--space-5); }
+
+/* Guides: miniature til venstre og tekst til højre (billedets guiderække), ikke 190 px høje fotokort. */
+@media (min-width:560px){
+  .fa-guides a{ flex-direction:row; align-items:stretch; }
+  .fa-guides img{ width:132px; height:auto; min-height:96px; flex:none; }
+  .fa-guide-tekst{ display:flex; flex-direction:column; justify-content:center; padding: var(--space-3) var(--space-4); }
+}
+
+/* Bundens linkgrupper i ét gitter (billede 8: "Relaterede søgninger" og "Se ... i din region" side om side). */
+.fa-links3 .fa-rel-grid{ grid-template-columns: minmax(0,1fr); gap: var(--space-5) var(--space-6); }
+@media (min-width:900px){ .fa-links3 .fa-rel-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); align-items:start; } }
+.fa-links3:not(:has(.fa-rel)){ display:none; }
+.fa-links3 .fa-h3{ font-size:16px; margin-bottom: var(--space-2); }
+
+/* Typefliser: fylder rækken (som billedernes 7 på en række), fast højde. 8 typer: to rækker à fire. */
+@media (min-width:1100px){
+  .fa-typer, .fa-typer:has(> li:nth-child(5)){ grid-template-columns: repeat(auto-fit, minmax(max(150px, calc((100% - 72px) / 7)), 1fr)); }
+  .fa-typer:has(> li:nth-child(8)){ grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .fa-typer a{ aspect-ratio:auto; height:96px; }
+}
+/* Smal skærm: ikonet i vælgerne udgår (typenavnet skal kunne stå fuldt); søgefeltets ikon bliver. */
+@media (max-width:640px){
+  .fa-felt:not(.fa-felt-q) .fa-ikon-felt svg{ display:none; }
+  .fa-felt:not(.fa-felt-q) .fa-ikon-felt .input{ padding-left:14px; }
+}

@@ -1329,12 +1329,15 @@ ${header}
   <div class="container mk-soeg-wrap">
     ${heroSoegHTML(brand, slug, items, fakta)}
     ${tillidsraekkeHTML()}
-    ${kortFortaltHTML(brand, items, fakta, stats)}
   </div>
 
   ${fremhaevetHTML(brand, items, fremhaevede, fremKort)}
 
   ${typeFlisersHTML(brand, fakta)}
+
+  <div class="container mk-kf-vrap">
+    ${kortFortaltHTML(brand, items, fakta, stats)}
+  </div>
 
   ${saadanHTML()}
 
