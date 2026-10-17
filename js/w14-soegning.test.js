@@ -91,6 +91,20 @@ test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet,
     assert.ok(m.knapI, 'Gem søgning i resultathovedet');
     assert.ok(m.cardBund <= 330, 'søgekortets underkant ' + m.cardBund);
     assert.ok(m.toolbarTop <= 360, 'resultathovedet starter højt: ' + m.toolbarTop);
+    const n = await s.page.evaluate(() => {
+      const R = e => document.querySelector(e).getBoundingClientRect();
+      const bk = R('.so-hero .so-breadcrumb');
+      return { heroH: R('.so-hero').height, band: R('#so-infoband').height, bkSynlig: bk.width > 2 && bk.height > 2,
+        sorteringsnote: getComputedStyle(document.getElementById('sortering-note')).display,
+        kortH: R('#results-grid .card').height, kortBredde: R('#results-grid .card').width,
+        kortIHero: R('.so-card').bottom <= R('.so-hero').bottom + 1 };
+    });
+    assert.ok(n.heroH <= 225, 'hero ' + n.heroH);
+    assert.ok(n.kortIHero, 'søgekortet ligger i bannerfotoet');
+    assert.ok(n.band <= 44, 'info-bånd er én linje: ' + n.band);
+    assert.ok(!n.bkSynlig, 'brødkrumme er kun for skærmlæsere i hero');
+    assert.equal(n.sorteringsnote, 'none', 'sorteringsreglen bor i (i) ved Sortér');
+    assert.ok(n.kortH <= 290, 'kort højde ' + n.kortH);
     const [sw, cw] = await s.page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     assert.equal(sw, cw);
     assert.deepEqual(s.fejl, []);

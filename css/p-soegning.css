@@ -566,3 +566,58 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
   .so-h1-title{ font-size: clamp(30px, 2.8vw, 40px); }
   .so-hero .so-h1{ margin-bottom: var(--space-3); }
 }
+
+/* ---- W14 iteration 2 ---- */
+@media (min-width:1100px){
+  /* Som mockuppen: søgekortet ligger INDE i bannerfotoet, kompakt, uden brødkrumme (den står stadig for skærmlæsere). */
+  :root{ --so-overlap: 0px; }
+  .so-hero{ padding: 18px 0 18px; }
+  .so-hero .so-breadcrumb{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; padding:0; margin:0; }
+  .so-h1-title{ font-size: clamp(30px, 2.6vw, 38px); }
+  .so-h1-sub{ margin-top:2px; font-size: clamp(15px, 1.2vw, 18px); }
+  .so-hero .so-h1{ margin-bottom: 12px; }
+  .so-hero .so-card{ padding:12px 16px; gap:8px 14px; }
+  .so-card .input, .so-card #filter-q{ height:44px; min-height:44px; }
+  .so-submit{ min-height:46px; }
+  .so-f-kk .kk-seg label{ min-height:36px; }
+}
+@media (min-width:1100px){
+  /* Info-bånd: én rolig linje; sorteringsreglen står i (i) ved Sortér. */
+  .so-infoband{ flex-wrap:nowrap; align-items:center; border:0; background:transparent; padding:0 2px; margin:0 0 var(--space-3); min-height:40px; font-size:12.5px; }
+  .so-infoband > *{ font-size:12.5px; white-space:nowrap; }
+  .so-infoband .results-mix{ white-space:nowrap !important; flex-wrap:nowrap !important; flex:0 1 auto; min-width:0; overflow:hidden !important; }
+  .so-infoband > :not([hidden]) ~ :not([hidden]){ border-left:0; margin-left:0 !important; padding-left:0; }
+  .so-infoband .so-frisk{ flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .so-infoband .so-frisk:not(:empty)::before{ content:"·"; margin:0 8px; }
+  .so-infoband .sortering-note{ display:none; }
+  .so-infoband .results-mix .mix-tekst{ white-space:nowrap; }
+}
+@media (min-width:760px){
+  #results-grid:not(.list-view) .rk-body{ padding:10px 12px 8px; gap:6px; }
+  #results-grid:not(.list-view) .rk-chips{ flex-wrap:wrap; gap:4px; }
+  #results-grid:not(.list-view) .rk-chip{ flex:1 1 auto; justify-content:center; padding:5px 6px; font-size:11.5px; }
+  #results-grid:not(.list-view) .rk-chip.rk-chip-note{ flex:1 1 100%; }
+  #results-grid:not(.list-view) .rk-fod{ border-top:0; padding-top:2px; }
+  #results-grid:not(.list-view) .rk-linje{ font-size:12px; }
+}
+@media (min-width:1100px){ .so-infoband .mix-info{ margin-block:0; } .so-infoband .results-mix .mix-tail{ flex-wrap:nowrap; } }
+
+/* ---- W14 iteration 2: mobilkomposition ---- */
+@media (max-width:559px){
+  .so-chiprow{ padding-top:6px; padding-bottom:0; }
+  .so-layout{ padding-top:0; }
+  .so-toolbar{ margin-bottom:6px; }
+  .so-infoband{ min-height:44px; }
+  .so-infoband .so-frisk{ display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:1; line-clamp:1; overflow:hidden; }
+  .so-infoband > :not([hidden]) ~ :not([hidden]){ flex:1 1 100%; }
+  .so-infoband .sortering-note{ display:none; }
+}
+@media (max-width:559px){ .so-h1-title{ font-size:25px; } .so-hero .so-h1{ margin-bottom:8px; } .so-h1-sub{ font-size:15px; } }
+@media (min-width:760px){
+  /* Kildenavnet afkortes ikke længere midt i ordet: op til 2 linjer (rækkens kort er ens høje, foden ligger i bunden). */
+  #results-grid:not(.list-view) .rk-fod{ align-items:flex-start; }
+  #results-grid:not(.list-view) .rk-sted{ flex:none; max-width:46%; padding-top:0; }
+  #results-grid:not(.list-view) .rk-kilde{ align-items:flex-start; line-height:1.3; }
+  #results-grid:not(.list-view) .rk-kilde svg, #results-grid:not(.list-view) .rk-sted svg{ margin-top:.2em; }
+  #results-grid:not(.list-view) .rk-kilde > span{ display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; white-space:normal; overflow:hidden; overflow-wrap:anywhere; }
+}
