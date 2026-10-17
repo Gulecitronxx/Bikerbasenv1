@@ -19,10 +19,13 @@ test('brødkrumme "Motorcykler" genbruger bb_srp_position og kræver samme annon
   assert.match(annonce, /soegHref = 'soegning\.html'/);
 });
 
-test('annoncesiden balancerer kolonner og strækker sidste kort', () => {
+/* W14 (bevidst ændring): strækningen af sidste kort (an-strak) gav kort med 200 px tomt rum og er fjernet. I stedet har kolonnerne en fast
+   komposition (kørekort i midten; "Handl trygt" + "Det bør du tjekke" i sidekolonnen) og ender naturligt. Browsermålingen står i w14-annonce.test.js. */
+test('annoncesiden balancerer kolonner uden at strække kort', () => {
   assert.match(annonce, /function anBalancerKolonner/);
-  assert.match(annonce, /classList\.add\('an-strak'\)/);
-  assert.equal((annonce.match(/anBalancerKolonner\(\);/g) || []).length, 2, 'kaldt i begge renderere');
+  assert.ok(!annonce.includes("classList.add('an-strak')"));
+  assert.ok(annonce.includes('kol[1].appendChild(kk)'));
+  assert.equal(annonce.split('anBalancerKolonner();').length - 1, 2, 'kaldt i begge renderere');
 });
 
 test('lagerUaktuelt: ingen levende annoncer + fejlet/tomt svar = uaktuelt', () => {

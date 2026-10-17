@@ -48,7 +48,7 @@ test('galleri: hovedbilledet fylder hele billedboksen (ingen grå stribe under f
   } finally { await s.ctx.close(); }
 });
 
-test('desktop: tre kolonner flugter i bunden, og kørekortkortet står i midten med badgen til højre', { timeout: 60000 }, async t => {
+test('desktop: ingen strækning — intet kort har tomt rum, kørekortkortet står i midten, lavt, med badgen til højre', { timeout: 90000 }, async t => {
   if (!kan.ok) return t.skip(kan.grund);
   for (const [fotos, label] of [[5, 'egen 5 fotos'], [0, 'egen uden foto']]){
     const s = await aabn({ width: 1440, height: 900 }, 'light', { fotos });
@@ -56,14 +56,19 @@ test('desktop: tre kolonner flugter i bunden, og kørekortkortet står i midten 
       await gaa(s, `annonce.html?id=${ID}`);
       const m = await s.page.evaluate(() => {
         const r = e => e.getBoundingClientRect();
-        const kol = ['.an-col-a', '.an-col-b', '.an-side'].map(q => r(document.querySelector(q)));
-        const badge = document.querySelector('.an-kk-badge'), tekst = document.querySelector('.an-kk-tekst');
-        return { bund: kol.map(k => Math.round(k.bottom)), iB: !!document.querySelector('.an-col-b .an-kk'),
+        const tomt = [...document.querySelectorAll('.an-kk, .an-tjek, .an-trygt-wrap .an-card, .an-fakta, .an-seller-wrap .sidebar-card')].map(k => {
+          const kids = [...k.children].filter(c => c.getBoundingClientRect().height > 0 && getComputedStyle(c).position !== 'absolute');
+          const sidste = Math.max(...kids.map(c => r(c).bottom));
+          return [k.className.split(' ')[0], Math.round(r(k).bottom - sidste)];
+        });
+        const kk = document.querySelector('.an-kk'), badge = document.querySelector('.an-kk-badge'), tekst = document.querySelector('.an-kk-tekst');
+        return { tomt, iB: !!document.querySelector('.an-col-b .an-kk'), kkH: Math.round(r(kk).height),
           badgeHoejre: r(badge).left >= r(tekst).right - 1, badgeLinje: r(badge).top < r(tekst).bottom };
       });
       assert.ok(m.iB, `${label}: kørekortkort i midterkolonnen`);
       assert.ok(m.badgeHoejre && m.badgeLinje, `${label}: badge til højre for teksten`);
-      assert.ok(Math.max(...m.bund) - Math.min(...m.bund) <= 2, `${label}: bundkanter ${m.bund}`);
+      assert.ok(m.kkH <= 240, `${label}: kørekortkort ${m.kkH} px`);
+      m.tomt.forEach(([navn, h]) => assert.ok(h <= 40, `${label}: ${navn} har ${h} px tomt rum i bunden`));
     } finally { await s.ctx.close(); }
   }
 });
@@ -73,8 +78,9 @@ test('kørekortkort: grundlag og legende bruger kun oplyste tal og offentlige gr
   const s = await aabn({ width: 1440, height: 900 }, 'light');
   try {
     await gaa(s, `annonce.html?id=${ID}`);
-    const tekst = await s.page.locator('.an-kk').innerText();
+    const tekst = await s.page.locator('.an-kk').textContent();
     assert.match(tekst, /Oplyst effekt\s*73 hk/);
+    assert.ok(await s.page.locator('.an-kk-mere:not([open])').count(), 'grundlag og legende er sammenfoldet som standard');
     assert.match(tekst, /Grænse for A2\s*højst 35 kW/);
     assert.doesNotMatch(tekst, /verificeret|garanteret/i);
     assert.match(tekst, /aldrig bekræftet/);
