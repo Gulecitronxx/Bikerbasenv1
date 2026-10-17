@@ -69,3 +69,50 @@ Branch `gauntlet/w14-forside` (fra fefe1570). Reference: `Forside.png` (1672x941
 `reference.webp` (mockup), `foer-1440.webp`, `foer-390.webp`, `efter-1440.webp`, `efter-390.webp`, `efter-1440-moerk.webp`, `efter-390-moerk.webp`,
 `sammenligning-1-hero-soegning.webp` (mockup | efter, øverst), `sammenligning-2-midtsektion-saadan.webp` (mockup | efter, kort/typer/Sådan virker/kolonner).
 Billederne er WebP (ikke PNG) for at holde samlet størrelse nede.
+
+---
+
+# Iteration 2 (efter blind Critic: AFVIS mildt, forside 7/10, hero 6,5, Sådan virker 7,5, mellemsektion 6,5)
+
+Kilde: `docs/review/gauntlet/visual/critic-agent1.md` (12 rettelser). Ny loop: render, side om side mod Forside.png, liste, implementér, render.
+Nye billeder (alle i `agent1-forside/`, WebP, samlet ca. 2,3 MB): `sammenligning-1-hero-soegning` (mockup | efter, øverst), `sammenligning-2-kort-og-typer`,
+`sammenligning-3-saadan-virker-og-kolonner`, `sammenligning-4-moerk-top`, `efter-1440`, `efter-1440-moerk`, `efter-390`, `efter-390-moerk`, `efter-1440-503`.
+Mørk tema er målt med `data-theme=dark` sat via initScript (bb_theme), og de mørke billeder er faktisk mørke.
+
+## Acceptkriterier for iteration 2 (målbare; testet i `js/w14-forside.test.js`)
+
+| # | Kriterium | Test |
+|---|---|---|
+| B1 | Hero-foto viser horisont + motorcyklens forlygte/tank: synligt fotoudsnit starter højst 28 % nede og når mindst 60 % | `hero-fotoet viser horisont ...` |
+| B2 | Typefliser viser hele motorcyklen (28-85 % af fotoets højde synlig), flise højst 110 px, scrim toner ud til gennemsigtig | `typefliserne viser hele motorcyklen` |
+| B3 | Kort: modelnavn og pris klippes ikke (pris under titel); ⇄ skjult i hvile på hover-enheder, højst ét ikon pr. foto i hvile | `kortets titel og pris klippes ikke` |
+| B4 | 503: ingen annoncetal synlige på fliser/mærker/kolonner, banneret ligger under heroen, sælg-panelet fylder rækken | `under fejlet lager (503) ...` |
+| B5 | Mobil 390: søgekort højst 350 px (før 490), søgeknap synlig inden 700 px | `W14 mobil 390` |
+| B6 | Tema-skift, mobilmenu (åbn/Escape) og cookie-dialog (vis/afvis) virker | `W14 funktion` |
+| B7 | Regionsflise højst ca. 62 px, tre kolonner på samme linje og højst 240 px | `W14 desktop 1440` |
+
+## Hvad er gjort (CSS i `css/p-forside.css`; én lille tilføjelse i `js/home.js`)
+
+1. **Hero-foto**: `object-position` 50 % 50 % og hero 330 px (desktop): horisont, klitter, hel overkrop af motorcyklen med forlygte, styr, tank og forhjul er synlige; søgekortet dækker kun nederste del af forhjulet (som i mockuppen, hvor kortet dækker rytterens underkrop). Scrimmen er kun bag tekstblokken (74 % til 0 % over de første 56 % af bredden); nederste gradient halveret.
+2. **Typefliser**: 104 px høje, `object-position` 50 % 68 %, så hele motorcyklen står i billedet; scrim kun nederst (0,84 til gennemsigtig ved 70 %). Over et helt hvidt foto er det yderste af navnelinjen ca. 4:1; over de faktiske beige studiofotos mindst 5:1 (se "Tilbageværende").
+3. **Kort (kun `body.home .kort-raekke`)**: pris står under titlen, titlen er højst to linjer uden klip; ⇄ vises kun ved hover/fokus på hover-enheder (touch: synlig, som før); aktiv sammenligning forbliver synlig. Eksterne annoncer har ikke favorit-hjerte i hvile — det er en eksisterende produktregel (`fav = !f.ext && !isOwnListing`), uændret.
+4. **Fejl/tomt lager**: tal på fliser, mærker, kørekort- og regionsceller og noter skjules via `html[data-lager-fejl]` (kilden til tallene er lageret selv — `js/home.js` fyldte dem fra `Store.getAllListings()`, som under delvis fejl indeholder en del af lageret; tallene vises nu ikke, mens fejlbanneret står). Banneret ligger nederst til højre på forsiden (ikke over heroens foto); funktion og tekst er uændret. En reserveret, tom kortplads får en ærlig tekst; er der slet ingen kandidater, fylder sælg-panelet hele rækken.
+5. **Tre kolonner**: paneler højst ca. 190-240 px, regionsfliser 62 px (før 110), mærkefliser 78 px med logo + navn + antal tæt; panelerne er ikke længere strakt til lige højde (ingen hule felter).
+6. **Sådan virker**: ikon 36 px, nummer 28 px med let skygge, pile i accentfarve, trintitel 14 px fed, tekst 12,5 px; stribe ca. 135 px. Overskriften står stadig over trinene (ikke i trin 1's celle).
+7. **Mobil**: søgekort 2 kolonner (type|pris), kørekort-segment, én knap: ca. 340 px (før 490); tillidsrække 2 kolonner; lavere sælg-foto; side 5800 px (før 6146).
+8. **Sælg-panel**: farvefoto i egen boks (ingen grå overlay), tekst over, knap under.
+9. **Header**: uændret 54/60 px (koordinator: ret ikke yderligere).
+10. **Kørekort "A"**: `A` peger bevidst på `soegning.html?koerekort=A`: tallet på fliserne er "ikke udelukket for A" (alle), mens `koerekort-a.html` kun viser annoncer med OPLYST effekt over A2-grænsen (to forskellige tal bag samme flise; det står i `js/home.js`). A1 og A2 peger på deres sider, og tallene stemmer med siderne. Ændres ikke uden en produktbeslutning.
+11. Fodnoten under kortene er uændret (den er den ærlige forklaring på udvalget); den fylder to linjer.
+
+## Tilbageværende afvigelser efter iteration 2 (ærligt)
+
+- **Rytterfoto mangler**: heroen og sælg-panelet viser studio-/kystfoto af en motorcykel uden rytter. Mockuppens "imponerende" udtryk bæres af rytter + bro + solnedgang; det kræver et nyt foto (asset), som ikke findes.
+- Typeflisernes navnelinje står på en mørk scrim nederst over hjulene; mockuppens fliser er brede landskabsbilleder med navnet i hjørnet. Vores studiofotos er næsten kvadratiske, så motorcyklens underkant ligger i scrimmen.
+- Mobil: siden er 5800 px (mål var under 5000). Resten er footeren (ca. 1270 px), SEO-linkbåndet over footeren (ca. 800 px) og tre-kolonne-sektionen; de er ikke skåret væk (SEO-linkgraf, juridisk og ærlig tekst).
+- Sådan virker: overskriften står over trin 1; "Bliv en del af fællesskabet" findes ikke (ingen fællesskabsfunktion).
+- Kortene har ingen vægtchip og ikke mockuppens "Kilde: Forhandler" i identisk form.
+- Hero er 330 px mod mockuppens ca. 245 px ved samme bredde, fordi motorcyklen skal kunne ses; header 54 px mod mockuppens ca. 35 px.
+- Tre kolonner har ujævn underkant (højeste panel = kørekort).
+
+## Ærlig vurdering "ligner mockuppen": 7,5/10 (komposition 8,5, fotografisk udtryk 5,5 pga. manglende rytterfoto, detaljegrad 7,5).
