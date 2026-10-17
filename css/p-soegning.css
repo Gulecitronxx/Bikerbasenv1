@@ -249,6 +249,13 @@
 .so-quick .chip:hover{ border-color: var(--color-fg-muted); }
 .so-quick .chip.active{ background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
 .so-quick .facet-n{ display:none; }
+/* W12: under lagerfejl (html[data-lager-fejl], sat af js/backend-bridge.js) er sidebarens tal ukendte: cifrene beholder bredden (transparente),
+   et '?' lægges ovenpå — layout og CLS uændret. Samme mønster som W11-fejl2 på facetsiderne. */
+html[data-lager-fejl] .facet-n{ position:relative; color:transparent; }
+html[data-lager-fejl] .facet-n::after{ content:"?"; content:"?" / "ukendt antal"; position:absolute; left:0; right:0; top:0; text-align:right; color: var(--color-fg-muted); font-weight:500; }
+html[data-lager-fejl] .chip.active .facet-n{ color:transparent; }
+html[data-lager-fejl] .chip.active .facet-n::after{ color: var(--color-fg); }
+html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 .so-quick .chip::before, .so-quick .chip[role="radio"]::before{ display:none; content:none; }
 .so-layout .range-row .input{ height:40px; min-height:40px; padding:0 10px; }
 
