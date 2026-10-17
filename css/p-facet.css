@@ -596,3 +596,15 @@
 .fa-koerekort .fa-soeg{ padding-top: var(--space-2); }
 .fa-koerekort .fa-soeg-titel{ font-size:15px; margin-bottom: 4px; }
 .fa-koerekort .fa-hero{ padding-bottom: var(--space-2); }
+@media (min-width:1100px){ .fa-soeg-knap{ flex:0 0 290px; } }   /* fast bredde: skrifttypeskift flytter ikke felterne (CLS) */
+
+/* Tap-mål >= 40 px (målt programmatisk): små links, chips, folder og kørekortvælger. */
+.fa-mere, .mk-link, .section-link{ min-height:40px; align-items:center; }
+.fa-mere{ position:relative; }
+.fa-chips .popular-chip{ min-height:40px; }
+.fa-mere-under summary, .fa-mere-intro summary, .mk-intro-mere summary{ min-height:40px; display:flex; align-items:center; }
+.mk-saadan .guide-boks a{ min-height:40px; }
+.mk-search .kk-seg label{ min-height:40px; }
+
+/* w14: under lagerfejl (html[data-lager-fejl]) er de byggede tal ikke pålidelige: panelets pris- og typelinjer (bagt ved byg) skjules; antallet dæmpes af styles.css. */
+html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-panel li:not(:first-child){ display:none; }

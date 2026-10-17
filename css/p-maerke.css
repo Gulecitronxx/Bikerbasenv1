@@ -704,3 +704,14 @@
 .mk-mini-nul strong{ font-family: var(--font-display); font-size:22px; line-height:1.2; }
 .mk-mini-nul span{ font-size:12.5px; }
 .mk-az-logo .bl--mono{ display:none; }   /* A–Z: ingen placeholder-initialer; kun godkendte logoer står i den faste kolonne */
+
+/* Tap-mål >= 40 px (målt programmatisk): små links, chips, folder og kørekortvælger. */
+.fa-mere, .mk-link, .section-link{ min-height:40px; align-items:center; }
+.fa-mere{ position:relative; }
+.fa-chips .popular-chip{ min-height:40px; }
+.fa-mere-under summary, .fa-mere-intro summary, .mk-intro-mere summary{ min-height:40px; display:flex; align-items:center; }
+.mk-saadan .guide-boks a{ min-height:40px; }
+.mk-search .kk-seg label{ min-height:40px; }
+
+/* w14: under lagerfejl (html[data-lager-fejl]) er de byggede tal ikke pålidelige: panelets pris- og typelinjer (bagt ved byg) skjules; antallet dæmpes af styles.css. */
+html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-panel li:not(:first-child){ display:none; }
