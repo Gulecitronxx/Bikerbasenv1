@@ -1,0 +1,75 @@
+/* Mærkelogoer (js/brand-logos.js). Linkes kun på de sider, der bruger dem — IKKE i styles.css.
+
+   Princip: logo, ordmærke og monogram ligger i den samme faste slot (højde/bredde pr. størrelse), så en side aldrig
+   hopper, når et logo kommer til, og så et bredt ordmærke og et rundt emblem fylder lige meget. Et ensfarvet logo er en
+   CSS-mask i currentColor: lys/mørk følger tokens uden filskift. Ingen hårdkodede farver; brandfarven bruges kun i
+   monogrammet (som i dag), grøn aldrig.
+
+   Størrelser (SKAL være lig SLOT i js/brand-logos.js — testet):  sm 18x28 · md 30x60 · lg 40x120 · hero 54x235 (40x170 på mobil). */
+
+.bl{
+  --bl-maxh:30px; --bl-maxw:60px; --bl-ar:1;
+  position:relative; display:inline-flex; align-items:center; justify-content:center; flex:none;
+  box-sizing:border-box; vertical-align:middle; line-height:1;
+  color: var(--bl-fg, var(--color-fg));
+}
+.bl--sm{ --bl-maxh:18px; --bl-maxw:28px; }
+.bl--md{ --bl-maxh:30px; --bl-maxw:60px; }
+.bl--lg{ --bl-maxh:40px; --bl-maxw:120px; }
+.bl--hero{ --bl-maxh:40px; --bl-maxw:170px; }
+@media (min-width:700px){ .bl--hero{ --bl-maxh:54px; --bl-maxw:235px; } }
+
+/* Logo: slottens mål følger logoets forhold, men aldrig ud over maks. højde/bredde (ensartet visuel vægt). */
+.bl--logo{
+  width: min(var(--bl-maxw), calc(var(--bl-maxh) * var(--bl-ar)));
+  max-width:100%;   /* i en smal flise: bredden giver efter, forholdet bevares (aspect-ratio) */
+  aspect-ratio: var(--bl-ar);
+}
+.bl-mark{
+  position:absolute; inset:0; background: currentColor;
+  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+  -webkit-mask-position:center; mask-position:center;
+  -webkit-mask-size:contain; mask-size:contain;
+}
+.bl-probe{ display:none; }
+.bl-img{ display:block; width:100%; height:100%; object-fit:contain; }
+@media (forced-colors:active){ .bl-mark{ background: CanvasText; } }
+
+/* Fallback ligger altid i markup og vises, når der ikke er logo — eller når logoet ikke kan hentes (.bl--fejl). */
+.bl-fb{ display:none; }
+.bl--mono > .bl-fb, .bl--ord > .bl-fb, .bl--fejl > .bl-fb{ display:inline-flex; }
+.bl--fejl > .bl-mark, .bl--fejl > .bl-img{ display:none; }
+
+/* Monogram-cirkel (som .maerke-mono / .mk-mono i dag). */
+.bl-mono{
+  --bl-mn:1;
+  align-items:center; justify-content:center; flex:none;
+  width: var(--bl-maxh); height: var(--bl-maxh); border-radius:50%;
+  background: var(--bl-mono-bg, var(--color-primary-tint)); color: var(--bl-mono-fg, var(--color-primary-hover));
+  font-family: var(--font-display); font-weight:700; letter-spacing:0;
+  font-size: calc(var(--bl-maxh) * (.5 - (var(--bl-mn) - 1) * .1));
+}
+
+/* Ordmærke i tekst: versaler, fast højde. Skriftstørrelsen er den mindste af tre grænser: slottens højde, antal linjer og
+   længste linjes bredde — så "BSA" og "LAUGE JENSEN" fylder slottet ens uden at flyde over. Farven er --color-fg-muted
+   (≥ 4,5:1 mod både flade og side, målt i w13-logo-layout.test.js). */
+.bl--ord{ height: var(--bl-maxh); max-width: var(--bl-maxw); }
+.bl-wordmark{
+  --bl-n:6; --bl-nl:1;
+  flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  max-width: 100%; box-sizing:border-box;
+  font-family: var(--font-display); font-weight:700; text-transform:uppercase; letter-spacing:.03em; line-height:1.05;
+  color: var(--bl-text, var(--color-fg-muted));
+  font-size: min(calc(var(--bl-maxh) * .5), calc(var(--bl-maxh) * .86 / var(--bl-nl)), calc(var(--bl-maxw) / (var(--bl-n) * .68)));
+  white-space:nowrap;
+}
+.bl-l{ display:block; }
+.bl--logo > .bl-wordmark{ position:absolute; inset:0; }
+
+/* Logoet i en link: følger linkens farve ved hover/fokus uden at flytte noget. */
+a:hover > .bl, a:focus-visible > .bl{ color: var(--bl-fg-hover, var(--bl-fg, var(--color-fg))); }
+
+/* Fast kolonne foran et navn (filterrække, A–Z): alle rækker får samme venstrekant, med eller uden logo. */
+.bl-spalte{ display:inline-flex; align-items:center; justify-content:center; flex:none; }
+.bl-spalte--sm{ width:28px; }
+.bl-spalte--md{ width:60px; }
