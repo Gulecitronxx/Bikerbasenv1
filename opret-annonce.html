@@ -386,17 +386,31 @@ try{
         <!-- role/tabindex/aria: zonen var en div med kun en click-lytter, og
              filfeltet er `hidden`, så tastatur og skærmlæser ikke kunne uploade
              overhovedet. js/opret-annonce.js svarer på Enter og mellemrum. -->
-        <div class="op-photos" id="op-photos">
-        <div class="upload-zone" id="upload-zone" role="button" tabindex="0" aria-labelledby="upload-titel" aria-describedby="upload-tekst">
-          <!-- accept: .heic/.heif står eksplicit ved siden af image/*, fordi
-               Windows og Android ofte ikke kender MIME-typen for et
-               iPhone-foto. Med image/* alene var filen grå i filvælgeren. -->
-          <input type="file" id="photo-input" accept="image/*,.heic,.heif" multiple hidden>
-          <div id="upload-icon-mount"></div>
-          <h3 id="upload-titel">Upload billeder</h3>
-          <p id="upload-tekst">Træk og slip billeder her, eller klik for at vælge. Op til 12 billeder — JPG, PNG eller HEIC, maks. 12 MB pr. billede.</p>
-        </div>
-        <div class="photo-grid" id="photo-grid"></div>
+        <div class="op-split op-split-photos">
+          <div class="op-photos" id="op-photos">
+          <div class="upload-zone" id="upload-zone" role="button" tabindex="0" aria-labelledby="upload-titel" aria-describedby="upload-tekst">
+            <!-- accept: .heic/.heif står eksplicit ved siden af image/*, fordi
+                 Windows og Android ofte ikke kender MIME-typen for et
+                 iPhone-foto. Med image/* alene var filen grå i filvælgeren. -->
+            <input type="file" id="photo-input" accept="image/*,.heic,.heif" multiple hidden>
+            <div id="upload-icon-mount"></div>
+            <h3 id="upload-titel">Upload billeder</h3>
+            <p id="upload-tekst">Træk og slip billeder her, eller klik for at vælge. Op til 12 billeder — JPG, PNG eller HEIC, maks. 12 MB pr. billede.</p>
+          </div>
+          <div class="photo-grid" id="photo-grid"></div>
+          </div>
+          <aside class="op-tips" aria-labelledby="tips-fotos-h">
+            <span class="op-tips-ico"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg></span>
+            <div>
+              <h3 id="tips-fotos-h">Gode billeder skaber tillid</h3>
+              <ul>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Tag hele motorcyklen fra siden og skråt forfra</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Vis km-tæller, udstyr og eventuelle skader</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Brug dagslys og en rolig baggrund</li>
+                <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19.5 7"/></svg>Billederne skal vise netop den motorcykel, du sælger</li>
+              </ul>
+            </div>
+          </aside>
         </div>
         <!-- Teksten skal være ORDRET den samme som renderPhotoGrid() skriver,
              ellers skifter linjen under sælgerens øjne, når JS'en lander. -->

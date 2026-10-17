@@ -472,3 +472,12 @@
   .op-stepper-card{ min-height:78px; }
   .op-side .op-live-card{ min-height:186px; }
 }
+
+/* W14: billedtrinnet — dropzone og miniaturer får hele rækken (som billedet), tipsene står som bånd under. */
+@container opform (min-width: 700px){
+  .op-split-photos{ grid-template-columns: minmax(0,1fr); }
+  .op-split-photos .op-tips ul{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:6px var(--space-5); }
+  .op-photos.has-photos{ grid-template-columns: minmax(250px, 30%) minmax(0,1fr); }
+  .op-photos.has-photos .photo-grid{ grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+}
+.op-split-photos{ margin-top: var(--space-4); }
