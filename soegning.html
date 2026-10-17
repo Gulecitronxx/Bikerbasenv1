@@ -1008,7 +1008,21 @@ try{
           <!-- Runde 7 (D7-S1): ingen "besked" loves — mails sendes ikke for indekserede annoncer. -->
           <p class="empty-agent-hint"><button type="button" class="link-btn" id="empty-agent-btn">Gem søgningen</button>, så du hurtigt kan komme tilbage og se, om der er kommet nye til.</p>
         </div>
+        <p class="so-viser" id="so-viser" role="status" aria-live="polite"></p>
         <div class="pagination" id="pagination"></div>
+
+        <!-- Gem søgning (søgeagent). Handlingen er den eksisterende #save-search-btn; denne knap klikker på den.
+             Teksten er ærlig: søgningen gemmes og tæller nye annoncer, men der sendes endnu ingen e-mails
+             (se runde 7, D7-S1 i js/search.js). Panelet skjules ved tomt/fejlet resultat, hvor tom-tilstanden
+             har sin egen "Gem søgningen"-genvej. -->
+        <section class="so-agent" id="so-agent" aria-labelledby="so-agent-h" hidden>
+          <span class="so-agent-ico" id="so-agent-ico" aria-hidden="true"></span>
+          <div class="so-agent-tekst">
+            <h2 id="so-agent-h">Gem søgningen</h2>
+            <p>Vi husker dine filtre under Mine annoncer › Søgeagenter og tæller nye annoncer, der matcher. Der sendes endnu ingen e-mails.</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="so-agent-btn"><span id="so-agent-label">Gem søgning</span></button>
+        </section>
       </div>
     </div>
   </div>

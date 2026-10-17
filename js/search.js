@@ -582,9 +582,13 @@ function refreshSaveSearchButton(){
   const btn = document.getElementById('save-search-btn');
   const tekst = saved ? 'Søgning gemt' : 'Gem søgning';
   document.getElementById('save-search-icon').innerHTML = saved ? Icon.checkCircle : Icon.bell;
+  const agentIco = document.getElementById('so-agent-ico');
+  if (agentIco) agentIco.innerHTML = saved ? Icon.checkCircle : Icon.bell;
   document.getElementById('save-search-label').textContent = tekst;
   const kortEl = document.getElementById('save-search-kort');
   if (kortEl) kortEl.textContent = saved ? 'Gemt' : 'Gem';
+  const agentLabel = document.getElementById('so-agent-label');
+  if (agentLabel) agentLabel.textContent = saved ? 'Søgning gemt — fjern' : 'Gem søgning';
   // På mobil vises kun klokken (teksten er skjult for øjet, men ikke for
   // skærmlæsere) — title giver den seende bruger det samme svar ved tryk-hold.
   btn.title = tekst;
@@ -1747,6 +1751,7 @@ function render(){
   const pageItems = filtered.slice((state.page-1)*PAGE_SIZE, state.page*PAGE_SIZE);
 
   renderResultsCount(filtered);
+  renderViser(total, state.page, pageItems.length, uaktuelt);
   if (uaktuelt){
     const rc = document.getElementById('results-count');
     if (rc) rc.textContent = 'Lageret kunne ikke hentes';
@@ -1988,6 +1993,22 @@ function sideNumre(current, total){
     ud.push(n);
   });
   return ud;
+}
+
+/* "Viser 25-48 af 140 motorcykler" under gitteret + Gem søgning-panelet (w10). Tallene er resultatets egne;
+   ved tomt eller fejlet resultat står hverken linje eller panel (tom-tilstanden har sin egen genvej). */
+function renderViser(total, side, paaSiden, uaktuelt){
+  const viser = document.getElementById('so-viser');
+  const agent = document.getElementById('so-agent');
+  const vis = !uaktuelt && total > 0 && paaSiden > 0;
+  if (viser){
+    const fra = (side - 1) * PAGE_SIZE + 1, til = fra + paaSiden - 1;
+    viser.textContent = !vis ? '' : total <= PAGE_SIZE
+      ? `Viser alle ${total.toLocaleString('da-DK')} ${total === 1 ? 'motorcykel' : 'motorcykler'}`
+      : `Viser ${fra.toLocaleString('da-DK')}–${til.toLocaleString('da-DK')} af ${total.toLocaleString('da-DK')} motorcykler`;
+    viser.hidden = !vis;
+  }
+  if (agent) agent.hidden = !vis;
 }
 
 function renderPagination(totalPages){
@@ -2400,6 +2421,7 @@ function wireCoreControls(){
     const saetPh = () => { qFelt.placeholder = mq.matches ? 'Mærke/model' : 'Mærke eller model'; };
     saetPh(); if (mq.addEventListener) mq.addEventListener('change', saetPh);
   }
+  document.getElementById('so-agent-btn')?.addEventListener('click', () => document.getElementById('save-search-btn').click());
   document.getElementById('save-search-btn').addEventListener('click', async () => {
     const qs = currentQueryString();
     const existing = Store.getSavedSearches().find(s => s.query === qs);
