@@ -884,7 +884,7 @@ async function overlayTest(page, base, url){
       for (let i = 0; i < Math.max(s.antalFokus, 1) + 3 && !forlod; i++){
         await page.keyboard.press('Tab');
         const t = await page.evaluate(overlayEfterTab);
-        if (!t.inde){ forlod = true; tilf('modal-fokus-faanges', navn, `Tab forlader ${s.sel} efter ${i + 1} tryk (${s.antalFokus} fokuserbare inde)`); }
+        if (!t.inde && !t.body){ forlod = true; tilf('modal-fokus-faanges', navn, `Tab forlader ${s.sel} efter ${i + 1} tryk (${s.antalFokus} fokuserbare inde)`); }
       }
       await page.keyboard.press('Escape');
       await page.waitForTimeout(450);
