@@ -1,0 +1,967 @@
+{
+  "yamaha": {
+    "navn": "Yamaha",
+    "fil": "img/brands/yamaha.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/yamaha-emblem.svg",
+        "forhold": 1.001,
+        "viewBox": "0 0 1000 999",
+        "stoerrelse_bytes": 2191,
+        "sha256": "d9ac4ecfaa4050fa538043c987b1ea8ecedc003bad87c064b59b28a68235efb2",
+        "iou": {
+          "fuld": 0.9857,
+          "fuld_ufiltreret": 0.5387,
+          "h64": 0.9644,
+          "h24": 0.9243
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/yamaha-ordmaerke.svg",
+        "forhold": 3.4843,
+        "viewBox": "0 0 1000 287",
+        "stoerrelse_bytes": 1960,
+        "sha256": "6b96473e1f6f9124e934feb756b90c65dabf84bbfdfd3386f0fec61c173131c2",
+        "iou": {
+          "fuld": 0.9827,
+          "fuld_ufiltreret": 0.4496,
+          "h64": 0.9879,
+          "h24": 0.9582
+        }
+      }
+    },
+    "forhold": 1.0111,
+    "viewBox": "0 0 1000 989",
+    "stoerrelse_bytes": 3910,
+    "sha256": "4eecd729281b96c5ebb41feef0edbf648d4d4a325cd43d48ca2b37548c98e9b8",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.47-1.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9803,
+      "fuld_ufiltreret": 0.9803,
+      "h64": 0.9523,
+      "h24": 0.9182
+    },
+    "maaling": {
+      "kilde_x": 75.48,
+      "kilde_y": 84.88,
+      "enhed_pr_pixel": 0.90007
+    },
+    "bemaerkninger": ""
+  },
+  "honda": {
+    "navn": "Honda",
+    "fil": "img/brands/honda.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/honda-emblem.svg",
+        "forhold": 1.4948,
+        "viewBox": "0 0 1000 669",
+        "stoerrelse_bytes": 1474,
+        "sha256": "1ae2bf85b19278885c7ee61fc39e81681fbdebbf7199787428a9b25202aed1ae",
+        "iou": {
+          "fuld": 0.9892,
+          "fuld_ufiltreret": 0.756,
+          "h64": 0.9705,
+          "h24": 0.9458
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/honda-ordmaerke.svg",
+        "forhold": 6.135,
+        "viewBox": "0 0 1000 163",
+        "stoerrelse_bytes": 1871,
+        "sha256": "e2717a234dd685095d200f7e9da3295b7abc799c69eb7aa41eb64be6f160a585",
+        "iou": {
+          "fuld": 0.978,
+          "fuld_ufiltreret": 0.234,
+          "h64": 0.9765,
+          "h24": 0.969
+        }
+      }
+    },
+    "forhold": 1.2516,
+    "viewBox": "0 0 1000 799",
+    "stoerrelse_bytes": 3187,
+    "sha256": "b1a426687a50e97654ac89d847eb0301baf3cbee1a6c0edbf522ea7d7c7b4ba1",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.48-2.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "tvivlsom",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9847,
+      "fuld_ufiltreret": 0.9847,
+      "h64": 0.9681,
+      "h24": 0.9332
+    },
+    "maaling": {
+      "kilde_x": 24.64,
+      "kilde_y": 148.5,
+      "enhed_pr_pixel": 0.8235
+    },
+    "bemaerkninger": ""
+  },
+  "kawasaki": {
+    "navn": "Kawasaki",
+    "fil": "img/brands/kawasaki.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/kawasaki-emblem.svg",
+        "forhold": 2.7248,
+        "viewBox": "0 0 1000 367",
+        "stoerrelse_bytes": 652,
+        "sha256": "dd33668df93d0c38bee14142fb05be7de1bdf3cf143a74ce64087a4cd0640952",
+        "iou": {
+          "fuld": 0.9957,
+          "fuld_ufiltreret": 0.6561,
+          "h64": 0.9931,
+          "h24": 0.9816
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/kawasaki-ordmaerke.svg",
+        "forhold": 4.7619,
+        "viewBox": "0 0 1000 210",
+        "stoerrelse_bytes": 2176,
+        "sha256": "7549ae62db98879b9f4d685e2d15c792035a9a00febc7feed53a34ac9a63478e",
+        "iou": {
+          "fuld": 0.9829,
+          "fuld_ufiltreret": 0.3382,
+          "h64": 0.98,
+          "h24": 0.9741
+        }
+      }
+    },
+    "forhold": 1.8727,
+    "viewBox": "0 0 1000 534",
+    "stoerrelse_bytes": 2663,
+    "sha256": "32a942427897eb59abb4d2a83353b85af693e3d4eaa74991c24fab842d35b7de",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.48-3.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.991,
+      "fuld_ufiltreret": 0.991,
+      "h64": 0.9826,
+      "h24": 0.9708
+    },
+    "maaling": {
+      "kilde_x": 58.22,
+      "kilde_y": 367.54,
+      "enhed_pr_pixel": 0.87604
+    },
+    "bemaerkninger": ""
+  },
+  "bmw": {
+    "navn": "BMW",
+    "fil": "img/brands/bmw.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/bmw-emblem.svg",
+        "forhold": 0.996,
+        "viewBox": "0 0 996 1000",
+        "stoerrelse_bytes": 1757,
+        "sha256": "bc9f251a9849870334210f400e2800ad9864847f017d4cf231d5a656caad0489",
+        "iou": {
+          "fuld": 0.9833,
+          "fuld_ufiltreret": 0.5285,
+          "h64": 0.9462,
+          "h24": 0.9115
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/bmw-ordmaerke.svg",
+        "forhold": 3.2787,
+        "viewBox": "0 0 1000 305",
+        "stoerrelse_bytes": 2671,
+        "sha256": "cbc7b02e6029e36979ecaa6316cb7f42fbe10a1093477cdddfe88d73dc5f4717",
+        "iou": {
+          "fuld": 0.9823,
+          "fuld_ufiltreret": 0.4588,
+          "h64": 0.9736,
+          "h24": 0.9483
+        }
+      }
+    },
+    "forhold": 1.0493,
+    "viewBox": "0 0 1000 953",
+    "stoerrelse_bytes": 4171,
+    "sha256": "23186893337a3016f24bf51287a5854fb78f30be5c059f0f56881c20f14a3c04",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.49-4.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9819,
+      "fuld_ufiltreret": 0.9819,
+      "h64": 0.9422,
+      "h24": 0.9103
+    },
+    "maaling": {
+      "kilde_x": 45.01,
+      "kilde_y": 86.16,
+      "enhed_pr_pixel": 0.8456
+    },
+    "bemaerkninger": ""
+  },
+  "ktm": {
+    "navn": "KTM",
+    "fil": "img/brands/ktm.svg",
+    "hovedform": "ordmaerke",
+    "varianter": {},
+    "forhold": 3.0581,
+    "viewBox": "0 0 1000 327",
+    "stoerrelse_bytes": 1228,
+    "sha256": "1226db440c32ace1f1328480089c9529e4a5f7353aa27b5cbce7e67f43b0f49e",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.50-5.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9902,
+      "fuld_ufiltreret": 0.9902,
+      "h64": 0.993,
+      "h24": 0.984
+    },
+    "maaling": {
+      "kilde_x": 16.32,
+      "kilde_y": 441.43,
+      "enhed_pr_pixel": 0.81327
+    },
+    "bemaerkninger": ""
+  },
+  "ducati": {
+    "navn": "Ducati",
+    "fil": "img/brands/ducati.svg",
+    "hovedform": "emblem",
+    "varianter": {},
+    "forhold": 0.963,
+    "viewBox": "0 0 963 1000",
+    "stoerrelse_bytes": 2134,
+    "sha256": "5441eff2aae5e97a2356fe01a8ad4747b8286b0a1b06dc0015a51b0a583396d8",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.51-6.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "tvivlsom",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9872,
+      "fuld_ufiltreret": 0.9872,
+      "h64": 0.944,
+      "h24": 0.916
+    },
+    "maaling": {
+      "kilde_x": 130.51,
+      "kilde_y": 132.87,
+      "enhed_pr_pixel": 0.96921
+    },
+    "bemaerkninger": ""
+  },
+  "suzuki": {
+    "navn": "Suzuki",
+    "fil": "img/brands/suzuki.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/suzuki-emblem.svg",
+        "forhold": 1.006,
+        "viewBox": "0 0 1000 994",
+        "stoerrelse_bytes": 759,
+        "sha256": "fe7280415df4ff8dda1f945a16bfef25a4702d96ae5d91c1be55a283a7b752fb",
+        "iou": {
+          "fuld": 0.9947,
+          "fuld_ufiltreret": 0.6565,
+          "h64": 0.9867,
+          "h24": 0.9737
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/suzuki-ordmaerke.svg",
+        "forhold": 5.102,
+        "viewBox": "0 0 1000 196",
+        "stoerrelse_bytes": 1512,
+        "sha256": "8835b9818998bdecfe8f7136b09ab612aac9ff8a2949ee349c25f4123980a8ee",
+        "iou": {
+          "fuld": 0.9848,
+          "fuld_ufiltreret": 0.337,
+          "h64": 0.981,
+          "h24": 0.9793
+        }
+      }
+    },
+    "forhold": 1.2531,
+    "viewBox": "0 0 1000 798",
+    "stoerrelse_bytes": 2077,
+    "sha256": "9225221f1f4367199e8fe39d28097013c78d3c219e6ba699f50709733e93559b",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.52-7.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9923,
+      "fuld_ufiltreret": 0.9923,
+      "h64": 0.9771,
+      "h24": 0.9453
+    },
+    "maaling": {
+      "kilde_x": 13.57,
+      "kilde_y": 164.34,
+      "enhed_pr_pixel": 0.81478
+    },
+    "bemaerkninger": ""
+  },
+  "triumph": {
+    "navn": "Triumph",
+    "fil": "img/brands/triumph.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/triumph-emblem.svg",
+        "forhold": 1.1779,
+        "viewBox": "0 0 1000 849",
+        "stoerrelse_bytes": 1428,
+        "sha256": "46cfd8822bdf212a63678e729ba4c2611317a51f37a04797503ca570187a1961",
+        "iou": {
+          "fuld": 0.9878,
+          "fuld_ufiltreret": 0.6013,
+          "h64": 0.9654,
+          "h24": 0.9327
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/triumph-ordmaerke.svg",
+        "forhold": 3.7175,
+        "viewBox": "0 0 1000 269",
+        "stoerrelse_bytes": 1785,
+        "sha256": "374cf4111b191b0f2c3e735c6d5cb70c28c44301e3baa2b46dd92a0e8f0dfba9",
+        "iou": {
+          "fuld": 0.9743,
+          "fuld_ufiltreret": 0.386,
+          "h64": 0.9771,
+          "h24": 0.9613
+        }
+      }
+    },
+    "forhold": 1.1779,
+    "viewBox": "0 0 1000 849",
+    "stoerrelse_bytes": 3004,
+    "sha256": "23a44b922a95c517ef78f914a62b488331542c8429a291f3689b6ce4ec9de978",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.53-8.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "tvivlsom",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9849,
+      "fuld_ufiltreret": 0.9849,
+      "h64": 0.9472,
+      "h24": 0.9067
+    },
+    "maaling": {
+      "kilde_x": 39.55,
+      "kilde_y": 192.14,
+      "enhed_pr_pixel": 0.84733
+    },
+    "bemaerkninger": ""
+  },
+  "harley-davidson": {
+    "navn": "Harley-Davidson",
+    "fil": "img/brands/harley-davidson.svg",
+    "hovedform": "emblem",
+    "varianter": {},
+    "forhold": 1.2547,
+    "viewBox": "0 0 1000 797",
+    "stoerrelse_bytes": 6031,
+    "sha256": "d72067f66400c4589cf7a7ad7c0090e1da4eb1bea6c05f88986e10564dffdc8f",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.54-9.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ubrugelig",
+    "kraever_officiel_fil": true,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9712,
+      "fuld_ufiltreret": 0.9712,
+      "h64": 0.949,
+      "h24": 0.9214
+    },
+    "maaling": {
+      "kilde_x": -6.75,
+      "kilde_y": 129.26,
+      "enhed_pr_pixel": 0.78843
+    },
+    "bemaerkninger": ""
+  },
+  "royal-enfield": {
+    "navn": "Royal Enfield",
+    "fil": "img/brands/royal-enfield.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/royal-enfield-emblem.svg",
+        "forhold": 1.0081,
+        "viewBox": "0 0 1000 992",
+        "stoerrelse_bytes": 1439,
+        "sha256": "0e8826128c12776eed94d094aad5e8a7ef9e0cdfce90ef91b579bbc195d18217",
+        "iou": {
+          "fuld": 0.9804,
+          "fuld_ufiltreret": 0.4472,
+          "h64": 0.9585,
+          "h24": 0.9311
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/royal-enfield-ordmaerke.svg",
+        "forhold": 2.1053,
+        "viewBox": "0 0 1000 475",
+        "stoerrelse_bytes": 3181,
+        "sha256": "01d88429130ed6ebd893e0745b48ddfedec4b8149e57e34ea199164c11ec85f3",
+        "iou": {
+          "fuld": 0.9789,
+          "fuld_ufiltreret": 0.5364,
+          "h64": 0.9695,
+          "h24": 0.9152
+        }
+      }
+    },
+    "forhold": 1.005,
+    "viewBox": "0 0 1000 995",
+    "stoerrelse_bytes": 4358,
+    "sha256": "257e395167a90d1b1a78287d659bd14c4fbdad3d3d4fc5d563a18ad944f35d10",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.14.55-10.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "tvivlsom",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9804,
+      "fuld_ufiltreret": 0.9804,
+      "h64": 0.9388,
+      "h24": 0.917
+    },
+    "maaling": {
+      "kilde_x": 78.02,
+      "kilde_y": 90.29,
+      "enhed_pr_pixel": 0.89496
+    },
+    "bemaerkninger": ""
+  },
+  "aprilia": {
+    "navn": "Aprilia",
+    "fil": "img/brands/aprilia.svg",
+    "hovedform": "ordmaerke",
+    "varianter": {},
+    "forhold": 3.413,
+    "viewBox": "0 0 1000 293",
+    "stoerrelse_bytes": 2007,
+    "sha256": "0f0234f72ced2d7cc359ed868e1c1f67b28524049ed9912e81b86e3d0bf85cde",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.23-1.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9842,
+      "fuld_ufiltreret": 0.9842,
+      "h64": 0.9761,
+      "h24": 0.9534
+    },
+    "maaling": {
+      "kilde_x": 4.71,
+      "kilde_y": 476.85,
+      "enhed_pr_pixel": 0.80076
+    },
+    "bemaerkninger": ""
+  },
+  "benelli": {
+    "navn": "Benelli",
+    "fil": "img/brands/benelli.svg",
+    "hovedform": "ordmaerke",
+    "varianter": {},
+    "forhold": 3.8168,
+    "viewBox": "0 0 1000 262",
+    "stoerrelse_bytes": 1873,
+    "sha256": "56688dc1abdc4cb21cafd2da074b926504c25a230d520c68fb4e4c2ff3971ed7",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.24-2.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ubrugelig",
+    "kraever_officiel_fil": true,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9849,
+      "fuld_ufiltreret": 0.3232,
+      "h64": 0.9804,
+      "h24": 0.9501
+    },
+    "maaling": {
+      "kilde_x": 111.06,
+      "kilde_y": 928.65,
+      "enhed_pr_pixel": 0.96433
+    },
+    "bemaerkninger": "Kun ordmærket er med: løve-/laurbærkrans-emblemet (80 konturer) kan ikke kodes under 6 KB uden stort tab (13,9 KB ved IoU 0,962; 6,3 KB ved IoU 0,87). Skrifttypen er ikke Benellis egen."
+  },
+  "cfmoto": {
+    "navn": "CFMoto",
+    "fil": "img/brands/cfmoto.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/cfmoto-emblem.svg",
+        "forhold": 1.0132,
+        "viewBox": "0 0 1000 987",
+        "stoerrelse_bytes": 752,
+        "sha256": "ce7d78985d10a0ad7e3babbacaed27531c55d73e02333dbd4d3027c36735269a",
+        "iou": {
+          "fuld": 0.9879,
+          "fuld_ufiltreret": 0.6095,
+          "h64": 0.974,
+          "h24": 0.9391
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/cfmoto-ordmaerke.svg",
+        "forhold": 5.7803,
+        "viewBox": "0 0 1000 173",
+        "stoerrelse_bytes": 1651,
+        "sha256": "12176ce7936aa4ce2dc5bcd5bb06645d48037a6bdc465bdd7b53e4ba3d4d37d8",
+        "iou": {
+          "fuld": 0.9817,
+          "fuld_ufiltreret": 0.3799,
+          "h64": 0.9769,
+          "h24": 0.9653
+        }
+      }
+    },
+    "forhold": 1.4225,
+    "viewBox": "0 0 1000 703",
+    "stoerrelse_bytes": 2191,
+    "sha256": "04aa8feb67f67659e67303768d0dafea20e155b2646a696342b0e36fa3762861",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.25-3.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9867,
+      "fuld_ufiltreret": 0.9867,
+      "h64": 0.9691,
+      "h24": 0.9368
+    },
+    "maaling": {
+      "kilde_x": 25.96,
+      "kilde_y": 215.09,
+      "enhed_pr_pixel": 0.83195
+    },
+    "bemaerkninger": ""
+  },
+  "husqvarna": {
+    "navn": "Husqvarna",
+    "fil": "img/brands/husqvarna.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/husqvarna-emblem.svg",
+        "forhold": 0.858,
+        "viewBox": "0 0 858 1000",
+        "stoerrelse_bytes": 1182,
+        "sha256": "488407bb738852e35d59832cd0e328799cccad42c7c0250212f3c99a96321dd4",
+        "iou": {
+          "fuld": 0.9926,
+          "fuld_ufiltreret": 0.7031,
+          "h64": 0.985,
+          "h24": 0.9191
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/husqvarna-ordmaerke.svg",
+        "forhold": 3.0488,
+        "viewBox": "0 0 1000 328",
+        "stoerrelse_bytes": 3547,
+        "sha256": "489c768547d2bc9f2d5673e0d551ccd1aafcffaf2c5350ee8347d46198410473",
+        "iou": {
+          "fuld": 0.9703,
+          "fuld_ufiltreret": 0.2875,
+          "h64": 0.9631,
+          "h24": 0.935
+        }
+      }
+    },
+    "forhold": 0.978,
+    "viewBox": "0 0 978 1000",
+    "stoerrelse_bytes": 4515,
+    "sha256": "af6cc498f2469f2ee59ad47409f8e561869683c55539a658c7eaf9d8b2c43476",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.26-4.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "tvivlsom",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.986,
+      "fuld_ufiltreret": 0.986,
+      "h64": 0.9494,
+      "h24": 0.8972
+    },
+    "maaling": {
+      "kilde_x": 117.31,
+      "kilde_y": 141.07,
+      "enhed_pr_pixel": 0.95717
+    },
+    "bemaerkninger": ""
+  },
+  "indian": {
+    "navn": "Indian",
+    "fil": "img/brands/indian.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/indian-emblem.svg",
+        "forhold": 1.9881,
+        "viewBox": "0 0 1000 503",
+        "stoerrelse_bytes": 3418,
+        "sha256": "c94ab41464b42c1bfe9158f8e1284903ebc41f520199980c22f10f7c7bd8bd20",
+        "iou": {
+          "fuld": 0.9033,
+          "fuld_ufiltreret": 0.5007,
+          "h64": 0.8976,
+          "h24": 0.8491
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/indian-ordmaerke.svg",
+        "forhold": 2.5253,
+        "viewBox": "0 0 1000 396",
+        "stoerrelse_bytes": 2842,
+        "sha256": "7e418eeefaa792590027d38b8925112db317a6a2343acdaf06a6230e401c5331",
+        "iou": {
+          "fuld": 0.9075,
+          "fuld_ufiltreret": 0.4398,
+          "h64": 0.897,
+          "h24": 0.8565
+        }
+      }
+    },
+    "forhold": 1.6234,
+    "viewBox": "0 0 1000 616",
+    "stoerrelse_bytes": 6046,
+    "sha256": "c750c9f5f3f49c643d606f86795c94708d52041c7d0e8c6d4c7e01dc21f17b95",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.27-5.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ubrugelig",
+    "kraever_officiel_fil": true,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9509,
+      "fuld_ufiltreret": 0.9509,
+      "h64": 0.9278,
+      "h24": 0.8887
+    },
+    "maaling": {
+      "kilde_x": 47.82,
+      "kilde_y": 279.07,
+      "enhed_pr_pixel": 0.81973
+    },
+    "bemaerkninger": ""
+  },
+  "moto-guzzi": {
+    "navn": "Moto Guzzi",
+    "fil": "img/brands/moto-guzzi.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/moto-guzzi-emblem.svg",
+        "forhold": 4.2918,
+        "viewBox": "0 0 1000 233",
+        "stoerrelse_bytes": 4026,
+        "sha256": "ea99ca9c2f48fc4cf47cf5f733a88f7856094d2a4c9c6fa8ad2953f52578f272",
+        "iou": {
+          "fuld": 0.9468,
+          "fuld_ufiltreret": 0.4047,
+          "h64": 0.9409,
+          "h24": 0.8997
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/moto-guzzi-ordmaerke.svg",
+        "forhold": 5.5866,
+        "viewBox": "0 0 1000 179",
+        "stoerrelse_bytes": 1853,
+        "sha256": "dd9ecf09a7d2ff3dd6f6df7d2f3be60fed77981fda0681c595ac4456fbf6e6bc",
+        "iou": {
+          "fuld": 0.9828,
+          "fuld_ufiltreret": 0.5715,
+          "h64": 0.9756,
+          "h24": 0.9687
+        }
+      }
+    },
+    "forhold": 2.8011,
+    "viewBox": "0 0 1000 357",
+    "stoerrelse_bytes": 5734,
+    "sha256": "5333557f132a6dd600480e61e5ed0130c087258c104d17818980595fbc86be49",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.28-6.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "tvivlsom",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9707,
+      "fuld_ufiltreret": 0.9707,
+      "h64": 0.9514,
+      "h24": 0.9282
+    },
+    "maaling": {
+      "kilde_x": 7.22,
+      "kilde_y": 430.17,
+      "enhed_pr_pixel": 0.80329
+    },
+    "bemaerkninger": ""
+  },
+  "mv-agusta": {
+    "navn": "MV Agusta",
+    "fil": "img/brands/mv-agusta.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/mv-agusta-emblem.svg",
+        "forhold": 1.4306,
+        "viewBox": "0 0 1000 699",
+        "stoerrelse_bytes": 4133,
+        "sha256": "75f292734bcd74fec368c694247f7d0b136d39a8091d2f58221b2095ca79a8da",
+        "iou": {
+          "fuld": 0.9781,
+          "fuld_ufiltreret": 0.8044,
+          "h64": 0.9482,
+          "h24": 0.9208
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/mv-agusta-ordmaerke.svg",
+        "forhold": 8.0645,
+        "viewBox": "0 0 1000 124",
+        "stoerrelse_bytes": 1719,
+        "sha256": "d0727c48e40a2480b5779d1e09a361dc5e4acb3d69a4c63300d16cffa7a7b8fe",
+        "iou": {
+          "fuld": 0.9674,
+          "fuld_ufiltreret": 0.1768,
+          "h64": 0.9657,
+          "h24": 0.9422
+        }
+      }
+    },
+    "forhold": 1.25,
+    "viewBox": "0 0 1000 800",
+    "stoerrelse_bytes": 5684,
+    "sha256": "1bf797edc7866f070897960f76728d0c394dd27933cdad70ebab142034e742a1",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.28-7.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "tvivlsom",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9791,
+      "fuld_ufiltreret": 0.9791,
+      "h64": 0.9506,
+      "h24": 0.9024
+    },
+    "maaling": {
+      "kilde_x": 30.08,
+      "kilde_y": 152.23,
+      "enhed_pr_pixel": 0.83626
+    },
+    "bemaerkninger": ""
+  },
+  "gasgas": {
+    "navn": "GasGas",
+    "fil": "img/brands/gasgas.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/gasgas-emblem.svg",
+        "forhold": 1.5848,
+        "viewBox": "0 0 1000 631",
+        "stoerrelse_bytes": 787,
+        "sha256": "796ec0f73444216cf47badc807d4ec5dc5fdf4db2cc6610f58aef6f0d85e3c5c",
+        "iou": {
+          "fuld": 0.9908,
+          "fuld_ufiltreret": 0.5994,
+          "h64": 0.9827,
+          "h24": 0.9664
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/gasgas-ordmaerke.svg",
+        "forhold": 5.8824,
+        "viewBox": "0 0 1000 170",
+        "stoerrelse_bytes": 1828,
+        "sha256": "e3764d72ced709ea7a1a94e71681c66357a5b583df65dd19c537a4e246893343",
+        "iou": {
+          "fuld": 0.979,
+          "fuld_ufiltreret": 0.391,
+          "h64": 0.9807,
+          "h24": 0.98
+        }
+      }
+    },
+    "forhold": 1.7889,
+    "viewBox": "0 0 1000 559",
+    "stoerrelse_bytes": 2438,
+    "sha256": "b8e058777ce5fcb0ba273a34549e611e2b86f321b46eac783e0e0717d9abc72a",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.29-8.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9835,
+      "fuld_ufiltreret": 0.9835,
+      "h64": 0.9667,
+      "h24": 0.9432
+    },
+    "maaling": {
+      "kilde_x": 14.07,
+      "kilde_y": 318.12,
+      "enhed_pr_pixel": 0.811
+    },
+    "bemaerkninger": ""
+  },
+  "zero": {
+    "navn": "Zero",
+    "fil": "img/brands/zero.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/zero-emblem.svg",
+        "forhold": 1.2121,
+        "viewBox": "0 0 1000 825",
+        "stoerrelse_bytes": 727,
+        "sha256": "38cd780459958dfb06cf9045a78e5bd7d99b324d0827174e765c6dfa92d33330",
+        "iou": {
+          "fuld": 0.9881,
+          "fuld_ufiltreret": 0.4365,
+          "h64": 0.9759,
+          "h24": 0.9676
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/zero-ordmaerke.svg",
+        "forhold": 3.0864,
+        "viewBox": "0 0 1000 324",
+        "stoerrelse_bytes": 2798,
+        "sha256": "c1e6f2e50373d90b7f9e5a8c587a4c8b02798391475354ef72000d0715434f84",
+        "iou": {
+          "fuld": 0.9773,
+          "fuld_ufiltreret": 0.5511,
+          "h64": 0.9643,
+          "h24": 0.9508
+        }
+      }
+    },
+    "forhold": 1.3333,
+    "viewBox": "0 0 1000 750",
+    "stoerrelse_bytes": 3302,
+    "sha256": "85a9c570b1aafaa233ac9d4ac632ffcb0880fa6eec78e2afb04a0022d9f8227c",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.30-9.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9793,
+      "fuld_ufiltreret": 0.9793,
+      "h64": 0.9582,
+      "h24": 0.9279
+    },
+    "maaling": {
+      "kilde_x": 44.44,
+      "kilde_y": 203.36,
+      "enhed_pr_pixel": 0.86302
+    },
+    "bemaerkninger": ""
+  },
+  "piaggio": {
+    "navn": "Piaggio",
+    "fil": "img/brands/piaggio.svg",
+    "hovedform": "lockup",
+    "varianter": {
+      "emblem": {
+        "fil": "img/brands/piaggio-emblem.svg",
+        "forhold": 0.912,
+        "viewBox": "0 0 912 1000",
+        "stoerrelse_bytes": 1355,
+        "sha256": "28c908877c1cdf37e680ba75151abbe46b42471b2fa89df50ff5d4344103b89f",
+        "iou": {
+          "fuld": 0.9895,
+          "fuld_ufiltreret": 0.6698,
+          "h64": 0.9653,
+          "h24": 0.9434
+        }
+      },
+      "ordmaerke": {
+        "fil": "img/brands/piaggio-ordmaerke.svg",
+        "forhold": 5.102,
+        "viewBox": "0 0 1000 196",
+        "stoerrelse_bytes": 1467,
+        "sha256": "913f8f6bfafa6ef348bf9deb8bd75e54333145943a98c5951b1f886e1210f765",
+        "iou": {
+          "fuld": 0.9835,
+          "fuld_ufiltreret": 0.321,
+          "h64": 0.9782,
+          "h24": 0.9724
+        }
+      }
+    },
+    "forhold": 1.1601,
+    "viewBox": "0 0 1000 862",
+    "stoerrelse_bytes": 2607,
+    "sha256": "e3c7746f5fed2438480e80ebff7dd5575588db9672e2e8fd2a06ac5b1e6ca092",
+    "kildefil": "ChatGPT-billede 17. okt. 2026, 13.37.31-10.png",
+    "proces": "AI-udkast → vektoriseret med scripts/logo-vektoriser.js",
+    "licens": "Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil",
+    "autenticitet": "ukendt",
+    "kraever_officiel_fil": false,
+    "godkendt": false,
+    "iou": {
+      "fuld": 0.9848,
+      "fuld_ufiltreret": 0.9848,
+      "h64": 0.9621,
+      "h24": 0.9256
+    },
+    "maaling": {
+      "kilde_x": 58.25,
+      "kilde_y": 150.51,
+      "enhed_pr_pixel": 0.87223
+    },
+    "bemaerkninger": ""
+  }
+}
