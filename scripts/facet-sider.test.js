@@ -95,7 +95,9 @@ test('type-siden bruger typens eget hero-foto, og alle lagertal står i data-fa-
   global.ALLE_LISTINGS = [];
   const alle = Array.from({ length: THRESHOLD + 3 }, (_, i) => l(i + 1, { type: 'sport', power: 100 }));
   const html = side(buildFacetList(alle).find(f => f.slug === 'type-sport'), alle);
-  assert.match(html, /<div class="fa-hero-bike"[^>]*><img src="img\/type\/sport\.webp"/);
+  /* w14: blind Critic fandt cutouten (frit stillet motorcykel i radial glød) som "sticker-look"; heroen er landskabsfotoet, typens foto bor i fliserne. */
+  assert.doesNotMatch(html, /fa-hero-bike|fa-hero-studio/);
+  assert.match(html, /<div class="fa-hero-media" aria-hidden="true">\s*<img src="img\/hero-1600\.webp"/);
   assert.match(html, /data-fa-n="all"/);
   assert.match(html, /data-fa-hydreret/);
   // intet lagertal står uden for et data-fa-n-element i "Se alle"-linket

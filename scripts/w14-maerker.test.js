@@ -146,3 +146,50 @@ test('CSS: heroer, chips og typefliser har billedets proportioner', () => {
   assert.match(mc, /\.mk-wordmark--lockup\{/);
   assert.match(les('css/p-brand-logo.css'), /\.bl--wm\{ --bl-maxh:44px; --bl-maxw:300px; --bl-k:128px; \}/);
 });
+
+/* ---------- Iteration 2 (blind Critic: AFVIS) ---------- */
+test('iteration 2: ingen sticker-hero og ingen fremmed motorcykel i mærke-/modelsiders hero; foldens tekst ligger under annoncerne', () => {
+  const alle = lager();
+  const t = bygSide('type-naked', alle);
+  assert.doesNotMatch(t, /fa-hero-bike|fa-hero-studio/);
+  const heroSlut = t.indexOf('</section>', t.indexOf('class="fa-hero"'));
+  assert.ok(!t.slice(t.indexOf('class="fa-hero"'), heroSlut).includes('fa-mere-intro'), 'folden står ikke i heroen');
+  const facets = forberedFacetter(global.ALLE_LISTINGS = alle);
+  const k = facets.find(f => f.kind === 'model') || facets.find(f => f.kind === 'kombi');
+  if (k){ const h = side(k, alle); assert.match(h, /fa-hero-flad/); assert.doesNotMatch(h, /hero-1600/); }
+});
+
+test('iteration 2: "Udforsk efter behov" har ikon i stedet for foto, og tal og link er det samme filter', () => {
+  const alle = lager(30);
+  const html = bygSide('type-naked', alle);
+  const m = html.match(/<ul class="fa-udforsk">[\s\S]*?<\/ul>/);
+  if (!m) return;   // intet udvalg at dele
+  assert.doesNotMatch(m[0], /<img/, 'ingen billeder (de blev det samme foto fire gange)');
+  assert.match(m[0], /fa-udforsk-ikon/);
+  const links = [...m[0].matchAll(/href="([^"]+)"/g)].map(x => x[1]);
+  assert.equal(new Set(links).size, links.length, 'ingen to kort peger det samme sted hen');
+});
+
+test('iteration 2: annoncer med foto kommer først i udsnittet, og højst 5 + 8 kort bages ind (resten via søgning)', () => {
+  const alle = lager(30).map((x, i) => Object.assign({}, x, { externalUrl: `https://test.dk/a/${i}` }, i % 2 ? { photoUrls: [] } : {}));
+  const html = bygSide('type-naked', alle);
+  const ider = [...html.matchAll(/class="card card-rich[^"]*" data-listing-id="([^"]+)"/g)].map(x => x[1]);
+  assert.equal(ider.length, 13, '5 udvalgte + 8 flere');
+  const medFoto = new Set(alle.filter(x => x.photoUrls.length).map(x => x.id));
+  const forsteFem = ider.slice(0, 5);
+  assert.ok(forsteFem.every(i => medFoto.has(i)), 'første række har foto');
+  assert.match(html, /class="fa-mere-lille"/);
+  assert.doesNotMatch(html, /<p class="brand-mere">/, 'ingen stor orange pille');
+});
+
+test('iteration 2: mærkesidens hero er flad med faktapanel; A1/A2/A er altid tre fliser; folden ligger under typefliserne', () => {
+  const items = [l(1, { brand: 'Yamaha', model: 'MT-07', power: 70, ccm: 689 }), l(2, { brand: 'Yamaha', model: 'R7', power: 70, ccm: 689 })];
+  const fakta = MK.maerkeFakta('Yamaha', items);
+  const kol = MK.treKolonnerHTML('Yamaha', fakta, items);
+  const kk = kol.match(/<ul class="mk-mini mk-mini-kk">[\s\S]*?<\/ul>/)[0];
+  assert.equal((kk.match(/<li>/g) || []).length, 3, 'A1, A2 og A');
+  assert.match(kk, /mk-mini-nul/, 'en kategori uden annoncer er en rolig 0-flise uden link');
+  assert.match(les('css/p-maerke.css'), /\.mk-cols\{ align-items:start; \}/);
+  assert.match(les('scripts/build-brand-pages.js'), /class="mk-hero mk-hero-flad"/);
+  assert.match(les('scripts/build-brand-pages.js'), /const MAERKE_KORT = 8;/);
+});
