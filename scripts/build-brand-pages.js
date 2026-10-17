@@ -11,6 +11,7 @@ const LINK = require('./seo-soeglink');   // F2-004/F2-005: ét sted bygger søg
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
 const { slugify: slugifyFælles } = require('./slug');
+const BrandLogos = require('../js/brand-logos.js');   // W13: delt logokerne (manifest -> js/brand-logos-data.js); standard er ordmærke/monogram
 const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering, standOpgoerelse: standOpg } = browserModules();
 
 /* Sidens egne ikoner (js/icons.js) som markup — samme SVG'er som resten af
@@ -775,11 +776,64 @@ function ctaFoto(fremhaevede){
   return l ? l.photoUrls[0] : null;
 }
 
-/* Diskret monogram i stedet for et logo: foerste bogstav i op til to ord. */
+/* Diskret monogram i stedet for et logo: foerste bogstav i op til to ord (manifestet kan overstyre, fx "MV"). */
 function monogram(brand){
-  const ord = String(brand).split(/[\s-]+/).filter(Boolean);
-  return (ord.length > 1 ? ord[0][0] + ord[1][0] : ord[0].slice(0, 1)).toLocaleUpperCase('da');
+  return BrandLogos.monogramFor(brand);
 }
+
+/* ---- W13: logo-pladser. Alt går gennem BrandLogos.logoHTML — ingen pr.-mærke-kode. Uden godkendt logo er output
+   uændret (monogram/ordmærke); et logo kommer først, når manifestet siger godkendt:true og filen findes. ---- */
+
+/* Hero og CTA: { harLogo, html, medNavn }. medNavn = logoet er kun et emblem, så navnet skrives ved siden af. */
+function logoSlot(brand, storrelse){
+  const l = BrandLogos.logoFor(brand);
+  if (!l.harLogo) return { harLogo: false, html: '', medNavn: false };
+  return { harLogo: true, html: BrandLogos.logoHTML(brand, { storrelse, decorative: true }), medNavn: l.variant === 'emblem' };
+}
+
+/* Mærkesidens hero-ordmærke (Mærker.png): logo + ordmærke over H1. Genbruger .mk-wordmark/.mk-mono-pladsen. */
+function heroOrdmaerkeHTML(brand){
+  const lg = logoSlot(brand, 'hero');
+  const cls = `mk-wordmark${brand.length > 11 ? ' mk-wordmark-lang' : ''}${lg.harLogo ? ' mk-wordmark--logo' : ''}`;
+  const indhold = lg.harLogo
+    ? lg.html + (lg.medNavn ? `<span>${esc(brand)}</span>` : '')
+    : `<span class="mk-mono">${esc(monogram(brand))}</span><span>${esc(brand)}</span>`;
+  return `<p class="${cls}" aria-hidden="true">${indhold}</p>`;
+}
+
+/* CTA-panelets mærkelinje: mindre logo øverst i panelet; uden logo den eksisterende tekstlinje. */
+function ctaNavnHTML(brand){
+  const lg = logoSlot(brand, 'lg');
+  if (!lg.harLogo) return `<p class="mk-cta-navn" aria-hidden="true">${esc(brand)}</p>`;
+  return `<p class="mk-cta-navn mk-cta-navn--logo" aria-hidden="true">${lg.html}${lg.medNavn ? `<span>${esc(brand)}</span>` : ''}</p>`;
+}
+
+/* maerker.html: flise (logo/monogram over navn og antal) og A–Z-række. harLogoer = mindst ét mærke har et godkendt logo
+   -> A–Z får en fast logokolonne på ALLE rækker (monogram hvor der intet logo er), ellers er rækkerne uændrede. */
+function maerkeFliseHTML(b, antalTekstStr){
+  return `<a class="mk-brandtile" href="maerke-${slugify(b)}.html">
+          <span class="mk-brandtile-logo">${BrandLogos.logoHTML(b, { storrelse: 'lg', decorative: true })}</span>
+          <span class="mk-brandtile-navn">${esc(b)}</span>
+          <span class="mk-brandtile-n">${antalTekstStr}</span>
+          <span class="mk-brandtile-go" aria-hidden="true">${ICON.arrowRight}</span>
+        </a>`;
+}
+function azRaekkeHTML(b, antal, harLogoer){
+  const logo = harLogoer ? `<span class="mk-az-logo">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true })}</span>` : '';
+  return `<li data-mk-soeg="${esc([BrandLogos.logoFor(b).slug || BrandLogos.noegle(b), ...BrandLogos.logoFor(b).aliaser].join(' '))}"><a href="maerke-${slugify(b)}.html"><span class="mk-az-navn">${logo}<span>${esc(b)}</span></span><span class="mk-az-n">${antal}</span></a></li>`;
+}
+function harNogetLogo(navne){ return navne.some(n => BrandLogos.logoFor(n).harLogo); }
+/* Hurtigsøg: skjult uden JS (js/maerker-sog.js viser den), så ingen ser et dødt felt. */
+function hurtigSoegHTML(){
+  return `<div class="mk-hurtigsoeg" data-mk-hurtigsoeg hidden>
+        <label class="mk-hurtigsoeg-label" for="mk-hurtigsoeg-input">Find et mærke</label>
+        <input class="input" id="mk-hurtigsoeg-input" type="search" autocomplete="off" placeholder="Fx Honda eller BMW" aria-controls="mk-az-liste">
+        <p class="mk-hurtigsoeg-status" role="status" aria-live="polite"></p>
+      </div>`;
+}
+/* Logoets script og stilark hører kun på siden, hvis der faktisk er logo-markup (fejlfallback + CSS). */
+function logoHead(brug){ return brug ? '<link rel="stylesheet" href="css/p-brand-logo.css">\n' : ''; }
+function logoScripts(brug){ return brug ? '<script defer src="js/brand-logos-data.js"></script>\n<script defer src="js/brand-logos.js"></script>\n' : ''; }
 
 /* Flisens foto: mærkets egen annonce af den type, helst fra en kilde uden
    skilt på vaeggen (mcsyd.dk-billederne bærer firmaets skilt og fylder hele
@@ -909,7 +963,7 @@ function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
   const faa = fremhaevede.length <= 2;
   const ctaHtml = `<aside class="mk-cta${faa ? ' mk-cta-bar' : ''}${foto ? '' : ' mk-cta-uden'}" aria-labelledby="mk-cta-h">
           <div class="mk-cta-body">
-            <p class="mk-cta-navn" aria-hidden="true">${b}</p>
+            ${ctaNavnHTML(brand)}
             <h3 id="mk-cta-h">Find din næste ${b}</h3>
             <ul class="mk-checks">
               <li><span class="mk-ok" aria-hidden="true">${ICON.check}</span>Danske forhandlere og markedspladser</li>
@@ -1230,7 +1284,7 @@ ${noindexMeta}<!-- Canonical staar HER, ikke kun i det blok scripts/build-meta.j
 </style>
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/p-maerke.css">
-${jsonLdBlock([
+${logoHead(BrandLogos.logoFor(brand).harLogo)}${jsonLdBlock([
   breadcrumbLd([
     { name: 'Forside', path: 'index.html' },
     { name: 'Mærker', path: 'maerker.html' },
@@ -1264,7 +1318,7 @@ ${header}
         <a href="maerker.html">Mærker</a><span class="bc-sep"></span>
         <span>${esc(brand)}</span>
       </nav>
-      <p class="mk-wordmark${brand.length > 11 ? ' mk-wordmark-lang' : ''}" aria-hidden="true"><span class="mk-mono">${esc(monogram(brand))}</span><span>${esc(brand)}</span></p>
+      ${heroOrdmaerkeHTML(brand)}
       <h1>${standN.renBrugt ? 'Brugte ' : ''}${esc(brand)}-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">${introFoerste}</p>
       ${introRest ? `<details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
@@ -1349,7 +1403,7 @@ ${footer}
 <script defer src="js/components.js"></script>
 <!-- Runde 7 (D7-M2): samme raekkefoelge som soegesiden (Sortering.sorter). -->
 <script defer src="js/sortering.js"></script>
-<script defer src="js/maerke.js"></script>
+${logoScripts(BrandLogos.logoFor(brand).harLogo)}<script defer src="js/maerke.js"></script>
 </body>
 </html>
 `;
@@ -1362,6 +1416,7 @@ const udenLager = maerkerUdenLager(Object.keys(BRANDS_BY_MODEL), brands);
 const topMaerker = brands.filter(b => slugify(b) !== 'andet-maerke')
   .sort((a, b) => byBrand[b].length - byBrand[a].length || a.localeCompare(b, 'da')).slice(0, 8);
 /* A–Z: første bogstav, dansk sortering (Æ Ø Å sidst). */
+const harLogoer = harNogetLogo(brands.filter(b => slugify(b) !== 'andet-maerke'));
 const bogstaver = (() => {
   const grupper = new Map();
   for (const b of brands){
@@ -1397,7 +1452,7 @@ ${csp}
 </style>
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/p-maerke.css">
-${jsonLdBlock([
+${logoHead(true)}${jsonLdBlock([
   breadcrumbLd([
     { name: 'Forside', path: 'index.html' },
     { name: 'Mærker', path: 'maerker.html' },
@@ -1434,11 +1489,7 @@ ${header}
         <a class="mk-link" href="soegning.html">Søg blandt alle ${tal(LISTINGS.length)} annoncer${ICON.arrowRight}</a>
       </div>
       <div class="mk-brandtiles">
-        ${topMaerker.map(b => `<a class="mk-brandtile" href="maerke-${slugify(b)}.html">
-          <span class="mk-brandtile-navn">${esc(b)}</span>
-          <span class="mk-brandtile-n">${antalTekst(byBrand[b].length, 'annonce', 'annoncer')}</span>
-          <span class="mk-brandtile-go" aria-hidden="true">${ICON.arrowRight}</span>
-        </a>`).join('\n        ')}
+        ${topMaerker.map(b => maerkeFliseHTML(b, antalTekst(byBrand[b].length, 'annonce', 'annoncer'))).join('\n        ')}
       </div>
     </div>
   </section>
@@ -1446,14 +1497,15 @@ ${header}
   <section class="section mk-sektion" aria-labelledby="mk-az-titel">
     <div class="container">
       <div class="mk-sek-head"><h2 id="mk-az-titel">Alle mærker A–Z</h2></div>
+      ${hurtigSoegHTML()}
       <nav class="mk-bogstaver" aria-label="Spring til bogstav">
         ${bogstaver.map(([bogstav]) => `<a href="#mk-az-${bogstav.toLowerCase()}">${bogstav}</a>`).join('\n        ')}
       </nav>
-      <div class="mk-az">
+      <div class="mk-az" id="mk-az-liste">
         ${bogstaver.map(([bogstav, liste]) => `<section class="mk-az-gruppe" id="mk-az-${bogstav.toLowerCase()}" aria-label="Mærker med ${bogstav}">
           <h3>${bogstav}</h3>
           <ul>
-            ${liste.map(b => `<li><a href="maerke-${slugify(b)}.html"><span>${esc(b)}</span><span class="mk-az-n">${byBrand[b].length}</span></a></li>`).join('\n            ')}
+            ${liste.map(b => azRaekkeHTML(b, byBrand[b].length, harLogoer)).join('\n            ')}
           </ul>
         </section>`).join('\n        ')}
       </div>
@@ -1490,7 +1542,8 @@ ${footer}
 <script defer src="js/data.js"></script>
 <script defer src="js/store.js"></script>
 <script defer src="js/components.js"></script>
-<script defer src="js/maerke.js"></script>
+${logoScripts(harLogoer)}<script defer src="js/maerke.js"></script>
+<script defer src="js/maerker-sog.js"></script>
 </body>
 </html>
 `;
@@ -1652,4 +1705,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { kortFortaltPunkter, kortFortaltHTML, prisStatistik, facetLinksFor, treKolonnerHTML, typeFlisersHTML, typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };
+module.exports = { heroOrdmaerkeHTML, ctaNavnHTML, maerkeFliseHTML, azRaekkeHTML, hurtigSoegHTML, harNogetLogo, kortFortaltPunkter, kortFortaltHTML, prisStatistik, facetLinksFor, treKolonnerHTML, typeFlisersHTML, typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };
