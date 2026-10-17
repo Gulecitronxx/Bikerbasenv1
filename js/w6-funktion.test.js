@@ -193,7 +193,7 @@ test('meldDataafbrud: tomt svar på forside, mærkeside og typeside viser banner
     assert.strictEqual(b.length, 1, `banner på "${side}"`);
     assert.match(b[0].innerHTML, /Vi fik ingen annoncer fra databasen/);
     assert.match(b[0].innerHTML, /Prøv igen/);
-    assert.strictEqual(b[0].attrs.role, 'status');
+    assert.strictEqual(b[0].attrs.role, 'alert');
   }
 });
 
