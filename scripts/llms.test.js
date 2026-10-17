@@ -5,6 +5,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { byg } = require('./build-llms.js');
@@ -12,14 +13,37 @@ const { byg } = require('./build-llms.js');
 const ROOT = path.join(__dirname, '..');
 const SITE = 'https://bikerbasen.dk';
 
+/* Scriptet køres i en TEMP-kopi (scripts/build-llms.js + site-url.js + js/seo.js), så testen aldrig skriver til
+   repoets llms.txt. Før kørte den scripts/build-llms.js direkte og omskrev llms.txt (LF i stedet for CRLF) ved hver npm test. */
+function kørIKopi(){
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'llms-'));
+  try {
+    for (const f of ['scripts/build-llms.js', 'scripts/site-url.js', 'js/seo.js']){
+      fs.mkdirSync(path.dirname(path.join(tmp, f)), { recursive: true });
+      fs.copyFileSync(path.join(ROOT, f), path.join(tmp, f));
+    }
+    const kør = () => spawnSync(process.execPath, [path.join(tmp, 'scripts', 'build-llms.js')], { encoding: 'utf8' });
+    const a = kør();
+    assert.equal(a.status, 0, a.stderr);
+    const f1 = fs.readFileSync(path.join(tmp, 'llms.txt'));
+    assert.equal(kør().status, 0);
+    return { f1, f2: fs.readFileSync(path.join(tmp, 'llms.txt')) };
+  } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+}
+
 test('llms.txt er deterministisk', () => {
   assert.equal(byg(SITE), byg(SITE));
-  const a = spawnSync(process.execPath, [path.join(__dirname, 'build-llms.js')], { encoding: 'utf8' });
-  assert.equal(a.status, 0, a.stderr);
-  const f1 = fs.readFileSync(path.join(ROOT, 'llms.txt'));
-  spawnSync(process.execPath, [path.join(__dirname, 'build-llms.js')]);
-  assert.ok(f1.equals(fs.readFileSync(path.join(ROOT, 'llms.txt'))), 'to kørsler giver samme bytes');
+  const { f1, f2 } = kørIKopi();
+  assert.ok(f1.equals(f2), 'to kørsler giver samme bytes');
   assert.equal(f1.toString('utf8'), byg(SITE));
+});
+
+test('llms.txt i repoet er opdateret (ens med scriptets output, bortset fra linjeskift) — og testen rører den ikke', () => {
+  const sti = path.join(ROOT, 'llms.txt');
+  const før = fs.readFileSync(sti);
+  kørIKopi();
+  assert.ok(før.equals(fs.readFileSync(sti)), 'testen ændrede ikke repoets llms.txt');
+  assert.equal(før.toString('utf8').split(String.fromCharCode(13)).join(''), byg(SITE), 'kør: node scripts/build-llms.js (eller build.js)');
 });
 
 test('llms.txt påstår ingen tal om antal annoncer, mærker eller priser', () => {

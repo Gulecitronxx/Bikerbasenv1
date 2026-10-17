@@ -1,0 +1,56 @@
+# FORSLAG til .github/workflows/deploy.yml — IKKE AKTIVERET (workflow-filer pushes ikke af Builder).
+# Aktivering: Orchestrator/ejer kopierer ændringerne ind i .github/workflows/deploy.yml.
+#
+# Ændring: nyt job `verificer` kører FOER `build`. Det fejler tidligt med en klar besked, og `build` har
+# `needs: verificer`. Jobbet kører node --check + verificer-site (seo-audit, sitemap, døde links, testliste,
+# synk-header) + UDGIV-tørkørsel (det trin, der fejlede i c4aada0) UDEN `npm test` (se risiko nedenfor).
+#
+# build.js kører IKKE i verificer-jobbet: den skriver sitemap/versionsstempel/genererede sider og er
+# build-jobbets opgave. Verificer kører mod de committede filer, så en commit hvor build.js ville
+# ændre noget, ikke skjules. (Vil man også fange det: tilføj `node scripts/build.js && git diff --exit-code`.)
+#
+# RISIKO ved at køre `npm test` i CI (derfor KUN som valgfrit, manuelt trin nedenfor):
+#  - Tid: 1049 tests tager ca. 2-7 min lokalt (Windows); på ubuntu-latest forventes samme størrelsesorden. Hver
+#    push til main blokeres så af testsuiten, og `concurrency: cancel-in-progress` annullerer et kørende forsøg.
+#  - node_modules: crawler-tests og smoke-browser kræver `npm ci` (package-lock findes); det tilføjer ca. 30-60 s
+#    og kræver netværk til npm-registret.
+#  - Playwright: smoke-browser.test.js / visuel-regression.test.js kan kræve en Chromium-download
+#    (`npx playwright install --with-deps chromium`, ca. 150+ MB) — langsomt og en netværks-afhængighed. Brug
+#    ikke browser-trinnene i deploy-gaten; kør dem lokalt (docs/review/gauntlet/PROCES.md).
+#  - Sideeffekter: nogle tests har skrevet til repoet (llms.txt — rettet i w11). En test, der mutererer filer i CI,
+#    er harmløs for deploy (checkout er flygtig), men kan skjule drift lokalt.
+#  - Ikke-determinisme: tests der rører netværk skal fejle lukket; ingen kendte i suiten (crawler-tests bruger fixtures).
+# Anbefaling: kør `gate` (hurtig, <1 min) som blokerende; kør `npm test` som separat workflow på pull_request
+# og på `workflow_dispatch`, ikke som krav for hver deploy.
+
+jobs:
+  verificer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verificer sitet (syntaks, SEO, sitemap, links, testliste, udgiv-tørkørsel)
+        run: |
+          echo "::group::verificer-site --hurtig --med-udgiv"
+          node scripts/verificer-site.js --hurtig --med-udgiv || {
+            echo "::error title=Gate fejlede::scripts/verificer-site.js --hurtig --med-udgiv fejlede FOER build. Kør 'npm run gate' lokalt (uden --hurtig: 'npm run verificer -- --med-udgiv') og ret trinnet, der er markeret FEJL i loggen."
+            exit 1
+          }
+          echo "::endgroup::"
+      # Valgfrit (slå til ved behov): fuld testsuite. Se RISIKO ovenfor.
+      # - name: npm ci + npm test
+      #   if: ${{ github.event_name == 'workflow_dispatch' }}
+      #   run: |
+      #     npm ci
+      #     npm test
+
+  build:
+    needs: verificer          # <-- NY linje; resten af jobbet er uændret
+    runs-on: ubuntu-latest
+    # ... (uændret: checkout, setup-node, build.js, udgiv.js, configure-pages, upload-pages-artifact)
+
+  deploy:
+    needs: build
+    # ... (uændret)
