@@ -97,7 +97,7 @@ test('desktop 1440: lav hero med overlappende kort, resultathoved på én linje,
       const t = c0.querySelector('.rk-titel').getBoundingClientRect(), pr = c0.querySelector('.rk-pris').getBoundingClientRect();
       const mid = e => { const r = R(e); return r.top + r.height / 2; };
       return {
-        heroH: hero.height, overlapTop: card.top < hero.bottom, overlapBund: card.bottom > hero.bottom,
+        heroH: hero.height, overlapTop: card.top < hero.bottom, card_bund_i_hero: card.bottom <= hero.bottom + 1,
         h1: parseFloat(getComputedStyle(document.querySelector('.so-h1-title')).fontSize),
         linje: [mid('#results-count'), mid('.sort-felt'), mid('.view-toggle')], infoH: R('#so-infoband').height,
         titelPris: Math.abs(t.top - pr.top) < 8, kolonner: getComputedStyle(document.querySelector('#results-grid')).gridTemplateColumns.split(' ').length,
@@ -106,10 +106,12 @@ test('desktop 1440: lav hero med overlappende kort, resultathoved på én linje,
       };
     });
     assert.ok(m.heroH <= 300, `hero ${m.heroH}`);
-    assert.ok(m.overlapTop && m.overlapBund, 'kortet hænger ned over bannerets kant');
+    /* W14: ved >= 1100 ligger søgekortet INDE i bannerfotoet (som mockuppen) i stedet for at hænge ned over kanten. */
+    assert.ok(m.overlapTop && m.card_bund_i_hero, 'kortet ligger i bannerfotoet');
     assert.ok(m.h1 <= 44, `h1 ${m.h1}`);
     assert.ok(Math.max(...m.linje) - Math.min(...m.linje) < 8, 'tal, sortér og gitter/liste på samme linje ' + m.linje);
-    assert.ok(m.infoH <= 41, `info-linje ${m.infoH}`);
+    /* W14: ærlighedsteksten ombrydes i stedet for at blive afkortet (to rolige linjer, sorteringsnoten synlig). */
+    assert.ok(m.infoH <= 60, `info-linje ${m.infoH}`);
     assert.ok(m.titelPris, 'titel og pris på samme linje');
     assert.equal(m.kolonner, 4);
     assert.match(m.viser, /^Viser 1–24 af [\d.]+ motorcykler$/);

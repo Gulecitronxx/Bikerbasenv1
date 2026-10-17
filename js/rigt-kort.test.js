@@ -71,7 +71,7 @@ test('titel og pris står på samme linje, titlen først', () => {
   const html = rig(ekstern());
   const top = html.match(/<div class="rk-top">([\s\S]*?)<\/div>/);
   assert.ok(top, 'kortet skal have en .rk-top');
-  assert.match(top[1], /<h3 class="rk-titel">Honda CB 1000 Hornet<\/h3>\s*<span class="rk-pris">124\.800 kr\.<\/span>/);
+  assert.match(top[1], /<h3 class="rk-titel"(?: title="Honda CB 1000 Hornet")?>Honda CB 1000 Hornet<\/h3>\s*<span class="rk-pris">124\.800 kr\.<\/span>/);
 });
 
 test('linjen "år | km | type" bærer de tre felter — og et manglende tal siges højt', () => {
