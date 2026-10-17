@@ -287,3 +287,12 @@ test('W14 i3: "Mere om"-laget er sammenfoldet, men teksten og genvejslinkene lig
   assert.equal(m.aaben, false); assert.equal(m.hvorfor, true); assert.ok(m.links >= 20, `links ${m.links}`);
   assert.ok(m.gap <= 160, `afstand ${m.gap}`);
 });
+
+test('W14: ingen mærkeflise flyder over (scrollWidth <= clientWidth) ved 1440/1280/1024/768/390, lys og mørk', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const tema of ['light', 'dark']) for (const vp of [1440, 1280, 1024, 768, 390]) {
+    const over = await aabn(vp, tema, p => p.evaluate(() => [...document.querySelectorAll('#brand-cloud .maerke-flise')]
+      .filter(a => a.scrollWidth > a.clientWidth + 1).map(a => a.getAttribute('aria-label'))));
+    assert.deepEqual(over, [], `${vp} ${tema}`);
+  }
+});
