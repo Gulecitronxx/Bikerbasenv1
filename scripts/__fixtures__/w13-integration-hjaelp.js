@@ -2,7 +2,21 @@
    syntetiske annoncer (scripts/smoke-fixtures.js). Alt udefra blokeres; intet læser produktion. */
 const path = require('path');
 const SB = require('../smoke-browser.js');
+const fs = require('fs');
 const { uuid } = require('../smoke-fixtures.js');
+const G = require('../brand-logos-gen.js');
+
+/* Testens EGET logo-data: uafhængigt af, hvilke mærker ejeren har godkendt i det rigtige manifest. Mærkerne i GODKENDT har logo
+   (SVG-filerne ligger i img/brands/), alle andre — fx Suzuki, Lauge Jensen, BSA, Cagiva, Kymco — er bevidst uden logo i testen.
+   Siderne får fixturen i stedet for js/brand-logos-data.js (Playwright route). */
+const GODKENDT = new Set(['honda', 'yamaha', 'bmw', 'kawasaki', 'harley-davidson', 'indian', 'benelli']);
+function fixtureManifest(){
+  const m = JSON.parse(fs.readFileSync(G.MANIFEST, 'utf8'));
+  for (const e of m.maerker) e.godkendt = GODKENDT.has(e.slug) && !!e.fil;
+  return m;
+}
+function fixtureData(){ return G.byggData(fixtureManifest()); }
+function fixtureDataTekst(){ return G.datafilTekst(fixtureManifest()); }
 
 const ROOT = path.join(__dirname, '..', '..');
 
@@ -18,6 +32,7 @@ async function start(rod){
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, colorScheme: tema });
     await ctx.addInitScript(SB.initScript, { tema: tema === 'dark' ? 'dark' : 'light' });
     await SB.installerMock(ctx, port, blokeret);
+    if (!rod) await ctx.route('**/js/brand-logos-data.js*', route => route.fulfill({ status: 200, contentType: 'text/javascript; charset=utf-8', body: fixtureDataTekst() }));
     if (forsinkSvg || blokerSvg){
       await ctx.route('**/img/brands/*.svg', async route => {
         if (blokerSvg) return route.fulfill({ status: 404, body: 'x' });
@@ -32,4 +47,4 @@ async function start(rod){
   }
   return { browser, port, side, anmodninger, annonceId: n => uuid(n), async close(){ await browser.close(); await new Promise(r => server.close(r)); } };
 }
-module.exports = { start, ROOT };
+module.exports = { start, ROOT, GODKENDT, fixtureData, fixtureDataTekst };
