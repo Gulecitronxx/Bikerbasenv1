@@ -99,21 +99,21 @@ function anAabnLightbox(){
   if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
 }
 
-/* Tastaturnavigation: ArrowLeft/Right bladrer, Home/End hopper til første/sidste. Galleriet er en fokuserbar gruppe
-   (tabindex=0 kun ved flere fotos), og tælleren er et aria-live-felt, så skærmlæseren hører "2 / 3". */
-function anGalleriTastatur(el){
-  if (!el || currentPhotos.length < 2) return;
-  el.addEventListener('keydown', e => {
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
-    if (e.key === 'ArrowLeft') shiftPhoto(-1);
-    else if (e.key === 'ArrowRight') shiftPhoto(1);
-    else if (e.key === 'Home') { currentPhotoIndex = 0; renderGallery(); }
-    else if (e.key === 'End') { currentPhotoIndex = currentPhotos.length - 1; renderGallery(); }
-    else return;
-    e.preventDefault();
-  });
-}
-
+/* Tastaturnavigation: ArrowLeft/Right bladrer, Home/End hopper til første/sidste. Galleriet er en fokuserbar gruppe
+   (tabindex=0 kun ved flere fotos), og tælleren er et aria-live-felt, så skærmlæseren hører "2 / 3". */
+function anGalleriTastatur(el){
+  if (!el || currentPhotos.length < 2) return;
+  el.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowLeft') shiftPhoto(-1);
+    else if (e.key === 'ArrowRight') shiftPhoto(1);
+    else if (e.key === 'Home') { currentPhotoIndex = 0; renderGallery(); }
+    else if (e.key === 'End') { currentPhotoIndex = currentPhotos.length - 1; renderGallery(); }
+    else return;
+    e.preventDefault();
+  });
+}
+
 /* Balancerer kolonnerne ved 1180+: "Kan du køre denne?", "Det bør du tjekke" og "Handl trygt" er flytbare kort. Alle 27
    placeringer prøves i den rigtige DOM, og den med mindst forskel mellem højeste og laveste kolonne bliver stående. Den
    sidste boks i hver kortere kolonne får .an-strak og strækkes til kolonnens bund (se p-annonce.css), så bundkanterne
@@ -161,6 +161,8 @@ function anBalancerKolonner(){
     anGemOprindelig(g);
     g.querySelectorAll('.an-strak').forEach(e => e.classList.remove('an-strak'));
     anGenopretOprindelig(g);
+    const dKlip = g.querySelector('#an-desc-tekst'); if (dKlip) dKlip.style.removeProperty('--an-clamp');
+    if (window.anOpdaterMere) window.anOpdaterMere();
     if (mqTablet.matches){ anTabletKolonner(g); return; }
     if (!mqBred.matches) return;
     /* W14: ingen permutationer og ingen strækning. Fast som i billedet: kørekortkortet i midten, "Handl trygt" og
@@ -169,19 +171,26 @@ function anBalancerKolonner(){
     const kk = g.querySelector('.an-kk'), tjek = g.querySelector('.an-tjek'), trygt = g.querySelector('.an-trygt-wrap');
     if (kol.some(k => !k) || !kk || !tjek || !trygt) return;
     kol[1].appendChild(kk);
-    /* Standard (som billedet): trygt + tjek i sidekolonnen. Er sidekolonnen markant højere end de andre (lange kilde-/sælgertekster),
-       prøves tjek i venstre og trygt i midten; den placering med mindst højdeforskel vælges, hvis den er mindst 80 px bedre. */
+    /* W14 runde 3: "Det bør du tjekke" er et fuldbredt bånd under de tre kolonner (direkte barn af grid'en, grid-area tip). "Handl trygt"
+       placeres i den kolonne (side, midt eller venstre), hvor forskellen mellem kolonnebundene bliver mindst; side vinder ved lighed. */
     g.classList.add('an-maal');
-    const maal = (tj, tr) => { kol[tj].appendChild(tjek); kol[tr].appendChild(trygt); if (tj === 2) kol[2].appendChild(trygt); const h = kol.map(k => k.getBoundingClientRect().height); return Math.max(...h) - Math.min(...h); };
-    let bedst = { tj: 2, tr: 2, spred: maal(2, 2) };
-    const standard = bedst.spred;
-    for (const [tj, tr] of [[0, 2], [0, 1], [2, 1], [1, 2]]){
-      const sp = maal(tj, tr);
-      if (sp < bedst.spred - 1) bedst = { tj, tr, spred: sp };
+    g.appendChild(tjek);
+    /* Balance: "Kan du køre" (venstre eller midt), "Handl trygt" (venstre, midt eller side) og beskrivelsens klip (12/9/7/5 linjer) vælges
+       så forskellen mellem kolonnebundene bliver mindst. Standard (kørekort midt, trygt i side, 12 linjer) vinder ved næsten-lighed. */
+    const desc = g.querySelector('#an-desc-tekst');
+    const klip = desc && desc.classList.contains('an-clamp') ? [12, 9, 7, 5] : [12];
+    let bedst = null;
+    for (const kkK of [1, 0]) for (const trK of [2, 1, 0]) for (const kl of klip){
+      kol[kkK].appendChild(kk); kol[trK].appendChild(trygt);
+      if (desc) desc.style.setProperty('--an-clamp', String(kl));
+      const h = kol.map(x => x.getBoundingClientRect().height);
+      const spred = Math.max(...h) - Math.min(...h);
+      const score = spred + (kkK !== 1 ? 25 : 0) + (trK !== 2 ? 25 : 0) + (12 - kl) * 5;
+      if (!bedst || score < bedst.score - 1) bedst = { kkK, trK, kl, score };
     }
-    if (bedst.spred > standard - 80) bedst = { tj: 2, tr: 2 };
-    kol[bedst.tj].appendChild(tjek);
-    if (bedst.tj === 2 && bedst.tr === 2){ kol[2].appendChild(trygt); kol[2].appendChild(tjek); } else kol[bedst.tr].appendChild(trygt);
+    kol[bedst.kkK].appendChild(kk); kol[bedst.trK].appendChild(trygt);
+    if (desc) desc.style.setProperty('--an-clamp', String(bedst.kl));
+    if (window.anOpdaterMere) window.anOpdaterMere();
     g.classList.remove('an-maal');
   };
   /* Første kørsel på denne grid; lytterne er globale og slår grid'en op ved hver ændring (siden kan tegnes om). */
@@ -268,7 +277,7 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
   const visNavn = erForhandler || loggedIn;
   const navn = visNavn && s.name ? escapeHTML(s.name) : (erForhandler ? 'Forhandler' : 'Privat sælger');
   const type = erForhandler ? 'Forhandler' : 'Privat sælger';
-  const undertekst = [visNavn && s.name ? type : '', s.city ? escapeHTML(s.city) : '']
+  const undertekst = [visNavn && s.name ? type : '', s.city ? escapeHTML(s.city) : '', !loggedIn && s.memberSince ? `Medlem siden ${s.memberSince}` : '']
     .filter(Boolean).join(' · ');
 
   const her = location.pathname.split('/').pop() + location.search;
@@ -352,7 +361,7 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
         </div>
         ${verifiedBadgeHTML(s)}
         ${cvrLinje}
-        ${tal.length ? `<div class="seller-stats">
+        ${loggedIn && tal.length ? `<div class="seller-stats">
           ${tal.map(([v, etiket]) => `<div class="seller-stat"><b>${v}</b><span>${etiket}</span></div>`).join('')}
         </div>` : ''}`;
 
@@ -641,14 +650,16 @@ function anNoegletal(l, hk){
 function anFakta(rader){
   const synlige = rader.filter(r => r && r[2] != null && r[2] !== '');
   /* W14: 'Ikke oplyst' sidst (stabil sortering), så udfyldte rækker står øverst. Ulige antal: sidste række fylder hele bredden. */
-  synlige.sort((a, b) => (a[2] === 'Ikke oplyst') - (b[2] === 'Ikke oplyst'));
-  const raekker = Math.ceil(synlige.length / 2);
+  const uoplyst = synlige.filter(r => r[2] === 'Ikke oplyst').map(r => r[1]);
+  const kendte = synlige.filter(r => r[2] !== 'Ikke oplyst');
+  const raekker = Math.ceil(kendte.length / 2);
   return `
     <section class="an-card an-fakta" aria-labelledby="an-fakta-h">
       <h2 id="an-fakta-h">Fakta om motorcyklen</h2>
       <dl class="an-facts" style="--an-rows:${raekker}">
-        ${synlige.map(([ikon, etiket, v]) => `<div class="an-fact"><span class="an-fact-ico">${ikon}</span><dt>${etiket}</dt><dd${v === 'Ikke oplyst' ? ' class="an-na"' : ''}>${String(v).includes('<') ? v : String(v).replace(/\//g, '/<wbr>')}</dd></div>`).join('')}
+        ${kendte.map(([ikon, etiket, v]) => `<div class="an-fact"><span class="an-fact-ico">${ikon}</span><dt>${etiket}</dt><dd${v === 'Ikke oplyst' ? ' class="an-na"' : ''}>${String(v).includes('<') ? v : String(v).replace(/\//g, '/<wbr>')}</dd></div>`).join('')}
       </dl>
+      ${uoplyst.length ? `<p class="an-fakta-io">Ikke oplyst: ${uoplyst.map(escapeHTML).join(', ')}</p>` : ''}
     </section>`;
 }
 
@@ -675,39 +686,31 @@ function anKoerekortKort(l, kkM, uvisA2A){
   const forklDele = String(kkM.forklaring || '').split(/(?<=\.)\s+/);
   const forklKort = forklDele.length > 1 && kkM.forklaring.length > 140 ? forklDele[0] : kkM.forklaring;
   const forklRest = forklKort === kkM.forklaring ? '' : `<p class="an-kk-rest">${escapeHTML(forklDele.slice(1).join(' '))}${escapeHTML(ekstra)}</p>`;
-  /* W14: "Det bygger vurderingen på" — kun oplyste tal og de offentlige grænser (A2: 35 kW, ca. 47 hk; A1: 11 kW, 125 cm³).
-     Viser køberen HVORFOR badgen står, som billedets kørekortmodul, uden at love mere end tallene kan. */
+  /* W14: grundlaget på én linje — kun oplyste tal og de offentlige grænser (A2: 35 kW, ca. 47 hk). */
   const hkOplyst = hkEllerNull(l.power);
-  const basis = [
-    ['Oplyst effekt', hkOplyst ? formatPower(hkOplyst) : 'Ikke oplyst'],
-    ['Oplyst motor', Number(l.ccm) > 0 ? formatCcm(l.ccm) : 'Ikke oplyst'],
-    ['Grænse for A2', 'højst 35 kW (ca. 47 hk)'],
+  const basisDele = [
+    hkOplyst ? `oplyst effekt ${formatPower(hkOplyst)}` : 'effekt ikke oplyst',
+    Number(l.ccm) > 0 ? `motor ${formatCcm(l.ccm)}` : 'motor ikke oplyst',
+    'A2-grænse højst 35 kW (ca. 47 hk)',
   ];
-  const basisHTML = `<dl class="an-kk-basis" aria-label="Det bygger vurderingen på">${basis.map(([e, v]) => `<div><dt>${e}</dt><dd${v === 'Ikke oplyst' ? ' class="an-na"' : ''}>${escapeHTML(v)}</dd></div>`).join('')}</dl>`;
+  const basisHTML = `<p class="an-kk-basis"><b>Grundlag:</b> ${basisDele.map(escapeHTML).join(' · ')}</p>`;
+  const restHTML = forklRest ? `<details class="an-kk-mere"><summary>Hvorfor ikke afgjort?</summary>${forklRest}</details>` : '';
   return `
     <section class="an-card an-kk" aria-labelledby="an-kk-h">
       <span class="an-kk-ico" aria-hidden="true">${AN_IKON.idcard}</span>
       <div class="an-kk-tekst">
         <h2 id="an-kk-h">Kan du køre denne motorcykel?</h2>
         <p>${escapeHTML(forklKort)}${forklKort === kkM.forklaring ? ekstra : ''}</p>
+        ${basisHTML}
+        ${restHTML}
         <a class="an-link" href="${side}">Læs mere om kørekort og regler${Icon.arrowRight}</a>
       </div>
       <div class="an-kk-badge an-kk-${tilstand}" role="img" aria-label="${escapeHTML(pille)} ${escapeHTML(badge)}: ${escapeHTML(badgeTekst)}"><span class="an-kk-pille">${escapeHTML(pille)}</span><b>${escapeHTML(badge)}</b><small>${escapeHTML(badgeTekst)}</small></div>
-      <details class="an-kk-mere">
-        <summary>Det bygger vurderingen på</summary>
-      ${forklRest}
-      ${basisHTML}
-      <ul class="an-kk-legende" aria-label="Sådan læser du badgen">
-        <li><b>Mulig</b> betyder ikke udelukket ud fra tallene, aldrig bekræftet.</li>
-        <li><b>Kræver A</b> betyder, at effekten alene ligger over A2-grænsen.</li>
-        <li><b>Ikke afgjort</b> bruges ved 48–49 hk, hvor kW afgør det.</li>
-      </ul>
-      </details>
     </section>`;
 }
 
 /* Generelle, sande råd — ingen påstande om netop denne motorcykel. */
-function anTjekKort(){
+function anTjekKort(foto){
   const punkter = [
     'Tjek servicehistorik og dokumentation',
     'Undersøg slidtage (dæk, kæde, bremser)',
@@ -715,16 +718,35 @@ function anTjekKort(){
     'Kontrollér for skader og tidligere uheld',
     'Tjek, at stelnummeret matcher papirerne',
   ];
+  /* W14: motorcyklen står ved siden af tjeklisten. Egen annonce: annoncens eget foto; ekstern: kildens thumbnail; ellers et
+     typefoto med ærligt label (det viser typen, ikke netop denne motorcykel). */
+  const fotoHTML2 = foto && foto.src ? `
+      <figure class="an-tjek-foto">
+        <img src="${escapeHTML(foto.src)}" alt="${escapeHTML(foto.alt || '')}" loading="lazy" decoding="async">
+        ${foto.label ? `<figcaption>${escapeHTML(foto.label)}</figcaption>` : ''}
+      </figure>` : '';
   return `
-    <section class="an-card an-tjek" aria-labelledby="an-tjek-h">
-      <span class="an-tjek-ico" aria-hidden="true">${AN_IKON.clipboard}</span>
-      <div>
+    <section class="an-card an-tjek${fotoHTML2 ? ' an-tjek-medfoto' : ''}" aria-labelledby="an-tjek-h">
+      <div class="an-tjek-tekst">
         <h2 id="an-tjek-h">Det bør du tjekke, inden du køber</h2>
         <p class="an-tjek-sub">Gå motorcyklen grundigt igennem, inden du køber. Her er de vigtigste punkter:</p>
         <ol class="an-tjek-liste">${punkter.map(p => `<li>${p}</li>`).join('')}</ol>
         <a class="an-link" href="guide-brugt-motorcykel.html">Se vores guide til brugt motorcykel${Icon.arrowRight}</a>
-      </div>
+      </div>${fotoHTML2}
     </section>`;
+}
+
+/* Foto til tjekbåndet (se anTjekKort). */
+function anTjekFoto(listing, ekstern){
+  const navn = `${listing.brand || ''} ${listing.model || ''}`.trim();
+  const egne = (currentPhotos || []).filter(Boolean);
+  if (egne.length){
+    return { src: egne.length > 1 && !ekstern ? egne[1] : egne[0], alt: navn, label: ekstern ? 'Foto fra kilden' : '' };
+  }
+  const typer = ['sport', 'touring', 'cruiser', 'naked', 'adventure', 'scooter', 'classic', 'cross'];
+  const typ = String(listing.type || '').toLowerCase();
+  if (typer.includes(typ)) return { src: `img/type/${typ}.webp`, alt: '', label: `Typefoto (${typeLabel(listing.type)}) — ikke annoncens eget` };
+  return null;
 }
 
 /* "Handl trygt på Bikerbasen" — kun punkter, siden faktisk lever op til. */
@@ -1146,7 +1168,7 @@ function renderExternalListing(listing){
       <div class="an-gallery">${fotoHTMLext}</div>
 
       ${anFakta(faktaRader)}
-      ${anTjekKort()}
+      ${anTjekKort(anTjekFoto(listing, true))}
 
       </div>
       <div class="an-col an-col-b">
@@ -1179,7 +1201,7 @@ function renderExternalListing(listing){
       </div>
     </div>`;
 
-  anFlytH1(fuldTitel, listing.brand);
+  anFlytH1(fuldTitel, listing.brand);
   anBalancerKolonner();
   anAktioner(listing, false);
   anVirkDel(listing);
@@ -1441,7 +1463,7 @@ function renderListing(){
       <div class="an-gallery">${galleriHTML}</div>
 
       ${anFakta(faktaRader)}
-      ${anTjekKort()}
+      ${anTjekKort(anTjekFoto(listing, false))}
 
       </div>
       <div class="an-col an-col-b">
@@ -1481,15 +1503,17 @@ function renderListing(){
      ikke bliver meget længere end de andre. Knappen findes kun, når teksten
      faktisk er klippet. */
   const dTekst = document.getElementById('an-desc-tekst'), dMere = document.getElementById('an-desc-mere');
-  if (dTekst && dMere && dTekst.scrollHeight > dTekst.clientHeight + 2){
-    dMere.hidden = false;
+  if (dTekst && dMere){
+    /* W14: knappen er altid koblet på og vises, når teksten er klippet — også efter at kolonnebalancen har strammet klippet. */
+    window.anOpdaterMere = () => { dMere.hidden = !dTekst.classList.contains('an-clamp') || !(dTekst.scrollHeight > dTekst.clientHeight + 2); };
     dMere.addEventListener('click', () => {
       const aaben = dTekst.classList.toggle('an-clamp') === false;
       dMere.textContent = aaben ? 'Vis mindre' : 'Vis hele beskrivelsen';
       dMere.setAttribute('aria-expanded', String(aaben));
     });
+    window.anOpdaterMere();
   }
-  anFlytH1(`${listing.brand} ${listing.model}`, listing.brand);
+  anFlytH1(`${listing.brand} ${listing.model}`, listing.brand);
   anBalancerKolonner();
   anAktioner(listing, isOwnListing(listing));
   anVirkDel(listing);

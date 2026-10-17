@@ -48,42 +48,78 @@ test('galleri: hovedbilledet fylder hele billedboksen (ingen grå stribe under f
   } finally { await s.ctx.close(); }
 });
 
-test('desktop: ingen strækning — intet kort har tomt rum, kørekortkortet står i midten, lavt, med badgen til højre', { timeout: 90000 }, async t => {
+const eksterne = [[uuid(14), 'ekstern med foto'], [uuid(13), 'ekstern 48 hk'], [uuid(5), 'ekstern uden foto'], [uuid(12), 'ekstern uden pris']];
+
+async function maalKolonner(s){
+  return s.page.evaluate(() => {
+    const r = e => e.getBoundingClientRect();
+    const bund = ['.an-col-a', '.an-col-b', '.an-side'].map(q => Math.round(r(document.querySelector(q)).bottom));
+    const grid = r(document.querySelector('.an-grid')), tjek = r(document.querySelector('.an-tjek'));
+    const tomt = [...document.querySelectorAll('.an-kk, .an-trygt-wrap .an-card, .an-fakta, .an-seller-wrap .sidebar-card')].map(k => {
+      const kids = [...k.children].filter(c => c.getBoundingClientRect().height > 0 && getComputedStyle(c).position !== 'absolute');
+      return [k.className.split(' ')[0], Math.round(r(k).bottom - Math.max(...kids.map(c => r(c).bottom)))];
+    });
+    return { bund, spred: Math.max(...bund) - Math.min(...bund), tjekBredde: tjek.width / grid.width, tjekTop: tjek.top, tomt,
+      kolBund: Math.max(...bund), fig: !!document.querySelector('.an-tjek-foto img'), figLabel: (document.querySelector('.an-tjek-foto figcaption') || {}).textContent || '' };
+  });
+}
+
+test('desktop 1440: kolonnebunde højst 100 px fra hinanden, "Det bør du tjekke" er et fuldbredt bånd under dem, intet kort har tomt rum', { timeout: 180000 }, async t => {
   if (!kan.ok) return t.skip(kan.grund);
-  for (const [fotos, label] of [[5, 'egen 5 fotos'], [0, 'egen uden foto']]){
-    const s = await aabn({ width: 1440, height: 900 }, 'light', { fotos });
-    try {
-      await gaa(s, `annonce.html?id=${ID}`);
-      const m = await s.page.evaluate(() => {
-        const r = e => e.getBoundingClientRect();
-        const tomt = [...document.querySelectorAll('.an-kk, .an-tjek, .an-trygt-wrap .an-card, .an-fakta, .an-seller-wrap .sidebar-card')].map(k => {
-          const kids = [...k.children].filter(c => c.getBoundingClientRect().height > 0 && getComputedStyle(c).position !== 'absolute');
-          const sidste = Math.max(...kids.map(c => r(c).bottom));
-          return [k.className.split(' ')[0], Math.round(r(k).bottom - sidste)];
-        });
-        const kk = document.querySelector('.an-kk'), badge = document.querySelector('.an-kk-badge'), tekst = document.querySelector('.an-kk-tekst');
-        return { tomt, iB: !!document.querySelector('.an-col-b .an-kk'), kkH: Math.round(r(kk).height),
-          badgeHoejre: r(badge).left >= r(tekst).right - 1, badgeLinje: r(badge).top < r(tekst).bottom };
-      });
-      assert.ok(m.iB, `${label}: kørekortkort i midterkolonnen`);
-      assert.ok(m.badgeHoejre && m.badgeLinje, `${label}: badge til højre for teksten`);
-      assert.ok(m.kkH <= 240, `${label}: kørekortkort ${m.kkH} px`);
+  const s = await aabn({ width: 1440, height: 900 }, 'light', { fotos: 5 });
+  try {
+    const sider = [[`annonce.html?id=${ID}`, 'egen 5 fotos'], ...eksterne.map(([id, n]) => [`annonce.html?id=${id}`, n])];
+    for (const [side, label] of sider){
+      await gaa(s, side);
+      const m = await maalKolonner(s);
+      assert.ok(m.spred <= 100, `${label}: kolonnebunde ${m.bund} (forskel ${m.spred} px)`);
+      assert.ok(m.tjekBredde >= 0.98, `${label}: tjekbåndet er ${Math.round(m.tjekBredde * 100)} % af gridbredden`);
+      assert.ok(m.tjekTop >= m.kolBund - 1, `${label}: tjekbåndet ligger under alle kolonner`);
+      assert.ok(m.fig, `${label}: foto ved siden af tjeklisten`);
       m.tomt.forEach(([navn, h]) => assert.ok(h <= 40, `${label}: ${navn} har ${h} px tomt rum i bunden`));
-    } finally { await s.ctx.close(); }
-  }
+    }
+    for (const fotos of [0, 1]){
+      const s2 = await aabn({ width: 1440, height: 900 }, 'light', { fotos });
+      try {
+        await gaa(s2, `annonce.html?id=${ID}`);
+        const m = await maalKolonner(s2);
+        assert.ok(m.spred <= 100, `egen ${fotos} fotos: kolonnebunde ${m.bund}`);
+        assert.match(m.figLabel + (fotos ? 'x' : ''), fotos ? /x/ : /Typefoto/, 'uden egne fotos: ærligt typefoto-label');
+      } finally { await s2.ctx.close(); }
+    }
+  } finally { await s.ctx.close(); }
 });
 
-test('kørekortkort: grundlag og legende bruger kun oplyste tal og offentlige grænser', { timeout: 60000 }, async t => {
+test('kørekortflade: lav (højst 190 px), titel på én linje, stor badge til højre, grundlag på én linje med kun oplyste tal', { timeout: 120000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ width: 1440, height: 900 }, 'light');
+  try {
+    for (const side of [`annonce.html?id=${ID}`, `annonce.html?id=${uuid(14)}`, `annonce.html?id=${uuid(13)}`]){
+      await gaa(s, side);
+      const m = await s.page.evaluate(() => {
+        const r = e => e.getBoundingClientRect();
+        const kk = document.querySelector('.an-kk'), badge = document.querySelector('.an-kk-badge'), tekst = document.querySelector('.an-kk-tekst');
+        return { h: Math.round(r(kk).height), h2: Math.round(r(document.querySelector('.an-kk h2')).height), badgeB: Math.round(r(badge).width),
+          badgeHoejre: r(badge).left >= r(tekst).right - 1, kolonne: !!kk.closest('.an-col-a, .an-col-b'), tekst: kk.textContent };
+      });
+      assert.ok(m.h <= 190, `${side}: kortet er ${m.h} px højt`);
+      assert.ok(m.h2 < 30, `${side}: titlen brydes (${m.h2} px)`);
+      assert.ok(m.badgeHoejre && m.badgeB >= 110, `${side}: stor badge til højre (${m.badgeB} px)`);
+      assert.match(m.tekst, /Grundlag:.*A2-grænse højst 35 kW \(ca\. 47 hk\)/);
+      assert.doesNotMatch(m.tekst, /verificeret|garanteret/i);
+    }
+    await gaa(s, `annonce.html?id=${ID}`);
+    assert.match(await s.page.locator('.an-kk').textContent(), /oplyst effekt 73 hk/);
+  } finally { await s.ctx.close(); }
+});
+
+test('faktatabel: uoplyste felter er samlet i én linje, ingen "Ikke oplyst"-rækker i tabellen', { timeout: 60000 }, async t => {
   if (!kan.ok) return t.skip(kan.grund);
   const s = await aabn({ width: 1440, height: 900 }, 'light');
   try {
     await gaa(s, `annonce.html?id=${ID}`);
-    const tekst = await s.page.locator('.an-kk').textContent();
-    assert.match(tekst, /Oplyst effekt\s*73 hk/);
-    assert.ok(await s.page.locator('.an-kk-mere:not([open])').count(), 'grundlag og legende er sammenfoldet som standard');
-    assert.match(tekst, /Grænse for A2\s*højst 35 kW/);
-    assert.doesNotMatch(tekst, /verificeret|garanteret/i);
-    assert.match(tekst, /aldrig bekræftet/);
+    assert.strictEqual(await s.page.locator('.an-facts dd.an-na').count(), 0);
+    assert.match(await s.page.locator('.an-fakta-io').innerText(), /^Ikke oplyst: .*Afgift/);
   } finally { await s.ctx.close(); }
 });
 
@@ -180,5 +216,62 @@ test('telefon-reveal (logget ind, andens annonce): knappen henter nummeret via R
       assert.match(tekst, forventet);
       assert.deepStrictEqual(s.fund, []);
     } finally { await s.ctx.close(); }
+  }
+});
+
+test('opret: lav hero (højst 200 px), eksempelkort i forhåndsvisningen fra start og kompakt upload-flise med miniaturefelter', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ width: 1440, height: 900 }, 'light', { loggetInd: true, annoncer: [] });
+  try {
+    await gaa(s, 'opret-annonce.html');
+    const m = await s.page.evaluate(() => {
+      const r = q => document.querySelector(q).getBoundingClientRect();
+      const z = r('#upload-zone');
+      const ghost = document.querySelector('.photo-ghosts > span');
+      return { hero: r('.op-hero').height, uploadH: z.height, ghostRække: ghost ? Math.abs(ghost.getBoundingClientRect().top - z.top) : 999,
+        kort: !!document.querySelector('#op-live-card .card'), eksempel: document.getElementById('op-live-card').classList.contains('op-live-eksempel'),
+        etiket: getComputedStyle(document.getElementById('op-live-card'), '::before').content };
+    });
+    assert.ok(m.hero <= 200, `hero ${m.hero} px`);
+    assert.ok(m.uploadH <= 140, `upload-flise ${m.uploadH} px`);
+    assert.ok(m.ghostRække <= 2, 'miniaturefelter står i samme række som upload-fliserne');
+    assert.ok(m.kort && m.eksempel, 'kortet vises uden input og er mærket som eksempel');
+    assert.match(m.etiket, /Eksempel/);
+    // efter valg af mærke og model er det ikke længere et eksempel
+    await s.page.selectOption('#f-brand', 'Yamaha'); await s.page.fill('#f-model', 'MT-07');
+    await s.page.waitForTimeout(200);
+    assert.ok(!(await s.page.evaluate(() => document.getElementById('op-live-card').classList.contains('op-live-eksempel'))));
+  } finally { await s.ctx.close(); }
+});
+
+test('opret login-port: teksten og toasten siger eksplicit, at billeder skal vælges efter login', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ width: 1440, height: 900 }, 'light', { loggetInd: false, annoncer: [] });
+  try {
+    await gaa(s, 'opret-annonce.html');
+    assert.match(await s.page.locator('#op-photo-gate').innerText(), /Billeder kan ikke gemmes i en kladde/);
+    await s.page.click('#op-photo-gate-btn');
+    await s.page.waitForFunction(() => /Billeder kan ikke gemmes i kladden/.test(document.body.innerText), null, { timeout: 4000 });
+    assert.match(await s.page.evaluate(() => document.body.innerText), /dem vælger du først, når du er logget ind/);
+    assert.strictEqual(s.bak.tilstand.tabeller.listings.length, 0, 'intet oprettet');
+  } finally { await s.ctx.close(); }
+});
+
+test('galleri: 6+ fotos giver 5 miniaturer og "+N"-flise; 0/1 foto har ingen pile', { timeout: 90000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ width: 1440, height: 900 }, 'light', { fotos: 14 });
+  try {
+    await gaa(s, `annonce.html?id=${ID}`);
+    assert.strictEqual(await s.page.locator('.gallery-thumbs button:not(.gallery-more)').count(), 5);
+    assert.match(await s.page.locator('.gallery-more span').innerText(), /^\+9$/);
+    assert.ok(await s.page.locator('#gallery-expand').count(), 'fuldskærmsknap');
+  } finally { await s.ctx.close(); }
+  for (const fotos of [0, 1]){
+    const s2 = await aabn({ width: 1440, height: 900 }, 'light', { fotos });
+    try {
+      await gaa(s2, `annonce.html?id=${ID}`);
+      assert.strictEqual(await s2.page.locator('.gallery-nav').count(), 0, `${fotos} foto: ingen pile`);
+      assert.strictEqual(await s2.page.locator('.gallery-thumbs').count(), 0, `${fotos} foto: ingen miniaturer`);
+    } finally { await s2.ctx.close(); }
   }
 });

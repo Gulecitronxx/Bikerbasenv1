@@ -893,7 +893,7 @@ function renderSeoAssistent(data){
     ? `<div class="detail-section" style="margin-top:20px;">
          <h2 style="font-size:16px;">Før du udgiver</h2>
          <ul class="equipment-list" style="grid-template-columns:1fr;">
-           ${gaps.slice(0, 4).map(g => `<li><span style="color:var(--color-danger); display:inline-flex;">${Icon.alertTriangle}</span>${escapeHTML(g)}</li>`).join('')}
+           ${gaps.slice(0, 4).map(g => `<li><span class="op-advarsel-ikon">${Icon.alertTriangle}</span>${escapeHTML(g)}</li>`).join('')}
          </ul>
          ${gaps.length > 4 ? `<p class="field-hint" style="margin-top:8px;">…og ${gaps.length - 4} ting mere, du kan nævne i beskrivelsen.</p>` : ''}
        </div>`
@@ -985,20 +985,16 @@ function renderLiveCard(){
     photoUrls, photos: photoUrls.length || 1, seller: sellerFromUser(Object.assign({}, user, { city: d.city })),
   });
   let html;
-  if (!harNavn){
-    /* Venlig tom tilstand i stedet for et kort fuldt af "ikke oplyst". */
-    html = `<div class="op-live-tomt">${Icon.bike}<b>Dit annoncekort vises her</b><span>Vælg mærke og model, så begynder kortet at tage form.</span></div>`;
-  } else {
-    try { html = listingCardHTML(l); } catch (e) { html = ''; }
-    html = html.replace('card-link" aria-label', 'card-link" tabindex="-1" aria-label');
-  }
+  /* W14 runde 3: kortet står fra første sekund (som i billedet), ærligt mærket "Eksempel", til mærke og model er valgt. */
+  try { html = listingCardHTML(l); } catch (e) { html = ''; }
+  html = html.replace('card-link" aria-label', 'card-link" tabindex="-1" aria-label');
   mount.innerHTML = html;
-  mount.classList.toggle('op-live-tom', !harNavn);
+  mount.classList.toggle('op-live-eksempel', !harNavn);
   mount.classList.toggle('op-live-nopris', harNavn && d.price == null);
   const note = document.getElementById('op-prev-note');
   if (note) note.textContent = harNavn
     ? 'Kortet opdateres, mens du udfylder. Det, du ikke har oplyst, står som "ikke oplyst".'
-    : 'Kortet opdateres, mens du udfylder.';
+    : 'Eksempel: kortet tager form, mens du udfylder.';
 }
 
 /* Mobil: forhåndsvisningen ligger under formularen, så en knap åbner den som et
@@ -1393,7 +1389,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      overleve omvejen, og derfor kan de først vælges efter login (se #op-photo-gate). */
   const tilLogin = () => {
     Store.saveDraft('form', Object.assign(collectFormData(), { videreTilTrin: 2 }));
-    toast('Din kladde er gemt på denne enhed — log ind, så fortsætter du med billederne.');
+    toast('Din kladde er gemt på denne enhed — log ind, så fortsætter du. Billeder kan ikke gemmes i kladden, så dem vælger du først, når du er logget ind.');
     setTimeout(() => { forlad('login.html?redirect=' + encodeURIComponent('opret-annonce.html')); }, 1400);
   };
   if (kraeverLogin() && new URLSearchParams(window.location.search).get('rediger')){
