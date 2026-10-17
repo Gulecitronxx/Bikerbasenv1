@@ -511,6 +511,15 @@ function auditKontrast(){
         if (c[3] > 0.01) bedst = Math.max(bedst, kontr(bland(c, forael.rgb), forael.rgb));
       }
     }
+    /* Kanten kan ligge på en omsluttende wrapper (fx .sort-felt) — den tæller som kontrolgrænse. */
+    for (let a = el.parentElement, d = 0; a && d < 2 && bedst < 3; a = a.parentElement, d++){
+      const ac = getComputedStyle(a);
+      const rp = bagved(a.parentElement || a, null);
+      if (rp.uafgjort) continue;
+      for (const sd of ['Top', 'Right', 'Bottom', 'Left']){
+        if (parseFloat(ac['border' + sd + 'Width']) > 0 && ac['border' + sd + 'Style'] !== 'none'){ const c = parse(ac['border' + sd + 'Color']); if (c[3] > 0.01) bedst = Math.max(bedst, kontr(bland(c, rp.rgb), rp.rgb)); }
+      }
+    }
     if (bedst < 3) add('kontrast-ui', el, `kant/fyld ${bedst.toFixed(2)}:1 mod baggrunden (krav 3:1)`);
   }
   return F;
