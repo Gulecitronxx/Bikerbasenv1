@@ -56,11 +56,15 @@
 .gd-meta-label{ font-weight:400; opacity:.85; }
 
 /* ---------- Layout ---------- */
+/* Mobil: "Kort fortalt" -> sammenklappelig indholdsfortegnelse -> artikel -> genveje. Højre spalte er display:contents,
+   så dens børn kan flex-ordnes ind mellem hero og artikel. Desktop: to spalter; indholdsfortegnelsen er sticky. */
 .gd-layout{ display:flex; flex-direction:column; gap: var(--space-5); padding-top: var(--space-5); padding-bottom: var(--space-8); }
-.gd-layout > .gd-main{ min-width:0; order:2; }
+.gd-layout > .gd-main{ min-width:0; order:3; }
 .gd-side{ display:contents; }
 .gd-side > .gd-tldr{ order:1; }
-.gd-side > .gd-dark, .gd-side > .gd-pop{ order:3; }
+.gd-side > .gd-toc{ order:2; }
+.gd-extras{ display:grid; gap: var(--space-5); margin-top: var(--space-6); }
+@media (min-width:700px){ .gd-extras{ grid-template-columns: repeat(2, minmax(0,1fr)); align-items:start; } }
 
 @media (min-width:1024px){
   .gd-layout{
@@ -70,28 +74,48 @@
   .gd-layout > .gd-main{ order:0; padding-top: var(--space-5); }
   .gd-side{
     display:flex; flex-direction:column; gap: var(--space-4);
-    margin-top: -132px; position:relative; z-index:2;
+    margin-top: -132px; position:relative; z-index:2; align-self:stretch;
   }
   .gd-side > *{ order:0; }
-}
-@media (min-width:1024px) and (min-height:1040px){
-  .gd-side{ position:sticky; top: calc(var(--header-h) + var(--space-4)); }
+  .gd-side > .gd-toc{
+    position:sticky; top: calc(var(--header-h) + var(--space-4));
+    max-height: calc(100vh - var(--header-h) - var(--space-6)); overflow-y:auto; overscroll-behavior:contain;
+  }
 }
 
 /* ---------- Indholdsfortegnelse ---------- */
 .gd-toc{
   background: var(--color-surface-2); border:1px solid var(--color-border);
-  border-radius: var(--radius-md); padding: var(--space-5) var(--space-5);
-  margin-bottom: var(--space-6);
+  border-radius: var(--radius-md);
 }
-.gd-toc h2{ display:flex; align-items:center; gap: var(--space-4); font-size: 20px; margin-bottom: var(--space-3); }
+.gd-toc-det > summary{
+  list-style:none; display:flex; align-items:center; justify-content:space-between; gap: var(--space-3);
+  min-height:52px; padding: var(--space-3) var(--space-5); cursor:pointer; border-radius: var(--radius-md);
+}
+.gd-toc-det > summary::-webkit-details-marker{ display:none; }
+.gd-toc-det > summary:focus-visible{ outline:2px solid var(--color-ring); outline-offset:2px; }
+.gd-toc h2{ display:flex; align-items:center; gap: var(--space-4); font-size: 20px; margin: 0; }
 .gd-toc-ic{ display:inline-flex; width:24px; height:24px; color: var(--color-fg); }
 .gd-toc-ic svg{ width:24px; height:24px; }
-.gd-toc ol{ margin:0; padding-left: 1.6em; display:grid; gap: 0 40px; font-size:15px; }
-@media (min-width:700px){ .gd-toc ol{ grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(var(--gd-toc-rows, 4), auto); } }
+.gd-toc-chev{ display:inline-flex; width:20px; height:20px; flex:none; color: var(--color-fg-muted); transition: transform .2s; }
+.gd-toc-chev svg{ width:100%; height:100%; }
+.gd-toc-det[open] .gd-toc-chev{ transform: rotate(180deg); }
+.gd-toc ol{ margin:0; padding: 0 var(--space-5) var(--space-4) calc(var(--space-5) + 1.6em); display:grid; gap: 0 40px; font-size:15px; }
+@media (min-width:700px) and (max-width:1023px){ .gd-toc ol{ grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(var(--gd-toc-rows, 4), auto); } }
 .gd-toc li::marker{ color: var(--color-fg-muted); font-weight:600; }
 .gd-toc a{ color: var(--color-fg); text-decoration:none; display:flex; align-items:center; min-height:40px; }
 .gd-toc a:hover{ color: var(--color-primary); text-decoration: underline; }
+.gd-toc a[aria-current="location"]{ color: var(--color-primary); font-weight:600; }
+@media (max-width:480px){ .gd-toc-det > summary{ padding: var(--space-3) var(--space-4); } .gd-toc ol{ padding-right: var(--space-4); padding-left: calc(var(--space-4) + 1.6em); } }
+/* Desktop: altid åben (Chromium/Safari/Firefox med ::details-content); ældre browsere åbnes af js/guides.js. */
+@media (min-width:1024px){
+  .gd-toc-det::details-content{ content-visibility:visible; display:block; }
+  .gd-toc-det > summary{ cursor:default; pointer-events:none; padding-bottom: var(--space-3); }
+  .gd-toc-chev{ display:none; }
+  .gd-toc h2{ font-size:18px; }
+  .gd-toc ol{ font-size:14.5px; padding-right: var(--space-4); }
+  .gd-toc a{ min-height:34px; }
+}
 
 /* ---------- Artikel ---------- */
 .gd-article{ counter-reset: gd-sec; font-size: 17px; line-height: 1.7; color: var(--color-fg); max-width: 760px; }
