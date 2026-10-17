@@ -12,7 +12,7 @@ const ALLE = ['Honda', 'Yamaha', 'BMW', 'Kawasaki', 'KTM', 'Ducati', 'Suzuki', '
 
 /* medLogo=false -> standard-instansen (ingen godkendte logoer); true -> testmanifestet med placeholder-SVG'er. */
 function instans(medLogo){
-  return medLogo ? BL.opret(G.byggData(H.testManifest())) : BL;
+  return BL.opret(G.byggData(medLogo ? H.testManifest() : H.renManifest()));
 }
 
 function side(medLogo, { sti = '/' } = {}){
