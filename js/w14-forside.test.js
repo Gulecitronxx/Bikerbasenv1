@@ -246,13 +246,14 @@ test('W14 i3: mærkefliserne dublerer ikke navnet, og kørekort-/typefliserne pe
   const r = await aabn(1440, 'light', p => p.evaluate(() => ({
     flise: [...document.querySelectorAll('#brand-cloud .maerke-flise')].map(a => ({
       navn: a.getAttribute('aria-label'),
-      tekster: [...a.querySelectorAll('strong')].filter(s => getComputedStyle(s).position !== 'absolute').map(s => s.textContent.trim()),
+      tekster: [...a.querySelectorAll('strong')].filter(s => getComputedStyle(s).visibility !== 'hidden').map(s => s.textContent.trim()),
+      emblem: !!a.querySelector('.bl--emblem'),
       logoTekst: (a.querySelector('.maerke-logo') || {}).textContent || '',
     })),
     kk: [...document.querySelectorAll('.tal-grid a[data-kk]')].map(a => [a.dataset.kk, a.getAttribute('href')]),
     typer: [...document.querySelectorAll('#category-tiles .tile')].map(a => [a.dataset.type, a.getAttribute('href')]),
   })));
-  for (const f of r.flise) assert.ok(f.tekster.length <= 1, `dublet i ${f.navn}`);
+  for (const f of r.flise) assert.ok(f.tekster.length === 0 || f.emblem, `navn og ordmærke dubleret i ${f.navn}`);   // synligt navn kun under et emblem (uden ordmærke)
   const kk = Object.fromEntries(r.kk);
   assert.equal(kk.A1, 'koerekort-a1.html'); assert.equal(kk.A2, 'koerekort-a2.html'); assert.equal(kk.A, 'koerekort-a.html');
   for (const [, href] of [...r.kk, ...r.typer]) {

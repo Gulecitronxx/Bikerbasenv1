@@ -772,3 +772,5 @@ body.home .site-footer{ margin-top: var(--space-5); }
 body.home .mere-om > summary{ padding-inline: var(--space-4); text-align:center; }
 body.home .mere-om > summary > span{ min-width:0; }
 body.home .mere-om{ overflow-x:clip; }
+/* Mærker uden emblem: logoet bærer selv ordmærket, teksten skjules (pladsen bevares, så antallet står på samme linje; linket har aria-label). */
+body.home .maerke-flise .maerke-navn-skjult{ position:static; width:auto; height:auto; margin:0; clip:auto; overflow:visible; visibility:hidden; }
