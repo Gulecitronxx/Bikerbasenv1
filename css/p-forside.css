@@ -1,0 +1,168 @@
+/* Forside (billede 1) — w11: modigere komposition oven på de delte komponenter i styles.css.
+   Kun body.home. Ingen nye farver (tokens), ingen nye assets. Rører ikke .data-afbrud, kortblokken (.rk-*, .card) eller footer.
+   Alle pladsholdere har fast højde, så tom/fejlet lager ikke giver layoutskift. */
+
+/* ---------- Hero: større, mere foto, tungere typografi ---------- */
+body.home .hero{ padding-top: var(--space-7); }
+body.home .hero-inner{ max-width: 780px; }
+body.home .hero-eyebrow{ gap:12px; font-size:12.5px; letter-spacing:.12em; }
+body.home .hero-eyebrow::before{ content:""; width:34px; height:4px; border-radius:2px; background: var(--color-primary); flex:none; }
+body.home .hero h1{ font-size: clamp(34px, 9vw, 44px); line-height:1.02; letter-spacing:-0.025em; font-weight:700; margin-bottom: var(--space-4); }
+body.home .hero p.lead{ font-size: clamp(16px,1.35vw,19px); max-width: 640px; }
+.hero-genveje{ display:flex; flex-wrap:wrap; gap:10px; margin:var(--space-4) 0 0; }
+.hero-chip{
+  display:inline-flex; align-items:center; min-height:40px; padding:0 16px; border-radius: var(--radius-pill);
+  background: rgba(20,17,14,.62); color:#fff; border:1px solid rgba(255,255,255,.4);
+  font-size:14px; font-weight:600; text-shadow:none; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  transition: background .15s, border-color .15s;
+}
+.hero-chip:hover{ background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.hero-chip:focus-visible{ outline:2.5px solid #fff; outline-offset:2px; }
+@media (max-width:760px){ .hero-genveje{ display:none; } }
+@media (min-width:768px){
+  body.home .hero{ min-height: 520px; padding-top: 72px; }
+  body.home .hero h1{ font-size: clamp(48px, 5.6vw, 58px); }
+  body.home .hero-photo{ object-position: 76% 62%; }
+}
+@media (min-width:1100px){
+  body.home .hero{ min-height: 600px; padding-top: 88px; }
+  body.home .hero h1{ font-size: clamp(60px, 5vw, 76px); max-width:none; }
+}
+/* Dybere, varmere bund og kraftigere venstre side bag den store tekst. */
+body.home .hero::after{
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--color-dark) 88%, transparent) 0%,
+      color-mix(in srgb, var(--color-dark) 72%, transparent) 34%,
+      color-mix(in srgb, var(--color-dark) 30%, transparent) max(720px, 46%),
+      transparent calc(max(720px, 46%) + 240px)),
+    linear-gradient(0deg, color-mix(in srgb, var(--color-dark) 40%, transparent) 0%, transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--color-dark) 38%, transparent) 0%, transparent 28%);
+}
+@media (max-width:760px){
+  body.home .hero::after{ background: linear-gradient(180deg,
+    color-mix(in srgb, var(--color-dark) 84%, transparent) 0%,
+    color-mix(in srgb, var(--color-dark) 72%, transparent) 40%,
+    color-mix(in srgb, var(--color-dark) 32%, transparent) 64%,
+    color-mix(in srgb, var(--color-dark) 26%, transparent) 100%); }
+}
+
+/* ---------- Søgekort: overlappende kort med accentkant og stor CTA ---------- */
+body.home .hero-sok{ margin-top:-88px; background: linear-gradient(180deg, transparent 0, transparent 88px, var(--color-surface-2) 88px); }
+body.home .search-panel{ position:relative; border-radius: 22px; box-shadow: 0 22px 54px rgba(20,16,10,.28), 0 2px 6px rgba(20,16,10,.1); border-color: color-mix(in srgb, var(--color-border) 70%, transparent); overflow:hidden; }
+body.home .search-panel::before{ content:""; position:absolute; left:0; right:0; top:0; height:5px; background: var(--color-primary); }
+@media (min-width:768px){ body.home .search-panel{ padding: var(--space-5) var(--space-5) var(--space-4); } }
+body.home .search-panel .input, body.home .search-panel select.input{ min-height:50px; border-radius:12px; }
+body.home .sk-cta .sk-knap{ min-height:62px; font-size:17px; border-radius:12px; box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 38%, transparent); }
+body.home .kk-seg label{ min-height:46px; }
+
+/* ---------- Tillidsrække: ikon i tonet cirkel ---------- */
+body.home .trust-band{ padding: var(--space-5) 0 var(--space-6); }
+@media (min-width:1100px){ body.home .trust-band{ padding-top: var(--space-6); } }
+body.home .trust-row li{ gap: var(--space-3); align-items:center; }
+body.home .trust-ico{ width:48px; height:48px; border-radius:50%; background: var(--color-primary-tint); color: var(--color-primary); align-items:center; justify-content:center; }
+body.home .trust-ico svg{ width:26px; height:26px; stroke-width:1.6; }
+:root[data-theme="dark"] body.home .trust-ico{ background: color-mix(in srgb, var(--color-primary) 22%, var(--color-surface)); }
+body.home .trust-row strong{ font-size:15px; }
+
+/* ---------- Sektionsrytme og overskrifter med accentstreg ---------- */
+body.home .udvalg{ padding: var(--space-7) 0 var(--space-5); }
+body.home .typer{ padding: var(--space-5) 0 var(--space-6); }
+body.home .saadan{ padding: var(--space-7) 0; background: var(--color-surface-2); border-block:1px solid var(--color-border); margin-top: var(--space-4); }
+body.home .tre-kol-sektion{ padding: var(--space-7) 0 var(--space-6); }
+body.home .hvorfor{ padding: var(--space-7) 0 var(--space-5); }
+@media (max-width:767px){
+  body.home .udvalg{ padding-top: var(--space-6); }
+  body.home .saadan, body.home .tre-kol-sektion, body.home .hvorfor{ padding-block: var(--space-6); }
+}
+body.home .sek-hoved{ align-items:flex-end; margin-bottom: var(--space-4); }
+body.home .sek-hoved h2, body.home .saadan-hoved h2, body.home .hvorfor h2{ font-size: clamp(24px, 2.2vw, 30px); line-height:1.15; letter-spacing:-0.015em; }
+body.home .sek-hoved h2::before, body.home .saadan-hoved h2::before, body.home .hvorfor h2::before{
+  content:""; display:block; width:40px; height:4px; border-radius:2px; background: var(--color-primary); margin-bottom: 12px;
+}
+body.home .sek-hoved .section-link{ font-size:15px; min-height:40px; align-items:center; }
+
+/* ---------- Typefliser: højere, foto-tungt ---------- */
+body.home .tile{ aspect-ratio:auto; height:124px; }
+@media (min-width:640px){ body.home .tile{ height:136px; } }
+body.home .tiles-raekke:empty{ min-height:124px; }
+@media (min-width:640px){ body.home .tiles-raekke:empty{ min-height:136px; } }
+body.home .tile .tile-navn{ font-size:18px; }
+body.home .tile .tile-count{ font-size:13px; }
+body.home .tile .tile-label{ left:14px; bottom:12px; }
+
+/* ---------- Sådan virker: 4 trin som kort med forbindelser ---------- */
+body.home .saadan-strip{ gap: var(--space-5); }
+@media (min-width:1280px){ body.home .saadan-strip{ grid-template-columns: minmax(0,1fr) 300px; gap: var(--space-5); } }
+body.home .saadan-hoved{ display:block; background:transparent; border:0; padding:0; }
+body.home .saadan-hoved h2{ margin-bottom: var(--space-5); }
+body.home .saadan-trin{ gap: 36px; counter-reset: none; }
+@media (min-width:600px){ body.home .saadan-trin{ gap: var(--space-4); } }
+@media (min-width:1000px){ body.home .saadan-trin{ gap: 40px; } }
+body.home .saadan-trin-punkt{
+  display:flex; flex-direction:column; align-items:flex-start; gap: var(--space-3); padding: var(--space-5) var(--space-4) var(--space-4);
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+}
+body.home .saadan-ico{
+  order:1; width:56px; height:56px; margin:0; padding:14px; border-radius:50%;
+  background: var(--color-primary-tint); color: var(--color-primary);
+}
+:root[data-theme="dark"] body.home .saadan-ico{ background: color-mix(in srgb, var(--color-primary) 22%, var(--color-surface)); }
+body.home .saadan-ico svg{ width:28px; height:28px; stroke-width:1.6; }
+body.home .saadan-nr{
+  position:absolute; top:14px; right:14px; width:30px; height:30px; font-size:14px; justify-self:auto; align-self:auto;
+}
+body.home .saadan-trin-punkt > div{ order:2; }
+body.home .saadan-trin-punkt strong{ font-size:16.5px; }
+body.home .saadan-trin-punkt div span{ font-size:13.5px; line-height:1.45; margin-top:4px; }
+/* Forbindelser: pil til højre mellem trin (>= 1000 px), pil nedad i en lodret liste (< 600 px). */
+body.home .saadan-trin-punkt:not(:last-child)::after{
+  content:""; position:absolute; width:26px; height:26px; background: var(--color-primary); opacity:.9;
+  right:-33px; top:50%; margin-top:-13px;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h16M14 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h16M14 6l6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+@media (min-width:600px) and (max-width:999px){ body.home .saadan-trin-punkt::after{ display:none; } }
+@media (max-width:599px){
+  body.home .saadan-trin-punkt:not(:last-child)::after{ right:auto; left:50%; top:auto; bottom:-31px; margin:0 0 0 -13px; transform: rotate(90deg); }
+}
+@media (min-width:1000px) and (max-width:1279px){ body.home .saadan-trin{ gap:36px; } body.home .saadan-trin-punkt:not(:last-child)::after{ right:-31px; } }
+
+/* ---------- Tre kolonner: kørekort som rækker med regel ---------- */
+@media (min-width:1100px){
+  body.home .tre-kol:not(:has(> .kol[hidden])){ grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--space-5); }
+}
+body.home .kol{ padding: var(--space-5); border-radius: 16px; }
+body.home .kol-hoved h2{ font-size:17px; }
+body.home .kol-hoved h2::before{ content:none; }
+body.home .tal-grid-3{ grid-template-columns: minmax(0,1fr); }
+body.home .tal-grid-3 a{
+  display:grid; grid-template-columns: 52px minmax(0,1fr) auto; grid-template-areas: "bogstav navn n" "bogstav regel n";
+  align-items:center; justify-items:start; column-gap: var(--space-3); row-gap:1px; min-height:68px; padding: 10px var(--space-3); text-align:left;
+}
+body.home .tal-grid-3 strong{ grid-area:bogstav; justify-self:stretch; display:flex; align-items:center; justify-content:center; height:44px; border-radius:12px; background: var(--color-primary-tint); color: var(--color-primary); font-size:20px; }
+:root[data-theme="dark"] body.home .tal-grid-3 strong{ background: color-mix(in srgb, var(--color-primary) 22%, var(--color-surface)); }
+body.home .tal-grid-3 .kk-navn{ grid-area:navn; font-size:13px; font-weight:600; color: var(--color-fg); }
+body.home .tal-grid-3 .kk-regel{ grid-area:regel; white-space:normal; font-size:12.5px; color: var(--color-fg-muted); line-height:1.35; }
+body.home .tal-grid-3 .kk-regel b{ font-weight:600; color: var(--color-fg); }
+body.home .tal-grid-3 .tal-n{ grid-area:n; align-self:center; justify-self:end; font-size:12.5px; font-weight:600; color: var(--color-fg); }
+body.home .tal-grid-3 .tal-n:empty{ min-height:0; }
+body.home .tal-grid-5 a{ min-height:64px; }
+body.home .maerke-flise, body.home .tal-grid a{ transition: border-color .15s, box-shadow .15s, transform .15s; }
+body.home .maerke-flise:hover, body.home .tal-grid a:hover{ transform: translateY(-1px); }
+
+/* ---------- Hvorfor Bikerbasen: tonet bånd ---------- */
+body.home .hvorfor{ background: transparent; }
+body.home .hvorfor-grid{ gap: var(--space-5); }
+@media (min-width:900px){ body.home .hvorfor-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--space-6); } }
+body.home .hvorfor-grid h3{ font-size:17px; }
+body.home .hvorfor-grid p{ font-size:14.5px; }
+body.home .hvorfor-mere summary{ min-height:44px; }
+body.home .hvorfor-grid h3::before{ display:none; }
+
+body.home .maerke-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; }
+body.home .tal-grid-5{ grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap:10px; }
+@media (min-width:1100px){ body.home .tal-grid-5{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (min-width:1700px){ body.home .maerke-grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }
+body.home .kol-hoved{ flex-wrap:wrap; row-gap:4px; }
+body.home .kol-hoved h2{ white-space:normal; }

@@ -70,6 +70,7 @@ try{
 
 
 <link rel="stylesheet" href="css/styles.css?v=245dda67">
+<link rel="stylesheet" href="css/p-forside.css">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -144,6 +145,7 @@ try{
         <!-- Overskriften siger mekanikken, ikke udfaldet: filteret kan kun udelukke (K17-P1-1). -->
         <h1 id="hero-titel">Søg motorcykler efter det kørekort, du har</h1>
         <p class="lead">Find den rigtige motorcykel — uden at gætte på effekt eller regler. Vælg A1, A2 eller A, og se kun dem, de oplyste tal ikke udelukker.</p>
+        <p class="hero-genveje" aria-label="Genveje"><a class="hero-chip" href="soegning.html?koerekort=A2">Mulige A2-motorcykler</a><a class="hero-chip" href="soegning.html?koerekort=A1">Mulige A1-motorcykler</a><a class="hero-chip" href="soegning.html?maxPrice=60000">Under 60.000 kr.</a></p>
       </div>
     </div>
   </section>
@@ -260,6 +262,7 @@ try{
     <div class="container container--wide">
       <div class="sek-hoved">
         <h2 id="typer-titel">Udforsk efter type</h2>
+        <a class="section-link" href="guide-mc-typer.html">Læs om motorcykeltyper<span aria-hidden="true"></span></a>
       </div>
       <div class="typer-wrap">
         <!-- Fliserne tegnes af js/home.js: foto fra img/type, antal fra lageret, link til den faste
@@ -340,9 +343,9 @@ try{
             <a class="kol-link" href="koerekort-a2.html">Om kørekort<span aria-hidden="true" data-icon="arrowRight"></span></a>
           </div>
           <ul class="tal-grid tal-grid-3">
-            <li><a href="koerekort-a1.html" data-kk="A1"><strong>A1</strong><span>Let mc</span><span class="tal-n" data-antal></span></a></li>
-            <li><a href="koerekort-a2.html" data-kk="A2"><strong>A2</strong><span>Mellem mc</span><span class="tal-n" data-antal></span></a></li>
-            <li><a href="soegning.html?koerekort=A" data-kk="A"><strong>A</strong><span>Alle mc</span><span class="tal-n" data-antal></span></a></li>
+            <li><a href="koerekort-a1.html" data-kk="A1"><strong>A1</strong><span class="kk-navn">Let mc</span><span class="kk-regel"><b>Fra 18 år</b> · op til 11 kW (15 hk)</span><span class="tal-n" data-antal></span></a></li>
+            <li><a href="koerekort-a2.html" data-kk="A2"><strong>A2</strong><span class="kk-navn">Mellem mc</span><span class="kk-regel"><b>Fra 20 år</b> · op til 35 kW (47 hk)</span><span class="tal-n" data-antal></span></a></li>
+            <li><a href="soegning.html?koerekort=A" data-kk="A"><strong>A</strong><span class="kk-navn">Alle mc</span><span class="kk-regel"><b>Fra 24 år</b> (22 efter 2 år på A2) · ingen effektgrænse</span><span class="tal-n" data-antal></span></a></li>
           </ul>
           <p class="kol-note">Ikke udelukket på de oplyste tal.</p>
         </section>
