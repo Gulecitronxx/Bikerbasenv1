@@ -774,3 +774,11 @@ body.home .mere-om > summary > span{ min-width:0; }
 body.home .mere-om{ overflow-x:clip; }
 /* Mærker uden emblem: logoet bærer selv ordmærket, teksten skjules (pladsen bevares, så antallet står på samme linje; linket har aria-label). */
 body.home .maerke-flise .maerke-navn-skjult{ position:static; width:auto; height:auto; margin:0; clip:auto; overflow:visible; visibility:hidden; }
+@media (min-width:1100px){
+  body.home .guide-boks{
+    background:
+      linear-gradient(90deg, var(--color-success-tint) 0%, var(--color-success-tint) 74%, color-mix(in srgb, var(--color-success-tint) 35%, transparent) 90%, transparent 100%),
+      url(../img/hero-800.webp) 96% 62% / auto 190% no-repeat;
+  }
+  body.home .guide-boks > div{ max-width: 72%; }
+}
