@@ -116,3 +116,52 @@ Mørk tema er målt med `data-theme=dark` sat via initScript (bb_theme), og de m
 - Tre kolonner har ujævn underkant (højeste panel = kørekort).
 
 ## Ærlig vurdering "ligner mockuppen": 7,5/10 (komposition 8,5, fotografisk udtryk 5,5 pga. manglende rytterfoto, detaljegrad 7,5).
+
+---
+
+# Iteration 3 (efter Critic runde 2: AFVIS, forside 6,5, hero 5,5, Sådan virker 5, mellemsektion 6,5)
+
+Kilde: `docs/review/gauntlet/visual/critic2-agent1.md`. Nye billeder (WebP, samlet ca. 2,1 MB, alle i `agent1-forside/`): `sammenligning-1-hero-soegning`, `-2-kort-og-typer`,
+`-3-saadan-virker-og-kolonner` (mockup | efter), `-4-moerk-top`, `efter-1440`, `efter-1440-moerk`, `efter-390`, `efter-390-moerk`, `efter-1440-503`.
+
+## Acceptkriterier (testet i `js/w14-forside.test.js`)
+
+| # | Kriterium | Test |
+|---|---|---|
+| C1 | Sådan virker er et TONET bånd (primary-tint, ikke hvidt), bredde >= 900 px, ikon-cirkler >= 56 px, nummer-mærker >= 24 px, pile mellem trinene, stribe 120-175 px | `W14 i3: hero ... Sådan virker ...` |
+| C2 | Hero højst 270 px; tillidsikoner >= 40 px i tonet cirkel | samme |
+| C3 | Tre kolonner på samme linje, lige høje (±4 px), højst 240 px | `W14 desktop 1440` |
+| C4 | Ingen mærkeflise dublerer navnet (synligt navn kun under emblem uden ordmærke) | `mærkefliserne dublerer ikke navnet ...` |
+| C5 | Kørekortfliserne A1/A2/A peger på `koerekort-a1/a2/a.html`; alle fliser, der peger på en side, peger på en fil der findes og ikke er noindex | samme |
+| C6 | Tap-mål >= 40 px på topnav, footer-links og genvejslisterne | `tap-mål >= 40 px på topnav ...` |
+| C7 | Link-båndet og "Hvorfor Bikerbasen" er sammenfoldet (`<details id="mere-om">`), men står i DOM, og afstanden tre kolonner til footer er højst 160 px | `"Mere om"-laget ...` |
+
+## Hvad er gjort
+
+1. **Sådan virker (ejerens favorit):** tonet bånd (varm primary-tint; mørkt tema: 10 % accent på flade), overskrift i båndet, ikon-cirkler på 56 px (hvid/mørk flade, kant), nummer som orange hjørnemærke på cirklen, pile i accentfarve, fed trintitel. Trin 4 er stadig "Gå videre til sælger": "Gem og sammenlign" er IKKE en sandhed for alle annoncer, fordi indekserede annoncer ikke kan gemmes (`fav = !f.ext && !isOwnListing` i `js/components.js`); sammenlign findes, men er ikke et selvstændigt trin. Guide-boksen "Køb og sælg trygt" har nu et ægte landskabsfoto (crop af `img/hero-800.webp`) bag en grøn scrim fra venstre (ingen opdigtet fællesskabsfunktion).
+2. **Hero:** 262 px (var 330); foto-crop uændret (horisont + forlygte/tank); h1 ca. 41 px. Tillidsrækken har 40 px ikoner i tonet cirkel og mere luft.
+3. **Tre kolonner:** `align-items: stretch`, lige høje paneler; fliserne fylder og centreres. Mærkefliser bruger nu logoets EMBLEM-variant (`BrandLogos.logoHTML(..., { form: 'emblem' })`) med navnet som tekst under; mærker uden emblem (fx Harley-Davidson) viser kun logoet, som selv bærer ordmærket (navnet skjules med `visibility:hidden`, pladsen bevares, linket har aria-label). Ingen "Honda Honda" og ingen to-linjers Harley-Davidson. De godkendte logoer er ikke ændret.
+4. **Konsistente links:** kørekortflisen A peger nu på `koerekort-a.html`, og tallet beregnes som målsiden gør det (kræver A og kan ikke effektbegrænses til A2): flisen hedder "Kræver A", og noten siger "A1/A2: ikke udelukket. A: kræver A." Scooter/Classic/Cross-fliserne peger bevidst stadig på søgningen: `type-scooter.html`, `type-classic.html` og `type-cross.html` findes som filer, men er `noindex, follow` (for få annoncer) og er ikke med i facet-linkene, så de linkes ikke fra forsiden (testen låser det).
+5. **Ekstra lag fjernet fra første blik:** "Hvorfor Bikerbasen", "Mere om kørekortet" og det store link-bånd ligger nu i ÉN sammenfoldet `<details id="mere-om">` lige over footeren ("Mere om Bikerbasen, kørekortet og alle genveje"). Al tekst og alle links står stadig i DOM (SEO). Siden er 2055 px lang på desktop (før 2650) og ca. 4470 px på 390 (før 5800).
+6. **Noter:** noten under Udvalgte og Typer er én linje (hele teksten i `title` og i DOM).
+7. **Tap-mål:** topnav >= 40 px, genvejslisternes links og overskrifter >= 40 px (footer-links var allerede 40).
+
+## Tilbageværende afvigelser (ærligt)
+
+- **Rytterfoto mangler** (asset): hero og sælg-panel er studio-/kystfoto uden rytter. Største resterende afvigelse; ikke løst med CSS.
+- Hero 262 px mod mockuppens ca. 245 px; header 54 px mod ca. 35 px.
+- Mockuppens fællesskabspanel med bjerg/vej er erstattet af "Køb og sælg trygt" med et ægte landskabscrop (ingen SVG-illustration; ingen fællesskabsfunktion at love).
+- Sådan virker trin 4 er "Gå videre til sælger" (se ovenfor); overskriften står i båndet over trin 1, ikke i trin 1's celle.
+- Hjertet vises ikke i hvile på indekserede kort (ikke gemmebare, produktregel); ⇄ vises ved hover.
+- Typeflisernes scrim: navnelinjen står over hjulene (studiofotos er næsten kvadratiske).
+- Region-/mærkefliser er høje (ca. 100 px) fordi de fylder panelet til lige højde; mærke- og kørekortpaneler er mere indholdsrige end regionspanelet.
+- Kortene har ingen vægtchip; kilden står som domæne + sælgertype.
+
+## Gate
+
+`npm run gate` (uden build): node --check, synk-header, seo-audit, sitemap, døde links og udgiv er OK. To røde trin er kendte: (2) `npm test`: kun `scripts/w12-kritisk.test.js` (committede sider har ældre indlejret kritisk CSS; grøn i en kopi efter `inline-critical.js` + `csp-hashes.js`); (7) `package.json` "test" mangler `js/w14-forside.test.js` (Orchestratorens fil).
+Smoke `index` 320/390/768/1024/1440 lys+mørk `--cls 0.05 --strikt`: 0 fejl, 0 advarsler (kørt to gange).
+
+## Ærlig vurdering "ligner mockuppen"
+
+Forside som helhed 7/10 | hero 6/10 (struktur og tekst rigtigt; motivet uden rytter trækker ned) | Sådan virker 7,5/10 | mellemsektion (typer + kolonner + panel) 7,5/10.
