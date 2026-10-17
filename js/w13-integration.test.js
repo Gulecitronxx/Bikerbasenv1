@@ -98,6 +98,7 @@ test('annonce: logo kun for godkendte mærker, højrejusteret ved ≥1180, aria-
     const logo = document.querySelector('.an-maerkelogo .bl'), pris = document.querySelector('.an-price');
     const r = raekke.getBoundingClientRect(), l = logo.getBoundingClientRect(), hh = h1.getBoundingClientRect(), p = pris.getBoundingClientRect();
     return { raekkeRight: r.right, raekkeLeft: r.left, logoRight: l.right, logoLeft: l.left, logoTop: l.top, logoBottom: l.bottom, h1Right: hh.right, h1Top: hh.top, h1Bottom: hh.bottom,
+      logoW: l.width, logoH: l.height, raekkeH: r.height, h1W: hh.width, h1H: hh.height,
       prisTop: p.top, label: logo.getAttribute('aria-label'), role: logo.getAttribute('role'), erLogo: logo.classList.contains('bl--logo'), h1Antal: document.querySelectorAll('h1').length };
   });
   assert.ok(m.erLogo);
@@ -109,6 +110,12 @@ test('annonce: logo kun for godkendte mærker, højrejusteret ved ≥1180, aria-
   assert.ok(m.logoBottom <= m.prisTop, 'logoet ligger over prisen');
   assert.ok(m.logoTop >= m.h1Top - 4 && m.logoTop <= m.h1Bottom, 'logoet står ved h1');
   assert.strictEqual(m.h1Antal, 1);
+  /* P2-4: stort nok til at kunne læses (mockuppen ca. 117x40 ved ca. 1440 — her 56-64 px høj, op til 160 bred), uden at skubbe H1 eller prisen */
+  assert.ok(m.logoH >= 56 && m.logoH <= 64.5, `logo ${m.logoW}x${m.logoH}: 56-64 px højt ved 1440`);
+  assert.ok(m.logoW <= 160.5, `logo ${m.logoW} bredt (maks. 160)`);
+  assert.ok(m.raekkeH <= Math.max(72, m.h1H + 1), `titelrækken ${m.raekkeH} px høj (maks. 72 eller h1'ens egen højde ${m.h1H})`);
+  assert.ok(m.h1W >= 280, `h1 er ikke presset: ${m.h1W} px bred`);
+  assert.ok(m.h1H <= 3 * 1.2 * 40 + 2, `h1 ombryder pænt: ${m.h1H} px`);
   await ctx.close();
 });
 
@@ -119,10 +126,14 @@ test('annonce: logo i titelrækken for Harley-Davidson, Indian og Benelli (godke
   for (const mærke of ['Harley-Davidson', 'Indian']){
     const { page, ctx } = await annonce(mærke, { w: 1440 });
     const m = await page.evaluate(() => { const r = document.querySelector('.an-titelraekke'), l = document.querySelector('.an-maerkelogo .bl');
-      return { raekke: !!r, label: l && l.getAttribute('aria-label'), hoejre: r && l ? Math.abs(r.getBoundingClientRect().right - l.getBoundingClientRect().right) : 99, h1: document.querySelectorAll('h1').length }; });
+      const lr = l.getBoundingClientRect(), hh = document.getElementById('listing-h1').getBoundingClientRect();
+      return { lh: lr.height, lw: lr.width, rh: r.getBoundingClientRect().height, h1h: hh.height, h1w: hh.width, raekke: !!r, label: l && l.getAttribute('aria-label'), hoejre: r && l ? Math.abs(r.getBoundingClientRect().right - l.getBoundingClientRect().right) : 99, h1: document.querySelectorAll('h1').length }; });
     assert.strictEqual(m.raekke, true, mærke);
     assert.strictEqual(m.label, mærke + '-logo');
     assert.ok(m.hoejre <= 1, mærke + ' højrejusteret');
+    assert.ok(m.lh >= 56 && m.lh <= 64.5 && m.lw <= 160.5, `${mærke}: logo ${m.lw}x${m.lh} (56-64 højt, maks. 160 bredt)`);
+    assert.ok(m.rh <= Math.max(72, m.h1h + 1), `${mærke}: titelrække ${m.rh} px`);
+    assert.ok(m.h1w >= 280, `${mærke}: h1 presset til ${m.h1w} px`);
     assert.strictEqual(m.h1, 1);
     await ctx.close();
   }
@@ -138,7 +149,7 @@ test('annonce: logo i titelrækken for Harley-Davidson, Indian og Benelli (godke
 test('annonce: ingen dubleret eller mistet logo efter resize 1440 -> 768 -> 390 -> 1440', async t => {
   if (skip(t)) return;
   const { page, ctx } = await annonce('Yamaha', { w: 1440 });
-  const tael = () => page.evaluate(() => ({ logo: document.querySelectorAll('.an-maerkelogo').length, bl: document.querySelectorAll('.an-maerkelogo .bl--logo').length,
+  const tael = () => page.evaluate(() => ({ lh: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().height, lw: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().width, venstre: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().left >= document.getElementById('listing-h1').getBoundingClientRect().right - 1, logo: document.querySelectorAll('.an-maerkelogo').length, bl: document.querySelectorAll('.an-maerkelogo .bl--logo').length,
     iHead: document.querySelectorAll('.an-head .an-titelraekke .an-maerkelogo').length, h1: document.querySelectorAll('#listing-h1').length, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
   for (const [w, hh] of [[1440, 900], [768, 1024], [390, 844], [1440, 900], [1024, 800], [1440, 900]]){
     await page.setViewportSize({ width: w, height: hh });
@@ -146,6 +157,10 @@ test('annonce: ingen dubleret eller mistet logo efter resize 1440 -> 768 -> 390 
     const x = await tael();
     assert.deepStrictEqual([x.logo, x.bl, x.iHead, x.h1], [1, 1, 1, 1], `ved ${w}: ${JSON.stringify(x)}`);
     assert.ok(x.sw <= x.cw, `vandret overflow ved ${w}`);
+    /* fast slot pr. bredde (xl): 64 px fra 1180, 44 px under, 34 px under 700 — logoet står ved siden af h1, aldrig under/over den */
+    const [lo, hi, wMax] = w >= 1180 ? [56, 64.5, 160.5] : w >= 700 ? [40, 44.5, 110.5] : [30, 34.5, 88.5];
+    assert.ok(x.lh >= lo && x.lh <= hi && x.lw <= wMax, `logo ${x.lw}x${x.lh} ved ${w}`);
+    assert.ok(x.venstre, `logoet står til højre for h1 ved ${w}`);
   }
   await ctx.close();
 });
@@ -230,12 +245,14 @@ test('søgefilter: logo i fast kolonne, venstrekanten er ens med og uden logo, l
     const r = await page.evaluate(() => [...document.querySelectorAll('#brand-list .checkbox-row:not([hidden])')].map(row => {
       const sp = row.querySelector(':scope > .bl-spalte'); const navn = row.children[2];
       return { brand: row.dataset.brandRow, navnLeft: Math.round(navn.getBoundingClientRect().left * 10) / 10, spalteLeft: Math.round(sp.getBoundingClientRect().left * 10) / 10,
-        spalteW: sp.getBoundingClientRect().width, logo: !!row.querySelector('.bl--logo'), mono: !!row.querySelector('.bl--mono'), cb: row.querySelector('input').getBoundingClientRect().left };
+        logoLeft: row.querySelector('.bl').getBoundingClientRect().left, spalteW: sp.getBoundingClientRect().width, logo: !!row.querySelector('.bl--logo'), mono: !!row.querySelector('.bl--mono'), cb: row.querySelector('input').getBoundingClientRect().left };
     }));
     assert.ok(r.length >= 6);
     assert.ok(r.some(x => x.logo) && r.some(x => x.mono), 'både med og uden logo i listen');
     assert.strictEqual(new Set(r.map(x => x.navnLeft)).size, 1, `${w}: navnenes venstrekant er ikke ens: ${JSON.stringify(r.map(x => [x.brand, x.navnLeft]))}`);
-    assert.strictEqual(new Set(r.map(x => x.spalteW)).size, 1);
+    assert.deepStrictEqual([...new Set(r.map(x => x.spalteW))], [56], `${w}: ens kolonnebredde (56 px = sm-slotten)`);
+    for (const x of r) assert.strictEqual(x.logo, BrandLogos.logoFor(x.brand).harLogo, `${w}: ${x.brand} — logo hvis mærket har et godkendt logo, ellers monogram (ingen blanding af bredde)`);
+    assert.strictEqual(new Set(r.map(x => Math.round(x.logoLeft))).size, 1, `${w}: logo/monogram står venstrestillet i kolonnen`);
     const svg = [...new Set(h.anmodninger.filter(x => /img\/brands\//.test(x)))];
     assert.ok(svg.length >= 2 && svg.length <= 8, `${w}: ${svg.length} forskellige SVG'er efter åbning (kun synlige rækker)`);
     await ctx.close();
@@ -300,4 +317,36 @@ test('søgning med valgt mærke: aktive filterchips og resultatkort har intet lo
   assert.ok(m.chips >= 1, 'Honda-chip findes');
   assert.strictEqual(m.bl, 0);
   await ctx.close();
+});
+
+/* P2-1: hver logofil hentes højst ÉN gang pr. sideindlæsning. Før lå der et skjult <img> med samme URL som maske-elementet (dobbelt så mange
+   SVG-kald: forside 12 til 6 logoer, maerker.html 26 til 13). Serveren sender no-store, så et dobbeltkald ville vise sig som to kald på samme URL. */
+test('P2-1 forside, annonce og søgefilter: hver SVG hentes højst én gang pr. side (ingen probe), og forsiden henter præcis ét kald pr. unikt logo', async t => {
+  if (skip(t)) return;
+  const taelSvg = () => h.anmodninger.filter(x => /^\/img\/brands\/.+\.svg$/.test(x)).reduce((o, p) => { o[p] = (o[p] || 0) + 1; return o; }, {});
+  // forside: seks fliser, fem med logo (Suzuki har monogram i testdata)
+  h.anmodninger.length = 0;
+  let r = await forside({ w: 1440 });
+  let n = taelSvg();
+  assert.deepStrictEqual(Object.values(n), [1, 1, 1, 1, 1], `forside: ${JSON.stringify(n)}`);
+  assert.strictEqual(Object.keys(n).length, 5);
+  await r.ctx.close();
+  // annonce (Honda): ét logo -> ét kald
+  h.anmodninger.length = 0;
+  r = await annonce('Honda', { w: 1440 });
+  n = taelSvg();
+  assert.deepStrictEqual(n, { '/img/brands/honda.svg': 1 }, `annonce: ${JSON.stringify(n)}`);
+  await r.ctx.close();
+  // søgefilter: 0 før åbning; efter åbning højst ét kald pr. fil, og kun for de synlige rækker
+  h.anmodninger.length = 0;
+  r = await h.side('soegning.html', { w: 1440, h: 900 });
+  await r.page.waitForSelector('#filter-brands .checkbox-row', { state: 'attached', timeout: 8000 });
+  await r.page.waitForTimeout(800);
+  assert.deepStrictEqual(taelSvg(), {}, 'søgning: intet logo hentes, før filteret åbnes');
+  await r.page.click('#so-more-btn');
+  await r.page.waitForTimeout(1200);
+  n = taelSvg();
+  assert.ok(Object.keys(n).length >= 2, `søgning efter åbning: ${JSON.stringify(n)}`);
+  for (const [f, k] of Object.entries(n)) assert.strictEqual(k, 1, `${f} hentet ${k} gange`);
+  await r.ctx.close();
 });

@@ -790,12 +790,11 @@
 /* W13 logo: titelrække med producentens logo højrejusteret ved H1 (kun når et godkendt logo findes; ellers er h1 alene som før). */
 .an-titelraekke{ display:flex; align-items:flex-start; justify-content:space-between; gap: var(--space-3); margin:12px 0 6px; }
 .an-titelraekke .an-h1{ margin:0; flex:1 1 auto; min-width:0; }
-.an-maerkelogo{ flex:none; display:flex; align-items:center; justify-content:flex-end; height:40px; margin-top:2px; }
+.an-maerkelogo{ flex:none; display:flex; align-items:center; justify-content:flex-end; margin-top:2px; }   /* slotten (xl) er 64 px høj fra 1180 px, 44 px under, 34 px under 700 px — se css/p-brand-logo.css */
 .listing-title-rad{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); }
 .listing-title-rad .listing-title{ min-width:0; }
 @media (max-width:1179px){
-  .an-maerkelogo{ height:30px; margin-top:0; }
-  .an-maerkelogo .bl{ --bl-maxh:30px; --bl-maxw:84px; }
+  .an-maerkelogo{ margin-top:0; }
 }
 .an-sub{ display:flex; flex-wrap:wrap; margin:0; color: var(--color-fg-muted); font-size:15px; }
 .an-sub span + span::before{ content:"|"; margin:0 10px; color: var(--color-border); }

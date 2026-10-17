@@ -151,7 +151,7 @@ function side(l){
   const billeder = l.photoUrls || [];
   /* Logoet står alene (aria-label "<Mærke>-logo") og findes kun, hvor mærket har et godkendt logo. Samme krav som js/annonce.js. */
   const harLogo = BrandLogos.logoFor(l.brand).harLogo;
-  const logoMarkup = harLogo ? BrandLogos.logoHTML(l.brand, { storrelse: 'lg', decorative: false }) : '';
+  const logoMarkup = harLogo ? BrandLogos.logoHTML(l.brand, { storrelse: 'xl', decorative: false, statisk: true }) : '';
   const udstyr = l.equipment || [];
 
   const dele = [`Årgang ${l.year}`, formatKm(l.km), formatCcm(l.ccm), l.condition].filter(Boolean);
@@ -200,7 +200,7 @@ ${csp}
 </style>
 ${billeder.length ? `<link rel="preload" as="image" href="${esc(billeder[0])}" fetchpriority="high">
 ` : ''}<link rel="stylesheet" href="css/styles.css${v}">
-${harLogo ? '<link rel="stylesheet" href="css/p-brand-logo.css">' + String.fromCharCode(10) : ''}<link rel="stylesheet" href="css/p-annonce.css">
+${harLogo ? '<link rel="stylesheet" href="css/p-brand-logo.css">' + String.fromCharCode(10) + '<noscript><style>.bl--logo>.bl-fb{display:inline-flex}.bl--logo>.bl-mark{display:none}</style></noscript>' + String.fromCharCode(10) : ''}<link rel="stylesheet" href="css/p-annonce.css">
 ${jsonLd(l, url)}
 </head>
 <body>

@@ -380,11 +380,12 @@ function populateFilterUI(){
   const brandSel = document.getElementById('so-brand');
   if (brandSel) brandSel.innerHTML = '<option value="">Alle mærker</option>' +
     [...maerker].sort((a, b) => a.localeCompare(b, 'da')).map(b => `<option value="${escapeHTML(b)}">${escapeHTML(b)}</option>`).join('');
-  /* W13 logo: lille mark (16-18 px) foran navnet i en FAST kolonne — et mærke uden godkendt logo får monogram i samme
-     kolonne, så venstrekanten af navnene er ens. Fejl-proben er lazy: rækker, der er foldet væk, henter intet. Kun i filteret: aktive filterchips og resultatkort har intet logo
+  /* W13 logo: lille mark (22 px høj, 56 px bred kolonne; emblem hvor det findes) foran navnet i en FAST kolonne — et mærke uden
+     godkendt logo får monogram i samme kolonne, så venstrekanten af navnene er ens. Logoet hentes først, når rækken er synlig
+     (BrandLogos-klienten): rækker, der er foldet væk, henter intet. Kun i filteret: aktive filterchips og resultatkort har intet logo
      (mockuppen: ren tekst). Navnet står som tekst ved siden af, så logoet er dekorativt. */
   const maerkeLogo = (b) => (typeof BrandLogos === 'undefined') ? ''
-    : `<span class="bl-spalte bl-spalte--sm" aria-hidden="true">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true }).replace('<img class="bl-probe"', '<img loading="lazy" class="bl-probe"')}</span>`;
+    : `<span class="bl-spalte bl-spalte--sm" aria-hidden="true">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true })}</span>`;
   const brandRows = maerker.map(b =>
     `<label class="checkbox-row" data-brand-row="${escapeHTML(b.toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(b)}">${maerkeLogo(b)}<span>${escapeHTML(b)}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `

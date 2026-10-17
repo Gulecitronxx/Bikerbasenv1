@@ -562,7 +562,7 @@ function anVirkDel(l){
 function anMaerkelogoHTML(maerke){
   if (typeof BrandLogos === 'undefined' || !maerke) return '';
   if (!BrandLogos.logoFor(maerke).harLogo) return '';
-  const html = BrandLogos.logoHTML(maerke, { storrelse: 'lg', decorative: false });
+  const html = BrandLogos.logoHTML(maerke, { storrelse: 'xl', decorative: false });
   return html ? `<span class="an-maerkelogo">${html}</span>` : '';
 }
 

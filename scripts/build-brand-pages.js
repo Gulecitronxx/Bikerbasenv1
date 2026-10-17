@@ -788,7 +788,7 @@ function monogram(brand){
 function logoSlot(brand, storrelse){
   const l = BrandLogos.logoFor(brand);
   if (!l.harLogo) return { harLogo: false, html: '', medNavn: false };
-  return { harLogo: true, html: BrandLogos.logoHTML(brand, { storrelse, decorative: true }), medNavn: l.variant === 'emblem' };
+  return { harLogo: true, html: BrandLogos.logoHTML(brand, { storrelse, decorative: true, statisk: true }), medNavn: l.variant === 'emblem' };
 }
 
 /* Mærkesidens hero-ordmærke (Mærker.png): logo + ordmærke over H1. Genbruger .mk-wordmark/.mk-mono-pladsen. */
@@ -812,14 +812,14 @@ function ctaNavnHTML(brand){
    -> A–Z får en fast logokolonne på ALLE rækker (monogram hvor der intet logo er), ellers er rækkerne uændrede. */
 function maerkeFliseHTML(b, antalTekstStr){
   return `<a class="mk-brandtile" href="maerke-${slugify(b)}.html">
-          <span class="mk-brandtile-logo">${BrandLogos.logoHTML(b, { storrelse: 'lg', decorative: true })}</span>
+          <span class="mk-brandtile-logo">${BrandLogos.logoHTML(b, { storrelse: 'lg', decorative: true, statisk: true })}</span>
           <span class="mk-brandtile-navn">${esc(b)}</span>
           <span class="mk-brandtile-n">${antalTekstStr}</span>
           <span class="mk-brandtile-go" aria-hidden="true">${ICON.arrowRight}</span>
         </a>`;
 }
 function azRaekkeHTML(b, antal, harLogoer){
-  const logo = harLogoer ? `<span class="mk-az-logo">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true })}</span>` : '';
+  const logo = harLogoer ? `<span class="mk-az-logo">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true, statisk: true })}</span>` : '';
   return `<li data-mk-soeg="${esc([BrandLogos.logoFor(b).slug || BrandLogos.noegle(b), ...BrandLogos.logoFor(b).aliaser].join('|'))}"><a href="maerke-${slugify(b)}.html"><span class="mk-az-navn">${logo}<span>${esc(b)}</span></span><span class="mk-az-n">${antal}</span></a></li>`;
 }
 function harNogetLogo(navne){ return navne.some(n => BrandLogos.logoFor(n).harLogo); }
@@ -832,7 +832,8 @@ function hurtigSoegHTML(){
       </div>`;
 }
 /* Logoets script og stilark hører kun på siden, hvis der faktisk er logo-markup (fejlfallback + CSS). */
-function logoHead(brug){ return brug ? '<link rel="stylesheet" href="css/p-brand-logo.css">\n' : ''; }
+/* Uden JavaScript sættes ensfarvede logoer ikke (masken hentes af js/brand-logos.js): så vises ordmærket/monogrammet i stedet for tom plads. */
+function logoHead(brug){ return brug ? '<link rel="stylesheet" href="css/p-brand-logo.css">\n<noscript><style>.bl--logo>.bl-fb{display:inline-flex}.bl--logo>.bl-mark{display:none}</style></noscript>\n' : ''; }
 function logoScripts(brug){ return brug ? '<script defer src="js/brand-logos-data.js"></script>\n<script defer src="js/brand-logos.js"></script>\n' : ''; }
 
 /* Flisens foto: mærkets egen annonce af den type, helst fra en kilde uden

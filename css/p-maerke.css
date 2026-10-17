@@ -550,14 +550,15 @@
 
 /* ---------- W13: mærkelogoer (js/brand-logos.js, css/p-brand-logo.css) ----------
    Slotten er fast, så en side aldrig hopper. Uden godkendt logo ligger her kun monogram/ordmærke som før. */
-.mk-wordmark--logo{ gap: .45em; font-size: clamp(30px, 1rem + 2.6vw, 54px); letter-spacing:.02em; }
+.mk-wordmark--logo{ gap: .45em; font-size: clamp(30px, 1rem + 2.6vw, 54px); letter-spacing:.02em; min-height:48px; }   /* fast ramme: H1 står ens på alle mærkesider, hvad enten logoet er højt (kvadratisk) eller lavt (ordmærke) */
+@media (min-width:700px){ .mk-wordmark--logo{ min-height:72px; } }
 .mk-hero{ --bl-fg:#fff; --bl-text:#fff; --bl-mono-fg:#fff; --bl-mono-bg:transparent; }
 .mk-hero .bl-mono{ border:2px solid var(--color-primary); }
 .mk-cta-navn--logo{ display:flex; align-items:center; gap:.5em; margin-bottom: var(--space-1); }
 .mk-cta-navn--logo .bl{ --bl-fg: var(--color-fg); }
 .mk-brandtile-logo{ display:flex; align-items:center; min-height:40px; margin-bottom: var(--space-2); }
 .mk-az-navn{ display:inline-flex; align-items:center; gap: var(--space-2); min-width:0; }
-.mk-az-logo{ display:inline-flex; align-items:center; justify-content:center; flex:none; width:28px; }
+.mk-az-logo{ display:inline-flex; align-items:center; justify-content:flex-start; flex:none; width:56px; }   /* = .bl-spalte--sm: en bred, lav slot, så også ordmærker (KTM, Aprilia, Benelli) kan vises */
 .mk-az-gruppe a:hover .mk-az-navn > span:last-child{ text-decoration:underline; }
 .mk-az-gruppe li[hidden], .mk-az-gruppe[hidden]{ display:none; }
 .mk-hurtigsoeg{ display:grid; gap: var(--space-1); max-width:420px; margin: 0 0 var(--space-4); }
