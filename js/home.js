@@ -330,6 +330,11 @@ async function buildForside(){
      annoncer) står i kolonnen; de næste otte som tekstlinks i .seo-links, så ingen mærkeside, der
      før var linket fra forsiden, mister sit link. Linket går til mærkesiden, hvor den findes
      (data-maerkesider skrives af byggetrinnet), ellers til søgningen. */
+  /* Logoet (godkendt, ensfarvet maske) eller monogram-cirklen; navnet står som tekst under, så logoet er dekorativt.
+     Mangler BrandLogos (script ikke indlæst), vises den gamle monogram-cirkel. */
+  const logoTilflise = (navn) => (typeof BrandLogos !== 'undefined')
+    ? `<span class="maerke-logo" aria-hidden="true">${BrandLogos.logoHTML(navn, { storrelse: 'lg', decorative: true })}</span>`
+    : `<span class="maerke-mono" aria-hidden="true">${escapeHTML(navn.charAt(0).toUpperCase())}</span>`;
   const brandCloud = document.getElementById('brand-cloud');
   const tegnMaerker = () => {
     const pr = new Map();
@@ -348,10 +353,11 @@ async function buildForside(){
     if (brandCloud){
       brandCloud.innerHTML = top.slice(0, 6).map(m =>
         `<a class="maerke-flise" href="${href(m)}" aria-label="${escapeHTML(m.navn)}, ${daTal(m.n)} annoncer">
-           <span class="maerke-mono" aria-hidden="true">${escapeHTML(m.navn.charAt(0).toUpperCase())}</span>
+           ${logoTilflise(m.navn)}
            <strong>${escapeHTML(m.navn)}</strong>
            <span class="tal-n" aria-hidden="true">${daTal(m.n)}</span>
          </a>`).join('');
+      if (typeof BrandLogos !== 'undefined' && BrandLogos.gennemgaa) BrandLogos.gennemgaa();
       const kol = brandCloud.closest('.kol'); if (kol) kol.hidden = top.length === 0;
     }
     const flere = document.querySelector('#seo-brands ul');

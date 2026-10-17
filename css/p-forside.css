@@ -163,7 +163,18 @@ body.home .hvorfor-grid h3::before{ display:none; }
 body.home .maerke-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; }
 body.home .tal-grid-5{ grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap:10px; }
 @media (min-width:1100px){ body.home .tal-grid-5{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
-@media (min-width:1700px){ body.home .maerke-grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }
+/* W13 logoer: Populære mærker som ÉN række på seks fliser (Forside.png) fra 1280 px. Mærke-kolonnen får mest plads, så
+   logo + navn + antal står uden at flydeover; kørekort- og regionskolonnen er stadig læsbare. Under 1280 px: 3 x 2. */
+@media (min-width:1280px){
+  body.home .tre-kol:not(:has(> .kol[hidden])){ grid-template-columns: minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.1fr); }
+  body.home .maerke-grid{ grid-template-columns: repeat(6, minmax(0,1fr)); gap:8px; }
+  body.home .maerke-grid:empty{ min-height:92px; }
+  body.home .maerke-flise{ min-height:92px; padding:10px 2px 8px; }
+}
+body.home .maerke-flise{ gap:3px; justify-content:flex-start; padding-top:10px; }   /* logoerne står på samme linje, også når et navn bryder over to linjer */
+body.home .maerke-logo{ display:flex; align-items:center; justify-content:center; width:100%; height:40px; flex:none; margin-bottom:2px; }   /* fast logo-slot: navn og antal står på samme linje i alle fliser */
+body.home .maerke-flise strong{ font-size:12px; }
+body.home .maerke-flise .tal-n{ font-size:11.5px; line-height:1.2; color: var(--color-fg-muted); }
 body.home .kol-hoved{ flex-wrap:wrap; row-gap:4px; }
 body.home .kol-hoved h2{ white-space:normal; }
 
