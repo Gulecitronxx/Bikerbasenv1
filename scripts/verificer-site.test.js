@@ -169,3 +169,14 @@ test('(8) valgfrit smoke-trin: ikke med som standard; --med-browser tilføjer de
   assert.match(r.navn, /smoke/);
   assert.ok(r.fund.length);
 }));
+
+test('(9) valgfrit visuelt trin: ikke med som standard; --med-visuel tilføjer det og fejler uden baseline', () => medSite(root => {
+  const standard = v.koer(root, { hurtig: true });
+  assert.strictEqual(standard.length, 7, 'standardadfærden er uændret: 7 trin');
+  assert.ok(!standard.some(r => /visuel/.test(r.navn)));
+  const r = v.tjekVisuel(root, path.join(root, 'findes-ikke'));
+  assert.strictEqual(r.ok, false, 'manglende baseline giver FEJL, ikke grøn');
+  assert.match(r.navn, /visuel/);
+  assert.match(r.fund[0], /baseline/);
+  assert.strictEqual(v.tjekVisuel(root, null).ok, false);
+}));

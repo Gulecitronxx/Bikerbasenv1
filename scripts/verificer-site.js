@@ -3,6 +3,7 @@
    Kør:  node scripts/verificer-site.js            (alle trin)
          node scripts/verificer-site.js --hurtig   (springer npm test over)
          node scripts/verificer-site.js --med-browser   (tilvalg: trin 8, offline browser-smoketest --hurtig)
+         node scripts/verificer-site.js --med-visuel <baseline-mappe>   (tilvalg: trin 9, visuel regression mod en baseline fra scripts/visuel-regression.js --ud)
 
    Exit 0 = alt grønt, exit 1 = mindst ét trin fejlede. Scriptet verificerer KUN det, der ligger
    på disken: det kører hverken build.js, udgiv.js, stamp-version.js eller andet, der rammer netværk
@@ -149,7 +150,19 @@ function tjekBrowserSmoke(root){
   return { navn, ok, fund: ok ? [] : [`exit ${r.status}`, ...uddrag((r.stdout || '') + String.fromCharCode(10) + (r.stderr || '')).split(String.fromCharCode(10))] };
 }
 
-function koer(root, { hurtig = false, medBrowser = false } = {}){
+/* (9) VALGFRIT (--med-visuel <baseline>): scripts/visuel-regression.js tager screenshots af nøglesiderne (390+1440, lys)
+   i en temp-mappe og sammenligner mod en baseline-mappe lavet med samme værktøj. Fejler over --graense (2 %). Offline. */
+function tjekVisuel(root, baseline){
+  const navn = 'visuel regression (valgfrit, --med-visuel)';
+  if (!baseline || !fs.existsSync(baseline)) return { navn, ok: false, fund: [`baseline-mappen findes ikke: ${baseline || '(ingen angivet)'}`] };
+  const ud = fs.mkdtempSync(path.join(require('os').tmpdir(), 'vr-verificer-'));
+  const script = path.join(__dirname, 'visuel-regression.js');
+  const r = spawnSync(process.execPath, [script, '--stille', '--rod', root, '--ud', ud, '--mod', baseline, '--viewports', '390,1440', '--temaer', 'lys'], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, timeout: 900000 });
+  const ok = r.status === 0;
+  return { navn, ok, fund: ok ? [] : [`exit ${r.status}`, ...uddrag((r.stdout || '') + String.fromCharCode(10) + (r.stderr || '')).split(String.fromCharCode(10)), `diff: ${path.join(ud, 'diff.html')}`] };
+}
+
+function koer(root, { hurtig = false, medBrowser = false, medVisuel = null } = {}){
   const trin = [
     () => tjekSyntaks(root),
     () => hurtig ? { navn: 'npm test', ok: true, sprunget: true, fund: [] } : tjekTests(root),
@@ -159,6 +172,7 @@ function koer(root, { hurtig = false, medBrowser = false } = {}){
     () => tjekDoedeLinks(root),
     () => tjekTestListe(root),
     ...(medBrowser ? [() => tjekBrowserSmoke(root)] : []),
+    ...(medVisuel ? [() => tjekVisuel(root, medVisuel)] : []),
   ];
   return trin.map(t => {
     try { return t(); } catch (e) { return { navn: 'trin kastede fejl', ok: false, fund: [String((e && e.message) || e)] }; }
@@ -177,10 +191,12 @@ function rapport(resultater){
   return { tekst: linjer.join('\n'), fejl };
 }
 
+const argVaerdi = flag => { const i = process.argv.indexOf(flag); return i >= 0 && process.argv[i + 1] ? path.resolve(process.argv[i + 1]) : null; };
+
 if (require.main === module){
-  const { tekst, fejl } = rapport(koer(REPO, { hurtig: process.argv.includes('--hurtig'), medBrowser: process.argv.includes('--med-browser') }));
+  const { tekst, fejl } = rapport(koer(REPO, { hurtig: process.argv.includes('--hurtig'), medBrowser: process.argv.includes('--med-browser'), medVisuel: argVaerdi('--med-visuel') }));
   console.log(tekst);
   process.exit(fejl ? 1 : 0);
 }
 
-module.exports = { tjekSyntaks, tjekTests, tjekHeader, tjekSeoAudit, tjekSitemap, tjekDoedeLinks, tjekTestListe, tjekBrowserSmoke, manglendeTests, interneLinks, koer, rapport };
+module.exports = { tjekSyntaks, tjekTests, tjekHeader, tjekSeoAudit, tjekSitemap, tjekDoedeLinks, tjekTestListe, tjekBrowserSmoke, tjekVisuel, manglendeTests, interneLinks, koer, rapport };
