@@ -333,8 +333,10 @@ async function buildForside(){
   /* Logoet (godkendt, ensfarvet maske) eller monogram-cirklen; navnet står som tekst under, så logoet er dekorativt.
      Mangler BrandLogos (script ikke indlæst), vises den gamle monogram-cirkel. */
   const logoTilflise = (navn) => (typeof BrandLogos !== 'undefined')
-    ? `<span class="maerke-logo" aria-hidden="true">${BrandLogos.logoHTML(navn, { storrelse: 'lg', decorative: true })}</span>`
+    ? `<span class="maerke-logo" aria-hidden="true">${BrandLogos.logoHTML(navn, { storrelse: 'lg', decorative: true, form: 'emblem' })}</span>`
     : `<span class="maerke-mono" aria-hidden="true">${escapeHTML(navn.charAt(0).toUpperCase())}</span>`;
+  /* Findes mærkets emblem (uden ordmærke), står navnet som tekst under det; ellers bærer logoet selv ordmærket, og teksten er kun for skærmlæsere (ingen dublet som 'Honda Honda'). */
+  const emblemFindes = (navn) => { try { return typeof BrandLogos !== 'undefined' && !!BrandLogos.logoFor(navn).emblem; } catch (e) { return false; } };
   const brandCloud = document.getElementById('brand-cloud');
   const tegnMaerker = () => {
     const pr = new Map();
@@ -354,7 +356,7 @@ async function buildForside(){
       brandCloud.innerHTML = top.slice(0, 6).map(m =>
         `<a class="maerke-flise" href="${href(m)}" aria-label="${escapeHTML(m.navn)}, ${daTal(m.n)} annoncer">
            ${logoTilflise(m.navn)}
-           <strong>${escapeHTML(m.navn)}</strong>
+           <strong${emblemFindes(m.navn) ? '' : ' class="maerke-navn-skjult"'}>${escapeHTML(m.navn)}</strong>
            <span class="tal-n" aria-hidden="true">${daTal(m.n)}</span>
          </a>`).join('');
       if (typeof BrandLogos !== 'undefined' && BrandLogos.gennemgaa) BrandLogos.gennemgaa();
@@ -375,8 +377,11 @@ async function buildForside(){
     const side = facetSider.get(`koerekort:${id}`);
     /* A bliver på søgningen: tallet her er "ikke udelukket for A" (alle), mens koerekort-a.html kun
        viser dem med OPLYST effekt over A2-grænsen — to forskellige tal bag samme flise. */
-    if (side && id !== 'A') a.setAttribute('href', side);
-    const n = Filtrering.anvendFiltre(ALLE, { koerekort: id }, null, null).length;
+    if (side) a.setAttribute('href', side);
+    /* A: samme tal som koerekort-a.html (kræver A og kan ikke effektbegrænses til A2); A1/A2: ikke udelukket på de oplyste tal. */
+    const n = (id === 'A' && typeof koerekortForListing === 'function')
+      ? ALLE.filter(l => koerekortForListing(l) === 'A' && !l.kanNedsaettesA2).length
+      : Filtrering.anvendFiltre(ALLE, { koerekort: id }, null, null).length;
     a.querySelector('[data-antal]').textContent = tomtLager ? '' : `${daTal(n)} ${n === 1 ? 'annonce' : 'annoncer'}`;
   });
   /* Regioner: fast landsdelsside, hvis den findes, ellers søgningen med regionsfilter. */
@@ -461,11 +466,13 @@ async function buildForside(){
      tage af, at rækkefølgen er søgningens, og reglen om ét kort pr. mærke. */
   const skrivFeaturedSub = (antal, kort) => {
     if (!featuredSub || !antal) return;
+    featuredSub.title = '';
     featuredSub.textContent =
       `${ANTALSORD[antal] || daTal(antal)} af de ${daTal(kandidater.length)} annoncer med foto og modelnavn — `
       + koerekortDel(kort)
       + `${enPrMaerkeHoldt ? 'højst én pr. mærke' : 'højst én pr. model'} og højst halvdelen fra samme kilde. `
       + `Samme rækkefølge som i søgningen.`;
+    featuredSub.title = featuredSub.textContent;
   };
 
   const featuredMount = document.getElementById('udvalg-kort');

@@ -78,7 +78,7 @@ for (const [vp, tema] of [[1440, 'light'], [1440, 'dark'], [1024, 'light'], [768
     assert.ok(m.ctaH >= 44, 'CTA-højde ' + m.ctaH);
     assert.notStrictEqual(m.ctaBg, 'rgb(30, 142, 90)', 'CTA må ikke være grøn');
     m.felter.forEach(h => assert.ok(h >= 40, 'felthøjde ' + h));
-    assert.equal(m.trinOverlap, false, 'trinnummer overlapper ikon');
+    if (vp < 1100) assert.equal(m.trinOverlap, false, 'trinnummer overlapper ikon');   // W14: fra 1100 px er nummeret et hjørnemærke på ikon-cirklen (bevidst overlap)
     m.ikonH.forEach(h => assert.ok(h >= 32, 'trinikon ' + h));
     m.tileH.forEach(h => assert.ok(h >= 72, 'flisehøjde ' + h));
     assert.equal(m.chips, 0, 'tap-mål under 40 px');

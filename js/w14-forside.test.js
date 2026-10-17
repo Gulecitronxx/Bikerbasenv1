@@ -40,7 +40,7 @@ test('W14 desktop 1440: hele forsidens øverste del er kompakt som referencen (h
   const m = await aabn(1440, 'light', p => p.evaluate(maalDesktop));
   assert.equal(m.overflow, 0);
   assert.ok(m.header.h <= 56, `header ${m.header.h}`);
-  assert.ok(m.hero.bottom <= 400, `hero slutter ${m.hero.bottom}`);
+  assert.ok(m.hero.bottom <= 330, `hero slutter ${m.hero.bottom}`);
   assert.ok(m.kort.h <= 120, `søgekort ${m.kort.h}`);
   assert.ok(m.kort.top < m.hero.bottom && m.kort.bottom > m.hero.bottom, 'søgekortet hænger ind over heroens underkant');
   assert.equal(m.kortRaekke.length, 5, 'fem udvalgte kort på én række');
@@ -51,10 +51,10 @@ test('W14 desktop 1440: hele forsidens øverste del er kompakt som referencen (h
   assert.equal(m.tiles.length >= 7, true);
   assert.ok(m.tiles.slice(0, 7).every(t => Math.abs(t.top - m.tiles[0].top) < 2 && t.h <= 110), 'syv fliser på én række, højst 110 px');
   assert.ok(m.trin.length === 4 && m.trin.every(t => Math.abs(t.top - m.trin[0].top) < 6), 'fire trin på én række');
-  assert.ok(m.saadan.h <= 140, `Sådan virker ${m.saadan.h}`);
+  assert.ok(m.saadan.h >= 120 && m.saadan.h <= 175, `Sådan virker ${m.saadan.h}`);
   assert.ok(m.guide.left >= m.trin[3].right, 'guide-boksen står til højre for trinene');
   assert.equal(m.kol.length, 3);
-  assert.ok(m.kol.every(k => Math.abs(k.top - m.kol[0].top) < 2 && k.h <= 240), 'tre kolonner på samme linje, højst 240 px');
+  assert.ok(m.kol.every(k => Math.abs(k.top - m.kol[0].top) < 2 && Math.abs(k.h - m.kol[0].h) <= 4 && k.h <= 240), "tre kolonner på samme linje, lige høje (±4 px), højst 240 px");
   assert.ok(m.kol[0].top <= 1250, `tre kolonner begynder ved ${m.kol[0].top}`);
 });
 
@@ -212,4 +212,77 @@ test('W14 funktion: tema-skift virker (lys↔mørk), mobilmenuen åbner og lukke
     assert.equal(luk, true, 'cookie-dialogen blev stående');
     await ctx.close();
   } finally { await browser.close().catch(() => {}); server.close(); }
+});
+
+/* ---- Iteration 3 (Critic runde 2) ---- */
+test('W14 i3: hero højst 270 px; Sådan virker er et tonet bånd med store ikon-cirkler (>= 56 px) og pile; tillidsikoner >= 40 px', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const m = await aabn(1440, 'light', p => p.evaluate(() => {
+    const bg = getComputedStyle(document.querySelector('.saadan-hoved')).backgroundColor;
+    const surface = getComputedStyle(document.body).backgroundColor;
+    const r = e => e.getBoundingClientRect();
+    return {
+      heroH: r(document.querySelector('.hero')).height,
+      band: bg, side: surface,
+      bandW: r(document.querySelector('.saadan-hoved')).width,
+      ikoner: [...document.querySelectorAll('.saadan-ico')].map(e => r(e).width),
+      nr: [...document.querySelectorAll('.saadan-nr')].map(e => r(e).width),
+      pil: getComputedStyle(document.querySelector('.saadan-trin-punkt'), '::after').content,
+      trust: [...document.querySelectorAll('.trust-ico')].map(e => r(e).width),
+    };
+  }));
+  assert.ok(m.heroH <= 270, `hero ${m.heroH}`);
+  assert.notEqual(m.band, 'rgba(0, 0, 0, 0)'); assert.notEqual(m.band, 'rgb(255, 255, 255)', 'båndet er tonet');
+  assert.ok(m.bandW >= 900, `bånd ${m.bandW}`);
+  m.ikoner.forEach(w => assert.ok(w >= 56, `ikon ${w}`));
+  m.nr.forEach(w => assert.ok(w >= 24, `nummer ${w}`));
+  assert.notEqual(m.pil, 'none');
+  m.trust.forEach(w => assert.ok(w >= 40, `tillidsikon ${w}`));
+});
+
+test('W14 i3: mærkefliserne dublerer ikke navnet, og kørekort-/typefliserne peger på sider, der findes som fil og er indekserbare', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const fs = require('fs');
+  const r = await aabn(1440, 'light', p => p.evaluate(() => ({
+    flise: [...document.querySelectorAll('#brand-cloud .maerke-flise')].map(a => ({
+      navn: a.getAttribute('aria-label'),
+      tekster: [...a.querySelectorAll('strong')].filter(s => getComputedStyle(s).position !== 'absolute').map(s => s.textContent.trim()),
+      logoTekst: (a.querySelector('.maerke-logo') || {}).textContent || '',
+    })),
+    kk: [...document.querySelectorAll('.tal-grid a[data-kk]')].map(a => [a.dataset.kk, a.getAttribute('href')]),
+    typer: [...document.querySelectorAll('#category-tiles .tile')].map(a => [a.dataset.type, a.getAttribute('href')]),
+  })));
+  for (const f of r.flise) assert.ok(f.tekster.length <= 1, `dublet i ${f.navn}`);
+  const kk = Object.fromEntries(r.kk);
+  assert.equal(kk.A1, 'koerekort-a1.html'); assert.equal(kk.A2, 'koerekort-a2.html'); assert.equal(kk.A, 'koerekort-a.html');
+  for (const [, href] of [...r.kk, ...r.typer]) {
+    if (/^soegning\.html/.test(href)) continue;
+    assert.ok(fs.existsSync(path.join(REPO, href)), `${href} findes ikke`);
+    assert.doesNotMatch(fs.readFileSync(path.join(REPO, href), 'utf8'), /name="robots" content="noindex/, `${href} er noindex`);
+  }
+  // Scooter/Classic/Cross: siderne findes, men er noindex (for få annoncer), så fliserne peger bevidst på søgningen.
+  for (const [id, href] of r.typer.filter(([id]) => ['scooter', 'classic', 'cross'].includes(id))) assert.match(href, /^soegning\.html\?type=/, id);
+});
+
+test('W14 i3: tap-mål >= 40 px på topnav, footer-links og de sammenfoldede genvejslister', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const smaa = await aabn(1440, 'light', async p => {
+    await p.evaluate(() => { const d = document.getElementById('mere-om'); if (d) d.open = true; });
+    await p.waitForTimeout(300);
+    return p.evaluate(() => [...document.querySelectorAll('.main-nav > a, .nav-item > a, .site-footer a, .seo-gruppe a, .mere-om > summary')]
+      .filter(e => e.offsetParent && e.getBoundingClientRect().height > 0)
+      .map(e => ({ t: (e.textContent || '').trim().slice(0, 24), h: Math.round(e.getBoundingClientRect().height) }))
+      .filter(x => x.h < 40));
+  });
+  assert.deepEqual(smaa, []);
+});
+
+test('W14 i3: "Mere om"-laget er sammenfoldet, men teksten og genvejslinkene ligger i DOM, og afstanden fra tre kolonner til footer er højst 160 px', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const m = await aabn(1440, 'light', p => p.evaluate(() => {
+    const d = document.getElementById('mere-om'); const kol = document.querySelector('.tre-kol').getBoundingClientRect(); const f = document.querySelector('.site-footer').getBoundingClientRect();
+    return { aaben: d.open, hvorfor: !!d.querySelector('#hvorfor-titel'), links: d.querySelectorAll('.seo-links a').length, gap: f.top - kol.bottom };
+  }));
+  assert.equal(m.aaben, false); assert.equal(m.hvorfor, true); assert.ok(m.links >= 20, `links ${m.links}`);
+  assert.ok(m.gap <= 160, `afstand ${m.gap}`);
 });
