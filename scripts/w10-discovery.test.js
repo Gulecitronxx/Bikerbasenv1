@@ -159,7 +159,9 @@ test('kort fortalt (mærke): antal i data-mk-n, mest udbudte typer og pris af an
 /* ---------- Guides ---------- */
 const ctx = { header: '<header class="site-header"></header>', footer: '<footer class="site-footer"></footer>', csp: '', populaer: '<section class="gd-pop"></section>', maerker: [] };
 
-test('guides: ét indholdsfortegnelses-element (details) i højre spalte, ankre findes, Kort fortalt kommer først', () => {
+/* W14 (bevidst ændring): billede 10 har indholdsfortegnelsen som bred boks øverst i artiklens spalte, ikke sticky i højre spalte.
+   Den ligger nu som første barn i .gd-main (før artiklen); højre spalte har Kort fortalt, derefter genveje. */
+test('guides: ét indholdsfortegnelses-element (details) øverst i artiklen, ankre findes, Kort fortalt først i højre spalte', () => {
   for (const g of GUIDES){
     const html = renderGuide(g, ctx);
     assert.strictEqual((html.match(/<nav class="gd-toc"/g) || []).length, 1, `${g.slug}: ét indholdsfortegnelses-element`);
@@ -169,8 +171,10 @@ test('guides: ét indholdsfortegnelses-element (details) i højre spalte, ankre 
     assert.ok(ankre.length >= 3, `${g.slug}: ankre`);
     for (const a of ankre) assert.ok(html.includes(`id="${a}"`), `${g.slug}: #${a} findes`);
     const side = html.match(/<aside class="gd-side"[\s\S]*?<\/aside>/)[0];
-    assert.ok(side.indexOf('gd-tldr') > -1 && side.indexOf('gd-tldr') < side.indexOf('gd-toc'), `${g.slug}: Kort fortalt før indholdsfortegnelsen`);
-    assert.ok(side.indexOf('gd-toc') > -1 && !/gd-pop|gd-dark/.test(side), `${g.slug}: sticky-boksen er alene med Kort fortalt`);
+    assert.ok(!/gd-toc/.test(side), `${g.slug}: indholdsfortegnelsen ligger i artiklens spalte, ikke i sidebjælken`);
+    const main = html.match(/<div class="gd-main">[\s\S]*?<article class="gd-article">/);
+    assert.ok(main && main[0].includes('<nav class="gd-toc"'), `${g.slug}: indholdsfortegnelsen står før artiklen`);
+    assert.ok(side.indexOf('gd-tldr') > -1 && side.indexOf('gd-tldr') < side.indexOf('gd-dark'), `${g.slug}: Kort fortalt kommer først i højre spalte`);
     assert.match(html, /Læsetid/); assert.match(html, /Opdateret/);
     assert.match(html, /<time datetime="\d{4}-\d{2}-\d{2}">/);
   }

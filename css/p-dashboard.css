@@ -895,3 +895,15 @@ a.db-tab{ display: inline-flex; align-items: center; text-decoration: none; }
   .db-stat{ grid-template-columns: minmax(0, 1fr); align-content: start; }
   .db-stat-label, .db-stat-sub{ overflow-wrap: break-word; }
 }
+
+/* Profilindstillinger: kortene i to spalter på brede skærme, så panelet ikke står halvtomt ved siden af sidebjælken. */
+@media (min-width: 1100px){
+  #tab-konto{ columns: 2; column-gap: var(--space-4); }
+  #tab-konto > .db-list-head{ column-span: all; }
+  #tab-konto .sidebar-card{ max-width: none; margin: 0 0 var(--space-4); break-inside: avoid; }
+}
+
+/* Hero som i billede 5: lav bjælke (ca. 160 px i referencen), ikke en halv skærm */
+.db-hero h1, .db-hero--slim h1{ font-size: clamp(32px, 3.4vw, 46px); margin-bottom: var(--space-2); }
+.db-hero-inner{ padding-top: var(--space-4); padding-bottom: var(--space-5); }
+.db-hero .breadcrumb{ margin-bottom: var(--space-2); }
