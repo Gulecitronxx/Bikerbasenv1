@@ -166,7 +166,8 @@ test('--maks-sider kan sænke loftet men aldrig hæve det over YAML\'ens', async
 test('gul og gratis\' egen YAML har paginering med et hårdt loft', () => {
   const k = laesKilde('guloggratis');
   assert.strictEqual(k.paginering.type, 'sidetal');
-  assert.ok(k.paginering.max_sider >= 59 && k.paginering.max_sider <= ABSOLUT_MAKS_SIDER);
+  // Standarden er bevidst forsigtig (15 sider pr. kørsel); hele kataloget (59) kræver ejerens bekræftelse og et højere tal.
+  assert.ok(k.paginering.max_sider >= 1 && k.paginering.max_sider <= ABSOLUT_MAKS_SIDER);
 });
 
 /* ---------- 3. Dedup ---------- */

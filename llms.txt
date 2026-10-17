@@ -19,7 +19,7 @@ Bikerbasen hoster ikke de indekserede annoncer: titel, pris, nøgletal og ét bi
 - [MC-udstyr](https://bikerbasen.dk/guide-mc-udstyr.html): Hjelm, tøj og pasform: hvad du bør vide, før du køber udstyr.
 - [Motorcykeltyper](https://bikerbasen.dk/guide-mc-typer.html): Naked, sport, adventure, touring, cruiser og flere: hvad typen siger om kørsel og brug.
 - [MC-ordliste](https://bikerbasen.dk/guide-mc-ordliste.html): ccm, kW, hk, kW pr. kg og andre begreber i en motorcykelannonce.
-- [Sådan sælger du din motorcykel](https://bikerbasen.dk/guide-saelg-motorcykel.html): Papirer, pris, annonce, sikker betaling, svindelmønstre og ejerskifte.
+- [Sådan sælger du din motorcykel](https://bikerbasen.dk/guide-saelg-motorcykel.html): Papirer, pris, annonce, betalingsråd, svindelmønstre og ejerskifte.
 - [Vinteropbevaring af motorcykel](https://bikerbasen.dk/guide-mc-vinteropbevaring.html): Generelle råd om rengøring, batteri, brændstof, dæk, kæde og forsikring.
 - [Første tur efter vinteren](https://bikerbasen.dk/guide-mc-foraar-tjekliste.html): Tjekliste til motorcyklen, før sæsonen starter.
 

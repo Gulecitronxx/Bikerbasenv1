@@ -149,7 +149,7 @@ async function indsamlAnnoncer(context, kilde, {
       const r = tilAnnonce(raa, kilde, liste.maerke);
       if (!r.ok){
         kasseret++;
-        const noegle = r.grund.replace(/d+/g, 'N');
+        const noegle = r.grund.replace(/\d+/g, 'N');
         grunde.set(noegle, (grunde.get(noegle) || 0) + 1);
         continue;
       }

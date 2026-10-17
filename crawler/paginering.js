@@ -145,6 +145,7 @@ async function gennemgaaSider({
       grund = `side ${nr} gav ingen nye annoncer — kilden gentager sig`;
       break;
     }
+    if (side.har_naeste === false && nr === 1){ grund = 'side 1 uden "næste" — enden kan ikke bekræftes (sidestrukturen kan være ændret)'; break; }
     if (side.har_naeste === false){ komplet = true; grund = `side ${nr} har ingen "næste" — enden nået`; break; }
     if (antalKilde && nr >= antalKilde){ komplet = true; grund = `side ${nr} af ${antalKilde} — enden nået`; break; }
     if (stopNaar()){ grund = 'grænsen for antal annoncer er nået'; break; }

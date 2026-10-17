@@ -89,7 +89,7 @@ liste_urler:
 paginering:
   type: sidetal
   parameter: page
-  max_sider: 60
+  max_sider: 15   # forsigtig standard pr. kørsel (≈900 annoncer, ≈45 min). Hele kataloget (59 sider) kræver ejerens bekræftelse af omfanget — hæv først da.
   stop_ved_tom_side: true
   naeste: 'link[rel="next"]'
   antal_sider:

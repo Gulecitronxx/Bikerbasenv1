@@ -1146,7 +1146,7 @@ const GUIDES = [
         html: `
 <ol>
 <li><strong>At stille motorcyklen væk uden at vaske den.</strong> Salt og snavs arbejder videre hele vinteren.</li>
-<li><strong>At glemme batteriet.</strong> Det er den hyppigste årsag til en motorcykel, der ikke vil starte i foråret.</li>
+<li><strong>At glemme batteriet.</strong> Et afladet batteri er en almindelig grund til, at en motorcykel ikke vil starte efter en vinter.</li>
 <li><strong>At bruge en tæt presenning udendørs.</strong> Fugt bliver fanget.</li>
 <li><strong>At springe betjeningsvejledningen over.</strong> Producentens råd for din model vejer tungere end generelle råd, også dem her.</li>
 <li><strong>At ændre forsikring eller registrering uden at spørge.</strong> Få svar fra selskabet og Motorstyrelsen først.</li>
