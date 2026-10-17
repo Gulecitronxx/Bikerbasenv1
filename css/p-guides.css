@@ -382,3 +382,13 @@
 .gd-find-alle:hover{ text-decoration:underline; }
 
 .gd-sec, .gd-sources, .gd-toc{ scroll-margin-top: calc(var(--header-h) + var(--space-4)); }
+
+/* Iteration 2 (billede 10): kompaktere hero og indholdsfortegnelse */
+.gd-hero h1{ font-size: clamp(32px, 3.2vw, 42px); }
+.gd-hero{ padding-bottom: var(--space-4); }
+.gd-lede{ font-size: clamp(16px, 1.3vw, 17px); }
+@media (min-width:1024px){
+  .gd-toc-det > summary{ padding: var(--space-4) var(--space-6) var(--space-1); min-height: 0; }
+  .gd-toc ol{ padding-bottom: var(--space-4); }
+  .gd-toc a{ min-height:30px; }
+}
