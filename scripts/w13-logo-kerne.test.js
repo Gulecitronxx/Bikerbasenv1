@@ -421,3 +421,15 @@ test('A3/A17 kernen har ingen afhængigheder; render-laget bruger hverken fetch,
   assert.equal(sandbox.BrandLogos.normaliser('H-D'), 'harley-davidson');
   assert.equal(sandbox.BrandLogos.logoHTML('Honda', { storrelse: 'md' }), BL.logoHTML('Honda', { storrelse: 'md' }), 'browser og Node giver ens markup');
 });
+
+test('P2-3 hero: et logo, hvis tegning selv bærer navnet (Harley-Davidson-skjoldet, Ducati-skjoldet), er ikke "emblem" i manifestet — så viser hero kun logoet, ikke navnet to gange', () => {
+  for (const slug of ['harley-davidson', 'ducati']){
+    const e = manifest.maerker.find(m => m.slug === slug);
+    assert.ok(e, slug);
+    assert.notEqual(e.variant, 'emblem', `${slug}: filen indeholder navnet; variant 'emblem' ville give ekstra tekstlinje ved siden af logoet`);
+    assert.equal(BL.logoFor(slug).variant, e.variant);
+  }
+  // generatoren skriver kun navnet ved siden af et emblem-only logo
+  const src = fs.readFileSync(path.join(ROOT, 'scripts', 'build-brand-pages.js'), 'utf8');
+  assert.match(src, /medNavn: l\.variant === 'emblem'/);
+});

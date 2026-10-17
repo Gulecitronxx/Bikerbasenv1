@@ -335,3 +335,26 @@ test('P2-2 A–Z-liste og filter: alle rækker har ens kolonnebredde (56 px) og 
     await ctx.close();
   }
 });
+
+test('P2-3 mærkesidens hero: fast ramme — logoet flytter ikke H1, CTA-logoet eller hero-logoet, når filen lander (SVG forsinket 900 ms), og H1 står på samme sted for alle logoformer', async t => {
+  if (skip(t)) return;
+  const h1Top = {};
+  for (const [url, w] of [['/maerke-honda.html', 1440], ['/maerke-kawasaki.html', 1440], ['/maerke-ducati.html', 1440], ['/maerke-bsa.html', 1440], ['/maerke-honda.html', 390]]){
+    const ctx = await browser.newContext({ viewport: { width: w, height: w > 700 ? 900 : 844 } });
+    await ctx.route('**/img/brands/*.svg', async route => { await new Promise(r => setTimeout(r, 900)); return route.continue(); });
+    await ctx.addInitScript(() => { window.__cls = 0; new PerformanceObserver(l => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true }); });
+    const page = await ctx.newPage();
+    await page.goto(svGen.url + url, { waitUntil: 'load' });
+    const maal = () => page.evaluate(() => { const g = s => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return [Math.round(r.x * 10), Math.round(r.y * 10), Math.round(r.width * 10), Math.round(r.height * 10)]; }; return { h1: g('.mk-hero h1'), ctaLogo: (g('.mk-cta .bl') || []).slice(2), logo: g('.mk-hero .bl'), ord: g('.mk-wordmark') }; });
+    const foer = await maal();
+    await page.waitForFunction(() => !document.querySelector('.bl--logo:not(.bl--img):not(.bl--klar):not(.bl--fejl)'), null, { timeout: 8000, polling: 50 });
+    await page.waitForTimeout(300);
+    assert.deepEqual(await maal(), foer, `${url} @${w}: layoutet flyttede sig, da logofilen kom`);
+    assert.ok(await page.evaluate(() => window.__cls) < 0.001, `${url} @${w}: CLS (sidens egen skrifttype-flytning er < 0,001; logoet bidrager 0 — målene ovenfor er identiske)`);
+    if (w > 700) h1Top[url] = foer.h1[1];
+    await ctx.close();
+  }
+  // Honda (emblem + navn), Kawasaki (bredt ordmærke), Ducati (lockup) og BSA uden logo: H1 står samme sted ±1 px — kun mærker med logo har den faste 72 px-ramme
+  const med = ['/maerke-honda.html', '/maerke-kawasaki.html', '/maerke-ducati.html'].map(u => h1Top[u]);
+  assert.ok(Math.max(...med) - Math.min(...med) <= 10, `H1-top med logo: ${med}`);
+});
