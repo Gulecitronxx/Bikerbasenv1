@@ -53,7 +53,7 @@ const RULER = {
   'kontrast-ui':       { wcag: '1.4.11', prio: 'P3', titel: 'Formularkontrol-kant under 3:1 mod baggrunden', forslag: 'Brug en kantfarve (eller fyldfarve) med mindst 3:1 mod omgivelserne.' },
   'kontrast-uafgjort': { wcag: '1.4.3', prio: 'U', titel: 'Kontrast kan ikke afgøres (gradient/billede bag teksten)', forslag: 'Kontrollér manuelt; sikr at teksten har en ensfarvet/mørklagt underlæg.' },
   'fokus-usynlig':     { wcag: '2.4.7 / 2.4.13', prio: 'P1', titel: 'Fokus er ikke synligt', forslag: 'Giv :focus-visible en tydelig outline (≥2 px, ≥3:1) — fjern aldrig outline uden erstatning.' },
-  'fokus-skjult-input':{ wcag: '2.4.7', prio: 'P3', titel: 'Visuelt skjult input: fokus kan ikke bekræftes', forslag: 'Sørg for at input:focus-visible + label/boks får synlig outline.' },
+  'fokus-skjult-input':{ wcag: '2.4.7', prio: 'P3', titel: 'Fokusindikator kan ikke måles (skjult input / range-thumb)', forslag: 'Sørg for at input:focus-visible + label/boks får synlig outline.' },
   'fokus-skjult':      { wcag: '2.4.11', prio: 'P2', titel: 'Fokuseret element dækkes af andet indhold', forslag: 'Brug scroll-padding-top/bottom svarende til sticky/fixed elementer.' },
   'tastaturfaelde':    { wcag: '2.1.2', prio: 'P1', titel: 'Tastaturfælde', forslag: 'Sørg for at Tab/Shift+Tab kan forlade komponenten.' },
   'klikbar-ikke-tastatur': { wcag: '2.1.1 / 4.1.2', prio: 'P1', titel: 'Klik-handler på element uden tastaturadgang', forslag: 'Brug <button>/<a href>, eller tilføj role, tabindex="0" og Enter/Space.' },
@@ -526,7 +526,7 @@ function fokusBasis(){
     for (const x of [...ks]) if (x && x.querySelector) for (const c of x.querySelectorAll('*')) { ks.add(c); if (ks.size > 25) break; }
     return [...ks].filter(Boolean);
   };
-  const snap = el => kandidater(el).map(k => [k, prop(k), prop(k, '::before'), prop(k, '::after')]);
+  const snap = el => kandidater(el).map(k => [k, prop(k), prop(k, '::before') + (k.type === 'range' ? prop(k, '::-webkit-slider-thumb') : ''), prop(k, '::after')]);
   window.__a11yBase = new Map();
   let n = 0;
   for (const el of document.querySelectorAll(FOKUS)){
@@ -558,7 +558,7 @@ function fokusStatus(){
   const s = { body: false, id: el.__a11yId, sel: sel(el), tag: el.tagName.toLowerCase(), top: Math.round(r.top + scrollY), w: Math.round(r.width), h: Math.round(r.height) };
   s.iframe = el.tagName === 'IFRAME';
   const lilleInput = el.tagName === 'INPUT' && (r.width <= 2 || r.height <= 2 || parseFloat(cs.opacity) === 0 || /rect\(0/.test(cs.clip) || cs.clipPath !== 'none');
-  s.skjultInput = lilleInput;
+  s.skjultInput = lilleInput || el.type === 'range';
   /* Indikator: sammenlign med basis */
   const basis = window.__a11yBase && window.__a11yBase.get(el);
   const prop = (n, ps) => { const c = getComputedStyle(n, ps); return [c.outlineStyle, c.outlineWidth, c.outlineColor, c.boxShadow, c.borderTopColor, c.borderTopWidth, c.backgroundColor, c.color, c.textDecorationLine, c.backgroundImage, c.filter].join('|'); };
@@ -567,7 +567,7 @@ function fokusStatus(){
   let aendret = false;
   if (basis){
     for (const [k, b0, b1, b2] of basis){
-      if (prop(k) !== b0 || prop(k, '::before') !== b1 || prop(k, '::after') !== b2){ aendret = true; if (k === el) { aendret = 'selv'; break; } }
+      if (prop(k) !== b0 || prop(k, '::before') + (k.type === 'range' ? prop(k, '::-webkit-slider-thumb') : '') !== b1 || prop(k, '::after') !== b2){ aendret = true; if (k === el) { aendret = 'selv'; break; } }
     }
   }
   s.indikator = eget || aendret === 'selv' || (aendret === true && lilleInput) || (aendret === true);
@@ -611,6 +611,7 @@ function tekstafstand(){
     return dele.join(' > ');
   };
   const fixedAnc = el => { for (let n = el; n && n.nodeType === 1; n = n.parentElement){ const p = getComputedStyle(n).position; if (p === 'fixed' || p === 'sticky') return n; } return null; };
+  const klipBoks = el => { let k = null; for (let n = el, d = 0; n && n.nodeType === 1 && d < 6; n = n.parentElement, d++){ const cs = getComputedStyle(n); if (cs.overflowX !== 'visible' || cs.overflowY !== 'visible'){ const r = n.getBoundingClientRect(); k = k ? { left: Math.max(k.left, r.left), top: Math.max(k.top, r.top), right: Math.min(k.right, r.right), bottom: Math.min(k.bottom, r.bottom) } : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; } } return k; };
   const skjultBoks = el => { for (let n = el, d = 0; n && n.nodeType === 1 && d < 3; n = n.parentElement, d++){ const r = n.getBoundingClientRect(); if ((r.width <= 2 || r.height <= 2) && /hidden|clip/.test(getComputedStyle(n).overflow)) return true; } return false; };
   const SKIP = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'SVG', 'PATH', 'HEAD']);
   const maal = () => {
@@ -627,9 +628,17 @@ function tekstafstand(){
       }
       const t = [...el.childNodes].filter(n => n.nodeType === 3 && n.nodeValue.trim());
       if (!t.length || cs.position === 'fixed' || skjultBoks(el)) continue;
-      let l = 1e9, tp = 1e9, rt = -1e9, bt = -1e9;
-      for (const n of t){ range.selectNodeContents(n); for (const r of range.getClientRects()){ if (r.width < 1 || r.height < 1) continue; l = Math.min(l, r.left); tp = Math.min(tp, r.top); rt = Math.max(rt, r.right); bt = Math.max(bt, r.bottom); } }
-      if (rt - l > 2 && bt - tp > 2) tekster.push({ el, s: sel(el), l, t: tp, r: rt, b: bt, fa: fixedAnc(el) });
+      const kb = klipBoks(el);
+      const fa = fixedAnc(el);
+      for (const n of t){
+        range.selectNodeContents(n);
+        for (const r of range.getClientRects()){
+          if (r.width < 1 || r.height < 1) continue;
+          let l = r.left, tp = r.top, rt = r.right, bt = r.bottom;
+          if (kb){ l = Math.max(l, kb.left); tp = Math.max(tp, kb.top); rt = Math.min(rt, kb.right); bt = Math.min(bt, kb.bottom); }
+          if (rt - l > 2 && bt - tp > 2) tekster.push({ el, s: sel(el), l, t: tp, r: rt, b: bt, fa });
+        }
+      }
     }
     tekster.sort((a, b) => a.t - b.t);
     const overlap = new Map();
@@ -678,7 +687,7 @@ function reflowMaal(){
   for (const el of document.body.querySelectorAll('*')){
     const cs = getComputedStyle(el);
     if (!/hidden|clip/.test(cs.overflowX) || !el.textContent.trim() || cs.textOverflow === 'ellipsis' || cs.whiteSpace.startsWith('nowrap')) continue;
-    if (el.scrollWidth > el.clientWidth + 2 && el.clientWidth > 0 && el.checkVisibility && el.checkVisibility()){
+    if (el.scrollWidth > el.clientWidth + 2 && el.clientWidth >= 8 && el.clientHeight >= 8 && el.checkVisibility && el.checkVisibility()){
       /* Vandret karrusel/slider med overflow:hidden er et bevidst valg — kun tekstcontainere uden børn med fast bredde flagges. */
       if (el.children.length > 2 && [...el.children].every(c => c.getBoundingClientRect().left >= el.getBoundingClientRect().left - 1)) continue;
       F.push({ regel: 'reflow-afklip', sel: sel(el), besked: `${el.scrollWidth}px indhold klippet i ${el.clientWidth}px (overflow-x:hidden)` });
@@ -738,6 +747,7 @@ function findUdloesere(){
 /* Kører i siden: marker udløseren nr. i (efter samme rækkefølge/nøgle) og returnér overlay-tilstand. */
 function markerUdloeser(nogle){
   const synlig = el => { try { return el.checkVisibility({ checkVisibilityCSS: true }); } catch (e) { return !!el.getClientRects().length; } };
+  const paaSkaerm = el => { if (!synlig(el)) return false; const r = el.getBoundingClientRect(); const ix = Math.min(r.right, innerWidth) - Math.max(r.left, 0), iy = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0); return ix > 0 && iy > 0 && ix * iy >= 0.3 * r.width * r.height; };
   const sel = n => { let s = n.tagName.toLowerCase(); if (n.id) s += '#' + n.id; else if (typeof n.className === 'string' && n.className.trim()) s += '.' + n.className.trim().split(/\s+/).slice(0, 2).join('.'); return s; };
   for (const el of document.querySelectorAll('button,[role=button],summary')){
     if (el.type === 'submit' || el.disabled || !synlig(el)) continue;
@@ -747,7 +757,7 @@ function markerUdloeser(nogle){
       el.scrollIntoView({ block: 'center' });
       el.focus();
       const kand = document.querySelectorAll('[role=dialog],[aria-modal=true],dialog,[class*=drawer],[class*=modal],[class*=overlay],[class*=menu],[class*=sheet],[class*=panel],[class*=popover],nav');
-      window.__a11yFoer = new Set([...kand].filter(synlig));
+      window.__a11yFoer = new Set([...kand].filter(paaSkaerm));
       return { fundet: true, expanded: el.getAttribute('aria-expanded'), url: location.href };
     }
   }
@@ -757,16 +767,20 @@ function markerUdloeser(nogle){
 /* Efter åbning: hvad blev åbnet, og er fokus inde? */
 function overlayStatus(){
   const synlig = el => { try { return el.checkVisibility({ checkVisibilityCSS: true }); } catch (e) { return !!el.getClientRects().length; } };
+  const paaSkaerm = el => { if (!synlig(el)) return false; const r = el.getBoundingClientRect(); const ix = Math.min(r.right, innerWidth) - Math.max(r.left, 0), iy = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0); return ix > 0 && iy > 0 && ix * iy >= 0.3 * r.width * r.height; };
   const sel = n => { let s = n.tagName.toLowerCase(); if (n.id) s += '#' + n.id; else if (typeof n.className === 'string' && n.className.trim()) s += '.' + n.className.trim().split(/\s+/).slice(0, 2).join('.'); return s; };
   const trig = document.querySelector('[data-a11y-trig]');
   if (!trig) return { fejl: 'udløser væk' };
   const ctl = trig.getAttribute('aria-controls') ? document.getElementById(trig.getAttribute('aria-controls').split(/\s+/)[0]) : null;
-  const kand = [...document.querySelectorAll('[role=dialog],[aria-modal=true],dialog,[class*=drawer],[class*=modal],[class*=overlay],[class*=menu],[class*=sheet],[class*=panel],[class*=popover],nav')].filter(synlig);
+  const kand = [...document.querySelectorAll('[role=dialog],[aria-modal=true],dialog,[class*=drawer],[class*=modal],[class*=overlay],[class*=menu],[class*=sheet],[class*=panel],[class*=popover],nav')].filter(paaSkaerm);
   let nye = kand.filter(k => !window.__a11yFoer.has(k) && !k.contains(trig));
-  if (ctl && synlig(ctl) && !window.__a11yFoer.has(ctl) && !nye.includes(ctl)) nye.push(ctl);
+  if (ctl && paaSkaerm(ctl) && !window.__a11yFoer.has(ctl) && !nye.includes(ctl)) nye.push(ctl);
   /* Største nye (men ikke en der indeholder en anden ny) */
-  nye = nye.filter(a => !nye.some(b => b !== a && a.contains(b)) || nye.length === 1);
-  const o = nye.sort((a, b) => b.getBoundingClientRect().width * b.getBoundingClientRect().height - a.getBoundingClientRect().width * a.getBoundingClientRect().height)[0];
+  const rang = x => (x.getAttribute('aria-modal') === 'true' || /^(dialog|alertdialog)$/.test(x.getAttribute('role') || '') || x.matches('dialog')) ? 1 : 0;
+  const areal = x => { const q = x.getBoundingClientRect(); return q.width * q.height; };
+  /* Foretræk eksplicit dialog; ellers det yderste nye element (ikke et barn af et andet nyt). */
+  const dialoger = nye.filter(x => rang(x));
+  const o = (dialoger.length ? dialoger : nye.filter(a => !nye.some(b => b !== a && b.contains(a)))).sort((a, b) => areal(b) - areal(a))[0];
   const ex = trig.getAttribute('aria-expanded');
   if (!o) return { aaben: false, expanded: ex };
   document.querySelectorAll('[data-a11y-overlay]').forEach(x => x.removeAttribute('data-a11y-overlay'));
@@ -776,7 +790,7 @@ function overlayStatus(){
   for (const n of document.querySelectorAll('body *')){ if (n === o || o.contains(n) || n.contains(o)) continue; const c = getComputedStyle(n); if (c.position === 'fixed' && n.getBoundingClientRect().width >= innerWidth * 0.95 && n.getBoundingClientRect().height >= innerHeight * 0.95 && synlig(n)) { bagTaeppe = true; break; } }
   const modal = o.getAttribute('aria-modal') === 'true' || o.matches('dialog[open]') || /^(dialog|alertdialog)$/.test(o.getAttribute('role') || '') || (cs.position === 'fixed' && r.width >= innerWidth * 0.7 && r.height >= innerHeight * 0.8) || bagTaeppe;
   const fokuser = o.querySelectorAll('a[href],button,input:not([type=hidden]),select,textarea,summary,[tabindex]:not([tabindex="-1"])');
-  return { aaben: true, sel: sel(o), modal, expanded: ex, fokusInde: o.contains(document.activeElement), antalFokus: [...fokuser].filter(synlig).length, url: location.href };
+  return { aaben: true, sel: sel(o), modal, strikt: o.getAttribute('aria-modal') === 'true' || o.matches('dialog[open]'), expanded: ex, fokusInde: o.contains(document.activeElement), antalFokus: [...fokuser].filter(synlig).length, url: location.href };
 }
 
 function overlayEfterTab(){
@@ -788,7 +802,8 @@ function overlayEfterEsc(){
   const synlig = el => { try { return el.checkVisibility({ checkVisibilityCSS: true }); } catch (e) { return !!el.getClientRects().length; } };
   const o = document.querySelector('[data-a11y-overlay]');
   const trig = document.querySelector('[data-a11y-trig]');
-  const lukket = !o || !o.isConnected || !synlig(o) || (getComputedStyle(o).visibility === 'hidden') || (o.getBoundingClientRect().right <= 0 || o.getBoundingClientRect().left >= innerWidth || o.getBoundingClientRect().bottom <= 0);
+  const paaSkaerm = el => { if (!synlig(el)) return false; const r = el.getBoundingClientRect(); const ix = Math.min(r.right, innerWidth) - Math.max(r.left, 0), iy = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0); return ix > 0 && iy > 0 && ix * iy >= 0.3 * r.width * r.height; };
+  const lukket = !o || !o.isConnected || !paaSkaerm(o);
   return { lukket, fokusRetur: !!trig && (document.activeElement === trig || trig.contains(document.activeElement)), expanded: trig ? trig.getAttribute('aria-expanded') : null, aktiv: document.activeElement ? document.activeElement.tagName.toLowerCase() : '' };
 }
 
@@ -838,7 +853,7 @@ async function tabTest(page, maks){
     sidsteTop = s.top;
     const usynligRect = s.w <= 2 || s.h <= 2;
     if (!s.indikator){
-      if (s.skjultInput) ikkeIndikator.set('P3|' + s.sel, 'visuelt skjult input uden synlig ændring på label/nabo');
+      if (s.skjultInput) ikkeIndikator.set('P3|' + s.sel, 'fokusindikatoren kan ikke måles automatisk (skjult input / pseudo-element, fx range-thumb) — bekræft manuelt');
       else if (!ikkeIndikator.has('P1|' + s.sel)) ikkeIndikator.set('P1|' + s.sel, `${s.tag} får ingen synlig outline/box-shadow/farveændring ved tastaturfokus`);
     } else if (s.udenfor || (usynligRect && !s.skjultInput)){
       ikkeIndikator.set('P1|' + s.sel, 'fokuseret element er ikke synligt i viewport (' + s.w + '×' + s.h + ')');
@@ -877,6 +892,7 @@ async function overlayTest(page, base, url){
       continue;
     }
     skidt = true;
+    if (m.expanded === null && s.expanded === null) tilf('aria-tilstand', navn, 'udløser åbner ' + s.sel + ' men har hverken aria-expanded eller aria-controls');
     if (m.expanded !== null && s.expanded !== 'true') tilf('aria-tilstand', navn, `efter åbning (Enter) er aria-expanded="${s.expanded}" (før: "${m.expanded}")`);
     if (s.modal){
       if (!s.fokusInde) tilf('modal-fokus-ind', navn, `${s.sel} åbnes uden at fokus flyttes ind`);
@@ -884,7 +900,7 @@ async function overlayTest(page, base, url){
       for (let i = 0; i < Math.max(s.antalFokus, 1) + 3 && !forlod; i++){
         await page.keyboard.press('Tab');
         const t = await page.evaluate(overlayEfterTab);
-        if (!t.inde && !t.body){ forlod = true; tilf('modal-fokus-faanges', navn, `Tab forlader ${s.sel} efter ${i + 1} tryk (${s.antalFokus} fokuserbare inde)`); }
+        if (!t.inde && !t.body){ forlod = true; tilf('modal-fokus-faanges', navn, `Tab forlader ${s.sel} efter ${i + 1} tryk (${s.antalFokus} fokuserbare inde)${s.strikt ? '' : ' [role=dialog uden aria-modal]'}`, s.strikt ? undefined : 'P2'); }
       }
       await page.keyboard.press('Escape');
       await page.waitForTimeout(450);
@@ -1155,4 +1171,4 @@ async function main(){
 
 if (require.main === module) main();
 
-module.exports = { koer, tabel, markdown, parseArgs, overTaerskel, familie, RULER };
+module.exports = { koer, tabel, markdown, parseArgs, overTaerskel, familie, RULER, _intern: { auditDom, auditKontrast, findUdloesere, overlayTest, tabTest, settle, a11yInit } };
