@@ -12,7 +12,6 @@
         "sha256": "d9ac4ecfaa4050fa538043c987b1ea8ecedc003bad87c064b59b28a68235efb2",
         "iou": {
           "fuld": 0.9857,
-          "fuld_ufiltreret": 0.5387,
           "h64": 0.9644,
           "h24": 0.9243
         }
@@ -25,7 +24,6 @@
         "sha256": "6b96473e1f6f9124e934feb756b90c65dabf84bbfdfd3386f0fec61c173131c2",
         "iou": {
           "fuld": 0.9827,
-          "fuld_ufiltreret": 0.4496,
           "h64": 0.9879,
           "h24": 0.9582
         }
@@ -67,7 +65,6 @@
         "sha256": "1ae2bf85b19278885c7ee61fc39e81681fbdebbf7199787428a9b25202aed1ae",
         "iou": {
           "fuld": 0.9892,
-          "fuld_ufiltreret": 0.756,
           "h64": 0.9705,
           "h24": 0.9458
         }
@@ -80,7 +77,6 @@
         "sha256": "e2717a234dd685095d200f7e9da3295b7abc799c69eb7aa41eb64be6f160a585",
         "iou": {
           "fuld": 0.978,
-          "fuld_ufiltreret": 0.234,
           "h64": 0.9765,
           "h24": 0.969
         }
@@ -122,7 +118,6 @@
         "sha256": "dd33668df93d0c38bee14142fb05be7de1bdf3cf143a74ce64087a4cd0640952",
         "iou": {
           "fuld": 0.9957,
-          "fuld_ufiltreret": 0.6561,
           "h64": 0.9931,
           "h24": 0.9816
         }
@@ -135,7 +130,6 @@
         "sha256": "7549ae62db98879b9f4d685e2d15c792035a9a00febc7feed53a34ac9a63478e",
         "iou": {
           "fuld": 0.9829,
-          "fuld_ufiltreret": 0.3382,
           "h64": 0.98,
           "h24": 0.9741
         }
@@ -177,7 +171,6 @@
         "sha256": "bc9f251a9849870334210f400e2800ad9864847f017d4cf231d5a656caad0489",
         "iou": {
           "fuld": 0.9833,
-          "fuld_ufiltreret": 0.5285,
           "h64": 0.9462,
           "h24": 0.9115
         }
@@ -190,7 +183,6 @@
         "sha256": "cbc7b02e6029e36979ecaa6316cb7f42fbe10a1093477cdddfe88d73dc5f4717",
         "iou": {
           "fuld": 0.9823,
-          "fuld_ufiltreret": 0.4588,
           "h64": 0.9736,
           "h24": 0.9483
         }
@@ -288,7 +280,6 @@
         "sha256": "fe7280415df4ff8dda1f945a16bfef25a4702d96ae5d91c1be55a283a7b752fb",
         "iou": {
           "fuld": 0.9947,
-          "fuld_ufiltreret": 0.6565,
           "h64": 0.9867,
           "h24": 0.9737
         }
@@ -301,7 +292,6 @@
         "sha256": "8835b9818998bdecfe8f7136b09ab612aac9ff8a2949ee349c25f4123980a8ee",
         "iou": {
           "fuld": 0.9848,
-          "fuld_ufiltreret": 0.337,
           "h64": 0.981,
           "h24": 0.9793
         }
@@ -343,7 +333,6 @@
         "sha256": "46cfd8822bdf212a63678e729ba4c2611317a51f37a04797503ca570187a1961",
         "iou": {
           "fuld": 0.9878,
-          "fuld_ufiltreret": 0.6013,
           "h64": 0.9654,
           "h24": 0.9327
         }
@@ -356,7 +345,6 @@
         "sha256": "374cf4111b191b0f2c3e735c6d5cb70c28c44301e3baa2b46dd92a0e8f0dfba9",
         "iou": {
           "fuld": 0.9743,
-          "fuld_ufiltreret": 0.386,
           "h64": 0.9771,
           "h24": 0.9613
         }
@@ -426,7 +414,6 @@
         "sha256": "0e8826128c12776eed94d094aad5e8a7ef9e0cdfce90ef91b579bbc195d18217",
         "iou": {
           "fuld": 0.9804,
-          "fuld_ufiltreret": 0.4472,
           "h64": 0.9585,
           "h24": 0.9311
         }
@@ -439,7 +426,6 @@
         "sha256": "01d88429130ed6ebd893e0745b48ddfedec4b8149e57e34ea199164c11ec85f3",
         "iou": {
           "fuld": 0.9789,
-          "fuld_ufiltreret": 0.5364,
           "h64": 0.9695,
           "h24": 0.9152
         }
@@ -537,7 +523,6 @@
         "sha256": "ce7d78985d10a0ad7e3babbacaed27531c55d73e02333dbd4d3027c36735269a",
         "iou": {
           "fuld": 0.9879,
-          "fuld_ufiltreret": 0.6095,
           "h64": 0.974,
           "h24": 0.9391
         }
@@ -550,7 +535,6 @@
         "sha256": "12176ce7936aa4ce2dc5bcd5bb06645d48037a6bdc465bdd7b53e4ba3d4d37d8",
         "iou": {
           "fuld": 0.9817,
-          "fuld_ufiltreret": 0.3799,
           "h64": 0.9769,
           "h24": 0.9653
         }
@@ -592,7 +576,6 @@
         "sha256": "488407bb738852e35d59832cd0e328799cccad42c7c0250212f3c99a96321dd4",
         "iou": {
           "fuld": 0.9926,
-          "fuld_ufiltreret": 0.7031,
           "h64": 0.985,
           "h24": 0.9191
         }
@@ -605,7 +588,6 @@
         "sha256": "489c768547d2bc9f2d5673e0d551ccd1aafcffaf2c5350ee8347d46198410473",
         "iou": {
           "fuld": 0.9703,
-          "fuld_ufiltreret": 0.2875,
           "h64": 0.9631,
           "h24": 0.935
         }
@@ -638,34 +620,7 @@
     "navn": "Indian",
     "fil": "img/brands/indian.svg",
     "hovedform": "lockup",
-    "varianter": {
-      "emblem": {
-        "fil": "img/brands/indian-emblem.svg",
-        "forhold": 1.9881,
-        "viewBox": "0 0 1000 503",
-        "stoerrelse_bytes": 3418,
-        "sha256": "c94ab41464b42c1bfe9158f8e1284903ebc41f520199980c22f10f7c7bd8bd20",
-        "iou": {
-          "fuld": 0.9033,
-          "fuld_ufiltreret": 0.5007,
-          "h64": 0.8976,
-          "h24": 0.8491
-        }
-      },
-      "ordmaerke": {
-        "fil": "img/brands/indian-ordmaerke.svg",
-        "forhold": 2.5253,
-        "viewBox": "0 0 1000 396",
-        "stoerrelse_bytes": 2842,
-        "sha256": "7e418eeefaa792590027d38b8925112db317a6a2343acdaf06a6230e401c5331",
-        "iou": {
-          "fuld": 0.9075,
-          "fuld_ufiltreret": 0.4398,
-          "h64": 0.897,
-          "h24": 0.8565
-        }
-      }
-    },
+    "varianter": {},
     "forhold": 1.6234,
     "viewBox": "0 0 1000 616",
     "stoerrelse_bytes": 6046,
@@ -702,7 +657,6 @@
         "sha256": "ea99ca9c2f48fc4cf47cf5f733a88f7856094d2a4c9c6fa8ad2953f52578f272",
         "iou": {
           "fuld": 0.9468,
-          "fuld_ufiltreret": 0.4047,
           "h64": 0.9409,
           "h24": 0.8997
         }
@@ -715,7 +669,6 @@
         "sha256": "dd9ecf09a7d2ff3dd6f6df7d2f3be60fed77981fda0681c595ac4456fbf6e6bc",
         "iou": {
           "fuld": 0.9828,
-          "fuld_ufiltreret": 0.5715,
           "h64": 0.9756,
           "h24": 0.9687
         }
@@ -757,7 +710,6 @@
         "sha256": "75f292734bcd74fec368c694247f7d0b136d39a8091d2f58221b2095ca79a8da",
         "iou": {
           "fuld": 0.9781,
-          "fuld_ufiltreret": 0.8044,
           "h64": 0.9482,
           "h24": 0.9208
         }
@@ -770,7 +722,6 @@
         "sha256": "d0727c48e40a2480b5779d1e09a361dc5e4acb3d69a4c63300d16cffa7a7b8fe",
         "iou": {
           "fuld": 0.9674,
-          "fuld_ufiltreret": 0.1768,
           "h64": 0.9657,
           "h24": 0.9422
         }
@@ -812,7 +763,6 @@
         "sha256": "796ec0f73444216cf47badc807d4ec5dc5fdf4db2cc6610f58aef6f0d85e3c5c",
         "iou": {
           "fuld": 0.9908,
-          "fuld_ufiltreret": 0.5994,
           "h64": 0.9827,
           "h24": 0.9664
         }
@@ -825,7 +775,6 @@
         "sha256": "e3764d72ced709ea7a1a94e71681c66357a5b583df65dd19c537a4e246893343",
         "iou": {
           "fuld": 0.979,
-          "fuld_ufiltreret": 0.391,
           "h64": 0.9807,
           "h24": 0.98
         }
@@ -867,7 +816,6 @@
         "sha256": "38cd780459958dfb06cf9045a78e5bd7d99b324d0827174e765c6dfa92d33330",
         "iou": {
           "fuld": 0.9881,
-          "fuld_ufiltreret": 0.4365,
           "h64": 0.9759,
           "h24": 0.9676
         }
@@ -880,7 +828,6 @@
         "sha256": "c1e6f2e50373d90b7f9e5a8c587a4c8b02798391475354ef72000d0715434f84",
         "iou": {
           "fuld": 0.9773,
-          "fuld_ufiltreret": 0.5511,
           "h64": 0.9643,
           "h24": 0.9508
         }
@@ -922,7 +869,6 @@
         "sha256": "28c908877c1cdf37e680ba75151abbe46b42471b2fa89df50ff5d4344103b89f",
         "iou": {
           "fuld": 0.9895,
-          "fuld_ufiltreret": 0.6698,
           "h64": 0.9653,
           "h24": 0.9434
         }
@@ -935,7 +881,6 @@
         "sha256": "913f8f6bfafa6ef348bf9deb8bd75e54333145943a98c5951b1f886e1210f765",
         "iou": {
           "fuld": 0.9835,
-          "fuld_ufiltreret": 0.321,
           "h64": 0.9782,
           "h24": 0.9724
         }

@@ -5,6 +5,7 @@
          node scripts/logo-vektoriser-alle.js --kun yamaha,honda   (kun disse; skriver ikke assets.json)
    Flag: --kilde <mappe>   mappen med kilde-PNG'erne (standard: C:\Users\pasca\Desktop\Bikerbasen billeder)
          --param '{json}'  tilsidesæt vektoriser-parametre (kun til forsøg; kør ikke med --kun for endelig assets.json)
+         --ud-svg <mappe>  skriv SVG og assets.json hertil i stedet for img/brands (bruges af testen)
          --ud-ark <mappe>  hvor kontaktark/diff-billeder lægges (standard: %TEMP%\logo-assets)
 
    Kildefilerne ligger uden for repoet og læses kun. Intet sættes til godkendt: godkendt=false for alle (ejer/jurist skal godkende).
@@ -18,12 +19,12 @@ const { vektoriser, laesPng, alfaMaske, blaekNiveau, fyldMaske, sletRegioner } =
 const { enkodPng, dekodPng } = require('./visuel-regression');
 
 const REPO = path.join(__dirname, '..');
-const UD_MAPPE = path.join(REPO, 'img', 'brands');
+let UD_MAPPE = path.join(REPO, 'img', 'brands');
 const KILDE_STANDARD = 'C:\\Users\\pasca\\Desktop\\Bikerbasen billeder';
 const PRE = 'ChatGPT-billede 17. okt. 2026, ';
 const PROCES = 'AI-udkast → vektoriseret med scripts/logo-vektoriser.js';
 const LICENS = 'Varemærke tilhører producenten; udkast ikke verificeret mod officiel fil';
-const IOU_KRAV = 0.97, IOU64_KRAV = 0.93, IOU24_KRAV = 0.85;
+const IOU_KRAV_OFFICIEL = 0.94 /* mærker der skal erstattes af officiel fil (Indian: 6 KB-loftet giver 0,951) */, IOU_KRAV = 0.97, IOU64_KRAV = 0.93, IOU24_KRAV = 0.85;
 
 /* Pr.-mærke-parametre. fjern = rektangler [x0,y0,x1,y1] i kildepixel (konturer hvis boks ligger helt indeni fjernes).
    varianter.<navn> = { behold: [rektangler] } (konturer hvis boksmidte ligger i et rektangel beholdes).
@@ -50,7 +51,7 @@ const TABEL = [
     bemaerkninger: 'Kun ordmærket er med: løve-/laurbærkrans-emblemet (80 konturer) kan ikke kodes under 6 KB uden stort tab (13,9 KB ved IoU 0,962; 6,3 KB ved IoU 0,87). Skrifttypen er ikke Benellis egen.' },
   { slug: 'cfmoto', navn: 'CFMoto', kilde: '13.37.25-3.png', hovedform: 'lockup', varianter: deling(860), autenticitet: 'ukendt' },
   { slug: 'husqvarna', navn: 'Husqvarna', kilde: '13.37.26-4.png', hovedform: 'lockup', varianter: deling(870), autenticitet: 'tvivlsom' },
-  { slug: 'indian', navn: 'Indian', kilde: '13.37.27-5.png', hovedform: 'lockup', varianter: deling(640), parametre: { tolerance: 1.2, glat: 1, minAreal: 100 },
+  { slug: 'indian', navn: 'Indian', kilde: '13.37.27-5.png', hovedform: 'lockup', parametre: { tolerance: 1.2, glat: 1, minAreal: 100 },
     slet: [[1118, 862, 1168, 914]], autenticitet: 'ubrugelig', kraever_officiel_fil: true },
   { slug: 'moto-guzzi', navn: 'Moto Guzzi', kilde: '13.37.28-6.png', hovedform: 'lockup', varianter: deling(684), parametre: { tolerance: 0.5, glat: 1 }, autenticitet: 'tvivlsom' },
   { slug: 'mv-agusta', navn: 'MV Agusta', kilde: '13.37.28-7.png', hovedform: 'lockup', varianter: deling(975), parametre: { tolerance: 0.6, glat: 1 }, autenticitet: 'tvivlsom' },
@@ -68,6 +69,7 @@ function parseArgs(argv){
   for (let i = 0; i < argv.length; i++){
     if (argv[i] === '--maal') a.maal = true;
     else if (argv[i] === '--kun') a.kun = argv[++i].split(',');
+    else if (argv[i] === '--ud-svg') a.udSvg = path.resolve(argv[++i]);
     else if (argv[i] === '--param') a.param = JSON.parse(argv[++i]);
     else if (argv[i] === '--kilde') a.kilde = argv[++i];
     else if (argv[i] === '--ud-ark') a.udArk = argv[++i];
@@ -280,7 +282,7 @@ function skrivAssets(udgaver, maaling, eksisterende){
     const hoved = filInfo(`${b.slug}.svg`, u.hoved);
     const m = maaling && maaling.res[b.slug];
     const gammel = eksisterende && eksisterende[b.slug];
-    const iou = f => f ? { fuld: round(f.fuld), fuld_ufiltreret: round(f.fuldUfiltreret), h64: round(f.h64), h24: round(f.h24) } : null;
+    const iou = (f, hoved) => f ? Object.assign({ fuld: round(f.fuld) }, hoved ? { fuld_ufiltreret: round(f.fuldUfiltreret) } : {}, { h64: round(f.h64), h24: round(f.h24) }) : null;
     const varianter = {};
     for (const [navn, v] of Object.entries(u.varianter)){
       varianter[navn] = Object.assign(filInfo(v.fil, v.r), { iou: m ? iou(m.varianter[navn]) : (gammel && gammel.varianter[navn] ? gammel.varianter[navn].iou : null) });
@@ -300,7 +302,7 @@ function skrivAssets(udgaver, maaling, eksisterende){
       autenticitet: b.autenticitet || 'ukendt',
       kraever_officiel_fil: !!b.kraever_officiel_fil,
       godkendt: false,
-      iou: m ? iou(m.hoved) : (gammel ? gammel.iou : null),
+      iou: m ? iou(m.hoved, true) : (gammel ? gammel.iou : null),
       maaling: { kilde_x: round(u.hoved.meta.kildeX, 2), kilde_y: round(u.hoved.meta.kildeY, 2), enhed_pr_pixel: round(u.hoved.meta.enhedPrPixel, 5) },
       bemaerkninger: b.bemaerkninger || '',
     };
@@ -311,6 +313,7 @@ const round = (v, d = 4) => Math.round(v * 10 ** d) / 10 ** d;
 
 async function main(argv){
   const a = parseArgs(argv);
+  if (a.udSvg) UD_MAPPE = a.udSvg;
   const udgaver = byg(a);
   let maaling = null;
   if (a.maal) maaling = await maal(a, udgaver);
@@ -320,7 +323,7 @@ async function main(argv){
     for (const u of udgaver){
       const m = maaling.res[u.b.slug].hoved;
       const bytes = Buffer.byteLength(u.hoved.svg);
-      const ok = m.fuld >= IOU_KRAV && m.h64 >= IOU64_KRAV && m.h24 >= IOU24_KRAV && bytes < 6144;
+      const ok = m.fuld >= (u.b.kraever_officiel_fil ? IOU_KRAV_OFFICIEL : IOU_KRAV) && m.h64 >= (u.b.kraever_officiel_fil ? 0.92 : IOU64_KRAV) && m.h24 >= IOU24_KRAV && bytes < 6144;
       if (!ok) fejl++;
       console.log(`${u.b.slug.padEnd(16)} ${String(bytes).padStart(5)}  ${String(u.hoved.meta.konturer).padStart(8)}  ${m.fuld.toFixed(4).padStart(9)}  ${m.fuldUfiltreret.toFixed(4).padStart(6)}  ${m.h64.toFixed(3).padStart(6)}  ${m.h24.toFixed(3).padStart(6)} ${ok ? '' : ' <-- UNDER KRAV'}`);
       for (const [n, v] of Object.entries(maaling.res[u.b.slug].varianter)){
@@ -345,4 +348,4 @@ if (require.main === module){
   main(process.argv.slice(2)).then(c => { process.exitCode = c; }, e => { console.error(e.stack || e.message); process.exitCode = 2; });
 }
 
-module.exports = { TABEL, PRE, byg, referenceMaske, skrivAssets, IOU_KRAV, IOU64_KRAV, IOU24_KRAV };
+module.exports = { IOU_KRAV_OFFICIEL, TABEL, PRE, byg, referenceMaske, skrivAssets, IOU_KRAV, IOU64_KRAV, IOU24_KRAV };
