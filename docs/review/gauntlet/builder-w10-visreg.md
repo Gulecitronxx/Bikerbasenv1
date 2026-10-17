@@ -32,7 +32,7 @@ De seks største (lys, 1440 hvor ikke andet):
 2. **type-sport** (57 % / 390: 49 %): ny sektion "Udforsk sport-motorcykler efter behov" (4 kort: A2, pris, årgang, km), "Guides og viden" med tre guidekort erstatter tekstteaseren, "Favoriter" i headeren; alt nedenunder skubbet ~100 px.
 3. **region-syddanmark / -midtjylland / -hovedstaden / -nordjylland** (44-56 % ved 1440, 36-47 % ved 390): samme facetside-skabelon som type (nye behov-kort, guide-sektion, flere interne links).
 4. **annonce** (1440: 44,5 %; 390: 19 %): "Kan du køre denne motorcykel?" flyttet fra bred bundrække til sidepanel under sælgerkortet, "Handl trygt" flyttet fra højre til under faktaboksen, tjekliste-kortet er nu ved siden af i midterkolonnen; "Favoriter" i headeren.
-5. **soegning** (390: 40 %; mørk 32 %): søgesiden er omlagt (skifter filter-/kortlayout; se diff.html).
+5. **soegning** (390: 40 %; mørk 32 %): stor forskel, årsag IKKE inspiceret af Builder (åbn diff.html) — sandsynligvis samme mønster som facetsiderne.
 6. **index** (1440: 30,6 %, mørk 27,6 %): næsten kun lodret forskydning: hero ~26 px højere (større h1) + "Favoriter" i headeren; sektionerne nedenunder er ellers de samme (eksempel på begrænsningen ovenfor). Også maerke-honda (27 % / 23 %) og koerekort-a2 (28 % / 25 % ved 390) ændret.
 Rapportér/regenerér med: `--ud work/ny --mod work/baseline` efter at have lavet begge mapper som ovenfor.
 
