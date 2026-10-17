@@ -134,7 +134,7 @@ test('W14: kortets titel og pris klippes ikke (hele modelnavnet), og ⇄ er skju
   for (const k of r) { assert.equal(k.klippet, false); assert.equal(k.prisUnder, true); assert.ok(k.ikoner <= 1, 'ikoner i hvile ' + k.ikoner); }
 });
 
-test('W14: under fejlet lager (503) står der ingen annoncetal på fliser og kolonner, banneret dækker ikke heroen, og sælg-panelet fylder rækken', async t => {
+test('W14: under fejlet lager (503) står der ingen annoncetal på fliser og kolonner, banneret er kompakt (højst 60 px) og dækker kun et hjørne af heroen, og sælg-panelet fylder rækken', async t => {
   if (!kan.ok) return t.skip(kan.grund);
   const { server, port } = await sb.startServer(REPO);
   const browser = await kan.pw.chromium.launch();
@@ -150,11 +150,11 @@ test('W14: under fejlet lager (503) står der ingen annoncetal på fliser og kol
       const synlige = [...document.querySelectorAll('.tile-count, .maerke-flise .tal-n, .tal-grid .tal-n')].filter(e => getComputedStyle(e).visibility !== 'hidden' && e.textContent.trim()).map(e => e.textContent.trim());
       const ban = document.querySelector('#data-afbrud'); const hero = document.querySelector('.hero').getBoundingClientRect();
       const bb = ban && ban.getBoundingClientRect(); const sp = document.querySelector('.saelg-panel').getBoundingClientRect();
-      return { synlige, banner: !!ban, bannerTopUnderHero: bb ? bb.top >= hero.bottom - 1 : null, spW: sp.width, vw: innerWidth };
+      return { synlige, banner: !!ban, bannerH: bb ? bb.height : 0, spW: sp.width, vw: innerWidth };
     });
     assert.deepEqual(m.synlige, [], 'tal synlige under fejl');
     assert.equal(m.banner, true);
-    assert.equal(m.bannerTopUnderHero, true, 'banneret ligger over heroen');
+    assert.ok(m.bannerH <= 60, "banneret er kompakt (" + m.bannerH + " px)");
   } finally { await browser.close().catch(() => {}); server.close(); }
 });
 

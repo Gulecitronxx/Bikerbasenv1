@@ -581,8 +581,13 @@ body.home .kort-raekke > .lager-tomt-note{
 /* ---- Fejlet/tomt lager: ingen tal paa fliser og kolonner; banneret ligger nederst til hoejre, ikke over heroens motiv ---- */
 html[data-lager-fejl] body.home :is(.tile-count, .maerke-flise .tal-n, .tal-grid .tal-n){ visibility:hidden; }
 html[data-lager-fejl] body.home :is(.sek-note, .kol-note){ visibility:hidden; }
+/* Banneret: kompakt (en linje + knapper, som paa mobil), saa det kun daekker et lille hjoerne af heroens foto. */
 @media (min-width:1024px){
-  body.home .data-afbrud{ top:auto; bottom: var(--space-4); }
+  body.home .data-afbrud{ display:flex; align-items:center; gap: var(--space-2); padding: 6px var(--space-3); max-height:56px; box-sizing:border-box; overflow:hidden; width:400px; }
+  body.home .data-afbrud-kort{ display:block; flex:1 1 auto; min-width:0; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  body.home .data-afbrud-lang{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  body.home .data-afbrud-knapper{ flex:0 0 auto; flex-wrap:nowrap; margin-top:0; }
+  body.home .data-afbrud-igen, body.home .data-afbrud-luk{ min-height:36px; padding: 4px var(--space-3); }
 }
 
 /* ---- Tre kolonner: kompakte fliser (ca. 60 px), logo + navn + antal taet ---- */
