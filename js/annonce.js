@@ -556,14 +556,31 @@ function anVirkDel(l){
 /* H1'en står i markup uden for #listing-detail (én h1 pr. side, også uden
    JavaScript). Her flyttes den ind i titelblokken, så den sidder, hvor
    billedet har den. */
-function anFlytH1(tekst){
+/* Producentens logo i titelrækken (Annonce.png): kun når mærket har et GODKENDT logo i manifestet — ellers intet (ingen
+   monogram, ingen tom plads). Rækken findes derfor kun, hvor logoet findes, og slottens mål kendes fra manifestet, før
+   filen er hentet (BrandLogos giver fast slot) — ingen CLS. Logoet står alene, så det har aria-label "<Mærke>-logo". */
+function anMaerkelogoHTML(maerke){
+  if (typeof BrandLogos === 'undefined' || !maerke) return '';
+  if (!BrandLogos.logoFor(maerke).harLogo) return '';
+  const html = BrandLogos.logoHTML(maerke, { storrelse: 'lg', decorative: false });
+  return html ? `<span class="an-maerkelogo">${html}</span>` : '';
+}
+
+function anFlytH1(tekst, maerke){
   const h1 = document.getElementById('listing-h1');
   const plads = document.getElementById('an-h1-slot');
   if (!h1 || !plads) return;
   if (tekst) h1.textContent = tekst;
   h1.classList.remove('visually-hidden');
   h1.classList.add('an-h1');
-  plads.replaceWith(h1);
+  const logo = anMaerkelogoHTML(maerke);
+  if (!logo){ plads.replaceWith(h1); return; }
+  const raekke = document.createElement('div');
+  raekke.className = 'an-titelraekke';
+  plads.replaceWith(raekke);
+  raekke.appendChild(h1);
+  raekke.insertAdjacentHTML('beforeend', logo);
+  if (typeof BrandLogos.gennemgaa === 'function') BrandLogos.gennemgaa();
 }
 
 const anChips = (liste) => liste.filter(Boolean).map(c => `<span class="an-chip">${escapeHTML(c)}</span>`).join('');
@@ -1097,7 +1114,7 @@ function renderExternalListing(listing){
       </div>
     </div>`;
 
-  anFlytH1(fuldTitel);
+  anFlytH1(fuldTitel, listing.brand);
   anBalancerKolonner();
   anAktioner(listing, false);
   anVirkDel(listing);
@@ -1402,7 +1419,7 @@ function renderListing(){
       dMere.setAttribute('aria-expanded', String(aaben));
     });
   }
-  anFlytH1(`${listing.brand} ${listing.model}`);
+  anFlytH1(`${listing.brand} ${listing.model}`, listing.brand);
   anBalancerKolonner();
   anAktioner(listing, isOwnListing(listing));
   anVirkDel(listing);

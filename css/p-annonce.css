@@ -787,6 +787,16 @@
   font-size: clamp(28px,3.1vw,40px); line-height:1.08; letter-spacing:-.01em; margin: 12px 0 6px;
   overflow-wrap:anywhere;
 }
+/* W13 logo: titelrække med producentens logo højrejusteret ved H1 (kun når et godkendt logo findes; ellers er h1 alene som før). */
+.an-titelraekke{ display:flex; align-items:flex-start; justify-content:space-between; gap: var(--space-3); margin:12px 0 6px; }
+.an-titelraekke .an-h1{ margin:0; flex:1 1 auto; min-width:0; }
+.an-maerkelogo{ flex:none; display:flex; align-items:center; justify-content:flex-end; height:40px; margin-top:2px; }
+.listing-title-rad{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); }
+.listing-title-rad .listing-title{ min-width:0; }
+@media (max-width:1179px){
+  .an-maerkelogo{ height:30px; margin-top:0; }
+  .an-maerkelogo .bl{ --bl-maxh:30px; --bl-maxw:84px; }
+}
 .an-sub{ display:flex; flex-wrap:wrap; margin:0; color: var(--color-fg-muted); font-size:15px; }
 .an-sub span + span::before{ content:"|"; margin:0 10px; color: var(--color-border); }
 .an-price-block{ margin-top: var(--space-3); }

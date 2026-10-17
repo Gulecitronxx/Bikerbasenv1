@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { ROOT, siteUrl, listingSlug, fetchListings, siteParts, esc } = require('./shared');
 const { tjekAntal, tjekSletninger, taelAnnonceSider } = require('./seo-vagt');
+const BrandLogos = require('../js/brand-logos.js');   // W13: producentlogo ved titlen (kun godkendt logo; ellers intet)
 
 // data.js giver os formatPrice, typeLabel, equipmentLabel osv.
 const dataSrc = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
@@ -148,6 +149,9 @@ function side(l){
   const url = `${BASE}/${fil}`;
   const navn = `${l.brand} ${l.model}`;
   const billeder = l.photoUrls || [];
+  /* Logoet står alene (aria-label "<Mærke>-logo") og findes kun, hvor mærket har et godkendt logo. Samme krav som js/annonce.js. */
+  const harLogo = BrandLogos.logoFor(l.brand).harLogo;
+  const logoMarkup = harLogo ? BrandLogos.logoHTML(l.brand, { storrelse: 'lg', decorative: false }) : '';
   const udstyr = l.equipment || [];
 
   const dele = [`Årgang ${l.year}`, formatKm(l.km), formatCcm(l.ccm), l.condition].filter(Boolean);
@@ -196,7 +200,7 @@ ${csp}
 </style>
 ${billeder.length ? `<link rel="preload" as="image" href="${esc(billeder[0])}" fetchpriority="high">
 ` : ''}<link rel="stylesheet" href="css/styles.css${v}">
-<link rel="stylesheet" href="css/p-annonce.css">
+${harLogo ? '<link rel="stylesheet" href="css/p-brand-logo.css">' + String.fromCharCode(10) : ''}<link rel="stylesheet" href="css/p-annonce.css">
 ${jsonLd(l, url)}
 </head>
 <body>
@@ -224,7 +228,7 @@ ${billeder.map((u, i) => `          <img src="${esc(u)}" alt="${esc(navn)} — b
 
         <div class="listing-header">
           <div>
-            <p class="listing-title">${esc(navn)}</p>
+            ${logoMarkup ? `<div class="listing-title-rad"><p class="listing-title">${esc(navn)}</p><span class="an-maerkelogo">${logoMarkup}</span></div>` : `<p class="listing-title">${esc(navn)}</p>`}
             <div class="listing-loc">${esc(l.city)}, ${esc(l.postnr)} · ${esc(l.region)}</div>
           </div>
           <div class="listing-price-block">
@@ -313,7 +317,9 @@ ${contactModal}
 <script defer src="js/backend-bridge.js${v}"></script>
 <script defer src="js/components.js${v}"></script>
 <script defer src="js/seo.js${v}"></script>
-<script defer src="js/annonce.js${v}"></script>
+${harLogo ? `<script defer src="js/brand-logos-data.js${v}"></script>
+<script defer src="js/brand-logos.js${v}"></script>
+` : ''}<script defer src="js/annonce.js${v}"></script>
 </body>
 </html>
 `;
