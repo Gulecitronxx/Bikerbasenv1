@@ -608,3 +608,41 @@
 
 /* w14: under lagerfejl (html[data-lager-fejl]) er de byggede tal ikke pålidelige: panelets pris- og typelinjer (bagt ved byg) skjules; antallet dæmpes af styles.css. */
 html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-panel li:not(:first-child){ display:none; }
+
+
+/* w14 iteration 3 (billedernes kort er ca. 205 px høje mod vores 350): kortene i udvalgs- og "flere"-rækkerne på disse sider får et bredere foto,
+   mindre luft og titel + pris på samme linje (billedets kortopbygning). Kun CSS i sidernes egne rækker; kortkomponenten (js/components.js) er uændret. */
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .card-media{ aspect-ratio: 2.1 / 1; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .rk-body{ padding: 10px 12px 8px; gap: 6px; }
+@container (min-width: 232px){
+  :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-top{ flex-direction:row; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
+  :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-titel{ flex:1 1 auto; }
+}
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-fod{ padding-top: 6px; }
+@media (max-width:519px){
+  :is(.fa-kortraekke, .mk-featured-kort) .card-rich .card-media{ aspect-ratio: 16 / 10; }
+}
+@media (min-width:1100px){
+  .fa-cta{ padding: var(--space-3) var(--space-4); gap: var(--space-2); }
+  .fa-cta h2{ font-size:19px; line-height:1.2; }
+  .fa-cta ul{ gap:4px; }
+  .fa-cta li{ font-size:13.5px; line-height:1.3; }
+  .fa-cta .btn{ padding-block:10px; }
+}
+/* Kort uden foto (tom plads): ikonet udgår og teksten er kompakt, så ét fotoløst kort ikke gør hele rækken 90 px højere. */
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom{ padding: 8px 52px 8px 10px; gap:2px; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom-ikon{ display:none !important; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom-titel{ font-size:12px; line-height:1.3; max-width:none; }
+
+/* w14 mobil (<560 px): sidens længde ved 390 px var 7.700-9.000 px (billedernes sider er korte). Info-bokse, guides og behovskort er vandrette skinner
+   med peek (som mærkesidens tre kolonner), og "flere"-gitteret viser 4 kort — "Se alle" fører videre til søgningen. */
+@media (max-width:559px){
+  :is(.fa-bokse-kk, .fa-bokse-4, .fa-guides, .fa-udforsk){
+    display:flex; gap: var(--space-3); overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
+    margin-inline: calc(-1 * var(--space-4)); padding-inline: var(--space-4); scroll-padding-inline: var(--space-4); padding-bottom:4px;
+  }
+  :is(.fa-bokse-kk, .fa-bokse-4, .fa-guides, .fa-udforsk)::-webkit-scrollbar{ display:none; }
+  :is(.fa-bokse-kk, .fa-bokse-4, .fa-guides, .fa-udforsk) > *{ flex:0 0 84%; scroll-snap-align:start; min-width:0; }
+  .fa-flere .listings-grid > :nth-child(n+5){ display:none; }
+  .fa-guides a{ flex-direction:row; }
+}

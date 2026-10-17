@@ -70,3 +70,50 @@ Ny: `scripts/w14-maerker.test.js` (8 tests, orchestrator føjer til `npm test`).
 
 ## Gate (npm run gate i worktree uden build)
 node --check, synk-header, seo-audit (0 fund), sitemap, døde links og udgiv-tørkørsel: OK. To trin FEJLER af kendte grunde: (7) package.json "test" mangler w14-maerker.test.js (Orchestratorens fil); (2) npm test: kun `w12-kritisk.test.js` browsertests på de committede (ikke regenererede) sider - alt andet grønt.
+
+---
+# Iteration 2-3 (efter blind Critic: AFVIS, Yamaha 5/10, Sport 5/10, A2 5,5/10)
+Billeder i `agent4-maerker/`: `sbs-y1..y3` (Yamaha), `sbs-t1..t3` (Sport), `sbs-k1..k3` (A2) = mockup | efter, `efter-*-1440`, `efter-*-390` (mobil), `efter-*-moerk` (mørk). `foer-*` er baseline fefe1570.
+
+## Acceptkriterier (iteration 2, skrevet efter Criticens dom, FØR rettelserne)
+I1 "Udvalgte"-overskrift højst y=600 ved 1440x900 og første kortrække helt synlig (kort-bund højst ca. 900) på mærke-, type- og regionsider.
+I2 Ingen frit stillet motorcykel (sticker) i hero og aldrig et fremmed mærkes motorcykel i et mærkes/models hero.
+I3 Ingen to "Udforsk efter behov"-kort med samme foto: ikon i stedet for foto.
+I4 CTA-panel lyst. I5 5 + 8 kort (mærke: 5 + 8), "Se alle" som lille link; foto-først i udsnittet. I6 Mobil 390 højst ca. 7.000 px.
+I7 Region-/kørekortkolonner uden stort tomt hul; A1/A2/A altid tre fliser. I8 Kort fortalt som bånd (ca. 90 px). I9 CLS < 0,05 ved 3 gentagelser; ingen flaky CLS. I10 Tap-mål >= 40 px, kontrast >= 4,5:1 programmatisk.
+
+## Måling (1440x900 lys, syntetisk lager; før iteration 2 -> nu)
+| | Mærke (Yamaha) | Type (Sport) | Kørekort (A2) | Region |
+|---|---|---|---|---|
+| hero-højde | 382 -> 272 px | 377 -> 254 | 306 -> 214 | 361 -> 242 |
+| "Udvalgte" fra top | 652 -> 543 | 694 -> 528 | 770 -> 599 | 679 -> 521 |
+| første kortrække helt synlig (kort-bund) | nej -> 873 | nej -> 839 | nej -> 910 | nej -> 832 |
+| sidehøjde 1440 | 6104 -> 4179 | 5327 -> 3348 | 5584 -> 3820 | 5766 -> 3479 |
+| sidehøjde 390 | 10208 -> 7086 | 10521 -> 6193 | 11147 -> 6915 | |
+Kørekort-kortbunden (910 px) er 10 px under folden: faktarække og søgekort kommer før annoncerne (som på billede 7).
+
+## Critic-punkter og status
+1. Region-/kørekortboks 500 px med tomt hul: lukket (kolonner `align-items:start`, region-fliser kompakte, A1/A2/A altid tre fliser; A1 uden annoncer er en rolig 0-flise uden link). 2. Hero 380 -> 214-272 px: lukket (overskrift + 2 linjers intro; foldens tekst flyttet under annoncerne; søgekort overlapper mere; "Få besked" i kortets bundlinje). 3. Hero-foto: lukket på det rettelige - mærke-/model-hero er flad med faktapanel (ægte tal) og ingen motorcykel; typesider/kørekort/region bruger landskabsfotoet; cutout/sticker er fjernet. Rytterfoto og en rigtig mærkehero-fotobank er et ASSET-problem (se tilbage). 4. "Udforsk efter behov": ikonkort, intet foto: lukket. 5. CTA-panel lyst: lukket (uden foto - der er intet ærligt rytterfoto). 6. 24 kort -> 5 + 8 (mærke 5 + 8; mobil 5 + 4), "Se alle" lille link: lukket. 7. Fotoløse kort: foto-først i udsnittet (byg og klient samme rækkefølge), kompakt tomt-foto-kort: lukket; ingen annonce skjules i søgning eller noscript. 8. A-Z: placeholder-initialer skjult (kun godkendte logoer i den faste kolonne); H-D-emblemet er stadig lille (sm-slot 22 px): delvist. 9. CLS: se nedenfor. 10. title/H1: bekræftet, se nedenfor.
+Desuden: kort i rækkerne har bredere foto og titel + pris på én linje (billedets kortopbygning); `FACET_RESERVE_H` 340 -> 264 (CLS-reservationen strakte kortene); Kort fortalt er et bånd (4 punkter side om side, ca. 90 px); tap-mål >= 40 px; mobil: info-bokse, guides og behovskort som vandrette skinner.
+
+## Verificeret programmatisk (ikke kun set)
+- CLS: smoke-browser `--cls 0.05 --strikt` x 3 kørsler, 19 sider x 320/390/768/1024/1440 x lys+mørk = 3 x 180 målinger, 0 fejl, 0 advarsler. Criticens flaky CLS (honda 768 mørk 0,277; cruiser 768 lys 0,143) kunne ikke genskabes (CDP CPU-throttling 4x og 14x, 2-3 gentagelser: 0,000-0,005; største kilde var et felt i søgekortet, der flyttede sig vandret ved skrifttypeskift; rettet med fast knapbredde). Årsagen er sandsynligvis, at hero-fotoet med cutout og højere indhold under hydrering er væk; jeg kan ikke bevise Criticens eksakte årsag.
+- Tap-mål: alle synlige a/button/select/summary/kk-labels >= 40 px højt på mærke-, type- og kørekortsider ved 390 og 1440, undtagen header/footer/lagerbanner (andre strømme) og to inline-tekstlinks i brødtekst.
+- Kontrast: alle tekstelementer med ensfarvet baggrund >= 4,5:1 (3:1 for stor tekst) på mærke, type, kørekort og oversigt, lys og mørk (tekst på hero-foto/gradient springes over og er hvid på scrim >= .7).
+- Tomt lager / lagerfejl (Supabase 500 og `[]`): ved 500 sættes banneret og `data-lager-fejl`, antal dæmpes til "?", panelets pris-/typelinjer skjules (ny regel i p-facet.css/p-maerke.css), 0 overflow, ingen undefined/NaN/null, ingen JS-fejl. Ved 200 med tom liste beholder siden de byggede kort uden banner - uændret adfærd fra tidligere runder (hydreringen rører ikke DOM, når hele lageret er tomt); ikke ændret.
+- Hydrering mod mock (308 annoncer): antal 31/116/61 matcher søgekort og søgeresultat; 13 kort bages og hydreres; 0 overflow.
+- A-Z-hurtigsøg: "harley" -> 1 (Harley-Davidson), "kawa" -> 1, "xyz" -> 0 + "Ingen mærker matcher", tom -> alle 18, Enter -> maerke-harley-davidson.html; ingen JS-fejl.
+- title/description/canonical/JSON-LD/h1: ingen linje i generatordiffen (fefe1570..HEAD) rører titel-, beskrivelse-, canonical-, JSON-LD- eller h1-logik (grep på diffen). Criticens afvigelser på type-sport/koerekort-a1 skyldes tynde syntetiske data (title følger antal), ikke diffen. NB: den syntetiske kopi gav 23 (byg) mod 31 (hydreret) sport-annoncer - byggets fixtures og klient-mocken er ikke ens.
+
+## "Ligner mockuppen": ærlig vurdering (x/10)
+- Mærkeside (Yamaha): **6,5/10**. Struktur, sektionsrækkefølge, lockup (emblem + ordmærke), kort-row med CTA, typefliser, Sådan virker og tre kolonner er tæt på; første skærm rummer nu hero, søgekort, tillidsrække og hele kortrækken. Mangler: fuldbleed foto med rytter, farvet logo, kortenes foto/egen mærkefarve, modelfliser med frilagte billeder.
+- Typeside (Sport): **6,5/10**. Struktur og densitet matcher billedet; hero med statspanel; "Udforsk efter behov" er ikoner/tal i stedet for undertypefotos (ingen undertypedata). Mangler rytterfoto, billedets frilagte modelbilleder og at kortene er kortere (kortkomponenten er delt).
+- Kørekortside (A2): **7/10**. Tættest: faktarække, søgekort, Udvalgte + CTA, typefliser, 3 info-bokse + næste skridt, modeller, guides. Mangler hero-rytter, "Nyeste A2" (ingen oprettelsesdato), 1 af 4 søgefelter (brændstof), og kortrækken er 10 px under folden.
+- Samlet: **6,5/10**. De resterende point er assets (rytterfotos, farvede logoer, frilagte modelbilleder, bjerg/vej-illustration) og data (undertyper, popularitet, oprettelsesdato), ikke layout.
+
+## Tilbage (ny liste)
+- Asset: rytter-/landskabsfotos til fuldbleed hero, mærkespecifikke heroer uden fremmed motorcykel (nu flad flade), frilagte modelbilleder, bjerg/vej-illustration til den grønne boks, farvede logoer (ejerens ensfarvede valg).
+- Data: undertyper (Supersport ...), popularitet, "Nyeste", vægt (kg-chip), brændstoffelt i kørekortsøgningen.
+- Mærkebrugerflade: H-D-emblemet i A-Z er 22 px (sm-slot er ejerens logo-system; ikke ændret).
+- Mobil: mærkesiderne ligger på ca. 7.100-7.200 px (mål 7.000).
+- Ved tomt lager (200 + []) beholdes de byggede kort uden banner - uændret fra før, bør afgøres af ejeren af backend-bridge.

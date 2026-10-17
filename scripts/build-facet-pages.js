@@ -220,7 +220,9 @@ const FACET_KORT = 13;   // w14: 5 udvalgte + 8 i "flere"-gitteret (to rækker);
    3. Tom-tilstandens markup kommer fra ÉN funktion (facetTomMarkup), der bruges af byggetrinnet og
       stringificeres ind i hydreringsscriptet — de kan ikke drive fra hinanden.
    Inline stil, fordi css/ er låst for denne strøm. */
-const FACET_RESERVE_H = 340;
+/* w14: 340 -> 264 px. Kortene er nu ca. 245-265 px høje på desktop (bredere foto, titel + pris på én linje); en højere reservation strakte kortene med tom luft.
+   Under den målte højde skifter siden ikke: hydreringen hæver min-height til containerens MÅLTE højde, før indholdet skiftes (tom-tilstand <-> kort). */
+const FACET_RESERVE_H = 264;
 const facetReserveStil = tom => ` style="min-height:${FACET_RESERVE_H}px${tom ? ';-webkit-mask-image:none;mask-image:none' : ''}"`;
 
 function facetTomMarkup(frase, soegUrl){
