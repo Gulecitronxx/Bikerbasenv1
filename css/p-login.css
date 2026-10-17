@@ -411,3 +411,31 @@ p.lg-or{ display:flex; align-items:center; gap: var(--space-4); margin: var(--sp
   .lg-member{ margin-top: var(--space-2); }
 }
 @media (min-width:1280px){ .lg-form-pane{ padding: 36px 64px 28px; } .lg-promo{ padding: 36px 64px 28px; } }
+
+/* ===== W14 iteration 3 ===== */
+/* opret-visning: højre kolonne får de tre trin (ærlige, i den rækkefølge det sker) i stedet for at stå næsten tom */
+.lg-steps{ list-style:none; margin: var(--space-4) 0 0; padding:0; gap: var(--space-2); }
+html[data-authtab="register"] .lg-steps, html[data-lgmode="register"] .lg-steps{ display:grid; }
+.lg-steps li{ display:flex; align-items:center; gap: var(--space-3); font-size:15px; font-weight:500; }
+.lg-steps b{ flex:none; width:30px; height:30px; border-radius:50%; background: var(--color-primary); color: var(--color-on-primary); display:inline-flex; align-items:center; justify-content:center; font-size:14px; }
+/* fejlboks: overlay, intet layout shift */
+.lg-extras{ position: relative; }
+.auth-error.auth-error-overlay{
+  position:absolute; left:0; right:0; top:0; z-index:3; margin:0; font-size:14.5px; line-height:1.4; font-weight:500;
+  box-shadow: var(--shadow-md);
+}
+/* fordelstekst: fast, kraftigere flade bag teksten, så motorens kromdele aldrig svækker læsbarheden (>= 4,5:1) */
+@media (min-width:960px){
+  .lg-promo > .lg-promo-body::before{
+    background: color-mix(in srgb, var(--color-surface-2) 96%, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 66% 70% at 34% 46%, #000 70%, transparent 100%);
+    mask-image: radial-gradient(ellipse 66% 70% at 34% 46%, #000 70%, transparent 100%);
+  }
+  .lg-bg-photo{ object-position: 100% 62%; }
+}
+
+/* tap-mål: logo-linket i headeren er 30 px højt; hit-area >= 44 px uden at flytte noget */
+.site-header .brand{ min-height: 44px; }
+.auth-error{ color: #9B1C14; }
+:root[data-theme="dark"] .auth-error{ color: var(--color-danger); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .auth-error{ color: var(--color-danger); } }

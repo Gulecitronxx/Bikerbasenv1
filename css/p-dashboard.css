@@ -955,3 +955,13 @@ a.db-title{ display:inline-block; padding: 10px 0; margin: -10px 0; }
   .db-hero-img{ filter: none; }
   .db-hero::after{ background: linear-gradient(90deg, rgba(14,12,10,.88) 0%, rgba(14,12,10,.66) 60%, rgba(14,12,10,.4) 100%); }
 }
+
+/* ===== W14 iteration 3 ===== */
+.db-hero-img{ object-position: 80% 36%; }
+.db-layout{ padding-bottom: var(--space-5); }
+.db-page ~ .site-footer{ margin-top: var(--space-5); }
+.db-num-tom .db-num-tx{ flex-direction: row; font-size: 13px; color: var(--color-fg-muted); }
+.db-num-tom .db-num-ic{ color: var(--color-fg-muted); }
+
+/* tap-mål: logo-linket i headeren er 30 px højt; hit-area >= 44 px uden at flytte noget */
+.site-header .brand{ min-height: 44px; }

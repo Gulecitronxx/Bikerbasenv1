@@ -130,6 +130,7 @@ function updateAuthSlot(){
     slot.setAttribute('href', 'mine-annoncer.html');
     slot.setAttribute('title', String(user.name || '').trim() ? 'Logget ind som ' + String(user.name).trim() : 'Min profil');
     slot.innerHTML = `${Icon.user}Min profil`;
+    document.querySelectorAll('.site-footer a[href="login.html"]').forEach(a => { a.textContent = 'Min profil'; a.setAttribute('href', 'mine-annoncer.html'); });
     if (!document.querySelector('[data-auth-logout]')){
       const ud = document.createElement('a');
       ud.href = '#'; ud.className = 'header-login header-logout'; ud.setAttribute('data-auth-logout', '');

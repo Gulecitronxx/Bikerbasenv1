@@ -449,3 +449,31 @@
   .gd-hero-photo{ filter: brightness(1.05); }
   .gd-hero-media::after{ background: linear-gradient(90deg, rgba(15,13,10,.86) 0%, rgba(15,13,10,.7) 60%, rgba(15,13,10,.5) 100%), linear-gradient(0deg, rgba(15,13,10,.3), rgba(15,13,10,0) 40%); }
 }
+
+/* ===== W14 iteration 3 ===== */
+/* hero <= ca. 310 px: H1 højst to linjer, ingress tre */
+.gd-hero h1{ max-width: min(100%, 820px); font-size: clamp(30px, 2.9vw, 40px); line-height: 1.06; }
+.gd-lede{ max-width: 46em; font-size: clamp(15.5px, 1.2vw, 17px); line-height: 1.45; }
+.gd-kicker{ margin-top: var(--space-3); }
+.gd-meta{ margin-top: var(--space-3); }
+.gd-hero{ padding-bottom: var(--space-4); }
+/* linjelængde: højst ca. 75 tegn */
+.gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 60ch; }
+@media (min-width:1100px){ .gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 60ch; } }
+/* typefliser under artiklen */
+.gd-findtype{ margin-top: var(--space-7); padding-top: var(--space-6); border-top: 1px solid var(--color-border); }
+.gd-findtype h2{ font-size: clamp(22px, 2.6vw, 28px); margin: 0 0 var(--space-1); }
+.gd-findtype > p{ margin: 0 0 var(--space-3); color: var(--color-fg-muted); font-size: 15px; }
+.gd-findtype .gd-types{ margin-top: var(--space-3); }
+.gd-findtype a.gd-type-link{
+  display:flex; flex-direction:column; height:100%; background: var(--color-surface); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); overflow:hidden; color: var(--color-fg); text-decoration:none; box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+.gd-findtype a.gd-type-link:hover{ box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--color-primary); }
+.gd-findtype .gd-type-go{ margin-top:auto; display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; color: var(--color-primary); }
+.gd-findtype .gd-type-go svg{ width:14px; height:14px; }
+.gd-findtype .gd-type{ margin:0; }
+
+/* tap-mål: logo-linket i headeren er 30 px højt; hit-area >= 44 px uden at flytte noget */
+.site-header .brand{ min-height: 44px; }

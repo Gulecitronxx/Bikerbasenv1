@@ -154,8 +154,8 @@ test('guide: sticky mini-indholdsfortegnelse i højre spalte med scroll-spy, ≥
   if (!kan.ok) return t.skip(kan.grund);
   const s = await aabn('guide-saelg-motorcykel.html');
   try {
-    assert.strictEqual(await s.page.locator('.gd-callout').count() >= 2, true, 'mindst to informationsbokse');
-    assert.ok(await s.page.locator('.gd-fig').count() >= 2, 'mindst to fotos i artiklen');
+    assert.ok(await s.page.locator('.gd-callout').count() >= 1, 'mindst én information-boks');
+    assert.ok(await s.page.locator('.gd-article img, .gd-findtype img').count() >= 2, 'mindst to fotos i artiklen');
     const pos = await s.page.evaluate(() => getComputedStyle(document.querySelector('.gd-minitoc')).position);
     assert.strictEqual(pos, 'sticky');
     await s.page.evaluate(() => window.scrollTo(0, 2600)); await s.page.waitForTimeout(500);
@@ -165,9 +165,7 @@ test('guide: sticky mini-indholdsfortegnelse i højre spalte med scroll-spy, ≥
     assert.ok(aktiv >= 1, 'aktivt afsnit markeres');
     const w = await boks(s.page, '.gd-article'); const tc = await boks(s.page, '.gd-toc');
     assert.ok(Math.abs((w.x + w.w) - (tc.x + tc.w)) < 4, 'brødtekst og indholdsfortegnelse flugter');
-    // callouts er guidens eget indhold: teksten findes i Kort fortalt
-    const ok = await s.page.evaluate(() => { const k = [...document.querySelectorAll('.gd-checks span:last-child')].map(e => e.textContent.trim()); return [...document.querySelectorAll('.gd-callout p')].every(p => k.includes(p.textContent.trim())); });
-    assert.ok(ok, 'callouts er hentet fra guidens Kort fortalt');
+    // (iteration 3: callouts er flyttet ud af brødteksten og må IKKE gentage Kort fortalt; se guide-testen længere nede)
   } finally { await s.luk(); }
 });
 
@@ -207,7 +205,7 @@ test('mine annoncer: 5 statistikkort med store tal, tællere med ikon, ægte tip
     assert.strictEqual(await s.page.locator('.db-stat').count(), 5);
     const px = await s.page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.db-stat-num')).fontSize));
     assert.ok(px >= 32, `tal ${px}px`);
-    assert.ok(await s.page.locator('.db-num-ic svg').count() >= 3, 'tællere har ikon');
+    assert.ok(await s.page.locator('.db-num-ic svg').count() >= 1, 'tællere/ingen-visninger har ikon');
     assert.ok(await s.page.locator('.db-tip-list li').count() >= 3);
     assert.strictEqual(await s.page.getAttribute('#tabbtn-mine', 'aria-selected'), 'true', '?tab=aktive åbner Mine annoncer');
     const tekst = await s.page.evaluate(() => document.body.innerText);
@@ -221,5 +219,100 @@ test('dashboard: privat bruger sendes til Mine annoncer (ingen blindgyde)', asyn
   try {
     await s.page.waitForURL(/mine-annoncer\.html/, { timeout: 8000 });
     assert.ok(!(await s.page.evaluate(() => document.body.innerText)).includes('er for forhandlere'));
+  } finally { await s.luk(); }
+});
+
+/* ---------- Iteration 3 (Critic runde 2) ---------- */
+const GUIDE_SIDER = ['guide-foerste-motorcykel', 'guide-a2-koerekort', 'guide-brugt-motorcykel', 'guide-mc-typer', 'guide-saelg-motorcykel', 'guide-mc-udstyr', 'guide-mc-vinteropbevaring', 'guide-mc-forsikring', 'guide-mc-ordliste', 'guide-mc-foraar-tjekliste'];
+
+test('guides: callouts er ikke dubletter af Kort fortalt eller af brødteksten; 5 typefliser; ingen foto-gentagelse i artiklen', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const side of GUIDE_SIDER){
+    const s = await aabn(side + '.html');
+    try {
+      const r = await s.page.evaluate(() => {
+        const norm = x => x.replace(/\s+/g, ' ').trim();
+        const kort = [...document.querySelectorAll('.gd-checks li span:last-child')].map(e => norm(e.textContent));
+        const callouts = [...document.querySelectorAll('.gd-callout p')].map(e => norm(e.textContent));
+        const brod = norm([...document.querySelectorAll('.gd-sec > p, .gd-sec > ul, .gd-sec > ol')].map(e => e.textContent).join(' '));
+        const srcs = [...document.querySelectorAll('.gd-hero-photo, .gd-article img, .gd-findtype img')].map(e => e.getAttribute('src'));
+        const hero = document.querySelector('.gd-hero').getBoundingClientRect().height;
+        const p = document.querySelector('.gd-sec > p'); const lh = parseFloat(getComputedStyle(p).lineHeight);
+        const lines = Math.max(1, Math.round(p.getBoundingClientRect().height / lh));
+        return { kort, callouts, dubletBrod: callouts.filter(c => brod.includes(c)), tiles: document.querySelectorAll('.gd-types .gd-type').length, srcs, hero, cpl: p.textContent.length / lines, h1lines: Math.round(document.querySelector('.gd-hero h1').getBoundingClientRect().height / parseFloat(getComputedStyle(document.querySelector('.gd-hero h1')).lineHeight)) };
+      });
+      for (const c of r.callouts) assert.ok(!r.kort.some(k => k.includes(c) || c.includes(k)), `${side}: callout gentager Kort fortalt: ${c}`);
+      assert.deepStrictEqual(r.dubletBrod, [], `${side}: callout står også i brødteksten`);
+      assert.strictEqual(r.tiles, 5, `${side}: 5 typefliser`);
+      assert.strictEqual(new Set(r.srcs).size, r.srcs.length, `${side}: samme foto to gange i artiklen: ${r.srcs}`);
+      assert.ok(r.hero <= 330, `${side}: hero ${Math.round(r.hero)} px`);
+      assert.ok(r.h1lines <= 2, `${side}: H1 ${r.h1lines} linjer`);
+      assert.ok(r.cpl <= 80, `${side}: linjelængde ${Math.round(r.cpl)} tegn`);
+    } finally { await s.luk(); }
+  }
+});
+
+test('guide: typeflisernes links peger på typesider, og fliserne er store nok (>= 170 px bredde)', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('guide-saelg-motorcykel.html');
+  try {
+    const r = await s.page.evaluate(() => [...document.querySelectorAll('.gd-findtype .gd-type-link')].map(a => [a.getAttribute('href'), Math.round(a.getBoundingClientRect().width)]));
+    assert.strictEqual(r.length, 5);
+    for (const [h, w] of r){ assert.match(h, /^type-[a-z]+\.html$/); assert.ok(w >= 170, `flise ${w}px`); }
+  } finally { await s.luk(); }
+});
+
+test('mine annoncer: "Ingen visninger endnu" i stedet for tre nuller; kort afstand til footeren', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('mine-annoncer.html', { loggetInd: true, annoncer: ANN });
+  try {
+    await s.page.waitForSelector('.db-num-tom');
+    const tekst = await s.page.evaluate(() => document.querySelector('#db-panel-annoncer').innerText);
+    assert.match(tekst, /Ingen visninger endnu/);
+    assert.ok(!/Telefonvisninger/.test(tekst) || /\d/.test(tekst), 'ingen række af nuller');
+    const gap = await s.page.evaluate(() => document.querySelector('.site-footer').getBoundingClientRect().top + scrollY - (document.querySelector('.db-layout').getBoundingClientRect().bottom + scrollY));
+    assert.ok(gap <= 64, `afstand layout -> footer ${Math.round(gap)} px`);
+  } finally { await s.luk(); }
+});
+
+test('login: opret-visningens højre kolonne har tre trin; fejlboksen flytter ikke formularen; kontrast på fejltekst', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const bak = lavBackend({ loggetInd: false, login: () => ({ status: 400, msg: 'Invalid login credentials' }) });
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await bak.installer(ctx, { tema: 'lys' });
+  const page = await ctx.newPage();
+  try {
+    await page.goto(URL('login.html'), { waitUntil: 'networkidle' });
+    const y0 = (await boks(page, '#login-email')).y; const cta0 = (await boks(page, '.lg-cta')).y;
+    await page.fill('#login-email', 'a@b.dk'); await page.fill('#login-password', 'forkert1');
+    await page.click('#login-form button[type=submit]');
+    await page.waitForSelector('#auth-error', { state: 'visible' });
+    await page.waitForTimeout(300);
+    const y1 = (await boks(page, '#login-email')).y; const cta1 = (await boks(page, '.lg-cta')).y;
+    assert.strictEqual(y1, y0, 'e-mail-feltet flyttede sig'); assert.strictEqual(cta1, cta0, 'knappen flyttede sig');
+    const kontrast = await page.evaluate(() => {
+      const el = document.getElementById('auth-error'); const cs = getComputedStyle(el);
+      const rgb = s => s.match(/[\d.]+/g).slice(0, 3).map(Number);
+      const lum = c => { const [r, g, b] = c.map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * r + .7152 * g + .0722 * b; };
+      const a = lum(rgb(cs.color)), b = lum(rgb(cs.backgroundColor)); return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+    });
+    assert.ok(kontrast >= 4.5, `fejltekst kontrast ${kontrast.toFixed(2)}`);
+    await page.click('.lg-promo-cta');
+    const trin = await page.locator('.lg-steps').isVisible();
+    assert.ok(trin, 'tre trin i opret-visningens højre kolonne');
+  } finally { await ctx.close(); }
+});
+
+test('header: logo-link >= 40 px højt; favorit-badge skjult ved 0; footerens login-link bliver "Min profil" når man er logget ind', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('guide-foerste-motorcykel.html', { bredde: 390, loggetInd: true });
+  try {
+    const b = await boks(s.page, '.site-header .brand');
+    assert.ok(b.h >= 40, `logo-link ${b.h}px`);
+    const d = await s.page.evaluate(() => { const e = document.querySelector('.fav-count'); return e ? getComputedStyle(e).display : 'none'; });
+    assert.strictEqual(d, 'none');
+    await s.page.waitForFunction(() => [...document.querySelectorAll('.site-footer a')].some(a => a.textContent.trim() === 'Min profil'));
+    const rest = await s.page.evaluate(() => [...document.querySelectorAll('.site-footer a[href="login.html"]')].length);
+    assert.strictEqual(rest, 0);
   } finally { await s.luk(); }
 });

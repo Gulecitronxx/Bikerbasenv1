@@ -261,3 +261,6 @@
 /* "Læs også": styles.css' regel for enlige links i lister (main ul:not([class]) > li > a:only-child) gjorde linkene
    til inline-block, så ikonet stod over teksten. Samme specificitet, senere kilde. */
 main .if-links ul > li > a:only-child{ display:flex; }
+
+/* tap-mål: logo-linket i headeren er 30 px højt; hit-area >= 44 px uden at flytte noget */
+.site-header .brand{ min-height: 44px; }

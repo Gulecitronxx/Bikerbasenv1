@@ -240,7 +240,11 @@ async function visAnnonceStatistik(grid){
     const blok = document.createElement('div');
     blok.className = 'db-nums db-nums-row';
     blok.title = 'Seneste 30 dage';
-    blok.innerHTML = kol(s.views, 'Visninger', 'eye') + (harGemt ? kol(gemt.get(row.dataset.listingId) || 0, 'Favoritter', 'heart') : '') + kol(s.contacts, 'Telefonvisninger', 'phone');
+    const gemtN = harGemt ? (gemt.get(row.dataset.listingId) || 0) : 0;
+    /* W14: tre nuller i en række ser dødt ud. Er alle tre 0, står der én ærlig linje i stedet. */
+    blok.innerHTML = (!s.views && !gemtN && !s.contacts)
+      ? `<span class="db-num db-num-tom"><span class="db-num-ic" aria-hidden="true">${Icon.eye || ''}</span><span class="db-num-tx">Ingen visninger endnu</span></span>`
+      : kol(s.views, 'Visninger', 'eye') + (harGemt ? kol(gemtN, 'Favoritter', 'heart') : '') + kol(s.contacts, 'Telefonvisninger', 'phone');
     row.querySelector('.db-status')?.appendChild(blok);
   });
 }
