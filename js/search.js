@@ -2425,6 +2425,20 @@ function wireCoreControls(){
     const saetPh = () => { qFelt.placeholder = mq.matches ? 'Mærke/model' : 'Mærke eller model'; };
     saetPh(); if (mq.addEventListener) mq.addEventListener('change', saetPh);
   }
+  /* W14: fra 1280 px staar "Gem soegning" i resultathovedet (som i billedet) i stedet for en tom raekke over gitteret;
+     under 1280 bliver den i chip-raekken. Samme knap og id, kun flyttet. */
+  (function(){
+    const knap = document.getElementById('save-search-btn');
+    const hjem = knap && knap.parentNode;
+    const mal = document.querySelector('#so-results-head .toolbar-actions');
+    if (!knap || !mal) return;
+    const mq = window.matchMedia('(min-width:1280px)');
+    const flyt = () => {
+      if (mq.matches){ if (knap.parentNode !== mal) mal.insertBefore(knap, mal.firstChild); }
+      else if (knap.parentNode !== hjem) hjem.insertBefore(knap, hjem.firstChild);
+    };
+    flyt(); if (mq.addEventListener) mq.addEventListener('change', flyt);
+  })();
   document.getElementById('so-agent-btn')?.addEventListener('click', () => document.getElementById('save-search-btn').click());
   document.getElementById('save-search-btn').addEventListener('click', async () => {
     const qs = currentQueryString();

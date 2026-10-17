@@ -542,3 +542,27 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
   .so-agent-tekst{ flex:1 1 calc(100% - 60px); }
   .so-agent .btn{ width:100%; justify-content:center; }
 }
+
+
+/* ============================================================================
+   W14 (visual fidelity): tættere, mere informationsrige kort; kompakt top; ingen tom chip-række på desktop.
+   ============================================================================ */
+@media (min-width:1280px){
+  /* Gem søgning bor i resultathovedet (flyttet af js/search.js); chip-rækken vises kun når der er filtre. */
+  .so-chiprow:not(:has(.active-filter-pill)){ display:none; }
+  .so-toolbar .toolbar-actions #save-search-btn{ min-height:44px; }
+}
+@media (min-width:760px){
+  /* Billedets foto er ca. 2,3:1 — lavere foto, flere kort pr. skærm. */
+  #results-grid:not(.list-view) .card-rich .card-media{ aspect-ratio:2/1; }
+  /* Det lavere foto har ikke plads til ikon + tekst + maerkat: ikonet udgaar, teksten "Ingen fotos" bliver. */
+  #results-grid:not(.list-view) .card-rich .foto-tom{ padding:6px 52px 8px 8px; gap:0; }
+  #results-grid:not(.list-view) .card-rich .foto-tom-ikon{ display:none !important; }
+}
+@media (min-width:1100px){
+  :root{ --so-overlap: 44px; }
+  .so-hero{ padding: var(--space-3) 0 0; }
+  .so-hero .so-breadcrumb{ padding-bottom: 6px; }
+  .so-h1-title{ font-size: clamp(30px, 2.8vw, 40px); }
+  .so-hero .so-h1{ margin-bottom: var(--space-3); }
+}
