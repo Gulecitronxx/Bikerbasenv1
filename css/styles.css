@@ -1687,20 +1687,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Under 380 px bliver to knapper side om side for smalle til etiketterne. */
 @media (max-width:379px){ .cookie-modal-actions{ flex-direction:column; } }
 
-/* ============ Verification steps (auth) ============ */
-.verify-row{
-  display:flex; align-items:center; justify-content:space-between; gap: var(--space-3);
-  padding: var(--space-3); border:1px solid var(--color-border); border-radius: var(--radius-sm); margin-bottom:10px;
-}
-.verify-row-info{ display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; }
-.verify-row-info svg{ width:19px; height:19px; color: var(--color-fg-muted); flex-shrink:0; }
-.verify-row.done{ border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border)); background: var(--color-success-tint); }
-.verify-row.done .verify-row-info svg{ color: var(--color-success); }
-.verify-status-done{ display:inline-flex; align-items:center; gap:6px; color: var(--color-success); font-size:13px; font-weight:700; }
-.verify-status-done svg{ width:16px; height:16px; }
-.code-input-row{ display:flex; gap:8px; margin-top:10px; }
-.code-input-row input{ width:44px; text-align:center; font-size:18px; font-weight:700; padding:10px 0; }
-
 /* ============ Reviews ============ */
 .review-item{ padding: var(--space-4) 0; border-bottom:1px solid var(--color-border); }
 .review-item:last-child{ border-bottom:none; }
