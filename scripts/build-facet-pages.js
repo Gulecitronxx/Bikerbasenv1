@@ -1426,12 +1426,6 @@ function budgetChips(facet){
   const h = facet.kind === 'budget' ? 'Andre prisklasser' : 'Se alle motorcykler efter budget';
   return `<div class="fa-rel"><h2 class="fa-h3">${h}</h2><div class="fa-chips">${b.map(f => `<a class="popular-chip popular-chip-sm" href="${f.slug}.html">${IKON('tag')}<span>Under ${tal(f.max)} kr.</span></a>`).join('')}</div></div>`;
 }
-function byChips(facet){
-  if (facet.kind !== 'region') return '';
-  const b = (global.__FACETTER || []).filter(f => f.kind === 'by' && f.qualifies && f.region === facet.id);
-  if (!b.length) return '';
-  return `<div class="fa-rel"><h2 class="fa-h3">Byer i ${esc(facet.id)}</h2><div class="fa-chips">${b.map(f => `<a class="popular-chip popular-chip-sm" href="${f.slug}.html">${IKON('pin')}<span>${esc(f.by)}</span></a>`).join('')}</div></div>`;
-}
 /* Mærke+type-siden for (facet-type, mærke), hvis den findes og er indekserbar. */
 function kombiHref(facet, brand){
   if (facet.kind !== 'type') return null;
