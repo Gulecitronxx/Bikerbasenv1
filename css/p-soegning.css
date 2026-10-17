@@ -482,7 +482,15 @@
   font-size:13px; line-height:1.4; row-gap:0; color: var(--color-fg-muted);
 }
 .so-infoband > :not([hidden]) ~ :not([hidden]){ border-left:1px solid var(--color-border); margin-left:12px !important; padding-left:12px; }
-.so-infoband{ align-items:center; column-gap:0; }
+.so-infoband{ align-items:center; align-content:flex-start; column-gap:0; }
+/* Pladsen står fra første maling (kildelinjen + lagerets alder + sorteringsreglen ombrydes til to linjer ved desktop), ellers rykker gitteret ca. 20 px, når hydreringen lander (CLS). */
+/* Målte slutlige højder (mock, tre kilder): 76 px < 360, 56 px 360-559, 73 px 560-639, 77 px 640-719, 57 px 720-1279, 39 px >= 1280. */
+.so-infoband{ min-height:56px; }
+@media (max-width:359px){ .so-infoband{ min-height:76px; } }
+@media (min-width:560px){ .so-infoband{ min-height:73px; } }
+@media (min-width:640px){ .so-infoband{ min-height:77px; } }
+@media (min-width:720px){ .so-infoband{ min-height:57px; } }
+@media (min-width:1280px){ .so-infoband{ min-height:39px; } }
 @media (max-width:639px){ .so-infoband{ padding:0; } }
 
 /* --- Kort: titel og pris på samme linje (billedet), jævne fotos --- */

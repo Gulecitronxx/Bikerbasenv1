@@ -1751,7 +1751,6 @@ function render(){
   const pageItems = filtered.slice((state.page-1)*PAGE_SIZE, state.page*PAGE_SIZE);
 
   renderResultsCount(filtered);
-  renderViser(total, state.page, pageItems.length, uaktuelt);
   if (uaktuelt){
     const rc = document.getElementById('results-count');
     if (rc) rc.textContent = 'Lageret kunne ikke hentes';
@@ -1798,8 +1797,13 @@ function render(){
     // adresser, indtil vi har tegnet de rigtige. Nu er de rigtige.
     grid.style.visibility = '';
     empty.style.display = 'none';
-    paintCards(grid, pageItems, genskabPosition);
+    /* w10: "Viser x-y af N" og Gem søgning-panelet står først, når ALLE kortene er tegnet — ellers står de et
+       øjeblik under de forudtegnede kort og springer ned, når gitteret vokser (CLS). Har brugeren et tyndt
+       resultat, har tyndt-resultat-panelet allerede sin egen "Gem søgningen"; så udelades dette panel. */
+    const tyndt = total < 4 && (pills.length > 0 || !!state.q);
+    paintCards(grid, pageItems, () => { genskabPosition?.(); renderViser(total, state.page, pageItems.length, uaktuelt, tyndt); });
   } else {
+    renderViser(0, state.page, 0, uaktuelt, false);
     grid.style.display = 'none';
     empty.style.display = 'block';
 
@@ -1997,7 +2001,7 @@ function sideNumre(current, total){
 
 /* "Viser 25-48 af 140 motorcykler" under gitteret + Gem søgning-panelet (w10). Tallene er resultatets egne;
    ved tomt eller fejlet resultat står hverken linje eller panel (tom-tilstanden har sin egen genvej). */
-function renderViser(total, side, paaSiden, uaktuelt){
+function renderViser(total, side, paaSiden, uaktuelt, tyndt){   // kaldes, når gitteret er færdigtegnet
   const viser = document.getElementById('so-viser');
   const agent = document.getElementById('so-agent');
   const vis = !uaktuelt && total > 0 && paaSiden > 0;
@@ -2008,7 +2012,7 @@ function renderViser(total, side, paaSiden, uaktuelt){
       : `Viser ${fra.toLocaleString('da-DK')}–${til.toLocaleString('da-DK')} af ${total.toLocaleString('da-DK')} motorcykler`;
     viser.hidden = !vis;
   }
-  if (agent) agent.hidden = !vis;
+  if (agent) agent.hidden = !vis || !!tyndt;
 }
 
 function renderPagination(totalPages){
