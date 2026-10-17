@@ -97,6 +97,13 @@ async function buildForside(){
 
   /* Har lageret svaret? Indtil da er der ikke noget at udtale sig om. */
   let dataKlar = false;
+  /* Fejlede en af kilderne (503/500/netværk), kender siden kun en del af lageret — så siger den intet tal. Ellers stod
+     "51 annoncer i Danmark" under fejlbanneret og påstod mere, end siden vidste. */
+  let lagerFejlet = false;
+  const lagerHentningFejlede = () => {
+    const st = window.DATA_STATUS || {};
+    return st.egne === 'fejlet' || st.eksterne === 'fejlet';
+  };
 
   /* Live-tælling der reagerer på hero-filtrene, før man trykker søg. Tallet kommer fra
      søgesidens egen beregning (js/filtrering.js): feltnavnene er søgesidens URL-navne, så det
@@ -153,7 +160,7 @@ async function buildForside(){
         + (meta.id === 'A' ? '' : `Vi viser kun dem, de oplyste tal ikke udelukker.`);
 
     if (uoplystHint){
-      const tekst = dataKlar ? uoplystTekst(skjult) : '';
+      const tekst = dataKlar && !lagerFejlet ? uoplystTekst(skjult) : '';
       uoplystHint.textContent = tekst;
       uoplystHint.hidden = !tekst;
     }
@@ -163,7 +170,7 @@ async function buildForside(){
     const friskTekst = frisk
       ? ` <span class="sk-frisk" title="${frisk.aeldsteTekst === frisk.datoTekst ? '' : 'Ældste bekræftelse: ' + frisk.aeldsteTekst}">${frisk.samlet}</span>`
       : '';
-    if (!dataKlar){
+    if (!dataKlar || lagerFejlet){
       countHint.textContent = '';
     } else if (harSøgt){
       countHint.innerHTML = n
@@ -240,21 +247,23 @@ async function buildForside(){
   if (typeof updateFavCount === 'function') updateFavCount();
 
   const ALLE = Store.getAllListings();   // databasen (+ demodata hvis slået til)
+  lagerFejlet = lagerHentningFejlede();  // ingen hero-tal under et fejlbanner (se opdaterHero)
   dataKlar = true;                       // først NU må forsiden nævne et antal
   opdaterHero();                         // nu med de rigtige tal fra databasen
 
   /* W9: tomt eller fejlet lager. Så findes der intet at tælle: ingen "0 annoncer" på fliser, kolonner eller
      hero, ingen tom typeoverskrift. Fejlbanneret (js/backend-bridge.js, #data-afbrud) lå øverst i <main> og
-     skubbede hele siden ned (CLS 0,16-0,18 på 390): det (klassen .data-afbrud, indsat af backend-bridge) flyttes under tillidsrækken i samme billede. */
+     skubbede hele siden ned (CLS 0,16-0,18 på 390). W10-fejl: banneret er nu et fast overlay (css/styles.css, .data-afbrud) og skal
+     ikke flyttes; siden gør kun det, den selv ejer: ingen tal, mens lageret er tomt eller ikke kom helt. */
   const tomtLager = ALLE.length === 0;
   document.body.classList.toggle('lager-tomt', tomtLager);
-  const afbrud = document.querySelector('.data-afbrud');
-  const heroSok = document.querySelector('.hero-sok');
-  if (afbrud){
-    /* Tomt lager: ind i annoncerækkens reserverede plads (ingen flytning af indhold). Ellers under søgekortet. */
-    const slot = document.getElementById('udvalg-kort');
-    if (tomtLager && slot) slot.append(afbrud);
-    else if (heroSok) heroSok.after(afbrud);
+  /* Pladsholderen (reserveret af CSS, så intet flytter sig) får en kort, ærlig tekst i stedet for at stå tom. */
+  const tomSlot = document.getElementById('udvalg-kort');
+  if (tomtLager && tomSlot && !tomSlot.querySelector('.lager-tomt-note')){
+    const note = document.createElement('p');
+    note.className = 'lager-tomt-note';
+    note.textContent = 'Der er ingen annoncer at vise lige nu. Prøv igen om lidt.';
+    tomSlot.append(note);
   }
 
   const harFoto = (l) => (l.photoUrls || []).length > 0;

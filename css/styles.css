@@ -3810,25 +3810,36 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    Se blokken øverst i js/backend-bridge.js.
 
    Farverne er --color-danger-tint/--color-danger, altså sitets egne
-   fejltokens — ikke en ny farve. Den står øverst i <main>, fordi hvert tal
-   under den er upålideligt, så længe den er der. Ingen pladsreservation:
-   elementet findes slet ikke i den normale tilstand, og en reserveret
-   højde ville koste luft på hver eneste indlæsning for en tilstand, der
-   efter D-013 skal være sjælden. */
+   fejltokens — ikke en ny farve.
+
+   W10-fejl: banneret er et OVERLAY, ikke en blok i flowet. Det lå før øverst i <main> og skubbede hele siden,
+   når svaret kom (CLS 0,07-1,0). Nu er det position:fixed lige under headeren: ude af flowet, så det
+   KAN ikke flytte noget, uanset hvornår databasen svarer, og uden pladsreservation på de sider, hvor alt er
+   i orden. Det følger med ved scroll (det er vigtigt nok til at blive stående), og "Luk" fjerner det. */
 .data-afbrud{
-  margin: 0 0 var(--space-4);
+  position: fixed;
+  top: calc(var(--header-h) + var(--space-2));
+  left: var(--gutter); right: var(--gutter);
+  margin: 0 auto;
+  max-width: 680px;
+  z-index: 99;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-danger);
   border-radius: var(--radius-sm);
-  background: var(--color-danger-tint);
+  background: linear-gradient(var(--color-danger-tint), var(--color-danger-tint)), var(--color-surface);
+  box-shadow: var(--shadow-md);
   color: var(--color-fg);
   font-size: 14px;
   line-height: 1.5;
 }
+/* Fra tablet og op: kompakt kort i højre side (over fotoet, ikke over forsidens overskrift). */
+@media (min-width:768px){ .data-afbrud{ left:auto; right: var(--gutter); width: 440px; margin: 0; } }
+.data-afbrud[hidden]{ display:none; }
 .data-afbrud strong{ display:block; }
-.data-afbrud-igen{
-  margin-top: var(--space-2);
+.data-afbrud-knapper{ display:flex; flex-wrap:wrap; gap: var(--space-2); margin-top: var(--space-2); }
+.data-afbrud-igen, .data-afbrud-luk{
   padding: 6px var(--space-3);
+  min-height: 32px;
   border: 1px solid var(--color-danger);
   border-radius: var(--radius-pill);
   background: transparent;
@@ -3837,7 +3848,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   font-weight: 600;
   cursor: pointer;
 }
-.data-afbrud-igen:hover{ background: var(--color-surface); }
+.data-afbrud-igen:hover, .data-afbrud-luk:hover{ background: var(--color-surface); }
+.data-afbrud-igen:focus-visible, .data-afbrud-luk:focus-visible{ outline: 2px solid var(--color-fg); outline-offset: 2px; }
 
 /* ============ W9: ærlig tom/fejlet forside (body.lager-tomt, sat af js/home.js når lageret er tomt) ============
    Ingen tal, ingen tomme overskrifter. Sælg-panelet bliver et kompakt bånd, og de to tilbageværende kolonner deler pladsen. */
@@ -3846,17 +3858,13 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* W9 P3: modigere forside-h1 på desktop (billede 1 har en stor overskrift); kun forsiden, kun >= 1100 px, ingen nye assets. */
 @media (min-width:1100px){ body.home .hero h1{ font-size: clamp(54px, 4.3vw, 62px); max-width: none; } }
 
-/* Fejlbanneret (.data-afbrud) indsættes øverst i <main> af js/backend-bridge.js. På forsiden flytter js/home.js det derfra, og indtil
-   da vises det ikke (ellers skubber det hele siden ned før flytningen: CLS).
-   Tomt/fejlet lager: banneret flyttes IND i annoncerækkens pladsholder (.kort-raekke har allerede min-height 330/360 px fra første
-   maling, før lageret har svaret), så siden ikke flytter sig, når svaret kommer: pladsen er reserveret af skelettet, ikke af en
-   ekstra blok. Sælg-panelet og alt andet står som før. Titlen over rækken skjules med visibility, så dens højde bevares. */
-body.home .data-afbrud{ display:none; }
-body.home .hero-sok ~ .data-afbrud{ display:block; margin: var(--space-4) auto 0; max-width: calc(var(--site-w) - 2 * var(--gutter)); width: calc(100% - 2 * var(--gutter)); }
-body.home .kort-raekke > .data-afbrud{ display:block; flex:1 1 100%; grid-column:1 / -1; align-self:start; margin:0; }
+/* Tomt/fejlet lager på forsiden: annoncerækken har min-height fra første maling (skelettet), så intet flytter sig, når svaret
+   kommer. Fejlbanneret (.data-afbrud) er et fast overlay og indgår ikke i layoutet. Titlen over rækken skjules med visibility,
+   så dens højde bevares. */
 .lager-tomt .kort-raekke{ min-height:330px; align-items:start; }
 @media (min-width:768px){ .lager-tomt .kort-raekke{ min-height:360px; } }
 .lager-tomt .udvalg-hoved .sek-hoved{ visibility:hidden; }
+.kort-raekke > .lager-tomt-note{ flex:1 1 100%; grid-column:1 / -1; align-self:start; margin:0; font-size:15px; color: var(--color-fg-muted); }
 .tre-kol:has(> .kol[hidden]){ grid-template-columns: minmax(0,1fr); }
 @media (min-width:1100px){ .tre-kol:has(> .kol[hidden]){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
 

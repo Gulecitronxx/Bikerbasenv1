@@ -1212,6 +1212,15 @@ function dataafbrudIndhold(status, tomt){
       + 'tallene ved filtrene dækker det, der faktisk er til salg.',
   };
 }
+/* Facetsidernes inline-script skriver "0 annoncer" i #facet-antal, når den hentede del af lageret ikke har et træf. Under et
+   fejlbanner (en kilde faldt) er det en påstand om noget, siden ikke har set: tallet erstattes, så længe fejlen står. */
+function skjulNulTalVedFejl(){
+  const el = document.getElementById('facet-antal');
+  if (!el || typeof MutationObserver === 'undefined') return;
+  const ret = () => { if (/^\s*0\s+annonce/.test(el.textContent)) el.textContent = 'Antal ukendt lige nu'; };
+  ret();
+  new MutationObserver(ret).observe(el, { childList: true, characterData: true, subtree: true });
+}
 function meldDataafbrud(){
   const status = window.DATA_STATUS;
   const fejlet = status.eksterne === 'fejlet' || status.egne === 'fejlet';
@@ -1225,12 +1234,19 @@ function meldDataafbrud(){
   const p = document.createElement('div');
   p.id = 'data-afbrud';
   p.className = 'data-afbrud';
-  p.setAttribute('role', 'status');
+  /* W10-fejl: role=alert alene (implicit assertive live region) — INGEN ekstra aria-live, ellers læses den op to gange.
+     Banneret er et fast overlay (css/styles.css, .data-afbrud), så det aldrig flytter indhold. Det står FØRST i <main>
+     i DOM-rækkefølgen, så "Prøv igen" er det første, tastaturet når efter headeren. */
+  p.setAttribute('role', 'alert');
   const { hvad, resten } = dataafbrudIndhold(status, tomt);
-  p.innerHTML = `<strong>${hvad}</strong> ${resten} `
-    + '<button type="button" class="data-afbrud-igen">Prøv igen</button>';
+  p.innerHTML = `<strong>${hvad}</strong> ${resten}`
+    + '<div class="data-afbrud-knapper"><button type="button" class="data-afbrud-igen">Prøv igen</button>'
+    + '<button type="button" class="data-afbrud-luk">Luk</button></div>';
+  /* Prøv igen = ny indlæsning: hver side tegner sig selv ud fra Store ved opstart, og der findes ingen fælles "tegn om". */
   p.querySelector('.data-afbrud-igen').addEventListener('click', () => location.reload());
+  p.querySelector('.data-afbrud-luk').addEventListener('click', () => { p.remove(); });
   vaert.prepend(p);
+  if (fejlet) skjulNulTalVedFejl();
 }
 
 /* Kald denne før første render på sider der viser data. */

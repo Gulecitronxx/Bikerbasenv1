@@ -46,9 +46,9 @@ async function maal(pw, mode, vp, tema, forsinkelse){
       const br = b.getBoundingClientRect(), sr = slot.getBoundingClientRect();
       return {
         cls: window.__smoke.cls,
-        iSlot: slot.contains(b),
+        fast: getComputedStyle(b).position === 'fixed',
         synlig: br.height > 0,
-        inden: br.top >= sr.top - 1 && br.bottom <= sr.bottom + 1,
+        inden: br.top >= -1 && br.bottom <= innerHeight + 1,
         slotHoejde: Math.round(sr.height),
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         antalTekst: /\b0 annoncer\b/.test(document.body.innerText),
@@ -68,8 +68,8 @@ for (const mode of ['tom', 'fejl']){
     test(`W9: tomt/fejlet lager (${mode}) ved ${vp} px ${tema}: banner i den reserverede plads, CLS < ${CLS_GRAENSE}, ingen 0-tal`, async t => {
       if (!kan.ok) return t.skip(kan.grund);
       const r = await maal(kan.pw, mode, vp, tema, 900);
-      assert.ok(r.iSlot, 'banneret skal ligge i annoncerækkens pladsholder');
-      assert.ok(r.synlig && r.inden, 'banneret skal ligge inden for pladsholderen (ikke uden for den reserverede højde)');
+      assert.ok(r.fast, 'W10: banneret er et fast overlay, ikke en blok i flowet');
+      assert.ok(r.synlig && r.inden, 'banneret skal være synligt i viewport');
       assert.ok(r.slotHoejde >= 330, `pladsholderen skal bevare mindst 330 px (fik ${r.slotHoejde})`);
       assert.ok(r.cls < CLS_GRAENSE, `CLS ${r.cls}`);
       assert.strictEqual(r.overflow, 0);
