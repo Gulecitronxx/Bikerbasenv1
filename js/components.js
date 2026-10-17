@@ -1209,7 +1209,10 @@ function initCookieConsent(){
      Escape lukker den ikke: et valg er paakraevet, og BEGGE valg staar aabne.
      Uden det ville dialogen kunne afvises uden svar, og saa ville statistikken
      staa i et uafklaret limbo. */
-  if (!dialog.open){
+  /* Privatlivspolitikken (og vilkår/om-indeksering) skal kunne læses, FØR man vælger — ellers fører 'Læs mere' i samtykket til en side
+     bag selve samtykket. Her åbnes dialogen ikke; statistik forbliver slukket (intet samtykke givet) og dialogen kommer på næste side. */
+  const laesSideFri = /\/(privatlivspolitik|vilkaar|om-indeksering)(\.html)?$/.test(location.pathname);
+  if (!dialog.open && !laesSideFri){
     if (dialog.showModal) dialog.showModal();
     else dialog.setAttribute('open', '');   // aeldre browser: dialogen vises, men uden top-lag
   }
