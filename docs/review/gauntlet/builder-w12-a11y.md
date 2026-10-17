@@ -16,3 +16,9 @@ node scripts/a11y-tjek.js --rapport work/a11y.json --md work/a11y.md
 node scripts/a11y-tjek.js --sider index,login --strikt
 ```
 Se resten (resultater, nye testfiler, DELT-ØNSKE) nederst efter kørsel.
+
+## Resultat
+- Fuld kørsel (92 sider, 644 målinger, 559 s): P1 2 mønstre, P2 20, P3 6, kontrast uafgjort 157. Fundliste: `a11y-audit-w12.md`.
+- Nye filer: `scripts/a11y-tjek.js`, `scripts/a11y-tjek.test.js` (16 tests, ca. 35 s, skipper uden Chromium).
+- **DELT-ØNSKE til Orchestratoren:** tilføj `scripts/a11y-tjek.test.js` til `npm test` i package.json.
+- Ingen build/generatorer kørt; ingen andre filer ændret.
