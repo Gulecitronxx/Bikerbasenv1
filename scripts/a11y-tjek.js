@@ -758,7 +758,7 @@ function markerUdloeser(nogle){
       el.focus();
       const kand = document.querySelectorAll('[role=dialog],[aria-modal=true],dialog,[class*=drawer],[class*=modal],[class*=overlay],[class*=menu],[class*=sheet],[class*=panel],[class*=popover],nav');
       window.__a11yFoer = new Set([...kand].filter(paaSkaerm));
-      return { fundet: true, expanded: el.getAttribute('aria-expanded'), url: location.href };
+      return { fundet: true, expanded: el.getAttribute('aria-expanded'), haspopup: el.getAttribute('aria-haspopup'), url: location.href };
     }
   }
   return { fundet: false };
@@ -892,7 +892,7 @@ async function overlayTest(page, base, url){
       continue;
     }
     skidt = true;
-    if (m.expanded === null && s.expanded === null) tilf('aria-tilstand', navn, 'udløser åbner ' + s.sel + ' men har hverken aria-expanded eller aria-controls');
+    if (m.expanded === null && s.expanded === null && !m.haspopup && !s.strikt) tilf('aria-tilstand', navn, 'udløser åbner ' + s.sel + ' men har hverken aria-expanded eller aria-controls');
     if (m.expanded !== null && s.expanded !== 'true') tilf('aria-tilstand', navn, `efter åbning (Enter) er aria-expanded="${s.expanded}" (før: "${m.expanded}")`);
     if (s.modal){
       if (!s.fokusInde) tilf('modal-fokus-ind', navn, `${s.sel} åbnes uden at fokus flyttes ind`);
