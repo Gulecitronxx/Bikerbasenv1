@@ -2356,7 +2356,7 @@ function wireCoreControls(){
   wireDualRange('range-price', 'filter-price-min', 'filter-price-max', 'priceMin', 'priceMax');
   wireDualRange('range-year', 'filter-year-min', 'filter-year-max', 'yearMin', 'yearMax');
 
-  document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; render(); });
+  document.getElementById('sort-select').addEventListener('change', (e) => { state.sort = e.target.value; state.page = 1; render(); });
 
   const resetAll = () => { state = { ...EMPTY_STATE, types: [], brands: [], models: [], regions: [], conditions: [], service: [], equipment: [], colors: [] }; pushFilterState(); };
   document.getElementById('clear-filters').addEventListener('click', resetAll);

@@ -1221,6 +1221,20 @@ function skjulNulTalVedFejl(){
   ret();
   new MutationObserver(ret).observe(el, { childList: true, characterData: true, subtree: true });
 }
+/* W11-fejl2: scroll nedad skjuler overlayet (det dækker ellers faste/sticky kontroller øverst), scroll opad eller øverst på
+   siden viser det igen. Aldrig skjult mens fokus er inde i det. Flytter intet (position:fixed, kun transform/visibility). */
+function skjulBannerVedScroll(el){
+  if (typeof window.addEventListener !== 'function' || typeof el.addEventListener !== 'function') return;
+  let sidste = window.scrollY || 0; let ticking = false;
+  const opdater = () => {
+    ticking = false;
+    const y = window.scrollY || 0; const d = y - sidste;
+    if (el.contains(document.activeElement) || y < 80 || d < -6) { el.classList.remove('is-skjult'); sidste = y; }
+    else if (d > 12) { el.classList.add('is-skjult'); sidste = y; }
+  };
+  window.addEventListener('scroll', () => { if (!ticking){ ticking = true; requestAnimationFrame(opdater); } }, { passive: true });
+  el.addEventListener('focusin', () => el.classList.remove('is-skjult'));
+}
 function meldDataafbrud(){
   const status = window.DATA_STATUS;
   const fejlet = status.eksterne === 'fejlet' || status.egne === 'fejlet';
@@ -1228,7 +1242,10 @@ function meldDataafbrud(){
     && lagerErTomt(status, typeof Store !== 'undefined' && Store.getAllListings ? Store.getAllListings().length : 1);
   const vaert = document.getElementById('main-content') || document.querySelector('main');
   const gammel = document.getElementById('data-afbrud');
-  if (!(fejlet || tomt) || !vaert){ gammel?.remove(); return; }
+  if (!(fejlet || tomt) || !vaert){ gammel?.remove(); document.documentElement?.removeAttribute('data-lager-fejl'); return; }
+  /* W11-fejl2: de byggede tal (data-fa-n/data-mk-n, "Kort fortalt") dæmpes af CSS, så længe lageret ikke er pålideligt.
+     Kun klient-adfærd: HTML'en i kilden (SEO) er uændret. */
+  document.documentElement?.setAttribute('data-lager-fejl', '');
   if (gammel) return;
 
   const p = document.createElement('div');
@@ -1239,14 +1256,21 @@ function meldDataafbrud(){
      i DOM-rækkefølgen, så "Prøv igen" er det første, tastaturet når efter headeren. */
   p.setAttribute('role', 'alert');
   const { hvad, resten } = dataafbrudIndhold(status, tomt);
-  p.innerHTML = `<strong>${hvad}</strong> ${resten}`
+  /* W11-fejl2: på mobil er banneret ÉN linje (kort, aria-hidden) + knapperne, ≤ 56 px, så det ikke dækker søgefeltet.
+     Den fulde tekst står i .data-afbrud-lang (visuelt skjult på mobil, men stadig i role=alert for skærmlæsere). */
+  p.innerHTML = `<span class="data-afbrud-kort" aria-hidden="true">${tomt ? 'Ingen annoncer hentet' : 'Lageret kunne ikke hentes'}</span>`
+    + `<span class="data-afbrud-lang"><strong>${hvad}</strong> ${resten}</span>`
     + '<div class="data-afbrud-knapper"><button type="button" class="data-afbrud-igen">Prøv igen</button>'
     + '<button type="button" class="data-afbrud-luk">Luk</button></div>';
   /* Prøv igen = ny indlæsning: hver side tegner sig selv ud fra Store ved opstart, og der findes ingen fælles "tegn om". */
   p.querySelector('.data-afbrud-igen').addEventListener('click', () => location.reload());
   p.querySelector('.data-afbrud-luk').addEventListener('click', () => { p.remove(); });
   vaert.prepend(p);
+  /* Mobil: brødkrummen (links lige under headeren) skal ikke dækkes — banneret lægges lige under den. */
+  const bk = window.innerWidth < 1024 ? document.querySelector('.breadcrumb') : null;
+  if (bk && p.style && bk.getBoundingClientRect && !bk.closest('#data-afbrud')){ const r = bk.getBoundingClientRect(); if (r.bottom > 0 && r.bottom < (window.innerWidth < 768 ? 240 : 140)) p.style.top = Math.round(r.bottom + 8) + 'px'; }
   if (fejlet) skjulNulTalVedFejl();
+  skjulBannerVedScroll(p);
 }
 
 /* Kald denne før første render på sider der viser data. */
