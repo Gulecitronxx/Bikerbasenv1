@@ -1433,7 +1433,7 @@ function kombiHref(facet, brand){
   return k ? `${k.slug}.html` : null;
 }
 function guideRaekke(facet){
-  const a2 = [GUIDE.a2, 'Kørekort A2: regler, krav og gode råd', 'Hvad A2 giver ret til, og vejen videre til A.', 'img/hero-960.webp'];
+  const a2 = [GUIDE.a2, 'Kørekort A2: regler, krav og gode råd', 'Hvad A2 giver ret til, og vejen videre til A.', 'img/hero-800.webp'];
   const foerste = [GUIDE.foerste, 'Din første motorcykel', 'Sådan finder du type og kørekort, der passer til dig.', 'img/type/naked.webp'];
   const brugt = [GUIDE.brugt, 'Sådan køber du brugt motorcykel', 'Tjekpunkter til besigtigelse og en tryg handel.', 'img/type/touring.webp'];
   const ordliste = [GUIDE.ordliste, 'MC-ordliste: ccm, kW og hk', 'Begreberne i en annonce, og hvad kørekortmærkerne betyder.', 'img/type/cruiser.webp'];

@@ -208,15 +208,16 @@ async function buildForside(){
   await yieldToMain();
 
   /* ============ Bid 2: typefliserne ============
-     Foto fra img/type (hentes med det samme — loading="lazy" udløste ikke hentningen i
-     fuldsidescreenshots, V-004), antal fra lageret (fyldTypeAntal), link til den faste typeside.
+     Foto fra img/type: lazy (w12-perf2) — kun fliser i rækkens synlige udsnit hentes; otte eager-fotos
+     kostede 117 KB på mobilforsiden. width/height bevares, så rækken ikke hopper. V-004: fuldsidescreenshots
+     skal scrolle, før de tager billedet. Antal fra lageret (fyldTypeAntal), link til den faste typeside.
      Antallet står SIDST i markup, selvom det tegnes under navnet, så skærmlæseren hører
      "Naked, 93 annoncer". */
   const tilesMount = document.getElementById('category-tiles');
   const fliseHref = (id) => facetSider.get(`type:${id}`) || `soegning.html?type=${id}`;
   tilesMount.innerHTML = TYPES.map(t => `
     <a href="${fliseHref(t.id)}" class="tile" data-type="${t.id}">
-      <span class="tile-media"><img src="img/type/${t.id}.webp" alt="" width="456" height="342" loading="eager" fetchpriority="low" decoding="async"></span>
+      <span class="tile-media"><img src="img/type/${t.id}.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
       <span class="tile-label"><span class="tile-navn">${escapeHTML(t.label.split('/')[0])}</span><span class="tile-count" data-type="${t.id}"></span></span>
     </a>`).join('');
 

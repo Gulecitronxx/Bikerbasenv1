@@ -262,7 +262,7 @@ test('W12 forside: lokale fotos indlæses, har alt, fast format; fejlet kildefot
         const alle = [...document.querySelectorAll('img')];
         const fliser = [...document.querySelectorAll('.tile')].filter(x => x.offsetParent).map(x => { const q = x.getBoundingClientRect(); return `${Math.round(q.width)}x${Math.round(q.height)}`; });
         const medier = [...document.querySelectorAll('.card-media')].map(m => { const q = m.getBoundingClientRect(); return +(q.width / q.height).toFixed(2); });
-        return { lok: lok.length, brudt: lok.filter(i => !(i.complete && i.naturalWidth > 0)).map(i => i.getAttribute('src')),
+        return { lok: lok.length, brudt: lok.filter(i => i.complete && i.naturalWidth === 0 && !(i.loading === 'lazy' && !i.currentSrc)).map(i => i.getAttribute('src')),
           utenAlt: alle.filter(i => i.getAttribute('alt') === null).length, utenMaal: lok.filter(i => !i.getAttribute('width') || !i.getAttribute('height')).length,
           fliser: [...new Set(fliser)], medier: [...new Set(medier)] };
       });

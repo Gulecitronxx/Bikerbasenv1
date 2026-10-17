@@ -1525,83 +1525,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* ============ Listing detail ============ */
 .gallery-main .card-photo{ width:100%; height:100%; object-fit:cover; }
 .gallery-thumbs .card-photo{ width:100%; height:100%; object-fit:cover; }
-/* Billederne på den forrenderede annonceside. De vises kun i det korte
-   øjeblik før js/annonce.js bytter dem ud med det rigtige galleri — og for
-   crawlere og browsere uden JavaScript, hvor de er det eneste der er. */
-.prerender-gallery{ display:grid; grid-template-columns:1fr; gap:8px; margin-bottom: var(--space-4); }
-.prerender-gallery img{ width:100%; height:auto; border-radius: var(--radius-lg); object-fit:cover; background:var(--color-surface-2); }
-.prerender-gallery img:first-child{ aspect-ratio:4/3; }
-.prerender-gallery img:not(:first-child){ display:none; }
-/* Det forrenderede foto skal fylde nøjagtig det samme som det galleri,
-   js/annonce.js bytter det ud med. Ellers bliver LCP-elementet det
-   hydrerede billede — som først findes efter javascriptet er kørt, og
-   sidens LCP falder fra 2.8s til 5.0s (målt). */
-@media (max-width:699px){
-  .prerender-gallery{ margin-inline: calc(var(--space-4) * -1); }
-  .prerender-gallery img{ border-radius:0; }
-}
-@media (min-width:700px){ .prerender-gallery img:first-child{ aspect-ratio:16/10; } }
-
-/* V-001: minmax(0,…) — et spor med 1fr kan ikke blive smallere end galleriets thumbnail-stribe (min-content), og siden fik 76 px vandret overflow paa 360/390. */
-.listing-detail{ display:grid; grid-template-columns:minmax(0,1fr); gap: var(--space-6); padding: var(--space-5) 0 var(--space-9); }
-@media (min-width:960px){ .listing-detail{ grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); align-items:start; } }
-
-.gallery{ border-radius: var(--radius-lg); overflow:hidden; background: var(--color-surface-2); position:relative; }
-/* Fotoet er det, køberen kigger på først. På mobil gik der 16:10 indrykket
-   billede — under en tredjedel af Bilbasens. Nu kant-til-kant og 4:3, så
-   motorcyklen fylder skærmen; fra 700px er der plads til de runde hjørner. */
-.gallery-main{ aspect-ratio: 4/3; position:relative; }
-@media (min-width:700px){ .gallery-main{ aspect-ratio: 16/10; } }
-@media (max-width:699px){
-  .gallery{ margin-inline: calc(var(--space-4) * -1); border-radius:0; }
-}
-/* Favoritten hører til oven på fotoet (som på kortene), ikke i titelrækken
-   hvor den stjal plads fra modelnavnet. */
-.gallery .fav-btn{ position:absolute; top:12px; right:12px; z-index:3; }
-.gallery-main svg{ width:100%; height:100%; }
-.gallery-counter{ position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.65); color:#fff; font-size:13px; font-weight:600; padding:5px 12px; border-radius: var(--radius-pill); }
-.gallery-nav{ position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.9); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--color-dark); }
-.gallery-nav.prev{ left:12px; } .gallery-nav.next{ right:12px; }
-.gallery-nav svg{ width:20px; height:20px; }
-.gallery-thumbs{ display:flex; gap:8px; padding: var(--space-3); overflow-x:auto; background: var(--color-surface); }
-.gallery-thumbs button{ flex-shrink:0; width:76px; height:56px; border-radius: var(--radius-sm); overflow:hidden; border:2px solid transparent; padding:0; cursor:pointer; background:var(--color-surface-2); }
-.gallery-thumbs button.active{ border-color: var(--color-primary); }
-.gallery-thumbs svg{ width:100%; height:100%; }
-
-/* Titel og pris stod side om side i én flex-række. På en telefon betød det,
-   at "Yamaha Virago 535" blev klippet til "Yamaha Virago", fordi prisen
-   holdt sin plads med white-space:nowrap. Nu stables de: titlen får hele
-   bredden, og prisen bliver sidens tydeligste tal med sin egen etiket —
-   samme greb som Bilbasens "Kontantpris", bare uden deres leasing-støj. */
-.listing-header{ display:grid; grid-template-columns:1fr; gap: var(--space-3); margin: var(--space-5) 0; }
-@media (min-width:700px){
-  .listing-header{ grid-template-columns: 1fr auto; align-items:flex-start; gap: var(--space-5); }
-  .listing-price-block{ text-align:right; }
-}
-.listing-title{ font-size: clamp(24px,3.4vw,34px); margin-bottom:8px; }
-.listing-loc{ display:flex; align-items:center; gap:6px; color: var(--color-fg-muted); font-size:14px; }
-.listing-loc svg{ width:16px; height:16px; }
-.listing-price-label{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); }
-.listing-price{ font-family: var(--font-display); font-size: clamp(30px,5vw,38px); font-weight:700; white-space:nowrap; line-height:1.1; }
-
-/* Kontaktbjælke i bunden på mobil. Bilbasen lægger "Skriv til sælger" og
-   "Ring op" øverst på siden, hvor de forsvinder, så snart man scroller ned
-   til specs og beskrivelse — dér hvor man faktisk beslutter sig. Vores
-   bliver hængende. Den står i markuppen fra start (ikke bygget af JS), så
-   den er der ved første maling og ikke skubber noget: position:fixed. */
-.listing-actionbar{
-  position:fixed; left:0; right:0; bottom:0; z-index:90;
-  display:flex; gap:10px; padding:10px 16px calc(10px + env(safe-area-inset-bottom));
-  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
-  backdrop-filter: blur(10px); border-top:1px solid var(--color-border);
-}
-.listing-actionbar .btn{ flex:1; min-height:48px; }
-.listing-actionbar .btn-outline{ flex:0 0 auto; padding-inline: 18px; }
-@media (min-width:960px){ .listing-actionbar{ display:none; } }
-/* Bjælken må ikke lægge sig oven på det sidste i footeren. Samme tal bruges
-   som scroll-padding-bottom i reset'en, så et tastetryk ikke lander under
-   bjælken (SC 2.4.11) — derfor er det en variabel og ikke to 76'ere. */
-@media (max-width:959px){ body.har-actionbar{ padding-bottom: var(--actionbar-h); } }
 /* HER SKUBBEDE handlingsbjaelken sig op over cookiebanneret, fordi banneret
    laa som en bundbjaelke oven paa "Skriv til saelger" — annoncesidens primaere
    handling. Runde 14 gjorde samtykket til en modal: den daekker ikke bjaelken,
@@ -1623,315 +1546,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 
 .sidebar-card{ background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-5); }
 .sidebar-card + .sidebar-card{ margin-top: var(--space-4); }
-.seller-row{ display:flex; align-items:center; gap: var(--space-3); }
-.avatar{ width:52px; height:52px; border-radius:50%; background: var(--color-primary-tint); color:var(--color-primary-hover); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:18px; flex-shrink:0; }
-.seller-name{ font-weight:700; display:flex; align-items:center; gap:6px; }
-.seller-name svg{ width:16px; height:16px; color: var(--color-success); }
-.seller-sub{ font-size:13px; color:var(--color-fg-muted); }
-.seller-stats{ display:flex; gap: var(--space-4); margin-top: var(--space-4); padding-top: var(--space-4); border-top:1px solid var(--color-border); }
-.seller-stat b{ display:block; font-family:var(--font-display); font-size:18px; }
-.seller-stat span{ font-size:12px; color:var(--color-fg-muted); }
-.contact-actions{ display:flex; flex-direction:column; gap:10px; margin-top: var(--space-4); }
-.phone-reveal{ display:flex; align-items:center; justify-content:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:17px; letter-spacing:.02em; }
 .safety-tip{ display:flex; gap:10px; font-size:13px; color: var(--color-fg-muted); margin-top: var(--space-4); padding-top: var(--space-4); border-top:1px solid var(--color-border); }
 .safety-tip svg{ width:18px; height:18px; flex-shrink:0; color: var(--color-fg-muted); }
-
-.similar-strip{ margin-top: var(--space-9); }
-
-/* ============ Detaljeside for en INDEKSERET annonce ============
-   Egen blok, ikke en variant af sælgersiden. De to sider har forskellige
-   opgaver: vores egen skal føre til en samtale, den her skal føre til
-   kilden — og undervejs aldrig efterlade tvivl om, hvem der står bag.
-
-   Disciplinen er hentet hos Bilbasens annonceside: prisen med sin etiket
-   over sig, specs i en rolig todelt tabel frem for et gitter af kasser,
-   hver sektion under sin overskrift med en streg imellem, og forhandleren
-   i sit eget kort ved siden af. Formsproget er vores eget.
-
-   Den stiplede kant går igen fra kortene (.card-external): stiplet =
-   lånt fra en anden side. Den er bevidst ikke pænere end vores egne
-   annoncer — den skal kunne kendes, ikke fremhæves. */
-
-/* Sidefoden på .listing-detail er sat til vores egne annoncer, hvor
-   kontaktbjælken ligger fast i bunden på mobil og skal have luft over sig.
-   Her er der ingen kontaktbjælke — den fjernes fra DOM'en — og 96px
-   tomrum oven i stribens egne 96px blev til en halv skærm ingenting
-   mellem sidste afsnit og "Lignende motorcykler". */
-.listing-detail:has(> .external-detail){ padding-bottom: var(--space-5); }
-
-/* Flaget står øverst, før foto og titel. Det er det første, øjet rammer,
-   og det eneste sted på siden, hvor afsenderen kan misforstås. */
-.external-detail-flag{
-  display:flex; align-items:center; gap:8px;
-  border:1.5px dashed var(--color-border); border-radius: var(--radius-md);
-  background: var(--color-surface-2); color: var(--color-fg-muted);
-  padding: 8px var(--space-3); font-size:13px; line-height:1.35;
-  margin-bottom: var(--space-3);
-}
-/* Runde 5 (D5-A1): én linje på mobil; på desktop siger højre spalte det samme
-   20 px derfra, så flaget er væk dér. */
-.external-detail-flag span{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.external-detail-flag b{ color: var(--color-fg); }
-@media (min-width:960px){
-  .external-detail-flag{ display:none; }
-  /* Runde 5 (D5-A2, desktop): fotoet var 440 px hoejt (703 px bredt, 16:10) og
-     skubbede pris til ~700 og noegletal UNDER folden ved 850. Bilbasens foto
-     er 484 px paa en 646 px spalte, men deres titel/pris ligger ogsaa under
-     folden — det vil vi ikke. 400 px foto = pris ~650, noegletal ~760. */
-  /* Runde 7 (D7-A2): 400 → 360 px, saa noegletallenes vaerdier staar over 850. */
-  .external-detail-photo img{ max-height:360px; width:100%; object-fit:cover; }
-}
-/* Runde 5 (D5-A4): handlingsrækken under titlen — stille, som Bilbasens
-   "Sammenlign · Print · Anmeld". */
-/* Runde 6 (D6-A1): primaer knap under prisen paa <960 px. */
-.external-detail-cta{ margin-top:12px; }
-.external-detail-cta svg{ width:16px; height:16px; }
-@media (min-width:960px){ .external-detail-cta{ display:none; } }
-.external-detail-actions{ display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
-.external-detail-actions .btn{ color: var(--color-fg-muted); }
-.external-detail-actions .btn svg{ width:16px; height:16px; }
-.external-detail-actions .btn[aria-pressed="true"]{ color: var(--color-primary); }
-/* Runde 5 (D5-A2): pris-etiketten står på linje med tallet. */
-.external-detail-price .external-detail-price-label{ display:inline; font-size:13px; font-weight:500; letter-spacing:0; text-transform:none; color: var(--color-fg-muted); margin:0 0 0 4px; }
-.external-detail-stat small{ font-size:11px; font-weight:500; color: var(--color-fg-muted); }
-/* Runde 5 (D5-A7): bjælken bærer prisen med ned gennem siden. */
-.listing-actionbar-pris{ font-weight:700; font-size:16px; white-space:nowrap; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
-.listing-actionbar-pris small{ font-weight:400; color: var(--color-fg-muted); font-size:12px; }
-.listing-actionbar[hidden]{ display:none; }
-.external-detail-flag b{ color: var(--color-fg); }
-.external-detail-flag svg{ width:18px; height:18px; flex:0 0 auto; margin-top:2px; }
-
-.external-detail-photo{ margin:0; }
-.external-detail-photo img,
-.external-detail-photo-tom{
-  width:100%; aspect-ratio:4/3; object-fit:cover; display:block;
-  border-radius: var(--radius-lg); background: var(--color-surface-2);
-}
-@media (min-width:700px){
-  .external-detail-photo img,
-  .external-detail-photo-tom{ aspect-ratio:16/10; }
-}
-/* Uden foto skal kassen ikke fylde det samme som et foto ville. En halv
-   skærm tomhed er ikke ærligere end en lav kasse — den er bare tom. */
-.external-detail-photo-tom{
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:10px; color: var(--color-fg-muted); font-size:14px; text-align:center;
-  border:1.5px dashed var(--color-border);
-  aspect-ratio:auto; min-height:150px; padding: var(--space-5);
-}
-@media (min-width:700px){ .external-detail-photo-tom{ aspect-ratio:auto; } }
-.external-detail-photo-tom svg{ width:28px; height:28px; }
-/* Fotoet er forhandlerens. Krediteringen står under billedet, hvor et
-   billedbureau ville sætte den — ikke gemt væk i en title-attribut. */
-.external-detail-photo figcaption{
-  display:flex; align-items:center; gap:6px;
-  font-size:12px; color: var(--color-fg-muted);
-  padding: var(--space-2) 2px 0;
-}
-.external-detail-photo figcaption svg{ width:14px; height:14px; flex:0 0 auto; }
-/* Kant til kant på telefon, præcis som .gallery på vores egne annoncer.
-   Fotoet er det første, en køber ser, og et indrykket billede med runde
-   hjørner gav det under to tredjedele af skærmbredden. */
-@media (max-width:699px){
-  .external-detail-photo{ margin-inline: calc(var(--space-4) * -1); }
-  .external-detail-photo img{ border-radius:0; }
-  .external-detail-photo figcaption{ padding-inline: var(--space-4); }
-  .external-detail-photo-tom{ margin-inline: var(--space-4); }
-}
-
-.external-detail-head{ margin: var(--space-5) 0 0; position:relative; }
-/* Runde 6 (D6-A3): paa desktop staar handlingsraekken (Sammenlign · Del · Meld
-   fejl) oeverst til hoejre paa titlens linje — Bilbasens "Sammenlign · Print ·
-   Anmeld" — og noegletallene rykker ≈50 px op, saa raekken med koerekort/aargang/
-   km/kubik/effekt begynder over folden ved 850. Titlen faar plads til hoejre. */
-@media (min-width:960px){
-  .external-detail-actions{ position:absolute; top:-4px; right:0; margin:0; }
-  .external-detail-title{ padding-right:280px; }
-  .external-detail-stats{ margin-top: var(--space-3); }
-}
-.external-detail-title{
-  font-family: var(--font-display); font-weight:700; line-height:1.1;
-  font-size: clamp(26px,3.6vw,36px); margin:0;
-}
-/* Bilbasens anden titellinje: variant/trim, dæmpet under modelnavnet.
-   Halvt så tung som linjen over — den skal læses, ikke konkurrere. Findes
-   ingen variant i kilden, står linjen slet ikke, og næste linje rykker op. */
-.external-detail-variant{
-  font-family: var(--font-display); font-weight:500;
-  font-size: clamp(17px,2.2vw,21px); line-height:1.25;
-  color: var(--color-fg-muted); margin:4px 0 0;
-}
-/* Tredje linje: by, landsdel og sælgertype — det, en køber ellers skal
-   lede efter i teksten. */
-.external-detail-sub{
-  display:flex; align-items:center; flex-wrap:wrap; gap:6px;
-  color: var(--color-fg-muted); font-size:14px; margin-top:8px;
-}
-.external-detail-sub svg{ width:16px; height:16px; flex:0 0 auto; }
-.external-detail-dot{ opacity:.5; }
-
-.external-detail-price-block{ margin-top: var(--space-4); }
-.external-detail-price-label{
-  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
-  color: var(--color-fg-muted); margin:0;
-}
-.external-detail-price{
-  font-family: var(--font-display); font-weight:700; line-height:1.1;
-  font-size: clamp(30px,5vw,38px); margin:2px 0 0;
-}
-.external-detail-price.is-tom{
-  font-size: clamp(17px,2.4vw,20px); font-weight:600; color: var(--color-fg-muted);
-}
-/* Salgsvilkår står LIGE under prisen, ikke nede i beskrivelsen. "Uden
-   klargøring" og "Engros" forklarer, hvorfor tallet er lavt — samme rolle
-   som Bilbasens "(Uden afgift)" under kontantprisen. Ser man dem først,
-   når man står i butikken, har prisen løjet. */
-.external-detail-vilkaar{ display:flex; flex-wrap:wrap; gap:6px; margin: var(--space-3) 0 0; }
-.external-detail-vilkaar-chip{
-  display:inline-flex; align-items:center;
-  border:1px solid var(--color-border); border-radius: var(--radius-pill);
-  background: var(--color-surface-2); color: var(--color-fg);
-  font-size:12px; font-weight:600; padding:4px 11px;
-}
-.external-detail-vilkaar-note{ margin:8px 0 0; font-size:12px; color: var(--color-fg-muted); line-height:1.5; }
-/* Runde 7 (D7-A2): paa mobil staar saetningen ogsaa under "Foer du koerer derhen";
-   her koster den 36 px over noegletallene. */
-@media (max-width:959px){ .external-detail-vilkaar-note{ display:none; } .external-detail-actions{ margin-top:12px; } }
-
-/* ---------- Kørekortpanelet ----------
-   Sidens vigtigste enkeltoplysning for en dansk køber, og derfor det
-   eneste element med farve på. Koden i firkanten er læsbar på et halvt
-   sekund; teksten ved siden af siger, hvad den bygger på, så ingen tager
-   den for en garanti. */
-.external-detail-kk{
-  display:flex; align-items:flex-start; gap: var(--space-4);
-  margin-top: var(--space-5); padding: var(--space-4);
-  border:1px solid var(--color-border); border-left:4px solid var(--color-primary);
-  border-radius: var(--radius-md); background: var(--color-surface);
-}
-.external-detail-kk-code{
-  flex:0 0 auto; display:flex; align-items:center; justify-content:center;
-  min-width:54px; height:54px; padding:0 10px;
-  background: var(--color-dark); color:#fff;
-  font-family: var(--font-display); font-weight:700; font-size:22px;
-  border-radius: var(--radius-md);
-}
-.external-detail-kk b{ display:block; font-size:16px; }
-.external-detail-kk p{ margin:4px 0 0; font-size:13px; color: var(--color-fg-muted); line-height:1.55; }
-/* Kan vi ikke regne kategorien ud, skal panelet ikke se ud, som om vi kan.
-   Gul kant og en mindre kode: et forbehold, ikke et svar. */
-.external-detail-kk.is-uvis{ border-left-color: var(--color-fg-muted); }
-.external-detail-kk.is-uvis .external-detail-kk-code{
-  background: var(--color-surface-2); color: var(--color-fg-muted);
-  font-size:17px; border:1.5px dashed var(--color-border);
-}
-
-/* Nøgletallene: årgang, km, ccm, hk. Kun dem vi har — auto-fit gør, at to
-   felter fylder rækken lige så pænt som fire. */
-.external-detail-stats{
-  /* Runde 6 (D6-A4): 120 px-minimum → fem celler paa én raekke i 703 px
-     (foer: fire + "Effekt" alene med tre graa felter). */
-  display:grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap:1px;
-  margin-top: var(--space-5);
-  background: var(--color-border); border:1px solid var(--color-border);
-  border-radius: var(--radius-md); overflow:hidden;
-}
-.external-detail-stat{ background: var(--color-surface); padding: var(--space-4); }
-.external-detail-stat-label{
-  display:flex; align-items:center; gap:6px;
-  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
-  color: var(--color-fg-muted);
-}
-.external-detail-stat-label svg{ width:15px; height:15px; }
-.external-detail-stat b{ display:block; margin-top:6px; font-family: var(--font-display); font-size:18px; }
-/* Under 560px er der kun plads til to felter i bredden. Med tre nøgletal
-   stod det sidste alene, og den tomme celle ved siden af viste gitterets
-   stregfarve igennem som en grå kasse uden indhold. Er sidste felt ulige,
-   tager det hele rækken i stedet. */
-@media (max-width:559px){
-  .external-detail-stats{ grid-template-columns: repeat(2,1fr); }
-  .external-detail-stat:last-child:nth-child(odd){ grid-column: 1 / -1; }
-}
-/* Runde 6 (D6-A4): 6. celle alene paa en raekke af fem → hele raekken. */
-@media (min-width:700px){ .external-detail-stat:last-child:nth-child(5n+1){ grid-column: 1 / -1; } }
-
-.external-detail-section{ margin-top: var(--space-7); padding-top: var(--space-6); border-top:1px solid var(--color-border); }
-.external-detail-section h2{ font-size:20px; margin-bottom: var(--space-3); }
-
-/* Specifikationstabellen. Etiket til venstre, værdi til højre, zebra —
-   samme aflæsning som Bilbasens "Detaljer", uden deres udfoldning, fordi
-   vi ikke har rækker nok til at skjule nogen. */
-.external-detail-specs{ margin:0; border:1px solid var(--color-border); border-radius: var(--radius-md); overflow:hidden; }
-.external-detail-row{
-  display:grid; grid-template-columns: 1fr auto; gap: var(--space-4);
-  align-items:baseline; padding: 11px var(--space-4);
-  font-size:15px;
-}
-.external-detail-row:nth-child(odd){ background: var(--color-surface); }
-.external-detail-row:nth-child(even){ background: var(--color-surface-2); }
-.external-detail-row dt{ color: var(--color-fg-muted); }
-.external-detail-row dd{ margin:0; font-weight:600; text-align:right; }
-
-.external-detail-note{ margin-top: var(--space-3); font-size:13px; color: var(--color-fg-muted); line-height:1.6; }
-.external-detail-quote{
-  margin:0; padding: var(--space-4); border-left:3px solid var(--color-border);
-  background: var(--color-surface-2); border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  color: var(--color-fg); line-height:1.7; font-size:15px;
-}
-.external-detail-raad{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
-.external-detail-raad li{
-  display:flex; align-items:flex-start; gap:10px;
-  font-size:14px; color: var(--color-fg-muted); line-height:1.55;
-}
-.external-detail-raad svg{ width:17px; height:17px; flex:0 0 auto; margin-top:2px; color: var(--color-fg-muted); }
-
-/* ---------- Kildekortet ----------
-   Står, hvor sælgerkortet står på vores egne annoncer. Det er med vilje:
-   det er dét sted, øjet leder efter "hvem handler jeg med" — og svaret
-   skal være MC Syd, ikke Bikerbasen. Ingen knap her fører til en samtale;
-   den ene knap fører ud af sitet. */
-.external-detail-aside{ display:flex; flex-direction:column; gap: var(--space-4); }
-@media (min-width:960px){
-  /* Runde 7 (D7-A4): sticky virkede ikke — gitteret straekker spalten til fuld
-     hoejde (align-items:stretch), saa der var intet at klaebe i. */
-  .external-detail-aside{ position:sticky; top: calc(var(--header-h) + var(--space-4)); align-self:start; }
-}
-.external-detail-source,
-.external-detail-next{
-  background: var(--color-surface); border:1.5px dashed var(--color-border);
-  border-radius: var(--radius-md); padding: var(--space-5);
-}
-.external-detail-source-head{ display:flex; align-items:flex-start; gap: var(--space-3); margin-bottom: var(--space-4); }
-.external-detail-source-head > svg{ width:26px; height:26px; flex:0 0 auto; color: var(--color-fg-muted); }
-.external-detail-source-label{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); margin:0; }
-.external-detail-source-name{ font-size:22px; margin:2px 0 0; line-height:1.15; }
-.external-detail-source-domain{ font-size:13px; color: var(--color-fg-muted); margin:2px 0 0; }
-.external-detail-source .btn svg{ width:15px; height:15px; }
-.external-detail-source-body{ margin: var(--space-4) 0 0; font-size:13px; line-height:1.6; color: var(--color-fg-muted); }
-.external-detail-source-meta{
-  display:flex; align-items:flex-start; gap:8px;
-  margin: var(--space-3) 0 0; padding-top: var(--space-3);
-  border-top:1px solid var(--color-border);
-  font-size:12px; color: var(--color-fg-muted); line-height:1.5;
-}
-.external-detail-source-meta svg{ width:15px; height:15px; flex:0 0 auto; }
-.external-detail-broken{
-  display:flex; align-items:flex-start; gap:8px;
-  font-size:13px; color: var(--color-danger); line-height:1.55;
-}
-.external-detail-broken svg{ width:16px; height:16px; flex:0 0 auto; margin-top:1px; }
-
-.external-detail-next h2{ font-size:15px; margin:0 0 var(--space-3); }
-.external-detail-next ul{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
-.external-detail-next a{
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  padding:9px 0; font-size:14px; color: var(--color-primary); font-weight:500;
-  border-bottom:1px solid var(--color-border);
-}
-.external-detail-next-n{ display:inline-flex; align-items:center; gap:4px; color: var(--color-fg-muted); font-weight:600; font-size:13px; font-variant-numeric: tabular-nums; }
-.external-detail-next-n svg{ width:14px; height:14px; }
-.external-detail-hentet{ border-top:0; padding-top:0; margin-top: var(--space-3); }
-.external-detail-next li:last-child a{ border-bottom:0; }
 
 /* ============ Forms ============ */
 .form-grid{ display:grid; grid-template-columns:1fr; gap: var(--space-4); }
@@ -1964,61 +1580,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .radio-card input:focus-visible + .radio-card-inner{ outline: 2.5px solid var(--color-ring); outline-offset:2px; }
 .eq-count{ color: var(--color-primary); font-weight:600; font-size:13px; margin-left:4px; }
 
-/* ============ Stepper (create listing) ============ */
-.stepper{ display:flex; align-items:center; gap:4px; margin: var(--space-5) 0; overflow-x:auto; }
-.step-item{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
-.step-dot{ width:32px; height:32px; border-radius:50%; background: var(--color-surface-2); border:1.5px solid var(--color-border); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color: var(--color-fg-muted); flex-shrink:0; transition: all .2s var(--ease-out); }
-.step-dot svg{ width:16px; height:16px; }
-.step-item.active .step-dot{ background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
-.step-item.done .step-dot{ background: var(--color-success); border-color: var(--color-success); color:#fff; }
-.step-label{ font-size:13px; font-weight:600; color: var(--color-fg-muted); white-space:nowrap; }
-.step-item.active .step-label{ color: var(--color-fg); }
-.step-line{ width:24px; height:2px; background: var(--color-border); flex-shrink:0; }
-@media (min-width:640px){ .step-line{ width:48px; } }
-
-/* På en telefon kunne de fire trinnavne ikke være der, så stepperen fik sin
-   egen vandrette scrollbar med pile — man skulle rulle sidelæns for at se,
-   hvor mange trin der var tilbage. Kun det aktive trin skriver sit navn;
-   prikkerne viser resten. Så er der ingen scrollbar at rulle i. */
-@media (max-width:520px){
-  .stepper{ overflow-x: visible; gap:6px; }
-  .step-item:not(.active) .step-label{
-    position:absolute; width:1px; height:1px; overflow:hidden;
-    clip:rect(0,0,0,0); white-space:nowrap;
-  }
-  .step-line{ width:auto; flex:1; min-width:8px; }
-}
-
-.upload-zone{
-  border:2px dashed var(--color-border); border-radius: var(--radius-md); padding: var(--space-7) var(--space-4);
-  text-align:center; cursor:pointer; transition: border-color .15s var(--ease-out), background-color .15s var(--ease-out);
-}
-.upload-zone:hover, .upload-zone.dragover{ border-color: var(--color-primary); background: var(--color-primary-tint); }
-.upload-zone svg{ width:36px; height:36px; color: var(--color-fg-muted); margin:0 auto var(--space-3); }
-.upload-zone h3{ font-size:16px; margin-bottom:4px; }
-.upload-zone p{ font-size:13px; color: var(--color-fg-muted); }
-
-.photo-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-top: var(--space-4); }
-@media (min-width:560px){ .photo-grid{ grid-template-columns: repeat(4,1fr); } }
-.photo-thumb{ position:relative; aspect-ratio:1; border-radius: var(--radius-sm); overflow:hidden; background: var(--color-surface-2); }
-.photo-thumb img{ width:100%; height:100%; object-fit:cover; }
-.photo-thumb .remove-photo{ position:absolute; top:4px; right:4px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-.photo-thumb .remove-photo svg{ width:14px; height:14px; }
-.photo-thumb .cover-tag{ position:absolute; bottom:4px; left:4px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase; }
-/* Skiller nyligt tilføjede billeder fra dem, der allerede ligger på annoncen. */
-.photo-thumb .cover-tag.new{ background: var(--color-primary); color: var(--color-on-primary); }
-.photo-thumb[draggable="true"]{ cursor:grab; }
-.photo-thumb.dragging{ opacity:.4; }
-.photo-thumb.drag-over{ outline:2.5px dashed var(--color-primary); outline-offset:-2px; }
-.photo-actions{ position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:center; gap:6px; padding:6px; background:linear-gradient(to top, rgba(0,0,0,.6), transparent); opacity:0; transition:opacity .15s var(--ease-out); }
-.photo-thumb:hover .photo-actions, .photo-thumb:focus-within .photo-actions{ opacity:1; }
-.photo-actions button{ width:28px; height:28px; border-radius:50%; border:none; background:rgba(255,255,255,.92); color: var(--color-fg); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow: var(--shadow-sm); }
-.photo-actions button:hover:not(:disabled){ background:#fff; }
-.photo-actions button:disabled{ opacity:.35; cursor:default; }
-.photo-actions button svg{ width:16px; height:16px; }
-.photo-actions .photo-cover{ background: var(--color-primary); color: var(--color-on-primary); }
-@media (pointer:coarse){ .photo-actions{ opacity:1; } }
-
 .form-actions{ display:flex; justify-content:space-between; gap: var(--space-3); margin-top: var(--space-6); padding-top: var(--space-5); border-top:1px solid var(--color-border); }
 /* Tilbage + Gem kladde + Næste var tilsammen 364px bred i en 343px række.
    Rækken har ingen overflow, så de 21px skubbede HELE dokumentet 5px ud til
@@ -2030,72 +1591,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   .form-actions .btn{ min-width:0; padding-inline: 12px; }
 }
 
-.preview-card-wrap{ max-width:400px; margin: 0 auto var(--space-6); }
-.preview-note{ display:flex; gap:10px; background: var(--color-primary-tint); color: var(--color-primary-hover); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size:13px; margin-bottom: var(--space-5); }
-:root[data-theme="dark"] .preview-note{ color: var(--color-primary); }
-.preview-note svg{ width:18px; height:18px; flex-shrink:0; }
-
-/* ============ Profile / dealer page ============ */
-.profile-hero{ background: var(--color-surface); border-bottom:1px solid var(--color-border); padding: var(--space-6) 0; }
-.profile-top{ display:flex; gap: var(--space-4); align-items:flex-start; flex-wrap:wrap; }
-.avatar-lg{ width:84px; height:84px; border-radius:50%; background: var(--color-primary-tint); color:var(--color-primary-hover); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:28px; flex-shrink:0; }
-.profile-info h1{ font-size:24px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.profile-info h1 svg{ width:20px; height:20px; color: var(--color-success); }
-.profile-meta{ display:flex; gap: var(--space-4); flex-wrap:wrap; color: var(--color-fg-muted); font-size:14px; margin-top:8px; }
-.profile-meta span{ display:flex; align-items:center; gap:5px; }
-.profile-meta svg{ width:15px; height:15px; }
-.profile-actions{ margin-left:auto; display:flex; gap:10px; flex-wrap:wrap; }
-.profile-stats-row{ display:flex; gap: var(--space-6); margin-top: var(--space-5); flex-wrap:wrap; }
-.profile-tabs{ display:flex; gap: var(--space-2); border-bottom:1px solid var(--color-border); margin-top: var(--space-5); overflow-x:auto; }
-.profile-tabs button{ padding: 12px 4px; background:none; border:none; font-weight:600; color: var(--color-fg-muted); position:relative; cursor:pointer; white-space:nowrap; min-height:44px; }
-.profile-tabs button.active{ color: var(--color-fg); }
-.profile-tabs button.active::after{ content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; background: var(--color-primary); }
-
-/* ============ Auth ============ */
-/* Undertitlen skiftes af js/login.js efter konteksten (?redirect=), og
-   teksterne er ikke lige lange. Uden en reserveret højde ville fanerne
-   og formularen nedenunder hoppe, når den rigtige tekst kom ind. */
-#auth-subtitle{ min-height: 3.2em; }
-@media (min-width:520px){ #auth-subtitle{ min-height: 2.6em; } }
-.auth-wrap{ min-height: calc(100dvh - var(--header-h)); display:flex; align-items:center; justify-content:center; padding: var(--space-6) var(--space-4); }
-
-/* To-panel-login: brandpanel til venstre, formular til højre. Panelet er
-   ren pynt og skjules på mobil, hvor formularen fylder hele bredden. */
-.auth-shell{ width:100%; max-width:940px; display:grid; grid-template-columns:1fr; gap: var(--space-5); align-items:stretch; }
-@media (min-width:860px){ .auth-shell{ grid-template-columns: 1.05fr 0.95fr; gap:0; box-shadow: var(--shadow-lg); border-radius: var(--radius-lg); overflow:hidden; } }
-
-.auth-hero{ display:none; }
-@media (min-width:860px){
-  .auth-hero{
-    display:flex; flex-direction:column; padding: var(--space-7);
-    background: linear-gradient(160deg, #1C1A18 0%, #2A2115 58%, #C6420E 150%);
-    color:#fff; position:relative; overflow:hidden;
-  }
-  /* Varm glød i hjørnet — samme greb som forsidens hero. */
-  .auth-hero::before{ content:''; position:absolute; right:-120px; top:-120px; width:420px; height:420px; border-radius:50%;
-    background: radial-gradient(circle, rgba(198,66,14,.55) 0%, rgba(198,66,14,0) 68%); }
-}
-.auth-hero-brand{ display:inline-flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:800; font-size:22px; color:#fff; text-decoration:none; position:relative; }
-.auth-hero-brand svg{ width:30px; height:30px; color:#FF6A32; }
-.auth-hero-brand .brand-logo{ width:38px; height:38px; border-radius:10px; }
-.auth-hero-title{ font-size:30px; line-height:1.12; letter-spacing:-.02em; margin-top: var(--space-6); position:relative; }
-.auth-hero-lead{ color:#C7C1B8; font-size:15px; margin-top:12px; position:relative; }
-.auth-hero-benefits{ list-style:none; display:flex; flex-direction:column; gap:14px; margin-top: var(--space-6); position:relative; }
-.auth-hero-benefits li{ display:flex; align-items:center; gap:12px; font-size:15px; }
-.auth-hero-benefits li span{ flex-shrink:0; width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); }
-.auth-hero-benefits li svg{ width:18px; height:18px; color:#FF6A32; }
-
-/* I to-panel-layoutet slutter kortet tæt til panelet uden egen skygge/ramme;
-   alene giver det stadig sin egen kant. */
-.auth-card{ width:100%; max-width:420px; background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-md); }
-@media (min-width:860px){
-  .auth-shell .auth-card{ max-width:none; border:none; border-radius:0; box-shadow:none; padding: var(--space-7); display:flex; flex-direction:column; justify-content:center; }
-}
-.auth-tabs{ display:flex; background: var(--color-surface-2); border-radius: var(--radius-pill); padding:4px; margin-bottom: var(--space-5); }
-.auth-tabs button{ flex:1; padding:10px; border-radius: var(--radius-pill); border:none; background:transparent; font-weight:700; font-size:14px; color: var(--color-fg-muted); cursor:pointer; min-height:40px; }
-.auth-tabs button.active{ background: var(--color-surface); color: var(--color-fg); box-shadow: var(--shadow-sm); }
-.auth-divider{ display:flex; align-items:center; gap:10px; color: var(--color-fg-muted); font-size:13px; margin: var(--space-4) 0; }
-.auth-divider::before,.auth-divider::after{ content:''; flex:1; height:1px; background: var(--color-border); }
 .checkbox-inline{ display:flex; align-items:flex-start; gap:8px; font-size:13px; color: var(--color-fg-muted); }
 .checkbox-inline input{ margin-top:3px; width:16px; height:16px; accent-color: var(--color-primary); flex-shrink:0; }
 
@@ -2141,84 +1636,11 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .tabs-row button.active{ color: var(--color-fg); }
 .tabs-row button.active::after{ content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px; background: var(--color-primary); }
 
-/* ===== Mine annoncer: tælle-faner, listerækker og hjælpe-sidebar ===== */
-.account-head{ display:flex; flex-wrap:wrap; gap: var(--space-3); align-items:center; justify-content:space-between; margin: var(--space-5) 0; }
-.count-tabs{ display:flex; gap:10px; flex-wrap:wrap; }
-.count-tab{ display:flex; align-items:center; gap:10px; padding:12px 16px; border:1.5px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); cursor:pointer; min-height:56px; transition: border-color .15s, background .15s; }
-.count-tab:hover{ border-color: var(--color-fg-muted); }
-.count-tab.active{ border-color: var(--color-primary); background: var(--color-primary); }
-.count-tab-icon{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: var(--color-surface-2); color: var(--color-fg-muted); flex-shrink:0; }
-.count-tab-icon svg{ width:18px; height:18px; }
-.count-tab.active .count-tab-icon{ background: rgba(255,255,255,.2); color:#fff; }
-.count-tab-text{ display:flex; flex-direction:column; align-items:flex-start; line-height:1.2; }
-.count-tab-label{ font-size:13px; font-weight:600; color: var(--color-fg-muted); }
-.count-tab-num{ font-size:20px; font-weight:800; color: var(--color-fg); }
-.count-tab.active .count-tab-label{ color: rgba(255,255,255,.85); }
-.count-tab.active .count-tab-num{ color:#fff; }
-.account-link{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; font-weight:600; font-size:14px; color: var(--color-fg-muted); min-height:44px; }
-.account-link svg{ width:18px; height:18px; }
-.account-link:hover, .account-link.active{ color: var(--color-primary); }
-
-.account-layout{ display:grid; grid-template-columns:1fr; gap: var(--space-5); align-items:start; }
-@media (min-width:900px){ .account-layout{ grid-template-columns: 1fr 300px; } }
-
-.list-toolbar{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); flex-wrap:wrap; margin-bottom: var(--space-4); }
-.list-heading{ font-size:22px; }
-.list-heading span{ color: var(--color-fg-muted); font-weight:600; }
-.sort-inline{ display:flex; align-items:center; gap:8px; font-size:14px; color: var(--color-fg-muted); }
-.sort-inline .input{ min-height:40px; padding:8px 32px 8px 12px; }
-
-.listing-rows{ display:flex; flex-direction:column; gap: var(--space-3); }
 .listing-row{ display:flex; gap: var(--space-4); padding: var(--space-4); border:1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); }
-.lr-media{ position:relative; width:150px; flex-shrink:0; aspect-ratio:4/3; border-radius: var(--radius-md); overflow:hidden; background: var(--color-surface-2); display:block; }
-.lr-media img, .lr-media svg{ width:100%; height:100%; object-fit:cover; display:block; }
-.lr-badge{ position:absolute; top:8px; left:8px; }
-.lr-body{ flex:1; min-width:0; display:flex; flex-direction:column; }
-.lr-head{ display:flex; align-items:flex-start; justify-content:space-between; gap: var(--space-3); }
-.lr-title{ font-family:var(--font-display); font-weight:700; font-size:18px; color: var(--color-fg); text-decoration:none; }
-.lr-title:hover{ color: var(--color-primary); }
-.lr-price{ font-family:var(--font-display); font-weight:800; font-size:18px; white-space:nowrap; }
-.lr-specs{ display:flex; flex-wrap:wrap; gap: var(--space-4) var(--space-6); margin: var(--space-3) 0; }
-.lr-spec{ display:flex; flex-direction:column; }
-.lr-spec span{ font-size:12px; color: var(--color-fg-muted); }
-.lr-spec b{ font-size:14px; }
-.lr-actions{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); margin-top:auto; padding-top: var(--space-2); }
-.lr-similar{ display:inline-flex; align-items:center; gap:6px; color: var(--color-primary); font-weight:600; font-size:14px; text-decoration:none; }
-.lr-similar svg{ width:16px; height:16px; }
-.lr-buttons{ display:flex; align-items:center; gap:8px; }
-.lr-trash{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg-muted); cursor:pointer; flex-shrink:0; }
-.lr-trash:hover{ border-color: var(--color-danger); color: var(--color-danger); }
-.lr-trash svg{ width:18px; height:18px; }
-/* Hjerte på favoritrækker — udfyldt, fordi annoncen allerede er liket; et
-   klik fjerner den fra favoritter. */
-.lr-fav{ display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border:1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg-muted); cursor:pointer; flex-shrink:0; }
-.lr-fav svg{ width:20px; height:20px; }
-.lr-fav.active{ color: var(--color-primary); border-color: var(--color-primary); }
-.lr-fav.active svg{ fill: currentColor; }
-.lr-fav:hover{ border-color: var(--color-primary); }
 @media (max-width:560px){
   .listing-row{ flex-direction:column; }
   .lr-media{ width:100%; aspect-ratio:16/10; }
 }
-
-.account-aside .aside-card{ background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); }
-.account-aside h3{ font-size:17px; margin-bottom:8px; }
-.account-aside p{ font-size:14px; color: var(--color-fg-muted); line-height:1.6; margin-bottom: var(--space-4); }
-@media (max-width:899px){ .account-aside{ display:none; } }
-
-/* Sektionen "Bike art" stod her (C-007). Den stylede den tegnede
-   pladsholdermotorcykel — tolv .ba-*-regler, som kun bikeArtSVG() i
-   js/bike-art.js kunne producere elementer til. Den tegnefunktion kaldes
-   ingen steder mere: pladsholderen er "Ingen fotos i denne annonce" fra
-   listingMediaHTML() i js/components.js. Reglerne var altså regler for
-   elementer, der ikke længere kan opstå, og de blev båret rundt i den
-   kritiske blok på fem sidetyper (soegning, annonce, maerke, forhandler,
-   mine-annoncer), hvor de indlejres i selve dokumentet.
-
-   scripts/inline-critical.js nævner stadig 'Bike art' i sine PAGES-lister.
-   Det er et no-op — filtreringen matcher på sektionsnavne, og et navn, der
-   ikke findes, giver ingen sektion — men listerne bør ryddes samtidig med
-   resten af C-007. */
 
 /* ============ Trust & safety ============ */
 .badge-verified{ background: var(--color-success); color:#fff; }
@@ -2303,20 +1725,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .cookie-modal-knap:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
 /* Knapperne står altid side om side (W12): 'Kun nødvendige' er det længste svar og får plads ved 320 px (flex:1 1 0, ens bredde). */
 
-/* ============ Verification steps (auth) ============ */
-.verify-row{
-  display:flex; align-items:center; justify-content:space-between; gap: var(--space-3);
-  padding: var(--space-3); border:1px solid var(--color-border); border-radius: var(--radius-sm); margin-bottom:10px;
-}
-.verify-row-info{ display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; }
-.verify-row-info svg{ width:19px; height:19px; color: var(--color-fg-muted); flex-shrink:0; }
-.verify-row.done{ border-color: color-mix(in srgb, var(--color-success) 40%, var(--color-border)); background: var(--color-success-tint); }
-.verify-row.done .verify-row-info svg{ color: var(--color-success); }
-.verify-status-done{ display:inline-flex; align-items:center; gap:6px; color: var(--color-success); font-size:13px; font-weight:700; }
-.verify-status-done svg{ width:16px; height:16px; }
-.code-input-row{ display:flex; gap:8px; margin-top:10px; }
-.code-input-row input{ width:44px; text-align:center; font-size:18px; font-weight:700; padding:10px 0; }
-
 /* ============ Reviews ============ */
 .review-item{ padding: var(--space-4) 0; border-bottom:1px solid var(--color-border); }
 .review-item:last-child{ border-bottom:none; }
@@ -2362,102 +1770,16 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .kyc-fields{ display:none; }
 .kyc-fields.show{ display:grid; }
 
-/* ============ Dealer dashboard ============ */
-.dash-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:var(--space-4); flex-wrap:wrap; padding: var(--space-6) 0 var(--space-2); }
-.dash-head h1{ font-size: clamp(24px,3.4vw,32px); }
-.dash-head p{ color: var(--color-fg-muted); margin-top:6px; }
-.dash-head-actions{ display:flex; gap:10px; }
-
-.demo-note{
-  display:flex; align-items:flex-start; gap:8px; font-size:13px; line-height:1.5;
-  color: var(--color-fg-muted); background: var(--color-surface-2);
-  border:1px solid var(--color-border); border-radius: var(--radius-sm);
-  padding: 10px var(--space-4); margin: var(--space-4) 0 var(--space-5);
-}
-.demo-note svg{ width:16px; height:16px; flex-shrink:0; margin-top:1px; }
-
-/* KPI row */
-.kpi-row{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
-@media (min-width:720px){ .kpi-row{ grid-template-columns: repeat(3,1fr); } }
-@media (min-width:1100px){ .kpi-row{ grid-template-columns: repeat(5,1fr); } }
-.kpi-tile{
-  background: var(--color-surface); border:1px solid var(--color-border);
-  border-radius: var(--radius-md); padding: var(--space-4);
-  display:flex; flex-direction:column; gap:4px; min-height:104px;
-}
-.kpi-label{ font-size:12px; font-weight:600; color: var(--color-fg-muted); text-transform:uppercase; letter-spacing:.04em; }
-.kpi-value{ font-family: var(--font-display); font-size:26px; font-weight:700; line-height:1.15; }
-.kpi-sub{ font-size:12px; color: var(--color-fg-muted); }
-.kpi-delta{ display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:700; flex-wrap:wrap; }
-.kpi-delta svg{ width:13px; height:13px; }
-.kpi-delta.up{ color: var(--color-success); }
-.kpi-delta.down{ color: var(--color-danger); }
-.kpi-delta-period{ font-weight:400; color: var(--color-fg-muted); }
-.sparkline{ width:100%; height:28px; margin-top:auto; overflow:visible; }
-.sparkline polyline{ fill:none; stroke: var(--viz-series); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
-
-/* Panels */
-.dash-grid{ display:grid; grid-template-columns:1fr; gap: var(--space-4); margin-top: var(--space-5); }
-@media (min-width:1000px){ .dash-grid{ grid-template-columns: 1.35fr 1fr; } }
 .panel{
   background: var(--color-surface); border:1px solid var(--color-border);
   border-radius: var(--radius-md); padding: var(--space-5); margin-top: var(--space-5);
 }
-.dash-grid .panel{ margin-top:0; }
-.panel-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-3); margin-bottom: var(--space-4); }
-.panel-head h2{ font-size:17px; }
-.panel-head p{ font-size:13px; color: var(--color-fg-muted); margin-top:4px; }
-
 /* Chart tokens — validated against surface in both modes */
 .panel{ --viz-series: #C6420E; --viz-grid: #E3DED6; --viz-axis: #6B6560; }
 :root[data-theme="dark"] .panel{ --viz-series: #E85A22; --viz-grid: #37312A; --viz-axis: #A79E92; }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .panel{ --viz-series: #E85A22; --viz-grid: #37312A; --viz-axis: #A79E92; }
 }
-
-.chart-wrap{ position:relative; }
-.viz-svg{ width:100%; height:auto; overflow:visible; }
-.viz-grid{ stroke: var(--viz-grid); stroke-width:1; }
-.viz-axis-text{ fill: var(--viz-axis); font-size:11px; font-family: var(--font-body); font-variant-numeric: tabular-nums; }
-.viz-area{ fill: var(--viz-series); opacity:.10; }
-.viz-line{ fill:none; stroke: var(--viz-series); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
-.viz-dot{ fill: var(--viz-series); stroke: var(--color-surface); stroke-width:2; }
-.viz-crosshair{ stroke: var(--viz-axis); stroke-width:1; opacity:.5; }
-.viz-hover-dot{ fill: var(--viz-series); stroke: var(--color-surface); stroke-width:2; }
-.viz-hover-layer rect{ cursor:crosshair; }
-.viz-tooltip{
-  position:absolute; transform: translate(-50%, -100%); pointer-events:none;
-  background: var(--color-dark); color:#fff; padding:6px 10px; border-radius: var(--radius-sm);
-  font-size:12px; line-height:1.4; white-space:nowrap; box-shadow: var(--shadow-md); z-index:5;
-}
-:root[data-theme="dark"] .viz-tooltip{ background:#000; border:1px solid var(--color-border); }
-.viz-tooltip strong{ display:block; font-size:13px; }
-.viz-tooltip span{ color:#B4AEA3; }
-.chart-empty{ color: var(--color-fg-muted); font-size:14px; padding: var(--space-5) 0; }
-
-/* Horizontal bars */
-.hbar-list{ display:flex; flex-direction:column; gap: var(--space-3); }
-.hbar-row{ display:grid; grid-template-columns: minmax(0,1fr) 1fr auto; align-items:center; gap:10px; }
-.hbar-label{ font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.hbar-track{ background: var(--color-surface-2); border-radius:4px; height:16px; overflow:hidden; }
-.hbar-fill{ display:block; height:100%; background: var(--viz-series); border-radius:0 4px 4px 0; }
-.hbar-value{ font-size:13px; font-weight:700; font-variant-numeric: tabular-nums; color: var(--color-fg-muted); }
-
-/* Data tables */
-.table-scroll{ overflow-x:auto; overflow-y:auto; }
-.data-table{ width:100%; border-collapse:collapse; font-size:14px; }
-.data-table th, .data-table td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--color-border); vertical-align:middle; }
-.data-table th{ font-size:12px; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); font-weight:700; white-space:nowrap; }
-.data-table td.num, .data-table th.num{ text-align:right; font-variant-numeric: tabular-nums; white-space:nowrap; }
-.data-table tbody tr:last-child td{ border-bottom:none; }
-.data-table tbody tr:hover{ background: var(--color-surface-2); }
-.table-title{ font-weight:600; display:block; }
-.table-title:hover{ color: var(--color-primary); text-decoration:underline; }
-.table-sub{ font-size:12px; color: var(--color-fg-muted); }
-.row-actions{ display:flex; gap:6px; justify-content:flex-end; }
-.status-pill{ display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius: var(--radius-pill); text-transform:uppercase; letter-spacing:.03em; }
-.status-pill.is-new{ background: var(--color-success); color:#fff; }
-.status-pill.is-active{ background: var(--color-surface-2); color: var(--color-fg-muted); }
 
 /* ============ Search enhancements (saved search, view toggle, filter badge) ============ */
 .filter-badge{
@@ -2699,20 +2021,8 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* (.hero-count-hint blev flyttet til Hero-sektionen som .hero-count — den skal
    med i den kritiske CSS, og "Popular searches" er ikke med på forsiden.) */
 
-/* ============ Brand landing pages ============ */
-.brand-hero{ padding: var(--space-6) 0 var(--space-5); max-width:760px; }
-.brand-hero h1{ font-size: clamp(26px,4vw,38px); margin-bottom: var(--space-3); }
 .brand-intro{ color: var(--color-fg-muted); line-height:1.7; font-size:16px; }
 .brand-intro strong{ color: var(--color-fg); }
-.brand-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: var(--space-5); }
-/* RUNDE 12 (R12-D-1): halens h2'er ("Prisniveau for Honda", "Ofte stillede
-   spoergsmaal") stod 19 px mod broedtekstens 16 — forholdet 1,2. En overskrift,
-   der er samme stoerrelse som teksten under den, er ikke en overskrift.
-   Referencen koerer omkring 2,8. 22 px giver 1,4 uden at raabe.
-   Tael-etiketterne ("276 annoncer") er derimod IKKE sektionsoverskrifter, men
-   etiketter paa en liste, og de bliver staaende paa 19, saa h1'en bliver ved
-   med at vaere det ene dominerende hoved i foerste skaerm. */
-.brand-sub{ font-size:22px; margin-bottom: var(--space-4); }
 #brand-antal, #facet-antal{ font-size:19px; }
 /* O3-1b: samtykke-hint i telefonfeltet. */
 .field-hint-inline{ display:block; font-size:12.5px; color: var(--color-fg-muted); font-weight:400; margin-top:2px; }
@@ -2726,21 +2036,9 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .udgivet-banner > svg{ width:20px; height:20px; color: var(--color-success, #2e7d32); flex:0 0 auto; }
 .udgivet-banner span{ flex:1 1 auto; }
 .udgivet-banner .icon-btn{ width:32px; height:32px; flex:0 0 auto; }
-/* O3-3 */
-.page-title-note{ font-size:13.5px; color: var(--color-fg-muted); margin-top:6px; }
-/* O3-8: typefliserne kostede ≈1 300 px af trin 1 paa mobil — mindre foto, samme valg. */
-@media (max-width:480px){
-  #type-radio-group .radio-card-media{ aspect-ratio:2/1; }
-}
-
 /* O1-12: feltnaer fejltekst i opret-flowet. */
 .felt-fejl{ margin:6px 0 0; font-size:12.5px; color: var(--color-danger); }
 .field.has-error .felt-fejl{ display:block; }
-
-/* O2-1: statistiklinjen paa egne annoncer. */
-.lr-statistik{ display:flex; align-items:center; gap:6px; margin:6px 0 0; font-size:13px; color: var(--color-fg); font-weight:600; }
-.lr-statistik svg{ width:15px; height:15px; color: var(--color-fg-muted); }
-.lr-statistik span{ color: var(--color-fg-muted); font-weight:400; }
 
 /* O1 (opret-annonce, runde 1) */
 .valgfri-fold{ margin-top:28px; border:1px solid var(--color-border); border-radius: var(--radius-md); padding:0 16px 4px; }
@@ -2778,8 +2076,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .brand-intro-mere{ margin-top:8px; }
 .brand-intro-mere summary{ cursor:pointer; color: var(--color-primary); font-weight:500; font-size:14px; }
 .brand-intro-mere > .brand-intro{ margin-top:8px; }
-.brand-sub:not(:first-child){ margin-top: var(--space-6); }
-.section-head .brand-sub{ margin-top:0; }
 /* Runde 10 (D9-M1-rest): facetfolden. RUNDE 11: fra <details> til ren CSS —
    se den maalte begrundelse i scripts/build-brand-pages.js (200 px spring paa
    mobil, 124 px hvis man vender den om). Checkboxen holder tilstanden, labelen
@@ -2811,11 +2107,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
    scripts/build-facet-pages.js) og skal derfor ikke baere en sektions
    bundluft oveni — ellers staar der bare et tomt hul, hvor h2'en var. */
 .brand-maerkerow-sektion{ padding-bottom: var(--space-4); }
-
-/* RUNDE 12: modelchipsene flyttede op i hero-blokken (se
-   scripts/build-brand-pages.js). De skal ligge taet paa introen, ikke baere
-   en hel sektions luft — raekken er navigation, ikke en sektion for sig. */
-.brand-modelrow{ margin-top: var(--space-4); }
 
 /* Runde 8 (D8-M3): facetlinks med tal over maerkesidens gitter.
    Runde 9 (D9-M1): raekkerne kostede ≈260 px og skubbede foerste kort til
@@ -2850,32 +2141,11 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* Runde 8 (D8-M1): knappen var 422 px bred paa en 390 px skaerm — hele siden
    kunne trækkes sidelaens. Teksten er kortet i byggetrinnet; det her er baeltet. */
 .brand-mere .btn{ white-space:normal; text-align:center; max-width:100%; line-height:1.35; }
-.brand-hero .brand-intro{ max-width:60ch; }
-
-.brand-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); }
-@media (min-width:640px){ .brand-grid{ grid-template-columns: repeat(3,1fr); } }
-@media (min-width:1024px){ .brand-grid{ grid-template-columns: repeat(4,1fr); } }
-.brand-card{
-  display:flex; flex-direction:column; gap:4px; padding: var(--space-4);
-  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
-  transition: transform .18s var(--ease-out), border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
-}
-.brand-card:hover{ transform: translateY(-3px); border-color: var(--color-primary); box-shadow: var(--shadow-md); }
-.brand-card-name{ font-family: var(--font-display); font-weight:700; font-size:17px; }
-.brand-card-count{ font-size:13px; color: var(--color-fg-muted); }
 /* Mærkesidernes noscript-liste. (Det komplette mærke-indeks — .brand-index
    og .brand-index-link — stod her indtil e8f2e60 fjernede markuppen: de 60
    links pegede på søgninger, hvoraf 44 gav nul træf. Se D-010.) */
 .brand-noscript ul, .brand-noscript{ padding-left:18px; }
 .brand-noscript li{ list-style:disc; margin-bottom:6px; color: var(--color-fg-muted); }
-
-/* ============ Auth-fejlbesked ============ */
-.auth-error{
-  background: var(--color-danger-tint); color: var(--color-danger);
-  border:1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
-  border-radius: var(--radius-sm); padding:10px var(--space-4);
-  font-size:13px; line-height:1.5; margin-bottom: var(--space-4);
-}
 
 /* ============ Upload-status ============ */
 .upload-progress{
@@ -3076,165 +2346,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .compare-table tbody td{ font-weight:600; }
 @media (max-width:560px){ .compare-bar{ left:12px; right:12px; transform:none; justify-content:space-between; padding-left:16px; } }
 
-/* ===== annoncedetalje ===== */
-
-/* Pladsen til annoncen, FØR js/annonce.js har fyldt den.
-
-   annonce.html holder beholderen tom på én linje netop for at :empty kan
-   ramme (se kommentaren dér). Uden reservationen stod "Lignende annoncer" og
-   footeren øverst i vinduet ved første maling og blev skubbet en hel side ned,
-   når annoncen kom ind — målt CLS 0,49.
-
-   Reservationen er 100vh og ikke annoncens rigtige højde med vilje: højden
-   svinger med antal fotos, udstyrsliste og beskrivelsens længde, så et fast
-   tal ville ramme forkert på hver anden annonce. Det, der tæller i CLS, er
-   om noget SYNLIGT flytter sig — er der en skærmfuld reserveret, starter
-   sektionerne nedenunder under folden og skubber derfor ingenting.
-   Er annoncen højere end reservationen (den er den næsten altid), vokser
-   kassen bare forbi min-height, og der bliver ingen tom plads tilbage. */
-#listing-detail:empty{ min-height:100vh; }
-
-/* Friskhedslinjen under stedet: "Annoncen er oprettet 16. aug. 2026 · 4 uger
-   siden". Arver .listing-loc og skal kun have lidt luft og en mindre grad —
-   datoen er et støttetal, ikke sidestillet med byen. Den vises kun, når vi
-   HAR datoen: eksterne annoncer har createdAt = null (js/backend-bridge.js),
-   og så falder linjen helt væk frem for at gætte en alder. */
-.listing-alder{ margin-top:4px; font-size:13px; }
-
-/* Avataren viser initialer, når vi kender navnet, og ellers et ikon —
-   butik for en forhandler, person for en privat sælger. Uden en
-   størrelsesregel foldede den inline-svg sig ud i sin egen standardstørrelse
-   (300×150) og sprængte kortet. */
-.avatar svg{ width:24px; height:24px; }
-
-/* CVR-linjen og forklaringen under login-knapperne. Samme dæmpede
-   ikon+tekst-form som .safety-tip, men uden stregen over — de hører til
-   oplysningen lige ovenfor, ikke til et nyt afsnit. */
-.seller-cvr,
-.seller-locked-note{
-  display:flex; gap:10px; align-items:flex-start;
-  font-size:13px; line-height:1.5; color: var(--color-fg-muted);
-  margin-top: var(--space-3);
-}
-.seller-cvr svg,
-.seller-locked-note svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
-.seller-cvr a{ color: var(--color-primary); text-decoration:underline; }
-
-/* Ring op-knappen fjernes, når sælgeren ikke har oplyst et nummer.
-   .btn sætter display, og en klasseregel slår browserens indbyggede
-   [hidden]-regel — uden den her blev knappen stående og loggede brugeren ud
-   ved tryk. Se kommentaren i js/annonce.js. */
-.listing-actionbar [hidden]{ display:none; }
-
-/* Kvitteringen i kontaktmodalen.
-   Grøn nok til at læses som "det gik godt", dæmpet nok til ikke at love mere
-   end teksten kan bakke op: henvendelsen er talt på annoncen, beskeden er
-   ikke leveret. Fokus lander her efter afsendelse, så den skal kunne tage en
-   fokusring uden at hoppe. */
-.contact-receipt{
-  background: var(--color-success-tint);
-  border:1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-}
-.contact-receipt:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
-.contact-receipt-title{
-  font-family: var(--font-display); font-weight:700; font-size:17px;
-  color: var(--color-success); margin-bottom:8px;
-}
-.contact-receipt-body{ font-size:14px; line-height:1.55; color: var(--color-fg); margin-bottom: var(--space-4); }
-/* Hensigterne gentaget. Dæmpet: det er en kvittering på noget, køberen selv
-   har skrevet, ikke ny information fra os. */
-.contact-receipt-intents{ margin-bottom: var(--space-4); }
-.contact-receipt-intents-title{ font-size:13px; font-weight:600; color: var(--color-fg-muted); margin-bottom:4px; }
-/* Reset'en sætter list-style:none på alle ul. Her SKAL punkterne være der:
-   det er en opremsning af flere ønsker, og uden mærker læses de to linjer
-   som én sætning, der er brækket forkert. */
-.contact-receipt-intents ul{ margin:0; padding-left:18px; list-style:disc; }
-.contact-receipt-intents li{ font-size:13px; line-height:1.5; color: var(--color-fg); }
-.contact-receipt-actions{ display:flex; flex-direction:column; gap:10px; }
-
-/* ---------- Annoncen uden ét eneste foto ----------
-
-   Erstatter karrusellen helt. Før stod en annonce uden billeder med "1 / 4",
-   pil frem, fire miniaturer og den samme tegnede motorcykel fire gange —
-   se den lange forklaring ved buildPhotoSet() i js/annonce.js.
-
-   Formen er hentet fra `.external-detail-photo-tom` (css/styles.css, afsnittet
-   om indekserede annoncer): kameraikon, stiplet kant, lav kasse, dæmpet
-   tekst. Det er med vilje det SAMME udtryk og ikke et nyt — de to felter
-   svarer på det samme spørgsmål på den samme sidetype, bare med hver sin
-   grund (vores sælger har ikke lagt fotos op / kilden sendte ingen med).
-   Ryddes der op, hører de to regelsæt sammen og bør slås sammen til ét.
-
-   Lav kasse, ikke fotohøjde: en halv skærm tomhed er ikke ærligere end en
-   lav kasse — den er bare tom. Højden er fast (ingen aspect-ratio), så der
-   heller ikke opstår et layouthop, når kassen kommer ind. */
-.gallery-tom{
-  position:relative;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:8px; text-align:center;
-  padding: var(--space-6) var(--space-5);
-  min-height:170px;
-  border:1.5px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-2);
-  color: var(--color-fg-muted);
-}
-.gallery-tom > svg{ width:30px; height:30px; }
-.gallery-tom-titel{
-  font-family: var(--font-display); font-weight:700; font-size:17px;
-  color: var(--color-fg);
-}
-.gallery-tom-tekst{ font-size:13px; line-height:1.55; max-width:46ch; }
-/* Gemmeknappen sad før i .gallery, som er position:relative. Feltet her
-   overtager rollen, så hjertet bliver hvor køberen er vant til det. */
-.gallery-tom .fav-btn{ position:absolute; top:12px; right:12px; z-index:3; }
-/* Kant til kant på telefon, præcis som .gallery gør det. */
-@media (max-width:699px){
-  .gallery-tom{ margin-inline: calc(var(--space-4) * -1); border-radius:0; border-inline:0; }
-}
-
-/* ---------- Sælgernavnet er et link ----------
-   Understregningen kommer først ved hover/fokus: navnet står i fed i et
-   kort, hvor det tydeligvis er overskriften, og en permanent streg ville
-   gøre det til en knap blandt knapper. */
-.seller-name-link{ text-decoration:none; }
-.seller-name-link:hover,
-.seller-name-link:focus-visible{ text-decoration:underline; color: var(--color-primary-hover); }
-
-/* ---------- Højre spalte ----------
-
-   Målt af kritikeren: tom fra ca. y=1000 og ned på 1440px, altså cirka
-   halvdelen af siden ved siden af beskrivelsen. To ting retter det:
-   sælgerkortet følger med ned (sticky, samme greb som
-   .external-detail-aside bruger på kildeannoncerne), og der er kommet et
-   "Søg videre"-kort under det. */
-.listing-aside{ min-width:0; }
-.listing-aside-inner{ display:flex; flex-direction:column; gap: var(--space-4); }
-@media (min-width:960px){
-  /* .listing-detail har `align-items:start`, og dét er grunden til de to
-     lag. En gittercelle med align-items:start er kun så høj som sit eget
-     indhold — sætter man `position:sticky` direkte på den, har elementet
-     nul strækning at klæbe i, og målingen viser den bare rulle med op
-     (top -332 px i stedet for 84 px). Cellen strækkes derfor til rækkens
-     højde, og det er indholdet inde i den, der klæber.
-     BEMÆRK: `.external-detail-aside` (afsnittet om indekserede annoncer)
-     har præcis samme fejl og ét lag — dens sticky virker ikke i dag. Den
-     hører til en anden hånd; rettelsen er den samme som her. */
-  .listing-aside{ align-self:stretch; }
-  .listing-aside-inner{ position:sticky; top: calc(var(--header-h) + var(--space-4)); }
-}
-/* .sidebar-card + .sidebar-card sætter margin-top; her styrer flex-gap
-   afstanden, så den skal nulstilles for ikke at tælle dobbelt. */
-.listing-aside .sidebar-card + .sidebar-card{ margin-top:0; }
-/* Samme liste som .external-detail-next — med vilje samme udtryk. */
-.listing-next h2{ font-size:15px; margin:0 0 var(--space-3); }
-.listing-next ul{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
-.listing-next a{ display:block; padding:8px 0; font-size:14px; border-bottom:1px solid var(--color-border); }
-.listing-next a:hover{ color: var(--color-primary-hover); }
-.listing-next li:last-child a{ border-bottom:0; }
-
 /* ---------- Specifikationstabellens sidste række ----------
 
    Tabellen har 10 faste felter plus dem, annoncen har udfyldt. Ved 3 spalter
@@ -3252,71 +2363,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .spec-item{ flex:1 1 calc(50% - 1px); min-width:0; }
 @media (min-width:560px){
   .spec-item{ flex-basis: calc(33.3333% - 1px); }
-}
-
-/* ---------- Kontrast på avataren ----------
-   Målt 4,19 (#C6420E på #FFE6D9) — initialerne er 18px fed, altså under
-   grænsen for "stor tekst", så kravet er 4,5. --color-primary-hover på samme
-   flade giver 5,4 i lys tilstand og 5,7 i mørk. Ingen ny farve: det er den
-   token, resten af siden bruger til netop dét, at primærfarven skal bære
-   tekst. Scopet til annoncesiden, fordi .avatar-reglen ligger i den delte
-   del af filen (se work/DECISIONS.md). */
-#listing-detail .avatar{ color: var(--color-primary-hover); }
-
-
-/* ---------- Kørekortet, når det IKKE kan afgøres ----------
-
-   Mærkatet forsvandt før uden et ord, når koerekortForListing() svarede
-   null. På kortet er det rigtigt (der er ingen plads til en sætning), men på
-   detaljesiden er det dér, beslutningen træffes, og et felt der bare mangler
-   ligner et spørgsmål, ingen har stillet. Linjen har samme form som de andre
-   forbeholdslinjer på siden — ikon, dæmpet flade, ingen advarselsfarve:
-   det er ikke en advarsel mod motorcyklen, det er en oplysning, vi mangler. */
-.listing-kk-uvis{
-  display:flex; gap:10px; align-items:flex-start;
-  margin: var(--space-4) 0 0;
-  padding: 12px 14px;
-  border:1px solid var(--color-border);
-  border-radius: var(--radius-md, 10px);
-  background: var(--color-surface-2, var(--color-surface));
-  color: var(--color-fg-muted);
-  font-size:14px; line-height:1.5;
-}
-.listing-kk-uvis svg{ flex:0 0 auto; margin-top:2px; }
-.listing-kk-uvis b{ color: var(--color-fg); }
-
-/* ---------- Et CVR-nummer, der ikke består modulus 11 ----------
-   Nummeret bliver stående — vi skjuler ikke, hvad sælgeren har skrevet — men
-   uden opslagslinket, for det kan ikke give et resultat. Farven er sidens
-   fare-token, ikke en ny: det ER den ene ting på sælgerkortet, der peger på,
-   at noget kan være galt. */
-.seller-cvr-fejl{ color: var(--color-danger); }
-.seller-cvr-fejl b{ color: var(--color-danger); }
-
-/* Samme oplysning på detaljesiden, i sætningsform. */
-.external-detail-ny{
-  display:flex; gap:10px; align-items:flex-start;
-  margin: var(--space-3) 0 0;
-  padding: 12px 14px;
-  border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
-  border-radius: var(--radius-md, 10px);
-  background: var(--color-primary-tint, var(--color-surface-2));
-  color: var(--color-fg-muted);
-  font-size:14px; line-height:1.5;
-}
-.external-detail-ny svg{ flex:0 0 auto; margin-top:2px; color: var(--color-primary-hover); }
-.external-detail-ny b{ color: var(--color-fg); }
-
-/* ---------- Det tomme fotofelt overflod skaermen paa telefon ----------
-   MAALT paa 390x844: `.external-detail-photo` faar negativ margin-inline paa
-   mobil (kant til kant), og `.external-detail-photo-tom` faar den positive
-   tilbage. Men feltet har ogsaa `width:100%` fra reglen, det deler med
-   <img>, og width:100% regner IKKE marginerne fra: 390 px bredt felt + 2x16
-   px margin = 422 px i et 390 px vindue. Dokumentet blev 406 px bredt, og
-   siden kunne scrolles vandret. Et foto rammes ikke — det har ingen margin.
-   `width:auto` lader marginerne bestemme bredden, som de skal. */
-@media (max-width:699px){
-  .external-detail-photo-tom{ width:auto; }
 }
 
 /* ===== søgning ===== */
@@ -3675,96 +2721,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   .srp .listings-grid .card-media{ aspect-ratio:16 / 10; }
 }
 
-/* ===== sælgerprofil =====
-
-   forhandler.html. Baren for FORHANDLERE er bar/04-forhandlerprofil-*.png;
-   for private sælgere findes der ingen bar (GAPS.md, gap 4).
-
-   Layoutet er to spalter, fordi de to ting, siden skal svare på, er
-   forskellige spørgsmål: "hvad har han til salg?" (venstre) og "hvem er
-   han, og hvad er oplysningerne værd?" (højre). På mobil kommer højre
-   spalte FØRST — det er dét, køberen kom for, og Bilbasens egen
-   mobilvisning gør det samme (forhandlerkortet før billisten). */
-.profil-krop{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-5);
-  padding: var(--space-6) var(--space-4) var(--space-7);
-}
-.profil-hoved{ order:2; min-width:0; }
-.profil-side{ order:1; }
-@media (min-width:768px){ .profil-krop{ padding-left: var(--space-6); padding-right: var(--space-6); } }
-@media (min-width:960px){
-  .profil-krop{ grid-template-columns: minmax(0,1fr) 340px; gap: var(--space-6); }
-  .profil-hoved{ order:1; }
-  .profil-side{ order:2; }
-  /* Oplysningerne følger med ned gennem annoncelisten. En forhandler med
-     tredive motorcykler skubber ellers "ingen af det her er kontrolleret"
-     ud af skærmen efter to skærmhøjder. */
-  .profil-side{ position:sticky; top: calc(var(--header-h) + var(--space-4)); align-self:start; }
-}
-
-/* ---------- Identiteten ---------- */
-.profile-hero .avatar-lg svg{ width:38px; height:38px; }
-.profil-type{
-  display:flex; align-items:center; flex-wrap:wrap;
-  gap: 8px var(--space-4); margin-top:10px;
-}
-.profil-type .badge{ font-size:12px; padding:5px 11px; }
-.profil-type .badge svg{ width:13px; height:13px; }
-/* .badge-neutral er tegnet til at ligge OVEN PÅ et foto (næsten hvid
-   baggrund). På profilens hvide flade forsvandt "Privat sælger" helt.
-   Kun overstyret her; kortene i søgningen rører vi ikke. */
-.profil-type .badge-neutral{
-  background: var(--color-surface-2); color: var(--color-fg);
-  border:1px solid var(--color-border);
-}
-.profil-type-sted{
-  display:inline-flex; align-items:center; gap:5px;
-  font-size:14px; color: var(--color-fg-muted);
-}
-.profil-type-sted svg{ width:15px; height:15px; }
-/* Bedømmelsen som chip, ikke som nøgletal. Den er et genvejslink ned til
-   anmeldelserne, fordi et tal uden teksten bag er svært at stole på. */
-.profil-karakter{
-  display:inline-flex; align-items:center; gap:6px;
-  font-size:14px; color: var(--color-fg);
-  background: var(--color-surface-2); border:1px solid var(--color-border);
-  border-radius: var(--radius-pill); padding:4px 12px;
-}
-.profil-karakter:hover{ border-color: var(--color-primary); }
-.profil-karakter svg{ width:15px; height:15px; color: var(--color-primary); }
-.profil-karakter b{ font-family: var(--font-display); }
-.profil-karakter span{ color: var(--color-fg-muted); }
-/* Er der for få anmeldelser til et gennemsnit, står chippen uden tal — kun
-   antallet. Så skal den heller ikke ligne en karakter: stjernen tones ned til
-   et ikon på linje med de andre metaoplysninger, og teksten står i ét vægtløst
-   niveau. Uden det her læste "★ 1 anmeldelse" som en etstjernet sælger. */
-.profil-karakter-uden-snit svg{ color: var(--color-fg-muted); }
-
-.profile-hero .profile-actions{ flex-direction:column; align-items:stretch; gap:8px; max-width:300px; }
-/* Noten har en ramme, fordi den står dér hvor en knap ellers ville stå.
-   Uden ramme lignede "sælgeren har ingen aktive annoncer …" en løs
-   tekststump, der var faldet af et sted længere oppe. */
-.profil-kontakt-note{
-  display:flex; gap:8px; align-items:flex-start;
-  font-size:13px; line-height:1.5; color: var(--color-fg-muted);
-  background: var(--color-surface-2); border:1px solid var(--color-border);
-  border-radius: var(--radius-sm); padding: var(--space-3);
-}
-.profil-kontakt-note svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
-
-/* ---------- Oplysningerne ---------- */
-.profil-side-titel{ font-size:17px; margin-bottom: var(--space-2); }
-.profil-fakta{ margin:0; }
-.profil-fakta > div{
-  display:flex; align-items:baseline; justify-content:space-between;
-  gap: var(--space-4); padding:9px 0;
-  border-bottom:1px solid var(--color-border);
-}
-.profil-fakta > div:last-child{ border-bottom:none; padding-bottom:0; }
-.profil-fakta dt{ font-size:13px; color: var(--color-fg-muted); flex-shrink:0; }
-.profil-fakta dd{ margin:0; font-size:14px; font-weight:600; text-align:right; word-break:break-word; }
 .profil-kilde{
   display:flex; gap:8px; align-items:flex-start;
   font-size:13px; line-height:1.55; color: var(--color-fg-muted);
@@ -3773,14 +2729,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 }
 .profil-kilde svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
 .profil-kilde b{ color: var(--color-fg); }
-/* .seller-type-note har selv margin-top; wrapperen findes kun for at give
-   den en plads i kolonnen. */
-.profil-jura .seller-type-note{ margin-top: var(--space-4); }
-/* "Anmeld profil" laa foer inde bag en fane og var reelt ikke et
-   touch-maal nogen ramte. Nu staar den fremme, og saa skal den ogsaa
-   overholde de 44px (Apple HIG / Material). */
-.profil-anmeld-kort{ margin-top: var(--space-4); padding: var(--space-2) var(--space-5); }
-.profil-anmeld-kort .report-link{ min-height:44px; }
 /* Den delte listevisning sætter aspect-ratio:auto på fotofeltet, så billedet
    strækkes til rækkens højde. Det virker på et rigtigt foto med
    object-fit:cover. Vores egne annoncer har ingen uploadede fotos, så feltet
@@ -3789,60 +2737,6 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 @media (min-width:640px){
   .profil-hoved .listings-grid.list-view .card-media{ aspect-ratio:4/3; align-self:flex-start; }
 }
-.profil-hoved .section-head{ margin-bottom: var(--space-4); }
-.profil-hoved .section-head h2{ font-size: clamp(20px,2.4vw,26px); }
-
-/* ---------- Anmeldelser ---------- */
-.profil-anmeldelser{
-  max-width: 720px;
-  padding: var(--space-6) 0 var(--space-9);
-  border-top:1px solid var(--color-border);
-}
-.profil-anmeldelser h2{ font-size:22px; display:flex; align-items:center; gap:10px; }
-.profil-tal{
-  font-family: var(--font-body); font-size:13px; font-weight:700;
-  background: var(--color-surface-2); color: var(--color-fg-muted);
-  padding:2px 10px; border-radius: var(--radius-pill);
-}
-.profil-anmeld-snit{
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  margin-top:8px; font-size:14px; color: var(--color-fg-muted); line-height:1.6;
-}
-.anmeld-liste:not(:empty){ margin-top: var(--space-4); }
-.anmeld-skriv{
-  margin-top: var(--space-5); padding: var(--space-5);
-  background: var(--color-surface); border:1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-.anmeld-skriv h3{ font-size:17px; margin-bottom: var(--space-3); }
-/* Betingelsen for at måtte skrive står FØR formularen, ikke som en fejl
-   bagefter. Se anmeldelsesFormHTML() i js/forhandler.js. */
-.anmeld-krav{
-  display:flex; gap:8px; align-items:flex-start;
-  font-size:13px; line-height:1.55; color: var(--color-fg-muted);
-  margin-bottom: var(--space-4);
-}
-.anmeld-krav svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
-/* Forbeholdet står OVER formularen og skal kunne ses uden at blive læst som
-   brødtekst — ellers opdager man først efter afsendelsen, at bedømmelsen
-   ikke nåede længere end til ens egen browser. */
-.anmeld-krav-lokal{
-  background: var(--color-surface-2); border:1px solid var(--color-border);
-  border-radius: var(--radius-md); padding: var(--space-3);
-}
-
-/* ---------- Pladsreservation ----------
-   Hele siden tegnes af JS efter to databasekald. Uden reserveret højde
-   hopper alt under helten, når svaret lander — og ethvert layoutskift
-   trækker fra i hastighedskategorien. Tallene er målt på den tegnede side,
-   ikke gættet. */
-#profile-top:empty{ min-height:296px; }
-#profil-side:empty{ min-height:650px; }
-#profil-anmeldelser:empty{ min-height:416px; }
-@media (min-width:960px){
-  #profile-top:empty{ min-height:140px; }
-}
-
 /* ===== forside ===== */
 
 /* ===== forside ===== (flyttet til Hero-sektionen) */
@@ -3940,133 +2834,6 @@ html[data-lager-fejl] :is(.fa-kf-liste, .mk-kf-liste, .fa-panel, .brand-intro, .
 .kort-raekke > .lager-tomt-note{ flex:1 1 100%; grid-column:1 / -1; align-self:start; margin:0; font-size:15px; color: var(--color-fg-muted); }
 .tre-kol:has(> .kol[hidden]){ grid-template-columns: minmax(0,1fr); }
 @media (min-width:1100px){ .tre-kol:has(> .kol[hidden]){ grid-template-columns: repeat(2, minmax(0,1fr)); } }
-
-/* ===== forhandler-vaerktoej ===== */
-/* dashboard.html/js/dashboard.js: kontostatus, kom-godt-i-gang, og
-   krav-flowet (gør krav på egne annoncer blandt de indekserede). Plus én
-   linje på forhandler.html for ejerens egen-profil-banner (nederst). */
-
-/* Kontostatus-strimlen øverst på dashboardet. Samme information som
-   "Mine annoncer -> Konto"s plan-card, bare kompakt og med ét link derhen —
-   Stripe/Shopify-mønster: man skal aldrig lede efter, om man betaler. */
-.plan-strip{
-  display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-}
-.plan-strip-badge{
-  display: inline-flex; align-items: center; gap: 6px;
-  font-weight: 700; font-size: 14px;
-  color: var(--color-success);
-}
-.plan-strip-badge svg{ width: 17px; height: 17px; }
-.plan-strip-badge.is-free{ color: var(--color-fg-muted); }
-.plan-strip-note{ color: var(--color-fg-muted); font-size: 13px; flex: 1 1 220px; }
-.plan-strip-link{
-  display: inline-flex; align-items: center; gap: 4px;
-  font-weight: 600; font-size: 14px; color: var(--color-primary);
-  white-space: nowrap;
-}
-.plan-strip-link svg{ width: 15px; height: 15px; }
-.plan-strip-link:hover{ text-decoration: underline; }
-
-/* Kom-godt-i-gang-kortet. Vises kun når kontoen reelt er tom (ingen egne
-   annoncer, ingen godkendte krav) — se renderKickoff() i js/dashboard.js. */
-.kickoff-card{
-  padding: var(--space-5);
-  margin-bottom: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-.kickoff-card h2{ font-size: 20px; margin-bottom: 4px; }
-.kickoff-card > p{ color: var(--color-fg-muted); font-size: 14px; margin-bottom: var(--space-4); }
-.kickoff-steps{
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-4);
-}
-.kickoff-step{ display: flex; gap: var(--space-3); align-items: flex-start; }
-.kickoff-step-num{
-  flex: none; display: flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--color-dark); color: #fff;
-  font-family: var(--font-display); font-weight: 700; font-size: 14px;
-}
-.kickoff-step h3{ font-size: 15px; margin-bottom: 3px; }
-.kickoff-step p{ color: var(--color-fg-muted); font-size: 13px; margin-bottom: var(--space-3); line-height: 1.5; }
-
-/* Eksterne annoncer, du ejer via et godkendt krav — badge med kildenavn i
-   tabellen, så det aldrig kan forveksles med en annonce, vi selv hoster. */
-.ekstern-kilde-badge{
-  display: inline-block; padding: 2px 9px;
-  border-radius: var(--radius-pill);
-  background: var(--color-surface-2);
-  color: var(--color-fg-muted);
-  font-size: 12px; font-weight: 600;
-}
-.input-sm{ padding: 6px 10px; font-size: 13px; height: auto; }
-
-/* Krav-status-farver ud over de to, .status-pill allerede har
-   (.is-new/.is-active — se css-sektionen for dashboardets annoncetabel). */
-.status-pill.is-afventer{ background: var(--color-primary-tint); color: var(--color-primary-hover); }
-.status-pill.is-afvist{ background: var(--color-danger-tint); color: var(--color-danger); }
-
-/* Søgefelt til krav-flowet */
-.krav-search-form{
-  display: flex; gap: var(--space-2);
-  margin-top: var(--space-2); margin-bottom: var(--space-3);
-  max-width: 480px;
-}
-.krav-search-form .input{ flex: 1; }
-.krav-search-hint{ color: var(--color-fg-muted); font-size: 13px; margin-bottom: var(--space-2); min-height: 1.4em; }
-
-.krav-results{ display: flex; flex-direction: column; gap: var(--space-2); }
-.krav-result-row{
-  display: flex; align-items: center; gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-}
-.krav-result-thumb{
-  flex: none; width: 64px; height: 48px; border-radius: 6px; overflow: hidden;
-  background: var(--color-surface-2);
-  display: flex; align-items: center; justify-content: center;
-}
-.krav-result-thumb img{ width: 100%; height: 100%; object-fit: cover; }
-.krav-result-nophoto{ color: var(--color-fg-muted); opacity: .6; }
-.krav-result-nophoto svg{ width: 20px; height: 20px; }
-.krav-result-info{ flex: 1; min-width: 0; }
-.krav-result-titel{ font-weight: 600; font-size: 14px; }
-.krav-result-sub{ color: var(--color-fg-muted); font-size: 12.5px; margin-top: 2px; }
-
-.krav-status-heading{ font-size: 15px; margin: var(--space-5) 0 var(--space-2); }
-.krav-status-list{ display: flex; flex-direction: column; gap: var(--space-2); }
-.krav-status-row{
-  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-}
-.krav-status-titel{ font-weight: 600; font-size: 14px; }
-.krav-status-dato{ color: var(--color-fg-muted); font-size: 12.5px; margin-top: 2px; }
-
-/* Ejerens egen-profil-banner på forhandler.html (js/forhandler.js,
-   renderEjerBanner()). Sidder OVEN PÅ den offentlige profil uden at ændre
-   noget af den — kun forhandleren selv ser den (bruger.id === seller.id). */
-.profil-ejer-banner{
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--color-dark);
-  color: #fff;
-}
-.profil-ejer-banner p{ font-size: 14px; margin: 0; }
-.profil-ejer-banner p strong{ display: block; font-size: 15px; margin-bottom: 2px; }
-.profil-ejer-banner .btn{ flex: none; }
 
 /* ===== soegning a11y ===== */
 /* Runde 4, builder 4 — fire fund fra work/DOM-soegning-runde3.md:

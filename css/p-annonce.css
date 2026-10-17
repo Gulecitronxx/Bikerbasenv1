@@ -3,6 +3,624 @@
    annonce-*.html (scripts/build-listing-pages.js). Kun tokens fra styles.css;
    klasserne har præfikset .an-. Lyst tema er målet, mørkt følger af tokens. */
 
+/* ===== Flyttet fra styles.css (w12-perf2): Listing detail (annoncegalleri, handlingsbjaelke, sidepanel) =====
+   Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
+   saa rækkefølgen mod resten af denne fils regler er uændret. */
+/* Billederne på den forrenderede annonceside. De vises kun i det korte
+   øjeblik før js/annonce.js bytter dem ud med det rigtige galleri — og for
+   crawlere og browsere uden JavaScript, hvor de er det eneste der er. */
+.prerender-gallery{ display:grid; grid-template-columns:1fr; gap:8px; margin-bottom: var(--space-4); }
+.prerender-gallery img{ width:100%; height:auto; border-radius: var(--radius-lg); object-fit:cover; background:var(--color-surface-2); }
+.prerender-gallery img:first-child{ aspect-ratio:4/3; }
+.prerender-gallery img:not(:first-child){ display:none; }
+/* Det forrenderede foto skal fylde nøjagtig det samme som det galleri,
+   js/annonce.js bytter det ud med. Ellers bliver LCP-elementet det
+   hydrerede billede — som først findes efter javascriptet er kørt, og
+   sidens LCP falder fra 2.8s til 5.0s (målt). */
+@media (max-width:699px){
+  .prerender-gallery{ margin-inline: calc(var(--space-4) * -1); }
+  .prerender-gallery img{ border-radius:0; }
+}
+@media (min-width:700px){ .prerender-gallery img:first-child{ aspect-ratio:16/10; } }
+
+/* V-001: minmax(0,…) — et spor med 1fr kan ikke blive smallere end galleriets thumbnail-stribe (min-content), og siden fik 76 px vandret overflow paa 360/390. */
+.listing-detail{ display:grid; grid-template-columns:minmax(0,1fr); gap: var(--space-6); padding: var(--space-5) 0 var(--space-9); }
+@media (min-width:960px){ .listing-detail{ grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); align-items:start; } }
+
+.gallery{ border-radius: var(--radius-lg); overflow:hidden; background: var(--color-surface-2); position:relative; }
+/* Fotoet er det, køberen kigger på først. På mobil gik der 16:10 indrykket
+   billede — under en tredjedel af Bilbasens. Nu kant-til-kant og 4:3, så
+   motorcyklen fylder skærmen; fra 700px er der plads til de runde hjørner. */
+.gallery-main{ aspect-ratio: 4/3; position:relative; }
+@media (min-width:700px){ .gallery-main{ aspect-ratio: 16/10; } }
+@media (max-width:699px){
+  .gallery{ margin-inline: calc(var(--space-4) * -1); border-radius:0; }
+}
+/* Favoritten hører til oven på fotoet (som på kortene), ikke i titelrækken
+   hvor den stjal plads fra modelnavnet. */
+.gallery .fav-btn{ position:absolute; top:12px; right:12px; z-index:3; }
+.gallery-main svg{ width:100%; height:100%; }
+.gallery-counter{ position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.65); color:#fff; font-size:13px; font-weight:600; padding:5px 12px; border-radius: var(--radius-pill); }
+.gallery-nav{ position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.9); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--color-dark); }
+.gallery-nav.prev{ left:12px; } .gallery-nav.next{ right:12px; }
+.gallery-nav svg{ width:20px; height:20px; }
+.gallery-thumbs{ display:flex; gap:8px; padding: var(--space-3); overflow-x:auto; background: var(--color-surface); }
+.gallery-thumbs button{ flex-shrink:0; width:76px; height:56px; border-radius: var(--radius-sm); overflow:hidden; border:2px solid transparent; padding:0; cursor:pointer; background:var(--color-surface-2); }
+.gallery-thumbs button.active{ border-color: var(--color-primary); }
+.gallery-thumbs svg{ width:100%; height:100%; }
+
+/* Titel og pris stod side om side i én flex-række. På en telefon betød det,
+   at "Yamaha Virago 535" blev klippet til "Yamaha Virago", fordi prisen
+   holdt sin plads med white-space:nowrap. Nu stables de: titlen får hele
+   bredden, og prisen bliver sidens tydeligste tal med sin egen etiket —
+   samme greb som Bilbasens "Kontantpris", bare uden deres leasing-støj. */
+.listing-header{ display:grid; grid-template-columns:1fr; gap: var(--space-3); margin: var(--space-5) 0; }
+@media (min-width:700px){
+  .listing-header{ grid-template-columns: 1fr auto; align-items:flex-start; gap: var(--space-5); }
+  .listing-price-block{ text-align:right; }
+}
+.listing-title{ font-size: clamp(24px,3.4vw,34px); margin-bottom:8px; }
+.listing-loc{ display:flex; align-items:center; gap:6px; color: var(--color-fg-muted); font-size:14px; }
+.listing-loc svg{ width:16px; height:16px; }
+.listing-price-label{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); }
+.listing-price{ font-family: var(--font-display); font-size: clamp(30px,5vw,38px); font-weight:700; white-space:nowrap; line-height:1.1; }
+
+/* Kontaktbjælke i bunden på mobil. Bilbasen lægger "Skriv til sælger" og
+   "Ring op" øverst på siden, hvor de forsvinder, så snart man scroller ned
+   til specs og beskrivelse — dér hvor man faktisk beslutter sig. Vores
+   bliver hængende. Den står i markuppen fra start (ikke bygget af JS), så
+   den er der ved første maling og ikke skubber noget: position:fixed. */
+.listing-actionbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:90;
+  display:flex; gap:10px; padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  backdrop-filter: blur(10px); border-top:1px solid var(--color-border);
+}
+.listing-actionbar .btn{ flex:1; min-height:48px; }
+.listing-actionbar .btn-outline{ flex:0 0 auto; padding-inline: 18px; }
+@media (min-width:960px){ .listing-actionbar{ display:none; } }
+/* Bjælken må ikke lægge sig oven på det sidste i footeren. Samme tal bruges
+   som scroll-padding-bottom i reset'en, så et tastetryk ikke lander under
+   bjælken (SC 2.4.11) — derfor er det en variabel og ikke to 76'ere. */
+@media (max-width:959px){ body.har-actionbar{ padding-bottom: var(--actionbar-h); } }
+.seller-row{ display:flex; align-items:center; gap: var(--space-3); }
+.avatar{ width:52px; height:52px; border-radius:50%; background: var(--color-primary-tint); color:var(--color-primary-hover); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:18px; flex-shrink:0; }
+.seller-name{ font-weight:700; display:flex; align-items:center; gap:6px; }
+.seller-name svg{ width:16px; height:16px; color: var(--color-success); }
+.seller-sub{ font-size:13px; color:var(--color-fg-muted); }
+.seller-stats{ display:flex; gap: var(--space-4); margin-top: var(--space-4); padding-top: var(--space-4); border-top:1px solid var(--color-border); }
+.seller-stat b{ display:block; font-family:var(--font-display); font-size:18px; }
+.seller-stat span{ font-size:12px; color:var(--color-fg-muted); }
+.contact-actions{ display:flex; flex-direction:column; gap:10px; margin-top: var(--space-4); }
+.phone-reveal{ display:flex; align-items:center; justify-content:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:17px; letter-spacing:.02em; }
+.similar-strip{ margin-top: var(--space-9); }
+
+/* ===== Flyttet fra styles.css (w12-perf2): Detaljeside for en INDEKSERET annonce (kildekort, koerekortpanel) =====
+   Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
+   saa rækkefølgen mod resten af denne fils regler er uændret. */
+/* ============ Detaljeside for en INDEKSERET annonce ============
+   Egen blok, ikke en variant af sælgersiden. De to sider har forskellige
+   opgaver: vores egen skal føre til en samtale, den her skal føre til
+   kilden — og undervejs aldrig efterlade tvivl om, hvem der står bag.
+
+   Disciplinen er hentet hos Bilbasens annonceside: prisen med sin etiket
+   over sig, specs i en rolig todelt tabel frem for et gitter af kasser,
+   hver sektion under sin overskrift med en streg imellem, og forhandleren
+   i sit eget kort ved siden af. Formsproget er vores eget.
+
+   Den stiplede kant går igen fra kortene (.card-external): stiplet =
+   lånt fra en anden side. Den er bevidst ikke pænere end vores egne
+   annoncer — den skal kunne kendes, ikke fremhæves. */
+
+/* Sidefoden på .listing-detail er sat til vores egne annoncer, hvor
+   kontaktbjælken ligger fast i bunden på mobil og skal have luft over sig.
+   Her er der ingen kontaktbjælke — den fjernes fra DOM'en — og 96px
+   tomrum oven i stribens egne 96px blev til en halv skærm ingenting
+   mellem sidste afsnit og "Lignende motorcykler". */
+.listing-detail:has(> .external-detail){ padding-bottom: var(--space-5); }
+
+/* Flaget står øverst, før foto og titel. Det er det første, øjet rammer,
+   og det eneste sted på siden, hvor afsenderen kan misforstås. */
+.external-detail-flag{
+  display:flex; align-items:center; gap:8px;
+  border:1.5px dashed var(--color-border); border-radius: var(--radius-md);
+  background: var(--color-surface-2); color: var(--color-fg-muted);
+  padding: 8px var(--space-3); font-size:13px; line-height:1.35;
+  margin-bottom: var(--space-3);
+}
+/* Runde 5 (D5-A1): én linje på mobil; på desktop siger højre spalte det samme
+   20 px derfra, så flaget er væk dér. */
+.external-detail-flag span{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.external-detail-flag b{ color: var(--color-fg); }
+@media (min-width:960px){
+  .external-detail-flag{ display:none; }
+  /* Runde 5 (D5-A2, desktop): fotoet var 440 px hoejt (703 px bredt, 16:10) og
+     skubbede pris til ~700 og noegletal UNDER folden ved 850. Bilbasens foto
+     er 484 px paa en 646 px spalte, men deres titel/pris ligger ogsaa under
+     folden — det vil vi ikke. 400 px foto = pris ~650, noegletal ~760. */
+  /* Runde 7 (D7-A2): 400 → 360 px, saa noegletallenes vaerdier staar over 850. */
+  .external-detail-photo img{ max-height:360px; width:100%; object-fit:cover; }
+}
+/* Runde 5 (D5-A4): handlingsrækken under titlen — stille, som Bilbasens
+   "Sammenlign · Print · Anmeld". */
+/* Runde 6 (D6-A1): primaer knap under prisen paa <960 px. */
+.external-detail-cta{ margin-top:12px; }
+.external-detail-cta svg{ width:16px; height:16px; }
+@media (min-width:960px){ .external-detail-cta{ display:none; } }
+.external-detail-actions{ display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+.external-detail-actions .btn{ color: var(--color-fg-muted); }
+.external-detail-actions .btn svg{ width:16px; height:16px; }
+.external-detail-actions .btn[aria-pressed="true"]{ color: var(--color-primary); }
+/* Runde 5 (D5-A2): pris-etiketten står på linje med tallet. */
+.external-detail-price .external-detail-price-label{ display:inline; font-size:13px; font-weight:500; letter-spacing:0; text-transform:none; color: var(--color-fg-muted); margin:0 0 0 4px; }
+.external-detail-stat small{ font-size:11px; font-weight:500; color: var(--color-fg-muted); }
+/* Runde 5 (D5-A7): bjælken bærer prisen med ned gennem siden. */
+.listing-actionbar-pris{ font-weight:700; font-size:16px; white-space:nowrap; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.listing-actionbar-pris small{ font-weight:400; color: var(--color-fg-muted); font-size:12px; }
+.listing-actionbar[hidden]{ display:none; }
+.external-detail-flag b{ color: var(--color-fg); }
+.external-detail-flag svg{ width:18px; height:18px; flex:0 0 auto; margin-top:2px; }
+
+.external-detail-photo{ margin:0; }
+.external-detail-photo img,
+.external-detail-photo-tom{
+  width:100%; aspect-ratio:4/3; object-fit:cover; display:block;
+  border-radius: var(--radius-lg); background: var(--color-surface-2);
+}
+@media (min-width:700px){
+  .external-detail-photo img,
+  .external-detail-photo-tom{ aspect-ratio:16/10; }
+}
+/* Uden foto skal kassen ikke fylde det samme som et foto ville. En halv
+   skærm tomhed er ikke ærligere end en lav kasse — den er bare tom. */
+.external-detail-photo-tom{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; color: var(--color-fg-muted); font-size:14px; text-align:center;
+  border:1.5px dashed var(--color-border);
+  aspect-ratio:auto; min-height:150px; padding: var(--space-5);
+}
+@media (min-width:700px){ .external-detail-photo-tom{ aspect-ratio:auto; } }
+.external-detail-photo-tom svg{ width:28px; height:28px; }
+/* Fotoet er forhandlerens. Krediteringen står under billedet, hvor et
+   billedbureau ville sætte den — ikke gemt væk i en title-attribut. */
+.external-detail-photo figcaption{
+  display:flex; align-items:center; gap:6px;
+  font-size:12px; color: var(--color-fg-muted);
+  padding: var(--space-2) 2px 0;
+}
+.external-detail-photo figcaption svg{ width:14px; height:14px; flex:0 0 auto; }
+/* Kant til kant på telefon, præcis som .gallery på vores egne annoncer.
+   Fotoet er det første, en køber ser, og et indrykket billede med runde
+   hjørner gav det under to tredjedele af skærmbredden. */
+@media (max-width:699px){
+  .external-detail-photo{ margin-inline: calc(var(--space-4) * -1); }
+  .external-detail-photo img{ border-radius:0; }
+  .external-detail-photo figcaption{ padding-inline: var(--space-4); }
+  .external-detail-photo-tom{ margin-inline: var(--space-4); }
+}
+
+.external-detail-head{ margin: var(--space-5) 0 0; position:relative; }
+/* Runde 6 (D6-A3): paa desktop staar handlingsraekken (Sammenlign · Del · Meld
+   fejl) oeverst til hoejre paa titlens linje — Bilbasens "Sammenlign · Print ·
+   Anmeld" — og noegletallene rykker ≈50 px op, saa raekken med koerekort/aargang/
+   km/kubik/effekt begynder over folden ved 850. Titlen faar plads til hoejre. */
+@media (min-width:960px){
+  .external-detail-actions{ position:absolute; top:-4px; right:0; margin:0; }
+  .external-detail-title{ padding-right:280px; }
+  .external-detail-stats{ margin-top: var(--space-3); }
+}
+.external-detail-title{
+  font-family: var(--font-display); font-weight:700; line-height:1.1;
+  font-size: clamp(26px,3.6vw,36px); margin:0;
+}
+/* Bilbasens anden titellinje: variant/trim, dæmpet under modelnavnet.
+   Halvt så tung som linjen over — den skal læses, ikke konkurrere. Findes
+   ingen variant i kilden, står linjen slet ikke, og næste linje rykker op. */
+.external-detail-variant{
+  font-family: var(--font-display); font-weight:500;
+  font-size: clamp(17px,2.2vw,21px); line-height:1.25;
+  color: var(--color-fg-muted); margin:4px 0 0;
+}
+/* Tredje linje: by, landsdel og sælgertype — det, en køber ellers skal
+   lede efter i teksten. */
+.external-detail-sub{
+  display:flex; align-items:center; flex-wrap:wrap; gap:6px;
+  color: var(--color-fg-muted); font-size:14px; margin-top:8px;
+}
+.external-detail-sub svg{ width:16px; height:16px; flex:0 0 auto; }
+.external-detail-dot{ opacity:.5; }
+
+.external-detail-price-block{ margin-top: var(--space-4); }
+.external-detail-price-label{
+  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  color: var(--color-fg-muted); margin:0;
+}
+.external-detail-price{
+  font-family: var(--font-display); font-weight:700; line-height:1.1;
+  font-size: clamp(30px,5vw,38px); margin:2px 0 0;
+}
+.external-detail-price.is-tom{
+  font-size: clamp(17px,2.4vw,20px); font-weight:600; color: var(--color-fg-muted);
+}
+/* Salgsvilkår står LIGE under prisen, ikke nede i beskrivelsen. "Uden
+   klargøring" og "Engros" forklarer, hvorfor tallet er lavt — samme rolle
+   som Bilbasens "(Uden afgift)" under kontantprisen. Ser man dem først,
+   når man står i butikken, har prisen løjet. */
+.external-detail-vilkaar{ display:flex; flex-wrap:wrap; gap:6px; margin: var(--space-3) 0 0; }
+.external-detail-vilkaar-chip{
+  display:inline-flex; align-items:center;
+  border:1px solid var(--color-border); border-radius: var(--radius-pill);
+  background: var(--color-surface-2); color: var(--color-fg);
+  font-size:12px; font-weight:600; padding:4px 11px;
+}
+.external-detail-vilkaar-note{ margin:8px 0 0; font-size:12px; color: var(--color-fg-muted); line-height:1.5; }
+/* Runde 7 (D7-A2): paa mobil staar saetningen ogsaa under "Foer du koerer derhen";
+   her koster den 36 px over noegletallene. */
+@media (max-width:959px){ .external-detail-vilkaar-note{ display:none; } .external-detail-actions{ margin-top:12px; } }
+
+/* ---------- Kørekortpanelet ----------
+   Sidens vigtigste enkeltoplysning for en dansk køber, og derfor det
+   eneste element med farve på. Koden i firkanten er læsbar på et halvt
+   sekund; teksten ved siden af siger, hvad den bygger på, så ingen tager
+   den for en garanti. */
+.external-detail-kk{
+  display:flex; align-items:flex-start; gap: var(--space-4);
+  margin-top: var(--space-5); padding: var(--space-4);
+  border:1px solid var(--color-border); border-left:4px solid var(--color-primary);
+  border-radius: var(--radius-md); background: var(--color-surface);
+}
+.external-detail-kk-code{
+  flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  min-width:54px; height:54px; padding:0 10px;
+  background: var(--color-dark); color:#fff;
+  font-family: var(--font-display); font-weight:700; font-size:22px;
+  border-radius: var(--radius-md);
+}
+.external-detail-kk b{ display:block; font-size:16px; }
+.external-detail-kk p{ margin:4px 0 0; font-size:13px; color: var(--color-fg-muted); line-height:1.55; }
+/* Kan vi ikke regne kategorien ud, skal panelet ikke se ud, som om vi kan.
+   Gul kant og en mindre kode: et forbehold, ikke et svar. */
+.external-detail-kk.is-uvis{ border-left-color: var(--color-fg-muted); }
+.external-detail-kk.is-uvis .external-detail-kk-code{
+  background: var(--color-surface-2); color: var(--color-fg-muted);
+  font-size:17px; border:1.5px dashed var(--color-border);
+}
+
+/* Nøgletallene: årgang, km, ccm, hk. Kun dem vi har — auto-fit gør, at to
+   felter fylder rækken lige så pænt som fire. */
+.external-detail-stats{
+  /* Runde 6 (D6-A4): 120 px-minimum → fem celler paa én raekke i 703 px
+     (foer: fire + "Effekt" alene med tre graa felter). */
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap:1px;
+  margin-top: var(--space-5);
+  background: var(--color-border); border:1px solid var(--color-border);
+  border-radius: var(--radius-md); overflow:hidden;
+}
+.external-detail-stat{ background: var(--color-surface); padding: var(--space-4); }
+.external-detail-stat-label{
+  display:flex; align-items:center; gap:6px;
+  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+  color: var(--color-fg-muted);
+}
+.external-detail-stat-label svg{ width:15px; height:15px; }
+.external-detail-stat b{ display:block; margin-top:6px; font-family: var(--font-display); font-size:18px; }
+/* Under 560px er der kun plads til to felter i bredden. Med tre nøgletal
+   stod det sidste alene, og den tomme celle ved siden af viste gitterets
+   stregfarve igennem som en grå kasse uden indhold. Er sidste felt ulige,
+   tager det hele rækken i stedet. */
+@media (max-width:559px){
+  .external-detail-stats{ grid-template-columns: repeat(2,1fr); }
+  .external-detail-stat:last-child:nth-child(odd){ grid-column: 1 / -1; }
+}
+/* Runde 6 (D6-A4): 6. celle alene paa en raekke af fem → hele raekken. */
+@media (min-width:700px){ .external-detail-stat:last-child:nth-child(5n+1){ grid-column: 1 / -1; } }
+
+.external-detail-section{ margin-top: var(--space-7); padding-top: var(--space-6); border-top:1px solid var(--color-border); }
+.external-detail-section h2{ font-size:20px; margin-bottom: var(--space-3); }
+
+/* Specifikationstabellen. Etiket til venstre, værdi til højre, zebra —
+   samme aflæsning som Bilbasens "Detaljer", uden deres udfoldning, fordi
+   vi ikke har rækker nok til at skjule nogen. */
+.external-detail-specs{ margin:0; border:1px solid var(--color-border); border-radius: var(--radius-md); overflow:hidden; }
+.external-detail-row{
+  display:grid; grid-template-columns: 1fr auto; gap: var(--space-4);
+  align-items:baseline; padding: 11px var(--space-4);
+  font-size:15px;
+}
+.external-detail-row:nth-child(odd){ background: var(--color-surface); }
+.external-detail-row:nth-child(even){ background: var(--color-surface-2); }
+.external-detail-row dt{ color: var(--color-fg-muted); }
+.external-detail-row dd{ margin:0; font-weight:600; text-align:right; }
+
+.external-detail-note{ margin-top: var(--space-3); font-size:13px; color: var(--color-fg-muted); line-height:1.6; }
+.external-detail-quote{
+  margin:0; padding: var(--space-4); border-left:3px solid var(--color-border);
+  background: var(--color-surface-2); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--color-fg); line-height:1.7; font-size:15px;
+}
+.external-detail-raad{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.external-detail-raad li{
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:14px; color: var(--color-fg-muted); line-height:1.55;
+}
+.external-detail-raad svg{ width:17px; height:17px; flex:0 0 auto; margin-top:2px; color: var(--color-fg-muted); }
+
+/* ---------- Kildekortet ----------
+   Står, hvor sælgerkortet står på vores egne annoncer. Det er med vilje:
+   det er dét sted, øjet leder efter "hvem handler jeg med" — og svaret
+   skal være MC Syd, ikke Bikerbasen. Ingen knap her fører til en samtale;
+   den ene knap fører ud af sitet. */
+.external-detail-aside{ display:flex; flex-direction:column; gap: var(--space-4); }
+@media (min-width:960px){
+  /* Runde 7 (D7-A4): sticky virkede ikke — gitteret straekker spalten til fuld
+     hoejde (align-items:stretch), saa der var intet at klaebe i. */
+  .external-detail-aside{ position:sticky; top: calc(var(--header-h) + var(--space-4)); align-self:start; }
+}
+.external-detail-source,
+.external-detail-next{
+  background: var(--color-surface); border:1.5px dashed var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-5);
+}
+.external-detail-source-head{ display:flex; align-items:flex-start; gap: var(--space-3); margin-bottom: var(--space-4); }
+.external-detail-source-head > svg{ width:26px; height:26px; flex:0 0 auto; color: var(--color-fg-muted); }
+.external-detail-source-label{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); margin:0; }
+.external-detail-source-name{ font-size:22px; margin:2px 0 0; line-height:1.15; }
+.external-detail-source-domain{ font-size:13px; color: var(--color-fg-muted); margin:2px 0 0; }
+.external-detail-source .btn svg{ width:15px; height:15px; }
+.external-detail-source-body{ margin: var(--space-4) 0 0; font-size:13px; line-height:1.6; color: var(--color-fg-muted); }
+.external-detail-source-meta{
+  display:flex; align-items:flex-start; gap:8px;
+  margin: var(--space-3) 0 0; padding-top: var(--space-3);
+  border-top:1px solid var(--color-border);
+  font-size:12px; color: var(--color-fg-muted); line-height:1.5;
+}
+.external-detail-source-meta svg{ width:15px; height:15px; flex:0 0 auto; }
+.external-detail-broken{
+  display:flex; align-items:flex-start; gap:8px;
+  font-size:13px; color: var(--color-danger); line-height:1.55;
+}
+.external-detail-broken svg{ width:16px; height:16px; flex:0 0 auto; margin-top:1px; }
+
+.external-detail-next h2{ font-size:15px; margin:0 0 var(--space-3); }
+.external-detail-next ul{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.external-detail-next a{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:9px 0; font-size:14px; color: var(--color-primary); font-weight:500;
+  border-bottom:1px solid var(--color-border);
+}
+.external-detail-next-n{ display:inline-flex; align-items:center; gap:4px; color: var(--color-fg-muted); font-weight:600; font-size:13px; font-variant-numeric: tabular-nums; }
+.external-detail-next-n svg{ width:14px; height:14px; }
+.external-detail-hentet{ border-top:0; padding-top:0; margin-top: var(--space-3); }
+.external-detail-next li:last-child a{ border-bottom:0; }
+
+/* ===== Flyttet fra styles.css (w12-perf2): annoncedetalje (indekseret annonce + sider) =====
+   Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
+   saa rækkefølgen mod resten af denne fils regler er uændret. */
+/* ===== annoncedetalje ===== */
+
+/* Pladsen til annoncen, FØR js/annonce.js har fyldt den.
+
+   annonce.html holder beholderen tom på én linje netop for at :empty kan
+   ramme (se kommentaren dér). Uden reservationen stod "Lignende annoncer" og
+   footeren øverst i vinduet ved første maling og blev skubbet en hel side ned,
+   når annoncen kom ind — målt CLS 0,49.
+
+   Reservationen er 100vh og ikke annoncens rigtige højde med vilje: højden
+   svinger med antal fotos, udstyrsliste og beskrivelsens længde, så et fast
+   tal ville ramme forkert på hver anden annonce. Det, der tæller i CLS, er
+   om noget SYNLIGT flytter sig — er der en skærmfuld reserveret, starter
+   sektionerne nedenunder under folden og skubber derfor ingenting.
+   Er annoncen højere end reservationen (den er den næsten altid), vokser
+   kassen bare forbi min-height, og der bliver ingen tom plads tilbage. */
+#listing-detail:empty{ min-height:100vh; }
+
+/* Friskhedslinjen under stedet: "Annoncen er oprettet 16. aug. 2026 · 4 uger
+   siden". Arver .listing-loc og skal kun have lidt luft og en mindre grad —
+   datoen er et støttetal, ikke sidestillet med byen. Den vises kun, når vi
+   HAR datoen: eksterne annoncer har createdAt = null (js/backend-bridge.js),
+   og så falder linjen helt væk frem for at gætte en alder. */
+.listing-alder{ margin-top:4px; font-size:13px; }
+
+/* Avataren viser initialer, når vi kender navnet, og ellers et ikon —
+   butik for en forhandler, person for en privat sælger. Uden en
+   størrelsesregel foldede den inline-svg sig ud i sin egen standardstørrelse
+   (300×150) og sprængte kortet. */
+.avatar svg{ width:24px; height:24px; }
+
+/* CVR-linjen og forklaringen under login-knapperne. Samme dæmpede
+   ikon+tekst-form som .safety-tip, men uden stregen over — de hører til
+   oplysningen lige ovenfor, ikke til et nyt afsnit. */
+.seller-cvr,
+.seller-locked-note{
+  display:flex; gap:10px; align-items:flex-start;
+  font-size:13px; line-height:1.5; color: var(--color-fg-muted);
+  margin-top: var(--space-3);
+}
+.seller-cvr svg,
+.seller-locked-note svg{ width:16px; height:16px; flex-shrink:0; margin-top:2px; }
+.seller-cvr a{ color: var(--color-primary); text-decoration:underline; }
+
+/* Ring op-knappen fjernes, når sælgeren ikke har oplyst et nummer.
+   .btn sætter display, og en klasseregel slår browserens indbyggede
+   [hidden]-regel — uden den her blev knappen stående og loggede brugeren ud
+   ved tryk. Se kommentaren i js/annonce.js. */
+.listing-actionbar [hidden]{ display:none; }
+
+/* Kvitteringen i kontaktmodalen.
+   Grøn nok til at læses som "det gik godt", dæmpet nok til ikke at love mere
+   end teksten kan bakke op: henvendelsen er talt på annoncen, beskeden er
+   ikke leveret. Fokus lander her efter afsendelse, så den skal kunne tage en
+   fokusring uden at hoppe. */
+.contact-receipt{
+  background: var(--color-success-tint);
+  border:1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+.contact-receipt:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
+.contact-receipt-title{
+  font-family: var(--font-display); font-weight:700; font-size:17px;
+  color: var(--color-success); margin-bottom:8px;
+}
+.contact-receipt-body{ font-size:14px; line-height:1.55; color: var(--color-fg); margin-bottom: var(--space-4); }
+/* Hensigterne gentaget. Dæmpet: det er en kvittering på noget, køberen selv
+   har skrevet, ikke ny information fra os. */
+.contact-receipt-intents{ margin-bottom: var(--space-4); }
+.contact-receipt-intents-title{ font-size:13px; font-weight:600; color: var(--color-fg-muted); margin-bottom:4px; }
+/* Reset'en sætter list-style:none på alle ul. Her SKAL punkterne være der:
+   det er en opremsning af flere ønsker, og uden mærker læses de to linjer
+   som én sætning, der er brækket forkert. */
+.contact-receipt-intents ul{ margin:0; padding-left:18px; list-style:disc; }
+.contact-receipt-intents li{ font-size:13px; line-height:1.5; color: var(--color-fg); }
+.contact-receipt-actions{ display:flex; flex-direction:column; gap:10px; }
+
+/* ---------- Annoncen uden ét eneste foto ----------
+
+   Erstatter karrusellen helt. Før stod en annonce uden billeder med "1 / 4",
+   pil frem, fire miniaturer og den samme tegnede motorcykel fire gange —
+   se den lange forklaring ved buildPhotoSet() i js/annonce.js.
+
+   Formen er hentet fra `.external-detail-photo-tom` (css/styles.css, afsnittet
+   om indekserede annoncer): kameraikon, stiplet kant, lav kasse, dæmpet
+   tekst. Det er med vilje det SAMME udtryk og ikke et nyt — de to felter
+   svarer på det samme spørgsmål på den samme sidetype, bare med hver sin
+   grund (vores sælger har ikke lagt fotos op / kilden sendte ingen med).
+   Ryddes der op, hører de to regelsæt sammen og bør slås sammen til ét.
+
+   Lav kasse, ikke fotohøjde: en halv skærm tomhed er ikke ærligere end en
+   lav kasse — den er bare tom. Højden er fast (ingen aspect-ratio), så der
+   heller ikke opstår et layouthop, når kassen kommer ind. */
+.gallery-tom{
+  position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px; text-align:center;
+  padding: var(--space-6) var(--space-5);
+  min-height:170px;
+  border:1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  color: var(--color-fg-muted);
+}
+.gallery-tom > svg{ width:30px; height:30px; }
+.gallery-tom-titel{
+  font-family: var(--font-display); font-weight:700; font-size:17px;
+  color: var(--color-fg);
+}
+.gallery-tom-tekst{ font-size:13px; line-height:1.55; max-width:46ch; }
+/* Gemmeknappen sad før i .gallery, som er position:relative. Feltet her
+   overtager rollen, så hjertet bliver hvor køberen er vant til det. */
+.gallery-tom .fav-btn{ position:absolute; top:12px; right:12px; z-index:3; }
+/* Kant til kant på telefon, præcis som .gallery gør det. */
+@media (max-width:699px){
+  .gallery-tom{ margin-inline: calc(var(--space-4) * -1); border-radius:0; border-inline:0; }
+}
+
+/* ---------- Sælgernavnet er et link ----------
+   Understregningen kommer først ved hover/fokus: navnet står i fed i et
+   kort, hvor det tydeligvis er overskriften, og en permanent streg ville
+   gøre det til en knap blandt knapper. */
+.seller-name-link{ text-decoration:none; }
+.seller-name-link:hover,
+.seller-name-link:focus-visible{ text-decoration:underline; color: var(--color-primary-hover); }
+
+/* ---------- Højre spalte ----------
+
+   Målt af kritikeren: tom fra ca. y=1000 og ned på 1440px, altså cirka
+   halvdelen af siden ved siden af beskrivelsen. To ting retter det:
+   sælgerkortet følger med ned (sticky, samme greb som
+   .external-detail-aside bruger på kildeannoncerne), og der er kommet et
+   "Søg videre"-kort under det. */
+.listing-aside{ min-width:0; }
+.listing-aside-inner{ display:flex; flex-direction:column; gap: var(--space-4); }
+@media (min-width:960px){
+  /* .listing-detail har `align-items:start`, og dét er grunden til de to
+     lag. En gittercelle med align-items:start er kun så høj som sit eget
+     indhold — sætter man `position:sticky` direkte på den, har elementet
+     nul strækning at klæbe i, og målingen viser den bare rulle med op
+     (top -332 px i stedet for 84 px). Cellen strækkes derfor til rækkens
+     højde, og det er indholdet inde i den, der klæber.
+     BEMÆRK: `.external-detail-aside` (afsnittet om indekserede annoncer)
+     har præcis samme fejl og ét lag — dens sticky virker ikke i dag. Den
+     hører til en anden hånd; rettelsen er den samme som her. */
+  .listing-aside{ align-self:stretch; }
+  .listing-aside-inner{ position:sticky; top: calc(var(--header-h) + var(--space-4)); }
+}
+/* .sidebar-card + .sidebar-card sætter margin-top; her styrer flex-gap
+   afstanden, så den skal nulstilles for ikke at tælle dobbelt. */
+.listing-aside .sidebar-card + .sidebar-card{ margin-top:0; }
+/* Samme liste som .external-detail-next — med vilje samme udtryk. */
+.listing-next h2{ font-size:15px; margin:0 0 var(--space-3); }
+.listing-next ul{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
+.listing-next a{ display:block; padding:8px 0; font-size:14px; border-bottom:1px solid var(--color-border); }
+.listing-next a:hover{ color: var(--color-primary-hover); }
+.listing-next li:last-child a{ border-bottom:0; }
+
+/* ---------- Kontrast på avataren ----------
+   Målt 4,19 (#C6420E på #FFE6D9) — initialerne er 18px fed, altså under
+   grænsen for "stor tekst", så kravet er 4,5. --color-primary-hover på samme
+   flade giver 5,4 i lys tilstand og 5,7 i mørk. Ingen ny farve: det er den
+   token, resten af siden bruger til netop dét, at primærfarven skal bære
+   tekst. Scopet til annoncesiden, fordi .avatar-reglen ligger i den delte
+   del af filen (se work/DECISIONS.md). */
+#listing-detail .avatar{ color: var(--color-primary-hover); }
+
+
+/* ---------- Kørekortet, når det IKKE kan afgøres ----------
+
+   Mærkatet forsvandt før uden et ord, når koerekortForListing() svarede
+   null. På kortet er det rigtigt (der er ingen plads til en sætning), men på
+   detaljesiden er det dér, beslutningen træffes, og et felt der bare mangler
+   ligner et spørgsmål, ingen har stillet. Linjen har samme form som de andre
+   forbeholdslinjer på siden — ikon, dæmpet flade, ingen advarselsfarve:
+   det er ikke en advarsel mod motorcyklen, det er en oplysning, vi mangler. */
+.listing-kk-uvis{
+  display:flex; gap:10px; align-items:flex-start;
+  margin: var(--space-4) 0 0;
+  padding: 12px 14px;
+  border:1px solid var(--color-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-surface-2, var(--color-surface));
+  color: var(--color-fg-muted);
+  font-size:14px; line-height:1.5;
+}
+.listing-kk-uvis svg{ flex:0 0 auto; margin-top:2px; }
+.listing-kk-uvis b{ color: var(--color-fg); }
+
+/* ---------- Et CVR-nummer, der ikke består modulus 11 ----------
+   Nummeret bliver stående — vi skjuler ikke, hvad sælgeren har skrevet — men
+   uden opslagslinket, for det kan ikke give et resultat. Farven er sidens
+   fare-token, ikke en ny: det ER den ene ting på sælgerkortet, der peger på,
+   at noget kan være galt. */
+.seller-cvr-fejl{ color: var(--color-danger); }
+.seller-cvr-fejl b{ color: var(--color-danger); }
+
+/* Samme oplysning på detaljesiden, i sætningsform. */
+.external-detail-ny{
+  display:flex; gap:10px; align-items:flex-start;
+  margin: var(--space-3) 0 0;
+  padding: 12px 14px;
+  border:1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-primary-tint, var(--color-surface-2));
+  color: var(--color-fg-muted);
+  font-size:14px; line-height:1.5;
+}
+.external-detail-ny svg{ flex:0 0 auto; margin-top:2px; color: var(--color-primary-hover); }
+.external-detail-ny b{ color: var(--color-fg); }
+
+/* ---------- Det tomme fotofelt overflod skaermen paa telefon ----------
+   MAALT paa 390x844: `.external-detail-photo` faar negativ margin-inline paa
+   mobil (kant til kant), og `.external-detail-photo-tom` faar den positive
+   tilbage. Men feltet har ogsaa `width:100%` fra reglen, det deler med
+   <img>, og width:100% regner IKKE marginerne fra: 390 px bredt felt + 2x16
+   px margin = 422 px i et 390 px vindue. Dokumentet blev 406 px bredt, og
+   siden kunne scrolles vandret. Et foto rammes ikke — det har ingen margin.
+   `width:auto` lader marginerne bestemme bredden, som de skal. */
+@media (max-width:699px){
+  .external-detail-photo-tom{ width:auto; }
+}
+
+
 
 /* ---------- Brødkrumme + handlinger ---------- */
 .an-crumbrow{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); flex-wrap:wrap; min-height:96px; }
