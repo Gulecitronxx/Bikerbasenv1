@@ -166,3 +166,6 @@ body.home .tal-grid-5{ grid-template-columns: repeat(auto-fit, minmax(112px, 1fr
 @media (min-width:1700px){ body.home .maerke-grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }
 body.home .kol-hoved{ flex-wrap:wrap; row-gap:4px; }
 body.home .kol-hoved h2{ white-space:normal; }
+
+/* Critic w11 P2: små tekstlinks som tap-mål >= 40 px (visuel størrelse uændret). */
+body.home .kol-link, body.home .guide-boks a{ display:inline-flex; align-items:center; min-height:40px; }
