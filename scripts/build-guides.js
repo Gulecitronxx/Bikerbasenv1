@@ -347,7 +347,7 @@ function renderGuide(g, ctx){
       </section>`).join('\n      ');
 
   const meta = `<ul class="gd-meta">
-        <li class="gd-meta-by"><img src="logo-mark.png" alt="" width="44" height="44" loading="eager"><span><strong>Af Bikerbasen</strong><span>Redaktionel guide med kilder</span></span></li>
+        <li class="gd-meta-by"><img src="logo-mark.png?v=logo1" alt="" width="44" height="44" loading="eager"><span><strong>Af Bikerbasen</strong><span>Redaktionel guide med kilder</span></span></li>
         <li class="gd-meta-item"><span class="gd-meta-ic" aria-hidden="true">${Icon.calendar}</span><span><span class="gd-meta-label">Opdateret</span><time datetime="${MOD}">${datoDa(MOD)}</time></span></li>
         <li class="gd-meta-item"><span class="gd-meta-ic" aria-hidden="true">${Icon.clock}</span><span><span class="gd-meta-label">Læsetid</span>${minutterTekst(min)}</span></li>
       </ul>`;
