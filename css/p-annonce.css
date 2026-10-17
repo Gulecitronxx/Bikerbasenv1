@@ -1114,7 +1114,7 @@ p.an-kk-basis{ display:block; grid-column:auto; border:0; padding:0; margin:0 0 
 p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
 .an-kk .an-link{ min-height:40px; margin-block:-8px -4px; }
 .an-kk-mere{ border-top:0; padding-top:0; }
-.an-kk-mere summary{ min-height:32px; }
+.an-kk-mere summary{ min-height:40px; }
 @media (min-width:1180px){
   .an-col-b .an-kk{ grid-template-columns:minmax(0,1fr) 140px; }
   .an-col-b .an-kk h2{ white-space:nowrap; font-size:15.5px; }
