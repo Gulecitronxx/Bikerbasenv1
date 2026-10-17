@@ -2381,4 +2381,4 @@ if (require.main === module){
   })().catch(e => SEO.afslut(e));
 }
 
-module.exports = { THRESHOLD, forberedFacetter, buildFacetList, uoplystAntal, cleanUrl, facetLinksBlock, side, facetSearchUrl, kraeverA, topModeller, brugtOrd, erIndekserbar, faqLdFor, nyFamilieMeta, medSlut, BESK_MAX, FACET_RESERVE_H, hydreringsScript, facetTomMarkup };
+module.exports = { kortFortaltPunkter, byFliser, THRESHOLD, forberedFacetter, buildFacetList, uoplystAntal, cleanUrl, facetLinksBlock, side, facetSearchUrl, kraeverA, topModeller, brugtOrd, erIndekserbar, faqLdFor, nyFamilieMeta, medSlut, BESK_MAX, FACET_RESERVE_H, hydreringsScript, facetTomMarkup };
