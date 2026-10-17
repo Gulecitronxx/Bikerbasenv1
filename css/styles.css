@@ -2234,19 +2234,23 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 
    De to knapper er BEVIDST ens. Juridisk skal fravalget vaere lige saa let som
    tilvalget, saa ingen af dem baerer primaerfarven. */
+/* W12: kompakt bundark (<= 30 % af viewporten, målt 320x568 til 1440x900) i stedet for en midterstillet modal på 407-495 px.
+   Stadig <dialog>.showModal() (fokusfælde, inert baggrund, top-lag) og samme valg/knapper — kun layout. Ingen layoutpåvirkning (fixed) = CLS 0. */
 .cookie-modal{
-  border:none; border-radius: var(--radius-lg); padding:0;
-  max-width: 34rem; width: calc(100vw - 2 * var(--space-4));
+  border:none; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding:0;
+  position:fixed; inset:auto 0 0 0; margin:0 auto; width:100%; max-width:42rem;
   background: var(--color-dark); color:#EDEAE4; box-shadow: var(--shadow-lg);
 }
-.cookie-modal::backdrop{ background: rgba(15,13,10,0.72); }
-.cookie-modal-indhold{ padding: var(--space-6); }
-.cookie-modal h2{ font-size:22px; line-height:1.25; margin:0 0 var(--space-4); color:#fff; }
-.cookie-modal p{ font-size:14px; line-height:1.6; color:#C9C3B8; margin:0 0 var(--space-3); }
+@media (min-width:700px){ .cookie-modal{ bottom: var(--space-4); border-radius: var(--radius-lg); } }
+.cookie-modal::backdrop{ background: rgba(15,13,10,0.45); }
+.cookie-modal-indhold{ padding: var(--space-3) var(--space-4) var(--space-3); }
+@media (min-width:700px){ .cookie-modal-indhold{ padding: var(--space-4) var(--space-5); } }
+.cookie-modal h2{ font-size:15px; line-height:1.25; margin:0 0 4px; color:#fff; }
+.cookie-modal p{ font-size:13px; line-height:1.45; color:#C9C3B8; margin:0; }
 .cookie-modal strong{ color:#fff; font-weight:600; }
 .cookie-modal-note{ font-size:13px; }
 .cookie-modal a{ color:#fff; text-decoration:underline; }
-.cookie-modal-actions{ display:flex; gap:var(--space-3); margin-top: var(--space-5); }
+.cookie-modal-actions{ display:flex; gap:var(--space-3); margin-top: var(--space-3); }
 .cookie-modal-knap{
   /* min-width:0 er ikke pynt: uden den giver flex-elementer sig selv
      min-width:auto, saa den laengste etiket ("Kun noedvendige") presser sin
@@ -2259,11 +2263,11 @@ main > .container > .section:last-child{ padding-bottom: 0; }
      begge skal se inaktive ud. De er nu fyldte og lige tydelige: samme flade,
      samme kant, samme tekstfarve. Ingen af dem baerer primaerfarven. */
   background:rgba(255,255,255,0.14); color:#fff; border:1.5px solid rgba(255,255,255,0.7);
+  min-height:44px; padding-block:8px; padding-inline: var(--space-3); font-size:14px;
 }
 .cookie-modal-knap:hover{ background:rgba(255,255,255,0.22); border-color:#fff; }
 .cookie-modal-knap:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
-/* Under 380 px bliver to knapper side om side for smalle til etiketterne. */
-@media (max-width:379px){ .cookie-modal-actions{ flex-direction:column; } }
+/* Knapperne står altid side om side (W12): 'Kun nødvendige' er det længste svar og får plads ved 320 px (flex:1 1 0, ens bredde). */
 
 /* ============ Verification steps (auth) ============ */
 .verify-row{
