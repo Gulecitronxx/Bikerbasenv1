@@ -316,6 +316,18 @@ const NAESTE = {
     ['Søg i hele udvalget', 'Filtrér efter type, pris, årgang og kørekort.', 'soegning.html'],
     ['Motorcykler til A2-kørekort', 'Annoncer, der ikke er udelukket til A2.', 'koerekort-a2.html'],
     ['Se mærkerne', 'Se, hvilke mærker der står i annoncerne.', 'maerker.html'] ] },
+  'guide-saelg-motorcykel': { h: 'Skal du sælge, og senere finde en ny?', p: 'Se, hvad der ligger i udvalget, og læs om sikker handel, før du går i gang.', links: [
+    ['Søg i hele udvalget', 'Se lignende annoncer fra flere kilder og sammenlign.', 'soegning.html'],
+    ['Sikkerhed og gode råd', 'Råd til købere og sælgere, og kendetegn ved svindel.', 'sikkerhed.html'],
+    ['Opret annonce', 'Læg din egen annonce på Bikerbasen.', 'opret-annonce.html'] ] },
+  'guide-mc-vinteropbevaring': { h: 'Motorcyklen er klar til vinteren. Hvad nu?', p: 'Næste skridt er at planlægge foråret, eller at kigge efter en ny.', links: [
+    ['Første tur efter vinteren', 'Tjekliste til væsker, batteri, dæk og bremser.', 'guide-mc-foraar-tjekliste.html'],
+    ['MC-forsikring', 'Hvad loven kræver, og hvad du bør spørge om.', 'guide-mc-forsikring.html'],
+    ['Søg motorcykler', 'Filtrér efter pris, årgang, km og kørekort.', 'soegning.html'] ] },
+  'guide-mc-foraar-tjekliste': { h: 'Klar til sæsonen?', p: 'Pas på udstyret og på forsikringen, eller se, hvad der ligger i udvalget.', links: [
+    ['Vinteropbevaring', 'Sådan gør du klar til næste vinter.', 'guide-mc-vinteropbevaring.html'],
+    ['Udstyr til motorcyklister', 'Hjelm, jakke, handsker og støvler.', 'guide-mc-udstyr.html'],
+    ['Søg motorcykler', 'Filtrér efter pris, årgang, km og kørekort.', 'soegning.html'] ] },
   'guide-mc-ordliste': { h: 'Klar til at læse annoncerne?', p: 'Nu kan du læse tallene. Se, hvad der ligger inden for dit kørekort.', links: [
     ['Motorcykler til A2-kørekort', 'Annoncer, der ikke er udelukket til A2.', 'koerekort-a2.html'],
     ['Hvad kræver A?', 'Annoncer, hvis oplyste effekt kræver kategori A.', 'koerekort-a.html'],

@@ -132,9 +132,9 @@ test('sidebjælkens udvalg: kun kendt effekt under A2-grænsen, og tomt uden dat
   assert.deepStrictEqual(udvalgTilSidebjaelke([mk(1, 40)]), [], 'under to kort udelades modulet');
 });
 
-test('guide-adresserne: de tre reserverede findes stadig, og fire nye er kommet til (to i W7, to i W9)', () => {
+test('guide-adresserne: de tre reserverede findes stadig, og syv nye er kommet til (to i W7, to i W9, tre i W12)', () => {
   assert.deepStrictEqual(GUIDES.map(g => g.file).sort(),
-    ['guide-a2-koerekort.html', 'guide-brugt-motorcykel.html', 'guide-foerste-motorcykel.html', 'guide-mc-forsikring.html', 'guide-mc-ordliste.html', 'guide-mc-typer.html', 'guide-mc-udstyr.html']);
+    ['guide-a2-koerekort.html', 'guide-brugt-motorcykel.html', 'guide-foerste-motorcykel.html', 'guide-mc-foraar-tjekliste.html', 'guide-mc-forsikring.html', 'guide-mc-ordliste.html', 'guide-mc-typer.html', 'guide-mc-udstyr.html', 'guide-mc-vinteropbevaring.html', 'guide-saelg-motorcykel.html']);
   assert.ok(sider.some(s => s.navn === 'guides.html'));
 });
 
