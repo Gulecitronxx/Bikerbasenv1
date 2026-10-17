@@ -18,7 +18,7 @@
   background:
     /* V2-002: scrimmen følger tekstkolonnen (px-stop), ikke fotoets bredde: bag h1/kicker/ingress >= .62 også ved 390 px,
        hvor kolonnen fylder hele bredden; motorcyklen til højre står stadig frem på brede skærme. */
-    linear-gradient(90deg, rgba(15,13,10,.86) 0%, rgba(15,13,10,.7) min(40%, 560px), rgba(15,13,10,.52) min(100%, 760px), rgba(15,13,10,.04) min(100%, 1200px)),
+    linear-gradient(90deg, rgba(15,13,10,.86) 0%, rgba(15,13,10,.7) min(40%, 560px), rgba(15,13,10,.62) min(100%, 760px), rgba(15,13,10,.04) min(100%, 1200px)),
     linear-gradient(0deg, rgba(15,13,10,.3), rgba(15,13,10,0) 40%);
 }
 .gd-hero-inner{ max-width: var(--site-w); }
@@ -398,7 +398,7 @@
 .gd-hero-photo{ filter: brightness(1.2) saturate(1.1) contrast(1.02); }
 .gd-hero-media::after{
   background:
-    linear-gradient(90deg, rgba(15,13,10,.74) 0%, rgba(15,13,10,.56) min(40%, 560px), rgba(15,13,10,.3) min(100%, 760px), rgba(15,13,10,0) min(100%, 1150px)),
+    linear-gradient(90deg, rgba(15,13,10,.74) 0%, rgba(15,13,10,.66) min(40%, 560px), rgba(15,13,10,.62) min(100%, 760px), rgba(15,13,10,0) min(100%, 1150px)),
     linear-gradient(0deg, rgba(15,13,10,.22), rgba(15,13,10,0) 40%);
 }
 .gd-hero h1{ font-weight: 700; font-size: clamp(34px, 3.5vw, 48px); max-width: 15ch; }
@@ -452,7 +452,8 @@
 
 /* ===== W14 iteration 3 ===== */
 /* hero <= ca. 310 px: H1 højst to linjer, ingress tre */
-.gd-hero h1{ max-width: min(100%, 820px); font-size: clamp(30px, 2.9vw, 40px); line-height: 1.06; }
+.gd-hero{ --h1-hero: clamp(30px, 2.9vw, 40px); }
+.gd-hero h1{ max-width: min(100%, 820px); font-size: var(--h1-hero); line-height: 1.06; }
 .gd-lede{ max-width: 46em; font-size: clamp(15.5px, 1.2vw, 17px); line-height: 1.45; }
 .gd-kicker{ margin-top: var(--space-3); }
 .gd-meta{ margin-top: var(--space-3); }
