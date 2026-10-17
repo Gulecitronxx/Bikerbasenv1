@@ -125,9 +125,18 @@ function updateAuthSlot(){
   // <img onerror> køre kode i ens egen header (self-XSS). Billig forsikring.
   const slot = document.querySelector('[data-auth-slot]');
   if (slot){
-    slot.setAttribute('href', '#');
-    slot.innerHTML = `${Icon.user}${escapeHTML(String(user.name || '').split(' ')[0])} · Log ud`;
-    slot.addEventListener('click', onLogout);
+    /* W14: "Test · Log ud" læste som en fejl (navn og handling i ét link). Nu: "Min profil" (link til Mine annoncer)
+       og et eget "Log ud"-link ved siden af. */
+    slot.setAttribute('href', 'mine-annoncer.html');
+    slot.setAttribute('title', String(user.name || '').trim() ? 'Logget ind som ' + String(user.name).trim() : 'Min profil');
+    slot.innerHTML = `${Icon.user}Min profil`;
+    if (!document.querySelector('[data-auth-logout]')){
+      const ud = document.createElement('a');
+      ud.href = '#'; ud.className = 'header-login header-logout'; ud.setAttribute('data-auth-logout', '');
+      ud.textContent = 'Log ud';
+      slot.insertAdjacentElement('afterend', ud);
+      ud.addEventListener('click', onLogout);
+    }
   }
   /* Runde 5 (D5-F7): profilikonet i mobilheaderen. Logget ind peger det paa
      "Mine annoncer" — IKKE paa log-ud: et ikon, der logger én ud ved et tryk,

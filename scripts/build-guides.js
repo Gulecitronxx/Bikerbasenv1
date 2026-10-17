@@ -344,6 +344,47 @@ function naesteBlok(g){
       </section>`;
 }
 
+/* ---------- Informationsbokse og fotos i brødteksten (billede 10) ----------
+   Kun guidens EGET indhold: hver callout er ét af guidens "Kort fortalt"-punkter, sat ind i den sektion, hvis tekst
+   ligner det mest (ordoverlap). Intet nyt er opfundet. Første = "Vigtigt", næste = "Tip". Dertil to fotos: guidens
+   kortbillede og forsidens heltefoto som bred strimmel. Fotos er pynt (alt tom). Reglen om læsetid/ordtal rører de
+   to ikke: de beregnes af guidens sektioner FØR tilføjelserne. */
+const ORD = t => new Set(String(t).toLowerCase().replace(/<[^>]+>/g, ' ').match(/[a-zæøå]{5,}/g) || []);
+const CALLOUT_IKON = {
+  Vigtigt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg>',
+  Tip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2.2h5c.1-1 .5-1.7 1.1-2.2A6 6 0 0 0 12 3Z"/></svg>',
+};
+function guideTillaeg(g, sektioner){
+  const ud = sektioner.map(() => '');
+  if (sektioner.length < 4 || !g.tldr || g.tldr.length < 2) return ud;
+  const secOrd = sektioner.map(s => ORD(s.title + ' ' + s.html));
+  const brugt = new Set();
+  const valg = [];
+  for (let k = 0; k < g.tldr.length && valg.length < 2; k++){
+    // vælg tldr-punktet med bedst overlap i en endnu ubrugt sektion fra nr. 2 og frem (ikke den første, ikke den sidste)
+    let bedst = null;
+    g.tldr.forEach((t, ti) => {
+      if (valg.some(v => v.ti === ti)) return;
+      const to = ORD(t);
+      secOrd.forEach((so, si) => {
+        if (si < 1 || si > sektioner.length - 2 || brugt.has(si)) return;
+        let n = 0; to.forEach(w => { if (so.has(w)) n++; });
+        if (!bedst || n > bedst.n) bedst = { n, ti, si };
+      });
+    });
+    if (!bedst) break;
+    brugt.add(bedst.si); valg.push(bedst);
+  }
+  valg.sort((a, b) => a.si - b.si).forEach((v, i) => {
+    const type = i === 0 ? 'Vigtigt' : 'Tip';
+    ud[v.si] += `\n        <aside class="gd-callout gd-callout-${type.toLowerCase()}" aria-label="${type}"><span class="gd-callout-ic">${CALLOUT_IKON[type]}</span><div><strong>${type}</strong><p>${esc(g.tldr[v.ti])}</p></div></aside>`;
+  });
+  // fotos: kortbilledet efter sektion 3, forsidefotoet som bred strimmel efter sektion 5 (hvis de findes)
+  if (sektioner.length > 3 && g.cardImage) ud[2] += `\n        <figure class="gd-fig"><img src="${g.cardImage}" alt="" style="object-position:${g.cardPos || '50% 50%'}" width="960" height="540" loading="lazy" decoding="async"></figure>`;
+  if (sektioner.length > 5) ud[4] += `\n        <figure class="gd-fig gd-fig-bred"><img src="img/hero-960.webp" alt="" width="960" height="407" loading="lazy" decoding="async"></figure>`;
+  return ud;
+}
+
 /* ---------- Guideside ---------- */
 function renderGuide(g, ctx){
   const PUB = publiceret(g), MOD = aendret(g);
@@ -353,10 +394,17 @@ function renderGuide(g, ctx){
   const kilder = g.sources.map(k => SRC[k]);
 
   const toc = sektioner.map(s => `<li><a href="#${s.id}">${esc(s.toc || s.title)}</a></li>`).join('\n          ');
-  const artikel = sektioner.map(s => `<section class="gd-sec" id="${s.id}" aria-labelledby="${s.id}-h">
+  const tillaeg = guideTillaeg(g, sektioner);
+  const artikel = sektioner.map((s, i) => `<section class="gd-sec" id="${s.id}" aria-labelledby="${s.id}-h">
         <h2 id="${s.id}-h">${esc(s.title)}</h2>
-        ${s.html.trim()}
+        ${s.html.trim()}${tillaeg[i] || ''}
       </section>`).join('\n      ');
+  const miniToc = `<nav class="gd-minitoc" aria-labelledby="gd-minitoc-h">
+      <h2 id="gd-minitoc-h">I denne guide</h2>
+      <ol>
+        ${sektioner.map(s => `<li><a href="#${s.id}">${esc(s.toc || s.title)}</a></li>`).join('\n        ')}
+      </ol>
+    </nav>`;
 
   const meta = `<ul class="gd-meta">
         <li class="gd-meta-by"><img src="logo-mark.png?v=logo1" alt="" width="44" height="44" loading="eager"><span><strong>Af Bikerbasen</strong><span>Redaktionel guide med kilder</span></span></li>
@@ -438,6 +486,7 @@ ${ctx.header}
       ${tldr}
       ${tvivl}
       ${ctx.populaer}
+      ${miniToc}
     </aside>
   </div>
 </main>

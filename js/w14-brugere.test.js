@@ -148,3 +148,78 @@ test('info-sider: "Læs også" er flex (ikon ved siden af tekst)', async t => {
     } finally { await s.luk(); }
   }
 });
+
+/* ---------- Iteration 2 (Critic: AFVIS 6/10): sticky mini-TOC, callouts, login i første skærm, rigere profilside ---------- */
+test('guide: sticky mini-indholdsfortegnelse i højre spalte med scroll-spy, ≥2 callouts og ≥2 fotos', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('guide-saelg-motorcykel.html');
+  try {
+    assert.strictEqual(await s.page.locator('.gd-callout').count() >= 2, true, 'mindst to informationsbokse');
+    assert.ok(await s.page.locator('.gd-fig').count() >= 2, 'mindst to fotos i artiklen');
+    const pos = await s.page.evaluate(() => getComputedStyle(document.querySelector('.gd-minitoc')).position);
+    assert.strictEqual(pos, 'sticky');
+    await s.page.evaluate(() => window.scrollTo(0, 2600)); await s.page.waitForTimeout(500);
+    const top = (await boks(s.page, '.gd-minitoc')); const scrollY = await s.page.evaluate(() => scrollY);
+    assert.ok(top.y - scrollY < 200 && top.y - scrollY > 0, `mini-TOC klistrer øverst (${top.y - scrollY})`);
+    const aktiv = await s.page.locator('.gd-minitoc a[aria-current="location"]').count();
+    assert.ok(aktiv >= 1, 'aktivt afsnit markeres');
+    const w = await boks(s.page, '.gd-article'); const tc = await boks(s.page, '.gd-toc');
+    assert.ok(Math.abs((w.x + w.w) - (tc.x + tc.w)) < 4, 'brødtekst og indholdsfortegnelse flugter');
+    // callouts er guidens eget indhold: teksten findes i Kort fortalt
+    const ok = await s.page.evaluate(() => { const k = [...document.querySelectorAll('.gd-checks span:last-child')].map(e => e.textContent.trim()); return [...document.querySelectorAll('.gd-callout p')].every(p => k.includes(p.textContent.trim())); });
+    assert.ok(ok, 'callouts er hentet fra guidens Kort fortalt');
+  } finally { await s.luk(); }
+});
+
+test('guide: mini-TOC er skjult på mobil og hero er lysere (foto løftet, scrim let til højre)', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('guide-foerste-motorcykel.html', { bredde: 390 });
+  try { assert.ok(!(await s.page.locator('.gd-minitoc').isVisible())); } finally { await s.luk(); }
+});
+
+test('login 1440x900: kort + fordelsstrimmel i første skærm, skarpt foto (srcset 200vw)', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('login.html');
+  try {
+    const strip = await boks(s.page, '.lg-strip');
+    assert.ok(strip.y + strip.h <= 902, `strimlen slutter i første skærm (${strip.y + strip.h})`);
+    const sizes = await s.page.getAttribute('.lg-bg-photo', 'sizes');
+    assert.match(sizes, /200vw/);
+    const fw = await s.page.evaluate(() => getComputedStyle(document.querySelector('#auth-title')).fontWeight);
+    assert.ok(Number(fw) >= 700);
+  } finally { await s.luk(); }
+});
+
+test('header logget ind: "Min profil" + eget "Log ud" (ikke "Navn · Log ud")', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('guides.html', { loggetInd: true });
+  try {
+    await s.page.waitForSelector('[data-auth-logout]');
+    const tekst = await s.page.evaluate(() => [document.querySelector('[data-auth-slot]').textContent.trim(), document.querySelector('[data-auth-logout]').textContent.trim()]);
+    assert.deepStrictEqual(tekst, ['Min profil', 'Log ud']);
+  } finally { await s.luk(); }
+});
+
+test('mine annoncer: 5 statistikkort med store tal, tællere med ikon, ægte tip-liste, ?tab=aktive virker', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('mine-annoncer.html?tab=aktive', { loggetInd: true, annoncer: ANN });
+  try {
+    assert.strictEqual(await s.page.locator('.db-stat').count(), 5);
+    const px = await s.page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.db-stat-num')).fontSize));
+    assert.ok(px >= 32, `tal ${px}px`);
+    assert.ok(await s.page.locator('.db-num-ic svg').count() >= 3, 'tællere har ikon');
+    assert.ok(await s.page.locator('.db-tip-list li').count() >= 3);
+    assert.strictEqual(await s.page.getAttribute('#tabbtn-mine', 'aria-selected'), 'true', '?tab=aktive åbner Mine annoncer');
+    const tekst = await s.page.evaluate(() => document.body.innerText);
+    assert.ok(!/Beskeder|Udløber om|\+24|henvendelser/i.test(tekst));
+  } finally { await s.luk(); }
+});
+
+test('dashboard: privat bruger sendes til Mine annoncer (ingen blindgyde)', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn('dashboard.html', { loggetInd: true });
+  try {
+    await s.page.waitForURL(/mine-annoncer\.html/, { timeout: 8000 });
+    assert.ok(!(await s.page.evaluate(() => document.body.innerText)).includes('er for forhandlere'));
+  } finally { await s.luk(); }
+});

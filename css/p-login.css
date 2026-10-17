@@ -388,3 +388,26 @@ p.lg-or{ display:flex; align-items:center; gap: var(--space-4); margin: var(--sp
 /* Billede 6: formularens overskrift står på én linje (ca. 37 px ved 1440), så kortet bliver lavere og fordelsstrimlen kommer ind i første skærm */
 @media (min-width:960px){ .lg-head h1{ font-size: clamp(30px, 2.6vw, 38px); } }
 @media (min-width:1100px){ .lg-head h1{ white-space: nowrap; } }
+
+/* ===== W14 iteration 2 (billede 6): hele kortet + fordelsstrimlen i første skærm ved 1440x900, skarpt foto, fed titel ===== */
+@media (min-width:960px){
+  .lg-stage{ padding: var(--space-5) var(--space-6); }
+  .lg-bg-photo{ top:0; height:100%; right:-4%; width:104%; object-position: 86% 62%; }
+  .lg-strip-list{ padding: var(--space-3) 0; }
+  .lg-strip-list li{ padding-block: var(--space-1); }
+  .lg-form-pane{ padding: 36px 56px 28px; }
+  .lg-head{ margin-bottom: var(--space-4); }
+  .lg-head h1{ font-weight: 700; letter-spacing: -.03em; }
+  .lg-head p{ margin-top: 8px; }
+  .lg-fields{ gap: var(--space-4); }
+  .lg-cta{ margin-top: var(--space-4); min-height: 54px; }
+  .lg-extras{ margin-top: var(--space-4); }
+  p.lg-or{ margin: var(--space-3) 0 var(--space-2); }
+  .lg-legal{ margin-top: var(--space-2); }
+  .lg-promo{ padding: 36px 48px 28px; }
+  .lg-promo h2{ font-size: clamp(30px, 2.8vw, 40px); font-weight: 700; letter-spacing: -.03em; }
+  .lg-benefits{ gap: 14px; margin: var(--space-4) 0; }
+  .lg-promo-cta{ min-height: 52px; }
+  .lg-member{ margin-top: var(--space-2); }
+}
+@media (min-width:1280px){ .lg-form-pane{ padding: 36px 64px 28px; } .lg-promo{ padding: 36px 64px 28px; } }

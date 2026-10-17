@@ -236,11 +236,11 @@ async function visAnnonceStatistik(grid){
   grid.querySelectorAll('.db-row[data-listing-id]').forEach(row => {
     if (row.dataset.status !== 'active' || !isUuid(row.dataset.listingId)) return;
     const s = sum.get(row.dataset.listingId) || { views: 0, contacts: 0 };
-    const kol = (n, t) => `<span class="db-num"><b>${n.toLocaleString('da-DK')}</b>${t}</span>`;
+    const kol = (n, t, ik) => `<span class="db-num"><span class="db-num-ic" aria-hidden="true">${Icon[ik] || ''}</span><span class="db-num-tx"><b>${n.toLocaleString('da-DK')}</b>${t}</span></span>`;
     const blok = document.createElement('div');
     blok.className = 'db-nums db-nums-row';
     blok.title = 'Seneste 30 dage';
-    blok.innerHTML = kol(s.views, 'Visninger') + (harGemt ? kol(gemt.get(row.dataset.listingId) || 0, 'Favoritter') : '') + kol(s.contacts, 'Telefonvisninger');
+    blok.innerHTML = kol(s.views, 'Visninger', 'eye') + (harGemt ? kol(gemt.get(row.dataset.listingId) || 0, 'Favoritter', 'heart') : '') + kol(s.contacts, 'Telefonvisninger', 'phone');
     row.querySelector('.db-status')?.appendChild(blok);
   });
 }
@@ -324,6 +324,7 @@ function renderMine(){
   setCount('mine-count-inline', mine.length);
   setCount('stat-aktive', tal.aktive);
   setCount('stat-kladder', tal.kladder);
+  setCount('stat-pause', tal.pause);
   const kladdeLink = document.getElementById('stat-kladde-link');
   if (kladdeLink) kladdeLink.firstChild.textContent = tal.kladder ? 'Fortsæt kladde' : 'Opret annonce';
 
@@ -785,7 +786,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   const params = new URLSearchParams(window.location.search);
-  setActiveTab(params.get('tab') || 'oversigt');
+  /* ?tab=aktive|kladder|annoncer er gamle/oplagte adresser til listen; ?tab=profil til kontofanen. */
+  const FANE_ALIAS = { aktive: 'mine', kladder: 'mine', annoncer: 'mine', gemte: 'favoritter', soegeagenter: 'agenter', profil: 'konto' };
+  const oensket = params.get('tab') || 'oversigt';
+  setActiveTab(FANE_ALIAS[oensket] || oensket);
 
   // Retur fra Stripe efter gennemført betaling. Webhooken sætter planen, men
   // kan være et øjeblik undervejs — hent sessionen igen og opdater kortet.

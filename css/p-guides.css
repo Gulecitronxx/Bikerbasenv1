@@ -393,3 +393,59 @@
   .gd-toc a{ min-height:30px; }
 }
 .gd-pop-all{ min-height:40px; align-items:center; }
+
+/* ===== W14 iteration 2 (billede 10: lys, varm hero med fed titel) ===== */
+.gd-hero-photo{ filter: brightness(1.2) saturate(1.1) contrast(1.02); }
+.gd-hero-media::after{
+  background:
+    linear-gradient(90deg, rgba(15,13,10,.74) 0%, rgba(15,13,10,.56) min(40%, 560px), rgba(15,13,10,.3) min(100%, 760px), rgba(15,13,10,0) min(100%, 1150px)),
+    linear-gradient(0deg, rgba(15,13,10,.22), rgba(15,13,10,0) 40%);
+}
+.gd-hero h1{ font-weight: 700; font-size: clamp(34px, 3.5vw, 48px); max-width: 15ch; }
+.gd-meta, .gd-meta-by span span, .gd-meta-label{ text-shadow: 0 1px 8px rgba(0,0,0,.45); }
+.gd-meta-label{ opacity: 1; }
+
+/* Brødtekst og indholdsfortegnelse flugter (billede 10: samme kolonnebredde) */
+.gd-article{ max-width: none; font-size: 17.5px; }
+.gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 72ch; }
+@media (min-width:1100px){ .gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 76ch; } }
+
+/* Informationsbokse (callouts) og fotos i artiklen */
+.gd-callout{
+  display:grid; grid-template-columns: 40px minmax(0,1fr); gap: var(--space-3); align-items:start;
+  margin: var(--space-5) 0 0; padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg);
+  background: var(--color-success-tint); border:1px solid color-mix(in srgb, var(--color-success) 28%, transparent);
+}
+.gd-callout-tip{ background: var(--color-primary-tint); border-color: color-mix(in srgb, var(--color-primary) 26%, transparent); }
+.gd-callout-ic{ display:inline-flex; width:36px; height:36px; border-radius:50%; background: var(--color-surface); color: var(--color-fg); align-items:center; justify-content:center; box-shadow: var(--shadow-sm); }
+.gd-callout-ic svg{ width:20px; height:20px; }
+.gd-callout strong{ display:block; font-family: var(--font-display); font-size: 17px; margin-bottom: 2px; }
+.gd-callout p{ margin:0; max-width:none; font-size:16px; line-height:1.55; }
+.gd-fig{ margin: var(--space-5) 0 0; border-radius: var(--radius-lg); overflow:hidden; background: var(--color-surface-2); }
+.gd-fig img{ display:block; width:100%; height: clamp(180px, 22vw, 280px); object-fit:cover; }
+.gd-fig-bred img{ object-position: 70% 60%; height: clamp(150px, 16vw, 210px); }
+
+/* Sticky mini-indholdsfortegnelse i højre spalte (kun desktop; mobil bruger den sammenklappelige boks) */
+.gd-minitoc{ display:none; }
+@media (min-width:1024px){
+  .gd-minitoc{
+    display:block; position:sticky; top: calc(var(--header-h, 68px) + var(--space-4)); order:9;
+    background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg);
+    padding: var(--space-4); box-shadow: var(--shadow-sm); max-height: calc(100vh - var(--header-h, 68px) - var(--space-6)); overflow:auto;
+  }
+  .gd-minitoc h2{ font-size:16px; margin:0 0 var(--space-2); }
+  .gd-minitoc ol{ list-style:none; margin:0; padding:0; display:grid; gap:0; counter-reset: mt; font-size:14px; }
+  .gd-minitoc li{ counter-increment: mt; }
+  .gd-minitoc a{
+    display:flex; gap:8px; align-items:flex-start; padding:7px 10px; border-radius:8px; color: var(--color-fg); text-decoration:none; line-height:1.3;
+    border-left:3px solid transparent;
+  }
+  .gd-minitoc a::before{ content: counter(mt) "."; color: var(--color-fg-muted); font-weight:700; min-width:1.4em; }
+  .gd-minitoc a:hover{ background: var(--color-surface-2); }
+  .gd-minitoc a[aria-current="location"]{ background: var(--color-primary-tint); border-left-color: var(--color-primary); font-weight:600; }
+  .gd-minitoc a[aria-current="location"]::before{ color: var(--color-primary-hover); }
+}
+@media (max-width: 700px){
+  .gd-hero-photo{ filter: brightness(1.05); }
+  .gd-hero-media::after{ background: linear-gradient(90deg, rgba(15,13,10,.86) 0%, rgba(15,13,10,.7) 60%, rgba(15,13,10,.5) 100%), linear-gradient(0deg, rgba(15,13,10,.3), rgba(15,13,10,0) 40%); }
+}

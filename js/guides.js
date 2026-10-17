@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (bred && bred.addEventListener) bred.addEventListener('change', synk);
   const sum = det.querySelector('summary');
   if (sum) sum.addEventListener('click', e => { if (bred && bred.matches) e.preventDefault(); });
-  const links = [...det.querySelectorAll('a[href^="#"]')];
+  const links = [...det.querySelectorAll('a[href^="#"]'), ...document.querySelectorAll('.gd-minitoc a[href^="#"]')];
   if (!links.length || !('IntersectionObserver' in window)) return;
   const afsnit = links.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
   const io = new IntersectionObserver(poster => {
