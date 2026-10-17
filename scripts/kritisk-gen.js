@@ -33,7 +33,8 @@ const LOGGET_IND = new Set(['dashboard', 'mine-annoncer', 'opret-annonce']);
 
 const REPO = path.join(__dirname, '..');
 const MANIFEST = path.join(__dirname, 'kritisk-manifest.json');
-const VIEWPORTE = [[390, 844], [1440, 900]];
+// 768x1024 (tablet) er med, fordi layoutet skifter ved 760/1024 px: uden det manglede fx .fa-h2/.fa-mere i det kritiske udsnit (CLS 0,116 på mc-honda-adventure ved 768).
+const VIEWPORTE = [[390, 844], [768, 1024], [1440, 900]];
 const SKJUL = /display\s*:\s*none|visibility\s*:\s*hidden|position\s*:\s*(fixed|sticky)|content-visibility/i;
 
 /* Vaelger uden det, der ikke findes ved foerste maling: pseudo-elementer og interaktionstilstande.
