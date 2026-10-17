@@ -392,3 +392,4 @@
   .gd-toc ol{ padding-bottom: var(--space-4); }
   .gd-toc a{ min-height:30px; }
 }
+.gd-pop-all{ min-height:40px; align-items:center; }
