@@ -28,6 +28,9 @@
 @media (max-width:699px){ .bl--xl{ --bl-maxh:34px; --bl-maxw:88px; --bl-k:45px; } }
 .bl--hero{ --bl-maxh:48px; --bl-maxw:200px; --bl-k:66.3px; }
 @media (min-width:700px){ .bl--hero{ --bl-maxh:72px; --bl-maxw:280px; --bl-k:97.5px; } }
+/* wm: ordmærke-varianten i hero-lockuppen (emblem + ordmærke side om side). */
+.bl--wm{ --bl-maxh:44px; --bl-maxw:300px; --bl-k:128px; }
+@media (max-width:699px){ .bl--wm{ --bl-maxh:32px; --bl-maxw:200px; --bl-k:96px; } }
 
 /* Logo: slottens mål følger logoets forhold, men aldrig ud over maks. højde/bredde/areal (ensartet visuel vægt). */
 .bl--logo{

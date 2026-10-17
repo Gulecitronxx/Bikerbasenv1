@@ -396,7 +396,7 @@ function introFor(brand, items){
    arvesætning, ingen FAQ, intet bundindhold, og bliver noindex. */
 const MIN_LISTINGS_FULD_TEKST = 5;
 /* Runde 7 (D7-M2): antal kort i maerkesidens gitter = soegesidens sidestoerrelse. */
-const MAERKE_KORT = 24;
+const MAERKE_KORT = 8;   // w14: to rækker à fire efter de 5 fremhævede; resten nås via søgningen
 
 /* Almindeligt kendt, IKKE tal-baseret viden om hvert mærke — hvad det er
    kendt for. Ingen tal her: hvert tal i sidens tekst kommer fra den rigtige
@@ -793,6 +793,14 @@ function logoSlot(brand, storrelse){
 
 /* Mærkesidens hero-ordmærke (Mærker.png): logo + ordmærke over H1. Genbruger .mk-wordmark/.mk-mono-pladsen. */
 function heroOrdmaerkeHTML(brand){
+  /* w14 (billede 9): hvor mærket har både emblem- og ordmærke-variant (samme tegning delt i to filer), står de SIDE OM SIDE som billedets
+     lockup (emblem + stort ordmærke) i stedet for den stablede hovedfil. Øvrige mærker er uændrede. */
+  const l0 = BrandLogos.logoFor(brand);
+  if (l0.harLogo && l0.emblem && l0.ordmaerke){
+    const em = BrandLogos.logoHTML(brand, { storrelse: 'hero', form: 'emblem', decorative: true, statisk: true });
+    const wm = BrandLogos.logoHTML(brand, { storrelse: 'wm', form: 'ordmaerke', decorative: true, statisk: true });
+    return `<p class="mk-wordmark mk-wordmark--logo mk-wordmark--lockup" aria-hidden="true">${em}${wm}</p>`;
+  }
   const lg = logoSlot(brand, 'hero');
   const cls = `mk-wordmark${brand.length > 11 ? ' mk-wordmark-lang' : ''}${lg.harLogo ? ' mk-wordmark--logo' : ''}`;
   const indhold = lg.harLogo
@@ -851,7 +859,13 @@ function maerkeFakta(brand, items){
     id: t.id, label: t.label, f: { types: [t.id] }, n: tael({ types: [t.id] }),
     foto: typeFoto(items, t.id),
   })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
-  const modeller = modelTal(items).slice(0, 30);
+  /* w14 (billede 9: modelfliser med billede): modellens egen annoncefoto (ét thumbnail pr. annonce, jf. CLAUDE.md regel 2), helst fra en kilde
+     uden skilt på væggen (mcsyd.dk). Ingen foto -> fliserne er tekst som før. */
+  const modeller = modelTal(items).slice(0, 30).map(x => {
+    const k = items.filter(l => String(l.model || '').trim().toLowerCase() === x.m.toLowerCase() && harFoto(l));
+    const bedst = k.find(l => !/mcsyd.dk/.test(String((l.source && l.source.domaene) || ''))) || k[0];
+    return Object.assign({}, x, { foto: bedst ? bedst.photoUrls[0] : null });
+  });
   const kk = ['A1', 'A2', 'A'].map(k => ({ k, f: { koerekort: k }, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
   const regioner = [...new Set(items.map(l => l.region).filter(Boolean))]
     .map(r => ({ r, f: { regions: [r] }, n: tael({ regions: [r] }) })).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.r.localeCompare(b.r, 'da'));
@@ -872,7 +886,7 @@ function heroSoegHTML(brand, slug, items, fakta){
           <label for="mk-q">Mærke eller model</label>
           <div class="input-icon-wrap">
             ${ICON.search}
-            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="${b}${eks ? ` (fx ${esc(eks)} …)` : ''}" aria-describedby="mk-q-hint">
+            <input class="input" type="text" id="mk-q" name="q" autocomplete="off" placeholder="${eks && eks.length <= 16 ? `Fx ${esc(eks)}` : 'Model, fx …'}" aria-describedby="mk-q-hint">
           </div>
           <span class="visually-hidden" id="mk-q-hint">Søgningen er begrænset til ${b}. Skriv en model for at snævre ind.</span>
         </div>
@@ -904,7 +918,7 @@ function heroSoegHTML(brand, slug, items, fakta){
           </div>
         </fieldset>
         <div class="mk-f-go">
-          <button type="submit" class="btn btn-primary btn-lg">Søg ${b} motorcykler${ICON.arrowRight}</button>
+          <button type="submit" class="btn btn-primary btn-lg">${brand.length <= 14 ? `Søg ${b}` : 'Søg motorcykler'}${ICON.arrowRight}</button>
           <p class="mk-count"><span data-mk-n>${tal(items.length)}</span> ${b} ${items.length === 1 ? 'motorcykel' : 'motorcykler'} i Danmark</p>
         </div>
       </form>`;
@@ -958,10 +972,23 @@ function kortFortaltHTML(brand, items, fakta, stats){
     </section>`;
 }
 
+/* w14: faktapanel i mærkeheroen (billede 8's statskort): antal, mest udbudte typer og prisniveau — kun det, annoncerne selv oplyser. */
+function mkPanelHTML(brand, items, fakta, stats){
+  const r = [];
+  r.push(`<li><span class="mk-panel-ik" aria-hidden="true">${ICON.bike}</span><div><strong><span data-mk-n>${tal(items.length)}</span> ${esc(brand)}-${items.length === 1 ? 'motorcykel' : 'motorcykler'}</strong><span>indekseret</span></div></li>`);
+  const t = fakta.typer.slice(0, 3).map(x => esc(x.label));
+  if (t.length) r.push(`<li><span class="mk-panel-ik" aria-hidden="true">${ICON.star}</span><div><strong>Mest udbudte typer</strong><span>${t.join(', ')}</span></div></li>`);
+  if (stats.antal){
+    const lav = stats.min, hoej = stats.max;
+    r.push(`<li><span class="mk-panel-ik" aria-hidden="true">${ICON.coins}</span><div><strong>Prisniveau</strong><span>${lav === hoej ? dkk(lav) : `fra ${dkk(lav)} til ${dkk(hoej)}`}</span></div></li>`);
+  }
+  return `<ul class="mk-panel" aria-label="Fakta om udvalget">${r.join('')}</ul>`;
+}
+
 function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
   const b = esc(brand);
   const foto = ctaFoto(fremhaevede);
-  const faa = fremhaevede.length <= 2;
+  const faa = false;   // w14: ingen bred bjælke-variant ved 1-2 annoncer: panelets form skal være ens, uanset hvor mange kort der bages (CLS)
   const ctaHtml = `<aside class="mk-cta${faa ? ' mk-cta-bar' : ''}${foto ? '' : ' mk-cta-uden'}" aria-labelledby="mk-cta-h">
           <div class="mk-cta-body">
             ${ctaNavnHTML(brand)}
@@ -971,7 +998,7 @@ function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
               <li><span class="mk-ok" aria-hidden="true">${ICON.check}</span>Kilden står på hvert kort</li>
               <li><span class="mk-ok" aria-hidden="true">${ICON.check}</span>Filtrér på dit kørekort</li>
             </ul>
-            <a class="btn btn-primary" href="${sogHref(brand)}">Søg ${b} motorcykler${ICON.arrowRight}</a>
+            <a class="btn btn-primary" href="${sogHref(brand)}">${brand.length <= 12 ? `Søg ${b}` : 'Se alle'}${ICON.arrowRight}</a>
           </div>
           ${foto ? `<img class="mk-cta-img" src="${esc(foto)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}
         </aside>`;
@@ -1054,7 +1081,7 @@ function saadanHTML(){
    annoncer, og siden måler ikke popularitet (jf. runde 8, D8-M5). */
 function treKolonnerHTML(brand, fakta, items){
   const b = esc(brand);
-  const modelFlise = x => `<li><a href="${sogHref(brand, x.f)}"><strong>${esc(x.m)}</strong><span>${antalTekst(x.n, 'annonce', 'annoncer')}</span></a></li>`;
+  const modelFlise = x => `<li><a href="${sogHref(brand, x.f)}"${x.foto ? ' class="mk-mini-foto"' : ''}>${x.foto ? `<img src="${esc(x.foto)}" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}<strong>${esc(x.m)}</strong><span>${antalTekst(x.n, 'annonce', 'annoncer')}</span></a></li>`;
   const kolonner = [];
   if (fakta.modeller.length){
     kolonner.push(`<section class="mk-col" aria-labelledby="mk-mod-h">
@@ -1306,12 +1333,12 @@ ${header}
        liste, facetter, prisniveau, FAQ og andre mærker (SEO).
        Hero'en bruger sidens eget fotos — intet mærkelogo og ingen af mærkets
        reklameslogans: mærkenavnet står som skrift, teksten er neutral. -->
-  <section class="mk-hero${heroV.foto ? '' : ' mk-hero-type'}">
+  <section class="mk-hero mk-hero-flad">
+    <!-- w14: landskabsfotoet (neutralt, ingen annonce) fylder højre side; aldrig et fremmed mærkes typefoto. Faktapanelet har ægte tal. -->
     <div class="mk-hero-media" aria-hidden="true">
-      ${heroV.foto ? `<img class="mk-hero-photo" src="img/hero-1600.webp"
+      <img class="mk-hero-photo" src="img/hero-1600.webp"
            srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
-           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">`
-        : (heroV.type ? `<img class="mk-hero-typeimg" src="img/type/${heroV.type}.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async">` : '')}
+           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
     </div>
     <div class="container mk-hero-inner">
       <nav class="breadcrumb" aria-label="Brødkrumme">
@@ -1322,19 +1349,22 @@ ${header}
       ${heroOrdmaerkeHTML(brand)}
       <h1>${standN.renBrugt ? 'Brugte ' : ''}${esc(brand)}-motorcykler til salg i Danmark</h1>
       <p class="brand-intro mk-intro">${introFoerste}</p>
-      ${introRest ? `<details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
+      ${mkPanelHTML(brand, items, fakta, stats)}
     </div>
   </section>
 
   <div class="container mk-soeg-wrap">
     ${heroSoegHTML(brand, slug, items, fakta)}
     ${tillidsraekkeHTML()}
-    ${kortFortaltHTML(brand, items, fakta, stats)}
   </div>
 
   ${fremhaevetHTML(brand, items, fremhaevede, fremKort)}
 
   ${typeFlisersHTML(brand, fakta)}
+
+  <div class="container mk-kf-vrap">
+    ${introRest ? `<details class="brand-intro-mere mk-intro-mere"><summary>Mere om udvalget</summary><p class="brand-intro">${introRest}</p></details>` : ''}
+  </div>
 
   ${saadanHTML()}
 
@@ -1351,7 +1381,7 @@ ${header}
       </div>
       ${facetLinksFor(brand, items)}
       <div class="listings-grid" id="brand-listings" data-brand="${esc(brand)}" data-viste="${MAERKE_KORT}"${resten.length ? '' : ' hidden'}>${kort}</div>
-      ${resten.length > MAERKE_KORT ? `<p class="brand-mere"><a href="soegning.html?brands=${encodeURIComponent(brand)}" class="btn btn-primary">Se alle ${items.length} ${esc(brand)} i søgningen</a></p>` : ''}
+      ${resten.length > MAERKE_KORT ? `<p class="mk-mere-lille"><a class="mk-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Se alle <span data-mk-n>${tal(items.length)}</span> ${esc(brand)} i søgningen${ICON.arrowRight}</a></p>` : ''}
       <div class="brand-actions">
         <a href="opret-annonce.html" class="btn btn-outline">Sælg din ${esc(brand)}</a>
       </div>
@@ -1373,6 +1403,10 @@ ${header}
         <p class="brand-intro">${esc(f.a)}</p>
       </details>`).join('\n      ')}
     </section>` : ''}
+
+    <section class="section mk-kf-bund" style="padding-top:0;">
+      ${kortFortaltHTML(brand, items, fakta, stats)}
+    </section>
 
     <section class="section" style="padding-top:0;">
       <h2 class="brand-sub">Andre mærker</h2>

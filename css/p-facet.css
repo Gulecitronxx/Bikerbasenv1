@@ -426,3 +426,269 @@
 .fa-tillid strong{ font-size:15px; }
 @media (min-width:960px){ .fa-tillid li + li{ border-left:1px solid var(--color-border); padding-left: var(--space-5); } }
 @media (max-width:480px){ .fa-tillid{ padding: var(--space-4); } }
+
+
+/* ============ w14 (Visual Fidelity Gauntlet): tættere på billede 7 (kørekort) og 8 (type) ============
+   Afvigelser fundet i sammenligningen: heroerne var 430-465 px høje mod billedernes 175-260 px; h1 64 px mod ca. 40 px;
+   kortenes chips ombrød til to rækker (tom luft midt i kortet); typefliserne var 4-5 høje fliser mod billedets 7 slanke;
+   modelrækken og bundens linkgrupper fyldte langt mere end billedets ene række; søgefelterne havde ingen ikoner. */
+
+/* Hero: lavere og med en overskrift i billedets størrelse. */
+.fa-hero{ padding: var(--space-3) 0 calc(var(--space-7) + var(--space-3)); }
+.fa-koerekort .fa-hero{ padding-bottom: var(--space-5); }
+.fa-hero-grid{ padding-top: var(--space-3); gap: var(--space-4); }
+.fa-hero h1{ font-size: clamp(1.875rem, 1.1rem + 2.4vw, 3rem); line-height:1.06; letter-spacing:-0.02em; margin-bottom: var(--space-2); }
+.fa-hero h1::after{ width:56px; height:4px; margin-top: var(--space-2); }
+.fa-kicker{ margin-bottom: var(--space-2); padding:4px 11px; font-size:11.5px; }
+.fa-hero-intro{ font-size: clamp(15px, 1.2vw, 17px); line-height:1.55; }
+.fa-mere-intro{ margin-top: var(--space-2); }
+@media (min-width:960px){ .fa-hero-tekst{ max-width: 780px; } .fa-koerekort .fa-hero-tekst{ max-width: 880px; } }
+@media (min-width:1100px){
+  .fa-type .fa-hero-grid, .fa-model .fa-hero-grid{ grid-template-columns: minmax(0,1fr) 300px 300px; padding-top: var(--space-2); }
+  .fa-type .fa-hero-tekst, .fa-model .fa-hero-tekst{ max-width: 660px; }
+  .fa-type .fa-hero, .fa-model .fa-hero{ padding-bottom: calc(var(--space-7) + var(--space-2)); }
+}
+.fa-soeg-vrap{ margin-top: calc(-1 * var(--space-7)); }
+.fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-4); }
+@media (max-width:640px){ .fa-soeg-vrap{ margin-top: calc(-1 * var(--space-7)); } .fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-4); } }
+
+/* Søgekort: ikoner i felterne (som billedernes søg-, type-, pris- og årgangsfelter), fede etiketter. */
+.fa-soeg{ padding: var(--space-4) var(--space-5) var(--space-3); border-radius: var(--radius-lg); }
+.fa-felt > label{ font-size:13px; font-weight:700; }
+.fa-ikon-felt .input{ padding-left:42px; }
+.fa-ikon-felt svg{ left:13px; width:19px; height:19px; }
+
+/* Annoncekort: kørekort-, ccm- og hk-chip på ÉN række (billedets chiprække); kun den lange "ikke afgjort"/markør-chip må ombryde. */
+.fa-side .rk-chips:not(:has(.rk-chip-note)):not(:has(.kk-ukendt)){ flex-wrap:nowrap; gap:4px; }
+@container (max-width: 262px){
+  .rk-chips .rk-kk svg{ display:none; }
+  .rk-chips .rk-chip{ font-size:11px; padding:6px 6px; }
+}
+
+/* Typefliser: slanke fotofliser som forsidens og billedets (7 på en række), aldrig høje kort. */
+.fa-typer{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
+@media (min-width:1100px){ .fa-typer, .fa-typer:has(> li:nth-child(5)){ grid-template-columns: repeat(7, minmax(0,1fr)); } }
+.fa-typer a{ aspect-ratio: 2.1 / 1; }
+.fa-type-tekst{ left:10px; bottom:8px; right:36px; }
+.fa-type-tekst strong{ font-size:14.5px; }
+.fa-typer .fa-pil{ bottom:8px; }
+
+/* Populære modeller: kompakte fliser i op til 6 spalter. */
+.fa-modeller{ grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3); }
+.fa-modeller img, .fa-model-ikon{ width:72px; height:54px; border-radius:7px; }
+.fa-modeller a{ min-height:68px; padding: var(--space-2) var(--space-3); }
+.fa-model-tekst strong{ font-size:14px; line-height:1.25; }
+
+/* Rytmen mellem sektionerne: som billedernes (ca. 24 px). */
+.fa-side .section, .fa-sektion{ padding-top: var(--space-5); }
+.fa-kf{ margin: var(--space-5) 0 0; padding: var(--space-4) var(--space-5); }
+.fa-kf h2{ font-size:18px; margin-bottom: var(--space-2); }
+.fa-kf-liste li{ font-size:14.5px; line-height:1.45; }
+.fa-tillid{ margin-top: var(--space-4); padding: var(--space-3) var(--space-5); }
+
+/* Guides: miniature til venstre og tekst til højre (billedets guiderække), ikke 190 px høje fotokort. */
+@media (min-width:560px){
+  .fa-guides a{ flex-direction:row; align-items:stretch; }
+  .fa-guides img{ width:132px; height:auto; min-height:96px; flex:none; }
+  .fa-guide-tekst{ display:flex; flex-direction:column; justify-content:center; padding: var(--space-3) var(--space-4); }
+}
+
+/* Bundens linkgrupper i ét gitter (billede 8: "Relaterede søgninger" og "Se ... i din region" side om side). */
+.fa-links3 .fa-rel-grid{ grid-template-columns: minmax(0,1fr); gap: var(--space-5) var(--space-6); }
+@media (min-width:900px){ .fa-links3 .fa-rel-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); align-items:start; } }
+.fa-links3:not(:has(.fa-rel)){ display:none; }
+.fa-links3 .fa-h3{ font-size:16px; margin-bottom: var(--space-2); }
+
+/* Typefliser: fylder rækken (som billedernes 7 på en række), fast højde. 8 typer: to rækker à fire. */
+@media (min-width:1100px){
+  .fa-typer, .fa-typer:has(> li:nth-child(5)){ grid-template-columns: repeat(auto-fit, minmax(max(150px, calc((100% - 72px) / 7)), 1fr)); }
+  .fa-typer:has(> li:nth-child(8)){ grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .fa-typer a{ aspect-ratio:auto; height:96px; }
+}
+/* Smal skærm: ikonet i vælgerne udgår (typenavnet skal kunne stå fuldt); søgefeltets ikon bliver. */
+@media (max-width:640px){
+  .fa-felt:not(.fa-felt-q) .fa-ikon-felt svg{ display:none; }
+  .fa-felt:not(.fa-felt-q) .fa-ikon-felt .input{ padding-left:14px; }
+}
+
+/* Faktatabel (modelsider): værdi og "oplyst i ..." på samme linje, så rækkerne bliver halvt så høje. */
+.fa-dl > div{ padding: 7px var(--space-4); align-items:baseline; }
+.fa-dl dd small{ display:inline; margin: 0 0 0 var(--space-2); }
+.fa-guides a{ height:100%; }
+
+
+/* ============ w14 iteration 2 (blind Critic: AFVIS 5/10): første skærm, ingen sticker-hero, ingen gentagne fotos ============
+   Mål ved 1440x900: "Udvalgte" starter højst ca. 600 px fra top, så første kortrække ses uden at scrolle (som billedernes første skærm). */
+
+/* Hero: kun overskrift + 2 linjers intro; foldens tekst ligger nu under annoncerne. */
+.fa-hero{ padding: var(--space-2) 0 calc(var(--space-6) + var(--space-3)); }
+.fa-koerekort .fa-hero{ padding-bottom: var(--space-3); }
+.fa-hero-grid{ padding-top: var(--space-2); gap: var(--space-3); align-items:center; }
+.fa-hero h1{ font-size: clamp(1.75rem, 1rem + 2vw, 2.5rem); margin-bottom: 6px; }
+.fa-hero h1::after{ width:44px; height:3px; margin-top: 6px; }
+.fa-kicker{ margin-bottom: 6px; padding:3px 10px; font-size:11px; }
+.fa-hero-intro{ font-size: clamp(14.5px, 1.1vw, 16px); line-height:1.5; max-width: 76ch; }
+@media (min-width:960px){
+  .fa-type .fa-hero-grid, .fa-model .fa-hero-grid, .fa-hero-grid{ grid-template-columns: minmax(0,1fr) 300px; padding-top: var(--space-2); }
+  .fa-hero-tekst, .fa-type .fa-hero-tekst, .fa-model .fa-hero-tekst{ max-width: 860px; }
+  .fa-koerekort .fa-hero-grid{ grid-template-columns: minmax(0,1fr); }
+}
+.fa-hero-flad{ background: radial-gradient(120% 150% at 88% 20%, #3b3026 0%, #1c1814 55%, #0f0d0a 100%); }
+.fa-hero:has(.fa-hero-flad)::after{ background:none; }
+.fa-panel{ padding: var(--space-1) var(--space-4); }
+.fa-panel li{ padding: 7px 0; gap: var(--space-3); }
+.fa-panel .fa-ik{ width:24px; height:24px; }
+.fa-panel strong{ font-size:14px; }
+.fa-panel span:not(.fa-ik){ font-size:13px; line-height:1.3; }
+
+/* Søgekort: overlapper heroen; "Få besked" står i kortets bundlinje (ikke som egen række). */
+.fa-soeg-vrap{ margin-top: calc(-1 * var(--space-6) - var(--space-2)); }
+.fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-3); }
+.fa-soeg{ padding: var(--space-3) var(--space-5) var(--space-1); }
+.fa-soeg-titel{ font-size:16px; margin-bottom: var(--space-2); }
+.fa-soeg-antal{ text-align:left; margin: var(--space-2) 0 0; min-height:36px; line-height:36px; }
+@media (min-width:641px){
+  .fa-agent{ position:absolute; right: var(--space-5); bottom:0; margin:0; }
+  .fa-agent a{ min-height:40px; padding-inline:0; }
+}
+@media (max-width:640px){ .fa-soeg-antal{ text-align:center; min-height:0; line-height:1.4; } .fa-soeg-vrap{ margin-top: calc(-1 * var(--space-7)); } .fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-4); } }
+
+/* Tillidsrække og sektionsrytme (billedernes ca. 24 px; overskrifter 22 px). */
+.fa-tillid{ margin-top: var(--space-3); padding: var(--space-2) var(--space-5); gap: var(--space-3) var(--space-5); }
+.fa-tillid .fa-ik{ width:36px; height:36px; padding:8px; }
+.fa-tillid strong{ font-size:14px; }
+.fa-side .section, .fa-sektion{ padding-top: var(--space-5); }
+.fa-h2, #facet-antal{ font-size: clamp(18px, 1.6vw, 22px); margin-bottom: var(--space-3); }
+.fa-h2-raekke{ margin-bottom: var(--space-3); }
+.fa-mere-lille{ text-align:right; margin: var(--space-2) 0 0; }
+.fa-mere-under{ margin: var(--space-3) 0 0; max-width:none; }
+.fa-mere-under summary{ color: var(--color-primary-hover); text-decoration:underline; text-underline-offset:3px; font-weight:600; cursor:pointer; padding:6px 0; }
+.fa-mere-under .brand-intro{ color: var(--color-fg-muted); }
+.fa-mere-under .brand-intro strong{ color: var(--color-fg); }
+
+/* Kort fortalt: ét bånd (fire punkter side om side på desktop). */
+@media (min-width:1100px){
+  .fa-kf{ display:grid; grid-template-columns: 130px minmax(0,1fr); align-items:center; gap: var(--space-4); padding: var(--space-3) var(--space-5); }
+  .fa-kf h2{ margin:0; font-size:16px; }
+  .fa-kf-liste{ grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-4); }
+  .fa-kf-liste li{ font-size:13.5px; line-height:1.4; }
+}
+
+/* "Udforsk efter behov": ikon + tal i stedet for et gentaget foto. */
+.fa-udforsk a{ min-height:0; }
+.fa-udforsk-ikon{ flex:0 0 64px; display:grid; place-items:center; background: var(--color-primary-tint); color: var(--color-primary); }
+.fa-udforsk-ikon .fa-ik{ width:30px; height:30px; }
+.fa-udforsk-tekst{ padding: var(--space-3); }
+.fa-udforsk-tekst > span:not(.fa-udforsk-link){ font-size:13px; line-height:1.4; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; line-clamp:3; overflow:hidden; }
+
+/* CTA-panel: lyst og roligt (brandtone), kun tekst og knap — ingen foto at vise ærligt. */
+.fa-cta{ background: linear-gradient(135deg, var(--color-primary-tint) 0%, var(--color-surface) 70%); color: var(--color-fg); border:1px solid var(--color-border); box-shadow: var(--shadow-sm); padding: var(--space-4) var(--space-5); gap: var(--space-3); }
+.fa-cta h2{ color: var(--color-fg); font-size: clamp(18px, 1.5vw, 21px); }
+.fa-cta li{ color: var(--color-fg); font-size:14px; }
+@media (min-width:1100px){ .fa-cta{ min-height:0; } }
+
+/* Kørekortsider: faktarække og søgekort kompakte, så annoncerne starter nær første skærm. */
+.fa-fakta{ padding-top: var(--space-3); gap: var(--space-2); }
+.fa-fakta-liste{ gap: var(--space-3); }
+.fa-fakta-liste li .fa-ik, .fa-fakta .fa-ik{ width:30px; height:30px; }
+.fa-fakta-kilde{ margin-top: 2px; }
+.fa-koerekort .fa-soeg-vrap{ margin-top: var(--space-2); }
+.fa-koerekort .fa-soeg{ padding-top: var(--space-2); }
+.fa-koerekort .fa-soeg-titel{ font-size:15px; margin-bottom: 4px; }
+.fa-koerekort .fa-hero{ padding-bottom: var(--space-2); }
+@media (min-width:1100px){ .fa-soeg-knap{ flex:0 0 290px; } }   /* fast bredde: skrifttypeskift flytter ikke felterne (CLS) */
+
+/* Tap-mål >= 40 px (målt programmatisk): små links, chips, folder og kørekortvælger. */
+.fa-mere, .mk-link, .section-link{ min-height:40px; align-items:center; }
+.fa-mere{ position:relative; }
+.fa-chips .popular-chip{ min-height:40px; }
+.fa-mere-under summary, .fa-mere-intro summary, .mk-intro-mere summary{ min-height:40px; display:flex; align-items:center; }
+.mk-saadan .guide-boks a{ min-height:40px; }
+.mk-search .kk-seg label{ min-height:40px; }
+
+/* w14: under lagerfejl (html[data-lager-fejl]) er de byggede tal ikke pålidelige: panelets pris- og typelinjer (bagt ved byg) skjules; antallet dæmpes af styles.css. */
+html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-panel li:not(:first-child){ visibility:hidden; }   /* skjul, men behold pladsen: ingen layoutflytning (CLS), når lagerfejl først meldes efter første maling */
+
+
+/* w14 iteration 3 (billedernes kort er ca. 205 px høje mod vores 350): kortene i udvalgs- og "flere"-rækkerne på disse sider får et bredere foto,
+   mindre luft og titel + pris på samme linje (billedets kortopbygning). Kun CSS i sidernes egne rækker; kortkomponenten (js/components.js) er uændret. */
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .card-media{ aspect-ratio: 2.1 / 1; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .rk-body{ padding: 10px 12px 8px; gap: 6px; }
+@container (min-width: 232px){
+  :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-top{ flex-direction:row; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
+  :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-titel{ flex:1 1 auto; }
+}
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-fod{ padding-top: 6px; }
+@media (max-width:519px){
+  :is(.fa-kortraekke, .mk-featured-kort) .card-rich .card-media{ aspect-ratio: 16 / 10; }
+}
+@media (min-width:1100px){
+  .fa-cta{ padding: var(--space-3) var(--space-4); gap: var(--space-2); }
+  .fa-cta h2{ font-size:19px; line-height:1.2; }
+  .fa-cta ul{ gap:4px; }
+  .fa-cta li{ font-size:13.5px; line-height:1.3; }
+  .fa-cta .btn{ padding-block:10px; }
+}
+/* Kort uden foto (tom plads): ikonet udgår og teksten er kompakt, så ét fotoløst kort ikke gør hele rækken 90 px højere. */
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom{ padding: 8px 52px 8px 10px; gap:2px; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom-ikon{ display:none !important; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom-titel{ font-size:12px; line-height:1.3; max-width:none; }
+
+/* w14 mobil (<560 px): sidens længde ved 390 px var 7.700-9.000 px (billedernes sider er korte). Info-bokse, guides og behovskort er vandrette skinner
+   med peek (som mærkesidens tre kolonner), og "flere"-gitteret viser 4 kort — "Se alle" fører videre til søgningen. */
+@media (max-width:559px){
+  :is(.fa-bokse-kk, .fa-bokse-4, .fa-guides, .fa-udforsk){
+    display:flex; gap: var(--space-3); overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;
+    margin-inline: calc(-1 * var(--space-4)); padding-inline: var(--space-4); scroll-padding-inline: var(--space-4); padding-bottom:4px;
+  }
+  :is(.fa-bokse-kk, .fa-bokse-4, .fa-guides, .fa-udforsk)::-webkit-scrollbar{ display:none; }
+  :is(.fa-bokse-kk, .fa-bokse-4, .fa-guides, .fa-udforsk) > *{ flex:0 0 84%; scroll-snap-align:start; min-width:0; }
+  .fa-flere .listings-grid > :nth-child(n+5){ display:none; }
+  .fa-guides a{ flex-direction:row; }
+}
+
+/* ============ Iteration 3 (Critic runde 2): typesiderne har deres eget typefoto som hero-baggrund ============ */
+.fa-hero-type{ background: radial-gradient(120% 150% at 80% 30%, #3b3026 0%, #1c1814 55%, #0f0d0a 100%); }
+.fa-hero-typefoto{ position:absolute; right:0; top:0; width:min(66%, 1000px); height:100%; object-fit:cover; object-position:50% 58%; opacity:.7; filter: saturate(.95) contrast(1.05);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 45%), linear-gradient(to bottom, #000 70%, transparent 100%);
+  -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent 0%, #000 45%), linear-gradient(to bottom, #000 70%, transparent 100%); mask-composite: intersect; }
+.fa-hero:has(.fa-hero-type)::after{ background: linear-gradient(0deg, rgba(15,13,10,.45) 0%, transparent 40%); }
+@media (max-width:959px){ .fa-hero-typefoto{ width:100%; opacity:.4; -webkit-mask-image:none; mask-image:none; } }
+
+
+/* ============ Iteration 3 (Critic runde 2): moduler, knapper, kort ============ */
+/* Behovskort med (dekorativt) typefoto igen — ét forskelligt foto pr. kort. */
+.fa-udforsk-foto{ flex:0 0 34%; max-width:140px; }
+/* CTA-panel med typefoto nederst til højre (lyst panel, fotoet toner ind). */
+.fa-cta-studio{ background: linear-gradient(135deg, var(--color-primary-tint) 0%, var(--color-surface) 70%); }
+.fa-cta-foto{ right:-14%; bottom:-8%; width:80%; opacity:.95; mix-blend-mode:multiply; z-index:0;
+  -webkit-mask-image: radial-gradient(ellipse 58% 60% at 52% 52%, #000 48%, transparent 100%); mask-image: radial-gradient(ellipse 58% 60% at 52% 52%, #000 48%, transparent 100%); }
+:root[data-theme="dark"] .fa-cta-foto{ mix-blend-mode:normal; opacity:.5; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .fa-cta-foto{ mix-blend-mode:normal; opacity:.5; } }
+.fa-cta > *:not(.fa-cta-foto){ position:relative; z-index:1; }
+/* Mærke-CTA: panelets lille foto-sliver i bunden udgår på desktop (intet ærligt rytterfoto at vise). */
+@media (min-width:1100px){ .mk-cta-img{ display:none; } }
+/* Søgeknap på ÉN linje. */
+.fa-soeg-knap, .mk-f-go .btn{ white-space:nowrap; }
+.mk-f-go .btn{ min-width:0; }
+.fa-mere, .section-link{ white-space:nowrap; }
+/* Kort: titel og pris på én linje, når der er plads; titlen afkortes. */
+@container (min-width: 250px){
+  :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-top{ flex-direction:row; align-items:baseline; justify-content:space-between; gap: var(--space-2); }
+  :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .rk-titel{ flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+}
+/* Kort uden annoncefoto: typens eget foto som ærlig fallback (tydeligt mærket "Typefoto"), ingen stiplet fejlramme. */
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom{ border-style:solid; border-color: transparent; background-size:cover; background-position:center; background-repeat:no-repeat; color:#fff; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom-titel{ color:#fff; text-shadow:0 1px 6px rgba(0,0,0,.7); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom::after{ content:"Typefoto (illustration)"; position:absolute; left:8px; bottom:6px; font-size:10.5px; font-weight:600; color:#fff; background:rgba(0,0,0,.55); padding:2px 6px; border-radius:4px; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .card-media{ position:relative; }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="sport"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/sport.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="naked"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/naked.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="touring"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/touring.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="adventure"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/adventure.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="cruiser"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/cruiser.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="scooter"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/scooter.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="classic"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/classic.webp"); }
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="cross"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/cross.webp"); }
+
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom::before{ display:none; }

@@ -203,7 +203,7 @@ function erIndekserbar(facet, items){
    halv megabyte. Samme kontrakt som mærkesiden: de første 24 + et link til
    søgningen, hvor resten ligger. noscript-listen beholder ALLE — den er ren
    tekst og koster ingenting, og så er lageret stadig synligt uden JS. */
-const FACET_KORT = 24;
+const FACET_KORT = 13;   // w14: 5 udvalgte + 8 i "flere"-gitteret (to rækker); resten nås via søgningen (billedernes sider er korte)
 
 /* w8-cls: stabil container + højdereservation på kortcontaineren #facet-listings.
    Den statiske HTML er bagt mod lageret på byggetidspunktet; hydreringen tegner mod lageret på
@@ -220,7 +220,9 @@ const FACET_KORT = 24;
    3. Tom-tilstandens markup kommer fra ÉN funktion (facetTomMarkup), der bruges af byggetrinnet og
       stringificeres ind i hydreringsscriptet — de kan ikke drive fra hinanden.
    Inline stil, fordi css/ er låst for denne strøm. */
-const FACET_RESERVE_H = 340;
+/* w14: 340 -> 264 px. Kortene er nu ca. 245-265 px høje på desktop (bredere foto, titel + pris på én linje); en højere reservation strakte kortene med tom luft.
+   Under den målte højde skifter siden ikke: hydreringen hæver min-height til containerens MÅLTE højde, før indholdet skiftes (tom-tilstand <-> kort). */
+const FACET_RESERVE_H = 264;
 const facetReserveStil = tom => ` style="min-height:${FACET_RESERVE_H}px${tom ? ';-webkit-mask-image:none;mask-image:none' : ''}"`;
 
 function facetTomMarkup(frase, soegUrl){
@@ -1072,11 +1074,12 @@ function antalPrTypeOgRegion(items){
   return { typer, regioner };
 }
 
-function faSelect(id, navn, label, valg, valgt){
-  return `<div class="field fa-felt"><label for="${id}">${label}</label>
-          <select class="input" id="${id}" name="${navn}">
+function faSelect(id, navn, label, valg, valgt, ikon){
+  const sel = `<select class="input" id="${id}" name="${navn}">
             ${valg.map(([v, t]) => `<option value="${esc(v)}"${String(v) === String(valgt) ? ' selected' : ''}>${esc(t)}</option>`).join('\n            ')}
-          </select></div>`;
+          </select>`;
+  return `<div class="field fa-felt"><label for="${id}">${label}</label>
+          ${ikon && IkonKilde[ikon] ? `<div class="input-icon-wrap fa-ikon-felt">${IkonKilde[ikon]}${sel}</div>` : sel}</div>`;
 }
 function soegekort(facet, items){
   const isType = facet.kind === 'type', isKk = facet.kind === 'koerekort', isModel = facet.kind === 'model', isRegion = facet.kind === 'region';
@@ -1084,14 +1087,14 @@ function soegekort(facet, items){
   const f = [];
   if (!isModel && !isKombi){
     f.push(`<div class="field fa-felt fa-felt-q"><label for="fa-q">Mærke eller model</label>
-          <input class="input" type="text" id="fa-q" name="q" placeholder="F.eks. Yamaha MT-07, Honda Rebel" autocomplete="off"></div>`);
+          <div class="input-icon-wrap fa-ikon-felt">${IkonKilde.search}<input class="input" type="text" id="fa-q" name="q" placeholder="F.eks. Yamaha MT-07, Honda Rebel" autocomplete="off"></div></div>`);
   }
   if (isType || isKk || isRegion || isBudget || isBy){
-    f.push(faSelect('fa-type', 'type', 'Type', [['', 'Alle typer'], ...TYPES.map(t => [t.id, `${t.label}-motorcykler`])], isType ? facet.id : ''));
+    f.push(faSelect('fa-type', 'type', 'Type', [['', 'Alle typer'], ...TYPES.map(t => [t.id, `${t.label}-motorcykler`])], isType ? facet.id : '', 'bike'));
   }
-  if (!isBudget) f.push(faSelect('fa-pris', 'maxPrice', 'Maks. pris', [['', 'Alle priser'], ...PRIS_TRIN.map(p => [p, `Op til ${tal(p)} kr.`])], ''));
-  f.push(faSelect('fa-aar', 'yearMin', 'Årgang', [['', 'Alle årgange'], ...AAR_TRIN.map(y => [y, `${y} og nyere`])], ''));
-  if (isModel || isKombi) f.push(faSelect('fa-km', 'kmMax', 'Maks. km', [['', 'Alle'], ...[10000, 30000, 60000].map(k => [k, `Op til ${tal(k)} km`])], ''));
+  if (!isBudget) f.push(faSelect('fa-pris', 'maxPrice', 'Maks. pris', [['', 'Alle priser'], ...PRIS_TRIN.map(p => [p, `Op til ${tal(p)} kr.`])], '', 'coins'));
+  f.push(faSelect('fa-aar', 'yearMin', 'Årgang', [['', 'Alle årgange'], ...AAR_TRIN.map(y => [y, `${y} og nyere`])], '', 'calendar'));
+  if (isModel || isKombi) f.push(faSelect('fa-km', 'kmMax', 'Maks. km', [['', 'Alle'], ...[10000, 30000, 60000].map(k => [k, `Op til ${tal(k)} km`])], '', 'gauge'));
   const skjult = [];
   if (isKk){ skjult.push(['koerekort', facet.id]); if (facet.id === 'A') skjult.push(['hkMin', A_MIN_HK]); }
   if (isRegion) skjult.push(['regions', facet.id]);
@@ -1100,14 +1103,16 @@ function soegekort(facet, items){
   if (isBy && facet.region) skjult.push(['regions', facet.region]);
   if (isKombi) skjult.push(['brands', facet.brand], ['type', facet.typeId]);
   const titel = isKk ? `Find motorcykler til ${esc(facet.id)}-kørekort` : null;
-  const knapTekst = isModel ? esc(facet.mv) : isType || isKombi ? frase(facet) : isRegion ? `i ${esc(facet.id)}`
-    : isBudget ? `under ${tal(facet.max)} kr.` : isBy ? (facet.region ? `i landsdelen ${esc(facet.region)}` : 'i hele landet') : `til ${esc(facet.id)}`;
+  /* Iteration 3: knappen står på ÉN linje på alle sider (kort label; lange navne giver blot "Søg"). Søgningens parametre er uændrede. */
+  const knapLabel = isModel ? (String(facet.mv).length <= 16 ? `Søg ${esc(facet.mv)}` : 'Søg')
+    : isType ? `Søg ${frase(facet)}` : isKombi ? 'Søg' : isRegion ? `Søg i ${esc(facet.id)}`
+    : isBudget ? `Søg under ${tal(facet.max)} kr.` : isBy ? (facet.region ? 'Søg i landsdelen' : 'Søg i hele landet') : `Søg motorcykler til ${esc(facet.id)}`;
   return `<form class="fa-soeg" action="soegning.html" method="get" aria-label="Søg ${frase(facet)}">
         ${titel ? `<h2 class="fa-soeg-titel">${titel}</h2>` : ''}
         <div class="fa-soeg-felter">
           ${f.join('\n          ')}
           ${skjult.map(([k, v]) => `<input type="hidden" name="${k}" value="${esc(v)}">`).join('')}
-          <button type="submit" class="btn btn-primary btn-lg fa-soeg-knap">Søg ${isType || isModel || isKombi ? '' : 'motorcykler '}${knapTekst} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></button>
+          <button type="submit" class="btn btn-primary btn-lg fa-soeg-knap">${knapLabel} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></button>
         </div>
         <p class="fa-soeg-antal">${nSpan('all', items.length)} ${ordSpan(items.length, fraseEt(facet), frase(facet))} indekseret på Bikerbasen${isBy && facet.region ? `. Søgningen filtrerer på landsdelen ${esc(facet.region)}` : ''}</p>
       </form>`;
@@ -1257,27 +1262,31 @@ function udforskBehov(facet, items, ctx){
   };
   const fallback = facet.kind === 'type' ? facet.id : facet.kind === 'kombi' ? facet.typeId : null;
   const kort = [];
-  const tilfoej = (titel, tekst, extra, noegle, sub) => {
+  /* w14: kortene har et ikon i stedet for et foto. Et foto pr. kort blev i praksis det samme billede fire gange (kortene deler ofte annoncer),
+     og det lignede en billedfejl. Tal og link er stadig det samme filter (ctx.link). */
+  /* Iteration 3: dekorative, FORSKELLIGE typefotos (aldrig det samme foto to gange side om side); fotoet er en illustration, ikke annoncernes billede. */
+  const fotoIder = TYPES.map(t => t.id).filter(i => i !== (facet.kind === 'type' ? facet.id : facet.kind === 'kombi' ? facet.typeId : ''));
+  const tilfoej = (titel, tekst, extra, noegle, sub, ikon) => {
     if (sub.length < 1 || sub.length >= tot) return;
     const l = ctx.link(extra);
-    kort.push({ titel, tekst, noegle, href: l.href, n: l.n, antal: sub.length, foto: foto(sub) });
+    kort.push({ titel, tekst, noegle, href: l.href, n: l.n, antal: sub.length, ikon, foto: fotoIder[kort.length % fotoIder.length] });
   };
   const nyereAar = I_AAR - 5;
   tilfoej('Til A2-kørekort', `Oplyst effekt inden for A2-grænsen på 35 kW (ca. ${A2_MAX_HK} hk). Tjek altid vægt og registreringsattest.`,
-    { koerekort: 'A2' }, 'kk:A2', items.filter(l => passerKoerekort(l, 'A2')));
+    { koerekort: 'A2' }, 'kk:A2', items.filter(l => passerKoerekort(l, 'A2')), 'idCard');
   const priser = items.filter(l => { const p = tilTal(l.price); return p !== null && p > 0; });
   const trin = PRIS_TRIN.find(p => { const a = priser.filter(l => tilTal(l.price) <= p).length; return a >= 2 && a < tot; });
   if (trin) tilfoej(`Under ${tal(trin)} kr.`, `Annoncer med en oplyst pris på højst ${tal(trin)} kr. Annoncer uden pris er ikke med.`,
-    { priceMax: trin }, `pris:${trin}`, priser.filter(l => tilTal(l.price) <= trin));
+    { priceMax: trin }, `pris:${trin}`, priser.filter(l => tilTal(l.price) <= trin), 'coins');
   tilfoej(`Fra ${nyereAar} og nyere`, `Årgang ${nyereAar} eller nyere ud fra det, annoncen oplyser.`,
-    { yearMin: nyereAar }, `aar:${nyereAar}`, items.filter(l => { const y = tilTal(l.year); return y !== null && y > 1900 && y >= nyereAar; }));
+    { yearMin: nyereAar }, `aar:${nyereAar}`, items.filter(l => { const y = tilTal(l.year); return y !== null && y > 1900 && y >= nyereAar; }), 'calendar');
   const kmTrin = [10000, 30000].find(k => { const a = items.filter(l => { const v = tilTal(l.km); return v !== null && v >= 0 && v <= k; }).length; return a >= 2 && a < tot; });
   if (kmTrin) tilfoej(`Under ${tal(kmTrin)} km`, 'Annoncer med en oplyst kilometerstand under grænsen. Annoncer uden km er ikke med.',
-    { kmMax: kmTrin }, `km:${kmTrin}`, items.filter(l => { const v = tilTal(l.km); return v !== null && v >= 0 && v <= kmTrin; }));
+    { kmMax: kmTrin }, `km:${kmTrin}`, items.filter(l => { const v = tilTal(l.km); return v !== null && v >= 0 && v <= kmTrin; }), 'gauge');
   if (facet.kind !== 'region'){
     const pr = new Map(); for (const l of items) if (l.region) pr.set(l.region, (pr.get(l.region) || 0) + 1);
     const top = [...pr.entries()].sort((a, b) => b[1] - a[1])[0];
-    if (top && pr.size > 1) tilfoej(`I ${top[0]}`, 'Den landsdel, hvor flest af annoncerne står.', { regions: [top[0]] }, `region:${top[0]}`, items.filter(l => l.region === top[0]));
+    if (top && pr.size > 1) tilfoej(`I ${top[0]}`, 'Den landsdel, hvor flest af annoncerne står.', { regions: [top[0]] }, `region:${top[0]}`, items.filter(l => l.region === top[0]), 'mapPin');
   }
   if (kort.length < 2) return '';
   const hvadEt = facet.kind === 'type' ? fraseEt(facet) : 'annonce';
@@ -1286,8 +1295,7 @@ function udforskBehov(facet, items, ctx){
   return `<section class="section fa-sektion fa-udforsk-vrap">
       <h2 class="fa-h2">${h}</h2>
       <ul class="fa-udforsk">${kort.slice(0, 4).map(k => `<li><a href="${k.href}">
-          <span class="fa-udforsk-foto">${k.foto ? `<img src="${esc(k.foto)}" alt="" width="240" height="180" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
-            : fallback ? `<img src="img/type/${esc(fallback)}.webp" alt="" width="456" height="342" loading="lazy" decoding="async">` : `<span class="fa-model-ikon">${IKON('bike')}</span>`}</span>
+          <span class="fa-udforsk-foto" aria-hidden="true"><img src="img/type/${esc(k.foto)}.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
           <span class="fa-udforsk-tekst"><strong>${k.titel}</strong><span>${k.tekst}</span>
             <span class="fa-udforsk-link">${k.n !== null ? `Se ${nSpan(k.noegle, k.n)} ${ordSpan(k.n, hvadEt, hvad)}` : 'Se i søgningen'} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></span></span></a></li>`).join('')}</ul>
     </section>`;
@@ -1566,7 +1574,10 @@ function hydreringsScript(){
   /* RUNDE 13 (R13-7): TOTALEN foer udsnittet — tallet i overskrift og intro
      bages ved bygget og skal opdateres, hvis lageret har aendret sig. */
   const alleTraef = traefSorteret.length;
-  const items = visListe.slice(0, viste);
+  /* w14: samme foto-først-rækkefølge som byggetrinnet (kun udsnittet af kort). */
+  const medFotoK = l => !!(l.photoUrls && l.photoUrls.length);
+  const fotoListe = visListe.filter(medFotoK).concat(visListe.filter(l => !medFotoK(l)));
+  const items = fotoListe.slice(0, viste);
   const frase = mount.dataset.facetFrase || 'motorcykler';
   /* w6-funktion: er HELE lageret tomt (backend-svar uden annoncer), står bannerets "Prøv igen" alene — siden må ikke også påstå, at kategorien er tom. */
   if (!items.length && Store.getAllListings().length === 0){
@@ -1736,7 +1747,10 @@ function side(facet, alle){
   /* Budgetsider (T-004): eget interval først, så de 24 viste kort ikke er de samme på alle fire trin. */
   const band = facet.kind === 'budget' && facet.lo ? budgetBand(facet, items) : null;
   const bandFoerst = arr => band ? [...arr.filter(l => band.includes(l)), ...arr.filter(l => !band.includes(l))] : arr;
-  const liste = facet.kind === 'model' ? SIDER.distinkte(items) : bandFoerst(items);
+  /* w14: annoncer med foto først i udsnittet (kun rækkefølgen i de viste kort; ingen annonce skjules i søgningen eller i noscript-listen). */
+  const medFoto = l => !!(l.photoUrls && l.photoUrls.length);
+  const fotoFoerst = arr => arr.filter(medFoto).concat(arr.filter(l => !medFoto(l)));
+  const liste = fotoFoerst(facet.kind === 'model' ? SIDER.distinkte(items) : bandFoerst(items));
   const samlet = items.length - liste.length;
   const samletTekst = n => `${n} af de ${items.length} annoncer er identiske lagerenheder (samme pris, årgang, km og forhandler) og vises som ét kort.`;
   const viste = liste.slice(0, FACET_KORT);
@@ -1846,8 +1860,13 @@ function side(facet, alle){
      den type, flest af annoncerne har. Kørekort og landsdel har intet ærligt
      typemotiv og beholder landskabsfotoet. */
   const domType = (() => { const m = new Map(); for (const l of items) if (l.type) m.set(l.type, (m.get(l.type) || 0) + 1); return [...m.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || null; })();
-  const heroFoto = facet.kind === 'type' ? facet.id : facet.kind === 'kombi' && TYPES.some(t => t.id === facet.typeId) ? facet.typeId
-    : facet.kind === 'model' && TYPES.some(t => t.id === domType) ? domType : null;
+  /* w14: ingen frit stillet motorcykel i en radial glød ("sticker") og aldrig et fremmed mærkes motorcykel i et mærkes hero: sider om et mærke
+     (model, mærke+type) får en rolig, flad hero; øvrige sider landskabsfotoet. Typens studiefoto bruges i fliserne, ikke i heroen. */
+  const heroFoto = null;
+  /* Iteration 3 (Critic runde 2): typesiderne får DERES eget typefoto som hero-baggrund (sport -> sport, ikke cruiser); alle øvrige sider landskabsfotoet.
+     Sticker-looket er væk, fordi fotoet er en fuldbleed baggrund, der toner ud mod teksten. */
+  const typeHero = facet.kind === 'type' && TYPES.some(t => t.id === facet.id) ? facet.id : null;
+  const fladHero = false;
   const boksViden = erKk ? '' : videnBokse(facet, items);
 
   return `<!doctype html>
@@ -1874,7 +1893,7 @@ ${qualifies ? '' : '<meta name="robots" content="noindex, follow">\n'}<link rel=
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=1) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-${heroFoto ? '' : `<link rel="preload" as="image" href="img/hero-1600.webp" imagesrcset="${heroSrcset}" imagesizes="100vw" fetchpriority="high">`}
+${fladHero || typeHero ? '' : `<link rel="preload" as="image" href="img/hero-1600.webp" imagesrcset="${heroSrcset}" imagesizes="100vw" fetchpriority="high">`}
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/p-facet.css">
 ${jsonLdBlock([
@@ -1896,7 +1915,7 @@ ${header}
 
 <main id="main-content" class="fa-side fa-${facet.kind}${facet.layout ? ` fa-${facet.layout}` : ''}">
   <section class="fa-hero">
-    ${heroFoto ? `<div class="fa-hero-media fa-hero-studio" aria-hidden="true"></div>` : `<div class="fa-hero-media" aria-hidden="true">
+    ${typeHero ? `<div class="fa-hero-media fa-hero-type" aria-hidden="true"><img class="fa-hero-typefoto" src="img/type/${typeHero}.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async"></div>` : `<div class="fa-hero-media" aria-hidden="true">
       <img src="img/hero-1600.webp" srcset="${heroSrcset}" sizes="100vw" alt="" width="2560" height="1086" fetchpriority="high" decoding="async">
     </div>`}
     <div class="container fa-hero-inner">
@@ -1906,9 +1925,7 @@ ${header}
           ${kicker ? `<p class="fa-kicker">${kicker}</p>` : ''}
           <h1>${h1}</h1>
           <p class="fa-hero-intro">${introDelt.foerste}</p>
-          ${introDelt.rest ? `<details class="brand-intro-mere fa-mere-intro"><summary>${introFoldEtiket}</summary><p class="brand-intro">${introDelt.rest}</p></details>` : ''}
         </div>
-        ${heroFoto ? `<div class="fa-hero-bike" aria-hidden="true"><img src="img/type/${heroFoto}.webp" alt="" width="456" height="342" fetchpriority="high" decoding="async"></div>` : ''}
         ${infoPanel(facet, items)}
       </div>
     </div>
@@ -1921,19 +1938,19 @@ ${header}
       <p class="fa-agent"><a href="${facetSearchUrl(facet)}${facetSearchUrl(facet).includes('?') ? '&amp;' : '?'}agent=1">Få besked om nye annoncer${facet.kind === 'by' ? ' i landsdelen' : ''}</a></p>
     </div>
     ${erKk ? '' : tillidsraekke(senestOpdateret)}
-    ${kortFortalt(facet, items, uoplyst)}
 
     <section class="section facet-liste-sektion fa-udvalgte">
       <div class="fa-h2-raekke"><h2 class="fa-h2">Udvalgte ${frase(facet)} på Bikerbasen</h2>${items.length ? `<a class="fa-mere" href="${facetSearchUrl(facet)}"><span>${seAlle(facet, items, ctx)}</span> <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a>` : ''}</div>
       ${items.length ? `<div class="fa-udvalgte-gitter">
         <div class="listings-grid fa-kortraekke" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}" data-udvalgte="${UDVALGTE}" data-facet-frase="${frase(facet)}" data-facet-soeg="${esc(facetSearchUrl(facet))}"${facetAttrs(facet)}${facetReserveStil()}>${kort1}</div>
-        ${ctaPanel(facet, ctaFoto(facet, items))}
+        ${ctaPanel(facet, facet.kind === 'type' ? facet.id : facet.kind === 'koerekort' ? ({ A1: 'scooter', A2: 'naked', A: 'sport' }[facet.id] || null) : ['region', 'budget', 'by'].includes(facet.kind) ? 'touring' : null)}
       </div>${facet.kind === 'model' ? `<p class="brand-facet-note" id="facet-dubletter"${samlet ? '' : ' hidden'}>${samlet ? samletTekst(samlet) : ''}</p>` : ''}` : `<div class="listings-grid fa-kortraekke" id="facet-listings" data-facet-kind="${facet.kind}" data-facet-id="${esc(facet.id)}" data-viste="${FACET_KORT}" data-udvalgte="${UDVALGTE}" data-facet-frase="${frase(facet)}" data-facet-soeg="${esc(facetSearchUrl(facet))}"${facetAttrs(facet)}${facetReserveStil(true)}>${facetTomMarkup(frase(facet), facetSearchUrl(facet))}</div>`}
     </section>
 
+    ${introDelt.rest ? `<details class="brand-intro-mere fa-mere-intro fa-mere-under"><summary>${introFoldEtiket}</summary><p class="brand-intro">${introDelt.rest}</p></details>` : ''}
+    ${erKk || ['region', 'budget'].includes(facet.kind) ? typeFliser(facet, typer, ctx) : ''}
     ${modelFakta(facet, items)}
     ${udforskBehov(facet, items, ctx)}
-    ${erKk || ['region', 'budget'].includes(facet.kind) ? typeFliser(facet, typer, ctx) : ''}
     ${byFliser(facet, ctx)}
     ${boksKk}
     ${facet.kind === 'by' ? '' : modelRaekke(facet, items, ctx)}
@@ -1955,7 +1972,7 @@ ${header}
       <div class="fa-h2-raekke"><div><h2 class="fa-h2" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="facet-note">${liste.length > FACET_KORT ? `De første ${FACET_KORT} vises her.` : ''}</p>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div></div>
       ${facetVaerktoejer(facet, items, ctx)}
       <div class="listings-grid" id="facet-listings-flere">${kort2}</div>
-      ${liste.length > FACET_KORT ? `<p class="brand-mere"><a href="${facetSearchUrl(facet)}" class="btn btn-primary"><span>${seAlle(facet, items, ctx)}</span></a></p>` : ''}
+      ${liste.length > FACET_KORT ? `<p class="fa-mere-lille"><a class="fa-mere" href="${facetSearchUrl(facet)}"><span>${seAlle(facet, items, ctx)}</span> <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a></p>` : ''}
     </section>` : `<h2 class="visually-hidden" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="visually-hidden" id="facet-note"></p>${items.length ? `<section class="section fa-flere">${facetVaerktoejer(facet, items, ctx)}</section>` : ''}`}
     ${items.length ? `<noscript>
       <ul class="brand-noscript">
@@ -1966,57 +1983,29 @@ ${header}
     ${faqHtml}
     ${boksViden}
     ${erKk || facet.kind === 'type' ? guideRaekke(facet) : ''}
+    ${kortFortalt(facet, items, uoplyst)}
 
-    <section class="section fa-sektion fa-rel-vrap">
+    ${(() => {
+      /* w14: alle linkgrupper nederst (relaterede søgninger, region, budget og "andre ...") står i ÉT gitter i stedet for 5-6 stablede
+         sektioner (billede 8: relaterede søgninger + region side om side). Samme links og overskrifter som før. */
+      const gruppe = (h, chips) => chips ? `<div class="fa-rel"><h2 class="fa-h3">${h}</h2><div class="fa-chips">${chips}</div></div>` : '';
+      const ekstra = facet.kind === 'model'
+        ? gruppe('Se også', andreModeller + (brandFindes ? `<a class="popular-chip" href="${brandFil}">Alle ${esc(facet.brand)}</a>` : ''))
+        : facet.kind === 'by'
+          ? gruppe(andreByer ? 'Andre byer' : 'Mere fra landsdelen', andreByer + (regionFindes ? `<a class="popular-chip" href="${regionFil}">Hele ${esc(facet.region)}</a>` : '') + '<a class="popular-chip" href="soegning.html">Hele landet</a>')
+        : facet.kind === 'kombi'
+          ? gruppe(`Mere fra ${esc(facet.brand)}`, andreKombi + (brandFindes ? `<a class="popular-chip" href="${brandFil}">Alle ${esc(facet.brand)}</a>` : '') + `<a class="popular-chip" href="type-${esc(facet.typeId)}.html">Alle ${esc(String(facet.typeLabel).toLowerCase())}-motorcykler</a>`)
+        : facet.kind === 'region'
+          ? gruppe('Andre landsdele', andreRegioner + '<a class="popular-chip" href="soegning.html">Hele landet</a>')
+          : gruppe('Andre typer', andreTyper) + gruppe('Kørekortkategorier', andreKk + '<a class="popular-chip" href="soegning.html">Alle motorcykler</a>');
+      const rel = relaterede(facet, items, ctx) + regionChips(facet, regioner, ctx) + budgetChips(facet);
+      return `<section class="section fa-sektion fa-links3" aria-label="Flere veje videre">
       <div class="fa-rel-grid">
-        ${relaterede(facet, items, ctx)}
-        ${regionChips(facet, regioner, ctx)}
-        ${budgetChips(facet)}
+        ${rel}
+        ${ekstra}
       </div>
-    </section>
-
-    ${facet.kind === 'model' ? `${andreModeller ? `<section class="section fa-sektion">
-      <h2 class="fa-h2">Se også</h2>
-      <div class="popular-row">
-        ${andreModeller}
-        ${brandFindes ? `<a class="popular-chip" href="${brandFil}">Alle ${esc(facet.brand)}</a>` : ''}
-      </div>
-    </section>` : brandFindes ? `<section class="section fa-sektion">
-      <div class="popular-row"><a class="popular-chip" href="${brandFil}">Alle ${esc(facet.brand)}</a></div>
-    </section>` : ''}` : facet.kind === 'by' ? `<section class="section fa-sektion">
-      <h2 class="fa-h2">${andreByer ? 'Andre byer' : 'Mere fra landsdelen'}</h2>
-      <div class="popular-row">
-        ${andreByer}
-        ${regionFindes ? `<a class="popular-chip" href="${regionFil}">Hele ${esc(facet.region)}</a>` : ''}
-        <a class="popular-chip" href="soegning.html">Hele landet</a>
-      </div>
-    </section>` : facet.kind === 'kombi' ? `<section class="section fa-sektion">
-      <h2 class="fa-h2">Mere fra ${esc(facet.brand)}</h2>
-      <div class="popular-row">
-        ${andreKombi}
-        ${brandFindes ? `<a class="popular-chip" href="${brandFil}">Alle ${esc(facet.brand)}</a>` : ''}
-        <a class="popular-chip" href="type-${esc(facet.typeId)}.html">Alle ${esc(String(facet.typeLabel).toLowerCase())}-motorcykler</a>
-      </div>
-    </section>` : facet.kind === 'region' ? `<section class="section fa-sektion">
-      <h2 class="fa-h2">Andre landsdele</h2>
-      <div class="popular-row">
-        ${andreRegioner}
-        <a class="popular-chip" href="soegning.html">Hele landet</a>
-      </div>
-    </section>` : `<section class="section fa-sektion">
-      <h2 class="fa-h2">Andre typer</h2>
-      <div class="popular-row">
-        ${andreTyper}
-      </div>
-    </section>
-
-    <section class="section fa-sektion">
-      <h2 class="fa-h2">Kørekortkategorier</h2>
-      <div class="popular-row">
-        ${andreKk}
-        <a class="popular-chip" href="soegning.html">Alle motorcykler</a>
-      </div>
-    </section>`}
+    </section>`;
+    })()}
   </div>
 </main>
 

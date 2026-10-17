@@ -27,6 +27,12 @@
           "hash": "1ae2bf85b19278885c7ee61fc39e81681fbdebbf7199787428a9b25202aed1ae",
           "bredde": 1000,
           "hoejde": 669
+        },
+        "ordmaerke": {
+          "fil": "img/brands/honda-ordmaerke.svg",
+          "hash": "e2717a234dd685095d200f7e9da3295b7abc799c69eb7aa41eb64be6f160a585",
+          "bredde": 1000,
+          "hoejde": 163
         }
       }
     },
@@ -81,6 +87,12 @@
           "hash": "d9ac4ecfaa4050fa538043c987b1ea8ecedc003bad87c064b59b28a68235efb2",
           "bredde": 1000,
           "hoejde": 999
+        },
+        "ordmaerke": {
+          "fil": "img/brands/yamaha-ordmaerke.svg",
+          "hash": "6b96473e1f6f9124e934feb756b90c65dabf84bbfdfd3386f0fec61c173131c2",
+          "bredde": 1000,
+          "hoejde": 287
         }
       }
     },
@@ -109,6 +121,12 @@
           "hash": "fe7280415df4ff8dda1f945a16bfef25a4702d96ae5d91c1be55a283a7b752fb",
           "bredde": 1000,
           "hoejde": 994
+        },
+        "ordmaerke": {
+          "fil": "img/brands/suzuki-ordmaerke.svg",
+          "hash": "8835b9818998bdecfe8f7136b09ab612aac9ff8a2949ee349c25f4123980a8ee",
+          "bredde": 1000,
+          "hoejde": 196
         }
       }
     },
@@ -139,6 +157,12 @@
           "hash": "bc9f251a9849870334210f400e2800ad9864847f017d4cf231d5a656caad0489",
           "bredde": 996,
           "hoejde": 1000
+        },
+        "ordmaerke": {
+          "fil": "img/brands/bmw-ordmaerke.svg",
+          "hash": "cbc7b02e6029e36979ecaa6316cb7f42fbe10a1093477cdddfe88d73dc5f4717",
+          "bredde": 1000,
+          "hoejde": 305
         }
       }
     },
@@ -167,6 +191,12 @@
           "hash": "dd33668df93d0c38bee14142fb05be7de1bdf3cf143a74ce64087a4cd0640952",
           "bredde": 1000,
           "hoejde": 367
+        },
+        "ordmaerke": {
+          "fil": "img/brands/kawasaki-ordmaerke.svg",
+          "hash": "7549ae62db98879b9f4d685e2d15c792035a9a00febc7feed53a34ac9a63478e",
+          "bredde": 1000,
+          "hoejde": 210
         }
       }
     },
@@ -197,6 +227,12 @@
           "hash": "46cfd8822bdf212a63678e729ba4c2611317a51f37a04797503ca570187a1961",
           "bredde": 1000,
           "hoejde": 849
+        },
+        "ordmaerke": {
+          "fil": "img/brands/triumph-ordmaerke.svg",
+          "hash": "374cf4111b191b0f2c3e735c6d5cb70c28c44301e3baa2b46dd92a0e8f0dfba9",
+          "bredde": 1000,
+          "hoejde": 269
         }
       }
     },
@@ -249,6 +285,12 @@
           "hash": "0e8826128c12776eed94d094aad5e8a7ef9e0cdfce90ef91b579bbc195d18217",
           "bredde": 1000,
           "hoejde": 992
+        },
+        "ordmaerke": {
+          "fil": "img/brands/royal-enfield-ordmaerke.svg",
+          "hash": "01d88429130ed6ebd893e0745b48ddfedec4b8149e57e34ea199164c11ec85f3",
+          "bredde": 1000,
+          "hoejde": 475
         }
       }
     },
@@ -337,6 +379,12 @@
           "hash": "ea99ca9c2f48fc4cf47cf5f733a88f7856094d2a4c9c6fa8ad2953f52578f272",
           "bredde": 1000,
           "hoejde": 233
+        },
+        "ordmaerke": {
+          "fil": "img/brands/moto-guzzi-ordmaerke.svg",
+          "hash": "dd9ecf09a7d2ff3dd6f6df7d2f3be60fed77981fda0681c595ac4456fbf6e6bc",
+          "bredde": 1000,
+          "hoejde": 179
         }
       }
     },
@@ -367,6 +415,12 @@
           "hash": "488407bb738852e35d59832cd0e328799cccad42c7c0250212f3c99a96321dd4",
           "bredde": 858,
           "hoejde": 1000
+        },
+        "ordmaerke": {
+          "fil": "img/brands/husqvarna-ordmaerke.svg",
+          "hash": "489c768547d2bc9f2d5673e0d551ccd1aafcffaf2c5350ee8347d46198410473",
+          "bredde": 1000,
+          "hoejde": 328
         }
       }
     },
@@ -439,6 +493,12 @@
           "hash": "75f292734bcd74fec368c694247f7d0b136d39a8091d2f58221b2095ca79a8da",
           "bredde": 1000,
           "hoejde": 699
+        },
+        "ordmaerke": {
+          "fil": "img/brands/mv-agusta-ordmaerke.svg",
+          "hash": "d0727c48e40a2480b5779d1e09a361dc5e4acb3d69a4c63300d16cffa7a7b8fe",
+          "bredde": 1000,
+          "hoejde": 124
         }
       }
     },
@@ -557,6 +617,12 @@
           "hash": "ce7d78985d10a0ad7e3babbacaed27531c55d73e02333dbd4d3027c36735269a",
           "bredde": 1000,
           "hoejde": 987
+        },
+        "ordmaerke": {
+          "fil": "img/brands/cfmoto-ordmaerke.svg",
+          "hash": "12176ce7936aa4ce2dc5bcd5bb06645d48037a6bdc465bdd7b53e4ba3d4d37d8",
+          "bredde": 1000,
+          "hoejde": 173
         }
       }
     },
@@ -704,6 +770,12 @@
           "hash": "28c908877c1cdf37e680ba75151abbe46b42471b2fa89df50ff5d4344103b89f",
           "bredde": 912,
           "hoejde": 1000
+        },
+        "ordmaerke": {
+          "fil": "img/brands/piaggio-ordmaerke.svg",
+          "hash": "913f8f6bfafa6ef348bf9deb8bd75e54333145943a98c5951b1f886e1210f765",
+          "bredde": 1000,
+          "hoejde": 196
         }
       }
     },
@@ -929,6 +1001,12 @@
           "hash": "796ec0f73444216cf47badc807d4ec5dc5fdf4db2cc6610f58aef6f0d85e3c5c",
           "bredde": 1000,
           "hoejde": 631
+        },
+        "ordmaerke": {
+          "fil": "img/brands/gasgas-ordmaerke.svg",
+          "hash": "e3764d72ced709ea7a1a94e71681c66357a5b583df65dd19c537a4e246893343",
+          "bredde": 1000,
+          "hoejde": 170
         }
       }
     },
@@ -1272,6 +1350,12 @@
           "hash": "38cd780459958dfb06cf9045a78e5bd7d99b324d0827174e765c6dfa92d33330",
           "bredde": 1000,
           "hoejde": 825
+        },
+        "ordmaerke": {
+          "fil": "img/brands/zero-ordmaerke.svg",
+          "hash": "c1e6f2e50373d90b7f9e5a8c587a4c8b02798391475354ef72000d0715434f84",
+          "bredde": 1000,
+          "hoejde": 324
         }
       }
     }

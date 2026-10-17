@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (alle.length && fremMount && ider(fremMount) !== nyeIder(frem)){
       fremMount.innerHTML = frem.map((l, i) => listingCardHTML(l, i)).join('');
+      /* w14: gitterets skabelon (1-2 annoncer har egne kolonner) følger det antal kort, der nu står i rækken - ellers ombrydes 5 kort i en 2-kolonne-skabelon fra et ældre byg. */
+      const fm = fremMount.closest('.mk-featured');
+      if (fm) fm.dataset.n = String(frem.length);
     }
     if (alle.length && gridMount && ider(gridMount) !== nyeIder(resten)){
       gridMount.innerHTML = resten.map((l, i) => listingCardHTML(l, i + frem.length)).join('');

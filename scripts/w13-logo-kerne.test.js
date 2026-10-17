@@ -293,7 +293,8 @@ test('P2-2 alle GODKENDTE logoer i det rigtige manifest viser logo (ikke monogra
     assert.ok(sm.h >= BL.MIN_HOEJDE && sm.w <= 56.01 && sm.h <= 22.01, `${m.slug} sm ${sm.w.toFixed(1)}x${sm.h.toFixed(1)}`);
   }
   // ens max-areal-regel: i hver størrelse er største/mindste areal ≤ 2,2 for logoer med forhold ≥ 0,85 (smallere er højdebegrænsede)
-  for (const s of BL.STORRELSER){
+  /* w14: 'wm' er kun til ordmærke-varianten i hero-lockuppen (ikke til hovedfilerne), så den indgår ikke i areal-reglen for hovedfiler. */
+  for (const s of BL.STORRELSER.filter(x => x !== 'wm')){
     const arealer = godkendte.map(m => { const l = BL.logoFor(m.navn); return { ar: l.bredde / l.hoejde, ...BL.slotMaal(s, l.bredde / l.hoejde) }; })
       .filter(x => x.ar >= 0.85 && x.h >= BL.MIN_HOEJDE).map(x => x.w * x.h);
     if (arealer.length < 2) continue;

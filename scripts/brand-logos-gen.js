@@ -25,7 +25,7 @@ const MANIFEST = path.join(ROOT, 'img', 'brands', 'manifest.json');
 const DATA = path.join(ROOT, 'js', 'brand-logos-data.js');
 const MAX_SVG_BYTES = 6 * 1024;
 const VARIANTER = ['emblem', 'lockup', 'ordmaerke'];
-const UNDERVARIANTER = ['emblem'];   // varianter.<navn> i manifestet; kun emblem bruges af klienten
+const UNDERVARIANTER = ['emblem', 'ordmaerke'];   // varianter.<navn> i manifestet; emblem (små slots) og ordmaerke (hero-lockup: emblem + ordmærke side om side) bruges af klienten
 const FALLBACKS = ['ordmaerke', 'monogram'];
 const FIL_MOENSTER = /^img\/brands\/[a-z0-9][a-z0-9-]*\.svg$/;
 
@@ -159,6 +159,8 @@ function byggData(manifest){
         o.l = { src: m.fil, w: r3(m.bredde), h: r3(m.hoejde), c: m.ensfarvet ? 1 : 0 };
         const em = m.varianter && m.varianter.emblem;
         if (em && em.fil && em.bredde > 0 && em.hoejde > 0) o.l.e = { src: em.fil, w: r3(em.bredde), h: r3(em.hoejde) };
+        const om = m.varianter && m.varianter.ordmaerke;
+        if (om && om.fil && om.bredde > 0 && om.hoejde > 0) o.l.o = { src: om.fil, w: r3(om.bredde), h: r3(om.hoejde) };
       }
       return o;
     }),
