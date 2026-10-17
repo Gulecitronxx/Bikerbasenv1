@@ -25,7 +25,7 @@
 // af body. Klienten (js/supabase-api.js) kalder denne funktion.
 //
 // Secrets:
-//   TAELLER_SALT    — salt til IP-hashen (valgfri; default 'bikerbasen')
+//   TAELLER_SALT    — hemmeligt salt til IP-hashen (anbefalet; mangler den, bruges SUPABASE_SERVICE_ROLE_KEY)
 //   SITE_URL        — til CORS
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — saettes automatisk
 
@@ -58,7 +58,10 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 async function ipHash(req: Request): Promise<string> {
   const ip = (req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || '')
     .split(',')[0].trim() || 'ukendt';
-  const salt = Deno.env.get('TAELLER_SALT') ?? 'bikerbasen';
+  /* Saltet SKAL være hemmeligt, ellers kan en IP brute-forces ud af hashen (IPv4 har kun ~4 mia. værdier). TAELLER_SALT er
+     det rigtige valg; mangler den, bruges i stedet service-role-nøglen, som altid er sat automatisk og aldrig forlader
+     serveren — aldrig en offentlig standardværdi. */
+  const salt = Deno.env.get('TAELLER_SALT') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? 'ukendt-salt';
   const dag = new Date().toISOString().slice(0, 10);
   const bytes = new TextEncoder().encode(`${ip}|${dag}|${salt}`);
   const digest = await crypto.subtle.digest('SHA-256', bytes);

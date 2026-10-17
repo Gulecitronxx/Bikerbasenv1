@@ -34,7 +34,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Hurtig gate FOER build: syntaks, SEO-audit, sitemap, døde links, testliste, header-synk og udgiv-tørkørsel (det trin, der
+  # fejlede i c4aada0). Kører mod de committede filer. npm test køres ikke her (tid/netværk) — se docs/review/gauntlet/PROCES.md.
+  verificer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verificer sitet (syntaks, SEO, sitemap, links, testliste, udgiv-tørkørsel)
+        run: |
+          node scripts/verificer-site.js --hurtig --med-udgiv || {
+            echo "::error title=Gate fejlede::scripts/verificer-site.js --hurtig --med-udgiv fejlede FOER build. Kør 'npm run gate' lokalt og ret trinnet, der er markeret FEJL."
+            exit 1
+          }
+
   build:
+    needs: verificer
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
