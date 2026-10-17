@@ -367,7 +367,7 @@
 :root[data-theme="dark"] .op-form .radio-card input:checked + .radio-card-inner .radio-card-label{ color: var(--color-primary); }
 
 /* Trin 1 og 2 står på samme side: tydelig adskillelse mellem sektionerne. */
-.op-form .form-step[data-step="2"]:not([hidden]){ margin-top: var(--space-6); padding-top: var(--space-6); border-top:1px solid var(--color-border); }
+.op-form .form-step[data-step="2"]:not([hidden]), .op-form .form-step[data-step="3"]:not([hidden]){ margin-top: var(--space-6); padding-top: var(--space-6); border-top:1px solid var(--color-border); }
 .op-form .form-step h2:focus:not(:focus-visible){ outline:none; }
 
 /* Trinbjælken er sektionsnavigation: knapper uden knap-udseende. */
@@ -481,3 +481,17 @@
   .op-photos.has-photos .photo-grid{ grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
 }
 .op-split-photos{ margin-top: var(--space-4); }
+
+/* W14 runde 2: tættere på billedets lave hero og kompakte første sektion. */
+@media (min-width:900px){
+  .op-hero{ padding: var(--space-4) 0 calc(var(--space-7, 40px) + var(--space-3)); }
+  .op-hero h1{ margin-bottom: var(--space-2); }
+  .op-trust{ padding: var(--space-3); gap: var(--space-2); }
+}
+/* Tips til mærke/model: bånd under typefliserne i stedet for en høj boks, så felterne rykker op. */
+@container opform (min-width: 700px){
+  .op-split-type{ grid-template-columns: minmax(0,1fr); }
+  .op-split-type .op-tips ul{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:6px var(--space-4); }
+}
+.op-split-type{ margin-top: var(--space-3); }
+.op-split-type .radio-card-group{ margin-bottom: var(--space-1); }
