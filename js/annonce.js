@@ -65,6 +65,40 @@ function renderGallery(){
   document.querySelectorAll('.gallery-thumbs button').forEach(b => b.classList.toggle('active', !!(Number(b.dataset.thumb) === currentPhotoIndex || (b.dataset.more && currentPhotoIndex >= 5))));
 }
 
+/* W14: fuldskærmsvisning. Native <dialog> (Esc lukker, fokus fanges), piletaster og knapper bladrer; kun egne annoncers fotos. */
+function anAabnLightbox(){
+  if (!currentPhotos.length) return;
+  let dlg = document.getElementById('an-lightbox');
+  if (!dlg){
+    dlg = document.createElement('dialog');
+    dlg.id = 'an-lightbox'; dlg.className = 'an-lb';
+    dlg.setAttribute('aria-label', 'Billeder i fuld størrelse');
+    dlg.innerHTML = `<button type="button" class="an-lb-luk" aria-label="Luk">${Icon.close}</button>
+      <button type="button" class="an-lb-pil prev" aria-label="Forrige billede">${Icon.chevronLeft}</button>
+      <img class="an-lb-img" alt="">
+      <button type="button" class="an-lb-pil next" aria-label="Næste billede">${Icon.chevronRight}</button>
+      <p class="an-lb-taeller" role="status" aria-live="polite"></p>`;
+    document.body.appendChild(dlg);
+    const vis = () => {
+      dlg.querySelector('.an-lb-img').src = currentPhotos[currentPhotoIndex];
+      dlg.querySelector('.an-lb-img').alt = `${currentListing?.brand || ''} ${currentListing?.model || ''} — billede ${currentPhotoIndex + 1} af ${currentPhotos.length}`.trim();
+      dlg.querySelector('.an-lb-taeller').textContent = `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
+      renderGallery();
+    };
+    dlg._vis = vis;
+    const flyt = d => { if (currentPhotos.length < 2) return; currentPhotoIndex = (currentPhotoIndex + d + currentPhotos.length) % currentPhotos.length; vis(); };
+    dlg.querySelector('.an-lb-luk').addEventListener('click', () => dlg.close());
+    dlg.querySelector('.prev').addEventListener('click', () => flyt(-1));
+    dlg.querySelector('.next').addEventListener('click', () => flyt(1));
+    if (currentPhotos.length < 2) dlg.querySelectorAll('.an-lb-pil').forEach(b => b.remove());
+    dlg.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') flyt(-1); else if (e.key === 'ArrowRight') flyt(1); });
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener('close', () => document.getElementById('gallery-expand')?.focus());
+  }
+  dlg._vis();
+  if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+}
+
 /* Tastaturnavigation: ArrowLeft/Right bladrer, Home/End hopper til første/sidste. Galleriet er en fokuserbar gruppe
    (tabindex=0 kun ved flere fotos), og tælleren er et aria-live-felt, så skærmlæseren hører "2 / 3". */
 function anGalleriTastatur(el){
@@ -129,21 +163,26 @@ function anBalancerKolonner(){
     anGenopretOprindelig(g);
     if (mqTablet.matches){ anTabletKolonner(g); return; }
     if (!mqBred.matches) return;
+    /* W14: ingen permutationer og ingen strækning. Fast som i billedet: kørekortkortet i midten, "Handl trygt" og
+       "Det bør du tjekke" i sidekolonnen under sælgerkortet. Kolonnerne ender naturligt (intet kort med tomt rum). */
     const kol = [g.querySelector('.an-col-a'), g.querySelector('.an-col-b'), g.querySelector('.an-side')];
-    const kort = [g.querySelector('.an-kk'), g.querySelector('.an-tjek'), g.querySelector('.an-trygt-wrap')];
-    if (kol.some(k => !k) || kort.some(k => !k)) return;
-    g.classList.add('an-maal');   // naturlig højde: ingen strækning, mens der måles
-    let bedst = null;
-    for (let a = 1; a < 2; a++) for (let b = 0; b < 3; b++) for (let c = 0; c < 3; c++){   // W14: kørekortkortet bor altid i midterkolonnen (som billedet)
-      const valg = [a, b, c];
-      kort.forEach((k, n) => kol[valg[n]].appendChild(k));
-      const h = kol.map(k => k.getBoundingClientRect().height);
-      const spredning = Math.max(...h) - Math.min(...h);
-      if (!bedst || spredning < bedst.spredning - 1) bedst = { valg, spredning };
+    const kk = g.querySelector('.an-kk'), tjek = g.querySelector('.an-tjek'), trygt = g.querySelector('.an-trygt-wrap');
+    if (kol.some(k => !k) || !kk || !tjek || !trygt) return;
+    kol[1].appendChild(kk);
+    /* Standard (som billedet): trygt + tjek i sidekolonnen. Er sidekolonnen markant højere end de andre (lange kilde-/sælgertekster),
+       prøves tjek i venstre og trygt i midten; den placering med mindst højdeforskel vælges, hvis den er mindst 80 px bedre. */
+    g.classList.add('an-maal');
+    const maal = (tj, tr) => { kol[tj].appendChild(tjek); kol[tr].appendChild(trygt); if (tj === 2) kol[2].appendChild(trygt); const h = kol.map(k => k.getBoundingClientRect().height); return Math.max(...h) - Math.min(...h); };
+    let bedst = { tj: 2, tr: 2, spred: maal(2, 2) };
+    const standard = bedst.spred;
+    for (const [tj, tr] of [[0, 2], [0, 1], [2, 1], [1, 2]]){
+      const sp = maal(tj, tr);
+      if (sp < bedst.spred - 1) bedst = { tj, tr, spred: sp };
     }
-    kort.forEach((k, n) => kol[bedst.valg[n]].appendChild(k));
+    if (bedst.spred > standard - 80) bedst = { tj: 2, tr: 2 };
+    kol[bedst.tj].appendChild(tjek);
+    if (bedst.tj === 2 && bedst.tr === 2){ kol[2].appendChild(trygt); kol[2].appendChild(tjek); } else kol[bedst.tr].appendChild(trygt);
     g.classList.remove('an-maal');
-    kol.forEach(k => { const sidste = k.lastElementChild; if (sidste) sidste.classList.add('an-strak'); });
   };
   /* Første kørsel på denne grid; lytterne er globale og slår grid'en op ved hver ændring (siden kan tegnes om). */
   g._anOrig = null;
@@ -335,8 +374,7 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
           ${erForhandler ? profilKnapHTML : `<a href="login.html?redirect=${redirect}" class="btn btn-outline btn-block">${Icon.user}Opret gratis profil</a>`}
         </div>
         <!-- Siger hvad login giver, og hvorfor — ikke bare at der er en mur. -->
-        <p class="seller-locked-note">${Icon.lock}<span>${erForhandler ? 'Forhandlerens profil er' : 'Sælgerens navn og profil er'} kun synlige for indloggede brugere. Det holder sælgerne fri af robotter og reklamehenvendelser.</span></p>
-        ${raad}
+        <p class="seller-locked-note">${Icon.lock}<span>${erForhandler ? 'Forhandlerens profil er' : 'Sælgerens navn og profil er'} kun synlige for indloggede brugere.</span></p>
       </div>`;
   }
 
@@ -471,6 +509,7 @@ const VIS_REKLAMATIONSRET = true;
    Klasserne har præfikset .an- og bor i css/p-annonce.css. */
 const anSvg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const AN_IKON = {
+  expand:  anSvg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
   bolt:    anSvg('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'),
   fuel:    anSvg('<path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16M3 21h12M14 9h2.5a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 0 3 0V8l-3-3M6 8h6"/>'),
   palette: anSvg('<circle cx="12" cy="12" r="9"/><circle cx="8" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16" cy="10.5" r="1"/>'),
@@ -601,10 +640,13 @@ function anNoegletal(l, hk){
    værdi null/'' udelades; grundfelterne får 'Ikke oplyst' af kaldstedet. */
 function anFakta(rader){
   const synlige = rader.filter(r => r && r[2] != null && r[2] !== '');
+  /* W14: 'Ikke oplyst' sidst (stabil sortering), så udfyldte rækker står øverst. Ulige antal: sidste række fylder hele bredden. */
+  synlige.sort((a, b) => (a[2] === 'Ikke oplyst') - (b[2] === 'Ikke oplyst'));
+  const raekker = Math.ceil(synlige.length / 2);
   return `
     <section class="an-card an-fakta" aria-labelledby="an-fakta-h">
       <h2 id="an-fakta-h">Fakta om motorcyklen</h2>
-      <dl class="an-facts">
+      <dl class="an-facts" style="--an-rows:${raekker}">
         ${synlige.map(([ikon, etiket, v]) => `<div class="an-fact"><span class="an-fact-ico">${ikon}</span><dt>${etiket}</dt><dd${v === 'Ikke oplyst' ? ' class="an-na"' : ''}>${String(v).includes('<') ? v : String(v).replace(/\//g, '/<wbr>')}</dd></div>`).join('')}
       </dl>
     </section>`;
@@ -629,6 +671,10 @@ function anKoerekortKort(l, kkM, uvisA2A){
     : kkM.graense ? 'Tjek kW i registreringsattesten' : 'Spørg sælgeren';
   const ekstra = (kk === 'A' && l.kanNedsaettesA2) ? ' Sælgeren oplyser, at den kan effektbegrænses til A2.' : '';
   const side = kk === 'A1' ? 'koerekort-a1.html' : 'koerekort-a2.html';
+  /* W14: lang forklaring (48–49 hk) vises som første sætning; resten ligger i detaljen 'Det bygger vurderingen på'. */
+  const forklDele = String(kkM.forklaring || '').split(/(?<=\.)\s+/);
+  const forklKort = forklDele.length > 1 && kkM.forklaring.length > 140 ? forklDele[0] : kkM.forklaring;
+  const forklRest = forklKort === kkM.forklaring ? '' : `<p class="an-kk-rest">${escapeHTML(forklDele.slice(1).join(' '))}${escapeHTML(ekstra)}</p>`;
   /* W14: "Det bygger vurderingen på" — kun oplyste tal og de offentlige grænser (A2: 35 kW, ca. 47 hk; A1: 11 kW, 125 cm³).
      Viser køberen HVORFOR badgen står, som billedets kørekortmodul, uden at love mere end tallene kan. */
   const hkOplyst = hkEllerNull(l.power);
@@ -643,16 +689,20 @@ function anKoerekortKort(l, kkM, uvisA2A){
       <span class="an-kk-ico" aria-hidden="true">${AN_IKON.idcard}</span>
       <div class="an-kk-tekst">
         <h2 id="an-kk-h">Kan du køre denne motorcykel?</h2>
-        <p>${escapeHTML(kkM.forklaring)}${ekstra}</p>
+        <p>${escapeHTML(forklKort)}${forklKort === kkM.forklaring ? ekstra : ''}</p>
         <a class="an-link" href="${side}">Læs mere om kørekort og regler${Icon.arrowRight}</a>
       </div>
       <div class="an-kk-badge an-kk-${tilstand}" role="img" aria-label="${escapeHTML(pille)} ${escapeHTML(badge)}: ${escapeHTML(badgeTekst)}"><span class="an-kk-pille">${escapeHTML(pille)}</span><b>${escapeHTML(badge)}</b><small>${escapeHTML(badgeTekst)}</small></div>
+      <details class="an-kk-mere">
+        <summary>Det bygger vurderingen på</summary>
+      ${forklRest}
       ${basisHTML}
       <ul class="an-kk-legende" aria-label="Sådan læser du badgen">
         <li><b>Mulig</b> betyder ikke udelukket ud fra tallene, aldrig bekræftet.</li>
         <li><b>Kræver A</b> betyder, at effekten alene ligger over A2-grænsen.</li>
         <li><b>Ikke afgjort</b> bruges ved 48–49 hk, hvor kW afgør det.</li>
       </ul>
+      </details>
     </section>`;
 }
 
@@ -1314,6 +1364,7 @@ function renderListing(){
       <div class="gallery" id="an-galleri" role="group" aria-roledescription="galleri" aria-label="Billeder af motorcyklen. Brug venstre og højre piletast" ${fotoAntal > 1 ? 'tabindex="0"' : ''}>
         <div class="gallery-main">
           <div id="gallery-main-img"></div>
+          <button type="button" class="gallery-expand" id="gallery-expand" aria-label="Se billederne i fuld størrelse" aria-haspopup="dialog">${AN_IKON.expand}</button>
           ${fotoAntal > 1 ? `
           <div class="gallery-counter" id="gallery-counter" role="status" aria-live="polite" aria-atomic="true"></div>
           <button type="button" class="gallery-nav prev" aria-label="Forrige billede">${Icon.chevronLeft}</button>
@@ -1450,6 +1501,7 @@ function renderListing(){
   document.querySelector('.gallery-nav.prev')?.addEventListener('click', () => shiftPhoto(-1));
   document.querySelector('.gallery-nav.next')?.addEventListener('click', () => shiftPhoto(1));
   anGalleriTastatur(document.getElementById('an-galleri'));
+  document.getElementById('gallery-expand')?.addEventListener('click', anAabnLightbox);
   document.querySelectorAll('.gallery-thumbs [data-thumb]').forEach(btn => {
     btn.addEventListener('click', () => { currentPhotoIndex = Number(btn.dataset.thumb); renderGallery(); });
   });
