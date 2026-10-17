@@ -35,7 +35,7 @@ node scripts/backend-deploy.js      # deploy det, der mangler (kræver token)
 | `NOTIFY_SECRET` | en lang tilfældig streng, du selv laver | Delt hemmelighed mellem databasens trigger (013) og `notify-saved-searches`. |
 | `SITE_URL` | `https://bikerbasen.dk` | Tilbage-links i mails og Stripe-flows. |
 | `CVR_API_TOKEN` (valgfri) | se `VERIFICERING.md` | `verify-profile` — uden den springes CVR-opslaget over. |
-| `TAELLER_SALT` (valgfri) | en tilfældig streng | `indberet`/`haendelse` salter IP-hashen med den (standard i koden, hvis den mangler). Skift den, og alle tællere starter forfra næste dag. |
+| `TAELLER_SALT` (valgfri) | en tilfældig streng | `indberet`/`haendelse` nøgler IP-hashen (HMAC) med den; mangler den, bruges en tilfældig pepper pr. funktionsinstans — aldrig en offentlig standardværdi. Skift den, og alle tællere starter forfra næste dag. |
 
 ## 2. Kør deployet
 

@@ -85,7 +85,7 @@ async function maal(browser, vaert, port, { side, query, vw, tema, fejl, forsink
     const synlig = !!a && cs.display !== 'none' && cs.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
     return {
       cls: window.__w10.cls, kilder: window.__w10.kilder,
-      banner: !!a, position: cs && cs.position, synlig,
+      banner: !!a, position: cs && cs.position, synlig, flow: !!a && a.classList.contains('data-afbrud-flow'),
       rolle: a && a.getAttribute('role'), liveAttr: a && a.getAttribute('aria-live'),
       iViewport: !!rect && rect.top >= -1 && rect.bottom <= innerHeight + 1 && rect.left >= -1 && rect.right <= innerWidth + 1,
       overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -124,7 +124,10 @@ test('W10-fejl: fejlbanneret flytter aldrig indhold (CLS < 0,05) og er et tilgæ
               if (r.fejlLog.length) fund.push(`${id}: sidefejl ${r.fejlLog[0]}`);
               if (r.overflow) fund.push(`${id}: vandret overflow`);
               if (r.banner){
-                if (r.position !== 'fixed') fund.push(`${id}: banneret er ${r.position}, ikke fixed`);
+                /* W12: på søgesiden under 1024 px ligger banneret som blok øverst i resultatområdet (data-afbrud-flow), så det ikke dækker
+                   hero-overskriften; CLS-kravet ovenfor gælder uændret. Alle andre sider/bredder er stadig et fast overlay. */
+                const flowOk = r.flow && side === 'soegning.html' && vw < 1024 && r.position === 'static';
+                if (r.position !== 'fixed' && !flowOk) fund.push(`${id}: banneret er ${r.position}, ikke fixed`);
                 if (r.rolle !== 'alert') fund.push(`${id}: role=${r.rolle}, forventet alert`);
                 if (r.liveAttr) fund.push(`${id}: aria-live sat oven i role=alert (dobbelt oplæsning)`);
                 if (!r.knap) fund.push(`${id}: 'Prøv igen' mangler`);

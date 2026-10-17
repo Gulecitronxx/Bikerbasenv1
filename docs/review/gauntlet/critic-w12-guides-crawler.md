@@ -1,0 +1,29 @@
+# Critic W12 - guides + crawler-paginering (commit 4ea2aa2)
+
+Arbejdskopi: %LOCALAPPDATA%\Temp\critic-w12-20261017124856 (git archive). Ingen nøgle, kun --toerloeb, intet skrevet.
+
+## DEL A - GUIDES: ACCEPTER (0 x P0/P1)
+Bekræftet mod primærkilder: omregistrering 4 hverdage og original attest = fuldmagt (borger.dk); sælger kan bede Motorstyrelsen afmelde; privatperson kan ikke selv afmelde, nummerpladeoperatør sætter gebyr (borger.dk); politi kan inddrage plader når forsikring ophører (borger.dk); BEK 1685/2025 §63 (syn ved ejerskifte, stk.2: 5-10 år/2 år, >10 år/1 år; 3 uger) og BEK 259/2026 §1 nr.6 "§§ 63 og 64 ophæves", ikrafttræden 1.1.2027 => "til og med 31.12.2026" KORREKT; færdselsloven §105 (ansvarsforsikring) og §81 (styrthjelm) i LBK 118/2026; Bilbog dækker motorcykler (pant/ejendomsforbehold, stelnummer); købeloven §§42/47/52/54 privatkøb, "som beset" dækker ikke svig; DOT: sidste 4 cifre = uge+år (korrekt for dæk efter 2000). "Intet skøde på motorcykel" = BEKRÆFTET som sproglig/juridisk pointe (motorcykler registreres i Motorregistret, ikke tinglyses som fast ejendom), men ordlyden er kategorisk -> P3.
+Ingen opdigtede priser/selskaber. Kilder i alle tre. Title 58/57/60, description 133/145/141, Article-JSON-LD ok (2026-10-17), Læs også = 3, links findes, seo-audit 0 fund (101 sider), sitemap+llms viser de nye, w12-guides/guides-test 95/95 grønne, footer-links i 40 sider.
+Fund:
+- P2 llms.txt:22: sælg-guiden beskrives "sikker betaling", mens guiden selv (og sikkerhed.html) siger Bikerbasen IKKE har sikker-betaling-flow. Misvisende løfte i AI-indekset. Ret til "betalingsråd".
+- P2 guide-mc-vinteropbevaring: "Batteriet er den hyppigste årsag til en MC der ikke vil starte" er usourced superlativ (USIKKER). Blødgør.
+- P3 vinter: "Der er ofte mere ro om foråret, men du kan ikke regne med det" modsiger forrige sætning (vinter er god tid til service); "bruge den modsat", "vent med at se på den, til foråret melder sig" er kluntet.
+- P3 sælg: "Skatteforvaltningen" findes ikke længere som myndighed (Skattestyrelsen/Skatteministeriet) - USIKKER; Forbrugerombudsmanden-afsnittet gælder erhvervsdrivende, ikke private sælgere (guiden siger det, men sætningen er løs).
+- P3 sælg: nævner ikke at det er KØBERS pligt at fremstille til syn inden 3 uger (§63 stk.1) - nyttigt for sælger. Syn-afsnittet forældes 1.1.2027 (sæt en revisionsdato).
+- P3 Kildeboilerplate "se din motorcykels registreringsattest, før du køber" og A2-kortblokken "Oplyst effekt under A2-grænsen" står også i vinter/forår-guiderne - irrelevant.
+- P3 Kortbilleder: vinter bruger motocross-foto (type/cross), forår bruger hero-800 (samme foto som foerste-motorcykel hero-960) - ikke unikke/tematiske. Alle tre Article-JSON-LD bruger samme hero-1600.webp.
+- Ingen kannibalisering mod guide-brugt/foerste (sælger- vs købersynsvinkel).
+
+## DEL B - CRAWLER: ACCEPTER med betingelser (0 x P0/P1 i koden; P1-risiko ved FULD kørsel)
+Seks regler: INTAKT. robots.txt tjekkes pr. side-URL (paginering.js:~118, robots.maaHente for nr>1), hastighed.js urørt (git diff mod origin/main og 7ef5efa: kun config/hent/pipeline/run/paginering/yaml), alle sider via medHastighedsgraense (3000 ms, serielt), User-Agent urørt, felt-whitelist/db.js (60 %-værn, 3 kørsler) urørt, opt-out/claim urørt. max_sider hårdt loft 1..100 (config valideres), yaml=60.
+komplet kun ved: tom side efter side 1, "af N", ingen rel=next. Alt andet (loft, fejl, robots-spær, ingen nye, --limit, --maks-sider, mislykket liste) => komplet=false => markerBorte kaldes ikke (pipeline.js:475-478). Dedup på kilde_annonce_id. MC Syd (ingen paginering) uændret: tørløb gav 5 fundet, 354 kort, grænsemeddelelse som før.
+Tests: node --test crawler/*.test.js = 221/221 grønne. Tørløb guloggratis --limit=6 --maks-sider=2: robots hentet, "59 sider", side 1 (60 kort, 59 nye) og side 2 via ?page=2 (60 kort, 58 nye), 6 detaljesider, 3000 ms, "TØRLØB: der skrives ikke", 0 borte. (Kun env uden SUPABASE-nøgle.)
+Fund:
+- P3 pipeline.js:152 regex-regression: `/\d+/g` blev til `/d+/g` -> bogstavet d i uuid'er erstattes af N i kasseringsgrunde ("033N8e965206"), og grupperingen af grunde virker ikke. Kosmetisk, men et reelt diff-uheld.
+- P2 paginering.js:~143: `har_naeste === false` => komplet. Hvis kildens `link[rel=next]` forsvinder ved designskift, bliver side 1 (60 annoncer) "komplet" og kun db.js' 60 %-værn forhindrer massiv borte-markering. Kræv at antal_sider (hvis konfigureret) også er 1, eller at rel=next-fravær kun tæller fra side >=2 / efter bekræftet "af N".
+- P2 knap-session (hent.js) er uafprøvet mod live (siger kommentaren selv); ingen kilde bruger den. Overvej at slå type=knap fra, til den er testet.
+Risiko ved fuld kørsel (59 sider + ~3.489 detaljesider @3000 ms ≈ 3 t, ca. 3.550 kald): trafik er ~1 kald/3 s - rimeligt mod kilde med skriftligt ja (16.08.2026), men ja'et er givet før paginering og dækker ikke dokumenteret ~60x mere volumen -> P1 (proces): få ejerens bekræftelse af omfanget. Ingen genoptagelse/checkpoint: annoncer skrives først EFTER detaljetrinnet (pipeline.js:446), så et 429/403 efter 2 timer kaster alt væk; 429/403 på listeside stopper straks, på detaljesider stopper efter 5 i træk (godt), men ingen Retry-After/backoff og ingen "hent kun nye/ændrede detaljer". Hver kørsel gentager alle ~3.489 detaljekald.
+Anbefaling: standard max_sider 15 pr. kørsel (900 annoncer, ca. 45 min) med rotation (gem næste startside; kataloget gennemløbes over ~4 kørsler) og gem listekortene løbende; detaljesider kun for nye/ændrede annoncer; ved 429 honorér Retry-After og stop; borte-markering først når en rotationscyklus er komplet. Indtil da: kør højst --maks-sider=10 manuelt.
+
+DOM: A = ACCEPTER (ret llms.txt-formuleringen). B = ACCEPTER koden; AFVIS fuld produktionskørsel (59 sider/3 t) før ejerbekræftelse af omfang, checkpoint/hent-kun-nye og det blødgjorte komplet-kriterie.

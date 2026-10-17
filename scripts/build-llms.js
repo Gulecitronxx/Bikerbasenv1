@@ -26,6 +26,11 @@ const AFSNIT = [
     ['guide-brugt-motorcykel.html', 'Køb brugt motorcykel', 'Tjekliste til køb af en brugt motorcykel.'],
     ['guide-mc-forsikring.html', 'MC-forsikring', 'Ansvar mod kasko og spørgsmål at stille, når du får et tilbud.'],
     ['guide-mc-udstyr.html', 'MC-udstyr', 'Hjelm, tøj og pasform: hvad du bør vide, før du køber udstyr.'],
+    ['guide-mc-typer.html', 'Motorcykeltyper', 'Naked, sport, adventure, touring, cruiser og flere: hvad typen siger om kørsel og brug.'],
+    ['guide-mc-ordliste.html', 'MC-ordliste', 'ccm, kW, hk, kW pr. kg og andre begreber i en motorcykelannonce.'],
+    ['guide-saelg-motorcykel.html', 'Sådan sælger du din motorcykel', 'Papirer, pris, annonce, betalingsråd, svindelmønstre og ejerskifte.'],
+    ['guide-mc-vinteropbevaring.html', 'Vinteropbevaring af motorcykel', 'Generelle råd om rengøring, batteri, brændstof, dæk, kæde og forsikring.'],
+    ['guide-mc-foraar-tjekliste.html', 'Første tur efter vinteren', 'Tjekliste til motorcyklen, før sæsonen starter.'],
   ]],
   ['Om Bikerbasen', [
     ['om-bikerbasen.html', 'Om Bikerbasen', 'Hvem vi er, og hvordan siden virker.'],

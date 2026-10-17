@@ -485,7 +485,9 @@ function facetTal(){
 function saetFacet(el, n, aktiv){
   const slot = el.querySelector('.facet-n');
   if (slot) slot.textContent = n == null ? '' : n;
-  const tom = n === 0 && !aktiv;
+  /* W12: under lagerfejl er 0 (eller et snapshot-tal) ikke et svar — CSS viser '?'; intet markeres som blindgyde eller spærres. */
+  const fejl = document.documentElement.hasAttribute('data-lager-fejl');
+  const tom = n === 0 && !aktiv && !fejl;
   el.classList.toggle('facet-empty', tom);
   const styr = el.tagName === 'BUTTON' ? el : el.querySelector('input');
   if (styr) styr.disabled = tom;
@@ -814,7 +816,6 @@ function externalRowHTML(l, i){
   if (!href) return '';
   const t = deltTitel(l);
   const model = escapeHTML(t.model), variant = escapeHTML(t.variant);
-  const sted = [l.city, l.postnr].filter(Boolean).map(escapeHTML).join(' ');
   return `
   <article class="listing-row is-external" data-listing-id="${l.id}" data-external="1">
     <div class="row-media">${listingMediaHTML(l, t.model, i === 0)}</div>
@@ -825,8 +826,7 @@ function externalRowHTML(l, i){
       </div>
       <h3 class="row-title">${model}</h3>
       ${variant ? `<p class="row-variant">${variant}</p>` : ''}
-      <p class="row-origin">${Icon.store}<b>${kilde}</b>${l.source?.domaene ? `<span class="row-dim">${escapeHTML(l.source.domaene)}</span>` : ''}
-        <span class="row-dim">${Icon.mapPin}${sted || 'Sted ikke oplyst'}</span></p>
+      <div class="row-origin">${kortFodHTML(l, kortFakta(l))}</div>
     </div>
     ${rowSpecsHTML(l)}
     <div class="row-end">
@@ -846,7 +846,6 @@ function listingRowHTML(l, i){
   const t = deltTitel(l);
   const model = escapeHTML(t.model), variant = escapeHTML(t.variant);
   const dealer = l.isDealer || l.seller?.isDealer;
-  const sted = [l.city, l.region].filter(Boolean).map(escapeHTML).join(', ');
   return `
   <article class="listing-row" data-listing-id="${l.id}">
     <div class="row-media">${listingMediaHTML(l, t.model, i === 0)}</div>
@@ -860,8 +859,7 @@ function listingRowHTML(l, i){
       </div>
       <h3 class="row-title">${model}</h3>
       ${variant || l.type ? `<p class="row-variant">${variant || escapeHTML(typeLabel(l.type))}</p>` : ''}
-      <p class="row-origin">${dealer ? Icon.store : Icon.user}<b>${escapeHTML(dealer ? (l.seller?.name || 'Forhandler') : 'Privat sælger')}</b>
-        <span class="row-dim">${Icon.mapPin}${sted || 'Sted ikke oplyst'}</span></p>
+      <div class="row-origin">${kortFodHTML(l, kortFakta(l))}</div>
     </div>
     ${rowSpecsHTML(l)}
     <div class="row-end">
@@ -1017,24 +1015,20 @@ function swipeCardHTML(l, stackPos){
   const kk = koerekortMaerkat(l);
   const f = kortFakta(l);
   const titel = escapeHTML(f.titel);   // samme titel som gitterkortet (aldrig "null null" ved manglende mærke/model)
-  const kilde = kortKildeHTML(l, f);
   return `
   <article class="swipe-card" data-stack="${stackPos}" style="--stack:${stackPos}">
     <div class="swipe-card-media">
       ${listingMediaHTML(l, f.titel)}
       <span class="swipe-stamp swipe-stamp-fav">Gem</span>
       <span class="swipe-stamp swipe-stamp-skip">Spring over</span>
-      ${l.isDealer ? `<span class="badge badge-dealer swipe-card-flag">${Icon.shieldCheck}Forhandler</span>` : ''}
+      ${l.isDealer ? `<span class="badge badge-dealer swipe-card-flag" title="Forhandler">${Icon.store}Forhandler</span>` : ''}
       <span class="card-koerekort swipe-card-kk" title="${escapeHTML(kk.forklaring)}">${escapeHTML(kkVisTekst(kk))}</span>
     </div>
     <div class="swipe-card-body">
       <div class="swipe-card-price">${formatPrice(l.price)}</div>
       <h3 class="swipe-card-title">${titel}</h3>
       <div class="swipe-card-meta"><span>${Icon.calendar}${!erTal(l.year) ? 'Årgang ikke oplyst' : escapeHTML(String(l.year))}</span><span>${Icon.gauge}${formatKm(l.km)}</span><span>${Icon.engine}${formatCcm(l.ccm)}</span></div>
-      <div class="swipe-card-fod">
-        <span class="swipe-card-loc">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
-        <span class="rk-kilde" title="${f.ext ? 'Annoncen ligger hos ' + escapeHTML(f.kilde) + '. Bikerbasen viser den, men handlen sker hos kilden.' : 'Annoncen ligger på Bikerbasen.'}">${kilde.ikon}<span>${kilde.tekst}</span></span>
-      </div>
+      <div class="swipe-card-fod">${kortFodHTML(l, f)}</div>
     </div>
   </article>`;
 }

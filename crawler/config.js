@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const YAML = require('yaml');
+const { validerPaginering } = require('./paginering');
 
 const KILDE_MAPPE = path.join(__dirname, '..', 'sources');
 
@@ -155,6 +156,9 @@ function validerKilde(k){
         'etiketten på kildens side mangler');
     }
   }
+
+  // Paginering (valgfri): type, hårdt loft, tom-side-stop. Se crawler/paginering.js.
+  validerPaginering(k.paginering, kraev);
 
   // Årgang og km: fra kortet ELLER fra detaljesiden, men de skal komme et sted fra.
   // "Fra kortet" tæller også et sammensat udtræk ({ css, udtraek }) — se

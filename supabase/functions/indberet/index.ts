@@ -25,7 +25,7 @@
 // direkte med reporter_id = auth.uid().
 //
 // Secrets:
-//   TAELLER_SALT    — salt til IP-hashen (valgfri; default 'bikerbasen')
+//   TAELLER_SALT    — hemmelig noegle til IP-hashen (anbefalet; mangler den, bruges en tilfaeldig pepper pr. instans)
 //   SITE_URL        — til CORS
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — saettes automatisk
 
@@ -54,15 +54,20 @@ const TARGET_TYPES = ['listing', 'profile'];
 const REASONS = ['svindel', 'stjaalet', 'falsk', 'upassende', 'andet'];
 const GRAENSE_PR_DAG = 10;
 
-/* Daglig saltet sha256 af afsenderens IP. Skifter hver dag, saa hashen ikke
-   kan slaas op paa tvaers af dage. Raa IP forlader aldrig denne funktion. */
+/* Daglig HMAC-SHA256 af afsenderens IP. Skifter hver dag, saa hashen ikke kan slaas op paa tvaers af dage. Raa IP forlader
+   aldrig denne funktion. Noeglen SKAL vaere hemmelig, ellers kan en IP brute-forces ud af hashen (IPv4 har kun ~4 mia.
+   vaerdier): TAELLER_SALT er det rigtige valg. Mangler den, bruges en tilfaeldig pepper, der genereres pr. funktionsinstans
+   (kan aldrig gaettes og er ikke afledt af nogen autentificeringsnoegle; taelleren bliver blot lidt mindre staerk paa tvaers
+   af genstarter). Ingen offentlig standardvaerdi og ingen genbrug af service-role-noeglen. */
+const INSTANS_PEPPER = crypto.getRandomValues(new Uint8Array(32));
 async function ipHash(req: Request): Promise<string> {
   const ip = (req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for') || '')
     .split(',')[0].trim() || 'ukendt';
-  const salt = Deno.env.get('TAELLER_SALT') ?? 'bikerbasen';
+  const salt = Deno.env.get('TAELLER_SALT');
+  const noegleBytes = salt ? new TextEncoder().encode(salt) : INSTANS_PEPPER;
+  const noegle = await crypto.subtle.importKey('raw', noegleBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const dag = new Date().toISOString().slice(0, 10);
-  const bytes = new TextEncoder().encode(`${ip}|${dag}|${salt}`);
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const digest = await crypto.subtle.sign('HMAC', noegle, new TextEncoder().encode(`${ip}|${dag}`));
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
 }
 

@@ -169,3 +169,28 @@ body.home .kol-hoved h2{ white-space:normal; }
 
 /* Critic w11 P2: små tekstlinks som tap-mål >= 40 px (visuel størrelse uændret). */
 body.home .kol-link, body.home .guide-boks a{ display:inline-flex; align-items:center; min-height:40px; }
+
+/* ---------- W12: mørkt tema — heroens underkant må ikke anes bag søgekortet ----------
+   Før: foto-/båndkanten (y = heroens underkant) stod som en hård streg, og kortet (#1F1C17) var næsten samme tone som båndet under
+   (#262219) med en 30 % gennemsigtig kant — så kortet læste som halvgennemsigtigt. Nu: (1) heroens nederste 140 px toner blødt ned i
+   båndets farve, så der ingen kant er; (2) kortet løftes en tand over båndet og får en fuld, opak kant og en tydelig skygge. */
+:root[data-theme="dark"] body.home .hero::before{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:140px; z-index:2; pointer-events:none;
+  background: linear-gradient(0deg, var(--color-surface-2) 0, color-mix(in srgb, var(--color-surface-2) 55%, transparent) 45%, transparent 100%);
+}
+:root[data-theme="dark"] body.home .search-panel{
+  background: color-mix(in srgb, var(--color-surface) 92%, #fff);
+  border-color: var(--color-border);
+  box-shadow: 0 22px 54px rgba(0,0,0,.55), 0 0 0 1px color-mix(in srgb, var(--color-border) 80%, #fff);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]):not([data-theme="dark"]) body.home .hero::before{
+    content:""; position:absolute; left:0; right:0; bottom:0; height:140px; z-index:2; pointer-events:none;
+    background: linear-gradient(0deg, var(--color-surface-2) 0, color-mix(in srgb, var(--color-surface-2) 55%, transparent) 45%, transparent 100%);
+  }
+  :root:not([data-theme="light"]):not([data-theme="dark"]) body.home .search-panel{
+    background: color-mix(in srgb, var(--color-surface) 92%, #fff);
+    border-color: var(--color-border);
+    box-shadow: 0 22px 54px rgba(0,0,0,.55), 0 0 0 1px color-mix(in srgb, var(--color-border) 80%, #fff);
+  }
+}

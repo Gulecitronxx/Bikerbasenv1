@@ -1265,6 +1265,17 @@ function meldDataafbrud(){
   /* Prøv igen = ny indlæsning: hver side tegner sig selv ud fra Store ved opstart, og der findes ingen fælles "tegn om". */
   p.querySelector('.data-afbrud-igen').addEventListener('click', () => location.reload());
   p.querySelector('.data-afbrud-luk').addEventListener('click', () => { p.remove(); });
+  /* W12: på søgesiden dækkede det faste overlay hero-overskriften på mobil (der er kun 12 px mellem overskrift og søgekort, så der er
+     ingen plads til et overlay uden at dække enten overskriften eller søgefeltet). Under 1024 px lægges banneret derfor som en blok øverst i
+     resultatområdet (under søgekortet, over "Lageret kunne ikke hentes"-titlen): hero og søgefelt er helt frie, og nu er der ingen fast
+     overlay at skjule ved scroll. role=alert, "Prøv igen" og "Luk" er uændrede. */
+  const iFlow = window.innerWidth < 1024 && sidensNavn() === 'soegning.html' ? document.getElementById('so-results') : null;
+  if (iFlow){
+    p.classList.add('data-afbrud-flow');
+    iFlow.prepend(p);
+    if (fejlet) skjulNulTalVedFejl();
+    return;
+  }
   vaert.prepend(p);
   /* Mobil: brødkrummen (links lige under headeren) skal ikke dækkes — banneret lægges lige under den. */
   const bk = window.innerWidth < 1024 ? document.querySelector('.breadcrumb') : null;

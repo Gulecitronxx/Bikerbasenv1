@@ -109,11 +109,14 @@ test('alle sessionStorage-/localStorage-nøgler i js/ er nævnt på privatlivssi
 test('IP-hash-tælling: hvis koden hasher IP, beskriver siden det (hash, IP, dato, sletning) og lover ikke mere end koden', () => {
   const ts = kilde('supabase/functions/haendelse/index.ts');
   const sql = kilde('supabase/022_anonym_skrivegulv.sql');
-  assert.match(ts, /crypto\.subtle\.digest\('SHA-256'/);
+  assert.match(ts, /crypto\.subtle\.sign\('HMAC'/);
+  // ingen offentlig standardværdi og ingen genbrug af service-role-nøglen som hashnøgle
+  assert.doesNotMatch(ts, /Deno\.env\.get\('TAELLER_SALT'\)\s*\?\?/);
+  assert.doesNotMatch(ts.split('async function ipHash')[1].split('Deno.serve')[0], /SERVICE_ROLE_KEY/);
   assert.match(sql, /delete from public\.skrive_taeller where dag < current_date - 1/);
   const t = TEKST.privatlivspolitik;
   assert.match(t, /IP-adresse/);
-  assert.match(t, /hash \(SHA-256\)/);
+  assert.match(t, /hash \(HMAC-SHA-256\)/);
   assert.match(t, /dagens dato/);
   assert.match(t, /slettes automatisk/);
   assert.match(t, /før i går/); // current_date - 1: rækker ældre end i går

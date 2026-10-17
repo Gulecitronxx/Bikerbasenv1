@@ -91,6 +91,18 @@ const SRC = {
     label: 'Brugte varer generelt — Forbrugerstyrelsen (forbrug.dk)',
     url: 'https://forbrug.dk/emner/nye-og-brugte-varer/brugte-varer-generelt',
   },
+  skat: {
+    label: 'Skatteforvaltningen — skat, afgifter og regler for private (skat.dk)',
+    url: 'https://www.skat.dk',
+  },
+  motorstyrelsen: {
+    label: 'Motorstyrelsen — Motorregistret, omregistrering og afmelding (motorst.dk)',
+    url: 'https://motorst.dk',
+  },
+  politiet: {
+    label: 'Politiet — forebyggelse af kriminalitet og anmeldelse (politi.dk)',
+    url: 'https://politi.dk',
+  },
 };
 
 /* Standarddatoer for de tre første guides. En guide kan have egne `published`/`modified` (de to nyeste har).
@@ -318,6 +330,7 @@ const GUIDES = [
   {
     file: 'guide-brugt-motorcykel.html',
     slug: 'guide-brugt-motorcykel',
+    modified: '2026-10-17',
     related: ['guide-mc-forsikring', 'guide-mc-ordliste', 'guide-foerste-motorcykel'],
     navn: 'Køb brugt motorcykel — det skal du tjekke',
     h1: 'Køb brugt motorcykel — det skal du tjekke',
@@ -427,7 +440,7 @@ const GUIDES = [
 <li><strong>Ansvarsforsikring:</strong> motordrevne køretøjer skal være dækket af en ansvarsforsikring i et selskab med Finanstilsynets tilladelse (færdselsloven § 105). Tegn den, før du kører hjem.</li>
 <li><strong>Udstyr:</strong> styrthjelm er lovpligtig for føreren og for passagerer fra 15 år, og føreren skal sørge for, at passagerer fra 5 til 15 år bruger den, medmindre passagersædet har sikkerhedssele. Pligten gælder ikke på fx en parkeringsplads (færdselsloven § 81).</li>
 </ul>
-<p>Er du på vej til din første motorcykel, kan du læse mere i <a href="guide-foerste-motorcykel.html">guiden til din første motorcykel</a>. Er du klar til at lede efter en, så start i <a href="soegning.html">søgningen</a>.</p>
+<p>Er du på vej til din første motorcykel, kan du læse mere i <a href="guide-foerste-motorcykel.html">guiden til din første motorcykel</a>. Er du klar til at lede efter en, så start i <a href="soegning.html">søgningen</a>. Skal du selv sælge en motorcykel, så læs <a href="guide-saelg-motorcykel.html">guiden til salg af motorcykel</a>.</p>
 <p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
       },
     ],
@@ -437,8 +450,8 @@ const GUIDES = [
     file: 'guide-mc-forsikring.html',
     slug: 'guide-mc-forsikring',
     published: '2026-10-16',
-    modified: '2026-10-16',
-    related: ['guide-foerste-motorcykel', 'guide-brugt-motorcykel', 'guide-mc-udstyr'],
+    modified: '2026-10-17',
+    related: ['guide-saelg-motorcykel', 'guide-brugt-motorcykel', 'guide-mc-udstyr'],
     navn: 'MC-forsikring: det skal du vide som ny motorcyklist',
     h1: 'MC-forsikring: det skal du vide som ny motorcyklist',
     title: 'MC-forsikring: det skal du vide som nybegynder',
@@ -505,7 +518,7 @@ const GUIDES = [
 <li>Hvilke krav gælder for føreren, og må andre låne motorcyklen?</li>
 <li>Gælder forsikringen i udlandet, og i hvilke lande?</li>
 <li>Er banekørsel, løb og træningsdage dækket? Det er ofte undtaget.</li>
-<li>Hvad gælder, hvis motorcyklen står stille om vinteren? Findes der en sæsonordning?</li>
+<li>Hvad gælder, hvis motorcyklen står stille om vinteren? Findes der en sæsonordning? Se <a href="guide-mc-vinteropbevaring.html">vinteropbevaring</a> og <a href="guide-mc-foraar-tjekliste.html">første tur efter vinteren</a>.</li>
 <li>Hvordan ændrer eller opsiger du aftalen, og hvilken binding er der?</li>
 </ol>
 <p>Læs betingelserne, ikke kun forsiden af tilbuddet. Det er i betingelserne, at undtagelserne står.</p>`,
@@ -533,7 +546,7 @@ const GUIDES = [
 <li><strong>Før du aftaler købet:</strong> få et tilbud på forsikring til netop den motorcykel, så du kender de løbende udgifter.</li>
 <li><strong>Når I har aftalt købet:</strong> sørg for, at ansvarsforsikringen er på plads, før du kører hjem. Afklar med sælger og dit selskab, hvordan overgangen sker, hvis motorcyklen allerede er registreret og forsikret hos sælger.</li>
 <li><strong>Efter købet:</strong> omregistrer motorcyklen. Fristen og fremgangsmåden står i <a href="guide-brugt-motorcykel.html">guiden til køb af brugt motorcykel</a> og på borger.dk.</li>
-<li><strong>Sælger du senere:</strong> giv forsikringsselskabet besked om salget.</li>
+<li><strong>Sælger du senere:</strong> giv forsikringsselskabet besked om salget, men afklar tidspunktet først. Se <a href="guide-saelg-motorcykel.html">guiden til salg af motorcykel</a>.</li>
 </ol>
 <p>Leder du stadig efter motorcykel, kan du bruge <a href="soegning.html">søgningen</a> og se, hvad der er til salg, så du har en konkret model at bede om tilbud på.</p>`,
       },
@@ -562,7 +575,7 @@ const GUIDES = [
     file: 'guide-mc-udstyr.html',
     slug: 'guide-mc-udstyr',
     published: '2026-10-16',
-    modified: '2026-10-16',
+    modified: '2026-10-17',
     related: ['guide-foerste-motorcykel', 'guide-mc-forsikring', 'guide-brugt-motorcykel'],
     navn: 'MC-udstyr til ny motorcyklist: hjelm og tøj',
     h1: 'MC-udstyr til ny motorcyklist: hjelm og tøj',
@@ -677,6 +690,7 @@ const GUIDES = [
 <p>Bikerbasen er et indeks over annoncer og sælger ikke udstyr, så vi anbefaler ingen mærker. Gå ind i en butik, få målt og prøvet, og stil spørgsmål om mærkning. Sæt penge af til udstyr, før du kigger på motorcyklen.</p>
 <p>Er du i tvivl om, hvad du kan vente med, så start med det, der sidder tættest på kroppen og rammer først: hjelm, handsker og støvler. Resten kan du bygge op over tid, efterhånden som du lærer din egen kørsel at kende.</p>
 <p>Oplysningerne her er generelle. Følg altid producentens anvisning og de aktuelle regler hos Færdselsstyrelsen.</p>
+<p>Udstyret skal også passes: se <a href="guide-mc-vinteropbevaring.html">vinteropbevaring</a> og <a href="guide-mc-foraar-tjekliste.html">tjeklisten til første tur efter vinteren</a>.</p>
 <p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
       },
     ],
@@ -804,7 +818,7 @@ const GUIDES = [
     file: 'guide-mc-ordliste.html',
     slug: 'guide-mc-ordliste',
     published: '2026-10-16',
-    modified: '2026-10-16',
+    modified: '2026-10-17',
     related: ['guide-a2-koerekort', 'guide-brugt-motorcykel', 'guide-mc-typer'],
     navn: 'MC-ordliste: ccm, kW, hk og andre begreber',
     h1: 'MC-ordliste: ccm, kW, hk og andre begreber',
@@ -896,7 +910,7 @@ const GUIDES = [
 <dt>Kilde</dt>
 <dd>Det sted, annoncen oprindeligt står: en forhandlers side eller en markedsplads. Bikerbasen samler annoncerne og linker til kilden. Vi sælger ikke selv, og handlen sker mellem dig og sælgeren.</dd>
 <dt>Forhandler og privat sælger</dt>
-<dd>Forhandler er en virksomhed, privat sælger er en person. Reglerne for reklamation er forskellige, så det betyder noget for dig som køber. Se <a href="guide-brugt-motorcykel.html">guiden til køb af brugt motorcykel</a>.</dd>
+<dd>Forhandler er en virksomhed, privat sælger er en person. Reglerne for reklamation er forskellige, så det betyder noget for dig som køber. Se <a href="guide-brugt-motorcykel.html">guiden til køb af brugt motorcykel</a>, eller <a href="guide-saelg-motorcykel.html">guiden til salg</a>, hvis du selv sælger.</dd>
 <dt>Pris ved henvendelse</dt>
 <dd>Annoncen oplyser ingen pris. Det betyder ikke, at motorcyklen er gratis eller dyr, kun at prisen skal spørges om hos sælgeren.</dd>
 <dt>Pant og ejendomsforbehold</dt>
@@ -922,6 +936,322 @@ const GUIDES = [
 <dd>Det felt, kilden ikke oplyser, står som "ikke oplyst". Vi gætter ikke.</dd>
 </dl>
 <p>Når du er klar, så kig på <a href="koerekort-a2.html">motorcykler til A2-kørekort</a> eller søg på hele udvalget.</p>
+<p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------ 8 (w12-guides) */
+  {
+    file: 'guide-saelg-motorcykel.html',
+    slug: 'guide-saelg-motorcykel',
+    published: '2026-10-17',
+    modified: '2026-10-17',
+    related: ['guide-brugt-motorcykel', 'guide-mc-forsikring', 'guide-mc-ordliste'],
+    navn: 'Sådan sælger du din motorcykel: trin for trin',
+    h1: 'Sådan sælger du din motorcykel: trin for trin',
+    title: 'Sådan sælger du din motorcykel: trin for trin',
+    description: 'Sælg din motorcykel trygt: papirer, prisresearch, ærlig annonce, betaling, svindelmønstre og ejerskifte i Motorregistret. Med kilder.',
+    ingress: 'En god handel starter, før annoncen er skrevet. Her er en jordnær gennemgang for dig, der sælger privat: papirerne, prisen, annoncen, samtalerne med købere, de svindelmønstre du bør kende, og hvad der skal ske, når motorcyklen skifter ejer.',
+    cardImage: 'img/sell-cruiser.webp',
+    cardPos: 'center',
+    tldr: [
+      'Saml papirerne først: registreringsattest, servicehistorik og regninger. Slå evt. gæld op i Bilbogen.',
+      'Find prisen ved at sammenligne med lignende annoncer, og vær ærlig om stand og fejl.',
+      'Mød køberen personligt, og aflever først motorcyklen og papirerne, når pengene står på din konto.',
+      'Ejerskiftet registreres i Motorregistret. Giv forsikringsselskabet besked, og få købsaftalen på skrift.',
+    ],
+    sources: ['ejerskifte', 'bilbogen', 'motorstyrelsen', 'koebeloven', 'brugtbil', 'forbrugerombudsmanden', 'skat', 'politiet', 'syn', 'synaendring'],
+    sections: [
+      {
+        id: 'forbered',
+        title: 'Før du lægger annoncen op',
+        toc: 'Før du lægger annoncen op',
+        html: `
+<p>Det går hurtigere og giver færre misforståelser, hvis du er forberedt. Tag motorcyklen ud og se den med en købers øjne: Hvad er i orden, og hvad er slidt eller beskadiget? Notér det, før du skriver et ord i annoncen. Afklar også, hvorfor du sælger, og hvornår du har brug for pengene. En sælger, der ikke er presset på tid, forhandler bedre og siger ikke ja til det første tilbud af ren utålmodighed.</p>
+<p>Bikerbasen er et indeks over annoncer, ikke et sted, hvor handlen sker. Vi viser annoncer fra forhandlere og markedspladser og sender læseren videre til kilden. Du annoncerer altså hos kilden, for eksempel på en markedsplads eller hos en forhandler. Vil du også have en annonce på Bikerbasen, kan du <a href="opret-annonce.html">oprette en annonce her</a>.</p>`,
+      },
+      {
+        id: 'papirer',
+        title: 'Papirer og dokumenter',
+        toc: 'Papirer og dokumenter',
+        html: `
+<p>Saml disse ting, før du får besøg:</p>
+<ul>
+<li><strong>Registreringsattesten.</strong> Det er dokumentet, der beskriver motorcyklen og ejeren i Motorregistret. Ifølge borger.dk svarer den originale registreringsattest til en fuldmagt fra ejeren, når nogen omregistrerer på vegne af en anden. Behandl den derfor som et værdipapir, og overlevér den først, når handlen er gennemført.</li>
+<li><strong>Servicehistorik og regninger.</strong> Dokumenterede arbejder gør det lettere for køberen at sige ja. Mangler du papirerne, så skriv det i annoncen frem for at antyde noget.</li>
+<li><strong>Syn.</strong> Motorcykler er som udgangspunkt ikke omfattet af periodisk syn, men til og med 31. december 2026 gælder en regel om syn ved ejerskifte for visse motorcykler, afhængigt af alder og hvornår de sidst er synet (BEK 1685/2025 § 63). Reglen er ophævet fra 1. januar 2027 (BEK 259/2026). Læs mere i <a href="guide-brugt-motorcykel.html">guiden til køb af brugt motorcykel</a>, og spørg Færdselsstyrelsen eller Motorstyrelsen, hvad der gælder for netop din motorcykel og dit salgstidspunkt.</li>
+<li><strong>Gæld og pant.</strong> Er motorcyklen købt på afbetaling eller med pant, skal det afklares med långiveren, før du sælger. Den digitale Bilbog på tinglysning.dk viser tinglyst pant og ejendomsforbehold. Slå dit eget stelnummer op, så du ved, hvad en køber vil kunne se.</li>
+</ul>
+<p>Tjek også, at oplysningerne på attesten passer til virkeligheden. Er motorcyklen ændret i forhold til fabriksudgaven, for eksempel udstødning eller effekt, så sig det åbent, og spørg Motorstyrelsen, om ændringen skal registreres.</p>`,
+      },
+      {
+        id: 'pris',
+        title: 'Sådan finder du en rimelig pris',
+        toc: 'Sådan finder du en rimelig pris',
+        html: `
+<p>Der findes ingen officiel pris på en brugt motorcykel. Det mest ærlige, du kan gøre, er at se, hvad andre beder om for lignende motorcykler. Søg på samme mærke og model, og sammenlign årgang, kilometer, stand og udstyr. På Bikerbasen kan du bruge <a href="soegning.html">søgningen</a> og siderne under <a href="maerker.html">mærker</a> til at se annoncer fra flere kilder på ét sted.</p>
+<p>Husk, at en annoncepris er det, sælgeren håber på, ikke det, motorcyklen endte med at blive solgt for. Sæt prisen, så der er lidt plads til at forhandle, men ikke så højt, at annoncen bliver stående. Er prisen markant lavere end andres, vil seriøse købere undre sig, og svindlere vil se en mulighed. Vil du have en uvildig vurdering, kan en forhandler eller et værksted se på motorcyklen.</p>
+<p>Gevinst eller tab ved et salg kan have skattemæssig betydning, afhængigt af din situation. Det kan vi ikke svare på. Spørg Skatteforvaltningen, hvis du er i tvivl, især hvis du sælger flere køretøjer.</p>`,
+      },
+      {
+        id: 'annonce',
+        title: 'Billeder og beskrivelse',
+        toc: 'Billeder og beskrivelse',
+        html: `
+<p>En god annonce svarer på de spørgsmål, køberen alligevel ville stille. Tag billederne i dagslys mod en rolig baggrund, og tag motorcyklen fra alle sider: begge sider, forfra, bagfra, cockpit med kilometertæller, motor, dæk, kæde og de steder, hvor der er skader. Viser du ridser og pletter, bliver du troet på, når du siger, at resten er i orden.</p>
+<p>I beskrivelsen skal du oplyse mærke, model, årgang, kilometerstand, effekt og registreringsstatus, som de står i papirerne. Skriv ærligt om stand, skader, udskiftede dele og servicehistorik. Undgå formuleringer, du ikke kan stå inde for. Skriver du for eksempel, at motorcyklen "kan drosles til A2", så skal det kunne dokumenteres, ellers lad være (se <a href="guide-a2-koerekort.html">guiden til A2-kørekort</a>). Forklaringer på forkortelser som kW og ccm finder du i <a href="guide-mc-ordliste.html">ordlisten</a>.</p>
+<p>Brug aldrig billeder fra andre annoncer. Det er vildledende, og det skaber mistillid. Forbrugerombudsmanden fører tilsyn med erhvervsdrivendes markedsføring over for forbrugere. Er du i tvivl om, hvordan reglerne gælder for dig, så spørg dem.</p>`,
+      },
+      {
+        id: 'samtaler',
+        title: 'Samtaler, besigtigelse og betaling',
+        toc: 'Samtaler, besigtigelse og betaling',
+        html: `
+<p>Svar høfligt og konkret, og lad købere komme og se motorcyklen. En seriøs køber vil gerne sidde på den, kigge i papirerne og høre motoren. Hvis du tillader en prøvetur, så se kørekortet, og aftal, hvem der hæfter, hvis der sker noget. Spørg dit forsikringsselskab på forhånd, hvad forsikringen dækker, hvis en anden kører på motorcyklen.</p>
+<p>Aftal betalingen, før I mødes. Aflever først motorcyklen, når du har set pengene på din egen konto. Et screenshot eller en kvittering fra køberen er ikke det samme som penge. Bikerbasen tilbyder i dag intet "sikker betaling"-flow, så betalingen sker direkte mellem dig og køberen. Vores <a href="sikkerhed.html">sikkerhedsside</a> har flere råd til sælgere.</p>`,
+      },
+      {
+        id: 'svindel',
+        title: 'Svindelmønstre, du bør kende',
+        toc: 'Svindelmønstre, du bør kende',
+        html: `
+<p>Svindlere bruger de samme tricks igen og igen. Vær opmærksom, hvis en køber:</p>
+<ul>
+<li>vil købe uden at se motorcyklen og tilbyder at sende en "fragtmand" eller "agent",</li>
+<li>betaler for meget og beder dig sende det overskydende beløb tilbage,</li>
+<li>sender dig et link, du skal åbne for at "modtage betalingen", eller beder om oplysninger fra dit bankkort, din netbank eller dit MitID,</li>
+<li>presser dig til at handle hurtigt og vil flytte samtalen til en anden kanal,</li>
+<li>henviser til en betalings- eller escrowtjeneste, du ikke selv har valgt. Bikerbasen har ingen sådan tjeneste, så et link, der påstår det, er et advarselstegn.</li>
+</ul>
+<p>Giv aldrig koder fra MitID eller banken til andre, uanset hvem de siger, de er. Mener du, at du er udsat for svindel, så stop kontakten, gem beskederne, og anmeld det til politiet. Er det en annonce på Bikerbasen, kan du anmelde annoncen eller profilen, som beskrevet på <a href="sikkerhed.html">sikkerhedssiden</a>.</p>`,
+      },
+      {
+        id: 'aftale',
+        title: 'Købsaftale og dit ansvar som sælger',
+        toc: 'Købsaftale og dit ansvar som sælger',
+        html: `
+<p>Få en skriftlig købsaftale, som begge underskriver. Den bør indeholde mærke, model, årgang, stelnummer, kilometerstand, prisen, datoen og de forbehold, I har aftalt. Hver part beholder en kopi. Der er ikke noget, der hedder et skøde på en motorcykel, som man kender det fra en bolig: aftalen er købsaftalen, og selve ejerskiftet registreres i Motorregistret.</p>
+<p>Som privat sælger har du ikke samme pligter som en forhandler, men du er ikke fri for ansvar. Har I ikke aftalt andet, gælder købelovens regler om mangler. Mange private sælger "som beset" og uden reklamationsret. Det dækker ikke svig, og urigtige oplysninger om motorcyklen kan give køberen ret til erstatning (se Forbrugerstyrelsens vejledning og købeloven). Skriv derfor kun det, du ved er rigtigt, og fortæl om de fejl, du kender. Det er både ærligt og det, der bedst beskytter dig, hvis I bliver uenige. Er du i tvivl om dine pligter, så spørg en rådgiver.</p>`,
+      },
+      {
+        id: 'overdragelse',
+        title: 'Overdragelse, ejerskifte og forsikring',
+        toc: 'Overdragelse, ejerskifte og forsikring',
+        html: `
+<p>Når pengene er modtaget, og aftalen er underskrevet, afleverer du motorcyklen og registreringsattesten. Ifølge borger.dk er det køberen, der skal omregistrere motorcyklen inden for 4 hverdage, og det kan ske i Motorstyrelsens app Ejerskifte eller i Motorregistret. Sker det ikke, kan du som sælger bede Motorstyrelsen om at afmelde motorcyklen. Spørg Motorstyrelsen, hvordan du gør, og hvad der gælder for nummerpladerne.</p>
+<p>Giv dit forsikringsselskab besked om salget, men afklar tidspunktet først. Ifølge borger.dk kan politiet inddrage nummerpladerne, hvis forsikringen ophører, mens motorcyklen stadig er registreret. Spørg selskabet, hvordan overgangen sker, og læs mere i <a href="guide-mc-forsikring.html">guiden til MC-forsikring</a>.</p>
+<p>Gem købsaftalen og eventuelle beskeder med køberen. Skal du bruge en ny motorcykel, kan du starte i <a href="soegning.html">søgningen</a>.</p>
+<p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------ 9 (w12-guides) */
+  {
+    file: 'guide-mc-vinteropbevaring.html',
+    slug: 'guide-mc-vinteropbevaring',
+    published: '2026-10-17',
+    modified: '2026-10-17',
+    related: ['guide-mc-foraar-tjekliste', 'guide-mc-forsikring', 'guide-mc-udstyr'],
+    navn: 'Vinteropbevaring af motorcykel: sådan gør du',
+    h1: 'Vinteropbevaring af motorcykel: sådan gør du',
+    title: 'Vinteropbevaring af motorcykel: sådan gør du',
+    description: 'Vinteropbevaring og vedligehold af motorcykel: rengøring, brændstof, batteri, dæk, kæde, opbevaringssted og forsikring. Generelle råd med kilder.',
+    ingress: 'Gør du motorcyklen ordentligt klar til vinteren, bruger du mindre tid på at rette op i foråret. Her er de generelle råd om rengøring, brændstof, batteri, dæk, kæde og opbevaring, og hvad du bør spørge din forsikring og din betjeningsvejledning om.',
+    cardImage: 'img/type/cross.webp',
+    cardPos: 'center',
+    tldr: [
+      'Vask og tør motorcyklen grundigt, og smør de dele, producenten anviser, før den kommer ind.',
+      'Følg betjeningsvejledningen for brændstof, olie, batteri og kølervæske. Den gælder for netop din model.',
+      'Stil den tørt og beskyttet, og aflast dækkene efter producentens råd.',
+      'Spørg dit forsikringsselskab, hvad der gælder, når motorcyklen står stille. Afmelding hører under Motorstyrelsen.',
+    ],
+    sources: ['sikkertrafik', 'faerdselsstyrelsen', 'faerdsel', 'ejerskifte', 'motorstyrelsen'],
+    sections: [
+      {
+        id: 'overblik',
+        title: 'Hvorfor gøre klar til vinteren?',
+        toc: 'Hvorfor gøre klar til vinteren?',
+        html: `
+<p>En motorcykel, der står stille i flere måneder, tager skade af fugt, gammelt brændstof og et afladet batteri. Det meste er let at undgå, hvis du bruger en eftermiddag på det i efteråret. Rådene her er generelle. De erstatter ikke betjeningsvejledningen for din motorcykel, og er du i tvivl, så spørg et værksted eller din forhandler. Bikerbasen er et indeks over annoncer og ikke et værksted.</p>
+<p>Starter du med en tjekliste, bliver arbejdet overskueligt: rengøring, væsker, batteri, dæk, kæde og bremser, opbevaringssted og papirer. Gem listen, så du kan bruge den modsat, når foråret kommer. Der har vi samlet den i <a href="guide-mc-foraar-tjekliste.html">tjeklisten til første tur efter vinteren</a>.</p>`,
+      },
+      {
+        id: 'rengoering',
+        title: 'Vask, tør og smør',
+        toc: 'Vask, tør og smør',
+        html: `
+<p>Vask motorcyklen, før den kommer ind. Snavs, insekter, vejsalt og grus holder på fugt og kan give ætsninger og korrosion i løbet af vinteren. Brug mild sæbe og rigeligt vand, og undgå at rette en kraftig vandstråle direkte mod lejer, bremser, elektronik og luftindtag. Lad den tørre helt bagefter. Kør evt. en kort tur, så vandet fordamper fra bremser og udstødning, men kun hvis du kan gøre det forsvarligt.</p>
+<p>Når den er tør, kan du give blanke metaldele og ubehandlede flader et tyndt lag produkt, der er beregnet til formålet. Husk at holde produkter væk fra bremseskiver, bremseklodser og dæk. Tjek betjeningsvejledningen for, hvad producenten anbefaler til lak, plast og gummi.</p>`,
+      },
+      {
+        id: 'vaesker',
+        title: 'Brændstof, olie og kølervæske',
+        toc: 'Brændstof, olie og kølervæske',
+        html: `
+<p><strong>Brændstof.</strong> Brændstof kan blive gammelt, hvis det står stille i lang tid. Mange vælger at fylde tanken, så der er mindre plads til kondens, og bruger evt. et produkt, der er beregnet til opbevaring. Andre tømmer systemet efter producentens anvisning. Hvad der er rigtigt for din motorcykel, afhænger af model og motortype, så læs vejledningen eller spørg værkstedet.</p>
+<p><strong>Olie.</strong> Brugt olie indeholder syrer og rester, du ikke bør lade stå i motoren i månedsvis. Mange vælger derfor at skifte olie og filter, før motorcyklen sættes væk, eller lige efter den kommer ud. Følg intervallerne i serviceplanen.</p>
+<p><strong>Kølervæske.</strong> Har motorcyklen vandkøling, skal væsken være beregnet til vinterfrost. Tjek niveau og frostbeskyttelse. Er du i tvivl, så få det målt på et værksted.</p>
+<p>Start ikke motoren blot for at lade den køre et par minutter. Den når ikke at blive varm nok til at fordampe fugten, og det kan gøre mere skade end gavn. Spørg et værksted, hvis du vil gøre noget i løbet af vinteren.</p>`,
+      },
+      {
+        id: 'batteri',
+        title: 'Batteri',
+        toc: 'Batteri',
+        html: `
+<p>Et batteri aflades langsomt, selv når motorcyklen står stille, og et afladet batteri kan tage skade. Der er to almindelige veje: tag det ud og opbevar det et frostfrit, tørt sted, eller lad det sidde og slut en vedligeholdelsesoplader til, der er beregnet til din batteritype.</p>
+<p>Batterier er ikke ens. Et traditionelt bly- eller gelbatteri og et lithiumbatteri skal ikke nødvendigvis lades på samme måde, og en forkert oplader kan ødelægge batteriet. Brug derfor kun en oplader, der passer til din batteritype, og følg batteriproducentens og motorcykelproducentens anvisning. Tag aldrig et batteri ud eller sæt det i, uden at tændingen er slukket, og læs betjeningsvejledningen, hvis motorcyklen har en elektronik, der mister indstillinger.</p>`,
+      },
+      {
+        id: 'daek',
+        title: 'Dæk og hjul',
+        toc: 'Dæk og hjul',
+        html: `
+<p>Et dæk, der står på samme punkt i månedsvis, kan få et fladt område. Mange bruger derfor en hjulstøtte eller et centralstativ, så dækkene aflastes, hvis motorcyklen har det. Er der ikke noget stativ, kan du følge producentens råd om dæktryk ved opbevaring.</p>
+<p>Brug anledningen til at se dækkene efter. Kig på mønster, slid, revner og skader. Alderen kan du se på DOT-mærkningen på dækkets side: de sidste fire cifre fortæller, i hvilken uge og hvilket år dækket er produceret. Dæk, der er revnede eller meget gamle, bør vurderes af en fagmand, uanset mønsterdybden. Dæktrykket justerer du efter producentens anvisning, ikke efter fornemmelse.</p>`,
+      },
+      {
+        id: 'kaede',
+        title: 'Kæde, bremser og kabler',
+        toc: 'Kæde, bremser og kabler',
+        html: `
+<ul>
+<li><strong>Kæde:</strong> rens den med et produkt, der er beregnet til formålet, lad den tørre, og smør den, så den ikke ruster. Tjek kædespændingen og slidtagen efter producentens anvisning. Har motorcyklen kardan eller rem, skal den ikke smøres på samme måde, så læs vejledningen.</li>
+<li><strong>Bremser:</strong> kig på klodser, skiver, slanger og bremsevæskens niveau. Bremsevæske optager fugt med tiden, og producenten angiver, hvor ofte den skal skiftes.</li>
+<li><strong>Kabler og håndtag:</strong> smør dem, hvis producenten anbefaler det, og kontrollér, at de bevæger sig frit.</li>
+<li><strong>Lys og elektronik:</strong> tjek lygter, blinklys og horn, så du kan se, om noget skal udskiftes, før sæsonen starter.</li>
+</ul>
+<p>Er du ikke selv vant til at skrue, er vinteren en god tid at lade et værksted gøre servicen. Der er ofte mere ro om foråret, men du kan ikke regne med det.</p>`,
+      },
+      {
+        id: 'opbevaring',
+        title: 'Hvor og hvordan opbevarer du den?',
+        toc: 'Hvor og hvordan opbevarer du den?',
+        html: `
+<p>Det bedste sted er tørt, uden store temperatursvingninger og uden fugt, der trænger op fra gulvet. En lukket garage er bedre end et udendørs skur, og et skur er bedre end åben himmel. Er det nødvendigt at opbevare motorcyklen udendørs, så brug en dækken, der kan ånde. En tæt plasticpresenning kan fange fugt og skade mere, end den gavner.</p>
+<p>Sæt motorcyklen på et sikkert underlag, og brug sidestøtte eller et stativ, så den ikke kan vælte. Lås den, også indendørs. Mus og andre dyr kan lide at bygge rede i luftindtag og udstødning, så tildæk åbninger, hvis producenten råder til det, og husk at fjerne det igen, før du starter motoren. Skriv det på en seddel, så du ikke glemmer det.</p>`,
+      },
+      {
+        id: 'forsikring',
+        title: 'Forsikring, afmelding og papirer',
+        toc: 'Forsikring, afmelding og papirer',
+        html: `
+<p>Motordrevne køretøjer skal være dækket af en ansvarsforsikring (færdselsloven § 105). Hvad der sker med forsikringen, når motorcyklen står stille i vintermånederne, afhænger af dit selskab og din aftale. Nogle selskaber har en sæsonordning, andre ikke. Spørg selskabet, hvad der gælder, og læs vilkårene, før du ændrer noget. Der er flere spørgsmål i <a href="guide-mc-forsikring.html">guiden til MC-forsikring</a>.</p>
+<p>Afmelding er en anden sag. Ifølge borger.dk kan du som privatperson ikke selv afmelde et køretøj i Motorregistret. Det sker ved at aflevere nummerpladerne hos en nummerpladeoperatør, og operatøren fastsætter selv gebyret. Spørg Motorstyrelsen og dit forsikringsselskab, hvad en afmelding betyder for afgifter og forsikring, før du beslutter dig. Ifølge borger.dk kan politiet inddrage nummerpladerne, hvis forsikringen ophører, så det er vigtigt at få forholdet afklaret.</p>
+<p>Gem registreringsattesten et sikkert sted, og tag billeder af motorcyklen, før den stilles væk. Det kan hjælpe, hvis du skal dokumentere stand og tilbehør senere. Skal du bruge udstyret, så pas også på det: tør jakke, handsker og støvler, og opbevar hjelmen tørt. Se <a href="guide-mc-udstyr.html">guiden til udstyr</a>.</p>`,
+      },
+      {
+        id: 'fejl',
+        title: 'Fejl, du let kan undgå',
+        toc: 'Typiske fejl du kan undgå',
+        html: `
+<ol>
+<li><strong>At stille motorcyklen væk uden at vaske den.</strong> Salt og snavs arbejder videre hele vinteren.</li>
+<li><strong>At glemme batteriet.</strong> Et afladet batteri er en almindelig grund til, at en motorcykel ikke vil starte efter en vinter.</li>
+<li><strong>At bruge en tæt presenning udendørs.</strong> Fugt bliver fanget.</li>
+<li><strong>At springe betjeningsvejledningen over.</strong> Producentens råd for din model vejer tungere end generelle råd, også dem her.</li>
+<li><strong>At ændre forsikring eller registrering uden at spørge.</strong> Få svar fra selskabet og Motorstyrelsen først.</li>
+</ol>
+<p>Er motorcyklen klar, så vent med at se på den, til foråret melder sig. Brug <a href="guide-mc-foraar-tjekliste.html">tjeklisten til første tur efter vinteren</a>, og husk, at oplysningerne her er generelle. Følg altid producentens anvisning og de aktuelle regler hos Færdselsstyrelsen.</p>
+<p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
+      },
+    ],
+  },
+  /* ------------------------------------------------------------------ 10 (w12-guides) */
+  {
+    file: 'guide-mc-foraar-tjekliste.html',
+    slug: 'guide-mc-foraar-tjekliste',
+    published: '2026-10-17',
+    modified: '2026-10-17',
+    related: ['guide-mc-vinteropbevaring', 'guide-mc-udstyr', 'guide-mc-forsikring'],
+    navn: 'Første tur efter vinteren: tjekliste til din MC',
+    h1: 'Første tur efter vinteren: tjekliste til din MC',
+    title: 'Første tur efter vinteren: tjekliste til din MC',
+    description: 'Klar til første tur i foråret? Tjekliste til motorcyklen: væsker, batteri, dæk, bremser, kæde, lys, papirer og forsikring, og en rolig start.',
+    ingress: 'Efter en lang vinter er både motorcykel og fører rustne. Her er en tjekliste, du kan gå igennem, før du kører ud første gang: et rundt blik, væsker, batteri, dæk, bremser, lys, papirer og en rolig første tur.',
+    cardImage: 'img/hero-800.webp',
+    cardPos: '15% center',
+    tldr: [
+      'Gå en runde om motorcyklen, og se efter lækager, skader og noget, der er løsnet.',
+      'Tjek batteri, væsker, dæktryk, bremser, kæde og lys, før du starter.',
+      'Se, at forsikring, registrering og eventuelt syn er i orden, før du kører ud.',
+      'Kør roligt den første tur. Dæk og bremser skal varmes op, og der kan ligge grus på vejene.',
+    ],
+    sources: ['sikkertrafik', 'faerdselsstyrelsen', 'faerdsel', 'motorstyrelsen'],
+    sections: [
+      {
+        id: 'rundt',
+        title: 'Et rundt blik, før du gør andet',
+        toc: 'Et rundt blik, før du gør andet',
+        html: `
+<p>Tag dækken og eventuelle åbningsdæksler af, og gå en runde om motorcyklen. Se efter olie eller andre væsker på gulvet, løsnede dele, revner i gummi og tegn på, at mus eller andre dyr har været på besøg i luftindtag og udstødning. Fjern alt, du har sat i for at holde dyr ude, før du forsøger at starte. Lugter der af gammelt brændstof, eller ser noget ud, som du ikke forstår, så lad værkstedet tage et kig, før du kører.</p>
+<p>Brug betjeningsvejledningen som facitliste. Den fortæller, hvor niveaumålere, sikringer og smørepunkter sidder, og hvilke værdier der gælder for netop din model. Rådene her er generelle og erstatter den ikke. Bikerbasen er et indeks over annoncer og ikke et værksted. Har du gjort motorcyklen klar til vinteren efter <a href="guide-mc-vinteropbevaring.html">vores råd om vinteropbevaring</a>, er du allerede godt på vej.</p>`,
+      },
+      {
+        id: 'batteri',
+        title: 'Batteri og start',
+        toc: 'Batteri og start',
+        html: `
+<p>Er batteriet taget ud, så sæt det i igen med tændingen slukket, og tjek, at polerne sidder fast og er rene. Har det siddet på en vedligeholdelsesoplader, så tag opladeren af, før du starter. Er batteriet svagt eller gammelt, vil det ofte vise sig som en træg start. Spørg et værksted, om det bør testes eller skiftes, i stedet for at give motoren gentagne forsøg.</p>
+<p>Når motoren går, så lad den køre roligt et øjeblik og lyt efter. Mærkelige lyde, røg, der ikke forsvinder, eller lysene på instrumentpanelet, der bliver ved med at lyse, er grund til at slukke og få en fagmand til at kigge på det.</p>`,
+      },
+      {
+        id: 'vaesker',
+        title: 'Olie, kølervæske og bremsevæske',
+        toc: 'Olie, kølervæske og bremsevæske',
+        html: `
+<ul>
+<li><strong>Olie:</strong> tjek niveauet efter producentens anvisning, typisk på et plant underlag og efter producentens metode. Er motorcyklen ikke serviceret før vinteren, så overvej at få olie og filter skiftet nu.</li>
+<li><strong>Kølervæske:</strong> har motorcyklen vandkøling, så tjek niveauet, og se efter lækager. Er du i tvivl om væskens kvalitet, kan et værksted måle den.</li>
+<li><strong>Bremsevæske:</strong> kig på niveauet og på væskens farve. Mørk væske eller et lavt niveau kan være tegn på slidte klodser eller en væske, der trænger til udskiftning. Bremser er ikke noget, man gætter på.</li>
+<li><strong>Brændstof:</strong> er brændstoffet blevet gammelt, kan motoren være svær at få i gang eller løbe uroligt. Spørg værkstedet, hvad du bør gøre.</li>
+</ul>`,
+      },
+      {
+        id: 'daek',
+        title: 'Dæk og hjul',
+        toc: 'Dæk og hjul',
+        html: `
+<p>Dæktrykket falder over vinteren, så mål det, før du kører ud, og juster det efter producentens anvisning, som du typisk finder i betjeningsvejledningen eller på en mærkat på motorcyklen. Mål, mens dækkene er kolde.</p>
+<p>Se på dækkenes mønster, revner og eventuelle skader. På siden af dækket står en DOT-mærkning, hvor de sidste fire cifre fortæller produktionsuge og -år. Er dækkene gamle eller revnede, så få en fagmand til at vurdere dem, selv om mønsteret ser fint ud. Kig også efter sten, søm og andre ting, der sidder i gummiet, og tjek, at hjulene løber frit og lejerne ikke larmer.</p>`,
+      },
+      {
+        id: 'bremser',
+        title: 'Bremser, kæde, lys og betjening',
+        toc: 'Bremser, kæde, lys og betjening',
+        html: `
+<ul>
+<li><strong>Bremser:</strong> træk i håndbremsen og træd på fodbremsen. Håndtaget må ikke føles svampet, og bremsen skal slippe igen. Kig på klodser og skiver.</li>
+<li><strong>Kæde:</strong> tjek spænding, slid og smøring efter producentens anvisning. Er den tør eller rusten, skal den rengøres og smøres. Har motorcyklen kardan eller rem, så kig i vejledningen.</li>
+<li><strong>Lys og horn:</strong> prøv forlys, nærlys, bremselys, blinklys og horn. Det er nemt at overse en pære, der er gået i løbet af vinteren.</li>
+<li><strong>Gas, kobling og kabler:</strong> de skal bevæge sig frit og vende tilbage af sig selv. Tjek, at styret kan drejes frit fra stop til stop.</li>
+<li><strong>Skruer og beslag:</strong> kig efter dele, der er løsnede af rystelser.</li>
+</ul>
+<p>Er du i tvivl om noget, især bremserne, så lad et værksted se på dem, før du kører.</p>`,
+      },
+      {
+        id: 'papirer',
+        title: 'Forsikring, registrering og papirer',
+        toc: 'Forsikring, registrering og papirer',
+        html: `
+<p>Motordrevne køretøjer skal være dækket af en ansvarsforsikring (færdselsloven § 105). Har du ændret eller sat din forsikring på pause over vinteren, så tjek, at den er i kraft, før du kører ud. Spørg dit selskab, hvis du er i tvivl. Er motorcyklen afmeldt, skal du afklare med Motorstyrelsen, hvad der skal ske, før den kan bruges på vej igen. Der er flere spørgsmål til selskabet i <a href="guide-mc-forsikring.html">guiden til MC-forsikring</a>.</p>
+<p>Husk registreringsattesten og dit kørekort. Har du købt motorcyklen sidste efterår, så tjek, at ejerskiftet er registreret. Syn er som udgangspunkt ikke et krav for motorcykler, men reglerne kan ændre sig, så spørg Færdselsstyrelsen, hvis du er i tvivl.</p>`,
+      },
+      {
+        id: 'udstyr',
+        title: 'Dig selv og dit udstyr',
+        toc: 'Dig selv og dit udstyr',
+        html: `
+<p>Styrthjelm er lovpligtig (færdselsloven § 81). Se hjelmen efter for revner, løse indvendige dele og en rem, der ikke ser ud, som den plejer. Tjek jakke, handsker, bukser og støvler for sømme, der har givet slip, og beskyttere, der er blevet stive eller flyttet sig. Læs mere i <a href="guide-mc-udstyr.html">guiden til udstyr</a>.</p>
+<p>Du er også en del af systemet. Efter måneder uden motorcykel er du ikke i samme form, som da du parkerede. Reaktionsevne og fornemmelse for grebet kommer tilbage, men ikke på ti minutter. Er du ny, så er foråret et godt tidspunkt at øve på en stille parkeringsplads.</p>`,
+      },
+      {
+        id: 'turen',
+        title: 'Den første tur',
+        toc: 'Den første tur',
+        html: `
+<p>Start med en kort, rolig tur på kendte veje. Dæk og bremser skal varmes op, og du skal mærke efter, hvordan motorcyklen opfører sig. Vær opmærksom på, at der kan ligge grus, sand og vejsalt tilbage fra vinteren, især i kurver og kanter. Vær også opmærksom på, at andre trafikanter ikke altid venter motorcyklister i foråret.</p>
+<p>Lyt efter nye lyde, og mærk, om motorcyklen trækker til siden, vibrerer eller bremser skævt. Stop og få det set efter, hvis noget ikke føles rigtigt. Har du været længe væk fra motorcykelkørsel, så tag det roligt, og læg gerne en kort tur ind, før du kører længere.</p>
+<p>Viser tjeklisten, at motorcyklen trænger til mere, end du selv kan klare, eller overvejer du at skifte til en anden, så kan du kigge i <a href="soegning.html">søgningen</a>. Er du i tvivl om, hvad du bør tjekke ved et køb, så læs <a href="guide-brugt-motorcykel.html">tjeklisten til køb af brugt motorcykel</a>.</p>
 <p class="gd-actions"><a class="btn btn-primary" href="soegning.html">Søg motorcykler på Bikerbasen</a></p>`,
       },
     ],
