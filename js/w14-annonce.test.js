@@ -164,3 +164,21 @@ test('opret: udlogget ser login-port i stedet for dropzone (billeder kan ikke ov
     assert.match(await s.page.locator('#op-photo-gate').innerText(), /Log ind for at tilføje billeder/);
   } finally { await s.ctx.close(); }
 });
+
+test('telefon-reveal (logget ind, andens annonce): knappen henter nummeret via RPC; uden samtykke vises en ærlig afvisning', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const [svar, forventet] of [['"12345678"', /12345678/], ['null', /ikke|vises|kan ikke/i]]){
+    const fremmed = 'cccccccc-0000-4000-8000-0000000000c1';
+    const ann = Object.assign(annonce(2), { seller_id: fremmed, seller: { id: fremmed, name: 'Anders', is_dealer: false, city: 'Odense', member_since: 2024 } });
+    const s = await aabn({ width: 1440, height: 900 }, 'light', { loggetInd: true, annoncer: [ann] });
+    try {
+      await s.ctx.route(/rpc\/hent_saelger_telefon/, r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: svar }));
+      await gaa(s, `annonce.html?id=${ID}`);
+      await s.page.click('#reveal-phone-btn');
+      await s.page.waitForFunction(() => !/Henter/.test(document.querySelector('.an-seller-wrap').textContent), null, { timeout: 5000 });
+      const tekst = await s.page.locator('.an-seller-wrap').innerText();
+      assert.match(tekst, forventet);
+      assert.deepStrictEqual(s.fund, []);
+    } finally { await s.ctx.close(); }
+  }
+});

@@ -1081,3 +1081,8 @@
   .an-col-b .an-kk .an-kk-ico{ display:none; }
   .an-col-b .an-kk .an-kk-badge{ max-width:128px; }
 }
+
+/* W14: tap-mål >= 40 px (målt 320–1440). */
+.an-link, .an-kk-mere summary, .an-mere{ min-height:40px; }
+.an-kk-mere summary{ padding-block:4px; }
+.gallery-thumbs button{ min-height:40px; }
