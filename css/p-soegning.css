@@ -436,3 +436,99 @@
 /* Tap-mål (w9): sammenlign-knap og info-knapper er mindst 40 x 40 (hit-feltet var 44 via ::before, men selve boksen var 34/24). */
 .so-results .card-compare{ width:40px; height:40px; right:4px; bottom:4px; }
 .so-infoband .mix-info, .so-toolbar .sortering-info{ width:40px; height:40px; min-width:40px; min-height:40px; margin-block:-10px; }
+
+/* ============================================================================
+   w10-soegning — tættere på billede 2 (runde efter "facelift, ikke gentænkning")
+   Kompakt hero med overlappende søgekort, chips direkte under kortet, rolig info-linje,
+   kort med titel + pris på én linje, "Viser x–y af N", Gem søgning-panel. Kun .so-*, ingen nye farver.
+   ============================================================================ */
+:root{ --so-overlap: 52px; }
+
+/* --- Hero: lav banner, kortet hænger ned over kanten (billedet) --- */
+.so-hero{ display:flow-root; overflow:visible; z-index:2; padding: var(--space-3) 0 0; }   /* z-index: det overlappende kort ligger over chip-rækken, ellers æder .so-wrap klikkene */
+.so-hero-media{ overflow:hidden; }
+.so-hero .so-breadcrumb{ padding:0 0 var(--space-2); font-size:12.5px; }
+.so-hero .so-h1{ margin:0 0 var(--space-3); max-width:none; }
+.so-h1-title{ font-size: clamp(30px, 3.1vw, 44px); line-height:1.06; }
+.so-h1-sub{ margin-top:4px; font-size: clamp(16px, 1.45vw, 20px); }
+.so-hero .so-card{ position:relative; z-index:2; margin-bottom: calc(var(--so-overlap) * -1); }
+.so-hero + .so-wrap{ padding-top: calc(var(--so-overlap) + var(--space-2)); }
+@media (min-width:1100px){ .so-hero{ padding: var(--space-4) 0 0; } }
+@media (max-width:559px){
+  :root{ --so-overlap: 28px; }
+  .so-hero{ padding: var(--space-3) 0 0; }
+}
+
+/* --- Chips: kompakte piller + "Ryd alle filtre" som link, "Gem søgning" længst til højre --- */
+.so-chiprow{ min-height:44px; padding: var(--space-1) 0 var(--space-3); }
+.so-chips .active-filter-pill{ min-height:36px; font-size:14px; font-weight:500; }
+.so-clear-all{ min-height:40px; padding:0 8px; display:inline-flex; align-items:center; }
+.so-chiprow-actions .btn{ min-height:40px; }
+
+/* --- Sidebar --- */
+.so-layout .filters-head h2{ font-size:20px; }
+.so-layout .filter-group summary{ min-height:40px; }
+.so-layout .so-checklist .chip{ min-height:40px; }
+.so-layout #clear-filters{ min-height:40px; padding:0 4px; display:inline-flex; align-items:center; }
+@media (max-width:559px){ .so-card-more{ min-height:40px; } }
+
+/* --- Resultathoved: tal + sortér + Gitter/Liste på én linje (billedet) --- */
+.so-toolbar{ margin-bottom: var(--space-2); }
+.so-toolbar .results-count{ font-size:20px; }
+@media (min-width:1100px){
+  .so-toolbar .results-headline{ min-height:0; }
+}
+
+/* --- Info-linje: rammeløs, rolig, ÉN linje (kildefordeling · lagerets alder · sorteringsregel) --- */
+.so-infoband{
+  margin:0 0 var(--space-3); padding:0; background:none; border:0; border-radius:0;
+  font-size:13px; line-height:1.4; row-gap:0; color: var(--color-fg-muted);
+}
+.so-infoband > :not([hidden]) ~ :not([hidden]){ border-left:1px solid var(--color-border); margin-left:12px !important; padding-left:12px; }
+.so-infoband{ align-items:center; align-content:flex-start; column-gap:0; }
+/* Pladsen står fra første maling (kildelinjen + lagerets alder + sorteringsreglen ombrydes til to linjer ved desktop), ellers rykker gitteret ca. 20 px, når hydreringen lander (CLS). */
+/* Målte slutlige højder (mock, tre kilder): 76 px < 360, 56 px 360-559, 73 px 560-639, 77 px 640-719, 57 px 720-1279, 39 px >= 1280. */
+.so-infoband{ min-height:56px; }
+@media (max-width:359px){ .so-infoband{ min-height:76px; } }
+@media (min-width:560px){ .so-infoband{ min-height:73px; } }
+@media (min-width:640px){ .so-infoband{ min-height:77px; } }
+@media (min-width:720px){ .so-infoband{ min-height:57px; } }
+@media (min-width:1280px){ .so-infoband{ min-height:39px; } }
+@media (max-width:639px){ .so-infoband{ padding:0; } }
+
+/* --- Kort: titel og pris på samme linje (billedet), jævne fotos --- */
+@media (min-width:560px){
+  #results-grid:not(.list-view) .rk-top{ flex-direction:row; align-items:flex-start; justify-content:space-between; gap:8px; }
+  #results-grid:not(.list-view) .rk-titel{
+    flex:1 1 0; min-width:0; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;
+  }
+  #results-grid:not(.list-view) .rk-pris{ flex:none; text-align:right; }
+  #results-grid:not(.list-view) .rk-pris.pris-mangler{ text-align:right; max-width:42%; }
+}
+#results-grid:not(.list-view) .card-rich .card-media{ aspect-ratio:16/10; }
+
+/* --- Viser x–y af N + paginering som runde firkanter --- */
+.so-viser{ margin: var(--space-5) 0 0; text-align:center; font-size:14px; font-weight:500; color: var(--color-fg-muted); }
+.so-viser[hidden]{ display:none; }
+.so-results .pagination{ margin-top: var(--space-3); }
+.so-results .pagination a, .so-results .pagination button{ border-radius: var(--radius-sm); min-width:40px; height:40px; }
+.so-results .pagination .pag-status{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; flex-basis:auto; }
+
+/* --- Gem søgning-panel (søgeagent; ærlig tekst) --- */
+.so-agent{
+  display:flex; align-items:center; gap: var(--space-4); margin: var(--space-6) 0 0; padding: var(--space-4) var(--space-5);
+  background: var(--color-primary-tint); border:1px solid color-mix(in srgb, var(--color-primary) 22%, transparent); border-radius: var(--radius-md);
+}
+.so-agent[hidden]{ display:none; }
+.so-agent-ico{ flex:none; width:44px; height:44px; border-radius:50%; background: var(--color-surface); color: var(--color-primary-hover); display:inline-flex; align-items:center; justify-content:center; }
+:root[data-theme="dark"] .so-agent-ico{ color: var(--color-primary); }
+.so-agent-ico svg{ width:22px; height:22px; }
+.so-agent-tekst{ flex:1 1 auto; min-width:0; }
+.so-agent-tekst h2{ margin:0 0 2px; font-size:17px; font-family: var(--font-display); letter-spacing:-.01em; color: var(--color-fg); }
+.so-agent-tekst p{ margin:0; font-size:14px; line-height:1.5; color: var(--color-fg); max-width:62ch; }
+.so-agent .btn{ flex:none; min-height:44px; white-space:nowrap; }
+@media (max-width:639px){
+  .so-agent{ flex-wrap:wrap; padding: var(--space-4); gap: var(--space-3); }
+  .so-agent-tekst{ flex:1 1 calc(100% - 60px); }
+  .so-agent .btn{ width:100%; justify-content:center; }
+}

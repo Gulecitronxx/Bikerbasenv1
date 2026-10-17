@@ -582,9 +582,13 @@ function refreshSaveSearchButton(){
   const btn = document.getElementById('save-search-btn');
   const tekst = saved ? 'Søgning gemt' : 'Gem søgning';
   document.getElementById('save-search-icon').innerHTML = saved ? Icon.checkCircle : Icon.bell;
+  const agentIco = document.getElementById('so-agent-ico');
+  if (agentIco) agentIco.innerHTML = saved ? Icon.checkCircle : Icon.bell;
   document.getElementById('save-search-label').textContent = tekst;
   const kortEl = document.getElementById('save-search-kort');
   if (kortEl) kortEl.textContent = saved ? 'Gemt' : 'Gem';
+  const agentLabel = document.getElementById('so-agent-label');
+  if (agentLabel) agentLabel.textContent = saved ? 'Søgning gemt — fjern' : 'Gem søgning';
   // På mobil vises kun klokken (teksten er skjult for øjet, men ikke for
   // skærmlæsere) — title giver den seende bruger det samme svar ved tryk-hold.
   btn.title = tekst;
@@ -1793,8 +1797,13 @@ function render(){
     // adresser, indtil vi har tegnet de rigtige. Nu er de rigtige.
     grid.style.visibility = '';
     empty.style.display = 'none';
-    paintCards(grid, pageItems, genskabPosition);
+    /* w10: "Viser x-y af N" og Gem søgning-panelet står først, når ALLE kortene er tegnet — ellers står de et
+       øjeblik under de forudtegnede kort og springer ned, når gitteret vokser (CLS). Har brugeren et tyndt
+       resultat, har tyndt-resultat-panelet allerede sin egen "Gem søgningen"; så udelades dette panel. */
+    const tyndt = total < 4 && (pills.length > 0 || !!state.q);
+    paintCards(grid, pageItems, () => { genskabPosition?.(); renderViser(total, state.page, pageItems.length, uaktuelt, tyndt); });
   } else {
+    renderViser(0, state.page, 0, uaktuelt, false);
     grid.style.display = 'none';
     empty.style.display = 'block';
 
@@ -1990,6 +1999,22 @@ function sideNumre(current, total){
   return ud;
 }
 
+/* "Viser 25-48 af 140 motorcykler" under gitteret + Gem søgning-panelet (w10). Tallene er resultatets egne;
+   ved tomt eller fejlet resultat står hverken linje eller panel (tom-tilstanden har sin egen genvej). */
+function renderViser(total, side, paaSiden, uaktuelt, tyndt){   // kaldes, når gitteret er færdigtegnet
+  const viser = document.getElementById('so-viser');
+  const agent = document.getElementById('so-agent');
+  const vis = !uaktuelt && total > 0 && paaSiden > 0;
+  if (viser){
+    const fra = (side - 1) * PAGE_SIZE + 1, til = fra + paaSiden - 1;
+    viser.textContent = !vis ? '' : total <= PAGE_SIZE
+      ? `Viser alle ${total.toLocaleString('da-DK')} ${total === 1 ? 'motorcykel' : 'motorcykler'}`
+      : `Viser ${fra.toLocaleString('da-DK')}–${til.toLocaleString('da-DK')} af ${total.toLocaleString('da-DK')} motorcykler`;
+    viser.hidden = !vis;
+  }
+  if (agent) agent.hidden = !vis || !!tyndt;
+}
+
 function renderPagination(totalPages){
   const pag = document.getElementById('pagination');
   if (!pag) return;
@@ -2001,7 +2026,7 @@ function renderPagination(totalPages){
      klikket afbrydes og gaar gennem pushFilterState(), saa Tilbage gaar én
      side tilbage med filtrene i behold. */
   const sideHref = (side) => {
-    const p = new URLSearchParams(currentQueryString());
+    const p = new URLSearchParams(currentQueryString(true));   // w10: med sortering, så "åbn i ny fane" giver samme rækkefølge
     if (side > 1) p.set('page', String(side)); else p.delete('page');
     const qs = p.toString();
     return 'soegning.html' + (qs ? '?' + qs : '');
@@ -2400,6 +2425,7 @@ function wireCoreControls(){
     const saetPh = () => { qFelt.placeholder = mq.matches ? 'Mærke/model' : 'Mærke eller model'; };
     saetPh(); if (mq.addEventListener) mq.addEventListener('change', saetPh);
   }
+  document.getElementById('so-agent-btn')?.addEventListener('click', () => document.getElementById('save-search-btn').click());
   document.getElementById('save-search-btn').addEventListener('click', async () => {
     const qs = currentQueryString();
     const existing = Store.getSavedSearches().find(s => s.query === qs);
