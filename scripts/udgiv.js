@@ -165,7 +165,7 @@ for (const navn of fs.readdirSync(ROOT)){
   if (!fs.statSync(path.join(ROOT, navn)).isFile()) continue;
   if (!RODMOENSTRE.some(re => re.test(navn))) continue;
   /* F-019: udviklernoter i HTML-kommentarer ("RUNDE 12 ...") udgives ikke. Kun _site rørs; kilden beholder dem. */
-  if (/\.html$/.test(navn)) fs.writeFileSync(path.join(UD, navn), optimerHead(fjernHtmlKommentarer(fs.readFileSync(path.join(ROOT, navn), 'utf8')), { beholdFontPreload: process.env.BB_FONT_PRELOAD === '1' }));
+  if (/\.html$/.test(navn)) fs.writeFileSync(path.join(UD, navn), optimerHead(fjernHtmlKommentarer(fs.readFileSync(path.join(ROOT, navn), 'utf8')), { beholdFontPreload: process.env.BB_FONT_PRELOAD !== '0' }   /* font-preloads BLIVER som standard (work/DECISIONS.md); BB_FONT_PRELOAD=0 fjerner dem (mobil-LCP -400…1100 ms, men fontskift uden size-adjust kan give CLS — se builder-w11-perf.md) */));
   else fs.copyFileSync(path.join(ROOT, navn), path.join(UD, navn));
   udgivet.push(navn);
 }

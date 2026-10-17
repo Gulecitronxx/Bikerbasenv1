@@ -8,7 +8,7 @@
    1760/1668 -> 1344/1424 ms; CLS uaendret (0,000-0,003). Modsiger work/DECISIONS.md
    "Font-preloadene BLIVER" (maalt dengang paa en stoerre css). Pris: fonten opdages foerst naar
    css er parset, saa teksten staar kort i system-skrift (font-display:swap, som altid).
-   BB_FONT_PRELOAD=1 beholder preloads. Regex rammer KUN as="font". */
+   Standard i udgiv.js: preloads BEHOLDES; BB_FONT_PRELOAD=0 fjerner dem. Regex rammer KUN as="font". */
 
 const FONT_PRELOAD = /<link\b[^>]*\brel="preload"[^>]*\bas="font"[^>]*>[ \t]*\r?\n?/gi;
 
