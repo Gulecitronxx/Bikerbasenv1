@@ -10,6 +10,10 @@
    Kun mærker med godkendt:true OG en fil kommer med logo-oplysninger i klientens data; alle andre er
    ordmærke/monogram. Kilde, licens og hash bliver i manifestet (de skal ikke sendes til browseren).
 
+   Varianter (tekniske felter, ikke en godkendelse): et mærke kan have `varianter.emblem = { fil, hash, bredde, hoejde }` — en anden fil
+   med samme tegning uden ordmærke (til små slots; js/brand-logos.js vælger den i 'sm'). Samme regler som hovedfilen (SVG-krav, hash,
+   mål); proveniens arves fra mærket. Klientens data får kun emblemets src og mål (`l.e`).
+
    Intet netværk. Intet skrives uden for manifestet og js/brand-logos-data.js. */
 
 const fs = require('fs');
@@ -21,6 +25,7 @@ const MANIFEST = path.join(ROOT, 'img', 'brands', 'manifest.json');
 const DATA = path.join(ROOT, 'js', 'brand-logos-data.js');
 const MAX_SVG_BYTES = 6 * 1024;
 const VARIANTER = ['emblem', 'lockup', 'ordmaerke'];
+const UNDERVARIANTER = ['emblem'];   // varianter.<navn> i manifestet; kun emblem bruges af klienten
 const FALLBACKS = ['ordmaerke', 'monogram'];
 const FIL_MOENSTER = /^img\/brands\/[a-z0-9][a-z0-9-]*\.svg$/;
 
@@ -88,6 +93,20 @@ function valider(manifest, laes){
       if (!mm) fejl.push(`${ref}: ${m.fil} har ingen læsbar viewBox`);
       if (!m.kilde || !m.licens) fejl.push(`${ref}: fil kræver kilde og licens (proveniens)`);
     }
+    if (m.varianter != null){
+      if (typeof m.varianter !== 'object' || Array.isArray(m.varianter)) return fejl.push(`${ref}: varianter skal være et objekt`);
+      for (const [navn, v] of Object.entries(m.varianter)){
+        const vref = `${ref} varianter.${navn}`;
+        if (!UNDERVARIANTER.includes(navn)){ fejl.push(`${vref}: ukendt variant (tilladt: ${UNDERVARIANTER.join('|')})`); continue; }
+        if (!m.fil){ fejl.push(`${vref}: kræver at mærket selv har en fil`); continue; }
+        if (!v || typeof v.fil !== 'string' || !FIL_MOENSTER.test(v.fil)){ fejl.push(`${vref}: fil skal være img/brands/<navn>.svg`); continue; }
+        if (v.fil === m.fil){ fejl.push(`${vref}: samme fil som hovedfilen`); continue; }
+        let tekst;
+        try { tekst = laes(v.fil); } catch (e){ fejl.push(`${vref}: filen ${v.fil} findes ikke`); continue; }
+        for (const f of tjekSvg(tekst.toString('utf8'))) fejl.push(`${vref}: ${v.fil}: ${f}`);
+        if (!maal(tekst.toString('utf8'))) fejl.push(`${vref}: ${v.fil} har ingen læsbar viewBox`);
+      }
+    }
   });
   return fejl;
 }
@@ -110,6 +129,20 @@ function udfyld(manifest, laes, opdater){
         else fejl.push(`${m.slug}: ${k} i manifestet (${m[k]}) passer ikke til filen (${ny[k]}) — kør med --opdater, hvis filen med vilje er ændret`);
       }
     }
+    for (const [navn, v] of Object.entries(m.varianter || {})){
+      if (!v || !v.fil) continue;
+      let vb;
+      try { vb = laes(v.fil); } catch (e){ continue; }
+      const vm = maal(vb.toString('utf8'));
+      const vny = { hash: sha256(vb), bredde: vm && vm.bredde, hoejde: vm && vm.hoejde };
+      for (const k of ['hash', 'bredde', 'hoejde']){
+        if (v[k] == null || v[k] === ''){ v[k] = vny[k]; aendret = true; }
+        else if (v[k] !== vny[k]){
+          if (opdater){ v[k] = vny[k]; aendret = true; }
+          else fejl.push(`${m.slug}: varianter.${navn}.${k} i manifestet (${v[k]}) passer ikke til filen (${vny[k]}) — kør med --opdater, hvis filen med vilje er ændret`);
+        }
+      }
+    }
   }
   return { manifest: kopi, aendret, fejl };
 }
@@ -124,6 +157,8 @@ function byggData(manifest){
       const o = { s: m.slug, n: m.navn, a: m.aliaser.slice(), m: m.monogram, v: m.variant, f: m.fallback };
       if (m.godkendt && m.fil){
         o.l = { src: m.fil, w: r3(m.bredde), h: r3(m.hoejde), c: m.ensfarvet ? 1 : 0 };
+        const em = m.varianter && m.varianter.emblem;
+        if (em && em.fil && em.bredde > 0 && em.hoejde > 0) o.l.e = { src: em.fil, w: r3(em.bredde), h: r3(em.hoejde) };
       }
       return o;
     }),

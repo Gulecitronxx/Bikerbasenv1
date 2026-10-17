@@ -47,17 +47,22 @@ ${hero('Honda')}${hero('Kawasaki')}${hero('BSA')}${hero('Harley-Davidson')}
 <h2>Søgefilter (sm-slot i fast kolonne)</h2>
 <div class="filter-test" data-test="filter">${FILTER.map(n => `<label><span class="bl-spalte bl-spalte--sm">${b.logoHTML(n, { storrelse: 'sm', decorative: true })}</span><input type="checkbox"> ${n}</label>`).join('')}</div>
 
-<h2>Annoncetitel med logo (lg, ikke dekorativt)</h2>
-<div class="titel-test" data-test="titel"><h1>Honda CB 1000 R</h1>${b.logoHTML('Honda', { storrelse: 'lg', decorative: false })}</div>
+<h2>Annoncetitel med logo (xl, ikke dekorativt)</h2>
+<div class="titel-test" data-test="titel"><h1>Honda CB 1000 R</h1>${b.logoHTML('Honda', { storrelse: 'xl', decorative: false })}</div>
 
 <h2>Ordmærke-fallback alene (lg, ikke dekorativt) — samme slot som et logo</h2>
 <div class="raekke" data-test="alene">${UDEN_LOGO.map(n => `<span class="alene">${b.logoHTML(n, { storrelse: 'lg', decorative: false })}</span>`).join('')}</div>
 
 <h2>Alle slotstørrelser, logo/fallback</h2>
-<div class="raekke" data-test="stoerrelser">${['sm', 'md', 'lg', 'hero'].map(s => ALLE.concat(UDEN_LOGO.slice(0, 3)).map(n => b.logoHTML(n, { storrelse: s })).join('')).join('')}</div>
+<div class="raekke" data-test="stoerrelser">${['sm', 'md', 'lg', 'xl', 'hero'].map(s => ALLE.concat(UDEN_LOGO.slice(0, 3)).map(n => b.logoHTML(n, { storrelse: s })).join('')).join('')}</div>
 
 <h2>md-slot: visuel vægt</h2>
 <div class="raekke" data-test="vaegt" id="vaegt">${ALLE.map(n => `<span data-n="${n}">${b.logoHTML(n, { storrelse: 'md' })}</span>`).join('')}</div>
+<h2>Alle slots: visuel vægt (areal) pr. størrelse</h2>
+<div class="raekke" data-test="vaegt-alle" id="vaegt-alle">${['sm', 'md', 'lg', 'xl', 'hero'].map(s => ALLE.map(n => `<span data-n="${n}" data-s="${s}">${b.logoHTML(n, { storrelse: s })}</span>`).join('')).join('')}</div>
+
+<h2>A–Z-liste (sm-slot i bred kolonne): logo eller monogram i samme kolonne</h2>
+<div class="filter-test" data-test="az">${ALLE.concat(UDEN_LOGO).map(n => `<label class="az-rad"><span class="bl-spalte bl-spalte--sm">${b.logoHTML(n, { storrelse: 'sm', decorative: true })}</span><span class="az-navn">${n}</span></label>`).join('')}</div>
 <div id="indsaet" style="min-height:120px" data-test="indsaet"></div>
 <script type="application/json" id="testdata">${JSON.stringify(G.byggData(H.testManifest()))}</script>
 <script src="${sti}js/brand-logos-data.js"></script><script src="${sti}js/brand-logos.js"></script>

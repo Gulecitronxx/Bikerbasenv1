@@ -215,9 +215,13 @@ test('A6 logo-markup: maske for ensfarvet, <img> for flerfarvet, fast slot og ko
   const inst = BL.opret(G.byggData(H.testManifest()));
   const m = inst.logoHTML('Honda', { storrelse: 'md' });
   assert.match(m, /class="bl bl--md bl--logo"/);
-  assert.match(m, /style="--bl-ar:1"/);
-  assert.match(m, /mask-image:url\('img\/brands\/fx-ring\.svg'\)/);
-  assert.match(m, /<img class="bl-probe" src="img\/brands\/fx-ring\.svg" alt="" width="\d+" height="\d+" hidden>/);
+  assert.match(m, /style="--bl-ar:1;--bl-sa:1"/);
+  assert.match(m, /<span class="bl-mark" data-bl-src="img\/brands\/fx-ring\.svg"><\/span>/);
+  // P2-1: INGEN skjult billede med samme URL ved siden af masken (det gav to SVG-kald pr. logo); klienten henter filen én gang
+  assert.doesNotMatch(m, /<img|bl-probe|mask-image/);
+  // statisk filreference (kun generatorerne): skjult + lazy, så scripts/udgiv.js ser filen, men browseren henter intet
+  const st = inst.logoHTML('Honda', { storrelse: 'md', statisk: true });
+  assert.match(st, /<img class="bl-ref" src="img\/brands\/fx-ring\.svg" alt="" width="\d+" height="\d+" loading="lazy" hidden>/);
   assert.match(m, /aria-hidden="true"/);
   assert.match(m, /bl-fb bl-mono/, 'fallback ligger i markup til fejlfald');
   // ikke dekorativt: rolle og navn (ikke tom alt)
@@ -234,14 +238,90 @@ test('A6 logo-markup: maske for ensfarvet, <img> for flerfarvet, fast slot og ko
   const lg = inst.logoFor('Kawasaki');
   assert.equal(lg.bredde / lg.hoejde, 4);
   const [mh, mw] = inst.SLOT.md;
-  const k = inst.logoHTML('Kawasaki', { storrelse: 'md' });
+  const k = inst.logoHTML('Kawasaki', { storrelse: 'md', statisk: true });
   const w = +/width="(\d+)"/.exec(k)[1], h = +/height="(\d+)"/.exec(k)[1];
   assert.ok(w <= mw && h <= mh, `${w}x${h} uden for ${mw}x${mh}`);
-  // variant-krav: kun det ønskede -> ellers fallback; bredt ordmærke i sm -> monogram
+  // variant-krav: kun det ønskede -> ellers fallback
   assert.match(inst.logoHTML('Honda', { storrelse: 'md', variant: 'lockup' }), /bl--mono/);
   assert.match(inst.logoHTML('Honda', { storrelse: 'md', variant: 'emblem' }), /bl--logo/);
-  assert.match(inst.logoHTML('Kawasaki', { storrelse: 'sm' }), /bl--mono/);
-  assert.match(inst.logoHTML('Honda', { storrelse: 'sm' }), /bl--logo/);
+});
+
+/* ---------- P2-2: varianter pr. størrelse, bred sm-slot, ens areal ---------- */
+
+test('P2-2 sm-slot: emblem-varianten vælges når den findes (og forholdet ≤ 3), ellers hovedfilen skaleret ned — aldrig monogram for et bredt logo', () => {
+  const inst = BL.opret(G.byggData(H.testManifest()));
+  // Honda: hovedfil fx-ring (1,0), emblem fx-mark (1,5) -> emblem i sm; hovedfil i alle andre størrelser
+  const hs = inst.logoHTML('Honda', { storrelse: 'sm' });
+  assert.match(hs, /bl--logo bl--emblem"/); assert.match(hs, /data-bl-src="img\/brands\/fx-mark\.svg"/); assert.match(hs, /--bl-ar:1\.5;/);
+  assert.match(inst.logoHTML('Honda', { storrelse: 'lg' }), /data-bl-src="img\/brands\/fx-ring\.svg"/);
+  assert.doesNotMatch(inst.logoHTML('Honda', { storrelse: 'lg' }), /bl--emblem/);
+  // Kawasaki: hovedfil 4,0 (bredt), emblem 2,5 -> emblem i sm (bredt logo bliver IKKE monogram længere)
+  const ks = inst.logoHTML('Kawasaki', { storrelse: 'sm' });
+  assert.match(ks, /bl--logo bl--emblem"/); assert.match(ks, /data-bl-src="img\/brands\/fx-bar-k\.svg"/);
+  // KTM: ingen emblem-fil -> hovedfilen (3,5) skaleres ned til den brede slot i stedet for monogram
+  const ts = inst.logoHTML('KTM', { storrelse: 'sm' });
+  assert.match(ts, /bl--logo"/); assert.doesNotMatch(ts, /bl--emblem|bl--mono/); assert.match(ts, /data-bl-src="img\/brands\/fx-wide\.svg"/);
+  // form: 'fuld' tvinger hovedfilen i sm; form: 'emblem' tvinger emblemet i en større slot
+  assert.match(inst.logoHTML('Honda', { storrelse: 'sm', form: 'fuld' }), /fx-ring\.svg/);
+  assert.match(inst.logoHTML('Honda', { storrelse: 'md', form: 'emblem' }), /fx-mark\.svg/);
+  // et emblem bredere end 3 vælges ikke automatisk (Moto Guzzis ørn er 4,3 — her en syntetisk post)
+  const bred = BL.opret({ v: 1, m: [{ s: 'x', n: 'X', a: [], m: 'X', v: 'lockup', f: 'ordmaerke', l: { src: 'img/brands/x.svg', w: 100, h: 50, c: 1, e: { src: 'img/brands/x-emblem.svg', w: 400, h: 100 } } }] });
+  assert.match(bred.logoHTML('X', { storrelse: 'sm' }), /data-bl-src="img\/brands\/x\.svg"/);
+  // data: varianten kommer fra manifestet (l.e), ingen mærke-hårdkodning i kernen
+  assert.deepEqual(inst.logoFor('Honda').emblem, { src: 'img/brands/fx-mark.svg', bredde: 150, hoejde: 100 });
+  assert.equal(inst.logoFor('KTM').emblem, null);
+  assert.doesNotMatch(fs.readFileSync(path.join(ROOT, 'js', 'brand-logos.js'), 'utf8'), /honda|kawasaki|yamaha|ktm|benelli|harley/i, 'ingen pr.-mærke-hårdkodning i kernen');
+});
+
+test('P2-2 læsbarhed: et logo, der ved slottens mål bliver lavere end 12 px, er monogram; alle andre er logo', () => {
+  const smal = BL.opret({ v: 1, m: [{ s: 'x', n: 'X', a: [], m: 'X', v: 'ordmaerke', f: 'ordmaerke', l: { src: 'img/brands/x.svg', w: 1000, h: 100, c: 1 } }] });
+  assert.match(smal.logoHTML('X', { storrelse: 'sm' }), /bl--mono/, 'forhold 10 i sm = 5,6 px højt');
+  assert.match(smal.logoHTML('X', { storrelse: 'lg' }), /bl--logo/);
+  const m = BL.slotMaal('sm', 4.5);
+  assert.ok(m.h >= BL.MIN_HOEJDE, `forhold 4,5 i sm: ${m.h}`);
+});
+
+test('P2-2 alle GODKENDTE logoer i det rigtige manifest viser logo (ikke monogram) i sm-slot, læsbart og med ens visuel vægt i alle slots', () => {
+  const godkendte = manifest.maerker.filter(m => m.godkendt && m.fil);
+  assert.ok(godkendte.length >= 1);
+  for (const m of godkendte){
+    const h = BL.logoHTML(m.navn, { storrelse: 'sm', decorative: true });
+    assert.match(h, /bl--logo/, `${m.slug}: monogram i sm — A–Z/filter ville blande logo og cirkel`);
+    const l = BL.logoFor(m.navn);
+    const em = l.emblem && l.emblem.bredde / l.emblem.hoejde <= BL.EMBLEM_MAKS_FORHOLD ? l.emblem : l;
+    const sm = BL.slotMaal('sm', em.bredde / em.hoejde);
+    assert.ok(sm.h >= BL.MIN_HOEJDE && sm.w <= 56.01 && sm.h <= 22.01, `${m.slug} sm ${sm.w.toFixed(1)}x${sm.h.toFixed(1)}`);
+  }
+  // ens max-areal-regel: i hver størrelse er største/mindste areal ≤ 2,2 for logoer med forhold ≥ 0,85 (smallere er højdebegrænsede)
+  for (const s of BL.STORRELSER){
+    const arealer = godkendte.map(m => { const l = BL.logoFor(m.navn); return { ar: l.bredde / l.hoejde, ...BL.slotMaal(s, l.bredde / l.hoejde) }; })
+      .filter(x => x.ar >= 0.85 && x.h >= BL.MIN_HOEJDE).map(x => x.w * x.h);
+    if (arealer.length < 2) continue;
+    assert.ok(Math.max(...arealer) / Math.min(...arealer) <= 2.2, `${s}: areal-forhold ${(Math.max(...arealer) / Math.min(...arealer)).toFixed(2)}`);
+  }
+});
+
+test('P2-2 gen-script: varianter.emblem valideres (fil, hash, mål) og kommer i klientens data; ukendt variant afvises', () => {
+  const laes = f => { const t = { 'img/brands/fx-ring.svg': 'fx-ring.svg', 'img/brands/fx-mark.svg': 'fx-mark.svg' }[f]; if (!t) throw new Error('findes ikke'); return Buffer.from(H.svgTekst(t)); };
+  const m = JSON.parse(JSON.stringify(H.renManifest()));
+  Object.assign(m.maerker[0], { fil: 'img/brands/fx-ring.svg', godkendt: true, kilde: 'x', licens: 'y', varianter: { emblem: { fil: 'img/brands/fx-mark.svg' } } });
+  const u = G.udfyld(m, laes, false);
+  assert.equal(u.manifest.maerker[0].varianter.emblem.bredde, 150);
+  assert.equal(u.manifest.maerker[0].varianter.emblem.hoejde, 100);
+  assert.equal(u.manifest.maerker[0].varianter.emblem.hash, G.sha256(Buffer.from(H.svgTekst('fx-mark.svg'))));
+  assert.deepEqual(G.valider(u.manifest, laes), []);
+  assert.deepEqual(G.byggData(u.manifest).m[0].l.e, { src: 'img/brands/fx-mark.svg', w: 150, h: 100 });
+  const forkert = JSON.parse(JSON.stringify(u.manifest)); forkert.maerker[0].varianter.emblem.hash = 'a'.repeat(64);
+  assert.match(G.udfyld(forkert, laes, false).fejl.join('\n'), /varianter\.emblem\.hash/);
+  const prøv = (aendr, forvent) => { const x = JSON.parse(JSON.stringify(u.manifest)); aendr(x.maerker[0]); assert.match(G.valider(x, laes).join('\n'), forvent); };
+  prøv(x => { x.varianter.lockup = { fil: 'img/brands/fx-mark.svg' }; }, /ukendt variant/);
+  prøv(x => { x.varianter.emblem.fil = 'img/brands/findes-ikke.svg'; }, /findes ikke/);
+  prøv(x => { x.varianter.emblem.fil = '../x.svg'; }, /skal være img\/brands/);
+  prøv(x => { x.varianter.emblem.fil = x.fil; }, /samme fil som hovedfilen/);
+  prøv(x => { x.fil = null; x.godkendt = false; }, /kræver at mærket selv har en fil/);
+  // et mærke uden godkendelse får ingen logo-data, heller ikke emblem
+  const ugk = JSON.parse(JSON.stringify(u.manifest)); ugk.maerker[0].godkendt = false;
+  assert.equal(G.byggData(ugk).m[0].l, undefined);
 });
 
 /* ---------- A12: CSS ---------- */
@@ -252,12 +332,19 @@ test('A12 p-brand-logo.css: ingen hårdkodede farver, og slotmålene følger SLO
   assert.doesNotMatch(uden, /#[0-9a-f]{3,8}\b/i, 'hex-farve');
   assert.doesNotMatch(uden, /\b(rgb|rgba|hsl|hsla)\(/i);
   assert.doesNotMatch(uden, /:\s*(white|black|red|green|blue|orange)\b/i);
-  for (const [navn, [h, w]] of Object.entries(BL.SLOT)){
+  for (const [navn, [h, w, k]] of Object.entries(BL.SLOT)){
     const moenster = navn === 'hero' ? '@media \\(min-width:700px\\)\\{ \\.bl--hero' : `\\.bl--${navn}`;
-    const regel = new RegExp(`${moenster}\\{[^}]*--bl-maxh:(\\d+)px;[^}]*--bl-maxw:(\\d+)px`).exec(uden);
+    const regel = new RegExp(`${moenster}\\{[^}]*--bl-maxh:(\\d+)px;[^}]*--bl-maxw:(\\d+)px;[^}]*--bl-k:([\\d.]+)px`).exec(uden);
     assert.ok(regel, `.bl--${navn} mangler i CSS`);
-    assert.equal(+regel[1], h, `${navn} højde`); assert.equal(+regel[2], w, `${navn} bredde`);
+    assert.equal(+regel[1], h, `${navn} højde`); assert.equal(+regel[2], w, `${navn} bredde`); assert.equal(+regel[3], k, `${navn} k (√maks. areal)`);
   }
+  // bredden følger højde, bredde OG areal (ens visuel vægt)
+  assert.match(uden, /width: min\(var\(--bl-maxw\), calc\(var\(--bl-maxh\) \* var\(--bl-ar\)\), calc\(var\(--bl-k\) \* var\(--bl-sa\)\)\)/);
+  assert.match(uden, /\.bl-spalte--sm\{ width:56px;/, 'den lille kolonne er lige så bred som sm-slotten');
+  assert.equal(BL.SLOT.sm[1], 56);
+  // masken er skjult, til klienten har hentet filen (aldrig en massiv blok), og tegnes først med .bl--klar
+  assert.match(uden, /\.bl-mark\{[^}]*visibility:hidden/); assert.match(uden, /\.bl--klar > \.bl-mark\{ visibility:visible; \}/);
+  assert.doesNotMatch(uden, /bl-probe/);
   assert.match(uden, /var\(--color-fg\)/); assert.match(uden, /var\(--color-fg-muted\)/);
   assert.doesNotMatch(uden, /--color-success/, 'grøn bruges kun til ✓');
 });
@@ -310,10 +397,19 @@ test('A14 hver manifest-fil findes og er med i udgiv-allowlisten (stille-404-vag
   assert.ok(brugt.length === 0 || brugt.every(f => /\.svg$/.test(f)));
 });
 
-test('A3/A17 kernen har ingen afhængigheder og bruger hverken fetch, eval eller DOM ved indlæsning', () => {
+test('A3/A17 kernen har ingen afhængigheder; render-laget bruger hverken fetch, eval eller DOM — klient-laget henter kun img/brands/*.svg', () => {
   const k = fs.readFileSync(path.join(ROOT, 'js', 'brand-logos.js'), 'utf8');
   const kode = k.replace(/\/\*[\s\S]*?\*\//g, '');
-  assert.doesNotMatch(kode, /\bfetch\s*\(|XMLHttpRequest|\beval\s*\(|new Function|innerHTML|document\.write/);
+  // render-laget (alt før klient-blokken) er rent: det kører også i Node/generatorerne
+  const klientStart = kode.indexOf('const doc = rod && rod.document;');
+  assert.ok(klientStart > 0, 'klient-blokken skal være afgrænset');
+  assert.doesNotMatch(kode.slice(0, klientStart), /\bfetch\s*\(|XMLHttpRequest|\beval\s*\(|new Function|innerHTML|document\.|rod\.document|MutationObserver/);
+  // klient-laget: ét fetch-kald, kun til filer, der matcher img/brands/<navn>.svg (data-attributten valideres først); ingen eval/innerHTML
+  const klient = kode.slice(klientStart);
+  assert.equal((klient.match(/\bfetch\s*\(/g) || []).length, 1, 'netop ét fetch-kald (ÉN hentning pr. fil)');
+  assert.match(klient, /const FIL_OK = \/\^img\\\/brands\\\/\[a-z0-9\]\[a-z0-9-\]\*\\\.svg\$\/;/);
+  assert.match(klient, /!FIL_OK\.test\(src\)/);
+  assert.doesNotMatch(klient, /XMLHttpRequest|\beval\s*\(|new Function|innerHTML|document\.write/);
   assert.deepEqual([...kode.matchAll(/require\(([^)]*)\)/g)].map(m => m[1]), ["'./brand-logos-data.js'"]);
   // indlæses i et rent vm-miljø uden Node-globaler som en browser (global BrandLogos)
   const vm = require('vm');

@@ -1,5 +1,5 @@
 /* Lille statisk server til logotests (kun 127.0.0.1, egen port). Leverer filer fra en rodmappe, virtuelle sider (/t/<navn>.html)
-   og placeholder-SVG'erne under /img/brands/ med et styrbart svar: 'ok' | 'langsom' (600 ms) | '404'.
+   og placeholder-SVG'erne under /img/brands/ med et styrbart svar: 'ok' | 'langsom' (600 ms) | '404' | 'html' (200, men en HTML-side i stedet for SVG).
    mask-image kræver samme oprindelse (CORS) — derfor en rigtig server og ikke file://. */
 const http = require('http');
 const fs = require('fs');
@@ -25,6 +25,7 @@ function start(rodSti, virtuelle){
     if (svg){
       const send = () => {
         if (tilstand.svg === '404'){ res.writeHead(404); return res.end('nej'); }
+        if (tilstand.svg === 'html'){ res.writeHead(200, { 'content-type': TYPER['.html'] }); return res.end('<!doctype html><title>x</title><p>Siden findes ikke</p>'); }
         res.writeHead(200, { 'content-type': TYPER['.svg'], 'cache-control': 'no-store' });
         res.end(fs.readFileSync(path.join(H.FIX_DIR, svg[1])));
       };

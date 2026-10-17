@@ -3,7 +3,7 @@
    Browser:  <script src="js/brand-logos-data.js"></script> <script src="js/brand-logos.js"></script>  ->  global BrandLogos
    Node:     const BrandLogos = require('./js/brand-logos.js');
 
-   Ingen afhængigheder, intet fetch. Data (js/brand-logos-data.js) er GENERERET af scripts/brand-logos-gen.js ud fra
+   Ingen afhængigheder. Data (js/brand-logos-data.js) er GENERERET af scripts/brand-logos-gen.js ud fra
    img/brands/manifest.json — ét sted at tilføje et mærke.
 
    Standard er tekst: et mærke uden godkendt logo vises som monogram-cirkel (hvor navnet står som tekst ved siden af)
@@ -12,16 +12,23 @@
 
    API
      normaliser(navn)            -> slug | null     ('Ukendt', 'andet mærke', tomt -> null)
-     logoFor(navn)               -> { slug, navn, harLogo, src, bredde, hoejde, monogram, variant, fallback, ensfarvet }
-     logoHTML(navn, valg)        -> markup (streng); valg: { storrelse:'sm|md|lg|hero', variant, decorative, fallback }
+     logoFor(navn)               -> { slug, navn, harLogo, src, bredde, hoejde, emblem:{src,bredde,hoejde}|null, monogram, variant, fallback, ensfarvet }
+     logoHTML(navn, valg)        -> markup (streng); valg: { storrelse:'sm|md|lg|xl|hero', variant, form:'emblem|fuld', decorative, fallback, statisk }
      monogramFor(navn)           -> 1-3 tegn
      opret(data)                 -> en ny instans med samme API (til tests med eget manifest)
 
+   Slot pr. størrelse: [maks. højde, maks. bredde, k]. Bredden er min(maks. bredde, maks. højde · forhold, k · √forhold), så alle
+   logoer — smalle, kvadratiske og brede — får næsten samme AREAL (k² = maks. areal): ens visuel vægt. 'sm' er en bred, lav slot
+   til lister (A–Z, filter); dér vælges mærkets emblem-variant (hvis filen findes og forholdet ≤ 3), ellers hovedfilen skaleret ned.
+
    Markup (fast slot -> ingen CLS; css/p-brand-logo.css):
-     <span class="bl bl--md bl--logo" data-bl="slug" style="--bl-ar:1.2" aria-hidden="true">
-       <span class="bl-mark" style="mask-image:..."></span>        ensfarvet logo som CSS-mask i currentColor (lys/mørk uden filskift)
-       <img class="bl-probe" ... hidden>                            fanger fejl; ved fejl får .bl klassen bl--fejl -> fallback vises
-       <span class="bl-fb ...">…</span>                             ordmærke/monogram, skjult så længe logoet virker
+     <span class="bl bl--md bl--logo" data-bl="slug" style="--bl-ar:1.2;--bl-sa:1.095" aria-hidden="true">
+       <span class="bl-mark" data-bl-src="img/brands/x.svg"></span>   ensfarvet logo som CSS-mask i currentColor (lys/mørk uden filskift).
+                                                                  Klienten henter filen ÉN gang pr. unik fil (fetch) og sætter masken, når den er hentet;
+                                                                  en fil, der ikke kan hentes, giver bl--fejl -> fallback. Ingen anden hentning af samme URL.
+       <img class="bl-ref" src=".." hidden loading="lazy">            KUN med valg.statisk (generatorer): statisk filreference, så scripts/udgiv.js
+                                                                  fanger en manglende fil. Skjult + lazy: henter intet.
+       <span class="bl-fb ...">…</span>                              ordmærke/monogram, skjult så længe logoet virker
      </span>
    Uden logo: <span class="bl bl--md bl--mono|bl--ord" data-bl="slug"><span class="bl-fb …">…</span></span>
    Alt fra mærkenavne escapes; navnet indgår aldrig i en attribut uden escape. */
@@ -31,9 +38,14 @@
 })(typeof self !== 'undefined' ? self : this, function (standardData, rod){
   'use strict';
 
-  const STORRELSER = ['sm', 'md', 'lg', 'hero'];
-  /* [maks. højde, maks. bredde] i px — SKAL følge css/p-brand-logo.css (testet). Hero er desktop-målet; CSS formindsker på mobil. */
-  const SLOT = { sm: [18, 28], md: [30, 60], lg: [40, 120], hero: [54, 235] };
+  const STORRELSER = ['sm', 'md', 'lg', 'xl', 'hero'];
+  /* [maks. højde, maks. bredde, k] i px — SKAL følge css/p-brand-logo.css (testet). k² er det maksimale areal. xl (annoncens titelrække) og hero
+     er desktop-målene; CSS formindsker dem på tablet/mobil. */
+  const SLOT = { sm: [22, 56, 26.5], md: [30, 60, 34.6], lg: [40, 120, 45.8], xl: [64, 160, 84.9], hero: [72, 280, 97.5] };
+  /* Et logo, der ved slottens mål ville blive lavere end dette, er ulæseligt — så er teksten ærligere. */
+  const MIN_HOEJDE = 12;
+  /* Emblem-varianten (uden ordmærke) vælges i 'sm', hvis den ikke er bredere end dette forhold; ellers hovedfilen. */
+  const EMBLEM_MAKS_FORHOLD = 3;
   const UKENDT = new Set(['ukendt', 'andet-maerke', 'andet', 'unknown', 'ukendt-maerke', 'andre-maerker', 'ikke-oplyst', 'ingen']);
 
   function esc(s){
@@ -70,6 +82,13 @@
     return [ord.slice(0, bedst).join(' '), ord.slice(bedst).join(' ')];
   }
 
+  /* Slottens pixelmål for et logo med forholdet ar: ens max-højde, ens max-bredde, ens max-areal. */
+  function slotMaal(str, ar){
+    const [mh, mw, k] = SLOT[str];
+    const w = Math.min(mw, mh * ar, k * Math.sqrt(ar));
+    return { w, h: w / ar };
+  }
+
   function opret(data){
     const d = data && Array.isArray(data.m) ? data : { v: 1, m: [] };
     const bySlug = new Map();
@@ -104,14 +123,17 @@
     function logoFor(navn){
       const slug = normaliser(navn);
       const raa = (typeof navn === 'string' || typeof navn === 'number') ? String(navn).trim().replace(/\s+/g, ' ') : '';
-      if (!slug) return { slug: null, navn: raa, aliaser: [], harLogo: false, src: null, bredde: null, hoejde: null, monogram: '', variant: null, fallback: 'ordmaerke', ensfarvet: true };
+      if (!slug) return { slug: null, navn: raa, aliaser: [], harLogo: false, src: null, bredde: null, hoejde: null, emblem: null, monogram: '', variant: null, fallback: 'ordmaerke', ensfarvet: true };
       const e = bySlug.get(slug);
       const visNavn = e ? e.n : raa;
       const l = e && e.l;
+      const harLogo = !!(l && l.src && l.w > 0 && l.h > 0);
+      const em = harLogo && l.e && l.e.src && l.e.w > 0 && l.e.h > 0 ? { src: l.e.src, bredde: l.e.w, hoejde: l.e.h } : null;
       return {
         slug, navn: visNavn, aliaser: e ? e.a.slice() : [],
-        harLogo: !!(l && l.src && l.w > 0 && l.h > 0),
+        harLogo,
         src: l ? l.src : null, bredde: l ? l.w : null, hoejde: l ? l.h : null,
+        emblem: em,
         monogram: e ? e.m : monogramRegel(visNavn),
         variant: e ? e.v : 'ordmaerke',
         fallback: e ? e.f : 'ordmaerke',
@@ -130,6 +152,16 @@
       return `<span class="bl-fb bl-wordmark" style="--bl-n:${n};--bl-nl:${ls.length}">${ls.map(x => `<span class="bl-l">${esc(x)}</span>`).join(' ')}</span>`;
     }
 
+    /* Hvilken fil tegnes? Emblemet i 'sm' (eller med form:'emblem'), når det findes; ellers hovedfilen. form:'fuld' tvinger hovedfilen. */
+    function vaelgFil(l, str, form){
+      const hoved = { src: l.src, bredde: l.bredde, hoejde: l.hoejde, emblem: false };
+      const em = l.emblem;
+      if (!em || form === 'fuld') return hoved;
+      const vil = form === 'emblem' || str === 'sm';
+      if (vil && (form === 'emblem' || em.bredde / em.hoejde <= EMBLEM_MAKS_FORHOLD)) return { src: em.src, bredde: em.bredde, hoejde: em.hoejde, emblem: true };
+      return hoved;
+    }
+
     function logoHTML(navn, valg){
       const o = valg || {};
       const l = logoFor(navn);
@@ -138,8 +170,11 @@
       const dekor = o.decorative !== false;
       let brugLogo = l.harLogo;
       if (brugLogo && o.variant && o.variant !== l.variant) brugLogo = false;
-      /* I den mindste slot er et bredt ordmærke ulæseligt — så er monogrammet ærligere. */
-      if (brugLogo && str === 'sm' && l.variant !== 'emblem' && l.bredde / l.hoejde > 1.6) brugLogo = false;
+      const fil = brugLogo ? vaelgFil(l, str, o.form) : null;
+      const ar = fil ? Math.round((fil.bredde / fil.hoejde) * 1000) / 1000 : 1;
+      const m = fil ? slotMaal(str, ar) : null;
+      /* Et logo, der ved slottens mål bliver ulæseligt lavt, er ærligere som tekst. */
+      if (fil && m.h < MIN_HOEJDE) brugLogo = false;
       let fbType = o.fallback === 'monogram' || o.fallback === 'ordmaerke' ? o.fallback : (dekor ? 'monogram' : l.fallback);
       if (str === 'sm') fbType = 'monogram';
 
@@ -150,42 +185,93 @@
       if (!brugLogo){
         return `<span class="bl bl--${str} ${fbType === 'monogram' ? 'bl--mono' : 'bl--ord'}" data-bl="${slugE}"${a11y}>${fallbackHTML(l, fbType)}</span>`;
       }
-      const ar = Math.round((l.bredde / l.hoejde) * 1000) / 1000;
-      const [mh, mw] = SLOT[str];
-      const w = Math.min(mw, mh * ar), h = w / ar;
-      const src = esc(l.src);
+      const sa = Math.round(Math.sqrt(ar) * 1000) / 1000;
+      const src = esc(fil.src);
       const fb = fallbackHTML(l, fbType);
+      const emCls = fil.emblem ? ' bl--emblem' : '';
       if (l.ensfarvet){
-        return `<span class="bl bl--${str} bl--logo" data-bl="${slugE}" style="--bl-ar:${ar}"${a11y}>` +
-          `<span class="bl-mark" style="-webkit-mask-image:url('${src}');mask-image:url('${src}')"></span>` +
-          `<img class="bl-probe" src="${src}" alt="" width="${Math.round(w)}" height="${Math.round(h)}" hidden>${fb}</span>`;
+        const ref = o.statisk ? `<img class="bl-ref" src="${src}" alt="" width="${Math.round(m.w)}" height="${Math.round(m.h)}" loading="lazy" hidden>` : '';
+        return `<span class="bl bl--${str} bl--logo${emCls}" data-bl="${slugE}" style="--bl-ar:${ar};--bl-sa:${sa}"${a11y}>` +
+          `<span class="bl-mark" data-bl-src="${src}"></span>${ref}${fb}</span>`;
       }
       const alt = dekor ? '' : `${navnE}-logo`;
-      return `<span class="bl bl--${str} bl--logo bl--img" data-bl="${slugE}" style="--bl-ar:${ar}"${dekor ? ' aria-hidden="true"' : ''}>` +
-        `<img class="bl-img" src="${src}" alt="${alt}" width="${Math.round(w)}" height="${Math.round(h)}" decoding="async">${fb}</span>`;
+      return `<span class="bl bl--${str} bl--logo bl--img${emCls}" data-bl="${slugE}" style="--bl-ar:${ar};--bl-sa:${sa}"${dekor ? ' aria-hidden="true"' : ''}>` +
+        `<img class="bl-img" src="${src}" alt="${alt}" width="${Math.round(m.w)}" height="${Math.round(m.h)}" decoding="async">${fb}</span>`;
     }
 
-    return { normaliser, logoFor, logoHTML, monogramFor, opret, STORRELSER, SLOT, esc, noegle, linjer, version: d.v };
+    return { normaliser, logoFor, logoHTML, monogramFor, opret, STORRELSER, SLOT, MIN_HOEJDE, EMBLEM_MAKS_FORHOLD, slotMaal, esc, noegle, linjer, version: d.v };
   }
 
   const api = opret(standardData);
 
-  /* Klienten: et logo, der ikke kan hentes, bliver aldrig et brudt billede — .bl får bl--fejl, og ordmærket/monogrammet
-     (som allerede ligger i markup) tager over. Capture-lytteren fanger også billeder, der indsættes senere; en kort
-     gennemgang ved DOMContentLoaded fanger dem, der allerede nåede at fejle, før scriptet kørte (SVG'er har altid width/
-     height — kræves af gen-scriptet — så naturalWidth 0 efter complete betyder en fejlet hentning, ikke et mål-løst billede). */
+  /* ---- Klienten ---------------------------------------------------------------------------------------------------------
+     Kun i en browser (rod.document). Intet af dette kører i Node/generatorerne, og `opret()` ovenfor har intet DOM/netværk.
+
+     ÉN hentning pr. unik logofil pr. sideindlæsning: det ensfarvede logo er en CSS-mask, og en maske kan ikke selv melde "404".
+     Før lå der derfor et skjult billede med samme URL som maske-elementet (to kald pr. logo). Nu henter klienten hver fil én gang
+     (HTTP-cachen gælder som normalt), lægger SVG'en som blob-URL og bruger den som maske på ALLE elementer med samme fil. Svarer filen
+     ikke 200 med en SVG, får alle elementer med filen bl--fejl, og ordmærket/monogrammet (som altid ligger i markup) tager over —
+     aldrig tom plads og aldrig en massiv blok (masken er skjult, til den er klar).
+     Elementer, der er med i layoutet (også under folden), hentes straks — som en CSS-mask altid gjorde. Elementer, der ikke er det
+     (et foldet filterpanel, display:none), hentes først, når de kommer til syne (IntersectionObserver): et skjult logo koster intet.
+     Dynamisk indsat markup opdages af en MutationObserver. */
   const doc = rod && rod.document;
   if (doc && doc.addEventListener){
     const markerFejl = t => {
       const bl = t.closest && t.closest('.bl');
       if (bl) bl.classList.add('bl--fejl');
     };
-    const erLogoBillede = t => t && t.tagName === 'IMG' && t.classList && (t.classList.contains('bl-probe') || t.classList.contains('bl-img'));
+    /* Flerfarvede logoer er et rigtigt billede (bl-img): browseren melder selv fejl. */
+    const erLogoBillede = t => t && t.tagName === 'IMG' && t.classList && t.classList.contains('bl-img');
     doc.addEventListener('error', ev => { if (erLogoBillede(ev && ev.target)) markerFejl(ev.target); }, true);
+
+    const FIL_OK = /^img\/brands\/[a-z0-9][a-z0-9-]*\.svg$/;
+    const hentet = new Map();   // fil -> Promise<blob-URL | null>
+    function hent(src){
+      if (hentet.has(src)) return hentet.get(src);
+      const p = (typeof rod.fetch === 'function' && rod.Blob && rod.URL && rod.URL.createObjectURL)
+        ? rod.fetch(src, { credentials: 'same-origin' })
+          .then(r => r.ok ? r.text() : Promise.reject(new Error('status ' + r.status)))
+          .then(t => /<svg[\s>]/i.test(t) ? rod.URL.createObjectURL(new rod.Blob([t], { type: 'image/svg+xml' })) : Promise.reject(new Error('ikke svg')))
+          .catch(() => null)
+        : Promise.resolve(null);
+      hentet.set(src, p);
+      return p;
+    }
+    function indlaes(bl){
+      const mark = bl.querySelector(':scope > .bl-mark');
+      const src = mark && mark.getAttribute('data-bl-src');
+      if (!mark || !src || !FIL_OK.test(src)){ if (mark) bl.classList.add('bl--fejl'); return; }
+      hent(src).then(url => {
+        if (!url){ bl.classList.add('bl--fejl'); return; }
+        mark.style.setProperty('--bl-u', `url("${url}")`);
+        bl.classList.add('bl--klar');
+      });
+    }
+    const io = typeof rod.IntersectionObserver === 'function'
+      ? new rod.IntersectionObserver(poster => {
+        for (const p of poster) if (p.isIntersecting){ io.unobserve(p.target); indlaes(p.target); }
+      }, { rootMargin: '200px' })
+      : null;
     const gennemgaa = () => {
-      const liste = doc.querySelectorAll ? doc.querySelectorAll('.bl img.bl-probe, .bl img.bl-img') : [];
-      for (let i = 0; i < liste.length; i++){ const im = liste[i]; if (im.complete && im.naturalWidth === 0) markerFejl(im); }
+      const liste = doc.querySelectorAll ? doc.querySelectorAll('.bl--logo:not([data-bl-set])') : [];
+      for (let i = 0; i < liste.length; i++){
+        const bl = liste[i];
+        bl.setAttribute('data-bl-set', '1');
+        if (bl.classList.contains('bl--img')){
+          const im = bl.querySelector(':scope > img.bl-img');
+          if (im && im.complete && im.naturalWidth === 0) markerFejl(im);
+        } else if (io && !bl.getClientRects().length) io.observe(bl);   // ikke i layoutet (skjult) -> vent til det vises
+        else indlaes(bl);
+      }
     };
+    let planlagt = false;
+    const planlaeg = () => { if (planlagt) return; planlagt = true; Promise.resolve().then(() => { planlagt = false; gennemgaa(); }); };
+    if (typeof rod.MutationObserver === 'function'){
+      new rod.MutationObserver(poster => {
+        for (const p of poster) for (const n of p.addedNodes) if (n.nodeType === 1){ planlaeg(); return; }
+      }).observe(doc.documentElement, { childList: true, subtree: true });
+    }
     if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', gennemgaa); else gennemgaa();
     api.gennemgaa = gennemgaa;   // kan kaldes igen efter at markup er indsat dynamisk
   }

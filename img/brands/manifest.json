@@ -20,7 +20,15 @@
       "autenticitet": "tvivlsom",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/honda-emblem.svg",
+          "hash": "1ae2bf85b19278885c7ee61fc39e81681fbdebbf7199787428a9b25202aed1ae",
+          "bredde": 1000,
+          "hoejde": 669
+        }
+      }
     },
     {
       "slug": "harley-davidson",
@@ -36,7 +44,7 @@
       "kilde": "AI-genereret udkast (ChatGPT, 17.10.2026) -> vektoriseret med scripts/logo-vektoriser.js",
       "licens": "Varemærke tilhører producenten; bruges kun til at identificere producenten i annoncer. Udkast ikke verificeret mod officiel fil.",
       "hash": "d72067f66400c4589cf7a7ad7c0090e1da4eb1bea6c05f88986e10564dffdc8f",
-      "variant": "emblem",
+      "variant": "lockup",
       "bredde": 1000,
       "hoejde": 797,
       "ensfarvet": true,
@@ -66,7 +74,15 @@
       "autenticitet": "ukendt",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/yamaha-emblem.svg",
+          "hash": "d9ac4ecfaa4050fa538043c987b1ea8ecedc003bad87c064b59b28a68235efb2",
+          "bredde": 1000,
+          "hoejde": 999
+        }
+      }
     },
     {
       "slug": "suzuki",
@@ -86,7 +102,15 @@
       "autenticitet": "ukendt",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/suzuki-emblem.svg",
+          "hash": "fe7280415df4ff8dda1f945a16bfef25a4702d96ae5d91c1be55a283a7b752fb",
+          "bredde": 1000,
+          "hoejde": 994
+        }
+      }
     },
     {
       "slug": "bmw",
@@ -108,7 +132,15 @@
       "autenticitet": "ukendt",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/bmw-emblem.svg",
+          "hash": "bc9f251a9849870334210f400e2800ad9864847f017d4cf231d5a656caad0489",
+          "bredde": 996,
+          "hoejde": 1000
+        }
+      }
     },
     {
       "slug": "kawasaki",
@@ -128,7 +160,15 @@
       "autenticitet": "ukendt",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/kawasaki-emblem.svg",
+          "hash": "dd33668df93d0c38bee14142fb05be7de1bdf3cf143a74ce64087a4cd0640952",
+          "bredde": 1000,
+          "hoejde": 367
+        }
+      }
     },
     {
       "slug": "triumph",
@@ -150,7 +190,15 @@
       "autenticitet": "tvivlsom",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/triumph-emblem.svg",
+          "hash": "46cfd8822bdf212a63678e729ba4c2611317a51f37a04797503ca570187a1961",
+          "bredde": 1000,
+          "hoejde": 849
+        }
+      }
     },
     {
       "slug": "ktm",
@@ -194,7 +242,15 @@
       "autenticitet": "tvivlsom",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/royal-enfield-emblem.svg",
+          "hash": "0e8826128c12776eed94d094aad5e8a7ef9e0cdfce90ef91b579bbc195d18217",
+          "bredde": 1000,
+          "hoejde": 992
+        }
+      }
     },
     {
       "slug": "bsa",
@@ -243,7 +299,7 @@
       "kilde": "AI-genereret udkast (ChatGPT, 17.10.2026) -> vektoriseret med scripts/logo-vektoriser.js",
       "licens": "Varemærke tilhører producenten; bruges kun til at identificere producenten i annoncer. Udkast ikke verificeret mod officiel fil.",
       "hash": "5441eff2aae5e97a2356fe01a8ad4747b8286b0a1b06dc0015a51b0a583396d8",
-      "variant": "emblem",
+      "variant": "lockup",
       "bredde": 963,
       "hoejde": 1000,
       "ensfarvet": true,
@@ -274,7 +330,15 @@
       "autenticitet": "tvivlsom",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/moto-guzzi-emblem.svg",
+          "hash": "ea99ca9c2f48fc4cf47cf5f733a88f7856094d2a4c9c6fa8ad2953f52578f272",
+          "bredde": 1000,
+          "hoejde": 233
+        }
+      }
     },
     {
       "slug": "husqvarna",
@@ -296,7 +360,15 @@
       "autenticitet": "tvivlsom",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/husqvarna-emblem.svg",
+          "hash": "488407bb738852e35d59832cd0e328799cccad42c7c0250212f3c99a96321dd4",
+          "bredde": 858,
+          "hoejde": 1000
+        }
+      }
     },
     {
       "slug": "indian",
@@ -360,7 +432,15 @@
       "autenticitet": "tvivlsom",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/mv-agusta-emblem.svg",
+          "hash": "75f292734bcd74fec368c694247f7d0b136d39a8091d2f58221b2095ca79a8da",
+          "bredde": 1000,
+          "hoejde": 699
+        }
+      }
     },
     {
       "slug": "victory",
@@ -470,7 +550,15 @@
       "autenticitet": "ukendt",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/cfmoto-emblem.svg",
+          "hash": "ce7d78985d10a0ad7e3babbacaed27531c55d73e02333dbd4d3027c36735269a",
+          "bredde": 1000,
+          "hoejde": 987
+        }
+      }
     },
     {
       "slug": "fantic",
@@ -609,7 +697,15 @@
       "autenticitet": "ukendt",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/piaggio-emblem.svg",
+          "hash": "28c908877c1cdf37e680ba75151abbe46b42471b2fa89df50ff5d4344103b89f",
+          "bredde": 912,
+          "hoejde": 1000
+        }
+      }
     },
     {
       "slug": "bimota",
@@ -826,7 +922,15 @@
       "autenticitet": "ukendt",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/gasgas-emblem.svg",
+          "hash": "796ec0f73444216cf47badc807d4ec5dc5fdf4db2cc6610f58aef6f0d85e3c5c",
+          "bredde": 1000,
+          "hoejde": 631
+        }
+      }
     },
     {
       "slug": "sherco",
@@ -1161,7 +1265,15 @@
       "autenticitet": "ukendt",
       "kraever_officiel_fil": false,
       "godkendt_af": "ejer",
-      "godkendt_dato": "2026-10-17"
+      "godkendt_dato": "2026-10-17",
+      "varianter": {
+        "emblem": {
+          "fil": "img/brands/zero-emblem.svg",
+          "hash": "38cd780459958dfb06cf9045a78e5bd7d99b324d0827174e765c6dfa92d33330",
+          "bredde": 1000,
+          "hoejde": 825
+        }
+      }
     }
   ]
 }

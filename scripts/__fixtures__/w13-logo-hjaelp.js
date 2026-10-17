@@ -8,12 +8,13 @@ const G = require('../brand-logos-gen.js');
 const ROOT = path.join(__dirname, '..', '..');
 const FIX_DIR = path.join(__dirname, 'brands');
 
-/* slug -> [placeholderfil, variant, ensfarvet] — blandede forhold: 0,6 · 0,9 · 1,0 · 1,15 · 1,5 · 3,5 · 4,0 */
+/* slug -> [placeholderfil, variant, ensfarvet, emblemfil?] — blandede forhold: 0,6 · 0,9 · 1,0 · 1,15 · 1,5 · 3,5 · 4,0. Emblemfilen (valgfri) er
+   mærkets varianter.emblem: Honda 1,5 (smallere end hovedfilen 1,0 er ikke kravet — kun at den vælges i sm), Kawasaki 2,5 (hovedfilen er 4,0). */
 const TILDELING = {
-  honda: ['fx-ring.svg', 'emblem', true],
+  honda: ['fx-ring.svg', 'emblem', true, 'fx-mark.svg'],
   yamaha: ['fx-triangle.svg', 'emblem', true],
   bmw: ['fx-hex.svg', 'emblem', true],
-  kawasaki: ['fx-bar.svg', 'ordmaerke', true],
+  kawasaki: ['fx-bar.svg', 'ordmaerke', true, 'fx-bar-k.svg'],
   ktm: ['fx-wide.svg', 'ordmaerke', true],
   ducati: ['fx-shield.svg', 'lockup', true],
   suzuki: ['fx-multi.svg', 'lockup', false],
@@ -27,7 +28,7 @@ function renManifest(){
   const m = JSON.parse(fs.readFileSync(G.MANIFEST, 'utf8'));
   for (const e of m.maerker){
     Object.assign(e, { fil: null, godkendt: false, kilde: null, licens: null, hash: null, bredde: null, hoejde: null, variant: 'ordmaerke', ensfarvet: true });
-    delete e.godkendt_af; delete e.godkendt_dato;
+    delete e.godkendt_af; delete e.godkendt_dato; delete e.varianter;
   }
   return m;
 }
@@ -47,6 +48,10 @@ function testManifest(){
     e.ensfarvet = t[2];
     e.bredde = mm.bredde; e.hoejde = mm.hoejde;
     e.hash = G.sha256(Buffer.from(tekst, 'utf8'));
+    if (t[3]){
+      const et = svgTekst(t[3]); const em = G.maal(et);
+      e.varianter = { emblem: { fil: `img/brands/${t[3]}`, hash: G.sha256(Buffer.from(et, 'utf8')), bredde: em.bredde, hoejde: em.hoejde } };
+    }
   }
   return m;
 }

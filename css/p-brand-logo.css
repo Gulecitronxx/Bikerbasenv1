@@ -5,33 +5,44 @@
    CSS-mask i currentColor: lys/mørk følger tokens uden filskift. Ingen hårdkodede farver; brandfarven bruges kun i
    monogrammet (som i dag), grøn aldrig.
 
-   Størrelser (SKAL være lig SLOT i js/brand-logos.js — testet):  sm 18x28 · md 30x60 · lg 40x120 · hero 54x235 (40x170 på mobil). */
+   Størrelser (SKAL være lig SLOT i js/brand-logos.js — testet): højde x bredde, k = √maks. areal.
+     sm 22x56 · md 30x60 · lg 40x120 · xl 64x160 (annoncens titelrække; 44x110 under 1180, 34x88 under 700) · hero 72x280 (48x200 på mobil).
+   Bredden er min(maks. bredde, maks. højde · forhold, k · √forhold): ens max-højde, ens max-bredde og ens max-AREAL, så et smalt
+   emblem, et kvadratisk skjold og et bredt ordmærke har samme visuelle vægt. --bl-ar og --bl-sa (= √forhold) står i markup.
+
+   Ensfarvet logo = CSS-mask. Masken sættes af js/brand-logos.js (--bl-u), når filen er hentet (ÉN hentning pr. fil); indtil da er
+   .bl-mark skjult (aldrig en massiv blok). Hentning fejler -> .bl--fejl -> fallback. */
 
 .bl{
-  --bl-maxh:30px; --bl-maxw:60px; --bl-ar:1;
+  --bl-maxh:30px; --bl-maxw:60px; --bl-k:34.6px; --bl-ar:1; --bl-sa:1;
   position:relative; display:inline-flex; align-items:center; justify-content:center; flex:none;
   box-sizing:border-box; vertical-align:middle; line-height:1;
   color: var(--bl-fg, var(--color-fg));
 }
-.bl--sm{ --bl-maxh:18px; --bl-maxw:28px; }
-.bl--md{ --bl-maxh:30px; --bl-maxw:60px; }
-.bl--lg{ --bl-maxh:40px; --bl-maxw:120px; }
-.bl--hero{ --bl-maxh:40px; --bl-maxw:170px; }
-@media (min-width:700px){ .bl--hero{ --bl-maxh:54px; --bl-maxw:235px; } }
+.bl--sm{ --bl-maxh:22px; --bl-maxw:56px; --bl-k:26.5px; }
+.bl--md{ --bl-maxh:30px; --bl-maxw:60px; --bl-k:34.6px; }
+.bl--lg{ --bl-maxh:40px; --bl-maxw:120px; --bl-k:45.8px; }
+.bl--xl{ --bl-maxh:64px; --bl-maxw:160px; --bl-k:84.9px; }
+@media (max-width:1179px){ .bl--xl{ --bl-maxh:44px; --bl-maxw:110px; --bl-k:58px; } }
+@media (max-width:699px){ .bl--xl{ --bl-maxh:34px; --bl-maxw:88px; --bl-k:45px; } }
+.bl--hero{ --bl-maxh:48px; --bl-maxw:200px; --bl-k:66.3px; }
+@media (min-width:700px){ .bl--hero{ --bl-maxh:72px; --bl-maxw:280px; --bl-k:97.5px; } }
 
-/* Logo: slottens mål følger logoets forhold, men aldrig ud over maks. højde/bredde (ensartet visuel vægt). */
+/* Logo: slottens mål følger logoets forhold, men aldrig ud over maks. højde/bredde/areal (ensartet visuel vægt). */
 .bl--logo{
-  width: min(var(--bl-maxw), calc(var(--bl-maxh) * var(--bl-ar)));
+  width: min(var(--bl-maxw), calc(var(--bl-maxh) * var(--bl-ar)), calc(var(--bl-k) * var(--bl-sa)));
   max-width:100%;   /* i en smal flise: bredden giver efter, forholdet bevares (aspect-ratio) */
   aspect-ratio: var(--bl-ar);
 }
 .bl-mark{
-  position:absolute; inset:0; background: currentColor;
+  position:absolute; inset:0; background: currentColor; visibility:hidden;
+  -webkit-mask-image: var(--bl-u, none); mask-image: var(--bl-u, none);
   -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
   -webkit-mask-position:center; mask-position:center;
   -webkit-mask-size:contain; mask-size:contain;
 }
-.bl-probe{ display:none; }
+.bl--klar > .bl-mark{ visibility:visible; }
+.bl-ref{ display:none; }
 .bl-img{ display:block; width:100%; height:100%; object-fit:contain; }
 @media (forced-colors:active){ .bl-mark{ background: CanvasText; } }
 
@@ -69,7 +80,8 @@
 /* Logoet i en link: følger linkens farve ved hover/fokus uden at flytte noget. */
 a:hover > .bl, a:focus-visible > .bl{ color: var(--bl-fg-hover, var(--bl-fg, var(--color-fg))); }
 
-/* Fast kolonne foran et navn (filterrække, A–Z): alle rækker får samme venstrekant, med eller uden logo. */
+/* Fast kolonne foran et navn (filterrække, A–Z): alle rækker får samme venstrekant, med eller uden logo. Den lille kolonne er
+   bred (56 px), så også et bredt ordmærke (KTM, Aprilia, Benelli) kan vises; logoerne står venstrestillet i den. */
 .bl-spalte{ display:inline-flex; align-items:center; justify-content:center; flex:none; }
-.bl-spalte--sm{ width:28px; }
+.bl-spalte--sm{ width:56px; justify-content:flex-start; }
 .bl-spalte--md{ width:60px; }
