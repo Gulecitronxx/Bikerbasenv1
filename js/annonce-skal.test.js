@@ -46,12 +46,14 @@ const { anFakta, anKoerekortKort, anTjekKort, anTrygtKort, anNoegletal, koerekor
   STUB + KILDER.map(læs).join('\n') +
   '\nreturn { anFakta, anKoerekortKort, anTjekKort, anTrygtKort, anNoegletal, koerekortMaerkat };')();
 
-test('faktatabellen skjuler tomme rækker og markerer "Ikke oplyst"', () => {
+/* W14 runde 3 (bevidst ændring): uoplyste felter står ikke længere som rækker med "Ikke oplyst", men samlet i én linje under tabellen. */
+test('faktatabellen skjuler tomme rækker og samler "Ikke oplyst" i én linje', () => {
   const html = anFakta([['<i></i>', 'Mærke', 'Yamaha'], ['<i></i>', 'Farve', null], ['<i></i>', 'Type', ''], ['<i></i>', 'Ydelse', 'Ikke oplyst']]);
   assert.match(html, /Mærke/);
   assert.doesNotMatch(html, /Farve/, 'null-række må ikke tegnes');
   assert.doesNotMatch(html, /Type/, 'tom række må ikke tegnes');
-  assert.match(html, /<dd class="an-na">Ikke oplyst<\/dd>/);
+  assert.doesNotMatch(html, /<dd class="an-na">/, 'ingen "Ikke oplyst"-række i tabellen');
+  assert.match(html, /<p class="an-fakta-io">Ikke oplyst: Ydelse<\/p>/);
 });
 
 test('kørekortkortet påstår aldrig mere end tallene kan bære', () => {
