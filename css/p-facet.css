@@ -510,3 +510,8 @@
   .fa-felt:not(.fa-felt-q) .fa-ikon-felt svg{ display:none; }
   .fa-felt:not(.fa-felt-q) .fa-ikon-felt .input{ padding-left:14px; }
 }
+
+/* Faktatabel (modelsider): værdi og "oplyst i ..." på samme linje, så rækkerne bliver halvt så høje. */
+.fa-dl > div{ padding: 7px var(--space-4); align-items:baseline; }
+.fa-dl dd small{ display:inline; margin: 0 0 0 var(--space-2); }
+.fa-guides a{ height:100%; }

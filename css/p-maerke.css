@@ -620,3 +620,24 @@
 .mk-mini-reg span{ font-weight:500; color: var(--color-fg-muted); font-size:12.5px; }
 .mk-mini-reg strong{ font-size:14px; }
 .mk-col{ border-radius: var(--radius-md); }
+
+/* Hero-lockup: emblem + ordmærke side om side (billede 9), midtstillet lodret, med luft imellem. */
+.mk-wordmark--lockup{ gap: var(--space-4); flex-wrap:wrap; row-gap: var(--space-2); }
+.mk-wordmark--lockup .bl{ flex:none; }
+.mk-wordmark--lockup .bl--wm{ margin-top:2px; }
+
+/* Modelfliser med foto (billede 9): billedet øverst, navn og antal under. */
+.mk-mini a.mk-mini-foto{ justify-content:flex-start; padding:0 0 8px; overflow:hidden; gap:2px; }
+.mk-mini a.mk-mini-foto img{ display:block; width:100%; aspect-ratio: 16 / 9; object-fit:cover; background: var(--color-surface-2); margin-bottom:6px; }
+.mk-mini a.mk-mini-foto strong, .mk-mini a.mk-mini-foto span{ padding-inline:6px; }
+.mk-brandtile-navn{ font-size:18px; }
+.mk-col-foot .mk-link{ display:inline-flex; padding-block:0; }   /* "main p > a:only-child" i styles.css gjorde linket til inline-block, så pilen faldt ned på næste linje */
+
+/* CTA-panelet må ikke være det, der bestemmer rækkens højde (kortene stod med tom luft over chip-rækken). */
+@media (min-width:1100px){
+  .mk-cta-body{ padding: var(--space-4) var(--space-4) var(--space-2); }
+  .mk-cta h3{ font-size:22px; margin-bottom: var(--space-2); }
+  .mk-checks{ gap:6px; margin-bottom: var(--space-3); }
+  .mk-cta-img{ min-height:56px; }
+}
+.mk-brandtile-navn{ padding-right:0; }   /* pilen står øverst ved logoet, ikke ved siden af navnet: "Harley-Davidson" skal stå på én linje */

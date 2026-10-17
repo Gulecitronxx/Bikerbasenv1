@@ -793,6 +793,14 @@ function logoSlot(brand, storrelse){
 
 /* Mærkesidens hero-ordmærke (Mærker.png): logo + ordmærke over H1. Genbruger .mk-wordmark/.mk-mono-pladsen. */
 function heroOrdmaerkeHTML(brand){
+  /* w14 (billede 9): hvor mærket har både emblem- og ordmærke-variant (samme tegning delt i to filer), står de SIDE OM SIDE som billedets
+     lockup (emblem + stort ordmærke) i stedet for den stablede hovedfil. Øvrige mærker er uændrede. */
+  const l0 = BrandLogos.logoFor(brand);
+  if (l0.harLogo && l0.emblem && l0.ordmaerke){
+    const em = BrandLogos.logoHTML(brand, { storrelse: 'hero', form: 'emblem', decorative: true, statisk: true });
+    const wm = BrandLogos.logoHTML(brand, { storrelse: 'wm', form: 'ordmaerke', decorative: true, statisk: true });
+    return `<p class="mk-wordmark mk-wordmark--logo mk-wordmark--lockup" aria-hidden="true">${em}${wm}</p>`;
+  }
   const lg = logoSlot(brand, 'hero');
   const cls = `mk-wordmark${brand.length > 11 ? ' mk-wordmark-lang' : ''}${lg.harLogo ? ' mk-wordmark--logo' : ''}`;
   const indhold = lg.harLogo
@@ -851,7 +859,13 @@ function maerkeFakta(brand, items){
     id: t.id, label: t.label, f: { types: [t.id] }, n: tael({ types: [t.id] }),
     foto: typeFoto(items, t.id),
   })).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
-  const modeller = modelTal(items).slice(0, 30);
+  /* w14 (billede 9: modelfliser med billede): modellens egen annoncefoto (ét thumbnail pr. annonce, jf. CLAUDE.md regel 2), helst fra en kilde
+     uden skilt på væggen (mcsyd.dk). Ingen foto -> fliserne er tekst som før. */
+  const modeller = modelTal(items).slice(0, 30).map(x => {
+    const k = items.filter(l => String(l.model || '').trim().toLowerCase() === x.m.toLowerCase() && harFoto(l));
+    const bedst = k.find(l => !/mcsyd.dk/.test(String((l.source && l.source.domaene) || ''))) || k[0];
+    return Object.assign({}, x, { foto: bedst ? bedst.photoUrls[0] : null });
+  });
   const kk = ['A1', 'A2', 'A'].map(k => ({ k, f: { koerekort: k }, n: tael({ koerekort: k }) })).filter(x => x.n > 0);
   const regioner = [...new Set(items.map(l => l.region).filter(Boolean))]
     .map(r => ({ r, f: { regions: [r] }, n: tael({ regions: [r] }) })).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.r.localeCompare(b.r, 'da'));
@@ -1054,7 +1068,7 @@ function saadanHTML(){
    annoncer, og siden måler ikke popularitet (jf. runde 8, D8-M5). */
 function treKolonnerHTML(brand, fakta, items){
   const b = esc(brand);
-  const modelFlise = x => `<li><a href="${sogHref(brand, x.f)}"><strong>${esc(x.m)}</strong><span>${antalTekst(x.n, 'annonce', 'annoncer')}</span></a></li>`;
+  const modelFlise = x => `<li><a href="${sogHref(brand, x.f)}"${x.foto ? ' class="mk-mini-foto"' : ''}>${x.foto ? `<img src="${esc(x.foto)}" alt="" width="96" height="54" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}<strong>${esc(x.m)}</strong><span>${antalTekst(x.n, 'annonce', 'annoncer')}</span></a></li>`;
   const kolonner = [];
   if (fakta.modeller.length){
     kolonner.push(`<section class="mk-col" aria-labelledby="mk-mod-h">

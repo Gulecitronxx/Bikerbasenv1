@@ -38,10 +38,11 @@
 })(typeof self !== 'undefined' ? self : this, function (standardData, rod){
   'use strict';
 
-  const STORRELSER = ['sm', 'md', 'lg', 'xl', 'hero'];
+  const STORRELSER = ['sm', 'md', 'lg', 'xl', 'hero', 'wm'];
   /* [maks. højde, maks. bredde, k] i px — SKAL følge css/p-brand-logo.css (testet). k² er det maksimale areal. xl (annoncens titelrække) og hero
      er desktop-målene; CSS formindsker dem på tablet/mobil. */
-  const SLOT = { sm: [22, 56, 26.5], md: [30, 60, 34.6], lg: [40, 120, 45.8], xl: [64, 160, 84.9], hero: [72, 280, 97.5] };
+  const SLOT = { sm: [22, 56, 26.5], md: [30, 60, 34.6], lg: [40, 120, 45.8], xl: [64, 160, 84.9], hero: [72, 280, 97.5], wm: [44, 300, 128] };
+  /* 'wm' = ordmærke-varianten ved siden af emblemet i mærkesidens hero-lockup (form:'ordmaerke'); 32 px høj på mobil (CSS). */
   /* Et logo, der ved slottens mål ville blive lavere end dette, er ulæseligt — så er teksten ærligere. */
   const MIN_HOEJDE = 12;
   /* Emblem-varianten (uden ordmærke) vælges i 'sm', hvis den ikke er bredere end dette forhold; ellers hovedfilen. */
@@ -129,11 +130,13 @@
       const l = e && e.l;
       const harLogo = !!(l && l.src && l.w > 0 && l.h > 0);
       const em = harLogo && l.e && l.e.src && l.e.w > 0 && l.e.h > 0 ? { src: l.e.src, bredde: l.e.w, hoejde: l.e.h } : null;
+      const om = harLogo && l.o && l.o.src && l.o.w > 0 && l.o.h > 0 ? { src: l.o.src, bredde: l.o.w, hoejde: l.o.h } : null;
       return {
         slug, navn: visNavn, aliaser: e ? e.a.slice() : [],
         harLogo,
         src: l ? l.src : null, bredde: l ? l.w : null, hoejde: l ? l.h : null,
         emblem: em,
+        ordmaerke: om,
         monogram: e ? e.m : monogramRegel(visNavn),
         variant: e ? e.v : 'ordmaerke',
         fallback: e ? e.f : 'ordmaerke',
@@ -155,8 +158,9 @@
     /* Hvilken fil tegnes? Emblemet i 'sm' (eller med form:'emblem'), når det findes; ellers hovedfilen. form:'fuld' tvinger hovedfilen. */
     function vaelgFil(l, str, form){
       const hoved = { src: l.src, bredde: l.bredde, hoejde: l.hoejde, emblem: false };
+      if (form === 'ordmaerke' && l.ordmaerke) return { src: l.ordmaerke.src, bredde: l.ordmaerke.bredde, hoejde: l.ordmaerke.hoejde, emblem: false };
       const em = l.emblem;
-      if (!em || form === 'fuld') return hoved;
+      if (!em || form === 'fuld' || form === 'ordmaerke') return hoved;
       const vil = form === 'emblem' || str === 'sm';
       if (vil && (form === 'emblem' || em.bredde / em.hoejde <= EMBLEM_MAKS_FORHOLD)) return { src: em.src, bredde: em.bredde, hoejde: em.hoejde, emblem: true };
       return hoved;
