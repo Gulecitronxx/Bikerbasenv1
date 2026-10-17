@@ -1023,3 +1023,12 @@
 .an-kk-legende{ grid-column:1 / -1; list-style:none; margin:0; padding:var(--space-3) 0 0; border-top:1px solid var(--color-border); display:grid; gap:6px; font-size:12.5px; line-height:1.5; color:var(--color-fg-muted); }
 .an-kk-legende b{ color:var(--color-fg); font-weight:600; }
 @media (max-width:759px){ .an-kk-legende{ display:none; } }
+
+/* W14: brødkrummen brækker aldrig over to linjer på desktop (forrenderet side ændrede brødtekst ved hydrering: CLS 0,298 ved 1024). */
+@media (min-width:900px){
+  .an-crumbrow{ flex-wrap:nowrap; }
+  .an-crumbrow .breadcrumb{ flex-wrap:nowrap; white-space:nowrap; overflow:hidden; }
+  .an-crumbrow .breadcrumb > a, .an-crumbrow .breadcrumb > .bc-sep{ flex:0 0 auto; }
+  .an-crumbrow .breadcrumb #bc-current{ overflow:hidden; text-overflow:ellipsis; overflow-wrap:normal; }
+  .an-actions{ flex:0 0 auto; }
+}

@@ -1181,7 +1181,10 @@ function renderListing(){
   const hentSt = window.DATA_STATUS || {};
   const hentefejl = !listing && (hentSt.egne === 'fejlet' || hentSt.eksterne === 'fejlet'
     || (Store.getAllListings().length === 0 && (hentSt.egne === 'ok' || hentSt.eksterne === 'ok')));
+  /* W14: fejltilstande erstatter den forrenderede side. Lås højden, så fodboksen ikke hopper (CLS 0,298 ved 1024 mørk). */
+  const laasMount = () => { const m = document.getElementById('listing-detail'); if (m && m.offsetHeight) m.style.minHeight = m.offsetHeight + 'px'; };
   if (hentefejl){
+    laasMount();
     document.title = 'Vi kunne ikke hente annoncen — Bikerbasen';
     document.getElementById('bc-current').textContent = 'Kunne ikke hentes';
     document.querySelectorAll('.bc-sep').forEach(s => s.innerHTML = Icon.chevronRight);
@@ -1198,6 +1201,7 @@ function renderListing(){
     return;
   }
   if (!listing){
+    laasMount();
     document.title = 'Annoncen findes ikke — Bikerbasen';
     // Solgte og slettede annoncer skal ikke ligge tilbage i Googles indeks.
     Seo.setMeta('meta[name="robots"]', 'name', 'robots', 'noindex, follow');
