@@ -509,6 +509,15 @@ async function buildForside(){
     wireFavoriteButtons(featuredMount);
   };
   if (kandidater.length) await tegnFeatured();
+  /* W14: en reserveret, men tom plads faar en aerlig tekst (ingen annoncer med foto og modelnavn, eller lageret kom ikke helt). */
+  if (!featuredMount.querySelector('.card') && !featuredMount.querySelector('.lager-tomt-note') && !(udvalgHoved && udvalgHoved.hidden)){
+    const n = document.createElement('p');
+    n.className = 'lager-tomt-note';
+    n.textContent = lagerFejlet
+      ? 'Annoncerne kunne ikke hentes fuldt ud lige nu, så der er intet udvalg at vise. Prøv igen om lidt.'
+      : 'Ingen annoncer med foto og modelnavn at vise lige nu — find dem i den fulde søgning.';
+    featuredMount.append(n);
+  }
   /* Et brudpunkt kan krydses ved rotation: så skal antallet af kort og underteksten følge med. */
   let _featuredRAF, sidsteAntal = maal();
   window.addEventListener('resize', () => {

@@ -524,3 +524,145 @@ body.home .hvorfor{ padding: var(--space-5) 0 var(--space-3); }
 
 /* ---- W14 runde 10: sammenlign-knappen flyttes til foto-hjoernet nederst til venstre, saa den ikke rammer hjertet paa det lavere foto ---- */
 body.home .kort-raekke .card-compare{ right:auto; left:6px; bottom:6px; }
+
+/* =====================================================================================================================
+   W14 iteration 2 (efter blind Critic): hero-foto, typefliser, kort, fejltilstand, kolonner, Saadan virker, mobil-soegekort
+   ===================================================================================================================== */
+
+/* ---- Hero-foto: horisont + motorcyklens forlygte, tank og forhjul synlige; moerk scrim kun bag tekstblokken ---- */
+@media (min-width:768px){
+  body.home .hero-photo{ object-position: 50% 50%; }
+}
+@media (min-width:1100px){
+  body.home .hero{ min-height: 330px; padding-top: 24px; padding-bottom: 84px; }
+  body.home .hero-photo{ object-position: 50% 50%; }
+  body.home .hero::after{
+    background:
+      linear-gradient(90deg,
+        color-mix(in srgb, var(--color-dark) 74%, transparent) 0%,
+        color-mix(in srgb, var(--color-dark) 58%, transparent) 26%,
+        color-mix(in srgb, var(--color-dark) 14%, transparent) 46%,
+        transparent 56%),
+      linear-gradient(0deg, color-mix(in srgb, var(--color-dark) 22%, transparent) 0%, transparent 28%);
+  }
+}
+
+/* ---- Typefliser: hele motorcyklen vises, scrim kun nederst bag navn og antal ---- */
+body.home .tile{ height:104px; }
+body.home .tiles-raekke:empty{ min-height:104px; }
+@media (min-width:640px){ body.home .tile{ height:104px; } body.home .tiles-raekke:empty{ min-height:104px; } }
+@media (min-width:1100px){ body.home .tile, body.home .tiles-raekke:empty{ height:104px; min-height:104px; } }
+body.home .tile .tile-media img{ object-position: 50% 68%; }
+body.home .tile::after{ background: linear-gradient(to top, rgba(10,8,6,.84) 0%, rgba(10,8,6,.7) 34%, rgba(10,8,6,.34) 52%, transparent 70%); }
+
+/* ---- Udvalgte kort: pris under titlen (hele modelnavnet vises), jaevn rytme; sammenlign-knappen kun ved hover/fokus ---- */
+body.home .kort-raekke .rk-top{ flex-direction:column; align-items:flex-start; gap:1px; }
+body.home .kort-raekke .rk-titel{ display:block; -webkit-line-clamp:unset; line-clamp:unset; overflow:visible; min-height:2.5em; font-size:14px; }
+body.home .kort-raekke .rk-pris{ font-size:15px; }
+@media (hover:hover){
+  body.home .kort-raekke .card-compare:not(.active){ opacity:0; transition: opacity .15s, transform .15s; }
+  body.home .kort-raekke .card:hover .card-compare, body.home .kort-raekke .card:focus-within .card-compare, body.home .kort-raekke .card-compare:focus-visible{ opacity:1; }
+}
+body.home .kort-raekke:empty{ min-height:0; }
+@media (min-width:1100px){ body.home .kort-raekke:empty{ min-height:262px; } }
+body.home .kort-raekke > .lager-tomt-note{
+  display:flex; align-items:center; justify-content:center; text-align:center; min-height:200px; padding: var(--space-5);
+  border:1px dashed var(--color-input-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg-muted); font-size:14px;
+}
+
+/* ---- Saelg-panel: foto i farver i egen boks (ingen graa overlay), tekst oeverst, knap nederst ---- */
+@media (min-width:1100px){
+  body.home .saelg-panel{ position:static; overflow:visible; padding:14px 16px; gap:10px; justify-content:flex-start; }
+  body.home .saelg-foto{ position:relative; inset:auto; flex:1 1 auto; min-height:70px; border-radius:8px; background-size:cover; background-position: 50% 62%; }
+  body.home .saelg-foto::after{ content:none; }
+  body.home .saelg-indhold, body.home .saelg-knap{ position:static; }
+  body.home .saelg-knap{ width:100%; align-self:stretch; min-height:44px; }
+}
+
+/* ---- Fejlet/tomt lager: ingen tal paa fliser og kolonner; banneret ligger nederst til hoejre, ikke over heroens motiv ---- */
+html[data-lager-fejl] body.home :is(.tile-count, .maerke-flise .tal-n, .tal-grid .tal-n){ visibility:hidden; }
+html[data-lager-fejl] body.home :is(.sek-note, .kol-note){ visibility:hidden; }
+@media (min-width:1024px){
+  body.home .data-afbrud{ top:auto; bottom: var(--space-4); }
+}
+
+/* ---- Tre kolonner: kompakte fliser (ca. 60 px), logo + navn + antal taet ---- */
+@media (min-width:1100px){
+  body.home .kol .maerke-grid, body.home .kol .tal-grid-5{ flex:0 0 auto; align-content:start; }
+  body.home .kol .tal-grid-5 a{ min-height:62px; height:62px; padding:6px 2px; justify-content:center; gap:1px; }
+  body.home .maerke-flise, body.home .maerke-grid:empty{ min-height:78px; }
+  body.home .maerke-flise .tal-n{ margin-top:0; }
+  body.home .maerke-logo{ height:30px; margin-bottom:0; }
+  body.home .maerke-flise{ gap:2px; padding-top:8px; padding-bottom:6px; justify-content:center; }
+}
+
+/* ---- Saadan virker: stoerre ikoner og trinnumre, tydeligere pile ---- */
+@media (min-width:1100px){
+  body.home .saadan-hoved{ padding: 12px 20px 14px; gap:8px; }
+  body.home .saadan-hoved h2{ font-size:16px; }
+  body.home .saadan-trin-punkt{ grid-template-columns: 30px 40px minmax(0,1fr); column-gap:10px; }
+  body.home .saadan-nr{ width:30px; height:30px; font-size:15px; box-shadow: 0 2px 6px color-mix(in srgb, var(--color-primary) 35%, transparent); }
+  body.home .saadan-ico{ width:40px; height:40px; color: var(--color-fg); }
+  body.home .saadan-ico svg{ width:38px; height:38px; stroke-width:1.5; }
+  body.home .saadan-trin-punkt strong{ font-size:14.5px; font-weight:700; }
+  body.home .saadan-trin-punkt div span{ font-size:12.5px; line-height:1.35; }
+  body.home .saadan-trin-punkt:not(:last-child)::after{ width:26px; height:26px; margin-top:-13px; right:-31px; background: var(--color-primary); opacity:.55; }
+}
+
+/* ---- Mobil: kompakt soegekort (felter i to kolonner), saa soegeknappen er synlig inden ca. 650 px ---- */
+@media (max-width:767px){
+  body.home .search-panel{ padding: 12px 12px 10px; border-radius:14px; }
+  body.home .search-panel::before{ display:none; }
+  body.home .sk-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px 10px; }
+  body.home .sk-q, body.home .sk-kk, body.home .sk-cta{ grid-column: 1 / -1; }
+  body.home .search-panel .field label, body.home .search-panel .kk-field legend{ font-size:11.5px; margin-bottom:2px; }
+  body.home .search-panel .input, body.home .search-panel select.input{ min-height:44px; font-size:15px; }
+  body.home .search-panel .input-icon-wrap .input{ padding-left:38px; }
+  body.home .search-panel .input-icon-wrap svg{ left:11px; width:18px; height:18px; }
+  body.home .kk-seg label{ min-height:42px; }
+  body.home .sk-cta .sk-knap{ min-height:50px; font-size:16px; }
+  body.home .hero{ padding-bottom: 80px; }
+  body.home .hero-sok{ margin-top:-64px; }
+  body.home .trust-band{ padding: 12px 0 8px; }
+}
+body.home .kort-raekke .rk-titel{ min-height:0; }
+@media (min-width:1100px){
+  body.home .tre-kol{ align-items:start; }
+  body.home .saadan-strip{ grid-template-columns: minmax(0,1fr) 270px; }
+  body.home .saadan-trin{ gap: 30px; }
+  body.home .saadan-trin-punkt{ grid-template-columns: 28px 36px minmax(0,1fr); column-gap:9px; }
+  body.home .saadan-nr{ width:28px; height:28px; font-size:14px; }
+  body.home .saadan-ico, body.home .saadan-ico svg{ width:36px; height:36px; }
+  body.home .saadan-trin-punkt strong{ font-size:14px; }
+  body.home .saadan-trin-punkt:not(:last-child)::after{ right:-28px; width:24px; height:24px; margin-top:-12px; }
+}
+
+/* ---- Mobil: kortere side (tillid i 2 kolonner, lavere sælg-foto, kompakte fliser) ---- */
+@media (max-width:767px){
+  body.home .trust-row{ grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px 12px; }
+  body.home .trust-row li{ gap:8px; align-items:flex-start; }
+  body.home .trust-ico, body.home .trust-ico svg{ width:24px; height:24px; }
+  body.home .trust-row strong{ font-size:12.5px; }
+  body.home .trust-row li span:not(.trust-ico){ font-size:11.5px; }
+  body.home .saelg-foto{ min-height:96px; }
+  body.home .saelg-panel{ padding:16px; }
+  body.home .kol .tal-grid-5{ grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
+  body.home .kol .tal-grid-5 a{ min-height:60px; }
+  body.home .maerke-flise{ min-height:84px; }
+  body.home .tal-grid-3 a{ min-height:64px; }
+  body.home .udvalg{ padding-bottom: var(--space-2); }
+}
+@media (max-width:359px){ body.home .trust-row{ grid-template-columns: 1fr; } }
+
+/* ---- Ingen udvalgte kort (fejlet/tomt lager): sælg-panelet fylder rækken i stedet for at staa alene med et hul ---- */
+body.home .udvalg-hoved[hidden]{ display:none; }
+@media (min-width:1100px){
+  body.home .udvalg-grid:has(> .udvalg-hoved[hidden]){ grid-template-columns: minmax(0,1fr); }
+  body.home .udvalg-grid:has(> .udvalg-hoved[hidden]) .saelg-panel{
+    grid-column:1 / -1; grid-row:1; flex-direction:row; align-items:center; gap: var(--space-5); padding: 18px 24px;
+  }
+  body.home .udvalg-grid:has(> .udvalg-hoved[hidden]) .saelg-indhold{ flex:1 1 auto; }
+  body.home .udvalg-grid:has(> .udvalg-hoved[hidden]) .saelg-foto{ flex:0 0 280px; height:110px; min-height:110px; order:3; }
+  body.home .udvalg-grid:has(> .udvalg-hoved[hidden]) .saelg-knap{ width:auto; flex:0 0 auto; order:2; padding-inline: var(--space-5); }
+}
+@media (min-width:1100px){ body.home .udvalg-grid:has(> .udvalg-hoved[hidden]) .saelg-knap{ align-self:center; } }

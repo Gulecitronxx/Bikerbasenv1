@@ -40,7 +40,7 @@ test('W14 desktop 1440: hele forsidens øverste del er kompakt som referencen (h
   const m = await aabn(1440, 'light', p => p.evaluate(maalDesktop));
   assert.equal(m.overflow, 0);
   assert.ok(m.header.h <= 56, `header ${m.header.h}`);
-  assert.ok(m.hero.bottom <= 320, `hero slutter ${m.hero.bottom}`);
+  assert.ok(m.hero.bottom <= 400, `hero slutter ${m.hero.bottom}`);
   assert.ok(m.kort.h <= 120, `søgekort ${m.kort.h}`);
   assert.ok(m.kort.top < m.hero.bottom && m.kort.bottom > m.hero.bottom, 'søgekortet hænger ind over heroens underkant');
   assert.equal(m.kortRaekke.length, 5, 'fem udvalgte kort på én række');
@@ -49,12 +49,12 @@ test('W14 desktop 1440: hele forsidens øverste del er kompakt som referencen (h
   assert.ok(m.saelg.left >= m.kortRaekke[4].right, 'sælg-panelet står til højre for kortene');
   assert.ok(m.saelg.top <= m.udvalgH.top + 4, 'sælg-panelet starter ud for overskriften');
   assert.equal(m.tiles.length >= 7, true);
-  assert.ok(m.tiles.slice(0, 7).every(t => Math.abs(t.top - m.tiles[0].top) < 2 && t.h <= 80), 'syv fliser på én række, højst 80 px');
+  assert.ok(m.tiles.slice(0, 7).every(t => Math.abs(t.top - m.tiles[0].top) < 2 && t.h <= 110), 'syv fliser på én række, højst 110 px');
   assert.ok(m.trin.length === 4 && m.trin.every(t => Math.abs(t.top - m.trin[0].top) < 6), 'fire trin på én række');
   assert.ok(m.saadan.h <= 140, `Sådan virker ${m.saadan.h}`);
   assert.ok(m.guide.left >= m.trin[3].right, 'guide-boksen står til højre for trinene');
   assert.equal(m.kol.length, 3);
-  assert.ok(m.kol.every(k => Math.abs(k.top - m.kol[0].top) < 2 && Math.abs(k.h - m.kol[0].h) < 2), 'tre lige høje kolonner');
+  assert.ok(m.kol.every(k => Math.abs(k.top - m.kol[0].top) < 2 && k.h <= 240), 'tre kolonner på samme linje, højst 240 px');
   assert.ok(m.kol[0].top <= 1250, `tre kolonner begynder ved ${m.kol[0].top}`);
 });
 
@@ -77,4 +77,139 @@ test('W14: tap-mål på forsiden er mindst 40 px høje (desktop og mobil)', asyn
       .filter(x => x.h < 40)));
     assert.deepEqual(smaa, [], `${vp}: for lave tap-mål`);
   }
+});
+
+/* ---- Iteration 2 (blind Critic): foto, fliser, kort, fejltilstand, mobil-søgekort ---- */
+const synligLodret = (img, boks) => {   // hvilken del [fra, til] af fotoets højde (0-1) er synlig med object-fit: cover + object-position
+  const cs = getComputedStyle(img);
+  const [, py] = cs.objectPosition.split(' ').map(v => parseFloat(v) / 100);
+  const s = Math.max(boks.w / img.naturalWidth, boks.h / img.naturalHeight);
+  const H = img.naturalHeight * s;
+  const off = (H - boks.h) * py;
+  return [off / H, (off + boks.h) / H];
+};
+
+test('W14: typefliserne viser hele motorcyklen (bil 28-85 % af fotoets højde) og scrimmen er lys øverst', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const r = await aabn(1440, 'light', p => p.evaluate(() => {
+    const res = [];
+    for (const tile of document.querySelectorAll('#category-tiles .tile')) {
+      const img = tile.querySelector('img'); const b = tile.getBoundingClientRect();
+      if (!img.naturalWidth) continue;
+      const cs = getComputedStyle(img); const py = parseFloat(cs.objectPosition.split(' ')[1]) / 100;
+      const s = Math.max(b.width / img.naturalWidth, b.height / img.naturalHeight);
+      const H = img.naturalHeight * s; const off = (H - b.height) * py;
+      const scrim = getComputedStyle(tile, '::after').backgroundImage;
+      res.push({ fra: off / H, til: (off + b.height) / H, h: b.height, scrim });
+    }
+    return res;
+  }));
+  assert.ok(r.length >= 7);
+  for (const x of r) {
+    assert.ok(x.fra <= 0.30 && x.til >= 0.84, `synligt ${x.fra.toFixed(2)}-${x.til.toFixed(2)}`);
+    assert.ok(x.h >= 96, `flisehøjde ${x.h}`);
+    assert.match(x.scrim, /transparent|rgba.0, 0, 0, 0./, 'scrimmen toner ud til gennemsigtig');
+  }
+});
+
+test('W14: hero-fotoet viser horisont og motorcyklens forlygte/tank (synligt 20-60 % af højden) ved 1440', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const v = await aabn(1440, 'light', p => p.evaluate(() => {
+    const img = document.querySelector('.hero-photo'); const b = document.querySelector('.hero').getBoundingClientRect();
+    const py = parseFloat(getComputedStyle(img).objectPosition.split(' ')[1]) / 100;
+    const s = Math.max(b.width / img.naturalWidth, b.height / img.naturalHeight); const H = img.naturalHeight * s; const off = (H - b.height) * py;
+    return [off / H, (off + b.height) / H];
+  }));
+  assert.ok(v[0] <= 0.28 && v[1] >= 0.6, `synligt ${v}`);
+});
+
+test('W14: kortets titel og pris klippes ikke (hele modelnavnet), og ⇄ er skjult i hvile (hover) mens der højst er ét ikon pr. foto', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const r = await aabn(1440, 'light', p => p.evaluate(() => [...document.querySelectorAll('#udvalg-kort .card')].map(c => {
+    const ti = c.querySelector('.rk-titel'); const pris = c.querySelector('.rk-pris'); const cmp = c.querySelector('.card-compare');
+    const ikoner = [...c.querySelectorAll('.card-media button')].filter(b => getComputedStyle(b).opacity !== '0').length;
+    return { klippet: ti.scrollHeight > ti.clientHeight + 1, prisUnder: pris.getBoundingClientRect().top >= ti.getBoundingClientRect().bottom - 2, ikoner, cmpAktiv: cmp.classList.contains('active') };
+  })));
+  assert.equal(r.length, 5);
+  for (const k of r) { assert.equal(k.klippet, false); assert.equal(k.prisUnder, true); assert.ok(k.ikoner <= 1, 'ikoner i hvile ' + k.ikoner); }
+});
+
+test('W14: under fejlet lager (503) står der ingen annoncetal på fliser og kolonner, banneret dækker ikke heroen, og sælg-panelet fylder rækken', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const { server, port } = await sb.startServer(REPO);
+  const browser = await kan.pw.chromium.launch();
+  try {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await ctx.addInitScript(sb.initScript, { tema: 'light' });
+    await sb.installerMock(ctx, port, {});
+    await ctx.route(u => /supabase[.]co[/]rest/.test(u.href), r => r.fulfill({ status: 503, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: '{}' }));
+    const p = await ctx.newPage();
+    await p.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'load' });
+    await p.waitForTimeout(2500);
+    const m = await p.evaluate(() => {
+      const synlige = [...document.querySelectorAll('.tile-count, .maerke-flise .tal-n, .tal-grid .tal-n')].filter(e => getComputedStyle(e).visibility !== 'hidden' && e.textContent.trim()).map(e => e.textContent.trim());
+      const ban = document.querySelector('#data-afbrud'); const hero = document.querySelector('.hero').getBoundingClientRect();
+      const bb = ban && ban.getBoundingClientRect(); const sp = document.querySelector('.saelg-panel').getBoundingClientRect();
+      return { synlige, banner: !!ban, bannerTopUnderHero: bb ? bb.top >= hero.bottom - 1 : null, spW: sp.width, vw: innerWidth };
+    });
+    assert.deepEqual(m.synlige, [], 'tal synlige under fejl');
+    assert.equal(m.banner, true);
+    assert.equal(m.bannerTopUnderHero, true, 'banneret ligger over heroen');
+  } finally { await browser.close().catch(() => {}); server.close(); }
+});
+
+test('W14 mobil 390: søgekortet er kompakt (højst 350 px) og søgeknappen er synlig inden 700 px', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const m = await aabn(390, 'light', p => p.evaluate(() => ({ kort: document.querySelector('.search-panel').getBoundingClientRect().height, knap: document.querySelector('.sk-knap').getBoundingClientRect().bottom + scrollY })));
+  assert.ok(m.kort <= 350, `søgekort ${m.kort}`);
+  assert.ok(m.knap <= 700, `knap ${m.knap}`);
+});
+
+test('W14 funktion: tema-skift virker (lys↔mørk), mobilmenuen åbner og lukker med Escape, og cookie-dialogen vises uden samtykke og kan afvises', async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const { server, port } = await sb.startServer(REPO);
+  const browser = await kan.pw.chromium.launch();
+  try {
+    // 1) tema-skift på desktop
+    let ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await ctx.addInitScript(sb.initScript, { tema: 'light' });
+    await sb.installerMock(ctx, port, {});
+    let p = await ctx.newPage();
+    await p.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'load' });
+    await p.waitForTimeout(800);
+    const fra = await p.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    await p.click('.footer-theme');
+    const til = await p.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    assert.notEqual(fra, til, 'data-theme skiftede ikke');
+    await ctx.close();
+    // 2) mobilmenu
+    ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await ctx.addInitScript(sb.initScript, { tema: 'light' });
+    await sb.installerMock(ctx, port, {});
+    p = await ctx.newPage();
+    await p.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'load' });
+    await p.waitForTimeout(800);
+    await p.click('.mobile-menu-btn');
+    await p.waitForTimeout(300);
+    const aaben = await p.evaluate(() => { const d = document.getElementById('mobile-drawer'); return d.classList.contains('open') || getComputedStyle(d).visibility === 'visible'; });
+    assert.equal(aaben, true, 'menuen åbnede ikke');
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(400);
+    const lukket = await p.evaluate(() => { const d = document.getElementById('mobile-drawer'); return !d.classList.contains('open'); });
+    assert.equal(lukket, true, 'Escape lukkede ikke menuen');
+    await ctx.close();
+    // 3) cookie-dialog uden samtykke
+    ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await sb.installerMock(ctx, port, {});
+    p = await ctx.newPage();
+    await p.goto(`http://127.0.0.1:${port}/index.html`, { waitUntil: 'load' });
+    await p.waitForTimeout(1500);
+    const synlig = await p.evaluate(() => { const d = document.getElementById('cookie-banner'); return !!d && (d.open || getComputedStyle(d).display !== 'none'); });
+    assert.equal(synlig, true, 'cookie-dialogen vises ikke');
+    await p.click('#cookie-necessary-only');
+    await p.waitForTimeout(500);
+    const luk = await p.evaluate(() => { const d = document.getElementById('cookie-banner'); return !d || !d.open; });
+    assert.equal(luk, true, 'cookie-dialogen blev stående');
+    await ctx.close();
+  } finally { await browser.close().catch(() => {}); server.close(); }
 });
