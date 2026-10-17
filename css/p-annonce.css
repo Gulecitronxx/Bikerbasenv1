@@ -3,6 +3,98 @@
    annonce-*.html (scripts/build-listing-pages.js). Kun tokens fra styles.css;
    klasserne har præfikset .an-. Lyst tema er målet, mørkt følger af tokens. */
 
+/* ===== Flyttet fra styles.css (w12-perf2): Listing detail (annoncegalleri, handlingsbjaelke, sidepanel) =====
+   Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
+   saa rækkefølgen mod resten af denne fils regler er uændret. */
+/* Billederne på den forrenderede annonceside. De vises kun i det korte
+   øjeblik før js/annonce.js bytter dem ud med det rigtige galleri — og for
+   crawlere og browsere uden JavaScript, hvor de er det eneste der er. */
+.prerender-gallery{ display:grid; grid-template-columns:1fr; gap:8px; margin-bottom: var(--space-4); }
+.prerender-gallery img{ width:100%; height:auto; border-radius: var(--radius-lg); object-fit:cover; background:var(--color-surface-2); }
+.prerender-gallery img:first-child{ aspect-ratio:4/3; }
+.prerender-gallery img:not(:first-child){ display:none; }
+/* Det forrenderede foto skal fylde nøjagtig det samme som det galleri,
+   js/annonce.js bytter det ud med. Ellers bliver LCP-elementet det
+   hydrerede billede — som først findes efter javascriptet er kørt, og
+   sidens LCP falder fra 2.8s til 5.0s (målt). */
+@media (max-width:699px){
+  .prerender-gallery{ margin-inline: calc(var(--space-4) * -1); }
+  .prerender-gallery img{ border-radius:0; }
+}
+@media (min-width:700px){ .prerender-gallery img:first-child{ aspect-ratio:16/10; } }
+
+/* V-001: minmax(0,…) — et spor med 1fr kan ikke blive smallere end galleriets thumbnail-stribe (min-content), og siden fik 76 px vandret overflow paa 360/390. */
+.listing-detail{ display:grid; grid-template-columns:minmax(0,1fr); gap: var(--space-6); padding: var(--space-5) 0 var(--space-9); }
+@media (min-width:960px){ .listing-detail{ grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); align-items:start; } }
+
+.gallery{ border-radius: var(--radius-lg); overflow:hidden; background: var(--color-surface-2); position:relative; }
+/* Fotoet er det, køberen kigger på først. På mobil gik der 16:10 indrykket
+   billede — under en tredjedel af Bilbasens. Nu kant-til-kant og 4:3, så
+   motorcyklen fylder skærmen; fra 700px er der plads til de runde hjørner. */
+.gallery-main{ aspect-ratio: 4/3; position:relative; }
+@media (min-width:700px){ .gallery-main{ aspect-ratio: 16/10; } }
+@media (max-width:699px){
+  .gallery{ margin-inline: calc(var(--space-4) * -1); border-radius:0; }
+}
+/* Favoritten hører til oven på fotoet (som på kortene), ikke i titelrækken
+   hvor den stjal plads fra modelnavnet. */
+.gallery .fav-btn{ position:absolute; top:12px; right:12px; z-index:3; }
+.gallery-main svg{ width:100%; height:100%; }
+.gallery-counter{ position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.65); color:#fff; font-size:13px; font-weight:600; padding:5px 12px; border-radius: var(--radius-pill); }
+.gallery-nav{ position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.9); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--color-dark); }
+.gallery-nav.prev{ left:12px; } .gallery-nav.next{ right:12px; }
+.gallery-nav svg{ width:20px; height:20px; }
+.gallery-thumbs{ display:flex; gap:8px; padding: var(--space-3); overflow-x:auto; background: var(--color-surface); }
+.gallery-thumbs button{ flex-shrink:0; width:76px; height:56px; border-radius: var(--radius-sm); overflow:hidden; border:2px solid transparent; padding:0; cursor:pointer; background:var(--color-surface-2); }
+.gallery-thumbs button.active{ border-color: var(--color-primary); }
+.gallery-thumbs svg{ width:100%; height:100%; }
+
+/* Titel og pris stod side om side i én flex-række. På en telefon betød det,
+   at "Yamaha Virago 535" blev klippet til "Yamaha Virago", fordi prisen
+   holdt sin plads med white-space:nowrap. Nu stables de: titlen får hele
+   bredden, og prisen bliver sidens tydeligste tal med sin egen etiket —
+   samme greb som Bilbasens "Kontantpris", bare uden deres leasing-støj. */
+.listing-header{ display:grid; grid-template-columns:1fr; gap: var(--space-3); margin: var(--space-5) 0; }
+@media (min-width:700px){
+  .listing-header{ grid-template-columns: 1fr auto; align-items:flex-start; gap: var(--space-5); }
+  .listing-price-block{ text-align:right; }
+}
+.listing-title{ font-size: clamp(24px,3.4vw,34px); margin-bottom:8px; }
+.listing-loc{ display:flex; align-items:center; gap:6px; color: var(--color-fg-muted); font-size:14px; }
+.listing-loc svg{ width:16px; height:16px; }
+.listing-price-label{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color: var(--color-fg-muted); }
+.listing-price{ font-family: var(--font-display); font-size: clamp(30px,5vw,38px); font-weight:700; white-space:nowrap; line-height:1.1; }
+
+/* Kontaktbjælke i bunden på mobil. Bilbasen lægger "Skriv til sælger" og
+   "Ring op" øverst på siden, hvor de forsvinder, så snart man scroller ned
+   til specs og beskrivelse — dér hvor man faktisk beslutter sig. Vores
+   bliver hængende. Den står i markuppen fra start (ikke bygget af JS), så
+   den er der ved første maling og ikke skubber noget: position:fixed. */
+.listing-actionbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:90;
+  display:flex; gap:10px; padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  backdrop-filter: blur(10px); border-top:1px solid var(--color-border);
+}
+.listing-actionbar .btn{ flex:1; min-height:48px; }
+.listing-actionbar .btn-outline{ flex:0 0 auto; padding-inline: 18px; }
+@media (min-width:960px){ .listing-actionbar{ display:none; } }
+/* Bjælken må ikke lægge sig oven på det sidste i footeren. Samme tal bruges
+   som scroll-padding-bottom i reset'en, så et tastetryk ikke lander under
+   bjælken (SC 2.4.11) — derfor er det en variabel og ikke to 76'ere. */
+@media (max-width:959px){ body.har-actionbar{ padding-bottom: var(--actionbar-h); } }
+.seller-row{ display:flex; align-items:center; gap: var(--space-3); }
+.avatar{ width:52px; height:52px; border-radius:50%; background: var(--color-primary-tint); color:var(--color-primary-hover); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:var(--font-display); font-size:18px; flex-shrink:0; }
+.seller-name{ font-weight:700; display:flex; align-items:center; gap:6px; }
+.seller-name svg{ width:16px; height:16px; color: var(--color-success); }
+.seller-sub{ font-size:13px; color:var(--color-fg-muted); }
+.seller-stats{ display:flex; gap: var(--space-4); margin-top: var(--space-4); padding-top: var(--space-4); border-top:1px solid var(--color-border); }
+.seller-stat b{ display:block; font-family:var(--font-display); font-size:18px; }
+.seller-stat span{ font-size:12px; color:var(--color-fg-muted); }
+.contact-actions{ display:flex; flex-direction:column; gap:10px; margin-top: var(--space-4); }
+.phone-reveal{ display:flex; align-items:center; justify-content:center; gap:8px; font-family:var(--font-display); font-weight:700; font-size:17px; letter-spacing:.02em; }
+.similar-strip{ margin-top: var(--space-9); }
+
 /* ===== Flyttet fra styles.css (w12-perf2): annoncedetalje (indekseret annonce + sider) =====
    Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
    saa rækkefølgen mod resten af denne fils regler er uændret. */
