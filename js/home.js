@@ -333,7 +333,7 @@ async function buildForside(){
   /* Logoet (godkendt, ensfarvet maske) eller monogram-cirklen; navnet står som tekst under, så logoet er dekorativt.
      Mangler BrandLogos (script ikke indlæst), vises den gamle monogram-cirkel. */
   const logoTilflise = (navn) => (typeof BrandLogos !== 'undefined')
-    ? `<span class="maerke-logo" aria-hidden="true">${BrandLogos.logoHTML(navn, { storrelse: 'lg', decorative: true, form: 'emblem' })}</span>`
+    ? `<span class="maerke-logo" aria-hidden="true">${BrandLogos.logoHTML(navn, emblemFindes(navn) ? { storrelse: 'lg', decorative: true, form: 'emblem' } : { storrelse: 'lg', decorative: true })}</span>`
     : `<span class="maerke-mono" aria-hidden="true">${escapeHTML(navn.charAt(0).toUpperCase())}</span>`;
   /* Findes mærkets emblem (uden ordmærke), står navnet som tekst under det; ellers bærer logoet selv ordmærket, og teksten er kun for skærmlæsere (ingen dublet som 'Honda Honda'). */
   const emblemFindes = (navn) => { try { return typeof BrandLogos !== 'undefined' && !!BrandLogos.logoFor(navn).emblem; } catch (e) { return false; } };

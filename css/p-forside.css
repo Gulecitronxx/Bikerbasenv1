@@ -782,3 +782,8 @@ body.home .maerke-flise .maerke-navn-skjult{ position:static; width:auto; height
   }
   body.home .guide-boks > div{ max-width: 72%; }
 }
+
+/* W14: mærkenavnet må aldrig flyde over flisen (også det skjulte navn bevarer sin plads, men klippes til flisens bredde). */
+body.home .maerke-flise strong{ display:block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+body.home .maerke-flise{ overflow:hidden; }
+body.home .maerke-flise .maerke-navn-skjult{ overflow:hidden; max-width:100%; }
