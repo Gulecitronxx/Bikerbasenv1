@@ -117,3 +117,20 @@ Desuden: kort i rækkerne har bredere foto og titel + pris på én linje (billed
 - Mærkebrugerflade: H-D-emblemet i A-Z er 22 px (sm-slot er ejerens logo-system; ikke ændret).
 - Mobil: mærkesiderne ligger på ca. 7.100-7.200 px (mål 7.000).
 - Ved tomt lager (200 + []) beholdes de byggede kort uden banner - uændret fra før, bør afgøres af ejeren af backend-bridge.
+
+---
+# Iteration 3b (efter Critic runde 2: AFVIS, Yamaha 5,0 / Sport 5,5 / A2 6,5)
+Lukket: hero igen et foto (mærke/model: landskabsfoto højre ca. 68 %, aldrig fremmed mærke; typesider: typens EGET foto som fuldbleed baggrund, så sport != cruiser; øvrige: landskabsfoto) | CTA-panel med typefoto på typesider og ingen foto-sliver på mærkesider | "Udforsk efter behov" har forskellige dekorative typefotos igen | søgeknap på én linje (kort label, nowrap; placeholder kortere) | ingen 0-fliser (A1 0 Yamaha udgår) | "Kort fortalt" flyttet til bunden | nummercirkel i "Sådan virker" ikke over ikonet | fotoløse kort: typens foto + "Typefoto (illustration)" i stedet for stiplet ramme | Vespa/Lauge Jensen-ordmærke i samme ramme som logoerne (H1 y=202 på alle 18 mærker).
+CLS: rækkens skabelon er ens uanset antal bagte kort (årsagen til 0,053-0,059 på små mærkesider: panelet skiftede fra bred bjælke til højre kolonne, når klienten hydrerede 5 kort mod 1-2 bagte). smoke-browser `--cls 0.05 --strikt` på ALLE 18 maerke-*.html + maerker, 5 viewports x lys+mørk, 3 kørsler: 3 x 190 målinger, 0 fejl.
+Tal = søgeresultat: årsagen til 61 mod 67 er demo-lageret (`SHOW_DEMO_DATA`, kun på 127.0.0.1/localhost); med det slået fra (som i drift) er mærkeside = søgning for Yamaha 61, Honda 109, Harley 24, Kawasaki 33.
+Tomt lager (200 + []): med demo-lageret slået fra som i drift sættes banner og `data-lager-fejl` også her (målt på mærke/type/kørekort; antal dæmpet). Criticens "intet banner" skyldtes demo-lageret på localhost.
+Panelrækker skjules nu med `visibility:hidden` (ikke display:none) under lagerfejl, så de ikke flytter layoutet.
+
+IKKE lukket (ærligt):
+- CLS på 4 sider i sekventiel smoke (samme browserkontekst, cachet CSS): model-honda-cb-1000-hornet, model-honda-xl-750-transalp, by-roedding ved 320 mørk (0,105-0,126) og mc-honda-adventure ved 768 mørk (0,113). Deterministisk i fuld kørsel (3 af 3), men 0,000 når siden måles alene/koldt, og med 6 parallelle kontekster. Skiftet sker før første rAF (hero ca. 23 px lavere/højere og søgekort ca. 22 px højere); årsagen er ikke fundet. Mærke-, type-, kørekort- og regionsider er rene. Kan være en regression fra min hero-ændring på model-/by-/mc-sider; skal undersøges af den, der kan måle på de rigtige sider efter build.
+- Guides og viden på A2, "Det skal du vide" findes i markup under annoncerne (ikke under folden på første skærm); "Nyeste A2" er udeladt (ingen oprettelsesdato).
+- Rytterfoto, farvede logoer, frilagte modelbilleder: assets.
+- Typesidens "Udforsk typer" med Supersport o.l.: ingen undertypedata; erstattet af behovskort med foto.
+- Tomt-lager-banner kun med demo-lager slået fra; ændret ikke i backend-bridge.
+
+Ligner mockuppen (ærligt): Yamaha 6/10, Sport 6,5/10, A2 7/10, samlet 6,5/10 (Critic: 5,0 / 5,5 / 6,5).
