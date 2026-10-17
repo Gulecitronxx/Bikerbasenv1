@@ -496,7 +496,7 @@
   /* Grøn tekst til statusbadge: --color-success (#1E8E5A) giver kun ca. 3,7:1
      på den lyse tint, så lys tilstand får en mørkere grøn (>= 4,5:1). */
   --db-ok: #176E45;
-  --db-hero-h: 244px;
+  --db-hero-h: 204px;
 }
 :root[data-theme="dark"]{ --db-ok: var(--color-success); }
 @media (prefers-color-scheme: dark){

@@ -257,7 +257,7 @@ html[data-lgmode="register"] .lg-only-login{ display:none; }
   }
 }
 @media (min-width:1280px){
-  .lg-form-pane{ padding: 64px 64px 48px; }
+  .lg-form-pane{ padding: 48px 64px 36px; }
   .lg-promo{ padding: 56px 64px 48px; }
 }
 
@@ -331,8 +331,14 @@ body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
   .lg-promo-body{
     max-width:470px; padding: 28px 28px 24px; margin:-28px 0 0 -28px;
     border-radius: var(--radius-lg);
-    background: color-mix(in srgb, var(--color-surface-2) 88%, transparent);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    background: none; isolation:isolate;
+  }
+  /* Fladen bag teksten fader ud mod fotoet uden synlig kant (billede 6: teksten ligger på en jævn tone) */
+  .lg-promo-body::before{
+    content:""; position:absolute; z-index:-1; inset:-36px -150px -36px -36px; border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--color-surface-2) 90%, transparent);
+    -webkit-mask-image: radial-gradient(ellipse 60% 66% at 34% 46%, #000 62%, transparent 100%);
+    mask-image: radial-gradient(ellipse 60% 66% at 34% 46%, #000 62%, transparent 100%);
   }
   .lg-promo > *{ max-width:none; }
   .lg-benefits{ max-width:none; }
@@ -363,7 +369,7 @@ body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
 
 /* Runde 2c */
 @media (min-width:960px){
-  .lg-promo > .lg-promo-body{ max-width:450px; background: color-mix(in srgb, var(--color-surface-2) 86%, transparent); }
+  .lg-promo > .lg-promo-body{ max-width:450px; }
   .lg-bg-photo{ right:-14%; width:114%; }
 }
 @media (min-width:960px) and (max-width:1279px){ .lg-bg-photo{ right:-22%; width:122%; } }
@@ -372,4 +378,9 @@ body:not(:has(.site-footer)) .lg-main{ margin-bottom:0; }
 .lg-promo-body .lg-promo-lead, .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#55504B; }
 :root[data-theme="dark"] .lg-promo-body .lg-promo-lead, :root[data-theme="dark"] .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#CFC8BE; }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .lg-promo-body .lg-promo-lead, :root:not([data-theme="light"]) .lg-promo-body .lg-benefits li span:not(.lg-bi){ color:#CFC8BE; } }
-@media (min-width:960px){ .lg-promo > .lg-promo-body{ background: color-mix(in srgb, var(--color-surface-2) 93%, transparent); } }
+@media (min-width:960px){ .lg-promo > .lg-promo-body::before{ background: color-mix(in srgb, var(--color-surface-2) 93%, transparent); } }
+
+/* ---------- "eller": ærligt alternativ til social login (findes ikke) ---------- */
+p.lg-or{ display:flex; align-items:center; gap: var(--space-4); margin: var(--space-4) 0 var(--space-3); color: var(--color-fg-muted); font-size:14px; }
+.lg-or::before, .lg-or::after{ content:""; flex:1; height:1px; background: var(--color-border); }
+.lg-guest{ width:100%; justify-content:center; min-height:48px; }

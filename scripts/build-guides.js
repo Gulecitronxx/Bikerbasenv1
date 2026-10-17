@@ -416,6 +416,7 @@ ${ctx.header}
 
   <div class="container gd-layout">
     <div class="gd-main">
+      ${tocBlok}
       <article class="gd-article">
       ${artikel}
 
@@ -430,17 +431,13 @@ ${ctx.header}
       </section>
       </article>
 
-      <div class="gd-extras">
-        ${tvivl}
-        ${ctx.populaer}
-      </div>
-
       ${relateretBlok(g)}
     </div>
 
-    <aside class="gd-side" aria-label="Kort fortalt og indhold">
+    <aside class="gd-side" aria-label="Kort fortalt og genveje">
       ${tldr}
-      ${tocBlok}
+      ${tvivl}
+      ${ctx.populaer}
     </aside>
   </div>
 </main>
