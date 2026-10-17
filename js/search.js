@@ -485,7 +485,9 @@ function facetTal(){
 function saetFacet(el, n, aktiv){
   const slot = el.querySelector('.facet-n');
   if (slot) slot.textContent = n == null ? '' : n;
-  const tom = n === 0 && !aktiv;
+  /* W12: under lagerfejl er 0 (eller et snapshot-tal) ikke et svar — CSS viser '?'; intet markeres som blindgyde eller spærres. */
+  const fejl = document.documentElement.hasAttribute('data-lager-fejl');
+  const tom = n === 0 && !aktiv && !fejl;
   el.classList.toggle('facet-empty', tom);
   const styr = el.tagName === 'BUTTON' ? el : el.querySelector('input');
   if (styr) styr.disabled = tom;
