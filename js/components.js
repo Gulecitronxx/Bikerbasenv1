@@ -880,8 +880,8 @@ function kortFodHTML(l, f){
     ? `Annoncen ligger hos ${kildenavn}${f.domaene ? ' (' + f.domaene + ')' : ''}. Bikerbasen viser den, men handlen sker hos kilden.`
     : 'Annoncen ligger på Bikerbasen.';
   return `<div class="rk-fod">
-        <span class="rk-sted" role="group" title="${escapeHTML(f.stedTitle)}" aria-label="Sted: ${escapeHTML(f.stedTitle)}">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
-        <span class="rk-kilde" role="group" title="${escapeHTML(kildeTitel)}" aria-label="Kilde: ${escapeHTML(lang)}">${ikon}<span>${tekst}</span></span>
+        <span class="rk-sted" title="${escapeHTML(f.stedTitle)}" role="group" aria-label="Sted: ${escapeHTML(f.stedTitle)}">${Icon.mapPin}<span>${escapeHTML(f.sted)}</span></span>
+        <span class="rk-kilde" title="${escapeHTML(kildeTitel)}" role="group" aria-label="Kilde: ${escapeHTML(lang)}">${ikon}<span>${tekst}</span></span>
       </div>`;
 }
 

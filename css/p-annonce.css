@@ -271,6 +271,7 @@
 }
 :root[data-theme="dark"] .an-kk-pille{ color: var(--color-primary); }
 .an-kk-kraever .an-kk-pille{ background: var(--color-fg); color: var(--color-surface); }
+:root[data-theme="dark"] .an-kk-kraever .an-kk-pille{ color: var(--color-surface); }   /* W11: mørk: orange tekst på lys pille gav 2,5:1 */
 .an-kk-kraever b{ color: var(--color-fg); }
 .an-kk-uafgjort, .an-kk-ukendt{ border-style:dashed; }
 .an-kk-uafgjort .an-kk-pille, .an-kk-ukendt .an-kk-pille{ background: var(--color-surface-2); color: var(--color-fg-muted); }

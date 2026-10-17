@@ -198,7 +198,9 @@ test('manglende tal siges højt — km i linjen, ccm/hk i en dæmpet chip', () =
   assert.match(html, /Km ikke oplyst/);
   assert.ok(!/ 0 km|null|NaN/.test(html));
   html = listingCardHTML(eksternAnnonce({ ccm: null, power: null }), 1);
-  assert.match(html, /ccm og hk ikke oplyst/);
+  /* W11: ingen "ccm og hk ikke oplyst"-chip mere — spec-chips vises kun for oplyste tal (kortet har ens chiprækker). */
+  assert.ok(!/ccm og hk ikke oplyst|rk-chip-mangler/.test(html));
+  assert.ok(!/<li class="rk-chip">[^<]*(ccm|hk)</.test(html), 'ingen ccm/hk-chip uden tal');
   html = listingCardHTML(eksternAnnonce(), 1);
   assert.ok(!/ikke oplyst/.test(html), 'uden huller skal der ikke stå noget om manglende felter');
 });

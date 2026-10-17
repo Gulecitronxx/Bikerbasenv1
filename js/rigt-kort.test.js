@@ -91,10 +91,11 @@ test('chips: kun de tal annoncen oplyser — og aldrig kg', () => {
 
 test('mangler hk, siger en dæmpet chip det; mangler begge, siger den begge', () => {
   const udenHk = chipsAf(rig(ekstern({ power: null })));
-  assert.match(udenHk, /rk-chip-mangler">hk ikke oplyst</);
+  /* W11: ingen "hk ikke oplyst"-chip — spec-chips vises kun for oplyste tal. */
+  assert.ok(!/rk-chip-mangler|ikke oplyst</.test(udenHk.replace(/Kørekort ikke afgjort/, '')));
   assert.ok(!/<li class="rk-chip">[^<]* hk</.test(udenHk), 'ingen opdigtet hk-chip');
   const udenBegge = chipsAf(rig(ekstern({ power: null, ccm: null })));
-  assert.match(udenBegge, /ccm og hk ikke oplyst/);
+  assert.ok(!/rk-chip-mangler/.test(udenBegge));
   assert.ok(!/<li class="rk-chip">[^<]*(ccm|hk)</.test(udenBegge), 'ingen ccm- eller hk-chip uden tal');
 });
 
