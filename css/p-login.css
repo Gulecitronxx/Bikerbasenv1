@@ -2,17 +2,6 @@
    Prefix .lg- — ingen nye farver eller knapper: .btn, .input, .field,
    .link-btn og tokens fra styles.css genbruges. */
 
-/* ===== Flyttet fra styles.css (w12-perf2): Auth-fejlbesked =====
-   Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
-   saa rækkefølgen mod resten af denne fils regler er uændret. */
-/* ============ Auth-fejlbesked ============ */
-.auth-error{
-  background: var(--color-danger-tint); color: var(--color-danger);
-  border:1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
-  border-radius: var(--radius-sm); padding:10px var(--space-4);
-  font-size:13px; line-height:1.5; margin-bottom: var(--space-4);
-}
-
 /* ===== Flyttet fra styles.css (w12-perf2): Auth (login/opret konto) =====
    Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
    saa rækkefølgen mod resten af denne fils regler er uændret. */
@@ -61,6 +50,18 @@
 .auth-tabs button.active{ background: var(--color-surface); color: var(--color-fg); box-shadow: var(--shadow-sm); }
 .auth-divider{ display:flex; align-items:center; gap:10px; color: var(--color-fg-muted); font-size:13px; margin: var(--space-4) 0; }
 .auth-divider::before,.auth-divider::after{ content:''; flex:1; height:1px; background: var(--color-border); }
+
+/* ===== Flyttet fra styles.css (w12-perf2): Auth-fejlbesked =====
+   Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
+   saa rækkefølgen mod resten af denne fils regler er uændret. */
+/* ============ Auth-fejlbesked ============ */
+.auth-error{
+  background: var(--color-danger-tint); color: var(--color-danger);
+  border:1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
+  border-radius: var(--radius-sm); padding:10px var(--space-4);
+  font-size:13px; line-height:1.5; margin-bottom: var(--space-4);
+}
+
 
 /* ---------- Tilstand: log ind / opret ----------
    login.html sætter data-authtab="register" på <html> i første chunk, når
