@@ -1,6 +1,6 @@
-const STEP_LABELS = ['Type & specs', 'Pris & beskrivelse', 'Billeder', 'Gennemse'];
+const STEP_LABELS = ['Detaljer', 'Billeder', 'Beskrivelse & pris', 'Gennemse'];
 /* Undertitler i trinbjælken (billede 4: titel + en linje under). */
-const STEP_SUBS = ['Om din motorcykel', 'Pris, sted og tekst', 'Upload fotos', 'Og udgiv annoncen'];
+const STEP_SUBS = ['Om din motorcykel', 'Upload fotos', 'Fortæl, pris og sted', 'Og udgiv annoncen'];
 let currentStep = 1;
 let uploadedPhotos = []; // { url, name }
 /* O1-4: dokumentupload fjernet — filerne blev aldrig uploadet eller vist. */
@@ -43,10 +43,9 @@ function erBilledfil(file){
   return BILLED_ENDELSER.test(file.name || '');
 }
 
-/* Trin 1 og 2 ("Type & specs" og "Pris & beskrivelse") står på ÉN side, som i
-   billede 4. currentStep er derfor 1, 3 eller 4; ankerTrin (1 eller 2) siger,
-   hvilken af de to sektioner på siden man er ved — trinbjælken er her
-   sektionsnavigation, og scroll-lytteren holder den ajour. */
+/* W14: trin 1–3 (Detaljer, Billeder, Beskrivelse & pris) står på ÉN lang side, som i billedet; trin 4 er gennemse.
+   currentStep er derfor 1 eller 4; ankerTrin (1–3) siger, hvilken sektion man er ved — trinbjælken er sektionsnavigation,
+   og scroll-lytteren holder den ajour. */
 let ankerTrin = 1;
 /* F-5: advar mod at forlade siden med uudgivne ændringer eller valgte fotos
    (fotos kan ikke gemmes i kladden). forlad() bruges af alle programmatiske
@@ -64,7 +63,7 @@ function renderStepper(){
   document.getElementById('stepper').innerHTML = STEP_LABELS.map((label, i) => {
     const n = i + 1;
     const cls = n === vis ? 'active' : (currentStep > 1 && n < vis ? 'done' : '');
-    const klik = currentStep === 1 ? n <= 2 : n < currentStep;
+    const klik = currentStep === 1 ? n <= 3 : n < currentStep;
     const tag = klik ? 'button type="button" data-goto="' + n + '"' : 'div';
     return `
     <${tag} class="step-item ${cls}" title="Trin ${n}: ${label}"${n === vis ? ' aria-current="step"' : ''}>
@@ -81,25 +80,25 @@ function goToStep(n){
      "Gem kladde" — det er trinskiftet, folk mister arbejde paa. Kun fremad/
      tilbage efter foerste tegning (ellers overskrives en gendannet kladde af
      en tom formular ved init). */
-  const maal = n === 2 ? 1 : n;     // 2 = anker på side 1, ikke en egen side
+  const maal = n <= 3 ? 1 : n;      // 2 og 3 = anker på side 1, ikke egne sider
   if (typeof collectFormData === 'function' && currentStep !== maal && !editingId){
     try { Store.saveDraft('form', collectFormData()); _ugemt = false; } catch (e) { /* aldrig blokere et trinskift */ }
   }
   currentStep = maal;
-  ankerTrin = n === 2 ? 2 : 1;
+  ankerTrin = n <= 3 ? n : 1;
   document.querySelectorAll('.form-step').forEach(s => {
     const t = Number(s.dataset.step);
-    s.hidden = maal === 1 ? t > 2 : t !== maal;
+    s.hidden = maal === 1 ? t > 3 : t !== maal;
   });
   renderStepper();
   document.getElementById('step-back').style.visibility = maal === 1 ? 'hidden' : 'visible';
   document.getElementById('step-next').textContent =
     maal === STEP_LABELS.length ? (editingId ? 'Gem ændringer' : 'Udgiv annonce')
-      : (maal === 1 ? 'Fortsæt til billeder' : 'Fortsæt til gennemse');
+      : 'Fortsæt til gennemse';
   if (maal === STEP_LABELS.length) renderPreview();
   renderLiveCard();
   const h2 = document.querySelector(`.form-step[data-step="${n}"] h2`);
-  if (n === 2 && h2) h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if ((n === 2 || n === 3) && h2) h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
   else if (!_foersteTegning) window.scrollTo({ top: 0, behavior: 'smooth' });
   /* O1-12: fokus paa trinnets overskrift — ellers staar en skaermlaeser stadig
      paa "Fortsaet" uden at faa at vide, at siden skiftede. Ikke ved første
@@ -116,12 +115,14 @@ function wireAnkerSpy(){
     travl = true;
     requestAnimationFrame(() => {
       travl = false;
-      const h = document.querySelector('.form-step[data-step="2"] h2');
-      if (!h) return;
-      /* Trin 2 er aktivt først, når dets overskrift er nået op under toppen (eller siden er scrollet i bund) —
-         ellers viser bjælken 2, mens "1. Motorcyklens detaljer" stadig står øverst på skærmen. */
+      /* Sektion n er aktiv, når dens overskrift er nået op under toppen (eller siden er scrollet i bund → sidste sektion). */
       const bund = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
-      const nyt = (h.getBoundingClientRect().top < window.innerHeight * 0.22 || bund) ? 2 : 1;
+      let nyt = 1;
+      [2, 3].forEach(n => {
+        const h = document.querySelector('.form-step[data-step="' + n + '"] h2');
+        if (h && h.getBoundingClientRect().top < window.innerHeight * 0.22) nyt = n;
+      });
+      if (bund) nyt = 3;
       if (nyt !== ankerTrin){ ankerTrin = nyt; renderStepper(); }
     });
   }, { passive: true });
@@ -203,8 +204,8 @@ function trinUdfyldt(n){
 }
 
 function validateStep(n){
-  /* Trin 1 og 2 står på samme side og valideres samlet. */
-  const trin = n <= 2 ? [1, 2] : [n];
+  /* Trin 1–3 står på samme side og valideres samlet (sektion 2 = billeder har ingen påkrævede felter). */
+  const trin = n <= 3 ? [1, 2, 3] : [n];
   let valid = true;
   /* Alle fejl samles som { el, besked }, og fokus går til den FØRSTE i
      dokumentets rækkefølge — ikke til den første, vi tilfældigvis opdagede. */
@@ -220,7 +221,9 @@ function validateStep(n){
     });
     /* Grænseværdier står ÉT sted: js/opret-validering.js. Formularen er
        novalidate, så min/max i HTML håndhæves ikke af browseren. */
-    OpretValidering.validerTrin(t, id => (document.getElementById(id) || {}).value, aar).forEach(f => {
+    /* DOM-sektion 3 (beskrivelse & pris) har valideringsreglernes trin 2; sektion 2 (billeder) har ingen regler. */
+    const regelTrin = t === 3 ? 2 : (t === 2 ? 0 : t);
+    if (regelTrin) OpretValidering.validerTrin(regelTrin, id => (document.getElementById(id) || {}).value, aar).forEach(f => {
       const el = document.getElementById(f.id);
       if (!el) return;
       valid = false;
@@ -242,7 +245,7 @@ function validateStep(n){
   if (n === 4){
     if (!document.getElementById('f-terms').checked) msg = 'Du skal acceptere vilkårene for annoncering';
   }
-  if (trin.includes(2)){
+  if (trin.includes(3)){
     // Frit indtastet postnummer uden bekræftet valg = annonce uden by/region.
     if (!acceptExactPostnr()){
       valid = false;
@@ -1386,6 +1389,13 @@ document.addEventListener('DOMContentLoaded', async () => {
      omvejen, billeder kan ikke (blob-URL'er). ?rediger= kraever stadig login
      med det samme: man kan ikke redigere en annonce, man ikke ejer. */
   const kraeverLogin = () => db.enabled && !Store.getUser()?.remote;
+  /* W14: login-gaten. Kladden gemmes først og kommer tilbage med billedsektionen i fokus (videreTilTrin 2); billeder kan ikke
+     overleve omvejen, og derfor kan de først vælges efter login (se #op-photo-gate). */
+  const tilLogin = () => {
+    Store.saveDraft('form', Object.assign(collectFormData(), { videreTilTrin: 2 }));
+    toast('Din kladde er gemt på denne enhed — log ind, så fortsætter du med billederne.');
+    setTimeout(() => { forlad('login.html?redirect=' + encodeURIComponent('opret-annonce.html')); }, 1400);
+  };
   if (kraeverLogin() && new URLSearchParams(window.location.search).get('rediger')){
     const tilbage = 'opret-annonce.html' + window.location.search;
     window.location.replace('login.html?redirect=' + encodeURIComponent(tilbage));
@@ -1413,6 +1423,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }).catch(() => {});
   }
+  if (kraeverLogin()){
+    document.getElementById('op-photo-gate').hidden = false;
+    document.getElementById('op-photo-sektion').hidden = true;
+    document.getElementById('op-photo-gate-btn').addEventListener('click', tilLogin);
+  }
   wirePhotoUpload();
   renderPhotoGrid();
   wireSeoAssist();
@@ -1432,8 +1447,8 @@ document.addEventListener('DOMContentLoaded', async () => {
        ingen roede rammer ved indlaesning). */
     const videre = Number(Store.getDraft()?.form?.videreTilTrin) || 0;
     draftUgyldig = OpretValidering.validerData(Store.getDraft()?.form, new Date().getFullYear(), { kunUgyldige: true }).length > 0;
-    if (videre === 3 && Store.getUser()?.remote && trinUdfyldt(1) && trinUdfyldt(2) && !draftUgyldig){
-      startTrin = 3;
+    if (videre >= 2 && Store.getUser()?.remote && trinUdfyldt(1) && trinUdfyldt(3) && !draftUgyldig){
+      startTrin = 2;
     }
   }
   wireAnkerSpy();
@@ -1450,19 +1465,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!validateStep(currentStep)) return;
     /* O1-1: login-gaten ligger HER — efter at motorcyklen og prisen er skrevet,
        foer billederne. Kladden gemmes foerst, saa intet gaar tabt. */
-    if (currentStep === 1 && kraeverLogin()){
-      // O2-3: toasten lover "fortsaetter med billederne" — saa skal kladden
-      // huske trinnet, ellers lander man paa trin 1 efter login.
-      Store.saveDraft('form', Object.assign(collectFormData(), { videreTilTrin: 3 }));
-      toast('Din kladde er gemt på denne enhed — log ind, så fortsætter du med billederne.');
-      setTimeout(() => { forlad('login.html?redirect=' + encodeURIComponent('opret-annonce.html')); }, 1400);
-      return;
-    }
-    if (currentStep < STEP_LABELS.length) goToStep(currentStep === 1 ? 3 : currentStep + 1);
+    if (currentStep === 1 && kraeverLogin()){ tilLogin(); return; }
+    if (currentStep < STEP_LABELS.length) goToStep(currentStep === 1 ? 4 : currentStep + 1);
     else publishListing();
   });
   document.getElementById('step-back').addEventListener('click', () => {
-    if (currentStep > 1) goToStep(currentStep === 3 ? 1 : currentStep - 1);
+    if (currentStep > 1) goToStep(1);
   });
   /* O2-7: i redigeringstilstand skjules knappen — ellers skrev en eksisterende
      annonces data sig ind i ny-annonce-kladden, og naeste "Udgiv" blev en dublet. */

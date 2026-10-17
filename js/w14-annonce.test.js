@@ -121,7 +121,6 @@ test('opret: billedtrinnet har dropzone og miniaturer i samme række og et tipsb
   const s = await aabn({ width: 1440, height: 900 }, 'light', { loggetInd: true, annoncer: [] });
   try {
     await gaa(s, 'opret-annonce.html');
-    await s.page.evaluate(() => { document.querySelector('.form-step[data-step="3"]').hidden = false; });
     await s.page.setInputFiles('#photo-input', Array.from({ length: 3 }, (_, i) => ({ name: `f${i}.png`, mimeType: 'image/png', buffer: lavPng(640, 480, [150 + i * 20, 80, 40]) })));
     await s.page.waitForSelector('.photo-thumb', { timeout: 5000 });
     const m = await s.page.evaluate(() => {
@@ -133,5 +132,35 @@ test('opret: billedtrinnet har dropzone og miniaturer i samme række og et tipsb
     assert.ok(m.thH >= 100, `miniaturer er store nok (${m.thH})`);
     assert.ok(m.tipsTop >= m.zBottom - 1, 'tipsbåndet ligger under rækken');
     assert.ok(m.ov <= 0);
+  } finally { await s.ctx.close(); }
+});
+
+test('opret: sektionsorden som billedet (Detaljer, Billeder, Beskrivelse og pris), 4 trin og fire kolonner i første feltrække', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ width: 1440, height: 900 }, 'light', { loggetInd: true, annoncer: [] });
+  try {
+    await gaa(s, 'opret-annonce.html');
+    const m = await s.page.evaluate(() => {
+      const h = [...document.querySelectorAll('.form-step h2')].map(e => e.textContent.split(/\s+/).join(' ').trim());
+      const top = id => document.getElementById(id).getBoundingClientRect().top;
+      const synlige = [...document.querySelectorAll('.form-step')].filter(e => !e.hidden).map(e => e.dataset.step);
+      return { h, synlige, trin: document.querySelectorAll('#stepper .step-item').length,
+        raekke: [top('f-brand'), top('f-model'), top('f-year'), top('f-km')].map(Math.round) };
+    });
+    assert.deepStrictEqual(m.h.slice(0, 3), ['1. Motorcyklens detaljer', '2. Billeder', '3. Beskrivelse og pris']);
+    assert.deepStrictEqual(m.synlige, ['1', '2', '3']);
+    assert.strictEqual(m.trin, 4);
+    assert.ok(new Set(m.raekke).size === 1, 'mærke, model, årgang og km på samme række: ' + m.raekke);
+  } finally { await s.ctx.close(); }
+});
+
+test('opret: udlogget ser login-port i stedet for dropzone (billeder kan ikke overleve en login-omvej)', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ width: 1440, height: 900 }, 'light', { loggetInd: false, annoncer: [] });
+  try {
+    await gaa(s, 'opret-annonce.html');
+    assert.ok(await s.page.locator('#op-photo-gate').isVisible(), 'login-port synlig');
+    assert.ok(!(await s.page.locator('#upload-zone').isVisible()), 'ingen dropzone udlogget');
+    assert.match(await s.page.locator('#op-photo-gate').innerText(), /Log ind for at tilføje billeder/);
   } finally { await s.ctx.close(); }
 });
