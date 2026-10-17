@@ -50,4 +50,38 @@ Fiktive tal, stjerner, "svartid", "autoriseret forhandler", betaling og beskeder
 - X6 `node --check` på js/scripts/crawler, `npm test` grønt (kendt: crawler-tests kræver node_modules; llms.txt omskrives af test og gendannes).
 
 ## Status / bevis
-(udfyldes nedenfor efter bygning)
+Skærmbilleder (udenfor repo): `%TEMP%w10-soegning` — `before-*` / `after-*` (1440 lys/mørk, 390 lys, tom, 503, liste). Harness `h.js`, `m.js`, `sc.js`, `f.js`, `a11y.js`, `cls.js` samme mappe. Mock-total er 98 (47 mock + 51 statisk snapshot) og 194 ved 140 rækker; 24 pr. side, så 1 -> 5 og 1 -> 9 sider; "<= 24 resultater" er målt med `?q=honda&koerekort=A2` (5 stk).
+
+Bygget (kun p-soegning.css, soegning.html, js/search.js; ingen delte filer rørt)
+- H1-H3: hero 264 -> 212 px; h1 44 px (var ca. 56); kortet hænger 52 px ned over bannerkanten (`display:flow-root` på hero, så den negative margen ikke klappes sammen; `z-index:2` så kortet ligger over chip-rækken). Én række af søgefelt/type/pris/kørekort/CTA ved >= 1100.
+- C1-C2: chips + "Ryd alle filtre" lige under kortet, "Gem søgning" længst til højre; pille 40 px, x-hitfelt 44 px. Måling: ryd alle -> `location.search === ''`.
+- S1-S3: sidebarens rækkefølge og foldbarhed var allerede som billedet; typerækker, Ryd alle og "Flere valg" løftet til >= 40 px. Gem søgning-panel under gitteret (`#so-agent`): ærlig tekst "Der sendes endnu ingen e-mails"; klikker på `#save-search-btn`, label følger tilstanden; skjules ved tomt/fejlet resultat og når tyndt-resultat-panelet (<= 3 træf) allerede har sin egen knap.
+- R1-R3: tal, Sortér og Gitter/Liste på samme midterlinje (forskel 0 px ved 1440); info-båndet er en rammeløs muted linje (39 px ved 1440), højden reserveret pr. breakpoint (CLS).
+- K1-K3: titel og pris på samme linje fra 560 px (titel max 2 linjer, pris til højre), foto 16:10, 4/3/2 kolonner. 48/49 hk "Ikke afgjort", 44 hk "Mulig A2" uændret via `a2Status`.
+- P1-P2: "Viser 25–48 af N motorcykler" (kun når kortene er tegnet) + firkantede sidetal >= 40 px; "Side x af y" er nu kun for skærmlæsere. FEJL RETTET (fandtes før): sidetals-hrefs tabte `sort=` (åbn-i-ny-fane gav anden rækkefølge); nu `currentQueryString(true)`.
+- T1-T2: tom og 503 målt (retry-knap, intet antal, ingen kort, ingen Viser/panel, 0 overflow, 0 konsolfejl).
+
+Målt
+- X1 overflow: 0 ved 320/390/768/1024/1440 x lys/mørk x {standard, side 2 af 140, tom, filter-URL}: 40 kombinationer + 503 ved 390/1440.
+- X2 CLS: `smoke-browser --sider soegning --cls 0.05 --strikt`, 10 målinger, 0 fejl, 0 advarsler (største CLS 0,017; før dette arbejde 0,03 uden min. 0,07 efter første version, derfor reservationen). Filter-URL ved 390 lys: 0,0000.
+- X3 tap-mål: alle målte kontroller >= 40 px (chips, x, Ryd alle, sortér, Gitter/Liste, Gem søgning, panelknap, sidetal, typerækker, Flere valg) ved 1440 og 390, lys og mørk.
+- X4 kontrast: 0 tekstklasser under 4,5:1 (getComputedStyle mod nærmeste opake baggrund, lys + mørk, 1440/390).
+- X5 tastatur: Tab-orden skip-link, header, søgekort, chips, Ryd alle, Gem søgning, sidebar; fokusring på alle undtagen de to skyderhåndtag (`dr-thumb`, eksisterende komponent); Enter på chip-x fjerner filtret.
+- F: sortering (URL), liste/gitter, side 2 m. sort bevaret, favorit (overlever reload), sammenlign, søgning -> annonce -> tilbage (scroll 1400 -> 1400, filter bevaret).
+- `node --check` OK. `npm test`: 1007/1007 grønt (llms.txt gendannet).
+
+Nye testfiler (Orchestrator tilføjer til `npm test`): `js/w10-soegning.test.js` (5 tests, browser mod lokal mock, springes over uden Playwright). Eksisterende tests er ikke ændret.
+
+Hvad ligner IKKE billedet endnu
+- Foto-tæller (1/12), "Autoriseret forhandler", stjerner, tal i hero ("12.842"), antal pr. kørekort/type fra billedet: opdigtet eller forbudt (ét thumbnail pr. annonce).
+- Kortenes A2-chip er orange/kobber (mulig) og sort (kræver A), ikke grøn; kg-chip findes ikke (vi har ikke vægten).
+- Billedet har aldrig en tom chip-række; hos os står "Gem søgning" alene til højre, når ingen filtre er valgt (ca. 44 px). Knappen er sidens eneste vej til søgeagenten øverst.
+- Ingen "Vis flere"-knap: pagineringen er rigtige links med filtre i adressen (SEO/tilbage-knap), og billedet viser ingen paginering.
+- Mobil: kortets sted/kilde-linje afkortes i 2-kolonne-gitteret ("Ro...") — kortlayoutet er delt (styles.css/components.js, DELT-ØNSKE nedenfor).
+- Sidebar-facettal i 503-tilstand viser stadig snapshot-tal (f.eks. 51).
+- Info-linjen er stadig tre ærlige oplysninger (kilde, bekræftelsesdato, blandet udbud) men nu i én rolig linje; billedet har ingen.
+- Swipe-knappen findes stadig ved siden af Gitter/Liste (ikon-kun); billedet har kun to. Skjules den på desktop, kan en gemt swipe-visning låse brugeren.
+
+DELT-ØNSKE: (1) kortets sted/kilde-fod på 320-390 px i 2 kolonner (stak sted og kilde, eller kortere kildetekst) — css/styles.css / js/components.js; (2) hvis Orchestratoren vil have titel+pris på én linje på alle landingssidernes kort: reglen er i css/p-soegning.css (`#results-grid:not(.list-view) .rk-top`) og kan flyttes til styles.css.
+Commits: se `git log gauntlet/w10-soegning` (d28b7f8 kriterier, 2390e1c, a731194, 22381cc, c5cbde5 + rapport).
+
