@@ -32,7 +32,7 @@
         "harley davidson"
       ],
       "fil": "img/brands/harley-davidson.svg",
-      "godkendt": false,
+      "godkendt": true,
       "kilde": "AI-genereret udkast (ChatGPT, 17.10.2026) -> vektoriseret med scripts/logo-vektoriser.js",
       "licens": "Varemærke tilhører producenten; bruges kun til at identificere producenten i annoncer. Udkast ikke verificeret mod officiel fil.",
       "hash": "d72067f66400c4589cf7a7ad7c0090e1da4eb1bea6c05f88986e10564dffdc8f",
@@ -43,7 +43,10 @@
       "monogram": "HD",
       "fallback": "ordmaerke",
       "autenticitet": "ubrugelig",
-      "kraever_officiel_fil": true
+      "kraever_officiel_fil": true,
+      "godkendt_af": "ejer",
+      "godkendt_dato": "2026-10-17",
+      "bemaerkning": "Slået til af ejeren 2026-10-17 mod anbefaling: gentegnet AI-udkast, ikke verificeret mod officiel fil (kraever_officiel_fil)."
     },
     {
       "slug": "yamaha",
@@ -303,7 +306,7 @@
         "indian motorcycles"
       ],
       "fil": "img/brands/indian.svg",
-      "godkendt": false,
+      "godkendt": true,
       "kilde": "AI-genereret udkast (ChatGPT, 17.10.2026) -> vektoriseret med scripts/logo-vektoriser.js",
       "licens": "Varemærke tilhører producenten; bruges kun til at identificere producenten i annoncer. Udkast ikke verificeret mod officiel fil.",
       "hash": "c750c9f5f3f49c643d606f86795c94708d52041c7d0e8c6d4c7e01dc21f17b95",
@@ -314,7 +317,10 @@
       "monogram": "I",
       "fallback": "ordmaerke",
       "autenticitet": "ubrugelig",
-      "kraever_officiel_fil": true
+      "kraever_officiel_fil": true,
+      "godkendt_af": "ejer",
+      "godkendt_dato": "2026-10-17",
+      "bemaerkning": "Slået til af ejeren 2026-10-17 mod anbefaling: gentegnet AI-udkast, ikke verificeret mod officiel fil (kraever_officiel_fil)."
     },
     {
       "slug": "lauge-jensen",
@@ -395,7 +401,7 @@
       "navn": "Benelli",
       "aliaser": [],
       "fil": "img/brands/benelli.svg",
-      "godkendt": false,
+      "godkendt": true,
       "kilde": "AI-genereret udkast (ChatGPT, 17.10.2026) -> vektoriseret med scripts/logo-vektoriser.js",
       "licens": "Varemærke tilhører producenten; bruges kun til at identificere producenten i annoncer. Udkast ikke verificeret mod officiel fil.",
       "hash": "56688dc1abdc4cb21cafd2da074b926504c25a230d520c68fb4e4c2ff3971ed7",
@@ -406,7 +412,10 @@
       "monogram": "B",
       "fallback": "ordmaerke",
       "autenticitet": "ubrugelig",
-      "kraever_officiel_fil": true
+      "kraever_officiel_fil": true,
+      "godkendt_af": "ejer",
+      "godkendt_dato": "2026-10-17",
+      "bemaerkning": "Slået til af ejeren 2026-10-17 mod anbefaling: gentegnet AI-udkast, ikke verificeret mod officiel fil (kraever_officiel_fil)."
     },
     {
       "slug": "buell",

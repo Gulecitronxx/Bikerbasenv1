@@ -98,7 +98,8 @@ test('A8 fejlet logo (404): bl--fejl, maske skjult, fallback har areal, slotten 
     const { page, ctx } = await side(sv.url + '/t-med.html');
     await page.waitForTimeout(400);
     const foer = await maalSlots(page);
-    const r = await page.evaluate(() => [...document.querySelectorAll('.bl--logo')].map(e => {
+    // Siden indlæser også standardmanifestet med de RIGTIGE godkendte logoer (leveres med 200). Kun testens placeholder-logoer (fx-*.svg) sættes til 404.
+    const r = await page.evaluate(() => [...document.querySelectorAll('.bl--logo')].filter(e => e.innerHTML.includes('/fx-')).map(e => {
       const fb = e.querySelector('.bl-fb'); const q = fb.getBoundingClientRect();
       const mask = e.querySelector('.bl-mark, .bl-img');
       return { fejl: e.classList.contains('bl--fejl'), fbW: q.width, fbH: q.height, masketSkjult: getComputedStyle(mask).display === 'none', tekst: fb.textContent.trim() };
