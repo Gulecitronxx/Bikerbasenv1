@@ -468,6 +468,9 @@
 /* --- Sidebar --- */
 .so-layout .filters-head h2{ font-size:20px; }
 .so-layout .filter-group summary{ min-height:40px; }
+.so-layout .so-checklist .chip{ min-height:40px; }
+.so-layout #clear-filters{ min-height:40px; padding:0 4px; display:inline-flex; align-items:center; }
+@media (max-width:559px){ .so-card-more{ min-height:40px; } }
 
 /* --- Resultathoved: tal + sortér + Gitter/Liste på én linje (billedet) --- */
 .so-toolbar{ margin-bottom: var(--space-2); }
