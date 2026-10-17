@@ -134,7 +134,7 @@ function anBalancerKolonner(){
     if (kol.some(k => !k) || kort.some(k => !k)) return;
     g.classList.add('an-maal');   // naturlig højde: ingen strækning, mens der måles
     let bedst = null;
-    for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) for (let c = 0; c < 3; c++){
+    for (let a = 1; a < 2; a++) for (let b = 0; b < 3; b++) for (let c = 0; c < 3; c++){   // W14: kørekortkortet bor altid i midterkolonnen (som billedet)
       const valg = [a, b, c];
       kort.forEach((k, n) => kol[valg[n]].appendChild(k));
       const h = kol.map(k => k.getBoundingClientRect().height);
@@ -629,6 +629,15 @@ function anKoerekortKort(l, kkM, uvisA2A){
     : kkM.graense ? 'Tjek kW i registreringsattesten' : 'Spørg sælgeren';
   const ekstra = (kk === 'A' && l.kanNedsaettesA2) ? ' Sælgeren oplyser, at den kan effektbegrænses til A2.' : '';
   const side = kk === 'A1' ? 'koerekort-a1.html' : 'koerekort-a2.html';
+  /* W14: "Det bygger vurderingen på" — kun oplyste tal og de offentlige grænser (A2: 35 kW, ca. 47 hk; A1: 11 kW, 125 cm³).
+     Viser køberen HVORFOR badgen står, som billedets kørekortmodul, uden at love mere end tallene kan. */
+  const hkOplyst = hkEllerNull(l.power);
+  const basis = [
+    ['Oplyst effekt', hkOplyst ? formatPower(hkOplyst) : 'Ikke oplyst'],
+    ['Oplyst motor', Number(l.ccm) > 0 ? formatCcm(l.ccm) : 'Ikke oplyst'],
+    ['Grænse for A2', 'højst 35 kW (ca. 47 hk)'],
+  ];
+  const basisHTML = `<dl class="an-kk-basis" aria-label="Det bygger vurderingen på">${basis.map(([e, v]) => `<div><dt>${e}</dt><dd${v === 'Ikke oplyst' ? ' class="an-na"' : ''}>${escapeHTML(v)}</dd></div>`).join('')}</dl>`;
   return `
     <section class="an-card an-kk" aria-labelledby="an-kk-h">
       <span class="an-kk-ico" aria-hidden="true">${AN_IKON.idcard}</span>
@@ -638,6 +647,12 @@ function anKoerekortKort(l, kkM, uvisA2A){
         <a class="an-link" href="${side}">Læs mere om kørekort og regler${Icon.arrowRight}</a>
       </div>
       <div class="an-kk-badge an-kk-${tilstand}" role="img" aria-label="${escapeHTML(pille)} ${escapeHTML(badge)}: ${escapeHTML(badgeTekst)}"><span class="an-kk-pille">${escapeHTML(pille)}</span><b>${escapeHTML(badge)}</b><small>${escapeHTML(badgeTekst)}</small></div>
+      ${basisHTML}
+      <ul class="an-kk-legende" aria-label="Sådan læser du badgen">
+        <li><b>Mulig</b> betyder ikke udelukket ud fra tallene, aldrig bekræftet.</li>
+        <li><b>Kræver A</b> betyder, at effekten alene ligger over A2-grænsen.</li>
+        <li><b>Ikke afgjort</b> bruges ved 48–49 hk, hvor kW afgør det.</li>
+      </ul>
     </section>`;
 }
 

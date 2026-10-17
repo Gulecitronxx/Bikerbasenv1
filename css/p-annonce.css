@@ -710,7 +710,7 @@
 }
 @media (min-width:1180px){
   .an-grid{
-    grid-template-columns: minmax(0,1.7fr) minmax(0,1.45fr) minmax(300px,1fr);
+    grid-template-columns: minmax(0,1.55fr) minmax(0,1.5fr) minmax(310px,1fr);
     grid-template-areas: "a b side";
   }
   .an-col{ display:flex; flex-direction:column; gap: var(--space-5); align-self:stretch; }
@@ -743,6 +743,7 @@
 .an-gallery .gallery{ background:none; overflow:visible; border-radius:0; margin:0; }
 .an-gallery .gallery-main{ aspect-ratio: 4/3; border-radius: var(--radius-md); overflow:hidden; background: var(--color-surface-2); }
 @media (min-width:700px){ .an-gallery .gallery-main{ aspect-ratio: 16/10; } }
+#gallery-main-img{ height:100%; }
 .an-gallery .gallery-counter{ top:12px; left:12px; right:auto; bottom:auto; }
 .gallery-thumbs{ display:grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap:8px; padding:8px 0 0; overflow:visible; background:none; }
 .gallery-thumbs button{ width:auto; height:auto; aspect-ratio: 4/3; min-width:0; position:relative; border-width:2px; }
@@ -855,7 +856,7 @@
 /* ---------- Fakta ---------- */
 .an-fakta{ container-type:inline-size; }
 .an-facts{ margin:0; column-count:1; column-gap: var(--space-4); }
-@container (min-width:460px){ .an-facts{ column-count:2; } }
+@container (min-width:400px){ .an-facts{ column-count:2; } }
 .an-fact{
   break-inside:avoid; display:grid; grid-template-columns: 18px minmax(0,1fr) minmax(0,1fr); gap:6px; align-items:center;
   padding:9px 8px; margin-bottom:6px; background: var(--color-bg); border-radius: var(--radius-sm); font-size:12.5px;
@@ -916,6 +917,12 @@
 .an-col .an-kk, .an-side .an-kk{ grid-template-columns: auto minmax(0,1fr); }
 .an-col .an-kk .an-kk-badge, .an-side .an-kk .an-kk-badge{ grid-column: 1 / -1; max-width:none; }
 .an-col .an-kk .an-kk-ico svg, .an-side .an-kk .an-kk-ico svg{ width:44px; height:44px; }
+/* W14: i en bred kolonne (som billedets midterkolonne) står badgen til højre for teksten, ikke under den. */
+@media (min-width:1180px){
+  .an-col-b .an-kk{ grid-template-columns: auto minmax(0,1fr) 128px; }
+  .an-col-b .an-kk .an-kk-badge{ grid-column:auto; max-width:128px; min-width:0; }
+  .an-col-b .an-kk .an-kk-ico svg{ width:56px; height:56px; }
+}
 
 /* ---------- Tjekliste ---------- */
 .an-tjek{
@@ -1007,3 +1014,11 @@
 @media (min-width:1180px){ .an-grid.an-maal > .an-col, .an-grid.an-maal > .an-side{ align-self:start; } }
 
 .similar-strip .card-compare{ width:40px; height:40px; right:4px; bottom:4px; }
+
+/* W14: kørekortkortets grundlag (oplyst effekt/motor + offentlig grænse) som tre rækker under teksten. */
+.an-kk-basis{ grid-column:1 / -1; margin:var(--space-1) 0 0; padding-top:var(--space-3); border-top:1px solid var(--color-border); display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:var(--space-3); }
+.an-kk-basis div{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.an-kk-basis dt{ font-size:12px; color:var(--color-fg-muted); }
+.an-kk-basis dd{ margin:0; font-size:14px; font-weight:600; overflow-wrap:anywhere; }
+.an-kk-legende{ grid-column:1 / -1; list-style:none; margin:0; padding:var(--space-3) 0 0; border-top:1px solid var(--color-border); display:grid; gap:6px; font-size:12.5px; line-height:1.5; color:var(--color-fg-muted); }
+.an-kk-legende b{ color:var(--color-fg); font-weight:600; }
