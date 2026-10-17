@@ -1,273 +1,147 @@
-/* Indlejrer den kritiske (above-the-fold) CSS på HVER side og gør resten af
-   styles.css ikke-render-blokerende. Kører sidst i byggekæden (efter
+/* Indlejrer den kritiske (above-the-fold) CSS i <head> og udskyder de fulde ark (css/styles.css + sidens
+   p-*.css), så første maling ikke venter på dem. Kører sidst før csp-hashes i byggekæden (efter
    stamp-version), så den arbejder på den friske ?v=.
 
    ============================================================
-   LÆS FØRST: INDLEJRINGEN ER SLÅET FRA — OG DET ER MÅLT
+   HVAD ER ÆNDRET I W12 (og hvorfor det virker nu)
    ============================================================
-   `IKKE_UDSKUDT` nedenfor matcher ALLE sider, så ingen side får en indlejret
-   kritisk blok i dag. Maskineriet er ikke slettet, fordi forudsætningen kan
-   ændre sig igen; her er den, og her er tallene.
+   Før: en håndlavet liste af sektionsnavne pr. side (PAGES), og en IKKE_UDSKUDT-regel, der matchede alle filer,
+   slog det hele fra. w11-perf målte, at indlejret kritisk CSS ville give mobil-FCP 1876 -> 652 ms (forside),
+   men CLS 0,121 på koerekort-a2. To årsager, begge fundet i w12:
 
-   Forudsætningen var, at `css/styles.css` var dyr at vente på: 52.486 B
-   gzip, render-blokerende, VeryHigh. Med `scripts/udgiv.js`' minificering af
-   `_site/` (17.08.2026) er den **20.641 B gzip**. Samtidig kostede den
-   indlejrede blok bytes i HVER eneste sideindlæsning, og de bytes ligger
-   allerforrest i køen — foran css, fonte, javascript og datahentningen:
+   1. Udsnittet var et gæt (hele sektioner efter navn). Nu afgør RIGTIG rendering det: scripts/kritisk-gen.js
+      åbner hver sides familie i Chromium (390x844 og 1440x900, lys/mørk, friske cookies, mock-data) og gemmer,
+      hvilke regler der rammer det, man ser i de første 1,5 viewporthøjder + skjulte elementer + alle
+      skjul/fastlås-regler. Resultatet er scripts/kritisk-manifest.json (regel-hashes pr. familie). Her, i
+      byggekæden, er der ingen browser: scripts/kritisk-css.js deler arkene i regler, tager dem manifestet kalder
+      kritiske MED PLUS ALLE REGLER MANIFESTET IKKE KENDER (ny/ændret regel = med), og skriver dem i arkets egen
+      rækkefølge. Et forældet manifest giver et større udsnit, aldrig et forkert.
+   2. Udskydelsen brugte `onload="this.rel='stylesheet'"`. csp-hashes.js AFBRYDER på inline event-handlere, og
+      CSP'en (script-src uden 'unsafe-hashes') blokerer dem: det fulde ark blev aldrig indlæst, og siden stod
+      med udsnittet alene (w11-målingen af 0,121 CLS var altså et ark, der ALDRIG kom). Nu: ingen script og
+      ingen handler. Arkene preloades i <head> (<link rel="preload" as="style">, høj prioritet, starter med det
+      samme), og de rigtige <link rel="stylesheet"> står sidst i <body> (før et evt. <style> i body). Chromium
+      maler det, der står før et stylesheet i body, uden at vente på det — og et ventende stylesheet holder
+      sidens deferred scripts tilbage, indtil arket er hentet. Det er præcis den rækkefølge, scripts altid har
+      kørt i (efter fuld CSS), så kode der læser layout (js/home.js måler gitterets spalter med
+      getComputedStyle) ser aldrig et udsnit. Uden JavaScript virker det også: det er almindelige links.
+      Kaskaden er uændret: det indlejrede udsnit står først, de fulde ark kommer bagefter og har sidste ord.
 
-     soegning.html   18.447 B gzip med blokken  ->   9.778 B uden  (-8.669)
-     index.html      12.023 B                   ->   7.310 B       (-4.713)
-     annonce.html    12.572 B                   ->   5.694 B       (-6.878)
+   Kun familier i AKTIV (scripts/kritisk-familier.js) får blokken; resten er byte-identiske med et build uden
+   dette trin (render-blokerende <link>). Aktiveringen hviler på målingerne i
+   docs/review/gauntlet/builder-w12-kritisk.md (CLS < 0,05 OG FCP-gevinst).
 
-   Altså betalte hver side for det samme CSS to gange. Målt (Lighthouse
-   12.8.2, mobil, 4x CPU, gzip-server, minificeret _site, 3 kørsler pr. celle):
+   CSP: sidernes style-src har 'unsafe-inline', så en indlejret <style> kræver ingen hash. script-src røres ikke.
 
-     soegning  91 / LCP 3.542  ->  92 / LCP 3.432
-     forside   93 / LCP 3.186  ->  95 / LCP 2.727-3.145
-     annonce   95 / LCP 2.924  ->  97 / LCP 2.516-2.628
+   Idempotent: hver kørsel nulstiller først siden til to almindelige render-blokerende <link>s (også fra den
+   gamle preload/onload-form) og bygger derefter forfra efter reglerne ovenfor.
 
-   CLS blev 0,000 / 0,000 / 0,001 begge veje. Det er ikke en tilfældighed:
-   med et render-blokerende ark er HELE stilarket til stede ved første
-   maling, så geometrien er rigtig fra første pixel. Den indlejrede blok var
-   altid et UDSNIT, og hvert udsnit er et sted, hvor to kopier kan blive
-   uenige — se de to fælder i work/DECISIONS.md ("Ny sektion i styles.css
-   skal registreres i scripts/inline-critical.js" og noten om forsidens
-   egen sektion, der IKKE var registreret). Den faelde findes ikke laengere.
-
-   HVORNÅR SKAL DEN SLÅS TIL IGEN? Når `_site/css/styles.css` gzip nærmer
-   sig 40 KB igen. Mål det, sæt `IKKE_UDSKUDT = []` og mål igen — begge veje,
-   på mindst tre kørsler, og med CLS i tabellen.
-
-   Historikken herunder står, fordi den forklarer HVORFOR listerne ser ud som
-   de gør, hvis nogen tænder for det igen.
-
-   Hvorfor: styles.css er 110KB og render-blokerende. Forsiden fik det fikset
-   i runde 3-4 (LCP 3.5s → 2.1s); søgesiden ventede stadig ~1.4s på hele arket
-   før første maling. Nu får alle sider samme behandling.
-
-   Hvordan: styles.css er allerede opdelt i navngivne sektionsoverskrifter
-   (kommentarlinjer med lighedstegn omkring navnet). Hver side får kun de
-   sektioner, der tegner dens above-the-fold — resten kommer med det
-   asynkrone ark. Sektioner
-   udskrives altid i filens egen rækkefølge, så kaskaden er uændret.
-
-   Idempotent: markøren <style id="critical"> genskrives, og stylesheet-linket
-   skiftes kun til preload-swap, hvis det stadig er et almindeligt stylesheet. */
+   Miljø: BB_KRITISK=alle|ingen|navn,navn tvinger aktivering (til måling og test); uden den gælder AKTIV. */
 
 const fs = require('fs');
 const path = require('path');
+const K = require('./kritisk-css');
+const { AKTIV, familieFor } = require('./kritisk-familier');
+
 const root = path.join(__dirname, '..');
+const MANIFEST = path.join(__dirname, 'kritisk-manifest.json');
 
-/* ---- 1. Opdel styles.css i navngivne sektioner ---- */
-const cssLines = fs.readFileSync(path.join(root, 'css', 'styles.css'), 'utf8').split(/\r?\n/);
-const sections = [];
-cssLines.forEach((line, i) => {
-  const m = line.match(/^\/\*\s*=+\s*(.+?)\s*=+/);
-  if (m) sections.push({ name: m[1], start: i });
-});
-sections.forEach((s, i) => { s.end = i + 1 < sections.length ? sections[i + 1].start : cssLines.length; });
-if (!sections.length) throw new Error('inline-critical: fandt ingen sektionsmarkører i styles.css');
-
-/* ---- 2. Hvad er above-the-fold hvor? ----
-   Navnene matches på præfiks, så de lange sektionsoverskrifter kan forkortes. */
-/* Footeren er sjældent above-the-fold, men den er billig (1.4KB) og holder
-   dokumenthøjden stabil, når det fulde ark lander — ellers hopper alt under
-   folden, så snart brugeren scroller. */
-const BASE = ['Design tokens', 'Reset', 'Buttons', 'Formularfelter', 'Pladsreservation', 'Sektionslayout', 'Header', 'Footer', 'Cookie consent', 'Sammenlign'];
-
-/* Sektioner der skal PILLES UD igen for enkelte sider, selvom de står i BASE.
-   Forsiden har ingen annoncekort over folden — hverken sammenlign-knappen på
-   kortene eller sammenlign-baren/-modalen kan ses ved første maling (begge er
-   [hidden], og Reset skjuler dem allerede). De 2.7KB flyttes derfor over i det
-   asynkrone ark, så selve dokumentet bliver mindre. Det er ikke pynt: hero-
-   billedet kan først hentes, når dokumentet er hentet, så hver sparet KB i
-   HTML'en flytter LCP'ens "load delay". */
-const UDEN = [
-  [/^index\.html$/, ['Sammenlign']],
-];
-
-const PAGES = [
-  // Forsiden: uændret fra runde 4 (headeren hen over hero-fotoet + footeren,
-  // som ligger mellem dem i arket). Rør den ikke — dens LCP er målt grøn.
-  [/^index\.html$/, ['Hero']],
-  // Søgesiden: filterlayout + første række kort er det man ser.
-  // NB: 'Swipe-visning' skal med — .view-toggle og .mobile-filter-btn står
-  // i den sektion, og uden dem er værktøjslinjen 137px højere ved første
-  // maling end bagefter (målt CLS 0.31).
-  [/^soegning\.html$/, ['Utility', 'Cards / listings grid', 'Search / filter layout',
-    'Breadcrumb', 'Bike art', 'Swipe-visning', 'Search enhancements',
-    'Mobil: værktøjslinje', 'Touch-mål']],
-  // Annoncesider (incl. de genererede annonce-<slug>.html): galleri + specs.
-  // NB: 'annoncedetalje' SKAL med. Sektionen indeholder
-  // `#listing-detail:empty{min-height:100vh}`, som reserverer pladsen til
-  // annoncen, før js/annonce.js har fyldt den. Ligger reglen kun i det
-  // asynkrone ark, findes den ikke ved første maling — altså præcis i det
-  // øjeblik den skal virke — og "Lignende annoncer" plus footeren står
-  // øverst i vinduet og bliver skubbet en hel side ned bagefter (målt CLS
-  // 0,49). Samme sektion har også .avatar svg-størrelsen, uden hvilken
-  // ikon-avataren folder sig ud i 300×150.
-  [/^annonce(-.+)?\.html$/, ['Utility', 'Breadcrumb', 'Listing detail', 'annoncedetalje',
-    'Bike art', 'Trust & safety', 'Reviews', 'Modal', 'Forms', 'Touch-mål']],
-  // Mærkesider (genererede) + mærkeoversigten.
-  [/^maerke(r|-.+)?\.html$/, ['Utility', 'Breadcrumb', 'Cards / listings grid', 'Bike art',
-    'Brand landing pages', 'Popular searches']],
-  [/^forhandler\.html$/, ['Utility', 'Breadcrumb', 'Profile / dealer page', 'Cards / listings grid',
-    'Bike art', 'Trust & safety', 'Reviews', 'Verification steps', 'Touch-mål']],
-  [/^login\.html$/, ['Utility', 'Forms', 'Auth', 'Verification steps', 'Auth-fejlbesked', 'Trust & safety']],
-  [/^opret-annonce\.html$/, ['Utility', 'Forms', 'Stepper']],
-  [/^mine-annoncer\.html$/, ['Utility', 'Cards / listings grid', 'Bike art', 'Mine annoncer']],
-  [/^dashboard\.html$/, ['Utility', 'Forms', 'Dealer dashboard']],
-  [/^(vilkaar|privatlivspolitik|sikkerhed|om-indeksering|404)\.html$/, ['Utility', 'Legal / static content', 'Trust & safety']],
-];
-
-/* Sider der beholder det render-blokerende <link> og IKKE får en indlejret
-   kritisk blok.
-
-   Den var oprindelig en undtagelsesliste for sider, hvor udsnittet ikke var
-   bevist at give samme geometri som det fulde ark. I dag står den på ALLE
-   sider, og grunden er ikke geometri men bytes — se den lange forklaring
-   øverst i filen, hvor tallene står. Skal indlejringen tændes igen, er det
-   HER, det sker: `[]` giver alle sider en kritisk blok, og en enkelt regex
-   giver den til alle undtagen dem, der matcher. */
-const IKKE_UDSKUDT = [/.*/];
-
-/* ---- 2b. Ekstra regler der KUN hører hjemme i den kritiske blok ----
-   Til rene ydelsesregler bundet til én sides dokumentstruktur — altså noget,
-   der ikke er design og derfor ikke hører hjemme i styles.css.
-
-   Listen er tom. To kandidater er prøvet på forsiden og forkastet — de står
-   her med tallene, så de ikke bliver "opfundet" igen:
-
-   1) `main > .section{ content-visibility: auto; contain-intrinsic-size:
-      auto 640px }`. Så tidligt ud som den store gevinst (TBT 570ms -> 410ms),
-      men den måling var forurenet: i samme omgang blev en ubrugt
-      postnumre.js på 40KB fjernet fra forsiden. Målt alene bagefter — med
-      alt andet på plads — gav den 88 mod 87 i performance, altså inden for
-      støjen, fordi annoncegitrene på det tidspunkt allerede blev tegnet
-      dovent og der derfor knap var noget tilbage at springe over.
-      Prisen var derimod målbar og reproducerbar: sprunget-over indhold har
-      ingen layoutbokse, så axe måler hvert trykmål til 0x0. target-size
-      fejlede på 6 elementer, og tilgængeligheden gik fra 100 til 97.
-      1 point performance for 3 points tilgængelighed er en dårlig handel.
-
-      (En mistanke om, at reglen også forhindrede kategorifliserne i at hente
-      deres billeder, blev efterprøvet og AFVIST: Lighthouse henter alle 8
-      med og uden reglen. Den observation stammede fra en browser med skjult
-      rude, hvor viewporten er 0px bred — dér arver alt nul bredde, og både
-      lazy-billeder og IntersectionObserver holder op med at virke. Mål aldrig
-      layout eller dovent indhold i en fane, hvor document.hidden er true.)
-
-   2) `main > .section{ contain: layout }`. Uden de problemer, men også uden
-      gevinst: 82 mod 83 i udgangspunktet. Den koster en ny stacking context
-      og et nyt containing block pr. sektion — risiko uden modydelse.
-
-   Den rigtige vej viste sig at ligge i js/home.js: kortene sættes ind i
-   portioner med et yield imellem, så det samme arbejde bliver til mange korte
-   opgaver i stedet for én lang. Det giver hele gevinsten uden at bede
-   browseren om at springe noget over, den har fået at vide skal males. */
-const EKSTRA = [];
-
-/* Skærer luften ud af den kritiske blok. Bevidst konservativ: mellemrum
-   omkring +, -, * og / røres ALDRIG, fordi calc() kræver dem
-   (`calc(var(--header-h) + var(--space-5))` bliver ugyldig uden). Kun
-   mellemrum omkring de tegn, hvor CSS aldrig kan tillægge dem betydning. */
-function minify(css){
-  return css
-    .replace(/\s*\{\s*/g, '{')
-    .replace(/\s*\}\s*/g, '}')
-    .replace(/\s*;\s*/g, ';')
-    .replace(/:\s+/g, ':')
-    .replace(/,\s+/g, ',')
-    .replace(/;\}/g, '}')
-    .trim();
+/* ---- Hvilke familier er slået til ---- */
+function aktiveFamilier(env = process.env.BB_KRITISK){
+  if (!env) return AKTIV;
+  if (env === 'ingen') return new Set();
+  if (env === 'alle') return 'alle';
+  return new Set(env.split(',').map(s => s.trim()).filter(Boolean));
 }
 
-function criticalFor(file){
-  const extra = (PAGES.find(([re]) => re.test(file)) || [null, []])[1];
-  const drop = (UDEN.find(([re]) => re.test(file)) || [null, []])[1];
-  const want = BASE.concat(extra).filter(w => !drop.includes(w));
-  const base = minify(sections
-    .filter(s => want.some(w => s.name.startsWith(w)))
-    .map(s => cssLines.slice(s.start, s.end).join('\n'))
-    .join('\n')
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')   // fjern kommentarer
-    .replace(/[ \t]+/g, ' ')
-    .replace(/\s*\n\s*/g, '\n')
-    .replace(/\n{2,}/g, '\n')
-    .trim());
-  const ekstra = (EKSTRA.find(([re]) => re.test(file)) || [null, ''])[1];
-  return ekstra ? base + '\n' + ekstra : base;
+/* ---- Nulstil til almindelige render-blokerende links ---- */
+function nulstil(html){
+  return html
+    // gammel form (w1-w10): preload + onload + noscript
+    .replace(/<link rel="preload" as="style" href="(css\/[^"]+)" onload="[^"]*">\s*\n?<noscript><link rel="stylesheet" href="css\/[^"]*"><\/noscript>/g, '<link rel="stylesheet" href="$1">')
+    // w12: indlejret blok væk; linkene nederst i body væk; preload i head bliver det almindelige link igen
+    .replace(/<style id="critical">[\s\S]*?<\/style>\r?\n?/g, '')
+    .replace(/<link rel="stylesheet" href="css\/[^"]+" data-kritisk>\r?\n?/g, '')
+    .replace(/<link rel="preload" as="style" href="(css\/[^"]+)" data-kritisk>/g, '<link rel="stylesheet" href="$1">');
 }
 
-/* ---- 3. Skriv det ind i hver HTML-side, der bruger arket ---- */
-const files = fs.readdirSync(root).filter(f => f.endsWith('.html'));
-let touched = 0;
+/* Stilarkene en side bruger (kun lokale css/*.css), i dokumentrækkefølge. */
+function arkIside(html){
+  const ud = [];
+  for (const m of html.matchAll(/<link rel="stylesheet" href="(css\/[a-zA-Z0-9._-]+\.css)(\?[^"]*)?">/g)){
+    if (!ud.some(x => x.fil === m[1])) ud.push({ fil: m[1], tag: m[0] });
+  }
+  return ud;
+}
 
-for (const file of files){
-  const htmlPath = path.join(root, file);
-  let html = fs.readFileSync(htmlPath, 'utf8');
-  if (!/<link[^>]+css\/styles\.css/.test(html)) continue;
+/* Bygger siden med indlejret kritisk blok. `kritisk` er CSS-teksten. Returnerer ny html (eller uændret, hvis siden
+   ingen almindelige css-links har). Erstatter med slice, ikke String.replace, så $ i CSS ikke tolkes som mønster. */
+function anvend(html, kritisk){
+  const ark = arkIside(html);
+  if (!ark.length) return html;
+  const eol = html.includes(String.fromCharCode(13, 10)) ? String.fromCharCode(13, 10) : String.fromCharCode(10);
+  const erstat = (h, fra, til) => { const i = h.indexOf(fra); return i < 0 ? h : h.slice(0, i) + til + h.slice(i + fra.length); };
+  const preload = t => t.replace('rel="stylesheet"', 'rel="preload" as="style"').replace(/>$/, ' data-kritisk>');
+  let ud = html;
+  ark.forEach((a, i) => { ud = erstat(ud, a.tag, (i === 0 ? '<style id="critical">' + kritisk + '</style>' + eol : '') + preload(a.tag)); });
+  // De rigtige links: foer et evt. <style> i body (sidens egne body-regler skal fortsat staa EFTER arkene i kaskaden), ellers nederst.
+  const links = ark.map(a => a.tag.replace(/>$/, ' data-kritisk>') + eol).join('');
+  const b = ud.search(/<body[\s>]/);
+  const bs = b < 0 ? -1 : ud.indexOf('<style', b);
+  const sted = bs >= 0 ? bs : ud.lastIndexOf('</body>');
+  return sted < 0 ? html : ud.slice(0, sted) + links + ud.slice(sted);
+}
 
-  if (IKKE_UDSKUDT.some(re => re.test(file))){
-    // Rul tilbage til et almindeligt stylesheet, hvis siden tidligere blev
-    // udskudt — og fjern den kritiske blok, så der ikke ligger død CSS.
-    const før = html;
-    html = html
-      .replace(/<link rel="preload" as="style" href="(css\/styles\.css[^"]*)" onload="[^"]*">\s*\n?<noscript><link rel="stylesheet" href="css\/styles\.css[^"]*"><\/noscript>/,
-        '<link rel="stylesheet" href="$1">')
-      .replace(/<style id="critical">[\s\S]*?<\/style>\n?/, '');
-    if (html !== før){
-      fs.writeFileSync(htmlPath, html);
-      console.log(`  ${file.padEnd(46)} render-blokerende, ingen indlejret blok`);
+/* ---- Hovedløb ---- */
+function koer(){
+  let manifest = null;
+  try { manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8')); } catch (e) { /* ingen manifest */ }
+  const aktive = aktiveFamilier();
+  const cache = {};
+  const hentArk = fil => {
+    if (!cache[fil]){
+      const p = K.parse(fs.readFileSync(path.join(root, fil), 'utf8'));
+      cache[fil] = p.farlig.length ? { farlig: p.farlig } : { traeet: p.traeet };
     }
-    continue;
+    return cache[fil];
+  };
+  const kendt = manifest ? new Set(manifest.regler) : new Set();
+
+  const files = fs.readdirSync(root).filter(f => f.endsWith('.html'));
+  let touched = 0, nulstillet = 0;
+  const pr = {};
+  for (const file of files){
+    const htmlPath = path.join(root, file);
+    const raa = fs.readFileSync(htmlPath, 'utf8');
+    if (!/<link[^>]+css\/styles\.css/.test(raa)) continue;
+    let html = nulstil(raa);
+    const fam = familieFor(file);
+    const taendt = fam && manifest && manifest.familier[fam] && (aktive === 'alle' || aktive.has(fam));
+    let anvendt = false;
+    if (taendt){
+      const ark = arkIside(html).map(a => hentArk(a.fil));
+      if (ark.some(a => a.farlig)){
+        console.warn(`  ${file}: ark kan ikke afkortes sikkert (${ark.find(a => a.farlig).farlig[0]}) — render-blokerende`);
+      } else {
+        const krit = new Set(manifest.familier[fam].krit.map(i => manifest.regler[i]));
+        const kritisk = K.udsnit(ark.map(a => a.traeet), krit, kendt);
+        const ny = anvend(html, kritisk);
+        if (ny !== html){
+          html = ny; anvendt = true;
+          pr[fam] = (pr[fam] || 0) + 1;
+          touched++;
+          if (process.env.BB_KRITISK_STILLE !== '1') console.log(`  ${file.padEnd(46)} ${(kritisk.length / 1024).toFixed(1)}KB kritisk (${fam})`);
+        }
+      }
+    }
+    if (html !== raa){
+      fs.writeFileSync(htmlPath, html);
+      if (!anvendt) nulstillet++;
+    }
   }
-
-  // Gør det fulde ark ikke-render-blokerende — KUN hvis det ikke allerede er
-  // skiftet. (Ellers rammer regex'en <link> inde i <noscript> og laver
-  // indlejrede noscripts.) stamp-version har opdateret ?v= forinden.
-  const alreadyAsync = /<link rel="preload" as="style" href="css\/styles\.css[^"]*" onload=/.test(html);
-  if (!alreadyAsync){
-    html = html.replace(
-      /<link rel="stylesheet" href="(css\/styles\.css[^"]*)">/,
-      '<link rel="preload" as="style" href="$1" onload="this.onload=null;this.rel=\'stylesheet\'">\n<noscript><link rel="stylesheet" href="$1"></noscript>'
-    );
-  }
-
-  const critical = criticalFor(file);
-  const block = `<style id="critical">${critical}</style>`;
-  {
-    // Fjern altid en tidligere blok først, så placeringen kan rettes på
-    // sider der blev bygget dengang den lå sidst i head.
-    html = html.replace(/<style id="critical">[\s\S]*?<\/style>\n?/, '');
-
-    /* FØR stylesheet-linket, ikke sidst i head.
-
-       Lå den kritiske blok efter linket, vandt den over det fulde ark for
-       enhver regel der stod begge steder — kaskaden blev vendt om. Det tog
-       et konkret offer: `.field{display:flex}` (i den kritiske blok siden
-       runde 12) slog `.kyc-fields{display:none}` fra arket ihjel, så
-       virksomhedsnavn og CVR stod fremme med røde stjerner for alle, der
-       oprettede en privat profil.
-
-       Med blokken før linket er rollerne rigtige: det indlejrede maler
-       hurtigt, og det fulde ark har sidste ord — præcis som hvis den
-       kritiske CSS ikke fandtes. */
-    // Første <link> der peger på arket — preload-varianten står før
-    // <noscript>-fallbacken, så "første match" er den rigtige. Match ikke på
-    // rel-værdien: gør man det, rammer man let linket INDE i <noscript> og
-    // splitter fallbacken.
-    html = html.replace(
-      /(<link\b[^>]*href="css\/styles\.css)/,
-      `${block}\n$1`
-    );
-    // Sikkerhedsnet: matchede formen ikke, så hellere sidst i head end slet ikke.
-    if (!html.includes('<style id="critical">')) html = html.replace('</head>', block + '\n</head>');
-  }
-
-  fs.writeFileSync(htmlPath, html);
-  console.log(`  ${file.padEnd(46)} ${(critical.length / 1024).toFixed(1)}KB kritisk`);
-  touched++;
+  console.log(`inline-critical: ${touched} sider fik indlejret kritisk CSS` + (touched ? ` (${Object.entries(pr).map(([k, v]) => `${k} ${v}`).join(', ')})` : '')
+    + (nulstillet ? `; ${nulstillet} nulstillet til render-blokerende` : '') + '.');
 }
 
-console.log(`inline-critical: ${touched} sider fik indlejret kritisk CSS.`);
+module.exports = { nulstil, anvend, arkIside, aktiveFamilier };
+if (require.main === module) koer();
