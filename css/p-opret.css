@@ -4,6 +4,69 @@
    Linkes EFTER styles.css fra opret-annonce.html.
    ============================================================ */
 
+/* ===== Flyttet fra styles.css (w12-perf2): Stepper (opret annonce) =====
+   Sidespecifik; stod foer i det delte ark og var render-blokerende paa alle sider. Staar HER i toppen,
+   saa rækkefølgen mod resten af denne fils regler er uændret. */
+/* ============ Stepper (create listing) ============ */
+.stepper{ display:flex; align-items:center; gap:4px; margin: var(--space-5) 0; overflow-x:auto; }
+.step-item{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.step-dot{ width:32px; height:32px; border-radius:50%; background: var(--color-surface-2); border:1.5px solid var(--color-border); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color: var(--color-fg-muted); flex-shrink:0; transition: all .2s var(--ease-out); }
+.step-dot svg{ width:16px; height:16px; }
+.step-item.active .step-dot{ background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.step-item.done .step-dot{ background: var(--color-success); border-color: var(--color-success); color:#fff; }
+.step-label{ font-size:13px; font-weight:600; color: var(--color-fg-muted); white-space:nowrap; }
+.step-item.active .step-label{ color: var(--color-fg); }
+.step-line{ width:24px; height:2px; background: var(--color-border); flex-shrink:0; }
+@media (min-width:640px){ .step-line{ width:48px; } }
+
+/* På en telefon kunne de fire trinnavne ikke være der, så stepperen fik sin
+   egen vandrette scrollbar med pile — man skulle rulle sidelæns for at se,
+   hvor mange trin der var tilbage. Kun det aktive trin skriver sit navn;
+   prikkerne viser resten. Så er der ingen scrollbar at rulle i. */
+@media (max-width:520px){
+  .stepper{ overflow-x: visible; gap:6px; }
+  .step-item:not(.active) .step-label{
+    position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap;
+  }
+  .step-line{ width:auto; flex:1; min-width:8px; }
+}
+
+.upload-zone{
+  border:2px dashed var(--color-border); border-radius: var(--radius-md); padding: var(--space-7) var(--space-4);
+  text-align:center; cursor:pointer; transition: border-color .15s var(--ease-out), background-color .15s var(--ease-out);
+}
+.upload-zone:hover, .upload-zone.dragover{ border-color: var(--color-primary); background: var(--color-primary-tint); }
+.upload-zone svg{ width:36px; height:36px; color: var(--color-fg-muted); margin:0 auto var(--space-3); }
+.upload-zone h3{ font-size:16px; margin-bottom:4px; }
+.upload-zone p{ font-size:13px; color: var(--color-fg-muted); }
+
+.photo-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-top: var(--space-4); }
+@media (min-width:560px){ .photo-grid{ grid-template-columns: repeat(4,1fr); } }
+.photo-thumb{ position:relative; aspect-ratio:1; border-radius: var(--radius-sm); overflow:hidden; background: var(--color-surface-2); }
+.photo-thumb img{ width:100%; height:100%; object-fit:cover; }
+.photo-thumb .remove-photo{ position:absolute; top:4px; right:4px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.photo-thumb .remove-photo svg{ width:14px; height:14px; }
+.photo-thumb .cover-tag{ position:absolute; bottom:4px; left:4px; background:rgba(0,0,0,0.6); color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase; }
+/* Skiller nyligt tilføjede billeder fra dem, der allerede ligger på annoncen. */
+.photo-thumb .cover-tag.new{ background: var(--color-primary); color: var(--color-on-primary); }
+.photo-thumb[draggable="true"]{ cursor:grab; }
+.photo-thumb.dragging{ opacity:.4; }
+.photo-thumb.drag-over{ outline:2.5px dashed var(--color-primary); outline-offset:-2px; }
+.photo-actions{ position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:center; gap:6px; padding:6px; background:linear-gradient(to top, rgba(0,0,0,.6), transparent); opacity:0; transition:opacity .15s var(--ease-out); }
+.photo-thumb:hover .photo-actions, .photo-thumb:focus-within .photo-actions{ opacity:1; }
+.photo-actions button{ width:28px; height:28px; border-radius:50%; border:none; background:rgba(255,255,255,.92); color: var(--color-fg); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow: var(--shadow-sm); }
+.photo-actions button:hover:not(:disabled){ background:#fff; }
+.photo-actions button:disabled{ opacity:.35; cursor:default; }
+.photo-actions button svg{ width:16px; height:16px; }
+.photo-actions .photo-cover{ background: var(--color-primary); color: var(--color-on-primary); }
+@media (pointer:coarse){ .photo-actions{ opacity:1; } }
+
+.preview-card-wrap{ max-width:400px; margin: 0 auto var(--space-6); }
+.preview-note{ display:flex; gap:10px; background: var(--color-primary-tint); color: var(--color-primary-hover); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); font-size:13px; margin-bottom: var(--space-5); }
+:root[data-theme="dark"] .preview-note{ color: var(--color-primary); }
+.preview-note svg{ width:18px; height:18px; flex-shrink:0; }
+
 /* ---------- Hero: foto, tilbage-link, h1, lead, tillidsboks ---------- */
 .op-hero{
   position:relative; overflow:hidden; isolation:isolate;
