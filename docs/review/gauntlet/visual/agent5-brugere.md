@@ -43,3 +43,35 @@ Grønt: w9-saelger 33, w7-funktion 34, login-fejl, mine-annoncer, favoritter, da
 
 ## Selv-score (ikke godkendelse; Critic vurderer)
 Guide ca. 4,2 · Login ca. 4,3 · Mine annoncer ca. 4,2.
+
+---
+
+# Iteration 2-3 (efter blind Critic: AFVIS 6 / 6,5 / 5,5)
+
+Critic-rapport: `docs/review/gauntlet/visual/critic-agent5.md` (i hovedrepoet). Billeder: `sbs-guide/mine/login.webp` (mockup | efter, 1440), `efter-guide-saelg-1440-{l,m}`, `efter-guide-saelg-390-m`, `efter-login-{1440-l,1440-m,390-l,390-m}`, `efter-mine-{1440-l,1440-m,390-l,390-m}`.
+
+## Acceptkriterier (iteration 2-3)
+K6 Guide-hero lysere/varmere (foto løftet, scrim kun bag tekst), fed H1, hvid tekst >= 4,5:1; hero <= 340 px ved 1440.
+K7 Brødtekst og indholdsfortegnelse flugter (samme højre kant); sticky mini-TOC i højre spalte (>= 1024 px) med aktivt afsnit (scroll-spy); mobil uændret sammenklappelig; >= 2 callouts og >= 2 fotos pr. guide; callouts kun fra guidens eget Kort fortalt.
+K8 Login 1440x900: hele kortet OG fordelsstrimlen i første skærm, skarpt foto (ingen opskalering af 1600 px-filen), fed H1; stadig ingen social login/120.000+/beskeder.
+K9 Mine annoncer: 5 statistikkort (kun ægte: aktive, kladde, favoritter, på pause, søgeagenter) med tal >= 32 px; tællere med ikon; ægte tip-liste i stedet for pynteform; header "Min profil" + "Log ud" (ikke "Navn · Log ud"); privat dashboard uden blindgyde; `?tab=aktive|kladder|annoncer|gemte|soegeagenter|profil` åbner den rette fane.
+K10 0 overflow 320-1440 lys+mørk, tap-mål >= 40, smoke strikt CLS < 0,05.
+
+## Afvigelser fundet (iteration 2) og status
+1 Hero mørk og underbelyst (guide, mine): foto `brightness(1.2) saturate(1.1)` + lysere scrim på desktop; mobil bevarer kraftigere scrim (kontrast) — LUKKET (mockuppens lyse stemning nås ikke fuldt: mangler rytterfoto).
+2 Brødtekst 840 vs TOC 935 / tom højre kolonne: artikel nu fuld kolonnebredde (afsnit 72-76 tegn), sticky mini-TOC som sidste modul i højre spalte — LUKKET.
+3 Kun sektion 1 havde moduler: 2 callouts ("Vigtigt", "Tip", hentet ordret fra guidens Kort fortalt, placeret i den sektion med størst ordoverlap) + 2 fotos pr. guide (guidens kortbillede og forsidefotoet) — LUKKET.
+4 Login: sløret foto (1600 px-filen blev opskaleret ca. 1,9x): `sizes="(min-width:960px) 200vw"` vælger 2560-filen, mindre zoom, hele motorcyklen i højre panel; kortet 753 -> 655 px; strimlen slutter ved 900 px ved 1440x900 — LUKKET.
+5 Mine annoncer: flade kort, tællere uden ikoner, "Test · Log ud", pladsholder-illustration, blindgyde i dashboard, `?tab=` — LUKKET (5. kort "På pause" i stedet for "Beskeder"; "Udløber om N dage" findes ikke i data og er IKKE opdigtet).
+6 Fund i egen test: 15 px overflow ved 320 px fra de nye tællere (w9-test fangede det) — rettet (tællere ombrydes under 520 px).
+
+## Ændrede/nye filer (iteration 2-3)
+`scripts/build-guides.js` (`guideTillaeg`, mini-TOC), `css/p-guides.css`, `js/guides.js` (scroll-spy også i mini-TOC), `css/p-login.css`, `login.html` (srcset sizes), `css/p-dashboard.css`, `mine-annoncer.html`, `js/mine-annoncer.js`, `js/dashboard.js` (privat -> mine-annoncer), `js/components.js` (header: "Min profil" + eget "Log ud"; fil ejes af Agent 1, minimal ændring i `updateAuthSlot`), `js/w14-brugere.test.js` (22 tests), kritisk-manifest, regenererede sider.
+
+## Måling
+`js/w14-brugere.test.js` 22/22, `js/w9-saelger.test.js` 33/33, w7-funktion 34, guides 85, w12-guides, w10-discovery, w12-kritisk 18, info-tekst 21, smoke-browser strikt `--cls 0.05` 190 målinger (19 sider x 320/390/768/1024/1440 x lys+mørk) 0 fejl/0 advarsler. `npm run gate`: trin 1, 3-6, 8 grønne. Trin 2 rødt KUN pga. `js/w10-fejl.test.js` (CLS 0,076-0,087 på model-honda-nx-500 og type-cruiser, 390 lys, `fa-soeg-vrap`/`fa-panel` = facet-sidernes søgepanel; filer jeg ikke har rørt og som ikke indlæser mine CSS-filer). Trin 7: `js/w14-brugere.test.js` mangler i package.json (Orchestratoren).
+
+## Ærlig "ligner mockuppen: x/10"
+- Artikel 7,3/10: komposition (hero + overlappende Kort fortalt, bred TOC, sektioner med moduler, tvivl-kort, sticky sidebjælke) er tæt; mangler lys rytterhero, forfatterfoto og type-kort på alle sektioner (fotos er guidens kortbillede + forsidefoto).
+- Login 8/10: kort + strimmel i første skærm, fade til foto, hel motorcykel, tillidsstrimmel; mangler rytter og håndskrevne captions, social login og 120.000+ (bevidst).
+- Mine annoncer 7,3/10: rigere kort med ikon og store tal, tællere med ikoner, opret-strimmel, hjælpekort, lavere lys hero; mangler Beskeder/visningsgraf/Udløber (findes ikke) og grøn farve (brand).
