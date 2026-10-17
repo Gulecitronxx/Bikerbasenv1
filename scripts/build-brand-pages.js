@@ -886,7 +886,8 @@ function kortFortaltPunkter(brand, items, fakta, stats){
   }
   if (stats.antal){
     const hvor = stats.antal === N ? '' : ' (ikke alle annoncer oplyser en pris)';
-    p.push(stats.min === stats.max ? `Den oplyste pris er ${dkk(stats.min)}${hvor}.` : `Oplyste priser fra ${dkk(stats.min)} til ${dkk(stats.max)}${hvor}.`);
+    const t = stats.min === stats.max ? `Den oplyste pris er ${dkk(stats.min)}${hvor}` : `Oplyste priser fra ${dkk(stats.min)} til ${dkk(stats.max)}${hvor}`;
+    p.push(t.endsWith('.') ? t : `${t}.`);   // dkk() slutter selv på "kr."
   }
   const a2 = (fakta.kk.find(x => x.k === 'A2') || {}).n || 0;
   if (a2 > 0 && p.length < 4) p.push(`${tal(a2)} af dem er ikke udelukket til A2 ud fra den oplyste effekt. Tjek altid registreringsattesten.`);

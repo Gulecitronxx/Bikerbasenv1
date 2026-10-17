@@ -1690,7 +1690,8 @@ function kortFortaltPunkter(facet, items, uoplyst){
   const priser = aggregatPriser(items);
   if (priser.length){
     const hvor = priser.length === N ? '' : ' (ikke alle annoncer oplyser en pris)';
-    p.push(priser[0] === priser[priser.length - 1] ? `Den oplyste pris er ${dkk(priser[0])}${hvor}.` : `Oplyste priser fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}${hvor}.`);
+    const t = priser[0] === priser[priser.length - 1] ? `Den oplyste pris er ${dkk(priser[0])}${hvor}` : `Oplyste priser fra ${dkk(priser[0])} til ${dkk(priser[priser.length - 1])}${hvor}`;
+    p.push(t.endsWith('.') ? t : `${t}.`);   // dkk() slutter selv på "kr."
   }
   /* 4. kørekort eller sidens faste løfte */
   if (facet.kind === 'koerekort' && uoplyst){
@@ -1835,7 +1836,7 @@ function side(facet, alle){
       </details>`).join('\n      ')}
     </section>` : '';
 
-  const kicker = erKk ? `Kørekort ${esc(facet.id)}` : facet.kind === 'region' ? 'Landsdel' : facet.kind === 'model' || facet.kind === 'kombi' ? esc(facet.brand) : facet.kind === 'budget' ? 'Budget' : facet.kind === 'by' ? 'By' : '';
+  const kicker = erKk ? `Kørekort ${esc(facet.id)}` : facet.kind === 'type' ? 'Motorcykeltype' : facet.kind === 'region' ? 'Landsdel' : facet.kind === 'model' || facet.kind === 'kombi' ? esc(facet.brand) : facet.kind === 'budget' ? 'Budget' : facet.kind === 'by' ? 'By' : '';
   const h1 = erKk && qualifies ? `Motorcykler til ${esc(facet.id)}-kørekort` : esc(facet.titel);
   const breadcrumb = `<nav class="breadcrumb fa-bc" aria-label="Brødkrumme">
         <a href="index.html">Forside</a><span class="bc-sep"></span>

@@ -476,3 +476,23 @@
 .mk-kf-ok svg{ width:13px; height:13px; stroke-width:3; }
 .mk-kf-t{ font-weight:700; }
 @media (max-width:480px){ .mk-kf{ padding: var(--space-4); } }
+
+/* ---------- w10-discovery: modigere hero (typografi, kontrast, tillidsrække; ingen nye billeder) ---------- */
+.mk-wordmark{ font-size: clamp(2.5rem, 1rem + 7vw, 5.5rem); letter-spacing:.015em; }
+.mk-wordmark-lang{ font-size: clamp(2rem, 0.8rem + 5.4vw, 4rem); }
+.mk-hero h1{ font-size: clamp(20px, 1rem + 1.4vw, 34px); font-weight:700; line-height:1.18; max-width: 28ch; letter-spacing:-0.01em; }
+.mk-hero h1::after{ content:""; display:block; width:84px; height:6px; margin-top: var(--space-3); border-radius:3px; background: var(--color-primary); }
+.mk-intro{ color:#fff; font-size: clamp(16px, 1.6vw, 18px); }
+.mk-hero-media::after{
+  background:
+    linear-gradient(90deg, rgba(12,10,8,.95) 0%, rgba(12,10,8,.86) min(38%, 560px), rgba(12,10,8,.7) min(100%, 800px), rgba(12,10,8,.12) min(100%, 1320px)),
+    linear-gradient(180deg, rgba(12,10,8,.35) 0%, rgba(12,10,8,0) 40%, rgba(12,10,8,.5) 100%);
+}
+.mk-trust{
+  margin: var(--space-5) 0 0; padding: var(--space-4) var(--space-5);
+  background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+}
+.mk-trust-ik{ width:48px; height:48px; align-items:center; justify-content:center; border-radius:50%; background: var(--color-primary-tint); color: var(--color-primary); }
+.mk-trust-ik svg{ width:26px; height:26px; }
+@media (min-width:1000px){ .mk-trust-item + .mk-trust-item{ border-left:1px solid var(--color-border); padding-left: var(--space-5); } }
+@media (max-width:480px){ .mk-trust{ padding: var(--space-4); } }
