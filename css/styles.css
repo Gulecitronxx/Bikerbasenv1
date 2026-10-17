@@ -905,6 +905,15 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   .card-rich .foto-tom-titel{ font-size:11px; line-height:1.3; max-width:none; text-wrap:balance; }
 }
 
+/* W12: listerækken (.row-origin) og swipe-kortet (.swipe-card-fod) bruger den fælles kortfod (kortFodHTML): samme rækkefølge (sted først),
+   samme title/aria-label. Rækkens layout er uændret; kun foden er den fælles. Wrapperne beholder deres egne mål, .rk-fod pakkes ud. */
+.row-origin .rk-fod{ flex:1 1 auto; min-width:0; margin:0; padding:0; border-top:0; flex-wrap:wrap; justify-content:flex-start; gap:2px 12px; font-size:12.5px; }
+.row-origin .rk-sted{ flex:0 1 auto; max-width:100%; }
+.row-origin .rk-kilde{ flex:0 1 auto; max-width:100%; justify-content:flex-start; }
+.row-origin .rk-kilde > span{ text-align:left; }
+.swipe-card-fod .rk-fod{ flex:1 1 auto; min-width:0; margin:0; padding:0; border-top:0; gap:var(--space-2); font-size:13px; }
+.swipe-card-fod .rk-sted{ font-size:14px; max-width:50%; }
+
 /* ============ Category tiles ============ */
 /* Typefliser: foto med navn og antal. Billederne er ALTID hentet (ikke lazy, V-004), og navnet står på en
    gradient-scrim, der giver teksten mindst 4,5:1 uanset fotoet (V-005). */
