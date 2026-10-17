@@ -59,8 +59,8 @@ try{
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=d8b4e62d) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
 
-<link rel="stylesheet" href="css/styles.css?v=90bc7ac4">
-<link rel="stylesheet" href="css/p-facet.css?v=90bc7ac4">
+<link rel="stylesheet" href="css/styles.css?v=b5633e4a">
+<link rel="stylesheet" href="css/p-facet.css?v=b5633e4a">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"},{"@type":"ListItem","position":3,"name":"BMW","item":"https://bikerbasen.dk/maerke-bmw"},{"@type":"ListItem","position":4,"name":"K 1200","item":"https://bikerbasen.dk/model-bmw-k-1200"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Hvad koster en BMW K 1200?","acceptedAnswer":{"@type":"Answer","text":"5 af de 5 BMW K 1200, vi har indekseret, oplyser en pris: fra 35.000 kr. til 74.800 kr. Prisen afhænger af årgang, kilometertal og stand — tallene opdateres, hver gang lageret indekseres."}},{"@type":"Question","name":"Hvilket kørekort kræver en BMW K 1200?","acceptedAnswer":{"@type":"Answer","text":"De 5 annoncer, vi har, ligger alle inden for grænserne for kørekort A ud fra den oplyste effekt og slagvolumen. Kørekortsreglerne stiller også krav, der ikke står i annoncerne — tjek altid registreringsattesten på den konkrete motorcykel."}},{"@type":"Question","name":"Hvilke årgange af BMW K 1200 er til salg?","acceptedAnswer":{"@type":"Answer","text":"Annoncerne spænder fra årgang 1997 til 2005. Flest er der af årgang 2005 (1), 2003 (1), 2002 (1), 1999 (1), 1997 (1). Årgangen står i annoncen — tallene opdateres, hver gang lageret indekseres."}}]}</script>
 </head>
@@ -458,17 +458,17 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=90bc7ac4"></script>
-<script defer src="js/supabase-config.js?v=90bc7ac4"></script>
-<script defer src="js/supabase-api.js?v=90bc7ac4"></script>
-<script defer src="js/icons.js?v=90bc7ac4"></script>
-<script defer src="js/bike-art.js?v=90bc7ac4"></script>
-<script defer src="js/data.js?v=90bc7ac4"></script>
-<script defer src="js/store.js?v=90bc7ac4"></script>
-<script defer src="js/maaling.js?v=90bc7ac4"></script>
-<script defer src="js/backend-bridge.js?v=90bc7ac4"></script>
-<script defer src="js/sortering.js?v=90bc7ac4"></script>
-<script defer src="js/components.js?v=90bc7ac4"></script>
+<script defer src="js/security.js?v=b5633e4a"></script>
+<script defer src="js/supabase-config.js?v=b5633e4a"></script>
+<script defer src="js/supabase-api.js?v=b5633e4a"></script>
+<script defer src="js/icons.js?v=b5633e4a"></script>
+<script defer src="js/bike-art.js?v=b5633e4a"></script>
+<script defer src="js/data.js?v=b5633e4a"></script>
+<script defer src="js/store.js?v=b5633e4a"></script>
+<script defer src="js/maaling.js?v=b5633e4a"></script>
+<script defer src="js/backend-bridge.js?v=b5633e4a"></script>
+<script defer src="js/sortering.js?v=b5633e4a"></script>
+<script defer src="js/components.js?v=b5633e4a"></script>
 <!-- Ingen separat js/facet.js: siden hydrerer sig selv med samme moenster som
      js/maerke.js bruger til maerke-*.html, bare filtreret paa type/koerekort/
      landsdel/model i stedet for maerke. koerekortForListing/passerKoerekort
@@ -607,12 +607,10 @@ try{
   document.documentElement.setAttribute('data-fa-hydreret', '1');
 });</script>
 <!--cookie:start-->
-<dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel">
+<dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">
     <h2 id="cookie-modal-titel">Vi bruger cookies</h2>
-    <p>Bikerbasen bruger <strong>nødvendige cookies</strong> for at få siden til at fungere — dem kan du ikke fravælge, og de bruges ikke til at følge dig.</p>
-    <p>Vi vil desuden gerne bruge <strong>valgfrie cookies til statistik</strong>, så vi kan se, hvad der virker på siden. Dem starter vi kun, hvis du siger ja.</p>
-    <p class="cookie-modal-note">Du kan altid skifte mening. Læs mere i vores <a href="privatlivspolitik.html">privatlivspolitik</a>.</p>
+    <p class="cookie-modal-note" id="cookie-modal-tekst"><strong>Nødvendige cookies</strong> får siden til at virke og følger dig ikke. <strong>Statistik-cookies</strong> starter vi kun, hvis du siger ja. <a href="privatlivspolitik.html">Læs mere</a></p>
     <div class="cookie-modal-actions">
       <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-necessary-only" autofocus>Kun nødvendige</button>
       <button type="button" class="btn btn-lg cookie-modal-knap" id="cookie-accept-all">Accepter alle</button>
