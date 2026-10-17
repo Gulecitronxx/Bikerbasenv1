@@ -25,7 +25,7 @@ const FAMILIER = [
 ];
 
 /* Familier med indlejret kritisk CSS. Fyldes ud efter maalingen (se dokumentet). */
-const AKTIV = new Set([]);
+const AKTIV = new Set(['forside', 'soegning', 'koerekort', 'type', 'region', 'budget', 'model', 'mc', 'guide', 'login']);
 
 function familieFor(fil){
   const f = FAMILIER.find(x => x.re.test(fil));
