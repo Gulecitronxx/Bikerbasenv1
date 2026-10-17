@@ -2,15 +2,17 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://bikerbasen.dk</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/soegning</loc><lastmod>2026-10-17</lastmod></url>
-  <url><loc>https://bikerbasen.dk/maerker</loc><lastmod>2026-10-16</lastmod></url>
+  <url><loc>https://bikerbasen.dk/maerker</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/opret-annonce</loc><lastmod>2026-10-16</lastmod></url>
   <url><loc>https://bikerbasen.dk/sikkerhed</loc><lastmod>2026-10-16</lastmod></url>
   <url><loc>https://bikerbasen.dk/vilkaar</loc><lastmod>2026-10-16</lastmod></url>
-  <url><loc>https://bikerbasen.dk/privatlivspolitik</loc><lastmod>2026-10-16</lastmod></url>
+  <url><loc>https://bikerbasen.dk/privatlivspolitik</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/om-bikerbasen</loc><lastmod>2026-10-16</lastmod></url>
   <url><loc>https://bikerbasen.dk/om-indeksering</loc></url>
   <url><loc>https://bikerbasen.dk/maerke-aprilia</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/maerke-bmw</loc><lastmod>2026-10-17</lastmod></url>
+  <url><loc>https://bikerbasen.dk/maerke-bsa</loc><lastmod>2026-10-17</lastmod></url>
+  <url><loc>https://bikerbasen.dk/maerke-ducati</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/maerke-harley-davidson</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/maerke-honda</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/maerke-kawasaki</loc><lastmod>2026-10-17</lastmod></url>
@@ -30,12 +32,15 @@
   <url><loc>https://bikerbasen.dk/koerekort-a2</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/koerekort-a</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/region-hovedstaden</loc><lastmod>2026-10-17</lastmod></url>
+  <url><loc>https://bikerbasen.dk/region-sjaelland</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/region-syddanmark</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/region-midtjylland</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/region-nordjylland</loc><lastmod>2026-10-17</lastmod></url>
+  <url><loc>https://bikerbasen.dk/model-bmw-k-1200</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/model-harley-davidson-flstc-heritage-softail-classic</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/model-honda-cb-1000-hornet</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/model-honda-cb-1000-r</loc><lastmod>2026-10-17</lastmod></url>
+  <url><loc>https://bikerbasen.dk/model-honda-cbr-1100-xx</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/model-honda-cl-500-a</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/model-honda-cmx-1100-d-rebel</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/model-honda-cmx-500-rebel</loc><lastmod>2026-10-17</lastmod></url>
@@ -51,7 +56,9 @@
   <url><loc>https://bikerbasen.dk/by-horsens</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/by-skive</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/by-thorsoe</loc><lastmod>2026-10-17</lastmod></url>
+  <url><loc>https://bikerbasen.dk/mc-bmw-touring</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/mc-harley-davidson-cruiser</loc><lastmod>2026-10-17</lastmod></url>
+  <url><loc>https://bikerbasen.dk/mc-honda-adventure</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/mc-honda-cruiser</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/mc-honda-naked</loc><lastmod>2026-10-17</lastmod></url>
   <url><loc>https://bikerbasen.dk/mc-honda-touring</loc><lastmod>2026-10-17</lastmod></url>

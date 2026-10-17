@@ -165,7 +165,7 @@ const SECRETS_KRAEVET = {
   'stripe-webhook':        ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'],
   'verify-profile':        ['SITE_URL'],                 // CVR_API_TOKEN er valgfri (se VERIFICERING.md)
   'notify-saved-searches': ['NOTIFY_SECRET', 'RESEND_API_KEY', 'SITE_URL'],
-  'indberet':              ['SITE_URL'],   // TAELLER_SALT er valgfri (standard i koden)
+  'indberet':              ['SITE_URL'],   // TAELLER_SALT anbefales (ellers tilfældig pepper pr. instans)
   'haendelse':             ['SITE_URL'],
 };
 
