@@ -45,7 +45,9 @@ test('handlingsbjælkens højde står ét sted og bruges begge steder', () => {
     'scroll-padding-bottom mangler, eller bruger et andet tal end bjælkens egen højde');
 
   // Og footeren skal holdes fri af den samme bjælke med det samme tal.
-  assert.match(css, /body\.har-actionbar\s*\{\s*padding-bottom:\s*var\(--actionbar-h\)/,
+  // perf2 flyttede body.har-actionbar-reglen til css/p-annonce.css (siden der har bjælken) — tjek begge ark.
+  const annonceCss = fs.readFileSync(path.join(__dirname, '..', 'css', 'p-annonce.css'), 'utf8');
+  assert.match(css + '\n' + annonceCss, /body\.har-actionbar\s*\{\s*padding-bottom:\s*var\(--actionbar-h\)/,
     'body.har-actionbar skal bruge --actionbar-h, ellers kan de to tal drive fra hinanden');
 });
 

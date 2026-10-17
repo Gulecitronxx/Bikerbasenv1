@@ -25,7 +25,10 @@ const FAMILIER = [
 ];
 
 /* Familier med indlejret kritisk CSS. Fyldes ud efter maalingen (se dokumentet). */
-const AKTIV = new Set(['forside', 'soegning', 'koerekort', 'type', 'region', 'budget', 'model', 'mc', 'guide', 'login']);
+// 'forside' er midlertidigt TAGET UD: ved 1440 px afviger sælg-panelet (#featured-section aside, y≈1119, under folden) med 3,8 px i højden
+// mellem kritisk-alene og fuldt ark (scripts/w12-kritisk.test.js). Aktivér igen, når årsagen er fundet og testen er grøn.
+// 'soegning' ligeså: 4 px forskel under folden ved 1440 (og også mellem to fulde ark = mock-timing) — ikke bevist, så ikke aktiveret.
+const AKTIV = new Set(['koerekort', 'type', 'region', 'budget', 'model', 'mc', 'guide', 'login']);
 
 function familieFor(fil){
   const f = FAMILIER.find(x => x.re.test(fil));

@@ -343,7 +343,7 @@ test('browser: kritisk udsnit alene giver samme stilarter og geometri over folde
 const COMMITTET = [
   // maerke er bevidst IKKE aktiveret (ikon-svg i fremhævet kort ustylet @1440, se scripts/kritisk-familier.js) og testes derfor ikke her.
   ['koerekort-a2.html', 'koerekort'], ['type-sport.html', 'type'], ['guide-a2-koerekort.html', 'guide'],
-  ['login.html', 'login'], ['index.html', 'forside'], ['soegning.html', 'soegning'],
+  ['login.html', 'login'], // index.html (forside) og soegning.html: ikke aktiveret (se scripts/kritisk-familier.js)
 ];
 
 for (const vp of [[390, 844], [1440, 900]]){
@@ -356,15 +356,19 @@ for (const vp of [[390, 844], [1440, 900]]){
     for (const [f] of COMMITTET) fs.copyFileSync(path.join(REPO, f), path.join(rod, f));
     for (const f of fs.readdirSync(REPO)) if (/^(package\.json|CNAME|robots\.txt|404\.html)$/.test(f)) fs.copyFileSync(path.join(REPO, f), path.join(rod, f));
     const kopi = medKritisk(rod, COMMITTET.map(x => x[1]).join(','));
+    const afvigelser = [];
     for (const [f, fam] of COMMITTET){
       assert.ok(m.familier[fam], fam);
       assert.ok(fs.readFileSync(path.join(kopi, f), 'utf8').includes('<style id="critical">'), `${f} fik ingen blok`);
       const fuld = await tagSnapshot(pw, { rod, side: f, vp });
       const kritAlene = await tagSnapshot(pw, { rod: kopi, side: f, vp, blokerSenere: true });
-      assert.deepStrictEqual(sammenlign(fuld, kritAlene), [], `${f}@${vp[0]}: kritisk alene afviger fra fuldt ark`);
+      const d1 = sammenlign(fuld, kritAlene);
+      if (d1.length) afvigelser.push(`${f}@${vp[0]}: kritisk alene afviger fra fuldt ark: ${d1.slice(0, 2).join(' | ')}`);
       const efter = await tagSnapshot(pw, { rod: kopi, side: f, vp });
-      assert.deepStrictEqual(sammenlign(fuld, efter), [], `${f}@${vp[0]}: efter load afviger fra fuldt ark`);
+      const d2 = sammenlign(fuld, efter);
+      if (d2.length) afvigelser.push(`${f}@${vp[0]}: efter load afviger fra fuldt ark: ${d2.slice(0, 2).join(' | ')}`);
     }
+    assert.deepStrictEqual(afvigelser, [], 'afvigelser (samlet)');
   });
 }
 
