@@ -33,7 +33,9 @@ test('W7-1: kortets indre mobilregler gælder både landingssiderne og #results-
 });
 
 test('W7-1: trykfladerne på kortet er ikke skåret ned (hjerte 44 px, sammenlign >= 44 px med usynlig kant)', () => {
-  assert.match(STYLES, /\.card-compare::before\{ content:''; position:absolute; inset:-5px;/);
+  /* W11: knappen er nu 40 px synligt + 2 px usynlig kant pr. side = 44 px trykflade (var 34 + 5). Samme krav, anden fordeling. */
+  assert.match(STYLES, /\.card-compare\{[^}]*width:40px; height:40px;/);
+  assert.match(STYLES, /\.card-compare::before\{ content:''; position:absolute; inset:-2px;/);
   const mobil = STYLES.slice(STYLES.indexOf('W7-1: ved 320 px'));
   assert.ok(!/\.fav-btn\s*\{[^}]*(width|height):\s*(?:[0-3]\d|4[0-3])px/.test(mobil), 'ingen fav-knap under 44 px i de nye regler');
 });

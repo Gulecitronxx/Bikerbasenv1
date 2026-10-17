@@ -863,13 +863,22 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .rk-chip-note{ white-space:normal; line-height:1.2; text-transform:none; background:transparent; border:1px solid var(--color-border); color: var(--color-fg-muted); }
 .rk-fod{ margin-top:auto; padding-top:8px; border-top:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; gap: var(--space-2); font-size:12px; color: var(--color-fg-muted); }
 .rk-sted, .rk-kilde{ display:inline-flex; align-items:center; gap:4px; min-width:0; }
-.rk-sted{ flex:1 1 auto; }
-.rk-kilde{ flex:0 1 auto; justify-content:flex-end; }
+/* Sted først: det får sin naturlige bredde (højst 60 %), kilden ellipser med resten. */
+.rk-sted{ flex:0 1 auto; max-width:60%; flex-shrink:0; }
+.rk-kilde{ flex:1 1 0; justify-content:flex-end; }
 .rk-sted svg, .rk-kilde svg{ width:13px; height:13px; flex:none; }
 .rk-sted span, .rk-kilde span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 .rk-kilde > span{ text-align:right; }
-/* Smalle kort: sælgertypen viger for domænet. */
-@container (max-width: 250px){ .rk-saelgertype{ display:none; } }
+/* Smalle kort: sælgertypen viger for domænet (den står stadig i title/aria-label). */
+@container (max-width: 300px){ .rk-saelgertype{ display:none; } }
+/* W11: i 2-kolonne-gitteret (kort 120-190 px) fik sted og kilde hver ~40 px og blev til "Ro…". Under 240 px kortbredde
+   stakkes foden: sted på første linje, kilde (ikon + kort navn) på anden. Bredden er den samme for alle kort i rækken,
+   så alle kort får samme fodhøjde (to linjer) — ingen forskudte rækker. Fuld tekst står i title og aria-label. */
+@container (max-width: 239px){
+  .rk-fod{ flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:3px; }
+  .rk-sted, .rk-kilde{ flex:none; max-width:100%; justify-content:flex-start; }
+  .rk-kilde > span{ text-align:left; }
+}
 
 /* ============ Category tiles ============ */
 /* Typefliser: foto med navn og antal. Billederne er ALTID hentet (ikke lazy, V-004), og navnet står på en
@@ -2982,7 +2991,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* ============ Sammenlign (compare) ============ */
 .card-compare{
   position:absolute; right:6px; bottom:6px; z-index:2;
-  width:34px; height:34px; border:none; border-radius:50%;
+  width:40px; height:40px; border:none; border-radius:50%;   /* W11: 40 px synligt (var 34 + usynlig kant) */
   background: rgba(255,255,255,.92); color: var(--color-fg-muted);
   display:flex; align-items:center; justify-content:center; cursor:pointer;
   box-shadow: var(--shadow-sm);
@@ -2993,7 +3002,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .card-compare:hover{ transform: scale(1.08); }
 /* D2 (23.08.2026): knappen tegnes 34x34, men rammer 44x44 — ::before er et
    usynligt, klikbart felt rundt om den. Visuelt uaendret. */
-.card-compare::before{ content:''; position:absolute; inset:-5px; border-radius:50%; }
+.card-compare::before{ content:''; position:absolute; inset:-2px; border-radius:50%; }
 .card-compare.active{ background: var(--color-primary); color: var(--color-on-primary); }
 :root[data-theme="dark"] .card-compare{ background: rgba(31,28,23,.92); }
 
