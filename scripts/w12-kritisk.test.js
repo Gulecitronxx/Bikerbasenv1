@@ -341,7 +341,8 @@ test('browser: kritisk udsnit alene giver samme stilarter og geometri over folde
 });
 
 const COMMITTET = [
-  ['koerekort-a2.html', 'koerekort'], ['type-sport.html', 'type'], ['maerke-honda.html', 'maerke'], ['guide-a2-koerekort.html', 'guide'],
+  // maerke er bevidst IKKE aktiveret (ikon-svg i fremhævet kort ustylet @1440, se scripts/kritisk-familier.js) og testes derfor ikke her.
+  ['koerekort-a2.html', 'koerekort'], ['type-sport.html', 'type'], ['guide-a2-koerekort.html', 'guide'],
   ['login.html', 'login'], ['index.html', 'forside'], ['soegning.html', 'soegning'],
 ];
 
