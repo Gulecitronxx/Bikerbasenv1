@@ -180,3 +180,21 @@ test('(9) valgfrit visuelt trin: ikke med som standard; --med-visuel tilføjer d
   assert.match(r.fund[0], /baseline/);
   assert.strictEqual(v.tjekVisuel(root, null).ok, false);
 }));
+
+test('(10) valgfrit udgiv-trin: ikke med som standard; --med-udgiv tilføjer det og fejler når udgiv.js fejler', () => medSite(root => {
+  const standard = v.koer(root, { hurtig: true });
+  assert.strictEqual(standard.length, 7, 'standardadfærden er uændret: 7 trin');
+  assert.ok(!standard.some(r => /udgiv/.test(r.navn)));
+  const mangler = v.tjekUdgiv(root);
+  assert.strictEqual(mangler.ok, false, 'uden scripts/udgiv.js er trinnet FEJL, ikke grøn');
+  SKRIV(root, 'scripts/udgiv.js', 'console.log("ok");\n');
+  assert.strictEqual(v.tjekUdgiv(root).ok, true, 'udgiv.js med exit 0 er grøn');
+  SKRIV(root, 'scripts/udgiv.js', 'console.error("AFBRUDT: 1 reference(r) peger paa filer"); console.error("  index.html -> falsk.js"); process.exit(1);\n');
+  const r = v.tjekUdgiv(root);
+  assert.strictEqual(r.ok, false);
+  assert.match(r.fund.join('\n'), /exit 1/);
+  assert.match(r.fund.join('\n'), /falsk\.js/, 'udgiv.js-fejlen vises i fund');
+  const med = v.koer(root, { hurtig: true, medUdgiv: true });
+  assert.strictEqual(med.length, 8);
+  assert.strictEqual(med.filter(x => !x.ok).length, 1);
+}));

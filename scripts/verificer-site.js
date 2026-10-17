@@ -2,11 +2,12 @@
 
    Kør:  node scripts/verificer-site.js            (alle trin)
          node scripts/verificer-site.js --hurtig   (springer npm test over)
+         node scripts/verificer-site.js --med-udgiv   (tilvalg: kører scripts/udgiv.js som tørkørsel — det trin, der fejlede i CI)
          node scripts/verificer-site.js --med-browser   (tilvalg: trin 8, offline browser-smoketest --hurtig)
          node scripts/verificer-site.js --med-visuel <baseline-mappe>   (tilvalg: trin 9, visuel regression mod en baseline fra scripts/visuel-regression.js --ud)
 
    Exit 0 = alt grønt, exit 1 = mindst ét trin fejlede. Scriptet verificerer KUN det, der ligger
-   på disken: det kører hverken build.js, udgiv.js, stamp-version.js eller andet, der rammer netværk
+   på disken: det kører hverken build.js, (uden --med-udgiv) udgiv.js, stamp-version.js eller andet, der rammer netværk
    eller Supabase, og det skriver ingen filer.
 
    Hvert trin er en funktion `tjek…(root)`, der returnerer { navn, ok, fund[] } — så
@@ -140,6 +141,20 @@ function tjekTestListe(root){
   return { navn: 'package.json "test" indeholder alle *.test.js', ok: !fund.length, fund };
 }
 
+/* (7b) VALGFRIT (--med-udgiv): kører rodens EGEN scripts/udgiv.js — samme tjek som CI's "Saml udgivelsen"-trin
+   (allowlist, minificering, og at hver fil-reference i de udgivne sider peger på en fil der er med).
+   udgiv.js har intet --ud-flag; det skriver kun til <rod>/_site/, som er gitignoreret, og rydder kun den mappe.
+   Rører hverken netværk, build.js eller kildefiler. Kører mod roden selv, så _site bliver liggende (ignoreret). */
+function tjekUdgiv(root){
+  const navn = 'udgiv (valgfrit, --med-udgiv)';
+  const script = path.join(root, 'scripts', 'udgiv.js');
+  if (!fs.existsSync(script)) return { navn, ok: false, fund: ['scripts/udgiv.js findes ikke'] };
+  const r = spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, timeout: 300000 });
+  const ok = r.status === 0;
+  const tekst = (r.stderr || '') + String.fromCharCode(10) + (r.stdout || '');
+  return { navn, ok, fund: ok ? [] : [`exit ${r.status}${r.error ? ' (' + r.error.message + ')' : ''}`, ...tekst.trim().split(String.fromCharCode(10)).slice(-30)] };
+}
+
 /* (8) VALGFRIT (--med-browser): scripts/smoke-browser.js --hurtig mod roden. Offline (al trafik blokeres, Supabase
    mockes), men starter en headless Chromium, så den er ikke med som standard. Exit 2 = Playwright mangler → FEJL. */
 function tjekBrowserSmoke(root){
@@ -162,7 +177,7 @@ function tjekVisuel(root, baseline){
   return { navn, ok, fund: ok ? [] : [`exit ${r.status}`, ...uddrag((r.stdout || '') + String.fromCharCode(10) + (r.stderr || '')).split(String.fromCharCode(10)), `diff: ${path.join(ud, 'diff.html')}`] };
 }
 
-function koer(root, { hurtig = false, medBrowser = false, medVisuel = null } = {}){
+function koer(root, { hurtig = false, medUdgiv = false, medBrowser = false, medVisuel = null } = {}){
   const trin = [
     () => tjekSyntaks(root),
     () => hurtig ? { navn: 'npm test', ok: true, sprunget: true, fund: [] } : tjekTests(root),
@@ -171,6 +186,7 @@ function koer(root, { hurtig = false, medBrowser = false, medVisuel = null } = {
     () => tjekSitemap(root),
     () => tjekDoedeLinks(root),
     () => tjekTestListe(root),
+    ...(medUdgiv ? [() => tjekUdgiv(root)] : []),
     ...(medBrowser ? [() => tjekBrowserSmoke(root)] : []),
     ...(medVisuel ? [() => tjekVisuel(root, medVisuel)] : []),
   ];
@@ -194,9 +210,9 @@ function rapport(resultater){
 const argVaerdi = flag => { const i = process.argv.indexOf(flag); return i >= 0 && process.argv[i + 1] ? path.resolve(process.argv[i + 1]) : null; };
 
 if (require.main === module){
-  const { tekst, fejl } = rapport(koer(REPO, { hurtig: process.argv.includes('--hurtig'), medBrowser: process.argv.includes('--med-browser'), medVisuel: argVaerdi('--med-visuel') }));
+  const { tekst, fejl } = rapport(koer(REPO, { hurtig: process.argv.includes('--hurtig'), medUdgiv: process.argv.includes('--med-udgiv'), medBrowser: process.argv.includes('--med-browser'), medVisuel: argVaerdi('--med-visuel') }));
   console.log(tekst);
   process.exit(fejl ? 1 : 0);
 }
 
-module.exports = { tjekSyntaks, tjekTests, tjekHeader, tjekSeoAudit, tjekSitemap, tjekDoedeLinks, tjekTestListe, tjekBrowserSmoke, tjekVisuel, manglendeTests, interneLinks, koer, rapport };
+module.exports = { tjekSyntaks, tjekTests, tjekHeader, tjekSeoAudit, tjekSitemap, tjekDoedeLinks, tjekTestListe, tjekUdgiv, tjekBrowserSmoke, tjekVisuel, manglendeTests, interneLinks, koer, rapport };
