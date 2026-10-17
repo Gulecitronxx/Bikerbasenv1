@@ -513,6 +513,9 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
   #results-grid:not(.list-view) .rk-pris.pris-mangler{ text-align:right; max-width:42%; }
 }
 #results-grid:not(.list-view) .card-rich .card-media{ aspect-ratio:16/10; }
+/* W12: under 360 px er 16:10-fotoet kun ca. 86 px højt, og hjertet (44 px) og sammenlign-knappen (40 px) skærer hinanden. 4:3 rydder det
+   (samme regel som styles.css W7-1, som denne side overstyrede). */
+@media (max-width:359px){ #results-grid:not(.list-view) .card-rich .card-media{ aspect-ratio:4/3; } }
 
 /* --- Viser x–y af N + paginering som runde firkanter --- */
 .so-viser{ margin: var(--space-5) 0 0; text-align:center; font-size:14px; font-weight:500; color: var(--color-fg-muted); }
