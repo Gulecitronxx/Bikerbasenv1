@@ -504,14 +504,6 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 @media (min-width:1024px){
   body.srp .data-afbrud{ top:auto; bottom:16px; }
 }
-/* V3: uden hero ligger søgefeltet og resultatlinjen højt oppe, så et fejlbanner i flowet (under 1024 px lagde backend-bridge det øverst i #so-results)
-   flyttede en stor del af skærmen, når svaret kom (CLS 0,09-0,20). Banneret er nu et fast bundkort på alle bredder: ude af flowet, kan ikke flytte noget. */
-@media (max-width:1023px){
-  body.srp .data-afbrud.data-afbrud-flow{
-    position:fixed; top:auto; bottom:12px; left:var(--gutter); right:var(--gutter); margin:0 auto; max-width:680px;
-    z-index:99; box-shadow:var(--shadow-md);
-  }
-}
 /* Bundmoduler: kompakt linkgitter (kun >= 1100 px; under det er layoutet uændret, ellers CLS ved 768) */
 @media (min-width:1100px){
 main > .container:has(> section.section > .section-head + .popular-row){
@@ -585,4 +577,12 @@ html:not(.so-klar) main > .container:has(> section.section > .section-head + .po
   .so-checklist .chip, .so-quick .chip, .so-q-go{ transition:none; }
   .so-q-go:active{ transform:none; }
   .so-chips .active-filter-pill{ animation:none; }
+}
+
+/* V3: uden hero ligger resultatområdet højt oppe, så fejlbanneret i flowet (backend-bridge lægger det øverst i #so-results under 1024 px) flyttede en stor del af
+   skærmen, når svaret kom. Det lægges nu OVER resultatområdets top (absolut): ude af flowet kan det ikke flytte noget, og det dækker kun resultathovedet,
+   som er tomt i fejltilstanden (sortering/visning er skjult uden resultater). Det fylder ikke over interaktive elementer andre steder. */
+@media (max-width:1023px){
+  .so-results{ position:relative; }
+  body.srp .data-afbrud.data-afbrud-flow{ position:absolute; top:0; left:0; right:0; margin:0; z-index:5; }
 }

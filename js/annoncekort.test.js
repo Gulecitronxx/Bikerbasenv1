@@ -198,7 +198,7 @@ test('ét labelsæt og én h1-skala i søgekort og hero', () => {
   for (const sel of ['.search-panel .field label', '.so-field > label', '.fa-soeg .field label', '.mk-search .field label'])
     assert.ok(css.includes(sel), `${sel} i den fælles labelregel`);
   assert.match(css, /--h1-hero: clamp\(/);
-  for (const [fil, sel] of [['p-facet.css', '.fa-hero h1{'], ['p-guides.css', 'font-size: var(--h1-hero)'], ['p-opret.css', 'var(--h1-hero)'], ['p-dashboard.css', 'var(--h1-hero)'], ['p-login.css', 'var(--h1-hero)'], ['p-soegning.css', 'var(--h1-hero)']])
+  for (const [fil, sel] of [['p-facet.css', '.fa-hero h1{'], ['p-guides.css', 'font-size: var(--h1-hero)'], ['p-opret.css', 'var(--h1-hero)'], ['p-dashboard.css', 'var(--h1-hero)'], ['p-login.css', 'var(--h1-hero)']])   // V3: søgesidens hero og synlige h1 er fjernet bevidst (h1 er visually-hidden), så p-soegning.css har ingen h1-skala at låse
     assert.ok(læsRod('css/' + fil).includes(sel), `${fil} bruger h1-skalaen`);
 });
 
