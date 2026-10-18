@@ -580,9 +580,13 @@ html:not(.so-klar) main > .container:has(> section.section > .section-head + .po
 }
 
 /* V3: uden hero ligger resultatområdet højt oppe, så fejlbanneret i flowet (backend-bridge lægger det øverst i #so-results under 1024 px) flyttede en stor del af
-   skærmen, når svaret kom. Det lægges nu OVER resultatområdets top (absolut): ude af flowet kan det ikke flytte noget, og det dækker kun resultathovedet,
-   som er tomt i fejltilstanden (sortering/visning er skjult uden resultater). Det fylder ikke over interaktive elementer andre steder. */
+   skærmen, når svaret kom. Banneret er derfor et FAST overlay nederst i viewport (W10: ude af flowet, kan intet flytte), som på desktop.
+   Fejltilstanden er kort, så bundmodulerne (faste sider) ellers ville ligge præcis i bannerets zone; de skubbes derfor under zonen, mens banneret står
+   (de er skjult med visibility, til gitteret er færdigt, så skubbet ikke ses som layoutskred). */
 @media (max-width:1023px){
-  .so-results{ position:relative; }
-  body.srp .data-afbrud.data-afbrud-flow{ position:absolute; top:0; left:0; right:0; margin:0; z-index:5; }
+  body.srp .data-afbrud.data-afbrud-flow{
+    position:fixed; top:auto; bottom:12px; left:var(--gutter); right:var(--gutter); margin:0 auto; max-width:680px;
+    z-index:99; box-shadow:var(--shadow-md);
+  }
 }
+body.srp:has(#data-afbrud) main > .container:has(> section.section > .section-head + .popular-row){ margin-top:96px; }
