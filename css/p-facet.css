@@ -118,6 +118,8 @@
 .fa-h3{ font-size:17px; margin:0 0 var(--space-3); }
 .fa-h2-raekke{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); flex-wrap:wrap; margin-bottom: var(--space-4); }
 .fa-h2-raekke .fa-h2{ margin:0; }
+/* Stabilt layout uafhængigt af skrifttypeskift: under 1100 px står "Se alle" ALTID under overskriften (ingen wrap-beslutning, der afhænger af tekstbredden i fallback- vs. webfont — kilden til CLS 0,116 ved 768). Fra 1100 px er der rigelig plads til begge på én linje. */
+@media (max-width:1099px){ .fa-h2-raekke{ flex-direction:column; align-items:flex-start; flex-wrap:nowrap; gap:var(--space-2); } }
 .fa-mere{ display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:14.5px; color: var(--color-primary); text-decoration:none; min-height:24px; }
 .fa-mere:hover{ text-decoration:underline; }
 .fa-mere .fa-pil{ width:16px; height:16px; }
