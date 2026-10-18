@@ -661,7 +661,8 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 .fa-udforsk-foto{ flex:0 0 34%; max-width:140px; }
 /* CTA-panel med typefoto nederst til højre (lyst panel, fotoet toner ind). */
 .fa-cta-studio{ background: linear-gradient(135deg, var(--color-primary-tint) 0%, var(--color-surface) 70%); }
-.fa-cta-foto{ right:-14%; bottom:-8%; width:80%; opacity:.95; mix-blend-mode:multiply; z-index:0;
+/* V2: fotoet ligger i egen række UNDER knappen (ingen overlap med punkter/knap). */
+.fa-cta-foto{ position:static; order:9; align-self:flex-end; margin:auto calc(-1 * var(--space-5)) calc(-1 * var(--space-4)) 0; width:62%; max-width:260px; height:auto; max-height:130px; object-fit:contain; object-position:right bottom; opacity:.95; mix-blend-mode:multiply; z-index:0;
   -webkit-mask-image: radial-gradient(ellipse 58% 60% at 52% 52%, #000 48%, transparent 100%); mask-image: radial-gradient(ellipse 58% 60% at 52% 52%, #000 48%, transparent 100%); }
 :root[data-theme="dark"] .fa-cta-foto{ mix-blend-mode:normal; opacity:.5; }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .fa-cta-foto{ mix-blend-mode:normal; opacity:.5; } }
