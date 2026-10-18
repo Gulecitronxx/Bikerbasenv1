@@ -203,6 +203,20 @@ function trinUdfyldt(n){
     el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '');
 }
 
+/* V2: konkrete danske fejltekster pr. påkrævet felt (før stod der "Feltet skal udfyldes." ved alle). */
+const MANGLER_TEKST = {
+  'f-brand': 'Vælg mærke.',
+  'f-model': 'Skriv modellen, f.eks. MT-07.',
+  'f-year': 'Angiv årgang, f.eks. 2021.',
+  'f-km': 'Angiv kilometerstand — skriv 0, hvis den er ny.',
+  'f-ccm': 'Angiv motorstørrelsen i ccm, f.eks. 689.',
+  'f-price': 'Angiv en pris i kr.',
+  'f-condition': 'Vælg motorcyklens stand.',
+  'f-postnr': 'Skriv postnummer, og vælg det fra listen.',
+  'f-desc': 'Skriv en kort beskrivelse af stand, service og udstyr.',
+  'f-terms': 'Du skal acceptere vilkårene for annoncering.',
+};
+
 function validateStep(n){
   /* Trin 1–3 står på samme side og valideres samlet (sektion 2 = billeder har ingen påkrævede felter). */
   const trin = n <= 3 ? [1, 2, 3] : [n];
@@ -216,7 +230,7 @@ function validateStep(n){
     section.querySelectorAll('[required]').forEach(el => {
       const field = el.closest('.field') || el.closest('.checkbox-inline');
       const ok = el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
-      if (!ok){ valid = false; fejl.push({ el, besked: null }); }
+      if (!ok){ valid = false; fejl.push({ el, besked: MANGLER_TEKST[el.id] || null }); }
       else { if (field) field.classList.remove('has-error'); el.style.borderColor = ''; el.removeAttribute('aria-invalid'); field?.querySelector('.felt-fejl')?.remove(); el.removeAttribute('aria-describedby'); }
     });
     /* Grænseværdier står ÉT sted: js/opret-validering.js. Formularen er
@@ -252,7 +266,7 @@ function validateStep(n){
       const pn = document.getElementById('f-postnr');
       const i = fejl.findIndex(x => x.el === pn);
       if (i !== -1) fejl.splice(i, 1);
-      fejl.push({ el: pn, besked: 'Vælg et postnummer fra listen.' });
+      fejl.push({ el: pn, besked: String(pn.value).trim() === '' ? MANGLER_TEKST['f-postnr'] : 'Vælg et postnummer fra listen.' });
     }
   }
   const refs = { first: null };
@@ -266,7 +280,8 @@ function validateStep(n){
   });
   if (fejl.length && !refs.first) refs.first = fejl[0].el;
   const forste = fejl.find(f => f.besked);
-  if (forste) msg = forste.besked;
+  if (forste) msg = fejl.filter(f => !f.kunFokus).length > 1
+    ? `${fejl.filter(f => !f.kunFokus).length} felter skal rettes. Først: ${forste.besked}` : forste.besked;
   if (!valid || msg){
     if (!valid && refs.first){
       refs.first.scrollIntoView({ block: 'center', behavior: 'smooth' });

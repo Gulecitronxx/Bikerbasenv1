@@ -25,9 +25,9 @@ function listingStatus(l){
 }
 
 const STATUS_VISNING = {
-  active: { label: 'Aktiv', cls: 'is-active' },
-  paused: { label: 'På pause', cls: 'is-paused' },
-  sold: { label: 'Solgt', cls: 'is-sold' },
+  active: { label: 'Aktiv', cls: 'is-active', ikon: 'checkCircle' },
+  paused: { label: 'På pause', cls: 'is-paused', ikon: 'pause' },
+  sold: { label: 'Solgt', cls: 'is-sold', ikon: 'checkCircle' },
   draft: { label: 'Kladde', cls: 'is-draft' },
 };
 function statusVisning(status){ return STATUS_VISNING[status] || STATUS_VISNING.active; }
@@ -161,7 +161,7 @@ function ownRowHTML(l){
     ${rowThumb(l, url, brand, model)}
     ${infoBlok(l, url, brand, model)}
     <div class="db-status">
-      <span class="db-badge ${v.cls}">${v.label}</span>
+      <span class="db-badge ${v.cls}">${v.ikon ? dbIkon(v.ikon) : ''}${v.label}</span>
       ${l.createdAt ? `<span class="db-when">${Icon.clock}Oprettet ${escapeHTML(timeAgoDa(l.createdAt))}</span>` : ''}
       ${status === 'paused' ? `<span class="db-when">${Icon.eye}Skjult for købere, indtil du aktiverer den</span>` : ''}
     </div>
@@ -173,6 +173,7 @@ function ownRowHTML(l){
         <div class="db-more-menu">
           <a href="${url}">${Icon.eye}Se annonce</a>
           <button type="button" data-copy-link="${url}">${Icon.share}Kopiér link</button>
+          ${kanSkifte && kanRedigere ? `<button type="button" data-mark-sold="${l.id}">${Icon.checkCircle}Markér som solgt</button>` : ''}
           <button type="button" class="db-danger" data-delete-listing="${l.id}">${Icon.trash}Slet annonce</button>
         </div>
       </details>
@@ -284,6 +285,27 @@ async function skiftStatus(id, btn){
   renderMine();
 }
 
+/* V2: markér solgt. 'sold' er en gyldig listings.status; annoncen forlader søgningen, men bliver stående her
+   og kan sættes til salg igen. Bekræftes først, fordi den forsvinder for købere. */
+async function markerSolgt(id, btn){
+  const l = egneListe().find(x => String(x.id) === String(id));
+  if (!l) return;
+  if (!confirm('Markér annoncen som solgt? Den fjernes fra søgningen, men du kan sætte den til salg igen under Mine annoncer.')) return;
+  btn.disabled = true;
+  let svar;
+  try { svar = await db.updateListing(id, { status: 'sold' }); }
+  catch (err){ svar = { error: err }; }
+  if (svar && svar.error){
+    btn.disabled = false;
+    toast('Annoncen kunne ikke markeres som solgt: ' + escapeHTML(fejlTekst(svar.error)), { type: 'error' });
+    return;
+  }
+  l.status = 'sold';
+  window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(x => String(x.id) !== String(id));
+  toast('Annoncen er markeret som solgt. Tillykke!');
+  renderMine();
+}
+
 async function sletAnnonce(id, btn){
   if (!confirm('Er du sikker på, at du vil slette denne annonce? Det kan ikke fortrydes.')) return;
   // Databaseannoncer har uuid som id. Number() på et uuid gav NaN, så sletningen
@@ -347,6 +369,9 @@ function renderMine(){
   visAnnonceStatistik(grid).catch(() => { /* tal er pynt; fejler kaldet, står der intet */ });
   grid.querySelectorAll('[data-delete-listing]').forEach(btn => {
     btn.addEventListener('click', () => sletAnnonce(btn.dataset.deleteListing, btn));
+  });
+  grid.querySelectorAll('[data-mark-sold]').forEach(btn => {
+    btn.addEventListener('click', () => markerSolgt(btn.dataset.markSold, btn));
   });
   grid.querySelectorAll('[data-copy-link]').forEach(btn => {
     btn.addEventListener('click', async () => {

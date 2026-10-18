@@ -439,3 +439,32 @@ html[data-authtab="register"] .lg-steps, html[data-lgmode="register"] .lg-steps{
 .auth-error{ color: #9B1C14; }
 :root[data-theme="dark"] .auth-error{ color: var(--color-danger); }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .auth-error{ color: var(--color-danger); } }
+
+/* ---------- V2 sælger: login tættere på billede 6 ---------- */
+/* 1) Fokus- og fejlstater: ring om feltet, ikonet skifter farve, rød ramme ved aria-invalid. */
+.lg-card .input{ transition: border-color .15s ease, box-shadow .15s ease; box-shadow: 0 1px 2px rgba(20,16,12,.05); }
+.lg-card .input:hover{ border-color: color-mix(in srgb, var(--color-fg) 38%, var(--color-border)); }
+.lg-card .input:focus-visible, .lg-card .input:focus{ border-color: var(--color-primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 20%, transparent); outline: none; }
+.lg-input:focus-within .lg-ic{ color: var(--color-primary); }
+.lg-card .input[aria-invalid="true"]{ border-color: var(--color-danger); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-danger) 16%, transparent); }
+/* 2) Fejlboksen ligger ikke længere klistret op ad "Fortsæt uden konto": luft over og under. */
+.lg-extras{ padding-top: 4px; }
+.auth-error.auth-error-overlay{ top: 0; padding: 9px var(--space-4); }
+/* 3) Knappen: dybde og tydelig fokusring (billedets knap står som en rigtig knap). */
+.lg-cta{ box-shadow: 0 6px 16px color-mix(in srgb, var(--color-primary) 32%, transparent); transition: box-shadow .15s ease, background-color .15s ease; }
+.lg-cta:hover:not(:disabled){ box-shadow: 0 10px 22px color-mix(in srgb, var(--color-primary) 38%, transparent); }
+.lg-cta:active:not(:disabled){ box-shadow: 0 3px 8px color-mix(in srgb, var(--color-primary) 30%, transparent); }
+.lg-cta:focus-visible{ outline: 3px solid var(--color-ring); outline-offset: 3px; }
+/* 4) Kortets dybde: lagdelt skygge og en hårfin lys kant, så kortet løfter sig fra fotoet. */
+.lg-card{ box-shadow: 0 2px 4px rgba(20,16,12,.10), 0 18px 44px rgba(20,16,12,.24); }
+/* 5) Fordelslisten: større ikoncirkler og mere luft mellem rækkerne (billedets 50 px-ikoner). */
+@media (min-width:960px){
+  .lg-bi{ width:50px; height:50px; }
+  .lg-bi svg{ width:24px; height:24px; }
+  .lg-benefits{ gap: 22px; }
+}
+/* 6) Mobil: sekundær knap og juridisk linje får fuld rækkevidde, og kortet overlapper fotoet blødere. */
+@media (max-width:959px){
+  .lg-card{ box-shadow: 0 -6px 24px rgba(20,16,12,.14), 0 10px 30px rgba(20,16,12,.18); }
+}
+@media (prefers-reduced-motion: reduce){ .lg-cta, .lg-card .input{ transition: none; } }

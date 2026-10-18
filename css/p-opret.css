@@ -546,3 +546,27 @@
   .op-trust{ padding: var(--space-2) var(--space-3); gap: 6px; }
   .op-trust small{ font-size:12px; }
 }
+
+/* ---------- V2 sælger: hero med plads til alt indhold (P2-2) ----------
+   Før klippede trinbjælken (der overlapper banneren) hero-undertekstens sidste linje og tillidsboksens
+   sidste linje, fordi bundpolstringen (34 px) var mindre end overlappet (48 px). Nu er overlappet 28 px,
+   bundpolstringen overlap + 20 px, og indholdet bestemmer højden. Gælder alle bredder. */
+.op-page{ --op-overlap: 28px; }
+.op-hero{ padding-top: var(--space-3); padding-bottom: calc(var(--op-overlap, 28px) + var(--space-5)); }
+.op-stepper-card{ margin-top: calc(-1 * var(--op-overlap, 28px)); }
+.op-hero-text{ max-width: 760px; }
+.op-hero-lead{ max-width: 720px; text-wrap: balance; }
+@media (min-width:900px){
+  .op-hero{ padding-top: var(--space-2); }
+  .op-hero h1{ margin: 0 0 var(--space-1); }
+  .op-hero-inner{ align-items:center; }
+  .op-trust{ padding: 10px 14px; gap: 6px; }
+  .op-trust-ico{ width:34px; height:34px; }
+  .op-trust-ico svg{ width:18px; height:18px; }
+  .op-trust li{ gap: var(--space-3); }
+}
+@media (max-width:700px){
+  .op-page{ --op-overlap: 24px; }
+  .op-hero{ padding-top: var(--space-2); }
+  .op-hero-inner{ gap: var(--space-3); }
+}
