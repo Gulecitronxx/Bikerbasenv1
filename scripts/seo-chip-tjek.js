@@ -41,13 +41,16 @@ function udklipKonstant(navn){
   return KILDE.slice(s, matchLuk(KILDE, s)) + ';';
 }
 
+/* readStateFromURL() filtrerer ?type= mod TYPES (js/data.js) — den global skal findes, ellers kaster klippet ReferenceError. */
+const TYPES = new Function(fs.readFileSync(path.join(__dirname, '..', 'js', 'data.js'), 'utf8') + ';return TYPES;')();
+
 const vindue = { location: { search: '' } };
-const laes = new Function('window', [
+const laes = new Function('window', 'TYPES', [
   udklipKonstant('LIST_PARAMS'), udklipKonstant('NUM_PARAMS'), udklipKonstant('SORTERINGER'),
   udklipKonstant('SORT_ALIAS'), udklipKonstant('EMPTY_STATE'),
   'let state = { ...EMPTY_STATE };', udklipFunktion('numOrNull'), udklipFunktion('readStateFromURL'),
   'return function(search){ window.location.search = search; state = { ...EMPTY_STATE }; readStateFromURL(); return state; };',
-].join('\n'))(vindue);
+].join('\n'))(vindue, TYPES);
 
 const afEsc = s => String(s).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 
