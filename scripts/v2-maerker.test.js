@@ -6,8 +6,7 @@ const path = require('path');
 const css = fs.readFileSync(path.join(__dirname, '..', 'css', 'p-facet.css'), 'utf8');
 
 test('V2: CTA-panelets foto ligger i egen række og overlapper ikke punkter/knap', () => {
-  const last = css.lastIndexOf('
-.fa-cta-foto{ position:static');
+  const last = css.lastIndexOf('.fa-cta-foto{ position:static');
   const regel = css.slice(last, css.indexOf('}', last));
   assert.match(regel, /position:\s*static/);
   assert.match(regel, /order:\s*9/);
