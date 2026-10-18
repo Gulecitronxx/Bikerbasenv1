@@ -149,3 +149,72 @@ test('Mine annoncer: markér solgt, afvist = intet kald; godkendt = status sold;
     assert.deepStrictEqual(s.fund, []);
   } finally { await s.ctx.close(); }
 });
+
+test('Login: tomt og ugyldigt skema faas fanget med konkret besked og fokus; intet auth-kald', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: false }, 'login.html', { width: 1440, height: 900 });
+  try {
+    const p = s.page, send = () => p.click('#login-form button[type=submit]');
+    const fejl = () => p.locator('#auth-error').innerText();
+    await send();
+    assert.match(await fejl(), /Skriv din e-mail/);
+    assert.strictEqual(await p.evaluate(() => document.activeElement.id), 'login-email');
+    assert.strictEqual(await p.getAttribute('#login-email', 'aria-invalid'), 'true');
+    await p.fill('#login-email', 'ikke-en-mail'); await send();
+    assert.match(await fejl(), /navn@eksempel\.dk/);
+    await p.fill('#login-email', 'a@b.dk'); await send();
+    assert.match(await fejl(), /Skriv din adgangskode/);
+    assert.strictEqual(await p.evaluate(() => document.activeElement.id), 'login-password');
+    assert.strictEqual(s.t.auth.filter(a => a.grant === 'password').length, 0, 'intet kald til auth');
+  } finally { await s.ctx.close(); }
+});
+
+test('Login: fejlboksen overlapper ikke "Fortsaet uden konto"; fokusring paa felt og knap (lys+moerk)', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const tema of ['lys', 'moerk']) {
+    const s = await aabn({ loggetInd: false, login: () => ({ status: 400 }) }, 'login.html', { width: 1440, height: 900 }, tema);
+    try {
+      const p = s.page;
+      await p.fill('#login-email', 'a@b.dk'); await p.fill('#login-password', 'forkert');
+      await p.click('#login-form button[type=submit]');
+      await p.waitForFunction(() => /Forkert/.test(document.getElementById('auth-error')?.textContent || ''));
+      const m = await p.evaluate(() => {
+        const e = document.getElementById('auth-error').getBoundingClientRect();
+        const k = [...document.querySelectorAll('.lg-extras a, .lg-extras button')].find(x => /uden konto/i.test(x.textContent)).getBoundingClientRect();
+        return { eBund: e.bottom, kTop: k.top };
+      });
+      assert.ok(m.kTop - m.eBund >= 4, `${tema}: fejl ${m.eBund} mod knap ${m.kTop}`);
+      await p.focus('#login-email'); await p.waitForTimeout(350);
+      const ring = await p.$eval('#login-email', el => getComputedStyle(el).boxShadow);
+      assert.notStrictEqual(ring, 'none');
+      assert.ok(/rgb/.test(ring) && /4px/.test(ring), 'fokusring: ' + ring);
+    } finally { await s.ctx.close(); }
+  }
+});
+
+test('Mine annoncer: statuskolonnen flugter paa tvaers af raekker, badge har ikon, 5. statistikkort fylder bredden paa mobil', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const annoncer = [{ brand: 'Yamaha', model: 'MT-07' }, { brand: 'Honda', model: 'CB500F', status: 'hidden' }, { brand: 'BMW', model: 'R 1250 GS' }];
+  const s = await aabn({ loggetInd: true, annoncer }, 'mine-annoncer.html', { width: 1440, height: 900 });
+  try {
+    await s.page.waitForSelector('.db-row');
+    const m = await s.page.evaluate(() => ({
+      x: [...document.querySelectorAll('.db-row .db-badge')].map(b => Math.round(b.getBoundingClientRect().left)),
+      ikon: [...document.querySelectorAll('.db-row .db-badge')].every(b => b.querySelector('svg')),
+    }));
+    assert.strictEqual(new Set(m.x).size, 1, 'badge-x: ' + m.x);
+    assert.ok(m.ikon, 'alle statusmaerker har ikon');
+  } finally { await s.ctx.close(); }
+  const mob = await aabn({ loggetInd: true, annoncer }, 'mine-annoncer.html', { width: 390, height: 844 });
+  try {
+    await mob.page.waitForSelector('.db-stat');
+    const m = await mob.page.evaluate(() => {
+      const k = [...document.querySelectorAll('.db-stat')];
+      const sidste = k[k.length - 1].getBoundingClientRect(), forste = k[0].getBoundingClientRect();
+      return { n: k.length, sidste: sidste.width, forste: forste.width, flade: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    assert.strictEqual(m.n, 5);
+    assert.ok(m.sidste > m.forste * 1.8, `sidste kort ${m.sidste} vs ${m.forste}`);
+    assert.ok(m.flade <= 0);
+  } finally { await mob.ctx.close(); }
+});

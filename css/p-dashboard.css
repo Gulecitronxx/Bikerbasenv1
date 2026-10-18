@@ -965,3 +965,36 @@ a.db-title{ display:inline-block; padding: 10px 0; margin: -10px 0; }
 
 /* tap-mål: logo-linket i headeren er 30 px højt; hit-area >= 44 px uden at flytte noget */
 .site-header .brand{ min-height: 44px; }
+
+/* ---------- V2 sælger: mine annoncer, tættere på billede 5 ---------- */
+/* 1) Statuskolonnen har fast bredde, så "Aktiv" og "På pause" står under hinanden i alle rækker
+      (før var kolonnen indholdsstyret og sprang fra række til række). */
+@container db-rows (min-width: 560px) and (max-width: 819px){
+  .db-row{ grid-template-columns: 132px minmax(0, 1fr) 156px; }
+}
+@container db-rows (min-width: 820px) and (max-width: 899px){
+  .db-row{ grid-template-columns: 132px minmax(150px, 1fr) 156px auto; }
+  .db-row:has(.db-nums){ grid-template-columns: 132px minmax(140px, 1fr) minmax(236px, auto) auto; }
+}
+@container db-rows (min-width: 900px){
+  .db-row, .db-row:has(.db-nums){ grid-template-columns: 132px minmax(150px, 1fr) 244px 244px; }
+}
+/* 2) Statusmærke med ikon (ikke kun farve). */
+.db-badge svg{ width: 14px; height: 14px; flex: 0 0 auto; }
+/* 3) Rækkens løft og fokus: rammen følger musen og tastaturet. */
+.db-row{ transition: border-color .15s ease, box-shadow .15s ease; }
+.db-row:hover, .db-row:focus-within{ border-color: color-mix(in srgb, var(--color-primary) 38%, var(--color-border)); box-shadow: var(--shadow-md); }
+/* 4) Mobil: femte statistikkort står ikke alene i en halv række. */
+@media (max-width: 719px){
+  .db-stats .db-stat:last-child:nth-child(odd){ grid-column: 1 / -1; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; }
+  .db-stats .db-stat:last-child:nth-child(odd) .db-stat-link{ grid-column: auto; }
+  .db-stats .db-stat:last-child:nth-child(odd) .db-stat-body{ grid-column: 2; }
+}
+/* 5) Mobil: fanelinjen viser, at der er flere faner (fade i højre kant). */
+@media (max-width: 719px){
+  .db-tabs{ -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+}
+/* 6) Min konto: tydeligere menurækker med skillelinjer. */
+.db-menu .db-menu-item{ min-height: 46px; }
+.db-menu .db-menu-item + .db-menu-item{ border-top: 1px solid var(--color-border); border-radius: 0; }
+

@@ -25,9 +25,9 @@ function listingStatus(l){
 }
 
 const STATUS_VISNING = {
-  active: { label: 'Aktiv', cls: 'is-active' },
-  paused: { label: 'På pause', cls: 'is-paused' },
-  sold: { label: 'Solgt', cls: 'is-sold' },
+  active: { label: 'Aktiv', cls: 'is-active', ikon: 'checkCircle' },
+  paused: { label: 'På pause', cls: 'is-paused', ikon: 'pause' },
+  sold: { label: 'Solgt', cls: 'is-sold', ikon: 'checkCircle' },
   draft: { label: 'Kladde', cls: 'is-draft' },
 };
 function statusVisning(status){ return STATUS_VISNING[status] || STATUS_VISNING.active; }
@@ -161,7 +161,7 @@ function ownRowHTML(l){
     ${rowThumb(l, url, brand, model)}
     ${infoBlok(l, url, brand, model)}
     <div class="db-status">
-      <span class="db-badge ${v.cls}">${v.label}</span>
+      <span class="db-badge ${v.cls}">${v.ikon ? dbIkon(v.ikon) : ''}${v.label}</span>
       ${l.createdAt ? `<span class="db-when">${Icon.clock}Oprettet ${escapeHTML(timeAgoDa(l.createdAt))}</span>` : ''}
       ${status === 'paused' ? `<span class="db-when">${Icon.eye}Skjult for købere, indtil du aktiverer den</span>` : ''}
     </div>

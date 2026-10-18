@@ -363,6 +363,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const password = document.getElementById('login-password').value;
     const btn = e.target.querySelector('button[type="submit"]');
 
+    /* V2: tomme og åbenlyst forkerte felter fanges her med en konkret besked og fokus på feltet.
+       Før gik et tomt skema til serveren og kom tilbage som "Forkert e-mail eller adgangskode.". */
+    const emailEl = document.getElementById('login-email'), pwEl = document.getElementById('login-password');
+    [emailEl, pwEl].forEach(el => el.removeAttribute('aria-invalid'));
+    const felt = (el, msg) => { el.setAttribute('aria-invalid', 'true'); authError(msg); el.focus(); };
+    if (!email) return felt(emailEl, 'Skriv din e-mail.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return felt(emailEl, 'E-mailen ser forkert ud. Den skal have formen navn@eksempel.dk.');
+    if (!password) return felt(pwEl, 'Skriv din adgangskode.');
+
     if (!db.enabled){
       /* Ingen opdigtet identitet og ingen opdigtede bekræftelser: en lokal session har kun den e-mail,
          brugeren selv skrev. */
