@@ -661,7 +661,8 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 .fa-udforsk-foto{ flex:0 0 34%; max-width:140px; }
 /* CTA-panel med typefoto nederst til højre (lyst panel, fotoet toner ind). */
 .fa-cta-studio{ background: linear-gradient(135deg, var(--color-primary-tint) 0%, var(--color-surface) 70%); }
-.fa-cta-foto{ right:-14%; bottom:-8%; width:80%; opacity:.95; mix-blend-mode:multiply; z-index:0;
+/* V2: fotoet ligger i egen række UNDER knappen (ingen overlap med punkter/knap). */
+.fa-cta-foto{ position:static; order:9; align-self:flex-end; margin:auto calc(-1 * var(--space-5)) calc(-1 * var(--space-4)) 0; width:62%; max-width:260px; height:auto; max-height:130px; object-fit:contain; object-position:right bottom; opacity:.95; mix-blend-mode:multiply; z-index:0;
   -webkit-mask-image: radial-gradient(ellipse 58% 60% at 52% 52%, #000 48%, transparent 100%); mask-image: radial-gradient(ellipse 58% 60% at 52% 52%, #000 48%, transparent 100%); }
 :root[data-theme="dark"] .fa-cta-foto{ mix-blend-mode:normal; opacity:.5; }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .fa-cta-foto{ mix-blend-mode:normal; opacity:.5; } }
@@ -692,3 +693,22 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="cross"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/cross.webp"); }
 
 :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom::before{ display:none; }
+
+/* ===== V2 (Builder 3, iteration 2) ===== */
+/* Populære modeller: fliserne fylder rækken (maks. 4 pr. række) og er lige høje i stedet for ujævne bredder med hul til højre. */
+.fa-modeller{ grid-template-columns: repeat(auto-fit, minmax(max(210px, calc((100% - 3 * var(--space-3)) / 4)), 1fr)); grid-auto-rows:1fr; }
+.fa-modeller li{ display:flex; min-width:0; }
+.fa-modeller a{ flex:1 1 auto; min-width:0; }
+.fa-model-tekst{ min-width:0; }
+.fa-modeller strong{ display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden; line-height:1.25; }
+/* Filter-/sorteringsrækker: ens etiketbredde, så chipsene i hver kolonne starter på samme linje. */
+@media (min-width:900px){
+  .fa-flere .brand-facet-navn, .mk-liste .brand-facet-navn{ display:inline-block; min-width:92px; }
+}
+/* Udforsk-efter-behov: lige høje kort, linket altid forankret i bunden. */
+.fa-udforsk > li{ display:flex; }
+.fa-udforsk > li > a{ flex:1 1 auto; }
+/* 5-6 modeller: tre kolonner (2 rækker, ingen halvtom række); færre fylder hele rækken. */
+@media (min-width:1100px){
+  .fa-modeller:has(> li:nth-child(5)){ grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
