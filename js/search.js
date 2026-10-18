@@ -55,13 +55,15 @@ function readStateFromURL(){
   }
   // Forsiden og kategorilinkene sender ?type=sport i ental.
   if (p.get('type')) state.types = p.get('type').split(',').filter(Boolean);
+  // Ukendte typer (?type=xyz) giver ellers en fantom-pille og 0 resultater.
+  { const kendte = new Set(TYPES.map(t => t.id)); state.types = state.types.filter(t => kendte.has(t)); }
   for (const [key, param] of Object.entries(NUM_PARAMS)) state[key] = numOrNull(p.get(param));
   if (p.get('maxPrice')) state.priceMax = numOrNull(p.get('maxPrice'));
   state.photosOnly = p.get('billeder') === '1';
   state.dealerOnly = p.get('dealer') === '1';
   state.nysynet = p.get('nysynet') === '1';
   state.vinterklar = p.get('vinter') === '1';
-  state.koerekort = p.get('koerekort') || '';
+  state.koerekort = ['A1', 'A2', 'A'].includes(p.get('koerekort')) ? p.get('koerekort') : '';   // ukendt kørekort i URL'en ignoreres, ikke et tomt filter
   state.kilde = p.get('kilde') || '';
   const sort = SORT_ALIAS[p.get('sort')] || p.get('sort') || '';
   state.sort = SORTERINGER.includes(sort) ? sort : 'blandet';
@@ -165,9 +167,6 @@ function populateChrome(){
   document.getElementById('bc-sep-1').innerHTML = Icon.chevronRight;
   document.getElementById('view-grid').innerHTML = Icon.grid + '<span class="vt-label">Gitter</span>';
   document.getElementById('view-list').innerHTML = Icon.list + '<span class="vt-label">Liste</span>';
-  // Søgekortets typevælger (billede 2): samme TYPES som sidebaren.
-  const typeSel = document.getElementById('so-type');
-  if (typeSel && typeSel.options.length === 1) TYPES.forEach(t => typeSel.add(new Option(t.label, t.id)));
   const vs = document.getElementById('view-swipe');
   if (vs) vs.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2" transform="rotate(-6 12 12)"/><path d="M9 20h6"/></svg>`;
 }
@@ -1169,39 +1168,6 @@ function reflectFilterPanel(){
   });
 }
 
-/* Søgekortet i hero'en (billede 2) er en anden indgang til de samme filtre:
-   Type, Maks. pris og Kørekort spejler `state` og skriver tilbage til det —
-   de har ingen egen logik. Står mere end ét valg i state (flere typer fra
-   sidebaren, et pris-interval uden for listen), vises det ærligt som et
-   ekstra valg i stedet for at vælgeren tilsyneladende siger noget andet. */
-function reflectHeroCard(){
-  const typeSel = document.getElementById('so-type');
-  if (typeSel){
-    typeSel.querySelectorAll('option[data-dyn]').forEach(o => o.remove());
-    if (state.types.length > 1){
-      const o = new Option(`${state.types.length} typer valgt`, '__flere'); o.dataset.dyn = '1'; typeSel.add(o);
-      typeSel.value = '__flere';
-    } else typeSel.value = [...typeSel.options].some(o => o.value === state.types[0]) ? state.types[0] : '';
-  }
-  const priceSel = document.getElementById('so-price');
-  if (priceSel){
-    priceSel.querySelectorAll('option[data-dyn]').forEach(o => o.remove());
-    /* Vælgeren viser det SAMME interval som filteret: kun et loft = "Op til X"
-       (eller det matchende valg), kun et gulv = "Fra X", begge = "X – Y".
-       Det dynamiske valg står kun, når intet fast valg passer. */
-    const lo = state.priceMin, hi = state.priceMax;
-    let v = '';
-    if (lo == null && hi != null) v = String(hi);
-    if (lo != null || (hi != null && ![...priceSel.options].some(o => o.value === v))){
-      const tekst = lo == null ? `Op til ${formatPrice(hi)}` : hi == null ? `Fra ${formatPrice(lo)}` : `${formatPrice(lo)} – ${formatPrice(hi)}`;
-      const o = new Option(tekst, '__dyn'); o.dataset.dyn = '1'; priceSel.add(o);
-      v = '__dyn';
-    }
-    priceSel.value = v;
-  }
-  document.querySelectorAll('input[name="so-koerekort"]').forEach(r => { r.checked = r.value === state.koerekort; });
-}
-
 /* Mærke- og modelvælgerne øverst i sidebaren. De viser ÉT valg; vælger man
    flere via "Tilføj flere" (afkrydsningslisten), står der "N mærker valgt". */
 function reflectBrandSelect(){
@@ -1247,7 +1213,6 @@ function reflectStateToUI(){
   if (qInput && qInput.value !== state.q) qInput.value = state.q;
   const qClear = document.getElementById('filter-q-clear');
   if (qClear) qClear.hidden = !state.q;
-  reflectHeroCard();
   document.querySelectorAll('.dual-range').forEach(el => el._sync && el._sync());
   document.getElementById('filter-photos-only').checked = state.photosOnly;
   document.getElementById('filter-dealer-only').checked = state.dealerOnly;
@@ -1750,7 +1715,11 @@ function maalSoegning(antal){
   }, 800);
 }
 
-function render(){
+/* Bundmodulerne vises først, når gitteret har sin endelige højde (alle kort tegnet, eller tomtilstand) — ellers springer de op i billedet og
+   bliver skubbet ned igen, mens kortene males portionsvis (CLS). css/p-soegning.css skjuler dem med visibility indtil html.so-klar. */
+function bundKlar(){ document.documentElement.classList.add('so-klar'); }
+
+function render(){
   writeStateToURL();
   reflectStateToUI();
   applyViewMode();
@@ -1845,9 +1814,10 @@ function render(){
        øjeblik under de forudtegnede kort og springer ned, når gitteret vokser (CLS). Har brugeren et tyndt
        resultat, har tyndt-resultat-panelet allerede sin egen "Gem søgningen"; så udelades dette panel. */
     const tyndt = total < 4 && (pills.length > 0 || !!state.q);
-    paintCards(grid, pageItems, () => { genskabPosition?.(); renderViser(total, state.page, pageItems.length, uaktuelt, tyndt); });
+    paintCards(grid, pageItems, () => { genskabPosition?.(); renderViser(total, state.page, pageItems.length, uaktuelt, tyndt); bundKlar(); });
   } else {
     renderViser(0, state.page, 0, uaktuelt, false);
+    bundKlar();
     grid.style.display = 'none';
     empty.style.display = 'block';
 
@@ -1883,6 +1853,7 @@ function render(){
 
   clearTimeout(secondaryHandle);
   secondaryHandle = setTimeout(() => renderSecondary(pills, pageItems, heading, total, totalPages), 0);
+
 }
 
 /* H1 fra de aktive filtre. Kildesider (?kilde=mcsyd.dk) er det nærmeste, en
@@ -2410,9 +2381,8 @@ function wireCoreControls(){
   document.getElementById('empty-clear-btn').addEventListener('click', resetAll);
   document.getElementById('so-clear-all')?.addEventListener('click', resetAll);
 
-  // Søgekortet i hero'en: type/pris/kørekort er genveje til de samme filtre
-  // som sidebaren; "Søg motorcykler" sender fritekstfeltet af sted med det
-  // samme (uden at vente på debouncen) og fører øjet ned til resultaterne.
+  // Søgefeltet øverst: "Søg" sender fritekstfeltet af sted med det samme (uden at vente på debouncen)
+  // og fører øjet ned til resultaterne. Type, pris og kørekort er kun i sidebaren.
   const soegekort = document.getElementById('srp-search');
   if (soegekort){
     soegekort.addEventListener('submit', (e) => {
@@ -2425,23 +2395,6 @@ function wireCoreControls(){
         maal.scrollIntoView({ behavior: stille ? 'auto' : 'smooth', block: 'start' });
       }
     });
-    document.getElementById('so-card-more')?.addEventListener('click', (e) => {
-      const aaben = !soegekort.classList.contains('is-open');
-      soegekort.classList.toggle('is-open', aaben);
-      e.currentTarget.setAttribute('aria-expanded', String(aaben));
-    });
-    document.getElementById('so-type')?.addEventListener('change', (e) => {
-      const v = e.target.value; if (v === '__flere') return;
-      state.types = v ? [v] : []; state.page = 1; pushFilterState();
-    });
-    document.getElementById('so-price')?.addEventListener('change', (e) => {
-      if (e.target.value === '__dyn') return;
-      // Maks. pris er ét loft: et gulv fra sidebaren/URL'en nulstilles med det nye valg.
-      state.priceMin = null;
-      state.priceMax = e.target.value ? Number(e.target.value) : null; state.page = 1; pushFilterState();
-    });
-    soegekort.querySelectorAll('input[name="so-koerekort"]').forEach(r =>
-      r.addEventListener('change', () => { if (r.checked) vaelgKoerekort(r.value); }));
   }
 
   document.getElementById('view-grid').addEventListener('click', () => setViewMode('grid'));
@@ -2462,15 +2415,6 @@ function wireCoreControls(){
     document.getElementById('save-search-btn').click();
   }
 
-  /* Runde 7 (D7-S2, koerer ved start — filterpanelet bygges foerst ved klik paa mobil): "Maerke eller model" (≈165 px) klippede stadig i et
-     ≈150 px felt paa 390. Kort tekst under 421 px; css saetter ellipse som
-     bagstopper, saa det aldrig klipper midt i et ord igen. */
-  const qFelt = document.getElementById('filter-q');
-  if (qFelt){
-    const mq = window.matchMedia('(max-width:420px)');
-    const saetPh = () => { qFelt.placeholder = mq.matches ? 'Mærke/model' : 'Mærke eller model'; };
-    saetPh(); if (mq.addEventListener) mq.addEventListener('change', saetPh);
-  }
   /* W14: fra 1280 px staar "Gem soegning" i resultathovedet (som i billedet) i stedet for en tom raekke over gitteret;
      under 1280 bliver den i chip-raekken. Samme knap og id, kun flyttet. */
   (function(){

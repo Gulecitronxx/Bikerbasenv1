@@ -3,7 +3,7 @@
    ============================================================================
 
    Linkes fra soegning.html EFTER css/styles.css og ejer kun den sides
-   layout. Alt nyt har prefikset .so- (hero, søgekort, chip-række, sidebar-
+   layout. Alt nyt har prefikset .so- (top, søgefelt, chip-række, sidebar-
    udseende). Det delte lag (styles.css, annoncekortet i js/components.js) er
    urørt; de få steder hvor en eksisterende regel i styles.css skal tilsidesættes,
    står selektoren med ID eller .srp foran, så rækkefølgen ikke afgør noget.
@@ -12,113 +12,42 @@
    farver. Lys tilstand er målet; mørk følger af tokens.
    ========================================================================== */
 
-/* ------------------------------------------------------------------ hero --
-   Fuldbredde-foto med h1 og søgekort i bunden (billede 2: kortet ligger i
-   bannerets nederste del). Heroen er mørk i begge temaer, som forsiden. */
-.so-hero{
-  position:relative; overflow:hidden; isolation:isolate;
-  background: var(--color-dark); color:#fff;
-  padding: var(--space-4) 0 var(--space-5);
-}
-.so-hero-media{ position:absolute; inset:0; z-index:-2; background: var(--color-dark); }
-.so-hero-photo{ width:100%; height:100%; object-fit:cover; object-position: 74% 58%; display:block; filter:saturate(1.12) contrast(1.04); }
-/* Scrim: mørkt bag teksten til venstre, blødt mod motorcyklen til højre, og
-   et bundlag så det hvide kort altid har ro omkring sig. */
-.so-hero::after{
-  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
-  background:
-    linear-gradient(90deg,
-      color-mix(in srgb, var(--color-dark) 90%, transparent) 0,
-      color-mix(in srgb, var(--color-dark) 76%, transparent) 420px,
-      color-mix(in srgb, var(--color-dark) 58%, transparent) 720px,
-      color-mix(in srgb, var(--color-dark) 22%, transparent) 940px,
-      transparent 1160px),
-    linear-gradient(0deg, color-mix(in srgb, var(--color-dark) 45%, transparent) 0%, transparent 40%);
-}
-.so-hero-inner{ position:relative; }
-
-.so-hero .so-breadcrumb{ padding:0 0 var(--space-3); margin:0; font-size:13px; color:#E6E0D6; }
-.so-hero .so-breadcrumb a{ color:#F4EFE7; text-decoration:underline; text-underline-offset:3px; }
-.so-hero .so-breadcrumb span{ color:#E6E0D6; }
-.so-hero .so-breadcrumb svg{ color:#E6E0D6; }
-
-.so-hero .so-h1{ margin:0 0 var(--space-4); max-width:760px; font-family: var(--font-display); text-shadow: 0 2px 24px rgba(0,0,0,.45); }
-.so-h1-title{ display:block; font-size: var(--h1-hero); line-height:1.04; font-weight:700; letter-spacing:-.015em; color:#fff; text-wrap:balance; }
-.so-h1-sub{ display:block; margin-top:6px; min-height:1.4em; font-size: clamp(16px, 1.7vw, 21px); line-height:1.35; font-weight:500; color:#F1ECE3; }
-
-/* ------------------------------------------------------------ søgekortet -- */
-.so-card{
-  display:grid; align-items:end; gap: var(--space-3) var(--space-4);
-  grid-template-columns: minmax(0,1fr);
-  padding: var(--space-4);
-  background: var(--color-surface); color: var(--color-fg);
-  border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
-  border:1px solid color-mix(in srgb, #fff 14%, transparent);
-}
-.so-field{ display:flex; flex-direction:column; gap:6px; min-width:0; margin:0; padding:0; border:0; }
-.so-field > label, .so-field > legend{ padding:0; }   /* skriften er fælles for alle søgekort: se .search-panel .field label i styles.css */
-.so-field > legend{ float:left; width:100%; margin-bottom:6px; }
-.so-field > legend + *{ clear:both; }
-.so-card .input{ height:48px; min-height:48px; font-size:15px; }
-.so-card select.input{ padding-right:38px; }
-
+/* ------------------------------------------------------------------ top --
+   V3: hero-fotoet og det store søgekort er fjernet. Toppen er brødkrumme + ét kompakt
+   søgefelt (#filter-q, forsidens ?q=) og derefter chip-rækken. H1'en er visually-hidden. */
+.so-top{ padding-top: var(--space-3); padding-bottom: var(--space-1); }
+.so-breadcrumb{ padding:0 0 var(--space-2); margin:0; font-size:13px; }
+.so-q{ display:flex; gap:8px; align-items:stretch; max-width:640px; margin:0; }
+.so-q .so-inputwrap{ flex:1 1 auto; min-width:0; }
+.so-q .so-go-spacer{ display:none; }
+.so-q-go{ flex:none; min-height:44px; padding:0 22px; justify-content:center; font-size:15px; }
 .so-inputwrap{ position:relative; }
 .so-ico{ position:absolute; left:14px; top:50%; transform:translateY(-50%); width:20px; height:20px; color: var(--color-fg-muted); pointer-events:none; display:block; }
 .so-ico svg{ width:20px; height:20px; display:block; }
-/* NF-3 (V-006/V-007): søgefeltet bruger .input og får dermed tokenets kant
-   (≥3:1) og placeholderfarven (≥4,5:1). ID-reglen i styles.css (#filter-q,
-   kant --color-border) skal slås, derfor .so-card #filter-q. */
-.so-card #filter-q{
-  width:100%; height:48px; padding:0 44px 0 44px; font-size:15px;
+/* NF-3 (V-006/V-007): søgefeltet bruger tokenets kant (≥3:1) og placeholderfarven (≥4,5:1).
+   ID-reglen i styles.css (#filter-q, kant --color-border) skal slås, derfor .so-q #filter-q. */
+.so-q #filter-q{
+  width:100%; height:44px; min-height:44px; padding:0 44px 0 44px; font-size:15px;
   border:1.5px solid var(--color-input-border); border-radius: var(--radius-sm);
   background: var(--color-surface); color: var(--color-fg);
+  transition: border-color .15s var(--ease-out), box-shadow .15s var(--ease-out);
 }
-.so-card #filter-q::placeholder{ color: var(--color-fg-muted); opacity:1; text-overflow:ellipsis; }
-.so-card #filter-q:placeholder-shown{ padding-left:44px; padding-right:12px; }
-.so-card #filter-q:hover{ border-color: var(--color-fg-muted); }
-.so-card #filter-q:focus-visible{ border-color: var(--color-primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent); outline:none; }
+.so-q #filter-q::placeholder{ color: var(--color-fg-muted); opacity:1; text-overflow:ellipsis; }
+.so-q #filter-q:placeholder-shown{ padding-left:44px; padding-right:12px; }
+.so-q #filter-q:hover{ border-color: var(--color-fg-muted); }
+.so-q #filter-q:focus-visible{ border-color: var(--color-primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent); outline:none; }
 .so-clear{
-  position:absolute; right:8px; top:50%; transform:translateY(-50%);
-  width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;
+  position:absolute; right:4px; top:50%; transform:translateY(-50%);
+  width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;
   border:0; border-radius:50%; background:transparent; color: var(--color-fg-muted); cursor:pointer;
 }
 .so-clear[hidden]{ display:none; }
 .so-clear:hover{ background: var(--color-surface-2); color: var(--color-fg); }
+.so-clear:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:-2px; }
 .so-clear svg{ width:16px; height:16px; }
-
-/* Kørekortsegmentet er forsidens .kk-seg (styles.css) — kun bredden styres her. */
-.so-f-kk .kk-seg{ min-width:0; }
-.so-f-kk .kk-seg label{ min-height:38px; padding:0 14px; }
-.so-submit{ min-height:52px; padding:0 28px; justify-content:center; gap:10px; font-size:16px; white-space:nowrap; }
-.so-submit svg{ width:20px; height:20px; flex:none; }
-
-@media (min-width:560px){
-  .so-card{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .so-f-q{ grid-column:1 / -1; }
-  .so-f-kk{ grid-column:1 / 2; }
-  .so-submit{ grid-column:2 / 3; }
-}
-@media (min-width:760px){
-  .so-card{ grid-template-columns: minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr); }
-  .so-f-q{ grid-column:auto; }
-  .so-f-kk{ grid-column:1 / 3; max-width:420px; }
-  .so-submit{ grid-column:3 / 4; }
-}
-@media (min-width:1100px){
-  .so-card{ grid-template-columns: minmax(0,1.55fr) minmax(0,1fr) minmax(0,1fr) auto auto; }
-  .so-f-kk{ grid-column:auto; max-width:none; }
-  .so-submit{ grid-column:auto; }
-  .so-hero{ padding: var(--space-5) 0 var(--space-5); }
-}
 @media (max-width:559px){
-  .so-card{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .so-f-q, .so-f-kk, .so-submit{ grid-column:1 / -1; }
-  .so-hero{ padding: var(--space-3) 0 var(--space-4); }
-  .so-hero .so-breadcrumb{ padding-bottom: var(--space-2); font-size:12.5px; }
-  .so-hero .so-h1{ margin-bottom: var(--space-3); }
-  .so-card{ padding: var(--space-3); gap: 10px; }
-  .so-submit{ width:100%; }
-  .so-f-kk .kk-seg label{ padding:0 6px; }
+  .so-top{ padding-top: var(--space-2); }
+  .so-breadcrumb{ display:none; }
 }
 
 /* --------------------------------------------------------- filter-chips -- */
@@ -327,9 +256,6 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 
 /* ======================= Runde 2 (Critic F1–F5, billedet tættere på) ======= */
 
-/* Ikoner i Type- og Pris-felterne (billedet) */
-.so-iconselect .so-ico{ z-index:1; }
-.so-iconselect select.input{ padding-left:44px; }
 
 /* Ingen tom "Ingen filtre valgt"-linje (billedet har ingen); rækken beholder højden. */
 .so-chips-none{ display:none !important; }
@@ -353,56 +279,16 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 .so-more-hint{ font-size:12.5px; line-height:1.4; color: var(--color-fg-muted); margin:0; }
 .so-more-hint[hidden]{ display:none; }
 
-/* Søg-knap: kort tekst kun på mobil */
-.so-submit-short{ display:none; }
-.so-card-more{ display:none; }
 
-/* ---------------------------------------------------- mobil (< 560 px) --
-   F4: kompakt hero. Søgefelt + "Søg" på én linje; Type, Pris og Kørekort ligger
-   bag "Flere valg" (de er stadig de samme filtre som i bundarket). */
 @media (max-width:559px){
-  .so-card{ grid-template-columns: repeat(12, minmax(0,1fr)); gap:10px 8px; }
-  .so-f-q{ grid-column: 1 / 10; }
-  .so-submit{ grid-column: 10 / 13; padding:0; min-height:48px; align-self:end; }
-  .so-submit-long{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
-  .so-submit-short{ display:inline; }
-  .so-f-q > label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
-  .so-card-more{
-    grid-column:1 / -1; grid-row:2; display:inline-flex; align-items:center; justify-content:center; gap:6px;
-    background:none; border:0; padding:4px 0 0; min-height:32px; font:inherit; font-size:14px; font-weight:600;
-    color: var(--color-primary-hover); cursor:pointer;
-  }
-  :root[data-theme="dark"] .so-card-more{ color: var(--color-primary); }
-  .so-card-more svg{ width:18px; height:18px; transition: transform .2s var(--ease-out); }
-  .so-card.is-open .so-card-more svg{ transform: rotate(180deg); }
-  .so-f-type, .so-f-price{ grid-column: span 6; grid-row:3; }
-  .so-f-kk{ grid-column:1 / -1; grid-row:4; }
-  .so-card:not(.is-open) .so-f-type,
-  .so-card:not(.is-open) .so-f-price,
-  .so-card:not(.is-open) .so-f-kk{ display:none; }
-  .so-hero .so-breadcrumb{ display:none; }
-  .so-hero{ padding: var(--space-4) 0 var(--space-3); }
-  .so-hero .so-h1{ margin-bottom:10px; }
-  .so-h1-sub{ font-size:16px; margin-top:4px; }
-  .so-card{ padding:10px; }
   .so-chiprow{ padding-top:10px; padding-bottom:6px; }
   /* Sorteringsforklaringen står i (i)-knappen; linjen over kortene koster 40 px på telefon. */
   .so-results .sortering-note{ display:none; }
-  /* F2: kraftigere scrim bag teksten på smal skærm */
-  .so-hero::after{
-    background: linear-gradient(180deg,
-      color-mix(in srgb, var(--color-dark) 86%, transparent) 0%,
-      color-mix(in srgb, var(--color-dark) 80%, transparent) 100%);
-  }
-  .so-h1-sub{ color:#fff; }
 }
-@media (min-width:560px){ .so-card-more{ display:none !important; } }
 
 /* F1: ingen input/select under 16 px på mobil (iOS zoomer ved fokus) */
 @media (max-width:767px){
-  body.srp .so-card .input,
-  body.srp .so-card select.input,
-  body.srp .so-card #filter-q,
+  body.srp .so-q #filter-q,
   body.srp .so-layout .so-sel,
   body.srp .so-layout .input,
   body.srp .so-layout #brand-search,
@@ -449,23 +335,6 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
    Kompakt hero med overlappende søgekort, chips direkte under kortet, rolig info-linje,
    kort med titel + pris på én linje, "Viser x–y af N", Gem søgning-panel. Kun .so-*, ingen nye farver.
    ============================================================================ */
-:root{ --so-overlap: 52px; }
-
-/* --- Hero: lav banner, kortet hænger ned over kanten (billedet) --- */
-.so-hero{ display:flow-root; overflow:visible; z-index:2; padding: var(--space-3) 0 0; }   /* z-index: det overlappende kort ligger over chip-rækken, ellers æder .so-wrap klikkene */
-.so-hero-media{ overflow:hidden; }
-.so-hero .so-breadcrumb{ padding:0 0 var(--space-2); font-size:12.5px; }
-.so-hero .so-h1{ margin:0 0 var(--space-3); max-width:none; }
-.so-h1-title{ font-size: clamp(30px, 3.1vw, 44px); line-height:1.06; }
-.so-h1-sub{ margin-top:4px; font-size: clamp(16px, 1.45vw, 20px); }
-.so-hero .so-card{ position:relative; z-index:2; margin-bottom: calc(var(--so-overlap) * -1); }
-.so-hero + .so-wrap{ padding-top: calc(var(--so-overlap) + var(--space-2)); }
-@media (min-width:1100px){ .so-hero{ padding: var(--space-4) 0 0; } }
-@media (max-width:559px){
-  :root{ --so-overlap: 28px; }
-  .so-hero{ padding: var(--space-3) 0 0; }
-}
-
 /* --- Chips: kompakte piller + "Ryd alle filtre" som link, "Gem søgning" længst til højre --- */
 .so-chiprow{ min-height:44px; padding: var(--space-1) 0 var(--space-3); }
 .so-chips .active-filter-pill{ min-height:36px; font-size:14px; font-weight:500; }
@@ -477,7 +346,6 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 .so-layout .filter-group summary{ min-height:40px; }
 .so-layout .so-checklist .chip{ min-height:40px; }
 .so-layout #clear-filters{ min-height:40px; padding:0 4px; display:inline-flex; align-items:center; }
-@media (max-width:559px){ .so-card-more{ min-height:40px; } }
 
 /* --- Resultathoved: tal + sortér + Gitter/Liste på én linje (billedet) --- */
 .so-toolbar{ margin-bottom: var(--space-2); }
@@ -559,28 +427,8 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
   #results-grid:not(.list-view) .card-rich .foto-tom{ padding:6px 52px 8px 8px; gap:0; }
   #results-grid:not(.list-view) .card-rich .foto-tom-ikon{ display:none !important; }
 }
-@media (min-width:1100px){
-  :root{ --so-overlap: 44px; }
-  .so-hero{ padding: var(--space-3) 0 0; }
-  .so-hero .so-breadcrumb{ padding-bottom: 6px; }
-  .so-h1-title{ font-size: clamp(30px, 2.8vw, 40px); }
-  .so-hero .so-h1{ margin-bottom: var(--space-3); }
-}
 
 /* ---- W14 iteration 2 ---- */
-@media (min-width:1100px){
-  /* Som mockuppen: søgekortet ligger INDE i bannerfotoet, kompakt, uden brødkrumme (den står stadig for skærmlæsere). */
-  :root{ --so-overlap: 0px; }
-  .so-hero{ padding: 18px 0 18px; }
-  .so-hero .so-breadcrumb{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; padding:0; margin:0; }
-  .so-h1-title{ font-size: clamp(30px, 2.6vw, 38px); }
-  .so-h1-sub{ margin-top:2px; font-size: clamp(15px, 1.2vw, 18px); }
-  .so-hero .so-h1{ margin-bottom: 12px; }
-  .so-hero .so-card{ padding:12px 16px; gap:8px 14px; }
-  .so-card .input, .so-card #filter-q{ height:44px; min-height:44px; }
-  .so-submit{ min-height:46px; }
-  .so-f-kk .kk-seg label{ min-height:40px; }
-}
 @media (min-width:1100px){
   /* Info-bånd: én rolig linje; sorteringsreglen står i (i) ved Sortér. */
   .so-infoband{ flex-wrap:nowrap; align-items:center; border:0; background:transparent; padding:0 2px; margin:0 0 var(--space-3); min-height:40px; font-size:12.5px; }
@@ -643,12 +491,6 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 .typefoto .card-photo{ width:100%; height:100%; object-fit:cover; filter:saturate(.75); }
 .typefoto .typefoto-label{ left:8px; bottom:8px; }
 @media (min-width:1100px){
-  /* hero: ca. 180 px, overskrift og undertitel paa samme linje, motorcyklen laeses i bannerets overkant */
-  .so-hero{ padding:12px 0 12px; }
-  .so-hero .so-h1{ display:flex; align-items:baseline; gap:6px 18px; flex-wrap:wrap; margin-bottom:8px; }
-  .so-h1-sub{ margin-top:0; }
-  .so-hero-photo{ object-position:74% 34%; }
-  .so-hero .so-card{ padding:8px 16px 10px; }
   /* info-bånd: fuld tekst (ingen ellipsis), to rolige linjer, sorteringsnoten synlig */
   .so-infoband{ flex-wrap:wrap; min-height:42px; row-gap:0; }
   .so-infoband .results-mix{ flex:1 1 100%; white-space:nowrap !important; }
@@ -661,6 +503,14 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 /* 503/tomt lager: fast overlay nederst til hoejre i stedet for over soegekortet */
 @media (min-width:1024px){
   body.srp .data-afbrud{ top:auto; bottom:16px; }
+}
+/* V3: uden hero ligger søgefeltet og resultatlinjen højt oppe, så et fejlbanner i flowet (under 1024 px lagde backend-bridge det øverst i #so-results)
+   flyttede en stor del af skærmen, når svaret kom (CLS 0,09-0,20). Banneret er nu et fast bundkort på alle bredder: ude af flowet, kan ikke flytte noget. */
+@media (max-width:1023px){
+  body.srp .data-afbrud.data-afbrud-flow{
+    position:fixed; top:auto; bottom:12px; left:var(--gutter); right:var(--gutter); margin:0 auto; max-width:680px;
+    z-index:99; box-shadow:var(--shadow-md);
+  }
 }
 /* Bundmoduler: kompakt linkgitter (kun >= 1100 px; under det er layoutet uændret, ellers CLS ved 768) */
 @media (min-width:1100px){
@@ -677,12 +527,9 @@ main > .container:has(> section.section > .section-head + .popular-row) .popular
 }
 /* Filter: lange maerke-/modellister scroller internt, saa Type bliver paa plads */
 .so-more #brand-list, .so-more #filter-models{ max-height:176px; overflow:auto; overscroll-behavior:contain; }
-/* tap-maal */
-.so-f-kk .kk-seg label{ min-width:40px; }
 @media (min-width:760px){ #results-grid:not(.list-view) .rk-fod{ padding-top:0; } #results-grid:not(.list-view) .rk-chip{ padding:3px 5px; } }
 .so-layout .so-more-btn{ min-height:40px; }
 .so-layout #filter-price-quick .chip, .so-layout .filter-body .chip{ min-height:40px; }
-.so-card .so-clear{ width:40px; height:40px; }
 @media (min-width:760px){
   #results-grid:not(.list-view) .rk-chips{ flex-wrap:nowrap !important; }
   #results-grid:not(.list-view) .rk-chip{ min-width:0; overflow:hidden; text-overflow:ellipsis; flex-shrink:1; }
@@ -722,3 +569,20 @@ main > .container:has(> section.section > .section-head + .popular-row) .popular
    den holdte højde, så ét kort stod 655 px højt, derefter 322, derefter 210 — og hver ny portion flyttede rækkerne nedenunder (CLS 0,05). Rækkerne
    beholder nu deres egen højde, og min-height holder kun sidens bund på plads. */
 #results-grid{ align-content:start; }
+
+/* Bundmodulerne ligger under gitteret. Skifter det forudtegnede gitter (24 kort) til en kort fejl-/tomtilstand, rykker de op i billedet; visibility
+   skjuler dem uden at ændre layoutet, indtil search.js har sat html.so-klar. Uden JS vises de efter 2 s (animationen) — aldrig skjult for evigt. */
+@keyframes so-bund-vis{ to{ visibility:visible; } }
+html:not(.so-klar) main > .container:has(> section.section > .section-head + .popular-row){ visibility:hidden; animation: so-bund-vis 0s linear 2s forwards; }
+
+/* V3 micro-interactions: diskrete, kun opacitet/baggrund/skala, slukket under prefers-reduced-motion. */
+.so-checklist .chip, .so-quick .chip{ transition: background-color .12s var(--ease-out), border-color .12s var(--ease-out), color .12s var(--ease-out); }
+.so-q-go{ transition: transform .1s var(--ease-out), background-color .15s var(--ease-out); }
+.so-q-go:active{ transform: scale(.97); }
+.so-chips .active-filter-pill{ animation: so-pille-ind .16s var(--ease-out) both; }
+@keyframes so-pille-ind{ from{ opacity:0; } to{ opacity:1; } }
+@media (prefers-reduced-motion: reduce){
+  .so-checklist .chip, .so-quick .chip, .so-q-go{ transition:none; }
+  .so-q-go:active{ transform:none; }
+  .so-chips .active-filter-pill{ animation:none; }
+}

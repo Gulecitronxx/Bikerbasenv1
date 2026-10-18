@@ -75,7 +75,7 @@ const overflow = s => s.page.evaluate(() => [document.documentElement.scrollWidt
 const skip = chromium ? false : 'Playwright mangler';
 
 
-test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet, kompakt hero', { skip }, async () => {
+test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet, ingen hero', { skip }, async () => {
   const s = await aabn({ w: 1440, n: 44 });
   try {
     await gaa(s, 'soegning.html');
@@ -84,25 +84,24 @@ test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet,
       const med = R('#results-grid .card .card-media');
       const knap = document.getElementById('save-search-btn');
       return { ratio: med.width / med.height, chiprow: getComputedStyle(document.getElementById('so-chiprow')).display,
-        knapI: !!knap.closest('#so-results-head'), cardBund: R('.so-card').bottom, toolbarTop: R('#so-results-head').top };
+        knapI: !!knap.closest('#so-results-head'), cardBund: R('.so-q').bottom, toolbarTop: R('#so-results-head').top };
     });
     assert.ok(m.ratio > 2.2 && m.ratio < 2.4, 'foto-format ' + m.ratio);
     assert.equal(m.chiprow, 'none');
     assert.ok(m.knapI, 'Gem søgning i resultathovedet');
-    assert.ok(m.cardBund <= 330, 'søgekortets underkant ' + m.cardBund);
-    assert.ok(m.toolbarTop <= 360, 'resultathovedet starter højt: ' + m.toolbarTop);
+    assert.ok(m.cardBund <= 200, 'søgefeltets underkant ' + m.cardBund);
+    assert.ok(m.toolbarTop <= 260, 'resultathovedet starter højt: ' + m.toolbarTop);
     const n = await s.page.evaluate(() => {
       const R = e => document.querySelector(e).getBoundingClientRect();
-      const bk = R('.so-hero .so-breadcrumb');
-      return { heroH: R('.so-hero').height, band: R('#so-infoband').height, bkSynlig: bk.width > 2 && bk.height > 2,
+      const bk = R('.so-top .so-breadcrumb');
+      return { band: R('#so-infoband').height, bkSynlig: bk.width > 2 && bk.height > 2,
         sorteringsnote: getComputedStyle(document.getElementById('sortering-note')).display,
         kortH: R('#results-grid .card').height, kortBredde: R('#results-grid .card').width,
-        kortIHero: R('.so-card').bottom <= R('.so-hero').bottom + 1 };
+        ingenHero: !document.querySelector('.so-hero, .so-card') };
     });
-    assert.ok(n.heroH <= 190, 'hero ' + n.heroH);
-    assert.ok(n.kortIHero, 'søgekortet ligger i bannerfotoet');
+    assert.ok(n.ingenHero, 'hero og søgekort er fjernet (V3)');
     assert.ok(n.band <= 44, 'info-bånd er én linje: ' + n.band);
-    assert.ok(!n.bkSynlig, 'brødkrumme er kun for skærmlæsere i hero');
+    assert.ok(n.bkSynlig, 'brødkrummen er synlig over søgefeltet');
     assert.equal(n.sorteringsnote, 'block', 'sorteringsreglen er synlig i info-linjen');
     assert.ok(n.kortH >= 195 && n.kortH <= 215, 'kort højde ' + n.kortH);
     const [sw, cw] = await s.page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
@@ -139,7 +138,7 @@ test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme fel
         samIFoto: kort.filter(k => k.querySelector('.card-media .card-compare')).length,
         titelLinjer: Math.max(...kort.map(k => { const t = k.querySelector('.rk-titel'); return Math.round(t.getBoundingClientRect().height / parseFloat(getComputedStyle(t).lineHeight)); })),
         hoejder: [...new Set(kort.map(k => Math.round(k.getBoundingClientRect().height)))],
-        brodkrumme: document.querySelector('.so-hero .so-breadcrumb').getBoundingClientRect().width,
+        brodkrumme: document.querySelector('.so-top .so-breadcrumb').getBoundingClientRect().width,
         bundH: (() => { const c = document.querySelector('main > .container:last-of-type'); return c.getBoundingClientRect().height; })(),
         info: (() => { const b = document.getElementById('so-infoband'); return [...b.querySelectorAll('*')].filter(e => e.offsetParent && e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== 'visible' && getComputedStyle(e).textOverflow === 'ellipsis').length; })(),
       };
@@ -154,7 +153,7 @@ test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme fel
   } finally { await s.luk(); }
 });
 
-test('503 ved 1440: fejlbanneret dækker ingen af søgekortets kontroller (elementFromPoint)', { skip }, async () => {
+test('503 ved 1440: fejlbanneret dækker ingen af søgefeltets kontroller (elementFromPoint)', { skip }, async () => {
   const s = await aabn({ w: 1440, n: 44, fail: 503 });
   try {
     await gaa(s, 'soegning.html');
@@ -170,7 +169,7 @@ test('503 ved 1440: fejlbanneret dækker ingen af søgekortets kontroller (eleme
       return { fejl, overlap: !(ban.right <= kort.left || ban.left >= kort.right || ban.bottom <= kort.top || ban.top >= kort.bottom) };
     });
     assert.deepEqual(r.fejl, []);
-    assert.equal(r.overlap, false, 'banneret overlapper ikke søgekortet');
+    assert.equal(r.overlap, false, 'banneret overlapper ikke søgefeltet');
   } finally { await s.luk(); }
 });
 

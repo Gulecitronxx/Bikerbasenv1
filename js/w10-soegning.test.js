@@ -82,33 +82,35 @@ test('markup: Viser-linje og Gem søgning-panel findes, panelet er ærligt (inge
   assert.match(html, /<section class="so-agent" id="so-agent"[^>]*hidden>/);
   assert.match(html, /Der sendes endnu ingen e-mails/);
   assert.doesNotMatch(html.match(/<section class="so-agent"[\s\S]*?<\/section>/)[0], /vi sender|du får en e-mail|besked når/i);
-  assert.match(css, /\.so-hero\{ display:flow-root;/, 'hero indeslutter kortets negative margen, så det rent faktisk overlapper');
+  assert.doesNotMatch(css, /\.so-hero|\.so-card\b/, 'V3: død hero-/søgekort-CSS er fjernet');
   assert.match(js, /function renderViser\(/);
   assert.match(js, /getElementById\('so-agent-btn'\)\?\.addEventListener\('click', \(\) => document\.getElementById\('save-search-btn'\)\.click\(\)\)/);
 });
 
-test('desktop 1440: lav hero med overlappende kort, resultathoved på én linje, 4 kolonner, titel og pris på samme linje', { skip }, async () => {
+test('desktop 1440: ingen hero (resultathoved højt oppe), kompakt søgefelt, resultathoved på én linje, 4 kolonner, titel og pris på samme linje', { skip }, async () => {
   const s = await aabn({ w: 1440, n: 44 });
   try {
     await gaa(s, 'soegning.html');
     const m = await s.page.evaluate(() => {
       const R = e => document.querySelector(e).getBoundingClientRect();
-      const hero = R('.so-hero'), card = R('.so-card'), c0 = document.querySelector('#results-grid .card');
+      const q = R('.so-q'), c0 = document.querySelector('#results-grid .card');
       const t = c0.querySelector('.rk-titel').getBoundingClientRect(), pr = c0.querySelector('.rk-pris').getBoundingClientRect();
       const mid = e => { const r = R(e); return r.top + r.height / 2; };
       return {
-        heroH: hero.height, overlapTop: card.top < hero.bottom, card_bund_i_hero: card.bottom <= hero.bottom + 1,
-        h1: parseFloat(getComputedStyle(document.querySelector('.so-h1-title')).fontSize),
+        qBund: q.bottom, qH: q.height, hero: !!document.querySelector('.so-hero'),
+        h1Skjult: (() => { const r = R('h1'); return r.width <= 2 && r.height <= 2; })(),
+        toolbarTop: R('#so-results-head').top,
         linje: [mid('#results-count'), mid('.sort-felt'), mid('.view-toggle')], infoH: R('#so-infoband').height,
         titelPris: Math.abs(t.top - pr.top) < 8, kolonner: getComputedStyle(document.querySelector('#results-grid')).gridTemplateColumns.split(' ').length,
         viser: document.getElementById('so-viser').textContent, agentSynlig: !document.getElementById('so-agent').hidden,
         pagLinks: [...document.querySelectorAll('#pagination a[data-page]')].map(a => { const r = a.getBoundingClientRect(); return [r.width, r.height]; }),
       };
     });
-    assert.ok(m.heroH <= 300, `hero ${m.heroH}`);
-    /* W14: ved >= 1100 ligger søgekortet INDE i bannerfotoet (som mockuppen) i stedet for at hænge ned over kanten. */
-    assert.ok(m.overlapTop && m.card_bund_i_hero, 'kortet ligger i bannerfotoet');
-    assert.ok(m.h1 <= 44, `h1 ${m.h1}`);
+    /* V3: ingen hero — søgefeltet er en kompakt linje og resultathovedet starter højt. */
+    assert.equal(m.hero, false, 'ingen .so-hero');
+    assert.ok(m.qH <= 50, `søgefelt ${m.qH}`);
+    assert.ok(m.h1Skjult, 'h1 er kun for skærmlæsere');
+    assert.ok(m.toolbarTop <= 260, `resultathovedet starter højt: ${m.toolbarTop}`);
     assert.ok(Math.max(...m.linje) - Math.min(...m.linje) < 8, 'tal, sortér og gitter/liste på samme linje ' + m.linje);
     /* W14: ærlighedsteksten ombrydes i stedet for at blive afkortet (to rolige linjer, sorteringsnoten synlig). */
     assert.ok(m.infoH <= 60, `info-linje ${m.infoH}`);

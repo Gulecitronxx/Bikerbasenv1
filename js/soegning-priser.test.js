@@ -33,19 +33,16 @@ test('båndene er sammenhængende og har unikke id\'er', () => {
   PRIS.forEach(p => assert.ok(p.label && !/\d{4,}/.test(p.label), `etiketten bruger punktum som tusindtalsskilletegn: ${p.label}`));
 });
 
-test('søgekortets Maks. pris-valg er tal, der også kan stå i URL\'en (?maxPrice=)', () => {
-  const valg = [...html.matchAll(/<select class="input" id="so-price">([\s\S]*?)<\/select>/g)][0][1];
-  const vaerdier = [...valg.matchAll(/value="(\d*)"/g)].map(m => m[1]);
-  assert.equal(vaerdier[0], '', 'første valg er "Alle priser"');
-  vaerdier.slice(1).forEach(v => assert.ok(Number(v) > 0 && Number.isFinite(Number(v)), `ugyldigt prisvalg: ${v}`));
+test('V3: hero og søgekort er fjernet — kun brødkrumme og ét kompakt søgefelt står tilbage', () => {
+  assert.doesNotMatch(html, /so-hero|class="so-card|id="so-price"|id="so-type"|name="so-koerekort"/);
+  assert.match(html, /<form class="so-q" id="srp-search"/);
+  // Type, pris og kørekort findes stadig som sidebar-filtre.
+  assert.match(html, /id="filter-types"/);
+  assert.match(html, /id="range-price"/);
+  assert.match(html, /id="filter-koerekort"/);
 });
 
-test('søgekortets kørekortvalg er de samme som lagerets (Alle, A1, A2, A)', () => {
-  const ids = [...html.matchAll(/name="so-koerekort" id="so-kk-[^"]*" value="([^"]*)"/g)].map(m => m[1]);
-  assert.deepEqual(ids, ['', 'A1', 'A2', 'A']);
-});
-
-test('søgefeltet i hero\'en er stadig #filter-q og bruger .input (kantkontrast, NF-3)', () => {
+test('søgefeltet øverst er stadig #filter-q og bruger .input (kantkontrast, NF-3)', () => {
   assert.match(html, /<input type="search" id="filter-q" class="input"/);
   assert.match(html, /id="brand-search"|<\/main>/);   // brand-search bygges af js/search.js
   assert.match(src, /<input type="text" id="brand-search" class="input"/, '#brand-search skal bruge .input (NF-5)');
@@ -53,6 +50,6 @@ test('søgefeltet i hero\'en er stadig #filter-q og bruger .input (kantkontrast,
 
 test('der er præcis én h1, og den er den dynamiske overskrift', () => {
   assert.equal((html.replace(/<!--[\s\S]*?-->/g, '').match(/<h1[\s>]/g) || []).length, 1);
-  assert.match(html, /<h1 class="search-heading so-h1">/);
+  assert.match(html, /<h1 class="search-heading so-h1 visually-hidden">/);
   assert.match(html, /id="so-h1-text"/);
 });
