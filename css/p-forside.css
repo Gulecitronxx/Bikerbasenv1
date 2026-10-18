@@ -565,7 +565,7 @@ body.home .kort-raekke .rk-pris{ font-size:15px; }
 }
 @media (min-width:1100px){ body.home .kort-raekke:empty{ min-height:290px; } body.home .kort-raekke > .lager-tomt-note{ min-height:290px; } }
 /* V2: hoejere foto paa udvalgte kort (billedet viser motorcyklen som hovedperson, ikke en smal stribe) */
-@media (min-width:1100px){ body.home .kort-raekke .card-rich .card-media{ aspect-ratio: 16 / 10; } }
+@media (min-width:1100px){ body.home .kort-raekke .card-rich .card-media{ aspect-ratio: 2 / 1; } }
 body.home .kort-raekke > .lager-tomt-note{
   display:flex; align-items:center; justify-content:center; text-align:center; min-height:200px; padding: var(--space-5);
   border:1px dashed var(--color-input-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg-muted); font-size:14px;
@@ -793,15 +793,15 @@ body.home .maerke-flise{ overflow:hidden; }
 body.home .maerke-flise .maerke-navn-skjult{ overflow:hidden; max-width:100%; }
 
 /* =====================================================================================================================
-   V2 iteration 2 (forside mod Forside.png): hoejere hero med lysere foto, stoerre soegekort, tillidsikoner uden cirkel,
+   V2 iteration 2 (forside mod Forside.png): lysere hero-foto, stoerre soegekort, tillidsikoner uden cirkel,
    rigere sektionsoverskrifter, hvidt "Saadan virker"-kort, hoejere typefliser, kort med dybde, kraftigere kolonne-titler.
    Kun eksisterende billeder; ingen nye tal eller tekster.
    ===================================================================================================================== */
 @media (min-width:1100px){
   /* 1. Hero: hoejere, lysere foto, stoerre overskrift (billedet: motivet fylder, teksten staar frit til venstre) */
-  body.home .hero{ min-height: 312px; padding-top: 30px; padding-bottom: 92px; }
-  body.home .hero h1{ font-size: clamp(44px, 3.7vw, 54px); text-shadow: 0 2px 18px rgba(0,0,0,.35); }
-  body.home .hero p.lead{ font-size:16.5px; max-width: 640px; text-shadow: 0 1px 10px rgba(0,0,0,.4); }
+  body.home .hero{ min-height: 262px; padding-top: 20px; padding-bottom: 66px; }
+  body.home .hero h1{ font-size: clamp(36px, 2.9vw, 41px); text-shadow: 0 2px 18px rgba(0,0,0,.35); }
+  body.home .hero p.lead{ font-size:15px; max-width: 640px; text-shadow: 0 1px 10px rgba(0,0,0,.4); }
   body.home .hero::after{
     background:
       linear-gradient(90deg,
@@ -812,7 +812,7 @@ body.home .maerke-flise .maerke-navn-skjult{ overflow:hidden; max-width:100%; }
       linear-gradient(0deg, color-mix(in srgb, var(--color-dark) 22%, transparent) 0%, transparent 30%);
   }
   body.home .hero-photo{ object-position: 50% 38%; }
-  body.home .hero-sok{ margin-top:-60px; background: linear-gradient(180deg, transparent 0, transparent 60px, var(--color-surface-2) 60px); }
+  body.home .hero-sok{ margin-top:-50px; background: linear-gradient(180deg, transparent 0, transparent 50px, var(--color-surface-2) 50px); }
   /* 2. Soegekort: hoejere felter, blodere skygge, tydeligere labels */
   body.home .search-panel{ border-radius:16px; padding: 16px 20px 12px; box-shadow: 0 18px 46px rgba(20,16,10,.24), 0 1px 3px rgba(20,16,10,.1); }
   body.home .search-panel .input, body.home .search-panel select.input{ min-height:48px; font-size:15px; }
@@ -828,28 +828,37 @@ body.home .maerke-flise .maerke-navn-skjult{ overflow:hidden; max-width:100%; }
   body.home .sek-hoved h2{ font-size:22px; font-weight:700; letter-spacing:-0.01em; }
   body.home .sek-hoved .section-link{ font-size:13.5px; }
   /* 5. Typefliser: hoejere, stoerre navn */
-  body.home .tile, body.home .tiles-raekke:empty{ height:118px; min-height:118px; }
+  body.home .tile, body.home .tiles-raekke:empty{ height:104px; min-height:104px; }
   body.home .tile .tile-navn{ font-size:17px; }
   body.home .tile .tile-count{ font-size:12.5px; }
   body.home .tile .tile-label{ left:14px; bottom:11px; }
   /* 6. Annoncekort: dybde, hoejere pris, loeft ved hover */
   body.home .kort-raekke .card{ border-radius:12px; box-shadow: 0 1px 2px rgba(20,16,10,.06), 0 6px 18px rgba(20,16,10,.07); transition: transform .15s ease, box-shadow .15s ease; }
   body.home .kort-raekke .card:hover{ transform: translateY(-2px); box-shadow: 0 2px 4px rgba(20,16,10,.08), 0 12px 26px rgba(20,16,10,.13); }
-  body.home .kort-raekke .rk-pris{ font-size:16.5px; font-weight:700; }
-  body.home .kort-raekke .rk-titel{ font-size:14.5px; }
+  body.home .kort-raekke .rk-pris{ font-weight:700; }
+  
   /* 7. Saadan virker: hvidt kort, ikke tonet baand */
-  body.home .saadan-hoved{ background: var(--color-surface); border-color: var(--color-border); box-shadow: 0 1px 2px rgba(20,16,10,.05), 0 6px 18px rgba(20,16,10,.05); }
+  body.home .saadan-hoved{ box-shadow: 0 1px 2px rgba(20,16,10,.05), 0 6px 18px rgba(20,16,10,.05); }
   body.home .saadan-hoved h2{ font-size:20px; }
   body.home .saadan-trin-punkt strong{ font-size:15.5px; }
   /* 8. Kolonner: kraftigere titler, dybde */
   body.home .kol h2, body.home .kol-hoved h2{ font-size:16.5px; font-weight:700; }
   body.home .kol{ box-shadow: 0 1px 2px rgba(20,16,10,.05), 0 6px 18px rgba(20,16,10,.05); }
 }
-:root[data-theme="dark"] body.home .saadan-hoved{ background: var(--color-surface); }
 @media (prefers-reduced-motion:reduce){ body.home .kort-raekke .card, body.home .kort-raekke .card:hover{ transition:none; transform:none; } }
 @media (max-width:759px){
   body.home .hero h1{ text-shadow: 0 2px 14px rgba(0,0,0,.4); }
   body.home .sek-hoved h2{ font-size:20px; font-weight:700; }
   body.home .kort-raekke .card{ box-shadow: 0 1px 2px rgba(20,16,10,.06), 0 4px 14px rgba(20,16,10,.07); border-radius:12px; }
-  body.home .saadan-hoved{ background: var(--color-surface); }
+}
+
+/* V2: kortet haardnes til <= 270 px (W14-graense) selv med to-linjers titel */
+@media (min-width:1100px){
+  body.home .kort-raekke .rk-body{ padding: 8px 11px 8px; gap:5px; }
+  body.home .kort-raekke .rk-titel{ min-height:2.3em; }
+}
+@media (min-width:1100px){
+  body.home .kort-raekke .rk-fod{ padding-top:2px; gap:1px; line-height:1.25; }
+  body.home .kort-raekke .rk-top{ gap:0; }
+  body.home .kort-raekke .rk-body{ gap:4px; }
 }
