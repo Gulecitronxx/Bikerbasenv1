@@ -563,7 +563,9 @@ body.home .kort-raekke .rk-pris{ font-size:15px; }
   body.home .kort-raekke .card-compare:not(.active){ opacity:0; transition: opacity .15s, transform .15s; }
   body.home .kort-raekke .card:hover .card-compare, body.home .kort-raekke .card:focus-within .card-compare, body.home .kort-raekke .card-compare:focus-visible{ opacity:1; }
 }
-@media (min-width:1100px){ body.home .kort-raekke:empty{ min-height:262px; } }
+@media (min-width:1100px){ body.home .kort-raekke:empty{ min-height:290px; } body.home .kort-raekke > .lager-tomt-note{ min-height:290px; } }
+/* V2: hoejere foto paa udvalgte kort (billedet viser motorcyklen som hovedperson, ikke en smal stribe) */
+@media (min-width:1100px){ body.home .kort-raekke .card-rich .card-media{ aspect-ratio: 16 / 10; } }
 body.home .kort-raekke > .lager-tomt-note{
   display:flex; align-items:center; justify-content:center; text-align:center; min-height:200px; padding: var(--space-5);
   border:1px dashed var(--color-input-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-fg-muted); font-size:14px;
@@ -740,7 +742,10 @@ body.home .maerke-flise .maerke-navn-skjult{ position:absolute; width:1px; heigh
 body.home .maerke-flise{ position:relative; }
 
 /* ---- Noter under kort og fliser: een linje (hele teksten staar i title og i DOM) ---- */
-body.home .sek-note{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* V2: forbeholdet maa aldrig afkortes midt i saetningen - noten bryder til flere linjer, og pladsen reserveres, saa den ikke skubber ved hydrering. */
+body.home .sek-note{ white-space:normal; overflow:visible; text-overflow:clip; line-height:1.45; }
+@media (min-width:600px){ body.home :is(#featured-sub, #types-sub):empty{ display:block; min-height:2.9em; } }
+@media (max-width:599px){ body.home :is(#featured-sub, #types-sub):empty{ display:block; min-height:5.8em; } }
 
 /* ---- Sammenfoldet "Mere om"-lag lige over footeren ---- */
 body.home .mere-om{ margin-top: var(--space-4); border-top:1px solid var(--color-border); }
@@ -767,7 +772,6 @@ body.home .site-footer{ margin-top: var(--space-5); }
       url(../img/hero-800.webp) 92% 62% / auto 190% no-repeat;
   }
   body.home .guide-boks > div{ max-width: 66%; }
-  body.home .kol-note{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 }
 body.home .mere-om > summary{ padding-inline: var(--space-4); text-align:center; }
 body.home .mere-om > summary > span{ min-width:0; }

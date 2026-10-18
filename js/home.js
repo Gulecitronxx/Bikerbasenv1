@@ -480,7 +480,9 @@ async function buildForside(){
   const saelgPanel = featuredSection && featuredSection.querySelector('.saelg-panel');
   // En overskrift uden indhold under ser i stykker ud — men sælg-panelet skal blive stående.
   const udvalgHoved = featuredMount.closest('.udvalg-hoved');
-  if (udvalgHoved) udvalgHoved.hidden = kandidater.length === 0 && !tomtLager;
+  /* V2: overskrift + reserveret kortrække bliver stående også uden kandidater (en ærlig tekst fylder pladsen) —
+     at skjule dem fik sælg-panelet til at hoppe (CLS 0,36 ved 1440, 0,04 ved 390). */
+  if (udvalgHoved) udvalgHoved.hidden = false;
   if (featuredSection && kandidater.length === 0 && !saelgPanel) featuredSection.hidden = true;
 
   /* Antallet af kort følger antallet af spalter (ellers står der en enlig efternøler): målt på
