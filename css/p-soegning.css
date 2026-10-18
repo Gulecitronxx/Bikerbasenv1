@@ -717,3 +717,8 @@ main > .container:has(> section.section > .section-head + .popular-row) .popular
 @media (max-width:759px){
   #results-grid:not(.list-view) .rk-chip.rk-kk{ margin-right:100%; flex-shrink:0; }
 }
+
+/* CLS-rod: paintCards() holder gitterets højde (min-height), mens kortene males portionsvis. Uden align-content:start strakte gitterets rækker sig til
+   den holdte højde, så ét kort stod 655 px højt, derefter 322, derefter 210 — og hver ny portion flyttede rækkerne nedenunder (CLS 0,05). Rækkerne
+   beholder nu deres egen højde, og min-height holder kun sidens bund på plads. */
+#results-grid{ align-content:start; }
