@@ -692,8 +692,8 @@ main > .container:has(> section.section > .section-head + .popular-row) .popular
 @media (max-width:759px){
   .typefoto .typefoto-label{ left:6px; bottom:6px; max-width:calc(100% - 12px); font-size:10px; line-height:1.15; padding:3px 6px; white-space:nowrap; }
 }
-/* 320-359 px: kortet er ca. 138 px bredt, så hele teksten kan ikke stå på én linje. Halen er visuelt skjult men læses stadig op. */
-@media (max-width:359px){
+/* Under 760 px er kortet 138-190 px bredt og deler fotoet med sammenlign-knappen, så hele teksten kan ikke stå på én linje uden at ramme knappen. Halen er visuelt skjult men læses stadig op, og title bærer forklaringen. */
+@media (max-width:759px){
   .typefoto .typefoto-label .tf-hale{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
 }
 
@@ -705,4 +705,15 @@ main > .container:has(> section.section > .section-head + .popular-row) .popular
 }
 @media (max-width:759px){
   .listing-row .row-title{ white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+}
+
+.so-toolbar .sort-felt[hidden], .so-toolbar .view-toggle[hidden]{ display:none !important; }
+/* Typefoto i listevisningen: samme ærlige fallback som gitteret. Rækkens foto er lille, så kun "Typefoto" står synligt (resten i DOM/oplæsning). */
+.row-media .typefoto{ position:relative; width:100%; height:100%; }
+.row-media .typefoto .typefoto-label{ left:4px; bottom:4px; max-width:calc(100% - 8px); font-size:10px; padding:3px 5px; white-space:nowrap; }
+.row-media .typefoto .typefoto-label .tf-hale{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+
+/* V2: kørekortchippen står på sin egen række i de smalle gitterkort, så ccm og hk står sammen på næste række i stedet for at hk står alene. */
+@media (max-width:759px){
+  #results-grid:not(.list-view) .rk-chip.rk-kk{ margin-right:100%; flex-shrink:0; }
 }

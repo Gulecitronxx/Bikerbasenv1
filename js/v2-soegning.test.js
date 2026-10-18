@@ -300,3 +300,48 @@ test('egen annonce: galleri bladrer, lightbox åbner/bladrer/lukker med Esc, og 
     assert.deepStrictEqual(s.fund, []);
   } finally { await s.ctx.close(); }
 });
+
+test('iteration 2: listevisning bruger samme ærlige typefoto som gitteret, tomtilstand skjuler sortering/visning, ?page=99 normaliseres', { timeout: 120000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn();
+  try {
+    await s.gaa('soegning.html?brands=Ducati'); await s.page.click('#view-list'); await hvil(s.page, 500);
+    const r = await s.page.evaluate(() => ({
+      tf: document.querySelectorAll('#results-grid .row-media .typefoto').length,
+      ingen: document.querySelectorAll('#results-grid .row-media .foto-tom').length,
+      label: document.querySelector('#results-grid .row-media .typefoto-label')?.textContent }));
+    assert.ok(r.tf > 0, 'typefoto i listen');
+    assert.strictEqual(r.ingen, 0, 'ingen "Ingen fotos"-felt i listen, når typen har et typefoto');
+    assert.match(r.label, /Typefoto/);
+    await s.page.click('#view-grid');
+    assert.ok(await s.page.locator('.sort-felt').isVisible() && await s.page.locator('.view-toggle').isVisible());
+    await s.page.fill('#filter-q', 'zzzzz'); await hvil(s.page, 700);
+    assert.ok(!(await s.page.locator('.sort-felt').isVisible()) && !(await s.page.locator('.view-toggle').isVisible()), 'ingen sortering/visning uden resultater');
+    await s.page.fill('#filter-q', ''); await hvil(s.page, 700);
+    assert.ok(await s.page.locator('.sort-felt').isVisible() && await s.page.locator('.view-toggle').isVisible(), 'tilbage med resultater');
+    await s.gaa('soegning.html?page=99'); await hvil(s.page);
+    assert.strictEqual(await s.page.evaluate(() => location.search), '?page=5');
+    assert.deepStrictEqual(await s.brud(), []);
+  } finally { await s.ctx.close(); }
+});
+
+test('iteration 2 mobil 390: kørekortchip på egen række, nøgletal 2x2, lav kørekortbadge, brødkrumme uden aktuel side', { timeout: 120000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ w: 390, h: 844, udenVagt: true });
+  try {
+    await s.gaa('soegning.html'); await hvil(s.page, 500);
+    const rk = await s.page.evaluate(() => [...document.querySelectorAll('#results-grid > article')].slice(0, 6).map(a => {
+      const kk = a.querySelector('.rk-kk'), ccm = [...a.querySelectorAll(".rk-chip")].find(c => /^\s*[\d.]+ ccm\s*$/.test(c.textContent));
+      return kk && ccm ? ccm.getBoundingClientRect().top - kk.getBoundingClientRect().top : null; }).filter(x => x !== null));
+    assert.ok(rk.length > 0 && rk.every(d => d > 10), 'ccm står under kørekortchippen: ' + rk);
+    await s.gaa('annonce.html?id=' + fx.egneRaekker()[0].id); await hvil(s.page, 500);
+    const m = await s.page.evaluate(() => ({
+      raekker: new Set([...document.querySelectorAll('.an-stats li')].map(l => Math.round(l.getBoundingClientRect().top))).size,
+      antal: document.querySelectorAll('.an-stats li').length,
+      badge: document.querySelector('.an-kk-badge').getBoundingClientRect().height,
+      bc: document.querySelector('#bc-current').getBoundingClientRect().width }));
+    assert.strictEqual(m.raekker, Math.ceil(m.antal / 2), `nøgletal i 2 kolonner (${m.antal} stk, ${m.raekker} rækker)`);
+    assert.ok(m.badge < 90, 'kørekortbadge er lav: ' + m.badge);
+    assert.ok(m.bc <= 1, 'aktuel side skjult visuelt i brødkrummen');
+  } finally { await s.ctx.close(); }
+});
