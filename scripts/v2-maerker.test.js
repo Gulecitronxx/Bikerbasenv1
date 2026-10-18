@@ -21,3 +21,11 @@ test('V2: kørekortfakta på kørekortsiderne', () => {
   assert.match(a, /24 år/); assert.match(a, /22 år/);
   assert.match(rd('koerekort-a1.html'), /0,1 kW pr\. kg/);
 });
+
+test('V2 iteration 2: modelfliser, kolonner og annoncepanel', () => {
+  const m = fs.readFileSync(path.join(__dirname, '..', 'css', 'p-maerke.css'), 'utf8');
+  assert.match(css, /\.fa-modeller\{ grid-template-columns: repeat\(auto-fit/);
+  assert.match(css, /\.fa-modeller:has\(> li:nth-child\(5\)\)/);
+  assert.match(m, /\.mk-cols\{ align-items:stretch; \}/);
+  assert.match(m, /\.mk-cta-body \.btn\{ margin-top:auto; \}/);
+});

@@ -17,3 +17,23 @@ Sammenlignet med mockups Mærker.png, Sport motorcykler.png, Motorcykler til A 2
 
 ## Tests
 `scripts/v2-maerker.test.js` (ikke tilføjet til package.json).
+
+## Iteration 2
+Før: `maerker-shots/foer/`, efter: `maerker-shots/efter/` (1440 og 390, lys og mørk, 3 sider).
+
+### Forskelsliste (mockup vs. vores)
+**Mærke (Yamaha)**: (1) mockuppens hero har rytterfoto og slogan, vores kun logo + overskrift (ikke efterlignet: intet ærligt foto/slogan); (2) tre kolonner (modeller/kørekort/region) havde tre forskellige højder; (3) annoncepanelet var halvt tomt i bunden; (4) region-fliserne stod som lille klump over tomt rum; (5) tillidsrækken er boksformet, mockuppens er en flad række; (6) modelfliserne i mockuppen har ikon + antal i fast række.
+**Type (Sport)**: (1) hero uden rytter; (2) "Populære modeller" var ujævne fliser med hul til højre; (3) etiketter i filterrækkerne havde forskellig bredde, så chips startede forskudt; (4) kortfoto fra forhandlere (MC Syd-skilt) dominerer; (5) mockuppens "typer"-række findes kun på A2-siden; (6) CTA-foto overlappede tekst (rettet i iteration 1).
+**Kørekort (A2)**: samme som type, plus (7) modelfliser 4+2 med halvtom række.
+
+### Rettet (kun CSS i p-facet.css / p-maerke.css)
+- Modelfliser: fylder rækken, lige høje, titel max 2 linjer; 5-6 modeller i 3 kolonner (A2-siden: 3x2 i stedet for 4+2).
+- Filter-/sorteringsrækker: ens etiketbredde (chips justeret).
+- Udforsk-efter-behov: lige høje kort.
+- Mærke: tre kolonner samme højde, regionsfliser jævnt fordelt, modelfotos lavere (21:9), kørekortlinks forankret i bunden.
+- Mærke-annoncepanel: mærketonet baggrund, knap forankret i bunden (intet tomt hvidt felt).
+- Mørk tilstand set for mærke og type; mobil (390) uændret layout, smoke 0 fejl.
+
+### Ikke gjort
+`node scripts/build.js` / `kritisk-gen.js` blev afvist af værktøjets tilladelsesspærre (produktionslæsning), så generatorer er ikke kørt og kritisk inline CSS er ikke regenereret. Ændringerne er kun i de linkede CSS-filer og virker på de eksisterende byggede sider; Orchestrator skal køre build -> kritisk-gen -> build. Ingen generator-ændringer.
+Tests: `scripts/v2-maerker.test.js` (3 tests).
