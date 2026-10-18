@@ -1226,6 +1226,15 @@ function initCookieConsent(){
     if (dialog.showModal) dialog.showModal();
     else dialog.setAttribute('open', '');   // aeldre browser: dialogen vises, men uden top-lag
   }
+  /* V3 QA: en indholdsblokker (Brave Shields' "Block cookie notices", uBlock/EasyList Cookie, udvidelser)
+     kan skjule #cookie-banner med display:none. En skjult showModal()-dialog gør stadig resten af siden
+     inert (hverken klik eller tastatur) — brugeren ser en død side uden at kunne svare. Er dialogen ikke
+     synlig, lukkes den, så siden kan bruges; der gemmes intet samtykke (statistik forbliver slukket)
+     og dialogen kommer igen næste gang. */
+  const synlig = () => { const c = getComputedStyle(dialog); return c.display !== 'none' && c.visibility !== 'hidden' && dialog.offsetWidth > 0 && dialog.offsetHeight > 0; };
+  const slipSiden = () => { if (dialog.isConnected && dialog.open && !synlig()){ if (dialog.close) dialog.close(); dialog.removeAttribute('open'); dialog.setAttribute('hidden', ''); } };
+  slipSiden();
+  setTimeout(slipSiden, 600);   // filtre der lægges på efter første malede billede
   dialog.addEventListener('cancel', e => e.preventDefault());
 
   const svar = level => () => {
