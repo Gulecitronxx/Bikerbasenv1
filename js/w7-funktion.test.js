@@ -294,7 +294,7 @@ test('K4: Mine annoncer — statusskift/sletning der kaster: knappen åbnes igen
     updateListing: async () => { throw new TypeError('Failed to fetch'); },
     deleteListing: async () => ({ error: {} }),                       // fejl uden message
   };
-  const S = lavSide(MINE, ['skiftStatus', 'sletAnnonce', 'Store'], { db, efter: `EGNE_ALLE = [{ id: '${id}', brand: 'A', model: 'B', status: 'active', price: 1, year: 2000 }];` });
+  const S = lavSide(MINE, ['skiftStatus', 'sletAnnonce', 'Store'], { db, foer: 'var bekraeft = async () => true;', efter: `EGNE_ALLE = [{ id: '${id}', brand: 'A', model: 'B', status: 'active', price: 1, year: 2000 }];` });
   S.Store.setUser({ name: 'A', email: 'a@b.dk', remote: true });
   const knap = S.dom.el('knap');
   await S.skiftStatus(id, knap);

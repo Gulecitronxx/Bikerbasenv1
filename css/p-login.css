@@ -468,3 +468,6 @@ html[data-authtab="register"] .lg-steps, html[data-lgmode="register"] .lg-steps{
   .lg-card{ box-shadow: 0 -6px 24px rgba(20,16,12,.14), 0 10px 30px rgba(20,16,12,.18); }
 }
 @media (prefers-reduced-motion: reduce){ .lg-cta, .lg-card .input{ transition: none; } }
+
+/* V3: ingen enlige ord paa sidste linje i overskrifter og undertekst ("Bikerbasen" alene) */
+.lg-head h1, .lg-promo h2, .lg-head p, .lg-promo > p{ text-wrap: balance; }

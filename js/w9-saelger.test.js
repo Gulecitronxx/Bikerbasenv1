@@ -26,12 +26,23 @@ async function aabn(opts = {}, sti){
   const bak = lavBackend(opts);
   const ctx = await browser.newContext({ viewport: opts.viewport || { width: 1280, height: 900 }, acceptDownloads: false });
   await bak.installer(ctx, { tema: opts.tema || 'lys' });
+  /* V3: bekræftelser er en <dialog> (js/bekraeft-dialog.js), ikke window.confirm. Testen svarer automatisk: window.__bekraeftSvar = 'ja' | 'nej'. */
+  await ctx.addInitScript(() => {
+    window.__bekraeftSvar = 'ja';
+    document.addEventListener('DOMContentLoaded', () => new MutationObserver(() => {
+      const d = document.querySelector('dialog.bb-bekraeft[open]');
+      if (d && !d.dataset.auto){ d.dataset.auto = '1'; setTimeout(() => d.querySelector(window.__bekraeftSvar === 'ja' ? '[data-bekraeft-ok]' : '[data-bekraeft-nej]').click(), 30); }
+    }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['open'] }));
+  });
   const page = await ctx.newPage();
   const fund = { konsol: [], side: [], dialoger: [] };
   page.on('pageerror', e => fund.side.push(e.message));
   page.on('console', m => { if (m.type() === 'error' && !/blockedbyclient|Failed to load resource/.test(m.text())) fund.konsol.push(m.text()); });
   page.on('dialog', d => { fund.dialoger.push(d.message()); d.accept(); });
   if (sti) await page.goto(URL(sti), { waitUntil: 'networkidle' });
+  /* V3 (P2-2): #op-photos er synlig i den statiske HTML, så den siger intet om, om init (login-status + kladde) er færdig.
+     Opret-siden sætter body[data-op-klar] når formularen er klar; vent på den i stedet for at gætte på timing. */
+  if (sti && /^opret-annonce\.html$/.test(sti)) await page.waitForSelector('body[data-op-klar]', { timeout: 10000 });
   return { bak, ctx, page, fund, t: bak.tilstand, luk: () => ctx.close() };
 }
 const skaerm = async (page, navn) => { if (SKAERM) await page.screenshot({ path: path.join(SKAERM, navn + '.png') }); };
@@ -179,7 +190,7 @@ test('K2c Udlogget: Fortsæt gemmer kladde og sender til login; efter login er f
     await s.page.fill('#login-password', 'testkode-123');
     await s.page.click('#login-form button[type="submit"], #login-submit');
     await s.page.waitForURL(/opret-annonce\.html/, { timeout: 10000 });
-    await s.page.waitForSelector('#op-photos', { state: 'visible', timeout: 5000 });   // W14: efter login er billedsektionen åben (før: gaten)
+    await s.page.waitForSelector('body[data-op-klar] #op-photos', { state: 'visible', timeout: 10000 });   // V3: vent på færdig init, ikke kun på at sektionen findes i HTML
     assert.strictEqual(await s.page.inputValue('#f-model'), 'MT-07');
     assert.strictEqual(s.t.tabeller.listings.length, 0, 'intet oprettet før Udgiv');
   } finally { await s.luk(); }
@@ -397,14 +408,14 @@ test('K6c Slet: afvist confirm = intet kald; godkendt = række væk, DELETE send
   const s = await aabn({ loggetInd: true, annoncer: TRE() }, 'mine-annoncer.html');
   try {
     await s.page.waitForSelector('.db-row');
-    s.page.removeAllListeners('dialog');
-    s.page.once('dialog', d => d.dismiss());
+    await s.page.evaluate(() => { window.__bekraeftSvar = 'nej'; });
     await raekke(s.page, a.id).locator('summary').click();
     await raekke(s.page, a.id).locator('[data-delete-listing]').click();
     await s.page.waitForTimeout(300);
     assert.strictEqual(s.t.log.filter(l => l.metode === 'DELETE' && l.tabel === 'listings').length, 0, 'afvist confirm = intet kald');
     assert.strictEqual(s.t.tabeller.listings.length, 3);
-    s.page.once('dialog', d => d.accept());
+    await s.page.evaluate(() => { window.__bekraeftSvar = 'ja'; });
+    if (!await raekke(s.page, a.id).locator('[data-delete-listing]').isVisible()) await raekke(s.page, a.id).locator('summary').click();   // menuen lukker, når dialogen tager fokus
     await raekke(s.page, a.id).locator('[data-delete-listing]').click();
     await s.page.waitForFunction(id => !document.querySelector(`.db-row[data-listing-id="${id}"]`), a.id);
     assert.strictEqual(s.t.tabeller.listings.length, 2);
