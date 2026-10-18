@@ -1928,7 +1928,7 @@ ${header}
         <div class="fa-hero-tekst">
           ${kicker ? `<p class="fa-kicker">${kicker}</p>` : ''}
           <h1>${h1}</h1>
-          <p class="fa-hero-intro">${introDelt.foerste}</p>
+          <p class="fa-hero-intro fa-intro-l${Math.max(2, Math.min(6, Math.ceil(String(introDelt.foerste).replace(/<[^>]*>/g, '').length / 48.5)))}">${introDelt.foerste}</p>
         </div>
         ${infoPanel(facet, items)}
       </div>

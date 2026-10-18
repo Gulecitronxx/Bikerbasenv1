@@ -727,3 +727,9 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 @media (max-width:640px){ .fa-cta-fod .btn{ flex:1 1 auto; } }
 /* V3: "Sport-motorcykler" blev afkortet i Type-feltet ved 390 px; Type får hele rækken, pris og årgang deler den næste. */
 @media (max-width:640px){ .fa-felt:has(> #fa-type), .fa-felt:has(#fa-type){ flex:1 1 100%; } }
+/* V3 (CLS 0,124 på mc-harley-davidson-cruiser @375): introens højde reserveres til det antal linjer, teksten fylder i en bredere
+   fallback-skrift (tegn / 48,5 pr. linje, sat ved byg). Når webfonten eller de hydrerede tal giver en linje færre, rykker panelet og
+   søgekortet under ikke. Kun smal skærm; linjehøjde 1,5 x 14,5 px som i reglen ovenfor. */
+@media (max-width:640px){
+  .fa-intro-l3{ min-height:65.25px; } .fa-intro-l4{ min-height:87px; } .fa-intro-l5{ min-height:108.75px; } .fa-intro-l6{ min-height:130.5px; }
+}
