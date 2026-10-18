@@ -252,7 +252,7 @@ function validateStep(n){
       valid = false; msg = 'Vælg venligst en motorcykeltype';
       markTypeError();
       const foersteType = document.querySelector('input[name="bike-type"]');
-      if (foersteType) fejl.push({ el: foersteType, besked: null, kunFokus: true });
+      if (foersteType) fejl.push({ el: foersteType, besked: 'Vælg motorcykeltype.', kunFokus: true });
     } else clearTypeError();
   }
   /* Trin 4 er to afkrydsningsfelter, ikke felter man udfylder. Sig hvad der mangler. */
@@ -280,8 +280,10 @@ function validateStep(n){
   });
   if (fejl.length && !refs.first) refs.first = fejl[0].el;
   const forste = fejl.find(f => f.besked);
-  if (forste) msg = fejl.filter(f => !f.kunFokus).length > 1
-    ? `${fejl.filter(f => !f.kunFokus).length} felter skal rettes. Først: ${forste.besked}` : forste.besked;
+  /* V3: typevalget tæller med og kan være "først" (det står øverst) — før sagde samlebeskeden "Først: Vælg mærke",
+     mens siden scrollede til typen og talte ét felt for lidt. */
+  if (forste) msg = fejl.length > 1
+    ? `${fejl.length} felter skal rettes. Først: ${forste.besked}` : forste.besked;
   if (!valid || msg){
     if (!valid && refs.first){
       refs.first.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -644,11 +646,11 @@ function renderPhotoGrid(){
     });
   });
   grid.querySelectorAll('[data-remove-existing]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const id = btn.dataset.removeExisting;
       const foto = existingPhotos.find(p => String(p.id) === String(id));
       if (!foto) return;
-      if (!confirm('Fjern dette billede fra annoncen? Det sker først når du gemmer.')) return;
+      if (!(await bekraeft({ titel: 'Fjern billedet?', tekst: 'Det fjernes først, når du gemmer ændringerne. Går du væk uden at gemme, bliver det på annoncen.', ok: 'Fjern billede', farlig: true }))) return;
       // Slettes først når annoncen gemmes, så man kan fortryde ved at gå væk.
       removedPhotoIds.push(foto);
       existingPhotos = existingPhotos.filter(p => String(p.id) !== String(id));
@@ -1301,10 +1303,14 @@ async function udgivTrin(){
 
 /* Fylder formularen med data i samme form som collectFormData returnerer.
    Bruges både af den gemte kladde og af redigering af en eksisterende annonce. */
-function fillForm(data){
+function fillForm(data, { bevarIndtastet = false } = {}){
+  /* bevarIndtastet: en kladde der lægges tilbage EFTER at brugeren er begyndt at skrive (langsom opstart),
+     må ikke overskrive det, brugeren selv har tastet. */
   const set = (id, value) => {
     const el = document.getElementById(id);
-    if (el && value != null && value !== '') el.value = value;
+    if (!el || value == null || value === '') return;
+    if (bevarIndtastet && el.value !== '' && el.value !== el.defaultValue) return;
+    el.value = value;
   };
   const typeRadio = document.querySelector(`input[name="bike-type"][value="${data.type}"]`);
   if (typeRadio){ typeRadio.checked = true; typeRadio.dispatchEvent(new Event('change', { bubbles: true })); }
@@ -1339,7 +1345,7 @@ function fillForm(data){
 function restoreDraft(){
   const draft = Store.getDraft()?.form;
   if (!draft) return false;
-  fillForm(draft);
+  fillForm(draft, { bevarIndtastet: true });
   return true;
 }
 
@@ -1466,6 +1472,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   wireForhaandsvisningsark();
   goToStep(startTrin);
   _ugemt = false;
+  /* V3: formularen er først klar her (login-status afgjort, kladde lagt tilbage). Før dette punkt er felterne tomme,
+     og tests/hjælpemidler kan ikke vide, om en kladde stadig er på vej. */
+  document.body.dataset.opKlar = '1';
   /* F-1: en gendannet kladde kan indeholde tal, der ikke består valideringen
      (gammel kladde, redigeret localStorage). Vis fejlene ved felterne med det samme. */
   if (!redigerId && draftUgyldig){

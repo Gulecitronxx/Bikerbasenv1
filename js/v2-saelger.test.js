@@ -21,6 +21,14 @@ async function aabn(opts = {}, sti, viewport = { width: 1280, height: 900 }, tem
   const bak = lavBackend(opts);
   const ctx = await browser.newContext({ viewport });
   await bak.installer(ctx, { tema });
+  /* V3: bekræftelser er en <dialog> (js/bekraeft-dialog.js), ikke window.confirm. Testen svarer automatisk: window.__bekraeftSvar = 'ja' | 'nej'. */
+  await ctx.addInitScript(() => {
+    window.__bekraeftSvar = 'ja';
+    document.addEventListener('DOMContentLoaded', () => new MutationObserver(() => {
+      const d = document.querySelector('dialog.bb-bekraeft[open]');
+      if (d && !d.dataset.auto){ d.dataset.auto = '1'; setTimeout(() => d.querySelector(window.__bekraeftSvar === 'ja' ? '[data-bekraeft-ok]' : '[data-bekraeft-nej]').click(), 30); }
+    }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['open'] }));
+  });
   const page = await ctx.newPage();
   const fund = [];
   page.on('pageerror', e => fund.push(e.message));
@@ -128,12 +136,13 @@ test('Mine annoncer: markér solgt, afvist = intet kald; godkendt = status sold;
     await p.waitForSelector('.db-row');
     const id = s.t.tabeller.listings[0].id;
     const raekke = p.locator(`.db-row[data-listing-id="${id}"]`);
-    p.removeAllListeners('dialog'); p.once('dialog', d => d.dismiss());
+    await p.evaluate(() => { window.__bekraeftSvar = 'nej'; });
     await raekke.locator('summary').click();
     await raekke.locator('[data-mark-sold]').click();
     await p.waitForTimeout(300);
     assert.strictEqual(s.t.log.filter(l => l.metode === 'PATCH').length, 0);
-    p.once('dialog', d => d.accept());
+    await p.evaluate(() => { window.__bekraeftSvar = 'ja'; });
+    if (!await raekke.locator('[data-mark-sold]').isVisible()) await raekke.locator('summary').click();   // menuen lukker, når dialogen tager fokus
     await raekke.locator('[data-mark-sold]').click();
     await p.waitForFunction(i => document.querySelector(`.db-row[data-listing-id="${i}"]`)?.dataset.status === 'sold', id);
     assert.strictEqual(s.t.tabeller.listings[0].status, 'sold');
@@ -142,7 +151,6 @@ test('Mine annoncer: markér solgt, afvist = intet kald; godkendt = status sold;
     s.t.fejl['PATCH listings'] = { status: 500, besked: 'mock' };
     const andet = s.t.tabeller.listings[1].id;
     const r2 = p.locator(`.db-row[data-listing-id="${andet}"]`);
-    p.once('dialog', d => d.accept());
     await r2.locator('summary').click(); await r2.locator('[data-mark-sold]').click();
     await p.waitForFunction(() => /kunne ikke markeres som solgt/.test(document.body.innerText));
     assert.strictEqual(s.t.tabeller.listings[1].status, 'active');

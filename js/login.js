@@ -42,7 +42,7 @@ const AUTH_ANNONCE = {
   tekst: 'Log ind for at se sælgerens navn og de kontaktoplysninger, sælgeren har oplyst. Det beskytter både køber og sælger.',
 };
 
-function anvendAuthKontekst(){
+function anvendAuthKontekst(kunTekst){
   const back = new URLSearchParams(window.location.search).get('redirect') || '';
   // Samme mønsterkrav som redirectAfterAuth: kun en relativ .html-sti.
   if (!/^[\w-]+\.html(\?[^#]*)?$/.test(back)) return;
@@ -52,7 +52,7 @@ function anvendAuthKontekst(){
 
   document.getElementById('auth-title').textContent = k.titel;
   document.getElementById('auth-subtitle').textContent = k.tekst;
-  if (k.fane === 'register') document.querySelector('[data-auth-tab="register"]')?.click();
+  if (!kunTekst && k.fane === 'register') document.querySelector('[data-auth-tab="register"]')?.click();
 }
 
 let pendingUser = null;
@@ -192,6 +192,9 @@ function showNewPasswordStep(){
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  /* V3 (CLS): overskrift og undertekst efter ?redirect= sættes FØR det første await. Før stod de først efter
+     backendReady(), så underteksten skiftede længde efter første tegning og skubbede formularen (CLS 0,036 ved 320 px). */
+  anvendAuthKontekst(true);
   /* SKAL kobles på FØR backendReady() rører klienten. Supabase læser
      recovery-tokenet fra adressen og sender PASSWORD_RECOVERY som en
      almindelig auth-hændelse, i det øjeblik klienten oprettes — en lytter,
@@ -349,7 +352,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Efter fanerne er koblet på — anvendAuthKontekst kan klikke på "Opret
   // profil", og det skal virke.
-  anvendAuthKontekst();
+  anvendAuthKontekst();   // anden gang: kun for at vælge fanen (tekst er allerede sat)
+
+  /* V3: musemarkør + tastatur: sæt markøren i første felt, så man kan skrive med det samme. Ikke på touch (ville åbne
+     tastaturet og skubbe siden), ikke når URL'en bærer et gendannelses-token (nulstil-trin viser andet felt først). */
+  try {
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !/[#&?](access_token|type=recovery|code=)/.test(location.hash + location.search)){
+      const foerste = ['#login-email', '#reg-name'].map(q => document.querySelector(q)).find(el => el && el.offsetParent);
+      if (foerste) foerste.focus({ preventScroll: true });
+    }
+  } catch (e) { /* fokus er en hjælp, aldrig et krav */ }
 
   document.getElementById('reg-dealer').addEventListener('change', (e) => {
     document.getElementById('kyc-fields').classList.toggle('show', e.target.checked);

@@ -683,8 +683,9 @@ function renderDashboard(user){
     }).join('');
     rowsEl.querySelectorAll('[data-del]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('Er du sikker på, at du vil slette denne annonce? Det kan ikke fortrydes.')) return;
         const id = btn.dataset.del;
+        const dl = (stats.find(x => String(x.listing.id) === String(id)) || {}).listing;
+        if (!(await bekraeft({ titel: `Slet ${dl ? [dl.brand, dl.model].filter(Boolean).join(' ') : 'annoncen'}?`, tekst: 'Annoncen og dens billeder fjernes helt. Det kan ikke fortrydes.', ok: 'Slet annonce', farlig: true }))) return;
         // Samme fælde som i "Mine annoncer": Number() på et uuid giver NaN,
         // så sletningen ramte kun localStorage og annoncen blev i databasen.
         if (isUuid(id)){

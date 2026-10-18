@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-YtJEBXvGTqKFRFjnuExED09xsaHLWtXEOP5H740fGmg=' 'sha256-CgXaw1f16XDiAZb/jsxgv1WvlAcuUHVLzIiuDp3dFWc=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-YtJEBXvGTqKFRFjnuExED09xsaHLWtXEOP5H740fGmg=' 'sha256-mSow4xwc547aMMn41v9zhq0d2LlSdTEtyDc6qP4roaY=' 'sha256-CgXaw1f16XDiAZb/jsxgv1WvlAcuUHVLzIiuDp3dFWc=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Log ind — Bikerbasen</title>
 <meta name="description" content="Log ind eller opret en profil på Bikerbasen for at gemme annoncer og oprette dine egne annoncer.">
@@ -157,6 +157,15 @@ html[data-authtab="register"] #register-form{ display:block !important; }
           <h1 id="auth-title"><span class="lg-only-login">Log ind på Bikerbasen</span><span class="lg-only-register">Opret din gratis konto</span></h1>
           <p id="auth-subtitle"><span class="lg-only-login">Få adgang til dine favoritter, gemte søgninger og annoncer – alt samlet ét sted.</span><span class="lg-only-register">Udfyld felterne herunder, så er du klar.</span></p>
         </div>
+        <script>/* V3: saet overskrift/undertekst efter ?redirect= FOER foerste maling (ellers skifter underteksten laengde bagefter og skubber formularen, CLS). Samme tekster som AUTH_KONTEKST i js/login.js (laast af test). */(function(){try{
+          var T={"opret-annonce.html":["Sælg din motorcykel","Opret en profil eller log ind for at lægge billeder på og udgive. Din kladde er gemt på denne enhed. Gratis for private."],"mine-annoncer.html":["Dine annoncer og favoritter","Log ind for at se de annoncer, du har gemt, og dem du selv har oprettet."],"dashboard.html":["Dit overblik","Log ind for at se visninger, telefonvisninger og status på dine annoncer."],"forhandler.html":["Se forhandlerens profil","Forhandlerens profil er kun synlig for indloggede brugere. Det beskytter både køber og sælger."]};
+          var b=new URLSearchParams(location.search).get("redirect")||"";
+          if(!/^[\w-]+\.html(\?[^#]*)?$/.test(b))return;
+          var f=b.split("?")[0],k=T[f];
+          if(!k&&/^annonce(-.+)?\.html$/.test(f))k=["Kontakt sælgeren","Log ind for at se sælgerens navn og de kontaktoplysninger, sælgeren har oplyst. Det beskytter både køber og sælger."];
+          if(!k)return;
+          document.getElementById("auth-title").textContent=k[0];document.getElementById("auth-subtitle").textContent=k[1];
+        }catch(e){}})();</script>
 
         <form id="login-form" novalidate>
           <div class="lg-fields">

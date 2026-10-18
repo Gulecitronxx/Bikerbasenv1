@@ -290,7 +290,7 @@ async function skiftStatus(id, btn){
 async function markerSolgt(id, btn){
   const l = egneListe().find(x => String(x.id) === String(id));
   if (!l) return;
-  if (!confirm('Markér annoncen som solgt? Den fjernes fra søgningen, men du kan sætte den til salg igen under Mine annoncer.')) return;
+  if (!(await bekraeft({ titel: `Markér ${[l.brand, l.model].filter(Boolean).join(' ') || 'annoncen'} som solgt?`, tekst: 'Annoncen fjernes fra søgningen. Du kan sætte den til salg igen under Mine annoncer.', ok: 'Markér som solgt' }))) return;
   btn.disabled = true;
   let svar;
   try { svar = await db.updateListing(id, { status: 'sold' }); }
@@ -307,7 +307,8 @@ async function markerSolgt(id, btn){
 }
 
 async function sletAnnonce(id, btn){
-  if (!confirm('Er du sikker på, at du vil slette denne annonce? Det kan ikke fortrydes.')) return;
+  const slet = egneListe().find(x => String(x.id) === String(id));
+  if (!(await bekraeft({ titel: `Slet ${slet ? [slet.brand, slet.model].filter(Boolean).join(' ') : 'annoncen'}?`, tekst: 'Annoncen og dens billeder fjernes helt. Det kan ikke fortrydes. Vil du bare skjule den, så sæt den på pause i stedet.', ok: 'Slet annonce', farlig: true }))) return;
   // Databaseannoncer har uuid som id. Number() på et uuid gav NaN, så sletningen
   // ramte kun localStorage og annoncen blev liggende i databasen.
   if (isUuid(id)){
@@ -384,8 +385,8 @@ function renderMine(){
   grid.querySelectorAll('[data-status-skift]').forEach(btn => {
     btn.addEventListener('click', () => skiftStatus(btn.dataset.statusSkift, btn));
   });
-  grid.querySelector('[data-delete-draft]')?.addEventListener('click', () => {
-    if (!confirm('Vil du slette kladden? Det kan ikke fortrydes.')) return;
+  grid.querySelector('[data-delete-draft]')?.addEventListener('click', async () => {
+    if (!(await bekraeft({ titel: 'Slet kladden?', tekst: 'De oplysninger, du har gemt på denne enhed, fjernes. Det kan ikke fortrydes.', ok: 'Slet kladde', farlig: true }))) return;
     Store.clearDraft();
     toast('Kladden er slettet');
     renderMine();
