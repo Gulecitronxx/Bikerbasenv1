@@ -193,7 +193,7 @@ test('T-001: A2-guiden har informationsintention — én tekst overalt, og den k
 test('W7: nye guides har egne, ikke-opdigtede datoer, og oversigten tæller alle guides', () => {
   for (const g of GUIDES){
     const html = sider.find(x => x.navn === g.file).html;
-    const pub = g.published || '2026-10-15', mod = g.modified || '2026-10-15';
+    const pub = g.published || require('./guides-data').PUBLISHED, mod = g.modified || require('./guides-data').MODIFIED;   // V3: standarddatoerne læses fra datafilen i stedet for at stå hårdkodet
     assert.ok(mod >= pub, g.file + ': modified >= published');
     const art = ldBlokke(html).find(o => o['@type'] === 'Article');
     assert.strictEqual(art.datePublished, pub);
@@ -244,6 +244,6 @@ test('W7: sitemap-linjerne bruger hver guides egen dato', () => {
   assert.strictEqual(typeof udvidSitemap, 'function');
   const xml = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
   for (const g of GUIDES){
-    assert.ok(xml.includes('<loc>' + cleanUrl(g.file) + '</loc><lastmod>' + (g.modified || '2026-10-15') + '</lastmod>'), g.file + ' mangler i sitemap.xml med rigtig lastmod');
+    assert.ok(xml.includes('<loc>' + cleanUrl(g.file) + '</loc><lastmod>' + (g.modified || require('./guides-data').MODIFIED) + '</lastmod>'), g.file + ' mangler i sitemap.xml med rigtig lastmod');
   }
 });

@@ -1213,10 +1213,12 @@ function ctaPanel(facet, foto){
     knap = 'Læs vores guide'; href = GUIDE.brugt;
   }
   return `<aside class="fa-cta${foto ? ' fa-cta-studio' : ''}" aria-label="Guide">
-        ${foto ? `<img class="fa-cta-foto" src="img/type/${foto}.webp" alt="" width="456" height="342" loading="lazy" decoding="async">` : ''}
         <h2>${titel}</h2>
         <ul>${punkter.map(p => `<li><span class="fa-ok" aria-hidden="true">${IkonKilde.check}</span>${p}</li>`).join('')}</ul>
-        <a class="btn btn-primary" href="${href}">${knap} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a>
+        <div class="fa-cta-fod">
+          <a class="btn btn-primary" href="${href}">${knap} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a>
+          ${foto ? `<img class="fa-cta-foto" src="img/type/${foto}.webp" alt="" width="456" height="342" loading="lazy" decoding="async">` : ''}
+        </div>
       </aside>`;
 }
 
@@ -1633,7 +1635,7 @@ function hydreringsScript(){
     el.textContent = n.toLocaleString('da-DK');
     const ord = el.parentElement && el.parentElement.querySelector('[data-fa-ord]');
     if (ord) ord.textContent = n === 1 ? ord.dataset.faEt : ord.dataset.faFl;
-    const maal = el.closest('.fa-rel-chip, .fa-typer li, .fa-modeller li, .fa-by-liste li, .brand-facet-raekke a');
+    const maal = el.closest('.fa-rel-chip, .fa-typer li, .fa-modeller li, .fa-by-liste li, .fa-udforsk li, .brand-facet-raekke a');
     if (maal) maal.hidden = n === 0;
   });
   const note = document.getElementById('facet-note');
@@ -1926,7 +1928,7 @@ ${header}
         <div class="fa-hero-tekst">
           ${kicker ? `<p class="fa-kicker">${kicker}</p>` : ''}
           <h1>${h1}</h1>
-          <p class="fa-hero-intro">${introDelt.foerste}</p>
+          <p class="fa-hero-intro fa-intro-l${Math.max(2, Math.min(6, Math.ceil(String(introDelt.foerste).replace(/<[^>]*>/g, '').length / 48.5)))}">${introDelt.foerste}</p>
         </div>
         ${infoPanel(facet, items)}
       </div>

@@ -211,11 +211,27 @@ function cleanUrl(file){
    → 0 annoncer, ?brands=Sym → 1). Uden det her ville Sym stå både i grid'en
    over mærker MED annoncer og på listen over dem uden. */
 function maerkerUdenLager(kendte, medLager){
-  const harLager = new Set((medLager || []).map(b => String(b).toLowerCase()));
-  return (kendte || [])
-    .filter(b => !harLager.has(String(b).toLowerCase()))
-    .sort((a, b) => a.localeCompare(b, 'da'));
+  /* V3: sammenligningen går på logo-manifestets slug (navn + aliaser), ikke kun på små bogstaver. Ellers stod "Zero Motorcycles"
+     (redaktionel liste) og "Zero" (lager) som to mærker, og "CFMOTO" og "CFMoto" kunne stå både som side og som tekst. Navnet vises
+     som manifestet staver det; to kendte navne med samme slug samles til ét. */
+  const noegle = b => (BrandLogos.normaliser(b) || String(b).toLowerCase());
+  const harLager = new Set((medLager || []).map(noegle));
+  const set = new Map();
+  for (const b of (kendte || [])){
+    const k = noegle(b);
+    if (harLager.has(k) || set.has(k)) continue;
+    const visNavn = BrandLogos.logoFor(b).navn || String(b);
+    set.set(k, visNavn);
+  }
+  return [...set.values()].sort((a, b) => a.localeCompare(b, 'da'));
 }
+
+/* V3 (alle mærker med): rigtige, kendte mærker, som en dansk MC-køber kan lede efter, men som ikke står i den redaktionelle liste
+   (BRANDS_BY_MODEL i js/data.js, som er delt med opret-annonce og ikke er dette scripts at ændre). De nævnes kun som TEKST under
+   "Flere mærker" — ingen side, intet link, ingen tal — og kun hvis lageret ikke har dem (maerkerUdenLager sorterer dem fra, når
+   de dukker op). Alle er ægte producenter; ingen er opfundet. Klassiske knallert- og veteranmærker (Puch, Simson, Kreidler,
+   Zündapp, Maico, Ossa) er med, fordi de bruges i Danmark; Husaberg og Derbi fordi brugte maskiner stadig handles. */
+const YDERLIGERE_KENDTE_MAERKER = ['Derbi', 'Husaberg', 'Kreidler', 'Laverda', 'Maico', 'Montesa', 'Moto Morini', 'Ossa', 'Puch', 'Simson', 'Sur-Ron', 'Talaria', 'Zündapp'];
 
 /* Struktureret data til mærkesiderne: BreadcrumbList så Google kan vise
    brødkrummen i søgeresultatet, og en ItemList over de annoncer der rent
@@ -1016,6 +1032,8 @@ function fremhaevetHTML(brand, items, fremhaevede, kortHtml){
   </section>`;
 }
 
+/* V3: flisen bruger typens egen illustration (som facetsiderne), ikke en tilfældig annonces foto — de bar forhandlerens skilt på væggen og var
+   et andet motiv for hver side. Tallet under navnet er stadig mærkets egne annoncer. */
 function typeFlisersHTML(brand, fakta){
   if (!fakta.typer.length) return '';
   const b = esc(brand);
@@ -1024,7 +1042,7 @@ function typeFlisersHTML(brand, fakta){
       <div class="mk-sek-head"><h2 id="mk-typer-h">Udforsk ${b} efter type</h2></div>
       <div class="tiles-grid mk-tiles">
         ${fakta.typer.map(t => `<a href="${sogHref(brand, t.f)}" class="tile">
-          <span class="tile-media"><img src="${t.foto ? esc(t.foto) : `img/type/${t.id}.webp`}" alt="" width="456" height="342" loading="lazy" decoding="async"${t.foto ? ' referrerpolicy="no-referrer"' : ''}></span>
+          <span class="tile-media"><img src="img/type/${esc(t.id)}.webp" alt="" width="456" height="342" loading="lazy" decoding="async"></span>
           <span class="tile-label"><span class="mk-tile-tekst"><span>${esc(t.label).replace('/', '/<wbr>')}</span><span class="mk-tile-n">${antalTekst(t.n, 'annonce', 'annoncer')}</span></span><span class="tile-go" aria-hidden="true">${ICON.arrowRight}</span></span>
         </a>`).join('\n        ')}
       </div>
@@ -1447,7 +1465,8 @@ ${logoScripts(BrandLogos.logoFor(brand).harLogo)}<script defer src="js/maerke.js
 }
 
 /* ---- Brand index ---- */
-const udenLager = maerkerUdenLager(Object.keys(BRANDS_BY_MODEL), brands);
+const udenLager = maerkerUdenLager([...Object.keys(BRANDS_BY_MODEL), ...YDERLIGERE_KENDTE_MAERKER], brands);
+const udenMaerke = LISTINGS.filter(l => !l.brand || l.brand === 'Ukendt').length;   // annoncer, kilden ikke har oplyst mærke på
 const topMaerker = brands.filter(b => slugify(b) !== 'andet-maerke')
   .sort((a, b) => byBrand[b].length - byBrand[a].length || a.localeCompare(b, 'da')).slice(0, 8);
 /* A–Z: første bogstav, dansk sortering (Æ Ø Å sidst). */
@@ -1509,7 +1528,7 @@ ${header}
         <a href="index.html">Forside</a><span class="bc-sep"></span><span>Mærker</span>
       </nav>
       <h1>Motorcykler efter mærke</h1>
-      <p class="brand-intro mk-intro">Gennemse brugte motorcykler efter mærke. Øverst dem, der er til salg lige nu — nederst dem, vi kender, men ikke har på lager i øjeblikket.</p>
+      <p class="brand-intro mk-intro">Gennemse motorcykler efter mærke. De mærker, der har annoncer i lageret, står øverst og i A–Z-listen med deres antal — nederst nævner vi flere kendte mærker, vi endnu ikke har annoncer fra.</p>
     </div>
   </section>
 
@@ -1549,11 +1568,14 @@ ${header}
 
   ${saadanHTML()}
 
-  ${udenLager.length ? `<section class="section mk-sektion">
+  ${udenLager.length ? `<section class="section mk-sektion mk-flere-sektion" aria-labelledby="mk-flere-h">
     <div class="container">
-      <div class="mk-sek-head"><h2>Mærker uden annoncer lige nu (${udenLager.length})</h2></div>
-      <p class="brand-intro">Dem kender vi godt — der er bare ingen til salg i øjeblikket. Vi linker dem, når der er noget at vise.</p>
-      <p class="brand-intro">${udenLager.map(esc).join(', ')}.</p>
+      <div class="mk-sek-head"><h2 id="mk-flere-h">Flere mærker (${udenLager.length})</h2></div>
+      <p class="brand-intro">Disse mærker kender vi, men ingen annoncer til salg er indekseret lige nu. De har derfor ingen egen side — den får de, når der er noget at vise. Imens finder du dem i <a href="soegning.html">den fulde søgning</a>.</p>
+      <ul class="mk-flere" aria-label="Mærker uden annoncer lige nu">
+        ${udenLager.map(b => `<li>${esc(b)}</li>`).join(' ')}
+      </ul>
+      ${udenMaerke ? `<p class="mk-flere-note">${tal(udenMaerke)} ${udenMaerke === 1 ? 'annonce oplyser' : 'annoncer oplyser'} ikke et mærke, og står derfor ikke under et mærke ovenfor. De er med i de ${tal(LISTINGS.length)} annoncer i søgningen.</p>` : ''}
       <div class="brand-actions">
         <a href="soegning.html" class="btn btn-outline">Søg blandt alle ${tal(LISTINGS.length)} annoncer</a>
       </div>
