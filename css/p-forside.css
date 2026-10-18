@@ -862,3 +862,18 @@ body.home .maerke-flise .maerke-navn-skjult{ overflow:hidden; max-width:100%; }
   body.home .kort-raekke .rk-top{ gap:0; }
   body.home .kort-raekke .rk-body{ gap:4px; }
 }
+
+/* ---------- V3 polish: forsidens nye rækkefølge (typer under søgekortet, tillid efter Udvalgte) ---------- */
+body.home .hero-sok{ position:relative; isolation:isolate; }
+/* Båndet bag søgekortet falmer ud mod sidebaggrunden i stedet for at ende i en hård kant over typeflisernes overskrift. */
+body.home .hero-sok::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:22px; z-index:-1; pointer-events:none;
+  background: linear-gradient(180deg, var(--color-surface-2), var(--color-bg)); }
+/* Tillidsrækken er nu en selvstændig sektion midt på siden: tonet bånd med hårlinjer, så den læses som en pause. */
+body.home .trust-sektion{ background: var(--color-surface-2); border-block: 1px solid var(--color-border); margin-top: var(--space-2); }
+body.home .trust-sektion + .section, body.home .trust-sektion + .saadan{ margin-top: 0; }
+body.home .trust-sektion .trust-band{ padding-block: 12px; }
+@media (max-width:767px){ body.home .trust-sektion .trust-band{ padding-block: 14px; } body.home .trust-sektion{ margin-top: var(--space-3); } }
+/* Typer-sektionen ligger nu direkte under kortet: luft over overskriften så "97 annoncer i Danmark" ikke klistrer til. */
+body.home .typer{ padding-top: var(--space-4); }
+@media (min-width:1100px){ body.home .typer{ padding-top: 18px; } }
+/* 1920: tillidsrækkens tekst må ikke blive til en smal søjle; behold max-bredde fra .container--wide. */
