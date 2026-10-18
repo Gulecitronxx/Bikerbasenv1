@@ -295,7 +295,15 @@ async function buildForside(){
      (typeFraTitel() i js/backend-bridge.js holder op, når kildens kategoriord mangler). */
   const fyldTypeAntal = () => {
     const typerSektion = tilesMount.closest('.typer');
-    if (typerSektion) typerSektion.hidden = ALLE.length === 0;
+    /* Tomt/fejlet lager: sektionen bliver stående (fliserne linker til faste typesider, uden tal). At skjule den, når
+       svaret kom, flyttede alt under den ~230 px op (CLS ~0,09) nu hvor den ligger over folden. */
+    if (typerSektion) typerSektion.hidden = false;
+    if (ALLE.length === 0){
+      tilesMount.querySelectorAll('.tile-count').forEach(el => { el.textContent = ''; });
+      tilesMount.querySelectorAll(':scope > .tile').forEach(t => { t.hidden = false; delete t.dataset.antal; });
+      opdaterPil();
+      return;
+    }
     let udenType = 0;
     for (const l of ALLE) if (l.type == null) udenType++;
     tilesMount.querySelectorAll('.tile-count').forEach(el => {

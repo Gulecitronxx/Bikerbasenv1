@@ -354,14 +354,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // profil", og det skal virke.
   anvendAuthKontekst();   // anden gang: kun for at vælge fanen (tekst er allerede sat)
 
-  /* V3: musemarkør + tastatur: sæt markøren i første felt, så man kan skrive med det samme. Ikke på touch (ville åbne
-     tastaturet og skubbe siden), ikke når URL'en bærer et gendannelses-token (nulstil-trin viser andet felt først). */
-  try {
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !/[#&?](access_token|type=recovery|code=)/.test(location.hash + location.search)){
-      const foerste = ['#login-email', '#reg-name'].map(q => document.querySelector(q)).find(el => el && el.offsetParent);
-      if (foerste) foerste.focus({ preventScroll: true });
-    }
-  } catch (e) { /* fokus er en hjælp, aldrig et krav */ }
 
   document.getElementById('reg-dealer').addEventListener('change', (e) => {
     document.getElementById('kyc-fields').classList.toggle('show', e.target.checked);

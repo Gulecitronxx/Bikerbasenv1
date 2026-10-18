@@ -19,13 +19,13 @@ const NYE = ['guide-saelg-motorcykel', 'guide-mc-vinteropbevaring', 'guide-mc-fo
 const get = slug => GUIDES.find(g => g.slug === slug);
 const tekstAf = g => JSON.stringify(g.sections.map(s => s.html)) + ' ' + g.tldr.join(' ') + ' ' + g.ingress + ' ' + g.description;
 
-test('de tre nye guides findes, er dateret 2026-10-17 og har mindst tre kilder, der findes', () => {
+test('de tre nye guides findes, er udgivet 2026-10-17 (dateModified ikke før det; løftet 18.10 af V3) og har mindst tre kilder, der findes', () => {
   for (const slug of NYE){
     const g = get(slug);
     assert.ok(g, slug);
     assert.strictEqual(g.file, slug + '.html');
     assert.strictEqual(g.published, '2026-10-17');
-    assert.strictEqual(g.modified, '2026-10-17');
+    assert.ok(g.modified >= '2026-10-17', slug + ': modified ikke før udgivelsen');   // V3 løftede dateModified til 2026-10-18 (fælles visning udvidet)
     assert.ok(g.sources.length >= 3, slug + ': kilder');
     for (const k of g.sources) assert.ok(SRC[k] && /^https:\/\//.test(SRC[k].url), slug + ': kilde ' + k);
     assert.ok(g.title.length <= 60, slug + ': title ' + g.title.length);
@@ -126,7 +126,7 @@ test('sitemap og llms.txt kender alle guides, og llms-listen har kun filer, der 
   const xml = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
   const guideAfsnit = AFSNIT.find(([h]) => h === 'Guides')[1].map(p => p[0]);
   for (const g of GUIDES){
-    assert.ok(xml.includes('/' + g.file.replace(/\.html$/, '') + '</loc><lastmod>' + (g.modified || '2026-10-15')), g.file + ' i sitemap');
+    assert.ok(xml.includes('/' + g.file.replace(/\.html$/, '') + '</loc><lastmod>' + (g.modified || require('./guides-data').MODIFIED)), g.file + ' i sitemap');
     assert.ok(guideAfsnit.includes(g.file), g.file + ' i llms-listen');
   }
   for (const f of guideAfsnit) assert.ok(fs.existsSync(path.join(ROOT, f)), f);
