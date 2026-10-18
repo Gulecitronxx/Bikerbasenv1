@@ -404,11 +404,12 @@ function guideTillaeg(g, sektioner){
 /* "Find motorcykler efter type": fem typefliser med foto og link til typesiderne (som i billede 10), under artiklen. Guider, der
    allerede har rækken i brødteksten (første motorcykel), får den ikke to gange. */
 function typeBlok(g, sektioner){
-  if (sektioner.some(s => /class="gd-types"/.test(s.html))) return '';
+  if (sektioner.some(s => /class="gd-types"/.test(s.html))) return `<section class="gd-findtype" aria-label="Annoncer efter region"><p class="gd-regionchips" style="margin-top:0"><span>Se annoncer efter region:</span> ${REGIONER.filter(([f]) => filFindes(f)).map(([f, t]) => `<a href="${f}">${t}</a>`).join(' ')}</p></section>`;
   return `<section class="gd-findtype" aria-labelledby="gd-findtype-h">
         <h2 id="gd-findtype-h">Find motorcykler efter type</h2>
         <p>Vælg en type, og se de annoncer, der er indekseret på Bikerbasen.</p>
         ${typeTiles()}
+        <p class="gd-regionchips"><span>Eller se annoncer efter region:</span> ${REGIONER.filter(([f]) => filFindes(f)).map(([f, t]) => `<a href="${f}">${t}</a>`).join(' ')}</p>
       </section>`;
 }
 const HERO_POS = ['72% 55%', '58% 42%', '82% 62%', '66% 48%', '76% 70%'];
@@ -438,6 +439,7 @@ function renderGuide(g, ctx){
         <li class="gd-meta-by"><img src="logo-mark.png?v=logo1" alt="" width="44" height="44" loading="eager"><span><strong>Af Bikerbasen</strong><span>Redaktionel guide med kilder</span></span></li>
         <li class="gd-meta-item"><span class="gd-meta-ic" aria-hidden="true">${Icon.calendar}</span><span><span class="gd-meta-label">Opdateret</span><time datetime="${MOD}">${datoDa(MOD)}</time></span></li>
         <li class="gd-meta-item"><span class="gd-meta-ic" aria-hidden="true">${Icon.clock}</span><span><span class="gd-meta-label">Læsetid</span>${minutterTekst(min)}</span></li>
+        <li class="gd-meta-item"><span class="gd-meta-ic" aria-hidden="true">${Icon.book}</span><span><span class="gd-meta-label">Kilder</span>${kilder.length} ${kilder.length === 1 ? 'officiel kilde' : 'kilder'}</span></li>
       </ul>`;
 
   const crumbs = [{ name: 'Forside', file: 'index.html' }, { name: 'Artikler & guides', file: 'guides.html' }, { name: g.navn, file: g.file }];
@@ -488,7 +490,7 @@ function renderGuide(g, ctx){
 ${ctx.header}
 
 <main id="main-content">
-  ${hero({ crumbs, kicker: 'GUIDE', h1: g.h1, ingress: g.ingress, meta, pos: HERO_POS[Math.max(0, GUIDES.indexOf(g)) % HERO_POS.length] })}
+  ${hero({ crumbs, kicker: `GUIDE · ${kategoriAf(g).toUpperCase()}`, h1: g.h1, ingress: g.ingress, meta, pos: HERO_POS[Math.max(0, GUIDES.indexOf(g)) % HERO_POS.length] })}
 
   <div class="container gd-layout">
     <div class="gd-main">
@@ -550,6 +552,15 @@ function guideMinutter(g){
 const TYPE_LINKS = [['naked', 'Naked'], ['sport', 'Sport'], ['adventure', 'Adventure/Enduro'], ['touring', 'Touring'], ['cruiser', 'Cruiser'], ['classic', 'Classic'], ['scooter', 'Scooter'], ['cross', 'Cross']];
 const KK_LINKS = [['koerekort-a1.html', 'Kørekort A1', 'Små motorcykler'], ['koerekort-a2.html', 'Kørekort A2', 'Mellemstore motorcykler'], ['koerekort-a.html', 'Kørekort A', 'Over A2-grænsen']];
 const filFindes = f => fs.existsSync(path.join(ROOT, f));
+/* Kategori pr. guide (vises som emne-chip i hero og på oversigtskort). */
+const KATEGORI = {
+  'guide-foerste-motorcykel': 'Køb', 'guide-a2-koerekort': 'Kørekort', 'guide-brugt-motorcykel': 'Køb', 'guide-mc-forsikring': 'Forsikring',
+  'guide-mc-udstyr': 'Udstyr', 'guide-mc-typer': 'Typer', 'guide-mc-ordliste': 'Begreber', 'guide-saelg-motorcykel': 'Salg',
+  'guide-mc-vinteropbevaring': 'Vedligehold', 'guide-mc-foraar-tjekliste': 'Vedligehold',
+};
+const kategoriAf = g => KATEGORI[g.slug] || 'Guide';
+const datoKort = iso => { const [y, m, d] = iso.split('-').map(Number); return `${d}. ${MAANEDER[m - 1].slice(0, 3)}${m === 5 ? '' : '.'} ${y}`; };
+const REGIONER = [['region-hovedstaden.html', 'Hovedstaden'], ['region-sjaelland.html', 'Sjælland'], ['region-syddanmark.html', 'Syddanmark'], ['region-midtjylland.html', 'Midtjylland'], ['region-nordjylland.html', 'Nordjylland']];
 function topMaerker(alle, n = 6){
   const m = new Map();
   for (const l of alle || []){
@@ -564,6 +575,7 @@ function findBlok(ctx){
   const kk = KK_LINKS.filter(([f]) => filFindes(f));
   const typer = TYPE_LINKS.filter(([id]) => filFindes(`type-${id}.html`));
   const maerker = (ctx.maerker || []).filter(b => filFindes(`maerke-${slugify(b)}.html`));
+  const regioner = REGIONER.filter(([f]) => filFindes(f));
   const kol = (h, p, liste, alle) => `<div class="gd-find-kol"><h3>${h}</h3><p>${p}</p><ul class="gd-find-list">${liste.join('')}</ul>${alle}</div>`;
   const li = (href, t, b) => `<li><a href="${href}"><span>${esc(t)}</span>${b ? `<small>${esc(b)}</small>` : ''}${Icon.arrowRight}</a></li>`;
   return `<section class="gd-find" aria-labelledby="gd-find-h">
@@ -572,6 +584,7 @@ function findBlok(ctx){
       <div class="gd-find-grid">
         ${kol('Efter kørekort', 'Se annoncer, der ikke er udelukket til dit kørekort ud fra de oplyste tal.', kk.map(([f, t, b]) => li(f, t, b)), `<a class="gd-find-alle" href="guide-a2-koerekort.html">Læs om kørekortreglerne ${Icon.arrowRight}</a>`)}
         ${kol('Efter type', 'Fra naked til touring. Typen siger noget om kørestilling og brug.', typer.map(([id, t]) => li(`type-${id}.html`, t, '')), `<a class="gd-find-alle" href="guide-mc-typer.html">Sådan vælger du type ${Icon.arrowRight}</a>`)}
+        ${kol('Efter region', 'Se, hvad der ligger i annoncerne fra din del af landet.', regioner.map(([f, t]) => li(f, t, '')), `<a class="gd-find-alle" href="guide-brugt-motorcykel.html">Sådan køber du brugt ${Icon.arrowRight}</a>`)}
         ${kol('Efter mærke', 'De mærker, der har flest annoncer på Bikerbasen lige nu.', maerker.map(b => li(`maerke-${slugify(b)}.html`, b, '')), `<a class="gd-find-alle" href="maerker.html">Alle mærker ${Icon.arrowRight}</a>`)}
       </div>
     </section>`;
@@ -582,10 +595,10 @@ function guideKort(g, cls){
         <a class="gd-card-link" href="${g.file}">
           <span class="gd-card-media"><img src="${g.cardImage}" alt="" style="object-position:${g.cardPos}" width="480" height="360" loading="${cls === 'gd-card-stor' ? 'eager' : 'lazy'}" decoding="async"></span>
           <span class="gd-card-body">
-            <span class="gd-card-kicker">Guide</span>
+            <span class="gd-card-kicker">${esc(kategoriAf(g))}</span>
             <h2 class="gd-card-title">${esc(g.navn)}</h2>
             <span class="gd-card-text">${esc(g.ingress)}</span>
-            <span class="gd-card-foot"><span class="gd-card-time"><span class="gd-meta-ic" aria-hidden="true">${Icon.clock}</span>Læsetid ${minutterTekst(guideMinutter(g))}</span><span class="gd-card-go">Læs guiden ${Icon.arrowRight}</span></span>
+            <span class="gd-card-foot"><span class="gd-card-time"><span class="gd-meta-ic" aria-hidden="true">${Icon.clock}</span>Læsetid ${minutterTekst(guideMinutter(g))}</span><span class="gd-card-dato">Opdateret <time datetime="${aendret(g)}">${datoKort(aendret(g))}</time></span><span class="gd-card-go">Læs guiden ${Icon.arrowRight}</span></span>
           </span>
         </a>
       </li>`;

@@ -118,6 +118,8 @@
 .fa-h3{ font-size:17px; margin:0 0 var(--space-3); }
 .fa-h2-raekke{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--space-3); flex-wrap:wrap; margin-bottom: var(--space-4); }
 .fa-h2-raekke .fa-h2{ margin:0; }
+/* Stabilt layout uafhængigt af skrifttypeskift: under 1100 px står "Se alle" ALTID under overskriften (ingen wrap-beslutning, der afhænger af tekstbredden i fallback- vs. webfont — kilden til CLS 0,116 ved 768). Fra 1100 px er der rigelig plads til begge på én linje. */
+@media (max-width:1099px){ .fa-h2-raekke{ flex-direction:column; align-items:flex-start; flex-wrap:nowrap; gap:var(--space-2); } }
 .fa-mere{ display:inline-flex; align-items:center; gap:6px; font-weight:600; font-size:14.5px; color: var(--color-primary); text-decoration:none; min-height:24px; }
 .fa-mere:hover{ text-decoration:underline; }
 .fa-mere .fa-pil{ width:16px; height:16px; }
@@ -712,3 +714,8 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 @media (min-width:1100px){
   .fa-modeller:has(> li:nth-child(5)){ grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
+
+/* v2-indhold: region -> kørekort/type-genveje */
+.fa-region-genveje{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); margin:var(--space-4) 0 0; font-size:14.5px; color:var(--color-fg-muted); }
+.fa-region-genveje a{ display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border:1px solid var(--color-border); border-radius:var(--radius-pill); background:var(--color-surface); color:var(--color-fg); font-weight:600; text-decoration:none; }
+.fa-region-genveje a:hover{ border-color:var(--color-primary); color:var(--color-primary); }
