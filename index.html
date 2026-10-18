@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Bikerbasen — motorcykler til salg i Danmark, nye og brugte">
 <meta name="twitter:description" content="Motorcykler til salg fra danske forhandlere og markedspladser — nye og brugte, samlet ét sted. Kilden står på hvert kort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -214,20 +214,25 @@ try{
         <p class="hero-uoplyst" id="hs-uoplyst-hint" role="status" hidden></p>
       </form>
     </div>
-
-    <!-- Kun løfter, der gælder HVERT kort. "Aldrig gættet" gælder kørekortFILTRET (oplyste tal), ikke
-         klassen — A2 kræver også kW/kg og afledningsregel, som ingen annonce oplyser. -->
-    <div class="trust-band">
-      <div class="container container--wide">
-        <ul class="trust-row">
-          <li><span class="trust-ico" data-icon="shieldCheck" aria-hidden="true"></span><div><strong>Kilden står på hvert kort</strong><span>Du kan altid se, hvor oplysningerne kommer fra.</span></div></li>
-          <li><span class="trust-ico" data-icon="idCard" aria-hidden="true"></span><div><strong>Kørekortfilter på oplyste tal</strong><span>Vi gætter aldrig. A2 afhænger også af vægt og afledningsregel, som annoncer sjældent oplyser.</span></div></li>
-          <li><span class="trust-ico" data-icon="clipboard" aria-hidden="true"></span><div><strong>Mangler et tal, står der &ldquo;Ikke oplyst&rdquo;</strong><span>Intet skøn i stedet for et tal, vi ikke har.</span></div></li>
-          <li><span class="trust-ico" data-icon="externalLink" aria-hidden="true"></span><div><strong>Du går videre til sælger</strong><span>Vi hoster ikke de indekserede annoncer — handlen sker hos kilden.</span></div></li>
-        </ul>
-      </div>
-    </div>
   </div>
+
+  <section class="section typer" aria-labelledby="typer-titel">
+    <div class="container container--wide">
+      <div class="sek-hoved">
+        <h2 id="typer-titel">Udforsk efter type</h2>
+        <a class="section-link" href="guide-mc-typer.html">Læs om motorcykeltyper<span aria-hidden="true"></span></a>
+      </div>
+      <div class="typer-wrap">
+        <!-- Fliserne tegnes af js/home.js: foto fra img/type, antal fra lageret, link til den faste
+             typeside (findes den ikke, til søgningen). Billederne hentes med det samme (ikke lazy). -->
+        <div class="tiles-raekke" id="category-tiles"></div>
+        <button type="button" class="typer-pil" id="typer-pil" aria-label="Se flere typer" data-icon="chevronRight"></button>
+      </div>
+      <!-- Teksten skrives om af js/home.js (fyldTypeAntal): hvor mange annoncer der IKKE har en type fra
+           kilden og derfor ikke ligger bag nogen flise. -->
+      <p class="sek-note" id="types-sub"></p>
+    </div>
+  </section>
 
   <!-- Udvalgte annoncer: samme rækkefølge som søgesidens standard, højst én pr. mærke og højst halvdelen
        fra samme kilde. Underteksten skrives fra data af js/home.js (skrivFeaturedSub), så den kan
@@ -259,23 +264,21 @@ try{
     </div>
   </section>
 
-  <section class="section typer" aria-labelledby="typer-titel">
-    <div class="container container--wide">
-      <div class="sek-hoved">
-        <h2 id="typer-titel">Udforsk efter type</h2>
-        <a class="section-link" href="guide-mc-typer.html">Læs om motorcykeltyper<span aria-hidden="true"></span></a>
+
+  <div class="trust-sektion">
+      <!-- Kun løfter, der gælder HVERT kort. "Aldrig gættet" gælder kørekortFILTRET (oplyste tal), ikke
+           klassen — A2 kræver også kW/kg og afledningsregel, som ingen annonce oplyser. -->
+      <div class="trust-band">
+        <div class="container container--wide">
+          <ul class="trust-row">
+            <li><span class="trust-ico" data-icon="shieldCheck" aria-hidden="true"></span><div><strong>Kilden står på hvert kort</strong><span>Du kan altid se, hvor oplysningerne kommer fra.</span></div></li>
+            <li><span class="trust-ico" data-icon="idCard" aria-hidden="true"></span><div><strong>Kørekortfilter på oplyste tal</strong><span>Vi gætter aldrig. A2 afhænger også af vægt og afledningsregel, som annoncer sjældent oplyser.</span></div></li>
+            <li><span class="trust-ico" data-icon="clipboard" aria-hidden="true"></span><div><strong>Mangler et tal, står der &ldquo;Ikke oplyst&rdquo;</strong><span>Intet skøn i stedet for et tal, vi ikke har.</span></div></li>
+            <li><span class="trust-ico" data-icon="externalLink" aria-hidden="true"></span><div><strong>Du går videre til sælger</strong><span>Vi hoster ikke de indekserede annoncer — handlen sker hos kilden.</span></div></li>
+          </ul>
+        </div>
       </div>
-      <div class="typer-wrap">
-        <!-- Fliserne tegnes af js/home.js: foto fra img/type, antal fra lageret, link til den faste
-             typeside (findes den ikke, til søgningen). Billederne hentes med det samme (ikke lazy). -->
-        <div class="tiles-raekke" id="category-tiles"></div>
-        <button type="button" class="typer-pil" id="typer-pil" aria-label="Se flere typer" data-icon="chevronRight"></button>
-      </div>
-      <!-- Teksten skrives om af js/home.js (fyldTypeAntal): hvor mange annoncer der IKKE har en type fra
-           kilden og derfor ikke ligger bag nogen flise. -->
-      <p class="sek-note" id="types-sub"></p>
-    </div>
-  </section>
+  </div>
 
   <section class="section" id="recently-viewed-section" hidden>
     <div class="container container--wide">
