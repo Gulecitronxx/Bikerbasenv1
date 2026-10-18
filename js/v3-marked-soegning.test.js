@@ -22,6 +22,10 @@ async function aabn(w, url) {
   await p.waitForTimeout(700);
   return { c, p, fejl };
 }
+/* Venter (op til 4 s) på at søgetilstanden opfylder pred, i stedet for faste pauser (debounce 250 ms + render er tidsfølsomt under belastning). */
+async function vent(p, pred) {
+  for (let i = 0; i < 40; i++) { if (pred(await tilstand(p))) return; await p.waitForTimeout(100); }
+}
 const tilstand = p => p.evaluate(() => ({
   q: document.getElementById('filter-q').value, url: location.search,
   n: document.getElementById('results-count').textContent.trim(),
@@ -37,15 +41,15 @@ test('ingen hero, én skjult h1, ?q=Honda filtrerer og kan fjernes som pille', a
     assert.ok(await p.evaluate(() => { const r = document.querySelector('h1').getBoundingClientRect(); return r.width <= 2 && r.height <= 2; }));
     let s = await tilstand(p);
     assert.equal(s.q, 'Honda'); assert.deepEqual(s.pills, ['"Honda"']);
-    await p.click('.active-filter-pill button'); await p.waitForTimeout(400);
+    await p.click('.active-filter-pill button'); await vent(p, x => x.pills.length === 0);
     s = await tilstand(p);
     assert.equal(s.q, ''); assert.deepEqual(s.pills, []); assert.equal(s.url, '');
-    await p.fill('#filter-q', 'zzzz'); await p.waitForTimeout(600);
+    await p.fill('#filter-q', 'zzzz'); await vent(p, x => /^0 /.test(x.n));
     assert.match((await tilstand(p)).n, /^0 /);
     assert.equal(await p.evaluate(() => getComputedStyle(document.getElementById('empty-state')).display), 'block');
-    await p.click('#filter-q-clear'); await p.waitForTimeout(400);
+    await p.click('#filter-q-clear'); await vent(p, x => x.q === '' && !/^0 /.test(x.n));
     assert.equal((await tilstand(p)).q, '');
-    await p.fill('#filter-q', 'kawasaki'); await p.press('#filter-q', 'Enter'); await p.waitForTimeout(400);
+    await p.fill('#filter-q', 'kawasaki'); await p.press('#filter-q', 'Enter'); await vent(p, x => x.pills.length === 1);
     assert.deepEqual((await tilstand(p)).pills, ['"kawasaki"']);
     assert.deepEqual(fejl, []);
   } finally { await c.close(); }
