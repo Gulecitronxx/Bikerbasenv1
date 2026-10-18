@@ -65,15 +65,15 @@ test('login: overskrift/undertekst efter ?redirect= står der FØR scripts køre
   } finally { await s.ctx.close(); }
 });
 
-test('login: ingen enkeltord på sidste linje i overskrifter (text-wrap: balance) og første felt har fokus med mus', { timeout: 60000 }, async t => {
+test('login: ingen enkeltord på sidste linje i overskrifter (text-wrap: balance) og skip-linket er stadig første Tab-stop', { timeout: 60000 }, async t => {
   if (!kan.ok) return t.skip(kan.grund);
   const s = await aabn({ loggetInd: false }, 'login.html', { viewport: { width: 375, height: 800 } });
   try {
     await s.page.waitForLoadState('networkidle');
     const wrap = await s.page.evaluate(() => ['.lg-head h1', '.lg-promo h2'].map(q => getComputedStyle(document.querySelector(q)).textWrap));
     assert.deepStrictEqual(wrap, ['balance', 'balance']);
-    // Playwright-chromium har fin pointer og hover, så første felt får fokus
-    assert.strictEqual(await s.page.evaluate(() => document.activeElement && document.activeElement.id), 'login-email');
+    await s.page.keyboard.press('Tab');
+    assert.ok(await s.page.evaluate(() => /skip|spring/i.test((document.activeElement.className || '') + (document.activeElement.textContent || ''))), 'første Tab rammer skip-linket');
   } finally { await s.ctx.close(); }
 });
 
