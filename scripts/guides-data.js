@@ -108,7 +108,7 @@ const SRC = {
 /* Standarddatoer for de tre første guides. En guide kan have egne `published`/`modified` (de to nyeste har).
    Datoerne er dagen, teksten faktisk blev skrevet eller rettet — aldrig tilbagedateret. */
 const PUBLISHED = '2026-10-15';
-const MODIFIED = '2026-10-15';
+const MODIFIED = '2026-10-18';
 
 const GUIDES = [
   /* ------------------------------------------------------------------ 1 */
@@ -330,7 +330,7 @@ const GUIDES = [
   {
     file: 'guide-brugt-motorcykel.html',
     slug: 'guide-brugt-motorcykel',
-    modified: '2026-10-17',
+    modified: '2026-10-18',
     related: ['guide-mc-forsikring', 'guide-mc-ordliste', 'guide-foerste-motorcykel'],
     navn: 'Køb brugt motorcykel — det skal du tjekke',
     h1: 'Køb brugt motorcykel — det skal du tjekke',
@@ -450,7 +450,7 @@ const GUIDES = [
     file: 'guide-mc-forsikring.html',
     slug: 'guide-mc-forsikring',
     published: '2026-10-16',
-    modified: '2026-10-17',
+    modified: '2026-10-18',
     related: ['guide-saelg-motorcykel', 'guide-brugt-motorcykel', 'guide-mc-udstyr'],
     navn: 'MC-forsikring: det skal du vide som ny motorcyklist',
     h1: 'MC-forsikring: det skal du vide som ny motorcyklist',
@@ -575,7 +575,7 @@ const GUIDES = [
     file: 'guide-mc-udstyr.html',
     slug: 'guide-mc-udstyr',
     published: '2026-10-16',
-    modified: '2026-10-17',
+    modified: '2026-10-18',
     related: ['guide-foerste-motorcykel', 'guide-mc-forsikring', 'guide-brugt-motorcykel'],
     navn: 'MC-udstyr til ny motorcyklist: hjelm og tøj',
     h1: 'MC-udstyr til ny motorcyklist: hjelm og tøj',
@@ -700,7 +700,7 @@ const GUIDES = [
     file: 'guide-mc-typer.html',
     slug: 'guide-mc-typer',
     published: '2026-10-16',
-    modified: '2026-10-16',
+    modified: '2026-10-18',
     related: ['guide-foerste-motorcykel', 'guide-mc-ordliste', 'guide-a2-koerekort'],
     navn: 'Motorcykeltyper: hvilken passer til dig?',
     h1: 'Motorcykeltyper: hvilken passer til dig?',
@@ -818,7 +818,7 @@ const GUIDES = [
     file: 'guide-mc-ordliste.html',
     slug: 'guide-mc-ordliste',
     published: '2026-10-16',
-    modified: '2026-10-17',
+    modified: '2026-10-18',
     related: ['guide-a2-koerekort', 'guide-brugt-motorcykel', 'guide-mc-typer'],
     navn: 'MC-ordliste: ccm, kW, hk og andre begreber',
     h1: 'MC-ordliste: ccm, kW, hk og andre begreber',
@@ -945,7 +945,7 @@ const GUIDES = [
     file: 'guide-saelg-motorcykel.html',
     slug: 'guide-saelg-motorcykel',
     published: '2026-10-17',
-    modified: '2026-10-17',
+    modified: '2026-10-18',
     related: ['guide-brugt-motorcykel', 'guide-mc-forsikring', 'guide-mc-ordliste'],
     navn: 'Sådan sælger du din motorcykel: trin for trin',
     h1: 'Sådan sælger du din motorcykel: trin for trin',
@@ -1050,7 +1050,7 @@ const GUIDES = [
     file: 'guide-mc-vinteropbevaring.html',
     slug: 'guide-mc-vinteropbevaring',
     published: '2026-10-17',
-    modified: '2026-10-17',
+    modified: '2026-10-18',
     related: ['guide-mc-foraar-tjekliste', 'guide-mc-forsikring', 'guide-mc-udstyr'],
     navn: 'Vinteropbevaring af motorcykel: sådan gør du',
     h1: 'Vinteropbevaring af motorcykel: sådan gør du',
@@ -1161,7 +1161,7 @@ const GUIDES = [
     file: 'guide-mc-foraar-tjekliste.html',
     slug: 'guide-mc-foraar-tjekliste',
     published: '2026-10-17',
-    modified: '2026-10-17',
+    modified: '2026-10-18',
     related: ['guide-mc-vinteropbevaring', 'guide-mc-udstyr', 'guide-mc-forsikring'],
     navn: 'Første tur efter vinteren: tjekliste til din MC',
     h1: 'Første tur efter vinteren: tjekliste til din MC',

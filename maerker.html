@@ -58,9 +58,9 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=c0781ea2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=d8b4e62d) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css?v=5bc49349">
-<link rel="stylesheet" href="css/p-maerke.css?v=5bc49349">
-<link rel="stylesheet" href="css/p-brand-logo.css?v=5bc49349">
+<link rel="stylesheet" href="css/styles.css?v=450dc657">
+<link rel="stylesheet" href="css/p-maerke.css?v=450dc657">
+<link rel="stylesheet" href="css/p-brand-logo.css?v=450dc657">
 <noscript><style>.bl--logo>.bl-fb{display:inline-flex}.bl--logo>.bl-mark{display:none}</style></noscript>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"}]}</script>
 </head>
@@ -123,7 +123,7 @@ try{
         <a href="index.html">Forside</a><span class="bc-sep"></span><span>Mærker</span>
       </nav>
       <h1>Motorcykler efter mærke</h1>
-      <p class="brand-intro mk-intro">Gennemse brugte motorcykler efter mærke. Øverst dem, der er til salg lige nu — nederst dem, vi kender, men ikke har på lager i øjeblikket.</p>
+      <p class="brand-intro mk-intro">Gennemse motorcykler efter mærke. De mærker, der har annoncer i lageret, står øverst og i A–Z-listen med deres antal — nederst nævner vi flere kendte mærker, vi endnu ikke har annoncer fra.</p>
     </div>
   </section>
 
@@ -369,11 +369,14 @@ try{
     </div>
   </section>
 
-  <section class="section mk-sektion">
+  <section class="section mk-sektion mk-flere-sektion" aria-labelledby="mk-flere-h">
     <div class="container">
-      <div class="mk-sek-head"><h2>Mærker uden annoncer lige nu (35)</h2></div>
-      <p class="brand-intro">Dem kender vi godt — der er bare ingen til salg i øjeblikket. Vi linker dem, når der er noget at vise.</p>
-      <p class="brand-intro">Bajaj, Beta, Bimota, Brixton, Can-Am, Daelim, Energica, GasGas, Gilera, Hero MotoCorp, Jawa, Keeway, Kove, Lambretta, Lexmoto, Mash, MZ, Nimbus, Norton, Peugeot, Piaggio, QJ Motor, Rieju, Sachs, Sherco, Super Soco, SWM, TM Racing, TVS, Ural, Vespa, Voge, Yezdi, Zero Motorcycles, Zontes.</p>
+      <div class="mk-sek-head"><h2 id="mk-flere-h">Flere mærker (48)</h2></div>
+      <p class="brand-intro">Disse mærker kender vi, men ingen annoncer til salg er indekseret lige nu. De har derfor ingen egen side — den får de, når der er noget at vise. Imens finder du dem i <a href="soegning.html">den fulde søgning</a>.</p>
+      <ul class="mk-flere" aria-label="Mærker uden annoncer lige nu">
+        <li>Bajaj</li> <li>Beta</li> <li>Bimota</li> <li>Brixton</li> <li>Can-Am</li> <li>Daelim</li> <li>Derbi</li> <li>Energica</li> <li>GasGas</li> <li>Gilera</li> <li>Hero MotoCorp</li> <li>Husaberg</li> <li>Jawa</li> <li>Keeway</li> <li>Kove</li> <li>Kreidler</li> <li>Lambretta</li> <li>Laverda</li> <li>Lexmoto</li> <li>Maico</li> <li>Mash</li> <li>Montesa</li> <li>Moto Morini</li> <li>MZ</li> <li>Nimbus</li> <li>Norton</li> <li>Ossa</li> <li>Peugeot</li> <li>Piaggio</li> <li>Puch</li> <li>QJ Motor</li> <li>Rieju</li> <li>Sachs</li> <li>Sherco</li> <li>Simson</li> <li>Super Soco</li> <li>Sur-Ron</li> <li>SWM</li> <li>Talaria</li> <li>TM Racing</li> <li>TVS</li> <li>Ural</li> <li>Vespa</li> <li>Voge</li> <li>Yezdi</li> <li>Zero Motorcycles</li> <li>Zontes</li> <li>Zündapp</li>
+      </ul>
+      <p class="mk-flere-note">2 annoncer oplyser ikke et mærke, og står derfor ikke under et mærke ovenfor. De er med i de 720 annoncer i søgningen.</p>
       <div class="brand-actions">
         <a href="soegning.html" class="btn btn-outline">Søg blandt alle 720 annoncer</a>
       </div>
@@ -458,16 +461,16 @@ try{
      længere begrundelse i sikkerhed.html; det er samme rettelse.
      RØR IKKE listen uden at rette den tilsvarende i maerker.html — den her
      er kilden, siden genereres af scripts/build-brand-pages.js. -->
-<script defer src="js/security.js?v=5bc49349"></script>
-<script defer src="js/icons.js?v=5bc49349"></script>
-<script defer src="js/bike-art.js?v=5bc49349"></script>
-<script defer src="js/data.js?v=5bc49349"></script>
-<script defer src="js/store.js?v=5bc49349"></script>
-<script defer src="js/components.js?v=5bc49349"></script>
-<script defer src="js/brand-logos-data.js?v=5bc49349"></script>
-<script defer src="js/brand-logos.js?v=5bc49349"></script>
-<script defer src="js/maerke.js?v=5bc49349"></script>
-<script defer src="js/maerker-sog.js?v=5bc49349"></script>
+<script defer src="js/security.js?v=450dc657"></script>
+<script defer src="js/icons.js?v=450dc657"></script>
+<script defer src="js/bike-art.js?v=450dc657"></script>
+<script defer src="js/data.js?v=450dc657"></script>
+<script defer src="js/store.js?v=450dc657"></script>
+<script defer src="js/components.js?v=450dc657"></script>
+<script defer src="js/brand-logos-data.js?v=450dc657"></script>
+<script defer src="js/brand-logos.js?v=450dc657"></script>
+<script defer src="js/maerke.js?v=450dc657"></script>
+<script defer src="js/maerker-sog.js?v=450dc657"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">
