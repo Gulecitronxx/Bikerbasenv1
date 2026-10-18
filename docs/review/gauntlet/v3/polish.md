@@ -34,3 +34,7 @@ css/styles.css (V3-blok sidst), css/p-forside.css (V3-blok sidst), index.html (g
 | Performance | 8 (ingen layout-ændring) | 8 |
 | Indholdskvalitet | 7 – fliser siger "annoncer" | 8 |
 Restpunkter: CLS-flake på index/390 i multi-side smoke; Forside.png-tillidsrække står under søgekort (bevidst flyttet af bruger).
+
+## Tillæg: CLS-rod på index (390)
+Målt med layout-shift-kilder + rAF-tidslinje (Playwright, 3 parallelle sider, varm cache). Årsag: sektionsbytningen lagde typefliserne over folden på mobil, og tre ting flyttede layoutet efter første maling: (1) "Udforsk efter type"-overskrift og link brød over i to rækker, da webfonten blev skiftet ind (+39 px); (2) `#types-sub` reserverede 5,8 em (tunet til Udvalgtes lange tekst) men fyldte to linjer; (3) `.sk-antal` i søgekortet voksede 17 -> 47 px (390) / 62 px (768) når lageret svarede. Rettet i css/p-forside.css (V3-CLS-blok): fast linjebrud for `.sek-hoved` <480 px, 3 linjer reserveret til noten <600 px, min-højde på `.sk-antal` <1100 px.
+Resultat: index CLS < 0,02 ved 320/390/768/1024/1440, lys+mørk, alene og i rækkefølge (3 kørsler à 60 målinger + 3 kørsler `index,soegning,maerker,index` ved 390: 0 fejl). Test: `scripts/v3-forside-cls.test.js` (Orchestrator tilføjer til package.json). W14 14/14, forside.test, forside-v2 grønne.

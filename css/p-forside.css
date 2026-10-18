@@ -877,3 +877,16 @@ body.home .trust-sektion .trust-band{ padding-block: 12px; }
 body.home .typer{ padding-top: var(--space-4); }
 @media (min-width:1100px){ body.home .typer{ padding-top: 18px; } }
 /* 1920: tillidsrækkens tekst må ikke blive til en smal søjle; behold max-bredde fra .container--wide. */
+
+/* ---------- V3 polish: CLS-rod (font-swap + reserverede højder tunet til den gamle rækkefølge) ----------
+   Efter sektionsbytningen ligger typefliserne over folden på mobil. Tre ting flyttede layoutet efter første maling:
+   1) overskrift + "Læs om ..."-link brød over i to rækker, da fonten blev skiftet ind (+39 px) -> brud er nu fast;
+   2) typefliserne-noten reserverede 5,8 em (beregnet til den lange Udvalgte-tekst) men fyldte to linjer -> 3 linjer reserveret;
+   3) antal-linjen i søgekortet voksede fra 1 til 2-3 linjer, da lageret svarede (+30 px) -> højden er reserveret. */
+@media (max-width:479px){
+  body.home .sek-hoved{ flex-wrap:wrap; row-gap:0; }
+  body.home .sek-hoved > h2{ flex:1 1 100%; }
+}
+@media (max-width:599px){ body.home #types-sub:empty{ min-height:4.35em; } }
+@media (max-width:759px){ body.home .sk-antal{ min-height:47px; } }
+@media (min-width:760px) and (max-width:1099px){ body.home .sk-antal{ min-height:62px; } }
