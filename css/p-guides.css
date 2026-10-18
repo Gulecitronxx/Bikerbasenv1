@@ -478,3 +478,11 @@
 
 /* tap-mål: logo-linket i headeren er 30 px højt; hit-area >= 44 px uden at flytte noget */
 .site-header .brand{ min-height: 44px; }
+
+/* v2-indhold: kategori/opdateret på kort, region-genveje, fire find-kolonner */
+.gd-card-dato{ flex:1 1 auto; color: var(--color-fg-muted); font-size:13px; white-space:nowrap; }
+.gd-card-dato time{ font-weight:600; color: var(--color-fg); }
+@media (min-width:1100px){ .gd-find-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--space-4); } }
+.gd-regionchips{ display:flex; flex-wrap:wrap; align-items:center; gap: var(--space-2); margin: var(--space-4) 0 0; font-size:14.5px; color: var(--color-fg-muted); }
+.gd-regionchips a{ display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border:1px solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-fg); font-weight:600; text-decoration:none; }
+.gd-regionchips a:hover{ border-color: var(--color-primary); color: var(--color-primary); }

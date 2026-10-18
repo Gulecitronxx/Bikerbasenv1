@@ -694,3 +694,7 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich[data-type="cross"] .foto-tom{ background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("../img/type/cross.webp"); }
 
 :is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom::before{ display:none; }
+/* v2-indhold: region -> kørekort/type-genveje */
+.fa-region-genveje{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); margin:var(--space-4) 0 0; font-size:14.5px; color:var(--color-fg-muted); }
+.fa-region-genveje a{ display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border:1px solid var(--color-border); border-radius:var(--radius-pill); background:var(--color-surface); color:var(--color-fg); font-weight:600; text-decoration:none; }
+.fa-region-genveje a:hover{ border-color:var(--color-primary); color:var(--color-primary); }

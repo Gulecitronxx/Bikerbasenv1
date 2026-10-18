@@ -45,3 +45,30 @@ test('browser: ingen layout-shift i Udvalgte-sektionen ved 768 (lys+moerk) efter
     server.close();
   }
 });
+
+/* ---------- Indhold og krydslinks (v2-indhold iteration 2) ---------- */
+const læs = f => fs.readFileSync(path.join(REPO, f), 'utf8');
+
+test('guides.html: hvert guidekort har kategori, laesetid og Opdateret-dato', () => {
+  const h = læs('guides.html');
+  const kort = h.match(/<li class="gd-card [^"]*">/g) || [];
+  assert.ok(kort.length >= 10, `kort: ${kort.length}`);
+  assert.strictEqual((h.match(/class="gd-card-dato">Opdateret <time datetime="\d{4}-\d{2}-\d{2}"/g) || []).length, kort.length);
+  assert.ok(!/<span class="gd-card-kicker">Guide<\/span>/.test(h), 'kategori i stedet for ens "Guide"');
+});
+
+test('guides: hero-chip med kategori og kildeantal fra data; regionlinks i alle guides', () => {
+  for (const f of fs.readdirSync(REPO).filter(x => /^guide-.*\.html$/.test(x))) {
+    const h = læs(f);
+    assert.match(h, /class="gd-kicker">GUIDE · [A-ZÆØÅ]+/, f);
+    assert.match(h, /gd-meta-label">Kilder<\/span>\d+ (officiel kilde|kilder)/, f);
+    for (const r of ['hovedstaden', 'sjaelland', 'syddanmark', 'midtjylland', 'nordjylland']) assert.ok(h.includes(`href="region-${r}.html"`), `${f} -> region-${r}`);
+  }
+});
+
+test('region-sider linker til kørekort og typer', () => {
+  for (const f of fs.readdirSync(REPO).filter(x => /^region-.*\.html$/.test(x))) {
+    const h = læs(f);
+    for (const l of ['koerekort-a1.html', 'koerekort-a2.html', 'koerekort-a.html', 'type-sport.html', 'type-touring.html']) assert.ok(h.includes(`href="${l}"`), `${f} -> ${l}`);
+  }
+});

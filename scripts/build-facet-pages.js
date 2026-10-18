@@ -1447,10 +1447,12 @@ function guideRaekke(facet){
   const ordliste = [GUIDE.ordliste, 'MC-ordliste: ccm, kW og hk', 'Begreberne i en annonce, og hvad kørekortmærkerne betyder.', 'img/type/cruiser.webp'];
   const typer = [GUIDE.typer, 'Motorcykeltyper: hvilken passer til dig?', 'Naked, sport, adventure, touring og cruiser forklaret.', 'img/type/adventure.webp'];
   /* Kørekortsider: reglerne først, så begreberne. Typesider: typerne først. Alle linker kun til guides, der findes. */
-  const g = facet && facet.kind === 'type' ? [typer, foerste, brugt] : [a2, foerste, ordliste, brugt];
+  const g = facet && facet.kind === 'type' ? [typer, foerste, brugt] : facet && facet.kind === 'region' ? [brugt, foerste, a2] : [a2, foerste, ordliste, brugt];
+  /* Region: kontekstuelle genveje til kørekort og type (v2-indhold). */
+  const genvejRegion = facet && facet.kind === 'region' ? `<p class="fa-region-genveje"><span>Find efter kørekort:</span> <a href="koerekort-a1.html">A1</a> <a href="koerekort-a2.html">A2</a> <a href="koerekort-a.html">A</a> <span>og type:</span> <a href="type-naked.html">Naked</a> <a href="type-sport.html">Sport</a> <a href="type-adventure.html">Adventure</a> <a href="type-touring.html">Touring</a> <a href="type-cruiser.html">Cruiser</a></p>` : '';
   return `<section class="section fa-sektion">
       <div class="fa-h2-raekke"><h2 class="fa-h2">Guides og viden</h2><a class="fa-mere" href="${GUIDE.alle}">Se alle guides <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a></div>
-      <ul class="fa-guides">${g.map(([h, t, b, img]) => `<li><a href="${h}"><img src="${img}" alt="" width="456" height="342" loading="lazy" decoding="async"><span class="fa-guide-tekst"><strong>${t}</strong><span>${b}</span></span></a></li>`).join('')}</ul>
+      <ul class="fa-guides">${g.map(([h, t, b, img]) => `<li><a href="${h}"><img src="${img}" alt="" width="456" height="342" loading="lazy" decoding="async"><span class="fa-guide-tekst"><strong>${t}</strong><span>${b}</span></span></a></li>`).join('')}</ul>${genvejRegion}
     </section>`;
 }
 
@@ -1982,7 +1984,7 @@ ${header}
 
     ${faqHtml}
     ${boksViden}
-    ${erKk || facet.kind === 'type' ? guideRaekke(facet) : ''}
+    ${erKk || facet.kind === 'type' || facet.kind === 'region' ? guideRaekke(facet) : ''}
     ${kortFortalt(facet, items, uoplyst)}
 
     ${(() => {
