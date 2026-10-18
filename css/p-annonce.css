@@ -1130,3 +1130,14 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
   .an-gallery .gallery-tom{ aspect-ratio:16/10; min-height:0; }
   .an-photo-tom{ aspect-ratio:16/10; min-height:0; }
 }
+
+/* V2 mobil: nøgletal i 2 x 2 (før stod det fjerde, "145 hk", alene på en tredje række), kørekortbadgen som lav linje i stedet for en høj boks,
+   og brødkrummen uden den aktuelle side (titlen står lige under) så "Kawasaki > ZX-6R" ikke klippes. Den aktuelle side bliver for skærmlæsere. */
+@media (max-width:599px){
+  .an-stats{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 12px; }
+  .an-card.an-kk .an-kk-badge{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; text-align:left; padding:10px 14px; }
+  .an-card.an-kk .an-kk-badge b{ margin-top:0; font-size:24px; }
+  .an-card.an-kk .an-kk-badge small{ flex:1 1 100%; margin-top:0; }
+  #bc-current{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  .breadcrumb .bc-sep:has(+ #bc-current){ display:none; }
+}

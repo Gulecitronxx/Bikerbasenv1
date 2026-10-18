@@ -823,7 +823,7 @@ function externalRowHTML(l, i){
   const t = deltTitel(l);
   const model = escapeHTML(t.model), variant = escapeHTML(t.variant);
   return `
-  <article class="listing-row is-external" data-listing-id="${l.id}" data-external="1">
+  <article class="listing-row is-external" data-listing-id="${l.id}" data-external="1"${l.type ? ` data-type="${escapeHTML(l.type)}"` : ''}>
     <div class="row-media">${listingMediaHTML(l, t.model, i === 0)}</div>
     <div class="row-head">
       <div class="row-flags">
@@ -853,7 +853,7 @@ function listingRowHTML(l, i){
   const model = escapeHTML(t.model), variant = escapeHTML(t.variant);
   const dealer = l.isDealer || l.seller?.isDealer;
   return `
-  <article class="listing-row" data-listing-id="${l.id}">
+  <article class="listing-row" data-listing-id="${l.id}"${l.type ? ` data-type="${escapeHTML(l.type)}"` : ''}>
     <div class="row-media">${listingMediaHTML(l, t.model, i === 0)}</div>
     <div class="row-head">
       <div class="row-flags">
@@ -971,7 +971,7 @@ function renderResultsCount(list){
   // "548 annoncer" — derfor uden tallet: "· fra 4 kilder (i)".
   const kort = `fra ${antalKilder} ${antalKilder === 1 ? 'kilde' : 'kilder'}`;
   mix.innerHTML = `${egneTekst}<span class="mix-tail">` +
-    `<span class="mix-part mix-ekstern"><span class="mix-lang">${kildeTekst}${flere}</span><span class="mix-kort">· ${kort}</span></span>` +
+    `<span class="mix-part mix-ekstern"><span class="mix-lang">${kildeTekst}${flere}</span><span class="mix-kort"><span class="mix-prik">· </span>${kort}</span></span>` +
     `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>` +
     `</span>`;
   mix.querySelector('#mix-info-btn').addEventListener('click', forklarIndekseret);
@@ -1483,14 +1483,14 @@ function activeFilterPills(){
     pills.push({ label: state.priceMax == null ? `Fra ${formatPrice(state.priceMin)}` : (state.priceMin ? `${formatPrice(state.priceMin)} – ${formatPrice(state.priceMax)}` : `Maks. ${formatPrice(state.priceMax)}`), clear: () => { state.priceMin=null; state.priceMax=null; } });
   }
   if (state.yearMin != null || state.yearMax != null){
-    pills.push({ label: `Årgang ${state.yearMin||'…'} – ${state.yearMax||'…'}`, clear: () => { state.yearMin=null; state.yearMax=null; } });
+    pills.push({ label: state.yearMax == null ? `Årgang fra ${state.yearMin}` : state.yearMin == null ? `Årgang til ${state.yearMax}` : `Årgang ${state.yearMin} – ${state.yearMax}`, clear: () => { state.yearMin=null; state.yearMax=null; } });
   }
   if (state.kmMax != null) pills.push({ label: `Maks. ${formatKm(state.kmMax)}`, clear: () => state.kmMax=null });
   if (state.ccmMin != null || state.ccmMax != null){
-    pills.push({ label: `${state.ccmMin||0} – ${state.ccmMax||'∞'} ccm`, clear: () => { state.ccmMin=null; state.ccmMax=null; } });
+    pills.push({ label: state.ccmMax == null ? `Fra ${state.ccmMin} ccm` : !state.ccmMin ? `Maks. ${state.ccmMax} ccm` : `${state.ccmMin} – ${state.ccmMax} ccm`, clear: () => { state.ccmMin=null; state.ccmMax=null; } });
   }
   if (state.hkMin != null || state.hkMax != null){
-    pills.push({ label: `${state.hkMin||0} – ${state.hkMax||'∞'} hk`, clear: () => { state.hkMin=null; state.hkMax=null; } });
+    pills.push({ label: state.hkMax == null ? `Fra ${state.hkMin} hk` : !state.hkMin ? `Maks. ${state.hkMax} hk` : `${state.hkMin} – ${state.hkMax} hk`, clear: () => { state.hkMin=null; state.hkMax=null; } });
   }
   if (state.dealerOnly) pills.push({ label: 'Kun forhandlere', clear: () => state.dealerOnly = false });
   if (state.kilde) pills.push({ label: `Hos ${state.kilde}`, clear: () => state.kilde = '' });
@@ -1533,14 +1533,14 @@ let cardChunkHandle = 0;
 const TYPEFOTO = ['adventure','classic','cross','cruiser','naked','scooter','sport','touring'];
 function typefotoKort(root){
   if (!root || !root.querySelectorAll) return;
-  const kort = root.matches && root.matches('.card-rich') ? [root] : Array.from(root.querySelectorAll('.card-rich'));
+  const kort = root.matches && root.matches('.card-rich, .listing-row') ? [root] : Array.from(root.querySelectorAll('.card-rich, .listing-row'));
   kort.forEach(k => {
     /* Fra 760 px staar sammenlign-knappen i kortets fod i stedet for oven i fotoet (css/p-soegning.css). */
     const sam = k.querySelector('.card-media > .card-compare');
     if (sam && window.innerWidth >= 760) k.appendChild(sam);
-    const tom = k.querySelector('.card-media > .foto-tom:not(.foto-fejl)');
+    const tom = k.querySelector('.card-media > .foto-tom:not(.foto-fejl), .row-media > .foto-tom:not(.foto-fejl)');
     if (!tom) return;
-    const t = String(k.dataset.type || '').toLowerCase();
+    const t = String(k.dataset.type || (k.querySelector('.row-variant')?.textContent) || '').toLowerCase();
     const slug = TYPEFOTO.find(x => t.startsWith(x));
     if (!slug) return;
     const img = document.createElement('img');
@@ -1550,7 +1550,7 @@ function typefotoKort(root){
     img.loading = 'lazy'; img.decoding = 'async';
     const label = document.createElement('span');
     label.className = 'typefoto-label';
-    label.textContent = 'Typefoto, ikke annoncens';
+    label.innerHTML = 'Typefoto<span class="tf-hale">, ikke annoncens</span>';
     label.title = 'Annoncen har ikke et billede. Fotoet er en illustration af typen ' + slug + '.';
     const wrap = document.createElement('div');
     wrap.className = 'typefoto';
@@ -1786,7 +1786,10 @@ function render(){
   renderUoplystNote();
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const sideFoer = state.page;
   state.page = Math.min(state.page, totalPages);
+  /* ?page=99 på et resultat med 5 sider viser side 5 — og URL'en siger det også (deles/bogmærkes som den side, den viser). */
+  if (state.page !== sideFoer) history.replaceState(null, '', beregnURL());
   const pageItems = filtered.slice((state.page-1)*PAGE_SIZE, state.page*PAGE_SIZE);
 
   renderResultsCount(filtered);
@@ -1830,6 +1833,8 @@ function render(){
 
   const grid = document.getElementById('results-grid');
   const empty = document.getElementById('empty-state');
+  /* Sortering og visningsvalg giver ingen mening uden resultater. */
+  document.querySelectorAll('#so-results-head .sort-felt, #so-results-head .view-toggle').forEach(e => { e.hidden = pageItems.length === 0; });
   if (pageItems.length){
     grid.style.display = '';
     // scripts/build-srp.js skjuler de forudtegnede kort på filtrerede
