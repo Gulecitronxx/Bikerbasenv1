@@ -200,9 +200,9 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=5bc49349">
-<link rel="stylesheet" href="css/p-brand-logo.css?v=5bc49349">
-<link rel="stylesheet" href="css/p-soegning.css?v=5bc49349">
+<link rel="stylesheet" href="css/styles.css?v=0436b112">
+<link rel="stylesheet" href="css/p-brand-logo.css?v=0436b112">
+<link rel="stylesheet" href="css/p-soegning.css?v=0436b112">
 
 
 
@@ -299,70 +299,24 @@ try{
 </div>
 
 <main id="main-content">
-  <!-- Hero: foto + overskrift + søgekort (billede 2). Søgekortets felter er
-       KUN en anden indgang til de samme filtre som sidebaren: søgefeltet er
-       stadig #filter-q, og type, pris og kørekort spejles til/fra `state`
-       (js/search.js, reflectStateToUI) — de har ingen egen logik. H1'en er
-       stadig den dynamiske (soegeoverskrift), nu med billedets "Find din
-       næste motorcykel" foran. -->
-  <section class="so-hero">
-    <div class="so-hero-media" aria-hidden="true">
-      <img class="so-hero-photo" src="img/hero-1600.webp"
-           srcset="img/hero-800.webp 800w, img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w"
-           sizes="100vw" alt="" width="2560" height="1086" fetchpriority="low" decoding="async">
-    </div>
-    <div class="container so-hero-inner">
-      <nav class="breadcrumb so-breadcrumb" aria-label="Brødkrumme">
-        <a href="index.html">Forside</a><span id="bc-sep-1">/</span><span id="bc-current">Søgeresultater</span>
-      </nav>
-      <!-- H1 skal stå før filterpanelets H2 i DOM'en (skærmlæser: sidens
-           første overskrift skal sige hvad siden handler om). Runde 8
-           (D8-S1): "Brugte" er droppet — ≈172 annoncer er fabriksnye. -->
-      <h1 class="search-heading so-h1"><span class="so-h1-title">Find din næste motorcykel</span><span class="visually-hidden"> — </span><span class="so-h1-sub"><span id="so-h1-n"></span><span id="so-h1-text">Motorcykler til salg i Danmark</span></span></h1>
-
-      <form class="so-card" id="srp-search" role="search" aria-label="Søg motorcykler" novalidate>
-        <div class="so-field so-f-q">
-          <label for="filter-q">Mærke eller model</label>
-          <div class="so-inputwrap">
-            <span class="so-ico" id="srp-search-icon" aria-hidden="true"></span>
-            <input type="search" id="filter-q" class="input" placeholder="Mærke eller model" autocomplete="off" enterkeyhint="search">
-            <button type="button" class="so-clear" id="filter-q-clear" aria-label="Ryd søgning" hidden></button>
-          </div>
-        </div>
-        <div class="so-field so-f-type">
-          <label for="so-type">Type</label>
-          <div class="so-inputwrap so-iconselect"><span class="so-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="16" r="3.5"/><circle cx="18.5" cy="16" r="3.5"/><path d="M5.5 16 9 8h5l4.5 8M9 8 7.5 5.5H5M12.5 12h4"/></svg></span>
-          <select class="input" id="so-type"><option value="">Alle typer</option></select></div>
-        </div>
-        <div class="so-field so-f-price">
-          <label for="so-price">Maks. pris</label>
-          <div class="so-inputwrap so-iconselect"><span class="so-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span>
-          <select class="input" id="so-price">
-            <option value="">Alle priser</option>
-            <option value="30000">Op til 30.000 kr.</option>
-            <option value="60000">Op til 60.000 kr.</option>
-            <option value="100000">Op til 100.000 kr.</option>
-            <option value="200000">Op til 200.000 kr.</option>
-          </select></div>
-        </div>
-        <fieldset class="so-field so-f-kk">
-          <legend>Kørekort</legend>
-          <div class="kk-seg">
-            <input type="radio" name="so-koerekort" id="so-kk-alle" value="" checked>
-            <label for="so-kk-alle">Alle</label>
-            <input type="radio" name="so-koerekort" id="so-kk-A1" value="A1">
-            <label for="so-kk-A1">A1</label>
-            <input type="radio" name="so-koerekort" id="so-kk-A2" value="A2">
-            <label for="so-kk-A2">A2</label>
-            <input type="radio" name="so-koerekort" id="so-kk-A" value="A">
-            <label for="so-kk-A">A</label>
-          </div>
-        </fieldset>
-        <button type="button" class="so-card-more" id="so-card-more" aria-expanded="false">Flere valg: type, pris og kørekort<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-        <button type="submit" class="btn btn-primary btn-lg so-submit"><span class="so-submit-long">Søg motorcykler</span><span class="so-submit-short" aria-hidden="true">Søg</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-      </form>
-    </div>
-  </section>
+  <!-- Toppen er kun brødkrumme + ét kompakt søgefelt (V3: hero-fotoet og det store søgekort er fjernet).
+       Fritekstfeltet er stadig #filter-q (forsiden sender ?q=...); type, pris og kørekort bor i sidebaren.
+       H1'en er den dynamiske (soegeoverskrift), synlig kun for skærmlæsere/SEO — resultatlinjen viser tallet. -->
+  <div class="container so-top">
+    <nav class="breadcrumb so-breadcrumb" aria-label="Brødkrumme">
+      <a href="index.html">Forside</a><span id="bc-sep-1">/</span><span id="bc-current">Søgeresultater</span>
+    </nav>
+    <h1 class="search-heading so-h1 visually-hidden"><span id="so-h1-n"></span><span id="so-h1-text">Motorcykler til salg i Danmark</span></h1>
+    <form class="so-q" id="srp-search" role="search" aria-label="Søg motorcykler" novalidate>
+      <label class="visually-hidden" for="filter-q">Mærke eller model</label>
+      <div class="so-inputwrap">
+        <span class="so-ico" id="srp-search-icon" aria-hidden="true"></span>
+        <input type="search" id="filter-q" class="input" placeholder="Søg på mærke eller model" autocomplete="off" enterkeyhint="search">
+        <button type="button" class="so-clear" id="filter-q-clear" aria-label="Ryd søgning" hidden></button>
+      </div>
+      <button type="submit" class="btn btn-primary so-q-go">Søg</button>
+    </form>
+  </div>
 
   <!-- Aktive filtre som fjernbare piller + "Ryd alle filtre". Rækken har fast
        højde, så den første pille ikke skubber sidebar og resultater ned. -->
@@ -1167,33 +1121,33 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=5bc49349"></script>
-<script defer src="js/supabase-config.js?v=5bc49349"></script>
-<script defer src="js/supabase-api.js?v=5bc49349"></script>
-<script defer src="js/icons.js?v=5bc49349"></script>
+<script defer src="js/security.js?v=0436b112"></script>
+<script defer src="js/supabase-config.js?v=0436b112"></script>
+<script defer src="js/supabase-api.js?v=0436b112"></script>
+<script defer src="js/icons.js?v=0436b112"></script>
 <!-- js/postnumre.js (40 KB, 1089 rækker) lå her, men ingen af søgesidens
      scripts slår et postnummer op — POSTNUMRE bruges kun ved oprettelse og
      redigering af annoncer. Filen blev altså hentet, parset og evalueret på
      hovedtråden uden at blive brugt. Fjernet herfra; de sider der faktisk
      bruger den (opret-annonce, dashboard, mine-annoncer …) loader den stadig. -->
-<script defer src="js/data.js?v=5bc49349"></script>
-<script defer src="js/store.js?v=5bc49349"></script>
-<script defer src="js/maaling.js?v=5bc49349"></script>
+<script defer src="js/data.js?v=0436b112"></script>
+<script defer src="js/store.js?v=0436b112"></script>
+<script defer src="js/maaling.js?v=0436b112"></script>
 <!-- js/filtrering.js: ÉT sted, hvor et filter afgør, hvad der er et træf.
      Skal loades EFTER js/data.js (den bruger passerKoerekort og
      hkEllerNull) og FØR js/search.js, som kalder Filtrering.* på
      topniveau i sin filterkæde. Se work/DECISIONS.md, "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=5bc49349"></script>
-<script defer src="js/backend-bridge.js?v=5bc49349"></script>
-<script defer src="js/components.js?v=5bc49349"></script>
+<script defer src="js/filtrering.js?v=0436b112"></script>
+<script defer src="js/backend-bridge.js?v=0436b112"></script>
+<script defer src="js/components.js?v=0436b112"></script>
 <!-- Sortering EFTER components.js (bruger koerekortMaerkat), FØR search.js
      (som læser Sortering ved indlæsning). Samme rækkefølge som
      browserModules() i scripts/shared.js — se js/sortering.js. -->
-<script defer src="js/sortering.js?v=5bc49349"></script>
-<script defer src="js/seo.js?v=5bc49349"></script>
-<script defer src="js/brand-logos-data.js?v=5bc49349"></script>
-<script defer src="js/brand-logos.js?v=5bc49349"></script>
-<script defer src="js/search.js?v=5bc49349"></script>
+<script defer src="js/sortering.js?v=0436b112"></script>
+<script defer src="js/seo.js?v=0436b112"></script>
+<script defer src="js/brand-logos-data.js?v=0436b112"></script>
+<script defer src="js/brand-logos.js?v=0436b112"></script>
+<script defer src="js/search.js?v=0436b112"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">
