@@ -971,7 +971,7 @@ function renderResultsCount(list){
   // "548 annoncer" — derfor uden tallet: "· fra 4 kilder (i)".
   const kort = `fra ${antalKilder} ${antalKilder === 1 ? 'kilde' : 'kilder'}`;
   mix.innerHTML = `${egneTekst}<span class="mix-tail">` +
-    `<span class="mix-part mix-ekstern"><span class="mix-lang">${kildeTekst}${flere}</span><span class="mix-kort">· ${kort}</span></span>` +
+    `<span class="mix-part mix-ekstern"><span class="mix-lang">${kildeTekst}${flere}</span><span class="mix-kort"><span class="mix-prik">· </span>${kort}</span></span>` +
     `<button type="button" class="mix-info" id="mix-info-btn" title="Hvad betyder indekseret?" aria-label="Hvad betyder det, at en annonce er indekseret?">${Icon.info}</button>` +
     `</span>`;
   mix.querySelector('#mix-info-btn').addEventListener('click', forklarIndekseret);
@@ -1483,14 +1483,14 @@ function activeFilterPills(){
     pills.push({ label: state.priceMax == null ? `Fra ${formatPrice(state.priceMin)}` : (state.priceMin ? `${formatPrice(state.priceMin)} – ${formatPrice(state.priceMax)}` : `Maks. ${formatPrice(state.priceMax)}`), clear: () => { state.priceMin=null; state.priceMax=null; } });
   }
   if (state.yearMin != null || state.yearMax != null){
-    pills.push({ label: `Årgang ${state.yearMin||'…'} – ${state.yearMax||'…'}`, clear: () => { state.yearMin=null; state.yearMax=null; } });
+    pills.push({ label: state.yearMax == null ? `Årgang fra ${state.yearMin}` : state.yearMin == null ? `Årgang til ${state.yearMax}` : `Årgang ${state.yearMin} – ${state.yearMax}`, clear: () => { state.yearMin=null; state.yearMax=null; } });
   }
   if (state.kmMax != null) pills.push({ label: `Maks. ${formatKm(state.kmMax)}`, clear: () => state.kmMax=null });
   if (state.ccmMin != null || state.ccmMax != null){
-    pills.push({ label: `${state.ccmMin||0} – ${state.ccmMax||'∞'} ccm`, clear: () => { state.ccmMin=null; state.ccmMax=null; } });
+    pills.push({ label: state.ccmMax == null ? `Fra ${state.ccmMin} ccm` : !state.ccmMin ? `Maks. ${state.ccmMax} ccm` : `${state.ccmMin} – ${state.ccmMax} ccm`, clear: () => { state.ccmMin=null; state.ccmMax=null; } });
   }
   if (state.hkMin != null || state.hkMax != null){
-    pills.push({ label: `${state.hkMin||0} – ${state.hkMax||'∞'} hk`, clear: () => { state.hkMin=null; state.hkMax=null; } });
+    pills.push({ label: state.hkMax == null ? `Fra ${state.hkMin} hk` : !state.hkMin ? `Maks. ${state.hkMax} hk` : `${state.hkMin} – ${state.hkMax} hk`, clear: () => { state.hkMin=null; state.hkMax=null; } });
   }
   if (state.dealerOnly) pills.push({ label: 'Kun forhandlere', clear: () => state.dealerOnly = false });
   if (state.kilde) pills.push({ label: `Hos ${state.kilde}`, clear: () => state.kilde = '' });
@@ -1550,7 +1550,7 @@ function typefotoKort(root){
     img.loading = 'lazy'; img.decoding = 'async';
     const label = document.createElement('span');
     label.className = 'typefoto-label';
-    label.textContent = 'Typefoto, ikke annoncens';
+    label.innerHTML = 'Typefoto<span class="tf-hale">, ikke annoncens</span>';
     label.title = 'Annoncen har ikke et billede. Fotoet er en illustration af typen ' + slug + '.';
     const wrap = document.createElement('div');
     wrap.className = 'typefoto';
