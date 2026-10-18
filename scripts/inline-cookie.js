@@ -35,7 +35,7 @@ const blok = `<!--cookie:start-->
     </div>
   </div>
 </dialog>
-<script>try{if(!localStorage.getItem(${JSON.stringify(NØGLE)})){var d=document.getElementById("cookie-banner");var l=/\\/(privatlivspolitik|vilkaar|om-indeksering)(\\.html)?$/.test(location.pathname);if(d&&!l){if(d.showModal){d.showModal();}else{d.setAttribute("open","");}}}}catch(e){}<\/script>
+<script>try{if(!localStorage.getItem(${JSON.stringify(NØGLE)})){var d=document.getElementById("cookie-banner");var l=/\\/(privatlivspolitik|vilkaar|om-indeksering)(\\.html)?$/.test(location.pathname);if(d&&!l){if(d.showModal){d.showModal();}else{d.setAttribute("open","");}var c=getComputedStyle(d);if(c.display==="none"||c.visibility==="hidden"||!d.offsetWidth){d.close&&d.close();d.removeAttribute("open");d.setAttribute("hidden","");}}}}catch(e){}<\/script>
 <!--cookie:end-->`;
 
 const files = fs.readdirSync(root).filter(f => f.endsWith('.html'));
