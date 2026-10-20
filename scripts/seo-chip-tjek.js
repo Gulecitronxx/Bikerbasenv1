@@ -48,7 +48,10 @@ const vindue = { location: { search: '' } };
 const laes = new Function('window', 'TYPES', [
   udklipKonstant('LIST_PARAMS'), udklipKonstant('NUM_PARAMS'), udklipKonstant('SORTERINGER'),
   udklipKonstant('SORT_ALIAS'), udklipKonstant('EMPTY_STATE'),
-  'let state = { ...EMPTY_STATE };', udklipFunktion('numOrNull'), udklipFunktion('readStateFromURL'),
+  'let state = { ...EMPTY_STATE };', udklipFunktion('numOrNull'),
+  // readStateFromURL() ender i kanoniserMaerkeOgModel() (V4), der rette valg til lagerets stavemåde via Store/Filtrering.
+  // Chip-testen skal kun læse URL'ens parametre, så den kører her som tom stub.
+  'function kanoniserMaerkeOgModel(){}', udklipFunktion('readStateFromURL'),
   'return function(search){ window.location.search = search; state = { ...EMPTY_STATE }; readStateFromURL(); return state; };',
 ].join('\n'))(vindue, TYPES);
 
