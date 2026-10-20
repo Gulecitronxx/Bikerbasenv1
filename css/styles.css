@@ -1254,6 +1254,10 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .checkbox-row input[type="checkbox"]{ width:18px; height:18px; accent-color: var(--color-primary); flex-shrink:0; }
 .range-row{ display:flex; gap:8px; align-items:center; }
 .range-row .input{ padding:9px 10px; font-size:14px; }
+/* F2: iOS/iPadOS Safari zoomer ind, når et felt får fokus med skriftstørrelse under 16 px. Felter er 16 px på smalle skærme og touch (desktop uændret). Står EFTER .search-panel/.range-row-reglerne ovenfor (samme specificitet, senere vinder). */
+@media (max-width:1099px), (pointer:coarse){
+  .input, select.input, textarea.input, .search-panel .input, .search-panel select.input, .range-row .input{ font-size:16px; }
+}
 .chip-group{ display:flex; flex-wrap:wrap; gap:6px; }
 .chip{
   font-size:13px; font-weight:600; padding:7px 12px; border-radius: var(--radius-pill);
