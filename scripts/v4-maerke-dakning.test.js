@@ -50,7 +50,7 @@ test('statiske tjek kan fejle: dublet-slug, canonical, manglende logo, dublet i 
     });
     ret(rod, 'maerke-honda.html', t => t.replace('href="https://bikerbasen.dk/maerke-honda"', 'href="https://bikerbasen.dk/maerke-andet"'));
     ret(rod, 'maerke-bmw.html', t => t.replace(/<meta name="robots" content="[^"]*noindex[^"]*">\s*/g, '').replace(/<span data-mk-n>[\d.]+<\/span>/, '<span data-mk-n>0</span>'));
-    ret(rod, 'maerker.html', t => t.replace('<li data-mk-soeg="honda">', '<li data-mk-soeg="honda"><a href="maerke-honda.html"><span class="mk-az-navn"><span>Honda</span></span><span class="mk-az-n">1</span></a></li><li data-mk-soeg="honda">'));
+    ret(rod, 'maerker.html', t => t.replace(/<li data-mk-soeg="honda[^"]*">/, m => m + '<a href="maerke-honda.html"><span class="mk-az-navn"><span>Honda</span></span><span class="mk-az-n">1</span></a></li>' + m));
     ret(rod, 'sitemap.xml', t => t.replace('</urlset>', '<url><loc>https://bikerbasen.dk/maerke-findes-ikke</loc></url></urlset>'));
     const navne = tjekNavne(staticFund(rod, { manifest: true }));
     for (const forventet of ['dublet-slug', 'logo-fil-mangler', 'side-canonical', 'tom-side-indekserbar', 'dublet-oversigt', 'sitemap-doedt', 'alias-to-maerker'])
