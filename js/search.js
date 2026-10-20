@@ -506,7 +506,7 @@ function facetTal(){
   return {
     typeAlle:   typBasis.length,
     types:      tael(typBasis,            l => l.type),
-    brands:     tael(basis('brands'),     l => Filtrering.maerkeNoegle(l.brand)),
+    brands:     tael(basis('brands'),     l => Filtrering.lagerMaerkeNoegle(l.brand)),   // V5: fritekst-mærker tælles under "Uoplyst mærke"
     regions:    tael(basis('regions'),    l => l.region),
     conditions: tael(basis('conditions'), l => l.condition),
     koerekort, pris,

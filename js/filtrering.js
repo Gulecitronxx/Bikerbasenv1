@@ -199,6 +199,15 @@ const Filtrering = (() => {
     return (n === '' || n === 'ukendt' || n === 'null' || n === 'undefined') ? 'ukendt' : n;
   }
   function erUoplystMaerke(b){ return maerkeNoegle(b) === 'ukendt'; }
+  /* V5: nøglen for et mærke, som det står på en ANNONCE (lagersiden). Et mærke, registret ikke kender (fx en sælgers fritekst fra "Andet mærke" i opret-annonce,
+     "Hanway"), må ikke blive en offentlig filterrække; det hører under "Uoplyst mærke" ligesom sentinellen "Ukendt" (antal, ?brands=Ukendt, pille og H1 følger nøglen).
+     Fritekstsøgningen er uberørt: q matcher annoncens brand-felt som før, så "hanway" stadig finder annoncen. Kun den VALGTE side (URL/afkrydsning) bruger maerkeNoegle(). */
+  function lagerMaerkeNoegle(b){
+    const k = maerkeNoegle(b);
+    if (k === 'ukendt') return k;
+    const reg = register();
+    return reg && typeof reg.erKendt === 'function' && !reg.erKendt(b) ? 'ukendt' : k;
+  }
   /* Det brugeren ser. "Ukendt" er en intern sentinel og skal aldrig stå som mærkenavn i et filter. */
   function maerkeVisning(b){
     if (erUoplystMaerke(b)) return uoplystTekst;
@@ -248,7 +257,7 @@ const Filtrering = (() => {
   function maerkeListe(alle, ekstra){
     const grupper = new Map();
     const tael = (b, n) => {
-      const k = maerkeNoegle(b);
+      const k = lagerMaerkeNoegle(b);
       const reg = register();
       const raa = String(b == null ? '' : b).trim();
       const navn = k === 'ukendt' ? MAERKE_UOPLYST : (reg ? (reg.kanonisk(raa) || raa) : raa);   // registrets stavemåde, ellers lagerets
@@ -272,7 +281,7 @@ const Filtrering = (() => {
     const nogler = new Set((maerker || []).map(maerkeNoegle));
     const grupper = new Map();
     for (const l of alle || []){
-      if (nogler.size && !nogler.has(maerkeNoegle(l.brand))) continue;
+      if (nogler.size && !nogler.has(lagerMaerkeNoegle(l.brand))) continue;
       const m = l.model == null ? '' : String(l.model).trim();
       if (!m) continue;
       const k = modelNoegle(m);
@@ -365,7 +374,7 @@ const Filtrering = (() => {
     // "Ukendt"/tom er ét uoplyst mærke (samme regel som mærkesiderne, js/maerke.js).
     if (brug('brands') && state.brands.length){
       const maerker = new Set(state.brands.map(maerkeNoegle));
-      list = list.filter(l => maerker.has(maerkeNoegle(l.brand)));
+      list = list.filter(l => maerker.has(lagerMaerkeNoegle(l.brand)));
     }
     if (brug('models') && state.models.length){
       const modeller = new Set(state.models.map(modelNoegle));
@@ -482,7 +491,7 @@ const Filtrering = (() => {
 
   return {
     UOPLYST, TOMT_FILTER, filtrerMedUoplyst, koerekortSvar, anvendFiltre, uoplystOpgoerelse,
-    MAERKE_UOPLYST, maerkeNoegle, erUoplystMaerke, maerkeVisning, saetUoplystMaerkeTekst, registrerMaerker,
+    MAERKE_UOPLYST, maerkeNoegle, lagerMaerkeNoegle, erUoplystMaerke, maerkeVisning, saetUoplystMaerkeTekst, registrerMaerker,
     maerkeListe, modelListe, modelNoegle, soegeForespoergsel,
   };
 })();
