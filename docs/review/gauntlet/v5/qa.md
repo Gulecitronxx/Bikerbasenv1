@@ -46,7 +46,7 @@ Fra `node scripts/v5-kompatibilitet.js` (antal = forekomster i css/js/inline). "
 
 | Funktion | Brugt | Chrome/Edge | Safari/iOS | Firefox | Uden støtte |
 |---|---|---|---|---|---|
-| Regex lookbehind `(?<=` `(?<!` | 7 (5 filer) | 62 | **16.4** | 78 | **nej - parse-fejl dræber filen** |
+| Regex lookbehind `(?<=` `(?<!` | 0 (var 7 i 5 filer; fjernet i F3) | 62 | 16.4 | 78 | nej - parse-fejl dræber filen (må ikke komme tilbage; testen vogter det) |
 | `color-mix()` | 363 | **111** | 16.2 | 113 | delvist |
 | `:has()` | 299 | 105 | 15.4 | **121** | delvist |
 | `@container` / `container-type` | 311 | 105 | 16 | 110 | delvist |
@@ -60,7 +60,7 @@ Fra `node scripts/v5-kompatibilitet.js` (antal = forekomster i css/js/inline). "
 | `?.` `??`, private felter `#x`, BigInt, `\p{L}` | 191/1/1/9 | 64-80 | 11.1-14.1 | 68-90 | nej |
 | `text-wrap: balance`, `scrollbar-width`, `content-visibility`, `backdrop-filter`, `accent-color`, `::backdrop`, `overscroll-behavior`, `mask` (både `-webkit-` og uprefixet) | 1-225 | 63-121 | 15.4-18.2 | 53-125 | progressiv |
 
-**Gulv** (laveste version hvor siden virker uden at noget går i stykker): Chrome/Edge 111 (color-mix), Safari/iOS **16.4** (lookbehind; 16.2 uden den), Firefox 121 (`:has`). Vagtlisten (nesting, `@scope`, anchor, popover, `toSorted`, `groupBy`, `structuredClone` m.fl.) er tom; testen fejler hvis en ny funktion hæver gulvet over denne baseline.
+**Gulv** (laveste version hvor siden virker uden at noget går i stykker): Chrome/Edge 111 (color-mix), Safari/iOS **16.2** (color-mix; var 16.4 på grund af regex-lookbehind, som er fjernet i F3), Firefox 121 (`:has`). Vagtlisten (nesting, `@scope`, anchor, popover, `toSorted`, `groupBy`, `structuredClone` m.fl.) er tom; testen fejler hvis en ny funktion hæver gulvet over denne baseline.
 
 ### Ældre-browser-simulering (Chromium, 11 sider x 375+1440 x lys+mørk = 44 målinger/variant)
 Kontrol (uændret kørt igen) = 0 forskelle, så forskellene er reelle.
@@ -107,14 +107,14 @@ Efter merge (fase 2): kør `node scripts/v4-maerke-dakning.js --data live --base
 Jeg kan ikke køre Safari eller Firefox. Gulvet står i matrixen ovenfor; nedenfor det, du skal se efter med egne øjne. Alt er sorteret efter risiko.
 
 ### iPhone / Safari (kræver iOS 16.4 eller nyere; test helst på 16.x og seneste)
-1. Version: Indstillinger > Generelt > Info. **iOS under 16.4 = siden kan være helt død** (lookbehind, F3). Er det en mulig målgruppe (iPhone 6s/7/8 på iOS 15/16.0-16.3), skal koden rettes - ellers skal det accepteres bevidst.
+1. Version: Indstillinger > Generelt > Info. Gulvet er nu iOS 16.2 (color-mix); iOS 15.4-16.1 og ældre får en pænt degraderet side (se simuleringen), under 15.4 mangler `dialog.showModal`, `:has` og `dvh` helt. (Lookbehind, som før krævede 16.4, er fjernet - F3.)
 2. Åbn bikerbasen.dk i en privat fane. Cookie-dialogen skal vises; "Kun nødvendige" lukker den; siden kan derefter scrolles og klikkes (dialogen bruger `<dialog>.showModal()`, Safari 15.4+).
-3. Forside: tryk i "Mærke eller model". **Zoomer siden ind?** Forventet: ja (felterne er 15 px; iOS zoomer ved <16 px) - samme på typesider, mærkesider, mærkeoversigtens hurtigsøgning (F2).
-4. Søgning: skriv "honda" -> 307 hits (live). Åbn filter-panelet (bottom sheet): kan det scrolles, og ligger nederste knap tydeligt over Safaris værktøjslinje? (`max-height:88vh` i stedet for `dvh`, F5.)
+3. Forside: tryk i "Mærke eller model". **Zoomer siden ind?** Forventet: nej (F2 er rettet: felterne er 16 px på telefon/tablet). Gælder også typesider, mærkesider, mærkeoversigtens hurtigsøgning og filterpanelet.
+4. Søgning: skriv "honda" -> 307 hits (live). Åbn filter-panelet (bottom sheet): kan det scrolles, og ligger nederste knap tydeligt over Safaris værktøjslinje? (F5: `88vh` + `88dvh`.)
 5. Annonce: swipe i galleriet, åbn lightbox (skal fylde hele skærmen, `100dvh`, ingen hvidt bånd under), "Vis nummer"-knappen (mobil-CTA).
 6. Opret annonce: vælg mærke (hjul-vælger), (efter V5) "Andet mærke", tilføj billede fra kamerarulle (HEIC), tastatur må ikke skjule feltet; kontrollér at formularens kolonner ser rigtige ud på telefon og tablet.
 7. Mørk tilstand (iOS Udseende), liggende format (notch/safe area; siden bruger ikke `viewport-fit=cover`, så den holder sig inden for sikkert område).
-8. Fejlfinding på Mac: Safari > Udvikler > [din iPhone] > Web Inspector; konsollen skal være tom. På iOS < 16.4 ser man "SyntaxError: Invalid regular expression: invalid group specifier name".
+8. Fejlfinding på Mac: Safari > Udvikler > [din iPhone] > Web Inspector; konsollen skal være tom.
 
 ### Firefox (desktop >= 121, Android Firefox; ESR 115 og ældre mangler `:has()`)
 1. Version: `about:support`. Under 121: `:has()`-regler ignoreres (facetter/filter mister afstand; annonce/søgning ser anderledes ud, intet går i stykker - se simulering).
@@ -127,6 +127,9 @@ Jeg kan ikke køre Safari eller Firefox. Gulvet står i matrixen ovenfor; nedenf
 
 ### Hvis noget afviger
 Skriv enhed + iOS/Firefox-version + side + skærmbillede. Chrome/Edge-resultaterne ovenfor er identiske, så en forskel i Safari/Firefox er en motorforskel, ikke et datafund.
+
+## QA's egne rettelser (efter fase 1)
+F1, F2, F3, F5, F6 og F8 er rettet i branch gauntlet/v5-qa, en commit pr. fund (se `qa-fund.md`, afsnittet "Status efter QA's egne rettelser"); F4 er kun et forslag. Nye tests: `js/v5-lookbehind-ekvivalens.test.js`, `js/v5-foto-tom-kontrast.test.js`, `js/v5-ios-zoom.test.js`, `js/v5-dvh-fallback.test.js`, `js/v5-opret-container-fallback.test.js` (til package.json "test").
 
 ## Fase 2 (når Orchestrator beder om det)
 1. `git archive cbbb411f` (eller master efter merge) til en tom mappe; kør `node scripts/build.js` i kopien (aldrig i repoet).

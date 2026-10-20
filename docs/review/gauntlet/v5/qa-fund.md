@@ -13,6 +13,28 @@ Bevis: `scripts/v5-krydsbrowser.js`, `scripts/v5-kompatibilitet.js`, `scripts/v5
 | F7 | info | Et eksternt billede (`assets.guloggratis.dk/images/c73303ca-ce20-47a7-9e01-ebd963c8c7d6/...-320x240.webp`) blokeres af ORB i Chrome/Edge/Chromium på live søgning (svaret er ikke et billede). Ingen konsolfejl, men et kort kan stå med brudt/tomt billede | `net::ERR_BLOCKED_BY_ORB` i `krydsbrowser-live.md` (`ekstern-forespoergsel`) | Crawlerens billed-url er forældet/forkert: lad kortets `onerror` falde tilbage til typefoto (kontrollér at det sker); tjek kilden | crawler/data (ikke QA) | live |
 | F8 | info | `opret-annonce` bruger `container-type` til formulargitteret: uden `@container`-støtte (Safari < 16, Firefox < 110) falder 4-kolonne-gitteret til 1 kolonne (+1162 px ved 1440, +623 px ved 375) | Simulering "uden @container": `krydsbrowser/uden-container-opret-annonce-1440.png` mod `normal-opret-annonce-1440.png` | Giv gitteret et almindeligt `@media`-fallback (samme kolonner ved samme bredde) | opret-ejer (css/p-opret.css) | live + master (kun gamle browsere) |
 
+## Status efter QA's egne rettelser (branch gauntlet/v5-qa, en commit pr. fund)
+
+| # | Status | Commit | Test |
+|---|---|---|---|
+| F1 | RETTET: hvid tekst/mærkat kun under `[data-type]`; ellers grå (kontrast >= 4,5:1 lys+mørk), ingen "Typefoto"-mærkat uden typefoto (css/p-facet.css ~688-690, css/p-maerke.css ~809-811) | 29ce985c | js/v5-foto-tom-kontrast.test.js |
+| F2 | RETTET: 16 px for felter < 1100 px og pointer:coarse (styles.css efter linje 1256, p-forside.css l. 625 + ny blok sidst, p-soegning.css l. ~290 media-betingelse); desktop uændret | 38eab23b | js/v5-ios-zoom.test.js |
+| F3 | RETTET: lookbehind fjernet fra 5 filer/7 steder; Safari-gulv 16.4 -> 16.2 | 4119b41b | js/v5-lookbehind-ekvivalens.test.js, scripts/v5-kompatibilitet.test.js |
+| F4 | FORSLAG nedenfor, ikke rettet | - | - |
+| F5 | RETTET: `88vh` efterfulgt af `88dvh` (styles.css 1238, 1509, 1604) | 5a3bf8df | js/v5-dvh-fallback.test.js |
+| F6 | RETTET: vh-fallback før alle 12 dvh-deklarationer (styles.css, p-annonce.css, p-login.css, p-opret.css) | 8529af9b | js/v5-dvh-fallback.test.js |
+| F7 | uændret (crawler/data) | - | - |
+| F8 | RETTET: `@supports not (container-type:inline-size){ @media ... }` efter hver @container opform-blok i css/p-opret.css (genereret af scripts/v5-opret-container-fallback.js; tærskler målt og genmålt i test) | 5baa34d2 | js/v5-opret-container-fallback.test.js |
+
+Bemærk: de øvrige @container-brugere (p-dashboard.css 8, p-facet.css 3, p-maerke.css 3, p-annonce.css 1) har endnu ingen fallback; simuleringen viste kun opret-annonce som tydeligt ændret, så de er ikke rørt.
+
+## F4 - forslag (ikke implementeret): tjek sessionen før dashboard-pakken hentes
+Problem: `dashboard.html` og `mine-annoncer.html` indlæser 13 `<script defer>` (196 kB JS gzip) + 66 kB CSS, og først `js/dashboard.js`/`mine-annoncer.js` omdirigerer en udlogget besøgende til `login.html?redirect=...`.
+Løsning (to dele, ingen ændring af login-flowet):
+1. Et lille inline-script FØRST i `<head>` på de to sider (genereres af scripts/inline-boot.js, så CSP-hash følger med): `try{var k=Object.keys(localStorage).filter(function(x){return /^sb-.*-auth-token$/.test(x)})[0];if(!k||!JSON.parse(localStorage.getItem(k)).access_token){location.replace('login.html?redirect='+encodeURIComponent(location.pathname.replace(/^//,'')+location.search))}}catch(e){location.replace('login.html?redirect=dashboard.html')}` (nøglenavnet læses fra js/supabase-config.js). Det er kun en HURTIG afvisning: serverens RLS og siden selv tjekker stadig rigtigt.
+2. Scripts-tagsene beholdes `defer`; browseren når at starte navigationen, før de er hentet, så en udlogget besøgende henter kun HTML + inline-CSS (omkring 8 kB gzip) i stedet for ~330 kB.
+Verifikation når det er lavet: `node scripts/v5-sidevaegt.js --browser` skal vise dashboard.html/mine-annoncer.html omdirigeret med målt overførsel tæt på login.html alene (dashboard-budgettet i scripts/v5-sidevaegt.budget.json kan så sænkes), og smoke/login-tests skal stadig være grønne.
+
 ## V5-krav som fejler (kendte, se `qa.md` afsnit 2)
 `v5-andet-mangler`, `v5-flere-ikke-hydreret`, `v5-hurtigsoeg-pille-filter`, `v5-hurtigsoeg-status`, `v5-ukendt-maerke-i-h1` (alle pr. cbbb411f; ejere: opret-ejer, maerke-ejer (Agent 1/maerker.html), soegning-ejer). Fixtures viser desuden at Vespa og Piaggio (1 annonce hver) står som inerte piller i "Flere mærker" trods annoncer (maerker.html er ren statisk markup og henter ikke lageret).
 
