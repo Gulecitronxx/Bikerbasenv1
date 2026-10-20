@@ -49,7 +49,7 @@ const { restSvar, PNG_1X1 } = require('./smoke-fixtures');
 
 const REPO = path.join(__dirname, '..');
 const VAERT = 'bb-qa.test';
-const HURTIG_MAERKER = ['Honda', 'Harley-Davidson', 'BMW', 'MV Agusta', 'Lauge Jensen', 'CFMoto', 'Zero Motorcycles'];
+const HURTIG_MAERKER = ['Honda', 'Harley-Davidson', 'BMW', 'MV Agusta', 'Lauge Jensen', 'CFMoto', 'Zero'];
 /* Kerne-aliasser fra opgaven: skal virke i fritekst. [søgeord, registerslug] */
 const KERNE_ALIAS = [
   ['cf moto', 'cfmoto'], ['CFMOTO', 'cfmoto'], ['cfmoto', 'cfmoto'], ['cf-moto', 'cfmoto'],
@@ -95,10 +95,29 @@ function normaliserRegister(raa, kilde) {
   return { kilde, maerker };
 }
 
+/* V4: det RIGTIGE register er js/brands-registry.js (Agent 1): alle() = poster med navn/slug/aliaser/periode/kilder/logo,
+   valgbare() = navne i opret-annonce. Logofil/hash/godkendelse hentes fra img/brands/manifest.json via logo-nøglen. */
+function indlaesRegistry(rod) {
+  const sti = path.join(rod, 'js', 'brands-registry.js');
+  if (!fs.existsSync(sti)) return null;
+  delete require.cache[require.resolve(sti)];
+  const BR = require(sti);
+  let manifest = { maerker: [] };
+  try { manifest = JSON.parse(fs.readFileSync(path.join(rod, 'img/brands/manifest.json'), 'utf8')); } catch (e) { /* ingen logoer */ }
+  const mi = new Map((manifest.maerker || []).map(m => [m.slug, m]));
+  const maerker = BR.alle().map(p => {
+    const nk = p.logo || p.slug;
+    const m = mi.get(nk) || {};
+    return { slug: p.slug, navn: p.navn, aliaser: (p.aliaser || []).slice(), fil: m.fil || null, godkendt: !!(m.fil && m.godkendt), varianter: m.varianter || {}, hash: m.hash || null, opret: true, periode: p.periode, logoNoegle: nk };
+  });
+  return { kilde: 'js/brands-registry.js (logoer fra img/brands/manifest.json)', maerker, registry: BR, valgbare: BR.valgbare() };
+}
+
 function indlaesRegister(rod, registerArg) {
+  if (!registerArg) { const r = indlaesRegistry(rod); if (r) return r; }
   const kandidater = registerArg
     ? [path.isAbsolute(registerArg) ? registerArg : path.resolve(registerArg)]
-    : ['img/brands/register.json', 'js/brand-register.json', 'img/brands/manifest.json'].map(r => path.join(rod, r));
+    : ['img/brands/manifest.json'].map(r => path.join(rod, r));
   for (const k of kandidater) {
     try { return normaliserRegister(JSON.parse(fs.readFileSync(k, 'utf8')), path.relative(rod, k) || k); } catch (e) { /* næste */ }
   }
@@ -113,6 +132,8 @@ function opslagFraRegister(reg) {
   return m;
 }
 const registerMaerkeFor = (opslag, navn) => opslag.get(fold(navn)) || null;
+/* Sidens filnavn følger registrets slug (ekstra.slug kan afvige fra slugify(navn) for at bevare URL'er). */
+const sideFil = (opslag, navn) => { const e = opslag.get(fold(navn)); return `maerke-${e ? e.slug : slugify(navn)}.html`; };
 
 /* ---------- Statiske tjek (ingen browser) ---------- */
 
@@ -146,7 +167,15 @@ function parsOversigt(rod) {
     };
   });
   const alleLinks = [...h.matchAll(/href="(maerke-[^"#?]+\.html)"/g)].map(m => m[1]);
-  return { raekker, alleLinks };
+  /* "Flere mærker": ikke-klikbare piller (<ul class="mk-flere">) for registermærker uden annoncer/side. */
+  const piller = [];
+  for (const m of h.matchAll(/<ul class="(mk-flere[^"]*)"[^>]*>([\s\S]*?)<\/ul>/g)) {
+    const historisk = /mk-flere-hist/.test(m[1]);
+    for (const li of m[2].matchAll(/<li>([\s\S]*?)<\/li>/g)) piller.push({ navn: afkod(li[1].replace(/<[^>]+>/g, '')).trim(), historisk, link: /<a\b/i.test(li[1]) });
+  }
+  const tal = re => { const x = h.match(re); return x ? Number(x[1]) : null; };
+  const flere = { piller, overskrift: tal(/Flere mærker \((\d+)\)/), intro: tal(/Disse (\d+) mærker/), historisk: tal(/Historiske mærker \((\d+)\)/), uoplyst: tal(/(\d+) annoncer? oplyser ikke et mærke/), alle: tal(/Søg blandt alle (\d+) annoncer/) };
+  return { raekker, alleLinks, flere };
 }
 
 function sitemapMaerker(rod) {
@@ -166,7 +195,7 @@ function statiskeTjek(rod, reg, opslag, T) {
     if (!e.navn) tilfoej(G, 'register-uden-navn', 'fejl', e.slug, 'registerrække uden navn');
     if (slugs.has(e.slug)) tilfoej(G, 'dublet-slug', 'fejl', e.navn, `slug "${e.slug}" bruges af både ${slugs.get(e.slug)} og ${e.navn}`);
     slugs.set(e.slug, e.navn);
-    if (e.slug !== slugify(e.navn) && e.slug !== fold(e.navn)) tilfoej(G, 'slug-afviger-fra-navn', 'advarsel', e.navn, `slug "${e.slug}" ≠ slugify("${e.navn}") = "${slugify(e.navn)}" — maerke-<slug>.html og logoets data-bl kan glide fra hinanden`);
+    if (e.slug !== slugify(e.navn) && e.slug !== fold(e.navn)) tilfoej(G, 'slug-afviger-fra-navn', reg.registry ? 'info' : 'advarsel', e.navn, `slug "${e.slug}" ≠ slugify("${e.navn}") = "${slugify(e.navn)}" — maerke-<slug>.html og logoets data-bl kan glide fra hinanden`);
     const nk = fold(e.navn);
     if (navne.has(nk)) tilfoej(G, 'dublet-navn', 'fejl', e.navn, `navnet foldes til samme nøgle som ${navne.get(nk)}`);
     navne.set(nk, e.navn);
@@ -179,6 +208,22 @@ function statiskeTjek(rod, reg, opslag, T) {
       if (aliasEjer.has(k) && aliasEjer.get(k) !== e.navn) tilfoej(G, 'alias-to-maerker', 'fejl', e.navn, `alias "${a}" ejes også af ${aliasEjer.get(k)}`);
       aliasEjer.set(k, e.navn);
     }
+  }
+
+  /* --- det rigtige register (js/brands-registry.js): egne invarianter, valgbarhed, normalisering --- */
+  if (reg.registry) {
+    const BR = reg.registry;
+    for (const d of BR.dubletter || []) tilfoej(G, 'register-dublet', 'fejl', '*', d);
+    const valg = new Set(reg.valgbare || []);
+    for (const e of reg.maerker) {
+      if (!valg.has(e.navn)) tilfoej('opret', 'register-ikke-valgbar', 'fejl', e.navn, 'BrandRegistry.valgbare() mangler mærket — mærker uden annoncer skal kunne vælges i opret-annonce');
+      for (const v of new Set([e.navn, e.navn.toUpperCase(), e.slug, e.slug.replace(/-/g, ' '), ...e.aliaser])) {
+        if (BR.normalise(v) !== e.navn) tilfoej('alias', 'register-normalise', 'fejl', e.navn, `BrandRegistry.normalise("${v}") = ${BR.normalise(v)}, forventet ${e.navn}`);
+      }
+      const fs2 = BR.fraSlug(e.slug);
+      if (!fs2 || fs2.navn !== e.navn) tilfoej(G, 'register-fraSlug', 'fejl', e.navn, `fraSlug("${e.slug}") giver ikke mærket`);
+    }
+    for (const v of BR.UKENDT_ALIASER || []) if (BR.normalise(v) !== BR.UKENDT) tilfoej(G, 'register-uoplyst', 'fejl', v, `"${v}" skal normaliseres til ${BR.UKENDT}`);
   }
 
   /* --- logo: fil, hash, godkendt --- */
@@ -204,17 +249,18 @@ function statiskeTjek(rod, reg, opslag, T) {
     const BL = require(kernSti);
     for (const e of reg.maerker) {
       const l = BL.logoFor(e.navn);
-      if (l.slug !== e.slug) tilfoej('logo', 'logo-slug', 'fejl', e.navn, `BrandLogos.normaliser("${e.navn}") = ${l.slug}, registret siger ${e.slug}`);
-      if (l.navn !== e.navn) tilfoej('logo', 'logo-navn', 'fejl', e.navn, `BrandLogos viser navnet "${l.navn}"`);
+      const nk = e.logoNoegle || e.slug;
+      if (l.slug !== nk) tilfoej('logo', 'logo-slug', 'fejl', e.navn, `BrandLogos.normaliser("${e.navn}") = ${l.slug}, registret siger ${nk}`);
+      if (l.navn !== e.navn) tilfoej('logo', 'logo-navn', 'fejl', e.navn, `BrandLogos viser navnet "${l.navn}" (ordmærke/monogram-fallback og logo-tekst), registret "${e.navn}"`);
       if (l.harLogo !== !!(e.fil && e.godkendt)) tilfoej('logo', 'logo-status', 'fejl', e.navn, `harLogo=${l.harLogo}, men registret har fil=${e.fil} godkendt=${e.godkendt} (generated js/brand-logos-data.js er ikke i synk — kør node scripts/brand-logos-gen.js)`);
       else if (l.harLogo && l.src !== e.fil) tilfoej('logo', 'logo-src', 'fejl', e.navn, `BrandLogos peger på ${l.src}, registret på ${e.fil}`);
       for (const a of e.aliaser) {
         const sl = BL.normaliser(a);
-        if (sl !== e.slug) tilfoej('logo', 'logo-alias', 'fejl', e.navn, `BrandLogos.normaliser("${a}") = ${sl}, forventet ${e.slug}`);
+        if (sl !== nk) tilfoej('logo', 'logo-alias', reg.registry ? 'advarsel' : 'fejl', e.navn, `BrandLogos.normaliser("${a}") = ${sl}, forventet ${nk}`);
       }
     }
     for (const m of BL.version !== undefined ? require(dataSti).m : []) {
-      if (!reg.maerker.some(e => e.slug === m.s)) tilfoej('logo', 'logodata-uden-register', 'advarsel', m.n, `js/brand-logos-data.js har ${m.s}, som ikke findes i registret`);
+      if (!reg.maerker.some(e => (e.logoNoegle || e.slug) === m.s)) tilfoej('logo', 'logodata-uden-register', 'advarsel', m.n, `js/brand-logos-data.js har ${m.s}, som ikke findes i registret`);
     }
   } catch (e) {
     tilfoej('logo', 'logo-kerne', 'advarsel', '*', `kunne ikke indlæse js/brand-logos.js: ${String(e.message).split('\n')[0]}`);
@@ -229,7 +275,7 @@ function statiskeTjek(rod, reg, opslag, T) {
     const navn = s.brand || s.fil;
     if (!s.brand) tilfoej(G, 'side-uden-data-mk-brand', 'fejl', s.fil, '<body data-mk-brand> mangler');
     if (s.brand && !e) tilfoej(G, 'side-uden-register', 'fejl', s.brand, `${s.fil}: mærket findes ikke i registret`);
-    if (s.brand && fold(s.brand) && `maerke-${slugify(s.brand)}.html` !== s.fil) tilfoej(G, 'side-filnavn', 'fejl', s.brand, `filen hedder ${s.fil}, men maerke-${slugify(s.brand)}.html forventes ud fra navnet (URL ≠ mærke)`);
+    if (s.brand && fold(s.brand) && sideFil(opslag, s.brand) !== s.fil) tilfoej(G, 'side-filnavn', 'fejl', s.brand, `filen hedder ${s.fil}, men ${sideFil(opslag, s.brand)} forventes ud fra navnet (URL ≠ mærke)`);
     if (e && s.brand !== e.navn) tilfoej(G, 'side-navn', 'fejl', s.brand, `siden bruger "${s.brand}", registret "${e.navn}"`);
     const forventetCanon = `https://bikerbasen.dk/${s.fil.replace(/\.html$/, '')}`;
     if (s.canonical !== forventetCanon) tilfoej(G, 'side-canonical', 'fejl', navn, `canonical ${s.canonical} ≠ ${forventetCanon}`);
@@ -238,7 +284,7 @@ function statiskeTjek(rod, reg, opslag, T) {
     if (s.brand && !s.soeglink.some(x => fold(x) === fold(s.brand))) tilfoej(G, 'side-soeglink', 'fejl', navn, `intet link soegning.html?brands=${s.brand}`);
     if (s.statiskAntal === 0 && !s.noindex) tilfoej(G, 'tom-side-indekserbar', 'fejl', navn, `${s.fil} viser 0 annoncer men er ikke noindex (regel: ingen tomme indekserbare mærkesider)`);
     if (s.statiskAntal == null) tilfoej(G, 'side-uden-antal', 'advarsel', navn, `${s.fil}: intet [data-mk-n] — antallet kan ikke tjekkes`);
-    for (const b of s.bl) if (e && b.slug !== e.slug) tilfoej('logo', 'side-logo-slug', 'fejl', navn, `${s.fil}: logo data-bl="${b.slug}", registret ${e.slug}`);
+    for (const b of s.bl) if (e && b.slug !== (e.logoNoegle || e.slug)) tilfoej('logo', 'side-logo-slug', 'fejl', navn, `${s.fil}: logo data-bl="${b.slug}", registret ${e.logoNoegle || e.slug}`);
     for (const src of s.srcs) if (!findes(rod, src)) tilfoej('logo', 'side-logo-fil', 'fejl', navn, `${s.fil}: ${src} findes ikke`);
     /* alt-tekst: dekorativt (aria-hidden + tom alt) ELLER alt nævner mærket */
     for (const b of s.bl) if (!/aria-hidden="true"/.test(b.tag)) tilfoej('logo', 'side-logo-a11y', 'advarsel', navn, `${s.fil}: logo ${b.slug} er hverken aria-hidden eller har alt`);
@@ -264,8 +310,8 @@ function statiskeTjek(rod, reg, opslag, T) {
       const n = r.navn || r.href;
       if (!e) { tilfoej(G, 'oversigt-uden-register', 'fejl', n, `oversigten viser "${r.navn}", der ikke findes i registret`); continue; }
       if (r.navn !== e.navn) tilfoej(G, 'oversigt-navn', 'fejl', e.navn, `oversigten viser "${r.navn}"`);
-      if (r.href !== `maerke-${slugify(e.navn)}.html`) tilfoej(G, 'oversigt-link', 'fejl', e.navn, `link ${r.href} ≠ maerke-${slugify(e.navn)}.html`);
-      if (r.bl && r.bl !== e.slug) tilfoej('logo', 'oversigt-logo-slug', 'fejl', e.navn, `data-bl="${r.bl}" ≠ ${e.slug}`);
+      if (r.href !== `maerke-${e.slug}.html`) tilfoej(G, 'oversigt-link', 'fejl', e.navn, `link ${r.href} ≠ maerke-${e.slug}.html`);
+      if (r.bl && r.bl !== (e.logoNoegle || e.slug)) tilfoej('logo', 'oversigt-logo-slug', 'fejl', e.navn, `data-bl="${r.bl}" ≠ ${e.logoNoegle || e.slug}`);
       if (r.src && !findes(rod, r.src)) tilfoej('logo', 'oversigt-logo-fil', 'fejl', e.navn, `${r.src} findes ikke`);
       if (r.src && !e.fil) tilfoej('logo', 'oversigt-logo-uden-register', 'fejl', e.navn, `oversigten tegner ${r.src}, men registret har ingen logofil`);
       if (r.src && e.fil && ![e.fil, ...Object.values(e.varianter || {}).map(v => v && v.fil)].includes(r.src)) tilfoej('logo', 'oversigt-logo-anden-fil', 'fejl', e.navn, `${r.src} er ikke registrets fil/variant (${e.fil})`);
@@ -274,6 +320,29 @@ function statiskeTjek(rod, reg, opslag, T) {
       if (!findes(rod, r.href)) tilfoej(G, 'oversigt-side-mangler', 'fejl', e.navn, `${r.href} findes ikke`);
     }
     for (const d of dubl) tilfoej(G, 'dublet-oversigt', 'fejl', d, 'samme mærke to gange i A–Z-listen');
+    /* "Flere mærker": registermærker uden side vises som piller, aldrig som link; hvert registermærke står præcis ét sted. */
+    const fl = ov.flere;
+    if (reg.registry) {
+      const iListe = new Set(ov.raekker.map(r => r.navn && fold(r.navn)));
+      const iPiller = new Map();
+      for (const p of fl.piller) {
+        const e = registerMaerkeFor(opslag, p.navn);
+        if (p.link) tilfoej(G, 'flere-pille-er-link', 'fejl', p.navn, 'pillen i "Flere mærker" er et link, men mærket har ingen side (ingen blindgyde/tom side)');
+        if (!e) { tilfoej(G, 'flere-pille-uden-register', 'fejl', p.navn, 'pillen er ikke i registret'); continue; }
+        if (e.navn !== p.navn) tilfoej(G, 'flere-pille-navn', 'fejl', e.navn, `pillen skriver "${p.navn}"`);
+        if (iPiller.has(fold(p.navn))) tilfoej(G, 'dublet-flere-pille', 'fejl', p.navn, 'mærket står to gange i "Flere mærker"');
+        iPiller.set(fold(p.navn), p);
+        if (iListe.has(fold(p.navn))) tilfoej(G, 'maerke-baade-raekke-og-pille', 'fejl', p.navn, 'mærket er både A–Z-række (med link) og "Flere mærker"-pille');
+        if (findes(rod, `maerke-${e.slug}.html`)) tilfoej(G, 'pille-med-side', 'fejl', p.navn, `maerke-${e.slug}.html findes, men mærket vises som pille uden link`);
+        if ((e.periode === 'historisk') !== p.historisk) tilfoej(G, 'flere-pille-periode', 'fejl', p.navn, `pillen står under ${p.historisk ? 'historiske' : 'aktuelle'}, registret siger ${e.periode}`);
+      }
+      for (const e of reg.maerker) if (!iListe.has(fold(e.navn)) && !iPiller.has(fold(e.navn))) tilfoej(G, 'maerke-ikke-paa-oversigt', 'fejl', e.navn, 'registermærket står hverken som A–Z-række eller "Flere mærker"-pille (skjult mærke)');
+      const hist = fl.piller.filter(p => p.historisk).length;
+      if (fl.overskrift != null && fl.overskrift !== fl.piller.length) tilfoej(G, 'flere-tal', 'fejl', '*', `overskriften siger ${fl.overskrift}, men der er ${fl.piller.length} piller`);
+      if (fl.intro != null && fl.intro !== fl.piller.length) tilfoej(G, 'flere-tal', 'fejl', '*', `introen siger ${fl.intro}, men der er ${fl.piller.length} piller`);
+      if (fl.historisk != null && fl.historisk !== hist) tilfoej(G, 'flere-tal', 'fejl', '*', `"Historiske mærker" siger ${fl.historisk}, men der er ${hist} historiske piller`);
+      if (ov.raekker.length + fl.piller.length !== reg.maerker.length) tilfoej(G, 'oversigt-sum', 'fejl', '*', `${ov.raekker.length} rækker + ${fl.piller.length} piller ≠ ${reg.maerker.length} registermærker`);
+    }
     for (const s of sider) if (!set.has(s.fil) && !s.noindex) tilfoej(G, 'side-ikke-i-oversigt', 'advarsel', s.brand || s.fil, `${s.fil} er indekserbar men ikke i maerker.html`);
   }
   /* --- sitemap --- */
@@ -502,7 +571,7 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
       mx.lager = m.n;
       if (!e) tilfoej('filter', 'lagermaerke-uden-register', 'fejl', m.navn, `lageret har ${m.n} annonce(r) med mærket "${m.navn}", men det findes ikke i registret (ingen logo/alias/mærkeside-beslutning)`);
       else if (e.navn !== m.navn) tilfoej('filter', 'lagermaerke-navn', 'fejl', m.navn, `lageret skriver "${m.navn}", registret "${e.navn}"`);
-      if (!statisk.sider.some(x => x.brand && fold(x.brand) === fold(m.navn))) tilfoej('side', 'lagermaerke-uden-side', opt.data === 'live' ? 'advarsel' : 'info', m.navn, `${m.n} annonce(r), men ingen maerke-${slugify(m.navn)}.html (mærket kan ikke nås via oversigten)`);
+      if (!statisk.sider.some(x => x.brand && fold(x.brand) === fold(m.navn))) tilfoej('side', 'lagermaerke-uden-side', opt.data === 'live' ? 'fejl' : 'info', m.navn, `${m.n} annonce(r), men ingen ${sideFil(opslag, m.navn)} (mærket kan ikke nås via oversigten)`);
     }
 
     /* mærkefilteret: findes, kan vælges, giver lagerets antal */
@@ -573,7 +642,7 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
     taelUd('aliasSyntetisk', synt.antal);
     for (const f of synt.fejl) {
       const kerne = KERNE_ALIAS.some(([q, s2]) => q === f.q && reg.maerker.find(e => e.slug === s2 && e.navn === f.navn));
-      tilfoej('alias', 'alias-fritekst', kerne || !f.alias ? 'fejl' : 'advarsel', f.navn, `fritekst "${f.q}" finder ikke en annonce med mærket ${f.navn}${f.alias ? ' (registeralias)' : ''}`);
+      tilfoej('alias', 'alias-fritekst', reg.registry || kerne || !f.alias ? 'fejl' : 'advarsel', f.navn, `fritekst "${f.q}" finder ikke en annonce med mærket ${f.navn}${f.alias ? ' (registeralias)' : ''}`);
       const mx = matrix[fold(f.navn)];
       if (mx) mx.aliasFejl = (mx.aliasFejl || 0) + 1;
     }
@@ -591,6 +660,18 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
     await p.close();
 
     /* === maerker.html: hydreret oversigt + hurtigsøgning === */
+    /* "Flere mærker"-piller må ikke have annoncer (så skulle de have en side); totaler på siden = lageret. */
+    if (statisk.oversigt && statisk.oversigt.flere) {
+      const fl = statisk.oversigt.flere;
+      for (const pi of fl.piller) {
+        const m = lagerMaerker.find(x => fold(x.navn) === fold(pi.navn));
+        if (m) tilfoej('filter', 'pille-har-annoncer', opt.data === 'live' ? 'fejl' : 'info', pi.navn, `"${pi.navn}" står som ikke-klikbar pille (ingen annoncer, ingen side), men lageret har ${m.n} annonce(r)`);
+      }
+      if (opt.data === 'live') {
+        if (fl.alle != null && fl.alle !== lager.liste.length) tilfoej('filter', 'oversigt-total', 'advarsel', '*', `maerker.html siger ${fl.alle} annoncer i alt; lageret har ${lager.liste.length} (statisk tal fra byggetidspunktet)`);
+        if (fl.uoplyst != null && fl.uoplyst !== ukendt) tilfoej('filter', 'oversigt-uoplyst', 'advarsel', 'Ukendt', `maerker.html siger ${fl.uoplyst} annoncer uden mærke; lageret har ${ukendt}`);
+      }
+    }
     const o = await aabnSide(context, base, 'maerker.html', port, tid);
     for (const f of o.fejl) tilfoej('side', 'oversigt-konsolfejl', 'fejl', 'maerker.html', f);
     for (const f of o.hentet404) tilfoej('side', 'oversigt-ressource-404', 'fejl', 'maerker.html', f);
@@ -599,7 +680,7 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
     })));
     const flise = await o.p.evaluate(() => [...document.querySelectorAll('.mk-brandtile')].map(t => ({ href: (t.getAttribute('href') || (t.querySelector('a') || {}).href || ''), n: (t.querySelector('.mk-brandtile-n') || {}).textContent || '' })));
     for (const m of lagerMaerker) {
-      const href = `maerke-${slugify(m.navn)}.html`;
+      const href = sideFil(opslag, m.navn);
       const r = ovr.find(x => x.href === href);
       const mx = matrix[fold(m.navn)];
       if (!r) { tilfoej('filter', 'oversigt-mangler-maerke', opt.data === 'live' ? 'fejl' : 'info', m.navn, `maerker.html har ingen række for ${m.navn} (${m.n} annoncer)`); if (mx) mx.oversigt = 'mangler'; continue; }
@@ -608,7 +689,7 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
       if (opt.data !== 'live' && r.n !== m.n && ovr.some(x => x.href === href)) { /* fixtures har andre antal end det statiske byg — sammenlignes ikke */ }
     }
     for (const r of ovr) {
-      const e = reg.maerker.find(x => `maerke-${slugify(x.navn)}.html` === r.href);
+      const e = reg.maerker.find(x => `maerke-${x.slug}.html` === r.href);
       if (e && !pr.has(e.navn.toLowerCase()) && r.n > 0 && opt.data === 'live') tilfoej('filter', 'oversigt-viser-annoncer-uden-lager', 'fejl', e.navn, `oversigten viser ${r.n} annoncer, men lageret har 0`);
     }
     if (flise.length && opt.data === 'live') for (const f of flise) {
@@ -650,7 +731,7 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
     for (const r of hs2) {
       const e = reg.maerker.find(x => x.slug === r.slug);
       if (!e) continue;
-      const href = `maerke-${slugify(e.navn)}.html`;
+      const href = `maerke-${e.slug}.html`;
       const iOversigt = ovr.some(x => x.href === href);
       if (iOversigt && !r.synlige.includes(href)) tilfoej('alias', 'hurtigsoeg-kernealias', 'fejl', e.navn, `hurtigsøgningen på maerker.html finder ikke ${e.navn} for "${r.q}" (viser: ${r.synlige.join(', ') || 'intet'})`);
       if (!iOversigt) tilfoej('alias', 'kernemaerke-uden-oversigtsraekke', 'info', e.navn, `${e.navn} har ingen række på maerker.html (kun mærker med annoncer vises) — "${r.q}" kan ikke findes dér`);
@@ -699,6 +780,7 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
     const op = await aabnSide(context, base, 'opret-annonce.html', port, tid);
     for (const f of op.fejl) tilfoej('opret', 'opret-konsolfejl', 'fejl', 'opret-annonce.html', f);
     const mulige = await op.p.evaluate(() => [...document.getElementById('f-brand').options].map(o => o.value).filter(Boolean));
+    if (reg.registry) for (const n of mulige) if (!reg.maerker.some(e => e.navn === n)) tilfoej('opret', 'opret-ekstra-maerke', 'advarsel', n, `#f-brand har "${n}", som ikke er i registret (BRANDS_BY_MODEL ude af trit med registret)`);
     const krav = new Map();
     for (const e of reg.maerker) if (e.opret && e.navn) krav.set(e.navn, 'register');
     for (const m of lagerMaerker) krav.set(m.navn, 'lager');
@@ -711,7 +793,7 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
       if (!mulige.includes(navn)) {
         const kunRegister = hvorfor === 'register';
         mx.opret = 'mangler';
-        tilfoej('opret', kunRegister ? 'opret-mangler-registermaerke' : 'opret-mangler-maerke', kunRegister ? 'advarsel' : 'fejl', navn, `opret-annonce kan ikke vælge "${navn}" (${hvorfor}${udenAnnoncer.has(navn) ? ', mærke uden annoncer' : ''}) — #f-brand har ${mulige.length} mærker`);
+        tilfoej('opret', kunRegister ? 'opret-mangler-registermaerke' : 'opret-mangler-maerke', kunRegister && !reg.registry ? 'advarsel' : 'fejl', navn, `opret-annonce kan ikke vælge "${navn}" (${hvorfor}${udenAnnoncer.has(navn) ? ', mærke uden annoncer' : ''}) — #f-brand har ${mulige.length} mærker`);
       } else mx.opret = 'ok';
     }
     const accept = await op.p.evaluate(({ navne }) => {

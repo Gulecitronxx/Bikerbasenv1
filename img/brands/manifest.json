@@ -5,7 +5,9 @@
     {
       "slug": "honda",
       "navn": "Honda",
-      "aliaser": [],
+      "aliaser": [
+        "honda motor"
+      ],
       "fil": "img/brands/honda.svg",
       "godkendt": true,
       "kilde": "AI-genereret udkast (ChatGPT, 17.10.2026) -> vektoriseret med scripts/logo-vektoriser.js",
@@ -43,7 +45,8 @@
         "harley",
         "hd",
         "h-d",
-        "harley davidson"
+        "harley davidson",
+        "harley-davidson motor company"
       ],
       "fil": "img/brands/harley-davidson.svg",
       "godkendt": true,
@@ -262,7 +265,8 @@
       "slug": "royal-enfield",
       "navn": "Royal Enfield",
       "aliaser": [
-        "royalenfield"
+        "royalenfield",
+        "royal enfield motors"
       ],
       "fil": "img/brands/royal-enfield.svg",
       "godkendt": true,
@@ -594,7 +598,8 @@
       "navn": "CFMoto",
       "aliaser": [
         "cf moto",
-        "cf-moto"
+        "cf-moto",
+        "cfmotor"
       ],
       "fil": "img/brands/cfmoto.svg",
       "godkendt": true,
@@ -629,7 +634,9 @@
     {
       "slug": "fantic",
       "navn": "Fantic",
-      "aliaser": [],
+      "aliaser": [
+        "fantic motor"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -647,7 +654,8 @@
       "navn": "FB Mondial",
       "aliaser": [
         "fbmondial",
-        "f.b. mondial"
+        "f.b. mondial",
+        "mondial"
       ],
       "fil": null,
       "godkendt": false,
@@ -798,7 +806,9 @@
     {
       "slug": "norton",
       "navn": "Norton",
-      "aliaser": [],
+      "aliaser": [
+        "norton motorcycles"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -846,7 +856,9 @@
     {
       "slug": "voge",
       "navn": "Voge",
-      "aliaser": [],
+      "aliaser": [
+        "loncin voge"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -862,7 +874,9 @@
     {
       "slug": "daelim",
       "navn": "Daelim",
-      "aliaser": [],
+      "aliaser": [
+        "daelim motor"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -894,7 +908,9 @@
     {
       "slug": "tvs",
       "navn": "TVS",
-      "aliaser": [],
+      "aliaser": [
+        "tvs motor"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -945,7 +961,9 @@
     {
       "slug": "ural",
       "navn": "Ural",
-      "aliaser": [],
+      "aliaser": [
+        "imz-ural"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -1111,7 +1129,10 @@
     {
       "slug": "peugeot",
       "navn": "Peugeot",
-      "aliaser": [],
+      "aliaser": [
+        "peugeot motocycles",
+        "peugeot scooters"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -1145,7 +1166,8 @@
       "navn": "Can-Am",
       "aliaser": [
         "can am",
-        "canam"
+        "canam",
+        "brp can-am"
       ],
       "fil": null,
       "godkendt": false,
@@ -1178,7 +1200,9 @@
     {
       "slug": "mash",
       "navn": "Mash",
-      "aliaser": [],
+      "aliaser": [
+        "mash motorcycles"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -1194,7 +1218,9 @@
     {
       "slug": "brixton",
       "navn": "Brixton",
-      "aliaser": [],
+      "aliaser": [
+        "brixton motorcycles"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -1245,7 +1271,9 @@
     {
       "slug": "kove",
       "navn": "Kove",
-      "aliaser": [],
+      "aliaser": [
+        "kove moto"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -1277,7 +1305,9 @@
     {
       "slug": "jawa",
       "navn": "Jawa",
-      "aliaser": [],
+      "aliaser": [
+        "jawa moto"
+      ],
       "fil": null,
       "godkendt": false,
       "kilde": null,
@@ -1358,6 +1388,480 @@
           "hoejde": 324
         }
       }
+    },
+    {
+      "slug": "derbi",
+      "navn": "Derbi",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "D",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "moto-morini",
+      "navn": "Moto Morini",
+      "aliaser": [
+        "morini"
+      ],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "MM",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "ajp",
+      "navn": "AJP",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "A",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "italjet",
+      "navn": "Italjet",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "I",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "tomos",
+      "navn": "Tomos",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "T",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "montesa",
+      "navn": "Montesa",
+      "aliaser": [
+        "montesa honda"
+      ],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "M",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "ajs",
+      "navn": "AJS",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "A",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "ariel",
+      "navn": "Ariel",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "A",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "matchless",
+      "navn": "Matchless",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "M",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "velocette",
+      "navn": "Velocette",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "V",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "vincent",
+      "navn": "Vincent",
+      "aliaser": [
+        "vincent hrd"
+      ],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "V",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "brough-superior",
+      "navn": "Brough Superior",
+      "aliaser": [
+        "brough"
+      ],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "BS",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "greeves",
+      "navn": "Greeves",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "G",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "sur-ron",
+      "navn": "Sur-Ron",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "SR",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "talaria",
+      "navn": "Talaria",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "T",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "husaberg",
+      "navn": "Husaberg",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "H",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "dkw",
+      "navn": "DKW",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "D",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "laverda",
+      "navn": "Laverda",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "L",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "puch",
+      "navn": "Puch",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "P",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "simson",
+      "navn": "Simson",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "S",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "zundapp",
+      "navn": "Zündapp",
+      "aliaser": [
+        "zuendapp"
+      ],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "Z",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "maico",
+      "navn": "Maico",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "M",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "ossa",
+      "navn": "Ossa",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "O",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "kreidler",
+      "navn": "Kreidler",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "K",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "bultaco",
+      "navn": "Bultaco",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "B",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "hercules",
+      "navn": "Hercules",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "H",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "nsu",
+      "navn": "NSU",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "N",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "horex",
+      "navn": "Horex",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "H",
+      "fallback": "ordmaerke"
+    },
+    {
+      "slug": "morbidelli",
+      "navn": "Morbidelli",
+      "aliaser": [],
+      "fil": null,
+      "godkendt": false,
+      "kilde": null,
+      "licens": null,
+      "hash": null,
+      "variant": "ordmaerke",
+      "bredde": null,
+      "hoejde": null,
+      "ensfarvet": true,
+      "monogram": "M",
+      "fallback": "ordmaerke"
     }
   ]
 }

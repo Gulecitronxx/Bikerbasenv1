@@ -147,6 +147,37 @@ function udfyld(manifest, laes, opdater){
   return { manifest: kopi, aendret, fejl };
 }
 
+/* V4: mærkeregistret (js/brands-registry.js) er kilden til NAVNE og ALIASER. Logo-manifestet følger det: hvert registreret mærke har en
+   post (uden logo, hvis der ingen er), navnet er registrets, og registrets aliaser er lagt til — så BrandLogos.normaliser() kender
+   dem alle og et logo-opslag via alias aldrig fejler. Rører aldrig fil/godkendt/kilde/licens/hash. Ren funktion: { manifest, aendret }. */
+function monogramFor(navn){
+  const ord = String(navn).split(/[\s-]+/).map(w => w.replace(/[^\p{L}\p{N}]/gu, '')).filter(Boolean);
+  if (!ord.length) return '?';
+  return (ord.length > 1 ? ord[0].charAt(0) + ord[1].charAt(0) : ord[0].slice(0, 1)).toLocaleUpperCase('da');
+}
+function synkRegister(manifest, REG){
+  const kopi = JSON.parse(JSON.stringify(manifest));
+  let aendret = false;
+  const bySlug = new Map(kopi.maerker.map(m => [m.slug, m]));
+  for (const p of REG.alle()){
+    const slug = p.logo || p.slug;
+    let m = bySlug.get(slug);
+    if (!m){
+      m = { slug, navn: p.navn, aliaser: [], fil: null, godkendt: false, kilde: null, licens: null, hash: null, variant: 'ordmaerke', bredde: null, hoejde: null,
+        ensfarvet: true, monogram: monogramFor(p.navn), fallback: 'ordmaerke' };
+      kopi.maerker.push(m); bySlug.set(slug, m); aendret = true;
+    }
+    if (m.navn !== p.navn){ m.navn = p.navn; aendret = true; }
+    const har = new Set([m.navn, ...m.aliaser].map(REG.noegle));
+    for (const a of p.aliaser){
+      const k = REG.noegle(a);
+      if (har.has(k)) continue;
+      m.aliaser.push(a); har.add(k); aendret = true;
+    }
+  }
+  return { manifest: kopi, aendret };
+}
+
 const r3 = n => Math.round(n * 1000) / 1000;
 
 /* Klientens data: kun det browseren skal bruge. Rækkefølgen følger manifestet. */
@@ -192,7 +223,8 @@ function koer(argv){
   const tjek = argv.includes('--tjek');
   const opdater = argv.includes('--opdater');
   const raa = fs.readFileSync(MANIFEST, 'utf8');
-  const manifest = JSON.parse(raa);
+  const sy = synkRegister(JSON.parse(raa), require('../js/brands-registry.js'));
+  const manifest = sy.manifest;
   const fejl = valider(manifest, laesRod);
   const u = udfyld(manifest, laesRod, opdater);
   fejl.push(...u.fejl);
@@ -203,16 +235,16 @@ function koer(argv){
     let galt = 0;
     const gammel = fs.existsSync(DATA) ? fs.readFileSync(DATA, 'utf8').replace(/\r\n/g, '\n') : '';
     if (gammel !== nyData){ console.error('brand-logos-gen: js/brand-logos-data.js er ude af trit med manifestet — kør node scripts/brand-logos-gen.js'); galt = 1; }
-    if (u.aendret){ console.error('brand-logos-gen: manifestet mangler hash/bredde/hoejde for en fil — kør node scripts/brand-logos-gen.js'); galt = 1; }
+    if (u.aendret || sy.aendret){ console.error('brand-logos-gen: manifestet mangler hash/bredde/hoejde for en fil, eller er ude af trit med mærkeregistret (js/brands-registry.js) — kør node scripts/brand-logos-gen.js'); galt = 1; }
     if (!galt) console.log(`brand-logos-gen: ok (${manifest.maerker.length} mærker, ${manifest.maerker.filter(m => m.godkendt && m.fil).length} med godkendt logo)`);
     return galt;
   }
-  if (u.aendret) fs.writeFileSync(MANIFEST, nyManifest, 'utf8');
+  if (u.aendret || sy.aendret) fs.writeFileSync(MANIFEST, nyManifest, 'utf8');
   fs.writeFileSync(DATA, nyData, 'utf8');
-  console.log(`brand-logos-gen: skrev js/brand-logos-data.js (${manifest.maerker.length} mærker, ${manifest.maerker.filter(m => m.godkendt && m.fil).length} med godkendt logo)${u.aendret ? '; manifestet fik hash/bredde/hoejde' : ''}`);
+  console.log(`brand-logos-gen: skrev js/brand-logos-data.js (${manifest.maerker.length} mærker, ${manifest.maerker.filter(m => m.godkendt && m.fil).length} med godkendt logo)${u.aendret || sy.aendret ? '; manifestet blev opdateret (hash/mål eller mærkeregistret)' : ''}`);
   return 0;
 }
 
 if (require.main === module) process.exit(koer(process.argv.slice(2)));
 
-module.exports = { tjekSvg, maal, sha256, valider, udfyld, byggData, datafilTekst, MAX_SVG_BYTES, FIL_MOENSTER, MANIFEST, DATA };
+module.exports = { synkRegister, tjekSvg, maal, sha256, valider, udfyld, byggData, datafilTekst, MAX_SVG_BYTES, FIL_MOENSTER, MANIFEST, DATA };
