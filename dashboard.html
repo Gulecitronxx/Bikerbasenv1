@@ -115,7 +115,7 @@ try{
     <a href="mine-annoncer.html?tab=favoritter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.6c0 4.4-8.8 10.4-8.8 10.4S3.2 13 3.2 8.6a4.9 4.9 0 0 1 8.8-3 4.9 4.9 0 0 1 8.8 3Z"/></svg>Gemte annoncer (<span data-fav-count-mobile>0</span>)</a>
   </div>
 </div>
-<main id="main-content" class="db-page">
+<main id="main-content" class="db-page db-venter" aria-busy="true">
   <section class="db-hero" aria-labelledby="db-h1">
     <img class="db-hero-img" src="img/hero-1600.webp" srcset="img/hero-960.webp 960w, img/hero-1600.webp 1600w, img/hero-2560.webp 2560w" sizes="100vw" alt="" width="1600" height="679" fetchpriority="high" decoding="async">
     <div class="container db-hero-inner">
@@ -125,7 +125,7 @@ try{
     </div>
   </section>
 
-  <div class="db-tabbar" id="dash-tabbar" style="display:none;">
+  <div class="db-tabbar" id="dash-tabbar">
     <div class="container db-tabbar-in">
       <div class="db-tabs" role="tablist" aria-label="Forhandler-dashboard">
         <button type="button" class="db-tab active" role="tab" id="dtab-oversigt" data-dtab="oversigt" aria-selected="true" aria-controls="dpanel-oversigt">Oversigt</button>
@@ -139,6 +139,7 @@ try{
 
   <div class="container db-layout">
     <div class="db-main">
+      <div class="db-skel" aria-hidden="true"><i></i><i></i><i></i></div>
 
       <div id="dash-gate" style="display:none;">
         <div class="db-empty">

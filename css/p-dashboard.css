@@ -1063,3 +1063,33 @@ a.db-title{ display:inline-block; padding: 10px 0; margin: -10px 0; }
 @container db-rows (min-width: 820px){
   .db-row[data-external] .db-actions{ flex-wrap: wrap; justify-content: flex-end; }
 }
+
+/* ===== V6 (P2-6): ingen layoutskift ved hydrering =====
+   MÅLT (mock-lager, 768 px): mine-annoncer 0,27 og dashboard 0,93. Årsag: siden står først med tomme lister og nul-tællere, og sidebjælken og
+   "Opret"-stribens placering er i første billede; så kommer data, rækkerne skubber alt under dem ud af vinduet (aside + create: 0,27), og på
+   dashboardet vises fane- og indholdsblokken først over sidebjælken (0,58 + 0,35). Hero-undertitlen på dashboardet sættes af JS og ombrydes
+   (0,02), og knappens ikon (tomt <span data-icon>) skubber fanebjælkens knap 16 px til siden.
+   Løsning: <main class="db-venter"> er sidens "henter"-tilstand. Mens den står, er ALT indhold under fanebjælken usynligt (visibility, så
+   målinger i koden stadig virker) og et skelet står i stedet; siden fjerner klassen, når data er tegnet (js: visSiden()). Usynlige elementer
+   tæller ikke som layoutskift, og et element der bliver synligt flytter sig ikke. Et css-ur (12 s) viser siden alligevel, hvis scriptet fejler. */
+.db-page{ min-height: 100vh; min-height: 100dvh; }                  /* sidefoden står aldrig i første billede, så den heller ikke rykker */
+.db-skel{ display: none; }
+.db-venter .db-main, .db-venter .db-aside, .db-venter .db-tabbar#dash-tabbar{ visibility: hidden; animation: db-frigiv 0s linear 12s forwards; }   /* dashboardets fanebjælke står i layoutet fra første billede, men er usynlig til data er der */
+.db-venter .db-main > .db-skel{ display: grid; gap: var(--space-3); visibility: visible; animation: db-skjul 0s linear 12s forwards; }
+.db-skel > i{
+  display: block; height: 118px; border-radius: var(--radius-md); border: 1px solid var(--color-border);
+  background: linear-gradient(100deg, var(--color-surface) 30%, var(--color-surface-2) 50%, var(--color-surface) 70%) 100% 0 / 300% 100%, var(--color-surface);
+  animation: db-skel 1.4s ease-in-out infinite;
+}
+.db-skel > i:first-child{ height: 96px; }
+@keyframes db-skel{ to{ background-position: 0 0, 0 0; } }
+@keyframes db-frigiv{ to{ visibility: visible; } }
+@keyframes db-skjul{ to{ visibility: hidden; height: 0; margin: 0; } }
+@media (prefers-reduced-motion: reduce){ .db-skel > i{ animation: none; } }
+
+/* Tomme ikon-pladser får deres endelige størrelse fra første billede (ikonet sættes af js). */
+.db-page .btn > [data-icon]:empty, .db-page .db-link > [data-icon]:empty{ display: inline-block; width: 16px; height: 16px; flex: none; }
+/* Hero-undertitlen på dashboardet skrives af js ("Firma · 7 aktive annoncer (…)") og kan fylde to linjer: reservér dem. */
+#dash-subtitle{ min-height: calc(2 * 1.45em); }
+/* Tap-mål: titel-links i krav-tabellerne var 21 px høje (WCAG 2.5.8). */
+.db-page .table-title{ display: inline-flex; align-items: center; min-height: 24px; }

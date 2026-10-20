@@ -280,10 +280,28 @@ function extGoneRowHTML(id, meta, lagerHentet){
 /* Visninger og favoritter (30 dage) som kolonner pr. aktiv annonce — kun når
    kaldene lykkes (listing_stats + my_listing_saves, ejer-RLS). Et tal uden data
    er et rigtigt nul; fejler kaldet, står der intet. */
-async function visAnnonceStatistik(grid){
+/* V6 (P2-6): tallene hentes SAMMEN med annoncerne (se hentRaekkeStatistik, kaldt i Promise.all før første tegning) og står i RAEKKE_STAT, så
+   rækken tegnes med tællerstriben i første omgang. Før hentede og indsatte siden striben EFTER første tegning: hver aktiv række voksede ~56 px,
+   og alt under rykkede (og striben forsvandt og kom igen ved hver sortering). Fejler hentningen, står der intet (som før). */
+let RAEKKE_STAT = null;
+async function hentRaekkeStatistik(){
+  RAEKKE_STAT = null;
   if (typeof db === 'undefined' || !db.enabled || !Store.getUser()?.remote) return;
-  const [st, sv] = await Promise.all([db.myListingStats(30), db.myListingSaves()]);
-  if (st.error || !st.data) return;
+  try {
+    const [st, sv] = await Promise.all([db.myListingStats(30), db.myListingSaves()]);
+    if (!st.error && st.data) RAEKKE_STAT = { st, sv };
+  } catch (err) { RAEKKE_STAT = null; }
+}
+
+/* Uden hentede tal (kaldt før første hentning) henter den dem først; renderMine() har dem normalt allerede. */
+async function visAnnonceStatistik(grid){
+  if (!RAEKKE_STAT) await hentRaekkeStatistik();
+  anvendRaekkeStatistik(grid);
+}
+
+function anvendRaekkeStatistik(grid){
+  if (!RAEKKE_STAT) return;
+  const { st, sv } = RAEKKE_STAT;
   const sum = new Map();
   for (const r of st.data){
     const s = sum.get(r.listing_id) || { views: 0, contacts: 0 };
@@ -409,7 +427,7 @@ function visEgneFejl(){
   el.hidden = !EGNE_FEJL;
   if (!EGNE_FEJL){ el.innerHTML = ''; return; }
   el.innerHTML = `${Icon.alertTriangle}<span><b>Vi kunne ikke hente alle dine annoncer.</b> Pausede og solgte annoncer mangler måske her, og tallene kan være for lave.</span><button type="button" class="btn btn-outline btn-sm" id="mine-retry">Prøv igen</button>`;
-  document.getElementById('mine-retry').addEventListener('click', async () => { await hentEgneAlle(); renderMine(); });
+  document.getElementById('mine-retry').addEventListener('click', async () => { await Promise.all([hentEgneAlle(), hentRaekkeStatistik()]); renderMine(); });
 }
 
 function renderMine(){
@@ -438,7 +456,7 @@ function renderMine(){
   grid.style.display = '';
   empty.style.display = 'none';
   grid.innerHTML = (kladde ? draftRowHTML(kladde) : '') + mine.map(ownRowHTML).join('');
-  visAnnonceStatistik(grid).catch(() => { /* tal er pynt; fejler kaldet, står der intet */ });
+  anvendRaekkeStatistik(grid);
   grid.querySelectorAll('[data-delete-listing]').forEach(btn => {
     btn.addEventListener('click', () => sletAnnonce(btn.dataset.deleteListing, btn));
   });
@@ -798,6 +816,15 @@ function fyldKontoKort(user){
   set('db-user-mail', user.email || '');
 }
 
+/* ---------- "Henter"-tilstand (V6, P2-6) ----------
+   <main class="db-venter"> holder alt indhold under fanebjælken usynligt (css/p-dashboard.css), til data er tegnet. visSiden() fjerner klassen. */
+function visSiden(){
+  const m = document.querySelector('main.db-page');
+  if (!m) return;
+  m.classList.remove('db-venter');
+  m.removeAttribute('aria-busy');
+}
+
 /* ---------- Faner ---------- */
 const DB_FANER = ['oversigt', 'mine', 'favoritter', 'agenter', 'konto'];
 let AKTIV_FANE = 'oversigt';
@@ -888,7 +915,7 @@ async function startAnonymeFavoritter(){
   document.getElementById('db-anon-note').hidden = false;
   document.getElementById('fav-sort').addEventListener('change', renderFavorites);
   document.addEventListener('bb:favorites-changed', renderFavorites);
-  await renderFavorites();
+  try { await renderFavorites(); } finally { visSiden(); }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -909,9 +936,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('agent-note-icon').innerHTML = Icon.info;
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = dbIkon(el.dataset.icon); });
 
-  await hentEgneAlle();
+  await Promise.all([hentEgneAlle(), hentRaekkeStatistik()]);
   renderMine();
-  renderFavorites();
+  /* Favoritter kan kræve enkeltopslag (en gemt annonce uden for de hentede 200): vent på dem, men højst 2,5 s, så siden aldrig hænger på dem. */
+  const favKlar = renderFavorites();
   renderAgents();
   wireTabs();
 
@@ -946,6 +974,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const FANE_ALIAS = { aktive: 'mine', kladder: 'mine', annoncer: 'mine', gemte: 'favoritter', soegeagenter: 'agenter', profil: 'konto' };
   const oensket = params.get('tab') || 'oversigt';
   setActiveTab(FANE_ALIAS[oensket] || oensket);
+  await Promise.race([favKlar, new Promise(r => setTimeout(r, 2500))]).catch(() => {});
+  visSiden();
 
   // Retur fra Stripe efter gennemført betaling. Webhooken sætter planen, men
   // kan være et øjeblik undervejs — hent sessionen igen og opdater kortet.
