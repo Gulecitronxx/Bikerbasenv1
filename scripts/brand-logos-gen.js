@@ -133,7 +133,7 @@ function validerOfficiel(m, ref, laes){
   if (!dato.test(String(m.hentet))) fejl.push(ref + ': hentet (dato) mangler');
   if (!m.godkendt_af || !dato.test(String(m.godkendt_dato))) fejl.push(ref + ': godkendt_af/godkendt_dato mangler');
   if (!/^[0-9a-f]{64}$/.test(String(m.kilde_hash))) fejl.push(ref + ': kilde_hash (sha256 af originalen) mangler');
-  if (!m.kilde_fil || !/^docs\/review\/gauntlet\/v5\/logoer\/original\/[a-z0-9-]+\.svg$/.test(m.kilde_fil)) fejl.push(ref + ': kilde_fil (originalen) mangler');
+  if (!m.kilde_fil || !/^docs\/review\/gauntlet\/v[56]\/logoer\/original\/[a-z0-9-]+\.svg$/.test(m.kilde_fil)) fejl.push(ref + ': kilde_fil (originalen) mangler');
   else {
     let orig = null;
     try { orig = laes(m.kilde_fil); } catch (e) { fejl.push(ref + ': originalen ' + m.kilde_fil + ' findes ikke'); }

@@ -99,28 +99,32 @@ test('mærkesidens modelfliser får foto fra en annonce af netop den model; uden
 
 /* ---------- 3. Hero-lockup ---------- */
 test('hero-lockup: emblem + ordmærke side om side, når begge varianter findes; ellers uændret', () => {
-  const y = MK.heroOrdmaerkeHTML('Yamaha');
+  /* V6: Yamaha har nu en officiel enkeltfil; kun de tre AI-udkast (GasGas, Zero, Moto Guzzi) har stadig emblem + ordmærke */
+  const y = MK.heroOrdmaerkeHTML('Zero');
   assert.match(y, /mk-wordmark--lockup/);
   assert.equal((y.match(/bl--hero/g) || []).length >= 1, true);
   assert.match(y, /bl--wm/);
-  assert.match(y, /yamaha-emblem\.svg/);
-  assert.match(y, /yamaha-ordmaerke\.svg/);
+  assert.match(y, /zero-emblem\.svg/);
+  assert.match(y, /zero-ordmaerke\.svg/);
   assert.ok(y.indexOf('bl--hero') < y.indexOf('bl--wm'), 'emblem før ordmærke');
   assert.match(y, /aria-hidden="true"/);
   /* Ducati har ingen varianter: ét logo i hero-slotten og ingen lockup-klasse */
   const d = MK.heroOrdmaerkeHTML('Ducati');
   assert.doesNotMatch(d, /mk-wordmark--lockup|bl--wm/);
   assert.match(d, /bl--hero/);
+  const yy = MK.heroOrdmaerkeHTML('Yamaha');
+  assert.doesNotMatch(yy, /mk-wordmark--lockup|bl--wm/);
+  assert.match(yy, /img\/brands\/yamaha\.svg/);
   /* mærke uden logo: monogram som før */
   const b = MK.heroOrdmaerkeHTML('Bajaj');
   assert.doesNotMatch(b, /bl--wm|lockup/);
 });
 
-test('ordmærke-varianter: filerne findes, er med i kernen, og de ti AI-godkendelser er uændrede (ejerens beslutning); de officielle har ingen varianter', () => {
+test('ordmærke-varianter: filerne findes, er med i kernen, og de tre AI-godkendelser er uændrede (ejerens beslutning); de officielle har ingen varianter', () => {
   const m = JSON.parse(les('img/brands/manifest.json'));
   const med = m.maerker.filter(x => x.varianter && x.varianter.ordmaerke);
-  /* V5: ti AI-udkast er erstattet af officielle filer (uden emblem/ordmærke-varianter); otte mærker har stadig lockup-varianter */
-  assert.ok(med.length >= 8, `${med.length} mærker med ordmærke-variant`);
+  /* V5 + V6: sytten AI-udkast er erstattet af officielle filer (uden emblem/ordmærke-varianter); tre mærker (GasGas, Zero, Moto Guzzi) har stadig lockup-varianter */
+  assert.deepStrictEqual(med.map(x => x.slug).sort(), ['gasgas', 'moto-guzzi', 'zero'], 'mærker med ordmærke-variant');
   for (const x of med){
     assert.ok(fs.existsSync(path.join(ROOT, x.varianter.ordmaerke.fil)), x.varianter.ordmaerke.fil);
     assert.ok(x.varianter.emblem, `${x.slug}: lockup kræver også emblem`);
@@ -128,11 +132,11 @@ test('ordmærke-varianter: filerne findes, er med i kernen, og de ti AI-godkende
     assert.ok(lf.ordmaerke && lf.ordmaerke.src === x.varianter.ordmaerke.fil, `${x.slug}: kernen kender varianten`);
   }
   const godkendte = m.maerker.filter(x => x.godkendt && x.autenticitet !== 'officiel');
-  assert.equal(godkendte.length, 10);
+  assert.equal(godkendte.length, 3);
   for (const x of godkendte){ assert.equal(x.godkendt_af, 'ejer'); assert.equal(x.godkendt_dato, '2026-10-17'); }
   const officielle = m.maerker.filter(x => x.godkendt && x.autenticitet === 'officiel');
-  assert.equal(officielle.length, 21);
-  for (const x of officielle){ assert.equal(x.varianter, undefined, x.slug); assert.equal(x.godkendt_dato, '2026-10-20'); }
+  assert.equal(officielle.length, 28);
+  for (const x of officielle){ assert.equal(x.varianter, undefined, x.slug); assert.ok(['2026-10-20', '2026-10-21'].includes(x.godkendt_dato), x.slug); }
   assert.deepEqual(BrandLogos.logoFor('Ducati').ordmaerke, null);
   /* form:'ordmaerke' uden variant falder tilbage til hovedfilen */
   assert.match(BrandLogos.logoHTML('Ducati', { storrelse: 'wm', form: 'ordmaerke' }), /img\/brands\/ducati\.svg/);

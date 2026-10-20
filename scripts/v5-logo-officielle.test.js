@@ -9,6 +9,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const G = require('./brand-logos-gen.js');
 const IMP = require('./v5-logo-import.js');
+const V6 = require('./v6-logo-import.js');
 const BL = require('../js/brand-logos.js');
 const VEK = require('./logo-vektoriser-alle.js');
 
@@ -19,6 +20,7 @@ const SLUGS = ['ajp', 'benelli', 'bimota', 'dkw', 'ducati', 'fantic', 'gilera', 
   'mv-agusta', 'piaggio', 'rieju', 'royal-enfield', 'sherco', 'sym', 'triumph', 'vespa'];
 /* AI-udkast, der blev erstattet af en officiel fil (honda ... piaggio) — 'tvivlsom'/'ubrugelig' i assets.json før V5 */
 const ERSTATTET = ['honda', 'harley-davidson', 'indian', 'benelli', 'triumph', 'royal-enfield', 'ducati', 'mv-agusta', 'husqvarna', 'piaggio'];
+const ERSTATTET_V5V6 = ERSTATTET.concat(V6.ERSTATTER_UDKAST);   // V6: yamaha, suzuki, bmw, kawasaki, ktm, aprilia, cfmoto
 const post = s => manifest.maerker.find(m => m.slug === s);
 const LF = buf => Buffer.from(buf).toString('utf8').split('\r\n').join('\n');
 const original = s => LF(fs.readFileSync(path.join(IMP.KILDE_MAPPE, `${s}.svg`)));
@@ -29,7 +31,8 @@ const rodAttrs = t => { const o = {}; for (const m of rodTag(t).matchAll(/\s([\w
 
 test('manifestet har præcis de 21 officielle poster: godkendt, officiel, farvet, med kilde, licens, hentedato, ejer-godkendelse og hash', () => {
   const officielle = manifest.maerker.filter(m => m.autenticitet === 'officiel').map(m => m.slug).sort();
-  assert.deepStrictEqual(officielle, SLUGS.slice().sort());
+  /* V6 har tilføjet syv flere officielle poster (scripts/v6-logo-import.js, testet i v6-logo-officielle.test.js); her kontrolleres de 21 fra V5 + at intet andet er officielt */
+  assert.deepStrictEqual(officielle, SLUGS.concat(V6.ERSTATTER_UDKAST).sort());
   for (const s of SLUGS){
     const m = post(s);
     assert.strictEqual(m.godkendt, true, s);
@@ -124,7 +127,7 @@ function ekstern(t){
 
 test('INGEN SVG i img/brands (alle filer, også AI-udkast) indeholder mailadresse, lokal filsti, telefonnummer, metadata/kommentarer, script, hændelses-attributter eller ekstern href', () => {
   const filer = fs.readdirSync(DIR).filter(f => f.endsWith('.svg'));
-  assert.ok(filer.length >= 40, `forventede alle logofiler, fandt ${filer.length}`);
+  assert.ok(filer.length >= 35, `forventede alle logofiler, fandt ${filer.length}`);
   for (const f of filer){
     const t = fs.readFileSync(path.join(DIR, f), 'utf8');
     for (const [re, navn] of FORBUDT) assert.ok(!re.test(t), `${f}: indeholder ${navn}`);
@@ -177,7 +180,7 @@ test('AI-udkastene er fjernet konsekvent: ingen emblem/ordmærke-varianter, asse
     assert.ok(VEK.ERSTATTET_AF_OFFICIEL.includes(s), `${s} mangler i vektoriser-batchens ERSTATTET_AF_OFFICIEL`);
     assert.ok(!VEK.TABEL.some(b => b.slug === s), `${s}: batchen ville overskrive den officielle fil`);
   }
-  assert.deepStrictEqual(VEK.ERSTATTET_AF_OFFICIEL.slice().sort(), ERSTATTET.slice().sort());
+  assert.deepStrictEqual(VEK.ERSTATTET_AF_OFFICIEL.slice().sort(), ERSTATTET_V5V6.slice().sort());
   assert.strictEqual(VEK.ALLE_UDKAST.length, 20);
   assert.deepStrictEqual(VEK.TABEL.map(b => b.slug).sort(), Object.keys(assets).sort());
   /* ingen forældreløse emblem/ordmærke-filer: hver -emblem/-ordmaerke-fil hører til et mærke med den variant i manifestet */

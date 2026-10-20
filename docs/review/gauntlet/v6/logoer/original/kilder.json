@@ -1,0 +1,72 @@
+[
+  {
+    "slug": "yamaha",
+    "fil": "yamaha.svg",
+    "bytes": 8194,
+    "sha256": "a86de75d538b626c88fcd71b60e36f8db6d9c9672b31d7fc1f62c1510fb3069d",
+    "kilde": "https://commons.wikimedia.org/wiki/File%3AYamaha_Motor_Co_logo.svg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/df/Yamaha_Motor_Co_logo.svg",
+    "licens": "Wikimedia Commons: Public domain (varemærkebeskyttet logo; bruges kun til at identificere producenten)",
+    "hentet": "2026-10-21"
+  },
+  {
+    "slug": "suzuki",
+    "fil": "suzuki.svg",
+    "bytes": 2875,
+    "sha256": "5f242fd894d6e2fb00650328ade8a1d071b80291b19c6a8fb7a95730e6e7750d",
+    "kilde": "https://commons.wikimedia.org/wiki/File%3ASuzuki_logo_2025.svg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Suzuki_logo_2025.svg",
+    "licens": "Wikimedia Commons: Public domain (varemærkebeskyttet logo; bruges kun til at identificere producenten)",
+    "hentet": "2026-10-21"
+  },
+  {
+    "slug": "bmw",
+    "fil": "bmw.svg",
+    "bytes": 8621,
+    "sha256": "5581aca876aa82f51d4ccf18099e2924e3981179f21a242743d47a1bc8f1a53c",
+    "kilde": "https://commons.wikimedia.org/wiki/File%3ALogo_BMW_Motorrad_2021.svg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0a/Logo_BMW_Motorrad_2021.svg",
+    "licens": "Wikimedia Commons: Public domain (varemærkebeskyttet logo; bruges kun til at identificere producenten)",
+    "hentet": "2026-10-21"
+  },
+  {
+    "slug": "kawasaki",
+    "fil": "kawasaki.svg",
+    "bytes": 3798,
+    "sha256": "d66c100e73a62747d11f8a112a8f9fd3aa6365dbad1cd7a0566ff2d83ca19e74",
+    "kilde": "https://commons.wikimedia.org/wiki/File%3AKawasaki-logo.svg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/d/da/Kawasaki-logo.svg",
+    "licens": "Wikimedia Commons: Public domain (varemærkebeskyttet logo; bruges kun til at identificere producenten)",
+    "hentet": "2026-10-21"
+  },
+  {
+    "slug": "ktm",
+    "fil": "ktm.svg",
+    "bytes": 1657,
+    "sha256": "57644ed8c811289e5ff92f1d3cbac3ec6fc3930ef5b7f2fd3c49a81a46edf645",
+    "kilde": "https://commons.wikimedia.org/wiki/File%3AKTM-Logo.svg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a9/KTM-Logo.svg",
+    "licens": "Wikimedia Commons: Public domain (varemærkebeskyttet logo; bruges kun til at identificere producenten)",
+    "hentet": "2026-10-21"
+  },
+  {
+    "slug": "aprilia",
+    "fil": "aprilia.svg",
+    "bytes": 3587,
+    "sha256": "d117baa5a5e5c25487ec913013903045eeb6ceba724b152ec09df944e68e89dd",
+    "kilde": "https://commons.wikimedia.org/wiki/File%3AAprilia-logo.svg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/9/99/Aprilia-logo.svg",
+    "licens": "Wikimedia Commons: Public domain (varemærkebeskyttet logo; bruges kun til at identificere producenten)",
+    "hentet": "2026-10-21"
+  },
+  {
+    "slug": "cfmoto",
+    "fil": "cfmoto.svg",
+    "bytes": 3960,
+    "sha256": "db4b56c6bc9490caa6b8fc16eea1ace9f79cf6704c9703426e644cd773073038",
+    "kilde": "https://commons.wikimedia.org/wiki/File%3ACFMOTO_Logo.svg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f4/CFMOTO_Logo.svg",
+    "licens": "Wikimedia Commons: Public domain (varemærkebeskyttet logo; bruges kun til at identificere producenten)",
+    "hentet": "2026-10-21"
+  }
+]

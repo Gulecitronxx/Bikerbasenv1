@@ -1,4 +1,4 @@
-/* Deterministisk batch: vektoriserer de AI-logoudkast, der stadig bruges (10; de øvrige 10 er erstattet af officielle filer, se ERSTATTET_AF_OFFICIEL) til img/brands/<slug>.svg (+ varianter) og skriver img/brands/assets.json.
+/* Deterministisk batch: vektoriserer de AI-logoudkast, der stadig bruges (3: GasGas, Zero, Moto Guzzi; de øvrige 17 er erstattet af officielle filer, se ERSTATTET_AF_OFFICIEL) til img/brands/<slug>.svg (+ varianter) og skriver img/brands/assets.json.
 
    Kør:  node scripts/logo-vektoriser-alle.js                      (byg SVG'er + assets.json)
          node scripts/logo-vektoriser-alle.js --maal               (byg + rasteriser i Chromium, mål IoU, lav kontaktark i %TEMP%\logo-assets)
@@ -63,7 +63,9 @@ const ALLE_UDKAST = [
 /* V5: disse ti mærker har nu en OFFICIEL fil (img/brands/<slug>.svg, importeret af scripts/v5-logo-import.js; manifest: autenticitet 'officiel').
    AI-udkastet er derfor ude af batchen: en kørsel må aldrig overskrive en officiel fil, og assets.json beskriver kun de udkast, der stadig bruges.
    Udkastene ligger i git-historikken (commits før V5-logoer). scripts/v5-logo-officielle.test.js holder listen i takt med manifestet. */
-const ERSTATTET_AF_OFFICIEL = ['honda', 'ducati', 'triumph', 'harley-davidson', 'royal-enfield', 'benelli', 'husqvarna', 'indian', 'mv-agusta', 'piaggio'];
+const ERSTATTET_AF_OFFICIEL = ['honda', 'ducati', 'triumph', 'harley-davidson', 'royal-enfield', 'benelli', 'husqvarna', 'indian', 'mv-agusta', 'piaggio',
+  /* V6: syv flere (scripts/v6-logo-import.js) — kun GasGas, Zero og Moto Guzzi har stadig et AI-udkast */
+  'yamaha', 'suzuki', 'bmw', 'kawasaki', 'ktm', 'aprilia', 'cfmoto'];
 const TABEL = ALLE_UDKAST.filter(b => !ERSTATTET_AF_OFFICIEL.includes(b.slug));
 
 const opts = b => Object.assign({ navn: b.navn, trim: true }, GLOBAL, b.parametre || {}, { fjern: b.fjern || [], slet: b.slet || [] });
