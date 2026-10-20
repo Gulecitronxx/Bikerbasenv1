@@ -960,3 +960,15 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
   .mk-bogstaver a{ flex:none; scroll-snap-align:start; }
 }
 .mk-az-logo .bl-mono{ font-size: calc(var(--bl-maxh) * .52); }
+/* V4-M5 "Flere mærker": historiske mærker er afdæmpet (stiplet kant) i forhold til aktuelle, så grupperne kan skelnes uden farve alene. */
+.mk-flere-hist li{ border-style:dashed; background:transparent; }
+.mk-flere-sektion .mk-flere{ margin-bottom: var(--space-2); }
+/* V4-M6 Smalle skærme: en ulige sidste typeflise fylder rækken (før: enlig flise med et hul ved siden af); modelfliserne står tre og tre
+   mellem 560 og 1099 px (før: 5 + 1 enlig). */
+@media (max-width:639px){
+  .mk-tiles > :last-child:nth-child(odd){ grid-column:1 / -1; }
+  .mk-tiles > :last-child:nth-child(odd) .tile{ aspect-ratio:auto; height:84px; }
+}
+@media (min-width:560px) and (max-width:1099px){
+  .mk-col .mk-mini:not(.mk-mini-reg):not(.mk-mini-kk){ grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
