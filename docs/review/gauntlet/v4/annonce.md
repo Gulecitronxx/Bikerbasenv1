@@ -90,16 +90,21 @@ Ligner mockuppen: **ca. 6/10** (før ca. 5/10 efter Criticens 3-6,5 på tidliger
 ## 9. Opfølgning efter V4-QA
 
 ### 9a. Mobil-CTA "Vis nummer" lovede noget, der måske ikke findes (QA-note)
-Fundet var rigtigt: bjælken  stod som "Vis nummer" for **alle udloggede** på alle database-annoncer ( er sand for hver uuid), et tryk sendte til login, og efter login kunne RPC'en  svare tomt (intet nummer eller intet samtykke), så knappen og bjælken forsvandt. Serveren kan ikke fortælle, om et nummer findes, uden at nummeret eller et flag udstilles (supabase/ er uden for min opgave og ville bryde "telefon vises aldrig offentligt"), så løsningen er ærlig tekst frem for et skjult løfte:
+Fundet var rigtigt: bjælken `#bar-phone` stod som "Vis nummer" for **alle udloggede** på alle database-annoncer (`telefonMulig` er sand for hver uuid), et tryk sendte til login, og efter login kunne RPC'en `hent_saelger_telefon` svare tomt (intet nummer eller intet samtykke), så knappen og bjælken forsvandt. Serveren kan ikke fortælle, om et nummer findes, uden at nummeret eller et flag udstilles (supabase/ er uden for min opgave og ville bryde "telefon vises aldrig offentligt"), så løsningen er ærlig tekst frem for et skjult løfte:
+
 * Udlogget, database-annonce: knappen hedder **"Log ind for at se nummer"** med linjen **"Ikke alle sælgere viser et"** under. Tryk sender til login med redirect tilbage (testet).
 * Logget ind, nummer ukendt: **"Vis nummer"** + **"hvis sælgeren viser det"**. Er svaret tomt, fjernes bjælken, og sælgerkortet siger "Sælgeren viser ikke sit telefonnummer" (som før, men nu uden at have lovet andet).
-* Kendt nummer (demoannoncer): blot "Vis nummer". Eksterne annoncer har aldrig telefonknap, bjælke eller  (testet).
-* Bjælken er stadig højst  (76 px); to-linjers knap med 11 px underlinje. CSS: sidste blok i .
-Tests (5 nye i ): udlogget tekst + højde, udlogget tryk til login med redirect, logget ind med tomt svar, logget ind med nummer, ekstern uden telefon.
+* Kendt nummer (demoannoncer): blot "Vis nummer". Eksterne annoncer har aldrig telefonknap, bjælke eller `tel:` (testet).
+* Bjælken er stadig højst `--actionbar-h` (76 px); to-linjers knap med 11 px underlinje. CSS: sidste blok i `css/p-annonce.css`.
 
-### 9b. Den sjældne konsolfejl på "ekstern med foto" — årsag fundet
-Instrumenteret med  (gemmer konsoltekst, kilde-URL, mislykkede forespørgsler og svar >= 400 pr. indlæsning) og  (gemmer nu alle fund med fuld tekst; , ).
+Tests (5 nye i `js/v4-annonce.test.js`): udlogget tekst + højde, udlogget tryk til login med redirect, logget ind med tomt svar, logget ind med nummer, ekstern uden telefon.
+
+### 9b. Den sjældne konsolfejl på "ekstern med foto": årsag fundet
+Instrumenteret med `scripts/v4-annonce-konsol.js` (gemmer konsoltekst, kilde-URL, mislykkede forespørgsler og svar >= 400 pr. indlæsning) og `scripts/v4-annonce-smoke.js` (gemmer nu alle fund med fuld tekst; `--gentag N`, `--kun`).
+
 * 10 x 16 indlæsninger (alle viewports, lys/mørk) alene: 0 fejl. Gentaget via smoke-stien 10 x 16: 0 fejl. Seks parallelle processer (288 indlæsninger): 0 fejl.
-* Med **14 parallelle processer** (336 indlæsninger) kom fejlen frem én gang:  på ****, forespørgselstype image, ingen HTTP-svar (docs/review/gauntlet/v4/annonce/konsol-ERR_NO_BUFFER_SPACE.json).
-* **Årsag: Windows' loopback løb tør for bufferplads under belastning (OS/lokal testserver), ikke siden, ikke mocken og ikke billedet.** App-koden har ingen -kald overhovedet; smoke-browser tæller "Failed to load resource" fra den lokale server som konsolfejl, fordi kun fremmede værter filtreres. Det passer til den oprindelige observation: ét , ingen .
-* Tiltag:  måler en variant igen én gang, hvis det ENESTE fund er , og gemmer fundet som  i rapporten. Forslag til Orchestrator (fælles fil, ikke rørt): lad  genforsøge én gang på netop den fejl, eller sætte keep-alive på dens statiske server.
+* Med **14 parallelle processer** (336 indlæsninger) kom fejlen frem én gang: `Failed to load resource: net::ERR_NO_BUFFER_SPACE` på **`http://127.0.0.1:<port>/logo-mark.png`**, forespørgselstype image, ingen HTTP-svar (`docs/review/gauntlet/v4/annonce/konsol-ERR_NO_BUFFER_SPACE.json`).
+* **Årsag: Windows' loopback løb tør for bufferplads under belastning (OS/lokal testserver), ikke siden, ikke mocken og ikke billedet.** App-koden har ingen `console.error`-kald overhovedet; smoke-browser tæller "Failed to load resource" fra den lokale server som konsolfejl, fordi kun fremmede værter filtreres. Det passer til den oprindelige observation: ét `konsolfejl`, ingen `ressource-404`.
+* Tiltag: `scripts/v4-annonce-smoke.js` måler en variant igen én gang, hvis det ENESTE fund er `ERR_NO_BUFFER_SPACE`, og gemmer fundet som `transient: true` i rapporten. Forslag til Orchestrator (fælles fil, ikke rørt): lad `scripts/smoke-browser.js` genforsøge én gang på netop den fejl, eller sætte keep-alive på dens statiske server.
+
+Verifikation efter merge af `gauntlet/master`: build -> kritisk-gen -> build, 390/390 tests tre gange (inkl. `scripts/w12-kritisk.test.js` og alle 16 tests i `js/v4-annonce.test.js`), smoke strikt 0 fejl.
