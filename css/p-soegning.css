@@ -299,6 +299,7 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 
 /* F3: smalle skærme — sortering og visning på hver sin linje, kildelinjen må ombryde */
 @media (max-width:380px){
+  /* (V5 prøvede at lade sortering og visning dele linje ved 360-380 px: valgteksten blev klippet til "Bland", så den står stadig på hver sin linje.) */
   body.srp .results-toolbar .sort-felt{ grid-area: 2 / 1 / 3 / 3; }
   body.srp .results-toolbar .view-toggle{ grid-area: 3 / 1 / 4 / 3; justify-self:stretch; }
   body.srp .results-toolbar .view-toggle button{ flex:1 1 0; }
@@ -736,4 +737,11 @@ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:emp
 @container (max-width:239px){
   #results-grid:not(.list-view) .rk-sted{ max-width:100%; }
   #results-grid:not(.list-view) .rk-fod{ align-items:flex-start; }   /* iteration 3 centrerede (align-items:center) også den stakkede fod: sted og kilde stod midtstillet */
+}
+
+/* V5: sammenlign-knappen (40 x 40, nederst til højre i kortet) stod med toppen ca. 17 px over fodlinjen og skar i chip-rækkens højre ende ("150 hk" blev halvt dækket)
+   på kort, hvor foden er én linje. Foden er nu mindst lige så høj som knappen (4 + 36 = 40 px), så knappen aldrig når chips-rækken. Kun fra 760 px, hvor knappen bor i foden. */
+@media (min-width:760px){
+  #results-grid:not(.list-view) .rk-body{ padding-bottom:4px; }
+  #results-grid:not(.list-view) .rk-fod{ min-height:36px; align-items:center; }
 }

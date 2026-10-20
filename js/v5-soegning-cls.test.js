@@ -165,6 +165,13 @@ for (const w of [375, 430, 768, 1024, 1440, 1920]) {
           for (let i = 0; i < bokse.length; i++) for (let j = i + 1; j < bokse.length; j++) if (skær(bokse[i], bokse[j])) ud.overlap.push(`${navn}: chip ${i}/${j}`);
           const kr = k.getBoundingClientRect();
           for (const ch of chips) { const b = ch.getBoundingClientRect(); if (b.right > kr.right + 1 || b.left < kr.left - 1) ud.overlap.push(`${navn}: chip uden for kortet`); }
+          /* Sammenlign-knappen må ikke dække en chip (fra 760 px bor den i foden; under det ligger den på fotoet). */
+          const sam = k.querySelector('.card-compare');
+          if (sam) { const sb = sam.getBoundingClientRect(); for (const ch of chips) if (skær(sb, ch.getBoundingClientRect())) ud.overlap.push(`${navn}: sammenlign dækker chip ${ch.textContent.trim().slice(0, 12)}`); }
+          /* Foden: sted og kilde må ikke ligge oven i hinanden eller under knappen. */
+          const sted = k.querySelector('.rk-sted'), kilde = k.querySelector('.rk-kilde');
+          if (sted && kilde && skær(sted.getBoundingClientRect(), kilde.getBoundingClientRect())) ud.overlap.push(`${navn}: sted dækker kilde`);
+          if (sam && kilde && skær(sam.getBoundingClientRect(), kilde.getBoundingClientRect())) ud.overlap.push(`${navn}: sammenlign dækker kilden`);
         }
         return ud;
       });
