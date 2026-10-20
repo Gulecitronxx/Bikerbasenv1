@@ -102,7 +102,8 @@ test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet,
     assert.ok(n.ingenHero, 'hero og søgekort er fjernet (V3)');
     assert.ok(n.band <= 44, 'info-bånd er én linje: ' + n.band);
     assert.ok(n.bkSynlig, 'brødkrummen er synlig over søgefeltet');
-    assert.equal(n.sorteringsnote, 'block', 'sorteringsreglen er synlig i info-linjen');
+    assert.equal(n.sorteringsnote, 'none', 'V4: sorteringsreglen står i (i) ved Sortér, ikke som en tredje finskriftslinje');
+    assert.equal(await s.page.evaluate(() => { const b = document.getElementById('sortering-info-btn'); return !!b && !b.hidden && b.getAttribute('aria-label'); }), 'Sådan er rækkefølgen sat');
     assert.ok(n.kortH >= 195 && n.kortH <= 215, 'kort højde ' + n.kortH);
     const [sw, cw] = await s.page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     assert.equal(sw, cw);

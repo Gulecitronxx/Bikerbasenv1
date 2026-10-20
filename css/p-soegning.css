@@ -634,13 +634,13 @@ body.srp:has(#data-afbrud) main > .container:has(> section.section > .section-he
    prefers-reduced-motion-regel i styles.css (varighed ~0), og shimmeren står stille uden animation. */
 /* Loading: åbnes siden med et filter i adressen, skjuler et inline-script gitteret (visibility:hidden), indtil resultatet er tegnet.
    Gitterets kort har allerede deres endelige størrelse, så de står som rolige skeletter i stedet for et blankt hul — ingen forskydning. */
-.srp #results-grid[style*="hidden"]{ visibility:visible !important; }
-.srp #results-grid[style*="hidden"] > .card{
+html:not(.so-klar) .srp #results-grid[style*="hidden"]{ visibility:visible !important; }
+html:not(.so-klar) .srp #results-grid[style*="hidden"] > .card{
   pointer-events:none; box-shadow:none; transform:none; border-color:transparent;
   background: linear-gradient(100deg, var(--color-surface-2) 30%, color-mix(in srgb, var(--color-surface-2) 55%, var(--color-surface)) 50%, var(--color-surface-2) 70%) 0 0 / 200% 100%;
   animation: bb-shimmer 1.8s linear infinite;
 }
-.srp #results-grid[style*="hidden"] > .card > *{ visibility:hidden; }
+html:not(.so-klar) .srp #results-grid[style*="hidden"] > .card > *{ visibility:hidden; }
 /* Knapfeedback */
 .srp .fav-btn.active svg{ animation: so-hjerte .24s var(--ease-out); }
 @keyframes so-hjerte{ 0%{ transform:scale(.78); } 60%{ transform:scale(1.2); } 100%{ transform:scale(1); } }

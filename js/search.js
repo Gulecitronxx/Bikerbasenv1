@@ -44,7 +44,7 @@ function kanoniserMaerkeOgModel(){
   const alle = Store.getAllListings();
   if (!alle.length) return;
   const kanon = new Map(Filtrering.maerkeListe(alle).map(m => [m.noegle, m.navn]));
-  state.brands = unikke(state.brands.map(b => kanon.get(Filtrering.maerkeNoegle(b)) || b));
+  state.brands = unikke(state.brands.map(b => kanon.get(Filtrering.maerkeNoegle(b)) || BrandRegistry.kanonisk(b) || b));
   if (state.models.length){
     const mod = new Map(Filtrering.modelListe(alle, state.brands).map(m => [m.noegle, m.navn]));
     state.models = unikke(state.models.map(m => mod.get(Filtrering.modelNoegle(m)) || m));
@@ -394,10 +394,11 @@ function populateFilterUI(){
      pillen ikke fjernes fra det sted, den blev sat). Runde 7 (D7-S3): flest annoncer foerst, saa de seks synlige foer
      folden er dem, nogen leder efter. */
   const maerker = Filtrering.maerkeListe(alle, state.brands);
+  const erUoplyst = b => BrandRegistry.erUkendt(b);
   const brandSel = document.getElementById('so-brand');
   if (brandSel) brandSel.innerHTML = '<option value="">Alle mærker</option>' +
-    [...maerker].sort((a, b) => (a.uoplyst - b.uoplyst) || a.visning.localeCompare(b.visning, 'da'))
-      .map(m => `<option value="${escapeHTML(m.navn)}">${escapeHTML(m.visning)}</option>`).join('');
+    maerker.map(m => m.navn).sort((a, b) => (erUoplyst(a) - erUoplyst(b)) || a.localeCompare(b, 'da'))
+      .map(b => `<option value="${escapeHTML(b)}">${escapeHTML(BrandRegistry.visNavn(b))}</option>`).join('');
   /* W13 logo: lille mark (22 px høj, 56 px bred kolonne; emblem hvor det findes) foran navnet i en FAST kolonne — et mærke uden
      godkendt logo får monogram i samme kolonne, så venstrekanten af navnene er ens. Logoet hentes først, når rækken er synlig
      (BrandLogos-klienten): rækker, der er foldet væk, henter intet. Kun i filteret: aktive filterchips og resultatkort har intet logo
@@ -1468,7 +1469,7 @@ function activeFilterPills(){
   const pills = [];
   if (state.q) pills.push({ label: `"${state.q}"`, clear: () => state.q = '' });
   state.types.forEach(t => pills.push({ label: typeLabel(t), clear: () => state.types = state.types.filter(x=>x!==t) }));
-  state.brands.forEach(b => pills.push({ label: Filtrering.maerkeVisning(b), clear: () => state.brands = state.brands.filter(x => !saaMaerke(x, b)) }));
+  state.brands.forEach(b => pills.push({ label: BrandRegistry.visNavn(b), clear: () => state.brands = state.brands.filter(x => !saaMaerke(x, b)) }));
   state.models.forEach(m => pills.push({ label: m, clear: () => state.models = state.models.filter(x=>x!==m) }));
   if (state.priceMin != null || state.priceMax != null){
     pills.push({ label: state.priceMax == null ? `Fra ${formatPrice(state.priceMin)}` : (state.priceMin ? `${formatPrice(state.priceMin)} – ${formatPrice(state.priceMax)}` : `Maks. ${formatPrice(state.priceMax)}`), clear: () => { state.priceMin=null; state.priceMax=null; } });

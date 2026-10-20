@@ -119,7 +119,9 @@ test('skift mellem filtre, tom tilstand, Ryd alle, visninger og sider: aldrig to
     st = await stat(s.page); assert.ok(!st.tom && st.n === 97 && st.kort === 24, 'efter Nulstil: ' + JSON.stringify(st));
     await s.page.fill('#filter-q', 'ducati'); await hvil(s.page, 700);
     st = await stat(s.page); assert.ok(!st.tom && st.kort === st.n && st.n > 0, JSON.stringify(st));
-    for (const v of ['#view-list', '#view-swipe', '#view-grid']){ await s.page.click(v); await hvil(s.page, 300); }
+    /* V4: svajpe-knappen er skjult fra 960 px (mobil-først); visningerne gitter/liste prøves her, svajpe på telefon i v4-soegning-ui.test.js. */
+    for (const v of ['#view-list', '#view-grid']){ await s.page.click(v); await hvil(s.page, 300); }
+    assert.equal(await s.page.evaluate(() => getComputedStyle(document.getElementById('view-swipe')).display), 'none');
     await s.page.fill('#filter-q', ''); await hvil(s.page, 700);
     await s.page.click('#pagination >> text=2'); await hvil(s.page);
     st = await stat(s.page); assert.ok(/side 2 af 5/.test(st.rc) && st.kort === 24 && !st.tom, JSON.stringify(st));
