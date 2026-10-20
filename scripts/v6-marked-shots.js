@@ -1,5 +1,5 @@
 /* V6 marked: skærmbilleder af annonce-, søge- og favoritsider (mocket, ingen netværk).
-   Kør: node scripts/v6-marked-shots.js --ud <mappe> --navn efter --sider ann-honda,ann-re,soeg --viewports 375,1440 [--temaer lys,moerk] [--klip 900] [--v6-rod <mappe>]
+   Kør: node scripts/v6-marked-shots.js --ud <mappe> --navn efter --sider ann-honda,ann-re,soeg --viewports 375,1440 [--temaer lys,moerk] [--klip 900] [--y0 0] [--v6-rod <mappe>]
    Sider (nøgler): ann-honda, ann-re (Royal Enfield), ann-husq (Husqvarna), ann-bmw, ann-egen, soeg, soeg-liste, fav-anon. Fuld side, med mindre --klip N. */
 const fs = require('fs');
 const path = require('path');
@@ -23,6 +23,7 @@ async function main(){
   const vps = arg('--viewports', '375,1440').split(',').map(Number);
   const temaer = arg('--temaer', 'lys').split(',');
   const klip = Number(arg('--klip', 0));
+  const y0 = Number(arg('--y0', 0));
   fs.mkdirSync(ud, { recursive: true });
   const kan = await playwrightTilgaengelig();
   const { server, port } = await startServer(rod);
@@ -42,7 +43,7 @@ async function main(){
         if (s === 'soeg-liste') { await page.click('#view-list').catch(() => {}); await page.waitForTimeout(300); }
         await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700){ window.scrollTo(0, y); await new Promise(r => setTimeout(r, 40)); } window.scrollTo(0, 0); await new Promise(r => setTimeout(r, 200)); });
         const fil = path.join(ud, `${navn}-${s}-${vp}-${tema === 'dark' ? 'moerk' : 'lys'}.png`);
-        await page.screenshot({ path: fil, fullPage: !klip, ...(klip ? { clip: { x: 0, y: 0, width: vp, height: klip } } : {}) });
+        await page.screenshot({ path: fil, fullPage: true, ...(klip ? { clip: { x: 0, y: y0, width: vp, height: klip } } : {}) });
         await ctx.close();
       }
     }

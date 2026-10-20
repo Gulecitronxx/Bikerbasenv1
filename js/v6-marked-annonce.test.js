@@ -127,3 +127,50 @@ for (const vp of [375, 768, 1440]) {
     }
   });
 }
+
+/* ---- V6: annoncesiden tættere på Annonce.png (forskelsliste i docs/review/gauntlet/v6/marked.md) ---- */
+test('V6 1440: fotopillen er kompakt ("Foto: MC Syd"), men "flere billeder i deres annonce" står for skærmlæsere og i knappens titel; ingen galleri/tæller opdigtet', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  const m = await side(1440, `annonce.html?id=${uuid(1)}`, p => p.evaluate(() => {
+    const cap = document.querySelector('.an-photo-ext figcaption'), mere = document.querySelector('.an-photo-mere'), link = document.querySelector('.an-photo-link');
+    const r = mere.getBoundingClientRect();
+    return { synlig: cap.innerText.replace(/\s+/g, ' ').trim(), capB: cap.getBoundingClientRect().width, mereB: r.width, mereH: r.height, titel: link && link.title, aria: link && link.getAttribute('aria-label'), tael: document.querySelectorAll('.an-photo-ext .gallery-counter, .an-gallery .gallery-thumbs').length };
+  }));
+  assert.ok(m.mereB <= 1.5 && m.mereH <= 1.5, `halen er visuelt skjult (${m.mereB}x${m.mereH})`);
+  assert.ok(m.capB <= 160, `pillen er kompakt: ${m.capB} px`);
+  assert.match(m.titel, /Flere billeder hos MC Syd/); assert.match(m.aria, /Flere billeder hos MC Syd/);
+  assert.strictEqual(m.tael, 0);
+});
+
+test('V6 1440: "Det bør du tjekke" har fotoet i højst ca. 40 % af båndet og er højst 200 px foto-højt (var halvdelen / 220 px)', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  const m = await side(1440, `annonce.html?id=${uuid(25)}`, p => p.evaluate(() => {
+    const b = document.querySelector('.an-tjek').getBoundingClientRect(), f = document.querySelector('.an-tjek-foto').getBoundingClientRect();
+    return { andel: f.width / b.width, fh: f.height, tekstB: document.querySelector('.an-tjek-tekst').getBoundingClientRect().width };
+  }));
+  assert.ok(m.andel <= 0.4, `foto ${(m.andel * 100).toFixed(0)} % af båndet`);
+  assert.ok(m.fh <= 200, `foto ${m.fh} px højt`);
+});
+
+test('V6: stribens kort (Lignende) har intet sted-led (kilden bliver), og kortet er lavere end før (højst 320 px ved 1440)', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  for (const vp of [375, 1440]) {
+    const m = await side(vp, `annonce.html?id=${uuid(25)}`, p => p.evaluate(() => {
+      const k = [...document.querySelectorAll('#similar-listings .card')];
+      return { n: k.length, sted: k.filter(e => e.querySelector('.rk-sted') && getComputedStyle(e.querySelector('.rk-sted')).display !== 'none').length, kilde: k.filter(e => e.querySelector('.rk-kilde')).length,
+        snit: k.reduce((s, e) => s + e.getBoundingClientRect().height, 0) / (k.length || 1), over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    }));
+    assert.ok(m.n >= 4, `${vp}: ${m.n} lignende`);
+    assert.strictEqual(m.sted, 0, `${vp}: sted skjult i stribens kort`);
+    assert.ok(m.kilde >= m.n - 1, `${vp}: kilden står stadig på kortene (${m.kilde}/${m.n})`);
+    if (vp === 1440) assert.ok(m.snit <= 320, `${vp}: kort ${m.snit.toFixed(0)} px`);
+    assert.strictEqual(m.over, 0);
+  }
+});
+
+test('V6 375: faktatabellens rækker er højst 34 px (10 rækker; før 36,8 px, tabellen 60 px lavere)', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  const m = await side(375, `annonce.html?id=${uuid(25)}`, p => p.evaluate(() => [...document.querySelectorAll('.an-fact')].map(e => Math.round(e.getBoundingClientRect().height))));
+  assert.ok(m.length >= 8);
+  assert.ok(m.every(h => h <= 34), `rækkehøjder ${m}`);
+});

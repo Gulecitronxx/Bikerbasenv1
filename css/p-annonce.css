@@ -1265,3 +1265,17 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
 .listing-actionbar .btn .bar-l{ display:block; font-weight:700; line-height:1.15; }
 .listing-actionbar .btn small{ display:block; margin-top:1px; font-size:11px; font-weight:500; line-height:1.1; opacity:.92; }
 .listing-actionbar .btn:has(small){ padding-block:5px; }
+
+/* ============ V6 marked: annoncesiden tættere på Annonce.png (se docs/review/gauntlet/v6/marked.md, forskelsliste) ============ */
+/* (V6-2) Fotopillen er kompakt som billedets tæller ("Foto: MC Syd"). "flere billeder i deres annonce" står stadig for skærmlæsere, og den runde knap øverst til højre (titel + aria-label) fører til kildens billeder. */
+.an-photo-ext .an-photo-mere{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+/* (V6-5) "Det bør du tjekke": fotoet fylder ca. 36 % af båndet (billedet: ca. 40 %) i stedet for halvdelen, og båndet er 30 px lavere. */
+@media (min-width:1180px){
+  .an-tjek.an-tjek-medfoto{ grid-template-columns:minmax(0,1.8fr) minmax(0,1fr); }
+  .an-tjek-foto{ height:190px; }
+}
+/* (V6-6) Lignende motorcykler: stedet står ikke i stribens kort (billedets række: foto, titel, år | km | type, pris); kilden er stadig på kortet (ærlighed), men uden to reserverede linjer. */
+.similar-strip .rk-sted{ display:none; }
+.similar-strip .rk-kilde{ min-height:0; }
+/* (V6-7) Faktatabel: lidt lavere rækker på telefon (10 rækker x ca. 7 px mindre). Desktop er uændret: kolonnebundene flugter (w14-annonce, højst 100 px). */
+@media (max-width:699px){ .an-fact{ padding:7px 8px; margin-bottom:4px; } }
