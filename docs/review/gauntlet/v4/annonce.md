@@ -46,9 +46,9 @@ Filer: `js/annonce.js`, `css/p-annonce.css`, `js/v4-annonce.test.js` (ny), `js/w
 ## 4. Verifikation
 
 * `node --check` på alle js/crawler/scripts: OK.
-* Relevante tests (32 filer, 384 tests inkl. ny `js/v4-annonce.test.js`, `js/w14-annonce.test.js`, `js/w11-kort.test.js`, `js/v2-soegning.test.js`, `scripts/annonce-statisk.test.js`, `scripts/w12-kritisk.test.js`): **384/384 grønne tre gange i træk** (efter build -> kritisk-gen -> build).
+* Relevante tests (32 filer, 390 tests inkl. ny `js/v4-annonce.test.js`, `js/w14-annonce.test.js`, `js/w11-kort.test.js`, `js/v2-soegning.test.js`, `scripts/annonce-statisk.test.js`, `scripts/w12-kritisk.test.js`): **390/390 grønne tre gange i træk (efter merge af gauntlet/master)** (efter build -> kritisk-gen -> build).
 * `node scripts/smoke-browser.js --sider "annonce,annonce-*" --viewports 320,390,768,1024,1440 --temaer lys,mørk --cls 0.05 --strikt`: **0 fejl, 0 advarsler, to gange** (30 målinger pr. kørsel).
-* `node scripts/v4-annonce-smoke.js` (ny): 8 annoncevarianter (ekstern med/uden foto og pris, markedsplads, egen med flere/ét/ingen foto) x 8 viewports (320/375/390/430/768/1024/1440/1920) x lys/mørk = 128 målinger, strikt, CLS 0,05: 0 fejl i 4 af 5 kørsler. **Én kørsel gav 1 `konsolfejl` på "ekstern med foto"**, som ikke kunne gentages i de fire efterfølgende kørsler (teksten blev ikke gemt; sandsynligvis en mock-race, men ikke bevist).
+* `node scripts/v4-annonce-smoke.js` (ny): 8 annoncevarianter x 8 viewports (320-1920) x lys/mørk = 128 målinger, strikt, CLS 0,05: 0 fejl (se afsnit 9 om den ene sjældne konsolfejl, som er forklaret).
 * Kolonnebund-spredning ved 1440 (mål i browser; testkrav højst 100 px for eksterne og egen med kort beskrivelse): eksterne 12-93 px, egen med 1 foto 37 px, egen uden foto 30 px. Egen med meget lang tekst 163 px (før: 165 px). Ved 1280/1180 er spredningen uændret til lidt bedre end før. Panelkortet ændrede altså ikke balancen.
 * Byggekæde kørt: `build.js` -> `kritisk-gen.js` -> `build.js`. Anden byg blev afbrudt af SEO-vagtens fail-safe for facet-sider (produktions-Supabase svarede tyndere end første gang); det rører ikke annoncesiderne, og de committede facet-sider/sitemap er ikke ændret af mig.
 
@@ -86,3 +86,25 @@ Ligner mockuppen: **ca. 6/10** (før ca. 5/10 efter Criticens 3-6,5 på tidliger
 4. Brødkrumme-aktionsrækken har ingen favorit på eksterne annoncer (D-008).
 5. Flaky konsolfejl (se afsnit 4) bør kigges på af Criticen med `scripts/v4-annonce-smoke.js` i en løkke.
 
+
+## 9. Opfølgning efter V4-QA
+
+### 9a. Mobil-CTA "Vis nummer" lovede noget, der måske ikke findes (QA-note)
+Fundet var rigtigt: bjælken `#bar-phone` stod som "Vis nummer" for **alle udloggede** på alle database-annoncer (`telefonMulig` er sand for hver uuid), et tryk sendte til login, og efter login kunne RPC'en `hent_saelger_telefon` svare tomt (intet nummer eller intet samtykke), så knappen og bjælken forsvandt. Serveren kan ikke fortælle, om et nummer findes, uden at nummeret eller et flag udstilles (supabase/ er uden for min opgave og ville bryde "telefon vises aldrig offentligt"), så løsningen er ærlig tekst frem for et skjult løfte:
+
+* Udlogget, database-annonce: knappen hedder **"Log ind for at se nummer"** med linjen **"Ikke alle sælgere viser et"** under. Tryk sender til login med redirect tilbage (testet).
+* Logget ind, nummer ukendt: **"Vis nummer"** + **"hvis sælgeren viser det"**. Er svaret tomt, fjernes bjælken, og sælgerkortet siger "Sælgeren viser ikke sit telefonnummer" (som før, men nu uden at have lovet andet).
+* Kendt nummer (demoannoncer): blot "Vis nummer". Eksterne annoncer har aldrig telefonknap, bjælke eller `tel:` (testet).
+* Bjælken er stadig højst `--actionbar-h` (76 px); to-linjers knap med 11 px underlinje. CSS: sidste blok i `css/p-annonce.css`.
+
+Tests (5 nye i `js/v4-annonce.test.js`): udlogget tekst + højde, udlogget tryk til login med redirect, logget ind med tomt svar, logget ind med nummer, ekstern uden telefon.
+
+### 9b. Den sjældne konsolfejl på "ekstern med foto": årsag fundet
+Instrumenteret med `scripts/v4-annonce-konsol.js` (gemmer konsoltekst, kilde-URL, mislykkede forespørgsler og svar >= 400 pr. indlæsning) og `scripts/v4-annonce-smoke.js` (gemmer nu alle fund med fuld tekst; `--gentag N`, `--kun`).
+
+* 10 x 16 indlæsninger (alle viewports, lys/mørk) alene: 0 fejl. Gentaget via smoke-stien 10 x 16: 0 fejl. Seks parallelle processer (288 indlæsninger): 0 fejl.
+* Med **14 parallelle processer** (336 indlæsninger) kom fejlen frem én gang: `Failed to load resource: net::ERR_NO_BUFFER_SPACE` på **`http://127.0.0.1:<port>/logo-mark.png`**, forespørgselstype image, ingen HTTP-svar (`docs/review/gauntlet/v4/annonce/konsol-ERR_NO_BUFFER_SPACE.json`).
+* **Årsag: Windows' loopback løb tør for bufferplads under belastning (OS/lokal testserver), ikke siden, ikke mocken og ikke billedet.** App-koden har ingen `console.error`-kald overhovedet; smoke-browser tæller "Failed to load resource" fra den lokale server som konsolfejl, fordi kun fremmede værter filtreres. Det passer til den oprindelige observation: ét `konsolfejl`, ingen `ressource-404`.
+* Tiltag: `scripts/v4-annonce-smoke.js` måler en variant igen én gang, hvis det ENESTE fund er `ERR_NO_BUFFER_SPACE`, og gemmer fundet som `transient: true` i rapporten. Forslag til Orchestrator (fælles fil, ikke rørt): lad `scripts/smoke-browser.js` genforsøge én gang på netop den fejl, eller sætte keep-alive på dens statiske server.
+
+Verifikation efter merge af `gauntlet/master`: build -> kritisk-gen -> build, 390/390 tests tre gange (inkl. `scripts/w12-kritisk.test.js` og alle 16 tests i `js/v4-annonce.test.js`), smoke strikt 0 fejl.
