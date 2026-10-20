@@ -143,7 +143,7 @@ function anTabletKolonner(g){
   const gal = a.querySelector('.an-gallery');
   if (gal) gal.after(desc); else a.prepend(desc);
   desc.after(fakta);
-  const head = b.querySelector('.an-head');
+  const head = b.querySelector('.an-panel') || b.querySelector('.an-head');
   if (head) head.after(kk); else b.prepend(kk);
   kk.after(sel);
   g.append(tjek, trygt);   // række 2: tjekliste (venstre), "Handl trygt" (højre)
@@ -399,7 +399,11 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
         <p class="seller-locked-note" id="seller-telefon-note">${Icon.info}<span>${telefonNoteHTML(telefon || telefonMulig ? 'knap' : 'intet')}</span></p>
         <div class="contact-actions">
           ${telefon || telefonMulig ? `<button type="button" class="btn btn-primary btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
-          ${profilKnapHTML}
+          <!-- V4: samme to sekundærhandlinger som på de indekserede annoncer (profil + kopiér link). -->
+          <div class="an-seller-sek">
+            ${profilHref ? `<a href="${profilHref}" class="btn btn-outline">${Icon.user}<span>Se sælgerprofil</span></a>` : ''}
+            <button type="button" class="btn btn-outline an-copylink" id="copy-link-btn">${AN_IKON.link}<span>Kopiér link</span></button>
+          </div>
         </div>
         ${raad}
       </div>
@@ -531,6 +535,8 @@ const AN_IKON = {
   doc:     anSvg('<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>'),
   snow:    anSvg('<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/>'),
   tag:     anSvg('<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/>'),
+  link:    anSvg('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
+  grid:    anSvg('<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'),
 };
 
 const anEnc = (s) => encodeURIComponent(s);
@@ -588,17 +594,38 @@ function anSeoBrodkrumme(l){
   Seo.setJsonLd('breadcrumb', Seo.breadcrumb(led));
 }
 
+/* V4: kvittering på selve knappen ("Link kopieret" i to sekunder + hak), så man ser udfaldet dér, hvor man trykkede — ikke kun i en
+   toast nederst. Teksten gendannes; role=status-toasten sørger for, at skærmlæsere også hører det. */
+function anKopieretFeedback(btn){
+  const span = btn && btn.querySelector('span');
+  if (!span) return;
+  if (!btn.dataset.org) btn.dataset.org = span.textContent;
+  span.textContent = 'Link kopieret';
+  btn.classList.add('an-kopieret');
+  clearTimeout(btn._kopT);
+  btn._kopT = setTimeout(() => { span.textContent = btn.dataset.org; btn.classList.remove('an-kopieret'); }, 2200);
+}
+
 function anVirkDel(l){
-  document.getElementById('share-listing-btn')?.addEventListener('click', async () => {
-    const url = location.href;
+  const url = () => location.href;
+  const kopier = async (btn) => {
+    try { await navigator.clipboard.writeText(url()); anKopieretFeedback(btn); toast('Link kopieret til udklipsholderen'); }
+    catch (e) { prompt('Kopiér linket:', url()); }
+  };
+  document.getElementById('share-listing-btn')?.addEventListener('click', async (e) => {
     const title = `${l.brand} ${l.model}${l.price ? ` — ${formatPrice(l.price)}` : ''}`;
     if (navigator.share){
-      try { await navigator.share({ title, url }); return; }
-      catch (e) { if (e.name === 'AbortError') return; }
+      try { await navigator.share({ title, url: url() }); return; }
+      catch (err) { if (err.name === 'AbortError') return; }
     }
-    try { await navigator.clipboard.writeText(url); toast('Link kopieret til udklipsholderen'); }
-    catch (e) { prompt('Kopiér linket:', url); }
+    kopier(e.currentTarget);
   });
+  document.getElementById('copy-link-btn')?.addEventListener('click', (e) => kopier(e.currentTarget));
+  /* Favoritten popper ét øjeblik, når den tændes (CSS .an-pop; slukkes under prefers-reduced-motion). Selve skiftet og toasten ligger i
+     wireFavoriteButtons (js/components.js). */
+  document.querySelectorAll('.an-fav').forEach(b => b.addEventListener('click', () => {
+    b.classList.remove('an-pop'); void b.offsetWidth; b.classList.add('an-pop');
+  }));
 }
 
 /* H1'en står i markup uden for #listing-detail (én h1 pr. side, også uden
@@ -640,6 +667,7 @@ function anNoegletal(l, hk){
     erTal(l.year) ? [Icon.calendar, String(l.year), 'Årgang'] : null,
     Number(l.ccm) > 0 ? [Icon.engine, formatCcm(l.ccm), 'Motor'] : null,
     hk ? [AN_IKON.bolt, formatPower(hk), 'Effekt'] : null,
+    l.fuel ? [AN_IKON.fuel, String(l.fuel), 'Brændstof'] : null,
   ].filter(Boolean);
   if (!felter.length) return '';
   return `<ul class="an-stats">${felter.map(([ikon, v, e]) => `<li>${ikon}<span><b>${escapeHTML(v)}</b><small>${e}</small></span></li>`).join('')}</ul>`;
@@ -1063,11 +1091,9 @@ function renderExternalListing(listing){
     [Icon.shieldCheck, 'Kørekort', kk ? escapeHTML(kkM.tekst) : (kkM.graense ? 'Ikke afgjort — tjek kW' : kkUvis ? 'A2 eller A — kan ikke afgøres' : 'Kan ikke afgøres')],
     erNy === true ? [Icon.checkCircle, 'Stand', 'Fabriksny'] : (erNy === false ? [Icon.checkCircle, 'Stand', 'Brugt'] : null),
     salgsmarkoerer.length ? [AN_IKON.tag, 'Salgsvilkår', salgsmarkoerer.map(escapeHTML).join(' · ')] : null,
-    listing.isDealer ? [Icon.store, 'Sælger', `Forhandler · ${kilde}`] : (listing.saelgertype === 'privat' ? [Icon.user, 'Sælger', 'Privat sælger'] : null),
-    stedTekst ? [Icon.mapPin, 'Sted', escapeHTML(stedTekst)] : null,
     /* Kun korte id'er (MC Syds "137963") er noget, en køber kan citere i
        telefonen; et uuid ombrød til flere linjer på mobil. */
-    listing.sourceListingId && String(listing.sourceListingId).length <= 12 ? [AN_IKON.doc, `Annonce-id hos ${kilde}`, escapeHTML(listing.sourceListingId)] : null,
+    listing.sourceListingId && String(listing.sourceListingId).length <= 12 ? [AN_IKON.doc, 'Annonce-id', escapeHTML(listing.sourceListingId)] : null,
   ];
 
   /* Datoen er den dag, VI fandt annoncen — ikke den dag, den blev oprettet
@@ -1099,6 +1125,12 @@ function renderExternalListing(listing){
   }
 
   const saelgerTypeTekst = listing.isDealer ? 'Forhandler' : (listing.saelgertype === 'privat' ? 'Privat sælger' : '');
+  /* Én sætning om, hvem man handler med, synlig i kortet; den fulde forklaring ligger i "Mere om salget" (samme tekst som før). */
+  const hvemKort = markedsplads
+    ? `Du handler med sælgeren bag annoncen, ikke med ${kilde}.`
+    : `Du handler direkte med ${kilde}.`;
+  const alleFraKilde = (listing.source?.domaene && typeof Store !== 'undefined' && Store.getAllListings)
+    ? Store.getAllListings().filter(x => x.source?.domaene === listing.source.domaene).length : 0;
   const prisTekst = listing.price == null ? '' : formatPrice(listing.price);
 
   const saelgerKort = `
@@ -1117,10 +1149,19 @@ function renderExternalListing(listing){
                 data-listing-id="${escapeHTML(String(listing.id))}"
                 class="btn btn-primary btn-block an-cta">Gå til annoncen hos&nbsp;<span class="an-nb">${kilde}</span>${Icon.externalLink}</a>`
           : `<p class="external-detail-broken">${Icon.alertTriangle}Annoncen kan ikke åbnes lige nu. Prøv igen senere${domaene ? `, eller find den på ${domaene}` : ''}.</p>`}
+        <!-- V4: to rolige sekundærhandlinger under den ene primære (som "Ring op / Send besked" i billedet) — kun handlinger, der findes. -->
+        <div class="an-seller-sek">
+          ${alleFraKilde > 1 ? `<a class="btn btn-outline" href="soegning.html?kilde=${anEnc(listing.source.domaene)}">${AN_IKON.grid}<span>Alle fra ${kilde}</span></a>` : ''}
+          <button type="button" class="btn btn-outline an-copylink" id="copy-link-btn">${AN_IKON.link}<span>Kopiér link</span></button>
+        </div>
+        <p class="an-seller-body an-seller-kort">${hvemKort}</p>
         ${hentetLinje ? `<p class="an-meta">${Icon.clock}<span>${hentetLinje}</span></p>` : ''}
         ${(listing.ogsaaHos || []).length ? `<p class="an-meta">${Icon.externalLink}<span>Samme annonce ligger også hos ${listing.ogsaaHos.map(o => o.url ? `<a href="${escapeHTML(o.url)}" target="_blank" rel="noopener noreferrer nofollow">${escapeHTML(o.navn || o.domaene || 'en anden kilde')}</a>` : escapeHTML(o.navn || o.domaene || 'en anden kilde')).join(' og ')} — vi viser den én gang.</span></p>` : ''}
-        <p class="an-seller-body">${hvorStaarDen}${hvemHandlerDuMed}</p>
-        <p class="an-meta">${Icon.info}<span>${kilde}s kontaktoplysninger og åbningstider står på deres egen side.</span></p>
+        <details class="an-seller-mere">
+          <summary>Mere om salget hos ${kilde}</summary>
+          <p class="an-seller-body">${hvorStaarDen}${hvemHandlerDuMed}</p>
+          <p class="an-meta">${Icon.info}<span>${kilde}s kontaktoplysninger og åbningstider står på deres egen side.</span></p>
+        </details>
         <button type="button" class="an-report" id="report-listing-btn">${Icon.flag}Meld fejl i annoncen</button>
       </section>`;
 
@@ -1134,8 +1175,8 @@ function renderExternalListing(listing){
        </section>`
     : `<section class="an-desc-sec">
          <h2>Beskrivelse og flere billeder</h2>
-         <p>Beskrivelse, udstyr og flere billeder står i annoncen hos ${kilde}. Vi gemmer ikke kildens tekst eller billeder — vi viser de oplyste nøgletal og sender dig videre.</p>
-         <p>Pris og oplysninger kan være ændret, siden vi hentede annoncen. Tjek dem hos ${kilde}, før du kører derhen.</p>
+         <p>Beskrivelse, udstyr og flere billeder står i annoncen hos ${kilde}. Vi gemmer ikke kildens tekst eller billeder og sender dig videre.</p>
+         <p class="an-note">Pris og oplysninger kan være ændret, siden vi hentede annoncen. Tjek dem hos ${kilde}, før du kører derhen.</p>
        </section>`;
 
   /* Tre grene — kildens svar, ikke vores gæt (se sellerTypeNoteHTML). */
@@ -1151,9 +1192,10 @@ function renderExternalListing(listing){
   const delVaerdier = [listing.year != null ? String(listing.year) : '', listing.km != null ? formatKm(listing.km) : '', variant].filter(Boolean);
 
   const fotoHTMLext = foto
-    ? `<figure class="an-photo">
+    ? `<figure class="an-photo an-photo-ext">
          <img src="${escapeHTML(foto)}" alt="${brand} ${model}" loading="eager" decoding="async">
-         <figcaption>${Icon.info}<span>Foto: ${kilde} — flere billeder i deres annonce</span></figcaption>
+         <figcaption>${Icon.camera}<span>Foto: ${kilde}<span class="an-photo-mere"> — flere billeder i deres annonce</span></span></figcaption>
+         ${href ? `<a class="an-photo-link" href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow" aria-label="Flere billeder hos ${kilde} (åbner i ny fane)" title="Flere billeder hos ${kilde}">${Icon.externalLink}</a>` : ''}
        </figure>`
     /* Kilden har ikke sat et foto på annoncen. Vi tegner ingenting og lover
        ikke, at der er billeder andetsteds. */
@@ -1172,6 +1214,7 @@ function renderExternalListing(listing){
 
       </div>
       <div class="an-col an-col-b">
+      <div class="an-panel">
       <section class="an-head" aria-label="Om motorcyklen">
         <div class="an-chips">${chips}</div>
         <div id="an-h1-slot"></div>
@@ -1191,6 +1234,7 @@ function renderExternalListing(listing){
       <div class="an-desc">
         ${beskrivelseHTML}
         ${saelgerNote}
+      </div>
       </div>
       ${anKoerekortKort(listing, kkM, kkUvis)}
 
@@ -1467,12 +1511,13 @@ function renderListing(){
 
       </div>
       <div class="an-col an-col-b">
+      <div class="an-panel">
       <section class="an-head" aria-label="Om motorcyklen">
         <div class="an-chips">${chips}</div>
         <div id="an-h1-slot"></div>
         ${delVaerdier.length ? `<p class="an-sub">${delVaerdier.map(v => `<span>${escapeHTML(v)}</span>`).join('')}</p>` : ''}
         <div class="an-price-block">
-          <p class="an-price">${formatPrice(listing.price)}</p>
+          <p class="an-price${listing.price == null ? ' is-tom' : ''}">${formatPrice(listing.price)}</p>
         </div>
         <div class="an-loc">
           <span>${Icon.mapPin}${escapeHTML(listing.city)}, ${escapeHTML(listing.postnr)} · ${escapeHTML(listing.region)}</span>
@@ -1485,6 +1530,7 @@ function renderListing(){
         ${suspicious ? `<div class="safety-banner an-advarsel">${Icon.alertTriangle}<span>Prisen er væsentligt under markedsniveau for denne type — vær ekstra opmærksom, og følg altid vores sikkerhedsråd.</span></div>` : ''}
         ${beskrivelseHTML}
         ${sellerTypeNoteHTML(listing.isDealer)}
+      </div>
       </div>
       ${anKoerekortKort(listing, kkM, false)}
 
