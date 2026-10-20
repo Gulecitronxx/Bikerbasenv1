@@ -95,7 +95,10 @@ for (const [vp, tema] of [[768, 'lys'], [1024, 'lys'], [768, 'mørk']]) {
   });
 }
 
-test('annonce paa mobil: raekkefoelge (titel+pris, koerekort, beskrivelse, fakta, kilde, tjek) og sticky bjaelke med pris', async (t) => {
+/* V4: rækkefølgen er bevidst ændret — kilden/sælgeren står nu lige efter titel, pris og nøgletal (som sidepanelet i billedet, der på mobil
+   falder ned under prisen), før kørekort, beskrivelse og faktatabel. Før stod den efter faktatabellen, og køberen skulle rulle forbi 1.500 px
+   for at se, hvem han handler med. Se docs/review/gauntlet/v4/annonce.md. */
+test('annonce paa mobil: raekkefoelge (titel+pris, kilde, koerekort, beskrivelse, fakta, handl trygt, tjek) og sticky bjaelke med pris', async (t) => {
   if (!H) return t.skip('Playwright mangler');
   for (const id of [uuid(1), uuid(901)]) {
     const r = await side(390, 'lys', `annonce.html?id=${id}`, p => p.evaluate(() => {
@@ -103,7 +106,7 @@ test('annonce paa mobil: raekkefoelge (titel+pris, koerekort, beskrivelse, fakta
       const bar = document.querySelector('.listing-actionbar:not([hidden])');
       const b = bar && bar.getBoundingClientRect();
       return {
-        ordre: ['.an-gallery, .an-photo, .an-photo-tom', '.an-head', '.an-kk', '.an-desc', '.an-fakta', '.an-seller-wrap', '.an-trygt-wrap', '.an-tjek'].map(top),
+        ordre: ['.an-gallery, .an-photo, .an-photo-tom', '.an-head', '.an-seller-wrap', '.an-kk', '.an-desc', '.an-fakta', '.an-trygt-wrap', '.an-tjek'].map(top),
         bar: !!bar, barBund: b ? Math.round(innerHeight - b.bottom) : null, barH: b ? Math.round(b.height) : 0, barPris: !!(bar && bar.querySelector('.listing-actionbar-pris')),
         over: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };

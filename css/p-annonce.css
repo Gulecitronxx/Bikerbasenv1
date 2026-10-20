@@ -667,8 +667,8 @@
 .an-grid{
   display:grid; gap: var(--space-5);
   grid-template-columns: minmax(0,1fr);
-  /* W11 mobil: galleri, titel+pris+nøgletal, kørekort, beskrivelse, faktatabel, kilde/sælger, handl trygt, tjekliste. */
-  grid-template-areas: "gallery" "head" "kk" "desc" "fakta" "seller" "trygt" "tip";
+  /* V4 mobil: galleri, titel+pris+nøgletal, kilde/sælger, kørekort, beskrivelse, faktatabel, handl trygt, tjekliste. */
+  grid-template-areas: "gallery" "head" "seller" "kk" "desc" "fakta" "trygt" "tip";
   align-items:start;
 }
 .an-grid > *, .an-side > *, .an-col > *{ min-width:0; }
@@ -1141,3 +1141,108 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
   #bc-current{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
   .breadcrumb .bc-sep:has(+ #bc-current){ display:none; }
 }
+
+/* ============ V4: annonceside tættere på billedets opbygning ============
+   Kun layout og hierarki med vores egne data (CLAUDE.md regel 2): intet galleri på eksterne annoncer, ingen opdigtede tal.
+   Se docs/review/gauntlet/v4/annonce.md for forskelslisten mod Annonce.png. */
+
+/* (1) Info-panelet: chips, titel, pris, nøgletal og beskrivelse står i ét hvidt kort i midterkolonnen (som i billedet). Under 1180 px er
+   panelet gennemsigtigt (display:contents), så grid-areas og tabletkolonnerne virker som før. */
+.an-panel{ display:contents; }
+@media (min-width:1180px){
+  .an-panel{
+    display:block; background:var(--color-surface); border:1px solid var(--color-border);
+    border-radius:var(--radius-md); padding:var(--space-4); box-shadow:var(--shadow-sm);
+  }
+  .an-panel .an-head{ padding-top:0; }
+  .an-panel .an-h1{ font-size:clamp(26px,2.4vw,34px); }
+  .an-panel .an-desc{ margin-top:var(--space-3); padding-top:var(--space-3); border-top:1px solid var(--color-border); }
+  .an-panel .an-desc-sec h2{ font-size:20px; margin-bottom:var(--space-2); }
+  .an-panel .seller-type-note{ padding:8px 12px; font-size:12.5px; line-height:1.45; }
+  .an-panel .an-desc .seller-type-note, .an-panel .an-desc .an-advarsel{ margin-top:var(--space-3); }
+  .an-panel .an-desc-sec p{ margin-bottom:var(--space-2); }
+  .an-panel .an-chips + .an-h1, .an-panel .an-titelraekke{ margin-top:10px; }
+  /* Nøgletal: lige fordelt over hele bredden som billedets række. */
+  .an-panel .an-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(98px,1fr)); gap:var(--space-3) var(--space-2); margin-top:var(--space-3); padding-top:var(--space-3); }
+  .an-panel .an-stats li{ gap:6px; }
+  .an-panel .an-stats li > svg{ width:22px; height:22px; }
+  .an-panel .an-stats b{ font-size:14.5px; }
+}
+
+/* (2) Sidepanelet klæber, mens man læser (kun når der er højde til det). */
+@media (min-width:1180px) and (min-height:760px){
+  .an-side{ position:sticky; top:calc(var(--header-h) + var(--space-4)); }
+}
+
+/* (3) Foto på ekstern annonce: kreditten som pille øverst til venstre (som billedets tæller) og en rund knap til kildens billeder øverst
+   til højre (billedets fuldskærmsknap). Der er stadig kun ét foto — knappen fører ud af sitet, ikke til et galleri hos os. */
+.an-photo-ext{ position:relative; }
+.an-photo-ext figcaption{
+  position:absolute; top:12px; left:12px; margin:0; padding:5px 12px; align-items:center; gap:6px;
+  border-radius:var(--radius-pill); background:rgba(0,0,0,.65); color:#fff; font:600 13px/1.2 var(--font-body); max-width:calc(100% - 76px);
+}
+.an-photo-ext figcaption svg{ width:15px; height:15px; margin:0; }
+.an-photo-link{
+  position:absolute; top:12px; right:12px; width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; background:rgba(20,18,15,.62); color:#fff;
+  transition:background-color .15s ease, transform .15s ease;
+}
+.an-photo-link svg{ width:20px; height:20px; }
+.an-photo-link:hover{ background:rgba(20,18,15,.82); transform:scale(1.06); }
+.an-photo-link:focus-visible{ outline:3px solid #fff; outline-offset:2px; box-shadow:0 0 0 5px rgba(20,18,15,.8); }
+@media (max-width:699px){ .an-photo-ext figcaption{ padding:5px 12px; } .an-photo-mere{ display:none; } }
+
+/* (4) Kildekortet: én primær handling og to rolige sekundære under den (billedets "Kontakt forhandler" / "Ring op" + "Send besked"). */
+.an-seller-sek{ display:grid; grid-template-columns:repeat(auto-fit,minmax(0,1fr)); gap:var(--space-2); margin:0 0 var(--space-3); }
+.an-seller-sek .btn{ min-height:44px; padding:6px 10px; font-size:14px; line-height:1.2; text-align:center; white-space:normal; gap:6px; }
+.an-seller-sek .btn svg{ width:16px; height:16px; flex:0 0 auto; }
+.an-seller-kort{ margin:0 0 var(--space-2); font-size:13.5px; line-height:1.5; color:var(--color-fg); }
+.an-seller-mere{ margin-top:var(--space-2); padding-top:var(--space-1); border-top:1px solid var(--color-border); }
+.an-seller-mere summary{ display:flex; align-items:center; min-height:40px; cursor:pointer; font-size:13px; font-weight:600; color:var(--color-fg-muted); }
+.an-seller-mere[open] summary{ margin-bottom:var(--space-1); }
+.an-seller-mere .an-seller-body{ margin-top:0; }
+.an-desc-kilde .an-link{ margin:0 0 var(--space-1); }
+
+/* (5) Kopiér link: kvittering på knappen. */
+.an-kopieret{ color:var(--color-success) !important; border-color:var(--color-success) !important; }
+.an-act.an-kopieret{ background:var(--color-success-tint); }
+
+/* (6) Lignende motorcykler: slankere kort (billedets rækker viser billede, titel, år | km | type og pris). Kørekort- og kubikchippen
+   bliver; hk og salgsmarkører står på kortets egen side. */
+.similar-strip .rk-chips .rk-chip:nth-child(n+3){ display:none; }
+
+/* (7) Mobil: kilden/sælgeren lige efter titel, pris og nøgletal (sticky bjælken bærer prisen og handlingen videre ned). Se grid-areas ovenfor. */
+
+/* (8) Micro-interactions: diskrete, ingen layoutflytning, slukket under prefers-reduced-motion. */
+.an-act{ transition:background-color .15s ease, color .15s ease; }
+.an-act:active{ transform:scale(.97); }
+.an-act:focus-visible, .an-link:focus-visible, .an-report:focus-visible, .an-seller-mere summary:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; border-radius:var(--radius-sm); }
+.an-cta svg, .an-link svg{ transition:transform .15s ease; }
+.an-cta:hover svg{ transform:translate(2px,-2px); }
+.an-link:hover svg{ transform:translateX(2px); }
+.an-seller-sek .btn:active, .an-cta:active{ transform:translateY(1px); }
+.gallery-thumbs button{ transition:border-color .15s ease, opacity .15s ease; }
+.gallery-thumbs button:not(.active):hover{ border-color:var(--color-fg-muted); }
+.gallery-expand, .gallery-nav{ transition:background-color .15s ease, transform .15s ease; }
+.gallery-expand:hover{ background:rgba(20,18,15,.82); transform:scale(1.06); }
+.gallery-nav:hover{ background:#fff; transform:translateY(-50%) scale(1.06); }
+.an-videre a{ transition:border-color .15s ease, background-color .15s ease; }
+.an-videre a:hover{ background:var(--color-surface-2); }
+@keyframes an-pop{ 0%{ transform:scale(1); } 40%{ transform:scale(1.3); } 100%{ transform:scale(1); } }
+.an-fav.an-pop.active svg{ animation:an-pop .38s cubic-bezier(.3,1.6,.5,1); }
+@media (prefers-reduced-motion:reduce){
+  .an-act, .an-cta svg, .an-link svg, .an-photo-link, .gallery-thumbs button, .gallery-expand, .gallery-nav, .an-videre a{ transition:none; }
+  .an-act:active, .an-seller-sek .btn:active, .an-cta:active{ transform:none; }
+  .an-fav.an-pop.active svg{ animation:none; }
+  .an-photo-link:hover, .gallery-expand:hover{ transform:none; }
+  .gallery-nav:hover{ transform:translateY(-50%); }
+  .an-cta:hover svg, .an-link:hover svg{ transform:none; }
+}
+/* Eksternt foto er højere (4:3) i den brede visning, så kolonnen med foto + faktatabel ikke ender 150 px over de to andre. */
+@media (min-width:1180px){ .an-photo-ext img, .an-photo-tom{ aspect-ratio:4/3; } }
+.an-seller-mere summary{ list-style:none; justify-content:space-between; }
+.an-seller-mere summary::-webkit-details-marker{ display:none; }
+.an-seller-mere summary::after{ content:""; width:8px; height:8px; margin-right:4px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg) translateY(-2px); transition:transform .15s ease; }
+.an-seller-mere[open] summary::after{ transform:rotate(-135deg) translateY(-2px); }
+@media (prefers-reduced-motion:reduce){ .an-seller-mere summary::after{ transition:none; } }
+.an-seller-sek .btn{ padding-inline:8px; gap:5px; font-size:13.5px; }
