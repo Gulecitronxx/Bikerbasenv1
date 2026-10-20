@@ -1622,6 +1622,15 @@ function renderListing(){
     const barPhone = document.getElementById('bar-phone');
     if (barPhone){
       barPhone.classList.replace('btn-outline', 'btn-primary');
+      /* V4/QA: løftet skal være sandt. Nummeret findes kun hos RPC'en (kun for indloggede), og om sælgeren viser det, ved ingen
+         før svaret er der. Derfor lover knappen ikke et nummer, når vi ikke KENDER et: udlogget står der, at man skal logge ind,
+         og at ikke alle sælgere viser et; logget ind står der, at det afhænger af sælgeren. Kun et kendt nummer (demoannoncer)
+         hedder blot "Vis nummer". */
+      if (!telefon){
+        barPhone.innerHTML = loggedIn
+          ? '<span class="bar-l">Vis nummer</span><small>hvis sælgeren viser det</small>'
+          : '<span class="bar-l">Log ind for at se nummer</span><small>Ikke alle sælgere viser et</small>';
+      }
       barPhone.addEventListener('click', () => spring('reveal-phone-btn', true));
     }
   }

@@ -208,3 +208,78 @@ test('lignende motorcykler: højst to chips pr. kort (kørekort + kubik), kortet
   assert.ok(r.chips.every(n => n <= 2 && n >= 1), r.chips.join(','));
   assert.ok(r.kk, 'kørekortchippen bliver på alle kort');
 });
+
+/* ---------- Mobil-CTA "Vis nummer" må ikke love et nummer, som måske ikke findes (QA-note til Agent 2) ----------
+   Nummeret findes kun hos RPC'en hent_saelger_telefon (kun indloggede; null hvis sælgeren ikke viser det). Før stod der "Vis nummer" for
+   alle udloggede på alle database-annoncer, et tryk sendte til login, og bagefter kunne svaret være tomt. */
+const { lavBackend } = require(path.join(REPO, 'scripts', 'w9-saelger-mock.js'));
+const FREMMED = 'cccccccc-0000-4000-8000-0000000000c1';
+const ANN_ID = '00000000-0000-4000-8000-0000000000e9';
+const fremmedAnnonce = () => ({ id: ANN_ID, brand: 'Yamaha', model: 'MT-07', type: 'naked', year: 2023, km: 16300, ccm: 689, power: 73, price: 69900, description: 'Velholdt.',
+  seller_id: FREMMED, seller: { id: FREMMED, name: 'Anders', is_dealer: false, city: 'Odense', member_since: 2024 },
+  photos: [{ id: 'p0', storage_path: 't/0.png', position: 0 }] });
+
+async function mobil(loggetInd, rpcSvar, fn) {
+  const bak = lavBackend({ loggetInd, annoncer: [fremmedAnnonce()] });
+  const c = await H.browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'da-DK', serviceWorkers: 'block' });
+  await bak.installer(c, { tema: 'lys' });
+  if (rpcSvar !== undefined) await c.route(/rpc\/hent_saelger_telefon/, r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: rpcSvar }));
+  const p = await c.newPage();
+  const fejl = []; p.on('pageerror', e => fejl.push(e.message));
+  try {
+    await p.goto(`${H.base}/annonce.html?id=${ANN_ID}`, { waitUntil: 'networkidle' });
+    await p.waitForTimeout(500);
+    const r = await fn(p);
+    assert.deepStrictEqual(fejl, []);
+    return r;
+  } finally { await c.close(); }
+}
+const barTekst = p => p.evaluate(() => { const b = document.getElementById('bar-phone'); return b ? { tekst: b.innerText.replace(/\s+/g, ' ').trim(), h: Math.round(document.getElementById('listing-actionbar').getBoundingClientRect().height) } : null; });
+
+test('udlogget på database-annonce: bjælken siger "Log ind for at se nummer" + at ikke alle sælgere viser et — ikke bare "Vis nummer"', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  const r = await mobil(false, undefined, async p => ({ bar: await barTekst(p), side: await p.evaluate(() => document.querySelector('.an-seller-wrap').innerText) }));
+  assert.match(r.bar.tekst, /^Log ind for at se nummer Ikke alle sælgere viser et$/);
+  assert.doesNotMatch(r.bar.tekst, /^Vis nummer/);
+  assert.ok(r.bar.h <= 76, `bjælken er højst --actionbar-h (76 px): ${r.bar.h}`);
+  assert.match(r.side, /Log ind for at se, om sælgeren har valgt at vise sit telefonnummer/);
+});
+
+test('udlogget: tryk på bjælken sender til login med redirect tilbage (det sker, som knappen siger)', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  const url = await mobil(false, undefined, async p => {
+    await Promise.all([p.waitForURL(/login\.html/, { timeout: 8000 }), p.click('#bar-phone')]);
+    return p.url();
+  });
+  assert.match(url, /login\.html\?redirect=%2Fannonce\.html/);
+});
+
+test('logget ind: bjælken siger "hvis sælgeren viser det"; er svaret tomt, fjernes bjælken og siden siger det ærligt', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  const r = await mobil(true, 'null', async p => {
+    const foer = await barTekst(p);
+    await p.click('#bar-phone');
+    await p.waitForFunction(() => !document.getElementById('listing-actionbar'), null, { timeout: 5000 });
+    return { foer, note: await p.evaluate(() => document.querySelector('.an-seller-wrap').innerText), knap: await p.locator('#reveal-phone-btn').count() };
+  });
+  assert.match(r.foer.tekst, /^Vis nummer hvis sælgeren viser det$/);
+  assert.match(r.note, /Sælgeren viser ikke sit telefonnummer/);
+  assert.strictEqual(r.knap, 0);
+});
+
+test('logget ind med nummer: tryk på bjælken viser nummeret', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  const nr = await mobil(true, '"12345678"', async p => {
+    await p.click('#bar-phone');
+    await p.waitForSelector('.phone-reveal', { timeout: 5000 });
+    return p.locator('.phone-reveal').innerText();
+  });
+  assert.match(nr, /12345678/);
+});
+
+test('ekstern annonce har aldrig telefonknap eller telefonbjælke', { timeout: 60000 }, async t => {
+  if (!H) return t.skip('Playwright mangler');
+  const r = await side(390, EKSTERN, p => p.evaluate(() => ({ bar: !!document.getElementById('bar-phone'), reveal: !!document.getElementById('reveal-phone-btn'),
+    listingBar: !!document.getElementById('listing-actionbar'), tel: document.querySelectorAll('a[href^="tel:"]').length, tekst: /Vis nummer|Vis telefonnummer/.test(document.body.innerText) })));
+  assert.deepStrictEqual(r, { bar: false, reveal: false, listingBar: false, tel: 0, tekst: false });
+});

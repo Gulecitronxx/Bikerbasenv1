@@ -1,0 +1,29 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "gange": 6,
+  "maalinger": 24,
+  "antalMedFejl": 1,
+  "fund": [
+    {
+      "kørsel": 2,
+      "vp": 320,
+      "tema": "dark",
+      "konsol": [
+        {
+          "tekst": "Failed to load resource: net::ERR_NO_BUFFER_SPACE",
+          "url": "http://127.0.0.1:60404/logo-mark.png?v=logo1",
+          "linje": 0
+        }
+      ],
+      "fejledeKald": [
+        {
+          "url": "http://127.0.0.1:60404/logo-mark.png?v=logo1",
+          "type": "image",
+          "fejl": "net::ERR_NO_BUFFER_SPACE"
+        }
+      ],
+      "svar": [],
+      "sidefejl": []
+    }
+  ]
+}
