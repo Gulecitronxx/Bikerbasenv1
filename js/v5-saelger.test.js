@@ -402,8 +402,10 @@ test('V5 favoritter: anonym med egne (uuid) favoritter får en ærlig besked, og
   const page = await ctx.newPage();
   try {
     await page.goto(URL('mine-annoncer.html?tab=favoritter'), { waitUntil: 'networkidle' });
-    await page.waitForSelector('#db-anon-egne:not([hidden])', { timeout: 10000 });
-    assert.match(await page.innerText('#db-anon-egne'), /1 gemt annonce fra private sælgere på Bikerbasen/);
+    /* V6 (Critic P2-5): uden andet at vise siger den tomme tilstand selv, at den gemte annonce kræver login (i stedet for "Ingen gemte annoncer" + en note ved siden af) */
+    await page.waitForSelector('#fav-empty h3', { state: 'visible', timeout: 10000 });
+    assert.match(await page.innerText('#fav-empty h3'), /^1 gemt annonce kræver login$/);
+    assert.match(await page.innerText('#fav-empty p'), /private sælgere/);
     assert.deepStrictEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('bb_favorites'))), ['aaaaaaaa-1111-4222-8333-444444444444'], 'ikke ryddet');
     assert.strictEqual(bak.tilstand.log.filter(l => l.tabel === 'listings' && l.metode === 'GET' && /aaaaaaaa-1111/.test(l.tabel)).length, 0);
     assert.deepStrictEqual(bak.tilstand.log.filter(l => !['GET', 'HEAD'].includes(l.metode)), []);
