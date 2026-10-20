@@ -30,6 +30,9 @@
                                                                   fanger en manglende fil. Skjult + lazy: henter intet.
        <span class="bl-fb ...">…</span>                              ordmærke/monogram, skjult så længe logoet virker
      </span>
+   Farvet logo (manifest: ensfarvet:false — ALLE officielle filer, V5): <span class="bl bl--lg bl--logo bl--img" data-bl="slug" style="--bl-ar:..;--bl-sa:.."><img class="bl-img" src=".." alt=".."
+                                                                  width height decoding="async" [loading="lazy" i sm/md/lg]>…fallback…</span> — SAMME faste slot som masken, men ægte brandfarver.
+                                                                  css/p-brand-logo.css lægger en neutral lys flise bag i mørk tilstand (og i mærkesidens hero), så mørke logoer ikke forsvinder.
    Uden logo: <span class="bl bl--md bl--mono|bl--ord" data-bl="slug"><span class="bl-fb …">…</span></span>
    Alt fra mærkenavne escapes; navnet indgår aldrig i en attribut uden escape. */
 (function (rod, fabrik){
@@ -199,8 +202,11 @@
           `<span class="bl-mark" data-bl-src="${src}"></span>${ref}${fb}</span>`;
       }
       const alt = dekor ? '' : `${navnE}-logo`;
+      /* Lister og fliser (sm/md/lg) henter først, når billedet er tæt på skærmen — et logo i et foldet filterpanel (display:none) henter slet intet.
+         xl/hero/wm (annoncens titel, mærkesidens hero) er øverst på siden og hentes straks. Fast width/height + aspect-ratio: ingen CLS. */
+      const lazy = str === 'sm' || str === 'md' || str === 'lg' ? ' loading="lazy"' : '';
       return `<span class="bl bl--${str} bl--logo bl--img${emCls}" data-bl="${slugE}" style="--bl-ar:${ar};--bl-sa:${sa}"${dekor ? ' aria-hidden="true"' : ''}>` +
-        `<img class="bl-img" src="${src}" alt="${alt}" width="${Math.round(m.w)}" height="${Math.round(m.h)}" decoding="async">${fb}</span>`;
+        `<img class="bl-img" src="${src}" alt="${alt}" width="${Math.round(m.w)}" height="${Math.round(m.h)}" decoding="async"${lazy}>${fb}</span>`;
     }
 
     return { normaliser, logoFor, logoHTML, monogramFor, opret, STORRELSER, SLOT, MIN_HOEJDE, EMBLEM_MAKS_FORHOLD, slotMaal, esc, noegle, linjer, version: d.v };

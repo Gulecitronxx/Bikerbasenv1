@@ -992,3 +992,7 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 .mk-flere-links li a:focus-visible{ outline:2px solid var(--color-primary); outline-offset:2px; }
 .mk-hurtigsoeg-status a{ font-weight:600; }
 @media (prefers-reduced-motion:no-preference){ .mk-flere-links li a{ transition:background-color .15s, color .15s; } }
+
+/* V5 logoer: farvede officielle logoer står på en lys flise (box-shadow-spread 4-6 px uden for slotten, se p-brand-logo.css); lidt luft, så flisen aldrig rører H1 / CTA-overskriften */
+.mk-hero .mk-wordmark--logo:has(.bl--img){ margin-bottom: var(--space-2); }
+.mk-cta-navn--logo:has(.bl--img){ margin-bottom: var(--space-3); }

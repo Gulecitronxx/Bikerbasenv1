@@ -49,8 +49,7 @@ try{
 </script>
 <!-- Ingen preconnect: maerkeoversigten viser ingen annoncer og henter
      hverken data fra Supabase eller supabase-js fra jsDelivr (se
-     scriptlisten nederst; js/maerker-lager.js henter kun efter første maling, fra samme
-     oprindelse som de andre sider). En preconnect til en vaert, der aldrig
+     scriptlisten nederst). En preconnect til en vaert, der aldrig
      kontaktes, koster DNS + TLS for ingenting — og de to haandtryk laa
      paa den kritiske sti foran fontene. -->
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=c0781ea2" as="font" type="font/woff2" crossorigin>
@@ -59,9 +58,9 @@ try{
 @font-face{font-family:'Space Grotesk';font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/spacegrotesk.woff2?v=c0781ea2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 @font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/ibmplexsans.woff2?v=d8b4e62d) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
 </style>
-<link rel="stylesheet" href="css/styles.css?v=0e914673">
-<link rel="stylesheet" href="css/p-maerke.css?v=0e914673">
-<link rel="stylesheet" href="css/p-brand-logo.css?v=0e914673">
+<link rel="stylesheet" href="css/styles.css?v=098c00a9">
+<link rel="stylesheet" href="css/p-maerke.css?v=098c00a9">
+<link rel="stylesheet" href="css/p-brand-logo.css?v=098c00a9">
 <noscript><style>.bl--logo>.bl-fb{display:inline-flex}.bl--logo>.bl-mark{display:none}</style></noscript>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Forside","item":"https://bikerbasen.dk"},{"@type":"ListItem","position":2,"name":"Mærker","item":"https://bikerbasen.dk/maerker"}]}</script>
 </head>
@@ -141,17 +140,17 @@ try{
     <div class="container">
       <div class="mk-sek-head">
         <h2 id="mk-top-h">Mærker med flest annoncer</h2>
-        <a class="mk-link" href="soegning.html"><span>Søg blandt alle <span data-mk-alle>720</span> annoncer</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
+        <a class="mk-link" href="soegning.html">Søg blandt alle 720 annoncer<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></a>
       </div>
       <div class="mk-brandtiles">
         <a class="mk-brandtile" href="maerke-honda.html">
-          <span class="mk-brandtile-logo"><span class="bl bl--lg bl--logo" data-bl="honda" style="--bl-ar:1.252;--bl-sa:1.119" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/honda.svg"></span><img class="bl-ref" src="img/brands/honda.svg" alt="" width="50" height="40" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">H</span></span></span>
+          <span class="mk-brandtile-logo"><span class="bl bl--lg bl--logo bl--img" data-bl="honda" style="--bl-ar:8.219;--bl-sa:2.867" aria-hidden="true"><img class="bl-img" src="img/brands/honda.svg" alt="" width="120" height="15" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:1">H</span></span></span>
           <span class="mk-brandtile-navn">Honda</span>
           <span class="mk-brandtile-n">307 annoncer</span>
           <span class="mk-brandtile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span>
         </a>
         <a class="mk-brandtile" href="maerke-harley-davidson.html">
-          <span class="mk-brandtile-logo"><span class="bl bl--lg bl--logo" data-bl="harley-davidson" style="--bl-ar:1.255;--bl-sa:1.12" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/harley-davidson.svg"></span><img class="bl-ref" src="img/brands/harley-davidson.svg" alt="" width="50" height="40" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:2">HD</span></span></span>
+          <span class="mk-brandtile-logo"><span class="bl bl--lg bl--logo bl--img" data-bl="harley-davidson" style="--bl-ar:1.234;--bl-sa:1.111" aria-hidden="true"><img class="bl-img" src="img/brands/harley-davidson.svg" alt="" width="49" height="40" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:2">HD</span></span></span>
           <span class="mk-brandtile-navn">Harley-Davidson</span>
           <span class="mk-brandtile-n">83 annoncer</span>
           <span class="mk-brandtile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span>
@@ -181,7 +180,7 @@ try{
           <span class="mk-brandtile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span>
         </a>
         <a class="mk-brandtile" href="maerke-triumph.html">
-          <span class="mk-brandtile-logo"><span class="bl bl--lg bl--logo" data-bl="triumph" style="--bl-ar:1.178;--bl-sa:1.085" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/triumph.svg"></span><img class="bl-ref" src="img/brands/triumph.svg" alt="" width="47" height="40" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">T</span></span></span>
+          <span class="mk-brandtile-logo"><span class="bl bl--lg bl--logo bl--img" data-bl="triumph" style="--bl-ar:1.116;--bl-sa:1.056" aria-hidden="true"><img class="bl-img" src="img/brands/triumph.svg" alt="" width="45" height="40" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:1">T</span></span></span>
           <span class="mk-brandtile-navn">Triumph</span>
           <span class="mk-brandtile-n">35 annoncer</span>
           <span class="mk-brandtile-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span>
@@ -232,7 +231,7 @@ try{
           <h3>B</h3>
           <ul>
             <li data-mk-soeg="bach"><a href="maerke-bach.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="bach" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span></span><span>Bach</span></span><span class="mk-az-n">1</span></a></li>
-            <li data-mk-soeg="benelli"><a href="maerke-benelli.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo" data-bl="benelli" style="--bl-ar:3.817;--bl-sa:1.954" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/benelli.svg"></span><img class="bl-ref" src="img/brands/benelli.svg" alt="" width="52" height="14" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span></span><span>Benelli</span></span><span class="mk-az-n">1</span></a></li>
+            <li data-mk-soeg="benelli"><a href="maerke-benelli.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="benelli" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span></span><span>Benelli</span></span><span class="mk-az-n">1</span></a></li>
             <li data-mk-soeg="bmw|bmw motorrad"><a href="maerke-bmw.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--emblem" data-bl="bmw" style="--bl-ar:0.996;--bl-sa:0.998" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/bmw-emblem.svg"></span><img class="bl-ref" src="img/brands/bmw-emblem.svg" alt="" width="22" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span></span><span>BMW</span></span><span class="mk-az-n">47</span></a></li>
             <li data-mk-soeg="bsa"><a href="maerke-bsa.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="bsa" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span></span><span>BSA</span></span><span class="mk-az-n">8</span></a></li>
             <li data-mk-soeg="buell"><a href="maerke-buell.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="buell" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">B</span></span></span><span>Buell</span></span><span class="mk-az-n">1</span></a></li>
@@ -248,8 +247,8 @@ try{
         <section class="mk-az-gruppe" id="mk-az-d" aria-label="Mærker med D">
           <h3>D</h3>
           <ul>
-            <li data-mk-soeg="dkw"><a href="maerke-dkw.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="dkw" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">D</span></span></span><span>DKW</span></span><span class="mk-az-n">1</span></a></li>
-            <li data-mk-soeg="ducati|ducati motor holding"><a href="maerke-ducati.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo" data-bl="ducati" style="--bl-ar:0.963;--bl-sa:0.981" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/ducati.svg"></span><img class="bl-ref" src="img/brands/ducati.svg" alt="" width="21" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">D</span></span></span><span>Ducati</span></span><span class="mk-az-n">5</span></a></li>
+            <li data-mk-soeg="dkw"><a href="maerke-dkw.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--img" data-bl="dkw" style="--bl-ar:1.968;--bl-sa:1.403" aria-hidden="true"><img class="bl-img" src="img/brands/dkw.svg" alt="" width="37" height="19" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:1">D</span></span></span><span>DKW</span></span><span class="mk-az-n">1</span></a></li>
+            <li data-mk-soeg="ducati|ducati motor holding"><a href="maerke-ducati.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--img" data-bl="ducati" style="--bl-ar:1.605;--bl-sa:1.267" aria-hidden="true"><img class="bl-img" src="img/brands/ducati.svg" alt="" width="34" height="21" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:1">D</span></span></span><span>Ducati</span></span><span class="mk-az-n">5</span></a></li>
           </ul>
         </section>
         <section class="mk-az-gruppe" id="mk-az-f" aria-label="Mærker med F">
@@ -262,16 +261,16 @@ try{
         <section class="mk-az-gruppe" id="mk-az-h" aria-label="Mærker med H">
           <h3>H</h3>
           <ul>
-            <li data-mk-soeg="harley-davidson|harley|hd|h-d|harley davidson|harley-davidson motor company"><a href="maerke-harley-davidson.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo" data-bl="harley-davidson" style="--bl-ar:1.255;--bl-sa:1.12" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/harley-davidson.svg"></span><img class="bl-ref" src="img/brands/harley-davidson.svg" alt="" width="28" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:2">HD</span></span></span><span>Harley-Davidson</span></span><span class="mk-az-n">83</span></a></li>
-            <li data-mk-soeg="honda|honda motor"><a href="maerke-honda.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--emblem" data-bl="honda" style="--bl-ar:1.495;--bl-sa:1.223" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/honda-emblem.svg"></span><img class="bl-ref" src="img/brands/honda-emblem.svg" alt="" width="32" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">H</span></span></span><span>Honda</span></span><span class="mk-az-n">307</span></a></li>
-            <li data-mk-soeg="husqvarna|husqvarna motorcycles"><a href="maerke-husqvarna.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--emblem" data-bl="husqvarna" style="--bl-ar:0.858;--bl-sa:0.926" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/husqvarna-emblem.svg"></span><img class="bl-ref" src="img/brands/husqvarna-emblem.svg" alt="" width="19" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">H</span></span></span><span>Husqvarna</span></span><span class="mk-az-n">2</span></a></li>
+            <li data-mk-soeg="harley-davidson|harley|hd|h-d|harley davidson|harley-davidson motor company"><a href="maerke-harley-davidson.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--img" data-bl="harley-davidson" style="--bl-ar:1.234;--bl-sa:1.111" aria-hidden="true"><img class="bl-img" src="img/brands/harley-davidson.svg" alt="" width="27" height="22" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:2">HD</span></span></span><span>Harley-Davidson</span></span><span class="mk-az-n">83</span></a></li>
+            <li data-mk-soeg="honda|honda motor"><a href="maerke-honda.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="honda" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">H</span></span></span><span>Honda</span></span><span class="mk-az-n">307</span></a></li>
+            <li data-mk-soeg="husqvarna|husqvarna motorcycles"><a href="maerke-husqvarna.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="husqvarna" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">H</span></span></span><span>Husqvarna</span></span><span class="mk-az-n">2</span></a></li>
             <li data-mk-soeg="hyosung"><a href="maerke-hyosung.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="hyosung" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">H</span></span></span><span>Hyosung</span></span><span class="mk-az-n">1</span></a></li>
           </ul>
         </section>
         <section class="mk-az-gruppe" id="mk-az-i" aria-label="Mærker med I">
           <h3>I</h3>
           <ul>
-            <li data-mk-soeg="indian|indian motorcycle|indian motorcycles"><a href="maerke-indian.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo" data-bl="indian" style="--bl-ar:1.623;--bl-sa:1.274" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/indian.svg"></span><img class="bl-ref" src="img/brands/indian.svg" alt="" width="34" height="21" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">I</span></span></span><span>Indian</span></span><span class="mk-az-n">2</span></a></li>
+            <li data-mk-soeg="indian|indian motorcycle|indian motorcycles"><a href="maerke-indian.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--img" data-bl="indian" style="--bl-ar:2.736;--bl-sa:1.654" aria-hidden="true"><img class="bl-img" src="img/brands/indian.svg" alt="" width="44" height="16" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:1">I</span></span></span><span>Indian</span></span><span class="mk-az-n">2</span></a></li>
           </ul>
         </section>
         <section class="mk-az-gruppe" id="mk-az-k" aria-label="Mærker med K">
@@ -292,27 +291,27 @@ try{
           <h3>M</h3>
           <ul>
             <li data-mk-soeg="moto-guzzi|motoguzzi"><a href="maerke-moto-guzzi.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo" data-bl="moto-guzzi" style="--bl-ar:2.801;--bl-sa:1.674" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/moto-guzzi.svg"></span><img class="bl-ref" src="img/brands/moto-guzzi.svg" alt="" width="44" height="16" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:2">MG</span></span></span><span>Moto Guzzi</span></span><span class="mk-az-n">3</span></a></li>
-            <li data-mk-soeg="mv-agusta|mvagusta"><a href="maerke-mv-agusta.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--emblem" data-bl="mv-agusta" style="--bl-ar:1.431;--bl-sa:1.196" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/mv-agusta-emblem.svg"></span><img class="bl-ref" src="img/brands/mv-agusta-emblem.svg" alt="" width="31" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:2">MV</span></span></span><span>MV Agusta</span></span><span class="mk-az-n">2</span></a></li>
+            <li data-mk-soeg="mv-agusta|mvagusta"><a href="maerke-mv-agusta.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--img" data-bl="mv-agusta" style="--bl-ar:1.5;--bl-sa:1.225" aria-hidden="true"><img class="bl-img" src="img/brands/mv-agusta.svg" alt="" width="32" height="22" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:2">MV</span></span></span><span>MV Agusta</span></span><span class="mk-az-n">2</span></a></li>
           </ul>
         </section>
         <section class="mk-az-gruppe" id="mk-az-r" aria-label="Mærker med R">
           <h3>R</h3>
           <ul>
             <li data-mk-soeg="rewaco"><a href="maerke-rewaco.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="rewaco" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">R</span></span></span><span>Rewaco</span></span><span class="mk-az-n">1</span></a></li>
-            <li data-mk-soeg="royal-enfield|royalenfield|royal enfield motors"><a href="maerke-royal-enfield.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--emblem" data-bl="royal-enfield" style="--bl-ar:1.008;--bl-sa:1.004" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/royal-enfield-emblem.svg"></span><img class="bl-ref" src="img/brands/royal-enfield-emblem.svg" alt="" width="22" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:2">RE</span></span></span><span>Royal Enfield</span></span><span class="mk-az-n">14</span></a></li>
+            <li data-mk-soeg="royal-enfield|royalenfield|royal enfield motors"><a href="maerke-royal-enfield.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="royal-enfield" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:2">RE</span></span></span><span>Royal Enfield</span></span><span class="mk-az-n">14</span></a></li>
           </ul>
         </section>
         <section class="mk-az-gruppe" id="mk-az-s" aria-label="Mærker med S">
           <h3>S</h3>
           <ul>
             <li data-mk-soeg="suzuki"><a href="maerke-suzuki.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--emblem" data-bl="suzuki" style="--bl-ar:1.006;--bl-sa:1.003" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/suzuki-emblem.svg"></span><img class="bl-ref" src="img/brands/suzuki-emblem.svg" alt="" width="22" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">S</span></span></span><span>Suzuki</span></span><span class="mk-az-n">63</span></a></li>
-            <li data-mk-soeg="sym|sanyang"><a href="maerke-sym.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--mono" data-bl="sym" aria-hidden="true"><span class="bl-fb bl-mono" style="--bl-mn:1">S</span></span></span><span>SYM</span></span><span class="mk-az-n">1</span></a></li>
+            <li data-mk-soeg="sym|sanyang"><a href="maerke-sym.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--img" data-bl="sym" style="--bl-ar:2.836;--bl-sa:1.684" aria-hidden="true"><img class="bl-img" src="img/brands/sym.svg" alt="" width="45" height="16" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:1">S</span></span></span><span>SYM</span></span><span class="mk-az-n">1</span></a></li>
           </ul>
         </section>
         <section class="mk-az-gruppe" id="mk-az-t" aria-label="Mærker med T">
           <h3>T</h3>
           <ul>
-            <li data-mk-soeg="triumph|triumph motorcycles"><a href="maerke-triumph.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--emblem" data-bl="triumph" style="--bl-ar:1.178;--bl-sa:1.085" aria-hidden="true"><span class="bl-mark" data-bl-src="img/brands/triumph-emblem.svg"></span><img class="bl-ref" src="img/brands/triumph-emblem.svg" alt="" width="26" height="22" loading="lazy" hidden><span class="bl-fb bl-mono" style="--bl-mn:1">T</span></span></span><span>Triumph</span></span><span class="mk-az-n">35</span></a></li>
+            <li data-mk-soeg="triumph|triumph motorcycles"><a href="maerke-triumph.html"><span class="mk-az-navn"><span class="mk-az-logo"><span class="bl bl--sm bl--logo bl--img" data-bl="triumph" style="--bl-ar:1.116;--bl-sa:1.056" aria-hidden="true"><img class="bl-img" src="img/brands/triumph.svg" alt="" width="25" height="22" decoding="async" loading="lazy"><span class="bl-fb bl-mono" style="--bl-mn:1">T</span></span></span><span>Triumph</span></span><span class="mk-az-n">35</span></a></li>
           </ul>
         </section>
         <section class="mk-az-gruppe" id="mk-az-v" aria-label="Mærker med V">
@@ -373,22 +372,18 @@ try{
 
   <section class="section mk-sektion mk-flere-sektion" aria-labelledby="mk-flere-h">
     <div class="container">
-      <div class="mk-sek-head"><h2 id="mk-flere-h">Flere mærker (<span data-mk-flere-n>72</span>)</h2></div>
-      <p class="brand-intro">Disse <span data-mk-flere-n>72</span> mærker kender vi, men ingen annoncer til salg er indekseret lige nu. De er ikke knapper: de har ingen egen side, før der er noget at vise (og siden er først indekserbar fra 5 annoncer). Sælger du et af dem, kan du <a href="opret-annonce.html">oprette en annonce</a>: alle mærkerne kan vælges dér, og et mærke, der ikke står på listen, kan du skrive selv. Imens finder du resten i <a href="soegning.html">den fulde søgning</a>.</p>
-      <div class="mk-flere-nye" data-mk-nye hidden>
-        <p class="mk-flere-note" role="status"><strong>Nyt siden sidste opdatering</strong> — disse mærker har fået annoncer, efter siden blev bygget:</p>
-        <ul class="mk-flere mk-flere-links" data-mk-nye-liste aria-label="Mærker, der netop har fået annoncer"></ul>
-      </div>
+      <div class="mk-sek-head"><h2 id="mk-flere-h">Flere mærker (63)</h2></div>
+      <p class="brand-intro">Disse 63 mærker kender vi, men ingen annoncer til salg er indekseret lige nu. De har derfor ingen egen side — den får de, når der er noget at vise (og er først indekserbar fra 5 annoncer). Sælger du et af dem, kan du <a href="opret-annonce.html">oprette en annonce</a>: alle mærkerne kan vælges dér. Imens finder du resten i <a href="soegning.html">den fulde søgning</a>.</p>
       <ul class="mk-flere" aria-label="Aktuelle mærker uden annoncer lige nu">
-        <li data-mk-soeg="AJP|ajp" data-mk-pille="ajp" data-mk-navn="AJP">AJP</li> <li data-mk-soeg="Bajaj|bajaj" data-mk-pille="bajaj" data-mk-navn="Bajaj">Bajaj</li> <li data-mk-soeg="Beta|beta" data-mk-pille="beta" data-mk-navn="Beta">Beta</li> <li data-mk-soeg="Bimota|bimota" data-mk-pille="bimota" data-mk-navn="Bimota">Bimota</li> <li data-mk-soeg="Boss Hoss|boss-hoss|boss hoss cycles" data-mk-pille="boss-hoss" data-mk-navn="Boss Hoss">Boss Hoss</li> <li data-mk-soeg="Brixton|brixton|brixton motorcycles" data-mk-pille="brixton" data-mk-navn="Brixton">Brixton</li> <li data-mk-soeg="Cake|cake" data-mk-pille="cake" data-mk-navn="Cake">Cake</li> <li data-mk-soeg="Can-Am|can-am|can am|canam|brp can-am" data-mk-pille="can-am" data-mk-navn="Can-Am">Can-Am</li> <li data-mk-soeg="Derbi|derbi" data-mk-pille="derbi" data-mk-navn="Derbi">Derbi</li> <li data-mk-soeg="Energica|energica" data-mk-pille="energica" data-mk-navn="Energica">Energica</li> <li data-mk-soeg="GasGas|gasgas|gas gas" data-mk-pille="gasgas" data-mk-navn="GasGas">GasGas</li> <li data-mk-soeg="Gilera|gilera" data-mk-pille="gilera" data-mk-navn="Gilera">Gilera</li> <li data-mk-soeg="Hero MotoCorp|hero-motocorp|hero|hero moto corp" data-mk-pille="hero-motocorp" data-mk-navn="Hero MotoCorp">Hero MotoCorp</li> <li data-mk-soeg="Horwin|horwin" data-mk-pille="horwin" data-mk-navn="Horwin">Horwin</li> <li data-mk-soeg="Italjet|italjet" data-mk-pille="italjet" data-mk-navn="Italjet">Italjet</li> <li data-mk-soeg="Jawa|jawa|jawa moto" data-mk-pille="jawa" data-mk-navn="Jawa">Jawa</li> <li data-mk-soeg="Keeway|keeway" data-mk-pille="keeway" data-mk-navn="Keeway">Keeway</li> <li data-mk-soeg="Kove|kove|kove moto" data-mk-pille="kove" data-mk-navn="Kove">Kove</li> <li data-mk-soeg="Lambretta|lambretta" data-mk-pille="lambretta" data-mk-navn="Lambretta">Lambretta</li> <li data-mk-soeg="Lexmoto|lexmoto" data-mk-pille="lexmoto" data-mk-navn="Lexmoto">Lexmoto</li> <li data-mk-soeg="Lifan|lifan" data-mk-pille="lifan" data-mk-navn="Lifan">Lifan</li> <li data-mk-soeg="Mash|mash|mash motorcycles" data-mk-pille="mash" data-mk-navn="Mash">Mash</li> <li data-mk-soeg="Montesa|montesa|montesa honda" data-mk-pille="montesa" data-mk-navn="Montesa">Montesa</li> <li data-mk-soeg="Moto Morini|moto-morini|morini" data-mk-pille="moto-morini" data-mk-navn="Moto Morini">Moto Morini</li> <li data-mk-soeg="NIU|niu|niu technologies" data-mk-pille="niu" data-mk-navn="NIU">NIU</li> <li data-mk-soeg="Norton|norton|norton motorcycles" data-mk-pille="norton" data-mk-navn="Norton">Norton</li> <li data-mk-soeg="Peugeot|peugeot|peugeot motocycles|peugeot scooters" data-mk-pille="peugeot" data-mk-navn="Peugeot">Peugeot</li> <li data-mk-soeg="Piaggio|piaggio|piaggio group" data-mk-pille="piaggio" data-mk-navn="Piaggio">Piaggio</li> <li data-mk-soeg="Polaris Slingshot|polaris-slingshot|slingshot|polaris" data-mk-pille="polaris-slingshot" data-mk-navn="Polaris Slingshot">Polaris Slingshot</li> <li data-mk-soeg="QJMotor|qjmotor|qj motor|qj|qjmotor" data-mk-pille="qjmotor" data-mk-navn="QJMotor">QJMotor</li> <li data-mk-soeg="Rieju|rieju" data-mk-pille="rieju" data-mk-navn="Rieju">Rieju</li> <li data-mk-soeg="Sachs|sachs" data-mk-pille="sachs" data-mk-navn="Sachs">Sachs</li> <li data-mk-soeg="Segway|segway|segway ninebot|ninebot" data-mk-pille="segway" data-mk-navn="Segway">Segway</li> <li data-mk-soeg="Sherco|sherco" data-mk-pille="sherco" data-mk-navn="Sherco">Sherco</li> <li data-mk-soeg="Silence|silence" data-mk-pille="silence" data-mk-navn="Silence">Silence</li> <li data-mk-soeg="Stark Future|stark-future|stark|stark varg|varg" data-mk-pille="stark-future" data-mk-navn="Stark Future">Stark Future</li> <li data-mk-soeg="Sur-Ron|sur-ron|surron|sur ron" data-mk-pille="sur-ron" data-mk-navn="Sur-Ron">Sur-Ron</li> <li data-mk-soeg="SWM|swm" data-mk-pille="swm" data-mk-navn="SWM">SWM</li> <li data-mk-soeg="Talaria|talaria" data-mk-pille="talaria" data-mk-navn="Talaria">Talaria</li> <li data-mk-soeg="Tomos|tomos" data-mk-pille="tomos" data-mk-navn="Tomos">Tomos</li> <li data-mk-soeg="TVS|tvs|tvs motor" data-mk-pille="tvs" data-mk-navn="TVS">TVS</li> <li data-mk-soeg="Ural|ural|imz-ural|imz ural" data-mk-pille="ural" data-mk-navn="Ural">Ural</li> <li data-mk-soeg="Vespa|vespa" data-mk-pille="vespa" data-mk-navn="Vespa">Vespa</li> <li data-mk-soeg="Voge|voge|loncin voge" data-mk-pille="voge" data-mk-navn="Voge">Voge</li> <li data-mk-soeg="Yezdi|yezdi" data-mk-pille="yezdi" data-mk-navn="Yezdi">Yezdi</li> <li data-mk-soeg="Zero|zero|zero motorcycles|zero motorcycle" data-mk-pille="zero" data-mk-navn="Zero">Zero</li> <li data-mk-soeg="Zontes|zontes" data-mk-pille="zontes" data-mk-navn="Zontes">Zontes</li>
+        <li>AJP</li> <li>Bajaj</li> <li>Beta</li> <li>Bimota</li> <li>Brixton</li> <li>Can-Am</li> <li>Daelim</li> <li>Derbi</li> <li>Energica</li> <li>GasGas</li> <li>Gilera</li> <li>Hero MotoCorp</li> <li>Italjet</li> <li>Jawa</li> <li>Keeway</li> <li>Kove</li> <li>Lambretta</li> <li>Lexmoto</li> <li>Mash</li> <li>Montesa</li> <li>Moto Morini</li> <li>Norton</li> <li>Peugeot</li> <li>Piaggio</li> <li>QJMotor</li> <li>Rieju</li> <li>Sachs</li> <li>Sherco</li> <li>Super Soco</li> <li>Sur-Ron</li> <li>SWM</li> <li>Talaria</li> <li>TM Racing</li> <li>Tomos</li> <li>TVS</li> <li>Ural</li> <li>Vespa</li> <li>Voge</li> <li>Yezdi</li> <li>Zero</li> <li>Zontes</li>
       </ul>
-      <p class="mk-flere-note"><strong>Historiske mærker (25)</strong> — ikke længere i produktion, men brugte maskiner handles stadig.</p>
+      <p class="mk-flere-note"><strong>Historiske mærker (22)</strong> — ikke længere i produktion, men brugte maskiner handles stadig.</p>
       <ul class="mk-flere mk-flere-hist" aria-label="Historiske mærker uden annoncer lige nu">
-        <li data-mk-soeg="Aermacchi|aermacchi" data-mk-pille="aermacchi" data-mk-navn="Aermacchi">Aermacchi</li> <li data-mk-soeg="AJS|ajs" data-mk-pille="ajs" data-mk-navn="AJS">AJS</li> <li data-mk-soeg="Ariel|ariel" data-mk-pille="ariel" data-mk-navn="Ariel">Ariel</li> <li data-mk-soeg="Brough Superior|brough-superior|brough" data-mk-pille="brough-superior" data-mk-navn="Brough Superior">Brough Superior</li> <li data-mk-soeg="Bultaco|bultaco" data-mk-pille="bultaco" data-mk-navn="Bultaco">Bultaco</li> <li data-mk-soeg="CZ|cz|čz|cz motorcycles" data-mk-pille="cz" data-mk-navn="CZ">CZ</li> <li data-mk-soeg="Greeves|greeves" data-mk-pille="greeves" data-mk-navn="Greeves">Greeves</li> <li data-mk-soeg="Hercules|hercules" data-mk-pille="hercules" data-mk-navn="Hercules">Hercules</li> <li data-mk-soeg="Horex|horex" data-mk-pille="horex" data-mk-navn="Horex">Horex</li> <li data-mk-soeg="Husaberg|husaberg" data-mk-pille="husaberg" data-mk-navn="Husaberg">Husaberg</li> <li data-mk-soeg="Kreidler|kreidler" data-mk-pille="kreidler" data-mk-navn="Kreidler">Kreidler</li> <li data-mk-soeg="Laverda|laverda" data-mk-pille="laverda" data-mk-navn="Laverda">Laverda</li> <li data-mk-soeg="Maico|maico" data-mk-pille="maico" data-mk-navn="Maico">Maico</li> <li data-mk-soeg="Malaguti|malaguti" data-mk-pille="malaguti" data-mk-navn="Malaguti">Malaguti</li> <li data-mk-soeg="Matchless|matchless" data-mk-pille="matchless" data-mk-navn="Matchless">Matchless</li> <li data-mk-soeg="Morbidelli|morbidelli" data-mk-pille="morbidelli" data-mk-navn="Morbidelli">Morbidelli</li> <li data-mk-soeg="MZ|mz" data-mk-pille="mz" data-mk-navn="MZ">MZ</li> <li data-mk-soeg="Nimbus|nimbus" data-mk-pille="nimbus" data-mk-navn="Nimbus">Nimbus</li> <li data-mk-soeg="NSU|nsu" data-mk-pille="nsu" data-mk-navn="NSU">NSU</li> <li data-mk-soeg="Ossa|ossa" data-mk-pille="ossa" data-mk-navn="Ossa">Ossa</li> <li data-mk-soeg="Puch|puch" data-mk-pille="puch" data-mk-navn="Puch">Puch</li> <li data-mk-soeg="Simson|simson" data-mk-pille="simson" data-mk-navn="Simson">Simson</li> <li data-mk-soeg="Velocette|velocette" data-mk-pille="velocette" data-mk-navn="Velocette">Velocette</li> <li data-mk-soeg="Vincent|vincent|vincent hrd" data-mk-pille="vincent" data-mk-navn="Vincent">Vincent</li> <li data-mk-soeg="Zündapp|zundapp|zundapp|zuendapp" data-mk-pille="zundapp" data-mk-navn="Zündapp">Zündapp</li>
+        <li>AJS</li> <li>Ariel</li> <li>Brough Superior</li> <li>Bultaco</li> <li>Greeves</li> <li>Hercules</li> <li>Horex</li> <li>Husaberg</li> <li>Kreidler</li> <li>Laverda</li> <li>Maico</li> <li>Matchless</li> <li>Morbidelli</li> <li>MZ</li> <li>Nimbus</li> <li>NSU</li> <li>Ossa</li> <li>Puch</li> <li>Simson</li> <li>Velocette</li> <li>Vincent</li> <li>Zündapp</li>
       </ul>
-      <p class="mk-flere-note">1 annonce har intet mærke fra vores liste (mærket er ikke oplyst, eller sælgeren har skrevet et andet mærke) og står derfor ikke under et mærke ovenfor. Den er med i de <span data-mk-alle>720</span> annoncer i søgningen.</p>
+      <p class="mk-flere-note">1 annonce oplyser ikke et mærke, og står derfor ikke under et mærke ovenfor. De er med i de 720 annoncer i søgningen.</p>
       <div class="brand-actions">
-        <a href="soegning.html" class="btn btn-outline"><span>Søg blandt alle <span data-mk-alle>720</span> annoncer</span></a>
+        <a href="soegning.html" class="btn btn-outline">Søg blandt alle 720 annoncer</a>
       </div>
     </div>
   </section>
@@ -469,22 +464,18 @@ try{
      hele Supabase-stakken (supabase-js fra jsDelivr 55.453 B, config, api,
      backend-bridge) og js/postnumre.js (40.050 B rå) taget ud. Se den
      længere begrundelse i sikkerhed.html; det er samme rettelse.
-     V5: js/maerker-lager.js indlæser config/api/bridge DYNAMISK efter første
-     maling (load + tomgang, aldrig ved Save-Data) og opdaterer tallene og
-     "Flere mærker" ud fra det levende lager. De står derfor ikke i listen her.
      RØR IKKE listen uden at rette den tilsvarende i maerker.html — den her
      er kilden, siden genereres af scripts/build-brand-pages.js. -->
-<script defer src="js/security.js?v=0e914673"></script>
-<script defer src="js/icons.js?v=0e914673"></script>
-<script defer src="js/bike-art.js?v=0e914673"></script>
-<script defer src="js/data.js?v=0e914673"></script>
-<script defer src="js/store.js?v=0e914673"></script>
-<script defer src="js/components.js?v=0e914673"></script>
-<script defer src="js/brand-logos-data.js?v=0e914673"></script>
-<script defer src="js/brand-logos.js?v=0e914673"></script>
-<script defer src="js/maerke.js?v=0e914673"></script>
-<script defer src="js/maerker-sog.js?v=0e914673"></script>
-<script defer src="js/maerker-lager.js?v=0e914673"></script>
+<script defer src="js/security.js?v=098c00a9"></script>
+<script defer src="js/icons.js?v=098c00a9"></script>
+<script defer src="js/bike-art.js?v=098c00a9"></script>
+<script defer src="js/data.js?v=098c00a9"></script>
+<script defer src="js/store.js?v=098c00a9"></script>
+<script defer src="js/components.js?v=098c00a9"></script>
+<script defer src="js/brand-logos-data.js?v=098c00a9"></script>
+<script defer src="js/brand-logos.js?v=098c00a9"></script>
+<script defer src="js/maerke.js?v=098c00a9"></script>
+<script defer src="js/maerker-sog.js?v=098c00a9"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">

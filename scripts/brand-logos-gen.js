@@ -24,6 +24,12 @@ const ROOT = path.join(__dirname, '..');
 const MANIFEST = path.join(ROOT, 'img', 'brands', 'manifest.json');
 const DATA = path.join(ROOT, 'js', 'brand-logos-data.js');
 const MAX_SVG_BYTES = 6 * 1024;
+/* V5: de OFFICIELLE filer (autenticitet 'officiel') er originale tegninger fra udgiveren og meget større end de vektoriserede AI-udkast
+   (største: Kymco, 29 KB). De indlæses kun som <img> (aldrig inline, aldrig som maske) og kun, hvor logoet vises. */
+const MAX_OFFICIEL_BYTES = 40 * 1024;
+/* Den standardiserede W3C-DOCTYPE uden intern delmængde ([ ... ]) er ufarlig og står i flere originale SVG'er (Illustrator, CorelDRAW,
+   Inkscape); den fjernes IKKE fra filerne (de skal ligge ordret som udgiveren skrev dem), men accepteres her. ENTITY og alt andet afvises stadig. */
+const W3C_DOCTYPE = /<!DOCTYPE\s+svg\s+PUBLIC\s+"-\/\/W3C\/\/DTD SVG 1\.[01]\/\/EN"\s+"http:\/\/www\.w3\.org\/Graphics\/SVG\/1\.[01]\/DTD\/svg1[01](?:-flat)?\.dtd"\s*>/i;
 const VARIANTER = ['emblem', 'lockup', 'ordmaerke'];
 const UNDERVARIANTER = ['emblem', 'ordmaerke'];   // varianter.<navn> i manifestet; emblem (små slots) og ordmaerke (hero-lockup: emblem + ordmærke side om side) bruges af klienten
 const FALLBACKS = ['ordmaerke', 'monogram'];
@@ -31,10 +37,12 @@ const FIL_MOENSTER = /^img\/brands\/[a-z0-9][a-z0-9-]*\.svg$/;
 
 /* SVG'er indlæses via CSS-mask eller <img> og kører derfor aldrig script, men de bliver stadig kontrolleret:
    en fil, der en dag indsættes inline, må ikke kunne andet end tegne. */
-function tjekSvg(tekst){
+function tjekSvg(tekst, maxBytes){
   const fejl = [];
+  const graense = maxBytes || MAX_SVG_BYTES;
   const b = Buffer.byteLength(tekst, 'utf8');
-  if (b >= MAX_SVG_BYTES) fejl.push(`${b} bytes (grænse ${MAX_SVG_BYTES - 1})`);
+  if (b >= graense) fejl.push(`${b} bytes (grænse ${graense - 1})`);
+  tekst = tekst.replace(W3C_DOCTYPE, '');
   if (!/^\s*(<\?xml[^>]*>\s*)?(<!--[\s\S]*?-->\s*)*<svg[\s>]/i.test(tekst)) fejl.push('starter ikke med <svg>');
   if (/<script/i.test(tekst)) fejl.push('indeholder <script>');
   if (/\son[a-z]+\s*=/i.test(tekst)) fejl.push('indeholder on*-attribut');
@@ -88,10 +96,12 @@ function valider(manifest, laes){
       if (!FIL_MOENSTER.test(m.fil)) return fejl.push(`${ref}: fil "${m.fil}" skal være img/brands/<navn>.svg`);
       let tekst;
       try { tekst = laes(m.fil); } catch (e){ return fejl.push(`${ref}: filen ${m.fil} findes ikke`); }
-      for (const f of tjekSvg(tekst.toString('utf8'))) fejl.push(`${ref}: ${m.fil}: ${f}`);
+      const officiel = m.autenticitet === 'officiel';
+      for (const f of tjekSvg(tekst.toString('utf8'), officiel ? MAX_OFFICIEL_BYTES : MAX_SVG_BYTES)) fejl.push(`${ref}: ${m.fil}: ${f}`);
       const mm = maal(tekst.toString('utf8'));
       if (!mm) fejl.push(`${ref}: ${m.fil} har ingen læsbar viewBox`);
       if (!m.kilde || !m.licens) fejl.push(`${ref}: fil kræver kilde og licens (proveniens)`);
+      if (officiel) fejl.push(...validerOfficiel(m, ref, laes));
     }
     if (m.varianter != null){
       if (typeof m.varianter !== 'object' || Array.isArray(m.varianter)) return fejl.push(`${ref}: varianter skal være et objekt`);
@@ -108,6 +118,28 @@ function valider(manifest, laes){
       }
     }
   });
+  return fejl;
+}
+
+/* En OFFICIEL fil har skærpet proveniens: kilde-URL, hentedato, godkendelse og hash af den uændrede original (kilde_fil), og den tegnes som
+   billede i brandfarver (ensfarvet:false) — aldrig som maske, som ville gøre farvede og fyldte logoer til en massiv blok. */
+function validerOfficiel(m, ref, laes){
+  const fejl = [];
+  const dato = /^\d{4}-\d{2}-\d{2}$/;
+  if (m.ensfarvet !== false) fejl.push(ref + ': en officiel fil er farvet (ensfarvet:false), ellers ødelægger masken tegningen');
+  if (m.kraever_officiel_fil !== false) fejl.push(ref + ': kraever_officiel_fil skal være false for en officiel fil');
+  if (!/^https:\/\/(commons|upload)\.wikimedia\.org\//.test(String(m.kilde))) fejl.push(ref + ': kilde skal være en https-adresse hos udgiveren af kilden');
+  if (!/^https:\/\//.test(String(m.kilde_url))) fejl.push(ref + ': kilde_url (direkte filadresse) mangler');
+  if (!dato.test(String(m.hentet))) fejl.push(ref + ': hentet (dato) mangler');
+  if (!m.godkendt_af || !dato.test(String(m.godkendt_dato))) fejl.push(ref + ': godkendt_af/godkendt_dato mangler');
+  if (!/^[0-9a-f]{64}$/.test(String(m.kilde_hash))) fejl.push(ref + ': kilde_hash (sha256 af originalen) mangler');
+  if (!m.kilde_fil || !/^docs\/review\/gauntlet\/v5\/logoer\/original\/[a-z0-9-]+\.svg$/.test(m.kilde_fil)) fejl.push(ref + ': kilde_fil (originalen) mangler');
+  else {
+    let orig = null;
+    try { orig = laes(m.kilde_fil); } catch (e) { fejl.push(ref + ': originalen ' + m.kilde_fil + ' findes ikke'); }
+    if (orig && sha256(orig) !== m.kilde_hash) fejl.push(ref + ': kilde_hash passer ikke til ' + m.kilde_fil);
+  }
+  if (typeof m.normalisering !== 'string' || !m.normalisering) fejl.push(ref + ': normalisering (hvad der er ændret ved viewBox) skal beskrives');
   return fejl;
 }
 
@@ -247,4 +279,4 @@ function koer(argv){
 
 if (require.main === module) process.exit(koer(process.argv.slice(2)));
 
-module.exports = { synkRegister, tjekSvg, maal, sha256, valider, udfyld, byggData, datafilTekst, MAX_SVG_BYTES, FIL_MOENSTER, MANIFEST, DATA };
+module.exports = { synkRegister, tjekSvg, validerOfficiel, MAX_OFFICIEL_BYTES, W3C_DOCTYPE, maal, sha256, valider, udfyld, byggData, datafilTekst, MAX_SVG_BYTES, FIL_MOENSTER, MANIFEST, DATA };

@@ -345,6 +345,9 @@ async function buildForside(){
     : `<span class="maerke-mono" aria-hidden="true">${escapeHTML(navn.charAt(0).toUpperCase())}</span>`;
   /* Findes mærkets emblem (uden ordmærke), står navnet som tekst under det; ellers bærer logoet selv ordmærket, og teksten er kun for skærmlæsere (ingen dublet som 'Honda Honda'). */
   const emblemFindes = (navn) => { try { return typeof BrandLogos !== 'undefined' && !!BrandLogos.logoFor(navn).emblem; } catch (e) { return false; } };
+  /* V5: navnet står som synlig tekst, når logoet ikke bærer det selv: et emblem-only logo (manifest-variant 'emblem', fx Harley-Davidson-skjoldet, Triumph, Gilera) eller en emblem-fil.
+     Et logo med ordmærke/lockup (Honda, DKW, Ducati …) bærer navnet selv. */
+  const navnSkalVises = (navn) => { try { if (emblemFindes(navn)) return true; const l = BrandLogos.logoFor(navn); return l.harLogo && l.variant === 'emblem'; } catch (e) { return false; } };
   const brandCloud = document.getElementById('brand-cloud');
   const tegnMaerker = () => {
     const pr = new Map();
@@ -364,7 +367,7 @@ async function buildForside(){
       brandCloud.innerHTML = top.slice(0, 6).map(m =>
         `<a class="maerke-flise" href="${href(m)}" aria-label="${escapeHTML(m.navn)}, ${daTal(m.n)} annoncer">
            ${logoTilflise(m.navn)}
-           <strong${emblemFindes(m.navn) ? '' : ' class="maerke-navn-skjult"'}>${escapeHTML(m.navn)}</strong>
+           <strong${navnSkalVises(m.navn) ? '' : ' class="maerke-navn-skjult"'}>${escapeHTML(m.navn)}</strong>
            <span class="tal-n" aria-hidden="true">${daTal(m.n)}</span>
          </a>`).join('');
       if (typeof BrandLogos !== 'undefined' && BrandLogos.gennemgaa) BrandLogos.gennemgaa();

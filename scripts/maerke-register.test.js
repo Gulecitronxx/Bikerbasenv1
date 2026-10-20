@@ -311,7 +311,8 @@ test('manglende logo giver aldrig manglende mærke: hvert registreret mærke har
     if (slugs.has(key)) assert.equal(BrandLogos.logoFor(p.navn).slug, key);
   }
   const udenLogo = R.alle().filter(p => !BrandLogos.logoFor(p.navn).harLogo).map(p => p.navn);
-  assert.ok(udenLogo.length > 0 && udenLogo.includes('DKW'), 'DKW har intet logo og skal alligevel kunne vises');
+  /* V5: DKW har fået officielt logo; BSA, Cagiva, Buell, Victory, FB Mondial, Hyosung, Rewaco, Lauge Jensen og Bach mangler stadig og beholder fallback */
+  assert.ok(udenLogo.length > 0 && udenLogo.includes('BSA') && !udenLogo.includes('DKW'), 'BSA har intet logo og skal alligevel kunne vises');
 });
 
 test('hver manifest-post (logo) peger på et registreret mærke, og alle manifestets navne/aliaser ender på samme mærke', () => {

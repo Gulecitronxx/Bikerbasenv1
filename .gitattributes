@@ -2,3 +2,6 @@
 # CRLF-konvertering paa Windows, saa sha256 i js/vendor/README.md kan
 # efterproeves i enhver arbejdskopi.
 js/vendor/** -text
+
+# V5 logoer: de officielle SVG-originaler ligger byte for byte som hentet (manifestets kilde_hash; ingen CRLF-konvertering)
+docs/review/gauntlet/v5/logoer/original/** -text

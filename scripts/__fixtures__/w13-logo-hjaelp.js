@@ -29,6 +29,8 @@ function renManifest(){
   for (const e of m.maerker){
     Object.assign(e, { fil: null, godkendt: false, kilde: null, licens: null, hash: null, bredde: null, hoejde: null, variant: 'ordmaerke', ensfarvet: true });
     delete e.godkendt_af; delete e.godkendt_dato; delete e.varianter;
+    /* V5: proveniensfelter for OFFICIELLE filer (scripts/v5-logo-import.js) hører til den ægte godkendelse og nulstilles sammen med den */
+    for (const k of ['autenticitet', 'kraever_officiel_fil', 'kilde_url', 'hentet', 'kilde_fil', 'kilde_hash', 'normalisering', 'bemaerkning']) delete e[k];
   }
   return m;
 }

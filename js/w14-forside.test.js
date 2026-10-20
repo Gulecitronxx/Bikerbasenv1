@@ -247,7 +247,8 @@ test('W14 i3: mærkefliserne dublerer ikke navnet, og kørekort-/typefliserne pe
     flise: [...document.querySelectorAll('#brand-cloud .maerke-flise')].map(a => ({
       navn: a.getAttribute('aria-label'),
       tekster: [...a.querySelectorAll('strong')].filter(s => getComputedStyle(s).visibility !== 'hidden').map(s => s.textContent.trim()),
-      emblem: !!a.querySelector('.bl--emblem'),
+      /* V5: emblem-only = en emblem-fil (bl--emblem) ELLER et logo, hvis manifest-variant er 'emblem' (Harley-Davidson-skjoldet uden tekst) */
+      emblem: !!a.querySelector('.bl--emblem') || (typeof BrandLogos !== 'undefined' && BrandLogos.logoFor((a.getAttribute('aria-label') || '').split(',')[0]).variant === 'emblem' && BrandLogos.logoFor((a.getAttribute('aria-label') || '').split(',')[0]).harLogo),
       logoTekst: (a.querySelector('.maerke-logo') || {}).textContent || '',
     })),
     kk: [...document.querySelectorAll('.tal-grid a[data-kk]')].map(a => [a.dataset.kk, a.getAttribute('href')]),

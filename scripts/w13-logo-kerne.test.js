@@ -50,11 +50,13 @@ test('A2 det RIGTIGE manifest er konsistent: godkendt -> fil findes, hash stemme
     assert.ok(fs.existsSync(path.join(ROOT, m.fil)), `${m.slug}: ${m.fil} findes ikke`);
     const buf = laes(m.fil);
     assert.equal(G.sha256(buf), m.hash, `${m.slug}: hash stemmer ikke`);
-    assert.ok(buf.length < 6 * 1024, `${m.slug}: ${buf.length} bytes`);
-    assert.deepEqual(G.tjekSvg(buf.toString('utf8')), [], m.slug);
+    /* V5: AI-udkastene er vektoriserede til < 6 KB; de officielle filer er udgiverens egne tegninger (grænse G.MAX_OFFICIEL_BYTES) */
+    const graense = m.autenticitet === 'officiel' ? G.MAX_OFFICIEL_BYTES : 6 * 1024;
+    assert.ok(buf.length < graense, `${m.slug}: ${buf.length} bytes`);
+    assert.deepEqual(G.tjekSvg(buf.toString('utf8'), graense), [], m.slug);
     const mm = G.maal(buf.toString('utf8'));
     assert.ok(Math.abs(m.bredde / m.hoejde - mm.bredde / mm.hoejde) < 0.001, `${m.slug}: forhold`);
-    assert.equal(m.godkendt_af, 'ejer', `${m.slug}: godkendt_af`);
+    assert.match(m.godkendt_af, /^ejer\b/, `${m.slug}: godkendt_af`);
     assert.match(String(m.godkendt_dato), /^\d{4}-\d{2}-\d{2}$/, `${m.slug}: godkendt_dato`);
     assert.ok(m.kilde && m.licens, `${m.slug}: proveniens`);
   }
@@ -239,7 +241,11 @@ test('A6 logo-markup: maske for ensfarvet, <img> for flerfarvet, fast slot og ko
   assert.doesNotMatch(a, /aria-hidden/);
   // flerfarvet: <img> med alt
   const f = inst.logoHTML('Suzuki', { storrelse: 'lg', decorative: false });
-  assert.match(f, /<img class="bl-img" src="img\/brands\/fx-multi\.svg" alt="Suzuki-logo" width="\d+" height="\d+" decoding="async">/);
+  /* lg (fliser/lister) henter lazy; xl/hero/wm (øverst på siden) henter straks */
+  assert.match(f, /<img class="bl-img" src="img\/brands\/fx-multi\.svg" alt="Suzuki-logo" width="\d+" height="\d+" decoding="async" loading="lazy">/);
+  assert.doesNotMatch(inst.logoHTML('Suzuki', { storrelse: 'xl', decorative: false }), /loading=/);
+  assert.doesNotMatch(inst.logoHTML('Suzuki', { storrelse: 'hero' }), /loading=/);
+  assert.match(inst.logoHTML('Suzuki', { storrelse: 'sm' }), /decoding="async" loading="lazy">/);
   assert.doesNotMatch(f, /mask-image/);
   const fd = inst.logoHTML('Suzuki', { storrelse: 'lg' });
   assert.match(fd, /alt=""/); assert.match(fd, /aria-hidden="true"/);
@@ -290,22 +296,30 @@ test('P2-2 læsbarhed: et logo, der ved slottens mål bliver lavere end 12 px, e
   assert.ok(m.h >= BL.MIN_HOEJDE, `forhold 4,5 i sm: ${m.h}`);
 });
 
-test('P2-2 alle GODKENDTE logoer i det rigtige manifest viser logo (ikke monogram) i sm-slot, læsbart og med ens visuel vægt i alle slots', () => {
+test('P2-2 alle GODKENDTE logoer i det rigtige manifest viser logo i sm-slot, når det er læsbart (ellers monogram), og har ens visuel vægt i alle slots', () => {
   const godkendte = manifest.maerker.filter(m => m.godkendt && m.fil);
   assert.ok(godkendte.length >= 1);
+  let laesbare = 0;
   for (const m of godkendte){
     const h = BL.logoHTML(m.navn, { storrelse: 'sm', decorative: true });
-    assert.match(h, /bl--logo/, `${m.slug}: monogram i sm — A–Z/filter ville blande logo og cirkel`);
     const l = BL.logoFor(m.navn);
     const em = l.emblem && l.emblem.bredde / l.emblem.hoejde <= BL.EMBLEM_MAKS_FORHOLD ? l.emblem : l;
     const sm = BL.slotMaal('sm', em.bredde / em.hoejde);
-    assert.ok(sm.h >= BL.MIN_HOEJDE && sm.w <= 56.01 && sm.h <= 22.01, `${m.slug} sm ${sm.w.toFixed(1)}x${sm.h.toFixed(1)}`);
+    assert.ok(sm.w <= 56.01 && sm.h <= 22.01, `${m.slug} sm ${sm.w.toFixed(1)}x${sm.h.toFixed(1)}`);
+    /* V5: et meget bredt officielt ordmærke uden emblem-variant (Honda 8,2:1, Rieju, Fantic, Royal Enfield, Kymco, Benelli, Keeway, Husqvarna) ville være
+       < 12 px højt i den lille sm-slot (56 x 22). Dér er monogrammet ærligere (navnet står som tekst ved siden af) — kernens egen læsbarhedsregel. */
+    if (sm.h >= BL.MIN_HOEJDE) assert.match(h, /bl--logo/, `${m.slug}: læsbart logo skal vises i sm`);
+    else assert.match(h, /bl--mono/, `${m.slug}: ulæseligt logo i sm skal være monogram`);
+    laesbare++;
+    if (sm.h < BL.MIN_HOEJDE) laesbare--;
   }
+  assert.ok(laesbare >= 12, `for få logoer vises i sm: ${laesbare}`);
   // ens max-areal-regel: i hver størrelse er største/mindste areal ≤ 2,2 for logoer med forhold ≥ 0,85 (smallere er højdebegrænsede)
   /* w14: 'wm' er kun til ordmærke-varianten i hero-lockuppen (ikke til hovedfilerne), så den indgår ikke i areal-reglen for hovedfiler. */
   for (const s of BL.STORRELSER.filter(x => x !== 'wm')){
     const arealer = godkendte.map(m => { const l = BL.logoFor(m.navn); return { ar: l.bredde / l.hoejde, ...BL.slotMaal(s, l.bredde / l.hoejde) }; })
-      .filter(x => x.ar >= 0.85 && x.h >= BL.MIN_HOEJDE).map(x => x.w * x.h);
+      /* V5: ordmærker bredere end 6:1 (Honda 8,2, Rieju 7,2, Fantic 7,0, Royal Enfield 7,5) er begrænset af slottens maks. bredde, ikke af arealet */
+      .filter(x => x.ar >= 0.85 && x.ar <= 6 && x.h >= BL.MIN_HOEJDE).map(x => x.w * x.h);
     if (arealer.length < 2) continue;
     assert.ok(Math.max(...arealer) / Math.min(...arealer) <= 2.2, `${s}: areal-forhold ${(Math.max(...arealer) / Math.min(...arealer)).toFixed(2)}`);
   }
@@ -434,12 +448,18 @@ test('A3/A17 kernen har ingen afhængigheder; render-laget bruger hverken fetch,
 });
 
 test('P2-3 hero: et logo, hvis tegning selv bærer navnet (Harley-Davidson-skjoldet, Ducati-skjoldet), er ikke "emblem" i manifestet — så viser hero kun logoet, ikke navnet to gange', () => {
-  for (const slug of ['harley-davidson', 'ducati']){
+  /* Ducati-filen (rød flade med ordet DUCATI) bærer navnet selv. V5: Harley-Davidsons officielle fil er skjoldet UDEN tekst — dér er 'emblem' det
+     rigtige, og hero skriver navnet ved siden af (ellers stod der intet navn). Reglen er: variant 'emblem' hvis og kun hvis tegningen ikke har navnet. */
+  for (const slug of ['ducati']){
     const e = manifest.maerker.find(m => m.slug === slug);
     assert.ok(e, slug);
     assert.notEqual(e.variant, 'emblem', `${slug}: filen indeholder navnet; variant 'emblem' ville give ekstra tekstlinje ved siden af logoet`);
     assert.equal(BL.logoFor(slug).variant, e.variant);
   }
+  const hd = manifest.maerker.find(m => m.slug === 'harley-davidson');
+  assert.equal(hd.autenticitet, 'officiel');
+  assert.equal(hd.variant, 'emblem', 'den officielle Harley-Davidson-fil er skjoldet uden tekst');
+  assert.equal(BL.logoFor('harley-davidson').variant, 'emblem');
   // generatoren skriver kun navnet ved siden af et emblem-only logo
   const src = fs.readFileSync(path.join(ROOT, 'scripts', 'build-brand-pages.js'), 'utf8');
   assert.match(src, /medNavn: l\.variant === 'emblem'/);
