@@ -149,7 +149,162 @@ const Filtrering = (() => {
      lægges sammen uden dobbelttælling. Byt om på to led, og totalen står
      stadig, men fordelingen på feltnavne skifter — og feltnavnene er
      præcis dét, begge sider skriver ud i deres forklaringslinje. */
-  const SOEGE_ALIAS = { hd: 'harleydavidson' };
+  /* ===== Mærker i søgning og filter (V4 søgning) =====
+
+     ÉN nøgle for "er det samme mærke", ÉN visning af mærkets navn og ÉT sted, der kender aliaserne. Før sammenlignede
+     filteret på små bogstaver, mærkesiderne på slug-foldningen (js/maerke.js mkNorm), og fritekstfeltet på en
+     delstreng af "mærke model" — tre definitioner af det samme spørgsmål.
+
+     Nøglen er SLUG-foldningen (scripts/slug.js, låst i js/v4-soegning-maerker.test.js): "Royal Enfield",
+     "Royal-enfield" og "royal enfield" er ét mærke, ligesom på mærkesiderne; "Ukendt", tom og null er ét "uoplyst".
+
+     Det centrale mærkeregister (V4 mærker) overtager aliaserne: Filtrering.registrerMaerker() tager
+     [{ navn, aliaser: [...] }] og lægger dem oven i grundtabellen. Indtil da står grundtabellen nedenfor, og den
+     indeholder kun skrivemåder, vi har set i lageret eller som brugere skriver dem ("cf moto", "harley", "hd"). */
+  const MAERKE_UOPLYST = 'Ukendt';          // sentinellen, js/backend-bridge.js normalizeExternalListing sætter
+  let uoplystTekst = 'Uoplyst mærke';
+  const noegleHuskeliste = new Map();   // mærkenavne er få; nøglen regnes én gang pr. stavemåde
+  function maerkeNoegle(b){
+    const raa = b == null ? '' : String(b);
+    let k = noegleHuskeliste.get(raa);
+    if (k === undefined){ k = beregnMaerkeNoegle(raa); if (noegleHuskeliste.size < 5000) noegleHuskeliste.set(raa, k); }
+    return k;
+  }
+  function beregnMaerkeNoegle(raa){
+    const n = raa.normalize('NFC').toLowerCase()
+      .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
+      .replace(/ß/g, 'ss').replace(/ł/g, 'l').replace(/þ/g, 'th').replace(/œ/g, 'oe').replace(/ı/g, 'i')
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '');
+    return (n === '' || n === 'ukendt' || n === 'null' || n === 'undefined') ? 'ukendt' : n;
+  }
+  function erUoplystMaerke(b){ return maerkeNoegle(b) === 'ukendt'; }
+  /* Det brugeren ser. "Ukendt" er en intern sentinel og skal aldrig stå som mærkenavn i et filter. */
+  function maerkeVisning(b){ return erUoplystMaerke(b) ? uoplystTekst : String(b).trim(); }
+  function saetUoplystMaerkeTekst(t){ if (t) uoplystTekst = String(t); }
+
+  const MAERKE_ALIASER = {
+    'Harley-Davidson': ['harley', 'hd', 'harleydavidson', 'hdavidson'],
+    'CFMoto': ['cfmoto'],
+    'Moto Guzzi': ['guzzi', 'motoguzzi'],
+    'MV Agusta': ['mv', 'mvagusta', 'agusta'],
+    'Royal Enfield': ['enfield', 'royalenfield'],
+    'FB Mondial': ['mondial', 'fbmondial'],
+    'Lauge Jensen': ['lauge', 'laugejensen'],
+    'BMW': ['bmwmotorrad'],
+    'Triumph': ['triumphmotorcycles'],
+    'Indian': ['indianmotorcycle', 'indianmotorcycles'],
+    'Yamaha': ['yamahamotor'],
+  };
+  const aliasNoegle = new Map();   // aliasnøgle -> mærkenøgle
+  function tilfoejAlias(navn, aliaser){
+    const k = maerkeNoegle(navn);
+    if (k === 'ukendt') return;
+    aliasNoegle.set(k, k);
+    (aliaser || []).forEach(a => { const ak = maerkeNoegle(a); if (ak !== 'ukendt') aliasNoegle.set(ak, k); });
+  }
+  Object.keys(MAERKE_ALIASER).forEach(n => tilfoejAlias(n, MAERKE_ALIASER[n]));
+  let aliasVersion = 0;   // hæves, når registeret ændrer aliaserne, så en gemt mærkenøgleliste kasseres
+  function registrerMaerker(liste){ (liste || []).forEach(m => tilfoejAlias(m.navn, m.aliaser)); aliasVersion++; }
+  /* Mærkeregisteret (img/brands/manifest.json -> js/brand-logos-data.js, generet af scripts/brand-logos-gen.js) er den fælles
+     kilde til mærkenavne og aliaser ("bmw motorrad", "triumph motorcycles", "ktm ag", "sanyang" …). Det læses første gang, en
+     fritekst skal tolkes — på en side, der har loadet filen (browser: global BrandLogosData; Node/tests: require). Findes den
+     ikke, gælder grundtabellen ovenfor alene. Når Agent 1's udvidede register er mergeet, ændres kun denne ene funktion. */
+  let registerIndlaest = false;
+  function indlaesRegister(){
+    if (registerIndlaest) return;
+    let d = null;
+    try {
+      if (typeof BrandLogosData !== 'undefined') d = BrandLogosData;
+      else if (typeof require === 'function') d = require('./brand-logos-data.js');
+    } catch (e) { d = null; }
+    if (!d || !Array.isArray(d.m)) { if (typeof BrandLogosData !== 'undefined' || typeof require === 'function') registerIndlaest = true; return; }
+    registerIndlaest = true;
+    registrerMaerker(d.m.map(x => ({ navn: x.n, aliaser: x.a })));
+  }
+
+  /* Et mærke pr. nøgle, i den stavemåde lageret oftest bruger (ved lighed: alfabetisk, så rækkefølgen er
+     ligegyldig). Uoplyste samles under sentinellen. Sorteret: flest annoncer først, "uoplyst" altid sidst. */
+  function maerkeListe(alle, ekstra){
+    const grupper = new Map();
+    const tael = (b, n) => {
+      const k = maerkeNoegle(b);
+      const navn = k === 'ukendt' ? MAERKE_UOPLYST : String(b).trim();
+      if (!grupper.has(k)) grupper.set(k, { noegle: k, stavemaader: new Map(), antal: 0 });
+      const g = grupper.get(k);
+      g.stavemaader.set(navn, (g.stavemaader.get(navn) || 0) + n);
+      g.antal += n;
+    };
+    for (const l of alle || []) tael(l.brand, 1);
+    (ekstra || []).forEach(b => { if (!grupper.has(maerkeNoegle(b))) tael(b, 0); });   // valgt via URL, ikke i lageret
+    return [...grupper.values()].map(g => {
+      const navn = [...g.stavemaader.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0][0];
+      return { navn, noegle: g.noegle, visning: maerkeVisning(navn), antal: g.antal, uoplyst: g.noegle === 'ukendt' };
+    }).sort((a, b) => (a.uoplyst - b.uoplyst) || (b.antal - a.antal) || a.visning.localeCompare(b.visning, 'da'));
+  }
+
+  /* Modellerne under de valgte mærker, fra LAGERET (ikke fra BRANDS_BY_MODEL: kataloget kendte 7 af Hondas 100
+     modeller, så modelfilteret kunne ikke finde GL 1800 Gold Wing (25) eller CMX 500 Rebel (18)). Tomme modeller er ikke
+     en model. Én række pr. model (små bogstaver, som filteret selv sammenligner); første stavemåde vinder. */
+  function modelListe(alle, maerker){
+    const nogler = new Set((maerker || []).map(maerkeNoegle));
+    const grupper = new Map();
+    for (const l of alle || []){
+      if (nogler.size && !nogler.has(maerkeNoegle(l.brand))) continue;
+      const m = l.model == null ? '' : String(l.model).trim();
+      if (!m) continue;
+      const k = modelNoegle(m);
+      if (!grupper.has(k)) grupper.set(k, { noegle: k, stavemaader: new Map(), antal: 0 });
+      const g = grupper.get(k);
+      g.stavemaader.set(m, (g.stavemaader.get(m) || 0) + 1);
+      g.antal++;
+    }
+    return [...grupper.values()].map(g => ({
+      navn: [...g.stavemaader.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0][0], noegle: g.noegle, antal: g.antal,
+    })).sort((a, b) => a.navn.localeCompare(b.navn, 'da'));
+  }
+  /* Samme model, forskellig stavemåde ("CB 650 R" / "CB650R" / "cb 650 r"): samme nøgle som harmoniserStavning() i
+     js/backend-bridge.js (små bogstaver, uden mellemrum og bindestreg; punktum bevares kun mellem to cifre). Annoncer,
+     brugerne selv har oprettet, løber ikke gennem den, så filteret må kunne samme sammenligning. */
+  function modelNoegle(m){
+    return String(m == null ? '' : m).toLowerCase().replace(/[\s\-]+/g, '').replace(/(?<!\d)\.|\.(?!\d)/g, '');
+  }
+
+  /* Fritekst: ord, der er et helt mærkenavn eller et alias (også over flere ord: "cf moto", "royal enfield", "h d"),
+     bliver til et mærkekrav; resten er delstrengs-ord i mærke+model som før. "harley sportster" = mærke Harley-Davidson
+     OG "sportster" i modellen; "honda yamaha" = Honda ELLER Yamaha. Et ord, der ikke er et helt mærke ("harl", "mot"),
+     falder tilbage til delstrengen. Kendte mærker = aliastabellen + lagerets egne. */
+  const kendteMaerkerCache = new WeakMap();
+  function kendteMaerkenoegler(alle){
+    if (!alle || typeof alle !== 'object') return aliasNoegle;
+    let m = kendteMaerkerCache.get(alle);
+    if (m && m.n === alle.length && m.v === aliasVersion) return m.map;
+    const map = new Map(aliasNoegle);
+    for (const l of alle){ const k = maerkeNoegle(l.brand); if (k !== 'ukendt') map.set(k, k); }
+    kendteMaerkerCache.set(alle, { n: alle.length, v: aliasVersion, map });
+    return map;
+  }
+  function soegeForespoergsel(q, alle){
+    const raa = String(q || '').trim().split(/\s+/).filter(Boolean);
+    if (!raa.length) return { maerker: new Set(), ord: [] };
+    indlaesRegister();
+    const kendte = kendteMaerkenoegler(alle);
+    const maerker = new Set(), ord = [];
+    for (let i = 0; i < raa.length;){
+      let brugt = 0;
+      for (const n of [3, 2, 1]){
+        if (i + n > raa.length) continue;
+        const k = maerkeNoegle(raa.slice(i, i + n).join(''));
+        if (k !== 'ukendt' && kendte.has(k)){ maerker.add(kendte.get(k)); brugt = n; break; }
+      }
+      if (brugt){ i += brugt; continue; }
+      const o = soegeNoegle(raa[i]);
+      if (o) ord.push(o);
+      i++;
+    }
+    return { maerker, ord };
+  }
+
   /* F2-009: et typeord i søgefeltet ("cruiser", "touring", "naked") finder annoncer af den type, ikke kun
      dem, hvor ordet tilfældigvis står i modelnavnet. Hele ordet skal være typeordet (efter normalisering);
      typen læses af annoncens type-id — samme felt som Type-filteret bruger. */
@@ -160,9 +315,6 @@ const Filtrering = (() => {
   function soegeNoegle(s){
     return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9æøå]+/g, '');
   }
-  function soegeOrd(q){
-    return String(q || '').trim().split(/\s+/).map(soegeNoegle).filter(Boolean).map(o => SOEGE_ALIAS[o] || o);
-  }
   function anvendFiltre(alle, filtre, spring, opsamler){
     const state = { ...TOMT_FILTER, ...(filtre || {}) };
     let list = alle;
@@ -172,24 +324,30 @@ const Filtrering = (() => {
     // selv om annoncen staar som "Gold Wing", "CB 500", "MT-09", "Harley-Davidson", "Ténéré".
     // Begge sider normaliseres (smaa bogstaver, uden accenter, uden mellemrum/tegn); hvert ord
     // i soegningen skal findes i mærke+model (OG).
-    const ord = soegeOrd(state.q);
-    if (brug('q') && ord.length){
+    // V4: mærkeord og aliaser ("cf moto", "harley", "hd") bliver et mærkekrav; resten er delstrengs-ord som før.
+    const { maerker: soegeMaerker, ord } = soegeForespoergsel(state.q, alle);
+    if (brug('q') && (ord.length || soegeMaerker.size)){
       list = list.filter(l => {
-        // ?? '': et felt uden værdi må aldrig blive til ordet "null" i høstakken (F2-009).
-        const hø = soegeNoegle(`${l.brand ?? ''} ${l.model ?? ''}`);
+        const mk = maerkeNoegle(l.brand);
+        if (soegeMaerker.size && !soegeMaerker.has(mk)) return false;
+        if (!ord.length) return true;
+        // ?? '': et felt uden værdi må aldrig blive til ordet "null" i høstakken (F2-009). Sentinellen "Ukendt"
+        // er ikke et mærkenavn og må ikke kunne findes ved at skrive "ukendt".
+        const hø = soegeNoegle(`${mk === 'ukendt' ? '' : (l.brand ?? '')} ${l.model ?? ''}`);
         return ord.every(o => hø.includes(o) || (l.type != null && SOEGE_TYPEORD[o] === l.type));
       });
     }
 
     // Mærke, model og titel kender vi altid — de kommer med annoncen fra kilden.
-    // F-011: "SYM" og "Sym" er ét mærke; store/små bogstaver afgør ikke et træf.
+    // F-011: "SYM" og "Sym" er ét mærke; V4: sammenlignet på slug-nøglen, så "Royal-enfield" = "Royal Enfield" og
+    // "Ukendt"/tom er ét uoplyst mærke (samme regel som mærkesiderne, js/maerke.js).
     if (brug('brands') && state.brands.length){
-      const maerker = new Set(state.brands.map(b => String(b).toLowerCase()));
-      list = list.filter(l => maerker.has(String(l.brand).toLowerCase()));
+      const maerker = new Set(state.brands.map(maerkeNoegle));
+      list = list.filter(l => maerker.has(maerkeNoegle(l.brand)));
     }
     if (brug('models') && state.models.length){
-      const modeller = new Set(state.models.map(m => String(m).toLowerCase()));
-      list = list.filter(l => modeller.has(String(l.model).toLowerCase()));
+      const modeller = new Set(state.models.map(modelNoegle));
+      list = list.filter(l => modeller.has(modelNoegle(l.model)));
     }
 
     // Kategorifiltre: værdien er enten oplyst, eller også er den det ikke.
@@ -300,7 +458,11 @@ const Filtrering = (() => {
     return { antal, felter, feltTekst };
   }
 
-  return { UOPLYST, TOMT_FILTER, filtrerMedUoplyst, koerekortSvar, anvendFiltre, uoplystOpgoerelse };
+  return {
+    UOPLYST, TOMT_FILTER, filtrerMedUoplyst, koerekortSvar, anvendFiltre, uoplystOpgoerelse,
+    MAERKE_UOPLYST, maerkeNoegle, erUoplystMaerke, maerkeVisning, saetUoplystMaerkeTekst, registrerMaerker,
+    maerkeListe, modelListe, modelNoegle, soegeForespoergsel,
+  };
 })();
 
 /* Node-siden af huset (tests). I browseren findes `module` ikke, og linjen

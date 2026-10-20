@@ -33,6 +33,24 @@ const SORTERINGER = ['blandet', 'date-desc', 'price-asc', 'price-desc', 'year-de
 const SORT_ALIAS = { relevans: 'blandet' };
 let state = { ...EMPTY_STATE };
 
+/* V4: "samme mærke" er slug-nøglen (Filtrering.maerkeNoegle), ikke en streng-lighed. */
+const saaMaerke = (a, b) => Filtrering.maerkeNoegle(a) === Filtrering.maerkeNoegle(b);
+const harMaerke = (b) => state.brands.some(x => saaMaerke(x, b));
+const unikke = (liste) => [...new Set(liste)];
+/* Et delt link kan stave mærket og modellen anderledes end lageret ("?brands=harley-davidson", "?model=gl 1800 gold wing").
+   Valgene sættes til lagerets egen stavemåde, så afkrydsning, pille og URL siger det samme som listen — og kan fjernes. */
+function kanoniserMaerkeOgModel(){
+  if (!state.brands.length && !state.models.length) return;
+  const alle = Store.getAllListings();
+  if (!alle.length) return;
+  const kanon = new Map(Filtrering.maerkeListe(alle).map(m => [m.noegle, m.navn]));
+  state.brands = unikke(state.brands.map(b => kanon.get(Filtrering.maerkeNoegle(b)) || b));
+  if (state.models.length){
+    const mod = new Map(Filtrering.modelListe(alle, state.brands).map(m => [m.noegle, m.navn]));
+    state.models = unikke(state.models.map(m => mod.get(Filtrering.modelNoegle(m)) || m));
+  }
+}
+
 /* Feltnavne i URL'en. Listen bruges begge veje, så et nyt filter kun skal
    tilføjes ét sted for at kunne deles, bogmærkes og gemmes som søgeagent. */
 const LIST_PARAMS = {
@@ -68,6 +86,7 @@ function readStateFromURL(){
   const sort = SORT_ALIAS[p.get('sort')] || p.get('sort') || '';
   state.sort = SORTERINGER.includes(sort) ? sort : 'blandet';
   state.page = numOrNull(p.get('page')) || 1;
+  kanoniserMaerkeOgModel();
 }
 function numOrNull(v){ return (v === null || v === '' || isNaN(Number(v))) ? null : Number(v); }
 
@@ -366,27 +385,26 @@ function populateFilterUI(){
      hver række har sit eget facettal, søgefeltet står lige over den, og
      "Vis alle N mærker" folder resten ud med ét tryk. Det, der forsvandt, er
      dubletten. */
-  const iLager = new Set(alle.map(l => l.brand).filter(Boolean));
-  // Et mærke valgt via URL bliver stående, selv om det ikke er i lageret —
-  // ellers kunne pillen ikke fjernes fra det sted, den blev sat.
-  state.brands.forEach(b => iLager.add(b));
-  /* Runde 7 (D7-S3): flest annoncer foerst (Honda 262, Harley 72, …), saa de
-     seks synlige foer folden er dem, nogen leder efter — ikke Andet Maerke,
-     Aprilia, Benelli, BMW, BSA, Cagiva. Alfabetisk ved lige antal. */
-  const antalPrMaerke = new Map();
-  for (const l of alle) if (l.brand) antalPrMaerke.set(l.brand, (antalPrMaerke.get(l.brand) || 0) + 1);
-  const maerker = [...iLager].sort((a,b) => (antalPrMaerke.get(b) || 0) - (antalPrMaerke.get(a) || 0) || a.localeCompare(b,'da'));
+  /* V4: listen kommer fra Filtrering.maerkeListe(): ét mærke pr. slug-nøgle (ingen dubletter, uanset skrivemåde i
+     lageret), tallet er lageret, og de uoplyste ("Ukendt") står som "Uoplyst mærke" SIDST — sentinellen er intern og
+     skal ikke stå som et mærkenavn. Et mærke valgt via URL bliver stående, selv om det ikke er i lageret (ellers kunne
+     pillen ikke fjernes fra det sted, den blev sat). Runde 7 (D7-S3): flest annoncer foerst, saa de seks synlige foer
+     folden er dem, nogen leder efter. */
+  const maerker = Filtrering.maerkeListe(alle, state.brands);
   const brandSel = document.getElementById('so-brand');
   if (brandSel) brandSel.innerHTML = '<option value="">Alle mærker</option>' +
-    [...maerker].sort((a, b) => a.localeCompare(b, 'da')).map(b => `<option value="${escapeHTML(b)}">${escapeHTML(b)}</option>`).join('');
+    [...maerker].sort((a, b) => (a.uoplyst - b.uoplyst) || a.visning.localeCompare(b.visning, 'da'))
+      .map(m => `<option value="${escapeHTML(m.navn)}">${escapeHTML(m.visning)}</option>`).join('');
   /* W13 logo: lille mark (22 px høj, 56 px bred kolonne; emblem hvor det findes) foran navnet i en FAST kolonne — et mærke uden
      godkendt logo får monogram i samme kolonne, så venstrekanten af navnene er ens. Logoet hentes først, når rækken er synlig
      (BrandLogos-klienten): rækker, der er foldet væk, henter intet. Kun i filteret: aktive filterchips og resultatkort har intet logo
      (mockuppen: ren tekst). Navnet står som tekst ved siden af, så logoet er dekorativt. */
   const maerkeLogo = (b) => (typeof BrandLogos === 'undefined') ? ''
     : `<span class="bl-spalte bl-spalte--sm" aria-hidden="true">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true })}</span>`;
-  const brandRows = maerker.map(b =>
-    `<label class="checkbox-row" data-brand-row="${escapeHTML(b.toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(b)}">${maerkeLogo(b)}<span>${escapeHTML(b)}</span>${FACET_SLOT}</label>`).join('');
+  /* Uden godkendt logo får et mærke monogram i den faste kolonne; "uoplyst" er ikke et mærke og får en tom kolonne
+     (samme bredde, så navnene flugter). Søgestrengen rummer både det viste navn og lagernavnet. */
+  const brandRows = maerker.map(m =>
+    `<label class="checkbox-row" data-brand-row="${escapeHTML((m.visning + ' ' + m.navn).toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(m.navn)}">${m.uoplyst ? '<span class="bl-spalte bl-spalte--sm" aria-hidden="true"></span>' : maerkeLogo(m.navn)}<span>${escapeHTML(m.visning)}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `
     <div class="filter-search"><input type="text" id="brand-search" class="input" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
     <div class="checkbox-list" id="brand-list">${brandRows}
@@ -476,7 +494,7 @@ function facetTal(){
   return {
     typeAlle:   typBasis.length,
     types:      tael(typBasis,            l => l.type),
-    brands:     tael(basis('brands'),     l => l.brand),
+    brands:     tael(basis('brands'),     l => Filtrering.maerkeNoegle(l.brand)),
     regions:    tael(basis('regions'),    l => l.region),
     conditions: tael(basis('conditions'), l => l.condition),
     koerekort, pris,
@@ -511,7 +529,7 @@ function renderFacetCounts(){
   document.querySelectorAll('#filter-price-quick .chip').forEach(c =>
     saetFacet(c, f.pris.get(c.dataset.pris) || 0, erAktivtPrisinterval(c.dataset.pris)));
   document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb =>
-    saetFacet(cb.closest('.checkbox-row'), f.brands.get(cb.dataset.brand) || 0, state.brands.includes(cb.dataset.brand)));
+    saetFacet(cb.closest('.checkbox-row'), f.brands.get(Filtrering.maerkeNoegle(cb.dataset.brand)) || 0, harMaerke(cb.dataset.brand)));
   document.querySelectorAll('#filter-regions input[data-region]').forEach(cb =>
     saetFacet(cb.closest('.checkbox-row'), f.regions.get(cb.dataset.region) || 0, state.regions.includes(cb.dataset.region)));
   document.querySelectorAll('#filter-conditions input[data-condition]').forEach(cb =>
@@ -624,7 +642,10 @@ function setViewMode(mode){
 }
 
 function applyViewMode(){
-  const mode = Store.getViewMode();
+  /* Svajpe-visningen er mobil-først; knappen er skjult fra 960 px (css/p-soegning.css). En svajpe-visning gemt på telefonen
+     vises derfor som gitter på en bred skærm i stedet for en kortstak uden knap at komme ud med. */
+  const gemt = Store.getViewMode();
+  const mode = gemt === 'swipe' && window.matchMedia('(min-width:960px)').matches ? 'grid' : gemt;
   const grid = document.getElementById('results-grid');
   const deck = document.getElementById('swipe-deck');
   const swipe = mode === 'swipe';
@@ -1145,7 +1166,7 @@ function reflectFilterPanel(){
   syncRadioChips(document.querySelectorAll('#filter-price-quick .chip'),
     ch => erAktivtPrisinterval(ch.dataset.pris));
   document.querySelectorAll('#filter-brands input[data-brand]').forEach(cb => {
-    cb.checked = state.brands.includes(cb.dataset.brand);
+    cb.checked = harMaerke(cb.dataset.brand);
   });
   // Skal stå EFTER afkrydsningen: et valgt mærke må ikke være foldet væk.
   opdaterMaerkeliste();
@@ -1192,13 +1213,13 @@ function saetFlereFoldet(aaben){
   if (lbl) lbl.textContent = aaben ? 'Skjul listen over mærker og modeller' : 'Tilføj flere mærker eller modeller';
   const plus = btn.firstElementChild; if (plus) plus.textContent = aaben ? '–' : '+';
 }
-function fyldModelSelect(models){
+function fyldModelSelect(models, taeller){
   const ms = document.getElementById('so-model');
   if (!ms) return;
   const ett = state.brands.length === 1;
   ms.disabled = !ett || !models.length;
   let html = `<option value="">Alle modeller</option>`;
-  if (ett) html += models.map(m => `<option value="${escapeHTML(m)}">${escapeHTML(m)}</option>`).join('');
+  if (ett) html += models.map(m => `<option value="${escapeHTML(m)}">${escapeHTML(m)}${taeller ? ` (${taeller(m)})` : ''}</option>`).join('');
   if (state.models.length > 1) html += `<option value="__flere">${state.models.length} modeller valgt</option>`;
   ms.innerHTML = html;
   ms.value = state.models.length > 1 ? '__flere' : (state.models[0] && ett ? state.models[0] : '');
@@ -1442,7 +1463,7 @@ function activeFilterPills(){
   const pills = [];
   if (state.q) pills.push({ label: `"${state.q}"`, clear: () => state.q = '' });
   state.types.forEach(t => pills.push({ label: typeLabel(t), clear: () => state.types = state.types.filter(x=>x!==t) }));
-  state.brands.forEach(b => pills.push({ label: b, clear: () => state.brands = state.brands.filter(x=>x!==b) }));
+  state.brands.forEach(b => pills.push({ label: Filtrering.maerkeVisning(b), clear: () => state.brands = state.brands.filter(x => !saaMaerke(x, b)) }));
   state.models.forEach(m => pills.push({ label: m, clear: () => state.models = state.models.filter(x=>x!==m) }));
   if (state.priceMin != null || state.priceMax != null){
     pills.push({ label: state.priceMax == null ? `Fra ${formatPrice(state.priceMin)}` : (state.priceMin ? `${formatPrice(state.priceMin)} – ${formatPrice(state.priceMax)}` : `Maks. ${formatPrice(state.priceMax)}`), clear: () => { state.priceMin=null; state.priceMax=null; } });
@@ -1871,7 +1892,7 @@ function soegeoverskrift(state, listings){
      til salg i Danmark i Syddanmark", i både H1 og title. Uden region og med
      mærke står der ikke "i Danmark" (det gjorde der heller ikke før). */
   const region = state.regions.length === 1 ? ` i ${state.regions[0]}` : '';
-  if (state.brands.length) return `${state.brands.slice(0,3).join(', ')} til salg${region}`;
+  if (state.brands.length) return `${state.brands.slice(0,3).map(Filtrering.maerkeVisning).join(', ')} til salg${region}`;
   return `Motorcykler til salg${region || ' i Danmark'}`;
 }
 
@@ -2073,11 +2094,10 @@ function renderPagination(totalPages){
   });
 }
 
-/* Modeller der findes under de valgte mærker (union). */
+/* Modeller der findes under de valgte mærker (union) — fra LAGERET, ikke fra BRANDS_BY_MODEL. Kataloget kendte 7 af Hondas
+   100 modeller; GL 1800 Gold Wing (25 annoncer) og CMX 500 Rebel (18) kunne ikke vælges. Se Filtrering.modelListe(). */
 function availableModels(){
-  const set = new Set();
-  state.brands.forEach(b => (BRANDS_BY_MODEL[b] || []).forEach(m => set.add(m)));
-  return set;
+  return new Set(Filtrering.modelListe(Store.getAllListings(), state.brands).map(m => m.navn));
 }
 
 /* Mærke → Model-kaskade: Model-facetten vises kun når et mærke er valgt, og
@@ -2093,15 +2113,16 @@ function renderModelFilter(){
      rent faktisk giver. Modeller med nul vises ikke. */
   const basis = anvendFiltre(Store.getAllListings(), 'models', null);
   const antal = new Map();
-  for (const l of basis){ if (l.model) antal.set(l.model, (antal.get(l.model) || 0) + 1); }
+  for (const l of basis){ const k = Filtrering.modelNoegle(l.model); if (k) antal.set(k, (antal.get(k) || 0) + 1); }
+  const taeller = m => antal.get(Filtrering.modelNoegle(m)) || 0;
 
   const models = [...availableModels()]
-    .filter(m => (antal.get(m) || 0) > 0 || state.models.includes(m))
+    .filter(m => taeller(m) > 0 || state.models.includes(m))
     .sort((a, b) => a.localeCompare(b, 'da'));
   /* skjulGruppe/visGruppe og ikke `group.hidden` alene: se kommentaren over
      skjulGruppe(). Model-gruppen var en af de syv tomme overskrifter, en
      kritiker talte i panelet. */
-  fyldModelSelect(models);
+  fyldModelSelect(models, taeller);
   if (!state.brands.length || !models.length){
     skjulGruppe(group); mount.innerHTML = ''; return;
   }
@@ -2113,8 +2134,23 @@ function renderModelFilter(){
   // .checkbox-list og ikke .checkbox-scroll: samme grund som mærkelisten —
   // et rullefelt inde i arket inde i siden. Modellisten er kort (kun modeller,
   // der findes i lageret), så den kan bare flyde.
-  mount.innerHTML = `<div class="checkbox-list">${models.map(m =>
-    `<label class="checkbox-row"><input type="checkbox" data-model="${escapeHTML(m)}"${state.models.includes(m) ? ' checked' : ''}><span>${escapeHTML(m)}</span><span class="facet-n" aria-hidden="true">${antal.get(m) || 0}</span></label>`).join('')}</div>`;
+  /* Flest annoncer først (som mærkelisten); en lang liste foldes efter de otte første, og et valgt valg står altid. */
+  const efterAntal = [...models].sort((a, b) => taeller(b) - taeller(a) || a.localeCompare(b, 'da'));
+  mount.innerHTML = `<div class="checkbox-list" id="model-list">${efterAntal.map(m =>
+    `<label class="checkbox-row" data-model-row><input type="checkbox" data-model="${escapeHTML(m)}"${state.models.includes(m) ? ' checked' : ''}><span>${escapeHTML(m)}</span><span class="facet-n" aria-hidden="true">${taeller(m)}</span></label>`).join('')}</div>
+    <button type="button" class="brand-more" id="model-more" aria-controls="model-list" aria-expanded="false" hidden></button>`;
+  opdaterModelliste();
+}
+const MODELLER_FOER_UDFOLD = 8;
+let modellerUdfoldet = false;
+function opdaterModelliste(){
+  const liste = document.getElementById('model-list'), knap = document.getElementById('model-more');
+  if (!liste || !knap) return;
+  const rows = [...liste.querySelectorAll('[data-model-row]')];
+  rows.forEach((row, i) => { row.hidden = !modellerUdfoldet && i >= MODELLER_FOER_UDFOLD && !row.querySelector('input').checked; });
+  knap.hidden = rows.length <= MODELLER_FOER_UDFOLD;
+  knap.setAttribute('aria-expanded', String(modellerUdfoldet));
+  knap.textContent = modellerUdfoldet ? 'Vis færre modeller' : `Vis alle ${rows.length} modeller`;
 }
 
 /* Dobbelt-tommel skyder bygget på to native range-inputs (tilgængelige,
@@ -2259,6 +2295,12 @@ function wireFilterControls(){
   });
   const brandSearch = document.getElementById('brand-search');
   if (brandSearch) brandSearch.addEventListener('input', opdaterMaerkeliste);
+  document.getElementById('filter-models')?.addEventListener('click', (e) => {
+    const knap = e.target.closest('#model-more'); if (!knap) return;
+    modellerUdfoldet = !modellerUdfoldet;
+    opdaterModelliste();
+    document.getElementById('model-more')?.focus();
+  });
   const brandMore = document.getElementById('brand-more');
   if (brandMore) brandMore.addEventListener('click', () => {
     maerkerUdfoldet = !maerkerUdfoldet;
