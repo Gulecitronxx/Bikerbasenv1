@@ -163,6 +163,19 @@ const Filtrering = (() => {
      indeholder kun skrivemåder, vi har set i lageret eller som brugere skriver dem ("cf moto", "harley", "hd"). */
   const MAERKE_UOPLYST = 'Ukendt';          // sentinellen, js/backend-bridge.js normalizeExternalListing sætter
   let uoplystTekst = 'Uoplyst mærke';
+  /* Det centrale mærkeregister (js/brands-registry.js, V4 mærker). I browseren ligger en kopi i js/data.js (global BrandRegistry);
+     i Node (tests, generatorer) hentes filen. Findes det ikke, gælder grundtabellen nedenfor alene (ingen side går i stykker). */
+  let registerRef;
+  function register(){
+    if (registerRef !== undefined) return registerRef;
+    try {
+      if (typeof BrandRegistry !== 'undefined') registerRef = BrandRegistry;
+      else if (typeof require === 'function') registerRef = require('./brands-registry.js');
+    } catch (e) { registerRef = null; }
+    if (registerRef === undefined) return null;   // endnu ikke indlæst (script-rækkefølge): prøv igen næste gang
+    if (registerRef && registerRef.UKENDT_LABEL) uoplystTekst = registerRef.UKENDT_LABEL;
+    return registerRef;
+  }
   const noegleHuskeliste = new Map();   // mærkenavne er få; nøglen regnes én gang pr. stavemåde
   function maerkeNoegle(b){
     const raa = b == null ? '' : String(b);
@@ -171,6 +184,13 @@ const Filtrering = (() => {
     return k;
   }
   function beregnMaerkeNoegle(raa){
+    const reg = register();
+    /* Registret: CFMOTO = CFMoto = CF Moto, "Zero" = "Zero Motorcycles", "Andet mærke"/tom = uoplyst. */
+    if (reg){
+      if (reg.erUkendt(raa)) return 'ukendt';
+      const k = reg.sammenlignNoegle(raa);
+      if (k && k !== 'null' && k !== 'undefined') return k;
+    }
     const n = raa.normalize('NFC').toLowerCase()
       .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
       .replace(/ß/g, 'ss').replace(/ł/g, 'l').replace(/þ/g, 'th').replace(/œ/g, 'oe').replace(/ı/g, 'i')
@@ -180,7 +200,11 @@ const Filtrering = (() => {
   }
   function erUoplystMaerke(b){ return maerkeNoegle(b) === 'ukendt'; }
   /* Det brugeren ser. "Ukendt" er en intern sentinel og skal aldrig stå som mærkenavn i et filter. */
-  function maerkeVisning(b){ return erUoplystMaerke(b) ? uoplystTekst : String(b).trim(); }
+  function maerkeVisning(b){
+    if (erUoplystMaerke(b)) return uoplystTekst;
+    const reg = register();
+    return reg ? reg.visNavn(b) : String(b).trim();
+  }
   function saetUoplystMaerkeTekst(t){ if (t) uoplystTekst = String(t); }
 
   const MAERKE_ALIASER = {
@@ -206,21 +230,17 @@ const Filtrering = (() => {
   Object.keys(MAERKE_ALIASER).forEach(n => tilfoejAlias(n, MAERKE_ALIASER[n]));
   let aliasVersion = 0;   // hæves, når registeret ændrer aliaserne, så en gemt mærkenøgleliste kasseres
   function registrerMaerker(liste){ (liste || []).forEach(m => tilfoejAlias(m.navn, m.aliaser)); aliasVersion++; }
-  /* Mærkeregisteret (img/brands/manifest.json -> js/brand-logos-data.js, generet af scripts/brand-logos-gen.js) er den fælles
-     kilde til mærkenavne og aliaser ("bmw motorrad", "triumph motorcycles", "ktm ag", "sanyang" …). Det læses første gang, en
-     fritekst skal tolkes — på en side, der har loadet filen (browser: global BrandLogosData; Node/tests: require). Findes den
-     ikke, gælder grundtabellen ovenfor alene. Når Agent 1's udvidede register er mergeet, ændres kun denne ene funktion. */
+  /* Registret er den fælles kilde til mærkenavne og aliaser ("bmw motorrad", "triumph motorcycles", "ktm ag", "sanyang" …).
+     Det læses første gang, en fritekst skal tolkes, og lægges oven i grundtabellen (som kun rummer de få kortformer, registret
+     ikke har: "mv", "agusta", "guzzi", "enfield"). */
   let registerIndlaest = false;
   function indlaesRegister(){
     if (registerIndlaest) return;
-    let d = null;
-    try {
-      if (typeof BrandLogosData !== 'undefined') d = BrandLogosData;
-      else if (typeof require === 'function') d = require('./brand-logos-data.js');
-    } catch (e) { d = null; }
-    if (!d || !Array.isArray(d.m)) { if (typeof BrandLogosData !== 'undefined' || typeof require === 'function') registerIndlaest = true; return; }
+    const reg = register();
+    if (!reg) return;
     registerIndlaest = true;
-    registrerMaerker(d.m.map(x => ({ navn: x.n, aliaser: x.a })));
+    noegleHuskeliste.clear();
+    registrerMaerker(reg.alle().map(p => ({ navn: p.navn, aliaser: [...p.aliaser, p.slug] })));
   }
 
   /* Et mærke pr. nøgle, i den stavemåde lageret oftest bruger (ved lighed: alfabetisk, så rækkefølgen er
@@ -229,7 +249,9 @@ const Filtrering = (() => {
     const grupper = new Map();
     const tael = (b, n) => {
       const k = maerkeNoegle(b);
-      const navn = k === 'ukendt' ? MAERKE_UOPLYST : String(b).trim();
+      const reg = register();
+      const raa = String(b == null ? '' : b).trim();
+      const navn = k === 'ukendt' ? MAERKE_UOPLYST : (reg ? (reg.kanonisk(raa) || raa) : raa);   // registrets stavemåde, ellers lagerets
       if (!grupper.has(k)) grupper.set(k, { noegle: k, stavemaader: new Map(), antal: 0 });
       const g = grupper.get(k);
       g.stavemaader.set(navn, (g.stavemaader.get(navn) || 0) + n);

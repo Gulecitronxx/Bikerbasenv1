@@ -20,16 +20,22 @@ const slugs = new Set(manifest.maerker.map(m => m.slug));
 /* ---------- A1/A2: manifest ---------- */
 
 test('A1 manifestet dækker alle mærkesider, de tre udkast-mærker uden side og alle redaktionelle mærker', () => {
-  assert.equal(manifest.maerker.length, 64);
+  assert.ok(manifest.maerker.length >= 64, 'logo-manifestet mistede mærker');
   const sider = fs.readdirSync(ROOT).filter(f => /^maerke-.+\.html$/.test(f)).map(f => f.replace(/^maerke-|\.html$/g, ''));
   assert.ok(sider.length >= 29, `forventede ≥ 29 mærkesider, fandt ${sider.length}`);
   for (const s of sider) assert.ok(slugs.has(s), `mærkeside ${s} mangler i manifestet`);
   for (const s of ['gasgas', 'zero', 'piaggio']) assert.ok(slugs.has(s), s);
-  const data = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
-  const blok = data.slice(data.indexOf('const BRANDS_BY_MODEL'), data.indexOf('const TYPE_BY_MODEL_HINT'));
-  const noegler = [...blok.matchAll(/^ {2}'?([^':\n]+?)'?: \[/gm)].map(m => m[1]);
-  assert.ok(noegler.length >= 60, `fandt kun ${noegler.length} mærker i BRANDS_BY_MODEL`);
-  for (const n of noegler) assert.ok(slugs.has(BL.normaliser(n)), `${n} -> ${BL.normaliser(n)} er ikke i manifestet`);
+  /* V4: de redaktionelle mærker er nu mærkeregistret (js/brands-registry.js). Mærker med en logo-post i manifestet peger på samme slug
+     (BrandRegistry.logoNoegle); et mærke UDEN post (nye V4-mærker) skal stadig give et fuldt fallback (monogram) — aldrig et manglende mærke. */
+  const REG = require('../js/brands-registry.js');
+  assert.ok(REG.alle().length >= 60, 'registret mistede mærker');
+  for (const p of REG.alle()){
+    const l = BL.logoFor(p.navn);
+    assert.ok(l.slug, `${p.navn}: ingen logo-nøgle`);
+    assert.ok(l.monogram && l.monogram.length >= 1, `${p.navn}: intet monogram`);
+    if (slugs.has(l.slug)) assert.equal(l.slug, p.logo || p.slug, `${p.navn}: registrets logo-nøgle ${p.logo || p.slug} ≠ manifestets ${l.slug}`);
+    else assert.equal(l.harLogo, false, `${p.navn}: logo uden manifest-post`);
+  }
 });
 
 test('A2 det RIGTIGE manifest er konsistent: godkendt -> fil findes, hash stemmer, < 6 KB, godkendt_af/dato; ingen rasterfiler', () => {

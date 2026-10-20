@@ -159,7 +159,8 @@ test('fritekst: delstreng af mærke virker stadig ("harl", "royal"), og modelord
 test('fritekst: sentinellen "ukendt" er ikke et mærkenavn og kan ikke findes; modelnavnet i en uoplyst annonce kan', () => {
   assert.deepEqual(find('ukendt'), []);
   assert.equal(find('dkw').length, 1);
-  assert.equal(F.maerkeNoegle(find('dkw')[0].brand), 'ukendt');
+  assert.equal(F.maerkeNoegle(find('dkw')[0].brand), 'dkw', 'DKW er et registreret mærke (V4 register), ikke uoplyst');
+  assert.ok(find('moto købes').length >= 1 && F.erUoplystMaerke(find('moto købes')[0].brand), 'modelnavnet i en uoplyst annonce kan findes');
   assert.equal(find('zzzz').length, 0);
   assert.equal(find('   ').length, LAGER.length);
 });
@@ -274,4 +275,19 @@ test('register: kernealiasserne virker stadig (cf moto/CFMOTO, harley/hd, zero, 
   assert.deepEqual(n('zero'), ['Zero Motorcycles']); assert.deepEqual(n('Zero Motorcycles'), ['Zero Motorcycles']);
   assert.deepEqual(n('mv agusta'), ['MV Agusta']);
   assert.deepEqual(n('harl'), ['Harley-Davidson']); assert.deepEqual(n('brutale'), ['MV Agusta']); assert.deepEqual(n('cb500'), ['Honda']);
+});
+
+/* ---------------------------------------------------------------- registret (V4 mærker) bag filter og mærkeliste */
+test('registret: Zero/Zero Motorcycles og CFMOTO/CFMoto er ét mærke i listen, filteret og visningen; uoplyst hedder registrets label', () => {
+  const R = require(path.join(REPO, 'js', 'brands-registry.js'));
+  const l = [{ brand: 'Zero Motorcycles', model: 'SR/F' }, { brand: 'Zero', model: 'DSR' }, { brand: 'CFMOTO', model: 'MTX800' },
+    { brand: 'CFMoto', model: '800 MT' }, { brand: 'Andet Mærke', model: 'X' }, { brand: 'Ukendt', model: 'Y' }];
+  const liste = FM.maerkeListe(l);
+  assert.deepEqual(liste.map(m => [m.navn, m.antal]), [['CFMoto', 2], ['Zero', 2], ['Ukendt', 2]].sort((a, b) => b[1] - a[1] || (a[0] === 'Ukendt') - (b[0] === 'Ukendt')));
+  assert.equal(FM.anvendFiltre(l, { brands: ['Zero'] }).length, 2);
+  assert.equal(FM.anvendFiltre(l, { brands: ['zero motorcycles'] }).length, 2);
+  assert.equal(FM.anvendFiltre(l, { brands: ['Ukendt'] }).length, 2);
+  assert.equal(FM.maerkeVisning('Ukendt'), R.UKENDT_LABEL);
+  assert.equal(FM.maerkeVisning('Zero Motorcycles'), 'Zero');
+  assert.equal(FM.anvendFiltre(l, { q: 'zero motorcycles' }).length, 2);
 });

@@ -101,18 +101,18 @@ function lavBro({ sdk, eksterneFejler = false, egneFejler = false }){
   /* regionFraPostnr og isUuid bor i js/data.js; vi låner dem DERFRA i stedet
      for at digte dem, så testen bruger den rigtige postnummertabel. */
   // (w3-data: broen bruger nu også saniterTal, kildeNyStatus, erEfterspoergsel og BRANDS_BY_MODEL fra js/data.js.)
-  const hjaelp = new Function(dataSrc + '\nreturn { regionFraPostnr, isUuid, saniterTal, kildeNyStatus, erEfterspoergsel, BRANDS_BY_MODEL };')();
+  const hjaelp = new Function(dataSrc + '\nreturn { regionFraPostnr, isUuid, saniterTal, kildeNyStatus, erEfterspoergsel, BRANDS_BY_MODEL, BrandRegistry };')();
 
   const api = new Function(
     'window', 'document', 'db', 'Store', 'fetch', 'localStorage', 'location',
-    'SUPABASE_CONFIG', 'isSupabaseConfigured', 'regionFraPostnr', 'isUuid', 'saniterTal', 'kildeNyStatus', 'erEfterspoergsel', 'BRANDS_BY_MODEL', 'console',
+    'SUPABASE_CONFIG', 'isSupabaseConfigured', 'regionFraPostnr', 'isUuid', 'saniterTal', 'kildeNyStatus', 'erEfterspoergsel', 'BRANDS_BY_MODEL', 'BrandRegistry', 'console',
     broSrc + '\nreturn { backendReady, loadExternalListings, loadRemoteListings };'
   )(
     window, document, db, Store, fetchStub,
     { setItem(){}, getItem: () => null },
     { pathname: '/soegning.html', search: '' },
     { url: 'https://x.supabase.co', anonKey: 'noegle' },
-    () => true, hjaelp.regionFraPostnr, hjaelp.isUuid, hjaelp.saniterTal, hjaelp.kildeNyStatus, hjaelp.erEfterspoergsel, hjaelp.BRANDS_BY_MODEL,
+    () => true, hjaelp.regionFraPostnr, hjaelp.isUuid, hjaelp.saniterTal, hjaelp.kildeNyStatus, hjaelp.erEfterspoergsel, hjaelp.BRANDS_BY_MODEL, hjaelp.BrandRegistry,
     { warn(){}, log(){}, error(){} },
   );
   return { ...api, window, main, kaldte };

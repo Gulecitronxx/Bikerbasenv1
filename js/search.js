@@ -71,6 +71,9 @@ function readStateFromURL(){
   for (const [key, param] of Object.entries(LIST_PARAMS)){
     state[key] = (p.get(param) || '').split(',').filter(Boolean);
   }
+  /* V4: mærker i URL'en kanoniseres mod registret (?brands=CFMOTO, ?brands=harley, ?brands=Zero%20Motorcycles), så et delt link
+     rammer det samme mærke som filteret og aldrig står som to pille-mærker. Ukendte navne bevares (pillen skal kunne fjernes). */
+  if (typeof BrandRegistry !== 'undefined') state.brands = [...new Set(state.brands.map(b => BrandRegistry.kanonisk(b)))];
   // Forsiden og kategorilinkene sender ?type=sport i ental.
   if (p.get('type')) state.types = p.get('type').split(',').filter(Boolean);
   // Ukendte typer (?type=xyz) giver ellers en fantom-pille og 0 resultater.
@@ -401,10 +404,12 @@ function populateFilterUI(){
      (mockuppen: ren tekst). Navnet står som tekst ved siden af, så logoet er dekorativt. */
   const maerkeLogo = (b) => (typeof BrandLogos === 'undefined') ? ''
     : `<span class="bl-spalte bl-spalte--sm" aria-hidden="true">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true })}</span>`;
+  /* Søgefeltet "Søg mærke…" finder også på registrets aliaser ("harley", "cf moto", "bmw motorrad"). */
+  const aliasTekst = b => ((BrandRegistry.find(b) || {}).aliaser || []).join(' ').toLowerCase();
   /* Uden godkendt logo får et mærke monogram i den faste kolonne; "uoplyst" er ikke et mærke og får en tom kolonne
      (samme bredde, så navnene flugter). Søgestrengen rummer både det viste navn og lagernavnet. */
   const brandRows = maerker.map(m =>
-    `<label class="checkbox-row" data-brand-row="${escapeHTML((m.visning + ' ' + m.navn).toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(m.navn)}">${m.uoplyst ? '<span class="bl-spalte bl-spalte--sm" aria-hidden="true"></span>' : maerkeLogo(m.navn)}<span>${escapeHTML(m.visning)}</span>${FACET_SLOT}</label>`).join('');
+    `<label class="checkbox-row" data-brand-row="${escapeHTML((m.visning + ' ' + m.navn).toLowerCase())}" data-brand-alias="${escapeHTML(aliasTekst(m.navn))}"><input type="checkbox" data-brand="${escapeHTML(m.navn)}">${m.uoplyst ? '<span class="bl-spalte bl-spalte--sm" aria-hidden="true"></span>' : maerkeLogo(m.navn)}<span>${escapeHTML(m.visning)}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `
     <div class="filter-search"><input type="text" id="brand-search" class="input" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
     <div class="checkbox-list" id="brand-list">${brandRows}
@@ -567,7 +572,7 @@ function opdaterMaerkeliste(){
 
   let matchende = 0, vist = 0;
   liste.querySelectorAll('[data-brand-row]').forEach(row => {
-    if (!row.dataset.brandRow.includes(q)){ row.hidden = true; return; }
+    if (!(row.dataset.brandRow + ' ' + (row.dataset.brandAlias || '')).includes(q)){ row.hidden = true; return; }
     matchende++;
     const valgt = row.querySelector('input')?.checked;
     const overGraensen = !q && !maerkerUdfoldet && !valgt && matchende > MAERKER_FOER_UDFOLD;
