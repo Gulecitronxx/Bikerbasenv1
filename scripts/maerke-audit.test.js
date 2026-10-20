@@ -13,7 +13,7 @@ const t = (navn, fn) => { fn(); n++; console.log('ok -', navn); };
 t('maerkerUdenLager folder aliaser: "Zero Motorcycles" og "Zero" er ét mærke', () => {
   assert.deepEqual(maerkerUdenLager(['Zero Motorcycles', 'Vespa'], ['Zero']), ['Vespa']);
   assert.deepEqual(maerkerUdenLager(['CFMOTO'], ['CFMoto']), []);
-  assert.deepEqual(maerkerUdenLager(['Zero Motorcycles', 'Zero'], []), ['Zero Motorcycles']);
+  assert.deepEqual(maerkerUdenLager(['Zero Motorcycles', 'Zero'], []), ['Zero']);
 });
 
 const sider = fs.readdirSync(ROOT).filter(f => /^maerke-.+\.html$/.test(f));

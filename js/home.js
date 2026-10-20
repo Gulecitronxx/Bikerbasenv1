@@ -280,7 +280,7 @@ async function buildForside(){
     const set = new Map();
     for (const l of ALLE){
       const b = String(l.brand || '').trim();
-      if (!b || b === 'Ukendt') continue;
+      if (!b || BrandRegistry.erUkendt(b)) continue;
       set.set(b.toLowerCase(), b);
       if (harModel(l)){ const bm = `${b} ${String(l.model).trim()}`; set.set(bm.toLowerCase(), bm); }
     }
@@ -350,8 +350,8 @@ async function buildForside(){
     const pr = new Map();
     for (const l of ALLE){
       const b = String(l.brand || '').trim();
-      if (!b || b === 'Ukendt') continue;
-      const s = slugify(b); if (!s) continue;
+      if (!b || BrandRegistry.erUkendt(b)) continue;
+      const s = BrandRegistry.slug(b) || slugify(b); if (!s) continue;
       let e = pr.get(s); if (!e){ e = { slug: s, n: 0, navne: new Map() }; pr.set(s, e); }
       e.n++; e.navne.set(b, (e.navne.get(b) || 0) + 1);
     }

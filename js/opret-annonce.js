@@ -319,7 +319,7 @@ function populateStaticFields(){
   document.getElementById('type-radio-group').addEventListener('change', clearTypeError);
 
   const brandSelect = document.getElementById('f-brand');
-  brandSelect.innerHTML = `<option value="">Vælg mærke</option>` + Object.keys(BRANDS_BY_MODEL).sort().map(b => `<option value="${b}">${b}</option>`).join('');
+  brandSelect.innerHTML = `<option value="">Vælg mærke</option>` + BrandRegistry.valgbare().map(b => `<option value="${b}">${b}</option>`).join('');   // V4: ALLE registrerede mærker kan vælges, også dem uden annoncer
   brandSelect.addEventListener('change', () => {
     const models = BRANDS_BY_MODEL[brandSelect.value] || [];
     document.getElementById('model-suggestions').innerHTML = models.map(m => `<option value="${m}">`).join('');
