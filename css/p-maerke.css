@@ -855,7 +855,13 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 
 /* V3: "Flere mærker" — kendte mærker uden annoncer lige nu. Tekst, ikke links (ingen tynde sider, intet link uden noget for enden). */
 .mk-flere{ list-style:none; margin:var(--space-3) 0 var(--space-3); padding:0; display:flex; flex-wrap:wrap; gap:8px; }
-.mk-flere li{ padding:6px 12px; border:1px solid var(--color-border); border-radius:999px; background:var(--color-surface); color:var(--color-fg-muted); font-size:14px; line-height:1.3; }
+/* V5: de er IKKE knapper. Før lignede de runde knapper med ramme, men kunne ikke trykkes. Nu er de ren tekst med en tom prik ("ingen
+   annoncer"): ingen ramme, ingen baggrund, ingen hover, ingen pegefinger. Rigtige links (mærker, der har fået annoncer siden byg) har
+   deres egen pille-stil nedenfor (.mk-flere-links). */
+.mk-flere{ gap:6px 20px; }
+.mk-flere li{ display:inline-flex; align-items:center; gap:8px; padding:2px 0; border:0; border-radius:0; background:none; color:var(--color-fg-muted); font-size:14px; line-height:1.3; cursor:default; user-select:text; }
+.mk-flere li::before{ content:""; flex:none; width:7px; height:7px; border-radius:50%; border:1.5px solid currentColor; opacity:.55; }
+.mk-flere[hidden], .mk-flere li[hidden]{ display:none; }
 .mk-flere-note{ margin:0 0 var(--space-3); font-size:14px; color:var(--color-fg-muted); max-width:70ch; }
 
 /* V3: styles.css' `main ul:not([class]) > li > a:only-child{display:inline-block}` har højere specificitet end .mk-az-gruppe a og slog
@@ -961,7 +967,7 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 }
 .mk-az-logo .bl-mono{ font-size: calc(var(--bl-maxh) * .52); }
 /* V4-M5 "Flere mærker": historiske mærker er afdæmpet (stiplet kant) i forhold til aktuelle, så grupperne kan skelnes uden farve alene. */
-.mk-flere-hist li{ border-style:dashed; background:transparent; }
+.mk-flere-hist li{ font-style:italic; }
 .mk-flere-sektion .mk-flere{ margin-bottom: var(--space-2); }
 /* V4-M6 Smalle skærme: en ulige sidste typeflise fylder rækken (før: enlig flise med et hul ved siden af); modelfliserne står tre og tre
    mellem 560 og 1099 px (før: 5 + 1 enlig). */
@@ -972,3 +978,15 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 @media (min-width:560px) and (max-width:1099px){
   .mk-col .mk-mini:not(.mk-mini-reg):not(.mk-mini-kk){ grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
+
+/* ============ V5 mærker: "Flere mærker" er tekst; nye mærker med annoncer er links; hurtigsøgningen finder begge ============ */
+.mk-flere-nye{ margin:var(--space-3) 0; }
+.mk-flere-nye[hidden]{ display:none; }
+.mk-flere-links{ gap:8px; }
+.mk-flere-links li{ padding:0; cursor:auto; font-style:normal; }
+.mk-flere-links li::before{ display:none; }
+.mk-flere-links li a{ display:inline-flex; align-items:center; min-height:36px; padding:6px 14px; border:1px solid var(--color-primary); border-radius:999px; color:var(--color-primary); font-weight:600; text-decoration:none; }
+.mk-flere-links li a:hover{ background:var(--color-primary); color:var(--color-on-primary); }
+.mk-flere-links li a:focus-visible{ outline:2px solid var(--color-primary); outline-offset:2px; }
+.mk-hurtigsoeg-status a{ font-weight:600; }
+@media (prefers-reduced-motion:no-preference){ .mk-flere-links li a{ transition:background-color .15s, color .15s; } }

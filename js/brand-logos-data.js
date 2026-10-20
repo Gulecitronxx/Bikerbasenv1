@@ -99,7 +99,19 @@
     {"s":"hercules","n":"Hercules","a":[],"m":"H","v":"ordmaerke","f":"ordmaerke"},
     {"s":"nsu","n":"NSU","a":[],"m":"N","v":"ordmaerke","f":"ordmaerke"},
     {"s":"horex","n":"Horex","a":[],"m":"H","v":"ordmaerke","f":"ordmaerke"},
-    {"s":"morbidelli","n":"Morbidelli","a":[],"m":"M","v":"ordmaerke","f":"ordmaerke"}
+    {"s":"morbidelli","n":"Morbidelli","a":[],"m":"M","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"malaguti","n":"Malaguti","a":[],"m":"M","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"boss-hoss","n":"Boss Hoss","a":["boss hoss cycles"],"m":"BH","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"polaris-slingshot","n":"Polaris Slingshot","a":["slingshot","polaris"],"m":"PS","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"niu","n":"NIU","a":["niu technologies"],"m":"N","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"segway","n":"Segway","a":["segway ninebot","ninebot"],"m":"S","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"lifan","n":"Lifan","a":[],"m":"L","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"horwin","n":"Horwin","a":[],"m":"H","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"silence","n":"Silence","a":[],"m":"S","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"stark-future","n":"Stark Future","a":["stark","stark varg","varg"],"m":"SF","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"cake","n":"Cake","a":[],"m":"C","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"aermacchi","n":"Aermacchi","a":[],"m":"A","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"cz","n":"CZ","a":["cz motorcycles"],"m":"C","v":"ordmaerke","f":"ordmaerke"}
   ]
   };
 });

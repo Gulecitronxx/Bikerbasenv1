@@ -35,7 +35,7 @@ t('hvert mærke med side står i A–Z med samme tal som sidens eget [data-mk-n]
 
 t('"Flere mærker" nævner ingen mærker, der har en side (ingen dubletter via alias)', () => {
   const blok = (oversigt.match(/<ul class="mk-flere"[^>]*>([\s\S]*?)<\/ul>/) || [])[1] || '';
-  const navne = [...blok.matchAll(/<li>([^<]+)<\/li>/g)].map(x => x[1].replace(/&amp;/g, '&'));
+  const navne = [...blok.matchAll(/<li\b[^>]*>([^<]+)<\/li>/g)].map(x => x[1].replace(/&amp;/g, '&'));
   assert.ok(navne.length >= 20, 'sektionen er tom');
   const harSide = new Set(sider.map(f => f.replace(/^maerke-|\.html$/g, '')));
   for (const nv of navne){

@@ -16,7 +16,7 @@ const ROOT = path.join(__dirname, '..');
 const R = require('../js/brands-registry.js');
 const { slugify } = require('./slug');
 const BrandLogos = require('../js/brand-logos.js');
-const { udtraek, indsaet } = require('./maerke-register-gen.js');
+const { udtraek, indsaet, browserTekst } = require('./maerke-register-gen.js');
 const { analyser, snapshotRaekker, SNAPSHOT } = require('./maerke-kandidater.js');
 const { browserModules } = require('./shared.js');
 
@@ -130,7 +130,7 @@ test('fraTekst læser kun et registreret mærke FØR mindst ét ord mere (ingen 
 /* ---------- 3. Alle forbrugere bruger registret ---------- */
 
 test('data.js bærer registret (ingen ekstra <script>) og kopien er i trit med js/brands-registry.js', () => {
-  assert.equal(indsaet(DATA_SRC, udtraek(laes('js/brands-registry.js'))), DATA_SRC, 'kør: node scripts/maerke-register-gen.js');
+  assert.equal(indsaet(DATA_SRC, browserTekst(laes('js/brands-registry.js'))), DATA_SRC, 'kør: node scripts/maerke-register-gen.js');
   const D = DATA.BrandRegistry;
   assert.equal(D.MAERKER_ANTAL, R.MAERKER_ANTAL);
   assert.deepEqual(D.dubletter, []);
@@ -199,7 +199,9 @@ test('mærkeoversigten (generatoren): "Flere mærker" dækker ALLE registrerede 
   assert.equal(opg.iLager.length, 3);
   assert.equal(opg.uoplyst, 1);
   const alleNavne = new Set([...opg.iLager.map(x => x.navn), ...opg.udenAnnoncer.aktuelle, ...opg.udenAnnoncer.historiske]);
-  assert.equal(alleNavne.size, R.alle().length, 'et registreret mærke er hverken i lager eller på listen "uden annoncer"');
+  /* V5: mærker uden selvstændigt belæg (offentlig:false) nævnes ikke offentligt; alle andre er enten i lageret eller på listen. */
+  assert.equal(alleNavne.size, R.alle().filter(p => p.offentlig).length, 'et offentligt registreret mærke er hverken i lager eller på listen "uden annoncer"');
+  for (const n of ['Daelim', 'Super Soco', 'TM Racing']) assert.ok(!alleNavne.has(n), n + ' må ikke stå offentligt før ejeren har bekræftet det');
   assert.ok(opg.udenAnnoncer.historiske.includes('Buell'));
   assert.ok(!opg.udenAnnoncer.historiske.includes('DKW'), 'DKW har en annonce');
   assert.ok(opg.udenAnnoncer.aktuelle.includes('Vespa'));

@@ -77,7 +77,8 @@ test('A3 data-filen er genereret af manifestet (--tjek grøn) og gen er determin
   assert.equal(G.datafilTekst(manifest), G.datafilTekst(JSON.parse(JSON.stringify(manifest))));
   const fil = fs.readFileSync(G.DATA, 'utf8').replace(/\r\n/g, '\n');
   assert.equal(fil, G.datafilTekst(manifest));
-  assert.ok(Buffer.byteLength(fil) < 12 * 1024, 'klientens data skal være lille (ingen kilde/licens/hash)');
+  /* V5: 14 KB (var 12): registret fik 12 mærker mere, og hver post står her (navn, alias, monogram), også uden godkendt logo. */
+  assert.ok(Buffer.byteLength(fil) < 14 * 1024, 'klientens data skal være lille (ingen kilde/licens/hash)');
   assert.doesNotMatch(fil, /kilde|licens|hash/);
 });
 

@@ -36,6 +36,7 @@ const BrandRegistry = (function () {
   const MIN_ANNONCER_INDEKS = 5;           // under: siden findes (hvis >=1 annonce) men er noindex og uden tekstpakke
   const MIN_FOREKOMSTER_KANDIDAT = 3;      // under: et ukendt mærkenavn er blot "afventer"
 
+  // @@NODE-ONLY-START
   /* Hvorfor et mærke tæller som ægte. 'ejer' og 'eks' er IKKE selvstændigt belæg: de siger kun, hvem der har nævnt det. */
   const KILDER = {
     wp:        'https://en.wikipedia.org/wiki/List_of_motorcycle_manufacturers',
@@ -54,7 +55,13 @@ const BrandRegistry = (function () {
     motoit:    'https://www.moto.it/concessionari/hyosung',
     surron:    'https://surron.com/',
     talaria:   'https://www.talariaeu.com/',
+    silence:   'https://www.silence.eco/',
+    horwin:    'https://www.horwin.com/',
+    stark:     'https://starkfuture.com/',
+    cake:      'https://ridecake.com/',
+    slingshot: 'https://en.wikipedia.org/wiki/Polaris_Slingshot',
   };
+  // @@NODE-ONLY-END
   const IKKE_BELAEG = new Set(['ejer', 'eks']);
 
   /* [navn, land, periode, aliaser, kilder, ekstra]. Rækkefølgen er uden betydning (alle visninger sorteres). */
@@ -98,12 +105,15 @@ const BrandRegistry = (function () {
     ['Jawa', 'CZ', 'aktuel', ['jawa moto'], ['wp', 'jawayezdi', 'ejer']],
     ['Brixton', 'AT', 'aktuel', ['brixton motorcycles'], ['brixton', 'ejer']],
     ['Rewaco', 'DE', 'aktuel', [], ['rewaco', 'lager']],
+    ['Malaguti', 'IT', 'historisk', [], ['wp'], { note: 'Wikipedia-listen fører Malaguti både som i produktion og som ophørt (1930-2018); registreret som historisk.' }],
     ['Ural', 'RU', 'aktuel', ['imz-ural', 'imz ural'], ['wp', 'ejer']],
     // ---- USA/Canada ----
     ['Harley-Davidson', 'US', 'aktuel', ['harley', 'hd', 'h-d', 'harley davidson', 'harley-davidson motor company'], ['wp', 'lager', 'ejer']],
     ['Indian', 'US', 'aktuel', ['indian motorcycle', 'indian motorcycles'], ['wp', 'lager', 'ejer']],
     ['Zero', 'US', 'aktuel', ['zero motorcycles', 'zero motorcycle'], ['wp', 'ejer'], { logo: 'zero', note: 'Officielt Zero Motorcycles; kort navn bruges overalt.' }],
     ['Can-Am', 'CA', 'aktuel', ['can am', 'canam', 'brp can-am'], ['wp', 'ejer']],
+    ['Boss Hoss', 'US', 'aktuel', ['boss hoss cycles'], ['wp'], { note: 'V8-motorcykler og trikes.' }],
+    ['Polaris Slingshot', 'US', 'aktuel', ['slingshot', 'polaris'], ['slingshot'], { note: 'Trehjulet køretøj fra Polaris (siden 2014); registreres som mærke, fordi annoncer skriver det som mærke.' }],
     ['Buell', 'US', 'historisk', [], ['wp', 'lager', 'ejer'], { note: 'Buell Motorcycle Company 1983-2009; Erik Buell Racing til 2015.' }],
     ['Victory', 'US', 'historisk', ['victory motorcycles'], ['wp', 'lager', 'ejer'], { note: 'Polaris stoppede Victory i 2017; brugte maskiner handles stadig.' }],
     // ---- Britiske ----
@@ -135,6 +145,14 @@ const BrandRegistry = (function () {
     ['Hero MotoCorp', 'IN', 'aktuel', ['hero', 'hero moto corp'], ['wp', 'eks'], { logo: 'hero-motocorp' }],
     ['Sur-Ron', 'CN', 'aktuel', ['surron', 'sur ron'], ['wp', 'surron']],
     ['Talaria', 'CN', 'aktuel', [], ['talaria', 'eks']],
+    // ---- V5: mærker, V4-Critic nævnte som manglende. Hvert har mindst ét belæg (se KILDER); land er kun informativt. ----
+    ['NIU', 'CN', 'aktuel', ['niu technologies'], ['wp'], { note: 'Elscootere (Niu Technologies).' }],
+    ['Segway', 'CN', 'aktuel', ['segway ninebot', 'ninebot'], ['wp'], { note: 'Segway Inc. (Ninebot); elscootere og -motorcykler.' }],
+    ['Lifan', 'CN', 'aktuel', [], ['wp']],
+    ['Horwin', 'CN', 'aktuel', [], ['horwin'], { note: 'Producentsiden bekræfter elscootere og -motorcykler; siden er kinesisk-sproget (cn.horwin.com), landet står ikke på siden.' }],
+    ['Silence', 'ES', 'aktuel', [], ['silence'], { note: 'Producentsiden (silence.eco) bekræfter kun et elektrisk-køretøjsmærke; landet (Spanien) og modellerne (S01) står ikke på siden og er ikke belagt her.' }],
+    ['Stark Future', 'ES', 'aktuel', ['stark', 'stark varg', 'varg'], ['stark'], { note: 'Producentsiden bekræfter elektriske VARG-motorcykler (enduro/supermoto/motocross); landet står ikke på siden.' }],
+    ['Cake', 'SE', 'ukendt', [], ['cake'], { note: 'Producentsiden bekræfter lette elektriske mopeder/motorcykler (Makka, Ösa, Kalk); landet og om mærket stadig produceres er ikke belagt her.' }],
     ['Super Soco', 'CN', 'aktuel', ['supersoco'], ['eks'], { note: 'Mangler selvstændigt belæg — kræver ejerens bekræftelse.' }],
     ['Daelim', 'KR', 'aktuel', ['daelim motor'], ['eks'], { note: 'Mangler selvstændigt belæg — kræver ejerens bekræftelse.' }],
     ['TM Racing', 'IT', 'aktuel', ['tm'], ['eks'], { logo: 'tm-racing', note: 'Mangler selvstændigt belæg — kræver ejerens bekræftelse.' }],
@@ -142,6 +160,8 @@ const BrandRegistry = (function () {
     ['Cagiva', 'IT', 'historisk', [], ['wp', 'lager', 'eks']],
     ['Husaberg', 'SE', 'historisk', [], ['wp', 'ejer']],
     ['DKW', 'DE', 'historisk', [], ['wp', 'lager', 'ejer'], { note: 'Fundet i lageret som "DKW 250" (Gul og Gratis).' }],
+    ['Aermacchi', 'IT', 'historisk', [], ['wp']],
+    ['CZ', 'CZ', 'historisk', ['čz', 'cz motorcycles'], ['wp'], { note: 'Tjekkisk ČZ (Wikipedia: ophørt 1997).' }],
     ['Laverda', 'IT', 'historisk', [], ['wp', 'eks']],
     ['Puch', 'AT', 'historisk', [], ['wp', 'eks']],
     ['Simson', 'DE', 'historisk', [], ['wp', 'eks']],
@@ -186,6 +206,10 @@ const BrandRegistry = (function () {
       aliaser: Object.freeze(r[3].slice()), kilder: Object.freeze(r[4].slice()),
       logo: ekstra.logo || null, note: ekstra.note || '',
       verificeret: r[4].some(k => !IKKE_BELAEG.has(k)),
+      /* offentlig: må mærket stå på de OFFENTLIGE lister (mærkeoversigtens "Flere mærker")? Kun med selvstændigt belæg. Et mærke uden
+         belæg (Daelim, Super Soco, TM Racing) er stadig GYLDIGT (normalisering, valg i opret-annonce, side hvis der er annoncer), men
+         påstås ikke offentligt som "kender vi", før ejeren har bekræftet det. */
+      offentlig: ekstra.offentlig !== false && r[4].some(k => !IKKE_BELAEG.has(k)),
     });
     liste.push(post);
     for (const n of [post.navn, ...post.aliaser, post.slug]) {
@@ -246,6 +270,30 @@ const BrandRegistry = (function () {
     return null;
   }
 
+  /* ---------- "Andet mærke" i opret-annonce (V5) ----------
+     En sælger, hvis mærke ikke står i registret (Silence, NIU, Segway, Boss Hoss …), skriver det selv. Teksten gemmes på annoncen
+     som den er (efter rensning), men den bliver ALDRIG et mærke af sig selv: ingen mærkeside, ingen "Populære mærker", ingen række i
+     Flere mærker. scripts/maerke-kandidater.js tæller dem som kandidater (ser et menneske at mærket er ægte, får det en registerpost).
+     Valideringen er ÉT sted, så formularen, kladdegendannelsen og testene siger det samme.
+     Returnerer { ok, navn, registreret, besked }: navn er den rensede tekst (eller registrets navn, hvis teksten ER et registreret
+     mærke — så "honda" ikke bliver et nyt "mærke" ved siden af Honda). */
+  const FRI_MIN = 2, FRI_MAX = 40;
+  function validerFriMaerke(raa) {
+    const tekst = String(raa == null ? '' : raa).replace(/\s+/g, ' ').trim();
+    const nej = besked => ({ ok: false, navn: tekst, registreret: false, besked });
+    if (!tekst) return nej('Skriv mærkets navn.');
+    if (tekst.length < FRI_MIN) return nej('Mærkets navn skal være mindst ' + FRI_MIN + ' tegn.');
+    if (tekst.length > FRI_MAX) return nej('Mærkets navn må højst være ' + FRI_MAX + ' tegn.');
+    if (/[<>]/.test(tekst) || /&[#a-z0-9]+;/i.test(tekst)) return nej('Mærkets navn må ikke indeholde HTML.');
+    if (!/^[\p{L}\p{N}][\p{L}\p{N} .'’+-]*$/u.test(tekst)) return nej('Brug kun bogstaver, tal, mellemrum, punktum, apostrof, plus og bindestreg.');
+    if (!/\p{L}/u.test(tekst)) return nej('Mærkets navn skal indeholde bogstaver.');
+    if (/https?|www\.|\.(com|dk|net|org|eu|de|se|no|uk)\b/i.test(tekst)) return nej('Skriv mærkets navn, ikke en internetadresse.');
+    if (ukendtNoegler.has(noegle(tekst))) return nej('Skriv mærkets rigtige navn. «' + tekst + '» er det, vi viser, når et mærke ikke er oplyst.');
+    const p = find(tekst);
+    return p ? { ok: true, navn: p.navn, registreret: true, besked: '' } : { ok: true, navn: tekst, registreret: false, besked: '' };
+  }
+
+  // @@NODE-ONLY-START
   /* ---------- Status og sideregler ---------- */
   /* 'aktiv' = har annoncer nu; 'uden-annoncer' = aktuelt/ukendt mærke uden annoncer; 'historisk' = historisk mærke uden annoncer. */
   function status(navn, antal) {
@@ -269,7 +317,7 @@ const BrandRegistry = (function () {
       pr.set(p.navn, (pr.get(p.navn) || 0) + 1);
     }
     const iLager = liste.filter(p => pr.has(p.navn)).map(p => ({ navn: p.navn, slug: p.slug, antal: pr.get(p.navn) }));
-    const udenAnnoncer = liste.filter(p => !pr.has(p.navn));
+    const udenAnnoncer = liste.filter(p => !pr.has(p.navn) && p.offentlig);   // V5: mærker uden belæg (offentlig:false) nævnes ikke offentligt
     return {
       iLager,
       udenAnnoncer: { aktuelle: udenAnnoncer.filter(p => p.periode !== 'historisk').map(p => p.navn).sort(sortDa),
@@ -279,6 +327,8 @@ const BrandRegistry = (function () {
     };
   }
 
+  // @@NODE-ONLY-END
+  // @@NODE-ONLY-START
   /* ---------- Kandidater (nye mærker fra annoncekilder) ----------
      Et mærkenavn, kilden bruger, men som ikke står i registret, bliver ALDRIG et mærke af sig selv. Det vurderes her og
      logges af scripts/maerke-kandidater.js. Tilstande:
@@ -328,11 +378,15 @@ const BrandRegistry = (function () {
     if ((antal || 0) < min) return ud('afventer', `set ${antal || 0} gang(e); kræver mindst ${min}`);
     return ud('kandidat', `set ${antal} gange og ikke i registret — slå mærket op, tilføj kilde og en post i MAERKER`, { naermeste: naermest });
   }
+  // @@NODE-ONLY-END
 
   return {
-    UKENDT, UKENDT_LABEL, UKENDT_ALIASER, MIN_ANNONCER_INDEKS, MIN_FOREKOMSTER_KANDIDAT, KILDER, MAERKER_ANTAL: liste.length,
+    UKENDT, UKENDT_LABEL, UKENDT_ALIASER, MIN_ANNONCER_INDEKS, MIN_FOREKOMSTER_KANDIDAT, MAERKER_ANTAL: liste.length, FRI_MIN, FRI_MAX,
     alle, valgbare, normalise, find, kanonisk, erKendt, erUkendt, visNavn, sammenlignNoegle, noegle, slug, fraSlug, slugFold, logoNoegle, fraTekst,
-    status, sideRegel, opgoer, vurderKandidat, dubletter: dubletter.slice(),
+    validerFriMaerke, dubletter: dubletter.slice(),
+    // @@NODE-ONLY-START
+    KILDER, status, sideRegel, opgoer, vurderKandidat,
+    // @@NODE-ONLY-END
   };
 })();
 // @@REGISTER-END

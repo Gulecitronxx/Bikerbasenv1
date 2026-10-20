@@ -1919,7 +1919,9 @@ function soegeoverskrift(state, listings){
      til salg i Danmark i Syddanmark", i både H1 og title. Uden region og med
      mærke står der ikke "i Danmark" (det gjorde der heller ikke før). */
   const region = state.regions.length === 1 ? ` i ${state.regions[0]}` : '';
-  if (state.brands.length) return `${state.brands.slice(0,3).map(b => (typeof BrandRegistry !== 'undefined' ? BrandRegistry.visNavn(b) : b)).join(', ')} til salg${region}`;
+  /* V5: et ukendt mærke i URL'en (?brands=xyz) spejles ikke i H1: kun registrerede mærker, "uoplyst" og mærker, annoncerne selv har. */
+  const h1Maerker = typeof BrandRegistry === 'undefined' ? state.brands : state.brands.filter(b => BrandRegistry.erKendt(b) || BrandRegistry.erUkendt(b) || listings.some(l => String(l.brand).toLowerCase() === String(b).toLowerCase()));
+  if (h1Maerker.length) return `${h1Maerker.slice(0,3).map(b => (typeof BrandRegistry !== 'undefined' ? BrandRegistry.visNavn(b) : b)).join(', ')} til salg${region}`;
   return `Motorcykler til salg${region || ' i Danmark'}`;
 }
 
