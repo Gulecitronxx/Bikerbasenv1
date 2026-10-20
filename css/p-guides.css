@@ -461,6 +461,7 @@
 /* linjelængde: højst ca. 75 tegn */
 .gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 60ch; }
 @media (min-width:1100px){ .gd-article > .gd-sec > p, .gd-article > .gd-sec > ul, .gd-article > .gd-sec > ol{ max-width: 60ch; } }
+/* V5: se blokken "V5 sælger: guides" nederst (typefliser og læs-også i fuld bredde). */
 /* typefliser under artiklen */
 .gd-findtype{ margin-top: var(--space-7); padding-top: var(--space-6); border-top: 1px solid var(--color-border); }
 .gd-findtype h2{ font-size: clamp(22px, 2.6vw, 28px); margin: 0 0 var(--space-1); }
@@ -486,3 +487,73 @@
 .gd-regionchips{ display:flex; flex-wrap:wrap; align-items:center; gap: var(--space-2); margin: var(--space-4) 0 0; font-size:14.5px; color: var(--color-fg-muted); }
 .gd-regionchips a{ display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border:1px solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface); color: var(--color-fg); font-weight:600; text-decoration:none; }
 .gd-regionchips a:hover{ border-color: var(--color-primary); color: var(--color-primary); }
+
+
+/* ===== V5 sælger: guides ===== */
+/* 1) Linjelængden står fast på ca. 60ch (højst 80 tegn pr. linje, låst af w14-brugere.test.js): læsbarheden går forud for at fylde
+      kolonnen. Det, der faktisk fyldte for lidt, var typefliserne (punkt 2) og "Læs også" (punkt 4). Åbningsafsnittet er ingress. */
+.gd-article > .gd-sec:first-child > p:first-of-type{ font-size: 19px; line-height: 1.6; }
+
+/* 2) Typefliserne havde samme 60ch-loft som brødteksten, så fem fliser blev presset ind på 630 px (118 px pr. flise) og linket
+      "Se adventure/enduro motorcykler" blev klippet. De bruger nu hele kolonnen. */
+.gd-article > .gd-sec > ul.gd-types{ max-width: none; }
+@media (min-width:1100px){ .gd-types{ gap: 14px; } }
+.gd-type-body{ padding: var(--space-3) var(--space-3) var(--space-4); }
+.gd-type-name{ font-size: 17px; }
+
+/* 3) Links i løbende tekst: global regel (main p > a:only-child) gjorde et enkelt link til inline-block med 4 px polstring og
+      gav en højere linje midt i afsnittet. Inline-links i brødtekst er undtaget fra mål-størrelsen (WCAG 2.5.8). */
+.gd-article p > a:only-child:not([class]), .gd-article li > a:only-child:not([class]){ display: inline; padding-block: 0; }
+
+/* 4) "Læs også": samme regel (.gd-sources li > a:only-child) gjorde kortene til inline-block, så fotoet fik højde 0 og kortene
+      stod uden billede. Nu fotokort som tænkt, med kategori over titlen og en pil. */
+.gd-related .gd-rel-list li > a.gd-rel-card{ display: flex; padding-block: 0; }
+.gd-related .gd-rel-media{ flex: 0 0 40%; max-width: 150px; min-height: 96px; }
+.gd-rel-kicker{ font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--color-primary-hover); }
+:root[data-theme="dark"] .gd-rel-kicker{ color: var(--color-primary); }
+.gd-rel-go{ margin-top: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--color-primary); }
+.gd-rel-go svg{ width: 14px; height: 14px; }
+.gd-related a.gd-rel-card:hover .gd-rel-body strong{ text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 699px){ .gd-related .gd-rel-media{ flex-basis: 34%; max-width: 128px; } }
+
+/* 5) Trin (nummererede lister): cirkler i brandfarve i stedet for grå standardtal, så en fremgangsmåde læses som trin. */
+.gd-article > .gd-sec > ol{ list-style: none; padding-left: 0; counter-reset: gd-trin; display: grid; gap: var(--space-3); }
+.gd-article > .gd-sec > ol > li{ counter-increment: gd-trin; position: relative; margin: 0; padding-left: 44px; min-height: 30px; }
+.gd-article > .gd-sec > ol > li::before{
+  content: counter(gd-trin); position: absolute; left: 0; top: 1px; width: 30px; height: 30px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--color-primary-tint); color: var(--color-primary-hover);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+  font: 700 14px/1 var(--font-display);
+}
+:root[data-theme="dark"] .gd-article > .gd-sec > ol > li::before{ color: var(--color-primary); }
+.gd-article > .gd-sec > ul:not(.gd-types):not(.gd-next-links) > li::marker{ color: var(--color-primary); }
+
+/* 6) Kilder som nummereret kildeliste med tydelig adskillelse (før: lange orange linjer med prikker). */
+#kilder > ul{ list-style: none; padding: 0; margin: 0 0 var(--space-4); counter-reset: gd-kilde; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); overflow: hidden; }
+#kilder > ul > li{ counter-increment: gd-kilde; display: flex; gap: var(--space-3); align-items: flex-start; margin: 0; padding: 12px var(--space-4); border-top: 1px solid var(--color-border); }
+#kilder > ul > li:first-child{ border-top: 0; }
+#kilder > ul > li::before{ content: counter(gd-kilde); flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--color-surface-2); color: var(--color-fg-muted); font: 700 12px/1 var(--font-display); margin-top: 1px; }
+#kilder > ul > li > a{ color: var(--color-fg); text-decoration-color: var(--color-primary); text-underline-offset: 3px; padding-block: 0; display: inline; }
+#kilder > ul > li > a:hover{ color: var(--color-primary-hover); }
+#kilder > ul > li > a::after{ content: " \2197"; color: var(--color-primary); font-weight: 700; }
+
+/* 7) Fokus: sticky mini-indholdsfortegnelse og kort får tydelig tastaturfokus. */
+.gd-minitoc a:focus-visible, .gd-related a.gd-rel-card:focus-visible, .gd-article a.gd-next-link:focus-visible, .gd-article a.gd-type-link:focus-visible{ outline: 2px solid var(--color-ring); outline-offset: 2px; }
+
+/* 8) Oversigten: et ulige antal guides efterlod et tomt felt i sidste række. Sidste felt er nu et mørkt link-felt ind i søgningen. */
+.gd-cta-tile{ display: flex; }
+.gd-cta-link{
+  position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: var(--space-2);
+  width: 100%; min-height: 220px; padding: var(--space-5); border-radius: var(--radius-lg); color: #fff; text-decoration: none;
+  background: var(--color-dark) url("../img/hero-800.webp") 80% center / cover no-repeat; box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.gd-cta-link::before{ content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(15,13,10,.55) 0%, rgba(15,13,10,.9) 100%); }
+.gd-cta-link:hover{ box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.gd-cta-link:focus-visible{ outline: 3px solid var(--color-ring); outline-offset: 3px; }
+.gd-cta-k{ font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.9); }
+.gd-cta-t{ font-family: var(--font-display); font-size: 20px; line-height: 1.2; }
+.gd-cta-b{ font-size: 14.5px; line-height: 1.5; color: rgba(255,255,255,.92); }
+.gd-cta-go{ display: inline-flex; align-items: center; gap: 6px; margin-top: var(--space-2); font-weight: 600; font-size: 14.5px; }
+.gd-cta-go svg{ width: 16px; height: 16px; }
+@media (prefers-reduced-motion: reduce){ .gd-cta-link{ transition: none; } .gd-cta-link:hover{ transform: none; } }

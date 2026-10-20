@@ -67,9 +67,9 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=fbce3c18">
-<link rel="stylesheet" href="css/p-dashboard.css?v=fbce3c18">
-<link rel="stylesheet" href="css/p-bekraeft.css?v=fbce3c18">
+<link rel="stylesheet" href="css/styles.css?v=8362dc74">
+<link rel="stylesheet" href="css/p-dashboard.css?v=8362dc74">
+<link rel="stylesheet" href="css/p-bekraeft.css?v=8362dc74">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -180,7 +180,7 @@ try{
       <!-- Annoncelisten vises under både "Oversigt" og "Mine annoncer". -->
       <section id="db-panel-annoncer" class="db-panel" role="tabpanel" aria-labelledby="tabbtn-oversigt">
         <div class="db-list-head" id="mine-toolbar">
-          <h2 class="db-list-title">Mine annoncer <span id="mine-count-inline">0</span></h2>
+          <h2 class="db-list-title" id="mine-heading" tabindex="-1">Mine annoncer <span id="mine-count-inline">0</span></h2>
           <label class="db-sort">Sorter efter
             <select class="input" id="mine-sort">
               <option value="date">Nyeste først</option>
@@ -191,11 +191,19 @@ try{
           </label>
         </div>
         <div id="mine-error" class="db-alert" role="alert" hidden></div>
-        <div id="mine-empty" class="db-empty" style="display:none;">
+        <div id="mine-empty" class="db-empty db-empty-rich" style="display:none;">
           <span class="db-empty-icon" id="mine-empty-icon"></span>
           <h3>Du har ingen annoncer endnu</h3>
-          <p>Opret din første annonce, og kom i gang med at sælge.</p>
-          <a href="opret-annonce.html" class="btn btn-primary">Opret annonce</a>
+          <p>Opret din første annonce, og kom i gang med at sælge. Du kan altid gemme en kladde og komme tilbage.</p>
+          <ol class="db-empty-steps">
+            <li><b>Fortæl om motorcyklen</b>Type, mærke, model, årgang og kilometer.</li>
+            <li><b>Tilføj fotos</b>Det første billede bliver forsidebillede på kortet.</li>
+            <li><b>Beskriv og udgiv</b>Skriv ærligt om stand og service, og vælg pris og sted.</li>
+          </ol>
+          <div class="db-empty-actions">
+            <a href="opret-annonce.html" class="btn btn-primary">Opret annonce</a>
+            <a href="guide-saelg-motorcykel.html" class="db-link">Sådan sælger du din motorcykel<span data-icon="arrowRight"></span></a>
+          </div>
         </div>
         <div id="mine-grid" class="db-rows" aria-live="polite"></div>
         <div class="db-create" id="mine-create">
@@ -376,19 +384,19 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=fbce3c18"></script>
-<script defer src="js/vendor/supabase.js?v=fbce3c18"></script>
-<script defer src="js/supabase-config.js?v=fbce3c18"></script>
-<script defer src="js/supabase-api.js?v=fbce3c18"></script>
-<script defer src="js/icons.js?v=fbce3c18"></script>
-<script defer src="js/postnumre.js?v=fbce3c18"></script>
-<script defer src="js/data.js?v=fbce3c18"></script>
-<script defer src="js/store.js?v=fbce3c18"></script>
-<script defer src="js/maaling.js?v=fbce3c18"></script>
-<script defer src="js/backend-bridge.js?v=fbce3c18"></script>
-<script defer src="js/components.js?v=fbce3c18"></script>
-<script defer src="js/bekraeft-dialog.js?v=fbce3c18"></script>
-<script defer src="js/mine-annoncer.js?v=fbce3c18"></script>
+<script defer src="js/security.js?v=8362dc74"></script>
+<script defer src="js/vendor/supabase.js?v=8362dc74"></script>
+<script defer src="js/supabase-config.js?v=8362dc74"></script>
+<script defer src="js/supabase-api.js?v=8362dc74"></script>
+<script defer src="js/icons.js?v=8362dc74"></script>
+<script defer src="js/postnumre.js?v=8362dc74"></script>
+<script defer src="js/data.js?v=8362dc74"></script>
+<script defer src="js/store.js?v=8362dc74"></script>
+<script defer src="js/maaling.js?v=8362dc74"></script>
+<script defer src="js/backend-bridge.js?v=8362dc74"></script>
+<script defer src="js/components.js?v=8362dc74"></script>
+<script defer src="js/bekraeft-dialog.js?v=8362dc74"></script>
+<script defer src="js/mine-annoncer.js?v=8362dc74"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">

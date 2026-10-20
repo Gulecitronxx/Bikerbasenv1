@@ -45,6 +45,7 @@ function lavPng(bredde = 640, hoejde = 480, farve = [200, 90, 40]){
     klump('IDAT', zlib.deflateSync(Buffer.concat(raekker))), klump('IEND', Buffer.alloc(0))]);
 }
 const PNG_LILLE = lavPng(16, 12);
+const PNG_STOR = lavPng(480, 360, [70, 78, 92]);   // kun til screenshots (opts.stortFoto): synlige, neutrale pladsholdere
 
 function lavBackend(opts = {}){
   const bruger = { id: BRUGER_ID, aud: 'authenticated', role: 'authenticated', email: 'test.saelger@example.test',
@@ -59,6 +60,7 @@ function lavBackend(opts = {}){
       listings: [], listing_photos: [], favorites: [], saved_searches: [], listing_stats: [], krav: [], eksterne_annoncer: [],
     },
     fejl: {}, log: [], uploads: [], slettedeFiler: [], auth: [],
+    saves: opts.saves || null,
     login: opts.login || null,   // (email, password) => { fejl?: {status, msg}} for login-tests
   };
   (opts.annoncer || []).forEach(a => tilstand.tabeller.listings.push(lavAnnonce(a)));
@@ -133,7 +135,7 @@ function lavBackend(opts = {}){
 
     if (tabel.startsWith('rpc/')){
       const navn = tabel.slice(4); log(200);
-      if (navn === 'my_listing_saves') return json(route, 200, []);
+      if (navn === 'my_listing_saves') return json(route, 200, tilstand.saves || []);   // [{ listing, saves }] — sæt i tests/screenshots
       return json(route, 200, null);
     }
     const lager = tilstand.tabeller[tabel];
@@ -221,7 +223,7 @@ function lavBackend(opts = {}){
       return json(route, 200, {});
     }
     if (p.startsWith('/storage/v1/')){
-      if (req.method() === 'GET') return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'image/png' }, body: PNG_LILLE });
+      if (req.method() === 'GET') return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'image/png' }, body: opts.stortFoto ? PNG_STOR : PNG_LILLE });
       const f = tagFejl(`${req.method()} storage`);
       if (f) return json(route, f.status, { statusCode: String(f.status), error: 'mock', message: f.besked || 'mock-fejl' });
       if (req.method() === 'DELETE'){

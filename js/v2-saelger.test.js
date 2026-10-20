@@ -163,7 +163,7 @@ test('Login: tomt og ugyldigt skema faas fanget med konkret besked og fokus; int
   const s = await aabn({ loggetInd: false }, 'login.html', { width: 1440, height: 900 });
   try {
     const p = s.page, send = () => p.click('#login-form button[type=submit]');
-    const fejl = () => p.locator('#auth-error').innerText();
+    const fejl = () => p.locator('.lg-card .felt-fejl').innerText();   // V5: feltfejl står ved feltet (ikke i overlayet)
     await send();
     assert.match(await fejl(), /Skriv din e-mail/);
     assert.strictEqual(await p.evaluate(() => document.activeElement.id), 'login-email');

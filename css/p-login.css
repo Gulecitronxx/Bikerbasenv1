@@ -471,3 +471,21 @@ html[data-authtab="register"] .lg-steps, html[data-lgmode="register"] .lg-steps{
 
 /* V3: ingen enlige ord paa sidste linje i overskrifter og undertekst ("Bikerbasen" alene) */
 .lg-head h1, .lg-promo h2, .lg-head p, .lg-promo > p{ text-wrap: balance; }
+
+/* ===== V5 sælger: login ===== */
+/* Fejl- og statusboks: kraftig venstrekant (ikke kun farve) og tydeligere tekst. */
+.auth-error{ border-left-width: 4px; font-weight: 600; }
+/* Opret-visningen: overskrift og lead i højre kolonne skifter (spans med .lg-only-login / .lg-only-register), så de ikke gentager formularens egen overskrift. */
+/* Indlæsning: lille spinner foran "Vent…" (knappen er allerede deaktiveret og aria-busy). Ingen bevægelse ved reduceret bevægelse. */
+.lg-cta[aria-busy="true"]::before{
+  content: ""; display: inline-block; width: 16px; height: 16px; margin-right: 10px; vertical-align: -3px;
+  border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  animation: lg-spin .7s linear infinite;
+}
+@keyframes lg-spin{ to{ transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){ .lg-cta[aria-busy="true"]::before{ animation: none; border-right-color: currentColor; opacity: .55; } }
+
+/* Feltfejl ved feltet (login og opret): læsbar størrelse og kontrast på kortets flade. */
+.lg-card .felt-fejl{ font-size: 14px; font-weight: 600; color: #9B1C14; margin: 8px 0 0; }
+:root[data-theme="dark"] .lg-card .felt-fejl{ color: var(--color-danger); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .lg-card .felt-fejl{ color: var(--color-danger); } }
