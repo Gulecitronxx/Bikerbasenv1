@@ -64,13 +64,13 @@
     {"s":"mash","n":"Mash","a":[],"m":"M","v":"ordmaerke","f":"ordmaerke"},
     {"s":"brixton","n":"Brixton","a":[],"m":"B","v":"ordmaerke","f":"ordmaerke"},
     {"s":"lexmoto","n":"Lexmoto","a":[],"m":"L","v":"ordmaerke","f":"ordmaerke"},
-    {"s":"qj-motor","n":"QJ Motor","a":["qj","qjmotor"],"m":"QM","v":"ordmaerke","f":"ordmaerke"},
+    {"s":"qj-motor","n":"QJMotor","a":["qj","qjmotor"],"m":"QM","v":"ordmaerke","f":"ordmaerke"},
     {"s":"kove","n":"Kove","a":[],"m":"K","v":"ordmaerke","f":"ordmaerke"},
     {"s":"super-soco","n":"Super Soco","a":[],"m":"SS","v":"ordmaerke","f":"ordmaerke"},
     {"s":"jawa","n":"Jawa","a":[],"m":"J","v":"ordmaerke","f":"ordmaerke"},
     {"s":"gilera","n":"Gilera","a":[],"m":"G","v":"ordmaerke","f":"ordmaerke"},
     {"s":"lambretta","n":"Lambretta","a":[],"m":"L","v":"ordmaerke","f":"ordmaerke"},
-    {"s":"zero","n":"Zero Motorcycles","a":["zero motorcycles","zero motorcycle"],"m":"Z","v":"lockup","f":"ordmaerke","l":{"src":"img/brands/zero.svg","w":1000,"h":750,"c":1,"e":{"src":"img/brands/zero-emblem.svg","w":1000,"h":825},"o":{"src":"img/brands/zero-ordmaerke.svg","w":1000,"h":324}}}
+    {"s":"zero","n":"Zero","a":["zero motorcycles","zero motorcycle"],"m":"Z","v":"lockup","f":"ordmaerke","l":{"src":"img/brands/zero.svg","w":1000,"h":750,"c":1,"e":{"src":"img/brands/zero-emblem.svg","w":1000,"h":825},"o":{"src":"img/brands/zero-ordmaerke.svg","w":1000,"h":324}}}
   ]
   };
 });

@@ -53,6 +53,9 @@ function readStateFromURL(){
   for (const [key, param] of Object.entries(LIST_PARAMS)){
     state[key] = (p.get(param) || '').split(',').filter(Boolean);
   }
+  /* V4: mærker i URL'en kanoniseres mod registret (?brands=CFMOTO, ?brands=harley, ?brands=Zero%20Motorcycles), så et delt link
+     rammer det samme mærke som filteret og aldrig står som to pille-mærker. Ukendte navne bevares (pillen skal kunne fjernes). */
+  if (typeof BrandRegistry !== 'undefined') state.brands = [...new Set(state.brands.map(b => BrandRegistry.kanonisk(b)))];
   // Forsiden og kategorilinkene sender ?type=sport i ental.
   if (p.get('type')) state.types = p.get('type').split(',').filter(Boolean);
   // Ukendte typer (?type=xyz) giver ellers en fantom-pille og 0 resultater.
@@ -375,18 +378,23 @@ function populateFilterUI(){
      Aprilia, Benelli, BMW, BSA, Cagiva. Alfabetisk ved lige antal. */
   const antalPrMaerke = new Map();
   for (const l of alle) if (l.brand) antalPrMaerke.set(l.brand, (antalPrMaerke.get(l.brand) || 0) + 1);
-  const maerker = [...iLager].sort((a,b) => (antalPrMaerke.get(b) || 0) - (antalPrMaerke.get(a) || 0) || a.localeCompare(b,'da'));
+  /* V4: "Ukendt" er sentinellen, ikke et mærke. Den står SIDST i listen under navnet "Uoplyst mærke" (ærligt: kilden har ikke oplyst
+     mærket) i stedet for midt i rækken som "Ukendt (2)". Værdien i filteret er stadig sentinellen, så ?brands=Ukendt virker. */
+  const erUoplyst = b => BrandRegistry.erUkendt(b);
+  const maerker = [...iLager].sort((a,b) => (erUoplyst(a) - erUoplyst(b)) || (antalPrMaerke.get(b) || 0) - (antalPrMaerke.get(a) || 0) || a.localeCompare(b,'da'));
   const brandSel = document.getElementById('so-brand');
   if (brandSel) brandSel.innerHTML = '<option value="">Alle mærker</option>' +
-    [...maerker].sort((a, b) => a.localeCompare(b, 'da')).map(b => `<option value="${escapeHTML(b)}">${escapeHTML(b)}</option>`).join('');
+    [...maerker].sort((a, b) => (erUoplyst(a) - erUoplyst(b)) || a.localeCompare(b, 'da')).map(b => `<option value="${escapeHTML(b)}">${escapeHTML(BrandRegistry.visNavn(b))}</option>`).join('');
   /* W13 logo: lille mark (22 px høj, 56 px bred kolonne; emblem hvor det findes) foran navnet i en FAST kolonne — et mærke uden
      godkendt logo får monogram i samme kolonne, så venstrekanten af navnene er ens. Logoet hentes først, når rækken er synlig
      (BrandLogos-klienten): rækker, der er foldet væk, henter intet. Kun i filteret: aktive filterchips og resultatkort har intet logo
      (mockuppen: ren tekst). Navnet står som tekst ved siden af, så logoet er dekorativt. */
   const maerkeLogo = (b) => (typeof BrandLogos === 'undefined') ? ''
     : `<span class="bl-spalte bl-spalte--sm" aria-hidden="true">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true })}</span>`;
+  /* Søgefeltet "Søg mærke…" finder også på registrets aliaser ("harley", "cf moto", "bmw motorrad"). */
+  const aliasTekst = b => ((BrandRegistry.find(b) || {}).aliaser || []).join(' ').toLowerCase();
   const brandRows = maerker.map(b =>
-    `<label class="checkbox-row" data-brand-row="${escapeHTML(b.toLowerCase())}"><input type="checkbox" data-brand="${escapeHTML(b)}">${maerkeLogo(b)}<span>${escapeHTML(b)}</span>${FACET_SLOT}</label>`).join('');
+    `<label class="checkbox-row" data-brand-row="${escapeHTML(BrandRegistry.visNavn(b).toLowerCase())}" data-brand-alias="${escapeHTML(aliasTekst(b))}"><input type="checkbox" data-brand="${escapeHTML(b)}">${maerkeLogo(b)}<span>${escapeHTML(BrandRegistry.visNavn(b))}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `
     <div class="filter-search"><input type="text" id="brand-search" class="input" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
     <div class="checkbox-list" id="brand-list">${brandRows}
@@ -549,7 +557,7 @@ function opdaterMaerkeliste(){
 
   let matchende = 0, vist = 0;
   liste.querySelectorAll('[data-brand-row]').forEach(row => {
-    if (!row.dataset.brandRow.includes(q)){ row.hidden = true; return; }
+    if (!(row.dataset.brandRow + ' ' + (row.dataset.brandAlias || '')).includes(q)){ row.hidden = true; return; }
     matchende++;
     const valgt = row.querySelector('input')?.checked;
     const overGraensen = !q && !maerkerUdfoldet && !valgt && matchende > MAERKER_FOER_UDFOLD;
@@ -1442,7 +1450,7 @@ function activeFilterPills(){
   const pills = [];
   if (state.q) pills.push({ label: `"${state.q}"`, clear: () => state.q = '' });
   state.types.forEach(t => pills.push({ label: typeLabel(t), clear: () => state.types = state.types.filter(x=>x!==t) }));
-  state.brands.forEach(b => pills.push({ label: b, clear: () => state.brands = state.brands.filter(x=>x!==b) }));
+  state.brands.forEach(b => pills.push({ label: BrandRegistry.visNavn(b), clear: () => state.brands = state.brands.filter(x=>x!==b) }));
   state.models.forEach(m => pills.push({ label: m, clear: () => state.models = state.models.filter(x=>x!==m) }));
   if (state.priceMin != null || state.priceMax != null){
     pills.push({ label: state.priceMax == null ? `Fra ${formatPrice(state.priceMin)}` : (state.priceMin ? `${formatPrice(state.priceMin)} – ${formatPrice(state.priceMax)}` : `Maks. ${formatPrice(state.priceMax)}`), clear: () => { state.priceMin=null; state.priceMax=null; } });
@@ -1871,7 +1879,7 @@ function soegeoverskrift(state, listings){
      til salg i Danmark i Syddanmark", i både H1 og title. Uden region og med
      mærke står der ikke "i Danmark" (det gjorde der heller ikke før). */
   const region = state.regions.length === 1 ? ` i ${state.regions[0]}` : '';
-  if (state.brands.length) return `${state.brands.slice(0,3).join(', ')} til salg${region}`;
+  if (state.brands.length) return `${state.brands.slice(0,3).map(b => (typeof BrandRegistry !== 'undefined' ? BrandRegistry.visNavn(b) : b)).join(', ')} til salg${region}`;
   return `Motorcykler til salg${region || ' i Danmark'}`;
 }
 

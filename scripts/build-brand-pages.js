@@ -11,6 +11,7 @@ const LINK = require('./seo-soeglink');   // F2-004/F2-005: ét sted bygger søg
 const ROOT = path.join(__dirname, '..');
 const { browserModules, fetchExternalListings, listingSlug } = require('./shared');
 const { slugify: slugifyFælles } = require('./slug');
+const BrandRegistry = require('../js/brands-registry.js');   // V4: ÉT mærkeregister (navne, aliaser, slugs, sideregler) — ikke spredte lister
 const BrandLogos = require('../js/brand-logos.js');   // W13: delt logokerne (manifest -> js/brand-logos-data.js); standard er ordmærke/monogram
 const { listingCardHTML, normalizeRemoteListing, normalizeExternalListing, Sortering, eksternErNy, markerTvaerkildeDubletter, Filtrering, standOpgoerelse: standOpg } = browserModules();
 
@@ -176,7 +177,7 @@ const harEgenSide = l => !l.isExternal;
 const internAdresse = l => harEgenSide(l) ? listingSlug(l) : `annonce.html?id=${l.id}`;
 
 /* ÉN slugify til alle sideadresser (accenter foldes, se scripts/slug.js). Funktionserklæringen er hejst som før. */
-function slugify(name){ return slugifyFælles(name); }
+function slugify(name){ const p = BrandRegistry.find(name); return p ? p.slug : slugifyFælles(name); }   // V4: et registreret mærke har den slug, registret siger (scripts/maerke-register.test.js låser, at den er den eksisterende URL)
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* Den rene adresse, en side kanonicaliserer til — samme regel som
@@ -211,27 +212,23 @@ function cleanUrl(file){
    → 0 annoncer, ?brands=Sym → 1). Uden det her ville Sym stå både i grid'en
    over mærker MED annoncer og på listen over dem uden. */
 function maerkerUdenLager(kendte, medLager){
-  /* V3: sammenligningen går på logo-manifestets slug (navn + aliaser), ikke kun på små bogstaver. Ellers stod "Zero Motorcycles"
-     (redaktionel liste) og "Zero" (lager) som to mærker, og "CFMOTO" og "CFMoto" kunne stå både som side og som tekst. Navnet vises
-     som manifestet staver det; to kendte navne med samme slug samles til ét. */
-  const noegle = b => (BrandLogos.normaliser(b) || String(b).toLowerCase());
+  /* V4: sammenligningen går på registrets nøgle (navn + aliaser), ikke på små bogstaver: "Zero Motorcycles" og "Zero", "CFMOTO" og "CFMoto"
+     er ét mærke, og et mærke vises under sit kanoniske navn. Navne, registret ikke kender, bevares som de står (logo-manifestets slug
+     som nøgle, ellers små bogstaver), så en test med fri liste stadig virker. To navne med samme nøgle samles til ét. */
+  const noegle = b => (BrandRegistry.erKendt(b) ? BrandRegistry.sammenlignNoegle(b) : (BrandLogos.normaliser(b) || String(b).toLowerCase()));
   const harLager = new Set((medLager || []).map(noegle));
   const set = new Map();
   for (const b of (kendte || [])){
     const k = noegle(b);
     if (harLager.has(k) || set.has(k)) continue;
-    const visNavn = BrandLogos.logoFor(b).navn || String(b);
-    set.set(k, visNavn);
+    set.set(k, BrandRegistry.erKendt(b) ? BrandRegistry.kanonisk(b) : (BrandLogos.logoFor(b).navn || String(b)));
   }
   return [...set.values()].sort((a, b) => a.localeCompare(b, 'da'));
 }
 
-/* V3 (alle mærker med): rigtige, kendte mærker, som en dansk MC-køber kan lede efter, men som ikke står i den redaktionelle liste
-   (BRANDS_BY_MODEL i js/data.js, som er delt med opret-annonce og ikke er dette scripts at ændre). De nævnes kun som TEKST under
-   "Flere mærker" — ingen side, intet link, ingen tal — og kun hvis lageret ikke har dem (maerkerUdenLager sorterer dem fra, når
-   de dukker op). Alle er ægte producenter; ingen er opfundet. Klassiske knallert- og veteranmærker (Puch, Simson, Kreidler,
-   Zündapp, Maico, Ossa) er med, fordi de bruges i Danmark; Husaberg og Derbi fordi brugte maskiner stadig handles. */
-const YDERLIGERE_KENDTE_MAERKER = ['Derbi', 'Husaberg', 'Kreidler', 'Laverda', 'Maico', 'Montesa', 'Moto Morini', 'Ossa', 'Puch', 'Simson', 'Sur-Ron', 'Talaria', 'Zündapp'];
+/* V4: de redaktionelle lister (BRANDS_BY_MODEL + YDERLIGERE_KENDTE_MAERKER) er afløst af mærkeregistret (js/brands-registry.js): alle
+   registrerede mærker uden annoncer nævnes som TEKST under "Flere mærker" — ingen side, intet link, ingen tal. Hvert mærke i
+   registret har mindst ét belæg (kilder); intet mærke oprettes ud fra en annonce. */
 
 /* Struktureret data til mærkesiderne: BreadcrumbList så Google kan vise
    brødkrummen i søgeresultatet, og en ItemList over de annoncer der rent
@@ -410,7 +407,7 @@ function introFor(brand, items){
    den bærer rigtigt lager, og at slette den ville slette et rigtigt fund —
    men den påstår ikke at være en landingsside for mærket: den får ingen
    arvesætning, ingen FAQ, intet bundindhold, og bliver noindex. */
-const MIN_LISTINGS_FULD_TEKST = 5;
+const MIN_LISTINGS_FULD_TEKST = BrandRegistry.MIN_ANNONCER_INDEKS;   // V4: reglen bor i registret (js/brands-registry.js)
 /* Runde 7 (D7-M2): antal kort i maerkesidens gitter = soegesidens sidestoerrelse. */
 const MAERKE_KORT = 8;   // w14: to rækker à fire efter de 5 fremhævede; resten nås via søgningen
 
@@ -1154,7 +1151,7 @@ function byg(){
    side uden søgeord og uden mening. I dag er der 0 af dem; spærren er der,
    fordi den næste kilde kan have nogle. */
 const byBrandRaw = {};
-LISTINGS.filter(l => l.brand && l.brand !== 'Ukendt')
+LISTINGS.filter(l => l.brand && !BrandRegistry.erUkendt(l.brand))
   .forEach(l => { (byBrandRaw[l.brand] = byBrandRaw[l.brand] || []).push(l); });
 
 /* To mærkenavne kan give SAMME slug uden at være det samme tegn for tegn —
@@ -1465,8 +1462,12 @@ ${logoScripts(BrandLogos.logoFor(brand).harLogo)}<script defer src="js/maerke.js
 }
 
 /* ---- Brand index ---- */
-const udenLager = maerkerUdenLager([...Object.keys(BRANDS_BY_MODEL), ...YDERLIGERE_KENDTE_MAERKER], brands);
-const udenMaerke = LISTINGS.filter(l => !l.brand || l.brand === 'Ukendt').length;   // annoncer, kilden ikke har oplyst mærke på
+/* V4: alle REGISTREREDE mærker uden annoncer — aktuelle for sig, historiske for sig. (maerkerUdenLager() beholdes som eksporteret hjælper.) */
+const opgoerelse = BrandRegistry.opgoer(LISTINGS.map(l => l.brand));
+const udenAktuelle = maerkerUdenLager(opgoerelse.udenAnnoncer.aktuelle, brands);
+const udenHistoriske = maerkerUdenLager(opgoerelse.udenAnnoncer.historiske, brands);
+const udenLager = [...udenAktuelle, ...udenHistoriske];
+const udenMaerke = LISTINGS.filter(l => !l.brand || BrandRegistry.erUkendt(l.brand)).length;   // annoncer, kilden ikke har oplyst mærke på
 const topMaerker = brands.filter(b => slugify(b) !== 'andet-maerke')
   .sort((a, b) => byBrand[b].length - byBrand[a].length || a.localeCompare(b, 'da')).slice(0, 8);
 /* A–Z: første bogstav, dansk sortering (Æ Ø Å sidst). */
@@ -1571,10 +1572,14 @@ ${header}
   ${udenLager.length ? `<section class="section mk-sektion mk-flere-sektion" aria-labelledby="mk-flere-h">
     <div class="container">
       <div class="mk-sek-head"><h2 id="mk-flere-h">Flere mærker (${udenLager.length})</h2></div>
-      <p class="brand-intro">Disse mærker kender vi, men ingen annoncer til salg er indekseret lige nu. De har derfor ingen egen side — den får de, når der er noget at vise. Imens finder du dem i <a href="soegning.html">den fulde søgning</a>.</p>
-      <ul class="mk-flere" aria-label="Mærker uden annoncer lige nu">
-        ${udenLager.map(b => `<li>${esc(b)}</li>`).join(' ')}
-      </ul>
+      <p class="brand-intro">Disse ${udenLager.length} mærker kender vi, men ingen annoncer til salg er indekseret lige nu. De har derfor ingen egen side — den får de, når der er noget at vise (og er først indekserbar fra ${BrandRegistry.MIN_ANNONCER_INDEKS} annoncer). Sælger du et af dem, kan du <a href="opret-annonce.html">oprette en annonce</a>: alle mærkerne kan vælges dér. Imens finder du resten i <a href="soegning.html">den fulde søgning</a>.</p>
+      ${udenAktuelle.length ? `<ul class="mk-flere" aria-label="Aktuelle mærker uden annoncer lige nu">
+        ${udenAktuelle.map(b => `<li>${esc(b)}</li>`).join(' ')}
+      </ul>` : ''}
+      ${udenHistoriske.length ? `<p class="mk-flere-note"><strong>Historiske mærker (${udenHistoriske.length})</strong> — ikke længere i produktion, men brugte maskiner handles stadig.</p>
+      <ul class="mk-flere mk-flere-hist" aria-label="Historiske mærker uden annoncer lige nu">
+        ${udenHistoriske.map(b => `<li>${esc(b)}</li>`).join(' ')}
+      </ul>` : ''}
       ${udenMaerke ? `<p class="mk-flere-note">${tal(udenMaerke)} ${udenMaerke === 1 ? 'annonce oplyser' : 'annoncer oplyser'} ikke et mærke, og står derfor ikke under et mærke ovenfor. De er med i de ${tal(LISTINGS.length)} annoncer i søgningen.</p>` : ''}
       <div class="brand-actions">
         <a href="soegning.html" class="btn btn-outline">Søg blandt alle ${tal(LISTINGS.length)} annoncer</a>
@@ -1762,4 +1767,4 @@ if (require.main === module){
    sted, hvor et manglende felt bliver en påstand, og de er derfor det ene
    sted her, det betaler sig at låse. require.main-gaten ovenfor er det, der
    gør en require() fra en test til noget andet end et helt byg. */
-module.exports = { heroOrdmaerkeHTML, ctaNavnHTML, maerkeFliseHTML, azRaekkeHTML, hurtigSoegHTML, harNogetLogo, kortFortaltPunkter, kortFortaltHTML, prisStatistik, facetLinksFor, treKolonnerHTML, typeFlisersHTML, typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };
+module.exports = { BrandRegistry, heroOrdmaerkeHTML, ctaNavnHTML, maerkeFliseHTML, azRaekkeHTML, hurtigSoegHTML, harNogetLogo, kortFortaltPunkter, kortFortaltHTML, prisStatistik, facetLinksFor, treKolonnerHTML, typeFlisersHTML, typeFoto, erModelnavn, modelTal, heroVariant, ctaFoto, monogram, maerkeFakta, introFor, noscriptLinje, brandItemListLd, harEgenSide, internAdresse, maerkerUdenLager, splitIntro, vaelgFremhaevede, nyeAf, brugtOrd, titelFor, metaBeskrivelseFor };

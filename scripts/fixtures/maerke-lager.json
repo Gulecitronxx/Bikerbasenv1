@@ -1,0 +1,360 @@
+{
+ "dato": "2026-10-19",
+ "antal": 735,
+ "raa": [
+  {
+   "maerke": "Honda",
+   "antal": 320
+  },
+  {
+   "maerke": "Harley-Davidson",
+   "antal": 82
+  },
+  {
+   "maerke": "Yamaha",
+   "antal": 70
+  },
+  {
+   "maerke": "Suzuki",
+   "antal": 65
+  },
+  {
+   "maerke": "BMW",
+   "antal": 46
+  },
+  {
+   "maerke": "Kawasaki",
+   "antal": 43
+  },
+  {
+   "maerke": "Triumph",
+   "antal": 35
+  },
+  {
+   "maerke": "KTM",
+   "antal": 14
+  },
+  {
+   "maerke": "Royal Enfield",
+   "antal": 13
+  },
+  {
+   "maerke": "Aprilia",
+   "antal": 7
+  },
+  {
+   "maerke": "Ducati",
+   "antal": 5
+  },
+  {
+   "maerke": "BSA",
+   "antal": 5
+  },
+  {
+   "maerke": "Andet Mærke",
+   "antal": 4
+  },
+  {
+   "maerke": "Moto Guzzi",
+   "antal": 3
+  },
+  {
+   "maerke": "Bsa",
+   "antal": 3
+  },
+  {
+   "maerke": "Husqvarna",
+   "antal": 2
+  },
+  {
+   "maerke": "Indian",
+   "antal": 2
+  },
+  {
+   "maerke": "MV Agusta",
+   "antal": 2
+  },
+  {
+   "maerke": "Sym",
+   "antal": 1
+  },
+  {
+   "maerke": "Rewaco",
+   "antal": 1
+  },
+  {
+   "maerke": "Buell",
+   "antal": 1
+  },
+  {
+   "maerke": "Cagiva",
+   "antal": 1
+  },
+  {
+   "maerke": "Bach",
+   "antal": 1
+  },
+  {
+   "maerke": "Ukendt",
+   "antal": 1
+  },
+  {
+   "maerke": "Victory",
+   "antal": 1
+  },
+  {
+   "maerke": "Lauge",
+   "antal": 1
+  },
+  {
+   "maerke": "Lauge Jensen",
+   "antal": 1
+  },
+  {
+   "maerke": "Kymco",
+   "antal": 1
+  },
+  {
+   "maerke": "Hyosung",
+   "antal": 1
+  },
+  {
+   "maerke": "Royal-enfield",
+   "antal": 1
+  },
+  {
+   "maerke": "Fb Mondial",
+   "antal": 1
+  },
+  {
+   "maerke": "Benelli",
+   "antal": 1
+  }
+ ],
+ "proever": [
+  {
+   "maerke": "BMW",
+   "titel": "BMW R 1300 Sportstouring RS BYTTER GERNE",
+   "model": "R 1300 RS",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/BMW%20R%201300%20Sportstouring%20RS%20%20%20%20BYTTER%20GERNE/185083?p=185083&m=1527"
+  },
+  {
+   "maerke": "Honda",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "model": "CMX 500 Rebel",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Ny/Honda%20CMX%20500%20Rebel%20Cruiser/118543?p=118543&m=1483"
+  },
+  {
+   "maerke": "Kawasaki",
+   "titel": "Kawasaki ZR-7 Street",
+   "model": "ZR-7",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Kawasaki%20ZR-7%20Street/140597?p=140597&m=1532"
+  },
+  {
+   "maerke": "Aprilia",
+   "titel": "Aprilia RSV 1000 Sport",
+   "model": "RSV 1000",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Aprilia%20RSV%201000%20Sport/49851?p=49851&m=1483"
+  },
+  {
+   "maerke": "Triumph",
+   "titel": "Triumph Speed Triple Street",
+   "model": "Speed Triple",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Triumph%20Speed%20Triple%20Street/49046?p=49046&m=1533"
+  },
+  {
+   "maerke": "Suzuki",
+   "titel": "Suzuki VS 400 Intruder Cruiser",
+   "model": "VS 400 Intruder",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Suzuki%20VS%20400%20Intruder%20Cruiser/168068?p=168068&m=1483"
+  },
+  {
+   "maerke": "Ducati",
+   "titel": "Ducati Scrambler Street",
+   "model": "Scrambler",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Ducati%20Scrambler%20Street/172833?p=172833&m=1534"
+  },
+  {
+   "maerke": "Harley-Davidson",
+   "titel": "Harley-Davidson FXBR Breakout",
+   "model": "FXBR Breakout",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Harley-Davidson%20FXBR%20Breakout/179186?p=179186&m=1528"
+  },
+  {
+   "maerke": "Yamaha",
+   "titel": "Yamaha FJR 1300 Sportstouring",
+   "model": "FJR 1300",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Yamaha%20FJR%201300%20Sportstouring/182213?p=182213&m=1526"
+  },
+  {
+   "maerke": "Husqvarna",
+   "titel": "Husqvarna SM 610 ie Motard",
+   "model": "SM 610 ie Motard",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Husqvarna%20SM%20610%20ie%20Motard/183911?p=183911&m=1483"
+  },
+  {
+   "maerke": "KTM",
+   "titel": "KTM 890 Adventure R Offroader",
+   "model": "890 R",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/KTM%20890%20Adventure%20R%20Offroader/158968?p=158968&m=1483"
+  },
+  {
+   "maerke": "Sym",
+   "titel": "Sym XS 125",
+   "model": "XS 125",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Sym%20XS%20125/181552?p=181552&m=1483"
+  },
+  {
+   "maerke": "Indian",
+   "titel": "Indian Challenger Dark Horse",
+   "model": "Challenger Dark Horse",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Indian%20Challenger%20Dark%20Horse/179779?p=179779&m=1483"
+  },
+  {
+   "maerke": "Moto Guzzi",
+   "titel": "Moto Guzzi V85 TT Offroader",
+   "model": "V85 TT",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Moto%20Guzzi%20V85%20TT%20Offroader/184644?p=184644&m=1483"
+  },
+  {
+   "maerke": "Rewaco",
+   "titel": "Rewaco Trike",
+   "model": "Trike",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Rewaco%20Trike/181437?p=181437&m=1483"
+  },
+  {
+   "maerke": "Buell",
+   "titel": "Buell XB12X Ulysses",
+   "model": "XB12X Ulysses",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Buell%20XB12X%20Ulysses/183862?p=183862&m=1483"
+  },
+  {
+   "maerke": "Cagiva",
+   "titel": "Cagiva Navigator 1000 Adventure",
+   "model": "Navigator 1000",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Cagiva%20Navigator%201000%20Adventure/181550?p=181550&m=1483"
+  },
+  {
+   "maerke": "MV Agusta",
+   "titel": "MV Agusta Stradale 800 Motard",
+   "model": "Stradale 800 Motard",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/MV%20Agusta%20Stradale%20800%20Motard/144057?p=144057&m=1483"
+  },
+  {
+   "maerke": "Royal Enfield",
+   "titel": "Royal Enfield Interceptor 650 Mark ll",
+   "model": "Interceptor 650 Mark ll",
+   "url": "https://www.guloggratis.dk/annonce/1d8c6953-25bb-4831-941a-0d990002963e/royal-enfield-interceptor-650-mark-ll"
+  },
+  {
+   "maerke": "Bach",
+   "titel": "Bach Delux 26 Kabinescooter RS90 EL Aut.",
+   "model": "Bach Delux 26 Kabinescooter RS90 EL Aut.",
+   "url": "https://www.guloggratis.dk/annonce/8f4eff65-290c-472a-81d3-77b9c76b9031/bach-delux-26-kabinescooter-rs90-el-aut"
+  },
+  {
+   "maerke": "BSA",
+   "titel": "BSA Gold star 650 Legacy Edition Tilbud 109998!",
+   "model": "Gold star 650 Legacy Edition",
+   "url": "https://www.guloggratis.dk/annonce/e3769fd0-e5bf-4762-bcef-b2fea96b57f6/bsa-gold-star-650-legacy-edition-tilbud-109998"
+  },
+  {
+   "maerke": "Ukendt",
+   "titel": "moto cross købes",
+   "model": "Moto købes",
+   "url": "https://www.guloggratis.dk/annonce/5e72af20-8fbb-4135-98b0-0fa17d122867/moto-cross-koebes"
+  },
+  {
+   "maerke": "Victory",
+   "titel": "Victory Highball Cruiser",
+   "model": "Highball",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Victory%20Highball%20Cruiser/148819?p=148819&m=1483"
+  },
+  {
+   "maerke": "Lauge",
+   "titel": "Lauge Jensen Great Dane",
+   "model": "Jensen Great Dane",
+   "url": "https://www.jensensmc.dk/motorcykler-/lauge-jensen-/lauge-jensen-great-dane"
+  },
+  {
+   "maerke": "Lauge Jensen",
+   "titel": "Lauge Jensen Great Dane",
+   "model": "Lauge Jensen Great Dane",
+   "url": "https://www.guloggratis.dk/annonce/fa4ff944-15bd-4238-893e-dbad39114bb9/lauge-jensen-great-dane"
+  },
+  {
+   "maerke": "Andet Mærke",
+   "titel": "CFMOTO MTX800",
+   "model": "MTX800",
+   "url": "https://www.guloggratis.dk/annonce/03300cdb-e222-4080-8ab7-b9d1a6c3faf4/cfmoto-mtx800"
+  },
+  {
+   "maerke": "Kymco",
+   "titel": "kymco x town 300 - rabatpris",
+   "model": "kymco x town 300 rabatpris",
+   "url": "https://www.guloggratis.dk/annonce/11c0f80b-1602-4e4e-bf50-332d5a6e0724/kymco-x-town-300-rabatpris"
+  },
+  {
+   "maerke": "Hyosung",
+   "titel": "God velkørende custom med lav. KM",
+   "model": "God velkørende custom med lav. KM",
+   "url": "https://www.guloggratis.dk/annonce/df515505-9b43-4768-bd2f-4bcb6eab6308/god-velkoerende-custom-med-lav-km"
+  },
+  {
+   "maerke": "Bsa",
+   "titel": "BSA Lightning Clubman Classic Bike",
+   "model": "BSA Lightning Clubman Classic Bike",
+   "url": "https://www.guloggratis.dk/annonce/f410a253-e9d1-430c-b7e0-6fe5481b6955/bsa-lightning-clubman-classic-bike"
+  },
+  {
+   "maerke": "Royal-enfield",
+   "titel": "Royal Enfield Classic 650 Black Chrome",
+   "model": "Classic 650 Black Chrome",
+   "url": "https://www.guloggratis.dk/annonce/59e4ae4f-0614-428c-a6b3-ac9536baa848/royal-enfield-classic-650-black-chrome"
+  },
+  {
+   "maerke": "Fb Mondial",
+   "titel": "FB Mondial HPS 125 Hipster",
+   "model": "FB Mondial HPS 125 Hipster",
+   "url": "https://www.guloggratis.dk/annonce/0e03d2b2-7649-4a9f-b250-3c194b5d0f06/fb-mondial-hps-125-hipster"
+  },
+  {
+   "maerke": "Benelli",
+   "titel": "Benelli Tre-K 1130 ENGROS/UDEN KLARGØRING Adventure",
+   "model": "Tre-K 1130",
+   "url": "https://mcsyd.dk/Produkter/Motorcykel/Brugt/Benelli%20Tre-K%201130%20ENGROSUDEN%20KLARG%C3%98RING%20Adventure/182937?p=182937&m=1483"
+  }
+ ],
+ "uoplyst": [
+  {
+   "maerke": "Ukendt",
+   "titel": "moto cross købes",
+   "model": "Moto købes",
+   "url": "https://www.guloggratis.dk/annonce/5e72af20-8fbb-4135-98b0-0fa17d122867/moto-cross-koebes"
+  },
+  {
+   "maerke": "Andet Mærke",
+   "titel": "CFMOTO MTX800",
+   "model": "MTX800",
+   "url": "https://www.guloggratis.dk/annonce/03300cdb-e222-4080-8ab7-b9d1a6c3faf4/cfmoto-mtx800"
+  },
+  {
+   "maerke": "Andet Mærke",
+   "titel": "DKW 250",
+   "model": "DKW 250",
+   "url": "https://www.guloggratis.dk/annonce/9fe612b4-5062-4e15-bed4-9240b7a864a1/dkw-250"
+  },
+  {
+   "maerke": "Andet Mærke",
+   "titel": "Victory motorcykel V 92 Prototype",
+   "model": "Victory motorcykel V 92 Prototype",
+   "url": "https://www.guloggratis.dk/annonce/5a7efaad-7043-4e7c-b2c1-f5d3796e8e29/victory-motorcykel-v-92-prototype"
+  },
+  {
+   "maerke": "Andet Mærke",
+   "titel": "Fantic moto cross maskine",
+   "model": "Fantic moto maskine",
+   "url": "https://www.guloggratis.dk/annonce/0cc02e11-9ad4-45db-978a-ab574170ea93/fantic-moto-cross-maskine"
+  }
+ ]
+}

@@ -217,7 +217,7 @@ function normalizeRemoteListing(row){
   const seller = row.seller || {};
   return {
     id: row.id,
-    brand: row.brand, model: row.model, type: row.type,
+    brand: BrandRegistry.kanonisk(row.brand), model: row.model, type: row.type,
     year: row.year, km: row.km, ccm: row.ccm, power: row.power,
     price: row.price, condition: row.condition,
     registration: row.registration, afgift: row.afgift,
@@ -522,40 +522,13 @@ function erKildensPladsholder(url){
   return !!u && PLADSHOLDER_MOENSTRE.some(re => re.test(u));
 }
 
-const MAERKE_AKRONYM = { bsa: 'BSA', ajs: 'AJS', mz: 'MZ', ktm: 'KTM', bmw: 'BMW', gasgas: 'GasGas', 'gas gas': 'GasGas', cfmoto: 'CFMoto', 'cf moto': 'CFMoto', 'mv agusta': 'MV Agusta',
-  /* RUNDE 13 (R13-5). Tre skrivemaader, der delte ét maerke i to — eller
-     udgav en ikke-maerkeside:
-
-     'royal-enfield'  Kilden skriver med bindestreg. Uden den her stod
-                      "Royal Enfield" OG "Royal-enfield" som to maerker i
-                      chiprraekken paa samme skaerm, hvilket underminerer
-                      tilliden til alle andre tal paa siden.
-     'lauge'          Ét maerke, to sider: maerke-lauge.html (1 annonce) og
-                      maerke-lauge-jensen.html (1 annonce). Annoncen bag den
-                      foerste hedder selv "Lauge Jensen Great Dane" og kommer
-                      fra Jensens Motorcykler. "Lauge" alene er ikke et
-                      motorcykelmaerke. Samme fold som 'harley' ->
-                      'Harley-Davidson', der allerede staar i tabellen.
-     'andet maerke'   Kildens RESERVEKATEGORI, ikke et maerke. Den udgav en
-                      indekserbar landingsside med h1 "Andet Maerke-motorcykler
-                      til salg i Danmark", hvis fire annoncer reelt er Victory,
-                      DKW og Fantic. Kilden har ikke oplyst maerket, saa svaret
-                      er 'Ukendt' — sentinelen, resten af koden allerede bruger
-                      (build-brand-pages.js:671 udelader den fra maerkesider,
-                      maerkeChips springer den over). Vi gaetter ikke paa, hvad
-                      der stod i stedet. */
-  'royal-enfield': 'Royal Enfield', 'lauge': 'Lauge Jensen',
-  'andet maerke': 'Ukendt', 'andet mærke': 'Ukendt',
-  /* F-011 (w3-data): samme mærke, to skrivemåder. Lageret har "Sym"/"Fb Mondial",
-     opret-annonce og mærkesiderne "SYM"/"FB Mondial", og ?brands=SYM gav 0. */
-  'sym': 'SYM', 'fb mondial': 'FB Mondial', 'fb-mondial': 'FB Mondial',
-  'hd': 'Harley-Davidson' };
+/* V4: stavemåder og aliaser bor i ÉT register (js/brands-registry.js, kopieret ind i js/data.js som BrandRegistry). Tabellen
+   MAERKE_AKRONYM, der stod her, er flyttet dertil — med alle sine rettelser: akronymer ("Bsa" -> BSA), "Royal-enfield",
+   "Lauge" -> Lauge Jensen, "Sym"/"Fb Mondial" -> SYM/FB Mondial, "hd" -> Harley-Davidson og kildens reservekategori
+   "Andet Mærke" -> sentinellen "Ukendt" (vises som "Uoplyst mærke"). Et mærkenavn, registret ikke kender, returneres UÆNDRET
+   her — men bliver ikke et mærke i byggEksternAnnonce(): det ender som "Ukendt" og logges af scripts/maerke-kandidater.js. */
 function maerkeAkronym(m){
-  if (!m) return m;
-  const k = String(m).trim().toLowerCase().replace(/\s+/g, ' ');
-  /* Slaa ogsaa op med bindestreger foldet til mellemrum, saa en ny kilde, der
-     skriver "Moto-Guzzi" eller "Can-Am", ikke faar sit eget maerke. */
-  return MAERKE_AKRONYM[k] || MAERKE_AKRONYM[k.replace(/-/g, ' ')] || m;
+  return BrandRegistry.kanonisk(m);
 }
 
 /* Maerket gentaget i modelfeltet: "Lauge Jensen **Lauge Jensen** Great Dane",
@@ -724,31 +697,13 @@ function modelFraDeeplink(url, maerke){
   t = fjernMaerkeDublet(b, rensModelStoej(t, null) || '');
   return t || null;
 }
-let _kendteMaerker = null;
-function kendteMaerker(){
-  if (_kendteMaerker) return _kendteMaerker;
-  const m = new Map();
-  const nok = s => String(s).toLowerCase().replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
-  Object.keys(BRANDS_BY_MODEL).forEach(b => m.set(nok(b), b));
-  Object.keys(MAERKE_AKRONYM).forEach(k => { const v = MAERKE_AKRONYM[k]; if (v !== 'Ukendt') m.set(nok(v), v); m.set(nok(k), v === 'Ukendt' ? null : v); });
-  _kendteMaerker = { m, nok };
-  return _kendteMaerker;
-}
 function maerkeFraDeeplink(url){
   return maerkeFraTekst(deeplinkTitel(url));
 }
 /* Mærket, når en tekst (deeplinkets titel eller annoncens egen titel) STARTER med et kendt mærke efterfulgt af
    mindst ét ord mere. Kun et ægte mærkenavn læses; alt andet giver null — ingen gæt (F2-014: "CFMOTO MTX800"). */
 function maerkeFraTekst(t){
-  if (!t) return null;
-  const { m, nok } = kendteMaerker();
-  const ord = nok(t).split(' ');
-  for (const n of [2, 1]){
-    if (ord.length < n + 1) continue;   // kræver også en model efter mærket
-    const hit = m.get(ord.slice(0, n).join(' '));
-    if (hit) return hit;
-  }
-  return null;
+  return BrandRegistry.fraTekst(t);
 }
 
 /* ---------- Samme mærke og model, forskellig stavemåde (F-011) ----------
@@ -781,7 +736,7 @@ function harmoniserStavning(liste){
     return g;
   };
   const maerker = grupper(l => noegle(l.brand), 'brand');
-  const kendte = new Map([...Object.keys(BRANDS_BY_MODEL), ...Object.values(MAERKE_AKRONYM).filter(v => v !== 'Ukendt')].map(b => [noegle(b), b]));
+  const kendte = new Map(BrandRegistry.alle().map(p => [noegle(p.navn), p.navn]));
   const vinderM = new Map([...maerker].map(([k, t]) => [k, bedst(t, kendte.get(k))]));
   for (const l of liste) if (l.brand) l.brand = vinderM.get(noegle(l.brand)) || l.brand;
   const modeller = grupper(l => noegle(l.brand) + '|' + noegle(l.model), 'model');
@@ -804,7 +759,9 @@ function byggEksternAnnonce(row){
   const kilde = row.kilde || {};
   /* F-008: er mærket "Ukendt", kan deeplinkets sti nævne et kendt mærke. */
   const brand = (() => {
-    const b = maerkeAkronym(row.maerke) || 'Ukendt';
+    /* V4: kun et REGISTRERET mærke bliver et mærke. Et nyt navn fra kilden (parserfejl, modelnavn, stavefejl) er "Ukendt" til
+       en menneskelig registerpost gør det til et mærke; scripts/maerke-kandidater.js logger dem. */
+    const b = BrandRegistry.normalise(row.maerke) || 'Ukendt';
     if (b !== 'Ukendt') return b;
     // Titlen starter med mærket ("CFMOTO MTX800"), også når kilden ikke er MC Syd og der ingen sti er at læse.
     const fraTitel = /^ukendt\b/i.test(String(row.titel || '').trim()) ? null : maerkeFraTekst(String(row.titel || '').trim());

@@ -349,7 +349,323 @@ function senesteBekraeftet(liste, nu){
   };
 }
 
-const BRANDS_BY_MODEL = {
+/* ============ Mærkeregistret (V4) ============
+   Afledt kopi af js/brands-registry.js (se scripts/maerke-register-gen.js). Det ER registret: kanoniske navne, aliaser,
+   slugs, periode, kilder og regler. BRANDS_BY_MODEL nedenfor er bare modelforslagene pr. mærke (til "Opret annonce"). */
+/* @@BRANDREG-START — afledt af js/brands-registry.js; redigér IKKE her, kør node scripts/maerke-register-gen.js */
+const BrandRegistry = (function () {
+  'use strict';
+
+  const UKENDT = 'Ukendt';                 // sentinellen, resten af koden (annonce.js, seo.js, generatorer) allerede kender
+  const UKENDT_LABEL = 'Uoplyst mærke';    // det, en BRUGER ser
+  const UKENDT_ALIASER = ['ukendt', 'andet mærke', 'andre mærker', 'ikke oplyst', 'uoplyst', 'uoplyst mærke', 'ingen', 'unknown', 'andet', 'other'];
+  const MIN_ANNONCER_INDEKS = 5;           // under: siden findes (hvis >=1 annonce) men er noindex og uden tekstpakke
+  const MIN_FOREKOMSTER_KANDIDAT = 3;      // under: et ukendt mærkenavn er blot "afventer"
+
+  /* Hvorfor et mærke tæller som ægte. 'ejer' og 'eks' er IKKE selvstændigt belæg: de siger kun, hvem der har nævnt det. */
+  const KILDER = {
+    wp:        'https://en.wikipedia.org/wiki/List_of_motorcycle_manufacturers',
+    lager:     'Ses i Bikerbasens indekserede lager (MC Syd, Gul og Gratis, Jensens Motorcykler), snapshot 2026-10-19',
+    ejer:      'Ejerens mærkeliste (V4-opgaven, 2026-10-19)',
+    eks:       'Eksisterende V3-liste (BRANDS_BY_MODEL/YDERLIGERE_KENDTE_MAERKER) — ikke selvstændigt belagt',
+    mash:      'https://www.mash-motors.fr/',
+    brixton:   'https://www.brixton-motorcycles.com/',
+    rewaco:    'https://www.rewaco.com/',
+    lexmoto:   'https://www.lexmoto.com/',
+    kove:      'https://www.kovemoto.com/',
+    jawayezdi: 'https://www.jawayezdimotorcycles.com/',
+    zontes:    'https://www.zontes.com/',
+    visordown: 'https://www.visordown.com/features/cfmoto-zongshen-chinese-motorcycle-brands-explained',
+    ingdk:     'https://ing.dk/artikel/motorcykler-i-oeksnehallen',
+    motoit:    'https://www.moto.it/concessionari/hyosung',
+    surron:    'https://surron.com/',
+    talaria:   'https://www.talariaeu.com/',
+  };
+  const IKKE_BELAEG = new Set(['ejer', 'eks']);
+
+  /* [navn, land, periode, aliaser, kilder, ekstra]. Rækkefølgen er uden betydning (alle visninger sorteres). */
+  const MAERKER = [
+    // ---- De store japanske ----
+    ['Yamaha', 'JP', 'aktuel', [], ['wp', 'lager', 'ejer']],
+    ['Honda', 'JP', 'aktuel', ['honda motor'], ['wp', 'lager', 'ejer']],
+    ['Kawasaki', 'JP', 'aktuel', [], ['wp', 'lager', 'ejer']],
+    ['Suzuki', 'JP', 'aktuel', [], ['wp', 'lager', 'ejer']],
+    // ---- Europa, nuværende ----
+    ['BMW', 'DE', 'aktuel', ['bmw motorrad'], ['wp', 'lager', 'ejer']],
+    ['Ducati', 'IT', 'aktuel', ['ducati motor holding'], ['wp', 'lager', 'ejer']],
+    ['KTM', 'AT', 'aktuel', ['ktm ag'], ['wp', 'lager', 'ejer']],
+    ['Triumph', 'GB', 'aktuel', ['triumph motorcycles'], ['wp', 'lager', 'ejer']],
+    ['Aprilia', 'IT', 'aktuel', [], ['wp', 'lager', 'ejer']],
+    ['Benelli', 'IT', 'aktuel', [], ['wp', 'lager', 'ejer']],
+    ['Husqvarna', 'SE', 'aktuel', ['husqvarna motorcycles'], ['wp', 'lager', 'ejer']],
+    ['Moto Guzzi', 'IT', 'aktuel', [], ['wp', 'lager', 'ejer']],
+    ['MV Agusta', 'IT', 'aktuel', [], ['wp', 'lager', 'ejer']],
+    ['GasGas', 'ES', 'aktuel', ['gas gas'], ['wp', 'ejer'], { note: 'Officielt skrevet GASGAS; Bikerbasen staver GasGas (som crawleren og logoet).' }],
+    ['Piaggio', 'IT', 'aktuel', ['piaggio group'], ['wp', 'ejer']],
+    ['Vespa', 'IT', 'aktuel', [], ['wp', 'ejer']],
+    ['Bimota', 'IT', 'aktuel', [], ['wp', 'ejer']],
+    ['Beta', 'IT', 'aktuel', [], ['wp', 'ejer']],
+    ['Sherco', 'FR', 'aktuel', [], ['wp', 'ejer']],
+    ['Fantic', 'IT', 'aktuel', ['fantic motor'], ['wp', 'lager', 'ejer']],
+    ['Rieju', 'ES', 'aktuel', [], ['wp', 'ejer']],
+    ['Derbi', 'ES', 'aktuel', [], ['wp', 'ejer']],
+    ['Gilera', 'IT', 'aktuel', [], ['wp', 'ejer']],
+    ['Peugeot', 'FR', 'aktuel', ['peugeot motocycles', 'peugeot scooters'], ['wp', 'ejer']],
+    ['Moto Morini', 'IT', 'aktuel', ['morini'], ['wp', 'ejer']],
+    ['SWM', 'IT', 'aktuel', [], ['wp', 'ejer']],
+    ['AJP', 'PT', 'aktuel', [], ['wp', 'ejer']],
+    ['FB Mondial', 'IT', 'aktuel', ['mondial', 'f.b. mondial'], ['wp', 'lager', 'ejer']],
+    ['Lambretta', 'IT', 'aktuel', [], ['wp', 'eks']],
+    ['Energica', 'IT', 'aktuel', [], ['wp', 'eks']],
+    ['Italjet', 'IT', 'aktuel', [], ['wp']],
+    ['Tomos', 'SI', 'aktuel', [], ['wp']],
+    ['Montesa', 'ES', 'aktuel', ['montesa honda'], ['wp', 'ejer']],
+    ['Sachs', 'DE', 'aktuel', [], ['wp', 'eks']],
+    ['Jawa', 'CZ', 'aktuel', ['jawa moto'], ['wp', 'jawayezdi', 'ejer']],
+    ['Brixton', 'AT', 'aktuel', ['brixton motorcycles'], ['brixton', 'ejer']],
+    ['Rewaco', 'DE', 'aktuel', [], ['rewaco', 'lager']],
+    ['Ural', 'RU', 'aktuel', ['imz-ural', 'imz ural'], ['wp', 'ejer']],
+    // ---- USA/Canada ----
+    ['Harley-Davidson', 'US', 'aktuel', ['harley', 'hd', 'h-d', 'harley davidson', 'harley-davidson motor company'], ['wp', 'lager', 'ejer']],
+    ['Indian', 'US', 'aktuel', ['indian motorcycle', 'indian motorcycles'], ['wp', 'lager', 'ejer']],
+    ['Zero', 'US', 'aktuel', ['zero motorcycles', 'zero motorcycle'], ['wp', 'ejer'], { logo: 'zero', note: 'Officielt Zero Motorcycles; kort navn bruges overalt.' }],
+    ['Can-Am', 'CA', 'aktuel', ['can am', 'canam', 'brp can-am'], ['wp', 'ejer']],
+    ['Buell', 'US', 'historisk', [], ['wp', 'lager', 'ejer'], { note: 'Buell Motorcycle Company 1983-2009; Erik Buell Racing til 2015.' }],
+    ['Victory', 'US', 'historisk', ['victory motorcycles'], ['wp', 'lager', 'ejer'], { note: 'Polaris stoppede Victory i 2017; brugte maskiner handles stadig.' }],
+    // ---- Britiske ----
+    ['Royal Enfield', 'IN', 'aktuel', ['royalenfield', 'royal enfield motors'], ['wp', 'lager', 'ejer'], { note: 'Oprindeligt britisk (1901-1968); i dag indisk-ejet.' }],
+    ['BSA', 'GB', 'aktuel', [], ['wp', 'lager', 'ejer'], { note: 'Genlanceret 2021; det oprindelige BSA ophørte 1972 (og 2003 i anden form).' }],
+    ['Norton', 'GB', 'aktuel', ['norton motorcycles'], ['wp', 'ejer'], { note: 'Genstartet 2008.' }],
+    ['AJS', 'GB', 'historisk', [], ['wp', 'eks']],
+    ['Ariel', 'GB', 'historisk', [], ['wp']],
+    ['Matchless', 'GB', 'historisk', [], ['wp']],
+    ['Velocette', 'GB', 'historisk', [], ['wp']],
+    ['Vincent', 'GB', 'historisk', ['vincent hrd'], ['wp']],
+    ['Brough Superior', 'GB', 'historisk', ['brough'], ['wp']],
+    ['Greeves', 'GB', 'historisk', [], ['wp']],
+    // ---- Kina/Taiwan/Korea/Indien ----
+    ['CFMoto', 'CN', 'aktuel', ['cfmoto', 'cf moto', 'cf-moto', 'cfmotor'], ['wp', 'lager', 'ejer'], { note: 'Officielt skrevet CFMOTO; Bikerbasen staver CFMoto (crawleren og logoet).' }],
+    ['SYM', 'TW', 'aktuel', ['sanyang'], ['wp', 'lager', 'ejer']],
+    ['Kymco', 'TW', 'aktuel', [], ['wp', 'lager', 'ejer']],
+    ['Keeway', 'CN', 'aktuel', [], ['wp', 'ejer']],
+    ['Hyosung', 'KR', 'aktuel', [], ['ingdk', 'motoit', 'lager', 'ejer']],
+    ['Mash', 'FR', 'aktuel', ['mash motorcycles'], ['mash', 'ejer'], { note: 'Fransk mærke, bygget i Kina.' }],
+    ['Voge', 'CN', 'aktuel', ['loncin voge'], ['visordown', 'ejer']],
+    ['Zontes', 'CN', 'aktuel', [], ['zontes', 'ejer']],
+    ['QJMotor', 'CN', 'aktuel', ['qj motor', 'qj', 'qjmotor'], ['wp', 'ejer'], { logo: 'qj-motor' }],
+    ['Lexmoto', 'GB', 'aktuel', [], ['lexmoto', 'eks']],
+    ['Kove', 'CN', 'aktuel', ['kove moto'], ['kove', 'eks']],
+    ['Yezdi', 'IN', 'aktuel', [], ['jawayezdi', 'eks']],
+    ['Bajaj', 'IN', 'aktuel', [], ['wp', 'eks']],
+    ['TVS', 'IN', 'aktuel', ['tvs motor'], ['wp', 'eks']],
+    ['Hero MotoCorp', 'IN', 'aktuel', ['hero', 'hero moto corp'], ['wp', 'eks'], { logo: 'hero-motocorp' }],
+    ['Sur-Ron', 'CN', 'aktuel', ['surron', 'sur ron'], ['wp', 'surron']],
+    ['Talaria', 'CN', 'aktuel', [], ['talaria', 'eks']],
+    ['Super Soco', 'CN', 'aktuel', ['supersoco'], ['eks'], { note: 'Mangler selvstændigt belæg — kræver ejerens bekræftelse.' }],
+    ['Daelim', 'KR', 'aktuel', ['daelim motor'], ['eks'], { note: 'Mangler selvstændigt belæg — kræver ejerens bekræftelse.' }],
+    ['TM Racing', 'IT', 'aktuel', ['tm'], ['eks'], { logo: 'tm-racing', note: 'Mangler selvstændigt belæg — kræver ejerens bekræftelse.' }],
+    // ---- Historiske kontinentale ----
+    ['Cagiva', 'IT', 'historisk', [], ['wp', 'lager', 'eks']],
+    ['Husaberg', 'SE', 'historisk', [], ['wp', 'ejer']],
+    ['DKW', 'DE', 'historisk', [], ['wp', 'lager', 'ejer'], { note: 'Fundet i lageret som "DKW 250" (Gul og Gratis).' }],
+    ['Laverda', 'IT', 'historisk', [], ['wp', 'eks']],
+    ['Puch', 'AT', 'historisk', [], ['wp', 'eks']],
+    ['Simson', 'DE', 'historisk', [], ['wp', 'eks']],
+    ['Zündapp', 'DE', 'historisk', ['zundapp', 'zuendapp'], ['wp', 'eks']],
+    ['Maico', 'DE', 'historisk', [], ['wp', 'eks']],
+    ['Ossa', 'ES', 'historisk', [], ['wp', 'eks']],
+    ['Kreidler', 'DE', 'historisk', [], ['wp', 'eks']],
+    ['Bultaco', 'ES', 'historisk', [], ['wp']],
+    ['Hercules', 'DE', 'historisk', [], ['wp']],
+    ['NSU', 'DE', 'historisk', [], ['wp']],
+    ['Horex', 'DE', 'historisk', [], ['wp']],
+    ['Morbidelli', 'IT', 'historisk', [], ['wp']],
+    ['MZ', 'DE', 'historisk', [], ['wp', 'eks'], { note: 'Østtyske MZ (1906-2009).' }],
+    ['Nimbus', 'DK', 'historisk', [], ['wp', 'eks'], { note: 'Dansk (1919-1959).' }],
+    // ---- Danske/lokale mærker, kun belagt via lageret ----
+    ['Lauge Jensen', 'DK', 'ukendt', ['lauge'], ['lager'], { note: 'Aliaset "lauge" findes, fordi én kilde skriver kun fornavnet.' }],
+    ['Bach', 'DK', 'ukendt', [], ['lager'], { note: 'Fundet som "Bach Delux 26 Kabinescooter" (Gul og Gratis). Siden bevares (URL).' }],
+  ];
+
+  /* ---------- Normalisering ---------- */
+  function fold(s) {
+    return String(s).normalize('NFC').toLowerCase()
+      .replace(/ø/g, 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa')
+      .replace(/ß/g, 'ss').replace(/ł/g, 'l').replace(/þ/g, 'th').replace(/œ/g, 'oe').replace(/ı/g, 'i')
+      .normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+  /* Opslagsnøglen: kun bogstaver og tal. "CF Moto", "cf-moto" og "CFMOTO" -> "cfmoto". */
+  function noegle(s) { return fold(s).replace(/&/g, '').replace(/[^a-z0-9]+/g, ''); }
+  function slugFold(s) { return fold(s).replace(/&/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+
+  const liste = [];
+  const nogleTilPost = new Map();
+  const slugTilPost = new Map();
+  const dubletter = [];      // fyldes, hvis to poster deler nøgle/slug — testen kræver en tom liste
+  const ukendtNoegler = new Set(UKENDT_ALIASER.map(noegle));
+  ukendtNoegler.add(noegle(UKENDT));
+
+  for (const r of MAERKER) {
+    const ekstra = r[5] || {};
+    const post = Object.freeze({
+      navn: r[0], slug: ekstra.slug || slugFold(r[0]), land: r[1], periode: r[2],
+      aliaser: Object.freeze(r[3].slice()), kilder: Object.freeze(r[4].slice()),
+      logo: ekstra.logo || null, note: ekstra.note || '',
+      verificeret: r[4].some(k => !IKKE_BELAEG.has(k)),
+    });
+    liste.push(post);
+    for (const n of [post.navn, ...post.aliaser, post.slug]) {
+      const k = noegle(n);
+      if (!k) continue;
+      const fund = nogleTilPost.get(k);
+      if (fund && fund !== post) dubletter.push(`${k}: ${fund.navn} / ${post.navn}`);
+      else nogleTilPost.set(k, post);
+    }
+    if (slugTilPost.has(post.slug)) dubletter.push(`slug ${post.slug}: ${slugTilPost.get(post.slug).navn} / ${post.navn}`);
+    slugTilPost.set(post.slug, post);
+  }
+  for (const k of ukendtNoegler) if (nogleTilPost.has(k)) dubletter.push(`${k}: er både "uoplyst" og ${nogleTilPost.get(k).navn}`);
+
+  const sortDa = (a, b) => a.localeCompare(b, 'da');
+
+  /* Det kanoniske navn, UKENDT for "uoplyst"-betegnelser, ellers null (ikke i registret). */
+  function normalise(navn) {
+    if (typeof navn !== 'string' && typeof navn !== 'number') return null;
+    const k = noegle(navn);
+    if (!k) return null;
+    if (ukendtNoegler.has(k)) return UKENDT;
+    const p = nogleTilPost.get(k);
+    return p ? p.navn : null;
+  }
+  function find(navn) { const n = normalise(navn); return n && n !== UKENDT ? nogleTilPost.get(noegle(n)) : null; }
+  /* Som maerkeAkronym(): kanonisk navn, "Ukendt" for uoplyst, ellers uændret (ingen gæt, ingen oprettelse). */
+  function kanonisk(m) { if (!m) return m; const n = normalise(m); return n || m; }
+  function erKendt(navn) { const n = normalise(navn); return !!n && n !== UKENDT; }
+  function erUkendt(b) { return !b || normalise(b) === UKENDT; }
+  /* Det, en bruger ser: uoplyst -> "Uoplyst mærke"; kendt -> kanonisk navn; ellers navnet som det står. */
+  function visNavn(b) { if (erUkendt(b)) return UKENDT_LABEL; return kanonisk(String(b).trim()); }
+  /* Nøgle til sammenligning uden hensyn til stavemåde/versaler (filtre, URL-parametre, tællinger). */
+  function sammenlignNoegle(b) { return noegle(kanonisk(b) || ''); }
+
+  function slug(navn) {
+    if (erUkendt(navn)) return null;
+    const p = find(navn);
+    return p ? p.slug : slugFold(navn);
+  }
+  function fraSlug(s) { return slugTilPost.get(String(s || '')) || null; }
+  function logoNoegle(navn) { const p = find(navn); return p ? (p.logo || p.slug) : null; }
+  function alle() { return liste.slice(); }
+  /* Alle registrerede mærker, til "Opret annonce": uanset om der er annoncer (sælgeren skal kunne vælge dem). */
+  function valgbare() { return liste.map(p => p.navn).sort(sortDa); }
+
+  /* Mærket, når en tekst STARTER med et registreret mærke efterfulgt af mindst ét ord mere (F2-014: ingen gæt). */
+  function fraTekst(tekst) {
+    if (!tekst) return null;
+    const ord = fold(tekst).split(/[^a-z0-9]+/).filter(Boolean);
+    for (const n of [3, 2, 1]) {
+      if (ord.length < n + 1) continue;
+      const k = ord.slice(0, n).join('');
+      if (ukendtNoegler.has(k)) continue;
+      const p = nogleTilPost.get(k);
+      if (p) return p.navn;
+    }
+    return null;
+  }
+
+  /* ---------- Status og sideregler ---------- */
+  /* 'aktiv' = har annoncer nu; 'uden-annoncer' = aktuelt/ukendt mærke uden annoncer; 'historisk' = historisk mærke uden annoncer. */
+  function status(navn, antal) {
+    const p = find(navn);
+    if (antal > 0) return 'aktiv';
+    return p && p.periode === 'historisk' ? 'historisk' : 'uden-annoncer';
+  }
+  /* Hvad et mærke må få: en tom side er en blindgyde; en tynd side er noindex; kun en rigtig side må indekseres. */
+  function sideRegel(antal) {
+    const n = Number(antal) || 0;
+    return { side: n > 0, indekserbar: n >= MIN_ANNONCER_INDEKS, tekstpakke: n >= MIN_ANNONCER_INDEKS };
+  }
+  /* Delt opgørelse: hvilke registrerede mærker har annoncer, hvilke ikke, og hvad står uregistreret/uoplyst?
+     `maerker` er listen af brand-felter fra lageret (en pr. annonce). */
+  function opgoer(maerker) {
+    const pr = new Map(), ukendt = { antal: 0 }, uregistreret = new Map();
+    for (const b of maerker || []) {
+      if (erUkendt(b)) { ukendt.antal++; continue; }
+      const p = find(b);
+      if (!p) { const k = String(b).trim(); uregistreret.set(k, (uregistreret.get(k) || 0) + 1); continue; }
+      pr.set(p.navn, (pr.get(p.navn) || 0) + 1);
+    }
+    const iLager = liste.filter(p => pr.has(p.navn)).map(p => ({ navn: p.navn, slug: p.slug, antal: pr.get(p.navn) }));
+    const udenAnnoncer = liste.filter(p => !pr.has(p.navn));
+    return {
+      iLager,
+      udenAnnoncer: { aktuelle: udenAnnoncer.filter(p => p.periode !== 'historisk').map(p => p.navn).sort(sortDa),
+                      historiske: udenAnnoncer.filter(p => p.periode === 'historisk').map(p => p.navn).sort(sortDa) },
+      uoplyst: ukendt.antal,
+      uregistreret: [...uregistreret].map(([navn, antal]) => ({ navn, antal })),
+    };
+  }
+
+  /* ---------- Kandidater (nye mærker fra annoncekilder) ----------
+     Et mærkenavn, kilden bruger, men som ikke står i registret, bliver ALDRIG et mærke af sig selv. Det vurderes her og
+     logges af scripts/maerke-kandidater.js. Tilstande:
+       registreret  findes (eller er "uoplyst")
+       afvist       ser ikke ud som et mærke: generisk ord, tal/lang tekst (modelnavn/titel), kendt modelnavn, eller en
+                    sandsynlig stavefejl af et registreret mærke (så er løsningen et alias, ikke et nyt mærke)
+       afventer     ser ud som et mærke, men er set under MIN_FOREKOMSTER_KANDIDAT gange
+       kandidat     ser ud som et mærke og er set mindst så mange gange: skal slås op (kilde) og evt. gives en post i MAERKER */
+  const GENERISKE = new Set(['motorcykel', 'motorcykler', 'scooter', 'scootere', 'cykel', 'moped', 'knallert', 'trike', 'cruiser', 'naked', 'sport', 'touring',
+    'adventure', 'enduro', 'cross', 'crosser', 'racer', 'custom', 'special', 'veteran', 'klassisk', 'el', 'elscooter', 'kabinescooter', 'kabine', 'koebes',
+    'soeges', 'saelges', 'bytte', 'ny', 'brugt', 'mc', 'diverse', 'blandet', 'ukendt', 'uoplyst', 'x', 'test', 'null', 'undefined', 'nan']);
+  function afstand(a, b) {
+    if (a === b) return 0;
+    const m = a.length, n = b.length;
+    let prev = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i];
+      for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[n];
+  }
+  function vurderKandidat(raaNavn, antal, valg) {
+    const o = valg || {};
+    const min = o.min == null ? MIN_FOREKOMSTER_KANDIDAT : o.min;
+    const navn = String(raaNavn == null ? '' : raaNavn).trim();
+    const ud = (tilstand, aarsag, ekstra) => Object.assign({ navn, antal: antal || 0, tilstand, aarsag }, ekstra || {});
+    const k = noegle(navn);
+    const kendt = normalise(navn);
+    if (kendt === UKENDT) return ud('registreret', 'uoplyst-betegnelse');
+    if (kendt) return ud('registreret', 'findes', { maerke: kendt });
+    if (!k || k.length < 2) return ud('afvist', 'tomt eller for kort');
+    if (GENERISKE.has(k)) return ud('afvist', 'generisk ord, ikke et mærke');
+    const ord = navn.split(/\s+/).filter(Boolean);
+    if (/\d/.test(navn) || ord.length > 3 || navn.length > 30) return ud('afvist', 'ligner et modelnavn eller en titel (tal, mange ord eller lang tekst)');
+    if (o.modelNoegler && o.modelNoegler.has(k)) return ud('afvist', 'er et kendt modelnavn');
+    let naermest = null, bedst = 99;
+    for (const p of liste) {
+      for (const n of [p.navn, ...p.aliaser]) {
+        const nk = noegle(n);
+        const d = afstand(k, nk);
+        if (d < bedst) { bedst = d; naermest = p.navn; }
+      }
+    }
+    const graense = k.length >= 8 ? 2 : (k.length >= 4 ? 1 : 0);
+    if (naermest && bedst <= graense) return ud('afvist', `sandsynlig stavefejl af ${naermest} (tilføj evt. som alias)`, { naermeste: naermest });
+    if ((antal || 0) < min) return ud('afventer', `set ${antal || 0} gang(e); kræver mindst ${min}`);
+    return ud('kandidat', `set ${antal} gange og ikke i registret — slå mærket op, tilføj kilde og en post i MAERKER`, { naermeste: naermest });
+  }
+
+  return {
+    UKENDT, UKENDT_LABEL, UKENDT_ALIASER, MIN_ANNONCER_INDEKS, MIN_FOREKOMSTER_KANDIDAT, KILDER, MAERKER_ANTAL: liste.length,
+    alle, valgbare, normalise, find, kanonisk, erKendt, erUkendt, visNavn, sammenlignNoegle, noegle, slug, fraSlug, slugFold, logoNoegle, fraTekst,
+    status, sideRegel, opgoer, vurderKandidat, dubletter: dubletter.slice(),
+  };
+})();
+/* @@BRANDREG-END */
+
+/* Modelforslag pr. mærke. Nøglerne SKAL være kanoniske registernavne (testet i scripts/maerke-register.test.js);
+   et mærke uden modelliste har stadig en post i registret og står derfor i BRANDS_BY_MODEL med en tom liste. */
+const MODELLER_PR_MAERKE = {
   Yamaha: ['MT-03', 'MT-07', 'MT-09', 'MT-10', 'YZF-R3', 'YZF-R6', 'YZF-R1', 'YZF-R7', 'Ténéré 700', 'XSR700', 'XSR900', 'Tracer 7', 'Tracer 9 GT', 'NMAX 125', 'XMAX 300', 'TMAX 560', 'WR250F', 'YZ450F', 'Niken', 'Virago 250', 'Virago 535', 'Virago 1100', 'V-Max', 'Fazer 600', 'FZ6', 'FZ1', 'RD350', 'DT125', 'XT250', 'XT660', 'Drag Star 650', 'Majesty 400', 'Seca II', 'SR400', 'MT-125', 'YZF-R125', 'XSR125', 'Tracer 900', 'Tracer 900 GT', 'Super Ténéré 1200', 'FJR1300', 'XJR1300', 'XJ6', 'FZ8', 'TDM900', 'WR450F', 'WR125R', 'MT-15', 'Aerox 155', 'Bolt'],
   Honda: ['CB125R', 'CB300R', 'CB500F', 'CB500X', 'CB650R', 'CB1000R', 'CBR500R', 'CBR600RR', 'CBR650R', 'CBR1000RR-R', 'Africa Twin', 'Africa Twin Adventure Sports', 'Rebel 300', 'Rebel 500', 'Rebel 1100', 'Forza 350', 'PCX 125', 'SH125i', 'Gold Wing', 'Gold Wing Tour', 'CRF250L', 'CRF450R', 'CRF450RL', 'Monkey', 'Super Cub C125', 'X-ADV', 'CB750 Four', 'CB400 Super Four', 'Hornet 600', 'Hornet 900', 'VFR800', 'Shadow 750', 'VTX1800', 'Transalp 750', 'Varadero 1000', 'Deauville 700', 'NC750X', 'Grom', 'CBX1000', 'CB1300', 'CBR125R', 'CBR300R', 'CB125F', 'CBR600F', 'CBR900RR Fireblade', 'CBR1000RR', 'VTR1000 Firestorm', 'VFR750', 'CBF600', 'CBF1000', 'NC700X', 'CB650F', 'Dominator NX650', 'CRF300L', 'Forza 750', 'Dax ST125'],
   Suzuki: ['GSX-R600', 'GSX-R750', 'GSX-R1000', 'GSX-S750', 'GSX-S1000', 'SV650', 'V-Strom 650', 'V-Strom 1050', 'Bandit 1200', 'Hayabusa', 'Burgman 400', 'Address 125', 'DR-Z400', 'RM-Z450', 'Boulevard M109R', 'Katana', 'GS500', 'Intruder 800', 'Marauder 800', 'GSF650 Bandit', 'DR650', 'Gladius 650', 'TL1000S', 'RGV250', 'GSX-R125', 'GSX-S125', 'GSX-8S', 'GSX-8R', 'V-Strom 800DE', 'Bandit 600', 'GSX650F', 'GSX1400', 'SV1000', 'Inazuma 250', 'GSX250R', 'Burgman 650', 'DR350', 'VanVan 200', 'Boulevard M50'],
@@ -371,9 +687,9 @@ const BRANDS_BY_MODEL = {
   Bimota: ['Tesi H2', 'KB4', 'DB4'],
   Norton: ['Commando 961', 'Atlas 650', 'V4SS'],
   Indian: ['Scout Bobber', 'Scout 100', 'Chief', 'Chieftain', 'Roadmaster', 'FTR 1200', 'Springfield'],
-  'Zero Motorcycles': ['S/R', 'SR/F', 'SR/S', 'DSR', 'FXE'],
+  Zero: ['S/R', 'SR/F', 'SR/S', 'DSR', 'FXE'],
   Energica: ['Eva Ribelle', 'Ego', 'Experia'],
-  CFMOTO: ['300NK', '450NK', '650NK', '700CL-X', '800MT', 'ZT310-R'],
+  CFMoto: ['300NK', '450NK', '650NK', '700CL-X', '800MT', 'ZT310-R'],
   Zontes: ['ZT125-U', 'ZT310-T', 'ZT350-G1'],
   Voge: ['300AC', '500R', '525DSX'],
   Kymco: ['Agility 125', 'Like 125', 'AK 550', 'X-Town 300'],
@@ -406,7 +722,7 @@ const BRANDS_BY_MODEL = {
   Mash: ['Seventy 125', 'Five Hundred', 'Two Fifty', 'Black Seven 125', 'Scrambler 400', 'Dirt Track 650', 'X-Ride 650', 'Family Side 400'],
   Brixton: ['Crossfire 125', 'Crossfire 500', 'Cromwell 125', 'Cromwell 250', 'Cromwell 1200', 'Sunray 125', 'Felsberg 125', 'Storr 500'],
   Lexmoto: ['LXR 125', 'LXR 380', 'ZSB 125', 'Isca 125', 'Assault 125', 'Michigan 125', 'Storm 125', 'Aspire 125'],
-  'QJ Motor': ['SRK 700', 'SRK 400', 'SRT 550', 'SRT 750', 'SRV 550', 'SRG 600', 'SRK 125'],
+  QJMotor: ['SRK 700', 'SRK 400', 'SRT 550', 'SRT 750', 'SRV 550', 'SRG 600', 'SRK 125'],
   Kove: ['450 Rally', '450R', '321RR', '321R', '800X', '500R', '525X'],
   'Super Soco': ['TC Max', 'TC', 'TS Street Hunter', 'CPx', 'VS1'],
   // Klassisk & scooter
@@ -414,6 +730,19 @@ const BRANDS_BY_MODEL = {
   Gilera: ['Fuoco 500', 'Nexus 250', 'Nexus 300', 'GP 800', 'Runner 200', 'Nexus 500'],
   Lambretta: ['V125 Special', 'V200 Special', 'G350', 'X300', 'Li 150', 'TV 175'],
 };
+
+/* Alle registrerede mærker som nøgler (tom modelliste, hvis der ingen forslag er) — ÉN liste for opret-annonce, søgning og
+   generatorer. Et nøgleord uden for registret (stavefejl, gammelt navn) kanoniseres; kendes det ikke, tages det med som det er,
+   så testen kan se det. */
+const BRANDS_BY_MODEL = (function () {
+  const ud = {};
+  BrandRegistry.alle().forEach(p => { ud[p.navn] = []; });
+  Object.keys(MODELLER_PR_MAERKE).forEach(k => {
+    const navn = BrandRegistry.kanonisk(k);
+    ud[navn] = (ud[navn] || []).concat(MODELLER_PR_MAERKE[k]);
+  });
+  return ud;
+})();
 
 const TYPE_BY_MODEL_HINT = {
   'MT-07': 'naked', 'MT-09': 'naked', 'YZF-R6': 'sport', 'YZF-R1': 'sport', 'Ténéré 700': 'adventure', 'XSR700': 'classic', 'Tracer 9 GT': 'touring', 'NMAX 125': 'scooter',

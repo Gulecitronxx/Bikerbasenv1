@@ -184,8 +184,10 @@ const Filtrering = (() => {
     // Mærke, model og titel kender vi altid — de kommer med annoncen fra kilden.
     // F-011: "SYM" og "Sym" er ét mærke; store/små bogstaver afgør ikke et træf.
     if (brug('brands') && state.brands.length){
-      const maerker = new Set(state.brands.map(b => String(b).toLowerCase()));
-      list = list.filter(l => maerker.has(String(l.brand).toLowerCase()));
+      /* V4: sammenligningen går på registrets nøgle (CFMOTO = CFMoto = CF Moto, Zero = Zero Motorcycles), ikke kun på små bogstaver. */
+      const mk = b => (typeof BrandRegistry !== 'undefined') ? BrandRegistry.sammenlignNoegle(b) : String(b).toLowerCase();
+      const maerker = new Set(state.brands.map(mk));
+      list = list.filter(l => maerker.has(mk(l.brand)));
     }
     if (brug('models') && state.models.length){
       const modeller = new Set(state.models.map(m => String(m).toLowerCase()));

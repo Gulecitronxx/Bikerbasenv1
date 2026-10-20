@@ -1234,11 +1234,41 @@ function initCookieConsent(){
   const synlig = () => { const c = getComputedStyle(dialog); return c.display !== 'none' && c.visibility !== 'hidden' && dialog.offsetWidth > 0 && dialog.offsetHeight > 0; };
   const slipSiden = () => { if (dialog.isConnected && dialog.open && !synlig()){ if (dialog.close) dialog.close(); dialog.removeAttribute('open'); dialog.setAttribute('hidden', ''); } };
   slipSiden();
-  setTimeout(slipSiden, 600);   // filtre der lægges på efter første malede billede
+  /* V4 QA: failsafen skal vare ved. Før kørte den kun nu og efter 600 ms; en blokker, der skjuler dialogen senere
+     (1200 ms+, målt), efterlod en inert, død side. Nu overvåges dialogen vedvarende: ændringer i style/class/hidden
+     og nye stylesheets i dokumentet (MutationObserver), et tjek hver 250 ms de første ~12 s, og ved
+     visibilitychange/focus/pageshow. Alt er idempotent og ophører, når dialogen er besvaret/fjernet. */
+  let vagtPlanlagt = false;
+  const vagt = () => {
+    if (!dialog.isConnected || !dialog.open){ ophoer(); return; }
+    slipSiden();
+    if (!dialog.open) ophoer();
+  };
+  const planlaeg = () => { if (vagtPlanlagt) return; vagtPlanlagt = true; requestAnimationFrame(() => { vagtPlanlagt = false; vagt(); }); };
+  let observer = null, interval = null;
+  function ophoer(){
+    if (observer){ observer.disconnect(); observer = null; }
+    if (interval){ clearInterval(interval); interval = null; }
+    document.removeEventListener('visibilitychange', planlaeg);
+    window.removeEventListener('focus', planlaeg);
+    window.removeEventListener('pageshow', planlaeg);
+  }
+  if (dialog.open){
+    if (typeof MutationObserver !== 'undefined'){
+      observer = new MutationObserver(planlaeg);
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class', 'hidden'], childList: true, subtree: true });
+    }
+    let kald = 0;
+    interval = setInterval(() => { vagt(); if (++kald >= 48) { clearInterval(interval); interval = null; } }, 250);
+    document.addEventListener('visibilitychange', planlaeg);
+    window.addEventListener('focus', planlaeg);
+    window.addEventListener('pageshow', planlaeg);
+  }
   dialog.addEventListener('cancel', e => e.preventDefault());
 
   const svar = level => () => {
     Store.setCookieConsent(level);
+    ophoer();
     if (dialog.open && dialog.close) dialog.close();
     dialog.remove();
     // Statistik er valgfri og starter foerst her — aldrig ved sideindlaesning.
