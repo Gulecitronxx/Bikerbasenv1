@@ -26,8 +26,8 @@ function kopierRod(medBrowserfiler) {
   return rod;
 }
 const ret = (rod, rel, fn) => { const p = path.join(rod, rel); fs.writeFileSync(p, fn(fs.readFileSync(p, 'utf8'))); };
-const staticFund = rod => {
-  const reg = R.indlaesRegister(rod);
+const staticFund = (rod, opts) => {
+  const reg = R.indlaesRegister(rod, opts && opts.manifest ? path.join(rod, 'img/brands/manifest.json') : undefined);
   const T = R.nyFundliste();
   R.statiskeTjek(rod, reg, R.opslagFraRegister(reg), T);
   return T.fund;
@@ -52,10 +52,35 @@ test('statiske tjek kan fejle: dublet-slug, canonical, manglende logo, dublet i 
     ret(rod, 'maerke-bmw.html', t => t.replace(/<meta name="robots" content="[^"]*noindex[^"]*">\s*/g, '').replace(/<span data-mk-n>[\d.]+<\/span>/, '<span data-mk-n>0</span>'));
     ret(rod, 'maerker.html', t => t.replace('<li data-mk-soeg="honda">', '<li data-mk-soeg="honda"><a href="maerke-honda.html"><span class="mk-az-navn"><span>Honda</span></span><span class="mk-az-n">1</span></a></li><li data-mk-soeg="honda">'));
     ret(rod, 'sitemap.xml', t => t.replace('</urlset>', '<url><loc>https://bikerbasen.dk/maerke-findes-ikke</loc></url></urlset>'));
-    const navne = tjekNavne(staticFund(rod));
+    const navne = tjekNavne(staticFund(rod, { manifest: true }));
     for (const forventet of ['dublet-slug', 'logo-fil-mangler', 'side-canonical', 'tom-side-indekserbar', 'dublet-oversigt', 'sitemap-doedt', 'alias-to-maerker'])
       assert.ok(navne.has(forventet), `mangler fund "${forventet}"; fik ${[...navne].join(', ')}`);
   } finally { fs.rmSync(rod, { recursive: true, force: true }); }
+});
+
+test('statiske tjek kan fejle (RIGTIGT register): dublet-alias, pille som link, skjult mærke, pille med side, forkert sum', () => {
+  const rod = kopierRod(false);
+  try {
+    fs.cpSync(path.join(REPO, 'js', 'brands-registry.js'), path.join(rod, 'js', 'brands-registry.js'));
+    assert.strictEqual(R.indlaesRegister(rod).registry ? 'registry' : 'manifest', 'registry');
+    ret(rod, 'js/brands-registry.js', t => { assert.ok(t.includes("['Yamaha', 'JP', 'aktuel', [],"), 'mutationsmål'); return t.replace("['Yamaha', 'JP', 'aktuel', [],", "['Yamaha', 'JP', 'aktuel', ['honda motor'],"); });
+    ret(rod, 'maerker.html', t => {
+      assert.ok(t.includes('<li>AJP</li>') && t.includes('<li>Zero</li>'), 'mutationsmål (pille)');
+      return t.replace('<li>AJP</li>', '<li><a href="maerke-ajp.html">AJP</a></li>').replace('<li>Zero</li>', '').replace('<li>Bajaj</li>', '<li>Bajaj</li> <li>Bajaj</li> <li>Bajaj</li>');
+    });
+    const fund = staticFund(rod);
+    const navne = tjekNavne(fund);
+    for (const forventet of ['register-dublet', 'flere-pille-er-link', 'oversigt-doedt-link', 'maerke-ikke-paa-oversigt', 'dublet-flere-pille', 'flere-tal', 'oversigt-sum'])
+      assert.ok(navne.has(forventet), `mangler fund "${forventet}"; fik ${[...navne].join(', ')}`);
+  } finally { fs.rmSync(rod, { recursive: true, force: true }); }
+});
+
+test('rigtigt register: 93+ mærker, alle valgbare, Zero har slug zero, ingen statiske fejl', () => {
+  const reg = R.indlaesRegister(REPO);
+  assert.ok(reg.registry, 'js/brands-registry.js skal bruges');
+  assert.ok(reg.maerker.length >= 90, String(reg.maerker.length));
+  assert.deepStrictEqual(reg.maerker.filter(e => !reg.valgbare.includes(e.navn)).map(e => e.navn), []);
+  assert.strictEqual(reg.maerker.find(e => e.navn === 'Zero').slug, 'zero');
 });
 
 test('baseline-sammenligning: skiftet mærke, mistet mærke, nyt mærke på Ukendt, stavning og forsvundne URL’er opdages', () => {
@@ -94,7 +119,7 @@ test('browser: et ødelagt mærkefilter (filtrering.js) opdages som filter-antal
   if (!kan.ok) return t.skip(kan.grund);
   const rod = kopierRod(true);
   try {
-    ret(rod, 'js/filtrering.js', s => { assert.ok(s.includes('list = list.filter(l => maerker.has(String(l.brand).toLowerCase()));'), 'mutationsmål mangler'); return s.replace('list = list.filter(l => maerker.has(String(l.brand).toLowerCase()));', 'list = list.filter(l => true);'); });
+    ret(rod, 'js/filtrering.js', s => { assert.ok(s.includes('list = list.filter(l => maerker.has(mk(l.brand)));'), 'mutationsmål mangler'); return s.replace('list = list.filter(l => maerker.has(mk(l.brand)));', 'list = list.filter(l => true);'); });
     const r = await R.koer({ rod, maerker: ['Honda', 'BMW', 'Yamaha'], data: 'fixtures', pw: kan.pw });
     const fund = r.fund.filter(f => f.tjek === 'filter-antal' && f.niveau === 'fejl');
     assert.ok(fund.length >= 3, `forventede filter-antal-fejl, fik ${JSON.stringify(r.fund.map(f => f.tjek))}`);
