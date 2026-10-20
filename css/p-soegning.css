@@ -751,3 +751,11 @@ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:emp
 #results-grid .row-tool:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
 /* Sammenlign-knappen i gitterkortet: tydelig fokusring (den har kun hover-skalering i styles.css). */
 #results-grid .card-compare:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
+
+/* V5: håndtagene på pris-/årgangsskyderen sad for højt (ca. 6 px over sporets midte). ::-webkit-slider-thumb placeres i toppen af det 34 px høje spor, medmindre den får
+   margin-top; Firefox centrerer selv. Nu: håndtaget er 24 x 24 px (border-box, 2 px ring; var 20 px + ring uden defineret kasse), margin-top = (34 - 24) / 2, og begge
+   motorer har samme mål. Sporets streg og udfyldningen er begge 4 px og står på top:50%; tastatur- og tryk-adfærd er uændret (input'en er stadig 34 px høj og fylder hele rækken). */
+.dr-thumb::-webkit-slider-thumb{ box-sizing:border-box; width:24px; height:24px; margin-top:5px; }
+.dr-thumb::-moz-range-thumb{ box-sizing:border-box; width:24px; height:24px; }
+.dr-thumb:focus-visible::-webkit-slider-thumb{ box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 32%, transparent); }
+.dr-thumb:focus-visible::-moz-range-thumb{ box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 32%, transparent); }
