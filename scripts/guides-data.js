@@ -229,7 +229,7 @@ const GUIDES = [
     description: 'A2-kørekort forklaret: 35 kW, 0,2 kW/kg, afledningsreglen, alder og vejen til A. Sådan tjekker du, om en motorcykel passer. Med kilder.',
     ingress: 'A2 er for mange vejen ind i motorcykelverdenen, men reglerne handler om mere end cm³. Her gennemgår vi grænserne for effekt og vægt, hvordan du kommer fra A1 til A2 til A, og hvordan du vælger en motorcykel, der faktisk kan dokumenteres som A2.',
     cardImage: 'img/type/naked.webp',
-    cardPos: 'center',
+    cardPos: 'center 100%',
     tldr: [
       'A2 handler om effekt (højst 35 kW) og vægt (højst 0,2 kW/kg), ikke om cm³.',
       'En motorcykel afledt af en model med over 70 kW opfylder ikke A2.',
@@ -338,7 +338,7 @@ const GUIDES = [
     description: 'Tjekliste til køb af brugt motorcykel: papirer, pant i Bilbogen, stand, forhandler eller privat, ejerskifte og forsikring. Med kilder.',
     ingress: 'En brugt motorcykel kan være et godt køb, men den fortæller kun så meget, som du selv får øje på. Her er en tjekliste, der tager dig fra annoncen til ejerskiftet: papirer, pant, stand, handlen og det, der skal ordnes bagefter.',
     cardImage: 'img/type/classic.webp',
-    cardPos: 'center',
+    cardPos: 'center 100%',
     tldr: [
       'Se registreringsattesten og slå stelnummeret op i Bilbogen, før du betaler.',
       'Hos en forhandler har du to års reklamationsret på mangler, der var der ved levering. Ved privatkøb afhænger det af aftalen: reklamer straks, og få aftaler og tilsagn på skrift.',
@@ -458,7 +458,7 @@ const GUIDES = [
     description: 'MC-forsikring for nye motorcyklister: hvad loven kræver, forskellen på ansvar og kasko, og hvad du bør spørge om, før du vælger. Med kilder.',
     ingress: 'Forsikring er det kedelige punkt i budgettet, indtil du får brug for den. Her får du de generelle fakta: hvad loven kræver, hvad der er frivilligt, og hvilke spørgsmål du bør stille, før du skriver under.',
     cardImage: 'img/type/touring.webp',
-    cardPos: 'center',
+    cardPos: 'center 100%',
     tldr: [
       'Ansvarsforsikring er et lovkrav (færdselsloven § 105). Den dækker skader på andre, ikke på din egen motorcykel.',
       'Vil du have din egen motorcykel dækket ved fx tyveri eller eget uheld, kræver det en kaskoforsikring. Den er frivillig.',
@@ -583,7 +583,7 @@ const GUIDES = [
     description: 'MC-udstyr til nye motorcyklister: hjelmpligten, pasform, beklædning, hvad du prioriterer først, og hvad du ikke bør købe brugt. Med kilder.',
     ingress: 'Udstyret er det, der sidder mellem dig og asfalten. Her får du en jordnær gennemgang af hjelm, jakke, handsker og støvler: hvad loven kræver, hvad du bør kigge efter, og hvordan du prioriterer, når pengene er begrænsede.',
     cardImage: 'img/type/sport.webp',
-    cardPos: 'center',
+    cardPos: 'center 100%',
     tldr: [
       'Styrthjelm er lovpligtig for føreren (færdselsloven § 81). Den skal sidde tæt og passe til din hovedform.',
       'Mange prioriterer hjelm, handsker og støvler først. Jakke og bukser med beskyttere hører med.',
@@ -708,7 +708,7 @@ const GUIDES = [
     description: 'Naked, sport, adventure, touring, cruiser, classic, scooter og cross: sådan skiller motorcykeltyperne sig ud, og hvordan du vælger efter din kørsel. Med kilder.',
     ingress: 'Typen fortæller, hvordan en motorcykel er bygget til at blive brugt: kørestilling, vindbeskyttelse, affjedring og bagage. Her er en jordnær gennemgang af de typer, du møder i annoncerne, og de spørgsmål, der hjælper dig til den rigtige.',
     cardImage: 'img/type/adventure.webp',
-    cardPos: 'center',
+    cardPos: 'center 100%',
     tldr: [
       'Typen siger noget om kørestilling og brug, ikke om kørekort. Det gør effekten.',
       'Start med, hvor og hvor langt du kører, og om du skal have bagage eller passager med.',
@@ -826,7 +826,7 @@ const GUIDES = [
     description: 'Hvad betyder ccm, kW, hk og kW/kg? Ordliste over begreberne i en motorcykelannonce, og hvordan du læser kørekortmærkerne på Bikerbasen. Med kilder.',
     ingress: 'En motorcykelannonce er fuld af forkortelser. Her forklarer vi de vigtigste, hvordan de hænger sammen med kørekortreglerne, og hvad der står på et annoncekort på Bikerbasen, og hvad der ikke gør.',
     cardImage: 'img/type/cruiser.webp',
-    cardPos: 'center',
+    cardPos: 'center 100%',
     tldr: [
       'ccm er motorens størrelse. kW og hk er effekten. 35 kW svarer til cirka 47 hk.',
       'Kørekortet afgøres af effekt og vægt, ikke af ccm alene.',
@@ -953,7 +953,7 @@ const GUIDES = [
     description: 'Sælg din motorcykel trygt: papirer, prisresearch, ærlig annonce, betaling, svindelmønstre og ejerskifte i Motorregistret. Med kilder.',
     ingress: 'En god handel starter, før annoncen er skrevet. Her er en jordnær gennemgang for dig, der sælger privat: papirerne, prisen, annoncen, samtalerne med købere, de svindelmønstre du bør kende, og hvad der skal ske, når motorcyklen skifter ejer.',
     cardImage: 'img/sell-cruiser.webp',
-    cardPos: 'center',
+    cardPos: 'center 100%',
     tldr: [
       'Saml papirerne først: registreringsattest, servicehistorik og regninger. Slå evt. gæld op i Bilbogen.',
       'Find prisen ved at sammenligne med lignende annoncer, og vær ærlig om stand og fejl.',
@@ -1058,7 +1058,7 @@ const GUIDES = [
     description: 'Vinteropbevaring og vedligehold af motorcykel: rengøring, brændstof, batteri, dæk, kæde, opbevaringssted og forsikring. Generelle råd med kilder.',
     ingress: 'Gør du motorcyklen ordentligt klar til vinteren, bruger du mindre tid på at rette op i foråret. Her er de generelle råd om rengøring, brændstof, batteri, dæk, kæde og opbevaring, og hvad du bør spørge din forsikring og din betjeningsvejledning om.',
     cardImage: 'img/type/cross.webp',
-    cardPos: 'center',
+    cardPos: 'center 100%',
     tldr: [
       'Vask og tør motorcyklen grundigt, og smør de dele, producenten anviser, før den kommer ind.',
       'Følg betjeningsvejledningen for brændstof, olie, batteri og kølervæske. Den gælder for netop din model.',
@@ -1169,7 +1169,7 @@ const GUIDES = [
     description: 'Klar til første tur i foråret? Tjekliste til motorcyklen: væsker, batteri, dæk, bremser, kæde, lys, papirer og forsikring, og en rolig start.',
     ingress: 'Efter en lang vinter er både motorcykel og fører rustne. Her er en tjekliste, du kan gå igennem, før du kører ud første gang: et rundt blik, væsker, batteri, dæk, bremser, lys, papirer og en rolig første tur.',
     cardImage: 'img/hero-800.webp',
-    cardPos: '15% center',
+    cardPos: '90% center',
     tldr: [
       'Gå en runde om motorcyklen, og se efter lækager, skader og noget, der er løsnet.',
       'Tjek batteri, væsker, dæktryk, bremser, kæde og lys, før du starter.',

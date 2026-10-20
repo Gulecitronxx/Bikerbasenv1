@@ -282,7 +282,7 @@ function relateretBlok(g){
         <ul class="gd-rel-list">
           ${r.map(x => `<li><a class="gd-rel-card" href="${x.file}">
             <span class="gd-rel-media"><img src="${x.cardImage}" alt="" style="object-position:${x.cardPos}" width="240" height="180" loading="lazy" decoding="async"></span>
-            <span class="gd-rel-body"><strong>${esc(x.navn)}</strong><span class="gd-rel-meta">Læsetid ${minutterTekst(guideMinutter(x))}</span></span>
+            <span class="gd-rel-body"><span class="gd-rel-kicker">${esc(kategoriAf(x))}</span><strong>${esc(x.navn)}</strong><span class="gd-rel-meta">Læsetid ${minutterTekst(guideMinutter(x))}</span><span class="gd-rel-go" aria-hidden="true">Læs guiden ${Icon.arrowRight}</span></span>
           </a></li>`).join('\n          ')}
         </ul>
       </section>`;
@@ -292,7 +292,7 @@ function relateretBlok(g){
    Hver guide slutter med tre veje videre: ind i søgningen, til en søsterguide eller til en kategoriside.
    Kun adresser, der findes (testen låser det). Ingen tal: siderne hydreres ikke, så et tal ville ælde. */
 const NAESTE = {
-  'guide-foerste-motorcykel': { h: 'Klar til at finde din første motorcykel?', p: 'Brug det, du har læst, som filter, når du søger.', links: [
+  'guide-foerste-motorcykel': { h: 'Gå videre herfra', p: 'Brug det, du har læst, som filter, når du søger.', links: [
     ['Motorcykler til A2-kørekort', 'Annoncer, der ikke er udelukket til A2 ud fra de oplyste tal.', 'koerekort-a2.html'],
     ['Sammenlign typerne', 'Naked, sport, adventure, touring, cruiser og flere.', 'guide-mc-typer.html'],
     ['Søg i hele udvalget', 'Filtrér efter pris, årgang, km og kørekort.', 'soegning.html'] ] },
@@ -412,7 +412,7 @@ function typeBlok(g, sektioner){
         <p class="gd-regionchips"><span>Eller se annoncer efter region:</span> ${REGIONER.filter(([f]) => filFindes(f)).map(([f, t]) => `<a href="${f}">${t}</a>`).join(' ')}</p>
       </section>`;
 }
-const HERO_POS = ['72% 55%', '58% 42%', '82% 62%', '66% 48%', '76% 70%'];
+const HERO_POS = ['90% 62%', '90% 55%', '90% 66%', '90% 58%', '90% 70%'];   /* V5: motorcyklen står til højre i fotoet (x 59-94 %); x-positionen holder den inde i billedet også på smalle skærme */
 
 /* ---------- Guideside ---------- */
 function renderGuide(g, ctx){
@@ -603,6 +603,17 @@ function guideKort(g, cls){
         </a>
       </li>`;
 }
+/* Sidste felt i rækken af guides, så et ulige antal ikke efterlader et hul: ét ærligt link ind i søgningen (ingen tal). */
+function afslutningsKort(){
+  return `<li class="gd-cta-tile">
+        <a class="gd-cta-link" href="soegning.html">
+          <span class="gd-cta-k">Fra læsning til køb</span>
+          <strong class="gd-cta-t">Se, hvad der ligger i udvalget</strong>
+          <span class="gd-cta-b">Filtrér efter type, pris, årgang og kørekort. Kilden står på hvert kort.</span>
+          <span class="gd-cta-go">Søg motorcykler ${Icon.arrowRight}</span>
+        </a>
+      </li>`;
+}
 function renderOversigt(ctx){
   const crumbs = [{ name: 'Forside', file: 'index.html' }, { name: 'Artikler & guides', file: OVERSIGT.file }];
   /* Magasinopsætning: én stor guide og to ved siden af (begynd her), derefter resten som kompakte kort. */
@@ -615,6 +626,7 @@ function renderOversigt(ctx){
   const flere = resten.length ? `<h2 class="gd-flere-h" id="gd-flere-h">Flere guides</h2>
     <ul class="gd-cards" aria-labelledby="gd-flere-h">
       ${resten.map(g => guideKort(g, 'gd-card-lille')).join('\n      ')}
+      ${resten.length % 4 ? afslutningsKort() : ''}
     </ul>` : '';
   const ld = jsonLd([
     {

@@ -102,6 +102,27 @@ function setCount(id, n){
   if (el) el.textContent = n;
 }
 
+/* ---------- Fokus (V5) ----------
+   Bekræftelsesdialogen ligger i <body>, uden for rækkens ⋮-menu. Før lukkede klik-udenfor-handleren menuen,
+   når man trykkede i dialogen, så "Slet annonce"-knappen (hvor fokus skulle tilbage til) blev skjult, og
+   fokus faldt til <body> — hverken efter Annuller eller efter en gennemført handling var der noget at stå på.
+   Nu: Annuller lukker menuen og lander på ⋮-knappen; en gennemført handling lander på det, der er tilbage
+   (næste række, rækkens egen titel eller listens overskrift). */
+function lukMenuOgFokus(menu){
+  if (!menu || !menu.isConnected) return;
+  menu.removeAttribute('open');
+  try { menu.querySelector('summary')?.focus({ preventScroll: true }); } catch (e) { /* fokus er en hjælp */ }
+}
+function fokusPaa(el){
+  if (!el) return;
+  try { el.focus(); } catch (e) { /* fokus er en hjælp */ }
+}
+/* Efter en ny tegning: fokus på elementet (vælger) i rækken for id, ellers listens overskrift. */
+function fokusRaekke(id, vaelger){
+  const raekke = [...document.querySelectorAll('#mine-grid .db-row[data-listing-id]')].find(r => r.dataset.listingId === String(id));
+  fokusPaa((raekke && raekke.querySelector(vaelger)) || document.getElementById('mine-heading'));
+}
+
 /* ---------- Annoncelisten ---------- */
 
 /* Alle egne annoncer, uanset status. Siden henter dem selv, fordi den fælles
@@ -163,7 +184,7 @@ function ownRowHTML(l){
     <div class="db-status">
       <span class="db-badge ${v.cls}">${v.ikon ? dbIkon(v.ikon) : ''}${v.label}</span>
       ${l.createdAt ? `<span class="db-when">${Icon.clock}Oprettet ${escapeHTML(timeAgoDa(l.createdAt))}</span>` : ''}
-      ${status === 'paused' ? `<span class="db-when">${Icon.eye}Skjult for købere, indtil du aktiverer den</span>` : ''}
+      ${status === 'paused' ? `<span class="db-when">${Icon.eye}Skjult for købere</span>` : ''}
     </div>
     <div class="db-actions">
       ${kanRedigere ? `<a class="btn btn-outline btn-sm" href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}">${Icon.edit}Rediger</a>` : ''}
@@ -284,7 +305,10 @@ async function visAnnonceStatistik(grid){
     blok.innerHTML = (!s.views && !gemtN && !s.contacts)
       ? `<span class="db-num db-num-tom"><span class="db-num-ic" aria-hidden="true">${Icon.eye || ''}</span><span class="db-num-tx">Ingen visninger endnu</span></span>`
       : kol(s.views, 'Visninger', 'eye') + (harGemt ? kol(gemtN, 'Favoritter', 'heart') : '') + kol(s.contacts, 'Telefonvisninger', 'phone');
-    row.querySelector('.db-status')?.appendChild(blok);
+    /* Tal: stribe nederst i rækken (ikke i statuskolonnen, hvor den løb ind under knapperne).
+       Ingen tal: den ene ærlige linje bliver i statuskolonnen, så rækken ikke får en tom stribe. */
+    if (blok.querySelector('.db-num-tom')) row.querySelector('.db-status')?.appendChild(blok);
+    else { blok.insertAdjacentHTML('beforeend', '<span class="db-nums-per">Seneste 30 dage</span>'); row.appendChild(blok); }
   });
 }
 
@@ -321,6 +345,7 @@ async function skiftStatus(id, btn){
   if (naeste.status !== 'active') window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(x => String(x.id) !== String(id));
   toast(naeste.besked);
   renderMine();
+  fokusRaekke(id, '[data-status-skift]');
 }
 
 /* V2: markér solgt. 'sold' er en gyldig listings.status; annoncen forlader søgningen, men bliver stående her
@@ -328,7 +353,8 @@ async function skiftStatus(id, btn){
 async function markerSolgt(id, btn){
   const l = egneListe().find(x => String(x.id) === String(id));
   if (!l) return;
-  if (!(await bekraeft({ titel: `Markér ${[l.brand, l.model].filter(Boolean).join(' ') || 'annoncen'} som solgt?`, tekst: 'Annoncen fjernes fra søgningen. Du kan sætte den til salg igen under Mine annoncer.', ok: 'Markér som solgt' }))) return;
+  const menu = btn.closest('details.db-more');
+  if (!(await bekraeft({ titel: `Markér ${[l.brand, l.model].filter(Boolean).join(' ') || 'annoncen'} som solgt?`, tekst: 'Annoncen fjernes fra søgningen. Du kan sætte den til salg igen under Mine annoncer.', ok: 'Markér som solgt' }))){ lukMenuOgFokus(menu); return; }
   btn.disabled = true;
   let svar;
   try { svar = await db.updateListing(id, { status: 'sold' }); }
@@ -342,11 +368,14 @@ async function markerSolgt(id, btn){
   window.REMOTE_LISTINGS = (window.REMOTE_LISTINGS || []).filter(x => String(x.id) !== String(id));
   toast('Annoncen er markeret som solgt. Tillykke!');
   renderMine();
+  fokusRaekke(id, '.db-title');
 }
 
 async function sletAnnonce(id, btn){
   const slet = egneListe().find(x => String(x.id) === String(id));
-  if (!(await bekraeft({ titel: `Slet ${slet ? [slet.brand, slet.model].filter(Boolean).join(' ') : 'annoncen'}?`, tekst: 'Annoncen og dens billeder fjernes helt. Det kan ikke fortrydes. Vil du bare skjule den, så sæt den på pause i stedet.', ok: 'Slet annonce', farlig: true }))) return;
+  const menu = btn.closest('details.db-more');
+  const pos = [...document.querySelectorAll('#mine-grid .db-row')].findIndex(r => r.dataset.listingId === String(id));
+  if (!(await bekraeft({ titel: `Slet ${slet ? [slet.brand, slet.model].filter(Boolean).join(' ') : 'annoncen'}?`, tekst: 'Annoncen og dens billeder fjernes helt. Det kan ikke fortrydes. Vil du bare skjule den, så sæt den på pause i stedet.', ok: 'Slet annonce', farlig: true }))){ lukMenuOgFokus(menu); return; }
   // Databaseannoncer har uuid som id. Number() på et uuid gav NaN, så sletningen
   // ramte kun localStorage og annoncen blev liggende i databasen.
   if (isUuid(id)){
@@ -368,6 +397,10 @@ async function sletAnnonce(id, btn){
   }
   toast('Annonce slettet');
   renderMine();
+  /* Rækken er væk: fokus til rækken, der rykkede op på pladsen (eller den forrige), ellers til overskriften. */
+  const rest = [...document.querySelectorAll('#mine-grid .db-row')];
+  const naesteRk = rest[Math.min(Math.max(pos, 0), rest.length - 1)];
+  fokusPaa((naesteRk && naesteRk.querySelector('.db-title')) || document.getElementById('mine-heading'));
 }
 
 function visEgneFejl(){
@@ -424,10 +457,11 @@ function renderMine(){
     btn.addEventListener('click', () => skiftStatus(btn.dataset.statusSkift, btn));
   });
   grid.querySelector('[data-delete-draft]')?.addEventListener('click', async () => {
-    if (!(await bekraeft({ titel: 'Slet kladden?', tekst: 'De oplysninger, du har gemt på denne enhed, fjernes. Det kan ikke fortrydes.', ok: 'Slet kladde', farlig: true }))) return;
+    if (!(await bekraeft({ titel: 'Slet kladden?', tekst: 'De oplysninger, du har gemt på denne enhed, fjernes. Det kan ikke fortrydes.', ok: 'Slet kladde', farlig: true }))){ fokusPaa(grid.querySelector('[data-delete-draft]')); return; }
     Store.clearDraft();
     toast('Kladden er slettet');
     renderMine();
+    fokusPaa(document.querySelector('#mine-grid .db-title') || document.getElementById('mine-heading'));
   });
 }
 
@@ -846,7 +880,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   wireTabs();
 
   document.addEventListener('click', (e) => {
+    if (e.target.closest && e.target.closest('dialog.bb-bekraeft')) return;   // dialogen hører til menuens handling
     document.querySelectorAll('.db-more[open]').forEach(d => { if (!d.contains(e.target)) d.removeAttribute('open'); });
+  });
+  /* Tab ud af en åben ⋮-menu lukker den (ellers står den åben over næste række). Ikke når fokus går til bekræftelsesdialogen. */
+  document.addEventListener('focusout', (e) => {
+    const d = e.target.closest && e.target.closest('.db-more[open]');
+    const hen = e.relatedTarget;
+    if (!d || !hen || d.contains(hen) || (hen.closest && hen.closest('dialog.bb-bekraeft'))) return;
+    d.removeAttribute('open');
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') document.querySelectorAll('.db-more[open]').forEach(d => { d.removeAttribute('open'); d.querySelector('summary')?.focus(); });

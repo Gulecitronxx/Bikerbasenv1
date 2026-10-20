@@ -58,11 +58,20 @@ window.addEventListener('beforeunload', (e) => {
 });
 let _foersteTegning = true;
 
+/* V5: trinbjælken er også en fremdriftsbjælke. På side 1 får et trin, man ikke står ved, et flueben, når dets
+   sektion er klar (påkrævede felter udfyldt; billeder: mindst ét valgt). Intet gættes — det er de samme tjek som
+   trinUdfyldt() og billedlisten. */
+function sektionKlar(n){
+  if (n === 2) return (uploadedPhotos.length + existingPhotos.length) > 0;
+  return trinUdfyldt(n);
+}
+
 function renderStepper(){
   const vis = currentStep === 1 ? ankerTrin : currentStep;
   document.getElementById('stepper').innerHTML = STEP_LABELS.map((label, i) => {
     const n = i + 1;
-    const cls = n === vis ? 'active' : (currentStep > 1 && n < vis ? 'done' : '');
+    const klar = currentStep === 1 && n <= 3 && n !== vis && sektionKlar(n);
+    const cls = n === vis ? 'active' : ((currentStep > 1 && n < vis) || klar ? 'done' : '');
     const klik = currentStep === 1 ? n <= 3 : n < currentStep;
     const tag = klik ? 'button type="button" data-goto="' + n + '"' : 'div';
     return `
@@ -1062,9 +1071,35 @@ function planlaegLiveKort(){
   clearTimeout(_liveTimer);
   _liveTimer = setTimeout(renderLiveCard, 120);
 }
+/* V5: "x af 10 påkrævede felter" i sidekortet + flueben i trinbjælken. Kaldes ved hver ændring (via renderLiveCard).
+   Trinbjælken tegnes kun igen, når et trins status faktisk skifter (ellers flimmer og tabt fokus). */
+let _trinSig = null;
+function opdaterFremdrift(){
+  const form = document.getElementById('listing-form');
+  const txt = document.getElementById('op-klar-tx'), tal = document.getElementById('op-klar-n'), fyld = document.getElementById('op-klar-fyld'), bar = document.getElementById('op-klar-bar');
+  if (!form) return;
+  const felter = [1, 3].flatMap(t => [...form.querySelectorAll(`.form-step[data-step="${t}"] [required]`)]);
+  const udfyldt = el => el.type === 'checkbox' ? el.checked : String(el.value).trim() !== '';
+  const ialt = felter.length + 1;                                                  // + motorcykeltypen (radiogruppe)
+  const klar = felter.filter(udfyldt).length + (document.querySelector('input[name="bike-type"]:checked') ? 1 : 0);
+  if (txt){
+    txt.textContent = klar === ialt ? 'Alt påkrævet er udfyldt' : 'Påkrævede felter udfyldt';
+    tal.textContent = `${klar} af ${ialt}`;
+    fyld.style.width = Math.round(klar / ialt * 100) + '%';
+    bar.setAttribute('aria-valuenow', String(klar)); bar.setAttribute('aria-valuemax', String(ialt));
+    bar.closest('.op-klar').classList.toggle('er-klar', klar === ialt);
+  }
+  if (currentStep === 1){
+    const sig = [1, 2, 3].map(n => sektionKlar(n) ? 1 : 0).join('') + ankerTrin;
+    if (_trinSig !== null && sig !== _trinSig) renderStepper();
+    _trinSig = sig;
+  }
+}
+
 function renderLiveCard(){
   const mount = document.getElementById('op-live-card');
   if (!mount || typeof collectFormData !== 'function') return;
+  try { opdaterFremdrift(); } catch (e) { /* fremdriften er pynt; aldrig blokere kortet */ }
   const d = collectFormData();
   /* Et tal, der ikke består valideringen (fx 9999 hk eller årgang 1850), vises
      ikke på kortet — det ville give et falsk kørekortmærkat og en urealistisk
@@ -1117,15 +1152,20 @@ function wireForhaandsvisningsark(){
   /* Pillen skjules, mens man skriver (tastaturet) og når kortet/footeren er i syne. */
   const side = document.querySelector('.op-side'), fod = document.querySelector('.site-footer');
   const synlige = new Set();
-  const opdater = () => aabn.classList.toggle('skjult', synlige.size > 0 || document.body.classList.contains('op-skriver'));
+  /* V5 (V3-rest): pillen dækkede nederste valideringsfejl og "Fortsæt"-knapperne på en telefon. Den skjules nu også, mens
+     handlingsrækken er i syne, og så længe et felt har en fejl (aria-invalid) — fejlteksten står frit, til den er rettet. */
+  const harFejl = () => !!document.querySelector('#listing-form [aria-invalid="true"], #listing-form .felt-fejl');
+  const opdater = () => aabn.classList.toggle('skjult', synlige.size > 0 || document.body.classList.contains('op-skriver') || harFejl());
+  const handlinger = document.querySelector('#listing-form .form-actions');
   if ('IntersectionObserver' in window){
     const io = new IntersectionObserver((poster) => {
       poster.forEach(p => { p.isIntersecting ? synlige.add(p.target) : synlige.delete(p.target); });
       opdater();
     });
-    [side, fod].forEach(e => e && io.observe(e));
+    [side, fod, handlinger].forEach(e => e && io.observe(e));
   }
   const form = document.getElementById('listing-form');
+  if ('MutationObserver' in window) new MutationObserver(opdater).observe(form, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-invalid'] });
   form.addEventListener('focusin', (e) => { if (e.target.matches('input:not([type=checkbox]):not([type=radio]), textarea, select')){ document.body.classList.add('op-skriver'); opdater(); } });
   form.addEventListener('focusout', () => { document.body.classList.remove('op-skriver'); opdater(); });
 }

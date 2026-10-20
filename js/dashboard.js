@@ -575,11 +575,23 @@ function wireKravUI(){
     else if (!e.shiftKey && document.activeElement === sidst){ e.preventDefault(); foerst.focus(); }
   });
 
+  document.getElementById('krav-dialog-doku').addEventListener('input', (e) => {
+    e.target.removeAttribute('aria-invalid'); e.target.removeAttribute('aria-describedby'); document.getElementById('krav-dialog-doku-fejl')?.remove();
+  });
   document.getElementById('krav-dialog-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!AKTUEL_KRAV_ANNONCE) return;
     const btn = document.getElementById('krav-dialog-submit');
-    const doku = document.getElementById('krav-dialog-doku').value.trim();
+    const dokuEl = document.getElementById('krav-dialog-doku');
+    const doku = dokuEl.value.trim();
+    /* V5: formularen er novalidate (browserens egen engelske "Please fill out this field." erstattes af en dansk fejl ved feltet),
+       og et felt med kun mellemrum tæller som tomt. */
+    document.getElementById('krav-dialog-doku-fejl')?.remove(); dokuEl.removeAttribute('aria-invalid'); dokuEl.removeAttribute('aria-describedby');
+    if (!doku){
+      const p = document.createElement('p'); p.className = 'felt-fejl'; p.id = 'krav-dialog-doku-fejl'; p.textContent = 'Skriv kort, hvordan vi kan se, at annoncen er din.';
+      dokuEl.parentElement.appendChild(p); dokuEl.setAttribute('aria-invalid', 'true'); dokuEl.setAttribute('aria-describedby', 'krav-dialog-doku-fejl'); dokuEl.focus();
+      return;
+    }
     btn.disabled = true; btn.textContent = 'Sender…';
 
     const { error } = await sikkertKald(() => db.submitKrav(AKTUEL_KRAV_ANNONCE.id, doku));
@@ -660,7 +672,7 @@ function renderDashboard(user){
     rowsEl.innerHTML = stats.map(x => {
       const l = x.listing;
       const antal = (l.photoUrls || []).length;
-      const tal = (n, t) => `<span class="db-num"><b>${n.toLocaleString('da-DK')}</b>${t}</span>`;
+      const tal = (n, t, ik) => `<span class="db-num"><span class="db-num-ic" aria-hidden="true">${Icon[ik] || ''}</span><span class="db-num-tx"><b>${n.toLocaleString('da-DK')}</b>${t}</span></span>`;
       return `
       <article class="db-row" data-listing-id="${l.id}">
         <a class="db-thumb" href="annonce.html?id=${l.id}" tabindex="-1" aria-hidden="true">${listingMediaHTML(l, '')}${antal ? `<span class="db-photos">${Icon.camera}${antal}</span>` : ''}</a>
@@ -672,13 +684,13 @@ function renderDashboard(user){
         </div>
         <div class="db-status">
           <span class="db-badge is-active">Aktiv</span>
-          <div class="db-nums">${tal(x.views, 'Visninger')}${tal(x.saves, 'Gemt')}${tal(x.inquiries, 'Telefonvisninger')}</div>
         </div>
         <div class="db-actions">
           <a href="opret-annonce.html?rediger=${encodeURIComponent(l.id)}" class="btn btn-outline btn-sm">${Icon.edit}Rediger</a>
           <a href="annonce.html?id=${l.id}" class="btn btn-outline btn-sm">Se</a>
           <button type="button" class="btn btn-outline btn-sm db-danger" data-del="${l.id}" aria-label="Slet annonce">${Icon.trash}<span class="db-lbl">Slet</span></button>
         </div>
+        <div class="db-nums" title="Seneste 30 dage">${tal(x.views, 'Visninger', 'eye')}${tal(x.saves, 'Gemt', 'heart')}${tal(x.inquiries, 'Telefonvisninger', 'phone')}<span class="db-nums-per">Seneste 30 dage</span></div>
       </article>`;
     }).join('');
     rowsEl.querySelectorAll('[data-del]').forEach(btn => {

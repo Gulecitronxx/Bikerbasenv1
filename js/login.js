@@ -111,6 +111,30 @@ function authError(msg, resendEmail){
   }
 }
 
+/* V5: fejl ved ET felt står ved feltet (aria-describedby + aria-invalid + fokus), ikke i overlayet nederst på kortet —
+   på en telefon lå beskeden skærmhøjder fra det felt, der manglede. authError() bruges stadig til fejl, der ikke hører
+   til ét felt (forkert kode, netværk, server). */
+function rydFeltFejl(){
+  document.querySelectorAll('.lg-card .felt-fejl').forEach(p => {
+    const el = document.getElementById(p.id.replace(/-fejl$/, ''));
+    if (el) el.removeAttribute('aria-describedby');
+    p.remove();
+  });
+  document.querySelectorAll('.lg-card [aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+}
+function feltFejl(el, msg){
+  rydFeltFejl();
+  authError('');
+  el.setAttribute('aria-invalid', 'true');
+  const p = document.createElement('p');
+  p.className = 'felt-fejl';
+  p.id = el.id + '-fejl';
+  p.textContent = msg;
+  (el.closest('.lg-input') || el).insertAdjacentElement('afterend', p);
+  el.setAttribute('aria-describedby', p.id);
+  el.focus();
+}
+
 /* Beskyttet mod dobbeltklik: resend() rammer den samme timelige mailgrænse
    som selve signUp(), og to kald i træk giver kun en forvirrende fejl. */
 let resendUnderway = false;
@@ -370,8 +394,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* V2: tomme og åbenlyst forkerte felter fanges her med en konkret besked og fokus på feltet.
        Før gik et tomt skema til serveren og kom tilbage som "Forkert e-mail eller adgangskode.". */
     const emailEl = document.getElementById('login-email'), pwEl = document.getElementById('login-password');
-    [emailEl, pwEl].forEach(el => el.removeAttribute('aria-invalid'));
-    const felt = (el, msg) => { el.setAttribute('aria-invalid', 'true'); authError(msg); el.focus(); };
+    rydFeltFejl();
+    const felt = feltFejl;
     if (!email) return felt(emailEl, 'Skriv din e-mail.');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return felt(emailEl, 'E-mailen ser forkert ud. Den skal have formen navn@eksempel.dk.');
     if (!password) return felt(pwEl, 'Skriv din adgangskode.');
@@ -405,6 +429,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(redirectAfterAuth, 400);
   });
 
+  /* V5: en rød ramme (aria-invalid) forsvinder, når man begynder at rette feltet. */
+  document.querySelectorAll('#login-form .input, #register-form .input').forEach(el => el.addEventListener('input', () => {
+    el.removeAttribute('aria-invalid');
+    const p = document.getElementById(el.id + '-fejl'); if (p){ p.remove(); el.removeAttribute('aria-describedby'); }
+  }));
+
   /* ---------- Opret profil ---------- */
   document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -416,9 +446,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const password = document.getElementById('reg-password').value;
     const btn = e.target.querySelector('button[type="submit"]');
 
+    /* V5: formularen er novalidate (ellers viste browseren sin egen engelske "Please fill out this field."-boble).
+       Samme mønster som log ind: konkret dansk besked, aria-invalid og fokus på det første felt, der mangler. */
+    const navnEl = document.getElementById('reg-name'), mailEl = document.getElementById('reg-email'), telEl = document.getElementById('reg-phone'), pwEl = document.getElementById('reg-password');
+    rydFeltFejl();
+    const felt = feltFejl;
+    if (!name) return felt(navnEl, 'Skriv dit navn.');
+    if (!email) return felt(mailEl, 'Skriv din e-mail.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return felt(mailEl, 'E-mailen ser forkert ud. Den skal have formen navn@eksempel.dk.');
+
     // O1-5: telefonnummer er valgfrit — det vises ikke for nogen endnu.
     let cvr = '', company = '';
-    if (!telefonOK(phone)){ authError('Telefonnummeret ser forkert ud. Skriv kun tal (mindst 8 cifre), eller lad feltet stå tomt.'); return; }
+    if (!telefonOK(phone)) return felt(telEl, 'Telefonnummeret ser forkert ud. Skriv kun tal (mindst 8 cifre), eller lad feltet stå tomt.');
+    if (!password || password.length < 6) return felt(pwEl, 'Adgangskoden skal være mindst 6 tegn.');
     if (isDealer){
       cvr = document.getElementById('reg-cvr').value.trim();
       company = document.getElementById('reg-company').value.trim();

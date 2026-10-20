@@ -797,10 +797,6 @@ a.db-tab{ display: inline-flex; align-items: center; text-decoration: none; }
 .db-stats--5 .db-stat-icon{ width: 40px; height: 40px; }
 .db-stats--5 .db-stat-icon svg{ width: 20px; height: 20px; }
 .db-stat-num.is-text{ font-size: 18px; line-height: 1.25; }
-@container db-rows (min-width: 820px){
-  .db-row:has(.db-nums){ grid-template-columns: 116px minmax(140px, 1fr) minmax(236px, auto) auto; }
-}
-.db-nums{ flex-wrap: nowrap; }
 .db-num{ white-space: nowrap; }
 /* Sælgerprofilen (forhandler.html): samme hero, kortere. */
 .db-hero--slim{ --db-hero-h: 168px; }
@@ -977,11 +973,10 @@ a.db-title{ display:inline-block; padding: 10px 0; margin: -10px 0; }
   .db-row{ grid-template-columns: 132px minmax(0, 1fr) 156px; }
 }
 @container db-rows (min-width: 820px) and (max-width: 899px){
-  .db-row{ grid-template-columns: 132px minmax(150px, 1fr) 156px auto; }
-  .db-row:has(.db-nums){ grid-template-columns: 132px minmax(140px, 1fr) minmax(236px, auto) auto; }
+  .db-row{ grid-template-columns: 132px minmax(150px, 1fr) 156px 292px; }
 }
 @container db-rows (min-width: 900px){
-  .db-row, .db-row:has(.db-nums){ grid-template-columns: 132px minmax(150px, 1fr) 244px 244px; }
+  .db-row{ grid-template-columns: 132px minmax(170px, 1fr) 168px 292px; }
 }
 /* 2) Statusmærke med ikon (ikke kun farve). */
 .db-badge svg{ width: 14px; height: 14px; flex: 0 0 auto; }
@@ -1002,3 +997,49 @@ a.db-title{ display:inline-block; padding: 10px 0; margin: -10px 0; }
 .db-menu .db-menu-item{ min-height: 46px; }
 .db-menu .db-menu-item + .db-menu-item{ border-top: 1px solid var(--color-border); border-radius: 0; }
 
+
+
+/* ===== V5 sælger: mine annoncer ===== */
+/* Rækkens indre mål som variabler, så statistikstriben kan løbe helt ud til kortets kant. */
+.db-row{ --rp-x: var(--space-3); --rp-y: var(--space-3); padding: var(--rp-y) var(--rp-x); }
+@container db-rows (min-width: 820px){ .db-row{ --rp-x: var(--space-4); } }
+/* Tællere (visninger, favoritter, telefonvisninger) har egen stribe nederst i rækken. Før stod de i statuskolonnen
+   og løb ind under knapperne ved 1440 px (tredje tal blev skåret af "Rediger"). Tal beregnes af egne data (listing_stats). */
+.db-row > .db-nums{
+  grid-column: 1 / -1; align-self: stretch; flex-basis: auto;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--space-5);
+  margin: 0 calc(-1 * var(--rp-x)) calc(-1 * var(--rp-y)); padding: 10px var(--rp-x);
+  border-top: 1px solid var(--color-border); background: var(--color-surface-2);
+  border-radius: 0 0 calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px);
+}
+.db-row > .db-nums .db-num b{ font-size: 16px; }
+.db-nums-per{ margin-left: auto; font-size: 12px; color: var(--color-fg-muted); }
+@media (max-width: 520px){ .db-nums-per{ flex-basis: 100%; margin-left: 0; } }
+.db-list-title:focus{ outline: none; }
+.db-list-title:focus-visible{ outline: 2px solid var(--color-ring); outline-offset: 4px; border-radius: 4px; }
+
+/* Tom tilstand: tre ærlige trin i stedet for et tomt kort. Samme trin som opret-annonce.html. */
+.db-empty-rich{ text-align: center; }
+.db-empty-steps{
+  list-style: none; margin: 0 auto var(--space-5); padding: 0; max-width: 640px; text-align: left;
+  display: grid; gap: var(--space-3); counter-reset: dbtrin;
+}
+@media (min-width: 720px){ .db-empty-steps{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.db-empty-steps li{
+  counter-increment: dbtrin; position: relative; padding: var(--space-3) var(--space-3) var(--space-3) 52px;
+  background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  font-size: 14px; line-height: 1.4; color: var(--color-fg);
+}
+.db-empty-steps li::before{
+  content: counter(dbtrin); position: absolute; left: 12px; top: 12px; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--color-primary); color: var(--color-on-primary);
+  font: 700 14px var(--font-display);
+}
+.db-empty-steps b{ display: block; font-size: 14.5px; }
+.db-empty-actions{ display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; align-items: center; }
+.db-empty-actions .db-link{ min-height: 44px; }
+/* Ved 720-1023 px deler fanerne rækken med "Opret ny annonce" og kan blive klippet midt i et ord (768: "F"). Samme fade som på mobil. */
+@media (min-width: 720px) and (max-width: 1023px){
+  .db-tabs{ -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+  .db-tabs.at-end{ -webkit-mask-image: none; mask-image: none; }
+}
