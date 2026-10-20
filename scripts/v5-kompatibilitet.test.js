@@ -1,8 +1,8 @@
 /* V5 browserkompatibilitet: låser scripts/v5-kompatibilitet.js.
    - Gulvet (laveste browserversion siden virker i) stiger ikke uden at nogen har besluttet det: nye CSS-/JS-funktioner, der kræver
-     nyere end Chrome 111 / Safari 16.4 / Firefox 121 (og ikke er rene forbedringer), får testen til at fejle. Bevidst hævning:
+     nyere end Chrome 111 / Safari 16.2 / Firefox 121 (og ikke er rene forbedringer), får testen til at fejle. Bevidst hævning:
      ret BASIS her og skriv hvorfor i commit-beskeden.
-   - Kendt fund: regex-lookbehind i 5 filer kræver Safari 16.4 (parse-fejl dræber filen på iOS <= 16.3). Antallet må ikke vokse.
+   - Regex-lookbehind er fjernet (F3) og må ikke komme tilbage: det kræver Safari 16.4 (parse-fejl dræber filen på iOS <= 16.3).
    - degrader() (simulering af ældre browser) fjerner præcis det, den skal, og intet andet.
    - Browser: siden kører stadig i Chromium med fjernet :has/@container/color-mix/dvh (ingen konsolfejl, ingen sidefejl). */
 const test = require('node:test');
@@ -11,10 +11,9 @@ const K = require('./v5-kompatibilitet.js');
 const sb = require('./smoke-browser.js');
 
 /* Baseline pr. 2026-10 (se docs/review/gauntlet/v5/qa.md). */
-const BASIS = { chrome: 111, safari: 16.4, firefox: 121 };
-const KENDT_LOOKBEHIND = { forekomster: 7, filer: 5 };
+const BASIS = { chrome: 111, safari: 16.2, firefox: 121 };
 
-test('gulvet er ikke steget: ingen ny funktion kræver nyere end Chrome 111 / Safari 16.4 / Firefox 121', () => {
+test('gulvet er ikke steget: ingen ny funktion kræver nyere end Chrome 111 / Safari 16.2 / Firefox 121', () => {
   const s = K.scan();
   for (const b of ['chrome', 'safari', 'firefox']) {
     const g = K.versionTal(s.gulv[b].version);
@@ -33,13 +32,11 @@ test('vagtliste: ingen brugt funktion hæver gulvet, og ingen funktion uden fall
   for (const r of s.brugt.filter(r => r.fallback !== 'progressiv')) for (const b of ['chrome', 'safari', 'firefox']) assert.ok(K.versionTal(r.min[b]) !== Infinity, `${r.label}: ${b} understøtter den slet ikke`);
 });
 
-test('kendt: regex-lookbehind (Safari 16.4) er ikke vokset - fjernes den, falder Safari-gulvet til 16.2', () => {
+test('regex-lookbehind er væk (F3): ingen forekomster, og Safari-gulvet er 16.2', () => {
   const s = K.scan();
   const l = s.brugt.find(r => r.id === 'regex-lookbehind');
-  const n = l ? l.antal : 0, filer = l ? l.filer.length : 0;
-  assert.ok(n <= KENDT_LOOKBEHIND.forekomster && filer <= KENDT_LOOKBEHIND.filer, `lookbehind vokser: ${n} forekomster i ${filer} filer (${l && l.filer.join(', ')}). Kendt: ${KENDT_LOOKBEHIND.forekomster}/${KENDT_LOOKBEHIND.filer}.`);
-  if (n === 0) assert.ok(K.versionTal(s.gulv.safari.version) <= 16.2, 'uden lookbehind skal Safari-gulvet være <= 16.2, men er ' + s.gulv.safari.version);
-  else assert.ok(K.versionTal(s.gulvUdenLookbehind.safari.version) <= 16.2, 'næste Safari-flaskehals efter lookbehind: ' + s.gulvUdenLookbehind.safari.version);
+  assert.ok(!l, `lookbehind er tilbage: ${l && l.antal} forekomster i ${l && l.filer.join(', ')} - Safari < 16.4 kan ikke parse det`);
+  assert.ok(K.versionTal(s.gulv.safari.version) <= 16.2, 'Safari-gulv: ' + s.gulv.safari.version);
 });
 
 test('scanneren kan fejle: finder funktioner i en fiktiv rod og beregner gulvet', () => {

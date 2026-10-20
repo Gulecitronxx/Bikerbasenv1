@@ -289,7 +289,7 @@ const Filtrering = (() => {
      js/backend-bridge.js (små bogstaver, uden mellemrum og bindestreg; punktum bevares kun mellem to cifre). Annoncer,
      brugerne selv har oprettet, løber ikke gennem den, så filteret må kunne samme sammenligning. */
   function modelNoegle(m){
-    return String(m == null ? '' : m).toLowerCase().replace(/[\s\-]+/g, '').replace(/(?<!\d)\.|\.(?!\d)/g, '');
+    return String(m == null ? '' : m).toLowerCase().replace(/[\s\-]+/g, '').replace(/\./g, (p, i, s) => (/\d/.test(s.charAt(i - 1)) && /\d/.test(s.charAt(i + 1))) ? p : '');   // uden lookbehind (Safari < 16.4)
   }
 
   /* Fritekst: ord, der er et helt mærkenavn eller et alias (også over flere ord: "cf moto", "royal enfield", "h d"),
