@@ -109,6 +109,7 @@ test('browser: den hurtige delmængde er grøn mod fixtures-baseline, dækker al
   assert.ok(d.hurtigsoegAlias >= 20, 'alias: hurtigsøgning maerker.html ' + d.hurtigsoegAlias);
   assert.ok(d.maerkesider >= 5, 'sider: ' + d.maerkesider);
   assert.ok(d.opretMaerker >= 5, 'opret-annonce: ' + d.opretMaerker);
+  for (const k of ['v5Andet', 'v5FlereHydrering', 'v5Hurtigsoeg', 'v5UkendtH1']) assert.ok(d[k] >= 1, 'V5-krav kørt: ' + k);   // scripts/v5-maerke-krav.js; kendte fund står i kendt-listen
   assert.strictEqual(d.baselineAnnoncer, r.lager.antal, 'baseline-id\'er sammenlignet');
   assert.strictEqual(r.baselineStat.uaendret, r.lager.antal);
   assert.strictEqual(r.baselineStat.skiftet + r.baselineStat.tilUkendt + r.baselineStat.fjernet, 0);

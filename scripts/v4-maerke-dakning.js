@@ -33,6 +33,9 @@
      5 regress  hvert annonce-id har samme mærke som i baseline (gem baseline fra gauntlet/master 95df5046)
      6 side     ingen dubletter (slug, navn, alias, stavemåde, sider), ingen ødelagte mærkesider, URL'er bevares, tomme
                 mærkesider er noindex
+     7 v5       (scripts/v5-maerke-krav.js) "Andet mærke" i opret-annonce, levende hydrering af "Flere mærker" (mocket Zero-annonce),
+                hurtigsøgningen finder piller, ukendt ?brands=xyz spejles ikke i H1. Kendte fund: --kendt. --uden-v5 springer over,
+                --streng-v5 tæller v5-krav som nye fejl, selvom de står i kendt-listen (brug efter merge).
 
    Niveauer: fejl (exit 1), advarsel (kun med --strikt), info. Fund i --kendt-listen tælles ikke (men vises).
    Exit 0 = ingen (nye) fejl, 1 = fejl fundet, 2 = kunne ikke køre.
@@ -840,6 +843,8 @@ async function koer(opt = {}) {
   const statisk = statiskeTjek(rod, reg, opslag, T);
   T.taelUd('registerMaerker', reg.maerker.length); T.taelUd('statiskeSider', statisk.sider.length);
   const b = await browserTjek(opt, rod, reg, opslag, statisk, T, matrix);
+  /* V5: nye krav (Andet mærke, levende Flere mærker, hurtigsøgning af piller, ukendt ?brands i H1). Egen server/browser, altid fixtures. */
+  if (!opt.udenV5) { const v5 = await require('./v5-maerke-krav').koerV5(opt, rod, reg, T); b.overtraedelser = (b.overtraedelser || []).concat(new Array(v5.skrivninger).fill('v5')); }
   let baselineStat = null, nyBaseline = null;
   if (b.lager && b.lager.liste.length) {
     if (opt.baseline) {
@@ -853,7 +858,7 @@ async function koer(opt = {}) {
     }
   }
   let kendt = new Set();
-  if (opt.kendt) { try { kendt = new Set(JSON.parse(fs.readFileSync(opt.kendt, 'utf8')).map(String)); } catch (e) { /* ingen */ } }
+  if (opt.kendt) { try { kendt = new Set(JSON.parse(fs.readFileSync(opt.kendt, 'utf8')).map(String).filter(k => !(opt.strengV5 && /^v5-/.test(k)))); } catch (e) { /* ingen */ } }   // --streng-v5: v5-krav er IKKE længere "kendte" (fase 2, efter merge)
   for (const f of T.fund) f.kendt = kendt.has(kendtNoegle(f)) || kendt.has(`${f.tjek}|*`);
   const taelling = { fejl: 0, advarsel: 0, info: 0, nyeFejl: 0, nyeAdvarsler: 0 };
   for (const f of T.fund) { taelling[f.niveau]++; if (!f.kendt && f.niveau === 'fejl') taelling.nyeFejl++; if (!f.kendt && f.niveau === 'advarsel') taelling.nyeAdvarsler++; }
@@ -874,7 +879,7 @@ function udskriv(r, { detaljer = 12, stille = false } = {}) {
   ud.push(`dækning: ${Object.entries(r.daekning || {}).map(([k, v]) => `${k} ${v}`).join(', ')} | Supabase-skrivninger afvist: ${r.overtraedelser}`);
   if (r.baselineStat) ud.push(`baseline: ${Object.entries(r.baselineStat).map(([k, v]) => `${k} ${v}`).join(', ')}`);
   ud.push('');
-  const grupper = { filter: '1 filter/antal', alias: '2 alias', logo: '3 logo/navn/link', opret: '4 opret-annonce', regress: '5 regression', side: '6 sider/dubletter/URL' };
+  const grupper = { filter: '1 filter/antal', alias: '2 alias', logo: '3 logo/navn/link', opret: '4 opret-annonce', regress: '5 regression', side: '6 sider/dubletter/URL', v5: '7 V5-krav' };
   for (const [g, navn] of Object.entries(grupper)) {
     const t = r.gruppeTal[g] || { fejl: 0, advarsel: 0, info: 0 };
     ud.push(`${navn.padEnd(26)} fejl ${String(t.fejl).padStart(3)}  advarsel ${String(t.advarsel).padStart(3)}  info ${String(t.info).padStart(3)}`);
@@ -903,6 +908,8 @@ function parseArgs(argv) {
     else if (a === '--register') o.register = nxt();
     else if (a === '--data') o.data = nxt();
     else if (a === '--hurtig') o.hurtig = true;
+    else if (a === '--uden-v5') o.udenV5 = true;
+    else if (a === '--streng-v5') o.strengV5 = true;
     else if (a === '--maerker') o.maerker = nxt().split(',').map(x => x.trim()).filter(Boolean);
     else if (a === '--snapshot') o.snapshot = path.resolve(nxt());
     else if (a === '--baseline') o.baseline = path.resolve(nxt());
