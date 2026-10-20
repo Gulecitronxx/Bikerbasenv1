@@ -663,6 +663,9 @@ function anFlytH1(tekst, maerke){
   if (!logo){ plads.replaceWith(h1); return; }
   const raekke = document.createElement('div');
   raekke.className = 'an-titelraekke';
+  /* V6 (Critic P2-3): et BREDT ordmærke (Honda 8:1, Fantic, Rieju, Keeway ...) står over titlen på mobil i stedet for at æde dens bredde. */
+  const lg = BrandLogos.logoFor(maerke);
+  if (lg && lg.bredde && lg.hoejde && lg.bredde / lg.hoejde > 3) raekke.classList.add('an-titelraekke--bred');
   plads.replaceWith(raekke);
   raekke.appendChild(h1);
   raekke.insertAdjacentHTML('beforeend', logo);
