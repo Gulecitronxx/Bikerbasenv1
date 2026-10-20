@@ -350,7 +350,7 @@ async function buildForside(){
     const pr = new Map();
     for (const l of ALLE){
       const b = String(l.brand || '').trim();
-      if (!b || BrandRegistry.erUkendt(b)) continue;
+      if (!b || !BrandRegistry.erKendt(b)) continue;   // V5: kun REGISTREREDE mærker (et fritekst-mærke fra «Andet mærke» bliver ikke en flise)
       const s = BrandRegistry.slug(b) || slugify(b); if (!s) continue;
       let e = pr.get(s); if (!e){ e = { slug: s, n: 0, navne: new Map() }; pr.set(s, e); }
       e.n++; e.navne.set(b, (e.navne.get(b) || 0) + 1);

@@ -108,7 +108,7 @@ function indlaesRegistry(rod) {
   const maerker = BR.alle().map(p => {
     const nk = p.logo || p.slug;
     const m = mi.get(nk) || {};
-    return { slug: p.slug, navn: p.navn, aliaser: (p.aliaser || []).slice(), fil: m.fil || null, godkendt: !!(m.fil && m.godkendt), varianter: m.varianter || {}, hash: m.hash || null, opret: true, periode: p.periode, logoNoegle: nk };
+    return { slug: p.slug, navn: p.navn, aliaser: (p.aliaser || []).slice(), fil: m.fil || null, godkendt: !!(m.fil && m.godkendt), varianter: m.varianter || {}, hash: m.hash || null, opret: true, periode: p.periode, logoNoegle: nk, offentlig: p.offentlig !== false };
   });
   return { kilde: 'js/brands-registry.js (logoer fra img/brands/manifest.json)', maerker, registry: BR, valgbare: BR.valgbare() };
 }
@@ -171,10 +171,12 @@ function parsOversigt(rod) {
   const piller = [];
   for (const m of h.matchAll(/<ul class="(mk-flere[^"]*)"[^>]*>([\s\S]*?)<\/ul>/g)) {
     const historisk = /mk-flere-hist/.test(m[1]);
-    for (const li of m[2].matchAll(/<li>([\s\S]*?)<\/li>/g)) piller.push({ navn: afkod(li[1].replace(/<[^>]+>/g, '')).trim(), historisk, link: /<a\b/i.test(li[1]) });
+    for (const li of m[2].matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/g)) piller.push({ navn: afkod(li[1].replace(/<[^>]+>/g, '')).trim(), historisk, link: /<a\b/i.test(li[1]) });
   }
-  const tal = re => { const x = h.match(re); return x ? Number(x[1]) : null; };
-  const flere = { piller, overskrift: tal(/Flere mærker \((\d+)\)/), intro: tal(/Disse (\d+) mærker/), historisk: tal(/Historiske mærker \((\d+)\)/), uoplyst: tal(/(\d+) annoncer? oplyser ikke et mærke/), alle: tal(/Søg blandt alle (\d+) annoncer/) };
+  /* V5: tallene står i <span data-mk-flere-n>/<span data-mk-alle> (js/maerker-lager.js kan opdatere dem); teksten læses uden spans. */
+  const hTekst = h.replace(/<span data-mk-(?:flere-n|alle)>([^<]*)<\/span>/g, '$1');
+  const tal = re => { const x = hTekst.match(re); return x ? Number(x[1]) : null; };
+  const flere = { piller, overskrift: tal(/Flere mærker \((\d+)\)/), intro: tal(/Disse (\d+) mærker/), historisk: tal(/Historiske mærker \((\d+)\)/), uoplyst: tal(/(\d+) annoncer? (?:oplyser ikke et mærke|har intet mærke fra vores liste)/), alle: tal(/Søg blandt alle (\d+) annoncer/) };
   return { raekker, alleLinks, flere };
 }
 
@@ -336,12 +338,15 @@ function statiskeTjek(rod, reg, opslag, T) {
         if (findes(rod, `maerke-${e.slug}.html`)) tilfoej(G, 'pille-med-side', 'fejl', p.navn, `maerke-${e.slug}.html findes, men mærket vises som pille uden link`);
         if ((e.periode === 'historisk') !== p.historisk) tilfoej(G, 'flere-pille-periode', 'fejl', p.navn, `pillen står under ${p.historisk ? 'historiske' : 'aktuelle'}, registret siger ${e.periode}`);
       }
-      for (const e of reg.maerker) if (!iListe.has(fold(e.navn)) && !iPiller.has(fold(e.navn))) tilfoej(G, 'maerke-ikke-paa-oversigt', 'fejl', e.navn, 'registermærket står hverken som A–Z-række eller "Flere mærker"-pille (skjult mærke)');
+      for (const e of reg.maerker) if (e.offentlig !== false && !iListe.has(fold(e.navn)) && !iPiller.has(fold(e.navn))) tilfoej(G, 'maerke-ikke-paa-oversigt', 'fejl', e.navn, 'registermærket står hverken som A–Z-række eller "Flere mærker"-pille (skjult mærke)');
       const hist = fl.piller.filter(p => p.historisk).length;
       if (fl.overskrift != null && fl.overskrift !== fl.piller.length) tilfoej(G, 'flere-tal', 'fejl', '*', `overskriften siger ${fl.overskrift}, men der er ${fl.piller.length} piller`);
       if (fl.intro != null && fl.intro !== fl.piller.length) tilfoej(G, 'flere-tal', 'fejl', '*', `introen siger ${fl.intro}, men der er ${fl.piller.length} piller`);
       if (fl.historisk != null && fl.historisk !== hist) tilfoej(G, 'flere-tal', 'fejl', '*', `"Historiske mærker" siger ${fl.historisk}, men der er ${hist} historiske piller`);
-      if (ov.raekker.length + fl.piller.length !== reg.maerker.length) tilfoej(G, 'oversigt-sum', 'fejl', '*', `${ov.raekker.length} rækker + ${fl.piller.length} piller ≠ ${reg.maerker.length} registermærker`);
+      /* V5: mærker uden belæg (offentlig:false: Daelim, Super Soco, TM Racing) står ikke offentligt, medmindre de har annoncer og dermed en række. */
+      const forventet = reg.maerker.filter(e => e.offentlig !== false || iListe.has(fold(e.navn))).length;
+      if (ov.raekker.length + fl.piller.length !== forventet) tilfoej(G, 'oversigt-sum', 'fejl', '*', `${ov.raekker.length} rækker + ${fl.piller.length} piller ≠ ${forventet} offentlige registermærker`);
+      for (const e of reg.maerker) if (e.offentlig === false && iPiller.has(fold(e.navn))) tilfoej(G, 'ubelagt-maerke-offentligt', 'fejl', e.navn, 'mærket har intet belæg (offentlig:false), men står som pille på maerker.html');
     }
     for (const s of sider) if (!set.has(s.fil) && !s.noindex) tilfoej(G, 'side-ikke-i-oversigt', 'advarsel', s.brand || s.fil, `${s.fil} er indekserbar men ikke i maerker.html`);
   }

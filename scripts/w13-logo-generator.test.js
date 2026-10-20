@@ -84,7 +84,7 @@ test('A15 med godkendte placeholder-logoer: hero, CTA, topfliser og A-Z bruger l
   assert.equal(fliser.length, 8);
   for (const f of fliser) assert.match(f, /class="bl bl--lg bl--(logo|mono)[ "]/);
   assert.ok(fliser.some(f => /bl--logo/.test(f)) && fliser.some(f => /bl--mono/.test(f)), 'både logo- og monogramfliser — samme slot');
-  const rk = idx.match(/<li data-mk-soeg=[\s\S]*?<\/li>/g);
+  const rk = idx.match(/<li data-mk-soeg="[^"]*"><a [\s\S]*?<\/li>/g);   // A–Z-rækkerne (V5: "Flere mærker"-pillerne har også data-mk-soeg, men er tekst)
   assert.ok(rk.length >= 29);
   assert.equal(antal(idx, /<span class="mk-az-logo">/g), rk.length, 'A-Z: logokolonne på ALLE rækker, ellers hopper navnene');
   for (const r of rk) assert.match(r, /class="bl bl--sm bl--(logo|mono)[ "]/);

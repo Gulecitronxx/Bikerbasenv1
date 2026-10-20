@@ -205,7 +205,8 @@ function trinUdfyldt(n){
 
 /* V2: konkrete danske fejltekster pr. påkrævet felt (før stod der "Feltet skal udfyldes." ved alle). */
 const MANGLER_TEKST = {
-  'f-brand': 'Vælg mærke.',
+  'f-brand': 'Vælg mærke — eller vælg «Andet mærke» og skriv det selv.',
+  'f-brand-fri': 'Skriv mærkets navn, f.eks. Silence.',
   'f-model': 'Skriv modellen, f.eks. MT-07.',
   'f-year': 'Angiv årgang, f.eks. 2021.',
   'f-km': 'Angiv kilometerstand — skriv 0, hvis den er ny.',
@@ -236,6 +237,19 @@ function validateStep(n){
     /* Grænseværdier står ÉT sted: js/opret-validering.js. Formularen er
        novalidate, så min/max i HTML håndhæves ikke af browseren. */
     /* DOM-sektion 3 (beskrivelse & pris) har valideringsreglernes trin 2; sektion 2 (billeder) har ingen regler. */
+    /* V5: "Andet mærke" — den skrevne tekst valideres af registret (2-40 tegn, ingen HTML, trimmet). Tom tekst fanges af [required] ovenfor. */
+    if (t === 1 && erAndetMaerke()){
+      const fri = document.getElementById('f-brand-fri');
+      if (fri && String(fri.value).trim() !== ''){
+        const v = BrandRegistry.validerFriMaerke(fri.value);
+        if (!v.ok){
+          valid = false;
+          const d = fejl.findIndex(x => x.el === fri);
+          if (d !== -1) fejl.splice(d, 1);
+          fejl.push({ el: fri, besked: v.besked });
+        }
+      }
+    }
     const regelTrin = t === 3 ? 2 : (t === 2 ? 0 : t);
     if (regelTrin) OpretValidering.validerTrin(regelTrin, id => (document.getElementById(id) || {}).value, aar).forEach(f => {
       const el = document.getElementById(f.id);
@@ -312,6 +326,57 @@ function renderTypeTilesIfStale(){
     </label>`).join('');
 }
 
+/* ---- V5: "Andet mærke" ----
+   Værdien i #f-brand er en sentinel, ikke et mærke; selve teksten står i #f-brand-fri. collectFormData() lægger den i brand, så resten
+   af siden (forhåndsvisning, kladde, udgivelse) ser ét mærke. */
+const ANDET_MAERKE = '__andet';
+function erAndetMaerke(){ const s = document.getElementById('f-brand'); return !!s && s.value === ANDET_MAERKE; }
+function lavFriMaerkeFelt(brandSelect){
+  const felt = document.createElement('div');
+  felt.className = 'field op-brand-fri';
+  felt.id = 'f-brand-fri-felt';
+  felt.hidden = true;
+  felt.style.display = 'none';
+  felt.style.gridColumn = '1 / -1';   // hele rækken (også i 1 og 2 kolonner) …
+  felt.style.maxWidth = '520px';      // … men ikke bredere end et navn behøver
+  felt.innerHTML = `<label for="f-brand-fri">Mærkets navn <span class="required-mark" aria-hidden="true">*</span></label>
+    <input class="input" id="f-brand-fri" maxlength="${BrandRegistry.FRI_MAX}" autocomplete="off" placeholder="F.eks. Hanway"aria-describedby="f-brand-fri-hint">
+    <span class="field-hint" id="f-brand-fri-hint">${BrandRegistry.FRI_MIN}–${BrandRegistry.FRI_MAX} tegn. Teksten står på din annonce. Den bliver ikke et nyt mærke på Bikerbasen, før vi har tjekket, at mærket findes.</span>`;
+  brandSelect.closest('.field').after(felt);
+  return felt;
+}
+function visFriMaerke(vis, { fokus = false } = {}){
+  const felt = document.getElementById('f-brand-fri-felt'); if (!felt) return;
+  const input = document.getElementById('f-brand-fri');
+  felt.hidden = !vis;
+  felt.style.display = vis ? '' : 'none';
+  if (vis){ input.required = true; if (fokus) input.focus(); }
+  else {
+    input.required = false; input.value = '';
+    felt.classList.remove('has-error'); input.removeAttribute('aria-invalid'); felt.querySelector('.felt-fejl')?.remove();
+    input.setAttribute('aria-describedby', 'f-brand-fri-hint');
+  }
+}
+/* Det mærke, annoncen får: valgt på listen, eller den rensede tekst fra «Andet mærke». */
+function valgtMaerke(){
+  const s = document.getElementById('f-brand');
+  if (!s) return '';
+  if (s.value !== ANDET_MAERKE) return s.value;
+  const raa = document.getElementById('f-brand-fri')?.value || '';
+  const v = BrandRegistry.validerFriMaerke(raa);
+  return v.ok ? v.navn : raa.trim();
+}
+/* Lægger et mærke tilbage i formularen (kladde, redigering): registreret -> valgt på listen, ellers -> «Andet mærke» + teksten. */
+function saetMaerke(brand){
+  const s = document.getElementById('f-brand');
+  if (!s || brand == null || brand === '') return;
+  if (BrandRegistry.erUkendt(brand)) return;
+  if (BrandRegistry.erKendt(brand)){ s.value = BrandRegistry.kanonisk(brand); visFriMaerke(false); return; }
+  s.value = ANDET_MAERKE;
+  visFriMaerke(true);
+  document.getElementById('f-brand-fri').value = String(brand);
+}
+
 function populateStaticFields(){
   renderTypeTilesIfStale();
   // Delegeret på gruppen, så den overlever, at renderTypeTilesIfStale() gentegner
@@ -319,10 +384,26 @@ function populateStaticFields(){
   document.getElementById('type-radio-group').addEventListener('change', clearTypeError);
 
   const brandSelect = document.getElementById('f-brand');
-  brandSelect.innerHTML = `<option value="">Vælg mærke</option>` + BrandRegistry.valgbare().map(b => `<option value="${b}">${b}</option>`).join('');   // V4: ALLE registrerede mærker kan vælges, også dem uden annoncer
-  brandSelect.addEventListener('change', () => {
+  /* V4: ALLE registrerede mærker kan vælges, også dem uden annoncer. V5: sidst står «Andet mærke», så en sælger med et mærke, der ikke
+     findes (endnu), aldrig blokeres: han skriver det selv. Teksten gemmes på annoncen, men bliver ikke et mærke på Bikerbasen. */
+  brandSelect.innerHTML = `<option value="">Vælg mærke</option>` + BrandRegistry.valgbare().map(b => `<option value="${b}">${b}</option>`).join('')
+    + `<option value="${ANDET_MAERKE}">Andet mærke (skriv selv)</option>`;
+  const friFelt = lavFriMaerkeFelt(brandSelect);
+  brandSelect.addEventListener('change', ev => {
     const models = BRANDS_BY_MODEL[brandSelect.value] || [];
     document.getElementById('model-suggestions').innerHTML = models.map(m => `<option value="${m}">`).join('');
+    visFriMaerke(erAndetMaerke(), { fokus: !!(ev && ev.isTrusted) });
+  });
+  const friInput = friFelt.querySelector('input');
+  /* Skriver sælgeren et mærke, der ER på listen ("honda"), vælges det på listen: ét mærke, ingen dublet-stavemåde. */
+  friInput.addEventListener('change', () => {
+    const v = BrandRegistry.validerFriMaerke(friInput.value);
+    if (v.ok && v.registreret){
+      brandSelect.value = v.navn;
+      brandSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    } else if (v.ok){
+      friInput.value = v.navn;   // renset: trimmet, ét mellemrum mellem ord
+    }
   });
 
   /* Tom førstemulighed med vilje. Feltet er påkrævet, men stod som standard
@@ -578,7 +659,7 @@ let _photoDragIdx = null;
    sende den videre til — se DECISIONS.md-noten for builder 4 om den
    udestående ledning. */
 function fotoAltTekst(indeksBlandtAlle){
-  const brand = document.getElementById('f-brand')?.value || '';
+  const brand = valgtMaerke();
   const model = document.getElementById('f-model')?.value || '';
   const year  = document.getElementById('f-year')?.value || '';
   const navn = [brand, model, year].filter(Boolean).join(' ') || 'Motorcyklen';
@@ -688,7 +769,8 @@ function collectFormData(){
   const postnr = (document.getElementById('f-postnr').value.trim().split(' ')[0]) || '';
   return {
     type,
-    brand: document.getElementById('f-brand').value,
+    brand: valgtMaerke(),
+    brandFri: erAndetMaerke(),   // V5: mærket er skrevet af sælgeren ("Andet mærke"); det er ikke en kolonne, kun et flag til validering
     model: document.getElementById('f-model').value,
     year: Number(document.getElementById('f-year').value) || null,
     km: document.getElementById('f-km').value.trim() === '' ? null : Number(document.getElementById('f-km').value) || 0,
@@ -1162,7 +1244,12 @@ async function udgivTrin(){
   /* Sidste gate: hele datasættet mod valideringstabellen, uanset hvordan man
      nåede hertil (kladde med videreTilTrin, redigeret localStorage, fremtidige
      genveje). Ved fejl sendes brugeren til side 1, hvor fejlene står ved felterne. */
-  const ugyldige = OpretValidering.validerData(collectFormData(), new Date().getFullYear());
+  const gateData = collectFormData();
+  const ugyldige = OpretValidering.validerData(gateData, new Date().getFullYear());
+  if (gateData.brandFri){
+    const v = BrandRegistry.validerFriMaerke(document.getElementById('f-brand-fri')?.value);
+    if (!v.ok && !ugyldige.some(f => f.id === 'f-brand')) ugyldige.push({ id: 'f-brand-fri', besked: v.besked });
+  }
   if (ugyldige.length){
     goToStep(1);
     setTimeout(() => {
@@ -1315,7 +1402,7 @@ function fillForm(data, { bevarIndtastet = false } = {}){
   const typeRadio = document.querySelector(`input[name="bike-type"][value="${data.type}"]`);
   if (typeRadio){ typeRadio.checked = true; typeRadio.dispatchEvent(new Event('change', { bubbles: true })); }
 
-  set('f-brand', data.brand);
+  saetMaerke(data.brand);   // V5: et mærke uden for registret kommer tilbage som «Andet mærke» + teksten
   // Modelforslagene afhænger af mærket, så det skal opdateres først.
   document.getElementById('f-brand')?.dispatchEvent(new Event('change', { bubbles: true }));
   set('f-model', data.model);

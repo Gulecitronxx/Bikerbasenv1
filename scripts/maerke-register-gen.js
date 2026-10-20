@@ -2,6 +2,12 @@
 /* Kopierer mærkeregistret (js/brands-registry.js, mellem // @@REGISTER-START og // @@REGISTER-END) ind i js/data.js
    mellem markørerne  / * @@BRANDREG-START * /  og  / * @@BRANDREG-END * /.
 
+   V5: kopien i data.js er en SLANK browserudgave. Browseren bruger kun navne, aliaser, slug, logo og de rene opslags-/valideringsfunktioner;
+   kilder, noter, kandidatvurdering, generatorens opgørelse og alle kommentarer bliver i js/brands-registry.js (Node: tests og generatorer
+   bruger den fulde fil). Det sparer data.js-vægt på alle ~100 sider uden en ny <script>-tag (se docs/review/gauntlet/v5/maerke.md).
+   Linjer mellem // @@NODE-ONLY-START og // @@NODE-ONLY-END udelades; MAERKER-tabellen skrives kompakt om (ingen noter; kilder bliver 'wp' =
+   har belæg / 'eks' = har ikke), så verificeret og offentlig er uændrede.
+
    Hvorfor: ca. 100 sider henter allerede js/data.js. Et separat registerscript ville kræve en ny <script>-tag i hver
    side og hver generator (og i udgivelsens allowlist). Kopien gør, at ét mærkeregister virker overalt uden at røre
    sidernes script-lister. Kilden er js/brands-registry.js; data.js er afledt.
@@ -29,6 +35,38 @@ function udtraek(kilde) {
   return t.slice(t.indexOf('\n', a) + 1, b).replace(/\n+$/, '');
 }
 
+/* Fuld registertekst -> slank browserudgave. Ren funktion (testes mod den fulde fil: samme svar på alle navne/aliaser). */
+function slank(regTekst) {
+  let t = regTekst.replace(/\r\n/g, '\n');
+  // 1. kun-Node-områder
+  t = t.replace(/^[ \t]*\/\/ @@NODE-ONLY-START[\s\S]*?\/\/ @@NODE-ONLY-END[ \t]*\n/gm, '');
+  // 2. tabellen: én kompakt linje pr. mærke
+  t = t.replace(/^(\s*)\[('(?:[^'\\]|\\.)*',.*)\],\s*$/gm, (hele, indryk, indhold) => {
+    let r;
+    /* eval er sikker her: indholdet er en MAERKER-linje fra repoets EGEN js/brands-registry.js (litteraler, ingen input udefra), og
+       linjen skal matche tabelmønstret ovenfor. En linje, der ikke kan læses, bliver stående uændret (og --tjek/testen fanger det). */
+    try { r = (0, eval)('[' + indhold + ']'); } catch (e) { return hele; }
+    if (!Array.isArray(r) || r.length < 5 || !Array.isArray(r[3]) || !Array.isArray(r[4])) return hele;
+    const IKKE_BELAEG = new Set(['ejer', 'eks']);
+    const e = r[5] || {};
+    const ekstra = {};
+    if (e.slug) ekstra.slug = e.slug;
+    if (e.logo) ekstra.logo = e.logo;
+    if (e.offentlig === false) ekstra.offentlig = false;
+    const post = [r[0], r[1], r[2], r[3], r[4].some(k => !IKKE_BELAEG.has(k)) ? ['wp'] : ['eks']];
+    if (Object.keys(ekstra).length) post.push(ekstra);
+    return indryk + JSON.stringify(post) + ',';
+  });
+  // 3. kommentarer: hele linjer og blokke, der starter en linje, samt haler efter mindst to mellemrum
+  t = t.replace(/^[ \t]*\/\*[\s\S]*?\*\/[ \t]*\n/gm, '');
+  t = t.replace(/^[ \t]*\/\/.*\n/gm, '');
+  t = t.replace(/(\S)[ \t]{2,}\/\/ [^\n'"`]*$/gm, '$1');
+  t = t.replace(/[ \t]+$/gm, '').replace(/\n{2,}/g, '\n');
+  return t.replace(/\n+$/, '');
+}
+
+function browserTekst(kilde) { return slank(udtraek(kilde)); }
+
 /* Ren funktion (testes): data.js-tekst + registertekst -> ny data.js-tekst. */
 function indsaet(dataTekst, regTekst) {
   const eol = dataTekst.includes('\r\n') ? '\r\n' : '\n';
@@ -42,7 +80,7 @@ function indsaet(dataTekst, regTekst) {
 
 function kor(argv) {
   const tjek = argv.includes('--tjek');
-  const reg = udtraek(fs.readFileSync(KILDE, 'utf8'));
+  const reg = browserTekst(fs.readFileSync(KILDE, 'utf8'));
   const gammel = fs.readFileSync(DATA, 'utf8');
   const ny = indsaet(gammel, reg);
   if (tjek) {
@@ -55,4 +93,4 @@ function kor(argv) {
 }
 
 if (require.main === module) process.exit(kor(process.argv.slice(2)));
-module.exports = { udtraek, indsaet, START, SLUT };
+module.exports = { udtraek, slank, browserTekst, indsaet, START, SLUT };

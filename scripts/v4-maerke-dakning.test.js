@@ -65,8 +65,10 @@ test('statiske tjek kan fejle (RIGTIGT register): dublet-alias, pille som link, 
     assert.strictEqual(R.indlaesRegister(rod).registry ? 'registry' : 'manifest', 'registry');
     ret(rod, 'js/brands-registry.js', t => { assert.ok(t.includes("['Yamaha', 'JP', 'aktuel', [],"), 'mutationsmål'); return t.replace("['Yamaha', 'JP', 'aktuel', [],", "['Yamaha', 'JP', 'aktuel', ['honda motor'],"); });
     ret(rod, 'maerker.html', t => {
-      assert.ok(t.includes('<li>AJP</li>') && t.includes('<li>Zero</li>'), 'mutationsmål (pille)');
-      return t.replace('<li>AJP</li>', '<li><a href="maerke-ajp.html">AJP</a></li>').replace('<li>Zero</li>', '').replace('<li>Bajaj</li>', '<li>Bajaj</li> <li>Bajaj</li> <li>Bajaj</li>');
+      /* V5: pillerne bærer data-mk-soeg/-pille/-navn (hurtigsøgning + levende tal) */
+      const pille = n => new RegExp('<li\\b[^>]*>' + n + '</li>');
+      assert.ok(pille('AJP').test(t) && pille('Zero').test(t), 'mutationsmål (pille)');
+      return t.replace(pille('AJP'), '<li><a href="maerke-ajp.html">AJP</a></li>').replace(pille('Zero'), '').replace(pille('Bajaj'), m => m + ' ' + m + ' ' + m);
     });
     const fund = staticFund(rod);
     const navne = tjekNavne(fund);

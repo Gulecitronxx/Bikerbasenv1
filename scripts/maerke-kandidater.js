@@ -34,6 +34,15 @@ function analyser(rows, valg) {
     const k = r.maerke == null || String(r.maerke).trim() === '' ? '(tomt)' : String(r.maerke).trim();
     raa.set(k, (raa.get(k) || 0) + (r.antal || 1));
   }
+  /* V5: sælgernes egne mærker ("Andet mærke" i opret-annonce) står på annoncen som fritekst. De tælles med her, så et mærke, flere sælgere
+     skriver, bliver en kandidat — men de bliver ALDRIG et mærke af sig selv. o.egne = liste af mærkestrenge fra egne annoncer. */
+  const egneTael = new Map();
+  for (const b of o.egne || []) {
+    const k = b == null ? '' : String(b).trim();
+    if (!k || R.erKendt(k) || R.erUkendt(k)) continue;   // registreret / uoplyst: intet at logge
+    egneTael.set(k, (egneTael.get(k) || 0) + 1);
+    raa.set(k, (raa.get(k) || 0) + 1);
+  }
   const modelNoegler = new Set();
   if (o.modeller) for (const liste of Object.values(o.modeller)) for (const m of liste) modelNoegler.add(R.noegle(m));
   const vurderinger = [...raa].map(([navn, antal]) => R.vurderKandidat(navn === '(tomt)' ? '' : navn, antal, { min, modelNoegler }));
@@ -63,6 +72,7 @@ function analyser(rows, valg) {
     afventer: vurderinger.filter(v => v.tilstand === 'afventer'),
     afviste: vurderinger.filter(v => v.tilstand === 'afvist'),
     uoplyst,
+    egneMaerker: [...egneTael].map(([navn, antal]) => vurderinger.find(v => v.raa === navn) || R.vurderKandidat(navn, antal, { min, modelNoegler })),
   };
 }
 
@@ -80,6 +90,8 @@ function rapport(a) {
   for (const v of a.afventer) L.push(`  ${v.navn} (${v.antal}) — ${v.aarsag}`);
   L.push('', `AFVIST (${a.afviste.length}):`);
   for (const v of a.afviste) L.push(`  ${v.navn} (${v.antal}) — ${v.aarsag}`);
+  L.push('', `SÆLGERNES EGNE MÆRKER ("Andet mærke" i opret-annonce, ${(a.egneMaerker || []).length}) — står som fritekst på annoncen, ikke som mærke:`);
+  for (const v of a.egneMaerker || []) L.push(`  ${v.navn} (${v.antal}) — ${v.tilstand}: ${v.aarsag}`);
   L.push('', `Annoncer uden registreret mærke ("Uoplyst mærke"): ${a.uoplyst.length}`);
   for (const u of a.uoplyst) L.push(`  "${u.titel}" (kildens mærke: ${u.raa || 'tomt'})`);
   return L.join('\n');
@@ -92,6 +104,8 @@ function markdown(a) {
     `## Kandidater (${a.kandidater.length})`, '', tabel(a.kandidater), '',
     `## Afventer (${a.afventer.length})`, '', tabel(a.afventer), '',
     `## Afvist (${a.afviste.length})`, '', tabel(a.afviste), '',
+    `## Sælgernes egne mærker, «Andet mærke» (${(a.egneMaerker || []).length})`, '',
+    (a.egneMaerker || []).length ? (a.egneMaerker || []).map(v => `- ${v.navn} (${v.antal}) — ${v.tilstand}: ${v.aarsag}`).join(String.fromCharCode(10)) : '_Ingen._', '',
     `## Annoncer uden registreret mærke (${a.uoplyst.length})`, '',
     a.uoplyst.length ? a.uoplyst.map(u => `- "${u.titel}" (kildens mærke: ${u.raa || 'tomt'})`).join('\n') : '_Ingen._', ''].join('\n');
 }
@@ -145,12 +159,13 @@ async function main(argv) {
   const B = browserModules();
   const data = fs.readFileSync(path.join(ROOT, 'js/data.js'), 'utf8');
   const modeller = new Function(data + '\n;return MODELLER_PR_MAERKE;')();
-  let rows;
+  let rows, egne = [];
   if (live) {
     rows = await fetchExternalListings();
+    try { egne = (await require('./shared').fetchListings([])).map(l => l.brand); } catch (e) { console.warn('Egne annoncer kunne ikke hentes (springes over):', e.message || e); }
     if (argv.includes('--gem')) { fs.writeFileSync(SNAPSHOT, JSON.stringify(bygSnapshot(rows, B), null, 1) + '\n'); console.log('Snapshot opdateret: ' + path.relative(ROOT, SNAPSHOT)); }
   } else rows = snapshotRaekker(laesSnapshot());
-  const a = analyser(rows, { browser: B, modeller, min });
+  const a = analyser(rows, { browser: B, modeller, min, egne });
   console.log(rapport(a));
   if (mdi >= 0 && argv[mdi + 1]) fs.writeFileSync(path.resolve(argv[mdi + 1]), markdown(a));
   return 0;

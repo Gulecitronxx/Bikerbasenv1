@@ -1151,7 +1151,9 @@ function byg(){
    side uden søgeord og uden mening. I dag er der 0 af dem; spærren er der,
    fordi den næste kilde kan have nogle. */
 const byBrandRaw = {};
-LISTINGS.filter(l => l.brand && !BrandRegistry.erUkendt(l.brand))
+/* V5: kun REGISTREREDE mærker får en side. En sælger kan skrive et andet mærke i opret-annonce ("Andet mærke"); den tekst står på
+   annoncen, men bliver aldrig til en mærkeside, før et menneske har givet mærket en registerpost (scripts/maerke-kandidater.js). */
+LISTINGS.filter(l => l.brand && BrandRegistry.erKendt(l.brand))
   .forEach(l => { (byBrandRaw[l.brand] = byBrandRaw[l.brand] || []).push(l); });
 
 /* To mærkenavne kan give SAMME slug uden at være det samme tegn for tegn —
@@ -1467,7 +1469,12 @@ const opgoerelse = BrandRegistry.opgoer(LISTINGS.map(l => l.brand));
 const udenAktuelle = maerkerUdenLager(opgoerelse.udenAnnoncer.aktuelle, brands);
 const udenHistoriske = maerkerUdenLager(opgoerelse.udenAnnoncer.historiske, brands);
 const udenLager = [...udenAktuelle, ...udenHistoriske];
-const udenMaerke = LISTINGS.filter(l => !l.brand || BrandRegistry.erUkendt(l.brand)).length;   // annoncer, kilden ikke har oplyst mærke på
+const udenMaerke = LISTINGS.filter(l => !l.brand || !BrandRegistry.erKendt(l.brand)).length;   // annoncer uden et mærke fra registret (ikke oplyst, eller sælgerens eget "andet mærke")
+const pilleHTML = b => {
+  const p = BrandRegistry.find(b);
+  const soeg = [b, p ? p.slug : '', ...(p ? p.aliaser : [])].filter(Boolean).join('|');
+  return `<li data-mk-soeg="${esc(soeg)}" data-mk-pille="${esc(p ? p.slug : slugify(b))}" data-mk-navn="${esc(b)}">${esc(b)}</li>`;
+};
 const topMaerker = brands.filter(b => slugify(b) !== 'andet-maerke')
   .sort((a, b) => byBrand[b].length - byBrand[a].length || a.localeCompare(b, 'da')).slice(0, 8);
 /* A–Z: første bogstav, dansk sortering (Æ Ø Å sidst). */
@@ -1496,7 +1503,8 @@ ${csp}
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <!-- Ingen preconnect: maerkeoversigten viser ingen annoncer og henter
      hverken data fra Supabase eller supabase-js fra jsDelivr (se
-     scriptlisten nederst). En preconnect til en vaert, der aldrig
+     scriptlisten nederst; js/maerker-lager.js henter kun efter første maling, fra samme
+     oprindelse som de andre sider). En preconnect til en vaert, der aldrig
      kontaktes, koster DNS + TLS for ingenting — og de to haandtryk laa
      paa den kritiske sti foran fontene. -->
 <link rel="preload" href="fonts/spacegrotesk.woff2?v=1" as="font" type="font/woff2" crossorigin>
@@ -1541,7 +1549,7 @@ ${header}
     <div class="container">
       <div class="mk-sek-head">
         <h2 id="mk-top-h">Mærker med flest annoncer</h2>
-        <a class="mk-link" href="soegning.html">Søg blandt alle ${tal(LISTINGS.length)} annoncer${ICON.arrowRight}</a>
+        <a class="mk-link" href="soegning.html"><span>Søg blandt alle <span data-mk-alle>${tal(LISTINGS.length)}</span> annoncer</span>${ICON.arrowRight}</a>
       </div>
       <div class="mk-brandtiles">
         ${topMaerker.map(b => maerkeFliseHTML(b, antalTekst(byBrand[b].length, 'annonce', 'annoncer'))).join('\n        ')}
@@ -1571,18 +1579,22 @@ ${header}
 
   ${udenLager.length ? `<section class="section mk-sektion mk-flere-sektion" aria-labelledby="mk-flere-h">
     <div class="container">
-      <div class="mk-sek-head"><h2 id="mk-flere-h">Flere mærker (${udenLager.length})</h2></div>
-      <p class="brand-intro">Disse ${udenLager.length} mærker kender vi, men ingen annoncer til salg er indekseret lige nu. De har derfor ingen egen side — den får de, når der er noget at vise (og er først indekserbar fra ${BrandRegistry.MIN_ANNONCER_INDEKS} annoncer). Sælger du et af dem, kan du <a href="opret-annonce.html">oprette en annonce</a>: alle mærkerne kan vælges dér. Imens finder du resten i <a href="soegning.html">den fulde søgning</a>.</p>
+      <div class="mk-sek-head"><h2 id="mk-flere-h">Flere mærker (<span data-mk-flere-n>${udenLager.length}</span>)</h2></div>
+      <p class="brand-intro">Disse <span data-mk-flere-n>${udenLager.length}</span> mærker kender vi, men ingen annoncer til salg er indekseret lige nu. De er ikke knapper: de har ingen egen side, før der er noget at vise (og siden er først indekserbar fra ${BrandRegistry.MIN_ANNONCER_INDEKS} annoncer). Sælger du et af dem, kan du <a href="opret-annonce.html">oprette en annonce</a>: alle mærkerne kan vælges dér, og et mærke, der ikke står på listen, kan du skrive selv. Imens finder du resten i <a href="soegning.html">den fulde søgning</a>.</p>
+      <div class="mk-flere-nye" data-mk-nye hidden>
+        <p class="mk-flere-note" role="status"><strong>Nyt siden sidste opdatering</strong> — disse mærker har fået annoncer, efter siden blev bygget:</p>
+        <ul class="mk-flere mk-flere-links" data-mk-nye-liste aria-label="Mærker, der netop har fået annoncer"></ul>
+      </div>
       ${udenAktuelle.length ? `<ul class="mk-flere" aria-label="Aktuelle mærker uden annoncer lige nu">
-        ${udenAktuelle.map(b => `<li>${esc(b)}</li>`).join(' ')}
+        ${udenAktuelle.map(pilleHTML).join(' ')}
       </ul>` : ''}
       ${udenHistoriske.length ? `<p class="mk-flere-note"><strong>Historiske mærker (${udenHistoriske.length})</strong> — ikke længere i produktion, men brugte maskiner handles stadig.</p>
       <ul class="mk-flere mk-flere-hist" aria-label="Historiske mærker uden annoncer lige nu">
-        ${udenHistoriske.map(b => `<li>${esc(b)}</li>`).join(' ')}
+        ${udenHistoriske.map(pilleHTML).join(' ')}
       </ul>` : ''}
-      ${udenMaerke ? `<p class="mk-flere-note">${tal(udenMaerke)} ${udenMaerke === 1 ? 'annonce oplyser' : 'annoncer oplyser'} ikke et mærke, og står derfor ikke under et mærke ovenfor. De er med i de ${tal(LISTINGS.length)} annoncer i søgningen.</p>` : ''}
+      ${udenMaerke ? `<p class="mk-flere-note">${tal(udenMaerke)} ${udenMaerke === 1 ? 'annonce har' : 'annoncer har'} intet mærke fra vores liste (mærket er ikke oplyst, eller sælgeren har skrevet et andet mærke) og står derfor ikke under et mærke ovenfor. ${udenMaerke === 1 ? 'Den er' : 'De er'} med i de <span data-mk-alle>${tal(LISTINGS.length)}</span> annoncer i søgningen.</p>` : ''}
       <div class="brand-actions">
-        <a href="soegning.html" class="btn btn-outline">Søg blandt alle ${tal(LISTINGS.length)} annoncer</a>
+        <a href="soegning.html" class="btn btn-outline"><span>Søg blandt alle <span data-mk-alle>${tal(LISTINGS.length)}</span> annoncer</span></a>
       </div>
     </div>
   </section>` : ''}
@@ -1596,6 +1608,9 @@ ${footer}
      hele Supabase-stakken (supabase-js fra jsDelivr 55.453 B, config, api,
      backend-bridge) og js/postnumre.js (40.050 B rå) taget ud. Se den
      længere begrundelse i sikkerhed.html; det er samme rettelse.
+     V5: js/maerker-lager.js indlæser config/api/bridge DYNAMISK efter første
+     maling (load + tomgang, aldrig ved Save-Data) og opdaterer tallene og
+     "Flere mærker" ud fra det levende lager. De står derfor ikke i listen her.
      RØR IKKE listen uden at rette den tilsvarende i maerker.html — den her
      er kilden, siden genereres af scripts/build-brand-pages.js. -->
 <script defer src="js/security.js"></script>
@@ -1606,6 +1621,7 @@ ${footer}
 <script defer src="js/components.js"></script>
 ${logoScripts(harLogoer)}<script defer src="js/maerke.js"></script>
 <script defer src="js/maerker-sog.js"></script>
+<script defer src="js/maerker-lager.js"></script>
 </body>
 </html>
 `;
