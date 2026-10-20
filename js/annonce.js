@@ -541,6 +541,14 @@ const AN_IKON = {
 
 const anEnc = (s) => encodeURIComponent(s);
 
+/* V6 (Critic P2-2): et mærke må kun få et LINK til søgningen, hvis søgningen kan vise det. ?brands= kender kun registrerede mærker; et fritekst-mærke
+   fra "Andet mærke" (fx "Fantasi Motors") giver "Ingen motorcykler" dér, selvom ?q= finder annoncen. Derfor: ukendt mærke = ren tekst, ingen mærke-/model-links
+   (hverken i brødkrummen, i de strukturerede data eller i "Se alle lignende"). */
+function anMaerkeKendt(maerke){
+  if (!maerke || maerke === 'Ukendt') return false;
+  return typeof BrandRegistry === 'undefined' || BrandRegistry.erKendt(maerke);
+}
+
 /* Brødkrumme: Forside › Motorcykler › Mærke › Model › Mærke Model (årgang).
    Mærket og modellen peger på den søgning, der viser præcis dem. "Ukendt" er
    ikke et mærke man kan søge på, så leddet udelades. */
@@ -548,6 +556,7 @@ function anBrodkrumme(l){
   const nav = document.getElementById('bc-nav');
   if (!nav) return;
   const maerkeOK = l.brand && l.brand !== 'Ukendt';
+  const maerkeLink = anMaerkeKendt(l.brand);
   /* "Motorcykler" fører tilbage til den søgning, annoncen blev åbnet fra (samme sessionStorage-nøgle som søgesidens
      scroll-hukommelse, bb_srp_position; den bærer søgestreng, scrollposition og annonce-id). Kun hvis id'et er DENNE
      annonce - ellers er den gemte søgning en andens. Søgesiden ruller selv til den gemte position. */
@@ -557,10 +566,11 @@ function anBrodkrumme(l){
     if (gemt && String(gemt.id) === String(l.id) && /^\?[^#]*$/.test(gemt.soeg || '')) soegHref += gemt.soeg;
   } catch (e) { /* privat tilstand: bart link */ }
   const led = [['index.html', 'Forside'], [soegHref, 'Motorcykler']];
-  if (maerkeOK) led.push([`soegning.html?brands=${anEnc(l.brand)}`, l.brand]);
-  if (maerkeOK && l.model) led.push([`soegning.html?brands=${anEnc(l.brand)}&model=${anEnc(l.model)}`, l.model]);
+  if (maerkeLink) led.push([`soegning.html?brands=${anEnc(l.brand)}`, l.brand]);
+  if (maerkeLink && l.model) led.push([`soegning.html?brands=${anEnc(l.brand)}&model=${anEnc(l.model)}`, l.model]);
+  else if (maerkeOK) led.push([null, l.brand]);   // ukendt mærke: ren tekst, intet link
   const sidste = [maerkeOK ? l.brand : '', l.model].filter(Boolean).join(' ') || 'Annonce';
-  nav.innerHTML = led.map(([h, t]) => `<a href="${h}">${escapeHTML(t)}</a><span class="bc-sep">${Icon.chevronRight}</span>`).join('')
+  nav.innerHTML = led.map(([h, t]) => `${h ? `<a href="${h}">${escapeHTML(t)}</a>` : `<span class="bc-plain">${escapeHTML(t)}</span>`}<span class="bc-sep">${Icon.chevronRight}</span>`).join('')
     + `<span id="bc-current" aria-current="page">${escapeHTML(sidste)}${l.year ? ` (${escapeHTML(String(l.year))})` : ''}</span>`;
 }
 
@@ -587,9 +597,10 @@ function anSeoBrodkrumme(l){
   let sidste = '';
   try { sidste = JSON.parse(el.textContent).itemListElement.slice(-1)[0].item; } catch (e) { return; }
   const maerkeOK = l.brand && l.brand !== 'Ukendt';
+  const maerkeLink = anMaerkeKendt(l.brand);
   const led = [{ name: 'Forside', path: '' }, { name: 'Motorcykler', path: 'soegning' }];
-  if (maerkeOK) led.push({ name: l.brand, path: `soegning?brands=${anEnc(l.brand)}` });
-  if (maerkeOK && l.model) led.push({ name: l.model, path: `soegning?brands=${anEnc(l.brand)}&model=${anEnc(l.model)}` });
+  if (maerkeLink) led.push({ name: l.brand, path: `soegning?brands=${anEnc(l.brand)}` });
+  if (maerkeLink && l.model) led.push({ name: l.model, path: `soegning?brands=${anEnc(l.brand)}&model=${anEnc(l.model)}` });
   led.push({ name: `${maerkeOK ? l.brand + ' ' : ''}${l.model || 'Annonce'}${l.year ? ` (${l.year})` : ''}`, path: sidste.replace(SITE_URL + '/', '') });
   Seo.setJsonLd('breadcrumb', Seo.breadcrumb(led));
 }
@@ -842,7 +853,7 @@ function anFyldLignende(listing){
   wireFavoriteButtons(mount);
   const alle = document.getElementById('similar-all');
   if (alle){
-    const maerke = listing.brand && listing.brand !== 'Ukendt';
+    const maerke = anMaerkeKendt(listing.brand);
     alle.href = maerke ? `soegning.html?brands=${anEnc(listing.brand)}` : 'soegning.html';
     alle.hidden = false;
   }

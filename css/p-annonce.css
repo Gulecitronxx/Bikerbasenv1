@@ -640,6 +640,8 @@
 .an-crumbrow .breadcrumb{ min-width:0; flex:1 1 320px; }
 .an-crumbrow .breadcrumb > *{ min-width:0; }
 .an-crumbrow .breadcrumb #bc-current{ color: var(--color-fg); font-weight:600; overflow-wrap:anywhere; }
+/* V6: et mærke uden søgning at pege på (fritekst fra "Andet mærke") står som ren tekst — ens farve som linkene, men ingen hover og ingen understregning. */
+.an-crumbrow .breadcrumb .bc-plain{ color: var(--color-fg-muted); cursor: default; }
 .an-actions{ display:flex; align-items:center; gap: var(--space-1); flex-wrap:wrap; padding-top:0; }
 .an-act{
   display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 12px;
@@ -1031,7 +1033,7 @@
 @media (min-width:900px){
   .an-crumbrow{ flex-wrap:nowrap; }
   .an-crumbrow .breadcrumb{ flex-wrap:nowrap; white-space:nowrap; overflow:hidden; }
-  .an-crumbrow .breadcrumb > a, .an-crumbrow .breadcrumb > .bc-sep{ flex:0 0 auto; }
+  .an-crumbrow .breadcrumb > a, .an-crumbrow .breadcrumb > .bc-plain, .an-crumbrow .breadcrumb > .bc-sep{ flex:0 0 auto; }
   .an-crumbrow .breadcrumb #bc-current{ overflow:hidden; text-overflow:ellipsis; overflow-wrap:normal; }
   .an-actions{ flex:0 0 auto; }
 }
