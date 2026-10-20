@@ -91,7 +91,13 @@ function readStateFromURL(){
   state.page = numOrNull(p.get('page')) || 1;
   kanoniserMaerkeOgModel();
 }
-function numOrNull(v){ return (v === null || v === '' || isNaN(Number(v))) ? null : Number(v); }
+/* V4: ugyldige tal i adressen ignoreres frem for at blive et filter: tekst, uendelig og negative tal (?maxPrice=-5 gav 0 resultater).
+   Alle talfelterne (pris, årgang, km, ccm, hk, ejere, alder, side) er ikke-negative. */
+function numOrNull(v){
+  if (v === null || v === '' || String(v).trim() === '') return null;
+  const n = Number(v);
+  return (Number.isFinite(n) && n >= 0) ? n : null;
+}
 
 /* Filtrene som query string. Uden side og sortering er det samtidig den
    nøgle en søgeagent sammenlignes på, så samme filtre altid genkendes. */
@@ -1820,10 +1826,18 @@ function render(){
      "… i Syddanmark"), står den uden tal, så tallet aldrig påstår noget andet
      end filteret. Hele h1'en er stadig den dynamiske overskrift (SEO). */
   const hTekst = document.getElementById('so-h1-text'), hAntal = document.getElementById('so-h1-n');
+  /* V4: tallet i H1 følger RESULTATET (efter filtrering og hydrering), ikke hele lageret: H1 stod på "97 motorcykler" ved
+     siden af 12, 1 eller 0 kort. Standardoverskriften får tallet foran ("12 motorcykler til salg i Danmark", "1 motorcykel …",
+     "Ingen motorcykler …"); en overskrift med mærke/region ("Honda til salg") får det bagved. Under lagerfejl står intet tal.
+     Den visuelt skjulte H1 er ikke selv en live-region: resultatlinjen (#results-count, role=status) siger tallet højt. */
   const standard = heading === 'Motorcykler til salg i Danmark';
-  const lager = uaktuelt ? 0 : Store.getAllListings().length;
-  const nyTekst = standard && lager ? 'motorcykler til salg i Danmark' : heading;
-  const nyAntal = standard && lager ? lager.toLocaleString('da-DK') + ' ' : '';
+  const tallet = total.toLocaleString('da-DK');
+  let nyTekst, nyAntal = '';
+  if (uaktuelt) nyTekst = heading;
+  else if (standard){
+    if (total === 0) nyTekst = 'Ingen motorcykler til salg i Danmark';
+    else { nyAntal = tallet + ' '; nyTekst = total === 1 ? 'motorcykel til salg i Danmark' : 'motorcykler til salg i Danmark'; }
+  } else nyTekst = total === 0 ? `${heading} — ingen annoncer lige nu` : `${heading} — ${tallet} ${total === 1 ? 'annonce' : 'annoncer'}`;
   if (hTekst && hTekst.textContent !== nyTekst) hTekst.textContent = nyTekst;
   if (hAntal && hAntal.textContent !== nyAntal) hAntal.textContent = nyAntal;
 

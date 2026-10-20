@@ -229,3 +229,73 @@ test('antal på tværs: søgning for et mærke = mærkesidens hydrerede tal', as
     assert.ok(paaSiden.length > 0 && paaSiden.every(x => x === iSoeg), `mærkeside ${paaSiden} vs søgning ${iSoeg}`);
   } finally { await s.c.close(); await m.c.close(); }
 });
+
+/* ---------------------------------------------------------------- V3-Critic: H1, ugyldige tal, fejlbanner */
+const h1 = p => p.evaluate(() => document.querySelector('h1').textContent.replace(/\s+/g, ' ').trim());
+
+test('H1 følger resultatet: standard, med q, med mærke og uden træf (ikke hele lageret)', async (t) => {
+  if (!H) return t.skip('Playwright mangler');
+  const { c, p } = await aabn(1440, 'soegning.html');
+  try {
+    let n = await tal(p);
+    assert.equal(await h1(p), `${n.toLocaleString('da-DK')} motorcykler til salg i Danmark`);
+    await p.fill('#filter-q', 'cf moto');
+    await vent(p, () => /^1 /.test(document.querySelector('h1').textContent));
+    n = await tal(p);
+    assert.equal(n, 1);
+    assert.equal(await h1(p), '1 motorcykel til salg i Danmark');
+    await p.fill('#filter-q', 'zzzzqq');
+    await vent(p, () => /^Ingen/.test(document.querySelector('h1').textContent));
+    assert.equal(await h1(p), 'Ingen motorcykler til salg i Danmark');
+    await p.fill('#filter-q', '');
+    await vent(p, () => /^\d/.test(document.querySelector('h1').textContent) && !/^1 /.test(document.querySelector('h1').textContent));
+    assert.equal(await h1(p), `${(await tal(p)).toLocaleString('da-DK')} motorcykler til salg i Danmark`);
+  } finally { await c.close(); }
+  const b = await aabn(1440, 'soegning.html?brands=Honda&type=touring');
+  try {
+    const n = await tal(b.p);
+    assert.equal(await h1(b.p), `Honda til salg — ${n.toLocaleString('da-DK')} ${n === 1 ? 'annonce' : 'annoncer'}`);
+  } finally { await b.c.close(); }
+});
+
+test('ugyldige tal i adressen ignoreres: ?maxPrice=-5, ?priceMin=abc, ?kmMax=-1, ?page=-3 giver hele lageret, ingen pille', async (t) => {
+  if (!H) return t.skip('Playwright mangler');
+  const base = await aabn(1440, 'soegning.html');
+  const alt = await tal(base.p); await base.c.close();
+  for (const q of ['maxPrice=-5', 'priceMin=abc', 'priceMax=-1', 'kmMax=-1', 'yearMin=-2000', 'hkMax=Infinity', 'page=-3', 'ccmMin=-1']){
+    const { c, p } = await aabn(1440, `soegning.html?${q}`);
+    try {
+      assert.equal(await tal(p), alt, q);
+      assert.deepEqual(await p.evaluate(() => [...document.querySelectorAll('.active-filter-pill')].map(x => x.textContent.trim())), [], q);
+      assert.equal(await p.evaluate(() => getComputedStyle(document.getElementById('empty-state')).display), 'none', q);
+    } finally { await c.close(); }
+  }
+  // gyldige tal virker stadig
+  const g = await aabn(1440, 'soegning.html?priceMax=50000');
+  try { assert.ok(await tal(g.p) < alt); assert.equal(await tal(g.p), await iSiden(g.p, { priceMax: 50000 })); } finally { await g.c.close(); }
+});
+
+for (const w of [320, 375, 430]){
+  test(`503 på ${w}: fejlbannerets titel står fuldt, uden klipning`, async (t) => {
+    if (!H) return t.skip('Playwright mangler');
+    const c = await H.browser.newContext({ viewport: { width: w, height: 812 }, locale: 'da-DK', serviceWorkers: 'block' });
+    await c.addInitScript(sb.initScript, { tema: 'light' });
+    await c.route('**/*', route => {
+      const u = new URL(route.request().url());
+      if (u.hostname === '127.0.0.1') return route.continue();
+      if (/supabase\.co$/.test(u.hostname)){
+        if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' } });
+        return route.fulfill({ status: 503, headers: { 'Access-Control-Allow-Origin': '*' }, body: '{}' });
+      }
+      return route.abort();
+    });
+    const p = await c.newPage();
+    try {
+      await p.goto(`http://127.0.0.1:${H.port}/soegning.html`, { waitUntil: 'networkidle' });
+      await p.waitForSelector('.data-afbrud-kort', { timeout: 8000 });
+      const m = await p.evaluate(() => { const k = document.querySelector('.data-afbrud-kort'); return { afskaaret: k.scrollWidth > k.clientWidth + 1 || k.scrollHeight > k.clientHeight + 1, tekst: k.textContent, overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth }; });
+      assert.equal(m.afskaaret, false, `"${m.tekst}" er klippet`);
+      assert.equal(m.overflowX, 0);
+    } finally { await c.close(); }
+  });
+}

@@ -657,3 +657,15 @@ html:not(.so-klar) .srp #results-grid[style*="hidden"] > .card > *{ visibility:h
 .srp .active-filter-pill button{ transition: background-color .12s var(--ease-out); }
 /* Facettallet skifter værdi uden at hoppe: tabulære tal */
 .srp .facet-n{ font-variant-numeric: tabular-nums; }
+
+/* V4: fejlbanneret (503/tomt lager) på telefon: titlen blev klippet til "Lageret kunne ikke hen…". På søgesiden må den stå på to linjer
+   (banneret er et fast overlay nederst og flytter intet); højden følger indholdet op til to linjer + knapper. */
+@media (max-width:1023px){
+  body.srp .data-afbrud{ max-height:none; align-items:center; }
+  body.srp .data-afbrud-kort{ white-space:normal; overflow:visible; text-overflow:clip; line-height:1.25; display:block; overflow-wrap:anywhere; }
+}
+@media (max-width:420px){
+  body.srp .data-afbrud{ flex-wrap:wrap; }
+  body.srp .data-afbrud-kort{ flex:1 1 100%; }
+  body.srp .data-afbrud-knapper{ flex:1 1 100%; justify-content:flex-end; }
+}
