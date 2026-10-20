@@ -99,6 +99,7 @@ for (const vp of [320, 390, 768, 1440]) {
   for (const visning of ['list', 'swipe']) {
     test(`${visning}-visning ved ${vp} px: fælles kortfod (.rk-fod, sted foerst, title + aria-label), ingen overflow`, async (t) => {
       if (!H) return t.skip('Playwright mangler');
+      if (visning === 'swipe' && vp >= 960) return t.skip('V4: svajpe-visningen er mobil-først; knappen er skjult fra 960 px');
       const r = await side(vp, 'lys', 'soegning.html', p => p.evaluate(() => {
         const kort = Array.from(document.querySelectorAll('.listing-row, .swipe-card[data-stack="0"]'));
         const ok = fn => kort.filter(fn).length;
