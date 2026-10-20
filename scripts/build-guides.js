@@ -381,6 +381,18 @@ function traekSaetning(html, tldrOrd){
   if (!rest) return null;
   return { html: html.replace(bedst.afsnit, `<p>${rest}</p>`), saetning: bedst.s, staerk: bedst.staerk };
 }
+/* Billedets egne mål (WebP-hoved), så figuren kan vises i sin naturlige størrelse og format i stedet for at blive beskåret og skaleret op. */
+function webpMaal(rel){
+  try {
+    const b = fs.readFileSync(path.join(ROOT, rel));
+    if (b.toString('ascii', 8, 12) !== 'WEBP') return null;
+    const t = b.toString('ascii', 12, 16);
+    if (t === 'VP8 ') return { w: b.readUInt16LE(26) & 0x3fff, h: b.readUInt16LE(28) & 0x3fff };
+    if (t === 'VP8L'){ const v = b.readUInt32LE(21); return { w: (v & 0x3fff) + 1, h: ((v >> 14) & 0x3fff) + 1 }; }
+    if (t === 'VP8X') return { w: b.readUIntLE(24, 3) + 1, h: b.readUIntLE(27, 3) + 1 };
+  } catch (e) { /* ukendt format: faldback nedenfor */ }
+  return null;
+}
 function guideTillaeg(g, sektioner){
   const ud = sektioner.map(() => '');
   if (sektioner.length < 4) return ud;
@@ -397,7 +409,9 @@ function guideTillaeg(g, sektioner){
   // ét foto i artiklen: guidens eget kortbillede, men aldrig forsidefotoet (heroen) og aldrig et foto, der også står i typeflisernes række
   const tiles = new Set(Object.keys(TYPE_TEKST).map(id => `img/type/${id}.webp`));
   if (g.cardImage && !/^img\/hero/.test(g.cardImage) && !tiles.has(g.cardImage) && sektioner.length > 3){
-    ud[2] += `\n        <figure class="gd-fig"><img src="${g.cardImage}" alt="" style="object-position:${g.cardPos || '50% 50%'}" width="960" height="540" loading="lazy" decoding="async"></figure>`;
+    /* V5: figuren vises i billedets eget format og højst i dets egen bredde (studiofotos er 456x342): ingen beskæring til en strimmel, ingen opskalering. */
+    const m = webpMaal(g.cardImage) || { w: 960, h: 540 };
+    ud[2] += `\n        <figure class="gd-fig" style="--gd-fig-w:${m.w}px"><img src="${g.cardImage}" alt="" style="object-position:${g.cardPos || '50% 50%'}" width="${m.w}" height="${m.h}" loading="lazy" decoding="async"></figure>`;
   }
   return ud;
 }

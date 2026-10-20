@@ -50,7 +50,11 @@ async function side(sti, w, tema = 'lys'){
   const ctx = await browser.newContext({ viewport: { width: w, height: 900 } });
   await bak.installer(ctx, { tema });
   const page = await ctx.newPage();
-  await page.goto(URL(sti), { waitUntil: 'networkidle' });
+  /* Windows kan løbe tør for socket-buffere ved mange hurtige sideindlæsninger (ERR_NO_BUFFER_SPACE, samme OS-fejl som smoke-browser dokumenterer): prøv igen. */
+  for (let forsoeg = 1; ; forsoeg++){
+    try { await page.goto(URL(sti), { waitUntil: 'networkidle' }); break; }
+    catch (e){ if (forsoeg >= 3 || !/ERR_NO_BUFFER_SPACE|ERR_CONNECTION/.test(String(e.message))) throw e; await page.waitForTimeout(400 * forsoeg); }
+  }
   await page.evaluate(async () => { const h = document.documentElement.scrollHeight; for (let y = 0; y < h; y += 600){ window.scrollTo(0, y); await new Promise(r => setTimeout(r, 30)); } window.scrollTo(0, 0); });
   await page.waitForFunction(() => [...document.images].every(i => i.complete), null, { timeout: 8000 }).catch(() => {});
   return { page, luk: () => ctx.close() };
@@ -131,4 +135,26 @@ test('guidedata: kortbilleder har en billedforankring, der holder motiverne i ud
       assert.match(g.cardPos, /^center( 100%| bottom)?$/, `${g.slug}: studiefoto forankres i bunden (${g.cardPos})`);
     }
   }
+});
+
+test('guide-figurer i artiklen: hele motorcyklen (>= 85 % af motivets bredde og højde) og ingen opskalering ved 375/430/768/1024/1440/1920', { timeout: 300000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  let figurer = 0;
+  for (const w of [375, 430, 768, 1024, 1440, 1920]){
+    for (const sd of GUIDES){
+      const s = await side(sd + '.html', w);
+      try {
+        const m = await s.page.evaluate(maalBilleder, '.gd-fig img');
+        const nat = await s.page.$$eval('.gd-fig img', els => els.map(i => [i.naturalWidth, i.naturalHeight]));
+        m.forEach((k, i) => { k.nat = nat[i]; });
+        for (const k of m){
+          figurer++;
+          assert.ok(!k.fejl, `${sd} ${w} ${k.src}: ${k.fejl}`);
+          assert.ok(k.bredde >= 0.85 && k.hoejde >= 0.85, `${sd} ${w}px figur ${k.src}: viser ${Math.round(k.bredde * 100)} % af motivets bredde og ${Math.round(k.hoejde * 100)} % af højden (felt ${k.box})`);
+          assert.ok(k.box[0] <= k.nat[0] + 1, `${sd} ${w}px figur ${k.src}: vist ${k.box[0]} px bred, men billedet er kun ${k.nat[0]} px (opskaleret = uskarpt)`);
+        }
+      } finally { await s.luk(); }
+    }
+  }
+  assert.ok(figurer >= 6 * 3, `der skal være figurer at måle (fandt ${figurer}; tre guides har en figur)`);
 });

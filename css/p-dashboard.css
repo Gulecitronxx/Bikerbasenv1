@@ -1043,3 +1043,23 @@ a.db-title{ display:inline-block; padding: 10px 0; margin: -10px 0; }
   .db-tabs{ -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
   .db-tabs.at-end{ -webkit-mask-image: none; mask-image: none; }
 }
+
+/* ===== V5: gemte annoncer uden login (?tab=favoritter) ===== */
+/* Anonyme ser kun favoritfanen (lokale favoritter på indekserede annoncer). Alt andet kræver login og skjules, så ingen lokkes ind i døde faner. */
+.db-anonym .db-stats, .db-anonym #db-panel-annoncer, .db-anonym #tab-agenter, .db-anonym #tab-konto, .db-anonym .db-account,
+.db-anonym .db-tab:not([data-tab="favoritter"]){ display: none !important; }
+.db-anon-note{
+  display: flex; align-items: flex-start; gap: var(--space-2); margin: 0 0 var(--space-3); padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  font-size: 14px; line-height: 1.5; color: var(--color-fg-muted);
+}
+.db-anon-note[hidden]{ display: none; }
+.db-anon-note a{ color: var(--color-primary-hover); font-weight: 600; text-underline-offset: 3px; }
+:root[data-theme="dark"] .db-anon-note a{ color: var(--color-primary); }
+.db-anon-ic{ display: inline-flex; flex: none; width: 18px; height: 18px; margin-top: 2px; }
+.db-anon-ic svg{ width: 18px; height: 18px; }
+/* Gemte indekserede annoncer har tre handlinger (Se annonce, Åbn hos kilden, hjerte) og kildenavne af vilkårlig længde: i den faste handlingskolonne
+   (292 px) ombrydes de til to linjer i stedet for at løbe ind over statuskolonnen. */
+@container db-rows (min-width: 820px){
+  .db-row[data-external] .db-actions{ flex-wrap: wrap; justify-content: flex-end; }
+}

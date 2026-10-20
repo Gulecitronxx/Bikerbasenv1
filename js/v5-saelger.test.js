@@ -340,3 +340,72 @@ test('V5 guides: "Læs også" bruger kategori og pil, og "Gå videre herfra" gen
   const h2 = [...html.matchAll(/<h2[^>]*>([^<]*)<\/h2>/g)].map(m => m[1].trim());
   assert.strictEqual(new Set(h2).size, h2.length, 'dubleret h2: ' + h2.join(' | '));
 });
+
+/* ---------------- Gemte annoncer uden login ---------------- */
+
+test('V5 favoritter: anonym trykker hjerte på ekstern annonce, åbner header-hjertet og ser listen uden login; ingen skrivning til Supabase', { timeout: 90000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const { eksterneRaekker } = require('../scripts/smoke-fixtures');
+  const bak = lavBackend({ loggetInd: false });
+  bak.tilstand.tabeller.eksterne_annoncer.push(...eksterneRaekker());
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await bak.installer(ctx, { tema: 'lys' });
+  const page = await ctx.newPage();
+  const fejl = []; page.on('pageerror', e => fejl.push(e.message));
+  try {
+    await page.goto(URL('soegning.html'), { waitUntil: 'networkidle' });
+    const hjerte = page.locator('[data-fav-toggle][data-fav-ext]').first();
+    await hjerte.waitFor({ state: 'visible', timeout: 15000 });
+    const id = await hjerte.getAttribute('data-fav-toggle');
+    await hjerte.click();
+    assert.ok(await page.evaluate(i => JSON.parse(localStorage.getItem('bb_favorites_ext') || '[]').map(String).includes(String(i)), id), 'gemt lokalt');
+    // headerens hjerte ("Gemte annoncer") åbner favoritfanen uden login-omvej
+    await Promise.all([page.waitForURL(/mine-annoncer\.html\?tab=favoritter/), page.locator('a[href="mine-annoncer.html?tab=favoritter"]').first().click()]);
+    await page.waitForSelector('#fav-grid .db-row[data-external="1"]', { timeout: 15000 });
+    assert.match(page.url(), /mine-annoncer\.html\?tab=favoritter/, 'ingen omdirigering til login');
+    assert.strictEqual(await page.locator(`#fav-grid .db-row[data-listing-id="${id}"]`).count(), 1, 'den gemte annonce står på listen');
+    const tekst = await page.innerText('main');
+    assert.match(tekst, /Gemt i denne browser — log ind for at gemme egne annoncer/);
+    assert.ok(!(await page.locator('.db-stats').isVisible()), 'statistikkort skjult for anonyme');
+    assert.ok(!(await page.locator('#db-panel-annoncer').isVisible()), 'egne annoncer skjult');
+    assert.strictEqual(await page.locator('.db-tab:visible').count(), 1, 'kun favoritfanen vises');
+    assert.ok(!/\b(null|undefined|NaN)\b/.test(tekst));
+    // fjern igen fra listen: forsvinder fra listen og fra lageret
+    await page.locator(`#fav-grid .db-row[data-listing-id="${id}"] [data-fav-toggle]`).click();
+    await page.waitForFunction(i => !document.querySelector(`#fav-grid .db-row[data-listing-id="${i}"]`), id);
+    assert.ok(await page.evaluate(i => !JSON.parse(localStorage.getItem('bb_favorites_ext') || '[]').map(String).includes(String(i)), id));
+    // ingen skrivning til backend, og ingen auth-kald ud over læsning
+    const skrivninger = bak.tilstand.log.filter(l => !['GET', 'HEAD'].includes(l.metode));
+    assert.deepStrictEqual(skrivninger, [], 'skrivninger til Supabase: ' + JSON.stringify(skrivninger));
+    assert.strictEqual(bak.tilstand.auth.filter(a => a.metode !== 'GET').length, 0, 'ingen auth-skrivning');
+    assert.deepStrictEqual(fejl, []);
+  } finally { await ctx.close(); }
+});
+
+test('V5 favoritter: anonym på de andre faner (?tab=aktive, mine, kladder, uden tab) sendes stadig til login', { timeout: 90000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const q of ['?tab=aktive', '?tab=mine', '?tab=kladder', '?tab=konto', '?tab=agenter', '']){
+    const s = await aabn({ loggetInd: false }, 'mine-annoncer.html' + q);
+    try {
+      await s.page.waitForURL(/login\.html/, { timeout: 10000 });
+      assert.match(decodeURIComponent(s.page.url()), /redirect=mine-annoncer\.html/, q);
+    } finally { await s.ctx.close(); }
+  }
+});
+
+test('V5 favoritter: anonym med egne (uuid) favoritter får en ærlig besked, og intet ryddes eller hentes fra databasen', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const bak = lavBackend({ loggetInd: false });
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await bak.installer(ctx, { tema: 'lys' });
+  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem('__seedFav')){ sessionStorage.setItem('__seedFav', '1'); localStorage.setItem('bb_favorites', JSON.stringify(['aaaaaaaa-1111-4222-8333-444444444444'])); } } catch (e) {} });
+  const page = await ctx.newPage();
+  try {
+    await page.goto(URL('mine-annoncer.html?tab=favoritter'), { waitUntil: 'networkidle' });
+    await page.waitForSelector('#db-anon-egne:not([hidden])', { timeout: 10000 });
+    assert.match(await page.innerText('#db-anon-egne'), /1 gemt annonce fra private sælgere på Bikerbasen/);
+    assert.deepStrictEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('bb_favorites'))), ['aaaaaaaa-1111-4222-8333-444444444444'], 'ikke ryddet');
+    assert.strictEqual(bak.tilstand.log.filter(l => l.tabel === 'listings' && l.metode === 'GET' && /aaaaaaaa-1111/.test(l.tabel)).length, 0);
+    assert.deepStrictEqual(bak.tilstand.log.filter(l => !['GET', 'HEAD'].includes(l.metode)), []);
+  } finally { await ctx.close(); }
+});

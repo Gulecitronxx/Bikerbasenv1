@@ -600,3 +600,9 @@
   .gd-hero{ min-height: min(18.5vw, 420px); }
   .gd-hero.gd-hero-lille{ min-height: min(15.5vw, 360px); }
 }
+
+/* ===== V5 guide-figur: hele motivet, ingen opskalering ===== */
+/* Figuren blev beskåret til en 704x180-strimmel (66 % af billedet, kun hjulene synlige) ved 768 og skaleret fra 456 til 936 px ved 1440 (uskarp).
+   Nu: billedets eget format (width/height fra filen), og figuren er højst lige så bred som billedet (--gd-fig-w). */
+.gd-fig{ max-width: min(100%, var(--gd-fig-w, 100%)); }
+.gd-fig img{ height: auto; aspect-ratio: auto; object-fit: cover; }

@@ -147,3 +147,18 @@ Test: `scripts/v5-guidekort.test.js` (5 tests, Playwright mod mock, lys og mørk
 Før/efter: `docs/review/gauntlet/v5/saelger/guidekort/foer/guides-{375,430,768,1440,1920}-{lys,moerk}.jpg` og `.../guidekort/efter/` (samme sæt). Forsidens guide-banner (`index.html`) bruger ikke disse billeder (tegning, ikke foto) og er urørt.
 
 Kørt grønt efter rettelsen: `scripts/guides.test.js`, `scripts/w12-guides.test.js`, `js/w14-brugere.test.js`, `scripts/v2-indhold-cls.test.js`, `js/v5-saelger.test.js`, `scripts/v5-guidekort.test.js`, smoke strikt (11 guidesider x 320/390/768/1024/1440 x lys/mørk) 0 fejl og 0 advarsler, to gange.
+
+## 9. Opfølgning på QA-dommen (to P2'er)
+
+**P2-2: gemte annoncer uden login.** Header-hjertet "Gemte annoncer" sendte anonyme til `login.html`, selvom favoritter på indekserede annoncer kun gemmes i browseren (D-008) og kommentaren i `js/components.js` påstod, at de virker for anonyme. Nu er netop én fane åben for anonyme: `mine-annoncer.html?tab=favoritter` (og aliasset `?tab=gemte`).
+- Anonym ser kun favoritlisten (lokale favoritter på indekserede annoncer) med den diskrete tekst "Gemt i denne browser — log ind for at gemme egne annoncer" (log ind linker til login med retur til favoritfanen). Siden hedder "Gemte annoncer"; statistikkort, egne annoncer, søgeagenter, profil og kontokort er skjult.
+- Alle andre faner (`aktive`, `mine`, `kladder`, `agenter`, `konto`) og kald uden `tab` sender stadig en anonym til login med `redirect`.
+- Egne uuid-favoritter kræver konto: de hentes ikke fra databasen og ryddes ikke. Har en anonym alligevel nogle, står der en ærlig linje ("Du har også 1 gemt annonce fra private sælgere på Bikerbasen. De vises, når du er logget ind."), så headerens tæller og listen ikke modsiger hinanden.
+- Ingen skrivning til Supabase i anonym tilstand. Kommentaren i `js/components.js` er rettet, så den siger, hvad der faktisk gælder.
+- Rækker for gemte indekserede annoncer har tre handlinger; i den faste handlingskolonne ombrydes de nu til to linjer i stedet for at løbe ind over statuskolonnen.
+- Test (`js/v5-saelger.test.js`, 3 nye): anonym trykker hjerte på ekstern annonce i søgningen, åbner header-hjertet, ser annoncen på listen uden login-omdirigering, fjerner den igen (liste og lager), og `log` har kun GET/HEAD; anonym på seks andre adresser sendes til login; anonym med egen uuid-favorit får beskeden og intet ryddes.
+
+**P2-3: guide-figur.** `guide-brugt-motorcykel.html` viste `classic.webp` (456x342) som en 704x180-strimmel ved 768 px (66 % beskåret, kun hjulene) og skaleret op til 936 px ved 1440 (uskarp). Årsag: `.gd-fig img{ height:clamp(180px,22vw,280px); object-fit:cover }` og `width="960" height="540"` fra generatoren. Der findes ingen større udgaver af typefotoerne i `img/` (kun 456x342; `sell-cruiser.webp` er 640x400), og der er ikke opfundet nogen.
+- Generatoren læser nu billedets egne mål (WebP-hoved) og skriver rigtige `width`/`height` samt `--gd-fig-w`; figuren vises i billedets eget format (`height:auto`, ingen beskæring) og højst i billedets egen bredde (456 / 640 px), så den aldrig skaleres op. Tre guides har en figur: brugt (classic, 456 px), sælg (sell-cruiser, 640 px) og vinteropbevaring (cross, 456 px).
+- `scripts/v5-guidekort.test.js` måler nu også artikel-figurer ved 375/430/768/1024/1440/1920: mindst 85 % af motivets bredde og højde synlig og vist bredde højst lig billedets egen bredde (ingen opskalering). Verificeret rød mod gammel CSS.
+- Billedet er skarpt ved 1x. På retina-skærme (2x) er 456 px stadig et lille kildebillede; det kan kun løses med nye, større billeder (asset, ikke kode).

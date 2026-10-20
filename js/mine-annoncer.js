@@ -466,7 +466,16 @@ function renderMine(){
 }
 
 async function renderFavorites(){
-  const favIds = Store.getFavorites();
+  /* V5: anonym (ingen login) ser kun de lokale favoritter (indekserede annoncer, gemt i denne browser). Egne uuid-favoritter kræver en konto:
+     de hentes ikke (intet kald til databasen) og ryddes ikke (intet skrives). Findes der alligevel nogle, siger siden det (#db-anon-egne). */
+  const anonym = !Store.getUser();
+  const favIds = anonym ? [] : Store.getFavorites();
+  const egneAnonymt = anonym ? Store.getFavorites().length : 0;
+  const egneNote = document.getElementById('db-anon-egne');
+  if (egneNote){
+    egneNote.hidden = !egneAnonymt;
+    if (egneAnonymt) egneNote.textContent = `Du har også ${egneAnonymt} gemt${egneAnonymt === 1 ? '' : 'e'} ${egneAnonymt === 1 ? 'annonce' : 'annoncer'} fra private sælgere på Bikerbasen. De vises, når du er logget ind.`;
+  }
   let favs = favIds.map(id => Store.getListingById(id)).filter(Boolean);
 
   // Favoritter der ikke er blandt de indlæste annoncer (fx uden for de
@@ -856,9 +865,36 @@ function wireTabs(){
   });
 }
 
+/* V5: ÉN fane er åben for anonyme: ?tab=favoritter ("Gemte annoncer" i headeren). Favoritter på indekserede annoncer gemmes kun i browseren (D-008), så de
+   skal kunne ses uden login. Alle andre faner, handlinger og sidens øvrige dele kræver stadig login (omdirigering som før). */
+function erAabenFaneForAnonyme(){
+  const t = new URLSearchParams(window.location.search).get('tab');
+  return t === 'favoritter' || t === 'gemte';
+}
+
+async function startAnonymeFavoritter(){
+  document.body.classList.add('db-anonym');
+  renderHeader('mine-annoncer.html');
+  document.querySelectorAll('.bc-sep').forEach(s => { s.innerHTML = Icon.chevronRight; });
+  document.getElementById('fav-empty-icon').innerHTML = Icon.heart;
+  document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = dbIkon(el.dataset.icon); });
+  document.title = 'Gemte annoncer | Bikerbasen';
+  const h1 = document.getElementById('db-h1'); if (h1) h1.textContent = 'Gemte annoncer';
+  const lead = document.querySelector('.db-hero-lead'); if (lead) lead.textContent = 'De annoncer, du har gemt med hjertet.';
+  const aktuel = document.querySelector('.db-crumb [aria-current="page"]'); if (aktuel) aktuel.textContent = 'Gemte annoncer';
+  const fane = document.getElementById('tabbtn-favoritter');
+  if (fane){ fane.classList.add('active'); fane.setAttribute('aria-selected', 'true'); fane.tabIndex = 0; }
+  document.getElementById('tab-favoritter').style.display = '';
+  document.getElementById('db-anon-note').hidden = false;
+  document.getElementById('fav-sort').addEventListener('change', renderFavorites);
+  document.addEventListener('bb:favorites-changed', renderFavorites);
+  await renderFavorites();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await backendReady();
   if (!Store.getUser()){
+    if (erAabenFaneForAnonyme()){ await startAnonymeFavoritter(); return; }
     window.location.replace('login.html?redirect=' + encodeURIComponent('mine-annoncer.html' + window.location.search));
     return;
   }

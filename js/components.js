@@ -36,7 +36,10 @@ function renderHeader(activeOverride){
 function updateAuthVisibility(){
   const loggedIn = !!Store.getUser();
   // Fuld href, så "Gemte annoncer" (mine-annoncer.html?tab=favoritter) ikke
-  // rammes — favoritter virker for anonyme og skal blive stående.
+  // rammes. Kun den ene fane er åben for anonyme: favoritter på indekserede
+  // annoncer gemmes kun i browseren (Store.getExternalFavorites) og kan ses uden
+  // login (js/mine-annoncer.js, startAnonymeFavoritter). Siden viser dem og intet
+  // andet; alle andre faner på Mine annoncer sender stadig en anonym til login.
   /* RUNDE 13 (R13-15): "opret-annonce.html" stod her og blev SKJULT for
      anonyme, saa ingen blev lokket ind i et doedt link. Men linket er ikke
      doedt: js/opret-annonce.js:1064 sender selv en anonym bruger til

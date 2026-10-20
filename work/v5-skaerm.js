@@ -48,14 +48,18 @@ const STAT = d => [
     'login-glemt': { sti: 'login.html', ind: false, act: async page => { await page.click('#forgot-password-btn'); await page.waitForTimeout(400); } },
     'login-redirect': { sti: 'login.html?redirect=opret-annonce.html', ind: false },
     'dash-ann': { sti: 'dashboard.html', ind: true, ann: ANN, dealer: true, act: async page => { await page.locator('#dtab-annoncer').click(); await page.waitForTimeout(500); } },
+    'fav-anon': { sti: 'mine-annoncer.html?tab=favoritter', ind: false, ext: true, act: async page => { await page.waitForTimeout(300); } },
+    brugt: { sti: 'guide-brugt-motorcykel.html', ind: false },
     'mine-rig': { sti: 'mine-annoncer.html', ind: true, ann: ANN_RIG, rig: true },
   };
   for (const s of SIDER) for (const vp of VP) for (const t of TEMA){
     const d = SID[s]; if (!d) continue;
     const bak = lavBackend({ loggetInd: d.ind, annoncer: d.ann, stortFoto: !!d.rig, login: d.login, forhandler: !!d.dealer });
+    if (d.ext){ bak.tilstand.tabeller.eksterne_annoncer.push(...require('../scripts/smoke-fixtures').eksterneRaekker()); }
     if (d.rig){ bak.tilstand.tabeller.listing_stats.push(...STAT(new Date().toISOString().slice(0, 10))); bak.tilstand.saves = [{ listing: ID(1), saves: 18 }, { listing: ID(2), saves: 36 }]; }
     const ctx = await browser.newContext({ viewport: { width: vp, height: HOEJDE[vp] || 900 } });
     await bak.installer(ctx, { tema: t });
+    if (d.ext) await ctx.addInitScript(() => { try { localStorage.setItem('bb_favorites_ext', JSON.stringify(['00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000011'])); } catch (e) {} });
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${port}/${d.sti}`, { waitUntil: 'networkidle' });
     if (/opret/.test(d.sti)) await page.waitForSelector('body[data-op-klar]', { timeout: 10000 }).catch(() => {});
