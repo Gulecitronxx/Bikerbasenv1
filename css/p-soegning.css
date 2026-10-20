@@ -480,7 +480,7 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
   #results-grid:not(.list-view) .rk-fod{ font-size:11.5px; padding-right:34px; align-items:center; }
   #results-grid:not(.list-view) .rk-kilde > span{ display:block; -webkit-line-clamp:unset; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #results-grid:not(.list-view) .rk-kilde{ align-items:center; }
-  #results-grid:not(.list-view) .rk-sted{ max-width:42%; }
+  #results-grid:not(.list-view) .rk-sted{ max-width:58%; }   /* V5: 42 % klippede "Nykøbing Falster" til "Nykøbing F…"; kilden (ellipse, fuld tekst i title) giver plads */
   /* Sammenlign-knappen ligger i kortets fod (ikke over motivet): 40 px trykflade, 30 px synlig rund. */
   #results-grid:not(.list-view) .card-compare{
     right:2px; bottom:0; width:40px; height:40px; box-shadow:none; background:radial-gradient(circle, var(--color-surface-2) 0 14px, transparent 15px);
@@ -745,3 +745,9 @@ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:emp
   #results-grid:not(.list-view) .rk-body{ padding-bottom:4px; }
   #results-grid:not(.list-view) .rk-fod{ min-height:36px; align-items:center; }
 }
+
+/* V5: listevisningens hjerte- og sammenlign-knapper var 36 x 36 px (under 40 px tap-mål). Samme ikon, større trykflade; fokusring og hover er styles.css'. */
+#results-grid .row-tool{ width:40px; height:40px; }
+#results-grid .row-tool:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
+/* Sammenlign-knappen i gitterkortet: tydelig fokusring (den har kun hover-skalering i styles.css). */
+#results-grid .card-compare:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
