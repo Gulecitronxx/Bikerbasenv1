@@ -308,7 +308,7 @@ async function visAnnonceStatistik(grid){
     /* Tal: stribe nederst i rækken (ikke i statuskolonnen, hvor den løb ind under knapperne).
        Ingen tal: den ene ærlige linje bliver i statuskolonnen, så rækken ikke får en tom stribe. */
     if (blok.querySelector('.db-num-tom')) row.querySelector('.db-status')?.appendChild(blok);
-    else { blok.insertAdjacentHTML('beforeend', '<span class="db-nums-per">Seneste 30 dage</span>'); row.appendChild(blok); }
+    else { blok.innerHTML += '<span class="db-nums-per">Seneste 30 dage</span>'; row.appendChild(blok); }
   });
 }
 

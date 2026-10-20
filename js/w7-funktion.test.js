@@ -142,14 +142,18 @@ test('K2b: Mine annoncer — statistikkolonnen pr. annonce hedder Telefonvisning
   };
   const S = lavSide(MINE, ['visAnnonceStatistik', 'Store'], { db });
   S.Store.setUser({ name: 'A', email: 'a@b.dk', remote: true });
-  const status = S.dom.el('status-celle'); const tilfoejet = [];
-  status.appendChild = c => { tilfoejet.push(c); return c; };
-  const raekke = { dataset: { listingId: id, status: 'active' }, querySelector: () => status };
+  /* V5: tællerne står i en egen stribe nederst i RÆKKEN (row.appendChild), ikke i statuskolonnen, hvor de løb ind under knapperne ved 1440 px.
+     Kravet om teksten ("2 Telefonvisninger", aldrig "henvendelser") er uændret; kun placeringen er flyttet, og at intet havner i statuskolonnen er låst. */
+  const status = S.dom.el('status-celle'); const tilfoejet = []; const iStatus = [];
+  status.appendChild = c => { iStatus.push(c); return c; };
+  const raekke = { dataset: { listingId: id, status: 'active' }, querySelector: () => status, appendChild: c => { tilfoejet.push(c); return c; } };
   const grid = { querySelectorAll: () => [raekke] };
   await S.visAnnonceStatistik(grid);
   assert.strictEqual(tilfoejet.length, 1);
+  assert.strictEqual(iStatus.length, 0, 'tællerne må ikke ligge i statuskolonnen');
   const t = tekst(tilfoejet[0].innerHTML);
   assert.match(t, /2 Telefonvisninger/);
+  assert.match(t, /Seneste 30 dage/);
   assert.ok(!/henvendels/i.test(t));
 });
 
