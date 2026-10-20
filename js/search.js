@@ -839,8 +839,8 @@ function rowMarkersHTML(markers){
 
    Samme løfter som kortet i js/components.js, og de er ikke til forhandling,
    fordi rækken er smallere: mærket "Hos <kilde>" står først i rækken, kildens
-   navn står hvor sælgeren ellers står, og der er intet hjerte — favoritter
-   peger på vores egne annoncer med en fremmednøgle.
+   navn står hvor sælgeren ellers står. Hjertet gemmer KUN i denne browser (V5, D-008 revideret): databasens favoritter peger på vores egne annoncer
+   med en fremmednøgle.
 
    Rækkefladen gik før til KILDEN. Den går nu til vores egen annonceside, af
    samme grund som kortet (se blokken over Listing card i
@@ -870,6 +870,7 @@ function externalRowHTML(l, i){
     <div class="row-end">
       <p class="row-price">${escapeHTML(formatPrice(l.price))}</p>
       <div class="row-tools">
+        <button type="button" class="row-tool row-fav ${Store.isFavorite(l.id)?'active':''}" aria-pressed="${Store.isFavorite(l.id)}" aria-label="${Store.isFavorite(l.id) ? 'Fjern fra gemte' : 'Gem annonce'}" title="Gemmes i denne browser" data-fav-toggle="${l.id}" data-fav-ext="1">${Icon.heart}</button>
         <button type="button" class="row-tool ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
       </div>
     </div>
@@ -904,7 +905,7 @@ function listingRowHTML(l, i){
       <p class="row-price">${escapeHTML(formatPrice(l.price))}</p>
       ${timeAgoDa(l.createdAt) ? `<p class="row-when">${escapeHTML(timeAgoDa(l.createdAt))}</p>` : ''}
       <div class="row-tools">
-        ${isOwnListing(l) ? '' : `<button type="button" class="row-tool row-fav ${fav?'active':''}" aria-pressed="${fav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
+        ${isOwnListing(l) ? '' : `<button type="button" class="row-tool row-fav ${fav?'active':''}" aria-pressed="${fav}" aria-label="${fav ? 'Fjern fra gemte' : 'Gem annonce'}" data-fav-toggle="${l.id}">${Icon.heart}</button>`}
         <button type="button" class="row-tool ${Store.isComparing(l.id)?'active':''}" data-compare-toggle="${l.id}" aria-pressed="${Store.isComparing(l.id)}" title="Sammenlign" aria-label="Tilføj til sammenligning">${Icon.compare}</button>
       </div>
     </div>
@@ -1100,7 +1101,11 @@ function renderSwipeDeck(){
 
 function advanceSwipe(fav){
   const cur = swipeItems[swipeIndex];
-  if (fav && cur && !Store.isFavorite(cur.id)){ Store.toggleFavorite(cur.id); if (typeof updateFavCount === 'function') updateFavCount(); toast('Gemt i favoritter'); }
+  if (fav && cur && !Store.isFavorite(cur.id)){
+    Store.toggleFavorite(cur.id, cur.isExternal ? { ext: true } : undefined);
+    if (typeof updateFavCount === 'function') updateFavCount();
+    toast((cur.isExternal && Store.eksternFavoritInfo && Store.eksternFavoritInfo()) || 'Gemt i favoritter');
+  }
   swipeIndex++;
   renderSwipeDeck();
 }

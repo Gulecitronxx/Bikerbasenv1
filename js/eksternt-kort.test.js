@@ -237,10 +237,14 @@ test('"Mulig A2" er tentativ i selve ordlyden; "Kræver A" er den bekræftede ud
    docs/review/DECISIONS.md. Testen ligger her, fordi det er den slags, en
    senere "konsistens-oprydning" retter uden at kende grunden. */
 
-test('det indekserede kort har intet gem-hjerte — og vores eget har ét', () => {
+/* V5 (D-008 REVIDERET): hjertet står nu på det indekserede kort OGSÅ, fordi favoritten på en indekseret annonce gemmes kun i browseren (localStorage,
+   Store.getExternalFavorites) og aldrig i databasen. Det der skulle forhindres — et hjerte, der ser ud som om det gemmer i databasen, men bliver afvist af
+   fremmednøglen — er ikke længere muligt: hjertet siger "Gemmes i denne browser" (tooltip, første tryk) og toggleFavorite kalder aldrig db.addFavorite for
+   dem (js/v5-favoritter.test.js). Se docs/review/DECISIONS.md. */
+test('det indekserede kort har et gem-hjerte, der er mærket som kun-lokalt — og vores eget har ét uden mærket', () => {
   const ekstern = listingCardHTML(eksternAnnonce(), 1);
-  assert.ok(!/fav-btn/.test(ekstern), 'en favorit, databasen afviser, må ikke se ud som om den virker');
-  assert.ok(!/data-fav-toggle/.test(ekstern));
+  assert.match(ekstern, /class="fav-btn /, 'V5: også indekserede annoncer kan gemmes (lokalt)');
+  assert.match(ekstern, /data-fav-toggle="[^"]+" data-fav-ext="1" title="Gemmes i denne browser"/, 'og siger ærligt, hvor favoritten bor');
   assert.match(ekstern, /data-compare-toggle/,
     'sammenlign SKAL blive: den er ærligt og udelukkende lokal og har ingen konto at svigte');
 
@@ -249,10 +253,13 @@ test('det indekserede kort har intet gem-hjerte — og vores eget har ét', () =
     km: 9100, ccm: 373, power: 44, city: 'Aarhus',
   }, 1);
   assert.match(eget, /class="fav-btn [^"]*" aria-pressed="false" aria-label="Gem annonce" data-fav-toggle="1021"/);
+  assert.ok(!/data-fav-ext/.test(eget), 'egne annoncer gemmes i databasen som før');
 });
 
-test('rækken følger kortet: heller ikke dér et hjerte', () => {
-  assert.ok(!/fav-btn|data-fav-toggle/.test(externalRowHTML(eksternAnnonce(), 1)));
+test('rækken følger kortet: samme kun-lokale hjerte', () => {
+  const r = externalRowHTML(eksternAnnonce(), 1);
+  assert.match(r, /class="row-tool row-fav [^"]*"[^>]*data-fav-toggle="[^"]+" data-fav-ext="1"/);
+  assert.match(r, /title="Gemmes i denne browser"/);
 });
 
 /* ---------- B3: et foto, kilden ikke leverer, bliver til det aerlige felt ---------- */

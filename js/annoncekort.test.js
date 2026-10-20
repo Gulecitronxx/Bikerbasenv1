@@ -126,9 +126,10 @@ test('bunden: sted og sælgertype + kilde; egne annoncer siger "Privat sælger" 
   assert.ok(!/rk-saelgertype/.test(ukendt));
 });
 
-test('ikoner: sammenlign på alle kort, hjerte KUN hvor det virker (egne annoncer)', () => {
+test('ikoner: sammenlign og hjerte på alle kort (V5: indekserede gemmes lokalt, D-008 revideret)', () => {
   assert.match(listingCardHTML(ekstern(), 1), /data-compare-toggle/);
-  assert.ok(!/fav-btn/.test(listingCardHTML(ekstern(), 1)));
+  /* V5: hjertet står også på det indekserede kort — men markeret som kun-lokalt (data-fav-ext + tooltip), så det ikke lover en databasefavorit. */
+  assert.match(listingCardHTML(ekstern(), 1), /class="fav-btn [^"]*"[^>]*data-fav-toggle="[^"]+" data-fav-ext="1" title="Gemmes i denne browser"/);
   assert.match(listingCardHTML(egen(), 1), /data-compare-toggle/);
   assert.match(listingCardHTML(egen(), 1), /data-fav-toggle="1021"/);
 });

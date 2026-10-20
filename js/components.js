@@ -103,7 +103,7 @@ function injectDealerNav(current){
    uden javascript; det er kun visningen, der styres her. Favoritfanen er
    uændret tilgængelig fra mine-annoncer.html's egne faneblade. */
 function updateFavCount(){
-  const n = Store.getFavorites().length;
+  const n = Store.getAllFavorites().length;   // V5: egne (database/lokale) + indekserede (kun denne browser)
   /* W9: desktopheaderens "Favoritter" står altid (billede 1); kun skuffens "Gemte annoncer (0)" skjules ved 0. */
   const skjul = el => { const a = el.closest && el.closest('a'); if (a && !a.classList.contains('header-fav')) a.hidden = n === 0; };
   document.querySelectorAll('[data-fav-count]').forEach(el => {
@@ -250,6 +250,9 @@ function wireHeader(){
   new MutationObserver(syncTemaAria).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTemaAria);
   document.addEventListener('bb:favorites-changed', updateFavCount);
+  /* V5: forudtegnede kort (facetsider, mærkesider, søgesidens første kort) har nu hjerte på alle kort; de skal virke, før en side-egen kode overtager.
+     wireFavoriteButtons springer knapper over, der allerede er koblet. */
+  wireFavoriteButtons(document);
 }
 
 /* opts.type: 'success' (standard) eller 'error'.
@@ -477,10 +480,10 @@ function fotoTomFaktaHTML(l){
      kortets areal), og det gjorde annonce.html uopnåelig for alt lager i drift. Annoncesiden er dér, kørekortdommen
      står med sit regnestykke — den ene oplysning, en køber ikke kan få hos kilden. Vejen ud af sitet findes ét sted:
      knappen på annoncesiden. Kilden NÆVNES på kortet (domæne i bunden, forklaring i title), men er ikke et link.
-   - Ingen favoritknap på indekserede annoncer. Favoritter peger på listings med en fremmednøgle
-     (`favorites.listing_id uuid not null references public.listings(id)`), så en uuid herfra bliver afvist af
-     databasen, og hjertet ville se ud som om det virkede (D-008, docs/review/DECISIONS.md). Sammenlign er lokalt og
-     har ingen konto at svigte, så den står på alle kort.
+   - Favorithjertet står på ALLE kort (V5, D-008 revideret). Egne annoncer gemmes som før (databasen, når man er logget ind). Indekserede annoncer kan IKKE
+     gemmes i databasen (`favorites.listing_id uuid not null references public.listings(id)` afviser deres uuid), så deres favoritter ligger kun i denne browser
+     (Store.getExternalFavorites, nøglen bb_favorites_ext) og når aldrig backend-broens favoritsynk. Hjertet på et indekseret kort bærer data-fav-ext og en
+     tooltip, der siger det, og første tryk siger det højt (Store.eksternFavoritInfo). Se docs/review/DECISIONS.md, D-008. Sammenlign er lokalt og står på alle kort.
    - Kørekortbadgen er koerekortMaerkat() — samme udregning som filteret. Se dens kommentar. */
 /* ---- Hjælpere til det indekserede kort ----
    De ligger her og ikke i data.js, fordi de alle sammen findes for at rette
@@ -900,7 +903,7 @@ function listingCardHTML(l, i){
   if (f.ext && !sikkerUrl(l.externalUrl)) return '';   // en annonce uden brugbar kilde-URL vises ikke
   const titel = escapeHTML(f.titel);
   const pris = f.ext ? eksternPrisTekst(l.price) : formatPrice(l.price);
-  const fav = !f.ext && !isOwnListing(l);
+  const fav = !isOwnListing(l);   // V5: også indekserede annoncer (kun lokalt), se blokken over "Listing card"
   const erFav = fav && Store.isFavorite(l.id);
   const kildenavn = f.ext ? ((l.source && l.source.navn) || f.kilde) : '';
 
@@ -948,7 +951,7 @@ function listingCardHTML(l, i){
     if (dele.length) badges = `<div class="card-badges">${dele.join('')}</div>`;
   }
   const hjerte = fav
-    ? `<button type="button" class="fav-btn ${erFav ? 'active' : ''}" aria-pressed="${erFav}" aria-label="Gem annonce" data-fav-toggle="${l.id}">${Icon.heart}</button>`
+    ? `<button type="button" class="fav-btn ${erFav ? 'active' : ''}" aria-pressed="${erFav}" aria-label="${erFav ? 'Fjern fra gemte' : 'Gem annonce'}" data-fav-toggle="${l.id}"${f.ext ? ' data-fav-ext="1" title="Gemmes i denne browser"' : ''}>${Icon.heart}</button>`
     : '';
   /* Bunden: sted til venstre, sælgertype + kilde til højre. Sælgertypen ligger i eget span, som smalle
      kort skjuler (container query) — domænet er det eneste, køberen selv kan slå op, og det vinder pladsen. */
@@ -1281,6 +1284,16 @@ function initCookieConsent(){
 
 function wireFavoriteButtons(root){
   (root || document).querySelectorAll('[data-fav-toggle]').forEach(btn => {
+    if (btn.dataset.favBound) return;   // V5: aldrig to lyttere på samme knap (et klik slog ellers favoritten til og straks fra igen)
+    btn.dataset.favBound = '1';
+    /* Forudtegnede knapper kender ikke browserens favoritter: tilstanden sættes fra Store, så et gemt hjerte står tændt fra første maling efter koblingen. */
+    try {
+      const gemt = Store.isFavorite(/^\d+$/.test(btn.getAttribute('data-fav-toggle')) ? Number(btn.getAttribute('data-fav-toggle')) : btn.getAttribute('data-fav-toggle'));
+      if (gemt !== btn.classList.contains('active')){
+        btn.classList.toggle('active', gemt); btn.setAttribute('aria-pressed', String(gemt));
+        if (/(fav-btn|row-fav|lr-fav)/.test(btn.className)) btn.setAttribute('aria-label', gemt ? 'Fjern fra gemte' : 'Gem annonce');
+      }
+    } catch (err) { /* Store mangler på en side uden store.js */ }
     btn.addEventListener('click', (e) => {
       e.preventDefault(); e.stopPropagation();
       // Ikke Number(): database-annoncer har uuid som id, og Number('4f2..')
@@ -1288,11 +1301,15 @@ function wireFavoriteButtons(root){
       // unlike en rigtig annonce. Behold id'et som det er.
       const raw = btn.getAttribute('data-fav-toggle');
       const id = /^\d+$/.test(raw) ? Number(raw) : raw;
-      const active = Store.toggleFavorite(id);
+      /* V5: et hjerte på en indekseret annonce siger det selv (data-fav-ext): favoritten gemmes kun i denne browser og rører aldrig databasen. */
+      const ekstern = btn.hasAttribute('data-fav-ext');
+      const active = Store.toggleFavorite(id, ekstern ? { ext: true } : undefined);
       if (typeof Maaling !== 'undefined') Maaling.favorit(Store.getListingById ? Store.getListingById(id) : null, active);
       btn.classList.toggle('active', active);
       btn.setAttribute('aria-pressed', active);
-      toast(active ? 'Tilføjet til gemte annoncer' : 'Fjernet fra gemte annoncer');
+      if (btn.classList.contains('fav-btn') || btn.classList.contains('row-fav') || btn.classList.contains('lr-fav')) btn.setAttribute('aria-label', active ? 'Fjern fra gemte' : 'Gem annonce');
+      const info = ekstern && active && Store.eksternFavoritInfo ? Store.eksternFavoritInfo() : '';
+      toast(info || (active ? 'Tilføjet til gemte annoncer' : 'Fjernet fra gemte annoncer'));
     });
   });
 }

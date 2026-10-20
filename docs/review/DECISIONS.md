@@ -707,3 +707,27 @@ browseren på 55559: med tom favoritliste er hjertet i headeren og "Gemte
 annoncer" i mobilskuffen `hidden` på alle prøvede sider; efter ét klik på et
 hjerte på et EGET kort dukker begge op med tallet 1 uden genindlæsning, og de
 forsvinder igen, når favoritten fjernes.
+
+#### D-008 REVIDERET — V5 (ejeren, via koordinatoren): hjerte på alle kort, eksterne gemmes kun lokalt
+**NY BESLUTNING.** `.fav-btn` står nu på ALLE kort (gitter, liste, forside, mærke- og facetsider, lignende, annonceside). Brugerne forventer et hjerte på alle
+kort, og et hjerte på kun nogle (egne) kort så uens ud (på søgesiden havde kun egne annoncer et hjerte; i test-lageret 3 af 738 kort, i drift 0 af 332 indekserede).
+
+**DET, AFVISNINGEN VAR BANGE FOR, ER LUKKET — ikke bare overset:**
+1. Fremmednøglen (`favorites.listing_id → listings`) er uændret, og der er ingen migration. Indekserede annoncer skrives derfor ALDRIG til databasen:
+   `Store.toggleFavorite(id, { ext })` tager en egen gren (`_toggleEkstern`), der kun rører localStorage (`bb_favorites_ext` + et lille øjebliksbillede
+   `bb_favorites_ext_meta` med titel og kildedomæne). Nøglen er annoncens id i `eksterne_annoncer`; crawleren upserter på `(kilde_id, kilde_annonce_id)`, så
+   id'et består på tværs af kørsler og byg.
+2. Backend-broens favoritsynk (`syncFavorites`, union af databasen og det lokale) ser dem aldrig: `Store.getFavorites()` er stadig KUN egne annoncer; de
+   indekserede ligger i `getExternalFavorites()`. `getAllFavorites()` er begge (header-tæller, "Gemte annoncer"-tal, `bb:favorites-changed`).
+3. Afvisningens punkt 4 — at hjertet lover noget, det ikke holder, for en indlogget — er nu sagt højt: hjertet på et indekseret kort har tooltip "Gemmes i
+   denne browser" (`data-fav-ext`), og FØRSTE tryk viser "Gemt i denne browser." (indloggede: "… Favoritter på annoncer fra andre sider følger ikke med til dine
+   andre enheder."). Ingen opdigtet synk. "Ryd data i denne browser" rydder også dem (de ligger i `Store.KEYS`).
+4. "Gemte annoncer" (`mine-annoncer.html?tab=favoritter`) viser egne og indekserede sammen. Indekserede står som række med link til vores annonceside og til kilden
+   (`noopener noreferrer nofollow`, ny fane). Er en gemt annonce ikke længere i indekset (kilden har fjernet den), står den som en ærlig række "Annoncen er ikke længere
+   i vores indeks" med Fjern-knap — den forsvinder ikke stille. Kunne lageret slet ikke hentes (`DATA_STATUS.eksterne != 'ok'`), står der "kunne ikke slås op lige nu"
+   i stedet for at påstå, at den er væk.
+**MÅLT:** `js/v5-favoritter.test.js` (7 tests, Playwright, mock): hjerte på alle kort ved 375/768/1440; tryk gemmer lokalt, tæller 1 i headeren, består efter genindlæsning,
+vises i listevisning og på annoncesiden; 0 skrivende kald (POST/PATCH/DELETE) mod Supabase — heller ikke med en indlogget session; forsvundet annonce; synken ser kun egne.
+**TESTS ÆNDRET FOR AT HOLDE D-008 (de låste det gamle valg):** `js/annoncekort.test.js` (ikoner), `js/eksternt-kort.test.js` (kort + række), `js/rigt-kort.test.js` (rigt kort):
+"intet hjerte på det indekserede kort" er blevet til "kun-lokalt hjerte (`data-fav-ext` + tooltip)"; egne annoncers hjerte er uændret.
+**HVIS EN FREMTIDIG MIGRATION GIVER DATABASEN EKSTERNE FAVORITTER:** så flyttes `bb_favorites_ext` til den tabel og beskeden om "kun denne browser" udgår — hjertet og kortene er klar.

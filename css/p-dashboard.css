@@ -665,6 +665,10 @@
 .db-icon-btn.lr-fav.active{ color: var(--color-primary); border-color: var(--color-primary); }
 .db-icon-btn.lr-fav.active svg{ fill: currentColor; }
 .db-row.is-paused .db-thumb img, .db-row.is-sold .db-thumb img{ filter: grayscale(.7); opacity: .8; }
+/* V5: gemt indekseret annonce, der ikke længere findes i indekset — ærlig række uden foto, med Fjern. */
+.db-row.is-gone{ border-style: dashed; }
+.db-row.is-gone .db-thumb{ background: var(--color-surface-2); border-radius: var(--radius-sm); min-height: 72px; }
+.db-row.is-gone .db-title{ color: var(--color-fg-muted); text-decoration: none; }
 
 @container db-rows (min-width: 560px){
   .db-row{

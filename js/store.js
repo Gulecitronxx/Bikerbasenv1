@@ -36,7 +36,7 @@ function fejlTekst(err){
 
 const Store = {
   KEYS: {
-    favorites: 'bb_favorites', myListings: 'bb_my_listings', theme: 'bb_theme', user: 'bb_user', draft: 'bb_draft',
+    favorites: 'bb_favorites', favoritesExt: 'bb_favorites_ext', favoritesExtMeta: 'bb_favorites_ext_meta', favoritesExtInfo: 'bb_favorites_ext_info', myListings: 'bb_my_listings', theme: 'bb_theme', user: 'bb_user', draft: 'bb_draft',
     reviews: 'bb_reviews', reports: 'bb_reports', cookieConsent: 'bb_cookie_consent',
     savedSearches: 'bb_saved_searches', viewMode: 'bb_view_mode', recentSearches: 'bb_recent_searches',
     compare: 'bb_compare', recentlyViewed: 'bb_recently_viewed',
@@ -80,15 +80,67 @@ const Store = {
     document.dispatchEvent(new CustomEvent('bb:compare-changed', { detail: [] }));
   },
 
+  /* Egne annoncers favoritter (databasen er sandheden for dem, når man er logget ind). Indekserede annoncer er IKKE med her: backend-broens synk
+     (syncFavorites) sammenfletter netop denne liste med favorites-tabellen, hvor listing_id har en fremmednøgle til listings. */
   getFavorites(){
     try { return JSON.parse(localStorage.getItem(this.KEYS.favorites)) || []; } catch(e){ return []; }
   },
+
+  /* V5 (D-008 revideret): favoritter på indekserede annoncer gemmes KUN i denne browser (localStorage), aldrig i databasen og aldrig i listen ovenfor.
+     Nøglen er annoncens id i eksterne_annoncer (uuid). Crawleren upserter på (kilde_id, kilde_annonce_id), så en række beholder sit id på tværs af
+     kørsler og byg; forsvinder annoncen fra kilden, forsvinder den fra indekset, og favoritten bliver stående som "ikke længere i vores indeks".
+     Ved siden af id'erne ligger et lille øjebliksbillede (titel + kildedomæne) pr. id, så en forsvundet annonce kan navngives ærligt. */
+  getExternalFavorites(){
+    try { const v = JSON.parse(localStorage.getItem(this.KEYS.favoritesExt)); return Array.isArray(v) ? v : []; } catch(e){ return []; }
+  },
+  getExternalFavoriteMeta(){
+    try { return JSON.parse(localStorage.getItem(this.KEYS.favoritesExtMeta)) || {}; } catch(e){ return {}; }
+  },
+  /* Begge slags, til tæller, hjerter og "Gemte annoncer". Rører aldrig databasen. */
+  getAllFavorites(){ return [...this.getFavorites(), ...this.getExternalFavorites()]; },
+  isExternalFavorite(id){ return this.getExternalFavorites().some(f => String(f) === String(id)); },
   // Sammenlign som streng: favoritter kan være uuid'er (database) eller tal
   // (gamle/lokale), og et strengt includes ville lade dem forbi hinanden.
-  isFavorite(id){ return this.getFavorites().some(f => String(f) === String(id)); },
+  isFavorite(id){ return this.getAllFavorites().some(f => String(f) === String(id)); },
+  /* Er id'et en indekseret annonce? Kortets knap siger det selv (opts.ext), ellers slås id'et op i lageret, ellers: er det allerede gemt som ekstern. */
+  _erEkstern(id, opts){
+    if (opts && typeof opts.ext === 'boolean') return opts.ext;
+    const t = (typeof this.getListingById === 'function' ? this.getListingById(id) : null);
+    if (t) return !!t.isExternal;
+    return this.isExternalFavorite(id);
+  },
+  _toggleEkstern(id){
+    let liste = this.getExternalFavorites();
+    const nu = !liste.some(f => String(f) === String(id));
+    liste = nu ? [...liste, id] : liste.filter(f => String(f) !== String(id));
+    let meta = this.getExternalFavoriteMeta();
+    if (nu){
+      const l = this.getListingById(id);
+      if (l) meta[String(id)] = { t: (typeof annonceNavn === 'function' ? annonceNavn(l) : [l.brand, l.model].filter(Boolean).join(' ')), k: (l.source && l.source.domaene) || '' };
+    } else { delete meta[String(id)]; }
+    try {
+      localStorage.setItem(this.KEYS.favoritesExt, JSON.stringify(liste));
+      localStorage.setItem(this.KEYS.favoritesExtMeta, JSON.stringify(meta));
+    } catch (e) { return !nu; /* fuld/blokeret lagring: hjertet lover intet, der ikke blev gemt */ }
+    document.dispatchEvent(new CustomEvent('bb:favorites-changed', { detail: this.getAllFavorites() }));
+    return nu;
+  },
+  /* Første gang en indekseret annonce gemmes, siger siden ærligt, hvor den bor. Returnerer teksten én gang, derefter ''. */
+  eksternFavoritInfo(){
+    try {
+      if (localStorage.getItem(this.KEYS.favoritesExtInfo)) return '';
+      localStorage.setItem(this.KEYS.favoritesExtInfo, '1');
+    } catch (e) { /* ingen lagring: vis den hver gang */ }
+    const iNet = !!(this.getUser && this.getUser() && this.getUser().remote);
+    return iNet
+      ? 'Gemt i denne browser. Favoritter på annoncer fra andre sider følger ikke med til dine andre enheder.'
+      : 'Gemt i denne browser.';
+  },
   /* Synkron af hensyn til UI'et; skrivningen til databasen sker i baggrunden,
      så hjertet reagerer med det samme. */
-  toggleFavorite(id){
+  toggleFavorite(id, opts){
+    /* Indekserede annoncer: kun lokalt (se getExternalFavorites). Aldrig db.addFavorite — favorites.listing_id har fremmednøgle til listings. */
+    if (this._erEkstern(id, opts)) return this._toggleEkstern(id);
     // Sikkerhedsnet: knappen skjules på egne annoncer, men DOM kan manipuleres.
     const target = this.getAllListings().find(l => String(l.id) === String(id));
     if (target && typeof isOwnListing === 'function' && isOwnListing(target)){

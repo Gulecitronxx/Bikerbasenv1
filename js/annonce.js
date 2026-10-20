@@ -565,7 +565,7 @@ function anBrodkrumme(l){
 }
 
 /* "Del annonce", "Sammenlign" og "Gem som favorit" øverst til højre — kun de
-   handlinger, der findes. Indekserede annoncer har ingen favorit (D-008). */
+   handlinger, der findes. Indekserede annoncer kan gemmes kun i denne browser (V5, D-008 revideret). */
 function anAktioner(l, eget){
   const mount = document.getElementById('an-actions');
   if (!mount) return;
@@ -575,7 +575,7 @@ function anAktioner(l, eget){
   mount.innerHTML = `
     <button type="button" class="an-act" id="share-listing-btn">${Icon.share}<span>Del annonce</span></button>
     <button type="button" class="an-act" data-compare-toggle="${id}" aria-pressed="${sammenlign ? 'true' : 'false'}">${Icon.compare}<span>Sammenlign</span></button>
-    ${(l.isExternal || eget) ? '' : `<button type="button" class="an-act an-fav ${fav ? 'active' : ''}" aria-pressed="${fav}" data-fav-toggle="${id}">${Icon.heart}<span class="an-fav-off">Gem som favorit</span><span class="an-fav-on">Gemt som favorit</span></button>`}`;
+    ${eget ? '' : `<button type="button" class="an-act an-fav ${fav ? 'active' : ''}" aria-pressed="${fav}" data-fav-toggle="${id}"${l.isExternal ? ' data-fav-ext="1" title="Gemmes i denne browser"' : ''}>${Icon.heart}<span class="an-fav-off">Gem som favorit</span><span class="an-fav-on">Gemt som favorit</span></button>`}`;
 }
 
 /* Strukturerede data skal følge den synlige brødkrumme (5 led). seo.js
@@ -1248,6 +1248,8 @@ function renderExternalListing(listing){
   anFlytH1(fuldTitel, listing.brand);
   anBalancerKolonner();
   anAktioner(listing, false);
+  /* V5: den indekserede annonce har nu et (kun-lokalt) hjerte; denne gren kobler ikke document, som den egne annonces gren gør. */
+  wireFavoriteButtons(document.getElementById('an-actions'));
   anVirkDel(listing);
   anFyldLignende(listing);
   anFyldVidere(listing, kk);

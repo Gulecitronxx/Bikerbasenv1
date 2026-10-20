@@ -218,6 +218,44 @@ function favRowHTML(l){
   </article>`;
 }
 
+/* V5 (D-008 revideret): gemt INDEKSERET annonce. Gemmes kun i denne browser (Store.getExternalFavorites). Rækken linker til vores annonceside og
+   til kilden; hjertet fjerner den. Er annoncen ikke længere i indekset, står den som en ærlig række (extGoneRowHTML) i stedet for at forsvinde. */
+function extFavRowHTML(l){
+  const brand = escapeHTML(l.brand), model = escapeHTML(l.model);
+  const url = `annonce.html?id=${l.id}`;
+  const kilde = escapeHTML((l.source && l.source.navn) || (l.source && l.source.domaene) || 'kilden');
+  const href = typeof sikkerUrl === 'function' ? sikkerUrl(l.externalUrl) : '';
+  return `
+  <article class="db-row" data-listing-id="${l.id}" data-external="1">
+    ${rowThumb(l, url, brand, model)}
+    ${infoBlok(l, url, brand, model)}
+    <div class="db-status"><span class="db-when">${Icon.heart}Gemt i denne browser</span><span class="db-when">Hos ${kilde}</span></div>
+    <div class="db-actions">
+      <a class="btn btn-outline btn-sm" href="${url}">Se annonce</a>
+      ${href ? `<a class="btn btn-outline btn-sm" href="${escapeHTML(href)}" target="_blank" rel="noopener noreferrer nofollow">Åbn hos ${kilde}</a>` : ''}
+      <button type="button" class="db-icon-btn lr-fav active" data-fav-toggle="${l.id}" data-fav-ext="1" aria-pressed="true" aria-label="Fjern fra gemte">${Icon.heart}</button>
+    </div>
+  </article>`;
+}
+
+function extGoneRowHTML(id, meta, lagerHentet){
+  const titel = escapeHTML((meta && meta.t) || 'Gemt annonce');
+  const kilde = meta && meta.k ? ` · ${escapeHTML(meta.k)}` : '';
+  const tekst = lagerHentet ? 'Annoncen er ikke længere i vores indeks' : 'Annoncen kunne ikke slås op lige nu (vi nåede ikke at hente de indekserede annoncer)';
+  return `
+  <article class="db-row is-gone" data-listing-id="${escapeHTML(String(id))}" data-external="1" data-gone="1">
+    <span class="db-thumb" aria-hidden="true"></span>
+    <div class="db-info">
+      <span class="db-title">${titel}</span>
+      <p class="db-meta">${tekst}${kilde}</p>
+    </div>
+    <div class="db-status"><span class="db-when">${Icon.heart}Gemt i denne browser</span></div>
+    <div class="db-actions">
+      <button type="button" class="btn btn-outline btn-sm" data-fav-toggle="${escapeHTML(String(id))}" data-fav-ext="1" aria-label="Fjern fra gemte: ${titel}">${Icon.trash}<span class="db-lbl">Fjern</span></button>
+    </div>
+  </article>`;
+}
+
 /* Visninger og favoritter (30 dage) som kolonner pr. aktiv annonce — kun når
    kaldene lykkes (listing_stats + my_listing_saves, ejer-RLS). Et tal uden data
    er et rigtigt nul; fejler kaldet, står der intet. */
@@ -347,7 +385,7 @@ function renderMine(){
   const kladde = draftSummary(Store.getDraft());
   const grid = document.getElementById('mine-grid');
   const empty = document.getElementById('mine-empty');
-  const tal = oversigtTal(mine, Store.getDraft(), Store.getFavorites().length, Store.getSavedSearches().length);
+  const tal = oversigtTal(mine, Store.getDraft(), Store.getAllFavorites().length, Store.getSavedSearches().length);
   setCount('mine-count-inline', mine.length);
   setCount('stat-aktive', tal.aktive);
   setCount('stat-kladder', tal.kladder);
@@ -427,13 +465,23 @@ async function renderFavorites(){
     updateFavCount();
   }
 
-  favs = sortListings(favs, document.getElementById('fav-sort')?.value);
+  /* V5: indekserede favoritter (kun denne browser). Fundne annoncer sorteres sammen med de egne; forsvundne står til sidst som ærlige rækker. */
+  const extIds = Store.getExternalFavorites();
+  const extMeta = Store.getExternalFavoriteMeta();
+  const lagerHentet = Store.dataStatus().eksterne === 'ok';
+  const extFundet = [], extVaek = [];
+  for (const id of extIds){
+    const l = Store.getListingById(id);
+    if (l && l.isExternal) extFundet.push(l); else extVaek.push(id);
+  }
+  favs = sortListings(favs.concat(extFundet), document.getElementById('fav-sort')?.value);
   const grid = document.getElementById('fav-grid');
   const empty = document.getElementById('fav-empty');
-  setCount('stat-fav', favs.length);
-  setCount('fav-count-inline', favs.length);
-  document.querySelector('#tab-favoritter .db-list-head')?.style.setProperty('display', favs.length ? '' : 'none');
-  if (!favs.length){
+  const antalFav = favs.length + extVaek.length;
+  setCount('stat-fav', antalFav);
+  setCount('fav-count-inline', antalFav);
+  document.querySelector('#tab-favoritter .db-list-head')?.style.setProperty('display', antalFav ? '' : 'none');
+  if (!antalFav){
     grid.style.display = 'none';
     grid.innerHTML = '';
     empty.style.display = 'block';
@@ -441,7 +489,7 @@ async function renderFavorites(){
   }
   grid.style.display = '';
   empty.style.display = 'none';
-  grid.innerHTML = favs.map(favRowHTML).join('');
+  grid.innerHTML = favs.map(l => l.isExternal ? extFavRowHTML(l) : favRowHTML(l)).join('') + extVaek.map(id => extGoneRowHTML(id, extMeta[String(id)], lagerHentet)).join('');
   wireFavoriteButtons(grid);
 }
 

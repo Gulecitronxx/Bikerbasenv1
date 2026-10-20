@@ -109,9 +109,9 @@ test('kørekortchippen er filterets udregning, ordret', () => {
   assert.match(rig(egen()), /rk-kk kk-a2/, 'A2-klassen følger med som CSS-klasse');
 });
 
-test('det indekserede rige kort: intet hjerte, ét internt link, ingen vej ud af sitet, kilden nævnt', () => {
+test('det indekserede rige kort: kun-lokalt hjerte (V5, D-008 revideret), ét internt link, ingen vej ud af sitet, kilden nævnt', () => {
   const html = rig(ekstern());
-  assert.ok(!/fav-btn|data-fav-toggle/.test(html), 'D-008: en favorit, databasen afviser, må ikke se ud som om den virker');
+  assert.match(html, /fav-btn[^>]*data-fav-toggle="[^"]+" data-fav-ext="1"/, 'V5: hjertet står også her, mærket som kun-lokalt (gemmes aldrig i databasen)');
   assert.match(html, /data-compare-toggle/);
   const links = html.match(/<a\b[^>]*>/g) || [];
   assert.equal(links.length, 1);
