@@ -5,6 +5,7 @@
          node scripts/smoke-browser.js --sider index,soegning,maerke-*  --viewports 390,1440  --temaer lys
          node scripts/smoke-browser.js --rapport work/smoke.json --cls 0.05 --strikt
          node scripts/smoke-browser.js --sider soegning --soeg-links --varm --viewports 375,430,768,1440   (V5: søgesiden med dybe links)
+         node scripts/smoke-browser.js --login-mock --varm --viewports 375,430,768,1024,1440 --cls 0.05 --strikt   (V6: konto-siderne som INDLOGGET)
 
    Hvad den gør:
      1. Starter en lokal statisk server (fri port) på repoets rod (--rod <mappe> for en anden).
@@ -25,6 +26,7 @@ const http = require('http');
 const { spawnSync } = require('child_process');
 const { eksterneRaekker, restSvar, PNG_1X1, uuid } = require('./smoke-fixtures');
 const { lagerRaekker } = require('./fixtures/v5-soegning-lager');
+const { lavKontoBackend } = require('./fixtures/v6-konto-lager');
 
 const REPO = path.join(__dirname, '..');
 
@@ -45,9 +47,10 @@ const TJEK = {
   'ressource-404': 'fejl',      // lokal undertransport (css/js/billede) svarede >= 400
   'indlæsning':    'fejl',      // navigation fejlede / sidens HTTP-status >= 400
   'data-afbrud':   'fejl',      // siden viser "kunne ikke hente annoncer" — mock-hydreringen virkede ikke
+  'omdirigeret':   'fejl',      // V6 (--login-mock): siden endte et andet sted end forventet (fx login.html trods mock-session)
 };
 
-const VIEWPORT_HOEJDE = { 320: 640, 360: 740, 390: 844, 768: 1024, 1024: 768, 1440: 900 };
+const VIEWPORT_HOEJDE = { 320: 640, 360: 740, 375: 812, 390: 844, 430: 932, 768: 1024, 1024: 768, 1440: 900, 1920: 1080 };
 const HURTIG_SIDER = ['index', 'soegning', 'annonce', 'maerker', 'maerke-honda', 'type-cruiser', 'login', 'guides'];
 const STANDARD_QUERY = { 'annonce.html': `?id=${uuid(1)}` };   // annonce.html uden id er en tom skal
 
@@ -58,6 +61,20 @@ const SOEGE_LINKS = [
   '?brands=BMW&model=R+1300+RS', '?types=cruiser&koerekort=A2', '?brands=Honda&types=cruiser&koerekort=A2&sort=price-asc',
   '?priceMax=60000&yearMin=2010', '?q=xyzzy',
 ];
+
+/* V6 (P2-6): konto-siderne er bag login, så smoke åbnede dem uden session og så kun omdirigeringen til login.html. Med --login-mock åbnes de som
+   INDLOGGET mod scripts/w9-saelger-mock.js med lageret i scripts/fixtures/v6-konto-lager.js (11 annoncer, dagstal, søgeagenter, krav). Intet forlader
+   maskinen. `forhandler` giver en forhandlerprofil (dashboard.html sender ellers private videre til mine-annoncer.html); `login: 'ud'` er samme mock
+   uden session (loginsiden udlogget); `slut` er den adresse siden FORVENTES at ende på (en indlogget bruger sendes væk fra login.html). */
+const LOGIN_JOBS = [
+  ...['oversigt', 'mine', 'favoritter', 'agenter', 'konto'].map(f => ({ side: 'mine-annoncer.html', query: `?tab=${f}` })),
+  ...['oversigt', 'annoncer', 'krav'].map(f => ({ side: 'dashboard.html', query: `?tab=${f}`, forhandler: true })),
+  { side: 'opret-annonce.html', query: '' },
+  { side: 'login.html', query: '', login: 'ud' },
+  { side: 'login.html', query: '?redirect=opret-annonce.html', login: 'ud' },
+  { side: 'login.html', query: '', login: 'ind', slut: 'mine-annoncer.html' },
+];
+const LOGIN_SIDER = [...new Set(LOGIN_JOBS.map(j => j.side))];
 
 /* Det store lager (søge-lagerets 735 rækker, se scripts/fixtures/v5-soegning-lager.js) i stedet for fixture-sættets 44: sidens CLS afhænger af hvor
    mange kort der hydreres, hvor mange der fravælges som uoplyste, og hvor lange titlerne er. */
@@ -317,7 +334,7 @@ function installerMock(context, port, blokeret, opt = {}){
 
 /* ---------- Én måling ---------- */
 
-async function maalSide({ context, base, port, side, query, viewport, tema, tid, clsGraense, cache }){
+async function maalSide({ context, base, port, side, query, viewport, tema, tid, clsGraense, cache, login, slut }){
   const fund = [];
   const tilfoej = (tjek, detalje) => fund.push({ tjek, niveau: TJEK[tjek], detalje });
   const page = await context.newPage();
@@ -357,6 +374,11 @@ async function maalSide({ context, base, port, side, query, viewport, tema, tid,
       await new Promise(r => setTimeout(r, 250));
     });
     data = await page.evaluate(maalISiden);
+    if (login){
+      const ende = new URL(page.url()).pathname.replace(/^\//, '');
+      const forventet = slut || side;
+      if (ende !== forventet) tilfoej('omdirigeret', `${login === 'ind' ? 'indlogget' : 'udlogget'} mock endte på ${ende || '/'} i stedet for ${forventet}`);
+    }
   } catch (e) {
     tilfoej('indlæsning', String((e && e.message) || e).split('\n')[0].slice(0, 200));
   }
@@ -377,7 +399,7 @@ async function maalSide({ context, base, port, side, query, viewport, tema, tid,
     if (andet.length) tilfoej('csp-andet', [...new Set(andet.map(c => `${c.d}: ${c.u}`))].slice(0, 3).join('; '));
     for (const a of data.ankre) tilfoej('anker-mangler', a);
   }
-  return { side, query: query || '', cache: cache || 'kold', viewport, tema, cls: data ? Number(data.cls.toFixed(4)) : null, h1: data ? data.h1 : null,
+  return { side, query: query || '', login: login || undefined, cache: cache || 'kold', viewport, tema, cls: data ? Number(data.cls.toFixed(4)) : null, h1: data ? data.h1 : null,
            annoncekort: data ? data.kort : null, stier: data ? data.stier : [], fund };
 }
 
@@ -410,7 +432,7 @@ const kunBufferFejl = m => m.fund.length > 0 && m.fund.every(erBufferFejl);
 async function maalMedGenforsoeg(arg, transient){
   const m = await maalSide(arg);
   if (!kunBufferFejl(m)) return m;
-  for (const f of m.fund) transient.push({ side: arg.side, query: arg.query || '', viewport: arg.viewport, tema: TEMA_VIS[arg.tema], cache: arg.cache || 'kold', ...f, transient: true });
+  for (const f of m.fund) transient.push({ side: arg.side, query: arg.query || '', login: arg.login, viewport: arg.viewport, tema: TEMA_VIS[arg.tema], cache: arg.cache || 'kold', ...f, transient: true });
   const igen = await maalSide(arg);
   igen.genmaalt = true;
   return igen;
@@ -419,7 +441,25 @@ async function maalMedGenforsoeg(arg, transient){
 /* En måling = { side, query }. `sider` kan indeholde en adresse med query ('soegning.html?types=cruiser'). */
 function laegJobs(rod, opt, hurtig){
   const jobs = [];
-  const tilfoej = (side, query) => { if (!jobs.some(j => j.side === side && j.query === query)) jobs.push({ side, query }); };
+  const tilfoej = (side, query, ekstra = {}) => { if (!jobs.some(j => j.side === side && j.query === query && j.login === ekstra.login)) jobs.push({ side, query, ...ekstra }); };
+  if (opt.loginMock){
+    /* V6: uden --sider kun de fire konto-sider; med --sider de af dem, der er nævnt (gerne med ?tab=…), og andre sider som almindelige målinger. */
+    const onsket = opt.sider && opt.sider.length ? opt.sider : null;
+    const loginJob = j => tilfoej(j.side, j.query, { login: j.login || 'ind', forhandler: !!j.forhandler, slut: j.slut });
+    if (!onsket) LOGIN_JOBS.forEach(loginJob);
+    else for (const s of onsket){
+      const [navn, ...q] = String(s).split('?');
+      const side = navn.endsWith('.html') ? navn : `${navn}.html`;
+      if (LOGIN_SIDER.includes(side)){
+        const mal = LOGIN_JOBS.filter(j => j.side === side);
+        if (q.length) loginJob({ ...mal[0], query: '?' + q.join('?'), login: undefined });
+        else mal.forEach(loginJob);
+      } else {
+        for (const f of vaelgSider(rod, { sider: [navn] })) tilfoej(f, q.length ? '?' + q.join('?') : (STANDARD_QUERY[f] || ''));
+      }
+    }
+    return jobs;
+  }
   const rene = (opt.sider || []).map(s => String(s).split('?')[0]);
   const filer = vaelgSider(rod, { sider: opt.sider ? rene : null, hurtig });
   const medQuery = new Map();
@@ -459,6 +499,7 @@ async function koer(opt = {}){
   const sider = [...new Set(jobs.map(j => j.side))];
   const stortLager = !!(opt.stortLager || opt.soegLinks);
   const varm = !!opt.varm;
+  const loginMock = !!opt.loginMock;
 
   const pw = opt.pw || (await playwrightTilgaengelig()).pw;
   if (!pw) throw new Error((await playwrightTilgaengelig()).grund);
@@ -478,34 +519,41 @@ async function koer(opt = {}){
     await installerMock(context, port, blokeret, stortLager ? { restSvar: lagerSvar } : {});
     return context;
   };
+  /* V6: ét nyt lager pr. kontekst (siderne skriver ind i det), så en måling aldrig arver en anden målings tilstand. */
+  const nyLoginKontekst = async (vp, tema, job) => {
+    const bak = lavKontoBackend({ forhandler: !!job.forhandler, loggetInd: job.login === 'ind' });
+    const context = await browser.newContext({
+      viewport: { width: vp, height: VIEWPORT_HOEJDE[vp] || 900 }, colorScheme: tema, locale: 'da-DK',
+      serviceWorkers: 'block', reducedMotion: 'no-preference',
+    });
+    await context.addInitScript(initScript, { tema });
+    await bak.installer(context, { tema, cookie: true });
+    return context;
+  };
+  const maalJob = async (j, vp, tema, caches, delt) => {
+    const arg = { base, port, side: j.side, query: j.query, viewport: vp, tema, tid, clsGraense, login: j.login, slut: j.slut };
+    const context = delt || (j.login ? await nyLoginKontekst(vp, tema, j) : await nyKontekst(vp, tema));
+    for (const cache of caches){
+      maalinger.push(await maalMedGenforsoeg({ ...arg, context, cache }, transient));
+      if (!opt.stille) process.stderr.write('.');
+    }
+    if (!delt) await context.close();
+  };
   try {
     for (const vp of viewports){
       for (const tema of temaer){
         const kø = jobs.slice();
         await Promise.all(Array.from({ length: Math.min(parallel, kø.length) }, async () => {
           if (!varm){
-            /* Kold cache: serveren siger no-store, så hver indlæsning henter alt, også inden for samme kontekst. */
-            const context = await nyKontekst(vp, tema);
-            while (kø.length){
-              const j = kø.shift();
-              const m = await maalMedGenforsoeg({ context, base, port, side: j.side, query: j.query, viewport: vp, tema, tid, clsGraense, cache: 'kold' }, transient);
-              maalinger.push(m);
-              if (!opt.stille) process.stderr.write('.');
-            }
-            await context.close();
+            /* Kold cache: serveren siger no-store, så hver indlæsning henter alt, også inden for samme kontekst.
+               Login-målinger får en kontekst hver (eget mock-lager og egen session). */
+            const delt = loginMock ? null : await nyKontekst(vp, tema);
+            while (kø.length) await maalJob(kø.shift(), vp, tema, ['kold'], delt);
+            if (delt) await delt.close();
           } else {
             /* Kold OG varm: en frisk kontekst pr. adresse (tom cache) måles først; samme kontekst indlæser adressen igen med cachen fyldt
                (serveren svarer max-age=600 som GitHub Pages). */
-            while (kø.length){
-              const j = kø.shift();
-              const context = await nyKontekst(vp, tema);
-              for (const cache of ['kold', 'varm']){
-                const m = await maalMedGenforsoeg({ context, base, port, side: j.side, query: j.query, viewport: vp, tema, tid, clsGraense, cache }, transient);
-                maalinger.push(m);
-                if (!opt.stille) process.stderr.write('.');
-              }
-              await context.close();
-            }
+            while (kø.length) await maalJob(kø.shift(), vp, tema, ['kold', 'varm'], null);
           }
         }));
       }
@@ -525,14 +573,14 @@ async function koer(opt = {}){
     for (const s of m.stier) if (dod(s)) m.fund.push({ tjek: 'dødt-link', niveau: TJEK['dødt-link'], detalje: s });
     delete m.stier;
   }
-  maalinger.sort((a, b) => a.side.localeCompare(b.side) || a.query.localeCompare(b.query) || a.viewport - b.viewport || a.tema.localeCompare(b.tema) || a.cache.localeCompare(b.cache));
+  maalinger.sort((a, b) => a.side.localeCompare(b.side) || a.query.localeCompare(b.query) || String(a.login || '').localeCompare(String(b.login || '')) || a.viewport - b.viewport || a.tema.localeCompare(b.tema) || a.cache.localeCompare(b.cache));
 
-  const fund = maalinger.flatMap(m => m.fund.map(f => ({ side: m.side, query: m.query, cache: m.cache, viewport: m.viewport, tema: TEMA_VIS[m.tema], ...f })));
+  const fund = maalinger.flatMap(m => m.fund.map(f => ({ side: m.side, query: m.query, login: m.login, cache: m.cache, viewport: m.viewport, tema: TEMA_VIS[m.tema], ...f })));
   const perTjek = {};
   for (const f of fund){ const k = (perTjek[f.tjek] = perTjek[f.tjek] || { niveau: f.niveau, antal: 0 }); k.antal++; }
   return {
     genereret: new Date().toISOString(),
-    indstillinger: { rod, sider, adresser: jobs.length, viewports, temaer: temaer.map(t => TEMA_VIS[t]), clsGraense, hurtig, stortLager, varm },
+    indstillinger: { rod, sider, adresser: jobs.length, viewports, temaer: temaer.map(t => TEMA_VIS[t]), clsGraense, hurtig, stortLager, varm, loginMock },
     antalMaalinger: maalinger.length,
     varighedSek: Math.round((Date.now() - start) / 1000),
     blokeredeVaerter: blokeret,
@@ -552,7 +600,7 @@ async function koer(opt = {}){
 function tabel(rapport, { maksLinjer = 80 } = {}){
   const grupper = new Map();
   for (const f of rapport.fund){
-    const navn = f.side + (f.query || '');
+    const navn = f.side + (f.query || '') + (f.login ? ` [${f.login}]` : '');
     const k = `${navn}|${f.tjek}`;
     if (!grupper.has(k)) grupper.set(k, { side: navn, tjek: f.tjek, niveau: f.niveau, hvor: new Set(), detalje: f.detalje });
     grupper.get(k).hvor.add(`${f.viewport}${f.tema === 'mørk' ? 'm' : ''}${f.cache === 'varm' ? 'v' : ''}`);
@@ -570,7 +618,7 @@ function tabel(rapport, { maksLinjer = 80 } = {}){
     ud.push('', 'Pr. tjek: ' + Object.entries(s.perTjek).map(([k, v]) => `${k}=${v.antal}${v.niveau === 'advarsel' ? '(adv)' : ''}`).join('  '));
   }
   for (const t of (rapport.transient || []).slice(0, 10))
-    ud.push(`TRANSIENT ${t.side}${t.query || ''} ${t.viewport}${t.tema === 'mørk' ? 'm' : ''}: ${String(t.detalje).slice(0, 100)} — målt igen`);
+    ud.push(`TRANSIENT ${t.side}${t.query || ''}${t.login ? ` [${t.login}]` : ''} ${t.viewport}${t.tema === 'mørk' ? 'm' : ''}: ${String(t.detalje).slice(0, 100)} — målt igen`);
   const v = Object.keys(rapport.blokeredeVaerter);
   if (v.length) ud.push('Blokerede fremmede værter (som forventet): ' + v.map(h => `${h}×${rapport.blokeredeVaerter[h]}`).join(', '));
   return ud.join('\n');
@@ -591,6 +639,7 @@ function parseArgs(argv){
     else if (a === '--soeg-links') o.soegLinks = true;
     else if (a === '--stort-lager') o.stortLager = true;
     else if (a === '--varm') o.varm = true;
+    else if (a === '--login-mock') o.loginMock = true;
     else if (a === '--viewports') o.viewports = liste(naeste());
     else if (a === '--temaer') o.temaer = liste(naeste());
     else if (a === '--rapport') o.rapport = naeste();
@@ -609,7 +658,9 @@ const HJAELP = `node scripts/smoke-browser.js [--hurtig] [--sider a,b,maerke-*,s
   [--rapport fil.json] [--cls 0.05] [--strikt] [--rod mappe] [--parallel 3] [--tid 20000] [--maks-linjer 80] [--stille]
   [--soeg-links]   måler også søgesiden på et sæt dybe links (?types, ?q, ?brands, ?koerekort, ?sort, ?page, kombinationer); bruger det store lager
   [--stort-lager]  lager på ~735 annoncer i stedet for 44 (mere som produktion)
-  [--varm]         måler hver adresse både med kold og varm cache (serveren svarer max-age=600)`;
+  [--varm]         måler hver adresse både med kold og varm cache (serveren svarer max-age=600)
+  [--login-mock]   V6: konto-siderne (mine-annoncer alle faner, dashboard alle faner, opret-annonce, login) som INDLOGGET mod scripts/w9-saelger-mock.js
+                   med lageret i scripts/fixtures/v6-konto-lager.js; login.html også udlogget. --sider vælger blandt dem (gerne med ?tab=…)`;
 
 async function main(){
   let o;
@@ -631,4 +682,4 @@ async function main(){
 
 if (require.main === module) main();
 
-module.exports = { startServer, installerMock, initScript, koer, tabel, parseArgs, playwrightTilgaengelig, findPlaywright, opslaaFil, vaelgSider, laegJobs, lagerSvar, kunBufferFejl, SOEGE_LINKS, TJEK, HURTIG_SIDER, eksterneRaekker };
+module.exports = { LOGIN_JOBS, startServer, installerMock, initScript, koer, tabel, parseArgs, playwrightTilgaengelig, findPlaywright, opslaaFil, vaelgSider, laegJobs, lagerSvar, kunBufferFejl, SOEGE_LINKS, TJEK, HURTIG_SIDER, eksterneRaekker };
