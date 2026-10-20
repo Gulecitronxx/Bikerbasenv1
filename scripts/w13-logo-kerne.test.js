@@ -23,7 +23,9 @@ test('A1 manifestet dækker alle mærkesider, de tre udkast-mærker uden side og
   assert.ok(manifest.maerker.length >= 64, 'logo-manifestet mistede mærker');
   const sider = fs.readdirSync(ROOT).filter(f => /^maerke-.+\.html$/.test(f)).map(f => f.replace(/^maerke-|\.html$/g, ''));
   assert.ok(sider.length >= 29, `forventede ≥ 29 mærkesider, fandt ${sider.length}`);
-  for (const s of sider) assert.ok(slugs.has(s), `mærkeside ${s} mangler i manifestet`);
+  /* V4: en mærkeside skal høre til et registreret mærke (js/brands-registry.js); logo-manifestet har kun poster for mærker med (udkast til) logo — resten får fallback. */
+  const REG0 = require('../js/brands-registry.js');
+  for (const s of sider) assert.ok(slugs.has(s) || REG0.fraSlug(s), `mærkeside ${s} mangler i manifestet og i registret`);
   for (const s of ['gasgas', 'zero', 'piaggio']) assert.ok(slugs.has(s), s);
   /* V4: de redaktionelle mærker er nu mærkeregistret (js/brands-registry.js). Mærker med en logo-post i manifestet peger på samme slug
      (BrandRegistry.logoNoegle); et mærke UDEN post (nye V4-mærker) skal stadig give et fuldt fallback (monogram) — aldrig et manglende mærke. */
