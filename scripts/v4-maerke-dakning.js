@@ -788,7 +788,7 @@ async function browserTjek(opt, rod, reg, opslag, statisk, T, matrix) {
     const op = await aabnSide(context, base, 'opret-annonce.html', port, tid);
     for (const f of op.fejl) tilfoej('opret', 'opret-konsolfejl', 'fejl', 'opret-annonce.html', f);
     const mulige = await op.p.evaluate(() => [...document.getElementById('f-brand').options].map(o => o.value).filter(Boolean));
-    if (reg.registry) for (const n of mulige) if (!reg.maerker.some(e => e.navn === n)) tilfoej('opret', 'opret-ekstra-maerke', 'advarsel', n, `#f-brand har "${n}", som ikke er i registret (BRANDS_BY_MODEL ude af trit med registret)`);
+    if (reg.registry) for (const n of mulige) if (n !== '__andet' && !reg.maerker.some(e => e.navn === n)) tilfoej('opret', 'opret-ekstra-maerke', 'advarsel', n, `#f-brand har "${n}", som ikke er i registret (BRANDS_BY_MODEL ude af trit med registret)`);
     const krav = new Map();
     for (const e of reg.maerker) if (e.opret && e.navn) krav.set(e.navn, 'register');
     for (const m of lagerMaerker) krav.set(m.navn, 'lager');
