@@ -4,6 +4,7 @@
          node scripts/smoke-browser.js --hurtig                 (8 repræsentative sider, 390+1440, lys)
          node scripts/smoke-browser.js --sider index,soegning,maerke-*  --viewports 390,1440  --temaer lys
          node scripts/smoke-browser.js --rapport work/smoke.json --cls 0.05 --strikt
+         node scripts/smoke-browser.js --sider soegning --soeg-links --varm --viewports 375,430,768,1440   (V5: søgesiden med dybe links)
 
    Hvad den gør:
      1. Starter en lokal statisk server (fri port) på repoets rod (--rod <mappe> for en anden).
@@ -23,6 +24,7 @@ const path = require('path');
 const http = require('http');
 const { spawnSync } = require('child_process');
 const { eksterneRaekker, restSvar, PNG_1X1, uuid } = require('./smoke-fixtures');
+const { lagerRaekker } = require('./fixtures/v5-soegning-lager');
 
 const REPO = path.join(__dirname, '..');
 
@@ -48,6 +50,24 @@ const TJEK = {
 const VIEWPORT_HOEJDE = { 320: 640, 360: 740, 390: 844, 768: 1024, 1024: 768, 1440: 900 };
 const HURTIG_SIDER = ['index', 'soegning', 'annonce', 'maerker', 'maerke-honda', 'type-cruiser', 'login', 'guides'];
 const STANDARD_QUERY = { 'annonce.html': `?id=${uuid(1)}` };   // annonce.html uden id er en tom skal
+
+/* V5 (P2-2): søgesiden måles også på DYBE links. Smoke åbnede kun soegning.html uden query, så CLS på ?types=cruiser og ?q=cf+moto (0,076 ved 768 px)
+   slap igennem. Sættet dækker hver parameterfamilie og et par kombinationer, og med vilje også adresser UDEN pille (?page=2, ?sort=) og uden træf. */
+const SOEGE_LINKS = [
+  '?types=cruiser', '?q=cf+moto', '?brands=Honda', '?koerekort=A2', '?sort=price-asc', '?page=2',
+  '?brands=BMW&model=R+1300+RS', '?types=cruiser&koerekort=A2', '?brands=Honda&types=cruiser&koerekort=A2&sort=price-asc',
+  '?priceMax=60000&yearMin=2010', '?q=xyzzy',
+];
+
+/* Det store lager (søge-lagerets 735 rækker, se scripts/fixtures/v5-soegning-lager.js) i stedet for fixture-sættets 44: sidens CLS afhænger af hvor
+   mange kort der hydreres, hvor mange der fravælges som uoplyste, og hvor lange titlerne er. */
+function lagerSvar(sti, soegeparametre){
+  const tabel = String(sti).split('?')[0];
+  if (tabel !== 'eksterne_annoncer') return restSvar(sti, soegeparametre);
+  const p = soegeparametre || new URLSearchParams(String(sti).split('?')[1] || '');
+  const grense = Number(p.get('limit')) || undefined, fra = Number(p.get('offset')) || 0;
+  return { status: 200, body: lagerRaekker().slice(fra, grense ? fra + grense : undefined) };
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -75,11 +95,18 @@ function opslaaFil(rod, urlSti){
   return null;
 }
 
-function startServer(rod){
+/* V5 (P2-6): keep-alive. Chromium åbner mange samtidige forbindelser til loopback; Windows kan løbe tør for bufferplads
+   (net::ERR_NO_BUFFER_SPACE, målt 1 af 59 enkeltkørsler og 1 af 336 med 14 processer). Længere keep-alive genbruger forbindelserne i stedet for at
+   åbne nye pr. fil. `cache: true` svarer som GitHub Pages (max-age=600) i stedet for no-store, så en anden indlæsning er en VARM cache. */
+function startServer(rod, { cache = false } = {}){
   const server = http.createServer((req, res) => {
     const fil = opslaaFil(rod, req.url);
     const send = (status, sti) => {
-      res.writeHead(status, { 'Content-Type': MIME[path.extname(sti).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+      res.writeHead(status, {
+        'Content-Type': MIME[path.extname(sti).toLowerCase()] || 'application/octet-stream',
+        'Cache-Control': cache && status === 200 ? 'public, max-age=600' : 'no-store',
+        'Connection': 'keep-alive', 'Keep-Alive': 'timeout=60',
+      });
       fs.createReadStream(sti).pipe(res);
     };
     if (fil) return send(200, fil);
@@ -88,6 +115,8 @@ function startServer(rod){
     res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('404');
   });
   return new Promise((ok, fejl) => {
+    server.keepAliveTimeout = 60000;
+    server.headersTimeout = 65000;
     server.once('error', fejl);
     server.listen(0, '127.0.0.1', () => ok({ server, port: server.address().port }));
   });
@@ -258,7 +287,9 @@ function initScript({ tema }){
 
 /* ---------- Net-mock ---------- */
 
-function installerMock(context, port, blokeret){
+/* `opt.restSvar` kan erstatte fixture-svaret (V5: det store søge-lager, se lagerSvar()). */
+function installerMock(context, port, blokeret, opt = {}){
+  const svarFn = opt.restSvar || restSvar;
   const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' };
   return context.route('**/*', route => {
     const req = route.request();
@@ -269,7 +300,7 @@ function installerMock(context, port, blokeret){
     if (/(^|\.)supabase\.co$/.test(u.hostname)){
       if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
       if (u.pathname.startsWith('/rest/v1/')){
-        const { status, body } = restSvar(u.pathname.slice('/rest/v1/'.length) + u.search, u.searchParams);
+        const { status, body } = svarFn(u.pathname.slice('/rest/v1/'.length) + u.search, u.searchParams);
         return route.fulfill({ status, headers: { ...cors, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       }
       if (u.pathname.startsWith('/storage/v1/'))
@@ -286,7 +317,7 @@ function installerMock(context, port, blokeret){
 
 /* ---------- Én måling ---------- */
 
-async function maalSide({ context, base, port, side, query, viewport, tema, tid, clsGraense }){
+async function maalSide({ context, base, port, side, query, viewport, tema, tid, clsGraense, cache }){
   const fund = [];
   const tilfoej = (tjek, detalje) => fund.push({ tjek, niveau: TJEK[tjek], detalje });
   const page = await context.newPage();
@@ -346,7 +377,7 @@ async function maalSide({ context, base, port, side, query, viewport, tema, tid,
     if (andet.length) tilfoej('csp-andet', [...new Set(andet.map(c => `${c.d}: ${c.u}`))].slice(0, 3).join('; '));
     for (const a of data.ankre) tilfoej('anker-mangler', a);
   }
-  return { side, query: query || '', viewport, tema, cls: data ? Number(data.cls.toFixed(4)) : null, h1: data ? data.h1 : null,
+  return { side, query: query || '', cache: cache || 'kold', viewport, tema, cls: data ? Number(data.cls.toFixed(4)) : null, h1: data ? data.h1 : null,
            annoncekort: data ? data.kort : null, stier: data ? data.stier : [], fund };
 }
 
@@ -370,6 +401,47 @@ function vaelgSider(rod, { sider, hurtig }){
   return alle;
 }
 
+/* V5 (P2-6): kendt OS-støj. Under belastning kan Windows' loopback løbe tør for bufferplads; Chromium logger så
+   'Failed to load resource: net::ERR_NO_BUFFER_SPACE' for en LOKAL fil (eller lader navigationen fejle). Er det det ENESTE fund på en måling,
+   måles den igen én gang; fundet gemmes som 'transient' i rapporten og tæller hverken som fejl eller advarsel. Kommer fejlen igen, er den ægte. */
+const erBufferFejl = f => (f.tjek === 'konsolfejl' || f.tjek === 'indlæsning') && /ERR_NO_BUFFER_SPACE/.test(f.detalje || '');
+const kunBufferFejl = m => m.fund.length > 0 && m.fund.every(erBufferFejl);
+
+async function maalMedGenforsoeg(arg, transient){
+  const m = await maalSide(arg);
+  if (!kunBufferFejl(m)) return m;
+  for (const f of m.fund) transient.push({ side: arg.side, query: arg.query || '', viewport: arg.viewport, tema: TEMA_VIS[arg.tema], cache: arg.cache || 'kold', ...f, transient: true });
+  const igen = await maalSide(arg);
+  igen.genmaalt = true;
+  return igen;
+}
+
+/* En måling = { side, query }. `sider` kan indeholde en adresse med query ('soegning.html?types=cruiser'). */
+function laegJobs(rod, opt, hurtig){
+  const jobs = [];
+  const tilfoej = (side, query) => { if (!jobs.some(j => j.side === side && j.query === query)) jobs.push({ side, query }); };
+  const rene = (opt.sider || []).map(s => String(s).split('?')[0]);
+  const filer = vaelgSider(rod, { sider: opt.sider ? rene : null, hurtig });
+  const medQuery = new Map();
+  for (const s of opt.sider || []){
+    const [navn, ...q] = String(s).split('?');
+    if (!q.length) continue;
+    const k = navn.replace(/\.html$/, '');
+    medQuery.set(k, (medQuery.get(k) || []).concat('?' + q.join('?')));
+  }
+  for (const f of filer){
+    const k = f.replace(/\.html$/, '');
+    const egne = medQuery.get(k);
+    if (egne) egne.forEach(q => tilfoej(f, q));
+    else tilfoej(f, (opt.query && opt.query[f]) || STANDARD_QUERY[f] || '');
+  }
+  if (opt.soegLinks && fs.existsSync(path.join(rod, 'soegning.html'))){
+    tilfoej('soegning.html', '');
+    SOEGE_LINKS.forEach(q => tilfoej('soegning.html', q));
+  }
+  return jobs;
+}
+
 async function koer(opt = {}){
   const rod = path.resolve(opt.rod || REPO);
   const hurtig = !!opt.hurtig;
@@ -382,36 +454,60 @@ async function koer(opt = {}){
   const clsGraense = opt.cls != null ? Number(opt.cls) : 0.05;
   const parallel = Math.max(1, Number(opt.parallel) || 3);
   const tid = Number(opt.tid) || 20000;
-  const sider = vaelgSider(rod, { sider: opt.sider, hurtig });
-  if (!sider.length) throw new Error('Ingen sider matcher.');
+  const jobs = laegJobs(rod, opt, hurtig);
+  if (!jobs.length) throw new Error('Ingen sider matcher.');
+  const sider = [...new Set(jobs.map(j => j.side))];
+  const stortLager = !!(opt.stortLager || opt.soegLinks);
+  const varm = !!opt.varm;
 
   const pw = opt.pw || (await playwrightTilgaengelig()).pw;
   if (!pw) throw new Error((await playwrightTilgaengelig()).grund);
-  const { server, port } = await startServer(rod);
+  const { server, port } = await startServer(rod, { cache: varm });
   const base = `http://127.0.0.1:${port}`;
   const blokeret = {};
   const maalinger = [];
+  const transient = [];
   const browser = await pw.chromium.launch({ headless: true });
   const start = Date.now();
+  const nyKontekst = async (vp, tema) => {
+    const context = await browser.newContext({
+      viewport: { width: vp, height: VIEWPORT_HOEJDE[vp] || 900 }, colorScheme: tema, locale: 'da-DK',
+      serviceWorkers: 'block', reducedMotion: 'no-preference',
+    });
+    await context.addInitScript(initScript, { tema });
+    await installerMock(context, port, blokeret, stortLager ? { restSvar: lagerSvar } : {});
+    return context;
+  };
   try {
     for (const vp of viewports){
       for (const tema of temaer){
-        const context = await browser.newContext({
-          viewport: { width: vp, height: VIEWPORT_HOEJDE[vp] || 900 }, colorScheme: tema, locale: 'da-DK',
-          serviceWorkers: 'block', reducedMotion: 'no-preference',
-        });
-        await context.addInitScript(initScript, { tema });
-        await installerMock(context, port, blokeret);
-        const kø = sider.slice();
+        const kø = jobs.slice();
         await Promise.all(Array.from({ length: Math.min(parallel, kø.length) }, async () => {
-          while (kø.length){
-            const side = kø.shift();
-            const m = await maalSide({ context, base, port, side, query: (opt.query && opt.query[side]) || STANDARD_QUERY[side] || '', viewport: vp, tema, tid, clsGraense });
-            maalinger.push(m);
-            if (!opt.stille) process.stderr.write('.');
+          if (!varm){
+            /* Kold cache: serveren siger no-store, så hver indlæsning henter alt, også inden for samme kontekst. */
+            const context = await nyKontekst(vp, tema);
+            while (kø.length){
+              const j = kø.shift();
+              const m = await maalMedGenforsoeg({ context, base, port, side: j.side, query: j.query, viewport: vp, tema, tid, clsGraense, cache: 'kold' }, transient);
+              maalinger.push(m);
+              if (!opt.stille) process.stderr.write('.');
+            }
+            await context.close();
+          } else {
+            /* Kold OG varm: en frisk kontekst pr. adresse (tom cache) måles først; samme kontekst indlæser adressen igen med cachen fyldt
+               (serveren svarer max-age=600 som GitHub Pages). */
+            while (kø.length){
+              const j = kø.shift();
+              const context = await nyKontekst(vp, tema);
+              for (const cache of ['kold', 'varm']){
+                const m = await maalMedGenforsoeg({ context, base, port, side: j.side, query: j.query, viewport: vp, tema, tid, clsGraense, cache }, transient);
+                maalinger.push(m);
+                if (!opt.stille) process.stderr.write('.');
+              }
+              await context.close();
+            }
           }
         }));
-        await context.close();
       }
     }
   } finally {
@@ -429,22 +525,24 @@ async function koer(opt = {}){
     for (const s of m.stier) if (dod(s)) m.fund.push({ tjek: 'dødt-link', niveau: TJEK['dødt-link'], detalje: s });
     delete m.stier;
   }
-  maalinger.sort((a, b) => a.side.localeCompare(b.side) || a.viewport - b.viewport || a.tema.localeCompare(b.tema));
+  maalinger.sort((a, b) => a.side.localeCompare(b.side) || a.query.localeCompare(b.query) || a.viewport - b.viewport || a.tema.localeCompare(b.tema) || a.cache.localeCompare(b.cache));
 
-  const fund = maalinger.flatMap(m => m.fund.map(f => ({ side: m.side, viewport: m.viewport, tema: TEMA_VIS[m.tema], ...f })));
+  const fund = maalinger.flatMap(m => m.fund.map(f => ({ side: m.side, query: m.query, cache: m.cache, viewport: m.viewport, tema: TEMA_VIS[m.tema], ...f })));
   const perTjek = {};
   for (const f of fund){ const k = (perTjek[f.tjek] = perTjek[f.tjek] || { niveau: f.niveau, antal: 0 }); k.antal++; }
   return {
     genereret: new Date().toISOString(),
-    indstillinger: { rod, sider, viewports, temaer: temaer.map(t => TEMA_VIS[t]), clsGraense, hurtig },
+    indstillinger: { rod, sider, adresser: jobs.length, viewports, temaer: temaer.map(t => TEMA_VIS[t]), clsGraense, hurtig, stortLager, varm },
     antalMaalinger: maalinger.length,
     varighedSek: Math.round((Date.now() - start) / 1000),
     blokeredeVaerter: blokeret,
     sammenfatning: {
       fejl: fund.filter(f => f.niveau === 'fejl').length,
       advarsler: fund.filter(f => f.niveau === 'advarsel').length,
+      transient: transient.length,
       perTjek,
     },
+    transient,
     maalinger: maalinger.map(m => ({ ...m, tema: TEMA_VIS[m.tema] })),
     fund,
   };
@@ -454,21 +552,25 @@ async function koer(opt = {}){
 function tabel(rapport, { maksLinjer = 80 } = {}){
   const grupper = new Map();
   for (const f of rapport.fund){
-    const k = `${f.side}|${f.tjek}`;
-    if (!grupper.has(k)) grupper.set(k, { side: f.side, tjek: f.tjek, niveau: f.niveau, hvor: new Set(), detalje: f.detalje });
-    grupper.get(k).hvor.add(`${f.viewport}${f.tema === 'mørk' ? 'm' : ''}`);
+    const navn = f.side + (f.query || '');
+    const k = `${navn}|${f.tjek}`;
+    if (!grupper.has(k)) grupper.set(k, { side: navn, tjek: f.tjek, niveau: f.niveau, hvor: new Set(), detalje: f.detalje });
+    grupper.get(k).hvor.add(`${f.viewport}${f.tema === 'mørk' ? 'm' : ''}${f.cache === 'varm' ? 'v' : ''}`);
   }
   const rk = { fejl: 0, advarsel: 1 };
   const rækker = [...grupper.values()].sort((a, b) => rk[a.niveau] - rk[b.niveau] || a.side.localeCompare(b.side) || a.tjek.localeCompare(b.tjek));
   const s = rapport.sammenfatning;
-  const ud = [`smoke-browser: ${rapport.antalMaalinger} målinger (${rapport.indstillinger.sider.length} sider × ${rapport.indstillinger.viewports.join('/')} × ${rapport.indstillinger.temaer.join('+')}) på ${rapport.varighedSek}s — ${s.fejl} fejl, ${s.advarsler} advarsler`];
+  const adr = rapport.indstillinger.adresser || rapport.indstillinger.sider.length;
+  const ud = [`smoke-browser: ${rapport.antalMaalinger} målinger (${adr} adresser × ${rapport.indstillinger.viewports.join('/')} × ${rapport.indstillinger.temaer.join('+')}${rapport.indstillinger.varm ? ' × kold+varm cache' : ''}) på ${rapport.varighedSek}s — ${s.fejl} fejl, ${s.advarsler} advarsler${s.transient ? `, ${s.transient} transient (OS-støj, målt igen)` : ''}`];
   if (rækker.length){
-    ud.push('', 'NIVEAU    SIDE                              TJEK           HVOR (m = mørk)   DETALJE');
+    ud.push('', 'NIVEAU    SIDE                              TJEK           HVOR (m = mørk, v = varm cache)   DETALJE');
     for (const r of rækker.slice(0, maksLinjer))
       ud.push(`${r.niveau.toUpperCase().padEnd(9)} ${r.side.padEnd(33)} ${r.tjek.padEnd(14)} ${[...r.hvor].join(',').padEnd(17)} ${String(r.detalje).slice(0, 110)}`);
     if (rækker.length > maksLinjer) ud.push(`... og ${rækker.length - maksLinjer} grupper til (se JSON-rapporten)`);
     ud.push('', 'Pr. tjek: ' + Object.entries(s.perTjek).map(([k, v]) => `${k}=${v.antal}${v.niveau === 'advarsel' ? '(adv)' : ''}`).join('  '));
   }
+  for (const t of (rapport.transient || []).slice(0, 10))
+    ud.push(`TRANSIENT ${t.side}${t.query || ''} ${t.viewport}${t.tema === 'mørk' ? 'm' : ''}: ${String(t.detalje).slice(0, 100)} — målt igen`);
   const v = Object.keys(rapport.blokeredeVaerter);
   if (v.length) ud.push('Blokerede fremmede værter (som forventet): ' + v.map(h => `${h}×${rapport.blokeredeVaerter[h]}`).join(', '));
   return ud.join('\n');
@@ -486,6 +588,9 @@ function parseArgs(argv){
     else if (a === '--strikt') o.strikt = true;
     else if (a === '--stille') o.stille = true;
     else if (a === '--sider') o.sider = liste(naeste());
+    else if (a === '--soeg-links') o.soegLinks = true;
+    else if (a === '--stort-lager') o.stortLager = true;
+    else if (a === '--varm') o.varm = true;
     else if (a === '--viewports') o.viewports = liste(naeste());
     else if (a === '--temaer') o.temaer = liste(naeste());
     else if (a === '--rapport') o.rapport = naeste();
@@ -500,8 +605,11 @@ function parseArgs(argv){
   return o;
 }
 
-const HJAELP = `node scripts/smoke-browser.js [--hurtig] [--sider a,b,maerke-*] [--viewports 320,390,768,1440] [--temaer lys,mørk]
-  [--rapport fil.json] [--cls 0.05] [--strikt] [--rod mappe] [--parallel 3] [--tid 20000] [--maks-linjer 80] [--stille]`;
+const HJAELP = `node scripts/smoke-browser.js [--hurtig] [--sider a,b,maerke-*,soegning.html?types=cruiser] [--viewports 320,390,768,1440] [--temaer lys,mørk]
+  [--rapport fil.json] [--cls 0.05] [--strikt] [--rod mappe] [--parallel 3] [--tid 20000] [--maks-linjer 80] [--stille]
+  [--soeg-links]   måler også søgesiden på et sæt dybe links (?types, ?q, ?brands, ?koerekort, ?sort, ?page, kombinationer); bruger det store lager
+  [--stort-lager]  lager på ~735 annoncer i stedet for 44 (mere som produktion)
+  [--varm]         måler hver adresse både med kold og varm cache (serveren svarer max-age=600)`;
 
 async function main(){
   let o;
@@ -523,4 +631,4 @@ async function main(){
 
 if (require.main === module) main();
 
-module.exports = { startServer, installerMock, initScript, koer, tabel, parseArgs, playwrightTilgaengelig, findPlaywright, opslaaFil, vaelgSider, TJEK, HURTIG_SIDER, eksterneRaekker };
+module.exports = { startServer, installerMock, initScript, koer, tabel, parseArgs, playwrightTilgaengelig, findPlaywright, opslaaFil, vaelgSider, laegJobs, lagerSvar, kunBufferFejl, SOEGE_LINKS, TJEK, HURTIG_SIDER, eksterneRaekker };

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-Js4Mp8/IDJ3p3l0wX6kElnTtV9M0Df9WcgsP+1jjEHw=' 'sha256-Ssk+LcAzQHvFhMvAxEWIw25Jt0DEpEVEkbWksBB5Ny0=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-p2ghdouoJYXy/HISENDMDGoH0wpyOE8ZF3kEfca0r8I=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-ZWZ6I2atnUJt7Z9iiyOnfN5TM0KWZw1svno7NnfDIqA=' 'sha256-Js4Mp8/IDJ3p3l0wX6kElnTtV9M0Df9WcgsP+1jjEHw=' 'sha256-Ssk+LcAzQHvFhMvAxEWIw25Jt0DEpEVEkbWksBB5Ny0=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk https://www.guloggratis.dk https://www.123mc.dk https://www.jensensmc.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <!-- Titel og beskrivelse er DE SAMME, som js/seo.js seoSearchResults() saetter
      for den ufiltrerede standardsoegning (overskriften "Brugte motorcykler til
@@ -30,7 +30,7 @@
 <meta name="twitter:title" content="Motorcykler til salg — nye og brugte | Bikerbasen">
 <meta name="twitter:description" content="Motorcykler til salg i Danmark — nye og brugte, samlet fra danske forhandlere og markedspladser. Filtrér på pris, årgang, km og kørekort — A1, A2 og A.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -44,6 +44,7 @@
 <link rel="icon" href="favicon.png?v=logo1" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script>try{var t=localStorage.getItem("bb_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<script id="so-pille">/* V5 CLS: står adressen med et filter, står pillerækken (js/search.js tegner den senere) med fra første maling, se css/p-soegning.css */try{var q=new URLSearchParams(location.search),f=0,n={},m=0;q.forEach(function(v,k){if(!v)return;if(!/^(sort|page|view|utm_[a-z]+|gclid|fbclid)$/i.test(k))f=1;var g=/^(types?|regions|conditions|service|udstyr|farve|kmMax|ejereMax|oprettet|koerekort|nysynet|vinter)$/.test(k)?k.replace(/^type$/,"types"):/^price(Min|Max)$/.test(k)?"pris":/^year(Min|Max)$/.test(k)?"aar":/^ccm(Min|Max)$/.test(k)?"ccm":/^hk(Min|Max)$/.test(k)?"hk":0;if(g&&!n[g]){n[g]=1;m++}});var c=document.documentElement.classList;if(f)c.add("so-pille");if(m)c.add("so-note")}catch(e){}</script>
 <script id="ga4">/* GA4 bag samtykke — se scripts/inline-analytics.js */
 window.bbStartAnalytics=function(){
   if(window.__ga4Startet)return; window.__ga4Startet=true;
@@ -99,9 +100,9 @@ try{
    samme øjeblik indholdet lander, så et forkert tal koster kun forskellen.
 
    Efter: CLS 0,014, og det der er tilbage er headerens hydrering. */
-#filter-koerekort:empty{min-height:68px}     /* 2 raekker à 34px (Alle/A1, A2/A) */
-#filter-types:empty{min-height:306px}        /* 9 raekker à 34px (Alle + 8 typer) */
-#filter-price-quick:empty{min-height:84px}   /* 4 prisintervaller i 2x2 à 38px + 8px */
+#filter-koerekort:empty{min-height:80px}     /* V5: 2 raekker à 40px (Alle/A1, A2/A); rækkerne blev 40 px i V3, reservationen stod stadig på 34 */
+#filter-types:empty{min-height:360px}        /* V5: 9 raekker à 40px (Alle + 8 typer) — var 306, så Type-gruppen voksede 54 px ved 960+ (CLS 0,008) */
+#filter-price-quick:empty{min-height:88px}   /* V5: 4 prisintervaller i 2x2 à 40px + 8px */
 /* Sammensaetningslinjen ("51 paa Bikerbasen · 332 indekseret hos MC Syd")
    staar hidden ved foerste maling — vi ved endnu ikke hvor annoncerne kommer
    fra. Da den blev vist, voksede vaerktoejslinjen 22px og skubbede hele
@@ -650,6 +651,9 @@ try{
             </div>
           </div>
         </div>
+
+        <!-- V5 CLS: pladsen til "N annoncer er ikke vist, fordi ... ikke er oplyst" står i markuppen (js/search.js renderUoplystNote() genbruger elementet), så noten ikke skubber infobånd og kort ned, når den kommer. -->
+        <p id="uoplyst-note" class="so-uoplyst" role="status"></p>
 
         <!-- Ét roligt info-bånd (w9): kildefordeling, lagerets alder og sorteringsreglen står sammen i stedet for tre spredte linjer. -->
         <div class="so-infoband" id="so-infoband" role="status" aria-live="polite">

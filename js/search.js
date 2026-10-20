@@ -1458,7 +1458,8 @@ function renderUoplystNote(){
      de samme fravalgte annoncer med hver sine ord. Kun slutningen paa
      saetningen er sidens egen ("Fjern filteret for at se dem"). */
   const { antal, felter, feltTekst } = Filtrering.uoplystOpgoerelse(uoplystSkjult);
-  if (!antal){ el.hidden = true; el.textContent = ''; return; }
+  /* Tom, ikke [hidden]: et tomt element skjules af .so-uoplyst:empty, og pladsen kan holdes til html.so-klar (css/p-soegning.css, V5 CLS). */
+  if (!antal){ el.hidden = false; el.textContent = ''; return; }
 
   const dem = antal === 1 ? 'den' : 'dem';
   const udvej = felter.length === 1
@@ -1843,6 +1844,7 @@ function render(){
 
   const grid = document.getElementById('results-grid');
   const empty = document.getElementById('empty-state');
+  renderThinPanel(pills, uaktuelt ? 0 : total);
   /* Sortering og visningsvalg giver ingen mening uden resultater. */
   document.querySelectorAll('#so-results-head .sort-felt, #so-results-head .view-toggle').forEach(e => { e.hidden = pageItems.length === 0; });
   if (pageItems.length){
@@ -1990,14 +1992,19 @@ function renderSecondary(pills, pageItems, heading, total, totalPages){
      blev bygget, fordi lageret hentes i to omgange. */
   synkroniserKravGrupper();
 
-  // Få-resultater-panel: gør et tyndt resultat til en konvertering i stedet for
-  // et dødt hjørne (kun når brugeren faktisk har filtreret).
+  renderPagination(totalPages);
+}
+
+/* Få-resultater-panel: gør et tyndt resultat til en konvertering i stedet for et dødt hjørne (kun når brugeren faktisk har filtreret).
+   V5 CLS: tegnes i etape 1, i samme opgave som kortene. Som etape 2 kom panelet en opgave EFTER kortene og skubbede "Viser alle ..." og
+   alt nedenunder 190 px ned (CLS 0,041 ved 768 på ?q=cf+moto). */
+function renderThinPanel(pills, total){
   const thin = document.getElementById('thin-result-panel');
-  if (thin){
-    const hasFilters = pills.length > 0 || !!state.q;
-    if (total > 0 && total < 4 && hasFilters){
-      thin.hidden = false;
-      thin.innerHTML = `
+  if (!thin) return;
+  const hasFilters = pills.length > 0 || !!state.q;
+  if (total > 0 && total < 4 && hasFilters){
+    thin.hidden = false;
+    thin.innerHTML = `
         <div class="thin-panel-inner">
           <div class="thin-panel-copy">
             <p class="thin-panel-title">${total === 1 ? 'Kun 1 match' : 'Kun ' + total + ' resultater'} — udvid din søgning</p>
@@ -2008,14 +2015,11 @@ function renderSecondary(pills, pageItems, heading, total, totalPages){
             <button type="button" class="btn btn-primary btn-sm" data-thin-agent>Gem søgningen</button>
           </div>
         </div>`;
-      thin.querySelector('[data-thin-reset]').addEventListener('click', () => document.getElementById('clear-filters').click());
-      thin.querySelector('[data-thin-agent]').addEventListener('click', () => document.getElementById('save-search-btn').click());
-    } else {
-      thin.hidden = true; thin.innerHTML = '';
-    }
+    thin.querySelector('[data-thin-reset]').addEventListener('click', () => document.getElementById('clear-filters').click());
+    thin.querySelector('[data-thin-agent]').addEventListener('click', () => document.getElementById('save-search-btn').click());
+  } else {
+    thin.hidden = true; thin.innerHTML = '';
   }
-
-  renderPagination(totalPages);
 }
 
 /* ============ Paginering: kun et vindue om den aktuelle side ============

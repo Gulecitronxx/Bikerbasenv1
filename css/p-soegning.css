@@ -373,12 +373,14 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 
 /* --- Kort: titel og pris på samme linje (billedet), jævne fotos --- */
 @media (min-width:560px){
-  #results-grid:not(.list-view) .rk-top{ flex-direction:row; align-items:flex-start; justify-content:space-between; gap:8px; }
+  /* V5: titel og pris på samme linje, når titlen er kort (som billedet); er titlen lang, får den hele linjen (op til to linjer), og prisen falder ned under den til højre.
+     Før var titlen klippet til én linje med ellipse ("Harley-Davidson FL…", "Honda CMX 1100 DT…") for at holde prisen ved siden af. */
+  #results-grid:not(.list-view) .rk-top{ flex-direction:row; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:0 8px; }
   #results-grid:not(.list-view) .rk-titel{
-    flex:1 1 0; min-width:0; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;
+    flex:0 1 auto; min-width:0; max-width:100%; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;
   }
-  #results-grid:not(.list-view) .rk-pris{ flex:none; text-align:right; }
-  #results-grid:not(.list-view) .rk-pris.pris-mangler{ text-align:right; max-width:42%; }
+  #results-grid:not(.list-view) .rk-pris{ flex:none; margin-left:auto; text-align:right; }
+  #results-grid:not(.list-view) .rk-pris.pris-mangler{ text-align:right; max-width:100%; }
 }
 #results-grid:not(.list-view) .card-rich .card-media{ aspect-ratio:16/10; }
 /* W12: under 360 px er 16:10-fotoet kun ca. 86 px højt, og hjertet (44 px) og sammenlign-knappen (40 px) skærer hinanden. 4:3 rydder det
@@ -419,10 +421,9 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
   /* Gem søgning bor i resultathovedet (flyttet af js/search.js); chip-rækken vises kun når der er filtre. */
   .so-chiprow:not(:has(.active-filter-pill)){ display:none; }
   .so-toolbar .toolbar-actions #save-search-btn{ min-height:44px; }
+  .so-toolbar .toolbar-actions{ min-height:44px; }   /* V5: knappen kommer med hydreringen; uden dette vokser rækken 2 px */
 }
 @media (min-width:760px){
-  /* Billedets foto er ca. 2,3:1 — lavere foto, flere kort pr. skærm. */
-  #results-grid:not(.list-view) .card-rich .card-media{ aspect-ratio:2/1; }
   /* Det lavere foto har ikke plads til ikon + tekst + maerkat: ikonet udgaar, teksten "Ingen fotos" bliver. */
   #results-grid:not(.list-view) .card-rich .foto-tom{ padding:6px 52px 8px 8px; gap:0; }
   #results-grid:not(.list-view) .card-rich .foto-tom-ikon{ display:none !important; }
@@ -462,15 +463,18 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
 /* ---- W14 iteration 3: kortet som mockuppen (lavt, ens, foto 2,3:1), typefoto-label, hero, info, bund, 503 ---- */
 @media (min-width:760px){
   #results-grid:not(.list-view){ gap:12px; }
-  #results-grid:not(.list-view) .card-rich .card-media{ aspect-ratio:2.3/1; }
+  /* V5: 16:10 i stedet for 2,3:1. Kildernes miniaturer er næsten altid 4:3 med motorcyklen midt i billedet; 2,3:1 skar hjul og forgaffel af (Critic V4).
+     Samme format som på telefon. object-position lidt under midten: hjulene er det, der ellers forsvinder. */
+  #results-grid:not(.list-view) .card-rich .card-media{ aspect-ratio:16/10; }
+  #results-grid:not(.list-view) .card-rich .card-photo{ object-position:50% 60%; }
   #results-grid:not(.list-view) .rk-body{ padding:7px 12px 7px; gap:3px; }
-  #results-grid:not(.list-view) .rk-titel{ -webkit-line-clamp:1; line-clamp:1; font-size:14.5px; line-height:1.3; }
+  #results-grid:not(.list-view) .rk-titel{ -webkit-line-clamp:2; line-clamp:2; font-size:14.5px; line-height:1.3; }
   #results-grid:not(.list-view) .rk-pris{ font-size:15px; }
   #results-grid:not(.list-view) .rk-top{ align-items:baseline; }
   #results-grid:not(.list-view) .rk-linje{ font-size:12px; line-height:1.25; }
   #results-grid:not(.list-view) .rk-chip{ padding:4px 5px; font-size:11px; }
   #results-grid:not(.list-view) .rk-chip.rk-kk svg{ display:none; }
-  #results-grid:not(.list-view) .rk-chips{ flex-wrap:nowrap; overflow:hidden; margin-top:1px; }
+  #results-grid:not(.list-view) .rk-chips{ flex-wrap:wrap; margin-top:1px; }
   #results-grid:not(.list-view) .rk-kk.kk-a{ background:transparent; color:var(--color-fg); box-shadow:inset 0 0 0 1px var(--color-input-border); }
   #results-grid:not(.list-view) .rk-fod{ font-size:11.5px; padding-right:34px; align-items:center; }
   #results-grid:not(.list-view) .rk-kilde > span{ display:block; -webkit-line-clamp:unset; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -523,9 +527,13 @@ main > .container:has(> section.section > .section-head + .popular-row) .popular
 .so-layout .so-more-btn{ min-height:40px; }
 .so-layout #filter-price-quick .chip, .so-layout .filter-body .chip{ min-height:40px; }
 @media (min-width:760px){
-  #results-grid:not(.list-view) .rk-chips{ flex-wrap:nowrap !important; }
-  #results-grid:not(.list-view) .rk-chip{ min-width:0; overflow:hidden; text-overflow:ellipsis; flex-shrink:1; }
-  #results-grid:not(.list-view) .rk-chip.rk-chip-note, #results-grid:not(.list-view) .rk-chip.rk-chip-mangler{ flex:0 1 auto; white-space:nowrap; background:transparent; border:0; box-shadow:inset 0 0 0 1px var(--color-border); }
+  /* V5 (Critic P2-3): chips klippes ikke længere. Før stod de på én linje med overflow:hidden, og i de smalle kort (768 px: 226 px) lå "Kræver A | 1.300 ccm 145 hk Bytter gerne"
+     oven i hinanden/var skåret. Nu ombrydes rækken: kørekort, ccm og hk står sammen, og salgsmærkatet ("Bytter gerne") får sin egen linje. Intet skjules. */
+  #results-grid:not(.list-view) .rk-chips{ flex-wrap:wrap !important; }
+  #results-grid:not(.list-view) .rk-chip{ min-width:0; flex-shrink:0; }
+  #results-grid:not(.list-view) .rk-chip.rk-chip-note, #results-grid:not(.list-view) .rk-chip.rk-chip-mangler{
+    flex:1 1 100%; max-width:100%; white-space:normal; line-height:1.25; background:transparent; border:0; box-shadow:inset 0 0 0 1px var(--color-border);
+  }
   #results-grid:not(.list-view) .rk-chip.rk-kk{ flex-shrink:0; max-width:100%; }
 }
 @media (max-width:759px){
@@ -602,11 +610,10 @@ body.srp:has(#data-afbrud) main > .container:has(> section.section > .section-he
    området tomt, og rækken har ingen kolonneafstand at betale for. */
 @media (max-width:959px){
   .so-chiprow:not(:has(.active-filter-pill)){ gap:0; }
-  main:has(#results-grid[style*="hidden"]) .so-chiprow{ gap:10px; }
+  html.so-pille .so-chiprow{ gap:10px; }   /* V5: afhænger ikke længere af det skjulte gitter, men af selve adressen (se .so-pille nedenfor) */
 }
 @media (max-width:620px){
   .so-chips-area{ min-height:0; }
-  main:has(#results-grid[style*="hidden"]) .so-chips-area{ min-height:28px; }
 }
 
 /* 2) Infobåndet: sorteringsreglen bor i (i) ved Sortér ("Sådan er rækkefølgen sat", med tal fra det viste resultat) — det er dér,
@@ -662,3 +669,71 @@ html:not(.so-klar) .srp #results-grid[style*="hidden"] > .card > *{ visibility:h
 /* V4: på de smalleste telefoner (≤380 px) stod resultathovedet med 44 px reserveret til en kildelinje, der for længst bor i infobåndet:
    20 px luft mellem "N motorcykler" og Sortér. Samme højde som 381-620 px (én linje). */
 @media (max-width:380px){ body.srp .results-headline{ min-height:24px; } }
+
+/* ============================================================================
+   V5 søgning: CLS på dybe links (?types=, ?q=, ?brands=, ?koerekort= ...)
+   ============================================================================
+   Rod-årsag (målt med layout-shift sources, 8 gentagelser pr. url): filterpillerne tegnes af js/search.js, EFTER at siden første
+   gang er malet. Pillerækken er 40 px høj (to rækker på en telefon: 88 px) og stod ikke i den første maling — resten af siden
+   sprang 41 px ved 768 (CLS 0,076), 56 px ved >= 1280 (rækken var display:none uden piller) og 109 px ved 375 med tre piller.
+   V4 reserverede 28 px, men kun <= 620 px og for HVER adresse med en søgestreng (også ?page=2/?sort=, hvor der ingen piller kommer).
+
+   Nu: et lille inline-script i <head> (id="so-pille") sætter html.so-pille, når adressen indeholder en parameter, der giver
+   en pille (alt andet end sort/page/view). Så står pillerækken i den første maling med sin endelige højde. For at højden er
+   den samme uanset hvor mange piller der er, står de på ÉN række, der ruller sideværts (< 1280 px; "Ryd alle filtre" bliver stående). */
+@media (max-width:1279px){
+  .so-chips-area{ flex-wrap:nowrap; gap:0 8px; }
+  .so-chips.active-filters{
+    flex:0 1 auto; min-width:0; flex-wrap:nowrap; overflow-x:auto; overscroll-behavior-x:contain;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch;
+    /* En lille udtoning i højre kant viser, at rækken kan rulles, uden at en rullebjælke ændrer rækkens højde. */
+    -webkit-mask-image:linear-gradient(to right, #000 calc(100% - 18px), transparent); mask-image:linear-gradient(to right, #000 calc(100% - 18px), transparent);
+    padding-right:14px; margin-right:-6px;
+  }
+  .so-chips.active-filters::-webkit-scrollbar{ display:none; }
+  .so-chips .active-filter-pill{ flex:none; white-space:nowrap; }
+  .so-clear-all{ flex:none; white-space:nowrap; }
+}
+html.so-pille .so-chips-area{ min-height:40px; }
+@media (min-width:1280px){
+  /* >= 1280 px skjuler V3 hele rækken uden piller. Står der piller på vej (adressen siger det), står rækken med fra første maling. */
+  html.so-pille:not(.so-klar) .so-chiprow:not(:has(.active-filter-pill)){ display:flex; }
+}
+
+/* "N annoncer er ikke vist, fordi ... ikke er oplyst": elementet står i soegning.html (skjult), så pladsen kan holdes, før teksten kendes.
+   Stilen bor her i stedet for i js/search.js' cssText. */
+.so-uoplyst{
+  margin:0 0 var(--space-4); padding:10px 14px; border:1px solid var(--color-border); border-radius: var(--radius-sm);
+  background: var(--color-surface-2); color: var(--color-fg-muted); font-size:14px; line-height:1.45;
+}
+.so-uoplyst:empty{ display:none; }
+/* Reserveret højde. Sætningen er 1-3 linjer, alt efter hvilke felter der fravælges og hvor bred spalten er; en forkert gætning flyttede resultatet 20 px (CLS 0,049 ved 768
+   på ?priceMax=&yearMin=). Derfor har boksen sin LANGESTE højde (sætningen med to felter, målt 103/83/63/42/63/42 px) fra første maling, også når teksten kun fylder én linje
+   (teksten står midt i boksen). Gælder kun adresser, hvor et filter kan fravælge uoplyste annoncer (html.so-note, sat af scriptet i <head>). Står der ingen note (intet fravalgt),
+   holdes pladsen til html.so-klar og forsvinder så. */
+html.so-note .so-uoplyst:not(:empty){ display:flex; align-items:center; }
+html.so-note:not(.so-klar) .so-uoplyst:empty{ display:block; visibility:hidden; }
+html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:empty{ min-height:83px; }
+@media (max-width:340px){ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:empty{ min-height:103px; } }
+@media (min-width:541px){ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:empty{ min-height:63px; } }
+@media (min-width:860px) and (max-width:959px){ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:empty{ min-height:42px; } }
+@media (min-width:1200px){ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:empty{ min-height:42px; } }
+
+/* Tomtilstandens "Gem søgningen" står midt i en sætning, men er en knap (ikke et link): 21 px høj er under WCAG 2.5.8's 24 px. Samme udseende, større trykflade. */
+.empty-agent-hint .link-btn{ display:inline-block; min-height:28px; padding:3px 2px; line-height:1.4; vertical-align:baseline; }
+
+/* V5: infobåndet. Under 1100 px stod "De fleste annoncer er bekræftet ..." på linjen UNDER kildefordelingen med en lodret streg i venstre kant (stregen var tænkt som skel mellem to
+   led på samme linje; ombrydningen gjorde den til en løsrevet streg midt på siden). Kildefordelingen fylder nu hele første linje, som den allerede gør fra 1100 px. */
+@media (max-width:1099px){
+  .so-infoband .results-mix{ flex:1 1 100%; }
+  .so-infoband > :not([hidden]) ~ :not([hidden]){ border-left:0; margin-left:0 !important; padding-left:0; }
+}
+
+/* V5: kortene i en række er ikke længere nødvendigvis lige høje (en lang titel får to linjer, et salgsmærkat får en chip-linje). Det overskydende rum ligger derfor over foden
+   (stedet/kilden står i bunden af alle kort i rækken), ikke under den. */
+#results-grid:not(.list-view) .rk-chips + .rk-fod{ margin-top:auto; }
+/* Stakket fod (kort smallere end 240 px, fx 3 spalter ved 768 px): stedet har hele linjen. Før klippede 42 %-reglen "Nykøbing Falster" til "Nykøbin…" midt i en tom linje. */
+@container (max-width:239px){
+  #results-grid:not(.list-view) .rk-sted{ max-width:100%; }
+  #results-grid:not(.list-view) .rk-fod{ align-items:flex-start; }   /* iteration 3 centrerede (align-items:center) også den stakkede fod: sted og kilde stod midtstillet */
+}

@@ -75,7 +75,7 @@ const overflow = s => s.page.evaluate(() => [document.documentElement.scrollWidt
 const skip = chromium ? false : 'Playwright mangler';
 
 
-test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet, ingen hero', { skip }, async () => {
+test('1440: foto 16:10 (V5), ingen tom chip-række, Gem søgning i resultathovedet, ingen hero', { skip }, async () => {
   const s = await aabn({ w: 1440, n: 44 });
   try {
     await gaa(s, 'soegning.html');
@@ -86,7 +86,7 @@ test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet,
       return { ratio: med.width / med.height, chiprow: getComputedStyle(document.getElementById('so-chiprow')).display,
         knapI: !!knap.closest('#so-results-head'), cardBund: R('.so-q').bottom, toolbarTop: R('#so-results-head').top };
     });
-    assert.ok(m.ratio > 2.2 && m.ratio < 2.4, 'foto-format ' + m.ratio);
+    assert.ok(Math.abs(m.ratio - 1.6) < 0.03, 'V5: foto-format 16:10 (2,3:1 skar hjul og forgaffel af) ' + m.ratio);
     assert.equal(m.chiprow, 'none');
     assert.ok(m.knapI, 'Gem søgning i resultathovedet');
     assert.ok(m.cardBund <= 200, 'søgefeltets underkant ' + m.cardBund);
@@ -104,7 +104,7 @@ test('1440: foto ca. 2:1, ingen tom chip-række, Gem søgning i resultathovedet,
     assert.ok(n.bkSynlig, 'brødkrummen er synlig over søgefeltet');
     assert.equal(n.sorteringsnote, 'none', 'V4: sorteringsreglen står i (i) ved Sortér, ikke som en tredje finskriftslinje');
     assert.equal(await s.page.evaluate(() => { const b = document.getElementById('sortering-info-btn'); return !!b && !b.hidden && b.getAttribute('aria-label'); }), 'Sådan er rækkefølgen sat');
-    assert.ok(n.kortH >= 195 && n.kortH <= 215, 'kort højde ' + n.kortH);
+    assert.ok(n.kortH >= 250 && n.kortH <= 340, 'kort højde ' + n.kortH);   // V5: 16:10-foto (161 px ved 258 px bredde) + tekst
     const [sw, cw] = await s.page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
     assert.equal(sw, cw);
     assert.deepEqual(s.fejl, []);
@@ -125,7 +125,7 @@ test('filter-URL 1440: chip-rækken vises; under 1280 bliver Gem søgning i chip
   } finally { await s.luk(); }
 });
 
-test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme felter), sammenlign i kortets fod, titel på én linje', { skip }, async () => {
+test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme felter), sammenlign i kortets fod, titel højst to linjer', { skip }, async () => {
   const s = await aabn({ w: 1440, n: 44 });
   try {
     await gaa(s, 'soegning.html');
@@ -139,6 +139,7 @@ test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme fel
         samIFoto: kort.filter(k => k.querySelector('.card-media .card-compare')).length,
         titelLinjer: Math.max(...kort.map(k => { const t = k.querySelector('.rk-titel'); return Math.round(t.getBoundingClientRect().height / parseFloat(getComputedStyle(t).lineHeight)); })),
         hoejder: [...new Set(kort.map(k => Math.round(k.getBoundingClientRect().height)))],
+        raekkerEns: (() => { const r = new Map(); for (const k of kort){ const b = k.getBoundingClientRect(); const t = Math.round(b.top + scrollY); (r.get(t) || r.set(t, new Set()).get(t)).add(Math.round(b.height)); } return [...r.values()].every(s => s.size === 1); })(),
         brodkrumme: document.querySelector('.so-top .so-breadcrumb').getBoundingClientRect().width,
         bundH: (() => { const c = document.querySelector('main > .container:last-of-type'); return c.getBoundingClientRect().height; })(),
         info: (() => { const b = document.getElementById('so-infoband'); return [...b.querySelectorAll('*')].filter(e => e.offsetParent && e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow !== 'visible' && getComputedStyle(e).textOverflow === 'ellipsis').length; })(),
@@ -147,8 +148,8 @@ test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme fel
     assert.ok(m.typefoto > 0 && m.labelTekst.every(t => /ikke annoncens/i.test(t)), 'typefoto med ærligt label');
     assert.equal(m.stiplet, 0, 'ingen stiplede tomme fotofelter');
     assert.equal(m.samIFoto, 0, 'sammenlign ligger ikke i fotoet');
-    assert.equal(m.titelLinjer, 1, 'titel på én linje');
-    assert.ok(Math.max(...m.hoejder) - Math.min(...m.hoejder) <= 4 && Math.max(...m.hoejder) <= 215, 'ens kort: ' + m.hoejder);
+    assert.ok(m.titelLinjer <= 2, 'V5: titel højst to linjer (var klippet til én linje med ellipse) ' + m.titelLinjer);
+    assert.ok(m.raekkerEns, 'kortene i samme række er lige høje (grid strækker), også når en titel/chip-række fylder mere');
     assert.ok(m.bundH <= 350, 'bundmoduler ' + m.bundH);
     assert.equal(m.info, 0, 'info-linjen er ikke afkortet med ellipsis');
   } finally { await s.luk(); }
