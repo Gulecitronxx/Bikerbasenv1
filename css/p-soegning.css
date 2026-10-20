@@ -477,16 +477,12 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
   #results-grid:not(.list-view) .rk-chip.rk-kk svg{ display:none; }
   #results-grid:not(.list-view) .rk-chips{ flex-wrap:wrap; margin-top:1px; }
   #results-grid:not(.list-view) .rk-kk.kk-a{ background:transparent; color:var(--color-fg); box-shadow:inset 0 0 0 1px var(--color-input-border); }
-  #results-grid:not(.list-view) .rk-fod{ font-size:11.5px; padding-right:34px; align-items:center; }
+  #results-grid:not(.list-view) .rk-fod{ font-size:11.5px; align-items:center; }   /* V6: ingen reserveret plads til sammenlign-knappen (den ligger på fotoet igen) */
   #results-grid:not(.list-view) .rk-kilde > span{ display:block; -webkit-line-clamp:unset; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #results-grid:not(.list-view) .rk-kilde{ align-items:center; }
   #results-grid:not(.list-view) .rk-sted{ max-width:58%; }   /* V5: 42 % klippede "Nykøbing Falster" til "Nykøbing F…"; kilden (ellipse, fuld tekst i title) giver plads */
-  /* Sammenlign-knappen ligger i kortets fod (ikke over motivet): 40 px trykflade, 30 px synlig rund. */
-  #results-grid:not(.list-view) .card-compare{
-    right:2px; bottom:0; width:40px; height:40px; box-shadow:none; background:radial-gradient(circle, var(--color-surface-2) 0 14px, transparent 15px);
-  }
-  #results-grid:not(.list-view) .card-compare.active{ background:radial-gradient(circle, var(--color-primary) 0 14px, transparent 15px); }
-  #results-grid:not(.list-view) .card-compare svg{ width:15px; height:15px; }
+  /* V6 (Critic P3, kortene ca. 18 % højere efter V5): sammenlign-knappen står PÅ fotoet (nederst til højre, 40 px trykflade) fra alle bredder, som den gør på telefon. Fra 760 px lå den i kortets
+     fod (en 40 px høj fodslot, 19 px højere kort) og blev flyttet derhen af js/search.js ved indtegningen, så et resize fra 1440 til 375 efterlod den i foden. Typefoto-label og "Ingen fotos" holder 52 px fri i højre side. */
 }
 /* typefoto-label: roligt, synligt, nederst til venstre i fotoet */
 .typefoto-label{ position:absolute; z-index:1; font-size:11px; font-weight:600; line-height:1; padding:4px 7px; border-radius:5px;
@@ -739,12 +735,14 @@ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:emp
   #results-grid:not(.list-view) .rk-fod{ align-items:flex-start; }   /* iteration 3 centrerede (align-items:center) også den stakkede fod: sted og kilde stod midtstillet */
 }
 
-/* V5: sammenlign-knappen (40 x 40, nederst til højre i kortet) stod med toppen ca. 17 px over fodlinjen og skar i chip-rækkens højre ende ("150 hk" blev halvt dækket)
-   på kort, hvor foden er én linje. Foden er nu mindst lige så høj som knappen (4 + 36 = 40 px), så knappen aldrig når chips-rækken. Kun fra 760 px, hvor knappen bor i foden. */
+/* V5: sammenlign-knappen (40 x 40) stod med toppen ca. 17 px over fodlinjen og skar i chip-rækken ("150 hk" blev halvt dækket). V5 gav foden en 40 px slot (4 + 36); V6 flytter knappen tilbage på
+   fotoet (se ovenfor), så foden er igen kun sin egen tekstlinje (ca. 17 px) og kortet ca. 15 px lavere. */
 @media (min-width:760px){
-  #results-grid:not(.list-view) .rk-body{ padding-bottom:4px; }
-  #results-grid:not(.list-view) .rk-fod{ min-height:36px; align-items:center; }
+  #results-grid:not(.list-view) .rk-body{ padding-bottom:8px; }
+  #results-grid:not(.list-view) .rk-fod{ min-height:0; align-items:center; }
 }
+/* den stakkede fod (kort smallere end 240 px, fx 3 spalter ved 768 px) er allerede to linjer høj og har ikke brug for ekstra luft under sig */
+@container (max-width:239px){ @media (min-width:760px){ #results-grid:not(.list-view) .rk-body{ padding-bottom:4px; } } }
 
 /* V5: listevisningens hjerte- og sammenlign-knapper var 36 x 36 px (under 40 px tap-mål). Samme ikon, større trykflade; fokusring og hover er styles.css'. */
 #results-grid .row-tool{ width:40px; height:40px; }
@@ -759,3 +757,20 @@ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:emp
 .dr-thumb::-moz-range-thumb{ box-sizing:border-box; width:24px; height:24px; }
 .dr-thumb:focus-visible::-webkit-slider-thumb{ box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 32%, transparent); }
 .dr-thumb:focus-visible::-moz-range-thumb{ box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 32%, transparent); }
+
+/* V6: i de smalle gitterkort (2 spalter på telefon, 138-190 px) brød "1978 | 17.100 km | Touring" over to linjer i ca. hvert andet kort (+17 px). Tættere skilletegn (5 px luft på hver side af stregen, i alt 11 px i stedet for 17;
+   samme grammatik: kant + negativ margen, så ingen enlig "|" starter en ombrudt linje) får de fleste til at stå på én linje; lange typenavne bryder stadig, intet klippes. */
+@media (max-width:759px){
+  #results-grid:not(.list-view) .rk-linje > span{ margin:0 11px 0 -6px; padding-left:5px; }
+  #results-grid:not(.list-view) .rk-linje > span:last-child{ margin-right:0; }
+  #results-grid:not(.list-view) .rk-linje > span:first-child{ margin-left:0; padding-left:0; border-left:0; }
+}
+
+/* V6 (Critic P3-2): monogram-fallbacken i mærkefilteret har samme visuelle vægt som de officielle logoer ved siden af. Før: en lille orange-tonet cirkel mellem tegnede/farvede logoer
+   (i mørk tilstand mellem LYSE fliser). Nu: neutral flade og mørk tekst (ingen brandfarve), samme 22 px og i mørk tilstand samme lyse flise (--color-fg, 3 px luft) som logoerne.
+   Kun filterrækken (.so-layout .bl-spalte); BrandLogos-kernen og mærkesiderne er uændrede. */
+.so-layout .bl-spalte .bl-mono{ --bl-mono-bg: var(--color-surface-2); --bl-mono-fg: var(--color-fg); box-shadow:inset 0 0 0 1px var(--color-border); }
+:root[data-theme="dark"] .so-layout .bl-spalte .bl-mono{ --bl-mono-bg: var(--color-fg); --bl-mono-fg: var(--color-bg); box-shadow:0 0 0 3px var(--color-fg); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .so-layout .bl-spalte .bl-mono{ --bl-mono-bg: var(--color-fg); --bl-mono-fg: var(--color-bg); box-shadow:0 0 0 3px var(--color-fg); }
+}
