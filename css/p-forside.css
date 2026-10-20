@@ -890,3 +890,19 @@ body.home .typer{ padding-top: var(--space-4); }
 @media (max-width:599px){ body.home #types-sub:empty{ min-height:4.35em; } }
 @media (max-width:759px){ body.home .sk-antal{ min-height:47px; } }
 @media (min-width:760px) and (max-width:1099px){ body.home .sk-antal{ min-height:62px; } }
+/* ============ V4 polish (Agent 4): forside ============ */
+
+/* V4-H1 Guide-boksen: det udtværede landskabsfoto lå under teksten (kontrast og et "spøgelsesbillede" ved kanten). Erstattet af en rolig,
+   dekorativ bjerg-og-vej-tegning nederst til højre (som billedets illustration); teksten ligger på en flad flade. Ingen opdigtet indhold. */
+@media (min-width:1100px){
+  body.home .guide-boks{
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 70' fill='none'%3E%3Cpath d='M0 70 L28 30 L44 46 L66 14 L96 52 L120 36 V70Z' fill='%231f7a4d' fill-opacity='.14'/%3E%3Cpath d='M0 70 L22 44 L40 58 L60 34 L84 62 L120 46 V70Z' fill='%231f7a4d' fill-opacity='.14'/%3E%3Cpath d='M70 70 C78 60 62 54 80 46 S96 40 100 34' stroke='%231f7a4d' stroke-opacity='.3' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") right bottom / 46% auto no-repeat,
+      var(--color-success-tint);
+  }
+  body.home .guide-boks > div{ max-width:none; }
+}
+
+/* V4-H2 "Sådan virker": trintekster står i toppen ud for ikonet (før: lodret centreret, så en tolinjers titel startede højere end en enlinjes). */
+body.home .saadan-trin-punkt{ align-items:start; }
+body.home .saadan-trin-punkt > div{ align-self:start; }

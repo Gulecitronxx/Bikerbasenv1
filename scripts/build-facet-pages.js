@@ -1638,6 +1638,13 @@ function hydreringsScript(){
     const maal = el.closest('.fa-rel-chip, .fa-typer li, .fa-modeller li, .fa-by-liste li, .fa-udforsk li, .brand-facet-raekke a');
     if (maal) maal.hidden = n === 0;
   });
+  /* V4: en liste, hvor alle punkter er skjult (0 i lageret), efterlader ikke en enlig overskrift. */
+  document.querySelectorAll('.fa-modeller, .fa-typer, .fa-by-liste').forEach(ul => {
+    if (ul.querySelector('li:not([hidden])')) return;
+    ul.hidden = true;
+    const h = ul.previousElementSibling;
+    if (h && /^H[23]$/.test(h.tagName)) h.hidden = true;
+  });
   const note = document.getElementById('facet-note');
   if (note) note.textContent = visListe.length > viste ? 'De første ' + viste + ' vises her.' : '';
   const dubl = document.getElementById('facet-dubletter');
