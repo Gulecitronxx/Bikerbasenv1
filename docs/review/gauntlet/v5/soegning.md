@@ -36,8 +36,9 @@ adresser med query direkte i `--sider soegning.html?types=cruiser`, `--stort-lag
 | | før | efter |
 |---|---|---|
 | værste CLS, matrix 375-1440 | 0,2605 (`?q=xyzzy` 1440) | **0,0095** |
-| målinger over 0,05 (mock, 7 adresser x 3 bredder) | 17 af 21 | **0** |
-Smoke strikt (`--cls 0.05 --strikt`) på 12 adresser x 8 bredder (320/375/390/430/768/1024/1440/1920) x lys+mørk x kold+varm = 384 målinger, to kørsler: se afsnit 7.
+| `?types=cruiser` 768 / `?q=cf+moto` 768 / kombination 375 / `?koerekort=A2` 1440 | 0,0775 / 0,074 / 0,164 / 0,076 | 0,0017 / 0,0017 / 0,000 / 0,0089 |
+Smoke strikt (`node scripts/smoke-browser.js --sider soegning --soeg-links --varm --viewports 320,375,390,430,768,1024,1440,1920 --temaer lys,mørk --cls 0.05 --strikt`): 384 målinger (12 adresser x 8 bredder x lys+mørk x kold+varm),
+to kørsler: begge 0 fejl, 0 advarsler, værste CLS 0,0095. Første kørsel fangede en ægte `ERR_NO_BUFFER_SPACE` (`?koerekort=A2`, 768 mørk) og målte den igen: gemt som `transient`, ikke talt som fejl — præcis det, genforsøget er til.
 
 ## 2. Chip-rækken i søgekortene (P2-3)
 Ved 768 px (3 spalter, kort på 226 px) lå "Kræver A | 1.300 ccm 145 hk Bytter gerne" oven i hinanden. Årsag: `flex-wrap:nowrap; overflow:hidden; text-overflow:ellipsis` fra W14 for at holde alle kort lige høje, hvilket skjulte info.
@@ -81,6 +82,7 @@ i mærkelisten, filteret og facettallene (`Filtrering.lagerMaerkeNoegle`, kun an
 `js/v5-soegning-maerke.test.js` (6): 0 rækker "Hanway", 1 række "Uoplyst mærke" (2 med sentinellen). H1-ændringen fra mærke-agenten er bevaret. `scripts/v4-maerke-dakning.test.js` mutationsmål omdøbt.
 
 ## 8. Smoke og test-infrastruktur (P2-6)
+(Verifikation i øvrigt: `npm test` 1521 tests; de to fejl i sidste kørsel var `privatlivspolitik` (bevidst tekst-hash opdateret i `scripts/info-tekst.test.js`) og en `facet-intro-cls`, der består alene og i gentagelse — timing under last. Kør `npm test` igen efter merge.)
 `scripts/smoke-browser.js`: (a) en måling, hvis ENESTE fund er `ERR_NO_BUFFER_SPACE` (konsolfejl eller navigation), måles igen én gang; fundet gemmes i rapportens `transient` og tæller hverken som fejl eller advarsel
 (vises som `TRANSIENT …` i tabellen; kommer fejlen igen, er den ægte, og et andet fund ved siden af skjules aldrig); (b) keep-alive (`keepAliveTimeout` 60 s, `Connection: keep-alive`) på den statiske server;
 (c) de nye søge-flag ovenfor. Test: `js/v5-soegning-cls.test.js` (to browsertests af genforsøget, en af keep-alive/cache-headere).
