@@ -121,7 +121,7 @@ test('browser: et ødelagt mærkefilter (filtrering.js) opdages som filter-antal
   if (!kan.ok) return t.skip(kan.grund);
   const rod = kopierRod(true);
   try {
-    ret(rod, 'js/filtrering.js', s => { assert.ok(s.includes('list = list.filter(l => maerker.has(maerkeNoegle(l.brand)));'), 'mutationsmål mangler'); return s.replace('list = list.filter(l => maerker.has(maerkeNoegle(l.brand)));', 'list = list.filter(l => true);'); });
+    ret(rod, 'js/filtrering.js', s => { assert.ok(s.includes('list = list.filter(l => maerker.has(lagerMaerkeNoegle(l.brand)));'), 'mutationsmål mangler'); return s.replace('list = list.filter(l => maerker.has(lagerMaerkeNoegle(l.brand)));', 'list = list.filter(l => true);'); });
     const r = await R.koer({ rod, maerker: ['Honda', 'BMW', 'Yamaha'], data: 'fixtures', pw: kan.pw });
     const fund = r.fund.filter(f => f.tjek === 'filter-antal' && f.niveau === 'fejl');
     assert.ok(fund.length >= 3, `forventede filter-antal-fejl, fik ${JSON.stringify(r.fund.map(f => f.tjek))}`);
