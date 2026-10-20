@@ -509,6 +509,6 @@ async function main() {
   process.exit(r.fund.some(f => f.niveau === 'fejl') ? 1 : 0);
 }
 
-module.exports = { koer, koerKanal, koerDegrader, vurder, sammenlignKanaler, markdown, KANALER, SIDER, probeFunktioner };
+module.exports = { koer, koerKanal, koerDegrader, vurder, sammenlignKanaler, markdown, KANALER, SIDER, probeFunktioner, maalSide, maalKontrast };
 
 if (require.main === module) main();
