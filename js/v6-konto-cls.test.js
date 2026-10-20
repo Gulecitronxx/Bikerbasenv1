@@ -27,6 +27,13 @@ async function maalCls(side, bredde, { tema = 'lys', forsinkelse = 0, forhandler
   const bak = lavKontoBackend({ forhandler });
   const ctx = await browser.newContext({ viewport: { width: bredde, height: HOEJDE[bredde] }, colorScheme: tema === 'moerk' ? 'dark' : 'light' });
   await ctx.addInitScript(sb.initScript, { tema: tema === 'moerk' ? 'dark' : 'light' });
+  /* Kilderne til hvert skift (til fejlbeskeden): hvilket element rykkede, hvornår, og hvor meget. */
+  await ctx.addInitScript(() => {
+    window.__skift = [];
+    try {
+      new PerformanceObserver(l => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__skift.push(`${Math.round(e.startTime)}ms ${e.value.toFixed(4)} ${e.sources.map(s => (s.node && (s.node.tagName + (s.node.id ? '#' + s.node.id : '') + (typeof s.node.className === 'string' ? '.' + s.node.className.split(' ')[0] : ''))) + ' ' + Math.round(s.previousRect.y) + '->' + Math.round(s.currentRect.y)).join(', ')}`); }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) { /* ingen support */ }
+  });
   await bak.installer(ctx, { tema: tema === 'moerk' ? 'dark' : 'light' });
   if (forsinkelse) await ctx.route(/\.supabase\.co/, async r => { await new Promise(x => setTimeout(x, forsinkelse)); await r.fallback(); });
   const page = await ctx.newPage();
@@ -34,12 +41,12 @@ async function maalCls(side, bredde, { tema = 'lys', forsinkelse = 0, forhandler
   page.on('pageerror', e => fejl.push(e.message));
   try {
     await page.goto(`http://127.0.0.1:${port}/${side}`, { waitUntil: 'load' });
-    await page.waitForSelector('main.db-page:not(.db-venter)', { state: 'attached', timeout: 15000 });
+    await page.waitForSelector(/^opret-annonce/.test(side) ? 'body[data-op-klar]' : 'main.db-page:not(.db-venter)', { state: 'attached', timeout: 15000 });
     await page.waitForLoadState('networkidle').catch(() => {});
     await page.waitForTimeout(500);
     const cls = await page.evaluate(() => window.__smoke.cls);
     const slut = new URL(page.url()).pathname.replace(/^\//, '');
-    return { cls, fejl, slut, rækker: await page.locator('.db-row[data-listing-id]').count() };
+    return { cls, fejl, slut, skift: await page.evaluate(() => (window.__skift || []).join(' | ')), rækker: await page.locator('.db-row[data-listing-id]').count() };
   } finally { await ctx.close(); }
 }
 
@@ -159,4 +166,76 @@ test('V6 konto: begge sider har db-venter, skelet og aria-busy; js og css har de
   assert.match(css, /\.db-page\{ min-height: 100vh; min-height: 100dvh; \}/);
   assert.match(css, /#dash-subtitle\{ min-height: calc\(2 \* 1\.45em\); \}/);
   assert.match(css, /prefers-reduced-motion: reduce\)\{ \.db-skel > i\{ animation: none; \} \}/);
+});
+
+/* ---------- opret-annonce og login (opgave 4) ---------- */
+
+const REDIGER = `opret-annonce.html?rediger=${require('../scripts/fixtures/v6-konto-lager').ID(1)}`;
+
+test('V6 opret-annonce: CLS < 0,02 indlogget — ny annonce og rediger, ved 375/768/1440/1920 (lys) og 768/1440 (mørk)', { timeout: 120000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const [bredde, tema] of [[375, 'lys'], [768, 'lys'], [1440, 'lys'], [1920, 'lys'], [768, 'moerk'], [1440, 'moerk']]){
+    for (const side of ['opret-annonce.html', REDIGER]){
+      const m = await maalCls(side, bredde, { tema });
+      assert.strictEqual(m.slut, 'opret-annonce.html', `${side}: endte på ${m.slut}`);
+      assert.deepStrictEqual(m.fejl, [], side);
+      assert.ok(m.cls < GRAENSE, `${side.slice(0, 40)} ved ${bredde} ${tema}: CLS ${m.cls.toFixed(4)} — ${m.skift}`);
+    }
+  }
+});
+
+test('V6 opret-annonce: forhåndsvisningen i sidekolonnen (>= 1024 px) har sin endelige højde fra første billede', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const bredde of [1024, 1440]){
+    const bak = lavKontoBackend({});
+    const ctx = await browser.newContext({ viewport: { width: bredde, height: 900 } });
+    await bak.installer(ctx, { tema: 'light' });
+    const page = await ctx.newPage();
+    try {
+      await page.goto(`http://127.0.0.1:${port}/opret-annonce.html`, { waitUntil: 'networkidle' });
+      await page.waitForSelector('body[data-op-klar]', { timeout: 10000 });
+      const h = await page.evaluate(() => ({ kort: document.getElementById('op-live-card').getBoundingClientRect().height, min: parseFloat(getComputedStyle(document.getElementById('op-live-card')).minHeight) }));
+      assert.ok(h.min >= h.kort - 0.5, `${bredde}: reserveret ${h.min} px < endelig højde ${h.kort} px (sidekolonnen under kortet vil hoppe)`);
+    } finally { await ctx.close(); }
+  }
+});
+
+test('V6 opret-annonce: ?rediger= sætter hero-overskrift og -undertekst før første await (ingen ombrydning efter hentning)', () => {
+  const js = fs.readFileSync(path.join(ROD, 'js/opret-annonce.js'), 'utf8');
+  const i = js.indexOf("document.addEventListener('DOMContentLoaded', async () => {");
+  assert.ok(i > 0);
+  const krop = js.slice(i, i + 200);
+  assert.ok(krop.indexOf('saetRedigerHero();') > 0 && krop.indexOf('saetRedigerHero();') < krop.indexOf('await backendReady()'));
+  assert.match(js, /lead\.textContent = REDIGER_LEAD \+ \(editingStatus === 'hidden' \? REDIGER_PAUSE : ''\)/);
+});
+
+test('V6 login: CLS < 0,02 udlogget (også med ?redirect=) ved 375/768/1440 lys og 768 mørk', { timeout: 90000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const [bredde, tema] of [[375, 'lys'], [768, 'lys'], [1440, 'lys'], [768, 'moerk']]){
+    for (const side of ['login.html', 'login.html?redirect=opret-annonce.html', 'login.html?redirect=mine-annoncer.html']){
+      const bak = lavKontoBackend({ loggetInd: false });
+      const ctx = await browser.newContext({ viewport: { width: bredde, height: HOEJDE[bredde] }, colorScheme: tema === 'moerk' ? 'dark' : 'light' });
+      await ctx.addInitScript(sb.initScript, { tema: tema === 'moerk' ? 'dark' : 'light' });
+      await bak.installer(ctx, { tema: tema === 'moerk' ? 'dark' : 'light' });
+      const page = await ctx.newPage();
+      try {
+        await page.goto(`http://127.0.0.1:${port}/${side}`, { waitUntil: 'load' });
+        await page.waitForLoadState('networkidle').catch(() => {});
+        await page.waitForTimeout(500);
+        const cls = await page.evaluate(() => window.__smoke.cls);
+        assert.ok(new URL(page.url()).pathname.endsWith('login.html'), `${side}: udlogget skal blive på login`);
+        assert.ok(cls < GRAENSE, `${side} ved ${bredde} ${tema}: CLS ${cls.toFixed(4)}`);
+      } finally { await ctx.close(); }
+    }
+  }
+});
+
+test('V6 opret-annonce: den indlejrede rediger-hero (#op-rediger-hero) bruger samme tekst som js/opret-annonce.js', () => {
+  const html = fs.readFileSync(path.join(ROD, 'opret-annonce.html'), 'utf8');
+  const js = fs.readFileSync(path.join(ROD, 'js/opret-annonce.js'), 'utf8');
+  const s = /<script id="op-rediger-hero">[\s\S]*?textContent="Rediger annonce";document\.querySelector\("\.op-hero-lead"\)\.textContent="([^"]+)"/.exec(html);
+  assert.ok(s, 'script mangler');
+  assert.strictEqual(s[1], /const REDIGER_LEAD = '([^']+)'/.exec(js)[1]);
+  assert.ok(html.indexOf('id="op-rediger-hero"') > html.indexOf('class="op-hero-lead"'), 'efter lead-elementet, før første maling');
+  assert.match(html, /<h1 id="op-h1">Opret annonce<\/h1>/, 'den statiske h1 er uændret (SEO/udlogget)');
 });

@@ -26,7 +26,7 @@ const http = require('http');
 const { spawnSync } = require('child_process');
 const { eksterneRaekker, restSvar, PNG_1X1, uuid } = require('./smoke-fixtures');
 const { lagerRaekker } = require('./fixtures/v5-soegning-lager');
-const { lavKontoBackend } = require('./fixtures/v6-konto-lager');
+const { lavKontoBackend, ID: KONTO_ID } = require('./fixtures/v6-konto-lager');
 
 const REPO = path.join(__dirname, '..');
 
@@ -70,6 +70,7 @@ const LOGIN_JOBS = [
   ...['oversigt', 'mine', 'favoritter', 'agenter', 'konto'].map(f => ({ side: 'mine-annoncer.html', query: `?tab=${f}` })),
   ...['oversigt', 'annoncer', 'krav'].map(f => ({ side: 'dashboard.html', query: `?tab=${f}`, forhandler: true })),
   { side: 'opret-annonce.html', query: '' },
+  { side: 'opret-annonce.html', query: `?rediger=${KONTO_ID(1)}` },
   { side: 'login.html', query: '', login: 'ud' },
   { side: 'login.html', query: '?redirect=opret-annonce.html', login: 'ud' },
   { side: 'login.html', query: '', login: 'ind', slut: 'mine-annoncer.html' },
