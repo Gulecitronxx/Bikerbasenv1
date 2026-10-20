@@ -322,3 +322,28 @@ test('hver manifest-post (logo) peger på et registreret mærke, og alle manifes
     for (const a of m.aliaser || []) assert.equal(R.normalise(a), p.navn, `alias "${a}" fra manifestet ender ikke på ${p.navn}`);
   }
 });
+
+/* ---------- 7. Logo-manifest og hurtigsøgning følger registret (QA G2/G3) ---------- */
+
+test('logo-manifestet er i trit med registret: hvert mærke har en post, og hvert registeralias slås op til mærkets logo-nøgle', () => {
+  const { synkRegister } = require('./brand-logos-gen.js');
+  const manifest = JSON.parse(laes('img/brands/manifest.json'));
+  const s = synkRegister(manifest, R);
+  assert.equal(s.aendret, false, 'manifestet er ude af trit med registret — kør node scripts/brand-logos-gen.js');
+  for (const p of R.alle()) {
+    const key = p.logo || p.slug;
+    assert.ok(manifest.maerker.some(m => m.slug === key), `${p.navn}: ingen manifestpost ${key}`);
+    for (const n of [p.navn, ...p.aliaser]) assert.equal(BrandLogos.normaliser(n), key, `BrandLogos.normaliser("${n}") ≠ ${key}`);
+  }
+});
+
+test('maerker.html: hurtigsøgningen (data-mk-soeg) har alle registeraliasser for mærker med række', () => {
+  const html = laes('maerker.html');
+  const raekker = [...html.matchAll(/<li[^>]*data-mk-soeg="([^"]*)"/g)].map(m => m[1].split('|').map(R.noegle));
+  assert.ok(raekker.length >= 25);
+  for (const r of raekker) {
+    const p = R.find(r[0]) || R.alle().find(q => r.includes(R.noegle(q.navn)));
+    assert.ok(p, `række uden registermærke: ${r.join('|')}`);
+    for (const a of p.aliaser) assert.ok(r.includes(R.noegle(a)), `${p.navn}: aliaset "${a}" mangler i data-mk-soeg`);
+  }
+});
