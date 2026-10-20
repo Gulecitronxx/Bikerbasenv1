@@ -1235,7 +1235,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
   .filters-overlay.open .filters-scrim{ opacity:1; }
   .filters-panel{
     position:absolute; bottom:0; left:0; right:0; top:auto;
-    max-height:88vh; border-radius: 20px 20px 0 0; box-shadow: var(--shadow-lg);
+    max-height:88vh; max-height:88dvh; border-radius: 20px 20px 0 0; box-shadow: var(--shadow-lg);
     transform: translateY(100%); transition: transform .25s var(--ease-out);
   }
   .filters-overlay.open .filters-panel{ transform: translateY(0); }
@@ -1506,7 +1506,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 
 /* filter drawer (mobile) reuses mobile-drawer but panel from left/bottom */
 .filter-drawer-panel{
-  position:absolute; bottom:0; left:0; right:0; max-height:88vh; width:100%;
+  position:absolute; bottom:0; left:0; right:0; max-height:88vh; max-height:88dvh; width:100%;
   background:var(--color-surface); border-radius: 20px 20px 0 0; box-shadow: var(--shadow-lg);
   padding: var(--space-4); display:flex; flex-direction:column;
   transform: translateY(100%); transition: transform .25s var(--ease-out);
@@ -1601,7 +1601,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 /* ============ Modal ============ */
 .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:300; display:none; align-items:center; justify-content:center; padding: var(--space-4); }
 .modal-overlay.open{ display:flex; }
-.modal-box{ background: var(--color-surface); border-radius: var(--radius-lg); max-width:480px; width:100%; padding: var(--space-5); box-shadow: var(--shadow-lg); max-height:88vh; overflow-y:auto; }
+.modal-box{ background: var(--color-surface); border-radius: var(--radius-lg); max-width:480px; width:100%; padding: var(--space-5); box-shadow: var(--shadow-lg); max-height:88vh; max-height:88dvh; overflow-y:auto; }
 .modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-4); }
 .modal-head h2{ font-size:19px; }
 
