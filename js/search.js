@@ -414,9 +414,9 @@ function populateFilterUI(){
   /* Søgefeltet "Søg mærke…" finder også på registrets aliaser ("harley", "cf moto", "bmw motorrad"). */
   const aliasTekst = b => ((BrandRegistry.find(b) || {}).aliaser || []).join(' ').toLowerCase();
   /* Uden godkendt logo får et mærke monogram i den faste kolonne; "uoplyst" er ikke et mærke og får en tom kolonne
-     (samme bredde, så navnene flugter). Søgestrengen rummer både det viste navn og lagernavnet. */
+     (samme bredde, så navnene flugter). Søgestrengen er det viste navn; aliaserne ligger i data-brand-alias. */
   const brandRows = maerker.map(m =>
-    `<label class="checkbox-row" data-brand-row="${escapeHTML((m.visning + ' ' + m.navn).toLowerCase())}" data-brand-alias="${escapeHTML(aliasTekst(m.navn))}"><input type="checkbox" data-brand="${escapeHTML(m.navn)}">${m.uoplyst ? '<span class="bl-spalte bl-spalte--sm" aria-hidden="true"></span>' : maerkeLogo(m.navn)}<span>${escapeHTML(m.visning)}</span>${FACET_SLOT}</label>`).join('');
+    `<label class="checkbox-row" data-brand-row="${escapeHTML(m.visning.toLowerCase())}" data-brand-alias="${escapeHTML(aliasTekst(m.navn))}"><input type="checkbox" data-brand="${escapeHTML(m.navn)}">${m.uoplyst ? '<span class="bl-spalte bl-spalte--sm" aria-hidden="true"></span>' : maerkeLogo(m.navn)}<span>${escapeHTML(m.visning)}</span>${FACET_SLOT}</label>`).join('');
   document.getElementById('filter-brands').innerHTML = `
     <div class="filter-search"><input type="text" id="brand-search" class="input" placeholder="Søg mærke…" autocomplete="off" aria-label="Søg i mærker"></div>
     <div class="checkbox-list" id="brand-list">${brandRows}
@@ -1912,7 +1912,7 @@ function soegeoverskrift(state, listings){
      til salg i Danmark i Syddanmark", i både H1 og title. Uden region og med
      mærke står der ikke "i Danmark" (det gjorde der heller ikke før). */
   const region = state.regions.length === 1 ? ` i ${state.regions[0]}` : '';
-  if (state.brands.length) return `${state.brands.slice(0,3).map(Filtrering.maerkeVisning).join(', ')} til salg${region}`;
+  if (state.brands.length) return `${state.brands.slice(0,3).map(b => (typeof BrandRegistry !== 'undefined' ? BrandRegistry.visNavn(b) : b)).join(', ')} til salg${region}`;
   return `Motorcykler til salg${region || ' i Danmark'}`;
 }
 

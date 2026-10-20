@@ -619,16 +619,11 @@ body.srp:has(#data-afbrud) main > .container:has(> section.section > .section-he
 }
 
 /* Infobåndets reserverede højde (CLS) er målt igen, nu uden sorteringsnoten (js/band-måling i docs/review/gauntlet/v4/soegning.md):
-   76 px < 360, 56 px 360-639, 58 px 640-699, 38 px (to linjer: kilder / alder) fra 700, og én linje fra 1360 px, hvor kilderne og
-   alderen kan stå ved siden af hinanden. */
+   76 px < 360, 56 px 360-639, 58 px 640-699, 38 px (to linjer: kilder / alder) fra 700 px. Én linje ved siden af hinanden fungerer ikke: alderslinjen bliver 493 px bred, når
+   lageret er over 14 dage gammelt, og så ombrydes den og skubber gitteret (prøvet og målt: CLS 0,117 ved 1440 mørk). */
 @media (min-width:560px){ .so-infoband{ min-height:56px; } }
 @media (min-width:640px){ .so-infoband{ min-height:58px; } }
 @media (min-width:700px){ .so-infoband{ min-height:38px; } }
-@media (min-width:1360px){
-  .so-infoband .results-mix{ flex:0 1 auto; }
-  .so-infoband .so-frisk:not(:empty)::before{ content:"·"; margin:0 8px; }
-  .so-infoband{ min-height:20px; }
-}
 
 /* 4) Micro-interactions og loading state (V4). Diskrete: kun opacitet, baggrund og små skaleringer; alt slukkes af den globale
    prefers-reduced-motion-regel i styles.css (varighed ~0), og shimmeren står stille uden animation. */
@@ -658,14 +653,12 @@ html:not(.so-klar) .srp #results-grid[style*="hidden"] > .card > *{ visibility:h
 /* Facettallet skifter værdi uden at hoppe: tabulære tal */
 .srp .facet-n{ font-variant-numeric: tabular-nums; }
 
-/* V4: fejlbanneret (503/tomt lager) på telefon: titlen blev klippet til "Lageret kunne ikke hen…". På søgesiden må den stå på to linjer
-   (banneret er et fast overlay nederst og flytter intet); højden følger indholdet op til to linjer + knapper. */
+/* V4: fejlbanneret (503/tomt lager) på telefon: titlen blev klippet til "Lageret kunne ikke hen…". Banneret er stadig højst 56 px (to
+   linjer à 16 px + polstring), så det dækker intet — men titlen må stå på to linjer i stedet for at klippes. */
 @media (max-width:1023px){
-  body.srp .data-afbrud{ max-height:none; align-items:center; }
-  body.srp .data-afbrud-kort{ white-space:normal; overflow:visible; text-overflow:clip; line-height:1.25; display:block; overflow-wrap:anywhere; }
+  body.srp .data-afbrud-kort{ white-space:normal; overflow:visible; text-overflow:clip; font-size:13.5px; line-height:1.2; overflow-wrap:anywhere; }
 }
-@media (max-width:420px){
-  body.srp .data-afbrud{ flex-wrap:wrap; }
-  body.srp .data-afbrud-kort{ flex:1 1 100%; }
-  body.srp .data-afbrud-knapper{ flex:1 1 100%; justify-content:flex-end; }
-}
+
+/* V4: på de smalleste telefoner (≤380 px) stod resultathovedet med 44 px reserveret til en kildelinje, der for længst bor i infobåndet:
+   20 px luft mellem "N motorcykler" og Sortér. Samme højde som 381-620 px (én linje). */
+@media (max-width:380px){ body.srp .results-headline{ min-height:24px; } }

@@ -291,3 +291,37 @@ test('registret: Zero/Zero Motorcycles og CFMOTO/CFMoto er ét mærke i listen, 
   assert.equal(FM.maerkeVisning('Zero Motorcycles'), 'Zero');
   assert.equal(FM.anvendFiltre(l, { q: 'zero motorcycles' }).length, 2);
 });
+
+/* ---------------------------------------------------------------- QA G1: ALLE registeraliasser (BrandRegistry.alle()) */
+test('registret: navn, slug, store/små bogstaver og HVERT alias for HVERT registermærke finder mærket i fritekst (ingen undtagelser)', () => {
+  const R = require(path.join(REPO, 'js', 'brands-registry.js'));
+  const alle = R.alle();
+  assert.ok(alle.length >= 60, `registret har ${alle.length} mærker`);
+  const fejl = [];
+  let antalAliasser = 0;
+  for (const p of alle){
+    const varianter = new Set([p.navn, p.navn.toUpperCase(), p.navn.toLowerCase(), p.slug, p.slug.replace(/-/g, ' '), ...p.aliaser,
+      ...p.aliaser.map(a => a.toUpperCase()), ...p.aliaser.map(a => a.replace(/[\s-]+/g, ''))]);
+    antalAliasser += p.aliaser.length;
+    for (const v of varianter){
+      const liste = [{ brand: p.navn, model: 'Testmodel 700' }, { brand: 'Honda', model: 'Agility 50' }, { brand: 'Kymco', model: 'Agility 50' }].filter((l, i) => i === 0 || l.brand !== p.navn);
+      const r = FM.anvendFiltre(liste, { q: v });
+      const mine = r.filter(l => l.brand === p.navn).length;
+      if (mine !== 1) fejl.push(`${p.navn}: "${v}" finder ikke mærket`);
+      // kun registrets eget mærke må findes (aliasset "tm"/"hero" tilhører præcis ét mærke)
+      if (r.some(l => l.brand !== p.navn)) fejl.push(`${p.navn}: "${v}" finder også et andet mærke`);
+    }
+  }
+  assert.ok(antalAliasser >= 40, `kun ${antalAliasser} aliasser testet`);
+  assert.deepEqual(fejl, []);
+});
+
+test('registret: alias + modelord ("bmw motorrad gs", "zero motorcycles sr f", "honda motor cb") = mærket OG modelordet', () => {
+  const l = [{ brand: 'BMW', model: 'R 1250 GS' }, { brand: 'BMW', model: 'K 1600 GT' }, { brand: 'Zero', model: 'SR/F' }, { brand: 'Zero', model: 'DSR' },
+    { brand: 'Honda', model: 'CB 500' }, { brand: 'Honda', model: 'NX 500' }, { brand: 'Kymco', model: 'Gs 50' }];
+  const n = q => FM.anvendFiltre(l, { q }).map(x => `${x.brand} ${x.model}`);
+  assert.deepEqual(n('bmw motorrad gs'), ['BMW R 1250 GS']);
+  assert.deepEqual(n('zero motorcycles sr f'), ['Zero SR/F']);
+  assert.deepEqual(n('honda motor cb'), ['Honda CB 500']);
+  assert.deepEqual(n('cfmotor'), []);
+});
