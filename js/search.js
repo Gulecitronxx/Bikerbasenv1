@@ -1746,7 +1746,7 @@ function maalSoegning(antal){
    bliver skubbet ned igen, mens kortene males portionsvis (CLS). css/p-soegning.css skjuler dem med visibility indtil html.so-klar. */
 function bundKlar(){ document.documentElement.classList.add('so-klar'); }
 
-function render(){
+function render(){
   writeStateToURL();
   reflectStateToUI();
   applyViewMode();
