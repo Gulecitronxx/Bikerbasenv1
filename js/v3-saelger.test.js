@@ -145,3 +145,27 @@ test('mine annoncer: slet åbner en navngiven dialog (ikke window.confirm) — f
     assert.deepStrictEqual(s.fund, []);
   } finally { await s.ctx.close(); }
 });
+
+test('mine annoncer: "Ryd mine data i denne browser" bruger bekræftelsesdialogen (ikke window.confirm) — Escape annullerer, bekræft rydder og går til forsiden', { timeout: 60000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  const s = await aabn({ loggetInd: true, annoncer: [{ brand: 'Honda', model: 'CB 500' }] }, 'mine-annoncer.html?tab=konto');
+  try {
+    let nativ = 0; s.page.on('dialog', d => { nativ++; d.dismiss(); });
+    await s.page.waitForSelector('#delete-account-btn', { state: 'visible' });
+    await s.page.click('#delete-account-btn');
+    const d = s.page.locator('dialog.bb-bekraeft[open]');
+    await d.waitFor();
+    assert.match(await d.locator('h2').innerText(), /Ryd data i denne browser\?/);
+    assert.match(await d.locator('p').innerText(), /Din konto og dine annoncer i databasen bliver stående/);
+    assert.strictEqual(await d.locator('[data-bekraeft-ok]').innerText(), 'Ryd data i browseren');
+    assert.strictEqual(await s.page.evaluate(() => document.activeElement.hasAttribute('data-bekraeft-nej')), true, 'fokus på det sikre valg');
+    await s.page.keyboard.press('Escape');
+    await s.page.waitForFunction(() => !document.querySelector('dialog.bb-bekraeft'));
+    assert.match(s.page.url(), /mine-annoncer\.html/, 'Escape rydder ikke og forlader ikke siden');
+    await s.page.click('#delete-account-btn');
+    await s.page.locator('dialog.bb-bekraeft[open] [data-bekraeft-ok]').click();
+    await s.page.waitForURL(/index\.html/, { timeout: 8000 });
+    assert.strictEqual(nativ, 0, 'ingen native dialoger');
+    assert.deepStrictEqual(s.fund, []);
+  } finally { await s.ctx.close(); }
+});

@@ -1,0 +1,301 @@
+{
+ "version": 1,
+ "meta": {
+  "commit": "95df5046101d48a9fa6324f0645bbf852ba774f7",
+  "gren": "gauntlet/v4-qa",
+  "dato": "2026-10-19T19:10:48.241Z",
+  "data": "fixtures",
+  "antalAnnoncer": 46,
+  "beskrivelse": "annonce-id -> mærke som siden klassificerer det (Store.getAllListings, demoannoncer fraregnet), plus mærkesider og deres URL/canonical/noindex."
+ },
+ "annoncer": {
+  "00000000-0000-4000-8000-000000000901": "Kawasaki",
+  "00000000-0000-4000-8000-000000000902": "Honda",
+  "00000000-0000-4000-8000-000000000903": "Yamaha",
+  "00000000-0000-4000-8000-000000000001": "Honda",
+  "00000000-0000-4000-8000-000000000002": "Honda",
+  "00000000-0000-4000-8000-000000000003": "Honda",
+  "00000000-0000-4000-8000-000000000004": "Honda",
+  "00000000-0000-4000-8000-000000000005": "Honda",
+  "00000000-0000-4000-8000-000000000006": "Honda",
+  "00000000-0000-4000-8000-000000000007": "Honda",
+  "00000000-0000-4000-8000-000000000008": "Honda",
+  "00000000-0000-4000-8000-000000000009": "Honda",
+  "00000000-0000-4000-8000-000000000010": "Harley-Davidson",
+  "00000000-0000-4000-8000-000000000011": "Harley-Davidson",
+  "00000000-0000-4000-8000-000000000012": "Harley-Davidson",
+  "00000000-0000-4000-8000-000000000013": "Yamaha",
+  "00000000-0000-4000-8000-000000000014": "Yamaha",
+  "00000000-0000-4000-8000-000000000015": "Yamaha",
+  "00000000-0000-4000-8000-000000000016": "Yamaha",
+  "00000000-0000-4000-8000-000000000017": "Yamaha",
+  "00000000-0000-4000-8000-000000000018": "Kawasaki",
+  "00000000-0000-4000-8000-000000000019": "Kawasaki",
+  "00000000-0000-4000-8000-000000000020": "Kawasaki",
+  "00000000-0000-4000-8000-000000000021": "Kawasaki",
+  "00000000-0000-4000-8000-000000000022": "Suzuki",
+  "00000000-0000-4000-8000-000000000023": "Suzuki",
+  "00000000-0000-4000-8000-000000000024": "Suzuki",
+  "00000000-0000-4000-8000-000000000025": "BMW",
+  "00000000-0000-4000-8000-000000000026": "BMW",
+  "00000000-0000-4000-8000-000000000027": "BMW",
+  "00000000-0000-4000-8000-000000000028": "BMW",
+  "00000000-0000-4000-8000-000000000029": "Triumph",
+  "00000000-0000-4000-8000-000000000030": "Triumph",
+  "00000000-0000-4000-8000-000000000031": "Ducati",
+  "00000000-0000-4000-8000-000000000032": "Ducati",
+  "00000000-0000-4000-8000-000000000033": "KTM",
+  "00000000-0000-4000-8000-000000000034": "KTM",
+  "00000000-0000-4000-8000-000000000035": "Royal Enfield",
+  "00000000-0000-4000-8000-000000000036": "Vespa",
+  "00000000-0000-4000-8000-000000000037": "Piaggio",
+  "00000000-0000-4000-8000-000000000038": "Husqvarna",
+  "00000000-0000-4000-8000-000000000039": "Aprilia",
+  "00000000-0000-4000-8000-000000000040": "MV Agusta",
+  "00000000-0000-4000-8000-000000000041": "Moto Guzzi",
+  "00000000-0000-4000-8000-000000000042": "Lauge Jensen",
+  "00000000-0000-4000-8000-000000000043": "Indian"
+ },
+ "maerkeAntal": {
+  "Kawasaki": 5,
+  "Honda": 10,
+  "Yamaha": 6,
+  "Harley-Davidson": 3,
+  "Suzuki": 3,
+  "BMW": 4,
+  "Triumph": 2,
+  "Ducati": 2,
+  "KTM": 2,
+  "Royal Enfield": 1,
+  "Vespa": 1,
+  "Piaggio": 1,
+  "Husqvarna": 1,
+  "Aprilia": 1,
+  "MV Agusta": 1,
+  "Moto Guzzi": 1,
+  "Lauge Jensen": 1,
+  "Indian": 1
+ },
+ "sider": {
+  "maerke-aprilia.html": {
+   "brand": "Aprilia",
+   "canonical": "https://bikerbasen.dk/maerke-aprilia",
+   "noindex": false,
+   "statiskAntal": 7
+  },
+  "maerke-bach.html": {
+   "brand": "Bach",
+   "canonical": "https://bikerbasen.dk/maerke-bach",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-benelli.html": {
+   "brand": "Benelli",
+   "canonical": "https://bikerbasen.dk/maerke-benelli",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-bmw.html": {
+   "brand": "BMW",
+   "canonical": "https://bikerbasen.dk/maerke-bmw",
+   "noindex": false,
+   "statiskAntal": 47
+  },
+  "maerke-bsa.html": {
+   "brand": "BSA",
+   "canonical": "https://bikerbasen.dk/maerke-bsa",
+   "noindex": false,
+   "statiskAntal": 8
+  },
+  "maerke-buell.html": {
+   "brand": "Buell",
+   "canonical": "https://bikerbasen.dk/maerke-buell",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-cagiva.html": {
+   "brand": "Cagiva",
+   "canonical": "https://bikerbasen.dk/maerke-cagiva",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-cfmoto.html": {
+   "brand": "CFMoto",
+   "canonical": "https://bikerbasen.dk/maerke-cfmoto",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-ducati.html": {
+   "brand": "Ducati",
+   "canonical": "https://bikerbasen.dk/maerke-ducati",
+   "noindex": false,
+   "statiskAntal": 5
+  },
+  "maerke-fantic.html": {
+   "brand": "Fantic",
+   "canonical": "https://bikerbasen.dk/maerke-fantic",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-fb-mondial.html": {
+   "brand": "FB Mondial",
+   "canonical": "https://bikerbasen.dk/maerke-fb-mondial",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-harley-davidson.html": {
+   "brand": "Harley-Davidson",
+   "canonical": "https://bikerbasen.dk/maerke-harley-davidson",
+   "noindex": false,
+   "statiskAntal": 83
+  },
+  "maerke-honda.html": {
+   "brand": "Honda",
+   "canonical": "https://bikerbasen.dk/maerke-honda",
+   "noindex": false,
+   "statiskAntal": 307
+  },
+  "maerke-husqvarna.html": {
+   "brand": "Husqvarna",
+   "canonical": "https://bikerbasen.dk/maerke-husqvarna",
+   "noindex": true,
+   "statiskAntal": 2
+  },
+  "maerke-hyosung.html": {
+   "brand": "Hyosung",
+   "canonical": "https://bikerbasen.dk/maerke-hyosung",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-indian.html": {
+   "brand": "Indian",
+   "canonical": "https://bikerbasen.dk/maerke-indian",
+   "noindex": true,
+   "statiskAntal": 2
+  },
+  "maerke-kawasaki.html": {
+   "brand": "Kawasaki",
+   "canonical": "https://bikerbasen.dk/maerke-kawasaki",
+   "noindex": false,
+   "statiskAntal": 43
+  },
+  "maerke-ktm.html": {
+   "brand": "KTM",
+   "canonical": "https://bikerbasen.dk/maerke-ktm",
+   "noindex": false,
+   "statiskAntal": 14
+  },
+  "maerke-kymco.html": {
+   "brand": "Kymco",
+   "canonical": "https://bikerbasen.dk/maerke-kymco",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-lauge-jensen.html": {
+   "brand": "Lauge Jensen",
+   "canonical": "https://bikerbasen.dk/maerke-lauge-jensen",
+   "noindex": true,
+   "statiskAntal": 2
+  },
+  "maerke-moto-guzzi.html": {
+   "brand": "Moto Guzzi",
+   "canonical": "https://bikerbasen.dk/maerke-moto-guzzi",
+   "noindex": true,
+   "statiskAntal": 3
+  },
+  "maerke-mv-agusta.html": {
+   "brand": "MV Agusta",
+   "canonical": "https://bikerbasen.dk/maerke-mv-agusta",
+   "noindex": true,
+   "statiskAntal": 2
+  },
+  "maerke-rewaco.html": {
+   "brand": "Rewaco",
+   "canonical": "https://bikerbasen.dk/maerke-rewaco",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-royal-enfield.html": {
+   "brand": "Royal Enfield",
+   "canonical": "https://bikerbasen.dk/maerke-royal-enfield",
+   "noindex": false,
+   "statiskAntal": 14
+  },
+  "maerke-suzuki.html": {
+   "brand": "Suzuki",
+   "canonical": "https://bikerbasen.dk/maerke-suzuki",
+   "noindex": false,
+   "statiskAntal": 63
+  },
+  "maerke-sym.html": {
+   "brand": "SYM",
+   "canonical": "https://bikerbasen.dk/maerke-sym",
+   "noindex": true,
+   "statiskAntal": 1
+  },
+  "maerke-triumph.html": {
+   "brand": "Triumph",
+   "canonical": "https://bikerbasen.dk/maerke-triumph",
+   "noindex": false,
+   "statiskAntal": 35
+  },
+  "maerke-victory.html": {
+   "brand": "Victory",
+   "canonical": "https://bikerbasen.dk/maerke-victory",
+   "noindex": true,
+   "statiskAntal": 2
+  },
+  "maerke-yamaha.html": {
+   "brand": "Yamaha",
+   "canonical": "https://bikerbasen.dk/maerke-yamaha",
+   "noindex": false,
+   "statiskAntal": 68
+  }
+ },
+ "oversigt": [
+  "maerke-aprilia.html",
+  "maerke-bach.html",
+  "maerke-benelli.html",
+  "maerke-bmw.html",
+  "maerke-bsa.html",
+  "maerke-buell.html",
+  "maerke-cagiva.html",
+  "maerke-cfmoto.html",
+  "maerke-ducati.html",
+  "maerke-fantic.html",
+  "maerke-fb-mondial.html",
+  "maerke-harley-davidson.html",
+  "maerke-honda.html",
+  "maerke-husqvarna.html",
+  "maerke-hyosung.html",
+  "maerke-indian.html",
+  "maerke-kawasaki.html",
+  "maerke-ktm.html",
+  "maerke-kymco.html",
+  "maerke-lauge-jensen.html",
+  "maerke-moto-guzzi.html",
+  "maerke-mv-agusta.html",
+  "maerke-rewaco.html",
+  "maerke-royal-enfield.html",
+  "maerke-suzuki.html",
+  "maerke-sym.html",
+  "maerke-triumph.html",
+  "maerke-victory.html",
+  "maerke-yamaha.html"
+ ],
+ "sitemap": [
+  "https://bikerbasen.dk/maerker",
+  "https://bikerbasen.dk/maerke-aprilia",
+  "https://bikerbasen.dk/maerke-bmw",
+  "https://bikerbasen.dk/maerke-bsa",
+  "https://bikerbasen.dk/maerke-ducati",
+  "https://bikerbasen.dk/maerke-harley-davidson",
+  "https://bikerbasen.dk/maerke-honda",
+  "https://bikerbasen.dk/maerke-kawasaki",
+  "https://bikerbasen.dk/maerke-ktm",
+  "https://bikerbasen.dk/maerke-royal-enfield",
+  "https://bikerbasen.dk/maerke-suzuki",
+  "https://bikerbasen.dk/maerke-triumph",
+  "https://bikerbasen.dk/maerke-yamaha"
+ ]
+}
