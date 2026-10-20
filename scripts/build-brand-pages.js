@@ -1130,7 +1130,7 @@ function treKolonnerHTML(brand, fakta, items){
     kolonner.push(`<section class="mk-col" aria-labelledby="mk-reg-h">
         <div class="mk-col-head"><h2 id="mk-reg-h">Find ${b} i din region</h2></div>
         <ul class="mk-mini mk-mini-reg">
-          ${fakta.regioner.map(x => `<li><a href="${sogHref(brand, x.f)}"><strong>${esc(x.r)}</strong><span>${tal(x.n)}</span></a></li>`).join('\n          ')}
+          ${fakta.regioner.map(x => `<li><a href="${sogHref(brand, x.f)}" style="--andel:${Math.max(4, Math.round(100 * x.n / fakta.regioner[0].n))}%"><strong>${esc(x.r)}</strong><span>${tal(x.n)}</span></a></li>`).join('\n          ')}
         </ul>
         ${fakta.udenRegion ? `<p class="mk-col-note">${antalTekst(fakta.udenRegion, 'annonce oplyser', 'annoncer oplyser')} ikke landsdel.</p>` : ''}
       </section>`);

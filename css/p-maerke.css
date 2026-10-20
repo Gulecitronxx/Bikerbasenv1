@@ -861,3 +861,114 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 /* V3: styles.css' `main ul:not([class]) > li > a:only-child{display:inline-block}` har højere specificitet end .mk-az-gruppe a og slog
    rækken sammen (navn og antal klistret sammen, kort understregning). ID-selektoren gør rækken til en flex-række igen. */
 #mk-az-liste .mk-az-gruppe a{ display:flex; }
+/* ============ V4 polish (Agent 4): mærke-, oversigts- og facetsiders finish ============ */
+
+/* V4-1 "Sådan virker": nummer + ikon på ÉN række over teksten, så trinteksten får hele kolonnens bredde (før: 3 kolonner -> 110 px tekst, 6 linjer). */
+@media (min-width:1000px){
+  .mk-saadan .saadan-trin-punkt{ grid-template-columns: auto minmax(0,1fr); column-gap:10px; row-gap:8px; }
+  .mk-saadan .saadan-nr{ grid-column:1; grid-row:1; align-self:center; }
+  .mk-saadan .saadan-ico{ grid-column:2; grid-row:1; width:30px; height:30px; justify-self:start; align-self:center; }
+  .mk-saadan .saadan-ico svg{ width:30px; height:30px; }
+  .mk-saadan .saadan-trin-punkt > div{ grid-column:1 / -1; grid-row:2; }
+  .mk-saadan .saadan-trin-punkt:not(:last-child)::after{ top:8px; right:-32px; }
+}
+
+/* V4-2 Regionskolonnen: rækker med andel-bjælke (beregnet af annoncetal; bredden er n / største n) i stedet for tre små fliser med 170 px tomt i bunden.
+   Navnet brydes aldrig midt i ordet ("Syddanmar|k" ved 1920). */
+.mk-cols .mk-mini-reg{ grid-template-columns: minmax(0,1fr); gap:6px; grid-auto-rows:minmax(48px, auto); align-content:start; }
+.mk-cols .mk-mini-reg a{
+  position:relative; flex-direction:row; justify-content:space-between; align-items:center; text-align:left; gap: var(--space-3);
+  min-height:48px; padding:8px 12px 13px; border:1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg);
+}
+.mk-cols .mk-mini-reg li:last-child a{ border-bottom:1px solid var(--color-border); }
+.mk-cols .mk-mini-reg strong{ font-size:14.5px; white-space:nowrap; overflow-wrap:normal; }
+.mk-cols .mk-mini-reg span{ font-size:14px; font-weight:700; color: var(--color-fg); font-variant-numeric: tabular-nums; }
+.mk-cols .mk-mini-reg a::after{
+  content:""; position:absolute; left:12px; right:12px; bottom:6px; height:3px; border-radius:3px;
+  background: linear-gradient(90deg, var(--color-primary) var(--andel, 0%), var(--color-border) var(--andel, 0%));
+}
+@media (min-width:1100px){
+  .mk-cols .mk-mini-reg{ flex:1 1 auto; }
+  .mk-cols .mk-mini-reg:has(> li:nth-child(4)){ grid-auto-rows:minmax(48px, 1fr); align-content:stretch; }
+}
+/* V4-3 Kørekortkolonnen: linkene følger tallene (ikke skubbet til bunden med et hul imellem); noten står nederst som i de to andre kolonner. */
+@media (min-width:1100px){
+  .mk-cols .mk-links{ margin-top: var(--space-4); padding-top:0; }
+  .mk-cols .mk-mini-kk a{ min-height:72px; }
+  .mk-cols .mk-links a{ min-height:46px; }
+}
+
+/* V4-4 "Mere om udvalget": et stille foldelink med pil (ikke et enligt orange understreget link midt på siden). */
+.mk-intro-mere{ margin: var(--space-3) 0 0; }
+.mk-intro-mere > summary{
+  display:inline-flex; align-items:center; gap:6px; list-style:none; cursor:pointer;
+  font-size:14px; font-weight:600; color: var(--color-fg-muted); text-decoration:none; padding:0 2px;
+}
+.mk-intro-mere > summary::-webkit-details-marker{ display:none; }
+.mk-intro-mere > summary::after{
+  content:""; width:7px; height:7px; border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px); transition: transform .18s var(--ease-out);
+}
+.mk-intro-mere[open] > summary::after{ transform: rotate(-135deg) translateY(-2px); }
+.mk-intro-mere > summary:hover{ color: var(--color-primary-hover); }
+.mk-kf-vrap .mk-intro-mere summary{ color: var(--color-fg-muted); }
+.mk-kf-vrap .mk-intro-mere summary:hover{ color: var(--color-primary-hover); }
+@media (prefers-reduced-motion: reduce){ .mk-intro-mere > summary::after{ transition:none; } }
+
+/* V4-5 Bunden af annoncelisten: "Sælg din ..." og "Se alle ... i søgningen" på ÉN række (før: to enlige elementer under en enkelt kort). */
+@media (min-width:640px){
+  .mk-liste{ display:grid; grid-template-columns: minmax(0,1fr) auto; grid-auto-flow:dense; column-gap: var(--space-4); align-items:center; }
+  .mk-liste > *{ grid-column:1 / -1; }
+  .mk-liste > .brand-actions{ grid-column:1; margin-top: var(--space-3); }
+  .mk-liste > .mk-mere-lille{ grid-column:2; margin: var(--space-3) 0 0; text-align:right; }
+}
+.mk-mere-lille .mk-link{ white-space:nowrap; }
+
+/* ---- V4 maerker.html: ensartet logo-layout ---- */
+/* V4-M1 Topmærker-fliserne: to kolonner på mobil (var én 125 px høj flise pr. mærke = 1.100 px), fire kolonner ved 7-8 mærker (var 6 + 2 forladte). */
+.mk-brandtiles{ grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--space-3); }
+.mk-brandtile{ padding: var(--space-4); }
+.mk-brandtile-navn{ font-size:16px; padding-right:0; }
+.mk-brandtile-logo{ min-height:44px; margin-bottom: var(--space-2); }
+@media (min-width:640px){
+  .mk-brandtiles{ grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); }
+  .mk-brandtiles:has(> :nth-child(7)){ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .mk-brandtile{ padding: var(--space-4) var(--space-5); }
+  .mk-brandtile-navn{ font-size:18px; }
+}
+@media (min-width:860px){
+  .mk-brandtiles:has(> :nth-child(7)){ grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+.mk-brandtile:focus-visible{ outline:2px solid var(--color-primary); outline-offset:3px; }
+.mk-brandtile:active{ transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+/* V4-M2 A–Z: samme logokolonne på ALLE rækker — mærker uden godkendt logo får det samme neutrale monogram (før: tomt hul, så rækkerne
+   hoppede mellem "med logo" og "uden"). Navnet står på én linje. */
+.mk-az{ columns: 270px; }
+.mk-az-logo .bl--mono{ display:inline-flex; }
+.mk-az-logo .bl-mono{
+  background: var(--color-surface-2); color: var(--color-fg-muted); box-shadow: inset 0 0 0 1px var(--color-border);
+  font-size: calc(var(--bl-maxh) * .46);
+}
+.mk-az-navn > span:last-child{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mk-az-gruppe a:focus-visible{ outline:2px solid var(--color-primary); outline-offset:2px; border-radius:4px; }
+/* V4-M3 Mærkeheroens fallback-monogram (mærker uden logo) i samme formsprog som logosystemets .bl-mono: fyldt cirkel, ikke en orange ring. */
+.mk-mono{ border:0; background: rgba(255,255,255,.16); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); font-size:.5em; }
+/* V4-M4 A–Z-bogstavrækken: én rulbar række på mobil (var tre rækker med et enligt "Y"). */
+@media (max-width:639px){
+  .mk-bogstaver{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; gap:4px; margin-inline: calc(-1 * var(--space-4)); padding-inline: var(--space-4); scroll-padding-inline: var(--space-4); }
+  .mk-bogstaver::-webkit-scrollbar{ display:none; }
+  .mk-bogstaver a{ flex:none; scroll-snap-align:start; }
+}
+.mk-az-logo .bl-mono{ font-size: calc(var(--bl-maxh) * .52); }
+/* V4-M5 "Flere mærker": historiske mærker er afdæmpet (stiplet kant) i forhold til aktuelle, så grupperne kan skelnes uden farve alene. */
+.mk-flere-hist li{ border-style:dashed; background:transparent; }
+.mk-flere-sektion .mk-flere{ margin-bottom: var(--space-2); }
+/* V4-M6 Smalle skærme: en ulige sidste typeflise fylder rækken (før: enlig flise med et hul ved siden af); modelfliserne står tre og tre
+   mellem 560 og 1099 px (før: 5 + 1 enlig). */
+@media (max-width:639px){
+  .mk-tiles > :last-child:nth-child(odd){ grid-column:1 / -1; }
+  .mk-tiles > :last-child:nth-child(odd) .tile{ aspect-ratio:auto; height:84px; }
+}
+@media (min-width:560px) and (max-width:1099px){
+  .mk-col .mk-mini:not(.mk-mini-reg):not(.mk-mini-kk){ grid-template-columns: repeat(3, minmax(0,1fr)); }
+}

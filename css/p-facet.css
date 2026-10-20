@@ -733,3 +733,30 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 @media (max-width:640px){
   .fa-intro-l3{ min-height:65.25px; } .fa-intro-l4{ min-height:87px; } .fa-intro-l5{ min-height:108.75px; } .fa-intro-l6{ min-height:130.5px; }
 }
+/* ============ V4 polish (Agent 4): type-, kørekort-, region- og modelsider ============ */
+
+/* V4-F1 Søgekortets titel stod klistret til første feltetiket på kørekortsiderne (4 px). */
+.fa-koerekort .fa-soeg-titel{ margin-bottom: var(--space-2); }
+
+/* V4-F2 Kort uden annoncefoto: "Typefoto (illustration)" og teksten stod oven i hinanden på kort med "Forhandler"-mærke
+   (styles.css lægger teksten i bunden, når der er mærker). Teksten står nu midt i fladen, med luft til etiketten. */
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom,
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .card-media:has(.card-badges) .foto-tom{
+  justify-content:center; padding: 30px 52px 30px 12px;
+}
+:is(.fa-kortraekke, .fa-flere .listings-grid, .mk-featured-kort, #brand-listings) .card-rich .foto-tom-titel{ font-size:12.5px; }
+
+/* V4-F3 "Mere om udvalget": stille foldelink med pil i stedet for et enligt understreget link. */
+.fa-mere-under{ margin: var(--space-3) 0 0; }
+.fa-mere-under > summary{
+  display:inline-flex; align-items:center; gap:6px; list-style:none; cursor:pointer;
+  font-size:14px; font-weight:600; color: var(--color-fg-muted); text-decoration:none; padding:0 2px;
+}
+.fa-mere-under > summary::-webkit-details-marker{ display:none; }
+.fa-mere-under > summary::after{
+  content:""; width:7px; height:7px; border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px); transition: transform .18s var(--ease-out);
+}
+.fa-mere-under[open] > summary::after{ transform: rotate(-135deg) translateY(-2px); }
+.fa-mere-under > summary:hover{ color: var(--color-primary-hover); }
+@media (prefers-reduced-motion: reduce){ .fa-mere-under > summary::after{ transition:none; } }
