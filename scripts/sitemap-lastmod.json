@@ -4,7 +4,7 @@
   "brandUrls": 23,
   "egne": 2,
   "eksterne": 718,
-  "maerkesider": 29,
+  "maerkesider": 30,
   "efterFacetUrls": 62,
   "facetSider": 39,
   "perKilde": {
@@ -20,12 +20,12 @@
    "d": "2026-10-17"
   },
   "budget-under-30000": {
-   "h": "0a3815cb22f2",
-   "d": "2026-10-17"
+   "h": "702beafaff12",
+   "d": "2026-10-20"
   },
   "budget-under-50000": {
-   "h": "0ad545681ed7",
-   "d": "2026-10-17"
+   "h": "984030a7427e",
+   "d": "2026-10-20"
   },
   "budget-under-75000": {
    "h": "ba52280d83d4",
@@ -116,8 +116,8 @@
    "d": "2026-10-17"
   },
   "maerker": {
-   "h": "5d5d4efe38c8",
-   "d": "2026-10-18"
+   "h": "0696faf767ac",
+   "d": "2026-10-20"
   },
   "mc-bmw-touring": {
    "h": "201bc9f31852",
