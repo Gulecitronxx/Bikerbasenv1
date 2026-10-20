@@ -146,7 +146,7 @@ test('"Kopiér link": kvittering på knappen ("Link kopieret" + hak-farve) og ge
   assert.doesNotMatch(r.klasseEfter, /an-kopieret/);
 });
 
-test('favorit på egen annonce: popper og skifter tekst + aria-pressed; hovedhjertet findes ikke på eksterne', { timeout: 60000 }, async t => {
+test('favorit på egen annonce: popper og skifter tekst + aria-pressed; hovedhjertet på eksterne er kun-lokalt (V5, D-008 revideret)', { timeout: 60000 }, async t => {
   if (!H) return t.skip('Playwright mangler');
   const e = await side(1440, EGEN, async p => {
     const f = p.locator('.an-fav');
@@ -155,8 +155,9 @@ test('favorit på egen annonce: popper og skifter tekst + aria-pressed; hovedhje
       anim: await p.evaluate(() => getComputedStyle(document.querySelector('.an-fav svg')).animationName) };
   });
   assert.ok(e.pop); assert.strictEqual(e.pressed, 'true'); assert.match(e.tekst, /Gemt som favorit/); assert.strictEqual(e.anim, 'an-pop');
-  const x = await side(1440, EKSTERN, p => p.locator('.an-fav').count());
-  assert.strictEqual(x, 0);
+  /* V5 (D-008 revideret): en indekseret annonce har nu også "Gem som favorit", men mærket som kun-lokal (gemmes aldrig i databasen) — se js/v5-favoritter.test.js. */
+  const x = await side(1440, EKSTERN, p => p.evaluate(() => { const b = document.querySelector('.an-fav'); return b ? { ext: b.getAttribute('data-fav-ext'), titel: b.title } : null; }));
+  assert.deepStrictEqual(x, { ext: '1', titel: 'Gemmes i denne browser' });
 });
 
 test('prefers-reduced-motion slukker overgange og popper-animationen', { timeout: 60000 }, async t => {
