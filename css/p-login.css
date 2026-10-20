@@ -11,7 +11,7 @@
    og formularen nedenunder hoppe, når den rigtige tekst kom ind. */
 #auth-subtitle{ min-height: 3.2em; }
 @media (min-width:520px){ #auth-subtitle{ min-height: 2.6em; } }
-.auth-wrap{ min-height: calc(100dvh - var(--header-h)); display:flex; align-items:center; justify-content:center; padding: var(--space-6) var(--space-4); }
+.auth-wrap{ min-height: calc(100vh - var(--header-h)); min-height: calc(100dvh - var(--header-h)); display:flex; align-items:center; justify-content:center; padding: var(--space-6) var(--space-4); }
 
 /* To-panel-login: brandpanel til venstre, formular til højre. Panelet er
    ren pynt og skjules på mobil, hvor formularen fylder hele bredden. */
@@ -77,7 +77,7 @@ html[data-lgmode="register"] .lg-only-login{ display:none; }
 .lg-main{
   position:relative; isolation:isolate;
   display:flex; flex-direction:column;
-  min-height: calc(100dvh - var(--header-h));
+  min-height: calc(100vh - var(--header-h)); min-height: calc(100dvh - var(--header-h));
   overflow:hidden; margin-bottom: calc(var(--space-9) * -1); /* footer har margin-top: space-9 */
   background: var(--color-dark);
 }

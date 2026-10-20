@@ -441,7 +441,7 @@
 .op-prev-fab svg{ width:18px; height:18px; }
 @media (max-width:1023px){ .op-prev-fab{ display:inline-flex; } }
 .op-sheet{
-  position:fixed; inset:auto 0 0 0; margin:0; width:100%; max-width:none; max-height:88dvh; overflow:auto;
+  position:fixed; inset:auto 0 0 0; margin:0; width:100%; max-width:none; max-height:88vh; max-height:88dvh; overflow:auto;
   border:0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: var(--space-4);
   background: var(--color-surface); color: var(--color-fg); box-shadow: var(--shadow-lg);
 }

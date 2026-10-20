@@ -192,7 +192,7 @@ body{
   color: var(--color-fg);
   line-height: 1.5;
   font-size: 16px;
-  min-height: 100dvh;
+  min-height: 100vh; min-height: 100dvh;
   transition: background-color .2s var(--ease-out), color .2s var(--ease-out);
 }
 img{max-width:100%; display:block;}
@@ -1220,7 +1220,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .filters-panel{
   background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-md);
   padding: var(--space-4); position:sticky; top: calc(var(--header-h) + 16px);
-  max-height: calc(100dvh - var(--header-h) - 32px); overflow-y:auto;
+  max-height: calc(100vh - var(--header-h) - 32px); max-height: calc(100dvh - var(--header-h) - 32px); overflow-y:auto;
   display:flex; flex-direction:column;
 }
 .filters-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--space-3); }
@@ -2335,7 +2335,7 @@ main > .container > .section:last-child{ padding-bottom: 0; }
 .compare-modal-panel{
   position:relative; background: var(--color-surface); border:1px solid var(--color-border);
   border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
-  width:min(760px, 100%); max-height:calc(100dvh - 32px);
+  width:min(760px, 100%); max-height:calc(100vh - 32px); max-height:calc(100dvh - 32px);
   display:flex; flex-direction:column; overflow:hidden;
 }
 .compare-modal-head{ display:flex; align-items:center; justify-content:space-between; padding: var(--space-4) var(--space-5); border-bottom:1px solid var(--color-border); }
