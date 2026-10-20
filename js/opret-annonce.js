@@ -965,7 +965,8 @@ function strukturerBeskrivelse(data){
   const linje1 = data.year ? `${navn} årgang ${data.year}, ${formatKm(data.km)}.` : `${navn}, ${formatKm(data.km)}.`;
 
   const raa = (data.description || '').trim();
-  const saetninger = raa.split(/(?<=[.!?])\s+|\n+/).map(s => s.trim()).filter(Boolean);
+  /* Del efter . ! ? + mellemrum (tegnet bliver på sætningen) eller ved linjeskift. Uden regex-lookbehind: Safari < 16.4 kan ikke parse det. */
+  const saetninger = (txt => { const ud = []; const re = /([.!?])\s+|\n+/g; let start = 0, m; while ((m = re.exec(txt))) { ud.push(txt.slice(start, m[1] ? m.index + 1 : m.index)); start = m.index + m[0].length; } ud.push(txt.slice(start)); return ud; })(raa).map(s => s.trim()).filter(Boolean);
   const linje2 = saetninger[0] || '';
   const resten = saetninger.slice(1);
 

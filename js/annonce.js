@@ -711,7 +711,8 @@ function anKoerekortKort(l, kkM, uvisA2A){
   const ekstra = (kk === 'A' && l.kanNedsaettesA2) ? ' Sælgeren oplyser, at den kan effektbegrænses til A2.' : '';
   const side = kk === 'A1' ? 'koerekort-a1.html' : 'koerekort-a2.html';
   /* W14: lang forklaring (48–49 hk) vises som første sætning; resten ligger i detaljen 'Det bygger vurderingen på'. */
-  const forklDele = String(kkM.forklaring || '').split(/(?<=\.)\s+/);
+  /* Del efter punktum + mellemrum (punktummet bliver på sætningen). Uden regex-lookbehind: Safari < 16.4 kan ikke parse det. */
+  const forklDele = (d => d.map((x, i) => i < d.length - 1 ? x + '.' : x))(String(kkM.forklaring || '').split(/\.\s+/));
   const forklKort = forklDele.length > 1 && kkM.forklaring.length > 140 ? forklDele[0] : kkM.forklaring;
   const forklRest = forklKort === kkM.forklaring ? '' : `<p class="an-kk-rest">${escapeHTML(forklDele.slice(1).join(' '))}${escapeHTML(ekstra)}</p>`;
   /* W14: grundlaget på én linje — kun oplyste tal og de offentlige grænser (A2: 35 kW, ca. 47 hk). */

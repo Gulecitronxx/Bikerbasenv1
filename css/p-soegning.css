@@ -286,8 +286,8 @@ html[data-lager-fejl] .facet-empty{ opacity:1; cursor:pointer; }
   .so-results .sortering-note{ display:none; }
 }
 
-/* F1: ingen input/select under 16 px på mobil (iOS zoomer ved fokus) */
-@media (max-width:767px){
+/* F1/F2: ingen input/select under 16 px på mobil, tablet (< 1100 px) og touch (iOS/iPadOS zoomer ved fokus) */
+@media (max-width:1099px), (pointer:coarse){
   body.srp .so-q #filter-q,
   body.srp .so-layout .so-sel,
   body.srp .so-layout .input,

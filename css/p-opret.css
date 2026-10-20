@@ -208,12 +208,30 @@
   /* Pris + stand deler række; postnummer (lang pladsholder) får hele rækken. */
   .op-grid-3 > .field:last-child:nth-child(3){ grid-column: 1 / -1; }
 }
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:346px){
+  .op-grid-2, .op-grid-3, .op-grid-4{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  /* Pris + stand deler række; postnummer (lang pladsholder) får hele rækken. */
+  .op-grid-3 > .field:last-child:nth-child(3){ grid-column: 1 / -1; }
+}
+}
 @container opform (min-width: 640px){
   .op-grid-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
   .op-grid-3 > .field:last-child:nth-child(3){ grid-column:auto; }
 }
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:722px) and (max-width:1023px), (min-width:1118px){
+  .op-grid-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .op-grid-3 > .field:last-child:nth-child(3){ grid-column:auto; }
+}
+}
 @container opform (min-width: 700px){
   .op-grid-4{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:814px) and (max-width:1023px), (min-width:1178px){
+  .op-grid-4{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
 }
 .op-title-note{ grid-column:1 / -1; margin:0; }
 .op-check-field{ justify-content:flex-end; padding-bottom:6px; }
@@ -226,6 +244,11 @@
 .op-split > *{ min-width:0; }
 @container opform (min-width: 700px){
   .op-split{ grid-template-columns: minmax(0,1fr) 270px; gap: var(--space-5); }
+}
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:814px) and (max-width:1023px), (min-width:1178px){
+  .op-split{ grid-template-columns: minmax(0,1fr) 270px; gap: var(--space-5); }
+}
 }
 .op-split-desc textarea.input{ min-height:190px; }
 
@@ -349,6 +372,14 @@
   .op-photos.has-photos .upload-zone p{ font-size:12px; }
   .op-photos.has-photos .photo-grid{ align-content:start; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:814px) and (max-width:1023px), (min-width:1178px){
+  .op-photos.has-photos{ grid-template-columns: 210px minmax(0,1fr); }
+  .op-photos.has-photos .upload-zone{ display:flex; flex-direction:column; justify-content:center; padding: var(--space-4); }
+  .op-photos.has-photos .upload-zone p{ font-size:12px; }
+  .op-photos.has-photos .photo-grid{ align-content:start; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
+}
 
 
 /* ============ Runde 2 (Critic-fund + billede 4 tættere på) ============ */
@@ -379,6 +410,12 @@
 @container opform (min-width: 700px){
   .op-photos.has-photos{ grid-template-columns: minmax(240px, 30%) minmax(0,1fr); }
   .op-photos.has-photos .photo-grid{ grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap:10px; }
+}
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:814px) and (max-width:1023px), (min-width:1178px){
+  .op-photos.has-photos{ grid-template-columns: minmax(240px, 30%) minmax(0,1fr); }
+  .op-photos.has-photos .photo-grid{ grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap:10px; }
+}
 }
 .op-form .photo-thumb{ aspect-ratio:1; }
 .op-form .photo-thumb .cover-tag:not(.new){
@@ -441,7 +478,7 @@
 .op-prev-fab svg{ width:18px; height:18px; }
 @media (max-width:1023px){ .op-prev-fab{ display:inline-flex; } }
 .op-sheet{
-  position:fixed; inset:auto 0 0 0; margin:0; width:100%; max-width:none; max-height:88dvh; overflow:auto;
+  position:fixed; inset:auto 0 0 0; margin:0; width:100%; max-width:none; max-height:88vh; max-height:88dvh; overflow:auto;
   border:0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: var(--space-4);
   background: var(--color-surface); color: var(--color-fg); box-shadow: var(--shadow-lg);
 }
@@ -480,6 +517,14 @@
   .op-photos.has-photos{ grid-template-columns: minmax(250px, 30%) minmax(0,1fr); }
   .op-photos.has-photos .photo-grid{ grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
 }
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:814px) and (max-width:1023px), (min-width:1178px){
+  .op-split-photos{ grid-template-columns: minmax(0,1fr); }
+  .op-split-photos .op-tips ul{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:6px var(--space-5); }
+  .op-photos.has-photos{ grid-template-columns: minmax(250px, 30%) minmax(0,1fr); }
+  .op-photos.has-photos .photo-grid{ grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+}
+}
 .op-split-photos{ margin-top: var(--space-4); }
 
 /* W14 runde 2: tættere på billedets lave hero og kompakte første sektion. */
@@ -492,6 +537,12 @@
 @container opform (min-width: 700px){
   .op-split-type{ grid-template-columns: minmax(0,1fr); }
   .op-split-type .op-tips ul{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:6px var(--space-4); }
+}
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:814px) and (max-width:1023px), (min-width:1178px){
+  .op-split-type{ grid-template-columns: minmax(0,1fr); }
+  .op-split-type .op-tips ul{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:6px var(--space-4); }
+}
 }
 .op-split-type{ margin-top: var(--space-3); }
 .op-split-type .radio-card-group{ margin-bottom: var(--space-1); }
@@ -515,6 +566,19 @@
   .op-photos:not(.has-photos) .photo-ghosts{ display:grid; grid-template-columns:repeat(auto-fill, minmax(112px,1fr)); gap:12px; }
   .photo-ghosts span{ aspect-ratio:1; max-height:132px; border:1.5px dashed var(--color-border); border-radius:var(--radius-sm); background:var(--color-surface-2); display:flex; align-items:flex-end; justify-content:flex-start; padding:6px; }
   .photo-ghosts b{ font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--color-fg-muted); font-weight:700; }
+}
+@supports not (container-type:inline-size){ /*F8-fallback*/
+@media (min-width:814px) and (max-width:1023px), (min-width:1178px){
+  .op-photos{ grid-template-columns: minmax(220px, 250px) minmax(0,1fr); align-items:start; }
+  .op-photos .upload-zone{ padding:var(--space-3); display:flex; flex-direction:column; justify-content:center; min-height:0; height:132px; box-sizing:border-box; overflow:hidden; }
+  .op-photos .upload-zone svg{ width:26px; height:26px; margin-bottom:var(--space-1); }
+  .op-photos .upload-zone h3{ font-size:15px; margin-bottom:2px; }
+  .op-photos .upload-zone p{ font-size:11.5px; line-height:1.35; margin:0; }
+  .op-photos.has-photos{ grid-template-columns: minmax(220px, 250px) minmax(0,1fr); }
+  .op-photos:not(.has-photos) .photo-ghosts{ display:grid; grid-template-columns:repeat(auto-fill, minmax(112px,1fr)); gap:12px; }
+  .photo-ghosts span{ aspect-ratio:1; max-height:132px; border:1.5px dashed var(--color-border); border-radius:var(--radius-sm); background:var(--color-surface-2); display:flex; align-items:flex-end; justify-content:flex-start; padding:6px; }
+  .photo-ghosts b{ font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--color-fg-muted); font-weight:700; }
+}
 }
 /* Gennemse: advarsler i brandfarve, ikke grøn (grøn kun ✓) og ikke rød. */
 .op-advarsel-ikon{ display:inline-flex; }

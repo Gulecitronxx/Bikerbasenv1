@@ -715,7 +715,7 @@ function maerkeFraTekst(t){
    formen: ingen model flettes sammen med en anden. */
 function harmoniserStavning(liste){
   // Punktum mellem to cifre er en decimal (CB 12.5 er ikke CB 125) og bevares.
-  const noegle = s => String(s || '').toLowerCase().replace(/[\s\-]+/g, '').replace(/(?<!\d)\.|\.(?!\d)/g, '');
+  const noegle = s => String(s || '').toLowerCase().replace(/[\s\-]+/g, '').replace(/\./g, (p, i, s) => (/\d/.test(s.charAt(i - 1)) && /\d/.test(s.charAt(i + 1))) ? p : '');   // uden lookbehind (Safari < 16.4)
   const versaler = s => (s.match(/[A-ZÆØÅ]/g) || []).length;
   const bedst = (taelling, kendt) => {
     const kand = [...taelling.entries()];

@@ -261,17 +261,19 @@ function saniterTal(t){
   let hk = tal(t && t.hk);
   const aargang = tal(t && t.aargang);
   const tekst = String((t && t.tekst) || '');
-  const am = tekst.match(/(?<![\p{L}\d])[aå]rg\.?\s*(\d{2,4})(?!\d)/iu);
+  /* Uden regex-lookbehind (Safari < 16.4 kan ikke parse det): foranstillet tegn fanges i gruppe 1 og ignoreres. */
+  const amR = tekst.match(/(^|[^\p{L}\d])([aå]rg\.?\s*(\d{2,4}))(?!\d)/iu);
+  const am = amR ? [amR[2], amR[3]] : null;
   const aargTal = am ? Number(am[1]) : null;
   const udenAarg = am ? tekst.replace(am[0], ' ') : tekst;
   if (ccm != null){
     const hkStoetter = hk != null && hk / ccm <= urimeligHkPrCcm(ccm);   // et realistisk hk-tal bakker ccm op
-    const stdIModel = new RegExp('(?<!\\d)' + ccm + '(?!\\d)').test(udenAarg);
+    const stdIModel = new RegExp('(^|\\D)' + ccm + '(?!\\d)').test(udenAarg);
     /* "årg NN"-reglen kræver BEVIS for, at ccm er årstallet: et større tal i titlen, der
        begynder med ccm-cifrene (XJ 900 årg 90), eller en årgang der selv er 19NN. Uden bevis
        bevares tallet (Puch Maxi S årg 50, Honda Super Cub årg 90). */
     const arg = aargTal != null && (ccm === aargTal || (aargTal < 100 && ccm === 1900 + aargTal));
-    const storreTal = arg && new RegExp('(?<!\\d)' + ccm + '\\d+(?!\\d)').test(udenAarg);
+    const storreTal = arg && new RegExp('(^|\\D)' + ccm + '\\d+(?!\\d)').test(udenAarg);
     const aargangEns = arg && aargang != null && (aargang === aargTal || aargang === 1900 + aargTal);
     if (ccm < MIN_CCM || ccm > MAKS_CCM) ccm = null;
     else if (aargang != null && ccm === aargang) ccm = null;
