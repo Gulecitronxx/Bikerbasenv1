@@ -28,7 +28,7 @@ const REG = ['Honda', 'Yamaha'];
 window.BrandRegistry = { valgbare: () => REG.slice() };
 window.Filtrering = { maerkeListe: l => [...new Set(l.map(x => x.brand).filter(b => b && !/^andet/i.test(b)))].map(navn => ({ navn })) };
 const sel = document.getElementById('f-brand'), felt = document.getElementById('andet-felt'), inp = document.getElementById('f-andet');
-sel.innerHTML = '<option value="">Vælg mærke</option>' + REG.map(b => '<option>' + b + '</option>').join('') + (MUT.includes('ingenAndet') ? '' : '<option value="Andet mærke">Andet mærke</option>');
+sel.innerHTML = '<option value="">Vælg mærke</option>' + REG.map(b => '<option>' + b + '</option>').join('') + (MUT.includes('ingenAndet') ? '' : '<option value="Andet mærke">Andet mærke (skriv selv)</option>');
 sel.addEventListener('change', () => {
   const andet = sel.value === 'Andet mærke';
   if (!MUT.includes('ingenFelt')) felt.hidden = MUT.includes('bliver') ? false : !andet;
@@ -64,6 +64,7 @@ const oversigtSide = (mut = []) => `<!doctype html><meta charset="utf-8"><body>
 <h2 id="h">Flere mærker (4)</h2><p id="intro">Disse 4 mærker kender vi.</p>
 <ul class="mk-flere"><li data-mk-soeg="zero|zero motorcycles">Zero</li><li data-mk-soeg="norton">Norton</li><li data-mk-soeg="ajp">AJP</li></ul>
 <p><strong id="hh">Historiske mærker (1)</strong></p>
+<ul class="mk-flere mk-flere-links" data-nye></ul>
 <ul class="mk-flere mk-flere-hist"><li data-mk-soeg="vincent">Vincent</li></ul>
 <style>.mk-flere li { display: inline-flex; } li[hidden] { display: none !important; }</style>
 <script>
@@ -73,7 +74,7 @@ window.Store = { getAllListings: () => [{ id: 'z1', brand: 'Zero' }] };
 const input = document.getElementById('mk-hurtigsoeg-input'), status = document.querySelector('.mk-hurtigsoeg-status'), liste = document.getElementById('mk-az-liste');
 const fold = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
 function opdaterTal() {
-  const piller = document.querySelectorAll('ul.mk-flere > li').length, hist = document.querySelectorAll('.mk-flere-hist > li').length;
+  const piller = document.querySelectorAll('ul.mk-flere:not(.mk-flere-links) > li').length, hist = document.querySelectorAll('.mk-flere-hist > li').length;
   const t = MUT.includes('forkertTal') ? piller + 5 : piller;
   document.getElementById('h').textContent = 'Flere mærker (' + t + ')';
   document.getElementById('intro').textContent = 'Disse ' + t + ' mærker kender vi.';
@@ -82,12 +83,14 @@ function opdaterTal() {
 /* Levende hydrering: pille -> A–Z-række med link, når lageret har annoncer for mærket. */
 if (!MUT.includes('ingenHydrering')) {
   const brands = new Set(Store.getAllListings().map(l => fold(l.brand)));
-  document.querySelectorAll('ul.mk-flere > li').forEach(li => {
+  document.querySelectorAll('ul.mk-flere:not(.mk-flere-links) > li').forEach(li => {
     if (!brands.has(fold(li.textContent))) return;
     const ny = document.createElement('li');
     ny.setAttribute('data-mk-soeg', li.getAttribute('data-mk-soeg'));
     ny.innerHTML = '<a href="' + (MUT.includes('doedtLink') ? 'findes-ikke.html' : 'soegning.html?brands=' + encodeURIComponent(li.textContent.trim())) + '">' + li.textContent.trim() + '</a>';
-    liste.appendChild(ny); li.remove();
+    if (MUT.includes('nyeLinks')) { ny.setAttribute('data-mk-navn', li.textContent.trim()); ny.firstChild.textContent = li.textContent.trim() + ' · 1 annonce'; document.querySelector('[data-nye]').appendChild(ny); }
+    else liste.appendChild(ny);
+    li.remove();
   });
   opdaterTal();
 }
@@ -175,6 +178,16 @@ test('B. Flere mærker: en side der hydrerer korrekt giver 0 fund', async (t) =>
   });
 });
 
+test('B+C. Flere mærker: hydrerede mærker som LINKS i egen liste (V5-design): 0 fund, og linket kan findes i hurtigsøgningen', async (t) => {
+  await medBrowser(t, async ctx => {
+    const s = samler();
+    const p = await side(ctx, oversigtSide(['nyeLinks']));
+    await K.tjekFlereHydrering(p, s.tilfoej, hydreringsOpts);
+    await K.tjekHurtigsoegPiller(p, s.tilfoej, { piller: FLERE_PILLER });
+    assert.deepStrictEqual(s.fund, [], JSON.stringify(s.fund));
+  });
+});
+
 test('B. Flere mærker: ingen hydrering, forkerte tal og dødt link opdages', async (t) => {
   await medBrowser(t, async ctx => {
     const a = samler();
@@ -229,12 +242,8 @@ test('D. Ukendt ?brands=xyz i H1: ren side giver 0 fund; spejling i H1 og title 
 
 /* ---------- Kendt-listen ---------- */
 
-test('kendt-listen: v5-poster er kun v5-tjek (og kun dem, kontrollerne kan udløse), ingen duplikater', () => {
+test('kendt-listen: ingen v5-krav er "kendte" mere (alle rettet i integreret V5); ingen duplikater', () => {
   const kendt = JSON.parse(fs.readFileSync(KENDT, 'utf8'));
   assert.strictEqual(new Set(kendt).size, kendt.length, 'dubletter i kendt-listen');
-  const v5 = kendt.filter(k => /^v5-/.test(k));
-  assert.ok(v5.length >= 10, 'v5-krav skal stå som kendte fund indtil de er rettet: ' + v5.length);
-  for (const k of v5) assert.ok(/\|\*$/.test(k), `v5-poster er jokere (tjek|*): ${k}`);
-  /* Fejl i selve kontrollerne (kunne-ikke-koere) og konsolfejl er ægte regressioner og må aldrig være "kendte". */
-  for (const k of v5) assert.ok(!/kunne-ikke-koere|konsolfejl|supabase-skrivning/.test(k), `må ikke være kendt: ${k}`);
+  assert.deepStrictEqual(kendt.filter(k => /^v5-/.test(k)), [], 'v5-krav må ikke gemmes som kendte fund: ret koden i stedet');
 });

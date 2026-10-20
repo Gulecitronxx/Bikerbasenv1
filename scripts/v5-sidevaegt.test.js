@@ -61,12 +61,17 @@ test('vagten kan fejle: opblæst js/data.js, ny stor fil og manglende lokal fil 
   } finally { fs.rmSync(rod, { recursive: true, force: true }); }
 });
 
-test('en lille ændring (under luften) giver ikke falsk alarm', async () => {
+test('en lille ændring (300 B, under luften) giver ikke et NYT fund i forhold til samme kopi uden ændringen', async () => {
+  /* Robust mod baseline: sammenligner med kopiens egne fund, så testen hverken afhænger af budgettets alder eller af andre filers størrelse. */
   const rod = kopierStatisk();
   try {
-    fs.appendFileSync(path.join(rod, 'js', 'data.js'), `\n/* ${stoej(300)} */\n`);
-    const r = await V.koer({ rod });
-    assert.deepStrictEqual(r.fund.filter(f => f.niveau === 'fejl'), [], JSON.stringify(r.fund.slice(0, 3)));
+    const nøgle = f => `${f.tjek}|${f.hvad}`;
+    const foer = new Set((await V.koer({ rod })).fund.map(nøgle));
+    fs.appendFileSync(path.join(rod, 'js', 'data.js'), `
+/* ${stoej(300)} */
+`);
+    const efter = (await V.koer({ rod })).fund.filter(f => f.niveau === 'fejl').map(nøgle);
+    assert.deepStrictEqual(efter.filter(k => !foer.has(k)), [], 'en ændring på 300 B må ikke udløse nye fund');
   } finally { fs.rmSync(rod, { recursive: true, force: true }); }
 });
 

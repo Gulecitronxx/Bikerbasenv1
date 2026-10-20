@@ -134,13 +134,16 @@ async function browserVaegt(rod, sider, pw) {
 
 /* ---------- Budget ---------- */
 
-function lavBudget(maal) {
+function lavBudget(maal, eksisterende) {
   const b = { version: 1, beskrivelse: 'Maks gzip-bytes (niveau 6). Nuværende størrelse + luft (filer 10 %, sider 8 %, browser 10 %), rundet op til 100 B. Hæves kun bevidst (node scripts/v5-sidevaegt.js --gem-budget).', filer: {}, sider: {}, browser: {} };
   /* Kun delte kerne-filer får individuelt budget (alle js/css; nye filer uden budget fanges af "ny-fil-uden-budget"). */
   for (const [f, e] of Object.entries(maal.filer)) b.filer[f] = afrund(e.gzip * LUFT.filer);
   for (const [s, e] of Object.entries(maal.sider)) b.sider[s] = afrund(e.i_alt * LUFT.sider);
   for (const [s, e] of Object.entries(maal.browser || {})) if (e.i_alt) b.browser[s] = afrund(e.i_alt * LUFT.browser);
   b.sider_standard = Math.max(...Object.values(maal.sider).map(e => e.i_alt)) > 0 ? afrund(Math.max(...Object.values(maal.sider).map(e => e.i_alt)) * LUFT.sider) : 0;
+  /* Begrundelser for vækst skrives af et menneske og bevares ved --gem-budget. */
+  if (eksisterende && eksisterende.begrundelser) b.begrundelser = eksisterende.begrundelser;
+  if (eksisterende && eksisterende.baseline) b.baseline = eksisterende.baseline;
   return b;
 }
 
@@ -224,7 +227,9 @@ async function main() {
   try { r = await koer({ ...o, browser: o.browser || o.gemBudget }); } catch (e) { console.error('v5-sidevaegt: ' + e.message); process.exit(2); }
   if (o.gemBudget) {
     const sti = o.budget || BUDGET_FIL;
-    fs.writeFileSync(sti, JSON.stringify(lavBudget(r.maal), null, 1) + '\n');
+    let gammel = null;
+    try { gammel = JSON.parse(fs.readFileSync(sti, 'utf8')); } catch (e) { /* ingen gammel budgetfil */ }
+    fs.writeFileSync(sti, JSON.stringify(lavBudget(r.maal, gammel), null, 1) + '\n');
     console.log('Budget skrevet: ' + sti);
     return;
   }

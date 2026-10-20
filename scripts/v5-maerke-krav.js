@@ -4,17 +4,17 @@
 
    KRAV (kontrakten kritikeren tester — afvigelser meldes til Orchestrator, så kontrakten kan rettes i stedet for koden):
      A  "Andet mærke" i opret-annonce
-        - #f-brand har en valgmulighed "Andet mærke" (tekst /^Andet( mærke)?$/i).
+        - #f-brand har en valgmulighed, hvis tekst begynder med "Andet mærke" (fx "Andet mærke (skriv selv)").
         - Vælges den, vises et tekstfelt (nyt synligt input/textarea) med tilgængeligt navn (label/aria-label), maxlength <= 60.
         - Tomt, kun mellemrum og en for lang tekst afvises af validateStep() (feltet får aria-invalid="true"); en normal tekst ("Fantasi Motors") accepteres.
         - HTML i feltet bliver aldrig til elementer eller script i siden (ingen XSS i forhåndsvisningen).
         - Teksten går ikke tabt (den står i collectFormData()), men bliver ALDRIG automatisk et offentligt mærke:
-          Filtrering.maerkeListe() over en annonce med collectFormData()-mærket må ikke indeholde fritekstmærket, og
+          Filtrering.maerkeListe() over en annonce med collectFormData()-mærket må ikke indeholde fritekstmærket (uregistrerede mærker grupperes som uoplyst; teksten må gerne stå i brand), og
           BrandRegistry.valgbare() er uændret. Skifter man tilbage til et rigtigt mærke, forsvinder feltet og teksten.
      B  Levende hydrering af "Flere mærker" på maerker.html
         - Har lageret annoncer for et mærke, der i den statiske HTML står som ikke-klikbar pille (her: en mocket Zero-annonce),
           må mærket ikke blive stående som inert pille: det bliver en række/et link til en side, der findes (maerke-<slug>.html
-          eller soegning.html?brands=<mærke>) — eller pillen bliver et link dertil.
+          eller soegning.html?brands=<mærke>) — eller pillen bliver et link dertil, eller mærket flyttes til en liste af LINKS (ul.mk-flere.mk-flere-links, li[data-mk-navn]).
         - Efter hydrering stemmer tallene: "Flere mærker (N)", "Disse N mærker", "Historiske mærker (M)" = antal piller, og
           A–Z-rækker + piller = antal registermærker. Hvert mærke står præcis ét sted.
      C  Hurtigsøgningen (#mk-hurtigsoeg-input) på maerker.html finder piller i "Flere mærker"
@@ -77,7 +77,7 @@ async function tjekAndetMaerke(p, tilfoej) {
   const M = 'Andet mærke';
   const fejl = (tjek, detalje, niveau = 'fejl') => tilfoej(G, tjek, niveau, M, detalje);
   const opt = await p.evaluate(() => [...document.getElementById('f-brand').options].map(o => ({ v: o.value, t: o.textContent.trim() })));
-  const andet = opt.find(o => /^(andet|andre)( mærker?)?$/i.test(o.t));
+  const andet = opt.find(o => /^(andet|andre)( mærker?)?(\s.*)?$/i.test(o.t));   // "Andet mærke" eller "Andet mærke (skriv selv)"
   if (!andet) { fejl('v5-andet-mangler', `#f-brand (${opt.length} valg) har ingen valgmulighed "Andet mærke" — en sælger med et mærke uden for registret kan ikke oprette annoncen`); return; }
   const foer = await p.evaluate(() => ({
     valgbare: BrandRegistry.valgbare().slice(),
@@ -123,6 +123,8 @@ async function tjekAndetMaerke(p, tilfoej) {
   if (xss.koert || xss.img) fejl('v5-andet-xss', `HTML i mærkefeltet blev til element/script i siden (${JSON.stringify(xss)}; felt afvist: ${html.afvist})`);
   const ok = await prov('Fantasi Motors');
   if (ok.afvist) fejl('v5-andet-gyldig-afvises', 'et normalt mærkenavn ("Fantasi Motors") afvises af validateStep');
+  /* opret-annonce indlæser ikke søgningens Filtrering; lån den fra samme server (kontrolsider definerer den selv). */
+  if (await p.evaluate(() => typeof Filtrering === 'undefined')) await p.addScriptTag({ url: 'js/filtrering.js' }).catch(() => {});
   const d = await p.evaluate(() => {
     const data = collectFormData();
     let liste = null, valgbare = BrandRegistry.valgbare();
@@ -130,7 +132,10 @@ async function tjekAndetMaerke(p, tilfoej) {
     return { json: JSON.stringify(data), brand: data.brand, liste, valgbare };
   });
   if (!/Fantasi Motors/.test(d.json)) fejl('v5-andet-tekst-gaar-tabt', 'teksten "Fantasi Motors" findes ikke i collectFormData() — sælgerens mærkenavn gemmes ikke');
-  if (/Fantasi Motors/i.test(String(d.brand)) || d.liste.some(n => fold(n) === fold('Fantasi Motors')))
+  /* Selve teksten må gerne stå i brand (annoncen viser den), men søgningens mærkeliste/filter må IKKE vise den som mærke: Filtrering skal
+     gruppere uregistrerede mærker som uoplyst. Kan Filtrering ikke vurderes, falder tjekket tilbage til at brand ikke må være teksten. */
+  const filtreringVurderet = Array.isArray(d.liste) && !d.liste.some(n => /maerkeListe kastede/.test(String(n)));
+  if (filtreringVurderet ? d.liste.some(n => fold(n) === fold('Fantasi Motors')) : /Fantasi Motors/i.test(String(d.brand)))
     fejl('v5-andet-bliver-offentligt-maerke', `collectFormData().brand = "${d.brand}", og søgningens mærkeliste ville vise "${d.liste.join(', ')}": fritekst må ikke automatisk blive et offentligt mærke/filter (brug "Andet mærke"/uoplyst + separat felt)`);
   if (JSON.stringify(d.valgbare) !== JSON.stringify(foer.valgbare)) fejl('v5-andet-aendrer-register', 'BrandRegistry.valgbare() ændrede sig, da fritekst blev indtastet');
   /* Tilbage til et rigtigt mærke: feltet og teksten skal væk. */
@@ -144,14 +149,18 @@ async function tjekAndetMaerke(p, tilfoej) {
 
 /* ---------- B: levende hydrering af "Flere mærker" ---------- */
 
+/* Piller = IKKE-klikbare piller (ul.mk-flere uden .mk-flere-links). Mærker, der har fået annoncer, må flyttes til en liste af LINKS
+   (ul.mk-flere.mk-flere-links, li[data-mk-navn] > a[href]) eller til A-Z-listen; begge dele tæller som hydreret. */
 const laesFlere = (p) => p.evaluate(() => {
   const synlig = e => (e.checkVisibility ? e.checkVisibility() : true);
-  const piller = [...document.querySelectorAll('ul.mk-flere > li')].map(li => ({ navn: li.textContent.replace(/\s+/g, ' ').trim(), link: (li.querySelector('a') || {}).getAttribute ? li.querySelector('a').getAttribute('href') : null, hist: !!li.closest('.mk-flere-hist'), synlig: synlig(li) }));
-  const raekker = [...document.querySelectorAll('#mk-az-liste li[data-mk-soeg]')].map(li => ({ href: (li.querySelector('a') || {}).getAttribute ? li.querySelector('a').getAttribute('href') : null, tekst: li.textContent.replace(/\s+/g, ' ').trim() }));
+  const tekst = li => li.textContent.replace(/\s+/g, ' ').trim();
+  const piller = [...document.querySelectorAll('ul.mk-flere:not(.mk-flere-links) > li')].map(li => ({ navn: li.getAttribute('data-mk-navn') || tekst(li), link: (li.querySelector('a') || {}).getAttribute ? li.querySelector('a').getAttribute('href') : null, hist: !!li.closest('.mk-flere-hist'), synlig: synlig(li) }));
+  const links = [...document.querySelectorAll('ul.mk-flere.mk-flere-links > li')].map(li => ({ navn: li.getAttribute('data-mk-navn') || tekst(li).split(' · ')[0], href: (li.querySelector('a') || {}).getAttribute ? li.querySelector('a').getAttribute('href') : null, tekst: tekst(li) }));
+  const raekker = [...document.querySelectorAll('#mk-az-liste li[data-mk-soeg]')].map(li => ({ href: (li.querySelector('a') || {}).getAttribute ? li.querySelector('a').getAttribute('href') : null, tekst: tekst(li) }));
   const tal = re => { const m = document.body.innerText.match(re); return m ? Number(m[1]) : null; };
   let lager = null;
   try { const demo = new Set((typeof LISTINGS !== 'undefined' ? LISTINGS : []).map(l => String(l.id))); lager = Store.getAllListings().filter(l => !demo.has(String(l.id))).map(l => l.brand); } catch (e) { /* ingen Store */ }
-  return { piller, raekker, lager, overskrift: tal(/Flere mærker \((\d+)\)/), intro: tal(/Disse (\d+) mærker/), hist: tal(/Historiske mærker \((\d+)\)/) };
+  return { piller, links, raekker, lager, overskrift: tal(/Flere mærker \((\d+)\)/), intro: tal(/Disse (\d+) mærker/), hist: tal(/Historiske mærker \((\d+)\)/) };
 });
 
 /* opts: { navn:'Zero', antal:1, registerAntal:93, linkFindes:(href)=>bool, ventMs:6000 } */
@@ -169,7 +178,8 @@ async function tjekFlereHydrering(p, tilfoej, opts) {
   }
   const raekke = d.raekker.find(r => fold(r.tekst).includes(fold(navn)));
   const pille = d.piller.find(x => fold(x.navn) === fold(navn));
-  const mål = raekke ? raekke.href : pille ? pille.link : null;
+  const link = d.links.find(x => fold(x.navn) === fold(navn));
+  const mål = raekke ? raekke.href : link ? link.href : pille ? pille.link : null;
   if (!mål) fejl('v5-flere-forsvundet', `${navn} er hverken A–Z-række, pille eller link efter hydrering (mærket er skjult)`);
   else {
     let ok = false;
@@ -178,18 +188,21 @@ async function tjekFlereHydrering(p, tilfoej, opts) {
     else ok = linkFindes ? linkFindes(mål) : true;
     if (!ok) fejl('v5-flere-link-doed', `${navn} linker til "${mål}", som hverken er en eksisterende side eller en søgning efter mærket`);
   }
+  if (link && link.tekst && !/\d/.test(link.tekst)) fejl('v5-flere-link-uden-tal', `linket "${link.tekst}" viser ikke antallet af annoncer`, 'advarsel');
   if (raekke && pille && !pille.link) fejl('v5-flere-dublet', `${navn} står både som A–Z-række og som pille`);
+  if (link && pille && !pille.link) fejl('v5-flere-dublet', `${navn} står både som link og som inert pille`);
   const antalPiller = d.piller.length, antalHist = d.piller.filter(x => x.hist).length;
   if (d.overskrift != null && d.overskrift !== antalPiller) fejl('v5-flere-tal-efter-hydrering', `overskriften siger "Flere mærker (${d.overskrift})", men der er ${antalPiller} piller`);
   if (d.intro != null && d.intro !== antalPiller) fejl('v5-flere-tal-efter-hydrering', `introen siger "Disse ${d.intro} mærker", men der er ${antalPiller} piller`);
   if (d.hist != null && d.hist !== antalHist) fejl('v5-flere-tal-efter-hydrering', `"Historiske mærker (${d.hist})" men der er ${antalHist} historiske piller`);
-  if (opts.registerAntal && d.raekker.length + antalPiller !== opts.registerAntal) fejl('v5-oversigt-sum-efter-hydrering', `${d.raekker.length} rækker + ${antalPiller} piller ≠ ${opts.registerAntal} registermærker`);
-  /* Generelt: ingen pille med annoncer i lageret. */
+  if (opts.registerAntal && d.raekker.length + antalPiller + d.links.length !== opts.registerAntal) fejl('v5-oversigt-sum-efter-hydrering', `${d.raekker.length} rækker + ${antalPiller} piller + ${d.links.length} links ≠ ${opts.registerAntal} registermærker`);
+  /* Generelt: ingen inert pille med annoncer i lageret. */
   if (d.lager) {
     const iLagerSet = new Set(d.lager.filter(Boolean).map(fold));
     for (const x of d.piller) if (!x.link && iLagerSet.has(fold(x.navn))) fejl('v5-flere-pille-har-annoncer', `"${x.navn}" er ikke-klikbar pille, men lageret har annoncer med mærket`);
   }
 }
+
 
 /* ---------- C: hurtigsøgningen finder piller ---------- */
 
@@ -203,7 +216,9 @@ async function tjekHurtigsoegPiller(p, tilfoej, opts) {
     const synlig = e => (e.checkVisibility ? e.checkVisibility() : !e.hidden);
     const input = document.getElementById('mk-hurtigsoeg-input');
     const status = document.querySelector('.mk-hurtigsoeg-status');
-    const pilleEls = [...document.querySelectorAll('ul.mk-flere > li')].map(li => ({ li, navn: li.textContent.replace(/\s+/g, ' ').trim() }));
+    const navnPaa = li => li.getAttribute('data-mk-navn') || li.textContent.replace(/\s+/g, ' ').trim().split(' · ')[0];
+    /* Både inerte piller og links til mærker, der har fået annoncer (ul.mk-flere.mk-flere-links), skal kunne findes. */
+    const pilleEls = [...document.querySelectorAll('ul.mk-flere > li')].map(li => ({ li, navn: navnPaa(li) }));
     const aliasFor = n => ((registerPiller.find(r => fold(r.navn) === fold(n)) || {}).aliaser) || [];
     const soeg = async q => {
       input.value = q; input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -226,7 +241,7 @@ async function tjekHurtigsoegPiller(p, tilfoej, opts) {
       const forMange = r.synlige.filter(n => !fo.includes(n)), forFaa = fo.filter(n => !r.synlige.includes(n));
       if (forMange.length || forFaa.length) ud.filter.push({ q, forMange: forMange.slice(0, 5), forFaa: forFaa.slice(0, 5) });
       const total = r.raekker + r.synlige.length;
-      const tallet = r.status && (r.status.match(/^(\d+)/) || [])[1];
+      const tallet = r.status && (r.status.match(/^(\d+) mærker? matcher\.$/) || [])[1];   // kun den simple form kan tælles; en rigere tekst kontrolleres kun for Ingen/ikke-Ingen
       if (total > 0 && /^Ingen/i.test(r.status || '')) ud.status.push(`"${q}": status "${r.status}" men ${r.raekker} rækker + ${r.synlige.length} piller matcher`);
       else if (total === 0 && r.status && !/^Ingen/i.test(r.status)) ud.status.push(`"${q}": status "${r.status}" men intet matcher`);
       else if (tallet != null && Number(tallet) !== total) ud.status.push(`"${q}": status "${r.status}" men ${r.raekker} rækker + ${r.synlige.length} piller er synlige`);
@@ -305,7 +320,7 @@ async function koerV5(opt, rod, reg, T) {
     /* B + C (samme side, B først: hydreringen ændrer pillerne C søger i) */
     const o = await aabn('maerker.html', 800);
     taelUd('v5FlereHydrering');
-    try { await tjekFlereHydrering(o, tilfoej, { navn: 'Zero', registerAntal: reg.maerker.length, linkFindes: h => fs.existsSync(path.join(rod, String(h).split('?')[0].split('#')[0])) }); }
+    try { await tjekFlereHydrering(o, tilfoej, { navn: 'Zero', registerAntal: reg.maerker.filter(e => e.offentlig !== false).length, linkFindes: h => fs.existsSync(path.join(rod, String(h).split('?')[0].split('#')[0])) }); }
     catch (e) { tilfoej(G, 'v5-flere-kunne-ikke-koere', 'fejl', 'Zero', String(e.message).split('\n')[0]); }
     taelUd('v5Hurtigsoeg');
     try { await tjekHurtigsoegPiller(o, tilfoej, { piller, hurtig: !!opt.hurtig }); }
