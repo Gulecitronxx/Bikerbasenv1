@@ -116,19 +116,23 @@ test('hero-lockup: emblem + ordmærke side om side, når begge varianter findes;
   assert.doesNotMatch(b, /bl--wm|lockup/);
 });
 
-test('ordmærke-varianter: filerne findes, er med i kernen, og alle 20 godkendelser er uændrede (ejerens beslutning)', () => {
+test('ordmærke-varianter: filerne findes, er med i kernen, og de ti AI-godkendelser er uændrede (ejerens beslutning); de officielle har ingen varianter', () => {
   const m = JSON.parse(les('img/brands/manifest.json'));
   const med = m.maerker.filter(x => x.varianter && x.varianter.ordmaerke);
-  assert.ok(med.length >= 10, `${med.length} mærker med ordmærke-variant`);
+  /* V5: ti AI-udkast er erstattet af officielle filer (uden emblem/ordmærke-varianter); otte mærker har stadig lockup-varianter */
+  assert.ok(med.length >= 8, `${med.length} mærker med ordmærke-variant`);
   for (const x of med){
     assert.ok(fs.existsSync(path.join(ROOT, x.varianter.ordmaerke.fil)), x.varianter.ordmaerke.fil);
     assert.ok(x.varianter.emblem, `${x.slug}: lockup kræver også emblem`);
     const lf = BrandLogos.logoFor(x.navn);
     assert.ok(lf.ordmaerke && lf.ordmaerke.src === x.varianter.ordmaerke.fil, `${x.slug}: kernen kender varianten`);
   }
-  const godkendte = m.maerker.filter(x => x.godkendt);
-  assert.equal(godkendte.length, 20);
+  const godkendte = m.maerker.filter(x => x.godkendt && x.autenticitet !== 'officiel');
+  assert.equal(godkendte.length, 10);
   for (const x of godkendte){ assert.equal(x.godkendt_af, 'ejer'); assert.equal(x.godkendt_dato, '2026-10-17'); }
+  const officielle = m.maerker.filter(x => x.godkendt && x.autenticitet === 'officiel');
+  assert.equal(officielle.length, 21);
+  for (const x of officielle){ assert.equal(x.varianter, undefined, x.slug); assert.equal(x.godkendt_dato, '2026-10-20'); }
   assert.deepEqual(BrandLogos.logoFor('Ducati').ordmaerke, null);
   /* form:'ordmaerke' uden variant falder tilbage til hovedfilen */
   assert.match(BrandLogos.logoHTML('Ducati', { storrelse: 'wm', form: 'ordmaerke' }), /img\/brands\/ducati\.svg/);

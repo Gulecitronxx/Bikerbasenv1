@@ -88,3 +88,33 @@ a:hover > .bl, a:focus-visible > .bl{ color: var(--bl-fg-hover, var(--bl-fg, var
 .bl-spalte{ display:inline-flex; align-items:center; justify-content:center; flex:none; }
 .bl-spalte--sm{ width:56px; justify-content:flex-start; }
 .bl-spalte--md{ width:60px; }
+
+/* ---------- V5: farvede, officielle logoer (<img class="bl-img">, ensfarvet:false i manifestet) ----------
+   De officielle filer er flerfarvede (DKW, Ducati, Sherco, Gilera m.fl. har fyldte blokke), og en maske i currentColor ville gøre dem til en
+   massiv klods. De tegnes derfor som billede i brandfarver — med SAMME faste slot som masken (bredde/areal/højde, aspect-ratio, width/height
+   i markup), så intet flytter sig.
+   Mørke logoer (Harley-Davidson, AJP, Keeway, Bimota …) forsvinder på mørk baggrund. Derfor står ALLE farvede logoer på en neutral lys flise
+   i mørk tilstand — samme flise for alle, ikke et valg pr. logo — og på mærkesidens hero (altid et mørkt foto, også i lys tilstand).
+   Flisen (--bl-chip-bg: lys --color-surface, mørk --color-fg) ligger UDEN FOR slotten (box-shadow-spread, --bl-pad), så slotmålene
+   og layoutet er uændrede, når temaet skifter. */
+.bl--img{
+  --bl-chip-bg: transparent; --bl-pad: 0px; --bl-pad-n: 4px;
+  border-radius: 4px;
+  background: var(--bl-chip-bg);
+  box-shadow: 0 0 0 var(--bl-pad) var(--bl-chip-bg);
+}
+.bl--img.bl--sm{ --bl-pad-n: 3px; border-radius: 3px; }
+.bl--img.bl--xl{ --bl-pad-n: 5px; }
+.bl--img.bl--hero, .bl--img.bl--wm{ --bl-pad-n: 6px; border-radius: 6px; }
+:root[data-theme="dark"] .bl--img{ --bl-chip-bg: var(--color-fg); --bl-pad: var(--bl-pad-n); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .bl--img{ --bl-chip-bg: var(--color-fg); --bl-pad: var(--bl-pad-n); }
+}
+/* mærkesidens hero: altid mørkt foto -> lys flise i begge temaer (lys tilstand: --color-surface, mørk: --color-fg som ovenfor) */
+.mk-hero .bl--img{ --bl-chip-bg: var(--color-surface); --bl-pad: var(--bl-pad-n); }
+:root[data-theme="dark"] .mk-hero .bl--img{ --bl-chip-bg: var(--color-fg); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .mk-hero .bl--img{ --bl-chip-bg: var(--color-fg); } }
+@media (forced-colors:active){ .bl--img{ forced-color-adjust: none; } }
+/* Uden JavaScript viser noscript-reglen (build: .bl--logo>.bl-fb) fallbacken oven på logoet; et billede-logo skal ikke have den, før billedet fejler. */
+.bl--logo.bl--img > .bl-fb{ display:none; }
+.bl--logo.bl--img.bl--fejl > .bl-fb{ display:inline-flex; }

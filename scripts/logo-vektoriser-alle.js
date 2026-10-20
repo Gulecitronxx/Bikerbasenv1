@@ -1,4 +1,4 @@
-/* Deterministisk batch: vektoriserer de 20 AI-logoudkast til img/brands/<slug>.svg (+ varianter) og skriver img/brands/assets.json.
+/* Deterministisk batch: vektoriserer de AI-logoudkast, der stadig bruges (10; de øvrige 10 er erstattet af officielle filer, se ERSTATTET_AF_OFFICIEL) til img/brands/<slug>.svg (+ varianter) og skriver img/brands/assets.json.
 
    Kør:  node scripts/logo-vektoriser-alle.js                      (byg SVG'er + assets.json)
          node scripts/logo-vektoriser-alle.js --maal               (byg + rasteriser i Chromium, mål IoU, lav kontaktark i %TEMP%\logo-assets)
@@ -33,7 +33,7 @@ const IOU_KRAV_OFFICIEL = 0.94 /* mærker der skal erstattes af officiel fil (In
 const deling = y => ({ emblem: { behold: [[0, 0, 1254, y]] }, ordmaerke: { behold: [[0, y, 1254, 1254]] } });
 const KUN_ORD = y => ({ ordmaerke: { behold: [[0, y[0], 1254, y[1]]] } });
 
-const TABEL = [
+const ALLE_UDKAST = [
   { slug: 'yamaha', navn: 'Yamaha', kilde: '13.14.47-1.png', hovedform: 'lockup', varianter: deling(880), autenticitet: 'ukendt' },
   { slug: 'honda', navn: 'Honda', kilde: '13.14.48-2.png', hovedform: 'lockup', varianter: deling(935), autenticitet: 'tvivlsom' },
   { slug: 'kawasaki', navn: 'Kawasaki', kilde: '13.14.48-3.png', hovedform: 'lockup', varianter: deling(750), autenticitet: 'ukendt' },
@@ -59,6 +59,12 @@ const TABEL = [
   { slug: 'zero', navn: 'Zero', kilde: '13.37.30-9.png', hovedform: 'lockup', varianter: deling(700), slet: [[1158, 968, 1210, 1016]], autenticitet: 'ukendt' },
   { slug: 'piaggio', navn: 'Piaggio', kilde: '13.37.31-10.png', hovedform: 'lockup', varianter: deling(930), autenticitet: 'ukendt' },
 ];
+
+/* V5: disse ti mærker har nu en OFFICIEL fil (img/brands/<slug>.svg, importeret af scripts/v5-logo-import.js; manifest: autenticitet 'officiel').
+   AI-udkastet er derfor ude af batchen: en kørsel må aldrig overskrive en officiel fil, og assets.json beskriver kun de udkast, der stadig bruges.
+   Udkastene ligger i git-historikken (commits før V5-logoer). scripts/v5-logo-officielle.test.js holder listen i takt med manifestet. */
+const ERSTATTET_AF_OFFICIEL = ['honda', 'ducati', 'triumph', 'harley-davidson', 'royal-enfield', 'benelli', 'husqvarna', 'indian', 'mv-agusta', 'piaggio'];
+const TABEL = ALLE_UDKAST.filter(b => !ERSTATTET_AF_OFFICIEL.includes(b.slug));
 
 const opts = b => Object.assign({ navn: b.navn, trim: true }, GLOBAL, b.parametre || {}, { fjern: b.fjern || [], slet: b.slet || [] });
 const GLOBAL = { tolerance: 0.5, glat: 1 };
@@ -348,4 +354,4 @@ if (require.main === module){
   main(process.argv.slice(2)).then(c => { process.exitCode = c; }, e => { console.error(e.stack || e.message); process.exitCode = 2; });
 }
 
-module.exports = { IOU_KRAV_OFFICIEL, TABEL, PRE, byg, referenceMaske, skrivAssets, IOU_KRAV, IOU64_KRAV, IOU24_KRAV };
+module.exports = { IOU_KRAV_OFFICIEL, TABEL, ALLE_UDKAST, ERSTATTET_AF_OFFICIEL, PRE, byg, referenceMaske, skrivAssets, IOU_KRAV, IOU64_KRAV, IOU24_KRAV };

@@ -75,7 +75,8 @@ test('forside 1440: seks fliser i ÉN række; logo ca. 30-50 % af flisehøjden; 
   for (const x of m){
     assert.ok(x.w >= 60, 'flisen er smal: ' + x.w);
     assert.ok(x.sw <= x.cw + 1, 'indhold flyder over flisen');
-    assert.ok(x.bh / x.h >= 0.14 && x.bh / x.h <= 0.55, `logo/flise ${(x.bh / x.h).toFixed(2)}`);
+    /* V5: Honda er nu et officielt ordmærke på 8,2:1 — i lg-slotten (maks. 120 px bred) er det ca. 15 px højt, ca. 7 % af flisen; emblemer fylder op til 55 % */
+    assert.ok(x.bh / x.h >= 0.06 && x.bh / x.h <= 0.55, `logo/flise ${(x.bh / x.h).toFixed(2)}`);
   }
   const med = m.map(x => x.bh / x.h).sort()[3];
   assert.ok(med >= 0.2, 'medianlogoet er mindst 20 % af flisen: ' + med);
@@ -99,7 +100,7 @@ test('annonce: logo kun for godkendte mærker, højrejusteret ved ≥1180, aria-
     const r = raekke.getBoundingClientRect(), l = logo.getBoundingClientRect(), hh = h1.getBoundingClientRect(), p = pris.getBoundingClientRect();
     return { raekkeRight: r.right, raekkeLeft: r.left, logoRight: l.right, logoLeft: l.left, logoTop: l.top, logoBottom: l.bottom, h1Right: hh.right, h1Top: hh.top, h1Bottom: hh.bottom,
       logoW: l.width, logoH: l.height, raekkeH: r.height, h1W: hh.width, h1H: hh.height,
-      prisTop: p.top, label: logo.getAttribute('aria-label'), role: logo.getAttribute('role'), erLogo: logo.classList.contains('bl--logo'), h1Antal: document.querySelectorAll('h1').length };
+      prisTop: p.top, label: logo.getAttribute('aria-label') || ((logo.querySelector('img.bl-img') || {}).alt || null), role: logo.getAttribute('role') || (logo.querySelector('img.bl-img') ? 'img' : null), erLogo: logo.classList.contains('bl--logo'), h1Antal: document.querySelectorAll('h1').length };
   });
   assert.ok(m.erLogo);
   assert.strictEqual(m.label, 'Honda-logo');
@@ -111,10 +112,13 @@ test('annonce: logo kun for godkendte mærker, højrejusteret ved ≥1180, aria-
   assert.ok(m.logoTop >= m.h1Top - 4 && m.logoTop <= m.h1Bottom, 'logoet står ved h1');
   assert.strictEqual(m.h1Antal, 1);
   /* P2-4: stort nok til at kunne læses (mockuppen ca. 117x40 ved ca. 1440 — her 56-64 px høj, op til 160 bred), uden at skubbe H1 eller prisen */
-  assert.ok(m.logoH >= 56 && m.logoH <= 64.5, `logo ${m.logoW}x${m.logoH}: 56-64 px højt ved 1440`);
+  /* V5: slottens mål følger logoets forhold (min. af maks. højde 64, maks. bredde 160 og maks. areal) — Honda er et bredt ordmærke (160 x ca. 20 px) */
+  const hl = BrandLogos.logoFor('Honda'), fv = BrandLogos.slotMaal('xl', hl.bredde / hl.hoejde);
+  assert.ok(Math.abs(m.logoH - fv.h) <= 1 && Math.abs(m.logoW - fv.w) <= 1 && m.logoH <= 64.5, `logo ${m.logoW}x${m.logoH} ved 1440, forventet ${fv.w.toFixed(1)}x${fv.h.toFixed(1)}`);
   assert.ok(m.logoW <= 160.5, `logo ${m.logoW} bredt (maks. 160)`);
   assert.ok(m.raekkeH <= Math.max(72, m.h1H + 1), `titelrækken ${m.raekkeH} px høj (maks. 72 eller h1'ens egen højde ${m.h1H})`);
-  assert.ok(m.h1W >= 280, `h1 er ikke presset: ${m.h1W} px bred`);
+  /* V5: Honda er et 160 px bredt ordmærke i xl-slotten (før: et ca. 80 px bredt udkast); h1 får derfor lidt mindre plads (262 px) og ombryder i to linjer */
+  assert.ok(m.h1W >= 240, `h1 er ikke presset: ${m.h1W} px bred`);
   assert.ok(m.h1H <= 3 * 1.2 * 40 + 2, `h1 ombryder pænt: ${m.h1H} px`);
   await ctx.close();
 });
@@ -127,11 +131,12 @@ test('annonce: logo i titelrækken for Harley-Davidson, Indian og Benelli (godke
     const { page, ctx } = await annonce(mærke, { w: 1440 });
     const m = await page.evaluate(() => { const r = document.querySelector('.an-titelraekke'), l = document.querySelector('.an-maerkelogo .bl');
       const lr = l.getBoundingClientRect(), hh = document.getElementById('listing-h1').getBoundingClientRect();
-      return { lh: lr.height, lw: lr.width, rh: r.getBoundingClientRect().height, h1h: hh.height, h1w: hh.width, raekke: !!r, label: l && l.getAttribute('aria-label'), hoejre: r && l ? Math.abs(r.getBoundingClientRect().right - l.getBoundingClientRect().right) : 99, h1: document.querySelectorAll('h1').length }; });
+      return { lh: lr.height, lw: lr.width, rh: r.getBoundingClientRect().height, h1h: hh.height, h1w: hh.width, raekke: !!r, label: l && (l.getAttribute('aria-label') || ((l.querySelector('img.bl-img') || {}).alt || null)), hoejre: r && l ? Math.abs(r.getBoundingClientRect().right - l.getBoundingClientRect().right) : 99, h1: document.querySelectorAll('h1').length }; });
     assert.strictEqual(m.raekke, true, mærke);
     assert.strictEqual(m.label, mærke + '-logo');
     assert.ok(m.hoejre <= 1, mærke + ' højrejusteret');
-    assert.ok(m.lh >= 56 && m.lh <= 64.5 && m.lw <= 160.5, `${mærke}: logo ${m.lw}x${m.lh} (56-64 højt, maks. 160 bredt)`);
+    const ll = BrandLogos.logoFor(mærke), fl = BrandLogos.slotMaal('xl', ll.bredde / ll.hoejde);
+    assert.ok(Math.abs(m.lh - fl.h) <= 1 && Math.abs(m.lw - fl.w) <= 1 && m.lh <= 64.5 && m.lw <= 160.5, `${mærke}: logo ${m.lw}x${m.lh} (forventet ${fl.w.toFixed(1)}x${fl.h.toFixed(1)}, maks. 64 højt, 160 bredt)`);
     assert.ok(m.rh <= Math.max(72, m.h1h + 1), `${mærke}: titelrække ${m.rh} px`);
     assert.ok(m.h1w >= 280, `${mærke}: h1 presset til ${m.h1w} px`);
     assert.strictEqual(m.h1, 1);
@@ -206,14 +211,17 @@ test('lys/mørk: logo og monogram har læsbar kontrast mod flisen, og masken fø
     const { page, ctx } = await forside({ w: 1440, tema });
     const m = await page.evaluate(() => {
       const a = [...document.querySelectorAll('#brand-cloud .maerke-flise')];
-      const logo = a.find(x => x.querySelector('.bl--logo')), mono = a.find(x => x.querySelector('.bl--mono'));
+      const logo = a.find(x => x.querySelector('.bl--logo .bl-mark')), mono = a.find(x => x.querySelector('.bl--mono')), billede = a.find(x => x.querySelector('.bl--img'));
       const bg = el => { let e = el; while (e){ const c = getComputedStyle(e).backgroundColor; if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) return c; e = e.parentElement; } return 'rgb(255,255,255)'; };
       const ml = logo.querySelector('.bl'), mn = mono.querySelector('.bl-mono');
       return { logoFarve: getComputedStyle(ml).color, logoMaskeBg: getComputedStyle(logo.querySelector('.bl-mark')).backgroundColor, logoBg: bg(logo),
-        monoFarve: getComputedStyle(mn).color, monoBg: getComputedStyle(mn).backgroundColor, navn: getComputedStyle(logo.querySelector('strong')).color, antal: getComputedStyle(logo.querySelector('.tal-n')).color };
+        billedeBg: billede ? getComputedStyle(billede.querySelector('.bl--img')).backgroundColor : null, monoFarve: getComputedStyle(mn).color, monoBg: getComputedStyle(mn).backgroundColor, navn: getComputedStyle(logo.querySelector('strong')).color, antal: getComputedStyle(logo.querySelector('.tal-n')).color };
     });
     farver[tema] = m;
     assert.strictEqual(m.logoMaskeBg, m.logoFarve, 'masken tegner i tekstfarven');
+    /* V5: farvede officielle logoer (Honda, Harley-Davidson …) står på en lys flise i mørk tilstand og uden flise i lys */
+    if (tema === 'dark') assert.strictEqual(m.billedeBg, 'rgb(245, 241, 235)', 'billede-logo på lys flise i mørk tilstand');
+    else assert.match(m.billedeBg, /rgba\(0, 0, 0, 0\)|transparent/, 'ingen flise i lys tilstand');
     assert.ok(kontrast(rgb(m.logoFarve), rgb(m.logoBg)) >= 4.5, `${tema}: logo ${kontrast(rgb(m.logoFarve), rgb(m.logoBg)).toFixed(2)}`);
     assert.ok(kontrast(rgb(m.monoFarve), rgb(m.monoBg)) >= 3, `${tema}: monogram ${kontrast(rgb(m.monoFarve), rgb(m.monoBg)).toFixed(2)}`);
     assert.ok(kontrast(rgb(m.antal), rgb(m.logoBg)) >= 4.5, `${tema}: antal ${kontrast(rgb(m.antal), rgb(m.logoBg)).toFixed(2)}`);
@@ -251,7 +259,8 @@ test('søgefilter: logo i fast kolonne, venstrekanten er ens med og uden logo, l
     assert.ok(r.some(x => x.logo) && r.some(x => x.mono), 'både med og uden logo i listen');
     assert.strictEqual(new Set(r.map(x => x.navnLeft)).size, 1, `${w}: navnenes venstrekant er ikke ens: ${JSON.stringify(r.map(x => [x.brand, x.navnLeft]))}`);
     assert.deepStrictEqual([...new Set(r.map(x => x.spalteW))], [56], `${w}: ens kolonnebredde (56 px = sm-slotten)`);
-    for (const x of r) assert.strictEqual(x.logo, BrandLogos.logoFor(x.brand).harLogo, `${w}: ${x.brand} — logo hvis mærket har et godkendt logo, ellers monogram (ingen blanding af bredde)`);
+    /* V5: logo hvis mærket har et godkendt, LÆSBART logo i sm-slotten (kernens regel: ≥ 12 px højt); ellers monogram — altid i samme 56 px kolonne */
+    for (const x of r) assert.strictEqual(x.logo, /bl--logo/.test(BrandLogos.logoHTML(x.brand, { storrelse: 'sm', decorative: true })), `${w}: ${x.brand} — logo hvis mærket har et læsbart godkendt logo, ellers monogram (ingen blanding af bredde)`);
     assert.strictEqual(new Set(r.map(x => Math.round(x.logoLeft))).size, 1, `${w}: logo/monogram står venstrestillet i kolonnen`);
     const svg = [...new Set(h.anmodninger.filter(x => /img\/brands\//.test(x)))];
     assert.ok(svg.length >= 2 && svg.length <= 8, `${w}: ${svg.length} forskellige SVG'er efter åbning (kun synlige rækker)`);
@@ -284,7 +293,8 @@ test('statisk annonceskabelon: logo kun for godkendte mærker, aria-label, og ku
   assert.ok(med.length >= 3, 'mindst tre mærker med logo i manifestet');
   for (const b of med){
     const s = side(mk(b));
-    assert.ok(s.includes('class="an-maerkelogo"') && s.includes(`aria-label="${Rigtig.logoFor(b).navn}-logo"`), b);
+    /* maske-logo: aria-label på spanen; farvet billede-logo (officiel fil): alt på <img> */
+    assert.ok(s.includes('class="an-maerkelogo"') && (s.includes(`aria-label="${Rigtig.logoFor(b).navn}-logo"`) || s.includes(`alt="${Rigtig.logoFor(b).navn}-logo"`)), b);
     assert.ok(s.includes('css/p-brand-logo.css') && s.includes('js/brand-logos.js') && s.includes('js/brand-logos-data.js'), b);
     assert.ok(s.indexOf('<script defer src="js/brand-logos.js') < s.indexOf('<script defer src="js/annonce.js'), 'logo-scriptet før annonce.js');
     assert.strictEqual((s.match(/<h1 /g) || []).length, 1);

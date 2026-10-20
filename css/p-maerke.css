@@ -972,3 +972,7 @@ html[data-lager-fejl] .mk-panel li:not(:first-child), html[data-lager-fejl] .fa-
 @media (min-width:560px) and (max-width:1099px){
   .mk-col .mk-mini:not(.mk-mini-reg):not(.mk-mini-kk){ grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
+
+/* V5 logoer: farvede officielle logoer står på en lys flise (box-shadow-spread 4-6 px uden for slotten, se p-brand-logo.css); lidt luft, så flisen aldrig rører H1 / CTA-overskriften */
+.mk-hero .mk-wordmark--logo:has(.bl--img){ margin-bottom: var(--space-2); }
+.mk-cta-navn--logo:has(.bl--img){ margin-bottom: var(--space-3); }

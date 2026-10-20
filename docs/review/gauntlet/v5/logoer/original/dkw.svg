@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with Inkscape (http://www.inkscape.org/) by Marsupilami -->
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg1246"
+   version="1.1"
+   width="1215.5"
+   height="617.48938">
+  <defs
+     id="defs1243" />
+  <rect
+     style="fill:#fbd12a;fill-rule:evenodd;stroke-width:0.86665678"
+     id="rect1084"
+     x="0"
+     y="0"
+     width="1215.5"
+     height="617.48938"
+     ry="105.72399" />
+  <path
+     d="m 545.25604,367.896 98.683,137.67 h 122.43 l -152.72,-207.4 113.24,-182.62 h -106.66 l -74.97,117.18 v -117.18 h -97.088 v 390.02 h 97.086 z"
+     id="path1086"
+     style="fill:#187cc8;stroke:#000000;stroke-width:20" />
+  <path
+     d="m 938.16604,352.596 40.282,152.97 h 48.29496 l 77.485,-390.02 h -87.036 l -24.80396,117.18 -31.505,-117.18 h -37.285 l -25.01,117.18 -31.57,-117.18 h -99.71 l 93.967,390.02 h 45.05 z"
+     stroke-miterlimit="10"
+     id="path1088"
+     style="fill:#187cc8;stroke:#000000;stroke-width:20;stroke-miterlimit:10" />
+  <path
+     d="m 118.12608,505.566 h 97.05 c 273.10996,1.177 272.59996,-389.24 0,-390.02 h -97.05 z m 115,-274.34 c 100.61996,-0.38 105.63996,157.05 0,156.88 z"
+     id="path1090"
+     style="fill:#187cc8;stroke:#000000;stroke-width:20" />
+  <rect
+     style="fill:none;stroke:#000000;stroke-width:20.38261032;stroke-dashoffset:6"
+     id="rect1094"
+     x="57.105347"
+     y="60.805305"
+     width="1102.6174"
+     height="496.33118"
+     ry="62.273979" />
+</svg>

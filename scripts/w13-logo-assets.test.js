@@ -11,11 +11,14 @@ const { spawnSync } = require('child_process');
 
 const REPO = path.join(__dirname, '..');
 const DIR = path.join(REPO, 'img', 'brands');
-const SLUGS = ['yamaha', 'honda', 'kawasaki', 'bmw', 'ktm', 'ducati', 'suzuki', 'triumph', 'harley-davidson', 'royal-enfield',
-  'aprilia', 'benelli', 'cfmoto', 'husqvarna', 'indian', 'moto-guzzi', 'mv-agusta', 'gasgas', 'zero', 'piaggio'];
+/* V5: ti af de oprindelige 20 AI-udkast er erstattet af OFFICIELLE filer (scripts/v5-logo-import.js, testet i scripts/v5-logo-officielle.test.js).
+   Her er kun de ti udkast, der stadig bruges. De officielle filer ligger i samme mappe og er ikke vektoriserede (flere paths, farver, > 6 KB). */
+const SLUGS = ['yamaha', 'kawasaki', 'bmw', 'ktm', 'suzuki', 'aprilia', 'cfmoto', 'moto-guzzi', 'gasgas', 'zero'];
 const KILDE = process.env.LOGO_KILDE || 'C:\\Users\\pasca\\Desktop\\Bikerbasen billeder';
 const assets = JSON.parse(fs.readFileSync(path.join(DIR, 'assets.json'), 'utf8'));
-const alleSvg = fs.readdirSync(DIR).filter(f => f.endsWith('.svg'));
+const manifestPoster = JSON.parse(fs.readFileSync(path.join(DIR, 'manifest.json'), 'utf8')).maerker;
+const officielleFiler = new Set(manifestPoster.filter(m => m.autenticitet === 'officiel').map(m => path.basename(m.fil)));
+const alleSvg = fs.readdirSync(DIR).filter(f => f.endsWith('.svg') && !officielleFiler.has(f));
 
 /* Minimal XML-velformethedstjek: tags balancerer, attributter er citerede, ingen DOCTYPE/entiteter/CDATA/kommentarer/PI. */
 function tjekXml(s){
@@ -34,13 +37,15 @@ function tjekXml(s){
   assert.strictEqual(stak.length, 0, 'ulukkede tags');
 }
 
-test('alle 20 hoved-SVG-filer findes, og assets.json har præcis disse 20 mærker', () => {
+test('alle 10 hoved-SVG-filer findes, og assets.json har præcis disse 10 mærker (de øvrige er officielle)', () => {
+  assert.strictEqual(officielleFiler.size, 21, 'V5: 21 officielle filer');
+  for (const s of SLUGS) assert.ok(!officielleFiler.has(`${s}.svg`), `${s} er både udkast og officiel`);
   for (const s of SLUGS) assert.ok(fs.existsSync(path.join(DIR, `${s}.svg`)), `${s}.svg mangler`);
   assert.deepStrictEqual(Object.keys(assets).sort(), SLUGS.slice().sort());
 });
 
 test('hver SVG er under 6 KB, ren (ét path + title) og sikker', () => {
-  assert.ok(alleSvg.length >= 20);
+  assert.ok(alleSvg.length >= 10);   // 10 hovedfiler + emblem/ordmærke-varianter
   for (const f of alleSvg){
     const raw = fs.readFileSync(path.join(DIR, f), 'utf8');
     assert.ok(Buffer.byteLength(raw) < 6144, `${f}: ${Buffer.byteLength(raw)} byte`);
@@ -104,10 +109,8 @@ test('metadata: godkendt=false for alle, autenticitet og krav om officiel fil', 
     assert.ok(/^ChatGPT-billede 17\. okt\. 2026, [\d.]+-\d+\.png$/.test(a.kildefil), `${s}: kildefil er kun filnavn`);
     assert.ok(['lockup', 'ordmaerke', 'emblem'].includes(a.hovedform));
   }
-  for (const s of ['harley-davidson', 'benelli', 'indian']){
-    assert.strictEqual(assets[s].kraever_officiel_fil, true, s);
-    assert.strictEqual(assets[s].autenticitet, 'ubrugelig', s);
-  }
+  /* Harley-Davidson, Benelli og Indian (før: 'ubrugelig', kraever_officiel_fil) har nu officielle filer og er ude af udkast-sættet */
+  for (const s of ['harley-davidson', 'benelli', 'indian']) assert.strictEqual(assets[s], undefined, s);
 });
 
 test('gemte IoU-målinger lever op til kravene (0,97; 0,94 for mærker der kræver officiel fil)', () => {
