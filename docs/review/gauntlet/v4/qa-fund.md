@@ -18,3 +18,14 @@ Bevis: `node scripts/v4-maerke-dakning.js --data live --snapshot <fil>` (viewpor
 
 ## Baseline
 720 annonce-id -> mærke gemt i `docs/review/gauntlet/v4/qa/maerke-baseline-live.json`. Live-lager ændres af crawleren: forsvundne/nye id'er er info; skiftet mærke er fejl.
+
+## Note til Agent 2 (annoncesider) - mobil-CTA "Vis nummer" lover noget, der måske ikke findes
+Ejer: Agent 2 (js/annonce.js, annonce.html, scripts/build-listing-pages.js). Ikke rettet af QA.
+
+Bevis (kode, ingen browserkørsel):
+- js/annonce.js:1548-1551: bjælken `#listing-actionbar` (knap `#bar-phone` "Vis nummer", annonce.html:170) fjernes kun hvis `loggedIn && !harNummer`. For en UDLOGGET besøgende vises den altid på egne (database-)annoncer.
+- js/annonce.js:1355 `telefonMulig = !telefon && isUuid(id) && db.enabled`: er altså sand for HVER database-annonce, uanset om sælgeren har slået nummeret til. Nummeret ligger aldrig i payloaden (kun RPC `hent_saelger_telefon`).
+- Klik som udlogget: `spring('reveal-phone-btn')` finder ingen knap og sender til `login.html?redirect=...` (js/annonce.js:1567-1572). Efter login klikker næste "Vis telefonnummer" på RPC'en; er svaret tomt (intet nummer / intet samtykke) kalder `telefonAfvist()` (linje 262) og fjerner knappen + bjælken. Resultat: CTA'en er trykket på, brugeren er tvunget gennem login, og svaret er "vises ikke".
+- Hvis sælgeren har et nummer i objektet (demo/lokale) virker knappen; for produktion (kun UUID-annoncer) afhænger det helt af RPC'en.
+
+Forslag (vælg én, Agent 2 beslutter): (a) vis bjælken kun, når man ved, at et nummer findes (fx lad RPC'en/public_profiles udstille et boolsk felt `telefon_vises`, aldrig selve nummeret); (b) ellers omdøb CTA'en til noget, der er sandt uden login ("Se sælger" / "Kontakt via annoncen") og lad nummer-forespørgslen vente til efter login; (c) som minimum: udlogget tryk skal sige hvad der sker ("Log ind for at se, om sælgeren viser nummer"), ikke love et nummer. Tilføj en test: udlogget annonce uden nummer må ikke have en primær "Vis nummer"-knap.
