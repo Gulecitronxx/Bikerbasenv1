@@ -284,7 +284,7 @@ test('V5 guide: typefliserne bruger hele kolonnen, "Læs også"-kortene har foto
     assert.ok(m.typerW >= m.kol - 2, `typefliserne fylder kolonnen (${m.typerW} af ${m.kol})`);
     assert.ok(m.tile >= 160, `flise ${m.tile}px`);
     assert.strictEqual(m.klippet, 0, 'ingen klippede typelinks');
-    assert.ok(m.rel.length === 3 && m.rel.every(r => r.h >= 80 && r.w >= 100), 'læs-også-fotos: ' + JSON.stringify(m.rel));
+    assert.ok(m.rel.length === 3 && m.rel.every(r => r.h >= 60 && r.w >= 100), 'læs-også-fotos: ' + JSON.stringify(m.rel));
     assert.ok(m.p > 560 && m.p < 700, `brødtekstens bredde ${m.p}`);
     assert.ok(m.linkDisplay === 'inline' || m.linkDisplay === 'ingen', 'enkeltlink i afsnit er inline: ' + m.linkDisplay);
     assert.ok(m.steps >= 1);

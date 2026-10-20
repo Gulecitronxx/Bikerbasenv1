@@ -412,7 +412,7 @@ function typeBlok(g, sektioner){
         <p class="gd-regionchips"><span>Eller se annoncer efter region:</span> ${REGIONER.filter(([f]) => filFindes(f)).map(([f, t]) => `<a href="${f}">${t}</a>`).join(' ')}</p>
       </section>`;
 }
-const HERO_POS = ['72% 55%', '58% 42%', '82% 62%', '66% 48%', '76% 70%'];
+const HERO_POS = ['90% 62%', '90% 55%', '90% 66%', '90% 58%', '90% 70%'];   /* V5: motorcyklen står til højre i fotoet (x 59-94 %); x-positionen holder den inde i billedet også på smalle skærme */
 
 /* ---------- Guideside ---------- */
 function renderGuide(g, ctx){

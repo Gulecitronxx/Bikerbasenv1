@@ -128,3 +128,22 @@ Smoke: `node scripts/smoke-browser.js --sider opret-annonce,login,mine-annoncer,
 5. `js/store.js` `toggleFavorite` (fra W9, uændret): databasefejl ved favorit gemmes kun som `console.warn`.
 6. Rytter-foto, håndskrevne taglines og et ægte autor-foto kræver assets; intet er downloadet.
 7. Guidesiderne er stadig statisk genereret: `build-guides.js` skriver rå HTML, og `inline-critical`/`csp-hashes` tilføjer resten (derfor skal hele byggekæden køres, ikke kun `build-guides.js`).
+
+## 8. Opfølgning: guidekort og hero-billeder (ejerens fund, separat commit)
+
+Fund (ejeren, `guides.html` ved ca. 1440): motorcykelbillederne i guidekortene var zoomet for meget ind (for-/baghjul og tank skåret af i siden), og kortets tekst stod med ca. 100 px tom plads mellem uddrag og "Læsetid".
+
+Årsag (målt): kortbillederne er studiofotos i 4:3 (456x342), hvor motorcyklen fylder hele bredden og står i bunden. Side-kortene (A2 og Køb brugt) lod billedfeltet strække sig til kortets højde (220 px bredt x ca. 300 px højt, `object-fit:cover`): 43 % af bredden røg af. Gitterkortene brugte 16:9 (hjul i bunden skåret), og tekstkolonnen var strakt med `margin-top:auto` til gitterets højeste kort. `guides-data.js` forankrede billederne i midten, og sidste guide (`hero-800`, `15% center`) viste vejen uden motorcykel.
+
+Rettet (`css/p-guides.css`, `scripts/guides-data.js`, `scripts/build-guides.js`):
+- Faste billedformater uden stor beskæring: gitterkort 3:2, side-kort 4:3 (vandret kort, billedet 44 % af bredden), det store kort 2:1 / fylder højden som et bredt bånd (fotoet er 2,4:1); små skærme (< 700 px) lodret med 3:2. Billederne forankres i bunden (`object-position: center 100%`); heltefotoet forankres til højre (82 %/90 %), hvor motorcyklen står.
+- Tekstblokken følger billedet: side-kortets tekst står midt for billedet, uden `margin-top:auto`; måling: højst 48 px luft mellem uddrag og "Læsetid" ved 768/1024/1440/1920 (før 85 px).
+- 1024-1199 px bruger tabletopstillingen (det store kort øverst, to vandrette kort under), fordi to kolonner dér gav stående strimler.
+- "Læs også": 3:2-miniature i fast format, midt i kortet (før: stående strimmel ved 375).
+- Hero-banner: motorcyklen står til højre i fotoet; x-forankringen er sat til 90 % på alle guides, og båndet vokser med skærmen fra 1440 px (18,5 vw / 15,5 vw på oversigten), så fotoet ikke skæres til en strimmel ved 1920 (motorcyklens synlige højde: 41 % -> 61 % på oversigten, 77 % på guiderne).
+
+Test: `scripts/v5-guidekort.test.js` (5 tests, Playwright mod mock, lys og mørk). Den regner ud, hvilket udsnit af originalbilledet `object-fit`/`object-position` viser, og kræver mindst 85 % af motivets bredde og højde i alle 10 kortbilleder ved 375/430/768/1024/1440/1920 (motiver målt ud fra billederne: studiofotos x 0-1, y 0,06-1; heltefotos x 0,59-0,94, y 0,27-0,87), mindst 90 % af bredden og 70 % af højden i hero-bannerne (50 % på den slanke oversigtsbjælke) på alle 11 sider ved 375/768/1440/1920, samme 85 % for "Læs også"-miniaturerne, højst 48 px luft i kortene, samt statisk at `cardPos` i `guides-data.js` er forankret. Verificeret rød mod versionen før rettelsen (kort: "100 % bredde, 80 % højde" ved 375; 85 px luft ved 1440).
+
+Før/efter: `docs/review/gauntlet/v5/saelger/guidekort/foer/guides-{375,430,768,1440,1920}-{lys,moerk}.jpg` og `.../guidekort/efter/` (samme sæt). Forsidens guide-banner (`index.html`) bruger ikke disse billeder (tegning, ikke foto) og er urørt.
+
+Kørt grønt efter rettelsen: `scripts/guides.test.js`, `scripts/w12-guides.test.js`, `js/w14-brugere.test.js`, `scripts/v2-indhold-cls.test.js`, `js/v5-saelger.test.js`, `scripts/v5-guidekort.test.js`, smoke strikt (11 guidesider x 320/390/768/1024/1440 x lys/mørk) 0 fejl og 0 advarsler, to gange.
