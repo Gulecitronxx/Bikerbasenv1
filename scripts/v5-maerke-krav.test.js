@@ -242,12 +242,8 @@ test('D. Ukendt ?brands=xyz i H1: ren side giver 0 fund; spejling i H1 og title 
 
 /* ---------- Kendt-listen ---------- */
 
-test('kendt-listen: v5-poster er kun v5-tjek (og kun dem, kontrollerne kan udløse), ingen duplikater', () => {
+test('kendt-listen: ingen v5-krav er "kendte" mere (alle rettet i integreret V5); ingen duplikater', () => {
   const kendt = JSON.parse(fs.readFileSync(KENDT, 'utf8'));
   assert.strictEqual(new Set(kendt).size, kendt.length, 'dubletter i kendt-listen');
-  const v5 = kendt.filter(k => /^v5-/.test(k));
-  assert.ok(v5.length >= 10, 'v5-krav skal stå som kendte fund indtil de er rettet: ' + v5.length);
-  for (const k of v5) assert.ok(/\|\*$/.test(k), `v5-poster er jokere (tjek|*): ${k}`);
-  /* Fejl i selve kontrollerne (kunne-ikke-koere) og konsolfejl er ægte regressioner og må aldrig være "kendte". */
-  for (const k of v5) assert.ok(!/kunne-ikke-koere|konsolfejl|supabase-skrivning/.test(k), `må ikke være kendt: ${k}`);
+  assert.deepStrictEqual(kendt.filter(k => /^v5-/.test(k)), [], 'v5-krav må ikke gemmes som kendte fund: ret koden i stedet');
 });
