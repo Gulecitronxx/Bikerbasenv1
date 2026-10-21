@@ -88,5 +88,8 @@ test('browser: målt overførsel for de tunge sider ligger inden for budget (das
   /* V6 (F4): en vagt først i <head> sender udloggede væk, FØR dashboard-pakken hentes. Målingen ender derfor på login.html og skal være LIGE SÅ LILLE som login.html
      alene (før: 1019 kB, begge pakker; nu: kun login.html + de 8 kB HTML fra den første side). Se js/v6-konto-vagt.test.js. */
   assert.ok(mine.i_alt >= r.maal.browser['login.html'].i_alt, 'omdirigeringen tæller mindst login-siden');
+  assert.strictEqual(mine.kontoPakkeHentet, false, 'kontosidens egen pakke (js/dashboard.js / js/mine-annoncer.js) må ikke hentes af en udlogget besøgende');
+  assert.ok(r.maal.browser['dashboard.html'].kontoPakkeHentet === false, 'samme for dashboard.html');
+  assert.ok(r.budget.browser['dashboard.html'] < 700000 && r.budget.browser['mine-annoncer.html'] < 700000, 'browser-budgettet for kontosiderne afspejler login-niveauet (< 700 kB), ikke de gamle 1,1 MB');
   assert.ok(mine.i_alt < r.maal.browser['login.html'].i_alt * 1.2, `dashboard-pakken hentes ikke længere før omdirigeringen: ${mine.i_alt} mod ${r.maal.browser['login.html'].i_alt}`);
 });
