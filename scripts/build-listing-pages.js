@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const { ROOT, siteUrl, listingSlug, fetchListings, siteParts, esc } = require('./shared');
 const { tjekAntal, tjekSletninger, taelAnnonceSider } = require('./seo-vagt');
+const BrandRegistry = require('../js/brands-registry.js');   // V6: kun registrerede mærker får mærke-/model-links i brødkrummen
 const BrandLogos = require('../js/brand-logos.js');   // W13: producentlogo ved titlen (kun godkendt logo; ellers intet)
 
 // data.js giver os formatPrice, typeLabel, equipmentLabel osv.
@@ -36,14 +37,19 @@ const Icon = (() => { const src = fs.readFileSync(path.join(ROOT, 'js/icons.js')
 /* Brødkrumme og handlingsrække skrives her med PRÆCIS samme markup som anBrodkrumme()/anAktioner() i
    js/annonce.js, så siden ikke skifter udseende eller flytter sig, når scriptet hydrerer. "Ukendt" er
    ikke et mærke man kan søge på, så leddet udelades (samme regel som i js/annonce.js). */
+/* V6: et fritekst-mærke ("Andet mærke") har ingen søgning at pege på (?brands= kender kun registrerede mærker) -> ren tekst, ingen links. */
+const maerkeKendt = (m) => !!m && m !== 'Ukendt' && BrandRegistry.erKendt(m);
+
 function brodkrumme(l){
   const maerkeOK = l.brand && l.brand !== 'Ukendt';
+  const maerkeLink = maerkeKendt(l.brand);
   const enc = encodeURIComponent;
   const led = [['index.html', 'Forside'], ['soegning.html', 'Motorcykler']];
-  if (maerkeOK) led.push([`soegning.html?brands=${enc(l.brand)}`, l.brand]);
-  if (maerkeOK && l.model) led.push([`soegning.html?brands=${enc(l.brand)}&model=${enc(l.model)}`, l.model]);
+  if (maerkeLink) led.push([`soegning.html?brands=${enc(l.brand)}`, l.brand]);
+  if (maerkeLink && l.model) led.push([`soegning.html?brands=${enc(l.brand)}&model=${enc(l.model)}`, l.model]);
+  else if (maerkeOK) led.push([null, l.brand]);
   const sidste = [maerkeOK ? l.brand : '', l.model].filter(Boolean).join(' ') || 'Annonce';
-  return led.map(([h, t]) => `<a href="${esc(h)}">${esc(t)}</a><span class="bc-sep">${Icon.chevronRight}</span>`).join('')
+  return led.map(([h, t]) => `${h ? `<a href="${esc(h)}">${esc(t)}</a>` : `<span class="bc-plain">${esc(t)}</span>`}<span class="bc-sep">${Icon.chevronRight}</span>`).join('')
     + `<span id="bc-current" aria-current="page">${esc(sidste)}${l.year ? ` (${esc(String(l.year))})` : ''}</span>`;
 }
 
@@ -131,9 +137,11 @@ function jsonLd(l, url){
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Forside', item: `${BASE}` },
       { '@type': 'ListItem', position: 2, name: 'Motorcykler', item: `${BASE}/soegning` },
-      { '@type': 'ListItem', position: 3, name: l.brand, item: `${BASE}/soegning?brands=${encodeURIComponent(l.brand)}` },
-      { '@type': 'ListItem', position: 4, name: l.model, item: `${BASE}/soegning?brands=${encodeURIComponent(l.brand)}&model=${encodeURIComponent(l.model)}` },
-      { '@type': 'ListItem', position: 5, name: `${navn} (${l.year})`, item: url },
+      ...(maerkeKendt(l.brand) ? [
+        { '@type': 'ListItem', position: 3, name: l.brand, item: `${BASE}/soegning?brands=${encodeURIComponent(l.brand)}` },
+        { '@type': 'ListItem', position: 4, name: l.model, item: `${BASE}/soegning?brands=${encodeURIComponent(l.brand)}&model=${encodeURIComponent(l.model)}` },
+      ] : []),
+      { '@type': 'ListItem', position: maerkeKendt(l.brand) ? 5 : 3, name: `${navn} (${l.year})`, item: url },
     ],
   };
   /* id'erne skal matche dem js/seo.js bruger. Seo.setJsonLd fjerner en

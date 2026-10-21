@@ -465,6 +465,23 @@ function renderMine(){
   });
 }
 
+/* V6: "Ingen gemte annoncer" er forkert, når der ER gemte annoncer, som blot kræver login (egne uuid-favoritter af private sælgere). Teksten, ikonet og knappen
+   skiftes og gendannes, så markuppen i mine-annoncer.html stadig er den tomme tilstand uden JavaScript. */
+function tomTilstand(empty, krL){
+  if (!empty) return;
+  const h = empty.querySelector('h3'), p = empty.querySelector('p'), a = empty.querySelector('a.btn');
+  if (!h || !p || !a) return;
+  if (!empty.dataset.org) empty.dataset.org = JSON.stringify({ h: h.textContent, p: p.textContent, t: a.textContent, href: a.getAttribute('href') });
+  const o = JSON.parse(empty.dataset.org);
+  empty.classList.toggle('db-empty--login', !!krL);
+  if (krL){
+    h.textContent = `${krL} gemt${krL === 1 ? '' : 'e'} annonce${krL === 1 ? '' : 'r'} kræver login`;
+    p.textContent = `${krL === 1 ? 'Annoncen' : 'Annoncerne'} er fra private sælgere og gemmes på din konto. Log ind for at se ${krL === 1 ? 'den' : 'dem'}.`;
+    a.textContent = 'Log ind';
+    a.setAttribute('href', 'login.html?redirect=' + encodeURIComponent('mine-annoncer.html?tab=favoritter'));
+  } else { h.textContent = o.h; p.textContent = o.p; a.textContent = o.t; a.setAttribute('href', o.href); }
+}
+
 async function renderFavorites(){
   /* V5: anonym (ingen login) ser kun de lokale favoritter (indekserede annoncer, gemt i denne browser). Egne uuid-favoritter kræver en konto:
      de hentes ikke (intet kald til databasen) og ryddes ikke (intet skrives). Findes der alligevel nogle, siger siden det (#db-anon-egne). */
@@ -521,10 +538,15 @@ async function renderFavorites(){
   const grid = document.getElementById('fav-grid');
   const empty = document.getElementById('fav-empty');
   const antalFav = favs.length + extVaek.length;
-  setCount('stat-fav', antalFav);
-  setCount('fav-count-inline', antalFav);
+  /* V6 (Critic P2-5): tælleren og listen siger det samme. Header-tælleren ("Favoritter 2") tæller også egne uuid-favoritter, som en anonym ikke kan se
+     (de kræver en konto). Her står derfor det SAMME tal (vist + kræver login), og siger listen intet, står der hvor mange der kræver login i stedet for
+     "Ingen gemte annoncer". Logget ind er egneAnonymt 0, og alt er som før. */
+  setCount('stat-fav', antalFav + egneAnonymt);
+  setCount('fav-count-inline', antalFav + egneAnonymt);
   document.querySelector('#tab-favoritter .db-list-head')?.style.setProperty('display', antalFav ? '' : 'none');
+  tomTilstand(empty, antalFav ? 0 : egneAnonymt);
   if (!antalFav){
+    if (egneNote) egneNote.hidden = true;   // den tomme tilstand siger det selv
     grid.style.display = 'none';
     grid.innerHTML = '';
     empty.style.display = 'block';

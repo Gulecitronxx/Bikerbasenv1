@@ -640,6 +640,8 @@
 .an-crumbrow .breadcrumb{ min-width:0; flex:1 1 320px; }
 .an-crumbrow .breadcrumb > *{ min-width:0; }
 .an-crumbrow .breadcrumb #bc-current{ color: var(--color-fg); font-weight:600; overflow-wrap:anywhere; }
+/* V6: et mærke uden søgning at pege på (fritekst fra "Andet mærke") står som ren tekst — ens farve som linkene, men ingen hover og ingen understregning. */
+.an-crumbrow .breadcrumb .bc-plain{ color: var(--color-fg-muted); cursor: default; }
 .an-actions{ display:flex; align-items:center; gap: var(--space-1); flex-wrap:wrap; padding-top:0; }
 .an-act{
   display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 12px;
@@ -787,15 +789,28 @@
   position:static; width:auto; height:auto; overflow:visible; clip:auto; white-space:normal;
   font-size: clamp(28px,3.1vw,40px); line-height:1.08; letter-spacing:-.01em; margin: 12px 0 6px;
   overflow-wrap:anywhere;
+  text-wrap:balance;   /* V6: ombrydes i lige lange linjer, aldrig et enligt ord ("R") på linje 2 */
 }
 /* W13 logo: titelrække med producentens logo højrejusteret ved H1 (kun når et godkendt logo findes; ellers er h1 alene som før). */
 .an-titelraekke{ display:flex; align-items:flex-start; justify-content:space-between; gap: var(--space-3); margin:12px 0 6px; }
 .an-titelraekke .an-h1{ margin:0; flex:1 1 auto; min-width:0; }
-.an-maerkelogo{ flex:none; display:flex; align-items:center; justify-content:flex-end; margin-top:2px; }   /* slotten (xl) er 64 px høj fra 1180 px, 44 px under, 34 px under 700 px — se css/p-brand-logo.css */
+.an-maerkelogo{ flex:none; display:flex; align-items:center; justify-content:flex-end; margin-top:2px; }
+/* V6 (Critic P2-3): maks.-bredde-loft for logoet i titelrækken. Et bredt ordmærke (Honda 8:1) var 160 px og åd H1'ens bredde ("R" alene på linje 2 ved 1440 og 768).
+   Loftet gælder kun BREDDEN (højden og arealgrænsen i p-brand-logo.css er uændrede), så smalle emblemer (Triumph, Harley) ikke berøres. */
+.an-maerkelogo .bl--xl{ --bl-maxw:120px; }
+@media (max-width:1179px){ .an-maerkelogo .bl--xl{ --bl-maxw:104px; } }   /* slotten (xl) er 64 px høj fra 1180 px, 44 px under, 34 px under 700 px — se css/p-brand-logo.css */
 .listing-title-rad{ display:flex; align-items:center; justify-content:space-between; gap: var(--space-3); }
 .listing-title-rad .listing-title{ min-width:0; }
 @media (max-width:1179px){
   .an-maerkelogo{ margin-top:0; }
+}
+/* Under 1180 px (mobil og tablet, hvor titelkolonnen kun er 290-340 px bred) står et bredt ordmærke ALENE i en række over titlen (venstrestillet),
+   så H1 får hele bredden ("Royal Enfield Interceptor 650" ellers: "650" alene på linje 3 ved 768). Fra 1180 px står det til højre som før. */
+@media (max-width:1179px){
+  .an-titelraekke--bred{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .an-titelraekke--bred .an-maerkelogo{ order:-1; justify-content:flex-start; margin-top:0; }
+  .an-titelraekke--bred .an-h1{ align-self:stretch; }
+  .an-titelraekke--bred .an-maerkelogo .bl--xl{ --bl-maxw:120px; }
 }
 .an-sub{ display:flex; flex-wrap:wrap; margin:0; color: var(--color-fg-muted); font-size:15px; }
 .an-sub span + span::before{ content:"|"; margin:0 10px; color: var(--color-border); }
@@ -1031,7 +1046,7 @@
 @media (min-width:900px){
   .an-crumbrow{ flex-wrap:nowrap; }
   .an-crumbrow .breadcrumb{ flex-wrap:nowrap; white-space:nowrap; overflow:hidden; }
-  .an-crumbrow .breadcrumb > a, .an-crumbrow .breadcrumb > .bc-sep{ flex:0 0 auto; }
+  .an-crumbrow .breadcrumb > a, .an-crumbrow .breadcrumb > .bc-plain, .an-crumbrow .breadcrumb > .bc-sep{ flex:0 0 auto; }
   .an-crumbrow .breadcrumb #bc-current{ overflow:hidden; text-overflow:ellipsis; overflow-wrap:normal; }
   .an-actions{ flex:0 0 auto; }
 }
@@ -1250,3 +1265,17 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
 .listing-actionbar .btn .bar-l{ display:block; font-weight:700; line-height:1.15; }
 .listing-actionbar .btn small{ display:block; margin-top:1px; font-size:11px; font-weight:500; line-height:1.1; opacity:.92; }
 .listing-actionbar .btn:has(small){ padding-block:5px; }
+
+/* ============ V6 marked: annoncesiden tættere på Annonce.png (se docs/review/gauntlet/v6/marked.md, forskelsliste) ============ */
+/* (V6-2) Fotopillen er kompakt som billedets tæller ("Foto: MC Syd"). "flere billeder i deres annonce" står stadig for skærmlæsere, og den runde knap øverst til højre (titel + aria-label) fører til kildens billeder. */
+.an-photo-ext .an-photo-mere{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+/* (V6-5) "Det bør du tjekke": fotoet fylder ca. 36 % af båndet (billedet: ca. 40 %) i stedet for halvdelen, og båndet er 30 px lavere. */
+@media (min-width:1180px){
+  .an-tjek.an-tjek-medfoto{ grid-template-columns:minmax(0,1.8fr) minmax(0,1fr); }
+  .an-tjek-foto{ height:190px; }
+}
+/* (V6-6) Lignende motorcykler: stedet står ikke i stribens kort (billedets række: foto, titel, år | km | type, pris); kilden er stadig på kortet (ærlighed), men uden to reserverede linjer. */
+.similar-strip .rk-sted{ display:none; }
+.similar-strip .rk-kilde{ min-height:0; }
+/* (V6-7) Faktatabel: lidt lavere rækker på telefon (10 rækker x ca. 7 px mindre). Desktop er uændret: kolonnebundene flugter (w14-annonce, højst 100 px). */
+@media (max-width:699px){ .an-fact{ padding:7px 8px; margin-bottom:4px; } }

@@ -1539,9 +1539,7 @@ function typefotoKort(root){
   if (!root || !root.querySelectorAll) return;
   const kort = root.matches && root.matches('.card-rich, .listing-row') ? [root] : Array.from(root.querySelectorAll('.card-rich, .listing-row'));
   kort.forEach(k => {
-    /* Fra 760 px staar sammenlign-knappen i kortets fod i stedet for oven i fotoet (css/p-soegning.css). */
-    const sam = k.querySelector('.card-media > .card-compare');
-    if (sam && window.innerWidth >= 760) k.appendChild(sam);
+    /* V6: sammenlign-knappen bliver på fotoet ved alle bredder (før V6 blev den flyttet ned i kortet fra 760 px, hvilket gav en 40 px fodslot og et resize-problem). */
     const tom = k.querySelector('.card-media > .foto-tom:not(.foto-fejl), .row-media > .foto-tom:not(.foto-fejl)');
     if (!tom) return;
     const t = String(k.dataset.type || (k.querySelector('.row-variant')?.textContent) || '').toLowerCase();

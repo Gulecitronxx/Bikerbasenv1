@@ -115,12 +115,13 @@ test('annonce: logo kun for godkendte mærker, højrejusteret ved ≥1180, aria-
   assert.strictEqual(m.h1Antal, 1);
   /* P2-4: stort nok til at kunne læses (mockuppen ca. 117x40 ved ca. 1440 — her 56-64 px høj, op til 160 bred), uden at skubbe H1 eller prisen */
   /* V5: slottens mål følger logoets forhold (min. af maks. højde 64, maks. bredde 160 og maks. areal) — Honda er et bredt ordmærke (160 x ca. 20 px) */
-  const hl = BrandLogos.logoFor('Honda'), fv = BrandLogos.slotMaal('xl', hl.bredde / hl.hoejde);
+  /* V6 (Critic P2-3): annoncens titelrække har et maks.-bredde-loft på 120 px (css/p-annonce.css) — slotten skaleres ned med uændret forhold */
+  const hl = BrandLogos.logoFor('Honda'), fv0 = BrandLogos.slotMaal('xl', hl.bredde / hl.hoejde), fv = { w: Math.min(fv0.w, 120), h: fv0.h * Math.min(1, 120 / fv0.w) };
   assert.ok(Math.abs(m.logoH - fv.h) <= 1 && Math.abs(m.logoW - fv.w) <= 1 && m.logoH <= 64.5, `logo ${m.logoW}x${m.logoH} ved 1440, forventet ${fv.w.toFixed(1)}x${fv.h.toFixed(1)}`);
-  assert.ok(m.logoW <= 160.5, `logo ${m.logoW} bredt (maks. 160)`);
+  assert.ok(m.logoW <= 120.5, `logo ${m.logoW} bredt (maks. 120 i titelrækken)`);
   assert.ok(m.raekkeH <= Math.max(72, m.h1H + 1), `titelrækken ${m.raekkeH} px høj (maks. 72 eller h1'ens egen højde ${m.h1H})`);
-  /* V5: Honda er et 160 px bredt ordmærke i xl-slotten (før: et ca. 80 px bredt udkast); h1 får derfor lidt mindre plads (262 px) og ombryder i to linjer */
-  assert.ok(m.h1W >= 240, `h1 er ikke presset: ${m.h1W} px bred`);
+  /* V5: Honda var et 160 px bredt ordmærke i xl-slotten (h1 262 px, "R" alene på linje 2, V5-Critic P2-3); V6: loft 120 px -> h1 får plads nok til at "Honda CB 1000 R" står på én linje */
+  assert.ok(m.h1W >= 290, `h1 er ikke presset: ${m.h1W} px bred`);
   assert.ok(m.h1H <= 3 * 1.2 * 40 + 2, `h1 ombryder pænt: ${m.h1H} px`);
   await ctx.close();
 });
@@ -138,7 +139,8 @@ test('annonce: logo i titelrækken for Harley-Davidson, Indian og Benelli (godke
     assert.strictEqual(m.label, mærke + '-logo');
     assert.ok(m.hoejre <= 1, mærke + ' højrejusteret');
     const ll = BrandLogos.logoFor(mærke), fl = BrandLogos.slotMaal('xl', ll.bredde / ll.hoejde);
-    assert.ok(Math.abs(m.lh - fl.h) <= 1 && Math.abs(m.lw - fl.w) <= 1 && m.lh <= 64.5 && m.lw <= 160.5, `${mærke}: logo ${m.lw}x${m.lh} (forventet ${fl.w.toFixed(1)}x${fl.h.toFixed(1)}, maks. 64 højt, 160 bredt)`);
+    const fe = { w: Math.min(fl.w, 120), h: fl.h * Math.min(1, 120 / fl.w) };   // V6: loft 120 px i titelrækken
+    assert.ok(Math.abs(m.lh - fe.h) <= 1 && Math.abs(m.lw - fe.w) <= 1 && m.lh <= 64.5 && m.lw <= 120.5, `${mærke}: logo ${m.lw}x${m.lh} (forventet ${fe.w.toFixed(1)}x${fe.h.toFixed(1)}, maks. 64 højt, 120 bredt)`);
     assert.ok(m.rh <= Math.max(72, m.h1h + 1), `${mærke}: titelrække ${m.rh} px`);
     assert.ok(m.h1w >= 280, `${mærke}: h1 presset til ${m.h1w} px`);
     assert.strictEqual(m.h1, 1);

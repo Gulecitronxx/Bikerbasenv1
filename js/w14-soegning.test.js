@@ -125,7 +125,7 @@ test('filter-URL 1440: chip-rækken vises; under 1280 bliver Gem søgning i chip
   } finally { await s.luk(); }
 });
 
-test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme felter), sammenlign i kortets fod, titel højst to linjer', { skip }, async () => {
+test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme felter), sammenlign på fotoet (V6), titel højst to linjer', { skip }, async () => {
   const s = await aabn({ w: 1440, n: 44 });
   try {
     await gaa(s, 'soegning.html');
@@ -147,7 +147,7 @@ test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme fel
     });
     assert.ok(m.typefoto > 0 && m.labelTekst.every(t => /ikke annoncens/i.test(t)), 'typefoto med ærligt label');
     assert.equal(m.stiplet, 0, 'ingen stiplede tomme fotofelter');
-    assert.equal(m.samIFoto, 0, 'sammenlign ligger ikke i fotoet');
+    assert.equal(m.samIFoto, m.n, 'V6: sammenlign ligger på fotoet (nederst til højre) i alle kort; før V6 i en 40 px fodslot (kortet 15 px højere)');
     assert.ok(m.titelLinjer <= 2, 'V5: titel højst to linjer (var klippet til én linje med ellipse) ' + m.titelLinjer);
     assert.ok(m.raekkerEns, 'kortene i samme række er lige høje (grid strækker), også når en titel/chip-række fylder mere');
     assert.ok(m.bundH <= 350, 'bundmoduler ' + m.bundH);
