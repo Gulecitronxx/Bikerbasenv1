@@ -74,7 +74,7 @@ test('A6/A9 slots: fallback og logo har areal > 0, ligger inden for slotten, og 
   assert.ok(mal.every(x => /url\("data:image\/svg\+xml,/.test(x.maske) && !/%3Csvg xmlns='http:\/\/www\.w3\.org\/2000\/svg'\/%3E/.test(x.maske)), 'maske = den hentede fil (ikke den tomme)');
   assert.equal(await page.evaluate(() => document.querySelectorAll('.bl--fejl').length), 0, 'ingen fejl når filerne leveres');
   // ens visuel vægt i ALLE slots (ens max-højde + max-bredde + max-areal): største/mindste areal ≤ 2,2 for logoer med forhold ≥ 0,85, og ingen uden for sin slot
-  const SL = { sm: [22, 56], md: [30, 60], lg: [40, 120], xl: [64, 160], hero: [72, 280] };
+  const SL = { sm: [22, 64], az: [22, 80], md: [30, 60], lg: [40, 120], xl: [64, 160], hero: [72, 280] };
   const va = await page.evaluate(() => [...document.querySelectorAll('#vaegt-alle [data-n]')].map(e => { const b = e.querySelector('.bl'); const r = b.getBoundingClientRect(); return { n: e.dataset.n, s: e.dataset.s, w: r.width, h: r.height, logo: b.classList.contains('bl--logo') }; }));
   for (const [s, [smh, smw]] of Object.entries(SL)){
     const rk = va.filter(x => x.s === s && x.logo);
@@ -310,7 +310,7 @@ test('P2-1 en logofil, der svarer 200 men er en HTML-side i stedet for SVG, give
   } finally { sv.tilstand.svg = 'ok'; }
 });
 
-test('P2-2 A–Z-liste og filter: alle rækker har ens kolonnebredde (56 px) og ens venstrekant; brede logoer (Kawasaki, KTM) er logoer, ikke monogram; mærker uden logo har monogram i samme kolonne', async t => {
+test('P2-2 A–Z-liste og filter: alle rækker har ens kolonnebredde (64 px = sm-slotten, V6; før 56) og ens venstrekant; brede logoer (Kawasaki, KTM) er logoer, ikke monogram; mærker uden logo har monogram i samme kolonne', async t => {
   if (skip()) return t.skip('Chromium mangler');
   for (const [w, tema] of [[1440, 'light'], [390, 'dark']]){
     const { page, ctx } = await side(sv.url + '/t-med.html', { w, tema });
@@ -320,14 +320,14 @@ test('P2-2 A–Z-liste og filter: alle rækker har ens kolonnebredde (56 px) og 
       return { navn: l.querySelector('.az-navn').textContent, spW: sp.width, spX: sp.x, blX: b.x, blW: b.width, blH: b.height, navnX: nv.x, logo: bl.classList.contains('bl--logo'), emblem: bl.classList.contains('bl--emblem'), mono: bl.classList.contains('bl--mono') };
     }));
     assert.ok(rk.length >= 14);
-    assert.deepEqual([...new Set(rk.map(x => x.spW))], [56], 'ens kolonnebredde');
+    assert.deepEqual([...new Set(rk.map(x => x.spW))], [64], 'ens kolonnebredde');
     assert.equal(new Set(rk.map(x => Math.round(x.spX))).size, 1, `ens venstrekant for kolonnen @${w}`);
     assert.equal(new Set(rk.map(x => Math.round(x.navnX))).size, 1, `ens venstrekant for navnene @${w}`);
     assert.equal(new Set(rk.map(x => Math.round(x.blX))).size, 1, `logo/monogram står venstrestillet i kolonnen @${w}`);
     for (const n of ['Honda', 'Yamaha', 'BMW', 'Kawasaki', 'KTM', 'Ducati', 'Suzuki', 'Triumph']){
       const x = rk.find(r => r.navn === n);
       assert.ok(x.logo && !x.mono, `${n} skal vise logo i A–Z`);
-      assert.ok(x.blH >= 12 && x.blW <= 56.5 && x.blH <= 22.5, `${n}: ${x.blW}x${x.blH}`);
+      assert.ok(x.blH >= 9.5 && x.blW <= 64.5 && x.blH <= 22.5, `${n}: ${x.blW}x${x.blH}`);
     }
     assert.ok(rk.find(r => r.navn === 'Kawasaki').emblem && rk.find(r => r.navn === 'Honda').emblem, 'emblem-varianten bruges i sm hvor den findes');
     assert.ok(!rk.find(r => r.navn === 'KTM').emblem, 'KTM har ingen emblem-fil: hovedfilen skaleres ned');

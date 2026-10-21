@@ -87,26 +87,26 @@ test('A15 med godkendte placeholder-logoer: hero, CTA, topfliser og A-Z bruger l
   const rk = idx.match(/<li data-mk-soeg="[^"]*"><a [\s\S]*?<\/li>/g);   // A–Z-rækkerne (V5: "Flere mærker"-pillerne har også data-mk-soeg, men er tekst)
   assert.ok(rk.length >= 29);
   assert.equal(antal(idx, /<span class="mk-az-logo">/g), rk.length, 'A-Z: logokolonne på ALLE rækker, ellers hopper navnene');
-  for (const r of rk) assert.match(r, /class="bl bl--sm bl--(logo|mono)[ "]/);
+  for (const r of rk) assert.match(r, /class="bl bl--az bl--(logo|mono)[ "]/);
   assert.match(idx, /<script defer src="js\/brand-logos-data\.js"><\/script>\s*<script defer src="js\/brand-logos\.js"><\/script>\s*<script defer src="js\/maerke\.js">/);
   // ingen pr.-mærke-hårdkodning: ALLE logoreferencer kommer fra manifestet
   for (const m of idx.matchAll(/img\/brands\/([a-z0-9-]+\.svg)/g)) assert.ok(Object.values(H.TILDELING).some(t => t.includes(m[1])), m[1]);
 
   /* P2-2: A–Z viser et logo for HVERT mærke, der har et godkendt logo (også brede: Kawasaki, KTM) — ikke monogram — og monogram for resten,
-     i samme (56 px) kolonne. sm vælger emblem-varianten, hvor manifestet har en; ellers hovedfilen. */
+     i samme (V6: 80 px, slot az) kolonne. az vælger emblem-varianten, hvor manifestet har en; ellers hovedfilen. */
   const raekkeFor = slug => rk.find(r => r.includes(`href="maerke-${slug}.html"`));
   for (const slug of Object.keys(H.TILDELING)){
     const r = raekkeFor(slug);
     if (!r) continue;   // mærket har ingen side i det syntetiske lager
-    assert.match(r, /class="bl bl--sm bl--logo[ "]/, `${slug}: logo i A–Z`);
+    assert.match(r, /class="bl bl--az bl--logo[ "]/, `${slug}: logo i A–Z`);
     assert.doesNotMatch(r, /bl--mono/, `${slug}: ikke monogram`);
     const em = H.TILDELING[slug][3];
     assert.match(r, new RegExp(`(?:data-bl-src|src)="img/brands/${(em || H.TILDELING[slug][0]).replace('.', '\\.')}"`), `${slug}: ${em ? 'emblem-variant' : 'hovedfil'} i sm`);
   }
   assert.match(raekkeFor('kawasaki'), /bl--emblem/);
-  assert.match(raekkeFor('bsa'), /bl--sm bl--mono/);
+  assert.match(raekkeFor('bsa'), /bl--az bl--mono/);
   assert.ok(rk.filter(r => /bl--logo/.test(r)).length >= 5 && rk.filter(r => /bl--mono/.test(r)).length >= 10);
-  assert.match(les(til, 'css/p-maerke.css'), /\.mk-az-logo\{[^}]*width:56px/);
+  assert.match(les(til, 'css/p-maerke.css'), /\.mk-az-logo\{[^}]*width:80px/);
 });
 
 test('A15 aliaser står i hver A-Z-række (hurtigsøg finder "harley" og "bmw motorrad")', () => {

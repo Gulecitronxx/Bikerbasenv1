@@ -840,7 +840,7 @@ function maerkeFliseHTML(b, antalTekstStr){
         </a>`;
 }
 function azRaekkeHTML(b, antal, harLogoer){
-  const logo = harLogoer ? `<span class="mk-az-logo">${BrandLogos.logoHTML(b, { storrelse: 'sm', decorative: true, statisk: true })}</span>` : '';
+  const logo = harLogoer ? `<span class="mk-az-logo">${BrandLogos.logoHTML(b, { storrelse: 'az', decorative: true, statisk: true })}</span>` : '';
   return `<li data-mk-soeg="${esc([BrandLogos.logoFor(b).slug || BrandLogos.noegle(b), ...BrandLogos.logoFor(b).aliaser].join('|'))}"><a href="maerke-${slugify(b)}.html"><span class="mk-az-navn">${logo}<span>${esc(b)}</span></span><span class="mk-az-n">${antal}</span></a></li>`;
 }
 function harNogetLogo(navne){ return navne.some(n => BrandLogos.logoFor(n).harLogo); }

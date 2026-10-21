@@ -6,7 +6,7 @@
    monogrammet (som i dag), grøn aldrig.
 
    Størrelser (SKAL være lig SLOT i js/brand-logos.js — testet): højde x bredde, k = √maks. areal.
-     sm 22x56 · md 30x60 · lg 40x120 · xl 64x160 (annoncens titelrække; 44x110 under 1180, 34x88 under 700) · hero 72x280 (48x200 på mobil).
+     sm 22x64 (filter) · az 22x80 (A–Z) · md 30x60 · lg 40x120 · xl 64x160 (annoncens titelrække; 44x110 under 1180, 34x88 under 700) · hero 72x280 (48x200 på mobil).
    Bredden er min(maks. bredde, maks. højde · forhold, k · √forhold): ens max-højde, ens max-bredde og ens max-AREAL, så et smalt
    emblem, et kvadratisk skjold og et bredt ordmærke har samme visuelle vægt. --bl-ar og --bl-sa (= √forhold) står i markup.
 
@@ -20,7 +20,9 @@
   box-sizing:border-box; vertical-align:middle; line-height:1;
   color: var(--bl-fg, var(--color-fg));
 }
-.bl--sm{ --bl-maxh:22px; --bl-maxw:56px; --bl-k:26.5px; }
+/* V6: sm = søgefilter (64 px), az = A–Z-listen (80 px); begge 22 px høje. Skal følge SLOT i js/brand-logos.js (testet). */
+.bl--sm{ --bl-maxh:22px; --bl-maxw:64px; --bl-k:26.5px; }
+.bl--az{ --bl-maxh:22px; --bl-maxw:80px; --bl-k:28px; }
 .bl--md{ --bl-maxh:30px; --bl-maxw:60px; --bl-k:34.6px; }
 .bl--lg{ --bl-maxh:40px; --bl-maxw:120px; --bl-k:45.8px; }
 .bl--xl{ --bl-maxh:64px; --bl-maxw:160px; --bl-k:84.9px; }
@@ -84,10 +86,13 @@
 a:hover > .bl, a:focus-visible > .bl{ color: var(--bl-fg-hover, var(--bl-fg, var(--color-fg))); }
 
 /* Fast kolonne foran et navn (filterrække, A–Z): alle rækker får samme venstrekant, med eller uden logo. Den lille kolonne er
-   bred (56 px), så også et bredt ordmærke (KTM, Aprilia, Benelli) kan vises; logoerne står venstrestillet i den. */
+   bred (64 px i filteret, 80 px i A–Z, se SLOT i js/brand-logos.js), så også et bredt ordmærke (KTM, Aprilia, Benelli, Kawasaki) kan vises; logoerne står venstrestillet i den. */
 .bl-spalte{ display:inline-flex; align-items:center; justify-content:center; flex:none; }
-.bl-spalte--sm{ width:56px; justify-content:flex-start; }
+.bl-spalte--sm{ width:64px; justify-content:flex-start; }
 .bl-spalte--md{ width:60px; }
+/* V6: monogrammet i filterlisten (de få brede ordmærker uden læsbart logo, og mærker uden logo) har samme neutrale udtryk som i A–Z (.mk-az-logo .bl-mono):
+   grå flade, dæmpet bogstav, tynd kant, samme 22 px — så det vejer som et logo og ikke som en orange knap midt mellem logoerne. */
+.bl-spalte .bl-mono{ background: var(--color-surface-2); color: var(--color-fg-muted); box-shadow: inset 0 0 0 1px var(--color-border); font-size: calc(var(--bl-maxh) * .46); }
 
 /* ---------- V5: farvede, officielle logoer (<img class="bl-img">, ensfarvet:false i manifestet) ----------
    De officielle filer er flerfarvede (DKW, Ducati, Sherco, Gilera m.fl. har fyldte blokke), og en maske i currentColor ville gøre dem til en
@@ -103,7 +108,7 @@ a:hover > .bl, a:focus-visible > .bl{ color: var(--bl-fg-hover, var(--bl-fg, var
   background: var(--bl-chip-bg);
   box-shadow: 0 0 0 var(--bl-pad) var(--bl-chip-bg);
 }
-.bl--img.bl--sm{ --bl-pad-n: 3px; border-radius: 3px; }
+.bl--img.bl--sm, .bl--img.bl--az{ --bl-pad-n: 3px; border-radius: 3px; }
 .bl--img.bl--xl{ --bl-pad-n: 5px; }
 .bl--img.bl--hero, .bl--img.bl--wm{ --bl-pad-n: 6px; border-radius: 6px; }
 :root[data-theme="dark"] .bl--img{ --bl-chip-bg: var(--color-fg); --bl-pad: var(--bl-pad-n); }

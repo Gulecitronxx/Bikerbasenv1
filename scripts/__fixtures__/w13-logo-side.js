@@ -59,7 +59,7 @@ ${hero('Honda')}${hero('Kawasaki')}${hero('BSA')}${hero('Harley-Davidson')}
 <h2>md-slot: visuel vægt</h2>
 <div class="raekke" data-test="vaegt" id="vaegt">${ALLE.map(n => `<span data-n="${n}">${b.logoHTML(n, { storrelse: 'md' })}</span>`).join('')}</div>
 <h2>Alle slots: visuel vægt (areal) pr. størrelse</h2>
-<div class="raekke" data-test="vaegt-alle" id="vaegt-alle">${['sm', 'md', 'lg', 'xl', 'hero'].map(s => ALLE.map(n => `<span data-n="${n}" data-s="${s}">${b.logoHTML(n, { storrelse: s })}</span>`).join('')).join('')}</div>
+<div class="raekke" data-test="vaegt-alle" id="vaegt-alle">${['sm', 'az', 'md', 'lg', 'xl', 'hero'].map(s => ALLE.map(n => `<span data-n="${n}" data-s="${s}">${b.logoHTML(n, { storrelse: s })}</span>`).join('')).join('')}</div>
 
 <h2>A–Z-liste (sm-slot i bred kolonne): logo eller monogram i samme kolonne</h2>
 <div class="filter-test" data-test="az">${ALLE.concat(UDEN_LOGO).map(n => `<label class="az-rad"><span class="bl-spalte bl-spalte--sm">${b.logoHTML(n, { storrelse: 'sm', decorative: true })}</span><span class="az-navn">${n}</span></label>`).join('')}</div>

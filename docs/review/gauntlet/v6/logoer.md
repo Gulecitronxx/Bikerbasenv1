@@ -27,11 +27,38 @@ For hver fil er union-boksen af alle tegne-elementer målt med `getBoundingClien
 
 ## BMW: "BMW Motorrad"-logoet bruges som BMW
 
-Filen er Motorrad-varianten (rundel + to linjer "BMW MOTORRAD"). Mærket i registret er BMW (alias `bmw motorrad`), og alle annoncer på sitet er motorcykler, så Motorrad-logoet er det rigtige for BMW's motorcykelmærke. Konteksterne er kontrolleret på skærmbillederne: oversigtskortet "BMW" (logo over navnet), mærkesidens hero (logoet ved siden af H1 "Brugte BMW-motorcykler til salg"), CTA-kortet "Find din næste BMW". Ordet "Motorrad" forvirrer ikke noget af stederne; i A-Z-listen vises monogram "B" (se nedenfor). Vil man have rundelen alene, kræver det en beskåret variant og en navnetekst ved siden af; ikke gjort, da det ville være en redigeret fil. `alt` er "BMW-logo".
+Filen er Motorrad-varianten (rundel + to linjer "BMW MOTORRAD"). Mærket i registret er BMW (alias `bmw motorrad`), og alle annoncer på sitet er motorcykler, så Motorrad-logoet er det rigtige for BMW's motorcykelmærke. Konteksterne er kontrolleret på skærmbillederne: oversigtskortet "BMW" (logo over navnet), mærkesidens hero (logoet ved siden af H1 "Brugte BMW-motorcykler til salg"), CTA-kortet "Find din næste BMW". Ordet "Motorrad" forvirrer ikke noget af stederne; i A-Z-listen og filteret vises logoet (se nedenfor). Vil man have rundelen alene, kræver det en beskåret variant og en navnetekst ved siden af; ikke gjort, da det ville være en redigeret fil. `alt` er "BMW-logo".
 
-## Konsekvens i sm-slotten (A-Z og søgefilter): fire flere monogrammer
+## Logo/monogram-blanding i A-Z og søgefilter (V5-Critic P3): to slots i stedet for én
 
-Kernens regel (min. 12 px højde, 56 x 22 px-slot) giver monogram, når et bredt logo ville blive lavere end 12 px. Med de nye filer gælder det Suzuki (10,9 px), Kawasaki (10,0), CFMoto (11,0) og BMW (11,95) i sm; Yamaha (12,7) og de øvrige får logo. Før havde fire af dem et AI-emblem i sm. I V5 var det otte brede ordmærker (Honda, Husqvarna, Royal Enfield, Benelli, Fantic, Keeway, Kymco, Rieju); nu er det tolv. Større slots (lg, xl, hero) er ikke berørt, og `md` bruges ikke på sitet. **Ønske til Orchestrator (fælles filer):** en bredere sm-slot (fx 80 x 22) i `SLOT`, `css/p-brand-logo.css`, `.bl-spalte--sm`, `.mk-az-logo` og de tests, der låser 56 px, løser alle tolv på én gang. Alternativt `MIN_HOEJDE` 10 for sm. Ikke ændret her.
+Problem: med de syv nye brede logoer ville tolv af de 31 mærker med logo være monogram i den lille sm-slot (22 x 56 px, kernens læsbarhedsgrænse 12 px): Honda, Royal Enfield, Rieju, Fantic, Kymco, Kawasaki, Benelli, Keeway, Suzuki, Husqvarna, CFMoto og BMW. Listerne blandede logoer og bogstavcirkler.
+
+**1. Målt plads** (`scripts/v6-logo-shots.js`, mock-data, 375/430/768/1440, lys + mørk; `sm-foer/maal.json`, `sm-efter/maal.json`):
+
+| Liste | Bredde | Luft mellem længste navn og antal ved 56 px kolonne | Konklusion |
+|---|---|---|---|
+| A-Z (maerker.html) | kolonner 280-340 px (1 kolonne under 640 px) | 60-170 px | 80 px kolonne kan rummes uden layoutændring |
+| Søgefilter (soegning.html) | panel **246 px** på desktop (1024-1920 px), 286-396 px på mobil, 734 px på tablet | **24 px** for "Harley-Davidson" (104 px) ved 1440 | højst +8 px: ved 70 px og derover bryder "Harley-Davidson" over to linjer (målt: 66 px fri 14, 68 px fri 12, 70 px brud) |
+
+**2. Beslutning:** A-Z får en egen størrelse `az` (22 x 80 px, k 28); filteret beholder `sm`, som kun udvides til 22 x 64 px (16 px luft, 6 px margin til brud). Samme højde (22 px) i begge, så rækkerne er lige høje. Derudover er `MIN_HOEJDE` sænket fra 12 til 9,5 px: et ordmærke på 9,5-12 px er lige så højt som versalerne i 14 px-teksten ved siden af (versalhøjde ca. 10 px) og læsbart; kun under 9,5 px er monogrammet ærligere.
+
+Ændret: `SLOT`, `STORRELSER`, `MIN_HOEJDE`, emblemvalg/fallback/lazy for `az` i `js/brand-logos.js`; `.bl--sm`, `.bl--az`, `.bl-spalte--sm`, `.bl--img` i `css/p-brand-logo.css`; `.mk-az-logo` (80 px) i `css/p-maerke.css`; A-Z-rækken bruger `az` i `scripts/build-brand-pages.js` (én linje). `js/search.js` er uændret (kun kommentar).
+
+**3. Resultat (uændret layout):**
+
+| | før (56 px) | efter |
+|---|---|---|
+| A-Z (30 rækker): logo / monogram | 11 / 19 (10 af monogrammerne var mærker med logo) | **21 / 9: alle mærker med logo viser logo** (de 9 monogrammer er mærker uden logo, f.eks. BSA, Buell, Bach) |
+| Filter: logo / monogram (21 rækker) | 11 / 10 | **15 / 6** (monogram for Honda, Royal Enfield, Rieju, Fantic, der er 7,0-8,2:1 og < 9,5 px høje i 64 px, og for mærker uden logo) |
+| Listehøjde A-Z (sektion, 375/768/1440) | 2428 / 1231 / 670 px | 2428 / 1231 / 670 px (uændret) |
+| Filter: liste-/panelhøjde, rækkehøjde | 176 px / 263-278 px / 32 px | 176 px / 263-278 px / 32 px (uændret) |
+| Vandret overløb, afskårne eller ombrudte navne | ingen | ingen (A-Z og filter, 320-1920 px) |
+
+Honda er altså stadig bogstavcirkel i filteret (første række, 16 annoncer): ved 80 px ville ordmærket kun blive 9,7 px højt, men filterpanelet (246 px) kan ikke rumme 80 px uden at "Harley-Davidson" brydes. Ønsker man også dér logoer, kræver det et bredere filterpanel (layoutændring i `p-soegning.css`), ikke en bredere slot.
+
+**Visuel vægt:** monogrammet i filteret var en orange tonet cirkel (`--color-primary-tint`), mens A-Z har en neutral grå cirkel. Filterets monogram har nu samme neutrale udtryk som A-Z (`.bl-spalte .bl-mono`: `--color-surface-2`, `--color-fg-muted`, tynd kant, 22 px, bogstav .46 x højden), så den vejer som et logo og ikke som en orange knap blandt logoerne. Størrelsen er den samme 22 px. Kontrasten er den samme som i A-Z (testet i `w13-logo-layout`).
+
+**4. CLS:** slotmål afhænger kun af markup (`width`/`height` i `<img>` = slotmatematikken, `--bl-ar`, `aspect-ratio`), aldrig af om filen er hentet; monogram eller logo vælges ved rendering ud fra manifestet. `w13-integration` ("CLS < 0,05 med forsinket SVG"), `v6-logo-officielle` (width/height = slotmål for alle mærker i sm og az) og smoke (`--cls 0.05`, 0 advarsler) er grønne.
 
 ## Tre mærker uden officiel SVG (beholder AI-udkast/fallback)
 
@@ -47,14 +74,15 @@ Kræv ved hentning: direkte SVG, licens/brugsvilkår (varemærke), og at filen i
 
 ## Tests (nye og ændrede)
 
-- **Ny:** `scripts/v6-logo-officielle.test.js` (18 tests): manifest/proveniens, hash og `kilder.json` (rå sha256, bytes, URL, licens, dato), kun rod-attributter ændret (geometri-fingeraftryk), viewBox kun rettet hvor nødvendigt, **guard mod persondata/metadata** (mail, stier, telefon, kommentarer, RDF, editor-metadata, script, hændelser, ekstern href/url(), indlejret billede, ENTITY; kun BMW har en DOCTYPE og kun den standardiserede W3C) for alle SVG i `img/brands`, docs-kopierne og `kilder.json`, renser, `--tjek`-reproducerbarhed, udkast ryddet (filer, `assets.json`, batch), tre udkast tilbage, markup og monogram-regel i alle størrelser, og i Chromium: tegningen fylder viewBox, farvet rendering (Aprilia rød flade, KTM orange flade, Yamaha rød, Suzuki blå), lys flise i mørk tilstand med uændrede slotmål, slotmål uden klemning på 375/768/1440 og intet vandret overløb, afgrænsning (`js/annonce.js` og `css/p-annonce.css` er urørte).
+- **Ny:** `scripts/v6-logo-officielle.test.js` (20 tests): manifest/proveniens, hash og `kilder.json` (rå sha256, bytes, URL, licens, dato), kun rod-attributter ændret (geometri-fingeraftryk), viewBox kun rettet hvor nødvendigt, **guard mod persondata/metadata** (mail, stier, telefon, kommentarer, RDF, editor-metadata, script, hændelser, ekstern href/url(), indlejret billede, ENTITY; kun BMW har en DOCTYPE og kun den standardiserede W3C) for alle SVG i `img/brands`, docs-kopierne og `kilder.json`, renser, `--tjek`-reproducerbarhed, udkast ryddet (filer, `assets.json`, batch), tre udkast tilbage, markup og monogram-regel i alle størrelser, og i Chromium: tegningen fylder viewBox, farvet rendering (Aprilia rød flade, KTM orange flade, Yamaha rød, Suzuki blå), lys flise i mørk tilstand med uændrede slotmål, slotmål uden klemning på 375/768/1440 og intet vandret overløb, afgrænsning (`js/annonce.js` og `css/p-annonce.css` er urørte).
 - **Ændret (tal og lister):** `scripts/v5-logo-officielle.test.js` (de 21 fra V5 + 7 fra V6, 17 erstattede udkast), `scripts/w13-logo-assets.test.js` (3 udkast, 28 officielle filer), `scripts/w14-maerker.test.js` (lockup-testen bruger Zero; Yamaha har ét logo).
 - Kørt: `w13-logo-assets`, `w13-logo-generator`, `w13-logo-kerne`, `w13-logo-layout`, `w14-maerker`, `v5-logo-officielle`, `v6-logo-officielle`, `brand-logos-gen --tjek`, `v5-/v6-logo-import --tjek`: alle grønne (se rapporten for antal). Smoke strikt (index, maerker, maerke-yamaha/suzuki/bmw/kawasaki/ktm/aprilia/cfmoto, soegning; 375/430/768/1440/1920; lys + mørk; `--cls 0.05`): 100 målinger, 0 fejl, 0 advarsler, to kørsler.
+- **Ændret for sm/az (V6, 2. runde):** `scripts/w13-logo-kerne.test.js` (SLOT sm 64 / az 80, MIN_HOEJDE 9,5, ALLE godkendte logoer har logo i az, højst fire monogrammer i sm; CSS-kolonne 64 px), `scripts/w13-logo-layout.test.js` (kolonne 64 px, az med i vægt-testen; logo >= 9,5 px) og fixturen `scripts/__fixtures__/w13-logo-side.js` (az-størrelsen), `scripts/w13-logo-generator.test.js` (A-Z-rækker er `bl--az`, `.mk-az-logo` 80 px), `js/w13-integration.test.js` (filterkolonne 64 px; NY kontrol: navnet står på én linje, >= 6 px luft til antallet, rækken er 32 px; forsidens medianlogo >= 10 % (var 20 %, fordi Yamaha/BMW/Kawasaki/Honda er brede ordmærker); Yamaha-annoncelogoet er bredde-begrænset; maske-vejen måles på et indsat Zero-logo, fordi alle forsidemærker nu er farvede billeder) og `scripts/__fixtures__/w13-integration-hjaelp.js` (Zero godkendt i testens eget logo-data). Ingen assertion er fjernet; de to sænkede grænser (medianlogo 20 til 10 %, logo-højde i annoncen) er begrundet i kommentarerne.
 - Brede ordmærker i annoncetitlen (Honda 160 px, V5-restpunkt 5) hører til annonce-agentens spor; `js/annonce.js` og `css/p-annonce.css` er ikke rørt. De syv nye logoer ligger alle inden for xl-slottens 160 x 64 px.
 
-## Screenshots
+## Screenshots (se også sm-foer/sm-efter nedenfor)
 
-`docs/review/gauntlet/v6/logoer/foer/` (HEAD før V6) og `.../efter/`: oversigten (`maerker`), forsiden (`index`) og tre mærkesider (`maerke-yamaha`, `maerke-bmw`, `maerke-ktm`) ved 375, 768 og 1440 px, lys og mørk (de første 2400 px). 1920 og 430 px er dækket af smoke-testen (ingen overløb, CLS under 0,05), ikke af billeder.
+`docs/review/gauntlet/v6/logoer/foer/` (HEAD før V6) og `.../efter/`: oversigten (`maerker`), forsiden (`index`) og tre mærkesider (`maerke-yamaha`, `maerke-bmw`, `maerke-ktm`) ved 375, 768 og 1440 px, lys og mørk (de første 2400 px). **A-Z og filter før/efter (sm/az-slots):** `.../sm-foer/` (56 px) og `.../sm-efter/` (az 80 / sm 64 px): `az-<bredde>-<tema>.jpg`, `filter-<bredde>-<tema>.jpg`, `filter-alle-...` ved 375, 430, 768 og 1440 px, lys + mørk, samt `maal.json` med listehøjder, rækkehøjder, luft og afskårne navne (`node scripts/v6-logo-shots.js --ud <mappe>`). 1920 og 430 px er dækket af smoke-testen (ingen overløb, CLS under 0,05), ikke af billeder.
 
 ## Byg
 
@@ -64,12 +92,12 @@ Kræv ved hentning: direkte SVG, licens/brugsvilkår (varemærke), og at filen i
 
 | Dimension | Mærkeoversigt | Mærkesider (hero/CTA) | Forside / søgefilter / A-Z |
 |---|---|---|---|
-| Visuel kvalitet | 8: Yamaha, Suzuki, BMW, Kawasaki, KTM får rigtige logoer i brandfarver; Aprilia kun i A-Z (lille) | 8: KTM-flisen og BMW-rundelen står klart; Yamaha/Suzuki brede og læsbare | 6: fire flere monogrammer i A-Z (Suzuki, Kawasaki, CFMoto, BMW); tidligere emblem |
-| Designkonsistens | 8: samme slot, flise og afstand som V5; udkast (GasGas, Zero, Moto Guzzi) ensfarvede ved siden af | 8 | 7 |
+| Visuel kvalitet | 8: alle mærker med logo har logo i A-Z (80 px slot) | 8: KTM-flisen og BMW-rundelen står klart; Yamaha/Suzuki brede og læsbare | 8: A-Z ren; filteret har fire monogrammer (Honda, Royal Enfield, Rieju, Fantic) i neutral grå |
+| Designkonsistens | 8: samme slot, flise og afstand som V5; udkast (GasGas, Zero, Moto Guzzi) ensfarvede ved siden af | 8 | 8: to slots (az 80 / sm 64 px), samme højde og neutralt monogram |
 | Funktionalitet | 9: fallback bevaret, tests | 9 | 9 |
-| Brugeroplevelse | 8 | 8: BMW "Motorrad" er rigtigt for et MC-mærke | 7: monogram i stedet for logo i A-Z |
+| Brugeroplevelse | 8 | 8: BMW "Motorrad" er rigtigt for et MC-mærke | 8: Honda (største mærke) er stadig cirkel i filteret |
 | Mobil | 8: 375/430 uden overflow | 8: KTM-logoet fylder pænt, flisen i mørk | 8 |
 | Performance | 8: filer 1,6-8,6 KB, lazy i lister; 10 filer slettet | 8 | 8 |
 | Indholdskvalitet | 9: kilde, licens, hentedato, ejer-godkendelse, hash og original pr. fil; ingen opdigtet | 9 | 9 |
 
-Samlet: 8/10. Det svageste punkt er sm-slotten (se ovenfor), som kræver en beslutning om en fælles fil.
+Samlet: 8/10. Det svageste punkt er Honda som bogstavcirkel i filteret (panelet er 246 px bredt).

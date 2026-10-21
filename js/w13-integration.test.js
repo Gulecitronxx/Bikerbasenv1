@@ -79,7 +79,9 @@ test('forside 1440: seks fliser i ÉN række; logo ca. 30-50 % af flisehøjden; 
     assert.ok(x.bh / x.h >= 0.06 && x.bh / x.h <= 0.55, `logo/flise ${(x.bh / x.h).toFixed(2)}`);
   }
   const med = m.map(x => x.bh / x.h).sort()[3];
-  assert.ok(med >= 0.2, 'medianlogoet er mindst 20 % af flisen: ' + med);
+  /* V6: Yamaha, BMW, Kawasaki og Honda er nu officielle ordmærker/lockups (forhold 4,3-8,2:1) i stedet for AI-emblemer (ca. 1:1), så medianlogoet er ca. 12,5 % af flisen
+     (22 px i en 175 px høj flise; før 20 %). Grænsen er sænket til 10 %; den øvre grænse (55 %) og alle andre kontroller i testen er uændrede. */
+  assert.ok(med >= 0.1, 'medianlogoet er mindst 10 % af flisen: ' + med);
   await ctx.close();
 });
 
@@ -163,8 +165,10 @@ test('annonce: ingen dubleret eller mistet logo efter resize 1440 -> 768 -> 390 
     assert.deepStrictEqual([x.logo, x.bl, x.iHead, x.h1], [1, 1, 1, 1], `ved ${w}: ${JSON.stringify(x)}`);
     assert.ok(x.sw <= x.cw, `vandret overflow ved ${w}`);
     /* fast slot pr. bredde (xl): 64 px fra 1180, 44 px under, 34 px under 700 — logoet står ved siden af h1, aldrig under/over den */
-    const [lo, hi, wMax] = w >= 1180 ? [56, 64.5, 160.5] : w >= 700 ? [40, 44.5, 110.5] : [30, 34.5, 88.5];
-    assert.ok(x.lh >= lo && x.lh <= hi && x.lw <= wMax, `logo ${x.lw}x${x.lh} ved ${w}`);
+    const [lo0, hi, wMax] = w >= 1180 ? [56, 64.5, 160.5] : w >= 700 ? [40, 44.5, 110.5] : [30, 34.5, 88.5];
+    /* V6: Yamaha er nu et officielt, bredt logo (4,35:1): slotten er så bredde-begrænset (160 px bred -> 36,8 px høj ved 1440), så nedre højdegrænse = 90 % af bredde/forhold */
+    const yl = BrandLogos.logoFor('Yamaha'), lo = Math.min(lo0, (wMax - 0.5) / (yl.bredde / yl.hoejde) * 0.9);
+    assert.ok(x.lh >= lo && x.lh <= hi && x.lw <= wMax && x.lw >= wMax - 3, `logo ${x.lw}x${x.lh} ved ${w} (slotten er fyldt til bredden)`);
     assert.ok(x.venstre, `logoet står til højre for h1 ved ${w}`);
   }
   await ctx.close();
@@ -209,6 +213,10 @@ test('lys/mørk: logo og monogram har læsbar kontrast mod flisen, og masken fø
   const farver = {};
   for (const tema of ['light', 'dark']){
     const { page, ctx } = await forside({ w: 1440, tema });
+    /* V6: alle forsidens mærker med logo er nu officielle farvede billeder (ingen maske). Maske-vejen (de tre sidste AI-udkast: GasGas, Zero, Moto Guzzi) måles på et
+       Zero-logo, der sættes ind i den første flises logoslot (Zero er godkendt i testens eget logo-data). Alt andet i testen er uændret. */
+    await page.evaluate(() => { const s = document.querySelector('#brand-cloud .maerke-flise .maerke-logo'); s.innerHTML = BrandLogos.logoHTML('Zero', { storrelse: 'lg', decorative: true }); s.closest('.maerke-flise').dataset.v6maske = '1'; });
+    await page.waitForFunction(() => document.querySelector('[data-v6maske] .bl--klar'), null, { timeout: 8000 });
     const m = await page.evaluate(() => {
       const a = [...document.querySelectorAll('#brand-cloud .maerke-flise')];
       const logo = a.find(x => x.querySelector('.bl--logo .bl-mark')), mono = a.find(x => x.querySelector('.bl--mono')), billede = a.find(x => x.querySelector('.bl--img'));
@@ -253,13 +261,16 @@ test('søgefilter: logo i fast kolonne, venstrekanten er ens med og uden logo, l
     const r = await page.evaluate(() => [...document.querySelectorAll('#brand-list .checkbox-row:not([hidden])')].map(row => {
       const sp = row.querySelector(':scope > .bl-spalte'); const navn = row.children[2];
       return { brand: row.dataset.brandRow, navnLeft: Math.round(navn.getBoundingClientRect().left * 10) / 10, spalteLeft: Math.round(sp.getBoundingClientRect().left * 10) / 10,
-        logoLeft: row.querySelector('.bl').getBoundingClientRect().left, spalteW: sp.getBoundingClientRect().width, logo: !!row.querySelector('.bl--logo'), mono: !!row.querySelector('.bl--mono'), cb: row.querySelector('input').getBoundingClientRect().left };
+        logoLeft: row.querySelector('.bl').getBoundingClientRect().left, spalteW: sp.getBoundingClientRect().width, logo: !!row.querySelector('.bl--logo'), mono: !!row.querySelector('.bl--mono'), cb: row.querySelector('input').getBoundingClientRect().left,
+        /* V6: den bredere kolonne må ikke presse navnet: luft mellem navn og antal, rækken bryder ikke over og er stadig 32 px høj */
+        fri: (row.querySelector('.facet-n') ? row.querySelector('.facet-n').getBoundingClientRect().left : row.getBoundingClientRect().right) - navn.getBoundingClientRect().right, raekkeH: row.getBoundingClientRect().height, navnH: navn.getBoundingClientRect().height, overloeb: row.scrollWidth - row.clientWidth };
     }));
     assert.ok(r.length >= 6);
+    for (const x of r) assert.ok(x.fri >= 6 && x.raekkeH <= 32.5 && x.navnH <= 24 && x.overloeb <= 1, `${w}: ${x.brand} — luft ${x.fri}, højde ${x.raekkeH}, navnet på én linje (${x.navnH}), overløb ${x.overloeb} (filteret er 246 px bredt på desktop)`);
     assert.ok(r.some(x => x.logo) && r.some(x => x.mono), 'både med og uden logo i listen');
     assert.strictEqual(new Set(r.map(x => x.navnLeft)).size, 1, `${w}: navnenes venstrekant er ikke ens: ${JSON.stringify(r.map(x => [x.brand, x.navnLeft]))}`);
-    assert.deepStrictEqual([...new Set(r.map(x => x.spalteW))], [56], `${w}: ens kolonnebredde (56 px = sm-slotten)`);
-    /* V5: logo hvis mærket har et godkendt, LÆSBART logo i sm-slotten (kernens regel: ≥ 12 px højt); ellers monogram — altid i samme 56 px kolonne */
+    assert.deepStrictEqual([...new Set(r.map(x => x.spalteW))], [64], `${w}: ens kolonnebredde (64 px = sm-slotten, V6; før 56)`);
+    /* V5: logo hvis mærket har et godkendt, LÆSBART logo i sm-slotten (kernens regel: ≥ 9,5 px højt, V6); ellers monogram — altid i samme 64 px kolonne */
     for (const x of r) assert.strictEqual(x.logo, /bl--logo/.test(BrandLogos.logoHTML(x.brand, { storrelse: 'sm', decorative: true })), `${w}: ${x.brand} — logo hvis mærket har et læsbart godkendt logo, ellers monogram (ingen blanding af bredde)`);
     assert.strictEqual(new Set(r.map(x => Math.round(x.logoLeft))).size, 1, `${w}: logo/monogram står venstrestillet i kolonnen`);
     const svg = [...new Set(h.anmodninger.filter(x => /img\/brands\//.test(x)))];

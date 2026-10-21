@@ -405,7 +405,7 @@ function populateFilterUI(){
   if (brandSel) brandSel.innerHTML = '<option value="">Alle mærker</option>' +
     maerker.map(m => m.navn).sort((a, b) => (erUoplyst(a) - erUoplyst(b)) || a.localeCompare(b, 'da'))
       .map(b => `<option value="${escapeHTML(b)}">${escapeHTML(BrandRegistry.visNavn(b))}</option>`).join('');
-  /* W13 logo: lille mark (22 px høj, 56 px bred kolonne; emblem hvor det findes) foran navnet i en FAST kolonne — et mærke uden
+  /* W13 logo: lille mark (22 px høj, 64 px bred kolonne (V6; panelet er 246 px bredt); emblem hvor det findes) foran navnet i en FAST kolonne — et mærke uden
      godkendt logo får monogram i samme kolonne, så venstrekanten af navnene er ens. Logoet hentes først, når rækken er synlig
      (BrandLogos-klienten): rækker, der er foldet væk, henter intet. Kun i filteret: aktive filterchips og resultatkort har intet logo
      (mockuppen: ren tekst). Navnet står som tekst ved siden af, så logoet er dekorativt. */

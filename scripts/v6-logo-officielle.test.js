@@ -262,6 +262,40 @@ test('logoFor/logoHTML: de syv er farvede <img> i fast slot uden emblem/ordmærk
   assert.match(BL.logoHTML('BMW', { storrelse: 'xl', decorative: false }), /alt="BMW-logo"/);
 });
 
+/* ---------- V6: sm (søgefilter, 64 px) og az (A-Z, 80 px) ---------- */
+
+test('A-Z (slot az, 80 px): ALLE mærker med godkendt logo har logo — ingen logo/monogram-blanding; filter (sm, 64 px): kun de fire bredeste ordmærker er monogram blandt dem med logo; slotmål afhænger kun af markup, ikke af indlæsning', () => {
+  const godkendte = manifest.maerker.filter(m => m.godkendt && m.fil);
+  assert.strictEqual(godkendte.length, 31);
+  assert.strictEqual(BL.SLOT.sm[1], 64); assert.strictEqual(BL.SLOT.az[1], 80); assert.strictEqual(BL.MIN_HOEJDE, 9.5);
+  const monoSm = godkendte.filter(m => /bl--mono/.test(BL.logoHTML(m.navn, { storrelse: 'sm', decorative: true }))).map(m => m.slug);
+  const monoAz = godkendte.filter(m => /bl--mono/.test(BL.logoHTML(m.navn, { storrelse: 'az', decorative: true }))).map(m => m.slug);
+  assert.deepStrictEqual(monoAz, [], 'A-Z: intet mærke med logo er monogram');
+  assert.deepStrictEqual(monoSm.slice().sort(), ['fantic', 'honda', 'rieju', 'royal-enfield'], 'filter: kun de fire bredeste (forhold over 7:1 giver < 9,5 px i 64 px) er monogram');
+  for (const m of godkendte){
+    for (const str of ['sm', 'az']){
+      const h = BL.logoHTML(m.navn, { storrelse: str, decorative: true, statisk: true });
+      if (/bl--mono/.test(h)) continue;
+      /* CLS: width/height i markup = slotmatematikken (aspect-ratio i CSS), så logoet fylder det samme, før og efter filen er hentet */
+      const w = +/width="(\d+)"/.exec(h)[1], hh = +/height="(\d+)"/.exec(h)[1];
+      const sm = BL.slotMaal(str, +/--bl-ar:([\d.]+)/.exec(h)[1]);
+      assert.ok(Math.abs(w - sm.w) <= 0.51 && Math.abs(hh - sm.h) <= 0.51, `${m.slug} ${str}: ${w}x${hh} mod slotmål ${sm.w.toFixed(1)}x${sm.h.toFixed(1)}`);
+      assert.ok(hh >= 9, `${m.slug} ${str}: ${hh} px højt`);
+    }
+  }
+});
+
+test('A-Z og filter: CSS-slotten følger kernen (sm 22x64, az 22x80), kolonnerne er lige så brede, monogrammet i filteret er neutralt som i A-Z, og A-Z bruger az i generatoren', () => {
+  const css = fs.readFileSync(path.join(ROOT, 'css', 'p-brand-logo.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(css, /\.bl--sm\{[^}]*--bl-maxh:22px;[^}]*--bl-maxw:64px/);
+  assert.match(css, /\.bl--az\{[^}]*--bl-maxh:22px;[^}]*--bl-maxw:80px/);
+  assert.match(css, /\.bl-spalte--sm\{ width:64px;/);
+  assert.match(css, /\.bl-spalte \.bl-mono\{[^}]*var\(--color-surface-2\)[^}]*var\(--color-fg-muted\)[^}]*var\(--color-border\)/, 'neutralt monogram i filteret (som .mk-az-logo .bl-mono)');
+  assert.match(fs.readFileSync(path.join(ROOT, 'css', 'p-maerke.css'), 'utf8'), /\.mk-az-logo\{[^}]*width:80px/);
+  assert.match(fs.readFileSync(path.join(__dirname, 'build-brand-pages.js'), 'utf8'), /storrelse: 'az', decorative: true, statisk: true/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'js', 'search.js'), 'utf8'), /storrelse: 'sm', decorative: true \}\)\}<\/span>`;/);
+});
+
 /* ---------- browser ---------- */
 
 const sb = require('./smoke-browser');

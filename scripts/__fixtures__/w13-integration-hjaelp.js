@@ -9,7 +9,7 @@ const G = require('../brand-logos-gen.js');
 /* Testens EGET logo-data: uafhængigt af, hvilke mærker ejeren har godkendt i det rigtige manifest. Mærkerne i GODKENDT har logo
    (SVG-filerne ligger i img/brands/), alle andre — fx Suzuki, Lauge Jensen, BSA, Cagiva, Kymco — er bevidst uden logo i testen.
    Siderne får fixturen i stedet for js/brand-logos-data.js (Playwright route). */
-const GODKENDT = new Set(['honda', 'yamaha', 'bmw', 'kawasaki', 'harley-davidson', 'indian', 'benelli']);
+const GODKENDT = new Set(['honda', 'yamaha', 'bmw', 'kawasaki', 'harley-davidson', 'indian', 'benelli', 'zero']);   // V6: zero = ét AI-udkast med maske (de øvrige er officielle farvede billeder)
 function fixtureManifest(){
   const m = JSON.parse(fs.readFileSync(G.MANIFEST, 'utf8'));
   for (const e of m.maerker) e.godkendt = GODKENDT.has(e.slug) && !!e.fil;

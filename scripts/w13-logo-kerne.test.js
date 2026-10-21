@@ -305,15 +305,22 @@ test('P2-2 alle GODKENDTE logoer i det rigtige manifest viser logo i sm-slot, n�
     const l = BL.logoFor(m.navn);
     const em = l.emblem && l.emblem.bredde / l.emblem.hoejde <= BL.EMBLEM_MAKS_FORHOLD ? l.emblem : l;
     const sm = BL.slotMaal('sm', em.bredde / em.hoejde);
-    assert.ok(sm.w <= 56.01 && sm.h <= 22.01, `${m.slug} sm ${sm.w.toFixed(1)}x${sm.h.toFixed(1)}`);
-    /* V5: et meget bredt officielt ordmærke uden emblem-variant (Honda 8,2:1, Rieju, Fantic, Royal Enfield, Kymco, Benelli, Keeway, Husqvarna) ville være
-       < 12 px højt i den lille sm-slot (56 x 22). Dér er monogrammet ærligere (navnet står som tekst ved siden af) — kernens egen læsbarhedsregel. */
+    assert.ok(sm.w <= BL.SLOT.sm[1] + 0.01 && sm.h <= 22.01, `${m.slug} sm ${sm.w.toFixed(1)}x${sm.h.toFixed(1)}`);
+    /* V6: A–Z-listen har sin egen, bredere slot ('az', 80 px): ALLE godkendte logoer er læsbare dér (ingen logo/monogram-blanding blandt mærker med logo) */
+    const azKilde = BL.logoFor(m.navn);
+    const azFil = azKilde.emblem && azKilde.emblem.bredde / azKilde.emblem.hoejde <= BL.EMBLEM_MAKS_FORHOLD ? azKilde.emblem : azKilde;
+    const az = BL.slotMaal('az', azFil.bredde / azFil.hoejde);
+    assert.ok(az.h >= BL.MIN_HOEJDE, `${m.slug}: logo i A–Z (az) ${az.w.toFixed(1)}x${az.h.toFixed(1)}`);
+    assert.match(BL.logoHTML(m.navn, { storrelse: 'az', decorative: true }), /bl--logo/, `${m.slug}: logo (ikke monogram) i A–Z`);
+    /* V5/V6: et meget bredt officielt ordmærke uden emblem-variant (de fire bredeste: forhold over 7:1) ville være < 9,5 px højt i filterets sm-slot (64 x 22).
+       Dér er monogrammet ærligere (navnet står som tekst ved siden af) — kernens egen læsbarhedsregel (V6: MIN_HOEJDE 9,5; før 12 gav det tolv monogrammer). */
     if (sm.h >= BL.MIN_HOEJDE) assert.match(h, /bl--logo/, `${m.slug}: læsbart logo skal vises i sm`);
     else assert.match(h, /bl--mono/, `${m.slug}: ulæseligt logo i sm skal være monogram`);
     laesbare++;
     if (sm.h < BL.MIN_HOEJDE) laesbare--;
   }
-  assert.ok(laesbare >= 12, `for få logoer vises i sm: ${laesbare}`);
+  assert.ok(godkendte.length - laesbare <= 4, `for få logoer vises i sm: ${laesbare} af ${godkendte.length} (højst fire monogrammer blandt mærker med logo: de fire bredeste ordmærker; før V6 var det tolv)`);
+  assert.ok(laesbare >= 27, `for få logoer vises i sm: ${laesbare}`);
   // ens max-areal-regel: i hver størrelse er største/mindste areal ≤ 2,2 for logoer med forhold ≥ 0,85 (smallere er højdebegrænsede)
   /* w14: 'wm' er kun til ordmærke-varianten i hero-lockuppen (ikke til hovedfilerne), så den indgår ikke i areal-reglen for hovedfiler. */
   for (const s of BL.STORRELSER.filter(x => x !== 'wm')){
@@ -364,8 +371,10 @@ test('A12 p-brand-logo.css: ingen hårdkodede farver, og slotmålene følger SLO
   }
   // bredden følger højde, bredde OG areal (ens visuel vægt)
   assert.match(uden, /width: min\(var\(--bl-maxw\), calc\(var\(--bl-maxh\) \* var\(--bl-ar\)\), calc\(var\(--bl-k\) \* var\(--bl-sa\)\)\)/);
-  assert.match(uden, /\.bl-spalte--sm\{ width:56px;/, 'den lille kolonne er lige så bred som sm-slotten');
-  assert.equal(BL.SLOT.sm[1], 56);
+  assert.match(uden, /\.bl-spalte--sm\{ width:64px;/, 'den lille kolonne er lige så bred som sm-slotten (V6: 64 px; før 56)');
+  assert.equal(BL.SLOT.sm[1], 64);
+  assert.equal(BL.SLOT.az[1], 80, 'A–Z-slotten (V6)');
+  assert.equal(BL.MIN_HOEJDE, 9.5);
   // før klienten har hentet filen er masken en TOM svg (aldrig en massiv blok), og computed style afhænger ikke af klasser, der sættes asynkront
   assert.match(uden, /\.bl-mark\{[^}]*mask-image: var\(--bl-u, url\("data:image\/svg\+xml,%3Csvg xmlns='http:\/\/www\.w3\.org\/2000\/svg'\/%3E"\)\)/);
   assert.doesNotMatch(uden, /visibility:\s*(hidden|visible)|bl--klar/);

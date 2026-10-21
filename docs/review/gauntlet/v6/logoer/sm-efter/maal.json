@@ -1,0 +1,322 @@
+{
+ "375-lys": {
+  "az": {
+   "raekker": 30,
+   "logoer": 21,
+   "mono": 9,
+   "raekkeH": 36,
+   "sektionH": 2428,
+   "afskaaret": [],
+   "overloeb": 0,
+   "spalteW": [
+    80
+   ]
+  },
+  "filter": {
+   "raekker": 6,
+   "logoer": 5,
+   "mono": 1,
+   "listeH": 176,
+   "panelH": 278,
+   "panelW": 341,
+   "raekkeH": 32,
+   "friPlads": 111,
+   "navnW": 33,
+   "afskaaret": [],
+   "overloeb": 0
+  },
+  "filterAlle": {
+   "raekker": 21,
+   "logoer": 15,
+   "mono": 6,
+   "listeH": 176,
+   "panelH": 278,
+   "panelW": 341,
+   "raekkeH": 32,
+   "friPlads": 111,
+   "navnW": 20,
+   "afskaaret": [],
+   "overloeb": 0
+  }
+ },
+ "375-moerk": {
+  "az": {
+   "raekker": 30,
+   "logoer": 21,
+   "mono": 9,
+   "raekkeH": 36,
+   "sektionH": 2428,
+   "afskaaret": [],
+   "overloeb": 0,
+   "spalteW": [
+    80
+   ]
+  },
+  "filter": {
+   "raekker": 6,
+   "logoer": 5,
+   "mono": 1,
+   "listeH": 176,
+   "panelH": 278,
+   "panelW": 341,
+   "raekkeH": 32,
+   "friPlads": 111,
+   "navnW": 33,
+   "afskaaret": [],
+   "overloeb": 0
+  },
+  "filterAlle": {
+   "raekker": 21,
+   "logoer": 15,
+   "mono": 6,
+   "listeH": 176,
+   "panelH": 278,
+   "panelW": 341,
+   "raekkeH": 32,
+   "friPlads": 111,
+   "navnW": 20,
+   "afskaaret": [],
+   "overloeb": 0
+  }
+ },
+ "430-lys": {
+  "az": {
+   "raekker": 30,
+   "logoer": 21,
+   "mono": 9,
+   "raekkeH": 36,
+   "sektionH": 2428,
+   "afskaaret": [],
+   "overloeb": 0,
+   "spalteW": [
+    80
+   ]
+  },
+  "filter": {
+   "raekker": 6,
+   "logoer": 5,
+   "mono": 1,
+   "listeH": 176,
+   "panelH": 278,
+   "panelW": 396,
+   "raekkeH": 32,
+   "friPlads": 166,
+   "navnW": 33,
+   "afskaaret": [],
+   "overloeb": 0
+  },
+  "filterAlle": {
+   "raekker": 21,
+   "logoer": 15,
+   "mono": 6,
+   "listeH": 176,
+   "panelH": 278,
+   "panelW": 396,
+   "raekkeH": 32,
+   "friPlads": 166,
+   "navnW": 20,
+   "afskaaret": [],
+   "overloeb": 0
+  }
+ },
+ "430-moerk": {
+  "az": {
+   "raekker": 30,
+   "logoer": 21,
+   "mono": 9,
+   "raekkeH": 36,
+   "sektionH": 2428,
+   "afskaaret": [],
+   "overloeb": 0,
+   "spalteW": [
+    80
+   ]
+  },
+  "filter": {
+   "raekker": 6,
+   "logoer": 5,
+   "mono": 1,
+   "listeH": 176,
+   "panelH": 278,
+   "panelW": 396,
+   "raekkeH": 32,
+   "friPlads": 166,
+   "navnW": 33,
+   "afskaaret": [],
+   "overloeb": 0
+  },
+  "filterAlle": {
+   "raekker": 21,
+   "logoer": 15,
+   "mono": 6,
+   "listeH": 176,
+   "panelH": 278,
+   "panelW": 396,
+   "raekkeH": 32,
+   "friPlads": 166,
+   "navnW": 20,
+   "afskaaret": [],
+   "overloeb": 0
+  }
+ },
+ "768-lys": {
+  "az": {
+   "raekker": 30,
+   "logoer": 21,
+   "mono": 9,
+   "raekkeH": 36,
+   "sektionH": 1231,
+   "afskaaret": [],
+   "overloeb": 0,
+   "spalteW": [
+    80
+   ]
+  },
+  "filter": {
+   "raekker": 6,
+   "logoer": 5,
+   "mono": 1,
+   "listeH": 176,
+   "panelH": 263,
+   "panelW": 734,
+   "raekkeH": 32,
+   "friPlads": 504,
+   "navnW": 33,
+   "afskaaret": [],
+   "overloeb": 0
+  },
+  "filterAlle": {
+   "raekker": 21,
+   "logoer": 15,
+   "mono": 6,
+   "listeH": 176,
+   "panelH": 263,
+   "panelW": 734,
+   "raekkeH": 32,
+   "friPlads": 504,
+   "navnW": 20,
+   "afskaaret": [],
+   "overloeb": 0
+  }
+ },
+ "768-moerk": {
+  "az": {
+   "raekker": 30,
+   "logoer": 21,
+   "mono": 9,
+   "raekkeH": 36,
+   "sektionH": 1231,
+   "afskaaret": [],
+   "overloeb": 0,
+   "spalteW": [
+    80
+   ]
+  },
+  "filter": {
+   "raekker": 6,
+   "logoer": 5,
+   "mono": 1,
+   "listeH": 176,
+   "panelH": 263,
+   "panelW": 734,
+   "raekkeH": 32,
+   "friPlads": 504,
+   "navnW": 33,
+   "afskaaret": [],
+   "overloeb": 0
+  },
+  "filterAlle": {
+   "raekker": 21,
+   "logoer": 15,
+   "mono": 6,
+   "listeH": 176,
+   "panelH": 263,
+   "panelW": 734,
+   "raekkeH": 32,
+   "friPlads": 504,
+   "navnW": 20,
+   "afskaaret": [],
+   "overloeb": 0
+  }
+ },
+ "1440-lys": {
+  "az": {
+   "raekker": 30,
+   "logoer": 21,
+   "mono": 9,
+   "raekkeH": 36,
+   "sektionH": 670,
+   "afskaaret": [],
+   "overloeb": 0,
+   "spalteW": [
+    80
+   ]
+  },
+  "filter": {
+   "raekker": 6,
+   "logoer": 5,
+   "mono": 1,
+   "listeH": 176,
+   "panelH": 263,
+   "panelW": 246,
+   "raekkeH": 32,
+   "friPlads": 16,
+   "navnW": 33,
+   "afskaaret": [],
+   "overloeb": 0
+  },
+  "filterAlle": {
+   "raekker": 21,
+   "logoer": 15,
+   "mono": 6,
+   "listeH": 176,
+   "panelH": 263,
+   "panelW": 246,
+   "raekkeH": 32,
+   "friPlads": 16,
+   "navnW": 20,
+   "afskaaret": [],
+   "overloeb": 0
+  }
+ },
+ "1440-moerk": {
+  "az": {
+   "raekker": 30,
+   "logoer": 21,
+   "mono": 9,
+   "raekkeH": 36,
+   "sektionH": 670,
+   "afskaaret": [],
+   "overloeb": 0,
+   "spalteW": [
+    80
+   ]
+  },
+  "filter": {
+   "raekker": 6,
+   "logoer": 5,
+   "mono": 1,
+   "listeH": 176,
+   "panelH": 263,
+   "panelW": 246,
+   "raekkeH": 32,
+   "friPlads": 16,
+   "navnW": 33,
+   "afskaaret": [],
+   "overloeb": 0
+  },
+  "filterAlle": {
+   "raekker": 21,
+   "logoer": 15,
+   "mono": 6,
+   "listeH": 176,
+   "panelH": 263,
+   "panelW": 246,
+   "raekkeH": 32,
+   "friPlads": 16,
+   "navnW": 20,
+   "afskaaret": [],
+   "overloeb": 0
+  }
+ }
+}

@@ -18,7 +18,7 @@
      opret(data)                 -> en ny instans med samme API (til tests med eget manifest)
 
    Slot pr. størrelse: [maks. højde, maks. bredde, k]. Bredden er min(maks. bredde, maks. højde · forhold, k · √forhold), så alle
-   logoer — smalle, kvadratiske og brede — får næsten samme AREAL (k² = maks. areal): ens visuel vægt. 'sm' er en bred, lav slot
+   logoer — smalle, kvadratiske og brede — får næsten samme AREAL (k² = maks. areal): ens visuel vægt. 'sm' (søgefilter, 64 px) og 'az' (A–Z, 80 px) er brede, lave slots
    til lister (A–Z, filter); dér vælges mærkets emblem-variant (hvis filen findes og forholdet ≤ 3), ellers hovedfilen skaleret ned.
 
    Markup (fast slot -> ingen CLS; css/p-brand-logo.css):
@@ -41,13 +41,18 @@
 })(typeof self !== 'undefined' ? self : this, function (standardData, rod){
   'use strict';
 
-  const STORRELSER = ['sm', 'md', 'lg', 'xl', 'hero', 'wm'];
+  const STORRELSER = ['sm', 'az', 'md', 'lg', 'xl', 'hero', 'wm'];
   /* [maks. højde, maks. bredde, k] i px — SKAL følge css/p-brand-logo.css (testet). k² er det maksimale areal. xl (annoncens titelrække) og hero
      er desktop-målene; CSS formindsker dem på tablet/mobil. */
-  const SLOT = { sm: [22, 56, 26.5], md: [30, 60, 34.6], lg: [40, 120, 45.8], xl: [64, 160, 84.9], hero: [72, 280, 97.5], wm: [44, 300, 128] };
+  const SLOT = { sm: [22, 64, 26.5], az: [22, 80, 28], md: [30, 60, 34.6], lg: [40, 120, 45.8], xl: [64, 160, 84.9], hero: [72, 280, 97.5], wm: [44, 300, 128] };
+  /* V6: 'sm' er søgefilterets mærkeliste (panelet er kun 246 px bredt på desktop: 64 px kolonne giver 16 px luft til det længste mærkenavn i listen (ved 72 px brydes det over to linjer), målt);
+     'az' er A–Z-listen på mærkesiden (kolonnerne er 280-340 px brede: 80 px kolonne). Samme højde, så rækkerne er lige høje. */
   /* 'wm' = ordmærke-varianten ved siden af emblemet i mærkesidens hero-lockup (form:'ordmaerke'); 32 px høj på mobil (CSS). */
   /* Et logo, der ved slottens mål ville blive lavere end dette, er ulæseligt — så er teksten ærligere. */
-  const MIN_HOEJDE = 12;
+  /* V6: 9,5 px (var 12). Et meget bredt ordmærke (forhold over 7:1) i en liste står i samme højde som versalerne i teksten ved siden af (14 px tekst: versalhøjde ca. 10 px),
+     og er læsbart; først under 9,5 px er monogrammet ærligere. Sænkningen gør, at kun de fire allerbredeste ordmærker (forhold over 7:1) stadig er monogram i filteret
+     og ingen i A–Z (var tolv; se docs/review/gauntlet/v6/logoer.md). lg/xl/hero/wm er langt over grænsen og er upåvirkede. */
+  const MIN_HOEJDE = 9.5;
   /* Emblem-varianten (uden ordmærke) vælges i 'sm', hvis den ikke er bredere end dette forhold; ellers hovedfilen. */
   const EMBLEM_MAKS_FORHOLD = 3;
   const UKENDT = new Set(['ukendt', 'andet-maerke', 'andet', 'unknown', 'ukendt-maerke', 'andre-maerker', 'ikke-oplyst', 'ingen']);
@@ -164,7 +169,7 @@
       if (form === 'ordmaerke' && l.ordmaerke) return { src: l.ordmaerke.src, bredde: l.ordmaerke.bredde, hoejde: l.ordmaerke.hoejde, emblem: false };
       const em = l.emblem;
       if (!em || form === 'fuld' || form === 'ordmaerke') return hoved;
-      const vil = form === 'emblem' || str === 'sm';
+      const vil = form === 'emblem' || str === 'sm' || str === 'az';
       if (vil && (form === 'emblem' || em.bredde / em.hoejde <= EMBLEM_MAKS_FORHOLD)) return { src: em.src, bredde: em.bredde, hoejde: em.hoejde, emblem: true };
       return hoved;
     }
@@ -183,7 +188,7 @@
       /* Et logo, der ved slottens mål bliver ulæseligt lavt, er ærligere som tekst. */
       if (fil && m.h < MIN_HOEJDE) brugLogo = false;
       let fbType = o.fallback === 'monogram' || o.fallback === 'ordmaerke' ? o.fallback : (dekor ? 'monogram' : l.fallback);
-      if (str === 'sm') fbType = 'monogram';
+      if (str === 'sm' || str === 'az') fbType = 'monogram';
 
       const navnE = esc(l.navn);
       const a11y = dekor ? ' aria-hidden="true"' : (brugLogo && l.ensfarvet ? ` role="img" aria-label="${navnE}-logo"` : (fbType === 'monogram' ? ` role="img" aria-label="${navnE}"` : ''));
@@ -204,7 +209,7 @@
       const alt = dekor ? '' : `${navnE}-logo`;
       /* Lister og fliser (sm/md/lg) henter først, når billedet er tæt på skærmen — et logo i et foldet filterpanel (display:none) henter slet intet.
          xl/hero/wm (annoncens titel, mærkesidens hero) er øverst på siden og hentes straks. Fast width/height + aspect-ratio: ingen CLS. */
-      const lazy = str === 'sm' || str === 'md' || str === 'lg' ? ' loading="lazy"' : '';
+      const lazy = str === 'sm' || str === 'az' || str === 'md' || str === 'lg' ? ' loading="lazy"' : '';
       return `<span class="bl bl--${str} bl--logo bl--img${emCls}" data-bl="${slugE}" style="--bl-ar:${ar};--bl-sa:${sa}"${dekor ? ' aria-hidden="true"' : ''}>` +
         `<img class="bl-img" src="${src}" alt="${alt}" width="${Math.round(m.w)}" height="${Math.round(m.h)}" decoding="async"${lazy}>${fb}</span>`;
     }
