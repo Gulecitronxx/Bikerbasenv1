@@ -115,7 +115,7 @@ test('V5 mine annoncer: efter bekræftet sletning/solgt/pause lander fokus et fo
   try {
     const p = s.page;
     await p.evaluate(() => { window.__bekraeftSvar = 'ja'; });
-    const klikJa = async () => { await p.waitForSelector('dialog.bb-bekraeft[open]'); await p.click('dialog.bb-bekraeft [data-bekraeft-ok]'); await p.waitForSelector('dialog.bb-bekraeft', { state: 'detached' }); await p.waitForTimeout(120); };
+    const klikJa = async () => { await p.waitForSelector('dialog.bb-bekraeft[open]'); await p.click('dialog.bb-bekraeft [data-bekraeft-ok]'); await p.waitForSelector('dialog.bb-bekraeft', { state: 'detached' }); await p.waitForTimeout(120); await p.waitForFunction(() => document.activeElement && document.activeElement !== document.body, null, { timeout: 5000 }).catch(() => {}); };   /* V6: fokus sættes først, når mock-backendens svar er behandlet; under CPU-last var 120 ms ikke nok */
     // pause/aktivér: fokus bliver på samme rækkes statusknap
     await p.waitForSelector(`.db-row[data-listing-id="${ID(2)}"] [data-status-skift]`);
     await rk(p, ID(2)).locator('[data-status-skift]').click();

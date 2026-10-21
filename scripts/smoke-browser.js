@@ -122,6 +122,19 @@ function startServer(rod, { cache = false } = {}){
   });
 }
 
+/* V6 (P2-4): navigation med genforsøg. Windows' loopback kan løbe tør for bufferplads (net::ERR_NO_BUFFER_SPACE, se startServer) og få en
+   enkelt page.goto til at fejle, selv når alt andet er ens. Kun disse OS-fejl (og ERR_CONNECTION_RESET/REFUSED) tages om, op til 3 forsøg med
+   stigende pause; alle andre fejl (timeout, 404-sider, scriptfejl) kastes uændret. Brug i stedet for page.goto i nye tests. */
+async function gaaTil(page, url, opt) {
+  for (let forsoeg = 1; ; forsoeg++) {
+    try { return await page.goto(url, opt); }
+    catch (e) {
+      if (forsoeg >= 3 || !/ERR_NO_BUFFER_SPACE|ERR_CONNECTION_(RESET|REFUSED)/.test(String(e && e.message))) throw e;
+      await new Promise(ok => setTimeout(ok, 400 * forsoeg));
+    }
+  }
+}
+
 /* ---------- Playwright ---------- */
 
 /* Finder Playwright: almindelig require, PLAYWRIGHT_PATH, repoets node_modules, og hovedmappens node_modules
@@ -631,4 +644,4 @@ async function main(){
 
 if (require.main === module) main();
 
-module.exports = { startServer, installerMock, initScript, koer, tabel, parseArgs, playwrightTilgaengelig, findPlaywright, opslaaFil, vaelgSider, laegJobs, lagerSvar, kunBufferFejl, SOEGE_LINKS, TJEK, HURTIG_SIDER, eksterneRaekker };
+module.exports = { gaaTil, startServer, installerMock, initScript, koer, tabel, parseArgs, playwrightTilgaengelig, findPlaywright, opslaaFil, vaelgSider, laegJobs, lagerSvar, kunBufferFejl, SOEGE_LINKS, TJEK, HURTIG_SIDER, eksterneRaekker };

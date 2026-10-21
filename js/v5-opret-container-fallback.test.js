@@ -39,7 +39,7 @@ test('F8: fallback-tærsklerne svarer til containerens bredde ved ALLE viewportb
     await c.addInitScript(sb.initScript, { tema: 'light' });
     await sb.installerMock(c, port, {});
     const p = await c.newPage();
-    await p.goto(`http://127.0.0.1:${port}/opret-annonce.html`, { waitUntil: 'load' });
+    await sb.gaaTil(p, `http://127.0.0.1:${port}/opret-annonce.html`, { waitUntil: 'load' });   // V6: genforsøg ved ERR_NO_BUFFER_SPACE
     await p.waitForTimeout(1200);
     const afvigelser = [];
     for (let w = 300; w <= 1600; w += 2) {
@@ -73,7 +73,7 @@ async function maal(browser, port, vp, variant) {
     });
   }
   const p = await c.newPage();
-  await p.goto(`http://127.0.0.1:${port}/opret-annonce.html`, { waitUntil: 'load' });
+  await sb.gaaTil(p, `http://127.0.0.1:${port}/opret-annonce.html`, { waitUntil: 'load' });
   await p.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
   await p.waitForTimeout(1500);
   const r = await p.evaluate(() => {
@@ -90,7 +90,9 @@ test('F8: uden container queries giver opret-annonce samme kolonner og sidehøjd
       const nativ = await maal(browser, port, vp, 'native');
       const med = await maal(browser, port, vp, 'med-fallback');
       const uden = await maal(browser, port, vp, 'uden-fallback');
-      assert.deepStrictEqual({ ...med, hoejde: Math.round(med.hoejde / 20) }, { ...nativ, hoejde: Math.round(nativ.hoejde / 20) }, `${vp}px: med fallback ${JSON.stringify(med)} vs container queries ${JSON.stringify(nativ)}`);
+      /* V6 (P2-4): kolonnerne skal være ens; sidehøjden må afvige få pixel (hydrering/skrift: 3666 mod 3671 gav en falsk rød, fordi afrunding til 20 px-spande skar mellem de to). Tolerance 30 px. */
+      assert.deepStrictEqual({ ...med, hoejde: 0 }, { ...nativ, hoejde: 0 }, `${vp}px: med fallback ${JSON.stringify(med)} vs container queries ${JSON.stringify(nativ)}`);
+      assert.ok(Math.abs(med.hoejde - nativ.hoejde) <= 30, `${vp}px: sidehøjde med fallback ${med.hoejde} mod container queries ${nativ.hoejde} (tolerance 30 px)`);
       if (vp >= 768) assert.notDeepStrictEqual(uden, nativ, `${vp}px: uden fallback skal afvige (ellers beviser testen intet): ${JSON.stringify(uden)}`);
     }
   });
