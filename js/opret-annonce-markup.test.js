@@ -40,5 +40,11 @@ test('ingen opdigtede tal eller påstande i tips og tillidsbokse', () => {
 
 test('inline scripts er ikke tilføjet (CSP-hashes)', () => {
   const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
-  assert.doesNotMatch(main, /<script/i);
+  /* V6: ÉT lille inline-script er tilladt i <main>: #op-rediger-hero (overskrift/undertekst for ?rediger= før første maling, så hero'en ikke ombryder: CLS).
+     Det er hashet af scripts/csp-hashes.js, som alle andre. Alle andre inline-scripts i <main> er stadig forbudt. */
+  const uden = main.replace(/<script id="op-rediger-hero">[\s\S]*?<\/script>/, '');
+  assert.doesNotMatch(uden, /<script/i);
+  const krop = /<script id="op-rediger-hero">([\s\S]*?)<\/script>/.exec(main)[1].replace(/\r\n?/g, '\n');
+  const hash = "'sha256-" + require('crypto').createHash('sha256').update(krop, 'utf8').digest('base64') + "'";
+  assert.ok(html.includes(hash), 'CSP mangler hash for #op-rediger-hero — kør node scripts/csp-hashes.js');
 });

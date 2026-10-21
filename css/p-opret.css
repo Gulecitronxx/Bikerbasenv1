@@ -507,7 +507,7 @@
    (live-kortet 0 -> 186 px) og stepperen vokser 66 -> 78 px; "Sikker handel" sprang 198 px (CLS 0,07). Højderne er reserveret. */
 @media (min-width:1024px){
   .op-stepper-card{ min-height:78px; }
-  .op-side .op-live-card{ min-height:186px; }
+  .op-side .op-live-card{ min-height:353px; }   /* V6: målt 349-353 px efter hydrering (var 186: sidekolonnen under kortet sprang 163 px, CLS 0,009) */
 }
 
 /* W14: billedtrinnet — dropzone og miniaturer får hele rækken (som billedet), tipsene står som bånd under. */

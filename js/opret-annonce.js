@@ -1518,12 +1518,22 @@ async function startEditing(id){
   document.title = 'Rediger annonce — Bikerbasen';
   document.querySelector('.op-hero h1').textContent = 'Rediger annonce';
   const lead = document.querySelector('.op-hero-lead');
-  if (lead) lead.textContent = 'Ret oplysningerne og gem. Billederne bliver på annoncen, medmindre du selv fjerner dem.'
-    + (editingStatus === 'hidden' ? ' Annoncen er på pause og vises ikke for købere, før du aktiverer den under Mine annoncer.' : '');
+  if (lead) lead.textContent = REDIGER_LEAD + (editingStatus === 'hidden' ? REDIGER_PAUSE : '');
   return true;
 }
 
+/* V6 (P2-6): hero-teksten for ?rediger= sættes FØR det første await (som login.js gør med ?redirect=). Før stod den først efter at annoncen var hentet:
+   den længere undertekst ombrød hero'en med en linje, og hele siden under rykkede 24 px ved 375 px (CLS 0,019 af 0,02-grænsen). */
+const REDIGER_LEAD = 'Ret oplysningerne og gem. Billederne bliver på annoncen, medmindre du selv fjerner dem.';
+const REDIGER_PAUSE = ' Annoncen er på pause og vises ikke for købere, før du aktiverer den under Mine annoncer.';
+function saetRedigerHero(){
+  if (!new URLSearchParams(window.location.search).get('rediger')) return;
+  const h1 = document.querySelector('.op-hero h1'); if (h1) h1.textContent = 'Rediger annonce';
+  const lead = document.querySelector('.op-hero-lead'); if (lead) lead.textContent = REDIGER_LEAD;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+  saetRedigerHero();
   await backendReady();
 
   /* O1-1: login-muren ved indlaesning er VAEK. Bilbasen moeder saelgeren med en

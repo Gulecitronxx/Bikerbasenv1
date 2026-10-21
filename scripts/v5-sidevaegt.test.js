@@ -85,5 +85,8 @@ test('browser: målt overførsel for de tunge sider ligger inden for budget (das
   assert.ok(mine && mine.i_alt > 0, 'mine-annoncer.html måles');
   /* Ikke-logget-ind-besøg henter både mine-annoncer og login: målingen skal vise det, i stedet for at lade 2x-tallet være et mysterium. */
   assert.strictEqual(mine.omdirigeret_til, 'login.html');
-  assert.ok(mine.i_alt > r.maal.browser['login.html'].i_alt, 'omdirigeringen tæller begge sider');
+  /* V6 (F4): en vagt først i <head> sender udloggede væk, FØR dashboard-pakken hentes. Målingen ender derfor på login.html og skal være LIGE SÅ LILLE som login.html
+     alene (før: 1019 kB, begge pakker; nu: kun login.html + de 8 kB HTML fra den første side). Se js/v6-konto-vagt.test.js. */
+  assert.ok(mine.i_alt >= r.maal.browser['login.html'].i_alt, 'omdirigeringen tæller mindst login-siden');
+  assert.ok(mine.i_alt < r.maal.browser['login.html'].i_alt * 1.2, `dashboard-pakken hentes ikke længere før omdirigeringen: ${mine.i_alt} mod ${r.maal.browser['login.html'].i_alt}`);
 });

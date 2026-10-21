@@ -801,6 +801,15 @@ function fyldDashKonto(user){
   });
 }
 
+/* V6 (P2-6): "henter"-tilstand — se css/p-dashboard.css (.db-venter) og mine-annoncer.js (visSiden). Alt indhold under hero'en er usynligt, til
+   data er tegnet; så skubber de sent tegnede kort, grafer og tabeller ikke rundt på noget, der allerede er synligt. */
+function visSiden(){
+  const m = document.querySelector('main.db-page');
+  if (!m) return;
+  m.classList.remove('db-venter');
+  m.removeAttribute('aria-busy');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await backendReady();
   const user = Store.getUser();
@@ -829,5 +838,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const anker = window.location.hash;
   const start = (anker === '#krav-panel' || anker === '#ekstern-panel') ? 'krav' : (new URLSearchParams(window.location.search).get('tab') || 'oversigt');
   setDashTab(start);
+  visSiden();
   if (start === 'krav' && anker) document.querySelector(anker)?.scrollIntoView();
 });
