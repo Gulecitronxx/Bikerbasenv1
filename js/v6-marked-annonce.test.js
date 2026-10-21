@@ -99,7 +99,10 @@ test('P2-2 statisk: fritekst-mærke = ren tekst i markup og to led (+ annoncen) 
 });
 
 /* ---- P2-3: brede ordmærker i titelrækken ---- */
-const WIDE = [['Honda', uuid(1)], ['KTM', uuid(34)], ['Royal Enfield', uuid(35)], ['Husqvarna', uuid(38)]];
+const BrandLogos = require(path.join(REPO, 'js', 'brand-logos.js'));
+/* mærker med brede (og, efter V6-logoerne, også smallere) logoer; 'bred' = forholdet > 3, som reglen i js/annonce.js */
+const WIDE = [['Honda', uuid(1)], ['KTM', uuid(34)], ['Royal Enfield', uuid(35)], ['Husqvarna', uuid(38)], ['Yamaha', uuid(13)], ['BMW', uuid(25)], ['Suzuki', uuid(22)], ['Kawasaki', uuid(18)]];
+const erBred = n => { const l = BrandLogos.logoFor(n); return !!(l.harLogo && l.bredde / l.hoejde > 3); };
 const TITEL = () => {
   const h1 = document.getElementById('listing-h1'), raekke = document.querySelector('.an-titelraekke'), logo = document.querySelector('.an-maerkelogo .bl');
   const tn = h1.firstChild, ord = []; const t = tn.textContent; let i = 0;
@@ -110,7 +113,7 @@ const TITEL = () => {
   return { tekst: t, linjer: linjer.length, sidste, h1W: hb.width, h1Top: hb.top, logoW: lb && lb.width, logoBund: lb && lb.bottom, logoTop: lb && lb.top, logoLeft: lb && lb.left, h1Right: hb.right, raekkeW: rb && rb.width, sw: document.documentElement.scrollWidth - document.documentElement.clientWidth };
 };
 for (const vp of [375, 768, 1440]) {
-  test(`P2-3 ${vp}: H1 ombrydes pænt (ingen enlige ord), logoet højst 120 px bredt og æder ikke titlen — Honda, KTM, Royal Enfield, Husqvarna`, { timeout: 90000 }, async t => {
+  test(`P2-3 ${vp}: H1 ombrydes pænt (ingen enlige ord), logoet højst 120 px bredt og æder ikke titlen — Honda, KTM, Royal Enfield, Husqvarna, Yamaha, BMW, Suzuki, Kawasaki`, { timeout: 90000 }, async t => {
     if (!H) return t.skip('Playwright mangler');
     for (const [navn, id] of WIDE) {
       const m = await side(vp, `annonce.html?id=${id}`, p => p.evaluate(TITEL));
@@ -118,10 +121,10 @@ for (const vp of [375, 768, 1440]) {
       assert.ok(m.linjer === 1 || m.sidste.length >= 2, `${navn} ${vp}: "${m.sidste.join(' ')}" står alene på sidste linje af "${m.tekst}" (${m.linjer} linjer)`);
       assert.ok(m.linjer <= 3, `${navn}: ${m.linjer} linjer`);
       assert.strictEqual(m.sw, 0, 'ingen vandret overflow');
-      if (vp < 1180) {
+      if (vp < 1180 && erBred(navn)) {
         assert.ok(m.logoBund <= m.h1Top + 1, `${navn}: ordmærket står over titlen under 1180 px (logo bund ${m.logoBund}, h1 top ${m.h1Top})`);
         assert.ok(m.h1W >= m.raekkeW - 1, `${navn}: H1 har hele rækkens bredde (${m.h1W} af ${m.raekkeW})`);
-      } else if (vp >= 700) {
+      } else {   // 1180 +, eller et smalt logo (forhold <= 3) ved siden af titlen
         assert.ok(m.logoLeft >= m.h1Right - 1, `${navn}: logoet overlapper ikke H1`);
       }
     }

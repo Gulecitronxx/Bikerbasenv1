@@ -158,7 +158,7 @@ test('annonce: logo i titelrækken for Harley-Davidson, Indian og Benelli (godke
 test('annonce: ingen dubleret eller mistet logo efter resize 1440 -> 768 -> 390 -> 1440', async t => {
   if (skip(t)) return;
   const { page, ctx } = await annonce('Yamaha', { w: 1440 });
-  const tael = () => page.evaluate(() => ({ lh: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().height, lw: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().width, venstre: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().left >= document.getElementById('listing-h1').getBoundingClientRect().right - 1, logo: document.querySelectorAll('.an-maerkelogo').length, bl: document.querySelectorAll('.an-maerkelogo .bl--logo').length,
+  const tael = () => page.evaluate(() => ({ lh: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().height, lw: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().width, venstre: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().left >= document.getElementById('listing-h1').getBoundingClientRect().right - 1, over: document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().bottom <= document.getElementById('listing-h1').getBoundingClientRect().top + 1, logo: document.querySelectorAll('.an-maerkelogo').length, bl: document.querySelectorAll('.an-maerkelogo .bl--logo').length,
     iHead: document.querySelectorAll('.an-head .an-titelraekke .an-maerkelogo').length, h1: document.querySelectorAll('#listing-h1').length, sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
   for (const [w, hh] of [[1440, 900], [768, 1024], [390, 844], [1440, 900], [1024, 800], [1440, 900]]){
     await page.setViewportSize({ width: w, height: hh });
@@ -166,12 +166,12 @@ test('annonce: ingen dubleret eller mistet logo efter resize 1440 -> 768 -> 390 
     const x = await tael();
     assert.deepStrictEqual([x.logo, x.bl, x.iHead, x.h1], [1, 1, 1, 1], `ved ${w}: ${JSON.stringify(x)}`);
     assert.ok(x.sw <= x.cw, `vandret overflow ved ${w}`);
-    /* fast slot pr. bredde (xl): 64 px fra 1180, 44 px under, 34 px under 700 — logoet står ved siden af h1, aldrig under/over den */
-    const [lo0, hi, wMax] = w >= 1180 ? [56, 64.5, 160.5] : w >= 700 ? [40, 44.5, 110.5] : [30, 34.5, 88.5];
-    /* V6: Yamaha er nu et officielt, bredt logo (4,35:1): slotten er så bredde-begrænset (160 px bred -> 36,8 px høj ved 1440), så nedre højdegrænse = 90 % af bredde/forhold */
-    const yl = BrandLogos.logoFor('Yamaha'), lo = Math.min(lo0, (wMax - 0.5) / (yl.bredde / yl.hoejde) * 0.9);
-    assert.ok(x.lh >= lo && x.lh <= hi && x.lw <= wMax && x.lw >= wMax - 3, `logo ${x.lw}x${x.lh} ved ${w} (slotten er fyldt til bredden)`);
-    assert.ok(x.venstre, `logoet står til højre for h1 ved ${w}`);
+    /* V6: Yamaha er et officielt, BREDT logo (4,35:1). Titelrækken har et bredde-loft på 120 px (css/p-annonce.css), så logoet er 120 px bredt og 120/forhold højt;
+       under 1180 px står et bredt logo ALENE over titlen (an-titelraekke--bred), fra 1180 px til højre for h1. Højden er aldrig over slottens maks. (64/44/34 px). */
+    const yl = BrandLogos.logoFor('Yamaha'), ar = yl.bredde / yl.hoejde, hMax = w >= 1180 ? 64.5 : w >= 700 ? 44.5 : 34.5, kA = w >= 1180 ? 84.9 : w >= 700 ? 58 : 45, ew = Math.min(120, kA * Math.sqrt(ar), (hMax - 0.5) * ar);   // arealgrænsen (k) bider på mobil
+    assert.ok(Math.abs(x.lw - ew) <= 0.6 && Math.abs(x.lh - ew / ar) <= 1 && x.lh <= hMax, `logo ${x.lw}x${x.lh} ved ${w} (forventet ${ew.toFixed(1)} x ${(ew / ar).toFixed(1)}, loft 120)`);
+    if (w >= 1180) assert.ok(x.venstre, `logoet står til højre for h1 ved ${w}`);
+    else assert.ok(x.over, `et bredt logo står over h1 under 1180 px (ved ${w})`);
   }
   await ctx.close();
 });

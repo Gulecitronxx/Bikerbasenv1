@@ -766,11 +766,10 @@ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:emp
   #results-grid:not(.list-view) .rk-linje > span:first-child{ margin-left:0; padding-left:0; border-left:0; }
 }
 
-/* V6 (Critic P3-2): monogram-fallbacken i mærkefilteret har samme visuelle vægt som de officielle logoer ved siden af. Før: en lille orange-tonet cirkel mellem tegnede/farvede logoer
-   (i mørk tilstand mellem LYSE fliser). Nu: neutral flade og mørk tekst (ingen brandfarve), samme 22 px og i mørk tilstand samme lyse flise (--color-fg, 3 px luft) som logoerne.
-   Kun filterrækken (.so-layout .bl-spalte); BrandLogos-kernen og mærkesiderne er uændrede. */
-.so-layout .bl-spalte .bl-mono{ --bl-mono-bg: var(--color-surface-2); --bl-mono-fg: var(--color-fg); box-shadow:inset 0 0 0 1px var(--color-border); }
-:root[data-theme="dark"] .so-layout .bl-spalte .bl-mono{ --bl-mono-bg: var(--color-fg); --bl-mono-fg: var(--color-bg); box-shadow:0 0 0 3px var(--color-fg); }
+/* V6 (Critic P3-2): monogram-fallbacken i mærkefilteret vejer som de officielle logoer. Logo-agentens `.bl-spalte .bl-mono` (css/p-brand-logo.css: neutral grå flade, dæmpet bogstav, tynd kant, 22 px, ens med A–Z) gælder i lys tilstand.
+   I mørk tilstand står de officielle logoer på en LYS flise (--color-fg, 3 px luft); monogrammet får samme lyse flise med mørk tekst, så en liste med logoer og monogrammer ikke blander lyse fliser og mørke cirkler.
+   Kun filterrækken (.so-layout .bl-spalte); størrelse og lys tilstand er kernens. */
+:root[data-theme="dark"] .so-layout .bl-spalte .bl-mono{ background:var(--color-fg); color:var(--color-bg); box-shadow:0 0 0 3px var(--color-fg); }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .so-layout .bl-spalte .bl-mono{ --bl-mono-bg: var(--color-fg); --bl-mono-fg: var(--color-bg); box-shadow:0 0 0 3px var(--color-fg); }
+  :root:not([data-theme="light"]) .so-layout .bl-spalte .bl-mono{ background:var(--color-fg); color:var(--color-bg); box-shadow:0 0 0 3px var(--color-fg); }
 }

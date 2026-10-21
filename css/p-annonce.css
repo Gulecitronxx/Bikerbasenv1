@@ -1279,3 +1279,9 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
 .similar-strip .rk-kilde{ min-height:0; }
 /* (V6-7) Faktatabel: lidt lavere rækker på telefon (10 rækker x ca. 7 px mindre). Desktop er uændret: kolonnebundene flugter (w14-annonce, højst 100 px). */
 @media (max-width:699px){ .an-fact{ padding:7px 8px; margin-bottom:4px; } }
+
+/* V6 (efter logo-agentens officielle logoer): titelrækken er mindst 64 px høj fra 1180 px (xl-slottens højde), uanset logoets form. Et bredt, lavt ordmærke (Kawasaki 5,6:1, 21 px højt) gjorde
+   rækken 20 px lavere end med det tidligere emblem og midterkolonnen tilsvarende kortere; kolonnebundene (w14-annonce, højst 100 px) skulle nu rammes af en tilfældig logoform. Logoet centreres lodret mod H1. */
+@media (min-width:1180px){
+  .an-titelraekke{ min-height:64px; align-items:center; }
+}
