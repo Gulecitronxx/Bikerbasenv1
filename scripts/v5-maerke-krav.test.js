@@ -37,6 +37,8 @@ sel.addEventListener('change', () => {
 });
 inp.addEventListener('input', () => { if (MUT.includes('xss')) document.getElementById('forhaand').innerHTML = inp.value; });
 window.validateStep = () => {
+  /* V6: som opret-annonce.js validateStep(): ved fejl flyttes fokus 280 ms senere (setTimeout) — kan ramme midt i en tastning. */
+  if (MUT.includes('fokustyveri')) setTimeout(() => { try { sel.focus(); } catch (e) { /* */ } }, 280);
   if (felt.hidden || MUT.includes('ingenValidering')) { inp.removeAttribute('aria-invalid'); return true; }
   const v = inp.value;
   const tomt = v.trim() === ''; let slet = false;
@@ -162,6 +164,16 @@ test('A. Andet mærke: hver ødelagt variant opdages', async (t) => {
       const s = samler();
       await K.tjekAndetMaerke(await side(ctx, andetSide(mut)), s.tilfoej);
       assert.ok(navne(s.fund).has(forventet), `${mut.join('+')}: forventede "${forventet}", fik ${[...navne(s.fund)].join(', ') || 'intet'}`);
+    }
+  });
+});
+
+test('A. Andet mærke (V6, P2-4): sidens forsinkede fokusflytning efter validateStep må ikke give en halv tekst (race i runneren)', async (t) => {
+  await medBrowser(t, async ctx => {
+    for (let i = 0; i < 4; i++) {
+      const s = samler();
+      await K.tjekAndetMaerke(await side(ctx, andetSide(['fokustyveri'])), s.tilfoej);
+      assert.deepStrictEqual(s.fund, [], `gentagelse ${i + 1}: ${JSON.stringify(s.fund)}`);
     }
   });
 });

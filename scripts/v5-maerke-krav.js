@@ -99,15 +99,31 @@ async function tjekAndetMaerke(p, tilfoej) {
 
   const sel = '[data-qa-andet]';
   /* Fylder feltet og kører sidens egen validering; aria-invalid="true" på feltet = afvist. */
+  /* V6 (P2-4): runnerens race. validateStep() flytter, når den finder fejl (her altid: typen er ikke valgt), fokus til det første
+     fejlfelt 280 ms senere (setTimeout efter scrollIntoView smooth). Den ventende fokusflytning fra FORRIGE prov() ramte midt i
+     næste p.fill() (select + indsæt) og efterlod "Fa" i stedet for "Fantasi Motors" — derfor 'v5-andet-tekst-gaar-tabt' i ca. hver
+     fjerde kørsel. Rettelse: (1) vent til sidens egen fokusflytning er afsluttet efter hvert validateStep, (2) udfyld med
+     aflæsning og genforsøg, så et fokustyveri aldrig kan give en halv tekst. */
+  const fylde = async tekst => {
+    const forventet = tekst.slice(0, 60);   // maxlength: feltet afkorter selv
+    for (let forsoeg = 0; forsoeg < 4; forsoeg++) {
+      await p.fill(sel, tekst);
+      const nu = await p.evaluate(q => document.querySelector(q).value, sel);
+      if (nu === forventet || (tekst.length > 60 && nu.length > 0 && tekst.startsWith(nu) && nu.length >= 2)) return;
+      await p.waitForTimeout(300);
+    }
+  };
   const prov = async tekst => {
-    await p.fill(sel, tekst);
+    await fylde(tekst);
     await p.dispatchEvent(sel, 'change');
-    return p.evaluate(() => {
+    const r = await p.evaluate(() => {
       try { validateStep(1); } catch (e) { return { fejl: String(e.message) }; }
       const e = document.querySelector('[data-qa-andet]');
       const felt = e.closest('.field') || e.parentElement;
       return { afvist: e.getAttribute('aria-invalid') === 'true' || !!(felt && (felt.classList.contains('has-error') || felt.querySelector('.felt-fejl'))), laengde: e.value.length };
     });
+    await p.waitForTimeout(400);   // sidens egen fokusflytning (280 ms) er nu afsluttet, før næste tastning
+    return r;
   };
   const tom = await prov('');
   if (tom.fejl) { fejl('v5-andet-validering-fejler', `validateStep kastede: ${tom.fejl}`); return; }
@@ -301,7 +317,11 @@ async function koerV5(opt, rod, reg, T) {
       const konsol = [];
       p.on('console', m => { if (m.type() === 'error' && !/Failed to load resource|Content[- ]Security/i.test(m.text())) konsol.push(m.text().slice(0, 160)); });
       p.on('pageerror', e => konsol.push('pageerror: ' + String((e && e.message) || e).slice(0, 160)));
-      await p.goto(`${base}/${sti}`, { waitUntil: 'load', timeout: opt.tid || 25000 });
+      /* V6: ERR_NO_BUFFER_SPACE (Windows-loopback under last) er OS-støj: tag navigationen om (op til 3 forsøg). */
+      for (let forsoeg = 1; ; forsoeg++) {
+        try { await p.goto(`${base}/${sti}`, { waitUntil: 'load', timeout: opt.tid || 25000 }); break; }
+        catch (e) { if (forsoeg >= 3 || !/ERR_NO_BUFFER_SPACE|ERR_CONNECTION_(RESET|REFUSED)/.test(String(e.message))) throw e; await p.waitForTimeout(400 * forsoeg); }
+      }
       await p.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
       await p.waitForFunction(() => !window.DATA_STATUS || (window.DATA_STATUS.eksterne !== 'ikke-hentet' && window.DATA_STATUS.egne !== 'ikke-hentet'), null, { timeout: 8000 }).catch(() => {});
       await p.waitForTimeout(vent);

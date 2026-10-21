@@ -35,6 +35,15 @@ test('kilde: bygget HTML har det nye inline script (kør node scripts/build.js v
   }
 });
 
+/* V6 (P2-4): Windows' loopback kan løbe tør for bufferplads under mange hurtige sideindlæsninger (net::ERR_NO_BUFFER_SPACE, samme OS-støj som
+   smoke-browser.js dokumenterer). En navigation, der fejler af netop den grund, tages om (op til 3 forsøg); alt andet kastes videre. */
+async function gaaTil(p, url, opt) {
+  for (let forsoeg = 1; ; forsoeg++) {
+    try { return await p.goto(url, opt); }
+    catch (e) { if (forsoeg >= 3 || !/ERR_NO_BUFFER_SPACE|ERR_CONNECTION_(RESET|REFUSED)/.test(String(e.message))) throw e; await p.waitForTimeout(400 * forsoeg); }
+  }
+}
+
 async function start(t) {
   const kan = await smoke.playwrightTilgaengelig();
   if (!kan.ok) { t.skip(kan.grund); return null; }
@@ -78,7 +87,7 @@ for (const [navn, blokerJs] of [['components.js blokeret', ['components.js']], [
       try {
         const { ctx, blokeret } = await nyKontekst(env, { blokerJs });
         const p = await ctx.newPage();
-        await p.goto(`http://127.0.0.1:${env.port}/index.html`, { waitUntil: 'load' });
+        await gaaTil(p, `http://127.0.0.1:${env.port}/index.html`, { waitUntil: 'load' });
         await p.waitForTimeout(800);
         let s = await tilstand(p);
         assert.equal(s.modal, true, 'dialogen skal være åben (modal) uden components.js');
@@ -111,7 +120,7 @@ test('almindelig indlæsning (components.js kører): ét klik = ét gemt samtykk
   try {
     const { ctx, blokeret } = await nyKontekst(env);
     const p = await ctx.newPage();
-    await p.goto(`http://127.0.0.1:${env.port}/index.html`, { waitUntil: 'load' });
+    await gaaTil(p, `http://127.0.0.1:${env.port}/index.html`, { waitUntil: 'load' });
     await p.waitForFunction(() => document.getElementById('cookie-banner').getAttribute('data-bound') === 'components', null, { timeout: 15000 });   // components.js har kørt uden at koble igen
     let s = await tilstand(p);
     assert.equal(s.modal, true); assert.equal(s.skrevet, 0); assert.equal(s.gtm, 0);
@@ -131,7 +140,7 @@ test('svar FØR components.js er indlæst (forsinket 2,5 s): ingen dobbeltbindin
   try {
     const { ctx, blokeret } = await nyKontekst(env, { forsinkJs: { 'components.js': 2500 } });
     const p = await ctx.newPage();
-    await p.goto(`http://127.0.0.1:${env.port}/index.html`, { waitUntil: 'commit' });
+    await gaaTil(p, `http://127.0.0.1:${env.port}/index.html`, { waitUntil: 'commit' });
     await p.waitForSelector('#cookie-banner[open]', { timeout: 8000 });
     await p.click('#cookie-necessary-only', { timeout: 4000 });
     await p.waitForLoadState('load', { timeout: 15000 });
@@ -151,7 +160,7 @@ test('privatlivspolitik, vilkår og om-indeksering åbner ikke dialogen (heller 
     for (const side of ['privatlivspolitik.html', 'vilkaar.html', 'om-indeksering.html']) {
       const { ctx } = await nyKontekst(env, { blokerJs: ['components.js'] });
       const p = await ctx.newPage();
-      await p.goto(`http://127.0.0.1:${env.port}/${side}`, { waitUntil: 'load' });
+      await gaaTil(p, `http://127.0.0.1:${env.port}/${side}`, { waitUntil: 'load' });
       await p.waitForTimeout(500);
       const s = await tilstand(p);
       assert.equal(s.modal, false, `${side}: dialogen må ikke være modal`);
@@ -168,7 +177,7 @@ test('allerede svaret: dialogen åbnes ikke (tilbagevendende besøgende), heller
     const { ctx } = await nyKontekst(env, { blokerJs: ['components.js'] });
     await ctx.addInitScript(() => { try { localStorage.setItem('bb_cookie_consent', JSON.stringify({ level: 'necessary', date: new Date().toISOString() })); } catch (e) { /* ingen lagring */ } });
     const p = await ctx.newPage();
-    await p.goto(`http://127.0.0.1:${env.port}/index.html`, { waitUntil: 'load' });
+    await gaaTil(p, `http://127.0.0.1:${env.port}/index.html`, { waitUntil: 'load' });
     await p.waitForTimeout(500);
     assert.equal(await p.evaluate(() => { const d = document.getElementById('cookie-banner'); return !!(d && d.open); }), false);
     await ctx.close();
