@@ -98,6 +98,10 @@ Rettelse:
 | CPU-belastning (`node --test` kører filer parallelt) gør Playwright-tidsvinduer snævre | CLS-score og timere forskubbes | tærskler med margin, genforsøg kun for load-støj, ingen faste `waitForTimeout` som eneste synkronisering i nye tests (brug `waitForFunction`/`waitForSelector`, som v6-cookie.test.js) |
 
 ### Kørsler (hærdningens bevis)
+- **Hele `npm test` 3 gange i træk: 3 af 3 grønne** (1692 tests, 1691 bestået, 1 sprunget over som før, ca. 6 min pr. kørsel; `git status` rent efter hver) plus
+  `scripts/v6-cookie.test.js` 3 af 3 (ikke i package.json endnu). Vejen dertil: første serie med kun runner-/CLS-rettelserne gav 2 røde + 1 grøn
+  (v5-opret-container-fallback, w14-brugere ERR_NO_BUFFER_SPACE, v5-saelger fokus; se tabellen), anden serie efter hærdningen 3 grønne. En enkelt rød kørsel
+  skyldtes i øvrigt `scripts/w13-logo-generator.test.js`, som kræver et rent git-træ (jeg havde ikke committet endnu); den er ikke flaky.
 - `node scripts/v4-maerke-dakning.js --hurtig ... --streng-v5`: 16/16 grønne (før ca. 1 af 4 røde).
 - Delmængde x3 i træk (`js/w10-fejl`, `js/w10-soegning`, `js/w11-fejl2`, `js/w13-integration`, `js/v5-soegning-cls`, `js/v5-saelger`, `scripts/v4-maerke-dakning`, `scripts/facet-intro-cls`,
   `scripts/v5-maerke-krav`, `scripts/v3-cookie-filter`, `scripts/v6-cookie`): 94 tests, 94 grønne, 3 af 3 kørsler (163-183 s hver), ingen genforsøg udløst.
