@@ -103,10 +103,11 @@ async function browserVaegt(rod, sider, pw) {
       const p = await ctx.newPage();
       const typer = {};
       const tael = (type, n) => { typer[type] = (typer[type] || 0) + n; };
-      let filer = 0;
+      let filer = 0, kontoPakke = false;
       p.on('response', async r => {
         try {
           if (!r.url().startsWith(base)) return;
+          if (/\/js\/(dashboard|mine-annoncer)\.js/.test(r.url())) kontoPakke = true;   // kontosidens egen pakke blev hentet
           const b = await r.body();
           const ct = r.headers()['content-type'] || '';
           const tekst = /text|javascript|json|svg|xml/.test(ct);
@@ -120,7 +121,7 @@ async function browserVaegt(rod, sider, pw) {
         await p.waitForTimeout(400);
         const i_alt = Object.values(typer).reduce((a, b) => a + b, 0);
         const slut = new URL(p.url()).pathname.replace(/^\/+/, '');
-        ud[side] = { i_alt, filer, ...typer, ...(slut && slut !== side ? { omdirigeret_til: slut } : {}) };
+        ud[side] = { i_alt, filer, ...typer, ...(slut && slut !== side ? { omdirigeret_til: slut, kontoPakkeHentet: kontoPakke } : {}) };
       } catch (e) { ud[side] = { fejl: String(e.message).split('\n')[0] }; }
       await p.close();
     }
@@ -198,7 +199,7 @@ function udskriv(r) {
   for (const s of r.topSider) ud.push(`  ${s.side.padEnd(30)} ${kb(s.i_alt).padStart(10)}  (html ${kb(s.html)}, js ${kb(s.js)}, css ${kb(s.css)}, fonte ${kb(s.fonte)})`);
   if (r.maal.browser) {
     ud.push('', 'Målt i Chromium (gzip for tekst, råt for billeder/fonte):');
-    for (const [s, e] of Object.entries(r.maal.browser)) ud.push(`  ${s.padEnd(22)} ${e.fejl ? 'FEJL ' + e.fejl : `${kb(e.i_alt).padStart(10)}  ${e.filer} filer${e.omdirigeret_til ? ' (OMDIRIGERET til ' + e.omdirigeret_til + ': ikke logget ind, så begge sider hentes)' : ''}: ${['html', 'js', 'css', 'fonte', 'billeder', 'andet'].filter(k => e[k]).map(k => `${k} ${kb(e[k])}`).join(', ')}`}`);
+    for (const [s, e] of Object.entries(r.maal.browser)) ud.push(`  ${s.padEnd(22)} ${e.fejl ? 'FEJL ' + e.fejl : `${kb(e.i_alt).padStart(10)}  ${e.filer} filer${e.omdirigeret_til ? ' (omdirigeret til ' + e.omdirigeret_til + (e.kontoPakkeHentet ? ': kontosidens egen pakke blev hentet først = SPILD' : ': ikke logget ind; vagten sender væk før kontosidens pakke hentes') + ')' : ''}: ${['html', 'js', 'css', 'fonte', 'billeder', 'andet'].filter(k => e[k]).map(k => `${k} ${kb(e[k])}`).join(', ')}`}`);
   }
   ud.push('');
   if (!r.fund.length) ud.push('Alt inden for budget.');
