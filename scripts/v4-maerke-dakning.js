@@ -497,7 +497,12 @@ async function aabnSide(context, base, sti, port, tid) {
   p.on('response', r => {
     try { const u = new URL(r.url()); if (u.hostname === VAERT && r.status() >= 400 && !r.request().isNavigationRequest()) hentet404.push(`${r.status()} ${u.pathname}`); } catch (e) { /* data: */ }
   });
-  const svar = await p.goto(`${base}/${sti}`, { waitUntil: 'load', timeout: tid });
+  /* V6: ERR_NO_BUFFER_SPACE (Windows-loopback under last) er OS-støj: tag navigationen om (op til 3 forsøg). */
+  let svar;
+  for (let forsoeg = 1; ; forsoeg++) {
+    try { svar = await p.goto(`${base}/${sti}`, { waitUntil: 'load', timeout: tid }); break; }
+    catch (e) { if (forsoeg >= 3 || !/ERR_NO_BUFFER_SPACE|ERR_CONNECTION_(RESET|REFUSED)/.test(String(e.message))) throw e; await p.waitForTimeout(400 * forsoeg); }
+  }
   await p.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
   await p.waitForFunction(() => !window.DATA_STATUS || (window.DATA_STATUS.eksterne !== 'ikke-hentet' && window.DATA_STATUS.egne !== 'ikke-hentet'), null, { timeout: 15000 }).catch(() => {});
   await p.waitForTimeout(350);

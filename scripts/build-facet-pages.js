@@ -1107,6 +1107,10 @@ function soegekort(facet, items){
   const knapLabel = isModel ? (String(facet.mv).length <= 16 ? `Søg ${esc(facet.mv)}` : 'Søg')
     : isType ? `Søg ${frase(facet)}` : isKombi ? 'Søg' : isRegion ? `Søg i ${esc(facet.id)}`
     : isBudget ? `Søg under ${tal(facet.max)} kr.` : isBy ? (facet.region ? 'Søg i landsdelen' : 'Søg i hele landet') : `Søg motorcykler til ${esc(facet.id)}`;
+  /* V6 (P2-4): tallet bages ved byg og regnes om ved hydrering; skifter det antal cifre, kan teksten ombrydes til en linje mindre og trække resten af
+     kortet op (CLS). Højden reserveres derfor til det antal linjer, den bagte tekst fylder på smal skærm (cirka 40 tegn pr. linje, p-facet.css .fa-antal-lN). */
+  const antalTekst = `${nSpan('all', items.length)} ${ordSpan(items.length, fraseEt(facet), frase(facet))} indekseret på Bikerbasen${isBy && facet.region ? `. Søgningen filtrerer på landsdelen ${esc(facet.region)}` : ''}`;
+  const antalLinjer = Math.max(1, Math.min(4, Math.ceil(antalTekst.replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/gi, 'x').length / 40)));
   return `<form class="fa-soeg" action="soegning.html" method="get" aria-label="Søg ${frase(facet)}">
         ${titel ? `<h2 class="fa-soeg-titel">${titel}</h2>` : ''}
         <div class="fa-soeg-felter">
@@ -1114,7 +1118,7 @@ function soegekort(facet, items){
           ${skjult.map(([k, v]) => `<input type="hidden" name="${k}" value="${esc(v)}">`).join('')}
           <button type="submit" class="btn btn-primary btn-lg fa-soeg-knap">${knapLabel} <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></button>
         </div>
-        <p class="fa-soeg-antal">${nSpan('all', items.length)} ${ordSpan(items.length, fraseEt(facet), frase(facet))} indekseret på Bikerbasen${isBy && facet.region ? `. Søgningen filtrerer på landsdelen ${esc(facet.region)}` : ''}</p>
+        <p class="fa-soeg-antal fa-antal-l${antalLinjer}">${antalTekst}</p>
       </form>`;
 }
 

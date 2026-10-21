@@ -30,7 +30,7 @@ async function aabn(sti, { bredde = 1440, tema = 'lys', loggetInd = false, annon
   const page = await ctx.newPage();
   const fejl = [];
   page.on('pageerror', e => fejl.push(e.message));
-  await page.goto(URL(sti), { waitUntil: 'networkidle' });
+  await sb.gaaTil(page, URL(sti), { waitUntil: 'networkidle' });   // V6: genforsøg ved ERR_NO_BUFFER_SPACE
   return { page, fejl, luk: () => ctx.close() };
 }
 const overflow = page => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -282,7 +282,7 @@ test('login: opret-visningens højre kolonne har tre trin; fejlboksen flytter ik
   await bak.installer(ctx, { tema: 'lys' });
   const page = await ctx.newPage();
   try {
-    await page.goto(URL('login.html'), { waitUntil: 'networkidle' });
+    await sb.gaaTil(page, URL('login.html'), { waitUntil: 'networkidle' });
     const y0 = (await boks(page, '#login-email')).y; const cta0 = (await boks(page, '.lg-cta')).y;
     await page.fill('#login-email', 'a@b.dk'); await page.fill('#login-password', 'forkert1');
     await page.click('#login-form button[type=submit]');

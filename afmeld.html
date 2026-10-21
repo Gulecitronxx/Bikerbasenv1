@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-oOa8w286KkWZTg0VQg7jCjiCHjF6xnZXX81clN8dbqM=' 'sha256-Ssk+LcAzQHvFhMvAxEWIw25Jt0DEpEVEkbWksBB5Ny0=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-6Y4He0rNRnVsqcAgohn83tvE7QXC5+0d2S2e45tTPQg=' 'sha256-aZ3fqg7wpahNVkLhLNNDFGvqgYnGvQvfU76nPYq8sJo=' 'sha256-oOa8w286KkWZTg0VQg7jCjiCHjF6xnZXX81clN8dbqM=' 'sha256-esVnkxMy7s0GnvlGt5kLK1w/p7rd3WwATRp2Ui8VrHs=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://images.danbase.dk https://assets.guloggratis.dk; connect-src 'self' https://hkcjrwglwurdjnobewzb.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex">
 <title>Afmeld søgeagent — Bikerbasen</title>
@@ -58,8 +58,8 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=0f5dc636">
-<link rel="stylesheet" href="css/p-login.css?v=0f5dc636">
+<link rel="stylesheet" href="css/styles.css?v=49d33d87">
+<link rel="stylesheet" href="css/p-login.css?v=49d33d87">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Gå til indhold</a>
@@ -155,13 +155,13 @@ try{
 </footer>
 
 <!-- Footeren (og dens lys/mørk-knap) kræver components.js og dens afhængigheder; siden har ellers intet script-lag. -->
-<script defer src="js/security.js?v=0f5dc636"></script>
-<script defer src="js/icons.js?v=0f5dc636"></script>
-<script defer src="js/data.js?v=0f5dc636"></script>
-<script defer src="js/store.js?v=0f5dc636"></script>
-<script defer src="js/maaling.js?v=0f5dc636"></script>
-<script defer src="js/components.js?v=0f5dc636"></script>
-<script defer src="js/info.js?v=0f5dc636"></script>
+<script defer src="js/security.js?v=49d33d87"></script>
+<script defer src="js/icons.js?v=49d33d87"></script>
+<script defer src="js/data.js?v=49d33d87"></script>
+<script defer src="js/store.js?v=49d33d87"></script>
+<script defer src="js/maaling.js?v=49d33d87"></script>
+<script defer src="js/components.js?v=49d33d87"></script>
+<script defer src="js/info.js?v=49d33d87"></script>
 
 
 <script>
@@ -215,7 +215,7 @@ try{
     </div>
   </div>
 </dialog>
-<script>try{if(!localStorage.getItem("bb_cookie_consent")){var d=document.getElementById("cookie-banner");var l=/\/(privatlivspolitik|vilkaar|om-indeksering)(\.html)?$/.test(location.pathname);if(d&&!l){if(d.showModal){d.showModal();}else{d.setAttribute("open","");}var z=function(){if(!d.isConnected||!d.open)return 1;var c=getComputedStyle(d);if(c.display==="none"||c.visibility==="hidden"||!d.offsetWidth){d.close&&d.close();d.removeAttribute("open");d.setAttribute("hidden","");return 1;}};if(!z()){var n=0,t=setInterval(function(){if(z()||++n>48)clearInterval(t);},250);document.addEventListener("visibilitychange",z);}}}}catch(e){}</script>
+<script>try{var K="bb_cookie_consent",d=document.getElementById("cookie-banner");if(d&&!localStorage.getItem(K)){var l=/\/(privatlivspolitik|vilkaar|om-indeksering)(\.html)?$/.test(location.pathname);if(!l){var sv=function(v){return function(){if(d.getAttribute("data-svaret"))return;d.setAttribute("data-svaret",v);try{localStorage.setItem(K,JSON.stringify({level:v,date:new Date().toISOString()}));}catch(e){}try{d.close&&d.close();}catch(e){}d.removeAttribute("open");if(d.parentNode)d.parentNode.removeChild(d);if(v==="all"&&typeof window.bbStartAnalytics==="function"){try{window.bbStartAnalytics();}catch(e){}}};};var a=document.getElementById("cookie-accept-all"),n=document.getElementById("cookie-necessary-only");if(a&&n){a.addEventListener("click",sv("all"));n.addEventListener("click",sv("necessary"));d.addEventListener("cancel",function(e){e.preventDefault();});d.setAttribute("data-bound","inline");}if(d.showModal){d.showModal();}else{d.setAttribute("open","");}var z=function(){if(!d.isConnected||!d.open)return 1;var c=getComputedStyle(d);if(c.display==="none"||c.visibility==="hidden"||!d.offsetWidth){d.close&&d.close();d.removeAttribute("open");d.setAttribute("hidden","");return 1;}};if(!z()){var m=0,t=setInterval(function(){if(z()||++m>48)clearInterval(t);},250);document.addEventListener("visibilitychange",z);}}}}catch(e){}</script>
 <!--cookie:end-->
 </body>
 </html>

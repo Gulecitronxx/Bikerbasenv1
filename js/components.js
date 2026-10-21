@@ -1281,8 +1281,13 @@ function initCookieConsent(){
     // "Kun noedvendige" starter den altsaa aldrig.
     if (level === 'all' && typeof window.bbStartAnalytics === 'function') window.bbStartAnalytics();
   };
+  /* V6: det inline script (scripts/inline-cookie.js) kobler selv knapperne og gemmer samtykket, så dialogen kan besvares,
+     også når denne fil er blokeret eller kommer for sent. Er den allerede koblet (data-bound="inline"), kobles der IKKE igen:
+     ét klik må kun gemme ét samtykke og kun starte statistik én gang. Vagten ovenfor beholdes. */
+  if (dialog.getAttribute('data-bound') === 'inline'){ dialog.setAttribute('data-bound', 'components'); return; }
   document.getElementById('cookie-accept-all').addEventListener('click', svar('all'));
   document.getElementById('cookie-necessary-only').addEventListener('click', svar('necessary'));
+  dialog.setAttribute('data-bound', 'components');
 }
 
 function wireFavoriteButtons(root){
