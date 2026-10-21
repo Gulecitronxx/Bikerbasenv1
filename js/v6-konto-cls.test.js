@@ -22,8 +22,16 @@ test.after(async () => { if (browser) await browser.close(); if (server) server.
 
 const HOEJDE = { 375: 812, 430: 932, 768: 1024, 1024: 768, 1440: 900, 1920: 1080 };
 
+/* OS-støj (Windows' loopback kan løbe tør for bufferplads under mange samtidige browsere: net::ERR_NO_BUFFER_SPACE) må ikke gøre en måling rød:
+   en kastet NAVIGATIONSFEJL tages om én gang; en målt CLS over grænsen tages aldrig om. */
+async function engang(fn){
+  try { return await fn(); }
+  catch (e) { if (!/net::ERR_|Target (page, context or browser )?has been closed|Navigation failed/.test(String(e && e.message))) throw e; return fn(); }
+}
+
 /* Åbner siden som indlogget og returnerer summen af layoutskift (uden nylig brugerinput) efter at alt er faldet til ro. */
-async function maalCls(side, bredde, { tema = 'lys', forsinkelse = 0, forhandler = false } = {}){
+const maalCls = (side, bredde, opt) => engang(() => maalClsEn(side, bredde, opt));
+async function maalClsEn(side, bredde, { tema = 'lys', forsinkelse = 0, forhandler = false } = {}){
   const bak = lavKontoBackend({ forhandler });
   const ctx = await browser.newContext({ viewport: { width: bredde, height: HOEJDE[bredde] }, colorScheme: tema === 'moerk' ? 'dark' : 'light' });
   await ctx.addInitScript(sb.initScript, { tema: tema === 'moerk' ? 'dark' : 'light' });
@@ -219,7 +227,7 @@ test('V6 login: CLS < 0,02 udlogget (også med ?redirect=) ved 375/768/1440 lys 
       await bak.installer(ctx, { tema: tema === 'moerk' ? 'dark' : 'light' });
       const page = await ctx.newPage();
       try {
-        await page.goto(`http://127.0.0.1:${port}/${side}`, { waitUntil: 'load' });
+        await engang(() => page.goto(`http://127.0.0.1:${port}/${side}`, { waitUntil: 'load' }));
         await page.waitForLoadState('networkidle').catch(() => {});
         await page.waitForTimeout(500);
         const cls = await page.evaluate(() => window.__smoke.cls);
