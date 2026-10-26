@@ -2667,6 +2667,28 @@ function wireMobileFilterDialog(){
    alt over 50 ms tæller direkte som blokeret tid. */
 const nextTask = () => new Promise(r => setTimeout(r, 0));
 
+/* V7 (mærke): søgeforslag i fritekstfeltet. Samme regel som forsidens #hs-suggest (js/home.js): kun mærker og mærke + model, der FINDES i lageret
+   (hvert forslag giver mindst ét træf — ingen statisk liste), og kun registrerede mærker (en sælgers fritekst-mærke er ikke et forslag).
+   Native <datalist>: ingen egen dropdown, ingen ekstra script, intet at gøre for tastaturet. Bygges efter første maling (etape 4). */
+function byggSoegeforslag(){
+  const inp = document.getElementById('filter-q');
+  if (!inp || document.getElementById('so-suggest') || typeof BrandRegistry === 'undefined') return;
+  const set = new Map();
+  for (const l of Store.getAllListings()){
+    const b = String(l.brand || '').trim();
+    if (!b || !BrandRegistry.erKendt(b)) continue;
+    set.set(b.toLowerCase(), b);
+    const m = String(l.model || '').trim();
+    if (m && m.toLowerCase() !== b.toLowerCase()){ const bm = `${b} ${m}`; set.set(bm.toLowerCase(), bm); }
+  }
+  if (!set.size) return;
+  const dl = document.createElement('datalist');
+  dl.id = 'so-suggest';
+  dl.innerHTML = [...set.values()].sort((a, b) => a.localeCompare(b, 'da')).map(v => `<option value="${escapeHTML(v)}"></option>`).join('');
+  document.body.appendChild(dl);
+  inp.setAttribute('list', 'so-suggest');
+}
+
 async function boot(){
   sikFriskNote();   // pladsen reserveres FØR lageret er hentet, så resultaterne ikke hopper (CLS)
   await backendReady();
@@ -2701,6 +2723,7 @@ async function boot(){
   // Etape 4: filterpanelet og bogføringen af søgningen.
   await nextTask();
   scheduleFilterPanel();
+  byggSoegeforslag();
   const qs = currentQueryString();
   if (qs) Store.addRecentSearch(qs, describeCurrentSearch(activeFilterPills()));
 }
