@@ -145,7 +145,16 @@ function tilRaekke(annonce, ukendte){
   return raekke;
 }
 
-async function skrivAnnoncer(sb, kilde_id, annoncer){
+/* `livscyklus` (flag BB_LIVSCYKLUS, se crawler/livscyklus.js) tilføjer de fem
+   kolonner, migration 030 opretter, til hver række, crawleren SER: en annonce i
+   listen nulstiller sine væk-signaler. Slået fra som standard, fordi en
+   kolonne, der ikke findes, vælter hele kørslen (se KOLONNER ovenfor). */
+const LIVSCYKLUS_NULSTIL = (nuIso) => ({
+  sidst_forsoegt: nuIso, vaek_i_traek: 0, foerste_vaek_signal: null,
+  teknisk_fejl_i_traek: 0, sidste_signal: 'set',
+});
+
+async function skrivAnnoncer(sb, kilde_id, annoncer, { livscyklus = false } = {}){
   if (!annoncer.length) return { nye: 0, opdaterede: 0, ukendte_felter: [] };
 
   const ider = annoncer.map(a => a.kilde_annonce_id);
@@ -166,10 +175,10 @@ async function skrivAnnoncer(sb, kilde_id, annoncer){
   const ukendte = new Set();
 
   for (const a of annoncer){
-    const raekke = { ...tilRaekke(a, ukendte), kilde_id, sidst_set: nu, status: 'aktiv' };
+    const raekke = { ...tilRaekke(a, ukendte), kilde_id, sidst_set: nu, status: 'aktiv', ...(livscyklus ? LIVSCYKLUS_NULSTIL(nu) : {}) };
     const kendt = kendte.get(a.kilde_annonce_id);
     if (kendt && kendt.manuelle_felter?.length){
-      const beskaaret = { sidst_set: nu };
+      const beskaaret = { sidst_set: nu, ...(livscyklus ? LIVSCYKLUS_NULSTIL(nu) : {}) };
       for (const [k, v] of Object.entries(raekke)){
         if (k === 'kilde_id' || k === 'kilde_annonce_id') continue;
         if (!kendt.manuelle_felter.includes(k)) beskaaret[k] = v;

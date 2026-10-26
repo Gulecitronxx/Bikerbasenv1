@@ -12,6 +12,7 @@ const { gennemgaaSider, sideUrl } = require('./paginering');
 const { tilAnnonce, berigMedDetalje } = require('./parse');
 const { nyRobotsVagt } = require('./robots');
 const db = require('./db');
+const lc = require('./livscyklus');
 
 function nyLog(skrivUd = true){
   const linjer = [];
@@ -276,7 +277,10 @@ async function indsamlAnnoncer(context, kilde, {
    øverst i filen. `hent` kan byttes ud af samme grund som i
    indsamlAnnoncer(): afbrydelsen skal kunne afprøves mod en attrap. */
 async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDetaljeside, robots = null }){
-  const tal = { hentet: 0, tomme: 0, fejlede: 0, ikke_fundet: 0, spaerret: 0, felter: new Map() };
+  // fjernede: annoncer hvis EGEN side svarede 404/410 (id -> '404'|'410'). Kun det er
+  // et bekræftet væk-signal; timeout, 5xx og robots-spærring er det aldrig
+  // (crawler/livscyklus.js).
+  const tal = { hentet: 0, tomme: 0, fejlede: 0, ikke_fundet: 0, spaerret: 0, felter: new Map(), fjernede: new Map() };
   const vagt = nyAfvisningsvagt();
   let afbryd = null;
   let behandlet = 0;
@@ -308,7 +312,7 @@ async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDeta
     } catch (e){
       tal.fejlede++;
       const status = statusFra(e);
-      if (status === 404 || status === 410) tal.ikke_fundet++;
+      if (status === 404 || status === 410){ tal.ikke_fundet++; tal.fjernede.set(annonce.kilde_annonce_id, String(status)); }
       if (tal.fejlede <= 3) log.skriv(`detaljeside fejlede (${annonce.kilde_annonce_id}): ${e.message}`);
       afbryd = vagt.tael(e);
       if (afbryd) break;
@@ -351,7 +355,7 @@ async function berigMedDetaljer(context, kilde, annoncer, { log, hent = hentDeta
    kunne efterprøves ved at få en rigtig forhandler til at svare 403 på
    hundredvis af kald i træk — altså ved at gøre præcis det, rettelsen er
    lavet for at undgå. */
-async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = false, stille = false, hentere = {} } = {}){
+async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = false, stille = false, hentere = {}, livscyklus = lc.livscyklusAktiv() } = {}){
   const log = nyLog(!stille);
   const kilde = laesKilde(navn);
 
@@ -364,6 +368,7 @@ async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = fals
   if (maksSider != null) log.skriv(`DELVIS KØRSEL: højst ${maksSider} listesider pr. liste-URL. Forsvundne annoncer markeres IKKE.`);
   if (kilde.paginering) log.skriv(`paginering: ${kilde.paginering.type}, loft ${kilde.paginering.max_sider} sider pr. liste-URL`);
   if (toerloeb) log.skriv('TØRLØB: der skrives ikke til databasen.');
+  if (livscyklus && !toerloeb) log.skriv('LIVSCYKLUS: slået til (BB_LIVSCYKLUS=1) — væk-signaler og tekniske fejl registreres pr. annonce.');
 
   /* ---------- robots.txt, hentet NU og ikke attesteret (C-013) ----------
      Spærren hed `robots_tjekket` og var en dato, nogen havde skrevet.
@@ -392,6 +397,16 @@ async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = fals
   if (!tilladteLister.length){
     log.skriv('SPÆRRE: robots.txt spærrer samtlige liste-URL\'er — kilden crawles ikke i denne kørsel.');
     log.skriv('        Tvivl falder ud til kildens fordel: en fil, vi ikke kunne læse, tæller også som et nej.');
+    /* En robots-spærring er en TEKNISK hindring for os, ikke et svar om annoncerne:
+       den kan registreres ("kunne ikke tjekke"), men tæller aldrig som væk. */
+    if (livscyklus && !toerloeb){
+      try {
+        const sb0 = db.klient();
+        const k0 = await db.sikrKilde(sb0, kilde);
+        const u = await lc.opdaterLivscyklus(sb0, k0.id, { fundet: new Set(), komplet: false, teknisk: { kode: 'robots' } });
+        log.skriv(`LIVSCYKLUS: ${u.teknisk} annoncer markeret "kunne ikke tjekkes" (robots) — ingen markeret væk.`);
+      } catch (e){ log.skriv(`LIVSCYKLUS: kunne ikke registrere robots-spærringen: ${e.message}`); }
+    }
     return { navn, sprunget_over: true, robots_naegtede: true, log: log.tekst() };
   }
   kilde.liste_urler = tilladteLister;
@@ -435,16 +450,26 @@ async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = fals
       log.skriv('ingen annoncer fundet. Selectors eller sidestruktur bør efterses, før det gentager sig.');
     }
 
+    let fjernede = new Map();
     if (kilde.detalje?.hent && annoncer.length){
       const sek = Math.round(annoncer.length * kilde.crawl_delay_ms / 1000);
       log.skriv(`henter ${annoncer.length} detaljesider (~${Math.floor(sek/60)} min ${sek%60} s ved ${kilde.crawl_delay_ms} ms mellem kald)`);
-      await berigMedDetaljer(browser.context, kilde, annoncer, {
+      const detaljer = await berigMedDetaljer(browser.context, kilde, annoncer, {
         log, hent: hentere.hentDetaljeside, robots,
       });
+      fjernede = detaljer.fjernede;
     }
 
-    if (!toerloeb && annoncer.length){
-      const skrevet = await db.skrivAnnoncer(sb, kilde_id, annoncer);
+    /* Med livscyklus slået til er en annonce, hvis EGEN side svarede 404/410, ikke
+       "set": den skrives ikke (hverken ny eller opdateret) og får i stedet et
+       væk-signal nedenfor. Uden flaget er adfærden uændret. */
+    const set = new Set(annoncer.map(a => a.kilde_annonce_id));
+    const tilSkrivning = livscyklus && fjernede.size
+      ? annoncer.filter(a => !fjernede.has(a.kilde_annonce_id)) : annoncer;
+    for (const id of livscyklus ? fjernede.keys() : []) set.delete(id);
+
+    if (!toerloeb && tilSkrivning.length){
+      const skrevet = await db.skrivAnnoncer(sb, kilde_id, tilSkrivning, { livscyklus });
       tal.nye = skrevet.nye;
       tal.opdaterede = skrevet.opdaterede;
       log.skriv(`gemt: ${skrevet.nye} nye, ${skrevet.opdaterede} opdaterede`);
@@ -472,10 +497,26 @@ async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = fals
        før sidste side, en side der fejlede eller blev spærret af robots.txt,
        en listeside der fejlede. `komplet` kommer fra indsamlAnnoncer() og
        er kun sand, når enden af kataloget er set. */
-    if (!toerloeb && !komplet){
+    if (!toerloeb && livscyklus){
+      /* Delvis med vilje (--limit/--maks-sider) siger intet; ufuldstændig af en
+         TEKNISK grund (en liste fejlede, pagineringen stoppede) er et teknisk signal. */
+      const bevidstDelvis = Boolean(limit) || maksSider != null;
+      const teknisk = !komplet && !bevidstDelvis ? { kode: 'ufuldstaendig' } : null;
+      if (!komplet) log.skriv(`ufuldstændig kørsel — ${bevidstDelvis ? 'delvis med vilje: ingen livscyklus-signaler' : 'registreres som teknisk ("kunne ikke tjekkes"), ikke som væk'} (${stopgrunde.join('; ') || 'ukendt grund'})`);
+      if (!bevidstDelvis){
+        const u = await lc.opdaterLivscyklus(sb, kilde_id, { fundet: set, fjernede, komplet, teknisk });
+        tal.borte = u.borte;
+        if (u.vaern_holdt) log.skriv(`VÆRN: usete annoncer fik IKKE væk-signal — ${u.vaern}.`);
+        log.skriv(`LIVSCYKLUS: ${u.vaek} væk-signaler, ${u.teknisk} tekniske, ${u.borte} sat til 'borte' (kræver ${lc.TAERSKLER.VAEK_FOER_BORTE} i træk over mindst ${lc.TAERSKLER.VAEK_MIN_DAGE} dage)`);
+      }
+      if (komplet){
+        const ud = await lc.udloebGamle(sb);
+        log.skriv(ud.sprunget_over ? `VÆRN: udløb holdt tilbage — ${ud.grund}` : `LIVSCYKLUS udløb: ${ud.antal} (${ud.grund})`);
+      }
+    } else if (!toerloeb && !komplet){
       log.skriv(`ufuldstændig kørsel — forsvundne annoncer markeres IKKE (${stopgrunde.join('; ') || 'ukendt grund'})`);
     }
-    if (!toerloeb && komplet){
+    if (!toerloeb && komplet && !livscyklus){
       const b = await db.markerBorte(sb, kilde_id, tal.fundet);
       tal.borte = b.antal;
       if (b.sprunget_over){
@@ -522,6 +563,11 @@ async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = fals
     }
     // Kørslen lukkes også når den fejler. En række uden afsluttet-tidsstempel
     // er umulig at skelne fra en kørsel, der stadig er i gang.
+    if (livscyklus && sb && kilde_id){
+      // Kørslen blev afbrudt: de usete annoncer kan ikke dømmes. Teknisk signal, aldrig væk.
+      await lc.opdaterLivscyklus(sb, kilde_id, { fundet: new Set(), komplet: false, teknisk: { kode: 'afbrudt' } })
+        .catch(() => {});
+    }
     if (koersel){
       await db.afslutKoersel(sb, koersel.id, tal, log.tekst()).catch(() => {});
     }
