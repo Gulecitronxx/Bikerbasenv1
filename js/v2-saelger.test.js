@@ -48,11 +48,12 @@ function stortPng(b, h){
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), kl('IHDR', ih), kl('IDAT', zlib.deflateSync(raw, { level: 0 })), kl('IEND', Buffer.alloc(0))]);
 }
 
-test('P2-2 Opret: hero-undertekst og tillidsboks klippes ikke af trinbjaelken (1440/768/390, lys+moerk)', { timeout: 90000 }, async t => {
+test('P2-2 Opret: hero-undertekst og tillidsboks klippes ikke af trinbjaelken (1440/768/390, lys+moerk)', { timeout: 240000 }, async t => {
   if (!kan.ok) return t.skip(kan.grund);
   for (const [w, h] of [[1440, 900], [768, 1024], [390, 844]]) for (const tema of ['lys', 'moerk']) {
     const s = await aabn({ loggetInd: true }, 'opret-annonce.html', { width: w, height: h }, tema);
     try {
+      await s.page.waitForSelector('body[data-op-klar]', { state: 'attached', timeout: 15000 });   // V7 QA: vent på at siden er klar (var: evaluate straks, element null under belastning)
       const m = await s.page.evaluate(() => {
         const bund = q => document.querySelector(q).getBoundingClientRect().bottom;
         const kort = document.querySelector('.op-stepper-card').getBoundingClientRect().top;

@@ -59,8 +59,10 @@ test('BB_TEST_UDEN_GENFORSOEG=1 slår genforsøget fra', () => {
   assert.match(r.ud, /fejl kald=1/);
 });
 
-test('package.json: "test" starter node med preload og begrænset samtidighed', () => {
+test('package.json: "test" kører via scripts/koer-test.js, som sætter preload og begrænset samtidighed', () => {
   const t = require('../package.json').scripts.test;
-  assert.match(t, /--require \.\/scripts\/test-preload\.js/);
-  assert.match(t, /--test-concurrency=\d+/);
+  assert.match(t, /^node scripts\/koer-test\.js /);
+  const k = fs.readFileSync(path.join(__dirname, 'koer-test.js'), 'utf8');
+  assert.match(k, /--require', '\.\/scripts\/test-preload\.js'/);
+  assert.match(k, /BB_TEST_SAMTIDIGE \|\| '8'/);
 });
