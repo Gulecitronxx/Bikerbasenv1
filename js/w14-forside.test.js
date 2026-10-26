@@ -262,8 +262,9 @@ test('W14 i3: mærkefliserne dublerer ikke navnet, og kørekort-/typefliserne pe
     assert.ok(fs.existsSync(path.join(REPO, href)), `${href} findes ikke`);
     assert.doesNotMatch(fs.readFileSync(path.join(REPO, href), 'utf8'), /name="robots" content="noindex/, `${href} er noindex`);
   }
-  // Scooter/Classic/Cross: siderne findes, men er noindex (for få annoncer), så fliserne peger bevidst på søgningen.
-  for (const [id, href] of r.typer.filter(([id]) => ['scooter', 'classic', 'cross'].includes(id))) assert.match(href, /^soegning\.html\?type=/, id);
+  // Scooter: siden findes, men er noindex (7 annoncer, under tærsklen på 10), så fliseprøven peger bevidst på søgningen. Classic og Cross har efter V7 data (typen afledt
+  // af mærke + model: classic 5 -> 25, cross 3 -> 11) over tærsklen og peger på deres egne sider; de er dækket af løkken ovenfor (siden findes og er ikke noindex).
+  for (const [id, href] of r.typer.filter(([id]) => ['scooter'].includes(id))) assert.match(href, /^soegning\.html\?type=/, id);
 });
 
 test('W14 i3: tap-mål >= 40 px på topnav, footer-links og de sammenfoldede genvejslister', async t => {

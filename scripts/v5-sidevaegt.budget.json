@@ -2,7 +2,7 @@
  "version": 1,
  "beskrivelse": "Maks gzip-bytes (niveau 6). Nuværende størrelse + luft (filer 10 %, sider 8 %, browser 10 %), rundet op til 100 B. Hæves kun bevidst (node scripts/v5-sidevaegt.js --gem-budget).",
  "filer": {
-  "js/annonce.js": 37700,
+  "js/annonce.js": 38100,
   "js/backend-bridge.js": 30400,
   "js/bekraeft-dialog.js": 1400,
   "js/bike-art.js": 3600,
@@ -11,7 +11,7 @@
   "js/brands-registry.js": 10000,
   "js/components.js": 32800,
   "js/dashboard.js": 14400,
-  "js/data.js": 47700,
+  "js/data.js": 48800,
   "js/filtrering.js": 11500,
   "js/forhandler.js": 16100,
   "js/guides.js": 1100,
@@ -184,7 +184,9 @@
  },
  "baseline": "Sat bevidst to gange: ved V5-integrationen (625ec7f5) og igen ved V6-integrationen (570e3f9e). V6-vækst pr. fil står under \"begrundelser_v6\"; V5-begrundelserne står under \"begrundelser\". Ingen vækst vurderet som spild.",
  "begrundelser_v7_data": {
-  "js/sortering.js": "+~130 B (6282 mod 6200): V7 data: nedtoning af forsinkede annoncer i Blandet + sorteringen Senest bekræftet."
+  "js/sortering.js": "+~130 B (6282 mod 6200): V7 data: nedtoning af forsinkede annoncer i Blandet + sorteringen Senest bekræftet.",
+  "js/data.js": "+~5,1 kB gzip (43,4 -> 48,4 kB): typetabellen (393 regler + motor, ca. 2,6 kB; data/model-typer.json er kilden, js/data.js har kopien, så ingen side henter en ekstra fil) og livscyklussen (annonceAlder/friskhedsFordeling, ca. 1,3 kB). Typetabellen er det, der gør, at 267 af 366 annoncer uden type nu har en. Budgettet 48800 er sat bevidst.",
+  "js/annonce.js": "+~150 B over budgettet: gennemsigtig relevansscore til Lignende motorcykler (vægtetabel, gulv, mangfoldighed, ærlig overskrift) og alder/afledt type på annoncesiden. Erstatter den gamle ca. 30-linjers anLignende."
  },
  "begrundelser_v6": {
   "js/mine-annoncer.js": "+1760 B (14808 -> 16568): V6 konto: henter-tilstand + skelet, tællerstribe i første tegning, reserveret hero-undertitel (CLS < 0,02) og den anonyme favoritfane (\"N gemte annoncer kræver login\"). Største V6-vækst; rimelig, men kandidat til at flytte skelet-markup ind i HTML.",
