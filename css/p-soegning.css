@@ -773,3 +773,6 @@ html.so-note .so-uoplyst:not(:empty), html.so-note:not(.so-klar) .so-uoplyst:emp
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .so-layout .bl-spalte .bl-mono{ background:var(--color-fg); color:var(--color-bg); box-shadow:0 0 0 3px var(--color-fg); }
 }
+
+/* V7 (mærke): søgeforslagene (datalist, js/search.js byggSoegeforslag) kommer, når man skriver. Browserens egen pil ligger ellers klods op ad ryd-knappen. */
+#filter-q::-webkit-calendar-picker-indicator{ display:none !important; }

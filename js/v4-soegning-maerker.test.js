@@ -160,7 +160,8 @@ test('fritekst: sentinellen "ukendt" er ikke et mærkenavn og kan ikke findes; m
   assert.deepEqual(find('ukendt'), []);
   assert.equal(find('dkw').length, 1);
   assert.equal(F.maerkeNoegle(find('dkw')[0].brand), 'dkw', 'DKW er et registreret mærke (V4 register), ikke uoplyst');
-  assert.ok(find('moto købes').length >= 1 && F.erUoplystMaerke(find('moto købes')[0].brand), 'modelnavnet i en uoplyst annonce kan findes');
+  /* V7 (mærke): 'moto cross købes' er efterspørgsel og ude af lageret; fixturens uoplyste række er nu et salg uden mærke ('crosser'). */
+  assert.ok(find('crosser').length >= 1 && F.erUoplystMaerke(find('crosser')[0].brand), 'modelnavnet i en uoplyst annonce kan findes');
   assert.equal(find('zzzz').length, 0);
   assert.equal(find('   ').length, LAGER.length);
 });
