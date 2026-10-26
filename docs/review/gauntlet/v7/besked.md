@@ -70,6 +70,7 @@ Fejler notifikationen, gemmes beskeden alligevel. Uudfyldte `<<PROJEKT_URL>>`/`<
 | `css/p-annonce.css` | To små regler til den nye kontaktbeskrivelse + pladsreservation til formularen. |
 | `scripts/v5-sidevaegt.budget.json` | Budget for de to nye filer + `supabase-config.js` (begrundet under `begrundelser_v7`). |
 | `js/w5-hjaelp.js` | Valgfri 4. parameter `foer` til `indlaes()` (kode før kilderne, bruges til flag-tests). |
+| `scripts/kritisk-gen.js` (+3 linjer), `scripts/kritisk-manifest.json` | **Ønsket ændring i fælles fil, gjort fordi gaten ellers fejler**: manifestet kendte kun ark, en side linker til; `scripts/w12-kritisk.test.js` kræver, at ALLE `css/*.css`-regler er kendt. `css/p-beskeder.css` er bevidst ikke linket fra nogen side (lazy), så generatoren tager nu alle ark i `css/` med i `regler` (aldrig i en families kritiske udsnit). Manifestet er regenereret med `kritisk-gen` (+100 regler). |
 
 ## 4. Flag fra (standard): hvad ser brugeren nu?
 
@@ -103,6 +104,10 @@ Nye filer (**ikke tilføjet til `package.json`** — Orchestrator ejer listen):
 | `js/v7-besked.test.js` | node | Validering, normalisering = SQL-reglen, hver SQL-kode har en dansk tekst, låse-/tids-/badgetekster, formularens markup, **flaget er default fra**, `beskeder.js` står ikke i nogen HTML, `bbIndlaesBeskeder()` henter intet uden flag, sælgerkortet i alle flag/login/uuid/egen-kombinationer. |
 | `js/v7-besked-sql.test.js` | node, **statisk SQL** | Alle tabeller har RLS; kun to politikker og begge `for select … to authenticated … auth.uid()`; ingen `using (true)`; ingen skrive-politik; ingen grant til anon/skriveret; hver funktion `security definer` + tom `search_path`; kun ti klientfunktioner med `execute` til authenticated; ingen e-mail/telefon i svar; rate-limit-linjerne findes; trigger-vagt; Edge Function læser ikke beskedtekst, escaper titel, kræver secret; ren ASCII; mock og SQL deler koder. |
 | `js/v7-besked-flow.test.js` | Playwright + mock | Flag fra (udlogget/indlogget, intet modul hentet, fane skjult); flag til: login-CTA, validering uden kald, send (netfejl, dobbeltklik, kvittering, notifikation uden tekst), honeypot, uverificeret e-mail + "send linket igen", egen/demo-annonce, mobilbjælke, sælger-badge -> læs -> svar -> køber-badge, deep-link, spam-grænser, slettet/solgt/pauset, blokér/fortryd/anmeld, XSS/escaping, tom/fejl-indbakke, mailvalg, **375/430 lys+mørk**, 1440/1920 mørk, CLS. Skærmbilleder med `BESKED_SKAERM=<mappe>`. |
+
+**Kørt på bygget tilstand** (`build.js` -> `kritisk-gen.js` -> `build.js`, alle exit 0): de tre nye + `w5-annonce`, `w6-funktion`, `v4-annonce`,
+`w14-annonce`, `w12-kritisk`, `v5-sidevaegt`, `csp-hashes`, `v6-konto-vagt`, `mine-annoncer` = 169 tests, **3 kørsler i træk, 0 fejl**.
+`smoke-browser --strikt --cls 0.05` (375/430/768/1440/1920, lys+mørk): `annonce.html` (10 målinger) og `--login-mock` med `mine-annoncer.html` (alle faner) + `opret-annonce.html` (70 målinger), **2 kørsler, 0 fejl, 0 advarsler**. Smoke kører med flaget FRA (standard); flag-til dækkes af `v7-besked-flow.test.js`. Det genererede byg-output er kasseret igen (kun `kritisk-manifest.json` er committet).
 
 Eksisterende tests, jeg har måttet røre (copy-ændringen er opgavens kerne):
 `js/w5-annonce.test.js`, `js/w6-funktion.test.js`, `js/v4-annonce.test.js` (nye formuleringer i flag-fra-teksten), `js/w6-funktion.test.js`
@@ -170,16 +175,31 @@ Rækkefølge — **flaget sættes SIDST**. Intet af dette er gjort.
 2. **Mailen kan ikke testes uden Resend/Deno.** Edge Function er læst og statisk kontrolleret, ikke kørt.
 3. **E-mailbekræftelse**: kræver at projektet faktisk sender bekræftelsesmails ved oprettelse. Er "Confirm email" slået fra i Supabase Auth, er ingen bruger "verificeret", og ingen kan skrive. Tjek Auth-indstillingen før flaget.
 4. **Statiske annoncesider** (`annonce-*.html`) har stadig "Log ind for at se sælger og kontaktoplysninger." i forrenderet markup (`scripts/build-listing-pages.js:288`) i de millisekunder, før JS erstatter kortet. Det er sandt nok i begge flagtilstande, men en ændring i generatoren (ikke mit område) kunne sige "Skriv til sælgeren" ved flag til.
-5. **Tilbagelevering til tredje part**: dealer-annoncer i `listings` får også beskedflade (alle brugeroprettede annoncer); eksterne har aldrig.
+5. **Dealer-annoncer**: dealer-annoncer i `listings` får også beskedflade (alle brugeroprettede annoncer); eksterne har aldrig.
 6. **Ingen realtime**: indbakken genhenter hvert 30. sekund og ved fokus. Supabase Realtime kunne erstatte det; kræver en politik-gennemgang.
 7. **Ingen vedhæftninger, ingen billeder i beskeder** (bevidst: ingen filer fra fremmede, ingen EXIF).
 8. **Mine annoncer-oversigtens statistikkort** viser ikke et beskedtal (badge på fane og header dækker behovet; kortgitteret har fem fliser).
 9. `package.json` "test"-listen skal have de tre nye filer (Orchestrator).
+10. **Før-eksisterende, ikke rørt**: headerens hovednavigation ombryder ("Artikler & guides", "Om Bikerbasen", "Mine annoncer" på 2-3 linjer) mellem ca. 1180 og 1366 px — målt identisk med og uden mine ændringer (flag fra, ingen badge). Badgen på "Min profil" tilføjer ~24 px til en allerede trang række ved de bredder; bør løses sammen med navigationen (fælles `css/styles.css`, ikke mit område).
+11. **Ingen kladde i browserens lager** (bevidst): den eksisterende test "alle sessionStorage-/localStorage-nøgler i js/ er nævnt på privatlivssiden" kræver, at hver nøgle står på privatlivssiden, og jeg må ikke røre den (en første version gemte en kladde i `sessionStorage`; den fangede testen, og den er fjernet). Skriver køberen og forlader siden, er teksten væk; ved fejl bevares den i feltet.
+12. **Sælgers navn til privat sælger**: tråden viser modpartens profilnavn (som i forvejen er offentligt for indloggede). Ønskes anonymitet indtil første svar, er det en produktbeslutning (ændr `modpart_navn` i `mine_samtaler`/`hent_samtale`).
 
 ## 10. Skærmbilleder
 
 `docs/review/gauntlet/v7/besked/` — `foer-*` (udgangspunkt, flag-fra-teksten før ændringen) og `flagfra-*` / `flagtil-*` (efter): annoncekort udlogget/indlogget, valideringsfejl, sendt, indbakke, tråd, slettet annonce, bloker-dialog, tom/fejl, mobil 375/430 og 1440/1920, lys og mørk.
 
-## 11. Selvvurdering (7 dimensioner, 1–10, pr. sidefamilie)
+## 11. Selvvurdering (7 dimensioner, 1-10, pr. sidefamilie)
 
-Udfyldes endeligt efter de afsluttende kørsler — se bunden af denne fil.
+Ærligt: ingen af tallene gælder produktion, før 025 er kørt og testet på staging. Karaktererne gælder koden og flowet mod mocken.
+
+| Dimension | Annoncesiden (kontaktkort) | Mine annoncer -> Beskeder |
+|---|---|---|
+| **Visuel kvalitet** | 8 — Kortet er stadig ét sammenhængende kort; formularen har samme tokens/knapper som resten. Flag-fra-teksten er fire linjer prosa uden ikon (bevidst, for kolonnebundene), lidt tæt. | 8 — to kolonner, status-mærker, ulæst-prik; tråden er en simpel boble-liste (ingen avatarer i bobler, ingen datoskillere). |
+| **Designkonsistens** | 8 — `.btn`, `.input`, `.seller-locked-note`, samme toast/dialog som resten. | 8 — genbruger `db-tab`, `db-list-title`, `bekraeft()`, `toast()`. Eget lazy-ark, men kun tokens. |
+| **Funktionalitet** | 8 — send, validering, dobbeltsend-spærre, netfejl uden tekst-tab, uverificeret e-mail med "send linket igen", eksisterende samtale vises. Ikke prøvet mod rigtig database. | 8 — læs/svar/ulæst, deep-link, blokér/fortryd, anmeld, mailvalg, låst ved solgt/pause/slettet, genhentning. Ingen realtime, ingen paginering over 100 tråde/200 beskeder. |
+| **Brugeroplevelse** | 9 — køber ser FØR login, hvad der sker; ærlig tekst i alle tilstande; hurtigstartere; kvittering med vej videre. | 8 — fokus lander rigtigt (tråd-overskrift, tilbage -> listen); tom/fejl/loading findes. Uden mail-aktivering hører sælgeren først om en besked ved næste login (derfor er guiden et krav). |
+| **Mobil** | 9 — 375/430: ingen overflow, felt 16 px (ingen iOS-zoom), Send 44 px, bjælken scroller til formularen. | 8 — liste ELLER tråd med tilbage-knap, 44 px-mål, badge på profilikonet. |
+| **Performance** | 8 — flag fra: ingen ekstra requests (`beskeder.js`/CSS hentes ikke, målt), men koden i eksisterende filer vokser (annoncesiden ca. +3,7 kB gzip: `annonce.js` +1,6, `components.js` +0,8, config +0,6, CSS +0,8). Flag til: lazy 10 + 2,7 kB gzip, CLS 0,002-0,013. | 8 — intet ekstra hentes før fanen åbnes (Mine annoncer ca. +2,4 kB gzip i delte filer); genhentning hvert 30. s kun når synlig. |
+| **Indholdskvalitet** | 9 — ærlig, dansk, ingen opdigtet svartid/tal; siger hvad der ikke deles. | 9 — hver fejlkode har en forklarende sætning (testet); sikkerhedsråd i tråden. |
+
+Samlet pr. mockup: **Annonce.png** (kontaktkortet) 8/10 — ejerens problem er løst i begge flagtilstande; **Mine annoncer.png** 8/10 — ny fane følger mockuppens faner, men mockuppen har ingen Beskeder-fane at måle mod.
