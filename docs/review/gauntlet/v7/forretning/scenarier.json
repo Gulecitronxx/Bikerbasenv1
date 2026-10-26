@@ -1,0 +1,163 @@
+{
+  "antagelser": {
+    "MOMS": 1.25,
+    "stripe": "1,9 % + 1,80 kr",
+    "SUPPORT": 4,
+    "FAST": 1500,
+    "LOEN": 25000,
+    "PRIS_A": 169,
+    "PRIS_BOOST": 59,
+    "PRIS_DEALER": 199
+  },
+  "scenarier": {
+    "pess": {
+      "input": {
+        "N": 15,
+        "s": 0.25,
+        "c": 0.25,
+        "g": 0.2,
+        "per": 1,
+        "ref": 0.08,
+        "boostA": 0.01,
+        "dealers": 1,
+        "churn": 0.05,
+        "visits": 2000,
+        "ctr": 0.005,
+        "lead": 0.1,
+        "prov": 40
+      },
+      "A": {
+        "betalende": 0.75,
+        "tabt": 2.25,
+        "md": 86.52975,
+        "N_effektiv": 12.75
+      },
+      "B": {
+        "betalende": 0.15,
+        "tabt": 0,
+        "md": 5.475450000000001
+      },
+      "C": {
+        "betalende": 0.8775,
+        "tabt": 2.25,
+        "md": 93.92160750000001
+      },
+      "D": {
+        "aar1": 411.0163125000001,
+        "mdr24": 1449.3733125,
+        "tabt_pr_md": 2.25
+      },
+      "dealer": {
+        "dealere": 1,
+        "md": 186.98125
+      },
+      "affiliate": {
+        "leads": 0.4,
+        "md": 16
+      },
+      "break_even_A_fast": 260.0261759683808
+    },
+    "base": {
+      "input": {
+        "N": 60,
+        "s": 0.36,
+        "c": 0.5,
+        "g": 0.12,
+        "per": 1.2,
+        "ref": 0.05,
+        "boostA": 0.04,
+        "dealers": 6,
+        "churn": 0.03,
+        "visits": 10000,
+        "ctr": 0.01,
+        "lead": 0.15,
+        "prov": 75
+      },
+      "A": {
+        "betalende": 9.504,
+        "tabt": 9.504,
+        "md": 1362.0638591999996,
+        "N_effektiv": 50.496
+      },
+      "B": {
+        "betalende": 2.4,
+        "tabt": 0,
+        "md": 91.0056
+      },
+      "C": {
+        "betalende": 11.52384,
+        "tabt": 9.504,
+        "md": 1474.6923897599997
+      },
+      "D": {
+        "aar1": 6469.803331199998,
+        "mdr24": 22814.569641599992,
+        "tabt_pr_md": 9.504
+      },
+      "dealer": {
+        "dealere": 6,
+        "md": 1121.8874999999998
+      },
+      "affiliate": {
+        "leads": 6,
+        "md": 450
+      },
+      "break_even_A_fast": 66.07619708290402
+    },
+    "opt": {
+      "input": {
+        "N": 250,
+        "s": 0.45,
+        "c": 0.7,
+        "g": 0.06,
+        "per": 1.4,
+        "ref": 0.03,
+        "boostA": 0.08,
+        "dealers": 20,
+        "churn": 0.02,
+        "visits": 40000,
+        "ctr": 0.02,
+        "lead": 0.2,
+        "prov": 120
+      },
+      "A": {
+        "betalende": 74.02499999999999,
+        "tabt": 31.725000000000005,
+        "md": 12657.253454999995,
+        "N_effektiv": 218.275
+      },
+      "B": {
+        "betalende": 20,
+        "tabt": 0,
+        "md": 777.26
+      },
+      "C": {
+        "betalende": 91.487,
+        "tabt": 31.725000000000005,
+        "md": 13623.562518499995
+      },
+      "D": {
+        "aar1": 60121.95391124997,
+        "mdr24": 212008.99537124988,
+        "tabt_pr_md": 31.725000000000005
+      },
+      "dealer": {
+        "dealere": 20,
+        "md": 3739.625
+      },
+      "affiliate": {
+        "leads": 64,
+        "md": 7680
+      },
+      "break_even_A_fast": 29.627280620809863
+    }
+  },
+  "break_even": {
+    "netto_kr_pr_ny_egen_annonce": 22.701064319999993,
+    "nye_annoncer_md_for_FAST": 66.07619708290402,
+    "nye_annoncer_md_for_LOEN": 1101.2699513817336,
+    "forhandlere_for_FAST": 8.022194738777284,
+    "forhandlere_for_LOEN": 133.70324564628808
+  },
+  "baseA_aar": 16344.766310399995
+}

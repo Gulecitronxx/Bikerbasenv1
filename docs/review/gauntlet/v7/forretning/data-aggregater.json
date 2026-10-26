@@ -1,0 +1,312 @@
+{
+  "hentet": "2026-10-26T17:16:47.220Z",
+  "egne": {
+    "antal_synlige_for_anon": 2,
+    "status": {
+      "active": 2
+    }
+  },
+  "eksterne": {
+    "alle_raekker": 735,
+    "status": {
+      "aktiv": 735
+    },
+    "aktive": 735,
+    "aktive_pr_kilde": {
+      "guloggratis.dk": 220,
+      "mcsyd.dk": 413,
+      "jensensmc.dk": 28,
+      "rydbergsmc.dk": 74
+    },
+    "aktive_pr_saelgertype": {
+      "ikke oplyst": 220,
+      "forhandler": 515
+    },
+    "aktive_med_pris": 687,
+    "pris_percentiler": {
+      "p10": 29300,
+      "p25": 59999,
+      "median": 105000,
+      "p75": 169997,
+      "p90": 251917
+    },
+    "pris_baand": {
+      "30-50k": 61,
+      "<=30k": 77,
+      "75-100k": 109,
+      ">150k": 212,
+      "100-150k": 145,
+      "50-75k": 83,
+      "ingen pris": 48
+    },
+    "andel_over": {
+      "50000": 0.7991266375545851,
+      "75000": 0.6783114992721979,
+      "100000": 0.519650655021834,
+      "150000": 0.30858806404657935
+    },
+    "antal_over_100k": 357,
+    "pris_baand_pr_saelgertype": {
+      "privat": {
+        "antal": 0,
+        "over_100k": 0,
+        "median": null
+      },
+      "forhandler": {
+        "antal": 475,
+        "over_100k": 280,
+        "median": 124995
+      },
+      "ikke oplyst": {
+        "antal": 212,
+        "over_100k": 77,
+        "median": 84993
+      }
+    },
+    "pr_type": {
+      "ukendt": {
+        "antal": 339,
+        "median": 99995,
+        "andel_over_100k": 0.484,
+        "andel_30_100k": 0.342
+      },
+      "Cruiser": {
+        "antal": 84,
+        "median": 147300,
+        "andel_over_100k": 0.643,
+        "andel_30_100k": 0.286
+      },
+      "Street": {
+        "antal": 57,
+        "median": 94800,
+        "andel_over_100k": 0.439,
+        "andel_30_100k": 0.544
+      },
+      "Adventure": {
+        "antal": 47,
+        "median": 149995,
+        "andel_over_100k": 0.745,
+        "andel_30_100k": 0.255
+      },
+      "Touring": {
+        "antal": 41,
+        "median": 149800,
+        "andel_over_100k": 0.561,
+        "andel_30_100k": 0.439
+      },
+      "Sportstouring": {
+        "antal": 32,
+        "median": 67300,
+        "andel_over_100k": 0.313,
+        "andel_30_100k": 0.531
+      },
+      "Sport": {
+        "antal": 24,
+        "median": 82300,
+        "andel_over_100k": 0.25,
+        "andel_30_100k": 0.625
+      },
+      "Offroader": {
+        "antal": 20,
+        "median": 139995,
+        "andel_over_100k": 0.75,
+        "andel_30_100k": 0.25
+      },
+      "Classic": {
+        "antal": 18,
+        "median": 115000,
+        "andel_over_100k": 0.611,
+        "andel_30_100k": 0.389
+      },
+      "Classic Cruiser": {
+        "antal": 13,
+        "median": 199800,
+        "andel_over_100k": 0.923,
+        "andel_30_100k": 0.077
+      },
+      "Klassiker": {
+        "antal": 4,
+        "median": 50000,
+        "andel_over_100k": 0,
+        "andel_30_100k": 1
+      },
+      "Cross": {
+        "antal": 3,
+        "median": 23500,
+        "andel_over_100k": 0,
+        "andel_30_100k": 0.333
+      }
+    },
+    "pr_maerke": {
+      "Honda": {
+        "antal": 294,
+        "median": 119995,
+        "andel_over_100k": 0.592,
+        "andel_30_100k": 0.333
+      },
+      "Harley-Davidson": {
+        "antal": 77,
+        "median": 234800,
+        "andel_over_100k": 0.961,
+        "andel_30_100k": 0.039
+      },
+      "Yamaha": {
+        "antal": 68,
+        "median": 67400,
+        "andel_over_100k": 0.338,
+        "andel_30_100k": 0.324
+      },
+      "Suzuki": {
+        "antal": 62,
+        "median": 65000,
+        "andel_over_100k": 0.323,
+        "andel_30_100k": 0.403
+      },
+      "BMW": {
+        "antal": 43,
+        "median": 74900,
+        "andel_over_100k": 0.326,
+        "andel_30_100k": 0.651
+      },
+      "Kawasaki": {
+        "antal": 40,
+        "median": 70750,
+        "andel_over_100k": 0.3,
+        "andel_30_100k": 0.45
+      },
+      "Triumph": {
+        "antal": 34,
+        "median": 93650,
+        "andel_over_100k": 0.324,
+        "andel_30_100k": 0.676
+      },
+      "Royal Enfield": {
+        "antal": 13,
+        "median": 86999,
+        "andel_over_100k": 0.308,
+        "andel_30_100k": 0.692
+      },
+      "KTM": {
+        "antal": 13,
+        "median": 124999,
+        "andel_over_100k": 0.692,
+        "andel_30_100k": 0.308
+      },
+      "Aprilia": {
+        "antal": 7,
+        "median": 84800,
+        "andel_over_100k": 0.286,
+        "andel_30_100k": 0.714
+      },
+      "BSA": {
+        "antal": 5,
+        "median": 109998,
+        "andel_over_100k": 0.6,
+        "andel_30_100k": 0.4
+      },
+      "Ducati": {
+        "antal": 5,
+        "median": 94800,
+        "andel_over_100k": 0.2,
+        "andel_30_100k": 0.8
+      },
+      "Andet Mærke": {
+        "antal": 4,
+        "median": 49200,
+        "andel_over_100k": 0,
+        "andel_30_100k": 0.75
+      },
+      "Moto Guzzi": {
+        "antal": 3,
+        "median": 99800,
+        "andel_over_100k": 0.333,
+        "andel_30_100k": 0.667
+      },
+      "MV Agusta": {
+        "antal": 2,
+        "median": 132350,
+        "andel_over_100k": 1,
+        "andel_30_100k": 0
+      }
+    },
+    "pris_baand_pr_kilde": {
+      "guloggratis.dk": {
+        "med_pris": 212,
+        "median": 84993,
+        "over_100k": 77,
+        "andel_over_100k": 0.363,
+        "andel_99_900_til_100k": 0.061,
+        "baand": {
+          "30-50k": 18,
+          "<=30k": 53,
+          "75-100k": 37,
+          ">150k": 30,
+          "100-150k": 47,
+          "50-75k": 27
+        }
+      },
+      "mcsyd.dk": {
+        "med_pris": 379,
+        "median": 119995,
+        "over_100k": 217,
+        "andel_over_100k": 0.573,
+        "andel_99_900_til_100k": 0.024,
+        "baand": {
+          "<=30k": 22,
+          "30-50k": 38,
+          "50-75k": 40,
+          "75-100k": 62,
+          "100-150k": 71,
+          ">150k": 146
+        }
+      },
+      "jensensmc.dk": {
+        "med_pris": 27,
+        "median": 102999,
+        "over_100k": 14,
+        "andel_over_100k": 0.519,
+        "andel_99_900_til_100k": 0,
+        "baand": {
+          ">150k": 5,
+          "100-150k": 9,
+          "50-75k": 8,
+          "75-100k": 3,
+          "30-50k": 2
+        }
+      },
+      "rydbergsmc.dk": {
+        "med_pris": 69,
+        "median": 149900,
+        "over_100k": 49,
+        "andel_over_100k": 0.71,
+        "andel_99_900_til_100k": 0.043,
+        "baand": {
+          ">150k": 31,
+          "100-150k": 18,
+          "50-75k": 8,
+          "30-50k": 3,
+          "75-100k": 7,
+          "<=30k": 2
+        }
+      }
+    },
+    "levetid_inaktive": {
+      "antal": 0,
+      "median_dage": null,
+      "p25": null,
+      "p75": null
+    },
+    "crawl_spaend": {
+      "aeldste_foerst_set": "2026-08-16T06:48:38.263539+00:00",
+      "nyeste_foerst_set": "2026-10-17T09:53:01.103181+00:00"
+    },
+    "alder_aktive_dage": {
+      "median": 68,
+      "p75": 71
+    }
+  },
+  "profiler": {
+    "antal": 8,
+    "forhandlere": 1
+  }
+}
