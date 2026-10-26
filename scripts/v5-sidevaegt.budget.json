@@ -2,7 +2,7 @@
   "version": 1,
   "beskrivelse": "Maks gzip-bytes (niveau 6). Nuværende størrelse + luft (filer 10 %, sider 8 %, browser 10 %), rundet op til 100 B. Hæves kun bevidst (node scripts/v5-sidevaegt.js --gem-budget).",
   "filer": {
-    "js/annonce.js": 38100,
+    "js/annonce.js": 39500,
     "js/backend-bridge.js": 30400,
     "js/bekraeft-dialog.js": 1400,
     "js/beskeder.js": 11200,
@@ -12,7 +12,7 @@
     "js/brands-registry.js": 10000,
     "js/components.js": 32800,
     "js/dashboard.js": 14400,
-    "js/data.js": 48800,
+    "js/data.js": 49400,
     "js/filtrering.js": 11500,
     "js/forhandler.js": 16100,
     "js/guides.js": 1100,
@@ -205,8 +205,6 @@
     "js/beskeder.js + css/p-beskeder.css (NYE, 10153 + 2653 B gzip)": "V7 beskeder: formular på annoncen, indbakke i Mine annoncer, ren logik. Hentes KUN lazy af bbIndlaesBeskeder() når flaget BB_FLAGS.beskeder er sat (default fra) — står ikke i nogen HTML-side, så ingen sidebudgetter vokser, og flag-fra-brugere henter dem aldrig. Budgettet er derfor sat for filerne, ikke for siderne.",
     "js/supabase-config.js": "+446 B (800 -> 1400): flaget BB_FLAGS + bbFlag() + den lille lazy-loader. Loaderen skal ligge i en fil, som alle sider med annonce og konto allerede henter."
   },
-  "js/annonce.js": 39500,
-  "js/data.js": 49400,
   "begrundelser_v7_integration": {
     "js/annonce.js": "38100 -> 39500 (+1,4 kB): efter integration af V7 besked (kontaktbeskrivelse foer login, tre ærlige indloggede tilstande, flag-gatet formular-mount) + V7 data (alder, afledt type, Lignende-score). Målt 39311 B gzip efter merge; 1,4 kB er ca. 0,5 % luft.",
     "js/data.js": "48800 -> 49400 (+0,6 kB): V7 mærke tilføjer efterspørgselsreglen 'slut-købes' (erEfterspoergsel) oven på V7 datas typetabel. Målt 49122 B gzip efter merge."
