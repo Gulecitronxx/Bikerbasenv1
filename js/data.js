@@ -1443,6 +1443,60 @@ function typeFraStreetModel(tekst){
   const hit = TYPE_FOR_MODELNAVN.find(([navn]) => t.includes(navn.toLowerCase()));
   return hit ? hit[1] : null;
 }
+/* @@TYPETABEL-START — afledt af data/model-typer.json (394 regler); redigér IKKE her, kør node scripts/type-klassificering.js --generer */
+const TYPE_TABEL = {
+  "aprilia": [["rs457","sport"],["rs660","sport"],["rs125","sport"],["rs250","sport"],["rsv","sport"],["tuono","naked"],["shiver","naked"],["tuareg","adventure"],["caponord","adventure"],["rst1000futura","touring"],["scarabeo","scooter"],["sportcity","scooter"],["sr50","scooter"],["atlantic","scooter"]],
+  "bmw": [["r1200gs","adventure"],["r1250gs","adventure"],["r1300gs","adventure"],["r1100gs","adventure"],["r1150gs","adventure"],["r80gs","adventure"],["r100gs","adventure"],["f650gs","adventure"],["f700gs","adventure"],["f750gs","adventure"],["f800gs","adventure"],["f850gs","adventure"],["f900gs","adventure"],["f450gs","adventure"],["g310gs","adventure"],["g650gs","adventure"],["r1200rt","touring"],["r1250rt","touring"],["r1100rt","touring"],["r1150rt","touring"],["r850rt","touring"],["r100rt","touring"],["r80rt","touring"],["r1200cl","touring"],["r1300rs","touring"],["r1250rs","touring"],["r1200rs","touring"],["k1200gt","touring"],["k1300gt","touring"],["k1600gt","touring"],["k1600gtl","touring"],["k1200lt","touring"],["k1100lt","touring"],["k1100rt","touring"],["k100rt","touring"],["k75rt","touring"],["k1200rs","touring"],["f800st","touring"],["r1200r","naked"],["r1250r","naked"],["f800r","naked"],["f900r","naked"],["g310r","naked"],["s1000r","naked"],["m1000r","naked"],["s1000rr","sport"],["m1000rr","sport"],["r1200c","cruiser"],["c400","scooter"],["c650","scooter"],["ce04","scooter"],["r45","classic"],["r65","classic"],["r60","classic"],["r75","classic"],["r50","classic"]],
+  "bsa": [["","classic"]],
+  "cfmoto": [["mtx800","adventure"],["800mt","adventure"],["mt800","adventure"]],
+  "dkw": [["","classic"]],
+  "ducati": [["monster","naked"],["streetfighter","naked"],["panigale","sport"],["749","sport"],["848","sport"],["899","sport"],["916","sport"],["996","sport"],["998","sport"],["999","sport"],["1098","sport"],["1198","sport"],["1199","sport"],["1299","sport"],["diavel","cruiser"],["xdiavel","cruiser"],["desertx","adventure"]],
+  "harleydavidson": [["flhtc","touring"],["flhtk","touring"],["flhtcu","touring"],["flhx","touring"],["fltr","touring"],["flrt","touring"],["flht","touring"],["~electraglide","touring"],["~streetglide","touring"],["~roadglide","touring"],["fxlrst",null],["~lowriderst",null],["flhr",null],["~roadking",null],["fxlrs","cruiser"],["fxlr","cruiser"],["fxbr","cruiser"],["fxsb","cruiser"],["fxbb","cruiser"],["fxbbs","cruiser"],["fxdb","cruiser"],["fxdf","cruiser"],["fxd","cruiser"],["fxe","cruiser"],["fxst","cruiser"],["fxs","cruiser"],["flst","cruiser"],["flhc","cruiser"],["flfb","cruiser"],["fls","cruiser"],["flsl","cruiser"],["fld","cruiser"],["flsb","cruiser"],["~softail","cruiser"],["~fatboy","cruiser"],["~dyna","cruiser"],["~nightrod","cruiser"],["vrsc","cruiser"],["~vrod","cruiser"],["~nighttrain","cruiser"],["xl883","cruiser"],["xl1200","cruiser"],["xl","cruiser"],["~sportster","cruiser"],["sporster","cruiser"],["rh975","cruiser"],["~nightster","cruiser"],["ra1250","adventure"],["~panamerica","adventure"]],
+  "honda": [["gl1800","touring"],["gl1500","touring"],["gl1200","touring"],["~goldwing","touring",1984,0],["nt1100","touring"],["nt650","touring"],["st1100","touring"],["st1300","touring"],["~paneuropean","touring"],["cb1000gt","touring"],["cbr1100xx","touring"],["cbr1000f","touring"],["vfr800","touring"],["cb1000r","naked"],["cb1000","naked"],["~hornet","naked"],["cb650r","naked"],["cb650f","naked"],["cb500f","naked"],["cb500","naked"],["cb500x","adventure"],["cb1300","naked"],["cbr1000rr","sport"],["cbr600rr","sport"],["cbr500r","sport"],["cbr250r","sport"],["vtr1000","sport"],["vf750f","sport"],["cmx500","cruiser"],["cmx1100","cruiser"],["cmx250","cruiser"],["~rebel","cruiser"],["vt600","cruiser"],["vt700","cruiser"],["vt750","cruiser"],["vt1100","cruiser"],["vtx1800","cruiser"],["vtx1300","cruiser"],["vf700magna","cruiser"],["~magna","cruiser"],["~valkyrie","cruiser"],["~africatwin","adventure"],["xrv750","adventure"],["xrv650","adventure"],["crf1100","adventure"],["crf1000","adventure"],["~transalp","adventure"],["xl750","adventure"],["xl700v","adventure"],["xl650v","adventure"],["xl600v","adventure"],["xl1000v","adventure"],["~varadero","adventure"],["nx500","adventure"],["nx650","adventure"],["crf300l","adventure"],["nc750x","adventure"],["nc700x","adventure"],["vfr1200x","adventure"],["nc750s","naked"],["nc700s","naked"],["crf110f","cross"],["crf125f","cross"],["crf150r","cross"],["crf250r","cross"],["crf450r","cross"],["forza","scooter"],["~nss300","scooter"],["sh125","scooter"],["sh150","scooter"],["sh300","scooter"],["sh350","scooter"],["pcx","scooter"]],
+  "husqvarna": [["svartpilen","naked"],["vitpilen","naked"],["norden901","adventure"],["701enduro","adventure"]],
+  "indian": [["chief","cruiser"],["scout","cruiser"],["springfield","cruiser"],["chieftain","cruiser"],["roadmaster","touring"],["pursuit","touring"],["ftr","naked"]],
+  "kawasaki": [["gtr1400","touring"],["z1000sx","touring",2011,0],["zx1400",null],["zx10","sport"],["zx6","sport"],["zx12r","sport"],["zx9r","sport"],["zx7r","sport"],["zx636","sport"],["z1000","naked",2003,0],["z900rs",null],["z650rs",null],["z900","naked",2017,0],["z650","naked",2017,0],["z800","naked",2013,0],["z400","naked",2019,0],["z300","naked",2015,0],["zh2","naked",2020,0],["vn650","cruiser"],["vn750","cruiser"],["vn800","cruiser"],["vn900","cruiser"],["vn1500","cruiser"],["vn1600","cruiser"],["vn1700","cruiser"],["vn2000","cruiser"],["~vulcan","cruiser"],["~kx450","cross"],["~kx250","cross"],["~kx125","cross"],["~kx85","cross"],["~kx65","cross"]],
+  "ktm": [["~superdukegt","touring"],["~duke","naked"],["~adventure","adventure"]],
+  "kymco": [["","scooter"]],
+  "motoguzzi": [["v85tt","adventure"],["stelvio","adventure"],["norge","touring"],["v100mandello","touring"],["california","cruiser"],["eldorado","cruiser"],["audace","cruiser"],["mgx21","cruiser"],["griso","naked"]],
+  "mvagusta": [["~turismoveloce","touring"],["brutale","naked"],["dragster","naked"],["f3","sport"],["f4","sport"]],
+  "royalenfield": [["~classic","classic"],["bullet","classic"],["~continentalgt","classic"],["interceptor","classic"],["~meteor","cruiser"],["shotgun","cruiser"],["himalayan","adventure"]],
+  "suzuki": [["dl650","adventure"],["dl1000","adventure"],["dl800","adventure"],["dl250","adventure"],["~vstrom","adventure"],["gsxs1000gt","touring"],["gsxs1000","naked"],["gsxs750","naked"],["gsx8s","naked"],["gsr750","naked"],["gsr600","naked"],["sv650","naked"],["sv1000","naked"],["gsx1400","naked"],["gsx8r","sport"],["gsxr","sport"],["vlr1800","cruiser"],["vl800","cruiser"],["vl1500","cruiser"],["vz800","cruiser"],["vz1600","cruiser"],["vzr1800","cruiser"],["vs1400","cruiser"],["vs800","cruiser"],["vs400","cruiser"],["gz250","cruiser"],["gz125","cruiser"],["~intruder","cruiser"],["~marauder","cruiser"],["ls650","cruiser"],["~burgman","scooter"],["an400","scooter"],["an650","scooter"],["~rmz","cross"]],
+  "sym": [["~orbit","scooter"],["~symphony","scooter"],["~joymax","scooter"],["~maxsym","scooter"],["~cruisym","scooter"],["~fiddle","scooter"],["~crox","scooter"]],
+  "triumph": [["~streettriple","naked"],["~speedtriple","naked"],["trident","naked",1991,0],["speed400","naked"],["sprintst","touring"],["trophy","touring"],["daytona660","sport"],["daytona675","sport"],["rocketiii","cruiser"],["rocketlll","cruiser"],["rocket3","cruiser"],["tiger800","adventure"],["tiger900","adventure"],["tiger1200","adventure"],["~tigerexplorer","adventure"],["bonneville","classic"],["thruxton",null],["~speedtwin","classic"],["~streettwin","classic"],["scrambler900","classic"],["scrambler1200","classic"],["t120","classic"],["t100","classic"],["tf250","cross"]],
+  "victory": [["crosscountry","touring"],["magnum","touring"],["vision","touring"],["","cruiser"]],
+  "yamaha": [["mt03","naked"],["mt07","naked"],["mt09","naked"],["mt10","naked"],["mt125","naked"],["xjr1300","naked"],["xjr1200","naked"],["~tracer","touring"],["fjr1300","touring"],["fj1200","touring"],["~tenere","adventure"],["~supertenere","adventure"],["xt1200","adventure"],["yzfr","sport"],["fzr","sport"],["xvz",null],["~tr1",null],["xv","cruiser"],["xvs","cruiser"],["~virago","cruiser"],["~dragstar","cruiser"],["~wildstar","cruiser"],["~roadstar","cruiser"],["xmax","scooter"],["nmax","scooter"],["tmax","scooter"],["tricity","scooter"],["majesty","scooter"],["aerox","scooter"],["neos","scooter"],["cygnus","scooter"],["ttr","cross"],["tt110r","cross"],["yz125","cross"],["yz250","cross"],["yz450","cross"],["yz85","cross"],["yz65","cross"],["pw50","cross"],["sr400","classic"],["sr500","classic"]],
+  "*": [["~scooter","scooter"],["~classicbike","classic"]],
+};
+/* Motorcykeltype afledt af mærke + model, når kilden ikke oplyser den (V7). Mønstret er et PRÆFIKS af det normaliserede
+   modelnavn (a-z0-9); "~" foran = "indeholder". Det LÆNGSTE mønster vinder; ved lige længde vinder mærkets eget over "*".
+   Type null blokerer (modellen forbliver Ukendt). Slutter mønstret på et ciffer, må næste tegn ikke være et ciffer.
+   Et tredje og fjerde tal er årgangsgrænser (fra, til; 0 = ingen): gælder reglen kun for nyere modeller (Z650 fra 2017), springes den
+   over, når årgangen er uden for — eller ukendt. */
+function typeNoegle(s){
+  return String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+function afledtTypeFor(brand, model, titel, aargang){
+  const b = typeNoegle(brand);
+  let m = typeNoegle(model);
+  if (!m){ const t = typeNoegle(titel); m = b && t.startsWith(b) ? t.slice(b.length) : t; }
+  let bedst = null;
+  for (const [liste, ejer] of [[TYPE_TABEL[b], 1], [TYPE_TABEL['*'], 0]]){
+    for (const [moenster, type, fra, til] of (liste || [])){
+      if (fra || til){
+        const aar = Number(aargang);
+        if (!(aar >= 1900) || (fra && aar < fra) || (til && aar > til)) continue;
+      }
+      const inkl = moenster.charAt(0) === '~';
+      const p = inkl ? moenster.slice(1) : moenster;
+      if (!(inkl ? m.includes(p) : m.startsWith(p))) continue;
+      if (!inkl && /\d$/.test(p) && /\d/.test(m.charAt(p.length))) continue;
+      if (!bedst || p.length > bedst.len || (p.length === bedst.len && ejer > bedst.ejer)) bedst = { len: p.length, ejer, type, moenster };
+    }
+  }
+  return bedst && bedst.type ? { type: bedst.type, regel: bedst.moenster } : null;
+}
+/* @@TYPETABEL-END */
 /* F2-003: "Nyt opslag" (oprettet for under 4 dage siden) er IKKE "Ny" (fabriksny). Samme ord om to ting
    fik en 1979 BMW R45 til at stå med grøn "NY". Opslagsmærket har eget ord og neutral (hvid) stil;
    "Ny" bruges kun om standen, og kun via kildeNyStatus() (kortets .rk-ny, annoncesidens "Stand: Fabriksny"). */

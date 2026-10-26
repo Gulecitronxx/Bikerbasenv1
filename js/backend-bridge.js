@@ -772,9 +772,13 @@ function byggEksternAnnonce(row){
   /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og vinder ALTID, undtagen når den er en
      fejllæsning af et modelnavn (Street/Sport Glide); så kommer typen fra titlen eller model-tabellen (data.js),
      ikke fra ordet. Beregnes FØR modellen, fordi et gentaget typeord i modelnavnet fjernes mod den. */
-  const typen = typeFraKategoriord(kildetypeErModelnavn(row) ? null : row.type) || typeFraTitel(row.titel || row.model)
+  const kildeTypen = typeFraKategoriord(kildetypeErModelnavn(row) ? null : row.type) || typeFraTitel(row.titel || row.model)
     // F2-008: er "Street" en del af modelnavnet, kommer typen fra model-tabellen (data.js), ikke fra ordet.
     || (modelMedTypeord(row.titel) ? typeFraStreetModel(row.titel) : null);
+  /* V7: tier kilden, afledes typen KUN af en regel i data/model-typer.json (CB 1000 R = naked), når modellen entydigt tilhører
+     én type. Resten er Ukendt. Den afledte type bærer typeAfledt og vises som "afledt fra model" — den skrives aldrig til databasen. */
+  const afledt = kildeTypen ? null : afledtTypeFor(brand, row.model, row.titel, row.aargang);
+  const typen = kildeTypen || (afledt ? afledt.type : null);
   return {
     id: row.id,
     /* Runde 6 (D6-F7): akronymer, kilden skrev med smaa bogstaver og crawleren
@@ -813,6 +817,8 @@ function byggEksternAnnonce(row){
        dækker næsten lige mange (285 mod 283): hans kommer fra kilden, min
        gætter sig frem fra en tekststreng. */
     type: typen,
+    typeAfledt: !!afledt,
+    typeRegel: afledt ? afledt.regel : null,
 
     /* Titlens anden linje — Bilbasens "54 Altitude 5d" under "Jeep Avenger".
        Hos os "Cruiser" under "Yamaha XV 750 Virago". 285 af 332 rækker har

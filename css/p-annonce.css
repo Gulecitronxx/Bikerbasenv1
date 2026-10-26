@@ -1292,3 +1292,5 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
 .an-alder-udloebet{ background:#FDE4D8; color:#7A1D0B; border-color:rgba(122,29,11,.28); }
 :root[data-theme="dark"] .an-alder{ background:#3B2A0C; color:#FCD34D; border-color:rgba(252,211,77,.3); }
 :root[data-theme="dark"] .an-alder-udloebet{ background:#4A1D12; color:#FCA98F; border-color:rgba(252,169,143,.3); }
+/* V7 data: "(afledt fra model)" ved Type, når kilden ikke oplyser den. Dæmpet, men læsbar. */
+.an-afledt{ color: var(--color-fg-muted); font-size:.92em; font-weight:400; cursor:help; }

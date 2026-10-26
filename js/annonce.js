@@ -1100,7 +1100,8 @@ function renderExternalListing(listing){
     [Icon.info, 'Model', model || IO],
     [Icon.calendar, 'Årgang', listing.year != null ? String(listing.year) : IO],
     [Icon.gauge, 'Kilometer', listing.km != null ? formatKm(listing.km) : IO],
-    [Icon.bike, 'Type', listing.type ? escapeHTML(typeLabel(listing.type)) : IO],
+    // V7: er typen afledt af modellen (kilden oplyser den ikke), står det der — ikke som kildens oplysning.
+    [Icon.bike, 'Type', listing.type ? escapeHTML(typeLabel(listing.type)) + (listing.typeAfledt ? ' <span class="an-afledt" title="Kilden oplyser ikke typen. Vi har afledt den af mærke og model (regeltabel i data/model-typer.json), fordi modellen entydigt hører til denne type.">(afledt fra model)</span>' : '') : IO],
     [Icon.engine, 'Motorstørrelse', ccm > 0 ? formatCcm(ccm) : IO],
     [AN_IKON.bolt, 'Ydelse', hk ? formatPower(hk) : IO],
     [Icon.shieldCheck, 'Kørekort', kk ? escapeHTML(kkM.tekst) : (kkM.graense ? 'Ikke afgjort — tjek kW' : kkUvis ? 'A2 eller A — kan ikke afgøres' : 'Kan ikke afgøres')],

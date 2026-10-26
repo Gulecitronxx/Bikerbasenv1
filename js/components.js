@@ -922,7 +922,9 @@ function listingCardHTML(l, i){
   linje.push(f.aar != null ? `<span>${escapeHTML(String(f.aar))}</span>` : '<span class="rk-mangler">Årgang ikke oplyst</span>');
   if (f.km != null) linje.push(`<span>${escapeHTML(formatKm(f.km))}</span>`);
   else if (!f.ny) linje.push('<span class="rk-mangler">Km ikke oplyst</span>');
-  if (f.type) linje.push(`<span>${escapeHTML(f.type)}</span>`);
+  if (f.type) linje.push(l.typeAfledt
+    ? `<span title="Typen er afledt af modellen — kilden oplyser den ikke.">${escapeHTML(f.type)}</span>`   // V7: ærlig om, hvor typen kommer fra
+    : `<span>${escapeHTML(f.type)}</span>`);
 
   const kk = f.kk;
   const kkKlasse = kk.kode ? ` kk-${String(kk.kode).toLowerCase()}` : ' kk-ukendt';
