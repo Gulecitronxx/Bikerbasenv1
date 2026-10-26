@@ -180,3 +180,21 @@ test('annoncesider: direkte adresse til en efterspørgsel virker (ingen fejl), o
     } finally { await c.close(); }
   }
 });
+
+test('søgeforslag (datalist i #filter-q): kun mærker og mærke + model fra lageret, og HVERT forslag giver mindst ét træf (ingen blindgyde)', async (t) => {
+  if (!H) return t.skip('Playwright mangler');
+  const { c, p, fejl } = await aabn(1440, 'soegning.html');
+  try {
+    assert.equal(await p.getAttribute('#filter-q', 'list'), 'so-suggest');
+    const valg = await p.evaluate(() => [...document.querySelectorAll('#so-suggest option')].map(o => o.value));
+    assert.ok(valg.length > 300, valg.length + ' forslag');
+    assert.equal(new Set(valg.map(v => v.toLowerCase())).size, valg.length, 'ingen dubletter');
+    assert.ok(valg.includes('Honda') && valg.includes('Honda GL 1800 Gold Wing') && valg.includes('Harley-Davidson'));
+    assert.ok(!valg.some(v => /^ukendt|uoplyst|købes|pris\b|projekt/i.test(v)), 'ingen støj eller uoplyst mærke som forslag');
+    const nul = valg.filter(v => iLager({ q: v }) === 0);
+    assert.deepStrictEqual(nul, [], 'forslag uden træf');
+    // pilen (browserens egen indikator) er skjult, så den ikke ligger op ad ryd-knappen
+    assert.match(fs.readFileSync(path.join(REPO, 'css', 'p-soegning.css'), 'utf8'), /#filter-q::-webkit-calendar-picker-indicator\s*\{\s*display:\s*none/);
+    assert.deepStrictEqual(fejl, []);
+  } finally { await c.close(); }
+});
