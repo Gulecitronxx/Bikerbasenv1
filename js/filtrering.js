@@ -358,13 +358,29 @@ const Filtrering = (() => {
     // V4: mærkeord og aliaser ("cf moto", "harley", "hd") bliver et mærkekrav; resten er delstrengs-ord som før.
     const { maerker: soegeMaerker, ord } = soegeForespoergsel(state.q, alle);
     if (brug('q') && (ord.length || soegeMaerker.size)){
-      list = list.filter(l => {
+      const hoestak = l => {
         const mk = maerkeNoegle(l.brand);
-        if (soegeMaerker.size && !soegeMaerker.has(mk)) return false;
-        if (!ord.length) return true;
         // ?? '': et felt uden værdi må aldrig blive til ordet "null" i høstakken (F2-009). Sentinellen "Ukendt"
         // er ikke et mærkenavn og må ikke kunne findes ved at skrive "ukendt".
-        const hø = soegeNoegle(`${mk === 'ukendt' ? '' : (l.brand ?? '')} ${l.model ?? ''}`);
+        return soegeNoegle(`${mk === 'ukendt' ? '' : (l.brand ?? '')} ${l.model ?? ''}`);
+      };
+      const maerkePasser = l => !soegeMaerker.size || soegeMaerker.has(maerkeNoegle(l.brand));
+      /* V7 (mærke): FRASE FØRST. "cb 650 r" er tre ord; hvert for sig findes i næsten alt ("r" i "classic", "cb" i "classic bike"), så
+         en BSA Spitfire 650 Classic Bike kom med blandt CB 650 R. Står de samme ord sammen i rækkefølge ("cb650r" i "honda cb 650 r"),
+         er det modellen brugeren mener: findes mindst ét sådant træf i hele lageret, gælder frasen; ellers falder vi tilbage til
+         de enkelte ord (OG) som før ("gold wing 1800", "650 cb"). Valget afhænger kun af lageret og søgeordet, ikke af de andre
+         filtre, så facettællingen (som kører kæden igen uden ét filter) altid er enig med resultatet. Typeord ("cruiser touring")
+         er undtaget. */
+      let frase = null;
+      if (ord.length >= 2 && !ord.some(o => SOEGE_TYPEORD[o])){
+        const kandidat = ord.join('');
+        if (list.some(l => maerkePasser(l) && hoestak(l).includes(kandidat))) frase = kandidat;
+      }
+      list = list.filter(l => {
+        if (!maerkePasser(l)) return false;
+        if (!ord.length) return true;
+        const hø = hoestak(l);
+        if (frase) return hø.includes(frase);
         return ord.every(o => hø.includes(o) || (l.type != null && SOEGE_TYPEORD[o] === l.type));
       });
     }
