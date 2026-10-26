@@ -623,7 +623,7 @@ test('K9c Fejl på trin 1 flytter fokus til første ugyldige felt med aria-inval
     await s.page.fill('#f-model', 'MT-07');
     await s.page.fill('#f-year', '1850');            // ugyldig
     await naeste(s.page);
-    await s.page.waitForFunction(() => document.activeElement && document.activeElement.id === 'f-year', null, { timeout: 3000 });
+    await s.page.waitForFunction(() => document.activeElement && document.activeElement.id === 'f-year', null, { timeout: 15000 });   // V7 QA: ventetid på fokusflytning (tilstand), ikke grænse; var 3000 og røde under mange samtidige browsere
     const info = await s.page.evaluate(() => { const e = document.getElementById('f-year'); const d = document.getElementById(e.getAttribute('aria-describedby') || ''); return { inv: e.getAttribute('aria-invalid'), tekst: d && d.innerText }; });
     assert.strictEqual(info.inv, 'true');
     assert.match(info.tekst || '', /Årgang/);

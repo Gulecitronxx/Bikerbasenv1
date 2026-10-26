@@ -1,0 +1,4316 @@
+[
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 4776,
+   "fund": [
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.sk-frisk x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x18"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x6"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x12"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 31x40 \"Skive\" | a 34x40 \"Sport\""
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-navn rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-count rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 4777,
+   "fund": [
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.sk-frisk x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x18"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x6"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x12"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 31x40 \"Skive\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 4547,
+   "fund": [
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.sk-frisk x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x18"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x6"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x12"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 31x40 \"Skive\" | a 34x40 \"Sport\""
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-navn rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-count rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 4548,
+   "fund": [
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "braekket-billede",
+     "el": "img.card-photo",
+     "detalje": ""
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.sk-frisk x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x18"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x6"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x12"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 31x40 \"Skive\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 3744,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.sk-frisk x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x3"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x6"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "4: a.brand 145x30 \"Bikerbasen\" | button#typer-pil.typer-pil 34x34 \"Se flere typer\" | a 31x40 \"Skive\" | a 34x40 \"Sport\""
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-navn rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-count rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 3745,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.sk-frisk x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x3"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x6"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "4: a.brand 145x30 \"Bikerbasen\" | button#typer-pil.typer-pil 34x34 \"Se flere typer\" | a 31x40 \"Skive\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2129,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.hero-eyebrow x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x15"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.kk-regel x3"
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-navn rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-count rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2130,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.hero-eyebrow x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x15"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.kk-regel x3"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2133,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.hero-eyebrow x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x15"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.kk-regel x3"
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-navn rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    },
+    {
+     "type": "kontrast<4.5",
+     "el": "",
+     "detalje": "span.tile-count rgb(255, 255, 255) paa rgb(240,237,232) = 1.17"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "forside",
+  "mockup": "Forside",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2134,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.hero-eyebrow x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x15"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.kk-regel x3"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 7039,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x72"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.tf-hale x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.badge x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 7040,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x72"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.tf-hale x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.badge x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 7030,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x72"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.tf-hale x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.badge x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 7031,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x72"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.tf-hale x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.badge x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4956,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.tf-hale x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.badge x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4957,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.tf-hale x2"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.badge x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 3332,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "label x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.facet-n x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 3333,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "label x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.facet-n x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 3370,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "label x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.facet-n x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "soegning",
+  "mockup": "Motorcykler til salg",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 3371,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "label x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.facet-n x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x24"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x50"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.typefoto-label x2"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6522,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "small x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "4: a.brand 145x30 \"Bikerbasen\" | a 35x40 \"BMW\" | a 29x40 \"R45\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6523,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "small x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "4: a.brand 145x30 \"Bikerbasen\" | a 35x40 \"BMW\" | a 29x40 \"R45\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6388,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "small x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "4: a.brand 145x30 \"Bikerbasen\" | a 35x40 \"BMW\" | a 29x40 \"R45\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6389,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "small x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "4: a.brand 145x30 \"Bikerbasen\" | a 35x40 \"BMW\" | a 29x40 \"R45\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4574,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 30x40 \"R45\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4575,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 30x40 \"R45\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2508,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2509,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2487,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce",
+  "mockup": "Annonce",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2488,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6486,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.foto-tom-titel x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "small x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 36x40 \"FLHX\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6487,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.foto-tom-titel x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "small x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 36x40 \"FLHX\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6350,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.foto-tom-titel x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "small x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 36x40 \"FLHX\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6351,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.foto-tom-titel x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "small x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 36x40 \"FLHX\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4760,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4761,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2651,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.foto-tom-titel x1"
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2652,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.foto-tom-titel x1"
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2648,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.foto-tom-titel x1"
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "annonce-ekstern",
+  "mockup": "Annonce",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2649,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.an-kk-pille x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.foto-tom-titel x1"
+    }
+   ]
+  },
+  "konsol": [
+   "console: Access to fetch at 'https://hkcjrwglwurdjnobewzb.supabase.co/functions/v1/haendelse' from origin 'http://127.0.0.1:58536' has been blocked by CORS policy: Respo"
+  ],
+  "http": [
+   "401 ps://hkcjrwglwurdjnobewzb.supabase.co/rest/v1/rpc/record_listing_event"
+  ]
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6170,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "8: a.brand 145x30 \"Bikerbasen\" | summary 275x32 \"Sikkerhed og elektro\" | summary 275x32 \"Komfort\" | summary 275x32 \"Instrumenter og forb\" | summary 275x32 \"Bagage og beskyttels\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6171,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "8: a.brand 145x30 \"Bikerbasen\" | summary 275x32 \"Sikkerhed og elektro\" | summary 275x32 \"Komfort\" | summary 275x32 \"Instrumenter og forb\" | summary 275x32 \"Bagage og beskyttels\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 5942,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "8: a.brand 145x30 \"Bikerbasen\" | summary 330x32 \"Sikkerhed og elektro\" | summary 330x32 \"Komfort\" | summary 330x32 \"Instrumenter og forb\" | summary 330x32 \"Bagage og beskyttels\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 5943,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "8: a.brand 145x30 \"Bikerbasen\" | summary 330x32 \"Sikkerhed og elektro\" | summary 330x32 \"Komfort\" | summary 330x32 \"Instrumenter og forb\" | summary 330x32 \"Bagage og beskyttels\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 5206,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "8: a.brand 145x30 \"Bikerbasen\" | summary 620x32 \"Sikkerhed og elektro\" | summary 620x32 \"Komfort\" | summary 620x32 \"Instrumenter og forb\" | summary 620x32 \"Bagage og beskyttels\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 5207,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "8: a.brand 145x30 \"Bikerbasen\" | summary 620x32 \"Sikkerhed og elektro\" | summary 620x32 \"Komfort\" | summary 620x32 \"Instrumenter og forb\" | summary 620x32 \"Bagage og beskyttels\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2987,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "b x1"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2988,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "b x1"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2987,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "b x1"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "opret",
+  "mockup": "Opret annonce",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2988,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "b x1"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6739,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6740,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6445,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6446,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4414,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4415,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2899,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 2900,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2776,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerker",
+  "mockup": "Maerker",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 2777,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.bl-fb x2"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 7511,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x17"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x18"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "5: a.brand 145x30 \"Bikerbasen\" | summary 247x33 \"Flere Honda-modeller\" | a 32x32 \"KTM\" | a 161x32 \"rådene om tryg hande\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 7512,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x17"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x18"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "5: a.brand 145x30 \"Bikerbasen\" | summary 247x33 \"Flere Honda-modeller\" | a 32x32 \"KTM\" | a 161x32 \"rådene om tryg hande\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 7098,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x17"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x18"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "6: a.brand 145x30 \"Bikerbasen\" | summary 292x33 \"Flere Honda-modeller\" | a 32x32 \"KTM\" | a 356x32 \"Se de 60 Honda, der \" | a 161x32 \"rådene om tryg hande\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 7099,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x17"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x9"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x18"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "6: a.brand 145x30 \"Bikerbasen\" | summary 292x33 \"Flere Honda-modeller\" | a 32x32 \"KTM\" | a 356x32 \"Se de 60 Honda, der \" | a 161x32 \"rådene om tryg hande\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 7274,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x3"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x3"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x6"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "7: a.brand 145x30 \"Bikerbasen\" | summary 654x33 \"Flere Honda-modeller\" | a 96x26 \"den fulde søgning\" | a 32x32 \"KTM\" | a 356x32 \"Se de 60 Honda, der \""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 7275,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x3"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x3"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x6"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "7: a.brand 145x30 \"Bikerbasen\" | summary 654x33 \"Flere Honda-modeller\" | a 96x26 \"den fulde søgning\" | a 32x32 \"KTM\" | a 356x32 \"Se de 60 Honda, der \""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 4424,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 4425,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 4373,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "maerke",
+  "mockup": "Maerker",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 4374,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6584,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x12"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6585,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x12"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6415,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x12"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6416,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x12"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 6215,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x17"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 6216,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x17"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a.brand 145x30 \"Bikerbasen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 3866,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 3866,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 3845,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "type-sport",
+  "mockup": "Sport motorcykler",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 3846,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 7000,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x12"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 103x27 \"Færdselsstyrelsen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6999,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x12"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 103x27 \"Færdselsstyrelsen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6856,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x12"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 103x27 \"Færdselsstyrelsen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6857,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x12"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 103x27 \"Færdselsstyrelsen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 6276,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x16"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 103x27 \"Færdselsstyrelsen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 6277,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x16"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "3: a.brand 145x30 \"Bikerbasen\" | a 103x27 \"Færdselsstyrelsen\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 3997,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 3998,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x4"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x8"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 3996,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "koerekort-a2",
+  "mockup": "Motorcykler til A2",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 3997,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "p.fa-kicker x1"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.visually-hidden x5"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "li.rk-chip x10"
+    },
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "span.brand-facet-navn x4"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 12054,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 250x24 \"Kørekort til motorcy\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 12055,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 250x24 \"Kørekort til motorcy\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 11176,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 250x24 \"Kørekort til motorcy\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 11177,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 250x24 \"Kørekort til motorcy\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 7965,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 250x24 \"Kørekort til motorcy\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 7966,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 250x24 \"Kørekort til motorcy\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 6519,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 6520,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 6536,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "artikel",
+  "mockup": "Artikel",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 6537,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 3431,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 34x44 \"vilkår\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 3432,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 34x44 \"vilkår\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 3307,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 34x44 \"vilkår\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 3308,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 34x44 \"vilkår\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 2639,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 34x44 \"vilkår\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 2640,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "2: a 34x44 \"vilkår\" | a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 1506,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 1507,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 1686,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "login",
+  "mockup": "Login eller opret profil",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 1687,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6544,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 6545,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6295,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 6296,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4877,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 4878,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 3204,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 3205,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 3204,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "mine-annoncer",
+  "mockup": "Mine annoncer",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 3205,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 3820,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 3821,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 3740,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 3741,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 3133,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 3134,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    },
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 1728,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 1729,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 1728,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "dashboard",
+  "mockup": "(forhandler)",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 1729,
+   "fund": [
+    {
+     "type": "tekst<11.5px",
+     "el": "",
+     "detalje": "text x5"
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 375,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 1961,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 375,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 375,
+   "sw": 375,
+   "h": 1962,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 430,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 1937,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 430,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 430,
+   "sw": 430,
+   "h": 1938,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 768,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 1414,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 768,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 768,
+   "sw": 768,
+   "h": 1415,
+   "fund": [
+    {
+     "type": "tap-maal<36px",
+     "el": "",
+     "detalje": "1: a 34x40 \"Sport\""
+    }
+   ]
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 1440,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 1406,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 1440,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1440,
+   "sw": 1440,
+   "h": 1407,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 1920,
+  "tema": "lys",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 1406,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ },
+ {
+  "familie": "404",
+  "mockup": "(fejlside)",
+  "vp": 1920,
+  "tema": "moerk",
+  "fejl": null,
+  "fund": {
+   "vw": 1920,
+   "sw": 1920,
+   "h": 1407,
+   "fund": []
+  },
+  "konsol": [],
+  "http": []
+ }
+]

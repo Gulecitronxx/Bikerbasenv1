@@ -79,6 +79,15 @@ async function aabn(o = {}){
   return { page, ctx, fund, gaa: (sti, vent = 'networkidle') => page.goto(`http://127.0.0.1:${port}/${sti}`, { waitUntil: vent }), brud: () => page.evaluate(() => window.__brud) };
 }
 const hvil = (page, ms = 400) => page.waitForTimeout(ms);
+/* Venter (højst 15 s) til resultattallet står der og antallet af synlige kort er det forventede (null: det tal, som resultattallet viser for første side, højst 24). Kaster ikke: fejler
+   tilstanden alligevel, siger testens egen assert det med de rigtige tal. */
+const afventKort = (page, forventet) => page.waitForFunction(f => {
+  const rc = document.getElementById('results-count');
+  const n = Number((((rc && rc.innerText.match(/^([\d.]+)/)) || [])[1] || '').replace(/\./g, ''));
+  if (!Number.isFinite(n) || (rc.innerText.trim() === '')) return false;
+  const kort = [...document.querySelectorAll('#results-grid > article')].filter(e => e.getBoundingClientRect().height > 0).length;
+  return kort === (f == null ? Math.min(24, n) : f);
+}, forventet, { timeout: 15000 }).catch(() => {});
 const stat = page => page.evaluate(() => {
   const rc = document.getElementById('results-count').innerText;
   const n = Number(((rc.match(/^([\d.]+)/) || [])[1] || '0').replace(/\./g, ''));
@@ -139,11 +148,14 @@ test('filterkombinationer: tal = kort summeret over alle sider, ingen dubletter;
   try {
     for (const k of kombi){
       await s.gaa('soegning.html' + k); await hvil(s.page, 300);
+      /* V7 QA: vent på TILSTANDEN (tallet er tegnet og kortene svarer til det), ikke på et fast antal millisekunder. Under mange samtidige
+         browsere (npm test) var side 2 målt med 8 af 14 kort tegnet. */
+      await afventKort(s.page, null);
       const foerste = await stat(s.page);
       const sider = Math.max(1, Math.ceil(foerste.n / 24));
       const ider = [], priser = [], km = [];
       for (let side = 1; side <= sider; side++){
-        if (side > 1){ await s.gaa('soegning.html' + k + (k ? '&' : '?') + 'page=' + side); await hvil(s.page, 250); }
+        if (side > 1){ await s.gaa('soegning.html' + k + (k ? '&' : '?') + 'page=' + side); await afventKort(s.page, Math.min(24, foerste.n - (side - 1) * 24)); }
         const d = await s.page.evaluate(() => [...document.querySelectorAll('#results-grid > article')].map(a => ({
           id: (a.querySelector('a.card-link')?.getAttribute('href') || ''),
           pris: ((a.innerText.match(/(\d{1,3}(?:\.\d{3})*) kr\./) || [])[1] || '').replace(/\./g, ''),

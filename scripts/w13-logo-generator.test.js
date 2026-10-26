@@ -9,7 +9,10 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const H = require('./__fixtures__/w13-logo-hjaelp.js');
 
-const BASE = path.join(os.tmpdir(), 'w13-logo');
+/* V7 QA: EGEN mappe pr. kørsel. Den faste %TEMP%\w13-logo blev delt af alle worktrees og alle kørsler: kopierRepo() kopierer oven i det, der lå (fra en
+   anden worktrees kode), og `udgiv.js` sletter _site mens en anden kørsel skriver (ENOTEMPTY, målt i npm test-kørsel 2 af 2). */
+const BASE = fs.mkdtempSync(path.join(os.tmpdir(), 'w13-logo-gen-'));
+process.on('exit', () => { try { fs.rmSync(BASE, { recursive: true, force: true, maxRetries: 3 }); } catch (e) { /* ryd op er bedste forsøg */ } });
 const dirAf = n => path.join(BASE, n);
 const les = (dir, f) => fs.readFileSync(path.join(dir, f), 'utf8');
 const maerkeFiler = dir => fs.readdirSync(dir).filter(f => /^maerke-.+\.html$/.test(f)).sort();

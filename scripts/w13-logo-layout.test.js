@@ -12,7 +12,9 @@ const T = require('./__fixtures__/w13-logo-side.js');
 
 let pw = null;
 try { pw = require('./smoke-browser').findPlaywright(); } catch (e) { /* springes over */ }
-const BASE = path.join(os.tmpdir(), 'w13-logo');
+/* V7 QA: egen mappe pr. kørsel (se w13-logo-generator.test.js). */
+const BASE = require('fs').mkdtempSync(path.join(os.tmpdir(), 'w13-logo-lay-'));
+process.on('exit', () => { try { require('fs').rmSync(BASE, { recursive: true, force: true, maxRetries: 3 }); } catch (e) { /* bedste forsøg */ } });
 const VIEW = [[320, 700], [390, 844], [768, 900], [1440, 900]];
 
 let browser, sv, svGen, svFra, dirTil, dirFra;
