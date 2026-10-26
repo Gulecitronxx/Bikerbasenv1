@@ -138,6 +138,7 @@ try{
       <div class="db-tabs" id="tabs-row" role="tablist" aria-label="Din profil">
         <button type="button" class="db-tab active" role="tab" id="tabbtn-oversigt" data-tab="oversigt" aria-selected="true" aria-controls="db-panel-annoncer">Oversigt</button>
         <button type="button" class="db-tab" role="tab" id="tabbtn-mine" data-tab="mine" aria-selected="false" aria-controls="db-panel-annoncer" tabindex="-1">Mine annoncer</button>
+        <button type="button" class="db-tab" role="tab" id="tabbtn-beskeder" data-tab="beskeder" aria-selected="false" aria-controls="tab-beskeder" tabindex="-1" hidden>Beskeder</button>
         <button type="button" class="db-tab" role="tab" id="tabbtn-favoritter" data-tab="favoritter" aria-selected="false" aria-controls="tab-favoritter" tabindex="-1">Favoritter</button>
         <button type="button" class="db-tab" role="tab" id="tabbtn-agenter" data-tab="agenter" aria-selected="false" aria-controls="tab-agenter" tabindex="-1">Søgeagenter</button>
         <button type="button" class="db-tab" role="tab" id="tabbtn-konto" data-tab="konto" aria-selected="false" aria-controls="tab-konto" tabindex="-1">Profilindstillinger</button>
@@ -236,6 +237,11 @@ try{
           <a href="soegning.html" class="btn btn-primary">Søg motorcykler</a>
         </div>
         <div id="fav-grid" class="db-rows"></div>
+      </section>
+
+      <!-- V7: beskeder. Fanen og panelet er skjult, til flaget BB_FLAGS.beskeder er sat (js/supabase-config.js); indholdet hentes først, når fanen åbnes (js/beskeder.js). -->
+      <section id="tab-beskeder" class="db-panel" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-beskeder">
+        <div id="beskeder-rod"><p role="status">Henter dine beskeder …</p></div>
       </section>
 
       <section id="tab-agenter" class="db-panel" style="display:none;" role="tabpanel" aria-labelledby="tabbtn-agenter">

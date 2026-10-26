@@ -848,11 +848,31 @@ function visSiden(){
 }
 
 /* ---------- Faner ---------- */
-const DB_FANER = ['oversigt', 'mine', 'favoritter', 'agenter', 'konto'];
+const DB_FANER = ['oversigt', 'mine', 'beskeder', 'favoritter', 'agenter', 'konto'];
 let AKTIV_FANE = 'oversigt';
 
+/* V7: Beskeder-fanen findes kun med flaget og en profil i databasen (lokale demoprofiler kan ikke sende eller modtage). */
+function beskederTilgaengelig(){
+  const b = Store.getUser();
+  return typeof bbFlag === 'function' && bbFlag('beskeder') && !!(b && b.remote) && typeof db !== 'undefined' && !!db.enabled;
+}
+let BESKED_INDBAKKE = null;
+async function startBeskeder(){
+  const rod = document.getElementById('beskeder-rod');
+  if (!rod || BESKED_INDBAKKE) return;
+  BESKED_INDBAKKE = 'henter';
+  const B = await bbIndlaesBeskeder();
+  if (!B){
+    BESKED_INDBAKKE = null;
+    rod.innerHTML = '<div class="db-empty" role="alert"><h3>Beskeder kunne ikke hentes</h3><p>Tjek din forbindelse, og prøv igen.</p><button type="button" class="btn btn-primary" id="beskeder-proev">Prøv igen</button></div>';
+    document.getElementById('beskeder-proev')?.addEventListener('click', () => { rod.innerHTML = '<p role="status">Henter dine beskeder …</p>'; startBeskeder(); });
+    return;
+  }
+  BESKED_INDBAKKE = B.indbakke(rod, { startSamtale: new URLSearchParams(window.location.search).get('samtale') });
+}
+
 function setActiveTab(tab, { fokus = false, scroll = false } = {}){
-  if (!DB_FANER.includes(tab)) tab = 'oversigt';
+  if (!DB_FANER.includes(tab) || (tab === 'beskeder' && !beskederTilgaengelig())) tab = 'oversigt';
   AKTIV_FANE = tab;
   document.querySelectorAll('.db-tab').forEach(b => {
     const aktiv = b.dataset.tab === tab;
@@ -867,12 +887,16 @@ function setActiveTab(tab, { fokus = false, scroll = false } = {}){
   document.getElementById('db-panel-annoncer').style.display = visAnnoncer ? '' : 'none';
   document.getElementById('db-panel-annoncer').setAttribute('aria-labelledby', 'tabbtn-' + (visAnnoncer ? tab : 'oversigt'));
   document.getElementById('tab-favoritter').style.display = tab === 'favoritter' ? '' : 'none';
+  const beskedPanel = document.getElementById('tab-beskeder');
+  if (beskedPanel) beskedPanel.style.display = tab === 'beskeder' ? '' : 'none';
   document.getElementById('tab-agenter').style.display = tab === 'agenter' ? '' : 'none';
   document.getElementById('tab-konto').style.display = tab === 'konto' ? '' : 'none';
+  if (tab === 'beskeder') startBeskeder();
   if (tab === 'konto') renderAccountTab();
   if (tab === 'agenter') renderAgents();
   const p = new URLSearchParams(window.location.search);
   p.set('tab', tab);
+  if (tab !== 'beskeder') p.delete('samtale');
   history.replaceState(null, '', window.location.pathname + '?' + p.toString());
   if (scroll) document.querySelector('.db-tabbar')?.scrollIntoView({ block: 'start' });
 }
@@ -888,7 +912,9 @@ function wireTabFade(){
 
 function wireTabs(){
   wireTabFade();
-  const faner = [...document.querySelectorAll('.db-tab')];
+  /* V7: Beskeder-fanen vises kun, når den er tilgængelig (flag + login i databasen). Piletaster springer skjulte faner over. */
+  if (beskederTilgaengelig()) document.getElementById('tabbtn-beskeder')?.removeAttribute('hidden');
+  const faner = [...document.querySelectorAll('.db-tab:not([hidden])')];
   faner.forEach((btn, i) => {
     btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
     // Piletaster flytter mellem faner, som i et rigtigt tablist.

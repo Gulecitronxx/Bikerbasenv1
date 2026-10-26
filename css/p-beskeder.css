@@ -1,0 +1,142 @@
+/* ============ Beskeder (V7) ============
+   Hentes af js/beskeder.js, når flaget BB_FLAGS.beskeder er sat — ikke af siderne. Bruger sitets tokens
+   (css/styles.css), så lys og mørk følger med uden egne farver. */
+
+.sr-only{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+/* ---- Formularen på annoncen ---- */
+.besked-kort{ padding-top:var(--space-3); border-top:1px solid var(--color-border); }
+/* Når kvitteringen / "du har allerede skrevet" står der, er den reserverede højde til formularen ikke længere nødvendig. */
+.besked-kort.er-faerdig{ min-height:0; }
+.besked-sidste{ margin:0 0 var(--space-3); padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm); background:var(--color-surface-2); font-size:13.5px; line-height:1.5; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+.besked-sidste span{ display:block; margin-bottom:2px; font-size:12px; font-weight:700; color:var(--color-fg-muted); }
+.besked-h{ margin:0 0 var(--space-1); font-family:var(--font-display); font-size:17px; line-height:1.25; color:var(--color-fg); }
+.besked-hint{ margin:0 0 var(--space-3); font-size:13px; line-height:1.5; color:var(--color-fg-muted); }
+.besked-form{ display:flex; flex-direction:column; gap:var(--space-2); }
+.besked-startere{ display:flex; flex-wrap:wrap; gap:6px; }
+.besked-starter{
+  min-height:36px; padding:6px 12px; border:1.5px solid var(--color-border); border-radius:var(--radius-pill);
+  background:transparent; color:var(--color-fg); font:inherit; font-size:13px; cursor:pointer; text-align:left;
+  transition:border-color .15s var(--ease-out), background-color .15s var(--ease-out);
+}
+.besked-starter:hover{ border-color:var(--color-fg-muted); background:var(--color-surface-2); }
+.besked-starter:focus-visible, .bsk-raekke:focus-visible, .bsk-menu summary:focus-visible, .bsk-tilbage:focus-visible,
+.besked-resend:focus-visible{ outline:2.5px solid var(--color-ring); outline-offset:2px; }
+.besked-label{ font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--color-fg-muted); }
+.besked-felt{ min-height:104px; resize:vertical; line-height:1.5; font-family:inherit; font-size:16px; }   /* 16 px: iOS zoomer ikke ind */
+.besked-felt[readonly]{ opacity:.7; }
+.besked-felt[aria-invalid="true"]{ border-color:var(--color-danger); }
+.besked-honning{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+.besked-fod{ display:flex; justify-content:flex-end; }
+.besked-taeller{ font-size:12.5px; color:var(--color-fg-muted); font-variant-numeric:tabular-nums; }
+.besked-taeller.er-over{ color:var(--color-danger); font-weight:700; }
+.besked-fejl{
+  margin:0; padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);
+  background:var(--color-danger-tint); color:var(--color-fg); font-size:13.5px; line-height:1.5; border:1px solid var(--color-danger);
+}
+.besked-resend{ display:inline; padding:0; border:0; background:none; color:var(--color-primary); font:inherit; font-weight:600; text-decoration:underline; cursor:pointer; }
+.besked-ok{
+  display:flex; gap:10px; align-items:flex-start; margin:0 0 var(--space-3); padding:var(--space-3);
+  border-radius:var(--radius-sm); background:var(--color-success-tint); color:var(--color-fg); font-size:14px; line-height:1.5;
+}
+.besked-ok svg{ width:20px; height:20px; flex:0 0 auto; margin-top:1px; color:var(--color-success); }
+.besked-ok:focus{ outline:none; }
+.besked-kort .btn:disabled{ cursor:progress; }
+@media (max-width:480px){ .besked-starter{ flex:1 1 100%; } }
+
+/* ---- Indbakken i Mine annoncer ---- */
+.bsk{ display:grid; grid-template-columns:minmax(0,1fr); gap:var(--space-4); }
+.bsk-lister, .bsk-traad{ min-width:0; }
+.bsk-mail{ display:flex; align-items:center; gap:10px; min-height:44px; margin:0 0 var(--space-3); font-size:14px; color:var(--color-fg); cursor:pointer; }
+.bsk-mail input{ width:20px; height:20px; accent-color:var(--color-primary); flex:0 0 auto; }
+.bsk-liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:var(--space-2); }
+.bsk-raekke{
+  position:relative; display:flex; gap:var(--space-3); align-items:flex-start; width:100%; min-height:72px; padding:var(--space-3);
+  border:1px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); color:var(--color-fg);
+  font:inherit; text-align:left; cursor:pointer; transition:border-color .15s var(--ease-out), background-color .15s var(--ease-out);
+}
+.bsk-raekke:hover{ border-color:var(--color-fg-muted); }
+.bsk-raekke.er-aktiv{ border-color:var(--color-primary); background:var(--color-primary-tint); }
+.bsk-avatar{
+  display:grid; place-items:center; width:40px; height:40px; flex:0 0 auto; border-radius:50%;
+  background:var(--color-primary-tint); color:var(--color-primary-hover); font-family:var(--font-display); font-weight:700; font-size:14px;
+}
+:root[data-theme="dark"] .bsk-avatar{ color:var(--color-primary); }
+.bsk-raekke.er-aktiv .bsk-avatar{ background:var(--color-surface); }
+.bsk-raekke-tekst{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; }
+.bsk-raekke-top{ display:flex; justify-content:space-between; gap:var(--space-2); align-items:baseline; }
+.bsk-raekke-top b{ font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bsk-raekke-top time{ font-size:12px; color:var(--color-fg-muted); flex:0 0 auto; }
+.bsk-raekke-annonce{ font-size:13px; font-weight:600; color:var(--color-fg); overflow-wrap:anywhere; }
+.bsk-raekke-udsnit{ font-size:13px; color:var(--color-fg-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bsk-raekke.er-ulaest .bsk-raekke-top b, .bsk-raekke.er-ulaest .bsk-raekke-udsnit{ font-weight:700; color:var(--color-fg); }
+.bsk-prik{ position:absolute; top:14px; right:14px; width:10px; height:10px; border-radius:50%; background:var(--color-primary); }
+.bsk-raekke.er-ulaest .bsk-raekke-top time{ margin-right:18px; }
+.bsk-maerke{ display:inline-block; padding:1px 8px; border-radius:var(--radius-pill); background:var(--color-surface-2); color:var(--color-fg-muted); font-size:11.5px; font-weight:700; vertical-align:middle; }
+.bsk-tom, .bsk-valg{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:var(--space-2); padding:var(--space-6) var(--space-4); border:1px dashed var(--color-border); border-radius:var(--radius-md); color:var(--color-fg-muted); }
+.bsk-tom h3{ margin:0; font-size:18px; color:var(--color-fg); }
+.bsk-tom p, .bsk-valg p{ margin:0; max-width:44ch; font-size:14px; line-height:1.55; }
+.bsk-tom-ikon{ display:inline-grid; place-items:center; width:56px; height:56px; border-radius:50%; background:var(--color-primary-tint); color:var(--color-primary); }
+.bsk-tom-ikon svg{ width:26px; height:26px; }
+.bsk-skelet{ display:flex; flex-direction:column; gap:var(--space-2); }
+.bsk-skelet i{ display:block; height:72px; border-radius:var(--radius-md); background:var(--color-surface-2); animation:bsk-puls 1.4s ease-in-out infinite; }
+@keyframes bsk-puls{ 50%{ opacity:.55; } }
+
+.bsk-traad{ display:flex; flex-direction:column; gap:var(--space-3); }
+.bsk-traadhoved{ display:flex; align-items:flex-start; gap:var(--space-2); }
+.bsk-traadtitel{ flex:1; min-width:0; }
+.bsk-traadtitel h3{ margin:0; font-size:18px; line-height:1.25; overflow-wrap:anywhere; }
+.bsk-traadtitel h3:focus{ outline:none; }
+.bsk-traadtitel h3 a{ color:inherit; text-decoration:underline; text-decoration-color:var(--color-border); text-underline-offset:3px; }
+.bsk-traadtitel h3 a:hover{ text-decoration-color:currentColor; }
+.bsk-traadtitel p{ margin:2px 0 0; font-size:13px; color:var(--color-fg-muted); }
+.bsk-tilbage{ display:none; place-items:center; width:44px; height:44px; flex:0 0 auto; border:0; border-radius:50%; background:transparent; color:var(--color-fg); cursor:pointer; }
+.bsk-tilbage:hover{ background:var(--color-surface-2); }
+.bsk-tilbage svg{ width:22px; height:22px; }
+.bsk-menu{ position:relative; flex:0 0 auto; }
+.bsk-menu summary{ display:grid; place-items:center; width:44px; height:44px; border-radius:50%; cursor:pointer; list-style:none; color:var(--color-fg); }
+.bsk-menu summary::-webkit-details-marker{ display:none; }
+.bsk-menu summary:hover{ background:var(--color-surface-2); }
+.bsk-menu summary svg{ width:20px; height:20px; }
+.bsk-menu-liste{
+  position:absolute; right:0; top:46px; z-index:5; min-width:220px; padding:var(--space-1); display:flex; flex-direction:column;
+  border:1px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); box-shadow:var(--shadow-md);
+}
+.bsk-menu-liste button{ min-height:44px; padding:0 var(--space-3); border:0; border-radius:var(--radius-sm); background:transparent; color:var(--color-fg); font:inherit; font-size:14px; text-align:left; cursor:pointer; }
+.bsk-menu-liste button:hover{ background:var(--color-surface-2); }
+.bsk-sikkerhed, .bsk-laas{ display:flex; gap:10px; align-items:flex-start; margin:0; padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm); font-size:13px; line-height:1.5; }
+.bsk-sikkerhed{ background:var(--color-surface-2); color:var(--color-fg-muted); }
+.bsk-laas{ background:var(--color-primary-tint); color:var(--color-fg); }
+.bsk-sikkerhed svg, .bsk-laas svg{ width:16px; height:16px; flex:0 0 auto; margin-top:2px; }
+.bsk-beskeder{
+  display:flex; flex-direction:column; gap:var(--space-2); max-height:min(56vh,520px); min-height:120px; overflow-y:auto;
+  padding:var(--space-3); border:1px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface);
+}
+.bsk-boble{ max-width:min(86%,560px); padding:var(--space-2) var(--space-3); border-radius:var(--radius-md); font-size:14.5px; line-height:1.5; }
+.bsk-boble p{ margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+.bsk-boble time{ display:block; margin-top:4px; font-size:12px; }   /* ingen opacity: hvid paa primary er 5,3:1, en 75 % gennemsigtig tid kun 3,4:1 */
+.bsk-boble.fra-modpart time{ color:var(--color-fg-muted); }
+.bsk-boble.fra-modpart{ align-self:flex-start; background:var(--color-surface-2); color:var(--color-fg); border-bottom-left-radius:4px; }
+.bsk-boble.fra-mig{ align-self:flex-end; background:var(--color-primary); color:var(--color-on-primary); border-bottom-right-radius:4px; }
+.bsk-svar{ display:flex; flex-direction:column; gap:var(--space-2); align-items:stretch; }
+.bsk-svar .btn{ align-self:flex-end; }
+.bsk-anmeld{ display:flex; flex-direction:column; gap:var(--space-2); padding:var(--space-3); border:1px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); }
+.bsk-anmeld h4{ margin:0; font-size:16px; }
+.bsk-anmeld p{ margin:0; font-size:13px; color:var(--color-fg-muted); }
+.bsk-anmeld-knapper{ display:flex; gap:var(--space-2); justify-content:flex-end; }
+
+/* Smal skærm: liste ELLER tråd (data-visning), aldrig begge. Bred skærm: to kolonner. */
+@media (max-width:899px){
+  .bsk[data-visning="liste"] .bsk-traad{ display:none; }
+  .bsk[data-visning="traad"] .bsk-lister{ display:none; }
+  .bsk-tilbage{ display:grid; }
+  .bsk-boble{ max-width:92%; }
+}
+@media (min-width:900px){
+  .bsk{ grid-template-columns:minmax(300px,360px) minmax(0,1fr); align-items:start; gap:var(--space-5); }
+  .bsk-valg{ min-height:280px; justify-content:center; }
+}
+@media (prefers-reduced-motion:reduce){
+  .bsk-skelet i{ animation:none; }
+  .besked-starter, .bsk-raekke{ transition:none; }
+}

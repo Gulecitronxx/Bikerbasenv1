@@ -23,3 +23,23 @@ const SUPABASE_CONFIG = {
 function isSupabaseConfigured(){
   return Boolean(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey);
 }
+
+/* V7: funktionsflag. `beskeder` er FRA, til ejeren har kørt supabase/025_beskeder.sql, deployet besked-notifikation og
+   opdateret privatlivspolitikken (docs/review/gauntlet/v7/besked.md). Test: sæt window.BB_FLAGS før dette script. */
+if (typeof window !== 'undefined') window.BB_FLAGS = Object.assign({ beskeder: false }, window.BB_FLAGS || {});
+function bbFlag(n){ return typeof window !== 'undefined' && !!(window.BB_FLAGS && window.BB_FLAGS[n]); }
+
+/* Henter js/beskeder.js første gang — kun når flaget er sat. ?v= følger dette scripts eget. */
+const BB_V = (() => { try { return ((document.currentScript.src.match(/[?&]v=([a-z0-9]+)/) || [])[1]) || ''; } catch (e) { return ''; } })();
+let _bbB = null;
+function bbIndlaesBeskeder(){
+  if (!bbFlag('beskeder')) return Promise.resolve(null);
+  if (typeof Beskeder !== 'undefined') return Promise.resolve(Beskeder);
+  return _bbB || (_bbB = new Promise(res => {
+    const s = document.createElement('script');
+    s.src = 'js/beskeder.js' + (BB_V ? '?v=' + BB_V : '');
+    s.onload = () => res(typeof Beskeder !== 'undefined' ? Beskeder : null);
+    s.onerror = () => { _bbB = null; res(null); };
+    document.head.appendChild(s);
+  }));
+}

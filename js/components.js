@@ -25,6 +25,8 @@ function renderHeader(activeOverride){
   injectDealerNav(current);
   updateFavCount();
   updateAuthSlot();
+  bbAnvendBeskedBadge();
+  bbHentBeskedBadge();
   wireHeader();
   initCookieConsent();
 }
@@ -157,6 +159,46 @@ function updateAuthSlot(){
     slotMobile.innerHTML = `${Icon.user}Log ud (${escapeHTML(user.name || '')})`;
     slotMobile.addEventListener('click', onLogout);
   }
+}
+
+/* V7: badge for ulæste beskeder (kun bag flaget BB_FLAGS.beskeder). Står på "Min profil" i headeren, på profilikonet i
+   mobilheaderen, på "Mine annoncer" i skuffen og på fanen Beskeder. Med ulæste peger profillinkene direkte på
+   fanen. Standard og fald-tilbage er "ingen badge": uden flag, uden login eller ved en fejl sker der ingenting. */
+let _bbUlaeste = 0;
+let _bbBadgeHentet = false;
+function bbSaetBeskedBadge(n){
+  _bbUlaeste = Math.max(0, Number(n) || 0);
+  bbAnvendBeskedBadge();
+}
+function bbAnvendBeskedBadge(){
+  if (typeof document === 'undefined') return;
+  const antal = _bbUlaeste;
+  const tekst = antal > 9 ? '9+' : String(antal);
+  const mal = document.querySelectorAll('[data-auth-slot], [data-auth-slot-icon], .mobile-drawer-panel a[href^="mine-annoncer.html"]:not([href*="tab=favoritter"]), #tabbtn-beskeder');
+  mal.forEach(el => {
+    const b = el.querySelector(':scope > .bb-badge');
+    if (el.matches('a')){
+      const href = el.getAttribute('href') || '';
+      if (/^mine-annoncer\.html(\?tab=beskeder)?$/.test(href)) el.setAttribute('href', antal ? 'mine-annoncer.html?tab=beskeder' : 'mine-annoncer.html');
+    }
+    if (!antal){ if (b) b.remove(); return; }
+    const badge = b || document.createElement('span');
+    badge.className = 'bb-badge';
+    badge.textContent = tekst;
+    badge.setAttribute('role', 'img');
+    badge.setAttribute('aria-label', antal === 1 ? '1 ulæst besked' : antal + ' ulæste beskeder');
+    if (!b) el.appendChild(badge);
+  });
+}
+async function bbHentBeskedBadge(){
+  if (_bbBadgeHentet || typeof bbFlag !== 'function' || !bbFlag('beskeder')) return;
+  const bruger = Store.getUser();
+  if (!bruger || !bruger.remote || typeof db === 'undefined' || !db.enabled) return;
+  _bbBadgeHentet = true;
+  try {
+    const { data, error } = await db.raw.rpc('ulaeste_samtaler');
+    if (!error && typeof data === 'number') bbSaetBeskedBadge(data);
+  } catch (e) { /* en badge er en hjælp, ikke en funktion */ }
 }
 
 let headerWired = false;
