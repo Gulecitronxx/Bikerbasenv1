@@ -3054,10 +3054,13 @@ main:focus{ outline:none; }
    oplysning ("Bekræftet for 63 dage siden"), ikke en label. */
 .badge.badge-alder{ background:#FEF3C7; color:#7C2D12; text-transform:none; letter-spacing:0; font-weight:600; max-width:100%; min-width:0; box-shadow:0 0 0 1px rgba(124,45,18,.22); }
 .badge.badge-alder > span:not(.visually-hidden){ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.badge.badge-alder .al-kort{ display:none; }
 .badge.badge-alder svg{ width:12px; height:12px; flex:none; }
 .badge.badge-alder-udloebet{ background:#FDE4D8; color:#7A1D0B; }
 :root[data-theme="dark"] .badge.badge-alder{ background:#3B2A0C; color:#FCD34D; box-shadow:0 0 0 1px rgba(252,211,77,.28); }
 :root[data-theme="dark"] .badge.badge-alder-udloebet{ background:#4A1D12; color:#FCA98F; }
 @container (max-width: 239px){
   .card-rich .card-badges .badge.badge-alder{ font-size:10px; padding:3px 6px; }
+  .card-rich .card-badges .badge.badge-alder .al-lang{ display:none; }
+  .card-rich .card-badges .badge.badge-alder .al-kort{ display:inline; }
 }

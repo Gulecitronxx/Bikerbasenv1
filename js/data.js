@@ -438,7 +438,7 @@ function annonceAlder(l, nu){
     : niveau === 'lang' ? `${ikkeTjekket}Den kan være solgt — tjek hos kilden.`
     : 'Den er sandsynligvis ikke længere til salg. Tjek hos kilden.';
   const linje = raad ? `${titel}. ${raad}` : `${titel}.`;
-  return { dage, tilstand, niveau, advarsel, kort, titel, raad, linje, rel };
+  return { dage, tilstand, niveau, advarsel, kort, kortest: advarsel ? `${dage} dage siden` : '', titel, raad, linje, rel };
 }
 
 /* Fordelingen over et udsnit: hvor mange er friske, forsinkede, "lang tid". Egne annoncer tæller ikke med. */

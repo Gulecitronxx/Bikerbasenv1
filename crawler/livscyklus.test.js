@@ -137,6 +137,18 @@ test('et "set" nulstiller; en teknisk fejl mellem to væk-signaler hverken nulst
   assert.equal(r.status, 'aktiv');
 });
 
+test('kildens egen "SOLGT"-markør er et væk-signal ("fjernet_markoer"); RESERVERET er det ikke', () => {
+  const m = lc.fjernedeFraMarkoerer([
+    { kilde_annonce_id: '1', salgsmarkoerer: ['SOLGT'] },
+    { kilde_annonce_id: '2', salgsmarkoerer: ['RESERVERET'] },
+    { kilde_annonce_id: '3', salgsmarkoerer: ['ENGROS', 'solgt'] },
+    { kilde_annonce_id: '4', salgsmarkoerer: [] },
+    { kilde_annonce_id: '5' },
+  ]);
+  assert.deepEqual([...m.entries()], [['1', 'fjernet_markoer'], ['3', 'fjernet_markoer']]);
+  assert.equal(lc.anvendSignal({ status: 'aktiv' }, { art: 'vaek', kode: 'fjernet_markoer' }, dag(0)).vaek_i_traek, 1);
+});
+
 /* ---------- 3. Tilstande ---------- */
 test('de fem tilstande — og 63 dage uden bekræftelse er IKKE "bekræftet"', () => {
   const nu = dag(0);

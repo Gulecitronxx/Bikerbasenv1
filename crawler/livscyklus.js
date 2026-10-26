@@ -172,6 +172,17 @@ function signalForUset(id, { fjernede, teknisk, komplet, vaern }){
   return null;   // bevidst delvis kørsel (--limit): ingen mening i at sige noget
 }
 
+/* En annonce, kilden SELV har mærket "SOLGT" i titlen (crawler/normalize.js trækker markøren ud i salgsmarkoerer), er et væk-signal fra kilden:
+   den tæller som "fjernet_markoer" og IKKE som "set". RESERVERET er ikke et væk-signal (den kan stadig blive solgt til en anden).
+   Returnerer et Map kilde_annonce_id -> 'fjernet_markoer'. */
+function fjernedeFraMarkoerer(annoncer){
+  const m = new Map();
+  for (const a of annoncer || []){
+    if (Array.isArray(a.salgsmarkoerer) && a.salgsmarkoerer.some(x => String(x).toUpperCase() === 'SOLGT')) m.set(a.kilde_annonce_id, 'fjernet_markoer');
+  }
+  return m;
+}
+
 /* Læser grundlaget til værnet: samme forespørgsler som markerBorte() i db.js. */
 async function laesVaernGrundlag(sb, kilde_id){
   const { data: koersler, error } = await sb
@@ -275,5 +286,5 @@ async function udloebGamle(sb, nu = new Date(), taerskler = TAERSKLER){
 module.exports = {
   TAERSKLER, TILSTANDE, VAEK_KODER, TEKNISKE_KODER, UDLOEB_MAKS_ANDEL,
   klassificerSignal, anvendSignal, vurderLivscyklus, dageMellem,
-  livscyklusAktiv, signalForUset, opdaterLivscyklus, udloebGamle, laesVaernGrundlag,
+  livscyklusAktiv, signalForUset, fjernedeFraMarkoerer, opdaterLivscyklus, udloebGamle, laesVaernGrundlag,
 };

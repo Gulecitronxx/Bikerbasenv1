@@ -463,6 +463,10 @@ async function koerKilde(navn, { limit = null, maksSider = null, toerloeb = fals
     /* Med livscyklus slået til er en annonce, hvis EGEN side svarede 404/410, ikke
        "set": den skrives ikke (hverken ny eller opdateret) og får i stedet et
        væk-signal nedenfor. Uden flaget er adfærden uændret. */
+    if (livscyklus){
+      // Kilden har selv skrevet SOLGT i titlen: et væk-signal, ikke et "set" (crawler/livscyklus.js fjernedeFraMarkoerer).
+      fjernede = new Map([...fjernede, ...lc.fjernedeFraMarkoerer(annoncer)]);
+    }
     const set = new Set(annoncer.map(a => a.kilde_annonce_id));
     const tilSkrivning = livscyklus && fjernede.size
       ? annoncer.filter(a => !fjernede.has(a.kilde_annonce_id)) : annoncer;

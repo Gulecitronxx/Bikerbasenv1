@@ -948,7 +948,7 @@ function listingCardHTML(l, i){
   if (f.ext){
     const alder = annonceAlder(l);
     if (alder && alder.advarsel){
-      badges = `<div class="card-badges"><span class="badge badge-alder badge-alder-${alder.niveau}" title="${escapeHTML(alder.linje)}">${Icon.clock}<span>${escapeHTML(alder.kort)}</span><span class="visually-hidden">. ${escapeHTML(alder.linje)}</span></span></div>`;
+      badges = `<div class="card-badges"><span class="badge badge-alder badge-alder-${alder.niveau}" title="${escapeHTML(alder.linje)}">${Icon.clock}<span class="al-lang">${escapeHTML(alder.kort)}</span><span class="al-kort" aria-hidden="true">${escapeHTML(alder.kortest)}</span><span class="visually-hidden">. ${escapeHTML(alder.linje)}</span></span></div>`;
     }
   }
   if (!f.ext){
