@@ -534,22 +534,22 @@ for (const [bredde, hoejde] of [[375, 812], [430, 932]]){
   }
 }
 
-test('flag TIL, mørk 1440 og 1920: formular og tråd (kontrast og layout)', { timeout: 120000 }, async t => {
+test('flag TIL, 768 lys samt 1440 og 1920 mørk: formular og tråd (kontrast og layout)', { timeout: 120000 }, async t => {
   if (!kan.ok) return t.skip(kan.grund);
   const bak = lavBackend({ annoncer: [ANN()] });
-  for (const bredde of [1440, 1920]){
-    const k = await side(bak, { som: 'koeber', viewport: { width: bredde, height: 1000 }, tema: 'moerk', sti: annonceSti() });
+  for (const [bredde, tema] of [[768, 'lys'], [1440, 'moerk'], [1920, 'moerk']]){
+    const k = await side(bak, { som: 'koeber', viewport: { width: bredde, height: 1000 }, tema, sti: annonceSti() });
     await k.page.waitForSelector('#besked-form, #besked-aabn');
     assert.ok(await overflow(k.page) <= 0);
-    await skaerm(k.page, `flagtil-annonce-${bredde}-moerk`, '.an-seller-wrap');
-    if (bredde === 1440 && await k.page.locator('#besked-form').count()){ await skrivOgSend(k, 'Hej, hvad er laveste pris?'); await k.page.waitForSelector('.besked-ok'); }
+    await skaerm(k.page, `flagtil-annonce-${bredde}-${tema}`, '.an-seller-wrap');
+    if (!bak.tilstand.tabeller.samtaler.length && await k.page.locator('#besked-form').count()){ await skrivOgSend(k, 'Hej, hvad er laveste pris?'); await k.page.waitForSelector('.besked-ok'); }
     await k.luk();
-    const s = await side(bak, { som: 'saelger', viewport: { width: bredde, height: 1000 }, tema: 'moerk', sti: 'mine-annoncer.html?tab=beskeder' });
+    const s = await side(bak, { som: 'saelger', viewport: { width: bredde, height: 1000 }, tema, sti: 'mine-annoncer.html?tab=beskeder' });
     await s.page.waitForSelector('.bsk-raekke');
     await s.page.locator('.bsk-raekke').first().click();
     await s.page.waitForSelector('.bsk-boble');
     assert.ok(await overflow(s.page) <= 0);
-    await skaerm(s.page, `flagtil-traad-${bredde}-moerk`);
+    await skaerm(s.page, `flagtil-traad-${bredde}-${tema}`);
     await s.luk();
   }
 });
@@ -583,4 +583,46 @@ test('flag TIL: annoncesidens CLS bliver lille, når formularen lander (pladsen 
   console.log('# CLS annonce flag TIL (har allerede skrevet):', cls2.toFixed(4));
   assert.ok(cls2 < 0.1, `CLS ${cls2}`);
   await ctx.close();
+});
+
+/* WCAG 1.4.3: kontrast (mindst 4,5:1) for den tekst, jeg har tilføjet — i lys og mørk. Bagrunden findes ved at gå opad til første dækkende farve. */
+async function kontrastVaerdier(page, vaelgere){
+  return page.evaluate(sels => {
+    const parse = c => { const m = String(c).match(/rgba?\(([^)]+)\)/); if (!m) return null; const p = m[1].split(/[ ,/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 }; };
+    const lum = ({ r, g, b }) => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+    const bag = el => { for (let e = el; e; e = e.parentElement){ const c = parse(getComputedStyle(e).backgroundColor); if (c && c.a > 0.95) return c; } return { r: 255, g: 255, b: 255, a: 1 }; };
+    return sels.map(sel => {
+      const el = document.querySelector(sel);
+      if (!el) return { sel, fundet: false };
+      const fg = parse(getComputedStyle(el).color), bg = bag(el);
+      const op = parseFloat(getComputedStyle(el).opacity);
+      const bl = op < 1 ? { r: fg.r * op + bg.r * (1 - op), g: fg.g * op + bg.g * (1 - op), b: fg.b * op + bg.b * (1 - op) } : fg;
+      const l1 = lum(bl), l2 = lum(bg);
+      return { sel, fundet: true, forhold: (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05) };
+    });
+  }, vaelgere);
+}
+
+test('kontrast ≥ 4,5:1 for indbakkens og formularens tekst, badge og bobler — lys og mørk', { timeout: 120000 }, async t => {
+  if (!kan.ok) return t.skip(kan.grund);
+  for (const tema of ['lys', 'moerk']){
+    const bak = lavBackend({ annoncer: [ANN()] });
+    await koeberSender(bak);
+    const k = await side(bak, { som: 'koeber', tema, sti: annonceSti() });
+    await k.page.waitForSelector('#besked-aabn');
+    const kk = await kontrastVaerdier(k.page, ['.besked-h', '.besked-hint', '.besked-sidste', '.besked-sidste span', '#besked-aabn']);
+    for (const r of kk) assert.ok(r.fundet && r.forhold >= 4.5, `${tema}: ${r.sel} kontrast ${r.forhold}`);
+    await k.luk();
+    const s = await side(bak, { som: 'saelger', tema, sti: 'mine-annoncer.html?tab=beskeder' });
+    await s.page.waitForSelector('.bsk-raekke');
+    await s.page.locator('.bsk-raekke').first().click();
+    await s.page.waitForSelector('.bsk-boble');
+    await s.page.fill('#bsk-svar-tekst', 'Ja, den er til salg.');
+    await s.page.click('#bsk-svar-send');
+    await s.page.waitForFunction(() => document.querySelectorAll('.bsk-boble').length === 2);
+    const sk = await kontrastVaerdier(s.page, ['.bsk-boble.fra-mig p', '.bsk-boble.fra-mig time', '.bsk-boble.fra-modpart p', '.bsk-boble.fra-modpart time',
+      '.bsk-raekke-top time', '.bsk-raekke-udsnit', '.bsk-raekke-annonce', '.bsk-sikkerhed', '.bsk-traadtitel p', '.bsk-mail span', '#bsk-svar-send', '.besked-taeller']);
+    for (const r of sk) assert.ok(r.fundet && r.forhold >= 4.5, `${tema}: ${r.sel} kontrast ${r.forhold}`);
+    await s.luk();
+  }
 });

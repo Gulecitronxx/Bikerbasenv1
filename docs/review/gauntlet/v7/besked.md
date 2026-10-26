@@ -88,7 +88,7 @@ Ingen formular, ingen beskedkald, `js/beskeder.js` og `css/p-beskeder.css` hente
 ## 5. Flag til: hvad ser brugeren?
 
 - **Udlogget**: "Skriv til sælgeren på Bikerbasen. Log ind gratis for at sende en besked. Sælgeren ser dit navn — ikke din e-mail eller dit telefonnummer." + primær knap *Log ind for at skrive til sælgeren*.
-- **Indlogget køber**: formular ("Send besked til sælgeren", tre hurtigstartere, tæller 0/1000, fejl på dansk, ingen dobbeltsend, kladde i `sessionStorage` bevares ved fejl), derefter kvittering med link til tråden. Har køberen allerede skrevet: "Du har allerede skrevet til sælgeren" + *Åbn samtalen*.
+- **Indlogget køber**: formular ("Send besked til sælgeren", tre hurtigstartere, tæller 0/1000, fejl på dansk, ingen dobbeltsend, teksten bevares i feltet ved fejl; ingen kladde i browserens lager (hver ny lager-nøgle skal stå på privatlivssiden)), derefter kvittering med link til tråden. Har køberen allerede skrevet: "Du har allerede skrevet til sælgeren" + *Åbn samtalen*.
 - **Mobilbjælken**: *Send besked* (ruller til og fokuserer feltet); udlogget *Log ind for at skrive*.
 - **Sælgerens egen annonce**: "Henvendelser til din annonce" + *Se beskeder* (ingen formular). **Demo- og indekserede annoncer**: ingen formular.
 - **Mine annoncer -> Beskeder**: liste + tråd (to kolonner fra 900 px, ellers liste ELLER tråd med tilbage-knap), ulæst-prik, status-mærke (Solgt / På pause / Slettet), tom-/fejl-/loading-tilstand, mailvalg, blokér/fortryd, anmeld, sikkerhedsråd i tråden, let genhentning hvert 30. sekund mens fanen er åben og synlig.

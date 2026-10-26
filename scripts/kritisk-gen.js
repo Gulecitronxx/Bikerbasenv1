@@ -205,7 +205,10 @@ async function koer(opt = {}){
   const alleArk = new Set();
   for (const f of htmlFiler) arkIside(fs.readFileSync(path.join(rod, f), 'utf8')).forEach(a => alleArk.add(a));
   for (const a of alleArk) hentArk(a);
-  const noegler = [...new Set(Object.values(parset).flatMap(a => K.alleNoegler(a.traeet)))].sort();
+  /* V7: ark, som ingen side peger på (lazy-hentede, fx css/p-beskeder.css bag flaget BB_FLAGS.beskeder), er stadig
+     committede ark-regler og skal være kendt (w12-kritisk.test.js). De kommer kun i `regler`, aldrig i en families udsnit. */
+  for (const f of fs.readdirSync(path.join(rod, 'css')).filter(x => x.endsWith('.css')).sort()) hentArk('css/' + f);
+  const noegler =[...new Set(Object.values(parset).flatMap(a => K.alleNoegler(a.traeet)))].sort();
   const indeks = new Map(noegler.map((n, i) => [n, i]));
   const familier = {};
   if (kunFamilier){

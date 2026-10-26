@@ -181,12 +181,6 @@ const BESKED_STARTERE = [
   'Hvad er den laveste pris?',
 ];
 
-function beskedKladdeNoegle(listingId){ return 'bb_besked_kladde_' + listingId; }
-function beskedHentKladde(listingId){ try { return sessionStorage.getItem(beskedKladdeNoegle(listingId)) || ''; } catch (e) { return ''; } }
-function beskedGemKladde(listingId, tekst){
-  try { if (tekst) sessionStorage.setItem(beskedKladdeNoegle(listingId), tekst); else sessionStorage.removeItem(beskedKladdeNoegle(listingId)); } catch (e) { /* privat tilstand */ }
-}
-
 function beskedFormularHTML(){
   const ikon = n => (typeof Icon !== 'undefined' && Icon[n]) || '';
   return `
@@ -263,12 +257,13 @@ async function beskedMonterFormular(rod, { listing }){
     }
   };
 
-  felt.value = beskedHentKladde(listing.id);
+  /* Ingen kladde i browserens lager: en besked er persondata, og hver ny localStorage-/sessionStorage-nøgle skal stå på
+     privatlivssiden. Teksten bevares i feltet ved fejl; forlader man siden, er den væk — ærligere end en skjult kopi. */
   taelOp();
-  felt.addEventListener('input', () => { taelOp(); beskedGemKladde(listing.id, felt.value); if (!fejl.hidden) visFejl(''); });
+  felt.addEventListener('input', () => { taelOp(); if (!fejl.hidden) visFejl(''); });
   rod.querySelectorAll('[data-starter]').forEach(b => b.addEventListener('click', () => {
     felt.value = (felt.value.trim() ? felt.value.replace(/\s+$/, '') + '\n' : '') + b.dataset.starter;
-    taelOp(); beskedGemKladde(listing.id, felt.value); felt.focus();
+    taelOp(); felt.focus();
   }));
 
   form.addEventListener('submit', async (e) => {
@@ -283,7 +278,6 @@ async function beskedMonterFormular(rod, { listing }){
     const svar = await BeskedApi.send(listing.id, v.tekst, honning ? honning.value : '');
     sender = false;
     if (svar && svar.ok === true){
-      beskedGemKladde(listing.id, '');
       rod.classList.add('er-faerdig');
       rod.innerHTML = beskedKvitteringHTML(svar.samtale_id);
       rod.querySelector('.besked-ok')?.setAttribute('tabindex', '-1');

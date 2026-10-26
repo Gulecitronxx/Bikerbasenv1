@@ -114,7 +114,8 @@
 }
 .bsk-boble{ max-width:min(86%,560px); padding:var(--space-2) var(--space-3); border-radius:var(--radius-md); font-size:14.5px; line-height:1.5; }
 .bsk-boble p{ margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
-.bsk-boble time{ display:block; margin-top:4px; font-size:11.5px; opacity:.75; }
+.bsk-boble time{ display:block; margin-top:4px; font-size:12px; }   /* ingen opacity: hvid paa primary er 5,3:1, en 75 % gennemsigtig tid kun 3,4:1 */
+.bsk-boble.fra-modpart time{ color:var(--color-fg-muted); }
 .bsk-boble.fra-modpart{ align-self:flex-start; background:var(--color-surface-2); color:var(--color-fg); border-bottom-left-radius:4px; }
 .bsk-boble.fra-mig{ align-self:flex-end; background:var(--color-primary); color:var(--color-on-primary); border-bottom-right-radius:4px; }
 .bsk-svar{ display:flex; flex-direction:column; gap:var(--space-2); align-items:stretch; }
