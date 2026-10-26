@@ -96,15 +96,15 @@ const noter = html => (html.match(/class="seller-locked-note"/g) || []).length;
 test('telefonNoteHTML: tre tilstande, tre forskellige ærlige tekster uden løfte om besked', () => {
   const knap = tekst(A.telefonNoteHTML('knap')), intet = tekst(A.telefonNoteHTML('intet')), afvist = tekst(A.telefonNoteHTML('afvist'));
   assert.strictEqual(new Set([knap, intet, afvist]).size, 3);
-  assert.match(intet, /Sælgeren har ikke oplyst telefon\. Annoncen kan ikke kontaktes via Bikerbasen endnu\./);
-  assert.match(afvist, /Sælgeren viser ikke sit telefonnummer\. Annoncen kan ikke kontaktes via Bikerbasen endnu\./);
-  assert.match(knap, /kan endnu ikke sendes via Bikerbasen/);
+  assert.match(intet, /Sælgeren har ikke oplyst telefon, og beskeder via Bikerbasen er ikke åbnet endnu\. Annoncen kan derfor ikke kontaktes via Bikerbasen lige nu\./);
+  assert.match(afvist, /Sælgeren viser ikke sit telefonnummer, og beskeder via Bikerbasen er ikke åbnet endnu\. Annoncen kan derfor ikke kontaktes via Bikerbasen lige nu\./);
+  assert.match(knap, /Beskeder via Bikerbasen er ikke åbnet endnu/);
   for (const t of [knap, intet, afvist]) assert.doesNotMatch(t, /vi sender|beskeden sendes|svar inden|skriv til sælger|send besked/i);
 });
 
 test('annoncesiden: privat sælger uden telefon får præcis den korte, sande tilstand — og ingen knap', () => {
   const html = saelger(egen());
-  assert.match(tekst(html), /Sælgeren har ikke oplyst telefon\. Annoncen kan ikke kontaktes via Bikerbasen endnu\./);
+  assert.match(tekst(html), /Sælgeren har ikke oplyst telefon, og beskeder via Bikerbasen er ikke åbnet endnu\. Annoncen kan derfor ikke kontaktes via Bikerbasen lige nu\./);
   assert.doesNotMatch(html, /reveal-phone-btn/);
   assert.strictEqual(noter(html), 1, 'netop én note om telefonen');
   assert.doesNotMatch(tekst(html), /Har sælgeren valgt at vise/, 'ingen modsigelse: ikke både "ikke oplyst" og "kan se med knappen"');
@@ -259,7 +259,8 @@ test('Sport som rigtigt sidste kategoriord og ægte modelord røres ikke', () =>
 
 /* ---------- 6. Ingen løfter i klienttekst ---------- */
 
-const JS_FILER = fs.readdirSync(__dirname).filter(f => f.endsWith('.js') && !f.endsWith('.test.js') && f !== 'w5-hjaelp.js');
+/* V7: js/beskeder.js indeholder bevidst beskedtekster ("Beskeden er sendt" …). Filen hentes KUN af bbIndlaesBeskeder() i js/supabase-config.js, som kræver flaget BB_FLAGS.beskeder (default fra); at den ikke står i nogen HTML-side, og at hentningen er flag-gated, låser js/v7-besked.test.js. */
+const JS_FILER = fs.readdirSync(__dirname).filter(f => f.endsWith('.js') && !f.endsWith('.test.js') && f !== 'w5-hjaelp.js' && f !== 'beskeder.js');
 /* Streng-litteraler og skabelontekst — ikke kommentarer — er det, brugeren læser. */
 const udenKommentarer = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`\\])\/\/[^\n]*/g, '$1');
 

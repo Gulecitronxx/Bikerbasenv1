@@ -35,8 +35,9 @@ const Store = Object.assign({ isComparing:()=>false, isFavorite:()=>false, getUs
 }
 
 /* kilder: filnavne i js/. navne: de globale navne testen vil have tilbage. */
-function indlaes(kilder, navne, extraStore){
-  const kode = stub(extraStore) + kilder.map(læs).join('\n') + `\nreturn { ${navne.join(', ')} };`;
+function indlaes(kilder, navne, extraStore, foer){
+  /* `foer` (valgfri): kode, der kører FØR kilderne — fx `const bbFlag = n => true;` til flag-tests (V7). */
+  const kode = stub(extraStore) + (foer || '') + kilder.map(læs).join('\n') + `\nreturn { ${navne.join(', ')} };`;
   return new Function(kode)();
 }
 

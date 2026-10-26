@@ -1285,3 +1285,11 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
 @media (min-width:1180px){
   .an-titelraekke{ min-height:64px; align-items:center; }
 }
+
+/* V7: kontaktvejen, når beskeder ikke er åbnet (flag fra): to korte trin og én ærlig note FØR knapperne.
+   .besked-kort reserverer pladsen til formularen (flag til), så sælgerkortet ikke hopper, når js/beskeder.js lander. */
+.seller-kontakt{ margin:var(--space-3) 0 0; }
+.seller-kontakt-tekst{ margin:0; font-size:13.5px; line-height:1.5; color:var(--color-fg-muted); }
+.seller-kontakt-tekst b{ color:var(--color-fg); }
+.besked-kort{ min-height:450px; margin-top:var(--space-3); }   /* målt: formularen er 445-465 px (375-1920 px) */
+.besked-skelet{ margin:var(--space-3) 0; font-size:13.5px; color:var(--color-fg-muted); }

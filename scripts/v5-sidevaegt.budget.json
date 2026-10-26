@@ -5,6 +5,7 @@
   "js/annonce.js": 37700,
   "js/backend-bridge.js": 30400,
   "js/bekraeft-dialog.js": 1400,
+  "js/beskeder.js": 11200,
   "js/bike-art.js": 3600,
   "js/brand-logos-data.js": 3000,
   "js/brand-logos.js": 8300,
@@ -34,11 +35,12 @@
   "js/sortering.js": 6200,
   "js/store.js": 7600,
   "js/supabase-api.js": 11600,
-  "js/supabase-config.js": 800,
+  "js/supabase-config.js": 1400,
   "js/w5-hjaelp.js": 1500,
   "js/w7-funktion-hjaelp.js": 2200,
   "css/p-annonce.css": 23400,
   "css/p-bekraeft.css": 700,
+  "css/p-beskeder.css": 3000,
   "css/p-brand-logo.css": 3900,
   "css/p-dashboard.css": 17400,
   "css/p-facet.css": 14800,
@@ -193,5 +195,9 @@
   "js/brand-logos.js / css/p-brand-logo.css": "+409 / +291 B: logoslots (A-Z 80 px, filter 64 px, MIN_HOEJDE 9,5) mod logo/monogram-blanding.",
   "img/brands (ikke i filbudgettet)": "7 officielle SVG-logoer erstatter AI-udkast: +9,8 kB rå samlet (BMW 4,2 -> 8,6 kB er størst). Målt +12,8 kB billeder på maerker.html. Kandidat: formindsk BMW-banen (afrund koordinater).",
   "dashboard.html / mine-annoncer.html (browser-budget)": "SÆNKET fra 1,1 MB til 0,62 MB (målt 555 kB): V6 konto-vagt (F4) sender udloggede til login før kontosidens pakke hentes; testen kræver, at kontosidens egen pakke ikke hentes (kontoPakkeHentet = false)."
+ },
+ "begrundelser_v7": {
+  "js/beskeder.js + css/p-beskeder.css (NYE, 10153 + 2653 B gzip)": "V7 beskeder: formular på annoncen, indbakke i Mine annoncer, ren logik. Hentes KUN lazy af bbIndlaesBeskeder() når flaget BB_FLAGS.beskeder er sat (default fra) — står ikke i nogen HTML-side, så ingen sidebudgetter vokser, og flag-fra-brugere henter dem aldrig. Budgettet er derfor sat for filerne, ikke for siderne.",
+  "js/supabase-config.js": "+446 B (800 -> 1400): flaget BB_FLAGS + bbFlag() + den lille lazy-loader. Loaderen skal ligge i en fil, som alle sider med annonce og konto allerede henter."
  }
 }

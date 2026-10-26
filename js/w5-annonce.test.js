@@ -67,9 +67,9 @@ test('indlogget sælgerkort: ingen betalingsknap, ingen kontaktformular, ærlig 
     const html = saelger(egen(), opts);
     for (const re of FORBUDT) assert.doesNotMatch(html, re, `${re} i sælgerkortet (${JSON.stringify(opts)})`);
     // W6: ÉN ærlig tekst pr. tilstand — med knap: ingen besked kan sendes; uden telefon: ikke oplyst, ingen kontaktvej.
-    assert.match(html, opts.telefon || opts.telefonMulig ? /Beskeder til sælger kan endnu ikke sendes via Bikerbasen/ : /Annoncen kan ikke kontaktes via Bikerbasen endnu/);
+    assert.match(html, opts.telefon || opts.telefonMulig ? /Beskeder via Bikerbasen er ikke åbnet endnu/ : /Annoncen kan derfor ikke kontaktes via Bikerbasen lige nu/);
     // Teksten står FØR første knap/link (handlingerne).
-    assert.ok(html.indexOf('Beskeder til sælger kan endnu ikke') < html.indexOf('contact-actions'), 'teksten skal stå før handlingerne');
+    assert.ok(html.indexOf('ikke åbnet endnu') < html.indexOf('contact-actions'), 'teksten skal stå før handlingerne');
   }
 });
 
@@ -79,14 +79,15 @@ test('telefonknap kun når sælgeren har et nummer / kan have valgt at vise det'
   assert.match(saelger(egen(), { telefonMulig: true }), /id="reveal-phone-btn"/);
   // Uden nummer siges det ærligt, og der lokkes ikke med "skriv i stedet".
   const uden = saelger(egen());
-  assert.match(uden, /Sælgeren har ikke oplyst telefon\.<\/b> Annoncen kan ikke kontaktes via Bikerbasen endnu\./);
+  assert.match(uden, /Sælgeren har ikke oplyst telefon,<\/b> og beskeder via Bikerbasen er ikke åbnet endnu\. Annoncen kan derfor ikke kontaktes via Bikerbasen lige nu\./);
   assert.doesNotMatch(uden, /Skriv i stedet/i);
 });
 
 test('udlogget sælgerkort: heller ikke her lokkes der til "skriv"', () => {
   const html = saelger(egen(), { loggedIn: false });
   for (const re of FORBUDT) assert.doesNotMatch(html, re);
-  assert.match(html, /Beskeder til sælger kan endnu ikke sendes via Bikerbasen/);
+  assert.match(html, /Beskeder via Bikerbasen er ikke åbnet endnu/);
+  assert.match(html, /Sådan kontakter du sælgeren/, 'V7: udlogget siger kortet, hvordan man når sælgeren, før man logger ind');
   assert.match(html, /login\.html\?redirect=/);
 });
 

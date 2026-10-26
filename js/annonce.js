@@ -242,20 +242,37 @@ function talDa(n){
                     annoncen), navnet gør ikke.
    Telefonnummer og kontaktflade er stadig bag login for begge — det er DÉR
    skrabning og uønskede henvendelser kommer fra, ikke fra sælgertypen. */
-/* W6: ÉN note om telefonen pr. tilstand — aldrig to, der siger hver sit.
+/* V7: kan der skrives til sælgeren på Bikerbasen? Kun når flaget er sat (js/supabase-config.js), annoncen ligger i
+   databasen (uuid), og backenden er til stede. Demoannoncer og indekserede annoncer har aldrig en beskedflade. */
+function beskedAktiv(){
+  return typeof bbFlag === 'function' && bbFlag('beskeder');
+}
+function kanSkriveTilSaelger(listing){
+  return beskedAktiv() && !!listing && typeof isUuid === 'function' && isUuid(String(listing.id))
+    && typeof db !== 'undefined' && !!db.enabled;
+}
+
+/* W6/V7: ÉN note om telefonen pr. tilstand — aldrig to, der siger hver sit.
      knap    der er (eller kan være) et nummer bag knappen "Vis telefonnummer"
      intet   sælgeren har ikke oplyst telefon (ingen knap)
      afvist  vi spurgte, og svaret var null: sælgeren viser ikke sit nummer (skellet mellem "intet" og "vil ikke
              vise" er sælgerens privatsag, derfor tales der ikke om, hvilket af dem det er)
-   Ingen af dem lover en besked: Bikerbasen leverer ingen beskeder endnu. */
-function telefonNoteHTML(tilstand){
+   Flaget fra: siger ærligt, at Bikerbasen endnu ikke leverer beskeder, og at annoncen så kun kan kontaktes via et
+   vist telefonnummer. Flaget til: pegen er beskedformularen, og telefonen er et valgfrit alternativ. */
+function telefonNoteHTML(tilstand, medBesked){
+  const besked = medBesked === undefined ? beskedAktiv() : !!medBesked;
+  if (besked){
+    if (tilstand === 'knap') return '<b>Foretrækker du at ringe?</b> Har sælgeren valgt at vise sit telefonnummer, kan du se det med knappen nedenfor.';
+    if (tilstand === 'afvist') return '<b>Sælgeren viser ikke sit telefonnummer.</b> Brug beskedformularen ovenfor.';
+    return '<b>Sælgeren har ikke oplyst telefon.</b> Brug beskedformularen ovenfor.';
+  }
   if (tilstand === 'knap'){
-    return '<b>Beskeder til sælger kan endnu ikke sendes via Bikerbasen.</b> Har sælgeren valgt at vise sit telefonnummer, kan du se det med knappen nedenfor.';
+    return '<b>Beskeder via Bikerbasen er ikke åbnet endnu.</b> Har sælgeren valgt at vise sit telefonnummer, kan du se det med knappen nedenfor.';
   }
   if (tilstand === 'afvist'){
-    return '<b>Sælgeren viser ikke sit telefonnummer.</b> Annoncen kan ikke kontaktes via Bikerbasen endnu.';
+    return '<b>Sælgeren viser ikke sit telefonnummer,</b> og beskeder via Bikerbasen er ikke åbnet endnu. Annoncen kan derfor ikke kontaktes via Bikerbasen lige nu.';
   }
-  return '<b>Sælgeren har ikke oplyst telefon.</b> Annoncen kan ikke kontaktes via Bikerbasen endnu.';
+  return '<b>Sælgeren har ikke oplyst telefon,</b> og beskeder via Bikerbasen er ikke åbnet endnu. Annoncen kan derfor ikke kontaktes via Bikerbasen lige nu.';
 }
 /* Efter et null-svar fra backend: noten OMSKRIVES (ikke endnu en note ved siden af), knappen fjernes, og
    handlingsbjælken fjernes, fordi dens eneste knap peger på den fjernede "Vis telefonnummer". */
@@ -271,7 +288,7 @@ function telefonAfvist(note, knap, bjaelke){
   }
 }
 
-function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig }){
+function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig, eget }){
   const s = listing.seller || {};
   const erForhandler = !!s.isDealer;
   const visNavn = erForhandler || loggedIn;
@@ -367,25 +384,41 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
 
   const raad = `<div class="safety-tip">${Icon.info}<span>Mød altid sælger et sikkert sted, og betal aldrig depositum uden at have set motorcyklen fysisk.</span></div>`;
 
+  const medBesked = kanSkriveTilSaelger(listing);
+
   if (!loggedIn){
     /* Forhandlerens profil er åben udlogget; privatsælgerens er ikke.
        Det er præcis samme skel som ovenfor: forhandleren er en virksomhed,
        hvis navn og by allerede står på kortet, mens privatsælgerens navn er
        skjult indtil login — og et link til "Anders Hansen" ville afsløre
        det, kortet lige har holdt tilbage. */
+    /* V7: ÉN tydelig besked om, hvordan man når sælgeren, FØR login — ikke kun "log ind for at se". Flaget til: man
+       kan skrive. Flaget fra: man ser, hvad login giver (og hvad der ikke findes), så ingen lokkes ind i en blindgyde. */
+    const kontaktUdlogget = medBesked
+      ? `<p class="seller-locked-note">${Icon.info}<span><b>Skriv til sælgeren på Bikerbasen.</b> Log ind gratis for at sende en besked. Sælgeren ser dit navn — ikke din e-mail eller dit telefonnummer.</span></p>`
+      : `<div class="seller-kontakt" id="seller-kontakt">
+          <p class="seller-kontakt-tekst"><b class="seller-kontakt-h">Sådan kontakter du sælgeren.</b> Log ind gratis, og tryk på &ldquo;Vis telefonnummer&rdquo;, hvis sælgeren har valgt at vise sit nummer. <b>Beskeder via Bikerbasen er ikke åbnet endnu</b>, så uden et vist nummer kan annoncen ikke kontaktes her.</p>
+        </div>`;
     return `
       <div class="sidebar-card">
         ${identitet}
-        <!-- F2-006: ingen besked kan sendes via os — det siges FØR enhver handling. -->
-        <p class="seller-locked-note">${Icon.info}<span><b>Beskeder til sælger kan endnu ikke sendes via Bikerbasen.</b> Log ind for at se, om sælgeren har valgt at vise sit telefonnummer.</span></p>
+        <!-- F2-006: ingen besked kan sendes via os, før flaget er sat — det siges FØR enhver handling. -->
+        ${kontaktUdlogget}
         <div class="contact-actions">
-          <a href="login.html?redirect=${redirect}" class="btn btn-primary btn-block">${Icon.user}Log ind for at se sælgeren</a>
+          <a href="login.html?redirect=${redirect}" class="btn btn-primary btn-block">${medBesked ? Icon.mail : Icon.user}${medBesked ? 'Log ind for at skrive til sælgeren' : 'Log ind for at se sælgeren'}</a>
           ${erForhandler ? profilKnapHTML : `<a href="login.html?redirect=${redirect}" class="btn btn-outline btn-block">${Icon.user}Opret gratis profil</a>`}
         </div>
         <!-- Siger hvad login giver, og hvorfor — ikke bare at der er en mur. -->
         <p class="seller-locked-note">${Icon.lock}<span>${erForhandler ? 'Forhandlerens profil er' : 'Sælgerens navn og profil er'} kun synlige for indloggede brugere.</span></p>
       </div>`;
   }
+
+  /* V7: indlogget køber med beskeder til: formularen (monteres af js/beskeder.js, som hentes først nu). Sælgerens egen
+     annonce får i stedet vejen til indbakken. Pladsen reserveres, så kortet ikke hopper, når formularen lander. */
+  const beskedFladeHTML = !medBesked ? ''
+    : (eget
+      ? `<div class="besked-kort besked-kort-egen" id="besked-kort-egen"><h3 class="besked-h">Henvendelser til din annonce</h3><p class="besked-hint">Købernes beskeder ligger i Mine annoncer under Beskeder.</p><a class="btn btn-outline btn-block" href="mine-annoncer.html?tab=beskeder">${Icon.mail}Se beskeder</a></div>`
+      : `<section class="besked-kort" id="besked-kort" aria-busy="true" aria-labelledby="besked-h"><h3 class="besked-h" id="besked-h">Skriv til sælgeren</h3><p class="besked-skelet" role="status">Åbner beskedformularen …</p></section>`);
 
   /* Telefonknappen vises kun, når der ER et nummer.
      public_profiles udstiller ikke telefon (se supabase/schema.sql), så på
@@ -395,8 +428,9 @@ function saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, t
   return `
       <div class="sidebar-card">
         ${identitet}
-        <!-- F2-006: den ærlige tekst står FØR enhver handling; der er ingen besked-formular. -->
-        <p class="seller-locked-note" id="seller-telefon-note">${Icon.info}<span>${telefonNoteHTML(telefon || telefonMulig ? 'knap' : 'intet')}</span></p>
+        <!-- F2-006: den ærlige tekst står FØR enhver handling; uden flaget er der ingen besked-formular. -->
+        ${beskedFladeHTML}
+        <p class="seller-locked-note" id="seller-telefon-note">${Icon.info}<span>${telefonNoteHTML(telefon || telefonMulig ? 'knap' : 'intet', medBesked)}</span></p>
         <div class="contact-actions">
           ${telefon || telefonMulig ? `<button type="button" class="btn btn-primary btn-block" id="reveal-phone-btn">${Icon.phone}Vis telefonnummer</button>` : ''}
           <!-- V4: samme to sekundærhandlinger som på de indekserede annoncer (profil + kopiér link). -->
@@ -1554,7 +1588,7 @@ function renderListing(){
       </div>
       <div class="an-side">
         <div class="an-seller-wrap">
-          ${saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig })}
+          ${saelgerKortHTML(listing, { loggedIn, avgRating, reviewCount, telefon, telefonMulig, eget: isOwnListing(listing) })}
           <button type="button" class="an-report" id="report-listing-btn">${Icon.flag}Anmeld annonce</button>
         </div>
         <div class="an-trygt-wrap">${anTrygtKort(false)}</div>
@@ -1610,7 +1644,9 @@ function renderListing(){
   document.getElementById('contact-modal')?.remove();
   const bar = document.getElementById('listing-actionbar');
   const harNummer = !!(telefon || telefonMulig);
-  if (bar && !isOwnListing(listing) && loggedIn && !harNummer) bar.remove();
+  /* V7: med beskeder til er bjælkens handling "Send besked" (ruller til formularen; udlogget: til login). */
+  const beskedBjaelke = kanSkriveTilSaelger(listing) && !isOwnListing(listing);
+  if (bar && !isOwnListing(listing) && loggedIn && !harNummer && !beskedBjaelke) bar.remove();
   else if (bar && !isOwnListing(listing)){
     bar.hidden = false;
     document.body.classList.add('har-actionbar');
@@ -1637,7 +1673,22 @@ function renderListing(){
     /* Enlig knap i bjælken: den er nu handlingen, så den er primær. spring() sender til login, når
        målknappen mangler (udlogget). */
     const barPhone = document.getElementById('bar-phone');
-    if (barPhone){
+    if (barPhone && beskedBjaelke){
+      barPhone.classList.replace('btn-outline', 'btn-primary');
+      barPhone.innerHTML = loggedIn
+        ? '<span class="bar-l">Send besked</span><small>til sælgeren</small>'
+        : '<span class="bar-l">Log ind for at skrive</span><small>Gratis profil</small>';
+      barPhone.addEventListener('click', () => {
+        const kort = document.getElementById('besked-kort');
+        if (!loggedIn || !kort){
+          location.href = `login.html?redirect=${encodeURIComponent(location.pathname + location.search)}`;
+          return;
+        }
+        kort.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const felt = document.getElementById('besked-tekst') || document.getElementById('besked-aabn');
+        if (felt) felt.focus({ preventScroll: true });
+      });
+    } else if (barPhone){
       barPhone.classList.replace('btn-outline', 'btn-primary');
       /* V4/QA: løftet skal være sandt. Nummeret findes kun hos RPC'en (kun for indloggede), og om sælgeren viser det, ved ingen
          før svaret er der. Derfor lover knappen ikke et nummer, når vi ikke KENDER et: udlogget står der, at man skal logge ind,
@@ -1650,6 +1701,23 @@ function renderListing(){
       }
       barPhone.addEventListener('click', () => spring('reveal-phone-btn', true));
     }
+  }
+
+  /* V7: formularen monteres, når js/beskeder.js er hentet. Fejler hentningen, står der en ærlig tekst med "Prøv igen" i
+     stedet for en tom boks. */
+  const beskedRod = document.getElementById('besked-kort');
+  if (beskedRod && loggedIn){
+    const monter = () => {
+      const bar = beskedRod.querySelector('.besked-skelet');
+      if (bar) bar.textContent = 'Åbner beskedformularen …';
+      bbIndlaesBeskeder().then(B => {
+        if (B){ B.monterFormular(beskedRod, { listing }); return; }
+        beskedRod.removeAttribute('aria-busy');
+        beskedRod.innerHTML = '<h3 class="besked-h">Skriv til sælgeren</h3><p class="besked-hint" role="alert">Beskedformularen kunne ikke hentes. Tjek din forbindelse, og prøv igen.</p><button type="button" class="btn btn-outline btn-block" id="besked-proev">Prøv igen</button>';
+        document.getElementById('besked-proev')?.addEventListener('click', () => { beskedRod.setAttribute('aria-busy', 'true'); beskedRod.innerHTML = '<p class="besked-skelet" role="status">Åbner beskedformularen …</p>'; monter(); });
+      });
+    };
+    monter();
   }
 
   // Kontaktknapperne findes kun i markup'en, når man er logget ind — al

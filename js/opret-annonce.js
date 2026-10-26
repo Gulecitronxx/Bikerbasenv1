@@ -1612,6 +1612,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   _ugemt = false;
   /* V3: formularen er først klar her (login-status afgjort, kladde lagt tilbage). Før dette punkt er felterne tomme,
      og tests/hjælpemidler kan ikke vide, om en kladde stadig er på vej. */
+  /* V7: med beskeder til er "Vi videresender ikke beskeder" ikke længere sandt (js/beskeder.js, supabase/025). */
+  if (typeof bbFlag === 'function' && bbFlag('beskeder')){
+    const kontakt = document.getElementById('naa-koebere-kontakt');
+    if (kontakt) kontakt.textContent = 'Indloggede købere kan sende dig en besked fra annoncen. Du læser og besvarer den under Mine annoncer, Beskeder, og din e-mail og dit telefonnummer deler vi ikke med køberen. Slår du telefonvisning til nedenfor, kan indloggede købere også se dit nummer med ét klik — hver gang det sker, tæller det som en telefonvisning.';
+  }
   document.body.dataset.opKlar = '1';
   /* F-1: en gendannet kladde kan indeholde tal, der ikke består valideringen
      (gammel kladde, redigeret localStorage). Vis fejlene ved felterne med det samme. */

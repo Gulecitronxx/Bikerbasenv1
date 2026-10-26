@@ -818,6 +818,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
   renderHeader('dashboard.html');
+  /* V7: med beskeder til er "Bikerbasen videresender ingen beskeder" ikke længere sandt. */
+  if (typeof bbFlag === 'function' && bbFlag('beskeder')){
+    const note = document.getElementById('dash-visning-note');
+    if (note) note.lastChild.textContent = 'Visninger tælles én gang pr. besøgende pr. session. Telefonvisninger er antallet af gange nogen har fået vist dit telefonnummer — det er ikke beskeder. Købernes beskeder ligger i Mine annoncer under Beskeder. Visninger og telefonvisninger findes kun for annoncer, du har oprettet direkte på Bikerbasen — ikke for indekserede annoncer, du har gjort krav på (se fanen Krav på annoncer).';
+  }
   document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = el.dataset.icon === 'logout' ? DASH_LOGOUT : (Icon[el.dataset.icon] || ''); });
   document.querySelectorAll('.bc-sep').forEach(s => { s.innerHTML = Icon.chevronRight; });
   fyldDashKonto(user);

@@ -243,7 +243,7 @@ test('udlogget på database-annonce: bjælken siger "Log ind for at se nummer" +
   assert.match(r.bar.tekst, /^Log ind for at se nummer Ikke alle sælgere viser et$/);
   assert.doesNotMatch(r.bar.tekst, /^Vis nummer/);
   assert.ok(r.bar.h <= 76, `bjælken er højst --actionbar-h (76 px): ${r.bar.h}`);
-  assert.match(r.side, /Log ind for at se, om sælgeren har valgt at vise sit telefonnummer/);
+  assert.match(r.side, /Log ind gratis, og tryk på .Vis telefonnummer., hvis sælgeren har valgt at vise sit nummer/);   // V7: ærlig vej FØR login
 });
 
 test('udlogget: tryk på bjælken sender til login med redirect tilbage (det sker, som knappen siger)', { timeout: 60000 }, async t => {
