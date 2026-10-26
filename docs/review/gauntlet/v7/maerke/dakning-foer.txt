@@ -1,0 +1,26 @@
+V4 mærkedækning — rod C:\Users\pasca\Desktop\rod\wt\v7-maerke
+data: live | register: js/brands-registry.js (logoer fra img/brands/manifest.json) (105 mærker) | lager: 720 annoncer, 31 mærkenavne | mærkesider: 30
+dækning: registerMaerker 105, statiskeSider 30, filterVaelger 30, filterAfkrydsning 30, aliasSyntetisk 383, aliasFritekstUI 11, hurtigsoegAlias 57, maerkesider 30, opretMaerker 105, v5Andet 1, v5FlereHydrering 1, v5Hurtigsoeg 1, v5UkendtH1 1 | Supabase-skrivninger afvist: 0
+
+1 filter/antal             fejl   0  advarsel   0  info   2
+2 alias                    fejl   0  advarsel   0  info   2
+3 logo/navn/link           fejl   0  advarsel   0  info   0
+4 opret-annonce            fejl   0  advarsel   0  info   0
+5 regression               fejl   0  advarsel   0  info   1
+6 sider/dubletter/URL      fejl   0  advarsel   0  info   0
+7 V5-krav                  fejl   0  advarsel   0  info   0
+
+[info] kernemaerke-uden-oversigtsraekke × 2
+    Zero: Zero har ingen række på maerker.html (kun mærker med annoncer vises) — "zero" kan ikke findes dér
+    Zero: Zero har ingen række på maerker.html (kun mærker med annoncer vises) — "Zero Motorcycles" kan ikke findes dér
+[info] lager-ukendt-maerke × 1
+    Ukendt: 1 af 720 annoncer har ukendt mærke (vises ikke som mærkefilter/mærkeside)
+[info] filter-viser-ukendt × 1
+    Ukendt: filteret har en række "Ukendt" (1 annoncer) — et ikke-mærke i mærkelisten
+[info] ingen-baseline × 1
+    *: ingen --baseline: regressionstjekket (punkt 5) er sprunget over
+
+I ALT: 0 fejl (0 nye), 0 advarsler (0 nye), 5 info
+Rapport: C:\Users\pasca\AppData\Local\Temp\claude\C--Users-pasca-Desktop-rod-Claude-code\d79efd16-61f8-4a34-8416-461587afcb4c\scratchpad\dakning-foer.json
+exit 0
+exit 0
