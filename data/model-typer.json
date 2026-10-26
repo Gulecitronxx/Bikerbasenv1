@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "beskrivelse": "Regeltabel: fra maerke + model til motorcykeltype, KUN naar modellen entydigt tilhoerer en type. Bruges af afledtTypeFor() i js/data.js (genereret blok @@TYPETABEL) naar kilden ikke selv oplyser typen. Alt andet er 'Ukendt'. Vi skriver intet til databasen: typen afledes ved laesning og vises som 'afledt fra model'. Redigér KUN her og kør: node scripts/type-klassificering.js --generer",
+  "regler_for_reglerne": [
+    "Moensteret er modelnavnet normaliseret: smaa bogstaver, kun a-z0-9, accenter fjernet ('Ténéré 700' -> 'tenere700').",
+    "Et moenster er et PRAEFIKS af modellen ('gl1800' rammer 'GL 1800 Gold Wing'). Slutter moensteret paa et ciffer, maa naeste tegn ikke vaere et ciffer ('cb500' rammer ikke 'cb5000').",
+    "Starter moensteret med '~', er det 'indeholder' ('~africatwin' rammer overalt i modelnavnet).",
+    "Flere moenstre kan ramme: det LAENGSTE vinder; ved lige laengde vinder et maerkespecifikt moenster over '*'. Et moenster med type null BLOKERER: modellen forbliver Ukendt (brug det til undtagelser: 'fxlrst' mellem de cruisere).",
+    "Typerne er sitets otte: sport, touring, cruiser, naked, adventure, scooter, classic, cross. 'Sportstouring' er touring (som i kildens eget ordforraad, js/backend-bridge.js MCSYD_KATEGORI).",
+    "TVIVL = IKKE MED. En model, forhandlere og fabrikken klassificerer forskelligt (CBR 650 R, Hayabusa, Bandit, Versys, Diversion, Road King ...), staar IKKE her: hellere Ukendt end en type, der staar paa kortet som et faktum."
+  ],
+  "maerker": {
+    "Honda": [
+      ["gl1800", "touring", "Gold Wing"], ["gl1500", "touring", "Gold Wing"], ["gl1200", "touring", "Gold Wing Aspencade/Interstate"], ["~goldwing", "touring", "Gold Wing fra 1984 (GL 1100 fra 1980-83 kaldes klassiker af forhandlerne: ikke med)", {"aarFra": 1984}],
+      ["nt1100", "touring", "NT1100"], ["nt650", "touring", "Deauville"], ["st1100", "touring", "Pan European"], ["st1300", "touring", "Pan European"], ["~paneuropean", "touring", "Pan European"],
+      ["cb1000gt", "touring", "CB1000GT, sportstourer"], ["cbr1100xx", "touring", "Blackbird, sportstourer (kildens 'Sportstouring' = touring)"], ["cbr1000f", "touring", "CBR1000F Hurricane, sportstourer"], ["vfr800", "touring", "VFR800, sportstourer"],
+      ["cb1000r", "naked", "CB1000R"], ["cb1000", "naked", "CB1000 Hornet/Big One"], ["~hornet", "naked", "Hornet (CB500/600/750/900/1000 Hornet)"], ["cb650r", "naked", "CB650R"], ["cb650f", "naked", "CB650F"], ["cb500f", "naked", "CB500F"], ["cb500", "naked", "CB500"], ["cb500x", "adventure", "CB500X"], ["cb1300", "naked", "CB1300 Super Four"],
+      ["cbr1000rr", "sport", "Fireblade"], ["cbr600rr", "sport", "CBR600RR"], ["cbr500r", "sport", "CBR500R"], ["cbr250r", "sport", "CBR250R"], ["vtr1000", "sport", "VTR1000 SP-1/SP-2"], ["vf750f", "sport", "VF750F"],
+      ["cmx500", "cruiser", "Rebel 500"], ["cmx1100", "cruiser", "Rebel 1100"], ["cmx250", "cruiser", "Rebel 250"], ["~rebel", "cruiser", "Rebel"],
+      ["vt600", "cruiser", "Shadow"], ["vt700", "cruiser", "Shadow"], ["vt750", "cruiser", "Shadow"], ["vt1100", "cruiser", "Shadow"], ["vtx1800", "cruiser", "VTX"], ["vtx1300", "cruiser", "VTX"], ["vf700magna", "cruiser", "Magna"], ["~magna", "cruiser", "Magna"], ["~valkyrie", "cruiser", "F6 Valkyrie"],
+      ["~africatwin", "adventure", "Africa Twin"], ["xrv750", "adventure", "Africa Twin"], ["xrv650", "adventure", "Africa Twin"], ["crf1100", "adventure", "Africa Twin"], ["crf1000", "adventure", "Africa Twin"], ["~transalp", "adventure", "Transalp"], ["xl750", "adventure", "Transalp"], ["xl700v", "adventure", "Transalp"], ["xl650v", "adventure", "Transalp"], ["xl600v", "adventure", "Transalp"], ["xl1000v", "adventure", "Varadero"], ["~varadero", "adventure", "Varadero"], ["nx500", "adventure", "NX500"], ["nx650", "adventure", "Dominator"], ["crf300l", "adventure", "CRF300L (kildens 'Offroader')"], ["nc750x", "adventure", "NC750X"], ["nc700x", "adventure", "NC700X"], ["vfr1200x", "adventure", "Crosstourer"],
+      ["nc750s", "naked", "NC750S"], ["nc700s", "naked", "NC700S"],
+      ["crf110f", "cross", "CRF110F"], ["crf125f", "cross", "CRF125F"], ["crf150r", "cross", "CRF150R"], ["crf250r", "cross", "CRF250R"], ["crf450r", "cross", "CRF450R"],
+      ["forza", "scooter", "Forza"], ["~nss300", "scooter", "Forza 300"], ["sh125", "scooter", "SH"], ["sh150", "scooter", "SH"], ["sh300", "scooter", "SH"], ["sh350", "scooter", "SH"], ["pcx", "scooter", "PCX"]
+    ],
+    "BMW": [
+      ["r1200gs", "adventure", "GS"], ["r1250gs", "adventure", "GS"], ["r1300gs", "adventure", "GS"], ["r1100gs", "adventure", "GS"], ["r1150gs", "adventure", "GS"], ["r80gs", "adventure", "GS"], ["r100gs", "adventure", "GS"], ["f650gs", "adventure", "GS"], ["f700gs", "adventure", "GS"], ["f750gs", "adventure", "GS"], ["f800gs", "adventure", "GS"], ["f850gs", "adventure", "GS"], ["f900gs", "adventure", "GS"], ["f450gs", "adventure", "GS"], ["g310gs", "adventure", "GS"], ["g650gs", "adventure", "GS"],
+      ["r1200rt", "touring", "RT"], ["r1250rt", "touring", "RT"], ["r1100rt", "touring", "RT"], ["r1150rt", "touring", "RT"], ["r850rt", "touring", "RT"], ["r100rt", "touring", "RT"], ["r80rt", "touring", "RT"], ["r1200cl", "touring", "R1200CL"],
+      ["r1300rs", "touring", "RS, sportstourer (kildens 'Sportstouring')"], ["r1250rs", "touring", "RS, sportstourer"], ["r1200rs", "touring", "RS, sportstourer"],
+      ["k1200gt", "touring", "GT"], ["k1300gt", "touring", "GT"], ["k1600gt", "touring", "GT"], ["k1600gtl", "touring", "GTL"], ["k1200lt", "touring", "LT"], ["k1100lt", "touring", "LT"], ["k1100rt", "touring", "RT"], ["k100rt", "touring", "RT"], ["k75rt", "touring", "RT"], ["k1200rs", "touring", "RS, sportstourer"], ["f800st", "touring", "ST, sportstourer"],
+      ["r1200r", "naked", "R"], ["r1250r", "naked", "R"], ["f800r", "naked", "F800R"], ["f900r", "naked", "F900R"], ["g310r", "naked", "G310R"], ["s1000r", "naked", "S1000R"], ["m1000r", "naked", "M1000R"],
+      ["s1000rr", "sport", "S1000RR"], ["m1000rr", "sport", "M1000RR"],
+      ["r1200c", "cruiser", "R1200C"],
+      ["c400", "scooter", "C400"], ["c650", "scooter", "C650"], ["ce04", "scooter", "CE 04"],
+      ["r45", "classic", "airhead 1978-85"], ["r65", "classic", "airhead 1978-85"], ["r60", "classic", "airhead"], ["r75", "classic", "airhead"], ["r50", "classic", "airhead"]
+    ],
+    "Harley-Davidson": [
+      ["flhtc", "touring", "Electra Glide"], ["flhtk", "touring", "Ultra Limited"], ["flhtcu", "touring", "Ultra Classic"], ["flhx", "touring", "Street Glide"], ["fltr", "touring", "Road Glide"], ["flrt", "touring", "Road Glide"], ["flht", "touring", "Electra Glide"], ["~electraglide", "touring", "Electra Glide"], ["~streetglide", "touring", "Street Glide"], ["~roadglide", "touring", "Road Glide"],
+      ["fxlrst", null, "Low Rider ST er en sporttourer, ikke en cruiser: BLOKERET"], ["~lowriderst", null, "BLOKERET (se fxlrst)"], ["flhr", null, "Road King: fabrikken siger touring, forhandlerne cruiser: BLOKERET"], ["~roadking", null, "BLOKERET (se flhr)"],
+      ["fxlrs", "cruiser", "Low Rider S"], ["fxlr", "cruiser", "Low Rider"], ["fxbr", "cruiser", "Breakout"], ["fxsb", "cruiser", "Breakout"], ["fxbb", "cruiser", "Street Bob"], ["fxbbs", "cruiser", "Street Bob S"], ["fxdb", "cruiser", "Street Bob (Dyna)"], ["fxdf", "cruiser", "Fat Bob (Dyna)"], ["fxd", "cruiser", "Dyna"], ["fxe", "cruiser", "Super Glide"], ["fxst", "cruiser", "Softail"], ["fxs", "cruiser", "Blackline"],
+      ["flst", "cruiser", "Heritage/Fat Boy/Springer/Softail"], ["flhc", "cruiser", "Heritage Classic"], ["flfb", "cruiser", "Fat Boy"], ["fls", "cruiser", "Softail Slim"], ["flsl", "cruiser", "Softail Slim"], ["fld", "cruiser", "Switchback"], ["flsb", "cruiser", "Sport Glide"],
+      ["~softail", "cruiser", "Softail"], ["~fatboy", "cruiser", "Fat Boy"], ["~dyna", "cruiser", "Dyna"], ["~nightrod", "cruiser", "V-Rod"], ["vrsc", "cruiser", "V-Rod"], ["~vrod", "cruiser", "V-Rod"], ["~nighttrain", "cruiser", "Night Train"],
+      ["xl883", "cruiser", "Sportster"], ["xl1200", "cruiser", "Sportster"], ["xl", "cruiser", "Sportster"], ["~sportster", "cruiser", "Sportster"], ["sporster", "cruiser", "Sportster (stavefejl i kilden)"], ["rh975", "cruiser", "Nightster"], ["~nightster", "cruiser", "Nightster"],
+      ["ra1250", "adventure", "Pan America"], ["~panamerica", "adventure", "Pan America"]
+    ],
+    "Kawasaki": [
+      ["gtr1400", "touring", "GTR 1400"], ["z1000sx", "touring", "Z1000SX, sportstourer (kildens 'Sportstouring')", {"aarFra": 2011}], ["zx1400", null, "ZX-14R: hypersport/sportstourer, BLOKERET"],
+      ["zx10", "sport", "ZX-10R"], ["zx6", "sport", "ZX-6R"], ["zx12r", "sport", "ZX-12R"], ["zx9r", "sport", "ZX-9R"], ["zx7r", "sport", "ZX-7R"], ["zx636", "sport", "ZX-6R 636"],
+      ["z1000", "naked", "Z1000 (fra 2003; foer var det en 70'er-klassiker)", {"aarFra": 2003}], ["z900rs", null, "Z900RS er retro, BLOKERET"], ["z650rs", null, "Z650RS er retro, BLOKERET"], ["z900", "naked", "Z900 (fra 2017; Z900 fra 1970'erne er en klassiker)", {"aarFra": 2017}], ["z650", "naked", "Z650 (fra 2017; Z650 fra 1976-83 er en klassiker)", {"aarFra": 2017}], ["z800", "naked", "Z800", {"aarFra": 2013}], ["z400", "naked", "Z400", {"aarFra": 2019}], ["z300", "naked", "Z300", {"aarFra": 2015}], ["zh2", "naked", "Z H2", {"aarFra": 2020}],
+      ["vn650", "cruiser", "Vulcan"], ["vn750", "cruiser", "Vulcan"], ["vn800", "cruiser", "Vulcan"], ["vn900", "cruiser", "Vulcan"], ["vn1500", "cruiser", "Vulcan"], ["vn1600", "cruiser", "Vulcan"], ["vn1700", "cruiser", "Vulcan"], ["vn2000", "cruiser", "Vulcan"], ["~vulcan", "cruiser", "Vulcan"],
+      ["~kx450", "cross", "KX450"], ["~kx250", "cross", "KX250"], ["~kx125", "cross", "KX125"], ["~kx85", "cross", "KX85"], ["~kx65", "cross", "KX65"]
+    ],
+    "Suzuki": [
+      ["dl650", "adventure", "V-Strom"], ["dl1000", "adventure", "V-Strom"], ["dl800", "adventure", "V-Strom"], ["dl250", "adventure", "V-Strom"], ["~vstrom", "adventure", "V-Strom"],
+      ["gsxs1000gt", "touring", "GSX-S1000GT, sportstourer (kildens 'Sportstouring')"],
+      ["gsxs1000", "naked", "GSX-S1000"], ["gsxs750", "naked", "GSX-S750"], ["gsx8s", "naked", "GSX-8S"], ["gsr750", "naked", "GSR750"], ["gsr600", "naked", "GSR600"], ["sv650", "naked", "SV650"], ["sv1000", "naked", "SV1000"], ["gsx1400", "naked", "GSX1400"],
+      ["gsx8r", "sport", "GSX-8R"], ["gsxr", "sport", "GSX-R"],
+      ["vlr1800", "cruiser", "Intruder"], ["vl800", "cruiser", "Intruder/Volusia"], ["vl1500", "cruiser", "Intruder"], ["vz800", "cruiser", "Marauder"], ["vz1600", "cruiser", "Marauder"], ["vzr1800", "cruiser", "Intruder M1800R"], ["vs1400", "cruiser", "Intruder"], ["vs800", "cruiser", "Intruder"], ["vs400", "cruiser", "Intruder"], ["gz250", "cruiser", "Marauder"], ["gz125", "cruiser", "Marauder"], ["~intruder", "cruiser", "Intruder"], ["~marauder", "cruiser", "Marauder"], ["ls650", "cruiser", "Savage/S40"],
+      ["~burgman", "scooter", "Burgman"], ["an400", "scooter", "Burgman"], ["an650", "scooter", "Burgman"],
+      ["~rmz", "cross", "RM-Z"]
+    ],
+    "Yamaha": [
+      ["mt03", "naked", "MT-03"], ["mt07", "naked", "MT-07"], ["mt09", "naked", "MT-09"], ["mt10", "naked", "MT-10"], ["mt125", "naked", "MT-125"], ["xjr1300", "naked", "XJR1300"], ["xjr1200", "naked", "XJR1200"],
+      ["~tracer", "touring", "Tracer, sportstourer (Yamahas egen kategori 'Sport Touring')"], ["fjr1300", "touring", "FJR1300"], ["fj1200", "touring", "FJ1200"],
+      ["~tenere", "adventure", "Ténéré"], ["~supertenere", "adventure", "Super Ténéré"], ["xt1200", "adventure", "Super Ténéré"],
+      ["yzfr", "sport", "YZF-R1/R3/R6/R7/R9/R125"], ["fzr", "sport", "FZR"],
+      ["xvz", null, "XVZ Venture er en tourer: BLOKERET"], ["~tr1", null, "XV1000 TR1 er en sportsstandard, ikke en cruiser: BLOKERET"], ["xv", "cruiser", "XV Virago/Wild Star/Midnight Star"], ["xvs", "cruiser", "XVS Drag Star/V-Star"], ["~virago", "cruiser", "Virago"], ["~dragstar", "cruiser", "Drag Star"], ["~wildstar", "cruiser", "Wild Star"], ["~roadstar", "cruiser", "Road Star"],
+      ["xmax", "scooter", "X-Max"], ["nmax", "scooter", "N-Max"], ["tmax", "scooter", "T-Max"], ["tricity", "scooter", "Tricity"], ["majesty", "scooter", "Majesty"], ["aerox", "scooter", "Aerox"], ["neos", "scooter", "Neo's"], ["cygnus", "scooter", "Cygnus"],
+      ["ttr", "cross", "TT-R"], ["tt110r", "cross", "TT-R110"], ["yz125", "cross", "YZ"], ["yz250", "cross", "YZ"], ["yz450", "cross", "YZ"], ["yz85", "cross", "YZ"], ["yz65", "cross", "YZ"], ["pw50", "cross", "PW50"],
+      ["sr400", "classic", "SR400"], ["sr500", "classic", "SR500"]
+    ],
+    "KTM": [
+      ["~superdukegt", "touring", "1290 Super Duke GT, sportstourer"], ["~duke", "naked", "Duke"], ["~adventure", "adventure", "Adventure"]
+    ],
+    "Triumph": [
+      ["~streettriple", "naked", "Street Triple"], ["~speedtriple", "naked", "Speed Triple"], ["trident", "naked", "Trident (fra 1991; T150 Trident fra 1968-75 er en klassiker)", {"aarFra": 1991}], ["speed400", "naked", "Speed 400"],
+      ["sprintst", "touring", "Sprint ST, sportstourer"], ["trophy", "touring", "Trophy"],
+      ["daytona660", "sport", "Daytona 660"], ["daytona675", "sport", "Daytona 675"],
+      ["rocketiii", "cruiser", "Rocket III"], ["rocketlll", "cruiser", "Rocket III (stavet med L i kilden)"], ["rocket3", "cruiser", "Rocket 3"],
+      ["tiger800", "adventure", "Tiger 800"], ["tiger900", "adventure", "Tiger 900"], ["tiger1200", "adventure", "Tiger 1200"], ["~tigerexplorer", "adventure", "Tiger Explorer"],
+      ["bonneville", "classic", "Modern Classics (Bonneville)"], ["thruxton", null, "Thruxton: forhandleren siger naked, Triumph selv Modern Classic: BLOKERET (tvivl)"], ["~speedtwin", "classic", "Modern Classics (Speed Twin)"], ["~streettwin", "classic", "Modern Classics (Street Twin)"], ["scrambler900", "classic", "Modern Classics"], ["scrambler1200", "classic", "Modern Classics"], ["t120", "classic", "Bonneville T120"], ["t100", "classic", "Bonneville T100"],
+      ["tf250", "cross", "TF 250"]
+    ],
+    "Ducati": [
+      ["monster", "naked", "Monster"], ["streetfighter", "naked", "Streetfighter"],
+      ["panigale", "sport", "Panigale"], ["749", "sport", "749"], ["848", "sport", "848"], ["899", "sport", "899"], ["916", "sport", "916"], ["996", "sport", "996"], ["998", "sport", "998"], ["999", "sport", "999"], ["1098", "sport", "1098"], ["1198", "sport", "1198"], ["1199", "sport", "1199"], ["1299", "sport", "1299"],
+      ["diavel", "cruiser", "Diavel"], ["xdiavel", "cruiser", "XDiavel"], ["desertx", "adventure", "DesertX"]
+    ],
+    "Aprilia": [
+      ["rs457", "sport", "RS 457"], ["rs660", "sport", "RS 660"], ["rs125", "sport", "RS 125"], ["rs250", "sport", "RS 250"], ["rsv", "sport", "RSV/RSV4"],
+      ["tuono", "naked", "Tuono"], ["shiver", "naked", "Shiver"],
+      ["tuareg", "adventure", "Tuareg"], ["caponord", "adventure", "Caponord"], ["rst1000futura", "touring", "Futura, sportstourer"],
+      ["scarabeo", "scooter", "Scarabeo"], ["sportcity", "scooter", "Sportcity"], ["sr50", "scooter", "SR50"], ["atlantic", "scooter", "Atlantic"]
+    ],
+    "Moto Guzzi": [
+      ["v85tt", "adventure", "V85 TT"], ["stelvio", "adventure", "Stelvio"], ["norge", "touring", "Norge"], ["v100mandello", "touring", "Mandello, sportstourer"],
+      ["california", "cruiser", "California"], ["eldorado", "cruiser", "Eldorado"], ["audace", "cruiser", "Audace"], ["mgx21", "cruiser", "MGX-21"], ["griso", "naked", "Griso"]
+    ],
+    "MV Agusta": [
+      ["~turismoveloce", "touring", "Turismo Veloce, sportstourer"], ["brutale", "naked", "Brutale"], ["dragster", "naked", "Dragster"], ["f3", "sport", "F3"], ["f4", "sport", "F4"]
+    ],
+    "Royal Enfield": [
+      ["~classic", "classic", "Classic 350/500/650"], ["bullet", "classic", "Bullet"], ["~continentalgt", "classic", "Continental GT"], ["interceptor", "classic", "Interceptor"], ["~meteor", "cruiser", "Meteor/Super Meteor"], ["shotgun", "cruiser", "Shotgun 650"], ["himalayan", "adventure", "Himalayan"]
+    ],
+    "Indian": [
+      ["chief", "cruiser", "Chief"], ["scout", "cruiser", "Scout"], ["springfield", "cruiser", "Springfield"], ["chieftain", "cruiser", "Chieftain"], ["roadmaster", "touring", "Roadmaster"], ["pursuit", "touring", "Pursuit"], ["ftr", "naked", "FTR"]
+    ],
+    "Victory": [
+      ["crosscountry", "touring", "Cross Country"], ["magnum", "touring", "Magnum"], ["vision", "touring", "Vision"], ["", "cruiser", "Hele maerket: Victory byggede kun cruisere (og touring-udgaverne ovenfor)"]
+    ],
+    "BSA": [
+      ["", "classic", "Hele maerket: BSA i lageret er 1960'er-klassikere og Classic Legends (Gold Star)"]
+    ],
+    "DKW": [
+      ["", "classic", "Hele maerket: DKW er klassikere"]
+    ],
+    "Kymco": [
+      ["", "scooter", "Hele maerket: Kymco i lageret er scootere"]
+    ],
+    "Husqvarna": [
+      ["svartpilen", "naked", "Svartpilen"], ["vitpilen", "naked", "Vitpilen"], ["norden901", "adventure", "Norden 901"], ["701enduro", "adventure", "701 Enduro"]
+    ],
+    "CFMoto": [
+      ["mtx800", "adventure", "800MT-X"], ["800mt", "adventure", "800MT"], ["mt800", "adventure", "800MT"]
+    ],
+    "SYM": [
+      ["~orbit", "scooter", "Orbit"], ["~symphony", "scooter", "Symphony"], ["~joymax", "scooter", "Joymax"], ["~maxsym", "scooter", "Maxsym"], ["~cruisym", "scooter", "Cruisym"], ["~fiddle", "scooter", "Fiddle"], ["~crox", "scooter", "Crox"]
+    ],
+    "*": [
+      ["~scooter", "scooter", "Modelnavnet siger selv 'scooter' (fx Kabinescooter)"], ["~classicbike", "classic", "'Classic Bike' er forhandlerens eget ord for en klassiker"]
+    ]
+  }
+}

@@ -849,49 +849,183 @@ function anTrygtKort(ekstern, kilde){
     </section>`;
 }
 
-/* "Lignende motorcykler": samme pointsystem for begge slags annoncer. Mærke,
-   model, pris, kubik, årgang og type — kun felter vi har. Kræver minimumsscore
-   (tom stribe er ærligere end 1983 mod 2023), og fotos vinder ved lige point. */
-function anLignende(listing){
-  const ccm = Number(listing.ccm) || 0;
-  const score = (l) => {
-    let s = 0;
-    if (listing.model && l.model && String(l.model).toLowerCase() === String(listing.model).toLowerCase()) s += 3;
-    if (l.brand === listing.brand) s += 2;
-    if (listing.price > 0 && l.price > 0 && Math.abs(l.price - listing.price) / listing.price <= 0.4) s += 3;
-    if (ccm > 0 && Number(l.ccm) > 0 && Math.abs(Number(l.ccm) - ccm) / ccm <= 0.35) s += 2;
-    if (listing.year && l.year && Math.abs(Number(l.year) - Number(listing.year)) <= 6) s += 1;
-    if (listing.type && l.type === listing.type) s += 2;
-    return s;
-  };
-  const andre = Store.getAllListings().filter(l => String(l.id) !== String(listing.id));
-  const rangeret = andre
-    .map(l => [score(l) + ((l.photoUrls && l.photoUrls[0]) ? 0.5 : 0), l])
-    .filter(([s]) => s >= 4)
-    .sort((a, b) => b[0] - a[0]);
-  const set = new Set(); const valgt = [];
-  for (const [, l] of rangeret){
-    const n = `${l.brand}|${l.model}|${l.price}`;
-    if (set.has(n)) continue;
-    set.add(n); valgt.push(l);
-    if (valgt.length === 6) break;
+/* ---------- "Lignende motorcykler" (V7, data): en gennemsigtig relevansscore ----------
+   FØR: point for mærke (2), model (3), pris ±40 % (3), kubik ±35 % (2), årgang ±6 (1) og type (2), og alt fra 4 point og op kom med. Mærke + pris
+   + kubik + årgang gav 8 point uden at typen eller modellen havde noget med hinanden at gøre: en BMW R45 (classic, 1979, 24.000 kr.) fik
+   en Honda Café Racer, en Suzuki Intruder og en Kawasaki ZZR 600 — alle tre i samme pris- og kubikklasse, ingen af dem en klassiker.
+
+   NU rangeres i et FAST hierarki, hvor hvert trin er tungere end de trin under det (se LIGNENDE.VAEGTE):
+
+     samme model                                         40   (mærke + modelnøgle ens; kun med mærket)
+     samme mærke OG type                                  26
+     samme type (andet mærke)                             14   (er målets type ukendt: samme mærke 12 i stedet for 4)
+     samme mærke (typen er en anden)                       2
+     samme modelserie (R 45 -> R 1200 R; CB 500 -> CB 1000 R) 6   (kun med samme mærke; boxer-/CB-/Gold Wing-slægtskab)
+     samme kørekortklasse (begge kendte)                   4
+     prisniveau inden for ±30 %                            5
+     årgang inden for ±3 / ±8 år                           4 / 2
+     motorstørrelse (ccm) inden for ±35 %                  3
+     mere end 20 års forskel på årgang                    -8   (en 1979'er og en 2025'er hører ikke sammen, selv om typen er ens)
+     samme region                                          1   (tie-break: ingen anden regel er så lille)
+     har foto                                              0,4 (tie-break efter regionen)
+
+   GULVET: mindst LIGNENDE.MIN_SCORE (20). En type alene (14) rækker ikke: den skal støttes af mindst to af pris/kørekort/årgang/kubik. Uden en
+   model- eller typeforbindelse kan INTET nå gulvet: alle støttepoint tilsammen er 17,4 (kørekort 4 + pris 5 + årgang 4 + kubik 3 + region 1 + foto 0,4),
+   og samme mærke med en anden type lægger kun 2 til = 19,4. Det er hele rettelsen: BMW R45 mod Honda Café Racer, Suzuki Intruder og Kawasaki ZZR
+   (samme pris- og kubikklasse, men hverken model eller type) kan ikke længere komme med. Eneste undtagelse: er MÅLETS type ukendt, tæller samme
+   mærke 12 (se maerkeUkendtType). Hellere færre end irrelevante.
+
+   MANGFOLDIGHED: højst 2 af samme model og højst 2 fra samme kilde/annoncør (kildens domæne; egne annoncer = sælgeren), højst 6 i alt,
+   og samme motorcykel to gange (mærke, model, årgang, pris, km) kun én gang.
+   Rækkefølge ved lige score: id — så samme annonce altid giver samme liste. */
+const LIGNENDE = Object.freeze({
+  VAEGTE: Object.freeze({
+    sammeModel: 40, maerkeOgType: 26, sammeType: 14, kunMaerke: 2, maerkeUkendtType: 12, serie: 6,
+    koerekort: 4, pris: 5, aargang3: 4, aargang8: 2, epoke: -8, ccm: 3, region: 1, foto: 0.4,
+  }),
+  MIN_SCORE: 20, MAKS: 6, MAKS_PR_MODEL: 2, MAKS_PR_KILDE: 2,
+  PRIS: 0.30, AARGANG: 8, EPOKE_AAR: 20, CCM: 0.35,
+});
+
+function lignendeModelNoegle(m){
+  return String(m == null ? '' : m).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '');
+}
+/* Modelserien: bogstaverne før første ciffer ("r45" -> "r", "cb1000r" -> "cb", "gl1800" -> "gl"); hele nøglen, når der ingen cifre er ("monster821" -> "monster"). */
+function lignendeSerie(m){
+  const k = lignendeModelNoegle(m);
+  const h = k.match(/^[a-z]+/);
+  return h ? h[0] : '';
+}
+function lignendeKilde(l){
+  if (l.isExternal) return `ekstern:${(l.source && (l.source.domaene || l.source.navn)) || 'ukendt'}`;
+  return `egen:${(l.seller && l.seller.id) || l.sellerId || 'bikerbasen'}`;
+}
+
+/* Scoren for ÉN kandidat mod målet, med grundene i klartekst. Ren funktion: samme input, samme svar. */
+function lignendeScore(maal, l){
+  const V = LIGNENDE.VAEGTE;
+  const grunde = [];
+  let s = 0;
+  const maerkeKendt = maal.brand && maal.brand !== 'Ukendt';
+  const sammeMaerke = !!maerkeKendt && l.brand === maal.brand;
+  const tM = lignendeModelNoegle(maal.model), lM = lignendeModelNoegle(l.model);
+  const typerKendte = !!(maal.type && l.type);
+  const sammeType = typerKendte && maal.type === l.type;
+  /* "Samme model" gælder ikke på tværs af epoker: en Bonneville T120 fra 1967 og en fra 2027 deler navn, ikke motorcykel. */
+  const ty0 = Number(maal.year), ly0 = Number(l.year);
+  const sammeEpoke = !(ty0 > 0 && ly0 > 0) || Math.abs(ty0 - ly0) <= LIGNENDE.EPOKE_AAR;
+  const sammeModel = sammeMaerke && sammeEpoke && tM.length >= 2 && lM.length >= 2 && (tM === lM
+    || (Math.min(tM.length, lM.length) >= 6 && (lM.startsWith(tM) || tM.startsWith(lM)) && (!typerKendte || sammeType)));
+  if (sammeModel){ s += V.sammeModel; grunde.push('samme model'); }
+  if (sammeMaerke && sammeType){ s += V.maerkeOgType; grunde.push('samme mærke og type'); }
+  else if (sammeType){ s += V.sammeType; grunde.push('samme type'); }
+  else if (sammeMaerke){
+    s += maal.type ? V.kunMaerke : V.maerkeUkendtType;
+    grunde.push(maal.type ? 'samme mærke' : 'samme mærke (typen kendes ikke)');
   }
-  return valgt;
+  const sammeSerie = sammeMaerke && !sammeModel && lignendeSerie(maal.model) && lignendeSerie(maal.model) === lignendeSerie(l.model);
+  if (sammeSerie){ s += V.serie; grunde.push('samme modelserie'); }
+  const tkk = koerekortMaerkat(maal).kode, lkk = koerekortMaerkat(l).kode;
+  if (tkk && lkk && tkk === lkk){ s += V.koerekort; grunde.push(`kørekort ${tkk}`); }
+  const tp = Number(maal.price), lp = Number(l.price);
+  if (tp > 0 && lp > 0 && Math.abs(lp - tp) / tp <= LIGNENDE.PRIS){ s += V.pris; grunde.push('prisniveau ±30 %'); }
+  const ty = Number(maal.year), ly = Number(l.year);
+  if (ty > 0 && ly > 0){
+    const d = Math.abs(ly - ty);
+    if (d <= 3){ s += V.aargang3; grunde.push('årgang ±3 år'); }
+    else if (d <= LIGNENDE.AARGANG){ s += V.aargang8; grunde.push('årgang ±8 år'); }
+    else if (d > LIGNENDE.EPOKE_AAR){ s += V.epoke; grunde.push('over 20 års forskel på årgang'); }
+  }
+  const tc = Number(maal.ccm), lc = Number(l.ccm);
+  if (tc > 0 && lc > 0 && Math.abs(lc - tc) / tc <= LIGNENDE.CCM){ s += V.ccm; grunde.push('motorstørrelse ±35 %'); }
+  if (maal.region && l.region && maal.region === l.region){ s += V.region; grunde.push('samme region'); }
+  if (l.photoUrls && l.photoUrls[0]) s += V.foto;
+  return { score: Math.round(s * 100) / 100, grunde, sammeModel, sammeType, sammeMaerke };
+}
+
+/* Hele udvælgelsen. `kandidater` er lageret (Store.getAllListings()). Returnerer { valgte: [{ l, score, grunde, ... }], overskrift, note }. */
+function lignendeRangering(maal, kandidater){
+  const C = LIGNENDE;
+  const vurderet = [];
+  for (const l of kandidater){
+    if (!l || String(l.id) === String(maal.id)) continue;
+    const r = lignendeScore(maal, l);
+    if (r.score < C.MIN_SCORE) continue;
+    vurderet.push({ l, ...r });
+  }
+  vurderet.sort((a, b) => (b.score - a.score) || String(a.l.id).localeCompare(String(b.l.id)));
+  const valgte = [], tilModel = new Map(), tilKilde = new Map(), set = new Set();
+  for (const v of vurderet){
+    if (valgte.length >= C.MAKS) break;
+    const modelNoegle = `${v.l.brand}|${lignendeModelNoegle(v.l.model)}`;
+    const kilde = lignendeKilde(v.l);
+    const dublet = [v.l.brand, lignendeModelNoegle(v.l.model), v.l.year, v.l.price, v.l.km].join('|');
+    if (set.has(dublet)) continue;
+    if ((tilModel.get(modelNoegle) || 0) >= C.MAKS_PR_MODEL) continue;
+    if ((tilKilde.get(kilde) || 0) >= C.MAKS_PR_KILDE) continue;
+    set.add(dublet);
+    tilModel.set(modelNoegle, (tilModel.get(modelNoegle) || 0) + 1);
+    tilKilde.set(kilde, (tilKilde.get(kilde) || 0) + 1);
+    valgte.push(v);
+  }
+  return { valgte, antalOverGulv: vurderet.length, ...lignendeOverskrift(maal, valgte) };
+}
+
+/* Ærlig overskrift: den siger, HVAD der er lignende — ikke bare "lignende". */
+function lignendeOverskrift(maal, valgte){
+  if (!valgte.length) return { overskrift: 'Lignende motorcykler', note: '' };
+  const alleModel = valgte.every(v => v.sammeModel);
+  const nogenModel = valgte.some(v => v.sammeModel);
+  const alleType = valgte.every(v => v.sammeType);
+  const enkelt = valgte.length === 1;
+  const typeNavn = maal.type ? typeLabel(maal.type) : '';
+  // "Scooter-motorcykler" er ikke dansk: scootere. Resten: "naked-motorcykler", "classic/veteran-motorcykler".
+  const typeOrd = maal.type === 'scooter' ? 'scootere' : `${typeNavn.toLowerCase()}-motorcykler`;
+  const model = [maal.brand && maal.brand !== 'Ukendt' ? maal.brand : '', maal.model].filter(Boolean).join(' ');
+  let overskrift, grundlag;
+  if (alleModel){ overskrift = `Flere ${model}`; grundlag = 'Samme model'; }
+  else if (nogenModel && alleType && typeNavn){ overskrift = `${model} og andre ${typeOrd}`; grundlag = `Samme model og type (${typeNavn})`; }
+  else if (alleType && typeNavn){ overskrift = `Andre ${typeOrd}`; grundlag = `Samme type (${typeNavn})`; }
+  else { overskrift = 'Lignende motorcykler'; grundlag = typeNavn ? `Samme model, mærke eller type (${typeNavn})` : 'Samme mærke'; }
+  const faerre = valgte.length < LIGNENDE.MAKS;
+  const note = `${grundlag}, rangeret efter pris (±30 %), årgang (±8 år) og motorstørrelse (±35 %).`
+    + (faerre ? (enkelt ? ' Kun én motorcykel er lignende nok — vi viser hellere få end irrelevante.' : ` Kun ${valgte.length} er lignende nok — vi viser hellere få end irrelevante.`) : '');
+  return { overskrift, note };
+}
+
+function anLignende(listing){
+  return lignendeRangering(listing, Store.getAllListings()).valgte.map(v => v.l);
 }
 
 function anFyldLignende(listing){
   const stribe = document.querySelector('.similar-strip');
   const mount = document.getElementById('similar-listings');
   if (!stribe || !mount) return;
-  const lignende = anLignende(listing);
-  if (!lignende.length){ stribe.hidden = true; return; }
+  const r = lignendeRangering(listing, Store.getAllListings());
+  if (!r.valgte.length){ stribe.hidden = true; return; }
   stribe.hidden = false;
-  mount.innerHTML = lignende.map((l, i) => listingCardHTML(l, i)).join('');
+  mount.innerHTML = r.valgte.map((v, i) => listingCardHTML(v.l, i)).join('');
   wireFavoriteButtons(mount);
+  /* Ærlig overskrift og én linje om grundlaget (V7). <h2> findes i markuppen (.section-head); noten oprettes her. */
+  const h2 = stribe.querySelector('.section-head h2');
+  if (h2) h2.textContent = r.overskrift;
+  let note = stribe.querySelector('.similar-note');
+  if (!note){
+    note = document.createElement('p');
+    note.className = 'similar-note';
+    const hoved = stribe.querySelector('.section-head');
+    if (hoved && hoved.parentNode) hoved.parentNode.insertBefore(note, hoved.nextSibling);
+  }
+  if (note) note.textContent = r.note;
   const alle = document.getElementById('similar-all');
   if (alle){
     const maerke = anMaerkeKendt(listing.brand);
-    alle.href = maerke ? `soegning.html?brands=${anEnc(listing.brand)}` : 'soegning.html';
+    if (listing.type){
+      alle.href = `soegning.html?type=${anEnc(listing.type)}`;
+      alle.textContent = `Se alle ${listing.type === 'scooter' ? 'scootere' : typeLabel(listing.type).toLowerCase() + '-motorcykler'}`;
+    } else {
+      alle.href = maerke ? `soegning.html?brands=${anEnc(listing.brand)}` : 'soegning.html';
+    }
     alle.hidden = false;
   }
 }
@@ -1134,7 +1268,8 @@ function renderExternalListing(listing){
     [Icon.info, 'Model', model || IO],
     [Icon.calendar, 'Årgang', listing.year != null ? String(listing.year) : IO],
     [Icon.gauge, 'Kilometer', listing.km != null ? formatKm(listing.km) : IO],
-    [Icon.bike, 'Type', listing.type ? escapeHTML(typeLabel(listing.type)) : IO],
+    // V7: er typen afledt af modellen (kilden oplyser den ikke), står det der — ikke som kildens oplysning.
+    [Icon.bike, 'Type', listing.type ? escapeHTML(typeLabel(listing.type)) + (listing.typeAfledt ? ' <span class="an-afledt" title="Kilden oplyser ikke typen. Vi har afledt den af mærke og model (regeltabel i data/model-typer.json), fordi modellen entydigt hører til denne type.">(afledt fra model)</span>' : '') : IO],
     [Icon.engine, 'Motorstørrelse', ccm > 0 ? formatCcm(ccm) : IO],
     [AN_IKON.bolt, 'Ydelse', hk ? formatPower(hk) : IO],
     [Icon.shieldCheck, 'Kørekort', kk ? escapeHTML(kkM.tekst) : (kkM.graense ? 'Ikke afgjort — tjek kW' : kkUvis ? 'A2 eller A — kan ikke afgøres' : 'Kan ikke afgøres')],
@@ -1166,11 +1301,18 @@ function renderExternalListing(listing){
     const dage = Math.max(0, Math.floor((Date.now() - t) / 86400000));
     return dage === 0 ? 'i dag' : dage === 1 ? 'i går' : `for ${dage} dage siden`;
   };
+  /* V7: en gammel bekræftelse står som en synlig note lige under prisen (det, der kan være ændret) — ikke kun som en lille grå
+     linje i sælgerkortet. Er annoncen frisk, står der intet. (I midterkolonnen og ikke i sælgerkortet: den kolonne er allerede
+     den højeste, og kolonnebalancen i anBalancerKolonner() kan ikke flytte noget derfra.) */
+  const alder = annonceAlder(listing);
+  const alderNote = alder && alder.advarsel
+    ? `<p class="an-alder an-alder-${alder.niveau}" role="note">${Icon.alertTriangle}<span><b>${escapeHTML(alder.titel)}.</b> ${escapeHTML(alder.raad)}</span></p>`
+    : '';
   let hentetLinje = '';
   if (fundet){
     const bekraeftet = listing.sidstSet ? relativ(listing.sidstSet) : '';
     hentetLinje = `Set hos ${kilde} første gang ${escapeHTML(fundet)}`
-      + (bekraeftet ? ` · sidst bekræftet ${bekraeftet}` : ` — ${relativ(listing.indekseretFoerste)}`);
+      + (bekraeftet ? (alder && alder.advarsel ? '' : ` · sidst bekræftet ${bekraeftet}`) : ` — ${relativ(listing.indekseretFoerste)}`);   // V7: er bekræftelsen gammel, står alderen i .an-alder ved knappen — ikke to gange
   }
 
   const saelgerTypeTekst = listing.isDealer ? 'Forhandler' : (listing.saelgertype === 'privat' ? 'Privat sælger' : '');
@@ -1276,6 +1418,7 @@ function renderExternalListing(listing){
           <p class="an-vilkaar">${salgsmarkoerer.map(m => `<span class="an-chip an-chip-soft">${escapeHTML(m)}</span>`).join('')}</p>
           <p class="an-note">Salgsvilkår oplyst i annoncen hos ${kilde} — de er en del af prisen. Få dem bekræftet dér.</p>` : ''}
         </div>
+        ${alderNote}
         ${anNoegletal(listing, hk)}
         ${fabriksnyNote ? `<p class="an-note an-ny">${Icon.info}<span>${fabriksnyNote}</span></p>` : ''}
       </section>

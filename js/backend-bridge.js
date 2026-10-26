@@ -865,9 +865,13 @@ function byggEksternAnnonce(row){
   /* Kolonnen `type` (migration 015) kommer fra kildens egen facetliste og vinder ALTID, undtagen når den er en
      fejllæsning af et modelnavn (Street/Sport Glide); så kommer typen fra titlen eller model-tabellen (data.js),
      ikke fra ordet. Beregnes FØR modellen, fordi et gentaget typeord i modelnavnet fjernes mod den. */
-  const typen = typeFraKategoriord(kildetypeErModelnavn(row) ? null : row.type) || typeFraTitel(row.titel || row.model)
+  const kildeTypen = typeFraKategoriord(kildetypeErModelnavn(row) ? null : row.type) || typeFraTitel(row.titel || row.model)
     // F2-008: er "Street" en del af modelnavnet, kommer typen fra model-tabellen (data.js), ikke fra ordet.
     || (modelMedTypeord(row.titel) ? typeFraStreetModel(row.titel) : null);
+  /* V7: tier kilden, afledes typen KUN af en regel i data/model-typer.json (CB 1000 R = naked), når modellen entydigt tilhører
+     én type. Resten er Ukendt. Den afledte type bærer typeAfledt og vises som "afledt fra model" — den skrives aldrig til databasen. */
+  const afledt = kildeTypen ? null : afledtTypeFor(brand, row.model, row.titel, row.aargang);
+  const typen = kildeTypen || (afledt ? afledt.type : null);
   return {
     id: row.id,
     /* Runde 6 (D6-F7): akronymer, kilden skrev med smaa bogstaver og crawleren
@@ -906,6 +910,8 @@ function byggEksternAnnonce(row){
        dækker næsten lige mange (285 mod 283): hans kommer fra kilden, min
        gætter sig frem fra en tekststreng. */
     type: typen,
+    typeAfledt: !!afledt,
+    typeRegel: afledt ? afledt.regel : null,
 
     /* Titlens anden linje — Bilbasens "54 Altitude 5d" under "Jeep Avenger".
        Hos os "Cruiser" under "Yamaha XV 750 Virago". 285 af 332 rækker har
@@ -977,6 +983,11 @@ function byggEksternAnnonce(row){
     kildeStand: row.stand || null,
     kildeTitel: row.titel || null,
     sidstSet: row.sidst_set || null,
+    /* V7 livscyklus (migration 030): null, indtil kolonnerne er oprettet OG flaget SUPABASE_CONFIG.livscyklus er slået til
+       (se eksterneKolonner() nedenfor). Alder alene (sidstSet) er det, siden ved i dag. */
+    sidstForsoegt: row.sidst_forsoegt || null,
+    vaekITraek: row.vaek_i_traek == null ? null : Number(row.vaek_i_traek),
+    tekniskFejlITraek: row.teknisk_fejl_i_traek == null ? null : Number(row.teknisk_fejl_i_traek),
 
     /* Landsdel er et opslag på postnummeret, ikke et skøn. Alle 332 MC
        Syd-annoncer har postnr 6630 Rødding og hører altså til Syddanmark. */
@@ -1076,6 +1087,14 @@ const EKSTERNE_KOLONNER =
   'by, postnr, saelgertype, thumbnail_url, uddrag, status, foerst_set, sidst_set, ' +
   'kilde:kilder(navn, domaene)';
 
+/* V7: de fire livscyklus-kolonner (supabase/030_livscyklus.sql) bestilles KUN, når ejeren har kørt migrationen og sat
+   SUPABASE_CONFIG.livscyklus = true i js/supabase-config.js. Beder vi om en kolonne, der ikke findes, svarer
+   PostgREST 42703, og alle annoncerne forsvinder (se noten ovenfor) — derfor flag og ikke "bare med". */
+function eksterneKolonner(){
+  const til = typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG && SUPABASE_CONFIG.livscyklus === true;
+  return EKSTERNE_KOLONNER + (til ? ', sidst_forsoegt, vaek_i_traek, teknisk_fejl_i_traek, sidste_signal' : '');
+}
+
 /* Rækkefølgen er `sidst_set` faldende — den SAMME som scripts/shared.js
    bruger, når mærkesidernes kort forudtegnes. Målt over otte indlæsninger er
    de 332 rækker kommet i samme orden hver gang, men Postgres lover det ikke
@@ -1088,7 +1107,7 @@ async function loadExternalListings(){
   // scripts/shared.js fetchExternalListings() i samme commit (B4), saa de
   // forudtegnede kort og de hentede staar i samme orden. Ingen `limit=`:
   // restHentAlle() henter alt, se dens hoved.
-  const res = await restHentAlle(`eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
+  const res = await restHentAlle(`eksterne_annoncer?select=${encodeURIComponent(eksterneKolonner())}`
     + '&status=eq.aktiv&order=sidst_set.desc,id.asc');
   if (res.error){
     // En fejl her må ikke tage dine egne annoncer med sig. Søgningen skal

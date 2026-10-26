@@ -168,7 +168,7 @@ async function buildForside(){
     /* F-003: ærlig alder på det viste. Nyeste sidst_set blandt de annoncer, tallet gælder. */
     const frisk = dataKlar && n ? senesteBekraeftet(list) : null;
     const friskTekst = frisk
-      ? ` <span class="sk-frisk" title="${frisk.aeldsteTekst === frisk.datoTekst ? '' : 'Ældste bekræftelse: ' + frisk.aeldsteTekst}">${frisk.samlet}</span>`
+      ? ` <span class="sk-frisk" title="${[frisk.samlet, frisk.detalje, frisk.aeldsteTekst === frisk.datoTekst ? '' : 'Ældste bekræftelse: ' + frisk.aeldsteTekst].filter(Boolean).join(' ')}">${frisk.kort}</span>`
       : '';
     if (!dataKlar || lagerFejlet){
       countHint.textContent = '';

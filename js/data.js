@@ -340,6 +340,22 @@ function salgsmarkoerLabel(m){
    at annoncerne kan være ændret siden. BESLUTNING: 14 dage. Egne annoncer har
    ingen sidstSet; er der ingen dato, svares null og der vises intet. */
 const GAMMEL_EFTER_DAGE = 14;
+
+/* ---------- Annoncens livscyklus (V7, data) ----------
+   MÅLT 26.10.2026: 332 af 735 indekserede annoncer (45 %) var sidst set for over 60 dage siden
+   (ældste 71) og stod stadig som aktive, fordi to forhandlere ikke var crawlet siden august, og
+   fordi medianen ("bekræftet senest 17. okt.") skjulte halen. Tærsklerne er spejlet i
+   crawler/livscyklus.js (TAERSKLER) og supabase/030_livscyklus.sql; crawler/livscyklus.test.js
+   kræver, at de er ens.
+
+     frisk       højst FRISK_DAGE siden annoncen sidst stod i kildens liste
+     forsinket   over FRISK_DAGE: vises, men med alderen skrevet ud
+     lang tid    over LANG_TID_DAGE: "kan være solgt" — nedtones i rækkefølgen, skjules ikke
+     udløbet     over UDLOEB_DAGE: sættes til status 'udloebet' af crawleren (migration 030)
+   Alderen regnes ALTID af sidstSet (findes i dag). vaekITraek / tekniskFejlITraek kommer først med
+   migration 030 og er null, indtil den er kørt; så er alder det eneste, vi ved. */
+const LIVSCYKLUS = Object.freeze({ FRISK_DAGE: 14, LANG_TID_DAGE: 30, UDLOEB_DAGE: 90 });
+const DAG_MS = 86400000;
 const DA_MD = ['jan.', 'feb.', 'mar.', 'apr.', 'maj', 'jun.', 'jul.', 'aug.', 'sep.', 'okt.', 'nov.', 'dec.'];
 function senesteBekraeftet(liste, nu){
   const slut = nu instanceof Date ? nu : new Date();
@@ -364,12 +380,102 @@ function senesteBekraeftet(liste, nu){
   const dage = Math.max(0, Math.floor((slut.getTime() - max) / 86400000));
   const gammel = dage > GAMMEL_EFTER_DAGE;
   const datoTekst = tekstFor(max);
+  /* V7: MEDIANEN skjulte halen — "bekræftet senest 17. okt." stod over et lager, hvor 45 % var over 60 dage
+     gammelt. Den samlede tekst siger nu, hvor mange der er bekræftet inden for FRISK_DAGE og hvor mange der
+     ikke er, med tal regnet af det viste udsnit. */
+  const fd = friskhedsFordeling(liste, slut);
+  const nyesteDato = tekstFor(nyeste);
+  const punktum = t => t + (t.endsWith('.') ? '' : '.');
+  let samletTekst, kortTekst;
+  if (fd.aeldre === 0){
+    kortTekst = `Alle bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato})`;
+    samletTekst = fd.dateret === 1
+      ? `Annoncen er bekræftet senest ${punktum(nyesteDato)}`
+      : `Alle ${fd.dateret} annoncer er bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}).`;
+  } else if (fd.frisk === 0){
+    kortTekst = `Ingen bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}) — kan være solgt`;
+    samletTekst = fd.dateret === 1
+      ? `Annoncen er sidst bekræftet ${punktum(tekstFor(nyeste))} Den kan være solgt — tjek hos kilden.`
+      : `Ingen af de ${fd.dateret} annoncer er bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}). De kan være solgt — tjek hos kilden.`;
+  } else {
+    kortTekst = `${fd.frisk} bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}), ${fd.aeldre} kan være solgt`;
+    samletTekst = `${fd.frisk} af ${fd.dateret} annoncer er bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}). ${fd.aeldre} kan være solgt — tjek hos kilden.`;
+  }
   return {
+    fordeling: fd,
     datoTekst, aeldsteTekst: tekstFor(min), nyesteTekst: tekstFor(nyeste), dage, gammel,
     tekst: `${faa ? (tider.length === 1 ? 'Annoncen er' : 'Annoncerne er') : 'De fleste annoncer er'} bekræftet senest ${datoTekst}`,
     advarsel: gammel ? 'Annoncerne kan være ændret siden.' : '',
-    samlet: `${faa ? (tider.length === 1 ? 'Annoncen er' : 'Annoncerne er') : 'De fleste annoncer er'} bekræftet senest ${datoTekst}${datoTekst.endsWith('.') ? '' : '.'}` + (gammel ? ' Annoncerne kan være ændret siden.' : ''),
+    samlet: samletTekst,
+    kort: kortTekst,
+    detalje: fd.aeldre ? `${fd.aeldre} er ikke bekræftet i over ${LIVSCYKLUS.FRISK_DAGE} dage${fd.lang + fd.udloebet ? `, heraf ${fd.lang + fd.udloebet} i over ${LIVSCYKLUS.LANG_TID_DAGE} dage` : ''}.` : '',
   };
+}
+
+function aldersDage(l, nu){
+  const slut = nu instanceof Date ? nu : new Date();
+  const t = l && l.sidstSet ? Date.parse(l.sidstSet) : NaN;
+  if (!Number.isFinite(t) || new Date(t).getFullYear() < 2000) return null;
+  if (t > slut.getTime() + DAG_MS) return null;   // en dato i fremtiden er ukendt, ikke "friskt"
+  return Math.max(0, Math.floor((slut.getTime() - t) / DAG_MS));
+}
+function relativDage(dage){
+  return dage === 0 ? 'i dag' : dage === 1 ? 'i går' : `for ${dage} dage siden`;
+}
+
+/* Den afledte tilstand (samme regel som vurderLivscyklus() i crawler/livscyklus.js). Gemmes aldrig:
+   alder går af sig selv. Egne annoncer (ingen sidstSet) har ingen tilstand: de hostes af os. */
+function livscyklusTilstand(l, nu){
+  const dage = aldersDage(l, nu);
+  if (dage == null) return null;
+  if (dage > LIVSCYKLUS.UDLOEB_DAGE) return 'slettet_udloebet';
+  if ((Number(l.vaekITraek) || 0) > 0 || (Number(l.tekniskFejlITraek) || 0) > 0) return 'midlertidigt_utilgaengelig';
+  if (dage > LIVSCYKLUS.FRISK_DAGE) return 'aktiv_forsinket';
+  return 'aktiv_bekraeftet';
+}
+
+/* Alderen, som den skal stå på kort og annonceside. null = ingen dato (egen annonce, ukendt dato).
+     niveau   frisk | forsinket | lang | udloebet | utilgaengelig
+     kort     teksten på kortets mærkat ('' når annoncen er frisk — så står der intet)
+     linje    hele sætningen til annoncesiden
+   Tonen: vi SKRIVER, hvor gammel bekræftelsen er, og siger "kan være solgt". Vi påstår ikke, at den er solgt. */
+function annonceAlder(l, nu){
+  const dage = aldersDage(l, nu);
+  if (dage == null) return null;
+  const tilstand = livscyklusTilstand(l, nu);
+  const rel = relativDage(dage);
+  const utilg = tilstand === 'midlertidigt_utilgaengelig';
+  let niveau = 'frisk';
+  if (tilstand === 'slettet_udloebet') niveau = 'udloebet';
+  else if (dage > LIVSCYKLUS.LANG_TID_DAGE) niveau = 'lang';
+  else if (dage > LIVSCYKLUS.FRISK_DAGE) niveau = 'forsinket';
+  if (utilg && niveau === 'frisk') niveau = 'forsinket';
+  const advarsel = niveau !== 'frisk';
+  const kort = !advarsel ? '' : niveau === 'udloebet' ? `Ikke bekræftet i ${dage} dage` : `Bekræftet ${rel}`;
+  const titel = niveau === 'udloebet' ? `Ikke bekræftet i ${dage} dage` : `Bekræftet ${rel}`;
+  const ikkeTjekket = utilg ? 'Vi kunne ikke tjekke den ved seneste forsøg. ' : '';
+  const raad = niveau === 'frisk' ? ''
+    : niveau === 'forsinket' ? `${ikkeTjekket}Tjek hos kilden, at den stadig er til salg.`
+    : niveau === 'lang' ? `${ikkeTjekket}Den kan være solgt — tjek hos kilden.`
+    : 'Den er sandsynligvis ikke længere til salg. Tjek hos kilden.';
+  const linje = raad ? `${titel}. ${raad}` : `${titel}.`;
+  return { dage, tilstand, niveau, advarsel, kort, kortest: advarsel ? `${dage} dage siden` : '', titel, raad, linje, rel };
+}
+
+/* Fordelingen over et udsnit: hvor mange er friske, forsinkede, "lang tid". Egne annoncer tæller ikke med. */
+function friskhedsFordeling(liste, nu){
+  const f = { dateret: 0, frisk: 0, forsinket: 0, lang: 0, udloebet: 0 };
+  for (const l of (liste || [])){
+    const a = annonceAlder(l, nu);
+    if (!a) continue;
+    f.dateret++;
+    if (a.niveau === 'frisk') f.frisk++;
+    else if (a.niveau === 'forsinket') f.forsinket++;
+    else if (a.niveau === 'lang') f.lang++;
+    else f.udloebet++;
+  }
+  f.aeldre = f.forsinket + f.lang + f.udloebet;
+  return f;
 }
 
 /* ============ Mærkeregistret (V4) ============
@@ -1358,6 +1464,60 @@ function typeFraStreetModel(tekst){
   const hit = TYPE_FOR_MODELNAVN.find(([navn]) => t.includes(navn.toLowerCase()));
   return hit ? hit[1] : null;
 }
+/* @@TYPETABEL-START — afledt af data/model-typer.json (394 regler); redigér IKKE her, kør node scripts/type-klassificering.js --generer */
+const TYPE_TABEL = {
+  "aprilia": [["rs457","sport"],["rs660","sport"],["rs125","sport"],["rs250","sport"],["rsv","sport"],["tuono","naked"],["shiver","naked"],["tuareg","adventure"],["caponord","adventure"],["rst1000futura","touring"],["scarabeo","scooter"],["sportcity","scooter"],["sr50","scooter"],["atlantic","scooter"]],
+  "bmw": [["r1200gs","adventure"],["r1250gs","adventure"],["r1300gs","adventure"],["r1100gs","adventure"],["r1150gs","adventure"],["r80gs","adventure"],["r100gs","adventure"],["f650gs","adventure"],["f700gs","adventure"],["f750gs","adventure"],["f800gs","adventure"],["f850gs","adventure"],["f900gs","adventure"],["f450gs","adventure"],["g310gs","adventure"],["g650gs","adventure"],["r1200rt","touring"],["r1250rt","touring"],["r1100rt","touring"],["r1150rt","touring"],["r850rt","touring"],["r100rt","touring"],["r80rt","touring"],["r1200cl","touring"],["r1300rs","touring"],["r1250rs","touring"],["r1200rs","touring"],["k1200gt","touring"],["k1300gt","touring"],["k1600gt","touring"],["k1600gtl","touring"],["k1200lt","touring"],["k1100lt","touring"],["k1100rt","touring"],["k100rt","touring"],["k75rt","touring"],["k1200rs","touring"],["f800st","touring"],["r1200r","naked"],["r1250r","naked"],["f800r","naked"],["f900r","naked"],["g310r","naked"],["s1000r","naked"],["m1000r","naked"],["s1000rr","sport"],["m1000rr","sport"],["r1200c","cruiser"],["c400","scooter"],["c650","scooter"],["ce04","scooter"],["r45","classic"],["r65","classic"],["r60","classic"],["r75","classic"],["r50","classic"]],
+  "bsa": [["","classic"]],
+  "cfmoto": [["mtx800","adventure"],["800mt","adventure"],["mt800","adventure"]],
+  "dkw": [["","classic"]],
+  "ducati": [["monster","naked"],["streetfighter","naked"],["panigale","sport"],["749","sport"],["848","sport"],["899","sport"],["916","sport"],["996","sport"],["998","sport"],["999","sport"],["1098","sport"],["1198","sport"],["1199","sport"],["1299","sport"],["diavel","cruiser"],["xdiavel","cruiser"],["desertx","adventure"]],
+  "harleydavidson": [["flhtc","touring"],["flhtk","touring"],["flhtcu","touring"],["flhx","touring"],["fltr","touring"],["flrt","touring"],["flht","touring"],["~electraglide","touring"],["~streetglide","touring"],["~roadglide","touring"],["fxlrst",null],["~lowriderst",null],["flhr",null],["~roadking",null],["fxlrs","cruiser"],["fxlr","cruiser"],["fxbr","cruiser"],["fxsb","cruiser"],["fxbb","cruiser"],["fxbbs","cruiser"],["fxdb","cruiser"],["fxdf","cruiser"],["fxd","cruiser"],["fxe","cruiser"],["fxst","cruiser"],["fxs","cruiser"],["flst","cruiser"],["flhc","cruiser"],["flfb","cruiser"],["fls","cruiser"],["flsl","cruiser"],["fld","cruiser"],["flsb","cruiser"],["~softail","cruiser"],["~fatboy","cruiser"],["~dyna","cruiser"],["~nightrod","cruiser"],["vrsc","cruiser"],["~vrod","cruiser"],["~nighttrain","cruiser"],["xl883","cruiser"],["xl1200","cruiser"],["xl","cruiser"],["~sportster","cruiser"],["sporster","cruiser"],["rh975","cruiser"],["~nightster","cruiser"],["ra1250","adventure"],["~panamerica","adventure"]],
+  "honda": [["gl1800","touring"],["gl1500","touring"],["gl1200","touring"],["~goldwing","touring",1984,0],["nt1100","touring"],["nt650","touring"],["st1100","touring"],["st1300","touring"],["~paneuropean","touring"],["cb1000gt","touring"],["cbr1100xx","touring"],["cbr1000f","touring"],["vfr800","touring"],["cb1000r","naked"],["cb1000","naked"],["~hornet","naked"],["cb650r","naked"],["cb650f","naked"],["cb500f","naked"],["cb500","naked"],["cb500x","adventure"],["cb1300","naked"],["cbr1000rr","sport"],["cbr600rr","sport"],["cbr500r","sport"],["cbr250r","sport"],["vtr1000","sport"],["vf750f","sport"],["cmx500","cruiser"],["cmx1100","cruiser"],["cmx250","cruiser"],["~rebel","cruiser"],["vt600","cruiser"],["vt700","cruiser"],["vt750","cruiser"],["vt1100","cruiser"],["vtx1800","cruiser"],["vtx1300","cruiser"],["vf700magna","cruiser"],["~magna","cruiser"],["~valkyrie","cruiser"],["~africatwin","adventure"],["xrv750","adventure"],["xrv650","adventure"],["crf1100","adventure"],["crf1000","adventure"],["~transalp","adventure"],["xl750","adventure"],["xl700v","adventure"],["xl650v","adventure"],["xl600v","adventure"],["xl1000v","adventure"],["~varadero","adventure"],["nx500","adventure"],["nx650","adventure"],["crf300l","adventure"],["nc750x","adventure"],["nc700x","adventure"],["vfr1200x","adventure"],["nc750s","naked"],["nc700s","naked"],["crf110f","cross"],["crf125f","cross"],["crf150r","cross"],["crf250r","cross"],["crf450r","cross"],["forza","scooter"],["~nss300","scooter"],["sh125","scooter"],["sh150","scooter"],["sh300","scooter"],["sh350","scooter"],["pcx","scooter"]],
+  "husqvarna": [["svartpilen","naked"],["vitpilen","naked"],["norden901","adventure"],["701enduro","adventure"]],
+  "indian": [["chief","cruiser"],["scout","cruiser"],["springfield","cruiser"],["chieftain","cruiser"],["roadmaster","touring"],["pursuit","touring"],["ftr","naked"]],
+  "kawasaki": [["gtr1400","touring"],["z1000sx","touring",2011,0],["zx1400",null],["zx10","sport"],["zx6","sport"],["zx12r","sport"],["zx9r","sport"],["zx7r","sport"],["zx636","sport"],["z1000","naked",2003,0],["z900rs",null],["z650rs",null],["z900","naked",2017,0],["z650","naked",2017,0],["z800","naked",2013,0],["z400","naked",2019,0],["z300","naked",2015,0],["zh2","naked",2020,0],["vn650","cruiser"],["vn750","cruiser"],["vn800","cruiser"],["vn900","cruiser"],["vn1500","cruiser"],["vn1600","cruiser"],["vn1700","cruiser"],["vn2000","cruiser"],["~vulcan","cruiser"],["~kx450","cross"],["~kx250","cross"],["~kx125","cross"],["~kx85","cross"],["~kx65","cross"]],
+  "ktm": [["~superdukegt","touring"],["~duke","naked"],["~adventure","adventure"]],
+  "kymco": [["","scooter"]],
+  "motoguzzi": [["v85tt","adventure"],["stelvio","adventure"],["norge","touring"],["v100mandello","touring"],["california","cruiser"],["eldorado","cruiser"],["audace","cruiser"],["mgx21","cruiser"],["griso","naked"]],
+  "mvagusta": [["~turismoveloce","touring"],["brutale","naked"],["dragster","naked"],["f3","sport"],["f4","sport"]],
+  "royalenfield": [["~classic","classic"],["bullet","classic"],["~continentalgt","classic"],["interceptor","classic"],["~meteor","cruiser"],["shotgun","cruiser"],["himalayan","adventure"]],
+  "suzuki": [["dl650","adventure"],["dl1000","adventure"],["dl800","adventure"],["dl250","adventure"],["~vstrom","adventure"],["gsxs1000gt","touring"],["gsxs1000","naked"],["gsxs750","naked"],["gsx8s","naked"],["gsr750","naked"],["gsr600","naked"],["sv650","naked"],["sv1000","naked"],["gsx1400","naked"],["gsx8r","sport"],["gsxr","sport"],["vlr1800","cruiser"],["vl800","cruiser"],["vl1500","cruiser"],["vz800","cruiser"],["vz1600","cruiser"],["vzr1800","cruiser"],["vs1400","cruiser"],["vs800","cruiser"],["vs400","cruiser"],["gz250","cruiser"],["gz125","cruiser"],["~intruder","cruiser"],["~marauder","cruiser"],["ls650","cruiser"],["~burgman","scooter"],["an400","scooter"],["an650","scooter"],["~rmz","cross"]],
+  "sym": [["~orbit","scooter"],["~symphony","scooter"],["~joymax","scooter"],["~maxsym","scooter"],["~cruisym","scooter"],["~fiddle","scooter"],["~crox","scooter"]],
+  "triumph": [["~streettriple","naked"],["~speedtriple","naked"],["trident","naked",1991,0],["speed400","naked"],["sprintst","touring"],["trophy","touring"],["daytona660","sport"],["daytona675","sport"],["rocketiii","cruiser"],["rocketlll","cruiser"],["rocket3","cruiser"],["tiger800","adventure"],["tiger900","adventure"],["tiger1200","adventure"],["~tigerexplorer","adventure"],["bonneville","classic"],["thruxton",null],["~speedtwin","classic"],["~streettwin","classic"],["scrambler900","classic"],["scrambler1200","classic"],["t120","classic"],["t100","classic"],["tf250","cross"]],
+  "victory": [["crosscountry","touring"],["magnum","touring"],["vision","touring"],["","cruiser"]],
+  "yamaha": [["mt03","naked"],["mt07","naked"],["mt09","naked"],["mt10","naked"],["mt125","naked"],["xjr1300","naked"],["xjr1200","naked"],["~tracer","touring"],["fjr1300","touring"],["fj1200","touring"],["~tenere","adventure"],["~supertenere","adventure"],["xt1200","adventure"],["yzfr","sport"],["fzr","sport"],["xvz",null],["~tr1",null],["xv","cruiser"],["xvs","cruiser"],["~virago","cruiser"],["~dragstar","cruiser"],["~wildstar","cruiser"],["~roadstar","cruiser"],["xmax","scooter"],["nmax","scooter"],["tmax","scooter"],["tricity","scooter"],["majesty","scooter"],["aerox","scooter"],["neos","scooter"],["cygnus","scooter"],["ttr","cross"],["tt110r","cross"],["yz125","cross"],["yz250","cross"],["yz450","cross"],["yz85","cross"],["yz65","cross"],["pw50","cross"],["sr400","classic"],["sr500","classic"]],
+  "*": [["~scooter","scooter"],["~classicbike","classic"]],
+};
+/* Motorcykeltype afledt af mærke + model, når kilden ikke oplyser den (V7). Mønstret er et PRÆFIKS af det normaliserede
+   modelnavn (a-z0-9); "~" foran = "indeholder". Det LÆNGSTE mønster vinder; ved lige længde vinder mærkets eget over "*".
+   Type null blokerer (modellen forbliver Ukendt). Slutter mønstret på et ciffer, må næste tegn ikke være et ciffer.
+   Et tredje og fjerde tal er årgangsgrænser (fra, til; 0 = ingen): gælder reglen kun for nyere modeller (Z650 fra 2017), springes den
+   over, når årgangen er uden for — eller ukendt. */
+function typeNoegle(s){
+  return String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+function afledtTypeFor(brand, model, titel, aargang){
+  const b = typeNoegle(brand);
+  let m = typeNoegle(model);
+  if (!m){ const t = typeNoegle(titel); m = b && t.startsWith(b) ? t.slice(b.length) : t; }
+  let bedst = null;
+  for (const [liste, ejer] of [[TYPE_TABEL[b], 1], [TYPE_TABEL['*'], 0]]){
+    for (const [moenster, type, fra, til] of (liste || [])){
+      if (fra || til){
+        const aar = Number(aargang);
+        if (!(aar >= 1900) || (fra && aar < fra) || (til && aar > til)) continue;
+      }
+      const inkl = moenster.charAt(0) === '~';
+      const p = inkl ? moenster.slice(1) : moenster;
+      if (!(inkl ? m.includes(p) : m.startsWith(p))) continue;
+      if (!inkl && /\d$/.test(p) && /\d/.test(m.charAt(p.length))) continue;
+      if (!bedst || p.length > bedst.len || (p.length === bedst.len && ejer > bedst.ejer)) bedst = { len: p.length, ejer, type, moenster };
+    }
+  }
+  return bedst && bedst.type ? { type: bedst.type, regel: bedst.moenster } : null;
+}
+/* @@TYPETABEL-END */
 /* F2-003: "Nyt opslag" (oprettet for under 4 dage siden) er IKKE "Ny" (fabriksny). Samme ord om to ting
    fik en 1979 BMW R45 til at stå med grøn "NY". Opslagsmærket har eget ord og neutral (hvid) stil;
    "Ny" bruges kun om standen, og kun via kildeNyStatus() (kortets .rk-ny, annoncesidens "Stand: Fabriksny"). */

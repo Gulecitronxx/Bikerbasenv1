@@ -1,0 +1,507 @@
+{
+ "beskrivelse": "Håndkontrol af 50 tilfældige AFLEDTE typer (fast frø 20261026, scripts/type-klassificering.js --stikproeve) fra produktionssnapshot 26.10.2026. Vurderingen er foretaget af builderen (Agent 2, V7) ud fra producentens egen modelserie; CBR 1000 F og CBR 1100 XX er grænsetilfælde (sportstourere), der følger kildens eget ord Sportstouring = touring. Testen låser, at reglerne giver præcis disse typer, og at mindst 95 % er vurderet korrekte.",
+ "frø": 20261026,
+ "vurderet_af": "V7 Agent 2 (builder) — skal efterkontrolleres af en uafhængig Critic",
+ "raekker": [
+  {
+   "nr": 1,
+   "brand": "Harley-Davidson",
+   "model": "FLFBS Fat Boy",
+   "titel": "Harley-Davidson FLFBS Fat Boy",
+   "aargang": 2018,
+   "afledt": "cruiser",
+   "regel": "~fatboy",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 2,
+   "brand": "Harley-Davidson",
+   "model": "FXSBSE CVO Breakout",
+   "titel": "Harley-Davidson FXSBSE CVO Breakout",
+   "aargang": 2013,
+   "afledt": "cruiser",
+   "regel": "fxsb",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 3,
+   "brand": "BSA",
+   "model": "Gold star 650 Legacy Edition",
+   "titel": "BSA Gold star 650 Legacy Edition Tilbud 109998!",
+   "aargang": 2025,
+   "afledt": "classic",
+   "regel": "",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 4,
+   "brand": "Yamaha",
+   "model": "XT 1200 Z",
+   "titel": "Yamaha XT 1200 Z",
+   "aargang": 2019,
+   "afledt": "adventure",
+   "regel": "xt1200",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 5,
+   "brand": "BSA",
+   "model": "A65 Thunderbolt Classic Bike",
+   "titel": "BSA A65 Thunderbolt Classic Bike",
+   "aargang": 1970,
+   "afledt": "classic",
+   "regel": "~classicbike",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 6,
+   "brand": "Honda",
+   "model": "Magna",
+   "titel": "Honda Magna",
+   "aargang": 1983,
+   "afledt": "cruiser",
+   "regel": "~magna",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 7,
+   "brand": "Honda",
+   "model": "XL 750 Transalp",
+   "titel": "Honda XL 750 Transalp",
+   "aargang": 2023,
+   "afledt": "adventure",
+   "regel": "~transalp",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 8,
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing",
+   "aargang": 2021,
+   "afledt": "touring",
+   "regel": "~goldwing",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 9,
+   "brand": "Suzuki",
+   "model": "DL 800 DE V-Strom",
+   "titel": "Suzuki DL 800 DE V-Strom",
+   "aargang": 2025,
+   "afledt": "adventure",
+   "regel": "~vstrom",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 10,
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing",
+   "aargang": 2025,
+   "afledt": "touring",
+   "regel": "~goldwing",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 11,
+   "brand": "Honda",
+   "model": "CB 1000 GT",
+   "titel": "Honda CB 1000 GT",
+   "aargang": 2026,
+   "afledt": "touring",
+   "regel": "cb1000gt",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 12,
+   "brand": "Honda",
+   "model": "CRF 1000 L Africa Twin DCT",
+   "titel": "Honda CRF 1000 L Africa Twin DCT",
+   "aargang": 2019,
+   "afledt": "adventure",
+   "regel": "~africatwin",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 13,
+   "brand": "Honda",
+   "model": "Vf750f",
+   "titel": "Honda vf750f",
+   "aargang": 1983,
+   "afledt": "sport",
+   "regel": "vf750f",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 14,
+   "brand": "Honda",
+   "model": "CB 1000 Hornet",
+   "titel": "Honda CB 1000 Hornet",
+   "aargang": 2025,
+   "afledt": "naked",
+   "regel": "cb1000",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 15,
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel",
+   "aargang": 2024,
+   "afledt": "cruiser",
+   "regel": "cmx1100",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 16,
+   "brand": "Honda",
+   "model": "CBR 1000 F",
+   "titel": "Honda CBR 1000 F",
+   "aargang": 1992,
+   "afledt": "touring",
+   "regel": "cbr1000f",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 17,
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing",
+   "aargang": 2025,
+   "afledt": "touring",
+   "regel": "~goldwing",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 18,
+   "brand": "Honda",
+   "model": "CB 1000 GT",
+   "titel": "Honda CB 1000 GT",
+   "aargang": 2026,
+   "afledt": "touring",
+   "regel": "cb1000gt",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 19,
+   "brand": "Triumph",
+   "model": "Bonneville T 120 C Classic Bike",
+   "titel": "Triumph Bonneville T 120 C Classic Bike",
+   "aargang": 1964,
+   "afledt": "classic",
+   "regel": "~classicbike",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 20,
+   "brand": "Kawasaki",
+   "model": "VN 2000",
+   "titel": "Kawasaki VN 2000",
+   "aargang": 2007,
+   "afledt": "cruiser",
+   "regel": "vn2000",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 21,
+   "brand": "Triumph",
+   "model": "Bonneville T 120 Black Jet Black",
+   "titel": "Triumph Bonneville T 120 Black Jet Black",
+   "aargang": 2027,
+   "afledt": "classic",
+   "regel": "bonneville",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 22,
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel",
+   "aargang": 2019,
+   "afledt": "cruiser",
+   "regel": "cmx500",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 23,
+   "brand": "BSA",
+   "model": "Lightning 650 Classic Bike",
+   "titel": "BSA Lightning 650 Classic Bike",
+   "aargang": 1969,
+   "afledt": "classic",
+   "regel": "~classicbike",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 24,
+   "brand": "Yamaha",
+   "model": "FJR 1300 AS",
+   "titel": "Yamaha FJR 1300 AS MC-SYD BYTTER GERNE",
+   "aargang": 2019,
+   "afledt": "touring",
+   "regel": "fjr1300",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 25,
+   "brand": "Honda",
+   "model": "CB 1000 R",
+   "titel": "Honda CB 1000 R",
+   "aargang": 2010,
+   "afledt": "naked",
+   "regel": "cb1000r",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 26,
+   "brand": "Honda",
+   "model": "CB 500 Hornet",
+   "titel": "Honda CB 500 Hornet",
+   "aargang": 2026,
+   "afledt": "naked",
+   "regel": "~hornet",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 27,
+   "brand": "Honda",
+   "model": "CB 1000 GT",
+   "titel": "Honda CB 1000 GT",
+   "aargang": 2026,
+   "afledt": "touring",
+   "regel": "cb1000gt",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 28,
+   "brand": "Honda",
+   "model": "CB 500 Hornet",
+   "titel": "Honda CB 500 Hornet 2025",
+   "aargang": 2025,
+   "afledt": "naked",
+   "regel": "~hornet",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 29,
+   "brand": "Yamaha",
+   "model": "Yz 85",
+   "titel": "Yamaha yz 85",
+   "aargang": 2019,
+   "afledt": "cross",
+   "regel": "yz85",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 30,
+   "brand": "Honda",
+   "model": "NC 750 XD",
+   "titel": "Honda NC 750 XD",
+   "aargang": 2026,
+   "afledt": "adventure",
+   "regel": "nc750x",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 31,
+   "brand": "BMW",
+   "model": "K 100 RT",
+   "titel": "BMW K 100 RT",
+   "aargang": 1985,
+   "afledt": "touring",
+   "regel": "k100rt",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 32,
+   "brand": "Honda",
+   "model": "VF 700 Magna",
+   "titel": "Honda VF 700 Magna",
+   "aargang": 1984,
+   "afledt": "cruiser",
+   "regel": "vf700magna",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 33,
+   "brand": "CFMoto",
+   "model": "MTX800",
+   "titel": "CFMOTO MTX800",
+   "aargang": 2026,
+   "afledt": "adventure",
+   "regel": "mtx800",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 34,
+   "brand": "Harley-Davidson",
+   "model": "XL1200N Nightster",
+   "titel": "Harley-Davidson XL1200N Nightster",
+   "aargang": 2010,
+   "afledt": "cruiser",
+   "regel": "~nightster",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 35,
+   "brand": "Honda",
+   "model": "CBR 1100 XX",
+   "titel": "Honda CBR 1100 XX",
+   "aargang": 2005,
+   "afledt": "touring",
+   "regel": "cbr1100xx",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 36,
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing",
+   "aargang": 2006,
+   "afledt": "touring",
+   "regel": "~goldwing",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 37,
+   "brand": "BMW",
+   "model": "R 1200 R",
+   "titel": "BMW R 1200 R",
+   "aargang": 2015,
+   "afledt": "naked",
+   "regel": "r1200r",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 38,
+   "brand": "Honda",
+   "model": "CRF 110 F",
+   "titel": "Honda CRF 110 F",
+   "aargang": 2026,
+   "afledt": "cross",
+   "regel": "crf110f",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 39,
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing",
+   "aargang": 2024,
+   "afledt": "touring",
+   "regel": "~goldwing",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 40,
+   "brand": "Honda",
+   "model": "CMX 1100 DT Rebel",
+   "titel": "Honda CMX 1100 DT Rebel",
+   "aargang": 2024,
+   "afledt": "cruiser",
+   "regel": "cmx1100",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 41,
+   "brand": "Yamaha",
+   "model": "Ténéré 700 World Raid T7",
+   "titel": "Yamaha Ténéré 700 World Raid T7 WORLD RAID 26 BWP1(REDL.WHI",
+   "aargang": 2026,
+   "afledt": "adventure",
+   "regel": "~tenere",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 42,
+   "brand": "Honda",
+   "model": "VT600 ‘NY pris’",
+   "titel": "Honda VT600 ‘NY pris’",
+   "aargang": 1994,
+   "afledt": "cruiser",
+   "regel": "vt600",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 43,
+   "brand": "Honda",
+   "model": "CB 750 Hornet E-Clutch",
+   "titel": "Honda CB 750 Hornet E-Clutch",
+   "aargang": 2026,
+   "afledt": "naked",
+   "regel": "~hornet",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 44,
+   "brand": "Yamaha",
+   "model": "XVS 1100",
+   "titel": "Yamaha XVS 1100",
+   "aargang": 2005,
+   "afledt": "cruiser",
+   "regel": "xvs",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 45,
+   "brand": "Honda",
+   "model": "NX 500",
+   "titel": "Honda NX 500",
+   "aargang": 2026,
+   "afledt": "adventure",
+   "regel": "nx500",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 46,
+   "brand": "Honda",
+   "model": "CBR 250 R",
+   "titel": "Honda CBR 250 R",
+   "aargang": 2015,
+   "afledt": "sport",
+   "regel": "cbr250r",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 47,
+   "brand": "Suzuki",
+   "model": "Gsxr 1100w",
+   "titel": "Suzuki gsxr 1100w",
+   "aargang": 1995,
+   "afledt": "sport",
+   "regel": "gsxr",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 48,
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing",
+   "aargang": 2001,
+   "afledt": "touring",
+   "regel": "~goldwing",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 49,
+   "brand": "Honda",
+   "model": "CB 1000 GT",
+   "titel": "Honda CB 1000 GT",
+   "aargang": 2026,
+   "afledt": "touring",
+   "regel": "cb1000gt",
+   "vurdering": "korrekt"
+  },
+  {
+   "nr": 50,
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel MC-SYD BYTTER GERNE - 5 ÅRS HONDA GARANTI",
+   "aargang": 2024,
+   "afledt": "cruiser",
+   "regel": "cmx1100",
+   "vurdering": "korrekt"
+  }
+ ]
+}

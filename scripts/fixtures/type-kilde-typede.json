@@ -1,0 +1,2589 @@
+{
+ "beskrivelse": "Annoncer, hvor KILDEN selv oplyste typen (snapshot af produktionen 26.10.2026, kun mærke/model/titel/årgang). Bruges til at måle, hvor ofte regeltabellen er enig med kilden, uden at se kildens type.",
+ "antal": 369,
+ "raekker": [
+  {
+   "brand": "BMW",
+   "model": "R 1300 RS",
+   "titel": "BMW R 1300 Sportstouring RS BYTTER GERNE",
+   "aargang": 2025,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200",
+   "titel": "BMW K 1200 Sportstouring",
+   "aargang": 1997,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2022,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "F6 Valkyrie",
+   "titel": "Honda F6 Valkyrie Cruiser",
+   "aargang": 1997,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "ZR-7",
+   "titel": "Kawasaki ZR-7 Street",
+   "aargang": 2000,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Aprilia",
+   "model": "RSV 1000",
+   "titel": "Aprilia RSV 1000 Sport",
+   "aargang": 2006,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1600 GT",
+   "titel": "BMW K 1600 Touring GT BYTTER GERNE",
+   "aargang": 2011,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 X",
+   "titel": "Honda NC 750 X Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Speed Triple",
+   "titel": "Triumph Speed Triple Street",
+   "aargang": 2005,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VS 400 Intruder",
+   "titel": "Suzuki VS 400 Intruder Cruiser",
+   "aargang": 1994,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650 R",
+   "titel": "Honda CB 650 Street R",
+   "aargang": 2023,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Tiger 1050",
+   "titel": "Triumph Tiger 1050 Adventure",
+   "aargang": 2013,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VLR 1800",
+   "titel": "Suzuki VLR 1800 Cruiser",
+   "aargang": 2009,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Ducati",
+   "model": "Scrambler",
+   "titel": "Ducati Scrambler Street",
+   "aargang": 2021,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "MSX 125",
+   "titel": "Honda MSX 125 Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2022,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 X",
+   "titel": "Honda NC 750 X Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1000 L Africa Twin",
+   "titel": "Honda CRF 1000 L Africa Twin Offroader",
+   "aargang": 2016,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "VF 1000",
+   "titel": "Honda VF 1000 Sport",
+   "aargang": 1985,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "ZZR 1400 ABS",
+   "titel": "Kawasaki ZZR 1400 ABS Sport",
+   "aargang": 2009,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "FJR 1300",
+   "titel": "Yamaha FJR 1300 Sportstouring",
+   "aargang": 2012,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GZ 250 Marauder",
+   "titel": "Suzuki GZ 250 Marauder Cruiser",
+   "aargang": 2003,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Aprilia",
+   "model": "RST 1000 Futura",
+   "titel": "Aprilia RST 1000 Futura Touring",
+   "aargang": 2004,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VS 1400 Intruder",
+   "titel": "Suzuki VS 1400 Intruder Cruiser",
+   "aargang": 1992,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "XL 750 Transalp",
+   "titel": "Honda XL 750 Transalp Offroader BYTTER GERNE",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXS Softail Blackline",
+   "titel": "Harley-Davidson FXS Softail Blackline Cruiser",
+   "aargang": 2011,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650 R",
+   "titel": "Honda CB 650 R Street",
+   "aargang": 2026,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XJ 600 S Diversion",
+   "titel": "Yamaha XJ 600 S Diversion Sportstouring",
+   "aargang": 2000,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 D",
+   "titel": "Honda NT 1100 D Touring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXST Softail",
+   "titel": "Harley-Davidson FXST Softail Cruiser",
+   "aargang": 2021,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 LD Africa Twin",
+   "titel": "Honda CRF 1100 LD Africa Twin Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "DL 1000 V-Strom",
+   "titel": "Suzuki DL 1000 V-Strom Adventure",
+   "aargang": 2010,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "KTM",
+   "model": "890 R",
+   "titel": "KTM 890 Adventure R Offroader",
+   "aargang": 2022,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLSTF Fat Boy",
+   "titel": "Harley-Davidson FLSTF Fat Boy Cruiser",
+   "aargang": 2004,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "R 1200",
+   "titel": "BMW R 1200 Adventure",
+   "aargang": 2017,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 Hornet",
+   "titel": "Honda CB 1000 Hornet Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 1000 RR Fireblade",
+   "titel": "Honda CBR 1000 RR Fireblade Sport",
+   "aargang": 2024,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLSTC Heritage Softail Classic Classic",
+   "titel": "Harley-Davidson FLSTC Heritage Softail Classic Classic Cruiser",
+   "aargang": 2006,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "F 800 R",
+   "titel": "BMW F 800 R Street",
+   "aargang": 2018,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 650 R",
+   "titel": "Honda CBR 650 R Sportstouring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "Custom Bike",
+   "titel": "Harley-Davidson Custom Bike Cruiser",
+   "aargang": 1976,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "MSX 125",
+   "titel": "Honda MSX 125 Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CL 500 A",
+   "titel": "Honda CL 500 A Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 500 R",
+   "titel": "Honda CBR 500 R Sport",
+   "aargang": 2026,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "ST 1300 Pan",
+   "titel": "Honda ST 1300 Pan Touring",
+   "aargang": 2003,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NX 500",
+   "titel": "Honda NX 500 Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 T Rebel",
+   "titel": "Honda CMX 1100 T Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "GTR 1400",
+   "titel": "Kawasaki GTR 1400 Sportstouring",
+   "aargang": 2011,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "KTM",
+   "model": "790 Duke",
+   "titel": "KTM 790 Duke Street",
+   "aargang": 2020,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650 R",
+   "titel": "Honda CB 650 Street R",
+   "aargang": 2023,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 500",
+   "titel": "Honda CB 500 Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 Hornet",
+   "titel": "Honda CB 1000 Hornet Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XV 750 Virago",
+   "titel": "Yamaha XV 750 Cruiser Virago ENGROS/UDEN KLARGØRING",
+   "aargang": 1995,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXDB Street Bob",
+   "titel": "Harley-Davidson FXDB Street Bob Cruiser",
+   "aargang": 2011,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "CVO Electra Glide Ultra Classic",
+   "titel": "Harley-Davidson CVO Electra Glide Ultra Classic FLHTCUSE CVO Black",
+   "aargang": 2011,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHRI Road King",
+   "titel": "Harley-Davidson FLHRI Road King Cruiser",
+   "aargang": 2008,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VZR 1800 Intruder",
+   "titel": "Suzuki VZR 1800 Intruder Cruiser",
+   "aargang": 2009,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "DL 650 V-Strom",
+   "titel": "Suzuki DL 650 V-Strom Offroader",
+   "aargang": 2023,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XV 1900",
+   "titel": "Yamaha XV 1900 Cruiser",
+   "aargang": 2010,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "KTM",
+   "model": "790",
+   "titel": "KTM 790 Adventure Adventure",
+   "aargang": 2020,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel S",
+   "titel": "Honda CMX 500 Rebel S Cruiser",
+   "aargang": 2025,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "VN 1500 Classic",
+   "titel": "Kawasaki VN 1500 Classic Cruiser",
+   "aargang": 1997,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "F 800 ST",
+   "titel": "BMW F 800 ST Sportstouring",
+   "aargang": 2007,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "VT 700",
+   "titel": "Honda VT 700 Cruiser",
+   "aargang": 1986,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "ST 1100 Pan",
+   "titel": "Honda ST 1100 Pan Touring",
+   "aargang": 1993,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GSX 1400",
+   "titel": "Suzuki GSX 1400 Street",
+   "aargang": 2004,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L",
+   "titel": "Honda CRF 1100 L Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "BMW",
+   "model": "R 1200 RT",
+   "titel": "BMW R 1200 RT Touring",
+   "aargang": 2005,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1100 Gold Wing",
+   "titel": "Honda GL 1100 Gold Wing Klassiker",
+   "aargang": 1981,
+   "kildeType": "classic"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "VN 650 Vulcan",
+   "titel": "Kawasaki VN 650 Vulcan Cruiser",
+   "aargang": 2022,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200",
+   "titel": "BMW K 1200 Touring",
+   "aargang": 2003,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XJ 900 S Diversion",
+   "titel": "Yamaha XJ 900 S Diversion Sportstouring",
+   "aargang": 1996,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200 LT",
+   "titel": "BMW K 1200 LT Touring",
+   "aargang": 2005,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing Touring",
+   "aargang": 2023,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1300",
+   "titel": "BMW K 1300 Sportstouring",
+   "aargang": 2010,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLSTN Softail Deluxe",
+   "titel": "Harley-Davidson FLSTN Softail Deluxe Cruiser",
+   "aargang": 2013,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200 RS",
+   "titel": "BMW K 1200 RS Touring",
+   "aargang": 2000,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VLR 1800",
+   "titel": "Suzuki VLR 1800 Cruiser",
+   "aargang": 2009,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "VFR 1200",
+   "titel": "Honda VFR 1200 Adventure",
+   "aargang": 2013,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "ST 1100",
+   "titel": "Honda ST 1100 Touring",
+   "aargang": 1995,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 600 RR",
+   "titel": "Honda CBR 600 RR Sport",
+   "aargang": 2026,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "DL 1000 V-Strom",
+   "titel": "Suzuki DL 1000 V-Strom Adventure",
+   "aargang": 2002,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "BMW",
+   "model": "R 1150 RT",
+   "titel": "BMW R 1150 RT Touring",
+   "aargang": 2001,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650 RC",
+   "titel": "Honda CB 650 RC Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "ZZR 1400 ABS",
+   "titel": "Kawasaki ZZR 1400 ABS Sportstouring",
+   "aargang": 2008,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750",
+   "titel": "Honda NC 750 Offroader",
+   "aargang": 2021,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 72",
+   "titel": "Honda CB 72 Klassiker",
+   "aargang": 1963,
+   "kildeType": "classic"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 650 R",
+   "titel": "Honda CBR 650 R Sportstouring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "DL 650 XT V-strom",
+   "titel": "Suzuki DL 650 XT V-strom Offroader",
+   "aargang": 2023,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XV 1700",
+   "titel": "Yamaha XV 1700 BYTTER GERNE Cruiser",
+   "aargang": 2003,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "F6 Valkyrie",
+   "titel": "Honda F6 Valkyrie Cruiser",
+   "aargang": 1997,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 500 R",
+   "titel": "Honda CBR 500 R Sport",
+   "aargang": 2026,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Aprilia",
+   "model": "RSV 1000 R",
+   "titel": "Aprilia RSV 1000 R Sport",
+   "aargang": 2004,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XV 535 Virago",
+   "titel": "Yamaha XV 535 Virago Cruiser",
+   "aargang": 1996,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBF 1000",
+   "titel": "Honda CBF 1000 Sportstouring",
+   "aargang": 2009,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "F6 Interstate",
+   "titel": "Honda F6 Interstate Cruiser",
+   "aargang": 1999,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 1000",
+   "titel": "Honda CBR 1000 Sport",
+   "aargang": 2024,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L",
+   "titel": "Honda CRF 1100 L Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "SV 650",
+   "titel": "Suzuki SV 650 Street",
+   "aargang": 2018,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTCU Electra Glide Ultra Classic",
+   "titel": "Harley-Davidson FLHTCU Electra Glide Ultra Classic Cruiser",
+   "aargang": 2014,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 Hornet",
+   "titel": "Honda CB 1000 Hornet Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1500 Gold Wing",
+   "titel": "Honda GL 1500 Gold Wing Touring",
+   "aargang": 1988,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VL 800 Z Voluzia",
+   "titel": "Suzuki VL 800 Z Voluzia Cruiser",
+   "aargang": 2002,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "ZX6R",
+   "titel": "Kawasaki ZX6R Sport",
+   "aargang": 2008,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Ducati",
+   "model": "Scrambler Full",
+   "titel": "Ducati Scrambler Full Street",
+   "aargang": 2019,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 250 R",
+   "titel": "Honda CBR 250 R Sport",
+   "aargang": 2011,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "DL 650 XT V-strom",
+   "titel": "Suzuki DL 650 XT V-strom Offroader BYTTER GERNE",
+   "aargang": 2023,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXBB Street Bob",
+   "titel": "Harley-Davidson FXBB Street Bob Cruiser",
+   "aargang": 2013,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GSXS 1000 GT",
+   "titel": "Suzuki GSXS 1000 GT BYTTER GERNE Sportstouring",
+   "aargang": 2023,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 X",
+   "titel": "Honda NC 750 X Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "BMW",
+   "model": "R 850 RT",
+   "titel": "BMW R 850 RT Touring",
+   "aargang": 2000,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 500 FA",
+   "titel": "Honda CB 500 FA Street BYTTER GERNE",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "Monkey",
+   "titel": "Honda Monkey Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "KTM",
+   "model": "1290 Super",
+   "titel": "KTM 1290 Super Adventure Adventure",
+   "aargang": 2017,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "XL 750 Transalp",
+   "titel": "Honda XL 750 Transalp Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200",
+   "titel": "BMW K 1200 Touring",
+   "aargang": 2005,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CL 500 A",
+   "titel": "Honda CL 500 A Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "XL 750 Transalp",
+   "titel": "Honda XL 750 Transalp Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTK Electra Glide Ultra Limited",
+   "titel": "Harley-Davidson FLHTK Electra Glide Ultra Limited Cruiser BYTTER GERNE",
+   "aargang": 2014,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "XL 750 Transalp",
+   "titel": "Honda XL 750 Transalp Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 XA",
+   "titel": "Honda NC 750 XA Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "KTM",
+   "model": "1290 Super",
+   "titel": "KTM 1290 Super Adventure Offroader",
+   "aargang": 2015,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 XA",
+   "titel": "Honda NC 750 XA Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "ST 125 DAX",
+   "titel": "Honda ST 125 DAX Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GSX 750 F",
+   "titel": "Suzuki GSX 750 F Sport",
+   "aargang": 1990,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "KTM",
+   "model": "390 Duke",
+   "titel": "KTM 390 Duke Street",
+   "aargang": 2017,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 X",
+   "titel": "Honda NC 750 X Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 1000 RR Fireblade",
+   "titel": "Honda CBR 1000 RR Fireblade Sport Sport",
+   "aargang": 2006,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "NX 500",
+   "titel": "Honda NX 500 Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XV 750 Virago",
+   "titel": "Yamaha XV 750 Virago Cruiser",
+   "aargang": 1989,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XV 750 Virago",
+   "titel": "Yamaha XV 750 Virago Cruiser",
+   "aargang": 1993,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "MSX 125",
+   "titel": "Honda MSX 125 Street",
+   "aargang": 2023,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 650 R",
+   "titel": "Honda CBR 650 R Sportstouring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "VN 650",
+   "titel": "Kawasaki VN 650 Cruiser",
+   "aargang": 2023,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLSTC Heritage Softail Classic",
+   "titel": "Harley-Davidson FLSTC Heritage Softail Classic Cruiser",
+   "aargang": 2010,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1000 L Africa Twin",
+   "titel": "Honda CRF 1000 L Africa Twin Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650 R",
+   "titel": "Honda CB 650 R Street",
+   "aargang": 2026,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 T Rebel",
+   "titel": "Honda CMX 1100 T Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "ZX12R",
+   "titel": "Kawasaki ZX12R Sport",
+   "aargang": 2006,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "XL883L",
+   "titel": "Harley-Davidson XL883L Cruiser",
+   "aargang": 2019,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 Hornet",
+   "titel": "Honda CB 1000 Hornet Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "XL1200X Forty Eight",
+   "titel": "Harley-Davidson XL1200X Forty Eight Cruiser",
+   "aargang": 2020,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Moto Guzzi",
+   "model": "V85 TT",
+   "titel": "Moto Guzzi V85 TT Offroader",
+   "aargang": 2020,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Thruxton",
+   "titel": "Triumph Thruxton Street",
+   "aargang": 2007,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "ST 1100",
+   "titel": "Honda ST 1100 Touring",
+   "aargang": 1995,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Street Triple R",
+   "titel": "Triumph Street Triple R Street",
+   "aargang": 2011,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHRC Road King Classic",
+   "titel": "Harley-Davidson FLHRC Road King Classic Cruiser",
+   "aargang": 2008,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLTRI Road Glide",
+   "titel": "Harley-Davidson FLTRI Road Glide",
+   "aargang": 2008,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel S",
+   "titel": "Honda CMX 500 Rebel S Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200 GT",
+   "titel": "BMW K 1200 Sportstouring GT BYTTER GERNE",
+   "aargang": 2007,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 650 R",
+   "titel": "Honda CBR 650 R Sportstouring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 D",
+   "titel": "Honda NT 1100 D Touring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 XA",
+   "titel": "Honda NC 750 XA Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLSTC Heritage Softail Classic",
+   "titel": "Harley-Davidson FLSTC Heritage Softail Classic Cruiser",
+   "aargang": 2006,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTK Electra Glide Ultra Limited",
+   "titel": "Harley-Davidson FLHTK Electra Glide Ultra Limited Cruiser",
+   "aargang": 2016,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "MSX 125",
+   "titel": "Honda MSX 125 Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 X",
+   "titel": "Honda NC 750 X Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "ST 125 DAX",
+   "titel": "Honda ST 125 DAX Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLSTC Heritage Softail Classic",
+   "titel": "Harley-Davidson FLSTC Heritage Softail Classic Cruiser",
+   "aargang": 2006,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VLR 1800",
+   "titel": "Suzuki VLR 1800 Cruiser",
+   "aargang": 2008,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2023,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 Hornet",
+   "titel": "Honda CB 1000 Hornet Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing Touring",
+   "aargang": 2026,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Daytona 1200",
+   "titel": "Triumph Daytona 1200 Sportstouring",
+   "aargang": 1993,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "ZZR 600",
+   "titel": "Kawasaki ZZR 600 Sport mc-syd engros",
+   "aargang": 1993,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 1000 RR-R",
+   "titel": "Honda CBR 1000 RR-R Sport",
+   "aargang": 2024,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTCUSE CVO Electra Glide Ultra Classic",
+   "titel": "Harley-Davidson FLHTCUSE CVO Electra Glide Ultra Classic Cruiser",
+   "aargang": 2009,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XSR 900",
+   "titel": "Yamaha XSR 900 Street",
+   "aargang": 2016,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "NX 500",
+   "titel": "Honda NX 500 Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750",
+   "titel": "Honda NC 750 Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTP Electra Glide Police",
+   "titel": "Harley-Davidson FLHTP Electra Glide Police Cruiser",
+   "aargang": 2023,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Rocket III",
+   "titel": "Triumph Rocket III Cruiser",
+   "aargang": 2007,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 650 R",
+   "titel": "Honda CBR 650 R Sportstouring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NC 750 X",
+   "titel": "Honda NC 750 X Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Aprilia",
+   "model": "RSV 1000 R",
+   "titel": "Aprilia RSV 1000 R Sport",
+   "aargang": 2005,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 Hornet",
+   "titel": "Honda CB 1000 Hornet Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "Monkey",
+   "titel": "Honda Monkey Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Cagiva",
+   "model": "Navigator 1000",
+   "titel": "Cagiva Navigator 1000 Adventure",
+   "aargang": 2005,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 1100 XX",
+   "titel": "Honda CBR 1100 XX Sportstouring",
+   "aargang": 2007,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 600 RR",
+   "titel": "Honda CBR 600 RR Sport",
+   "aargang": 2026,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2023,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "VF 1000 F",
+   "titel": "Honda VF 1000 F Sportstouring",
+   "aargang": 1985,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "BMW",
+   "model": "R 1200 CL",
+   "titel": "BMW R 1200 CL Touring",
+   "aargang": 2002,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650 R",
+   "titel": "Honda CB 650 R Street",
+   "aargang": 2026,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "XL883 Standard",
+   "titel": "Harley-Davidson XL883 Standard Cruiser",
+   "aargang": 2007,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XV 1600 Wild Star",
+   "titel": "Yamaha XV 1600 Wild Star Cruiser",
+   "aargang": 2002,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NX 500",
+   "titel": "Honda NX 500 Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "VTR 1000 SP-1",
+   "titel": "Honda VTR 1000 SP-1 Sport",
+   "aargang": 2001,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 500 XA",
+   "titel": "Honda CB 500 XA Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Daytona 1200",
+   "titel": "Triumph Daytona 1200 Sportstouring",
+   "aargang": 1993,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2022,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTCUI Electra Glide Ultra Classic",
+   "titel": "Harley-Davidson FLHTCUI Electra Glide Ultra Classic Cruiser",
+   "aargang": 2003,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XV 750",
+   "titel": "Yamaha XV 750 Cruiser",
+   "aargang": 1990,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing Touring",
+   "aargang": 2026,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "Z 750",
+   "titel": "Kawasaki Z 750 Touring",
+   "aargang": 2006,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "KTM",
+   "model": "990 Super Duke",
+   "titel": "KTM 990 Super Duke Street",
+   "aargang": 2005,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "GB 350 S",
+   "titel": "Honda GB 350 S Street",
+   "aargang": 2026,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHRC Road King Classic",
+   "titel": "Harley-Davidson FLHRC Road King Classic Cruiser",
+   "aargang": 2013,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2023,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Street Triple R",
+   "titel": "Triumph Street Triple R Street",
+   "aargang": 2011,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GSX 1100 EF",
+   "titel": "Suzuki GSX 1100 EF Street",
+   "aargang": 1981,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "GB 350 S",
+   "titel": "Honda GB 350 S Street",
+   "aargang": 2026,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "FJR 1300 AS",
+   "titel": "Yamaha FJR 1300 AS Touring",
+   "aargang": 2019,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 R",
+   "titel": "Honda CB 1000 R Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "VT 750",
+   "titel": "Honda VT 750 Cruiser",
+   "aargang": 2015,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 R",
+   "titel": "Honda CB 1000 R Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTCUSE CVO Electra Glide Ultra Classic",
+   "titel": "Harley-Davidson FLHTCUSE CVO Electra Glide Ultra Classic Cruiser",
+   "aargang": 2011,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Indian",
+   "model": "FTR 1200",
+   "titel": "Indian FTR 1200 Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XS 650",
+   "titel": "Yamaha XS 650 Klassiker",
+   "aargang": 1973,
+   "kildeType": "classic"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 300 L",
+   "titel": "Honda CRF 300 L Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 Rebel",
+   "titel": "Honda CMX 1100 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1000 L Africa Twin",
+   "titel": "Honda CRF 1000 L Africa Twin Offroader Offroader",
+   "aargang": 2022,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "FJR 1300 A",
+   "titel": "Yamaha FJR 1300 A Touring",
+   "aargang": 2017,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Daytona 900",
+   "titel": "Triumph Daytona 900 Sport",
+   "aargang": 1995,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "Softail FXST",
+   "titel": "Harley-Davidson Softail FXST Cruiser",
+   "aargang": 2003,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CL 500 A",
+   "titel": "Honda CL 500 A Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Tiger 750",
+   "titel": "Triumph Tiger 750 Klassiker",
+   "aargang": 1973,
+   "kildeType": "classic"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VLR 1800",
+   "titel": "Suzuki VLR 1800 Cruiser",
+   "aargang": 2009,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XVS 950 A",
+   "titel": "Yamaha XVS 950 A Cruiser",
+   "aargang": 2014,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200 S",
+   "titel": "BMW K 1200 S Sportstouring",
+   "aargang": 2006,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650",
+   "titel": "Honda CB 650 Street",
+   "aargang": 2026,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 500",
+   "titel": "Honda CB 500 Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Offroader",
+   "aargang": 2020,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 600 F",
+   "titel": "Honda CBR 600 F Sportstouring",
+   "aargang": 1993,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHR Road King",
+   "titel": "Harley-Davidson FLHR Road King Cruiser",
+   "aargang": 2008,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 650 Deauville",
+   "titel": "Honda NT 650 Deauville Touring",
+   "aargang": 1999,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "XL 750 Transalp",
+   "titel": "Honda XL 750 Transalp Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "ZX10R",
+   "titel": "Kawasaki ZX10R Sport",
+   "aargang": 2004,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000",
+   "titel": "Honda CB 1000 Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXD Dyna Super Glide",
+   "titel": "Harley-Davidson FXD Dyna Super Glide Cruiser",
+   "aargang": 2002,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "NX 500",
+   "titel": "Honda NX 500 Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTCUI Electra Glide Ultra Classic",
+   "titel": "Harley-Davidson FLHTCUI Electra Glide Ultra Classic Cruiser",
+   "aargang": 2003,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650 R",
+   "titel": "Honda CB 650 Street R",
+   "aargang": 2023,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200",
+   "titel": "BMW K 1200 Touring",
+   "aargang": 1999,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 Rebel",
+   "titel": "Honda CMX 1100 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "VTX 1800",
+   "titel": "Honda VTX 1800 Cruiser",
+   "aargang": 2002,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Daytona 955i",
+   "titel": "Triumph Daytona 955i Sport",
+   "aargang": 2001,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "TX 750",
+   "titel": "Yamaha TX 750 Klassiker",
+   "aargang": 1975,
+   "kildeType": "classic"
+  },
+  {
+   "brand": "KTM",
+   "model": "1290 Super Duke GT",
+   "titel": "KTM 1290 Super Duke GT Offroader",
+   "aargang": 2019,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XVS 650 Drag Star",
+   "titel": "Yamaha XVS 650 Drag Star Cruiser",
+   "aargang": 2003,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "XL1200N Nightster",
+   "titel": "Harley-Davidson XL1200N Nightster Cruiser",
+   "aargang": 2010,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "R 1100 S",
+   "titel": "BMW R 1100 Sportstouring S BYTTER GERNE",
+   "aargang": 1999,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 650 R",
+   "titel": "Honda CB 650 Street R",
+   "aargang": 2023,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VLR 1800",
+   "titel": "Suzuki VLR 1800 Cruiser",
+   "aargang": 2009,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "BMW",
+   "model": "F 800 S",
+   "titel": "BMW F 800 S Sportstouring",
+   "aargang": 2007,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 1000 F",
+   "titel": "Honda CBR 1000 F Sportstouring",
+   "aargang": 1991,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing Touring",
+   "aargang": 2024,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXDF Dyna Fat Bob",
+   "titel": "Harley-Davidson FXDF Dyna Fat Bob Cruiser",
+   "aargang": 2014,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000 R",
+   "titel": "Honda CB 1000 R Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Rocket III",
+   "titel": "Triumph Rocket III Cruiser",
+   "aargang": 2006,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L",
+   "titel": "Honda CRF 1100 L Adventure",
+   "aargang": 2025,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHX Street Glide",
+   "titel": "Harley-Davidson FLHX Street Glide",
+   "aargang": 2007,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 100",
+   "titel": "BMW K 100 Naked",
+   "aargang": 1988,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "BMW",
+   "model": "R 1300 GS",
+   "titel": "BMW R 1300 GS Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Ukendt",
+   "model": "Moto købes",
+   "titel": "moto cross købes",
+   "aargang": null,
+   "kildeType": "cross"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXE Super Glide",
+   "titel": "Harley-Davidson FXE Super Glide",
+   "aargang": 1980,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "Moto yamaha",
+   "titel": "moto cross yamaha",
+   "aargang": null,
+   "kildeType": "cross"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTCUI Electra Glide Ultra Classic",
+   "titel": "Harley-Davidson FLHTCUI Electra Glide Ultra Classic",
+   "aargang": 2005,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "BMW",
+   "model": "R 1300 GS",
+   "titel": "BMW R 1300 GS Adventure",
+   "aargang": 2025,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTCI Electra Glide Classic",
+   "titel": "Harley-Davidson FLHTCI Electra Glide Classic",
+   "aargang": 2006,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHX Glide",
+   "titel": "Harley-Davidson FLHX Street Glide",
+   "aargang": 2025,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLTRXS Road Glide Special",
+   "titel": "Harley-Davidson FLTRXS Road Glide Special",
+   "aargang": 2022,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXD Dyna Super Glide",
+   "titel": "Harley-Davidson FXD Dyna Super Glide",
+   "aargang": 2002,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHXS Glide Special",
+   "titel": "Harley-Davidson FLHXS Street Glide Special",
+   "aargang": 2020,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLTRXS Road Glide Special",
+   "titel": "Harley-Davidson FLTRXS Road Glide Special",
+   "aargang": 2020,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHXS Glide Special",
+   "titel": "Harley-Davidson FLHXS Street Glide Special",
+   "aargang": 2018,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CB 1000",
+   "titel": "Honda CB 1000 Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1200 S",
+   "titel": "BMW K 1200 S Sportstouring",
+   "aargang": 2006,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "BMW",
+   "model": "K 1600",
+   "titel": "BMW K 1600 Touring",
+   "aargang": 2016,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2025,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLSB Glide",
+   "titel": "Harley-Davidson FLSB Sport Glide",
+   "aargang": 2019,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "VFR 800 F",
+   "titel": "Honda VFR 800 F BYTTER GERNE Sportstouring",
+   "aargang": 2002,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "VT 1100",
+   "titel": "Honda VT 1100 ENGROS/UDEN KLARGØRING Cruiser",
+   "aargang": 1992,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Victory",
+   "model": "Highball",
+   "titel": "Victory Highball Cruiser",
+   "aargang": 2017,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2025,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "XJR 1300",
+   "titel": "Yamaha XJR 1300 Street",
+   "aargang": 2002,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1000 L Africa Twin DCT",
+   "titel": "Honda CRF 1000 L Africa Twin DCT Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1500 Gold Wing",
+   "titel": "Honda GL 1500 Gold Wing Touring",
+   "aargang": 1988,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLD Switchback",
+   "titel": "Harley-Davidson FLD Switchback Cruiser BYTTER GERNE",
+   "aargang": 2013,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHRCI Road King Classic",
+   "titel": "Harley-Davidson FLHRCI Road King Classic Cruiser",
+   "aargang": 2007,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "XL 750 Transalp",
+   "titel": "Honda XL 750 Transalp Offroader",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBR 1000 F",
+   "titel": "Honda CBR 1000 F Sportstouring",
+   "aargang": 1987,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GSF 600 S Bandit",
+   "titel": "Suzuki GSF 600 S Bandit Sportstouring",
+   "aargang": 2004,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GSF 650 S Bandit",
+   "titel": "Suzuki GSF 650 S Bandit Sportstouring",
+   "aargang": 2007,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L Africa",
+   "titel": "Honda CRF 1100 L Africa Offroader",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "NT 1100 A",
+   "titel": "Honda NT 1100 A Touring",
+   "aargang": 2022,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Yamaha",
+   "model": "MT-09",
+   "titel": "Yamaha MT-09 Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "NX 500",
+   "titel": "Honda NX 500 Adventure",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 Rebel",
+   "titel": "Honda CMX 1100 Rebel Cruiser",
+   "aargang": 2023,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 LD Africa Twin",
+   "titel": "Honda CRF 1100 LD Africa Twin Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 L",
+   "titel": "Honda CRF 1100 L Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTCUSE CVO Electra Glide Ultra Classic",
+   "titel": "Harley-Davidson FLHTCUSE CVO Electra Glide Ultra Classic Touring",
+   "aargang": 2015,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Ducati",
+   "model": "Super",
+   "titel": "Ducati Super Sport Sportstouring",
+   "aargang": 2017,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLHTC Electra Glide Classic",
+   "titel": "Harley-Davidson FLHTC Electra Glide Classic Touring",
+   "aargang": 2012,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 300 L",
+   "titel": "Honda CRF 300 L Offroader BYTTER GERNE",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GSX 1300 R Hayabusa",
+   "titel": "Suzuki GSX 1300 R Hayabusa Sportstouring",
+   "aargang": 2021,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "VZ 800 Intruder",
+   "titel": "Suzuki VZ 800 Intruder Cruiser",
+   "aargang": 2005,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "VFR 1200",
+   "titel": "Honda VFR 1200 Adventure",
+   "aargang": 2018,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Kawasaki",
+   "model": "Z 1000 SX",
+   "titel": "Kawasaki Z 1000 SX Sportstouring",
+   "aargang": 2012,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CL 500 A",
+   "titel": "Honda CL 500 A Street",
+   "aargang": 2024,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLSTC Heritage Softail Classic",
+   "titel": "Harley-Davidson FLSTC Heritage Softail Classic Cruiser",
+   "aargang": 2010,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing BYTTER GERNE Touring",
+   "aargang": 2005,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLD Switchback",
+   "titel": "Harley-Davidson FLD Switchback Cruiser",
+   "aargang": 2011,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1500 Gold Wing",
+   "titel": "Honda GL 1500 Gold Wing Touring",
+   "aargang": 1992,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "RH975 Nightster",
+   "titel": "Harley-Davidson RH975 Nightster Cruiser",
+   "aargang": 2026,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "CBF 1000 A",
+   "titel": "Honda CBF 1000 Touring A BYTTER GERNE",
+   "aargang": 2013,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 1100 D Rebel",
+   "titel": "Honda CMX 1100 D Rebel Cruiser",
+   "aargang": 2024,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1500 Gold Wing",
+   "titel": "Honda GL 1500 Gold Wing Touring BYTTER GERNE",
+   "aargang": 1992,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "KTM",
+   "model": "1190",
+   "titel": "KTM 1190 Adventure",
+   "aargang": 2017,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Street Triple RS",
+   "titel": "Triumph Street Triple RS",
+   "aargang": 2017,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Fantic",
+   "model": "Fantic moto maskine",
+   "titel": "Fantic moto cross maskine",
+   "aargang": null,
+   "kildeType": "cross"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXBB Bob 107\"",
+   "titel": "Harley-Davidson FXBB Street Bob 107\"",
+   "aargang": null,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Husqvarna",
+   "model": "701",
+   "titel": "Husqvarna 701 Enduro",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "KTM",
+   "model": "1190",
+   "titel": "KTM 1190 Adventure",
+   "aargang": 2013,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Daytona 955i bike",
+   "titel": "Triumph Daytona 955i Naked bike",
+   "aargang": 2005,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXD Dyna Super Glide",
+   "titel": "Harley-Davidson FXD Dyna Super Glide",
+   "aargang": 2000,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "Zusuki V-STROM 650 dl",
+   "titel": "Zusuki V-STROM Adventure Tourer + 650 dl",
+   "aargang": 2023,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FLTRXS Road Glide Special",
+   "titel": "Harley-Davidson FLTRXS Road Glide Special",
+   "aargang": 2017,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Tiger 850",
+   "titel": "Triumph Tiger 850 sport",
+   "aargang": 2021,
+   "kildeType": "sport"
+  },
+  {
+   "brand": "Honda",
+   "model": "F6 Valkyrie",
+   "titel": "Honda F6 Valkyrie Cruiser",
+   "aargang": 1998,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Benelli",
+   "model": "Tre-K 1130",
+   "titel": "Benelli Tre-K 1130 ENGROS/UDEN KLARGØRING Adventure",
+   "aargang": 2008,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CMX 500 Rebel",
+   "titel": "Honda CMX 500 Rebel Cruiser",
+   "aargang": 2025,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "VT 750 C",
+   "titel": "Honda VT 750 Cruiser C BYTTER GERNE",
+   "aargang": 2017,
+   "kildeType": "cruiser"
+  },
+  {
+   "brand": "Honda",
+   "model": "GL 1800 Gold Wing",
+   "titel": "Honda GL 1800 Gold Wing BYTTER GERNE Touring",
+   "aargang": 2026,
+   "kildeType": "touring"
+  },
+  {
+   "brand": "Suzuki",
+   "model": "GSR 750",
+   "titel": "Suzuki GSR 750 Street",
+   "aargang": 2016,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Triumph",
+   "model": "Street Triple RS",
+   "titel": "Triumph Street Triple RS Street",
+   "aargang": 2025,
+   "kildeType": "naked"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 1100 LD Africa Twin",
+   "titel": "Honda CRF 1100 LD Africa Twin Adventure Offroader",
+   "aargang": 2020,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "CRF 300 L",
+   "titel": "Honda CRF 300 L Offroader BYTTER GERNE",
+   "aargang": 2024,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Honda",
+   "model": "XL 750 Transalp",
+   "titel": "Honda XL 750 Transalp Adventure",
+   "aargang": 2026,
+   "kildeType": "adventure"
+  },
+  {
+   "brand": "Harley-Davidson",
+   "model": "FXBB Bob",
+   "titel": "Harley-Davidson FXBB Street Bob Cruiser BYTTER GERNE",
+   "aargang": 2019,
+   "kildeType": "cruiser"
+  }
+ ]
+}

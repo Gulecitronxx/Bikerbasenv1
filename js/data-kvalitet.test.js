@@ -326,7 +326,8 @@ test('F-003: friskheden regnes som MEDIANEN af sidstSet, og lageret kaldes gamme
   assert.equal(g.datoTekst, '1. jul.');
   assert.equal(g.gammel, true);
   assert.equal(g.advarsel, 'Annoncerne kan være ændret siden.');
-  assert.equal(g.samlet, 'De fleste annoncer er bekræftet senest 1. jul. Annoncerne kan være ændret siden.');
+  // V7: den samlede tekst nævner halen med tal (medianen alene skjulte 300 gamle bag ét friskt opslag).
+  assert.equal(g.samlet, '1 af 301 annoncer er bekræftet inden for 14 dage (senest 15. okt.). 300 kan være solgt — tjek hos kilden.');
   assert.equal(M.senesteBekraeftet(liste, new Date('2026-09-07T12:00:00Z')).gammel, false, '14 dage er stadig inden for grænsen');
   assert.equal(M.senesteBekraeftet([{ sidstSet: '2026-08-24T12:00:00Z' }], new Date('2026-09-08T12:00:00Z')).gammel, true, '15 dage er over');
   assert.equal(M.senesteBekraeftet([{ sidstSet: '2025-12-24T12:00:00Z' }], nu).datoTekst, '24. dec. 2025');

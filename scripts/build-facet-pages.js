@@ -1164,7 +1164,7 @@ function tillidsraekke(senest){
     ['shieldCheck', 'Kilden står på hvert kort', 'Du kan altid se, hvor annoncen kommer fra.'],
     ['checkCircle', 'Kørekortfilter på oplyste tal', 'Vi gætter aldrig. Mangler et tal, står der "Ikke oplyst".'],
     ['heart', 'Gem dine favoritter', 'Tryk på hjertet på et kort og find dem igen senere.'],
-    ['clock', senest ? `Bekræftet ${senest}` : 'Opdateres løbende', senest ? 'Senest bekræftet hos kilderne.' : 'Lageret indekseres løbende fra kilderne.'],
+    ['clock', senest ? `Senest bekræftet ${senest}` : 'Opdateres løbende', senest ? 'Nyeste bekræftelse hos kilderne. Ældre annoncer har deres alder på kortet.' : 'Lageret indekseres løbende fra kilderne.'],
   ];
   return `<ul class="fa-tillid">${r.map(([i, t, s]) => `<li>${IKON(i)}<div><strong>${t}</strong><span>${s}</span></div></li>`).join('')}</ul>`;
 }
@@ -1984,7 +1984,7 @@ ${header}
       <!-- "lige nu" er væk (R11-I-10): tallet bages ved byg og opdateres ikke
            ved visning. Datoen under siger i stedet, hvornaar lageret sidst blev
            bekraeftet — samme linje som maerkesiden (D9-M2). -->
-      <div class="fa-h2-raekke"><div><h2 class="fa-h2" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="facet-note">${liste.length > FACET_KORT ? `De første ${FACET_KORT} vises her.` : ''}</p>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}.</p>` : ''}</div></div>
+      <div class="fa-h2-raekke"><div><h2 class="fa-h2" id="facet-antal">${items.length} ${items.length === 1 ? 'annonce' : 'annoncer'}</h2><p class="brand-facet-note" id="facet-note">${liste.length > FACET_KORT ? `De første ${FACET_KORT} vises her.` : ''}</p>${senestOpdateret ? `<p class="brand-facet-note">Senest bekræftet hos kilderne ${senestOpdateret}. Ikke alle er det: en annonce, vi ikke har kunnet bekræfte i over 14 dage, har sin alder på kortet.</p>` : ''}</div></div>
       ${facetVaerktoejer(facet, items, ctx)}
       <div class="listings-grid" id="facet-listings-flere">${kort2}</div>
       ${liste.length > FACET_KORT ? `<p class="fa-mere-lille"><a class="fa-mere" href="${facetSearchUrl(facet)}"><span>${seAlle(facet, items, ctx)}</span> <span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a></p>` : ''}

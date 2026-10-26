@@ -103,13 +103,38 @@ const Sortering = (function(){
     return n;
   }
 
+  /* V7 data: nedtoning af forsinkede annoncer — rangeres lavere, SKJULES aldrig. Trækkes fra oplystheden:
+     inden for FRISK_DAGE 0, til LANG_TID_DAGE -2, derover -4. Alderen regnes mod listens NYESTE bekræftelse,
+     ikke mod "nu": buildet (build-srp.js) og browseren giver så samme rækkefølge af samme data (ingen CLS).
+     Annoncer uden dato (egne) nedtones aldrig. */
+  const FRISK = (typeof LIVSCYKLUS !== 'undefined' && LIVSCYKLUS.FRISK_DAGE) || 14;
+  const LANG_TID = (typeof LIVSCYKLUS !== 'undefined' && LIVSCYKLUS.LANG_TID_DAGE) || 30;
+  const DAG = 86400000;
+  const sidstTid = l => {
+    const t = l && l.sidstSet ? Date.parse(l.sidstSet) : NaN;
+    return Number.isFinite(t) && new Date(t).getFullYear() >= 2000 ? t : null;
+  };
+  const nyesteBekraeftelse = list => {
+    let ref = null;
+    for (const l of list){ const t = sidstTid(l); if (t != null && (ref == null || t > ref)) ref = t; }
+    return ref;
+  };
+  function nedtoning(l, ref){
+    const t = sidstTid(l);
+    if (t == null || ref == null) return 0;
+    const d = (ref - t) / DAG;
+    return d > LANG_TID ? 4 : d > FRISK ? 2 : 0;
+  }
+
   function blandetRaekkefoelge(list){
+    const ref = nyesteBekraeftelse(list);
+    const rang = l => annonceOplysthed(l) - nedtoning(l, ref);
     const tid = l => (l.createdAt ? new Date(l.createdAt).getTime() : null);
     /* Tredje niveau er id og ikke "uændret rækkefølge": annoncerne kommer fra
        to kilder, der flettes i js/backend-bridge.js, og et genbesøg må ikke
        give en anden rækkefølge, end det link man delte. */
     const bedstFoerst = (a, b) => {
-      const d = annonceOplysthed(b) - annonceOplysthed(a);
+      const d = rang(b) - rang(a);
       if (d) return d;
       const ta = tid(a), tb = tid(b);
       if (ta != null && tb != null && ta !== tb) return tb - ta;
@@ -140,9 +165,9 @@ const Sortering = (function(){
       const ud = [];
       let i = 0;
       while (i < sorteret.length){
-        const p = annonceOplysthed(sorteret[i]);
+        const p = rang(sorteret[i]);
         let j = i;
-        while (j < sorteret.length && annonceOplysthed(sorteret[j]) === p) j++;
+        while (j < sorteret.length && rang(sorteret[j]) === p) j++;
         const klasse = sorteret.slice(i, j);
         const koeer = new Map();
         for (const l of klasse){ const k = kildeNoegle(l); if (!koeer.has(k)) koeer.set(k, []); koeer.get(k).push(l); }
@@ -187,8 +212,8 @@ const Sortering = (function(){
   }
 
   /* Sorterer en (allerede filtreret) liste efter `sort` — en af
-     SORTERINGER i js/search.js: 'blandet', 'date-desc', 'price-asc',
-     'price-desc', 'year-desc', 'km-asc'. Ukendt sort falder tilbage til
+     SORTERINGER i js/search.js: 'blandet', 'date-desc', 'bekraeftet-desc',
+     'price-asc', 'price-desc', 'year-desc', 'km-asc'. Ukendt sort falder tilbage til
      'date-desc', som før. Listen sorteres på stedet OG returneres. */
   function sorter(list, sort){
 
@@ -225,6 +250,26 @@ const Sortering = (function(){
        `sorters`. */
     if (sort === 'blandet') return blandetRaekkefoelge(list);
 
+    /* "Senest bekræftet": dagen, crawleren sidst så annoncen (egne: oprettelsesdagen). Samme dag = én gruppe,
+       ordnet som "blandet". Uden dato bagest. */
+    if (sort === 'bekraeftet-desc'){
+      const dagNoegle = l => {
+        const t = sidstTid(l) ?? (l.createdAt ? new Date(l.createdAt).getTime() : null);
+        return Number.isFinite(t) ? Math.floor(t / DAG) : null;
+      };
+      const grupper = new Map();
+      for (const l of list){
+        const k = dagNoegle(l);
+        if (!grupper.has(k)) grupper.set(k, []);
+        grupper.get(k).push(l);
+      }
+      const noegler = [...grupper.keys()].filter(k => k != null).sort((a, b) => b - a);
+      if (grupper.has(null)) noegler.push(null);
+      const ud = [];
+      for (const k of noegler) ud.push(...blandetRaekkefoelge(grupper.get(k)));
+      return ud;
+    }
+
     /* "Nyeste først" var en fælde, og det er målt: valget lagde de 51 annoncer
        MED dato øverst og de 332 uden bagefter — og de 51 er præcis dem, der
        ikke har fået uploadet et foto. Side 1 blev derfor 24 grå felter, mens
@@ -251,6 +296,6 @@ const Sortering = (function(){
     return list;
   }
 
-  return { harFoto, annonceOplysthed, blandetRaekkefoelge, sorter, OPLYSTHED };
+  return { harFoto, annonceOplysthed, blandetRaekkefoelge, sorter, OPLYSTHED, nedtoning, nyesteBekraeftelse };
   })();
   if (typeof module !== 'undefined' && module.exports) module.exports = Sortering;

@@ -1393,7 +1393,7 @@ ${header}
         <!-- ÉT antal på siden (V-012): items.length, samme som titel, intro og
              FAQ. js/maerke.js opdaterer alle [data-mk-n] samlet, hvis lageret
              har ændret sig siden bygget — aldrig kun ét af dem. -->
-        <div><h2 class="brand-sub" id="brand-antal">${items.length > fremhaevede.length ? `Flere ${esc(brand)}-annoncer` : `Alle ${esc(brand)}-annoncer`}</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>${tal(items.length)}</span> ${items.length === 1 ? 'annonce' : 'annoncer'} i alt. ${items.length > fremhaevede.length + MAERKE_KORT ? `De første ${MAERKE_KORT} af resten vises her. ` : ''}${senestOpdateret ? `Senest bekræftet hos kilderne ${senestOpdateret}.` : ''}</p></div>
+        <div><h2 class="brand-sub" id="brand-antal">${items.length > fremhaevede.length ? `Flere ${esc(brand)}-annoncer` : `Alle ${esc(brand)}-annoncer`}</h2><p class="brand-facet-note" id="brand-note"><span data-mk-n>${tal(items.length)}</span> ${items.length === 1 ? 'annonce' : 'annoncer'} i alt. ${items.length > fremhaevede.length + MAERKE_KORT ? `De første ${MAERKE_KORT} af resten vises her. ` : ''}${senestOpdateret ? `Senest bekræftet hos kilderne ${senestOpdateret}. Ikke alle er det: en annonce, vi ikke har kunnet bekræfte i over 14 dage, har sin alder på kortet.` : ''}</p></div>
         <a class="section-link" href="soegning.html?brands=${encodeURIComponent(brand)}">Alle <span data-mk-n>${tal(items.length)}</span> i søgningen<span aria-hidden="true"></span></a>
       </div>
       ${facetLinksFor(brand, items)}

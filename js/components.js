@@ -964,7 +964,9 @@ function listingCardHTML(l, i){
   linje.push(f.aar != null ? `<span>${escapeHTML(String(f.aar))}</span>` : '<span class="rk-mangler">Årgang ikke oplyst</span>');
   if (f.km != null) linje.push(`<span>${escapeHTML(formatKm(f.km))}</span>`);
   else if (!f.ny) linje.push('<span class="rk-mangler">Km ikke oplyst</span>');
-  if (f.type) linje.push(`<span>${escapeHTML(f.type)}</span>`);
+  if (f.type) linje.push(l.typeAfledt
+    ? `<span title="Typen er afledt af modellen — kilden oplyser den ikke.">${escapeHTML(f.type)}</span>`   // V7: ærlig om, hvor typen kommer fra
+    : `<span>${escapeHTML(f.type)}</span>`);
 
   const kk = f.kk;
   const kkKlasse = kk.kode ? ` kk-${String(kk.kode).toLowerCase()}` : ' kk-ukendt';
@@ -982,6 +984,15 @@ function listingCardHTML(l, i){
   /* Mærkater på fotoet gælder kun egne annoncer (kilden har sit eget). Prismærkatet fik sin forklaring
      med tal, køberen selv kan efterprøve — se prisSammenligning() i js/data.js. */
   let badges = '';
+  /* V7: ærlig alder på det indekserede kort. Kun når bekræftelsen er over FRISK_DAGE gammel (eller kilden ikke
+     kunne tjekkes): så står der "Bekræftet for 63 dage siden" på fotoet, og title/aria har hele sætningen. Et
+     friskt kort siger intet. Mærkatet ligger OVER fotoet og flytter derfor intet i kortets højde. */
+  if (f.ext){
+    const alder = annonceAlder(l);
+    if (alder && alder.advarsel){
+      badges = `<div class="card-badges"><span class="badge badge-alder badge-alder-${alder.niveau}" title="${escapeHTML(alder.linje)}">${Icon.clock}<span class="al-lang">${escapeHTML(alder.kort)}</span><span class="al-kort" aria-hidden="true">${escapeHTML(alder.kortest)}</span><span class="visually-hidden">. ${escapeHTML(alder.linje)}</span></span></div>`;
+    }
+  }
   if (!f.ext){
     const mistaenkt = isSuspiciouslyCheap(l);
     const prisBasis = mistaenkt ? prisSammenligning(l) : null;

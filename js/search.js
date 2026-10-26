@@ -25,7 +25,7 @@ const EMPTY_STATE = {
    forkaste en ?sort= fra URL'en, vi ikke kender — før faldt en ukendt værdi
    igennem til `sorters[state.sort] || …`, og så stod der en sortering i
    vælgeren, som ikke var den, resultatet var sorteret efter. */
-const SORTERINGER = ['blandet', 'date-desc', 'price-asc', 'price-desc', 'year-desc', 'km-asc'];
+const SORTERINGER = ['blandet', 'date-desc', 'bekraeftet-desc', 'price-asc', 'price-desc', 'year-desc', 'km-asc'];
 /* Standardsorteringen hed `relevans` i runde 1. Den skrives aldrig i URL'en
    (den er standard, se currentQueryString), men et delt eller bogmærket link
    med ?sort=relevans skal ikke lande i "Nyeste først" bare fordi vi rettede
@@ -1042,7 +1042,7 @@ function renderFriskNote(list){
     return;
   }
   el.hidden = false;
-  el.title = frisk.aeldsteTekst === frisk.datoTekst ? '' : `Ældste bekræftelse: ${frisk.aeldsteTekst}`;
+  el.title = [frisk.detalje, frisk.aeldsteTekst === frisk.datoTekst ? '' : `Ældste bekræftelse: ${frisk.aeldsteTekst}`].filter(Boolean).join(' ');
   el.textContent = frisk.samlet;
 }
 
@@ -1350,7 +1350,14 @@ function forklarSortering(){
     markedsplads efter tur, så længe kilden har flere i den klasse. Så ligner
     side 1 hele lageret og ikke den største kildes katalog. Inden for kildens
     egen kø afgør datoen og derefter annoncens id rækkefølgen, så det samme
-    link altid giver den samme liste.</p>`);
+    link altid giver den samme liste.</p>
+    <p style="margin-top:12px;"><b>Forsinkede annoncer nedtones, de skjules ikke.</b>
+    En annonce, vi ikke har kunnet bekræfte hos kilden i over 14 dage, mister
+    2 point; over 30 dage mister den 4. Så en annonce, der kan være solgt,
+    ikke står foran en, vi har set i dag — men den er der stadig, og
+    antallene er de samme. Alderen regnes mod den nyeste bekræftelse i
+    listen. Vil du have de nyligt bekræftede øverst, så vælg
+    <i>Senest bekræftet</i>.</p>`);
 }
 
 /* Sætningen over resultaterne. Runde 2 skrev BEGGE regler her, og de to
@@ -1370,7 +1377,7 @@ function renderSorteringsNote(sideItems, heleResultatet){
      skjult. Den vises, naar der er noget at forklare (blandet/date-desc). */
   const fastInfo = document.getElementById('sortering-info-btn');
   if (fastInfo && !fastInfo.dataset.klar){ fastInfo.dataset.klar = '1'; fastInfo.innerHTML = Icon.info; fastInfo.addEventListener('click', forklarSortering); }
-  if (fastInfo) fastInfo.hidden = !(state.sort === 'blandet' || state.sort === 'date-desc');
+  if (fastInfo) fastInfo.hidden = !(state.sort === 'blandet' || state.sort === 'date-desc' || state.sort === 'bekraeftet-desc');
   const infoKnap = '';
 
   /* "Nyeste først" er den anden sortering, der har brug for en linje — og
@@ -1390,6 +1397,16 @@ function renderSorteringsNote(sideItems, heleResultatet){
        HVORFOR de udaterede staar bagest, staar i (i), hvor det hoerer til. */
     el.innerHTML = `Nyeste først: ${medDato} af ${heleResultatet.length} har en dato og står øverst — `
       + `resten uden dato bagefter.${infoKnap}`;
+    return;
+  }
+
+  /* V7: "Senest bekræftet" — hvor mange står øverst, fordi de er bekræftet inden for FRISK_DAGE. */
+  if (state.sort === 'bekraeftet-desc'){
+    const fd = friskhedsFordeling(heleResultatet);
+    if (!fd.dateret || !fd.aeldre){ el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = `Senest bekræftet først: ${fd.frisk} af ${fd.dateret} indekserede er bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage — `
+      + `de ${fd.aeldre} øvrige står bagest og kan være solgt.${infoKnap}`;
     return;
   }
 

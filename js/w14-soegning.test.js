@@ -150,7 +150,8 @@ test('1440 uden thumbnails: ærligt typefoto med label (ingen stiplede tomme fel
     assert.equal(m.samIFoto, m.n, 'V6: sammenlign ligger på fotoet (nederst til højre) i alle kort; før V6 i en 40 px fodslot (kortet 15 px højere)');
     assert.ok(m.titelLinjer <= 2, 'V5: titel højst to linjer (var klippet til én linje med ellipse) ' + m.titelLinjer);
     assert.ok(m.raekkerEns, 'kortene i samme række er lige høje (grid strækker), også når en titel/chip-række fylder mere');
-    assert.ok(m.bundH <= 350, 'bundmoduler ' + m.bundH);
+    /* V7 data: 430 (før 350). Typen afledes nu af mærke + model, så Classic og Cross har over 10 annoncer og får deres egne type-sider: facetlinkblokken nederst har 7 type-chips i stedet for 5 og ombryder til en række mere ved 1440 px (ca. +78 px). */
+    assert.ok(m.bundH <= 430, 'bundmoduler ' + m.bundH);
     assert.equal(m.info, 0, 'info-linjen er ikke afkortet med ellipsis');
   } finally { await s.luk(); }
 });
