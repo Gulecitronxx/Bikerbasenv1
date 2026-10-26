@@ -1294,3 +1294,5 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
 :root[data-theme="dark"] .an-alder-udloebet{ background:#4A1D12; color:#FCA98F; border-color:rgba(252,169,143,.3); }
 /* V7 data: "(afledt fra model)" ved Type, når kilden ikke oplyser den. Dæmpet, men læsbar. */
 .an-afledt{ color: var(--color-fg-muted); font-size:.92em; font-weight:400; cursor:help; }
+/* V7 data: én linje om grundlaget for "Lignende motorcykler" (js/annonce.js lignendeOverskrift). Står mellem overskriften og kortene. */
+.similar-strip .similar-note{ margin:calc(-1 * var(--space-2)) 0 var(--space-4); font-size:13px; line-height:1.45; color: var(--color-fg-muted); max-width:70ch; }
