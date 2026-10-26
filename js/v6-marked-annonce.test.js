@@ -113,10 +113,16 @@ const TITEL = () => {
   return { tekst: t, linjer: linjer.length, sidste, h1W: hb.width, h1Top: hb.top, logoW: lb && lb.width, logoBund: lb && lb.bottom, logoTop: lb && lb.top, logoLeft: lb && lb.left, h1Right: hb.right, raekkeW: rb && rb.width, sw: document.documentElement.scrollWidth - document.documentElement.clientWidth };
 };
 for (const vp of [375, 768, 1440]) {
-  test(`P2-3 ${vp}: H1 ombrydes pænt (ingen enlige ord), logoet højst 120 px bredt og æder ikke titlen — Honda, KTM, Royal Enfield, Husqvarna, Yamaha, BMW, Suzuki, Kawasaki`, { timeout: 90000 }, async t => {
+  test(`P2-3 ${vp}: H1 ombrydes pænt (ingen enlige ord), logoet højst 120 px bredt og æder ikke titlen — Honda, KTM, Royal Enfield, Husqvarna, Yamaha, BMW, Suzuki, Kawasaki`, { timeout: 240000 }, async t => {
     if (!H) return t.skip('Playwright mangler');
     for (const [navn, id] of WIDE) {
-      const m = await side(vp, `annonce.html?id=${id}`, p => p.evaluate(TITEL));
+      /* V7 QA: mål først når TILSTANDEN er nået (fonte indlæst, logoet tegnet) og to målinger i træk er ens — ikke efter et fast antal ms. */
+      const m = await side(vp, `annonce.html?id=${id}`, async p => {
+        await p.waitForFunction(() => document.fonts.status === 'loaded' && (document.querySelector('.an-maerkelogo .bl') || {}).getBoundingClientRect && document.querySelector('.an-maerkelogo .bl').getBoundingClientRect().width > 0, null, { timeout: 15000 }).catch(() => {});
+        let sidste = null, nu = await p.evaluate(TITEL);
+        for (let i = 0; i < 20 && JSON.stringify(nu) !== JSON.stringify(sidste); i++) { sidste = nu; await p.waitForTimeout(120); nu = await p.evaluate(TITEL); }
+        return nu;
+      });
       assert.ok(m.logoW > 0 && m.logoW <= 120.5, `${navn}: logo ${m.logoW} px bredt (loft 120)`);
       assert.ok(m.linjer === 1 || m.sidste.length >= 2, `${navn} ${vp}: "${m.sidste.join(' ')}" står alene på sidste linje af "${m.tekst}" (${m.linjer} linjer)`);
       assert.ok(m.linjer <= 3, `${navn}: ${m.linjer} linjer`);

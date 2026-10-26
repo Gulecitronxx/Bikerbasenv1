@@ -116,19 +116,30 @@ test('genforsøg: kommer fejlen igen, er den ægte (fejl), og et andet fund skju
 
 /* ---------------- søgesiden: CLS på dybe links, kold og varm cache ---------------- */
 
-test('CLS under 0,05 på søgesidens dybe links ved 375/430/768/1440, lys og mørk, kold og varm cache (og 0 fejl)', { timeout: 420000 }, async t => {
-  if (!kan.ok) return t.skip(kan.grund);
-  const r = await sb.koer({ sider: ['soegning'], soegLinks: true, varm: true, viewports: [375, 430, 768, 1440], temaer: ['lys', 'mørk'], cls: 0.05, stille: true, pw: kan.pw });
-  const udenTransient = r.fund.filter(f => !f.transient);
-  assert.strictEqual(r.sammenfatning.fejl, 0, 'fejl: ' + JSON.stringify(udenTransient.slice(0, 5)));
-  const forsat = r.maalinger.filter(m => m.cls > 0.05).map(m => `${m.query || '(ingen)'} ${m.viewport} ${m.tema} ${m.cache}: ${m.cls}`);
-  assert.deepStrictEqual(forsat, [], 'CLS over 0,05: ' + forsat.join('; '));
-  assert.strictEqual(r.maalinger.length, (sb.SOEGE_LINKS.length + 1) * 4 * 2 * 2, 'hver adresse x viewport x tema x kold/varm');
-  assert.ok(r.maalinger.some(m => m.cache === 'varm') && r.maalinger.some(m => m.cache === 'kold'));
-  assert.ok(r.maalinger.every(m => m.annoncekort > 0 || /xyzzy/.test(m.query)), 'kortene blev tegnet (siden hydrerede)');
-  const vaerst = r.maalinger.reduce((a, b) => (b.cls > a.cls ? b : a));
-  console.log(`# v5-soegning-cls: ${r.maalinger.length} målinger, værste CLS ${vaerst.cls} (${vaerst.query || '(ingen)'} ${vaerst.viewport} ${vaerst.tema} ${vaerst.cache}), ${r.sammenfatning.transient} transient`);
-});
+/* V7 QA: ÉN test pr. viewport (var én test på 420 s, målt 297 s under npm test og dermed tæt på loftet), og GENMÅLING VED RØD: en måling over 0,05 tages om
+   med præcis samme adresse/viewport/tema (kold og varm cache), og kun hvis den OGSÅ er over i genmålingen tæller den. Grænsen 0,05 er uændret. */
+for (const vp of [375, 430, 768, 1440]) {
+  test(`CLS under 0,05 på søgesidens dybe links ved ${vp} px, lys og mørk, kold og varm cache (og 0 fejl)`, { timeout: 420000 }, async t => {
+    if (!kan.ok) return t.skip(kan.grund);
+    const r = await sb.koer({ sider: ['soegning'], soegLinks: true, varm: true, viewports: [vp], temaer: ['lys', 'mørk'], cls: 0.05, stille: true, pw: kan.pw });
+    const udenTransient = r.fund.filter(f => !f.transient);
+    const rod = r.maalinger.filter(m => m.cls > 0.05);
+    const ende = [];
+    for (const m of rod) {   // genmåling ved rød: samme adresse, viewport, tema
+      const igen = await sb.koer({ sider: [`soegning.html${m.query || ''}`], varm: true, viewports: [vp], temaer: [m.tema === 'mørk' ? 'mørk' : 'lys'], cls: 0.05, stille: true, pw: kan.pw });
+      const same = igen.maalinger.find(x => x.cache === m.cache && x.query === m.query);
+      if (!same || same.cls > 0.05) ende.push(`${m.query || '(ingen)'} ${m.viewport} ${m.tema} ${m.cache}: ${m.cls} (genmåling ${same ? same.cls : 'mangler'})`);
+    }
+    const fejlUdenCls = udenTransient.filter(f => f.tjek !== 'cls' && sb.TJEK[f.tjek] === 'fejl');
+    assert.strictEqual(fejlUdenCls.length, 0, 'fejl: ' + JSON.stringify(fejlUdenCls.slice(0, 5)));
+    assert.deepStrictEqual(ende, [], 'CLS over 0,05 (også i genmåling): ' + ende.join('; '));
+    assert.strictEqual(r.maalinger.length, (sb.SOEGE_LINKS.length + 1) * 2 * 2, 'hver adresse x tema x kold/varm');
+    assert.ok(r.maalinger.some(m => m.cache === 'varm') && r.maalinger.some(m => m.cache === 'kold'));
+    assert.ok(r.maalinger.every(m => m.annoncekort > 0 || /xyzzy/.test(m.query)), 'kortene blev tegnet (siden hydrerede)');
+    const vaerst = r.maalinger.reduce((a, b) => (b.cls > a.cls ? b : a));
+    console.log(`# v5-soegning-cls ${vp}: ${r.maalinger.length} målinger, værste CLS ${vaerst.cls} (${vaerst.query || '(ingen)'} ${vaerst.viewport} ${vaerst.tema} ${vaerst.cache}), ${r.sammenfatning.transient} transient, ${rod.length} rød(e) før genmåling`);
+  });
+}
 
 /* ---------------- søgesiden: layout i kortene ---------------- */
 

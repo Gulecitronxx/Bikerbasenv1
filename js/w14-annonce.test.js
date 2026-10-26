@@ -249,9 +249,11 @@ test('opret login-port: teksten og toasten siger eksplicit, at billeder skal væ
   const s = await aabn({ width: 1440, height: 900 }, 'light', { loggetInd: false, annoncer: [] });
   try {
     await gaa(s, 'opret-annonce.html');
+    /* V7 QA: vent på at formularen er klar (data-op-klar sættes EFTER at knappens lytter er koblet på); før var klikket muligt før lytteren, og toasten udeblev under belastning. */
+    await s.page.waitForSelector('body[data-op-klar]', { state: 'attached', timeout: 15000 });
     assert.match(await s.page.locator('#op-photo-gate').innerText(), /Billeder kan ikke gemmes i en kladde/);
     await s.page.click('#op-photo-gate-btn');
-    await s.page.waitForFunction(() => /Billeder kan ikke gemmes i kladden/.test(document.body.innerText), null, { timeout: 4000 });
+    await s.page.waitForFunction(() => /Billeder kan ikke gemmes i kladden/.test(document.body.innerText), null, { timeout: 15000 });
     assert.match(await s.page.evaluate(() => document.body.innerText), /dem vælger du først, når du er logget ind/);
     assert.strictEqual(s.bak.tilstand.tabeller.listings.length, 0, 'intet oprettet');
   } finally { await s.ctx.close(); }
