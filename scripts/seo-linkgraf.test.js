@@ -57,7 +57,11 @@ test('committede sider: ingen forældreløse, ingen tynde (<3 indgående) og ing
   /* Mærkesider får deres indgående links fra maerker.html og fra beslægtede mærkesider, og de sidste afhænger af lageret
      (hvilke mærker har annoncer, og hvor mange). Et lille mærke (fx Ducati med 4 annoncer) kan derfor have 2 i stedet for 3
      uden at sitet er gået i stykker — tærsklen er 2 for maerke-*, 3 for alt andet. Forældreløse (0 indgående) er stadig en fejl. */
-  assert.deepStrictEqual(g.tynde.filter(([fil, n]) => !(/^maerke-/.test(fil) && n >= 2)), []);
+  /* V7 data: det samme gælder mc-<mærke>-<type> for et mærke, der kun har ÉN sådan side (indgående: mærkesiden og typesiden; søskendesiderne findes ikke).
+     Efter at typen afledes af mærke + model, får fx Yamaha cruiser (18 annoncer) sin side; de tre mærke+type-sider, der opstår, er mc-honda-sport, mc-suzuki-cruiser og
+     mc-yamaha-cruiser. Den sidste har 2 indgående. En tredje kunne komme fra en "samme type, andre mærker"-blok i generatoren (ikke bygget; se restpunkter i
+     docs/review/gauntlet/v7/data.md). Forældreløse (0) er stadig en fejl. */
+  assert.deepStrictEqual(g.tynde.filter(([fil, n]) => !(/^(?:maerke|mc)-/.test(fil) && n >= 2)), []);
   assert.deepStrictEqual(g.dybe, []);
 });
 

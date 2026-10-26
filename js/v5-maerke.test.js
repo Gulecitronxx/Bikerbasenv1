@@ -114,7 +114,11 @@ test('V5: registrets vægt i data.js er målt og holdes nede (slank kopi < 4 KB 
   const fuld = zlib.gzipSync(R.MAERKER_ANTAL && fs.readFileSync(path.join(rod, 'js/brands-registry.js'), 'utf8')).length;
   assert.ok(gz < 4096, `slank kopi ${gz} B gzip`);
   assert.ok(gz < fuld * 0.7, `slank ${gz} B skal være væsentligt mindre end den fulde fil ${fuld} B`);
-  assert.ok(zlib.gzipSync(data).length < 45905, 'data.js (gzip) skal være mindre end før V5 (45.905 B), selv med 12 mærker mere');
+  /* V7 data: data.js har fået to nye dele, som ikke hører til registret: typetabellen (@@TYPETABEL, genereret af scripts/type-klassificering.js, ca. 3,2 kB gzip) og
+     livscyklus-/alderslogikken (ca. 1,8 kB). V5-ratchetten måler derfor data.js UDEN typetabellen og med 2.000 B luft til livscyklussen; hele filens vægt holdes af
+     sidevægtsbudgettet (scripts/v5-sidevaegt.budget.json, "js/data.js"), der er hævet bevidst med begrundelse. */
+  const udenTypetabel = data.slice(0, data.indexOf('/* @@TYPETABEL-START')) + data.slice(data.indexOf('/* @@TYPETABEL-END */') + '/* @@TYPETABEL-END */'.length);
+  assert.ok(zlib.gzipSync(udenTypetabel).length < 45905 + 2000, 'data.js (gzip, uden typetabellen) skal holde V5-grænsen (45.905 B) plus 2.000 B til V7-livscyklussen, selv med 12 mærker mere');
   for (const forbudt of ['wikipedia.org', 'visordown', 'GENERISKE', 'vurderKandidat']) assert.ok(!blok.includes(forbudt), `${forbudt} hører ikke i browserkopien`);
 });
 
