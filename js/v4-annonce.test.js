@@ -240,7 +240,7 @@ const barTekst = p => p.evaluate(() => { const b = document.getElementById('bar-
 test('udlogget på database-annonce: bjælken siger "Log ind for at se nummer" + at ikke alle sælgere viser et — ikke bare "Vis nummer"', { timeout: 60000 }, async t => {
   if (!H) return t.skip('Playwright mangler');
   const r = await mobil(false, undefined, async p => ({ bar: await barTekst(p), side: await p.evaluate(() => document.querySelector('.an-seller-wrap').innerText) }));
-  assert.match(r.bar.tekst, /^Log ind for at se nummer Ikke alle sælgere viser et$/);
+  assert.match(r.bar.tekst, /^Log ind for at se nummer Ikke alle sælgere viser deres nummer$/);
   assert.doesNotMatch(r.bar.tekst, /^Vis nummer/);
   assert.ok(r.bar.h <= 76, `bjælken er højst --actionbar-h (76 px): ${r.bar.h}`);
   assert.match(r.side, /Log ind gratis, og tryk på .Vis telefonnummer., hvis sælgeren har valgt at vise sit nummer/);   // V7: ærlig vej FØR login

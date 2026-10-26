@@ -84,7 +84,7 @@ const RODMOENSTRE = [
 const FORBUDTE_TYPER = /\.(sql|ya?ml|md|env|pem|key)$/i;
 
 function ryd(dir){
-  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
 }
 
 /* ---- Minificering på vej ud ----

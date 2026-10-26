@@ -1840,7 +1840,7 @@ function renderListing(){
       if (!telefon){
         barPhone.innerHTML = loggedIn
           ? '<span class="bar-l">Vis nummer</span><small>hvis sælgeren viser det</small>'
-          : '<span class="bar-l">Log ind for at se nummer</span><small>Ikke alle sælgere viser et</small>';
+          : '<span class="bar-l">Log ind for at se nummer</span><small>Ikke alle sælgere viser deres nummer</small>';
       }
       barPhone.addEventListener('click', () => spring('reveal-phone-btn', true));
     }
