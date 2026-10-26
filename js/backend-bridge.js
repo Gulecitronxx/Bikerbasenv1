@@ -551,7 +551,50 @@ function fjernOrdDublet(tekst){
   return String(tekst).split(/\s+/).filter((o, i, a) => i === 0 || o.toLowerCase() !== a[i-1].toLowerCase()).join(' ');
 }
 
+/* V7: hængsler efter modelnavnet — kun i halen, kun hele ord. */
+function efterStoej(m, p_aargang){
+  let t = String(m || '').trim();
+  const foer = t;
+  // Kildens kategoriord "Classic Bike" efter et modelord (BSA A65 Thunderbolt Classic Bike); "Custom Bike" røres ikke.
+  t = t.replace(/(\S)\s+classic\s+bike\s*$/i, '$1');
+  // "Daytona 955i bike": "bike" efter et modelord med tal.
+  t = t.replace(/(\S*\d\S*)\s+bike\s*$/i, '$1');
+  // A2-hængsel ("Cb500 1996 a2"): hører til kørekortet, ikke til modellen.
+  t = t.replace(/(\S)\s+a2\s*$/i, '$1');
+  // Et trailing årstal, der ligger inden for ét år af annoncens egen årgang (Cb500 1996 på en 1997-annonce).
+  const aar = Number(p_aargang);
+  if (aar) {
+    const mm = t.match(/^(.*\S)\s+((?:19[5-9]|20[0-2])\d)$/);
+    if (mm && /\p{L}/u.test(mm[1]) && Math.abs(Number(mm[2]) - aar) <= 1) t = mm[1];
+  }
+  t = t.replace(/[\s,\-–·]+$/, '').trim();
+  return t || foer;
+}
+
+/* V7: kategoriord i modelfeltet efter at mærket er fjernet. "Victory motorcykel V 92 Prototype" -> "V 92 Prototype";
+   "Yamaha moto yamaha" -> intet; "Fantic moto maskine" -> intet. 'moto' alene er et ord i rigtige modelnavne (Honda Motocompo),
+   så det fjernes kun foran selve mærkenavnet eller når alt andet også er kategoriord. */
+const KATEGORI_ORD = new Set(['moto', 'motorcykel', 'motorcykler', 'mc', 'maskine', 'maskiner', 'scooter', 'knallert', 'bike', 'cykel']);
+function fjernKategoriOrd(maerke, model){
+  if (!model) return model;
+  let t = String(model).trim();
+  const noeg = s => String(s || '').toLowerCase().replace(/[^a-z0-9æøå]+/g, '');
+  const ord = t.split(/\s+/);
+  if (ord.length && ord.every(o => KATEGORI_ORD.has(noeg(o)))) return '';
+  let aendret = false;
+  if (ord.length > 1 && /^motorcykel(?:ler)?$/i.test(noeg(ord[0]))){ t = ord.slice(1).join(' '); aendret = true; }
+  else if (ord.length > 1 && noeg(ord[0]) === 'moto' && maerke && noeg(ord.slice(1).join('')) === noeg(maerke)){ t = ''; aendret = true; }
+  if (aendret && t && /^[a-zæøå]/.test(t)) t = t.charAt(0).toUpperCase() + t.slice(1);
+  return t;
+}
+
 function fjernMaerkeDublet(maerke, model){
+  const uden = fjernMaerkeDubletRaa(maerke, model);
+  // V7: et mærkenavn foran en model med småt ("Nye Kawasaki kx 450") efterlader "kx 450"; kortets model starter med stort.
+  const pyntet = uden && uden !== model && /^[a-zæøå]/.test(uden) ? uden.charAt(0).toUpperCase() + uden.slice(1) : uden;
+  return fjernKategoriOrd(maerke, pyntet);
+}
+function fjernMaerkeDubletRaa(maerke, model){
   if (!maerke || !model) return model;
   const m = String(model).trim();
   const b = String(maerke).trim();
@@ -583,6 +626,47 @@ function fjernMaerkeDublet(maerke, model){
    igen overalt. Reglen klipper ved det foerste stoejord/kildenavn og ved to
    VERSAL-ord i traek efter et modelord (farver/udstyr). Resten smides vaek:
    det er reklame, ikke data. Ingen ny oplysning opfindes. */
+/* ---------- V7 (mærke): konservativ støj i modelnavnet (rensModelStoej) ----------
+   Målt på lageret 26.10.2026 (735 rækker) stod der stadig 14 modelnavne i modelfilteret, som ikke er modeller:
+   "VT600 'NY pris'", "x town 300 rabatpris", "XSR 900 GP DEMOPRIS", "CBF125 2009 Projekt mekaniker", "Cb500 1996 a2",
+   "ZL600 lav sædehøjde", "Xj 900 årg 90", "GSX-8T 776 83HK 6g", "Classic 350cc classic-bike.dk", "Nye Kawasaki kx 450",
+   "A65 Thunderbolt Classic Bike" (6 stk.), "Daytona 955i bike" og "God velkørende custom med lav. KM".
+   Reglen er TOKEN-baseret og klipper kun ved et helt ord (aldrig midt i et modelnavn): pris-ord (pris, rabatpris,
+   demopris ...), projekt/mekaniker, "lav", km/hk-angivelser, "årg NN", et enkelt A2-hængsel, et årstal der er annoncens
+   egen årgang (±1), et domænenavn og kildens kategoriord "Classic Bike". Et modelnavn med tal (XV 1900, VN 2000, GSX-8R)
+   røres ikke: årstal-reglen kræver at tallet ligger inden for ét år af annoncens årgang. Fastholdt af
+   js/v7-maerke-model.test.js mod 100 rigtige modelnavne fra lageret (scripts/fixtures/v7-modelnavne-rigtige.json). */
+const STOEJ_FOER_ORD = new Set(['ny', 'nye', 'nyt', 'nedsat', 'ekstra', 'fast', 'kontant', 'super']);
+const STOEJ_HELE_ORD = /^(?:pris|priser|rabat|projekt|projektmc|mekaniker|mekanikerprojekt|reservedele|defekt|velkørende|lav|lavt|sædehøjde)$/;
+function stoejToken(t){ return String(t || '').toLowerCase().replace(/^[‘’'"“”(\[]+|[‘’'"“”)\].,;:!?]+$/g, ''); }
+function erStoejOrd(n){
+  if (!n) return false;
+  if (STOEJ_HELE_ORD.test(n)) return true;
+  if (/^[a-zæøå]{2,}pris$/.test(n)) return true;              // rabatpris, demopris, nypris, tilbudspris
+  if (/^\d[\d.,]*(?:km|tkm|kilometer)$/.test(n)) return true;  // 50000km
+  if (/^\d{1,3}hk$/.test(n)) return true;                      // 83hk
+  return false;
+}
+function klipStoejOrd(m){
+  const t = m.split(' ');
+  for (let i = 1; i < t.length; i++){
+    const n = stoejToken(t[i]);
+    let start = -1;
+    if (erStoejOrd(n)) start = i;
+    else if (/^\d[\d.,]*$/.test(n) && /^(?:km|tkm|kilometer)$/.test(stoejToken(t[i + 1]))) start = i;   // "25000 km"
+    if (start < 0) continue;
+    if (start > 1 && STOEJ_FOER_ORD.has(stoejToken(t[start - 1]))) start--;                          // "NY pris"
+    if (start > 1 && /^\d{1,3}hk$/.test(n) && /^\d{3,4}$/.test(stoejToken(t[start - 1]))) start--;     // "776 83HK"
+    return t.slice(0, start).join(' ');
+  }
+  return m;
+}
+/* En model, der er en hel sætning ("God velkørende custom med lav. KM"): mindst 4 ord, ingen tal og et dansk funktionsord. */
+function erBeskrivelse(m){
+  const t = m.split(' ').map(stoejToken).filter(Boolean);
+  return t.length >= 4 && !t.some(x => /\d/.test(x)) && t.some(x => /^(?:med|og|til|er|uden|kun|har|god|godt|velkørende|lav)$/.test(x));
+}
+
 const MODEL_STOEJ = /\b(s[aæ]lges|byttes|bud|garanti|bytter|nysynet|velholdt|flot|pæn|fabriks|modtages|kan\s+leveres|tilbud|nedsat|kampagne|leasing|mc[-\s]?syd|aalborg\s+mc|\d+\s*(?:års|aars|år)\b)/i;
 function rensModelStoej(model, p_aargang){
   if (!model) return model;
@@ -590,6 +674,12 @@ function rensModelStoej(model, p_aargang){
   const hit = m.search(MODEL_STOEJ);
   if (hit > 0) m = m.slice(0, hit);
   else if (hit === 0) return null;
+  // V7: "Nye Kawasaki kx 450" -> "Kawasaki kx 450" (kun med mindst to ord bagefter); sætninger er ikke modeller.
+  m = m.replace(/^(?:nye?|nyt)\s+(?=\S+\s+\S)/i, '');
+  if (erBeskrivelse(m)) return null;
+  m = klipStoejOrd(m);
+  // "Xj 900 årg 90": en eksplicit årg-markør er altid støj (uanset annoncens årgang).
+  m = m.replace(/\s+(?:årg\.?|årgang|aarg\.?)\s*\d{2,4}\s*$/i, '');
   // "med meget udstyr", "med masser af" — reklame fra det ord og frem.
   m = m.replace(/\s+\bmed\s+(meget|masser|lidt|alt|fuld)\b.*$/i, '');
   // To versal-ord (>= 3 bogstaver) i traek efter et modelord: farve/udstyr.
@@ -604,12 +694,15 @@ function rensModelStoej(model, p_aargang){
   // "Thruxton 1200 fra 2017", "GPZ 500S aarg 1992"), "650 cc" og modeller
   // skrevet helt med smaat ("vf750f"). Aarstallet klippes KUN naar det er
   // annoncens egen aargang (p_aargang) — "CB 500" beholder sit 500.
+  // V7: forhandlerens domænenavn i halen ("Classic 350cc classic-bike.dk") er reklame.
+  m = m.replace(/\s+\S+\.(?:dk|com|net|eu|nu)\s*$/i, '');
   if (p_aargang){
     // (\b virker ikke foran "å" — ikke-ASCII er ikke \w i JS. Skilletegnet
     // foran er derfor kravet: et aarstal klistret direkte paa modellen roeres ikke.)
     m = m.replace(new RegExp('[\\s,\\-–]+(?:fra\\s+|[aå]rg\\.?\\s*)?' + p_aargang + '\\b\\s*$', 'i'), '').trim();
   }
   m = m.replace(/\s*\b\d{2,4}\s?cc\.?\b\s*$/i, '').trim();
+  m = efterStoej(m, p_aargang);
   if (/^[a-zæøå]/.test(m)) m = m.charAt(0).toUpperCase() + m.slice(1);
 
   // "Motorcykel", "MC", "Scooter" alene er ikke et modelnavn — det er kildens

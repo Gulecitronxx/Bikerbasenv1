@@ -290,16 +290,37 @@ function saniterTal(t){
    "BSA / Triumph / Norton købes" lå som til salg under BSA. Kun entydige ord:
    "søger" er med vilje IKKE med ("søger ny ejer" er et salg). */
 /* REGEL (forenklet — reglerne selv var risikoen): en annonce skjules KUN når titlen STARTER med
-   købes, ønskes købt, vil købe eller efterlyses (ordgrænse, evt. efter citationstegn/parentes). Alt andet beholdes,
-   også "BSA / Triumph / Norton købes", "Søges: …", "Søger …", "Køb: …" og "Leder efter …": falske negativer er
+   købes, ønskes købt, vil købe eller efterlyses (ordgrænse, evt. efter citationstegn/parentes) — og fra V7 også når titlen
+   ENDER på "købes" under de snævre betingelser i EFT_SLUT nedenfor. Alt andet beholdes,
+   også "Søges: …", "Søger …", "Køb: …" og "Leder efter …": falske negativer er
    accepteret — hellere ét efterspørgsels-opslag for meget i søgningen end et ægte salg skjult. Der er ingen
    undtagelsesliste. "Vil købe" kræver desuden, at titlen hverken har "?" eller "her er" ("Vil købe? Her er min Honda"). */
 const EFT_START = new RegExp('^[\\s"\'(]*(?:købes|ønskes\\s+købt|efterlyses|vil\\s+købe)(?![\\p{L}\\d])', 'iu');
+/* V7 (mærke): SLUT-reglen. "moto cross købes" og "BSA / Triumph / Norton købes" (begge Gul og Gratis, 26.10.2026) er
+   efterspørgsel, men står i slutningen af titlen. Reglen er smal og har en undtagelsesliste, fordi den tidligere slut-regel
+   ramte "Honda kan også købes": titlen skal ENDE på "købes" (evt. + tegnsætning) eller "ønskes købt", have mindst ét ord foran
+   og højst 7 ord, ordet lige foran må ikke være "kan/også/hurtig/handel ..." (et udbud: "kan købes", "hurtig handel købes"),
+   og titlen må hverken have "?" eller salgsord (sælges, til salg, bytter, garanti, bud, kr, pris). Alt andet er stadig et salg.
+   Uden lookbehind (Safari < 16.4). Fastholdt af js/v7-maerke-efterspoergsel.test.js (også mod lagerets titler). */
+const EFT_SLUT = /^(.*\S)[\s\/\-–,:;(]+(?:købes|ønskes\s+købt)[\s!.)"']*$/iu;
+const EFT_SLUT_FOER_IKKE = /^(?:kan|kunne|skal|må|bør|også|evt|nu|her|ikke|hurtig|handel|gerne|nemt|let|hos|altid|bliver|kun)$/;
+const EFT_SALGSORD = /(?:sælges|sælger|til\s+salg|bytter|byttes|garanti|(?:^|[^\p{L}\d])bud(?![\p{L}\d])|(?:^|[^\p{L}\d])kr(?![\p{L}\d])|pris)/iu;
+function erEfterspoergselISlutning(t){
+  const m = t.match(EFT_SLUT);
+  if (!m) return false;
+  if (/\?/.test(t) || EFT_SALGSORD.test(t)) return false;
+  const ord = m[1].split(/\s+/).filter(o => /[\p{L}\d]/u.test(o));
+  if (!ord.length || ord.length > 7) return false;
+  const sidste = ord[ord.length - 1].toLowerCase().replace(/^[^\p{L}\d]+|[^\p{L}\d]+$/gu, '');
+  return !EFT_SLUT_FOER_IKKE.test(sidste);
+}
 function erEfterspoergsel(titel){
   const t = String(titel || '').trim();
-  if (!EFT_START.test(t)) return false;
-  if (/^[\s"'(]*vil\s+købe/i.test(t) && (/\?/.test(t) || /\bher\s+er\b/i.test(t))) return false;
-  return true;
+  if (EFT_START.test(t)){
+    if (/^[\s"'(]*vil\s+købe/i.test(t) && (/\?/.test(t) || /\bher\s+er\b/i.test(t))) return false;
+    return true;
+  }
+  return erEfterspoergselISlutning(t);
 }
 
 /* ---------- Salgsmærkater (F-010) ----------

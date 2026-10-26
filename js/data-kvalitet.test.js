@@ -237,11 +237,11 @@ test('F-011: FB Mondial, HD og CB 12.5', () => {
 
 test('F-009: kun købes / ønskes købt / vil købe / efterlyses i titlens START skjules; alt andet er et salg', () => {
   // Efterspørgsel (skjules).
-  for (const t of ['Købes: Honda CBR', 'Købes Yamaha MT-07', 'Købes - Honda CB 500', 'Ønskes købt: CB 500', 'Efterlyses: Honda Monkey', 'Vil købe Honda Hornet', 'KØBES KONTANT', '  Købes'])
+  for (const t of ['Købes: Honda CBR', 'Købes Yamaha MT-07', 'Købes - Honda CB 500', 'Ønskes købt: CB 500', 'Efterlyses: Honda Monkey', 'Vil købe Honda Hornet', 'KØBES KONTANT', '  Købes',
+                   'BSA / Triumph / Norton købes', 'moto cross købes'])   // V7 (mærke): slut-reglen, se js/v7-maerke-efterspoergsel.test.js
     assert.equal(M.erEfterspoergsel(t), true, t);
   // Ægte salg (beholdes): Criticens titler, og alle andre ord end de fire.
   for (const t of ['Honda CB 500', 'Yamaha XV 750 Virago', 'Triumph Bonneville søger ny ejer', 'Kawasaki Z1 sælges, køber betaler omregistrering',
-                   'BSA / Triumph / Norton købes',    // slut-"købes" skjules ikke længere (accepteret falsk negativ)
                    'Honda CBR 600 kan købes med 12 mdr garanti', 'Honda VFR - søges nyt hjem', 'Honda VFR søges ny ejer', 'Honda CB 500 – ny ejer søges', 'Honda CB 500 – køber søges',
                    'Søges: kærlig ejer til min Honda', 'Søger efter ny ejer', 'Køb: Honda CB 500 til salg', 'Køb: din næste Harley her', 'Søger du en pæn CB 500? Her er den',
                    'Søges kun seriøse købere', 'Leder efter ny ejer til min Honda', 'Søger bytte', 'Vil købe? Her er min Honda', 'Vil du købe en Honda? Her er den',
