@@ -940,6 +940,15 @@ function listingCardHTML(l, i){
   /* Mærkater på fotoet gælder kun egne annoncer (kilden har sit eget). Prismærkatet fik sin forklaring
      med tal, køberen selv kan efterprøve — se prisSammenligning() i js/data.js. */
   let badges = '';
+  /* V7: ærlig alder på det indekserede kort. Kun når bekræftelsen er over FRISK_DAGE gammel (eller kilden ikke
+     kunne tjekkes): så står der "Bekræftet for 63 dage siden" på fotoet, og title/aria har hele sætningen. Et
+     friskt kort siger intet. Mærkatet ligger OVER fotoet og flytter derfor intet i kortets højde. */
+  if (f.ext){
+    const alder = annonceAlder(l);
+    if (alder && alder.advarsel){
+      badges = `<div class="card-badges"><span class="badge badge-alder badge-alder-${alder.niveau}" title="${escapeHTML(alder.linje)}">${Icon.clock}<span>${escapeHTML(alder.kort)}</span><span class="visually-hidden">. ${escapeHTML(alder.linje)}</span></span></div>`;
+    }
+  }
   if (!f.ext){
     const mistaenkt = isSuspiciouslyCheap(l);
     const prisBasis = mistaenkt ? prisSammenligning(l) : null;

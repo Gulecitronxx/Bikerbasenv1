@@ -31,7 +31,7 @@
   "js/search.js": 56200,
   "js/security.js": 700,
   "js/seo.js": 11200,
-  "js/sortering.js": 6200,
+  "js/sortering.js": 6400,
   "js/store.js": 7600,
   "js/supabase-api.js": 11600,
   "js/supabase-config.js": 800,
@@ -183,6 +183,9 @@
   "sider": "Sidebudgetter følger filerne; største side (annonce) 391 kB gzip, uændret i størrelsesorden."
  },
  "baseline": "Sat bevidst to gange: ved V5-integrationen (625ec7f5) og igen ved V6-integrationen (570e3f9e). V6-vækst pr. fil står under \"begrundelser_v6\"; V5-begrundelserne står under \"begrundelser\". Ingen vækst vurderet som spild.",
+ "begrundelser_v7_data": {
+  "js/sortering.js": "+~130 B (6282 mod 6200): V7 data: nedtoning af forsinkede annoncer i Blandet + sorteringen Senest bekræftet."
+ },
  "begrundelser_v6": {
   "js/mine-annoncer.js": "+1760 B (14808 -> 16568): V6 konto: henter-tilstand + skelet, tællerstribe i første tegning, reserveret hero-undertitel (CLS < 0,02) og den anonyme favoritfane (\"N gemte annoncer kræver login\"). Største V6-vækst; rimelig, men kandidat til at flytte skelet-markup ind i HTML.",
   "css/p-dashboard.css": "+1477 B: skelet/henter-tilstand og tællerstribe til dashboard og mine annoncer (samme CLS-arbejde).",

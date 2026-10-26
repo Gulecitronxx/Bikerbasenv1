@@ -884,6 +884,11 @@ function byggEksternAnnonce(row){
     kildeStand: row.stand || null,
     kildeTitel: row.titel || null,
     sidstSet: row.sidst_set || null,
+    /* V7 livscyklus (migration 030): null, indtil kolonnerne er oprettet OG flaget SUPABASE_CONFIG.livscyklus er slået til
+       (se eksterneKolonner() nedenfor). Alder alene (sidstSet) er det, siden ved i dag. */
+    sidstForsoegt: row.sidst_forsoegt || null,
+    vaekITraek: row.vaek_i_traek == null ? null : Number(row.vaek_i_traek),
+    tekniskFejlITraek: row.teknisk_fejl_i_traek == null ? null : Number(row.teknisk_fejl_i_traek),
 
     /* Landsdel er et opslag på postnummeret, ikke et skøn. Alle 332 MC
        Syd-annoncer har postnr 6630 Rødding og hører altså til Syddanmark. */
@@ -983,6 +988,14 @@ const EKSTERNE_KOLONNER =
   'by, postnr, saelgertype, thumbnail_url, uddrag, status, foerst_set, sidst_set, ' +
   'kilde:kilder(navn, domaene)';
 
+/* V7: de fire livscyklus-kolonner (supabase/030_livscyklus.sql) bestilles KUN, når ejeren har kørt migrationen og sat
+   SUPABASE_CONFIG.livscyklus = true i js/supabase-config.js. Beder vi om en kolonne, der ikke findes, svarer
+   PostgREST 42703, og alle annoncerne forsvinder (se noten ovenfor) — derfor flag og ikke "bare med". */
+function eksterneKolonner(){
+  const til = typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG && SUPABASE_CONFIG.livscyklus === true;
+  return EKSTERNE_KOLONNER + (til ? ', sidst_forsoegt, vaek_i_traek, teknisk_fejl_i_traek, sidste_signal' : '');
+}
+
 /* Rækkefølgen er `sidst_set` faldende — den SAMME som scripts/shared.js
    bruger, når mærkesidernes kort forudtegnes. Målt over otte indlæsninger er
    de 332 rækker kommet i samme orden hver gang, men Postgres lover det ikke
@@ -995,7 +1008,7 @@ async function loadExternalListings(){
   // scripts/shared.js fetchExternalListings() i samme commit (B4), saa de
   // forudtegnede kort og de hentede staar i samme orden. Ingen `limit=`:
   // restHentAlle() henter alt, se dens hoved.
-  const res = await restHentAlle(`eksterne_annoncer?select=${encodeURIComponent(EKSTERNE_KOLONNER)}`
+  const res = await restHentAlle(`eksterne_annoncer?select=${encodeURIComponent(eksterneKolonner())}`
     + '&status=eq.aktiv&order=sidst_set.desc,id.asc');
   if (res.error){
     // En fejl her må ikke tage dine egne annoncer med sig. Søgningen skal

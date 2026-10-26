@@ -1132,11 +1132,18 @@ function renderExternalListing(listing){
     const dage = Math.max(0, Math.floor((Date.now() - t) / 86400000));
     return dage === 0 ? 'i dag' : dage === 1 ? 'i går' : `for ${dage} dage siden`;
   };
+  /* V7: en gammel bekræftelse står som en synlig note lige under prisen (det, der kan være ændret) — ikke kun som en lille grå
+     linje i sælgerkortet. Er annoncen frisk, står der intet. (I midterkolonnen og ikke i sælgerkortet: den kolonne er allerede
+     den højeste, og kolonnebalancen i anBalancerKolonner() kan ikke flytte noget derfra.) */
+  const alder = annonceAlder(listing);
+  const alderNote = alder && alder.advarsel
+    ? `<p class="an-alder an-alder-${alder.niveau}" role="note">${Icon.alertTriangle}<span><b>${escapeHTML(alder.titel)}.</b> ${escapeHTML(alder.raad)}</span></p>`
+    : '';
   let hentetLinje = '';
   if (fundet){
     const bekraeftet = listing.sidstSet ? relativ(listing.sidstSet) : '';
     hentetLinje = `Set hos ${kilde} første gang ${escapeHTML(fundet)}`
-      + (bekraeftet ? ` · sidst bekræftet ${bekraeftet}` : ` — ${relativ(listing.indekseretFoerste)}`);
+      + (bekraeftet ? (alder && alder.advarsel ? '' : ` · sidst bekræftet ${bekraeftet}`) : ` — ${relativ(listing.indekseretFoerste)}`);   // V7: er bekræftelsen gammel, står alderen i .an-alder ved knappen — ikke to gange
   }
 
   const saelgerTypeTekst = listing.isDealer ? 'Forhandler' : (listing.saelgertype === 'privat' ? 'Privat sælger' : '');
@@ -1242,6 +1249,7 @@ function renderExternalListing(listing){
           <p class="an-vilkaar">${salgsmarkoerer.map(m => `<span class="an-chip an-chip-soft">${escapeHTML(m)}</span>`).join('')}</p>
           <p class="an-note">Salgsvilkår oplyst i annoncen hos ${kilde} — de er en del af prisen. Få dem bekræftet dér.</p>` : ''}
         </div>
+        ${alderNote}
         ${anNoegletal(listing, hk)}
         ${fabriksnyNote ? `<p class="an-note an-ny">${Icon.info}<span>${fabriksnyNote}</span></p>` : ''}
       </section>

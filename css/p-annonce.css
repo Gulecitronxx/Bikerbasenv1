@@ -1285,3 +1285,10 @@ p.an-kk-basis b{ color:var(--color-fg); font-weight:600; }
 @media (min-width:1180px){
   .an-titelraekke{ min-height:64px; align-items:center; }
 }
+/* V7 data: synlig note ved siden af "Gå til annoncen hos …", når bekræftelsen er gammel eller kilden ikke kunne tjekkes. Rolig, ikke alarmerende: vi skriver alderen og siger "kan være solgt", vi påstår ikke, at den er solgt. */
+.an-alder{ display:flex; gap:8px; align-items:flex-start; margin:10px 0 0; padding:8px 10px; border-radius: var(--radius-md); font-size:12.5px; line-height:1.4; background:#FEF3C7; color:#7C2D12; border:1px solid rgba(124,45,18,.25); }
+.an-alder svg{ width:16px; height:16px; flex:0 0 auto; margin-top:2px; }
+.an-alder b{ font-weight:700; }
+.an-alder-udloebet{ background:#FDE4D8; color:#7A1D0B; border-color:rgba(122,29,11,.28); }
+:root[data-theme="dark"] .an-alder{ background:#3B2A0C; color:#FCD34D; border-color:rgba(252,211,77,.3); }
+:root[data-theme="dark"] .an-alder-udloebet{ background:#4A1D12; color:#FCA98F; border-color:rgba(252,169,143,.3); }

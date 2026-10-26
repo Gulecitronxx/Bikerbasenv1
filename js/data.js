@@ -319,6 +319,22 @@ function salgsmarkoerLabel(m){
    at annoncerne kan være ændret siden. BESLUTNING: 14 dage. Egne annoncer har
    ingen sidstSet; er der ingen dato, svares null og der vises intet. */
 const GAMMEL_EFTER_DAGE = 14;
+
+/* ---------- Annoncens livscyklus (V7, data) ----------
+   MÅLT 26.10.2026: 332 af 735 indekserede annoncer (45 %) var sidst set for over 60 dage siden
+   (ældste 71) og stod stadig som aktive, fordi to forhandlere ikke var crawlet siden august, og
+   fordi medianen ("bekræftet senest 17. okt.") skjulte halen. Tærsklerne er spejlet i
+   crawler/livscyklus.js (TAERSKLER) og supabase/030_livscyklus.sql; crawler/livscyklus.test.js
+   kræver, at de er ens.
+
+     frisk       højst FRISK_DAGE siden annoncen sidst stod i kildens liste
+     forsinket   over FRISK_DAGE: vises, men med alderen skrevet ud
+     lang tid    over LANG_TID_DAGE: "kan være solgt" — nedtones i rækkefølgen, skjules ikke
+     udløbet     over UDLOEB_DAGE: sættes til status 'udloebet' af crawleren (migration 030)
+   Alderen regnes ALTID af sidstSet (findes i dag). vaekITraek / tekniskFejlITraek kommer først med
+   migration 030 og er null, indtil den er kørt; så er alder det eneste, vi ved. */
+const LIVSCYKLUS = Object.freeze({ FRISK_DAGE: 14, LANG_TID_DAGE: 30, UDLOEB_DAGE: 90 });
+const DAG_MS = 86400000;
 const DA_MD = ['jan.', 'feb.', 'mar.', 'apr.', 'maj', 'jun.', 'jul.', 'aug.', 'sep.', 'okt.', 'nov.', 'dec.'];
 function senesteBekraeftet(liste, nu){
   const slut = nu instanceof Date ? nu : new Date();
@@ -343,12 +359,102 @@ function senesteBekraeftet(liste, nu){
   const dage = Math.max(0, Math.floor((slut.getTime() - max) / 86400000));
   const gammel = dage > GAMMEL_EFTER_DAGE;
   const datoTekst = tekstFor(max);
+  /* V7: MEDIANEN skjulte halen — "bekræftet senest 17. okt." stod over et lager, hvor 45 % var over 60 dage
+     gammelt. Den samlede tekst siger nu, hvor mange der er bekræftet inden for FRISK_DAGE og hvor mange der
+     ikke er, med tal regnet af det viste udsnit. */
+  const fd = friskhedsFordeling(liste, slut);
+  const nyesteDato = tekstFor(nyeste);
+  const punktum = t => t + (t.endsWith('.') ? '' : '.');
+  let samletTekst, kortTekst;
+  if (fd.aeldre === 0){
+    kortTekst = `Alle bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato})`;
+    samletTekst = fd.dateret === 1
+      ? `Annoncen er bekræftet senest ${punktum(nyesteDato)}`
+      : `Alle ${fd.dateret} annoncer er bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}).`;
+  } else if (fd.frisk === 0){
+    kortTekst = `Ingen bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}) — kan være solgt`;
+    samletTekst = fd.dateret === 1
+      ? `Annoncen er sidst bekræftet ${punktum(tekstFor(nyeste))} Den kan være solgt — tjek hos kilden.`
+      : `Ingen af de ${fd.dateret} annoncer er bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}). De kan være solgt — tjek hos kilden.`;
+  } else {
+    kortTekst = `${fd.frisk} bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}), ${fd.aeldre} kan være solgt`;
+    samletTekst = `${fd.frisk} af ${fd.dateret} annoncer er bekræftet inden for ${LIVSCYKLUS.FRISK_DAGE} dage (senest ${nyesteDato}). ${fd.aeldre} kan være solgt — tjek hos kilden.`;
+  }
   return {
+    fordeling: fd,
     datoTekst, aeldsteTekst: tekstFor(min), nyesteTekst: tekstFor(nyeste), dage, gammel,
     tekst: `${faa ? (tider.length === 1 ? 'Annoncen er' : 'Annoncerne er') : 'De fleste annoncer er'} bekræftet senest ${datoTekst}`,
     advarsel: gammel ? 'Annoncerne kan være ændret siden.' : '',
-    samlet: `${faa ? (tider.length === 1 ? 'Annoncen er' : 'Annoncerne er') : 'De fleste annoncer er'} bekræftet senest ${datoTekst}${datoTekst.endsWith('.') ? '' : '.'}` + (gammel ? ' Annoncerne kan være ændret siden.' : ''),
+    samlet: samletTekst,
+    kort: kortTekst,
+    detalje: fd.aeldre ? `${fd.aeldre} er ikke bekræftet i over ${LIVSCYKLUS.FRISK_DAGE} dage${fd.lang + fd.udloebet ? `, heraf ${fd.lang + fd.udloebet} i over ${LIVSCYKLUS.LANG_TID_DAGE} dage` : ''}.` : '',
   };
+}
+
+function aldersDage(l, nu){
+  const slut = nu instanceof Date ? nu : new Date();
+  const t = l && l.sidstSet ? Date.parse(l.sidstSet) : NaN;
+  if (!Number.isFinite(t) || new Date(t).getFullYear() < 2000) return null;
+  if (t > slut.getTime() + DAG_MS) return null;   // en dato i fremtiden er ukendt, ikke "friskt"
+  return Math.max(0, Math.floor((slut.getTime() - t) / DAG_MS));
+}
+function relativDage(dage){
+  return dage === 0 ? 'i dag' : dage === 1 ? 'i går' : `for ${dage} dage siden`;
+}
+
+/* Den afledte tilstand (samme regel som vurderLivscyklus() i crawler/livscyklus.js). Gemmes aldrig:
+   alder går af sig selv. Egne annoncer (ingen sidstSet) har ingen tilstand: de hostes af os. */
+function livscyklusTilstand(l, nu){
+  const dage = aldersDage(l, nu);
+  if (dage == null) return null;
+  if (dage > LIVSCYKLUS.UDLOEB_DAGE) return 'slettet_udloebet';
+  if ((Number(l.vaekITraek) || 0) > 0 || (Number(l.tekniskFejlITraek) || 0) > 0) return 'midlertidigt_utilgaengelig';
+  if (dage > LIVSCYKLUS.FRISK_DAGE) return 'aktiv_forsinket';
+  return 'aktiv_bekraeftet';
+}
+
+/* Alderen, som den skal stå på kort og annonceside. null = ingen dato (egen annonce, ukendt dato).
+     niveau   frisk | forsinket | lang | udloebet | utilgaengelig
+     kort     teksten på kortets mærkat ('' når annoncen er frisk — så står der intet)
+     linje    hele sætningen til annoncesiden
+   Tonen: vi SKRIVER, hvor gammel bekræftelsen er, og siger "kan være solgt". Vi påstår ikke, at den er solgt. */
+function annonceAlder(l, nu){
+  const dage = aldersDage(l, nu);
+  if (dage == null) return null;
+  const tilstand = livscyklusTilstand(l, nu);
+  const rel = relativDage(dage);
+  const utilg = tilstand === 'midlertidigt_utilgaengelig';
+  let niveau = 'frisk';
+  if (tilstand === 'slettet_udloebet') niveau = 'udloebet';
+  else if (dage > LIVSCYKLUS.LANG_TID_DAGE) niveau = 'lang';
+  else if (dage > LIVSCYKLUS.FRISK_DAGE) niveau = 'forsinket';
+  if (utilg && niveau === 'frisk') niveau = 'forsinket';
+  const advarsel = niveau !== 'frisk';
+  const kort = !advarsel ? '' : niveau === 'udloebet' ? `Ikke bekræftet i ${dage} dage` : `Bekræftet ${rel}`;
+  const titel = niveau === 'udloebet' ? `Ikke bekræftet i ${dage} dage` : `Bekræftet ${rel}`;
+  const ikkeTjekket = utilg ? 'Vi kunne ikke tjekke den ved seneste forsøg. ' : '';
+  const raad = niveau === 'frisk' ? ''
+    : niveau === 'forsinket' ? `${ikkeTjekket}Tjek hos kilden, at den stadig er til salg.`
+    : niveau === 'lang' ? `${ikkeTjekket}Den kan være solgt — tjek hos kilden.`
+    : 'Den er sandsynligvis ikke længere til salg. Tjek hos kilden.';
+  const linje = raad ? `${titel}. ${raad}` : `${titel}.`;
+  return { dage, tilstand, niveau, advarsel, kort, titel, raad, linje, rel };
+}
+
+/* Fordelingen over et udsnit: hvor mange er friske, forsinkede, "lang tid". Egne annoncer tæller ikke med. */
+function friskhedsFordeling(liste, nu){
+  const f = { dateret: 0, frisk: 0, forsinket: 0, lang: 0, udloebet: 0 };
+  for (const l of (liste || [])){
+    const a = annonceAlder(l, nu);
+    if (!a) continue;
+    f.dateret++;
+    if (a.niveau === 'frisk') f.frisk++;
+    else if (a.niveau === 'forsinket') f.forsinket++;
+    else if (a.niveau === 'lang') f.lang++;
+    else f.udloebet++;
+  }
+  f.aeldre = f.forsinket + f.lang + f.udloebet;
+  return f;
 }
 
 /* ============ Mærkeregistret (V4) ============

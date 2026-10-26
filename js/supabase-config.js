@@ -16,6 +16,8 @@
 const SUPABASE_CONFIG = {
   url: 'https://hkcjrwglwurdjnobewzb.supabase.co',
   anonKey: 'sb_publishable_m_ZXdYaGVARkJRyDyyJJhA_9lgcw-t5', // publishable (offentlig) — ikke secret/service_role
+  // V7: true EFTER supabase/030_livscyklus.sql er kørt (ellers 42703 og alle annoncer forsvinder).
+  livscyklus: false,
 };
 
 /* Så længe felterne er tomme, kører siden videre på localStorage-demodata.
