@@ -32,7 +32,9 @@ function beskedAntalLinks(t){
 function beskedValider(raa){
   const tekst = beskedRens(raa);
   const antal = tekst.length;
-  if (!antal) return { ok: false, tekst, antal, fejl: 'Skriv en besked, før du sender.' };
+  /* Samme idé som bb_er_blank() i SQL: kun whitespace/usynlige tegn (NBSP, nul-bredde, BOM) er en tom besked. */
+  const BLANK = /^[\s\u00a0\u200b-\u200f\u2028-\u202f\u205f-\u2064\u3000\ufeff]*$/;
+  if (!antal || BLANK.test(tekst)) return { ok: false, tekst, antal, fejl: 'Skriv en besked, før du sender.' };
   if (antal < BESKED_MIN) return { ok: false, tekst, antal, fejl: 'Beskeden er for kort. Skriv mindst to tegn.' };
   if (antal > BESKED_MAX) return { ok: false, tekst, antal, fejl: `Beskeden er ${antal - BESKED_MAX} tegn for lang. Der er plads til ${BESKED_MAX} tegn.` };
   if (beskedAntalLinks(tekst) > BESKED_MAX_LINKS) return { ok: false, tekst, antal, fejl: 'Beskeden indeholder for mange links. Skriv uden links, eller højst to.' };

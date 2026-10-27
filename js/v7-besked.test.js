@@ -40,6 +40,16 @@ test('validering: tom, for kort, grænsen 1000, for lang og links — med danske
   assert.match(B.beskedValider('http://a.dk http://b.dk www.c.dk').fejl, /links/);
 });
 
+test('validering: kun tabulatorer, NBSP eller nul-bredde-tegn er en tom besked (som bb_er_blank i SQL)', () => {
+  const c = n => String.fromCharCode(n);
+  for (const blank of [c(9) + c(9) + c(9), c(160) + c(160), c(8203) + c(8203) + c(8203), c(65279) + c(65279), c(12288) + c(12288), c(9) + c(160) + c(8203) + c(10)]){
+    const r = B.beskedValider(blank);
+    assert.strictEqual(r.ok, false, JSON.stringify(blank));
+    assert.match(r.fejl, /Skriv en besked/);
+  }
+  assert.strictEqual(B.beskedValider(c(9) + 'ok' + c(9)).ok, true, 'to rigtige tegn med tabulatorer omkring er stadig en besked');
+});
+
 test('normalisering: samme regel som bb_rens_besked() i SQL (CRLF, højst én blank linje, trim)', () => {
   assert.strictEqual(B.beskedRens('  Hej\r\n\r\n\r\n\r\nDav \r\n'), 'Hej\n\nDav');
   assert.strictEqual(B.beskedRens(null), '');

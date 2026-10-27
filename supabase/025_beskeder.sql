@@ -135,11 +135,26 @@ language sql
 immutable
 set search_path = ''
 as $fn$
+  -- btrim(x) uden 2. argument fjerner KUN mellemrum; tabulatorer, linjeskift, NBSP og nul-bredde-tegn
+  -- slap igennem som "tekst" (Critic P2-B). Derfor en eksplicit tegnmaengde i begge ender.
   select btrim(
     regexp_replace(
       replace(replace(coalesce(p_tekst, ''), chr(13) || chr(10), chr(10)), chr(13), chr(10)),
-      chr(10) || '{3,}', chr(10) || chr(10), 'g')
+      chr(10) || '{3,}', chr(10) || chr(10), 'g'),
+    ' ' || chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(160) || chr(8203) || chr(8204) || chr(8205)
+      || chr(8288) || chr(65279)
   );
+$fn$;
+
+-- Er teksten "tom" i praksis? Kun whitespace, kontroltegn og usynlige tegn (NBSP, nul-bredde, Unicode-mellemrum).
+-- Bruges i send_besked, svar_besked OG som CHECK paa tabellen, saa en direkte vej udenom ikke findes.
+create or replace function public.bb_er_blank(p_tekst text)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $fn$
+  select coalesce(p_tekst, '') ~ '^[[:space:][:cntrl:]\u00a0\u1680\u2000-\u200f\u2028-\u202f\u205f-\u2064\u3000\ufeff]*$';
 $fn$;
 
 create or replace function public.bb_antal_links(p_tekst text)
@@ -156,6 +171,16 @@ $fn$;
 
 revoke execute on function public.bb_rens_besked(text) from public, anon, authenticated;
 revoke execute on function public.bb_antal_links(text) from public, anon, authenticated;
+revoke execute on function public.bb_er_blank(text) from public, anon, authenticated;
+
+-- Tabellen naegter selv en tekst, der kun er whitespace/usynlige tegn (kan koeres igen: constraint oprettes kun een gang).
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'beskeder_ikke_blank') then
+    alter table public.beskeder
+      add constraint beskeder_ikke_blank check (not public.bb_er_blank(tekst));
+  end if;
+end $$;
 
 -- ---------- 4. send_besked: foerste besked til en saelger ----------
 -- Svarer ALTID jsonb { ok: true, samtale_id } eller { ok: false, kode }.
@@ -193,12 +218,18 @@ begin
   end if;
 
   v_tekst := public.bb_rens_besked(p_tekst);
-  if char_length(v_tekst) < 2 or char_length(v_tekst) > 1000 then
+  if public.bb_er_blank(v_tekst) or char_length(v_tekst) < 2 or char_length(v_tekst) > 1000 then
     return jsonb_build_object('ok', false, 'kode', 'ugyldig_tekst');
   end if;
   if public.bb_antal_links(v_tekst) > 2 then
     return jsonb_build_object('ok', false, 'kode', 'for_mange_links');
   end if;
+
+  -- Serialiser denne brugers skrivende kald (Critic P2-A): graenserne herunder TAELLER raekker, og under READ
+  -- COMMITTED saa N samtidige kald alle "count < graense" og indsatte alle. Transaktionslaasen (pr. bruger, frigives
+  -- ved commit/rollback) goer, at naeste kald foerst taeller, naar det foregaaende er committet. Samme noegle i alle
+  -- skrivende funktioner, saa send og svar deler loft.
+  perform pg_advisory_xact_lock(hashtextextended(v_uid::text, 0));
 
   select l.id, l.seller_id, l.brand, l.model, l.year, l.status
     into v_l
@@ -310,12 +341,15 @@ begin
   end if;
 
   v_tekst := public.bb_rens_besked(p_tekst);
-  if char_length(v_tekst) < 2 or char_length(v_tekst) > 1000 then
+  if public.bb_er_blank(v_tekst) or char_length(v_tekst) < 2 or char_length(v_tekst) > 1000 then
     return jsonb_build_object('ok', false, 'kode', 'ugyldig_tekst');
   end if;
   if public.bb_antal_links(v_tekst) > 2 then
     return jsonb_build_object('ok', false, 'kode', 'for_mange_links');
   end if;
+
+  -- Samme pr.-bruger-laas som i send_besked (graenserne herunder taeller raekker; se Critic P2-A).
+  perform pg_advisory_xact_lock(hashtextextended(v_uid::text, 0));
 
   -- Annoncen skal stadig vaere aktiv (slettet = listing_id er NULL).
   if v_s.listing_id is not null then
@@ -531,6 +565,8 @@ begin
   if v_uid is null then
     return jsonb_build_object('ok', false, 'kode', 'ikke_logget_ind');
   end if;
+  -- Serialiser brugerens skrivende kald (samme noegle som send_besked/svar_besked).
+  perform pg_advisory_xact_lock(hashtextextended(v_uid::text, 0));
   select s.seller_id, s.buyer_id into v_s from public.samtaler s
   where s.id = p_samtale and (s.seller_id = v_uid or s.buyer_id = v_uid);
   if not found then
@@ -558,6 +594,8 @@ begin
   if v_uid is null then
     return jsonb_build_object('ok', false, 'kode', 'ikke_logget_ind');
   end if;
+  -- Serialiser brugerens skrivende kald (samme noegle som send_besked/svar_besked).
+  perform pg_advisory_xact_lock(hashtextextended(v_uid::text, 0));
   select s.seller_id, s.buyer_id into v_s from public.samtaler s
   where s.id = p_samtale and (s.seller_id = v_uid or s.buyer_id = v_uid);
   if not found then
@@ -586,6 +624,8 @@ begin
   if v_uid is null then
     return jsonb_build_object('ok', false, 'kode', 'ikke_logget_ind');
   end if;
+  -- Serialiser brugerens skrivende kald (samme noegle som send_besked/svar_besked).
+  perform pg_advisory_xact_lock(hashtextextended(v_uid::text, 0));
   if p_aarsag is null or p_aarsag not in ('svindel', 'upassende', 'andet') then
     return jsonb_build_object('ok', false, 'kode', 'ugyldig_aarsag');
   end if;
@@ -629,6 +669,7 @@ as $fn$
 declare v_uid uuid := auth.uid();
 begin
   if v_uid is null then return false; end if;
+  perform pg_advisory_xact_lock(hashtextextended(v_uid::text, 0));
   insert into public.besked_indstillinger (user_id, mail_ved_ny_besked, updated_at)
   values (v_uid, coalesce(p_til, true), now())
   on conflict (user_id) do update set mail_ved_ny_besked = excluded.mail_ved_ny_besked, updated_at = now();

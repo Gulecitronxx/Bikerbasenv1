@@ -121,7 +121,7 @@ Rækkefølge — **flaget sættes SIDST**. Intet af dette er gjort.
 1. **Stage først.** Opret en Supabase-branch/staging og kør hele 025 dér. Tjek de fire sætninger nederst i filen
    (`has_function_privilege('anon', …)` skal give *false*, `has_table_privilege('authenticated','public.beskeder','insert')` *false*).
    Kør derefter flowet med to testkonti med bekræftet e-mail (send, svar, blokér, slettet annonce, spam-grænse). SQL'en er skrevet
-   uden at kunne køres lokalt og er kun statisk kontrolleret.
+   uden en lokal Postgres; siden er den kørt i PGlite (afsnit 11), men aldrig på rigtig Supabase.
 2. **Migration i produktion.** I filen: erstat `<<PROJEKT_URL>>` (`https://<projekt-ref>.supabase.co`) og `<<HEMMELIGHED>>` (samme
    værdi som i `013_soegeagenter.sql`/secret `NOTIFY_SECRET`) i funktionen `besked_notifikation()`. Kør filen i SQL Editor. Den kan
    køres igen uden skade. Uden de to værdier virker beskeder, men der sendes ingen mail.
@@ -171,7 +171,7 @@ Rækkefølge — **flaget sættes SIDST**. Intet af dette er gjort.
 
 ## 9. Ærlige forbehold og restpunkter
 
-1. **SQL er ikke kørt mod en rigtig Postgres.** Der er ingen lokal Postgres her; SQL'en er skrevet og læst igennem, og testen er statisk. Mock-flowet beviser frontenden, ikke databasen. Trin 1 i guiden (staging) er derfor et krav, ikke en anbefaling. De mest risikable steder at se efter: `mine_samtaler` (`returns table` + sql-funktion), `hent_samtale` (jsonb_agg med `order by`), og at `grant`-løkken i bunden accepterer signaturerne.
+1. **SQL er ikke kørt mod en rigtig Supabase/Postgres-server.** Oprindeligt kun statisk kontrolleret; efter Criticens fund er den kørt i PGlite (WASM-Postgres) mod stubbet Supabase-skema, se afsnit 11 for hvad det dækker og ikke dækker. Mock-flowet beviser frontenden, ikke databasen. Trin 1 i guiden (staging) er derfor et krav, ikke en anbefaling. De mest risikable steder at se efter: `mine_samtaler` (`returns table` + sql-funktion), `hent_samtale` (jsonb_agg med `order by`), og at `grant`-løkken i bunden accepterer signaturerne.
 2. **Mailen kan ikke testes uden Resend/Deno.** Edge Function er læst og statisk kontrolleret, ikke kørt.
 3. **E-mailbekræftelse**: kræver at projektet faktisk sender bekræftelsesmails ved oprettelse. Er "Confirm email" slået fra i Supabase Auth, er ingen bruger "verificeret", og ingen kan skrive. Tjek Auth-indstillingen før flaget.
 4. **Statiske annoncesider** (`annonce-*.html`) har stadig "Log ind for at se sælger og kontaktoplysninger." i forrenderet markup (`scripts/build-listing-pages.js:288`) i de millisekunder, før JS erstatter kortet. Det er sandt nok i begge flagtilstande, men en ændring i generatoren (ikke mit område) kunne sige "Skriv til sælgeren" ved flag til.
@@ -188,7 +188,28 @@ Rækkefølge — **flaget sættes SIDST**. Intet af dette er gjort.
 
 `docs/review/gauntlet/v7/besked/` — `foer-*` (udgangspunkt, flag-fra-teksten før ændringen) og `flagfra-*` / `flagtil-*` (efter): annoncekort udlogget/indlogget, valideringsfejl, sendt, indbakke, tråd, slettet annonce, bloker-dialog, tom/fejl, mobil 375/430 og 1440/1920, lys og mørk.
 
-## 11. Selvvurdering (7 dimensioner, 1-10, pr. sidefamilie)
+## 11. Rettelser efter Critic (P2-A rate-limit-race, P2-B whitespace) — branch gauntlet/v7-besked2
+
+Blind Critic fandt to P2 i `supabase/025_beskeder.sql`. Begge er rettet i kildefilen (stadig ikke kørt mod rigtig Supabase):
+
+**P2-A — rate limit kunne omgås med parallelle kald.** Grænserne tæller rækker i `beskeder`/`samtaler`; under READ COMMITTED så N samtidige kald alle `count < grænse`.
+Rettelse: `perform pg_advisory_xact_lock(hashtextextended(v_uid::text, 0));` i ALLE skrivende RPC'er (`send_besked`, `svar_besked`, `rapporter_samtale`, `bloker_modpart`, `fjern_blokering`, `saet_besked_mail`), samme nøgle pr. bruger så send og svar deler loft. Låsen tages EFTER de billige afvisninger (honeypot, uverificeret, ugyldig/blank tekst, links) og FØR første tælling og første skrivning; den frigives automatisk ved commit/rollback (kun `_xact_`-varianten). Hver plpgsql-sætning får nyt snapshot, så næste kald ser det forrige kalds committede række, når det får låsen.
+
+**P2-B — whitespace-only slap igennem.** `btrim(x)` fjerner kun mellemrum. Rettelse i tre lag:
+1. `bb_rens_besked` trimmer nu en eksplicit tegnmængde (mellemrum, tab, LF, VT, FF, CR, NBSP, nul-bredde U+200B-D, U+2060, BOM) i begge ender.
+2. Ny `bb_er_blank(text)` (immutable, ikke kaldbar udefra): regexp over `[[:space:][:cntrl:]]` + NBSP, U+1680, U+2000-200F, U+2028-202F, U+205F-2064, U+3000, BOM. `send_besked` og `svar_besked` svarer `ugyldig_tekst` (før linktælling og før låsen).
+3. `check (not bb_er_blank(tekst))` (`beskeder_ikke_blank`) på tabellen, oprettet idempotent — også en direkte vej udenom nægtes.
+Frontenden spejler reglen (`beskedValider`), så brugeren får "Skriv en besked, før du sender" i stedet for en generisk serverfejl; mocken spejler den også.
+
+**Tests**
+- `js/v7-besked-sql.test.js` (statisk): hver skrivende funktion har netop én lås, taget efter `auth.uid()`, før første `count(*)`/`insert`/`delete`, efter afvisningen af ugyldig tekst; ingen session-lås; `bb_rens_besked` trimmer tab/NBSP/nul-bredde/BOM; `bb_er_blank` dækker tegnklasserne; begge RPC'er kalder den før linktælling; CHECK findes og er idempotent; `bb_er_blank` er lukket for klientroller.
+- `js/v7-besked.test.js`: `beskedValider` afviser tab/NBSP/nul-bredde/BOM/ideografisk mellemrum.
+- **NY** `js/v7-besked-pglite.test.js` (kører 025 i PGlite; springes over uden pakken — sæt `PGLITE_DIR=<mappe med node_modules/@electric-sql/pglite>`; PGlite er ikke tilføjet som afhængighed og skal ikke i `package.json` uden Orchestrators ok). Tilføj filen til listen, hvis PGlite bliver en devDependency.
+
+**Verificeret i PGlite (WASM-Postgres 17, stubbet `auth.users`/`auth.uid()`, `profiles`, `listings`, `reports`, `net.http_post`):** 025 kan køres og køres igen; 9 slags blank tekst (tab, linjeskift, tab+mellemrum, NBSP, nul-bredde, em-space, BOM, ideografisk mellemrum, blandet) afvises af `send_besked`, 3 af `svar_besked`; ét tegn omgivet af tabulatorer afvises; direkte `insert` af blank tekst stoppes af `beskeder_ikke_blank`; `bb_rens_besked` trimmer korrekt; alle 6 skrivende RPC'er tager låsen (netop én, i `pg_locks`, nøglen = `hashtextextended(uid,0)`) og slipper den ved commit; afviste kald tager ingen lås; rækkegrænsen (5 pr. annonce) virker serielt og for kald i samme transaktion; anon/authenticated kan ikke kalde interne funktioner, uverificeret kan ikke skrive. Samme harness mod den GAMLE fil giver fejl på alle blank-tests og alle lås-tests (testen kan altså fejle).
+**KUN statisk / ikke bevist:** at to *samtidige* forbindelser faktisk udelukker hinanden (PGlite har én forbindelse; udelukkelsen er Postgres' egen garanti for advisory-låse, men er ikke målt her); Supabase-specifikke default-privileges, PostgREST, `pg_net`/Resend. **Før flaget tændes:** kør 025 på en Supabase-branch og send 30 parallelle `send_besked` fra samme bruger — højst 5 (pr. annonce) / 20 (pr. time) må lykkes.
+
+## 12. Selvvurdering (7 dimensioner, 1-10, pr. sidefamilie)
 
 Ærligt: ingen af tallene gælder produktion, før 025 er kørt og testet på staging. Karaktererne gælder koden og flowet mod mocken.
 

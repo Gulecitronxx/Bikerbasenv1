@@ -146,6 +146,41 @@ test('Edge Function: hemmelighed, intet brugerindhold i mailen, escapet titel, k
   assert.match(EDGE, /Vi sender ikke selve teksten i mailen/);
 });
 
+test('Critic P2-A: hver skrivende RPC tager en advisory-laas pr. bruger, FOER raekketaellingerne og FOER INSERT', () => {
+  const LAAS = "pg_advisory_xact_lock(hashtextextended(v_uid::text, 0))";
+  for (const n of ['send_besked', 'svar_besked', 'rapporter_samtale', 'bloker_modpart', 'fjern_blokering', 'saet_besked_mail']){
+    const f = FUNKTIONER.find(x => x.navn === n).krop;
+    assert.strictEqual(f.split(LAAS).length - 1, 1, `${n}: netop én laas`);
+    const laasPos = f.indexOf(LAAS);
+    const foerste = ['count(*)', 'insert into', 'delete from'].map(k => f.indexOf(k)).filter(i => i >= 0);
+    assert.ok(foerste.length === 0 || laasPos < Math.min(...foerste), `${n}: laasen skal tages foer foerste taelling/skrivning`);
+    assert.ok(laasPos > f.indexOf('auth.uid()'), `${n}: laasen bruger v_uid, ikke en klientstyret vaerdi`);
+  }
+  for (const n of ['send_besked', 'svar_besked']){
+    const f = FUNKTIONER.find(x => x.navn === n).krop;
+    assert.ok(f.indexOf(LAAS) > f.indexOf("'ugyldig_tekst'"), `${n}: ugyldig tekst afvises foer laasen (ingen laas for afviste kald)`);
+    assert.ok(f.indexOf(LAAS) < f.indexOf("interval '1 hour'"), `${n}: laas foer timegraensen`);
+  }
+  assert.doesNotMatch(KODE, /pg_advisory_lock\(/, 'kun transaktionslaasen (frigives automatisk ved commit/rollback), aldrig en session-laas');
+});
+
+test('Critic P2-B: whitespace-only afvises i databasen — trim med eksplicit tegnmaengde, bb_er_blank i begge RPC\'er og som CHECK', () => {
+  const rens = FUNKTIONER.find(f => f.navn === 'bb_rens_besked').krop;
+  for (const c of ['chr(9)', 'chr(10)', 'chr(13)', 'chr(160)', 'chr(8203)', 'chr(65279)']) assert.ok(rens.includes(c), `bb_rens_besked trimmer ${c}`);
+  const blank = FUNKTIONER.find(f => f.navn === 'bb_er_blank').krop;
+  assert.match(blank, /\[\[:space:\]\[:cntrl:\]/, 'whitespace og kontroltegn');
+  for (const h of ['u00a0', 'u200f', 'u2064', 'u3000', 'ufeff']) assert.ok(blank.includes(h), `bb_er_blank daekker ${h}`);
+  assert.match(blank, /immutable/);
+  for (const n of ['send_besked', 'svar_besked']){
+    const f = FUNKTIONER.find(x => x.navn === n).krop;
+    assert.match(f, /if public\.bb_er_blank\(v_tekst\) or char_length\(v_tekst\) < 2/, `${n}: blank tekst giver ugyldig_tekst`);
+    assert.ok(f.indexOf('bb_er_blank') < f.indexOf('bb_antal_links'), `${n}: blank tjekkes foer linktaelling`);
+  }
+  assert.match(KODE, /add constraint beskeder_ikke_blank check \(not public\.bb_er_blank\(tekst\)\)/, 'tabellen naegter blank tekst, ogsaa ved direkte insert');
+  assert.match(KODE, /if not exists \(select 1 from pg_constraint where conname = 'beskeder_ikke_blank'\)/, 'constraint kan oprettes igen uden fejl');
+  assert.match(KODE, /revoke execute on function public\.bb_er_blank\(text\) from public, anon, authenticated/);
+});
+
 test('mock og SQL deler regler: alle SQL-koder kendes af mocken og af frontendens tekster', () => {
   const mock = fs.readFileSync(path.join(REPO, 'scripts', 'w9-saelger-mock.js'), 'utf8');
   const koder = new Set([...KODE.matchAll(/'kode',\s*'([a-z_]+)'/g)].map(m => m[1]));

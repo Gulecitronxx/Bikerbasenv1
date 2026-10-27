@@ -177,7 +177,7 @@ function lavBackend(opts = {}){
   }
   function tjekTekst(tekst){
     const t = rens(tekst);
-    if (t.length < 2 || t.length > 1000) return { kode: 'ugyldig_tekst' };
+    if (t.length < 2 || t.length > 1000 || /^[\s\u00a0\u200b-\u200f\u2028-\u202f\u205f-\u2064\u3000\ufeff]*$/.test(t)) return { kode: 'ugyldig_tekst' };   // som bb_er_blank() i SQL
     if (antalLinks(t) > 2) return { kode: 'for_mange_links' };
     return { t };
   }
