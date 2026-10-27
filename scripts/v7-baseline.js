@@ -101,7 +101,7 @@ function pct(sorted, p) {
   out.soegeside = await page.evaluate(() => {
     const t = document.body.innerText;
     const fund = [];
-    const re = /[^\n]*(bekræftet senest|uden type|ikke kategoris|Uden type|uden angivet type)[^\n]*/gi;
+    const re = /[^\n]*(bekræftet|uden type|ikke kategoris|Uden type|uden angivet type|afledt|aktualitet|ikke set)[^\n]*/gi;
     let m; while ((m = re.exec(t))) fund.push(m[0].trim().slice(0, 240));
     const typeFilter = [...document.querySelectorAll('input[name="type"], input[name="types"], [data-type]')].map(i => i.value || i.dataset.type);
     return { fund, typeFilter };
@@ -118,7 +118,7 @@ function pct(sorted, p) {
   out.forside = await page.evaluate(() => {
     const t = document.body.innerText;
     const fund = [];
-    const re = /[^\n]*(bekræftet senest|uden type|annoncer)[^\n]*/gi;
+    const re = /[^\n]*(bekræftet|uden type|annoncer|afledt|ikke set)[^\n]*/gi;
     let m; while ((m = re.exec(t))) fund.push(m[0].trim().slice(0, 240));
     return { fund: [...new Set(fund)].slice(0, 25) };
   });
