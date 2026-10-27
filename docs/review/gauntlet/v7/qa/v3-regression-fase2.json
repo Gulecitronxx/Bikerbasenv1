@@ -1,0 +1,2411 @@
+{
+  "genereret": "2026-10-27T16:50:20.671Z",
+  "rod": "C:\\Users\\pasca\\Desktop\\rod\\wt\\_v7-qa-arkiv",
+  "smoke": {
+    "fejl": 3,
+    "advarsler": 0,
+    "transient": 0,
+    "perTjek": {
+      "cls": {
+        "niveau": "fejl",
+        "antal": 3
+      }
+    }
+  },
+  "dybt": [
+    {
+      "side": "404.html",
+      "viewport": 1440,
+      "kb": 681,
+      "filer": 14,
+      "lcp": 128,
+      "h1": "Den side fandt vi ikke",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "afmeld.html",
+      "viewport": 1440,
+      "kb": 686,
+      "filer": 14,
+      "lcp": 92,
+      "h1": "Linket mangler en kode",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "annonce-bmw-r45-1979-59d3a9a1.html",
+      "viewport": 1440,
+      "kb": 1222,
+      "filer": 25,
+      "lcp": 104,
+      "h1": "BMW R45",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "annonce-harley-davidson-flhx-2007-541ad405.html",
+      "viewport": 1440,
+      "kb": 1214,
+      "filer": 25,
+      "lcp": 92,
+      "h1": "Harley-Davidson FLHX",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "annonce.html",
+      "viewport": 1440,
+      "kb": 1217,
+      "filer": 25,
+      "lcp": 188,
+      "h1": "Honda CB 1000 R",
+      "tal": [
+        "16\nMotorcykler",
+        "97\nMotorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "budget-under-100000.html",
+      "viewport": 1440,
+      "kb": 1136,
+      "filer": 26,
+      "lcp": 180,
+      "h1": "Motorcykler under 100.000 kr.",
+      "tal": [
+        "77 motorcykler",
+        "77\nmotorcykler",
+        "77 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "budget-under-30000.html",
+      "viewport": 1440,
+      "kb": 1115,
+      "filer": 26,
+      "lcp": 164,
+      "h1": "Motorcykler under 30.000 kr.",
+      "tal": [
+        "7\nmotorcykler",
+        "7 motorcykler",
+        "7 motorcykler",
+        "1 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "budget-under-50000.html",
+      "viewport": 1440,
+      "kb": 1122,
+      "filer": 26,
+      "lcp": 180,
+      "h1": "Motorcykler under 50.000 kr.",
+      "tal": [
+        "26 motorcykler",
+        "26\nmotorcykler",
+        "26 motorcykler",
+        "3 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "budget-under-75000.html",
+      "viewport": 1440,
+      "kb": 1128,
+      "filer": 26,
+      "lcp": 156,
+      "h1": "Motorcykler under 75.000 kr.",
+      "tal": [
+        "55 motorcykler",
+        "55\nmotorcykler",
+        "55 motorcykler",
+        "3 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "by-horsens.html",
+      "viewport": 1440,
+      "kb": 955,
+      "filer": 19,
+      "lcp": 140,
+      "h1": "Motorcykler til salg i Horsens",
+      "tal": [
+        "1\nmotorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "by-skive.html",
+      "viewport": 1440,
+      "kb": 954,
+      "filer": 19,
+      "lcp": 164,
+      "h1": "Motorcykler til salg i Skive",
+      "tal": [
+        "1\nmotorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "by-thorsoe.html",
+      "viewport": 1440,
+      "kb": 958,
+      "filer": 19,
+      "lcp": 156,
+      "h1": "Motorcykler til salg i Thorsø",
+      "tal": [
+        "74\nmotorcykler",
+        "74 motorcykler",
+        "74 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "dashboard.html",
+      "viewport": 1440,
+      "kb": 1190,
+      "filer": 19,
+      "lcp": 128,
+      "h1": "Dit overblik",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "forhandler.html",
+      "viewport": 1440,
+      "kb": 1121,
+      "filer": 19,
+      "lcp": 80,
+      "h1": "Sælgerprofil på Bikerbasen",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-a2-koerekort.html",
+      "viewport": 1440,
+      "kb": 929,
+      "filer": 19,
+      "lcp": 148,
+      "h1": "A2-kørekort: regler, alder og krav",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-brugt-motorcykel.html",
+      "viewport": 1440,
+      "kb": 946,
+      "filer": 20,
+      "lcp": 152,
+      "h1": "Køb brugt motorcykel — det skal du tjekke",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-foerste-motorcykel.html",
+      "viewport": 1440,
+      "kb": 999,
+      "filer": 24,
+      "lcp": 144,
+      "h1": "Sådan vælger du din første motorcykel",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-foraar-tjekliste.html",
+      "viewport": 1440,
+      "kb": 929,
+      "filer": 19,
+      "lcp": 144,
+      "h1": "Første tur efter vinteren: tjekliste til din MC",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-forsikring.html",
+      "viewport": 1440,
+      "kb": 929,
+      "filer": 19,
+      "lcp": 144,
+      "h1": "MC-forsikring: det skal du vide som ny motorcyklist",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-ordliste.html",
+      "viewport": 1440,
+      "kb": 928,
+      "filer": 19,
+      "lcp": 152,
+      "h1": "MC-ordliste: ccm, kW, hk og andre begreber",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-typer.html",
+      "viewport": 1440,
+      "kb": 999,
+      "filer": 24,
+      "lcp": 144,
+      "h1": "Motorcykeltyper: hvilken passer til dig?",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-udstyr.html",
+      "viewport": 1440,
+      "kb": 928,
+      "filer": 19,
+      "lcp": 136,
+      "h1": "MC-udstyr til ny motorcyklist: hjelm og tøj",
+      "tal": [],
+      "fund": [
+        {
+          "tjek": "overlap",
+          "niveau": "advarsel",
+          "detalje": "guiden til din første motorcyk <> guiden til MC-forsikring"
+        }
+      ]
+    },
+    {
+      "side": "guide-mc-vinteropbevaring.html",
+      "viewport": 1440,
+      "kb": 947,
+      "filer": 20,
+      "lcp": 152,
+      "h1": "Vinteropbevaring af motorcykel: sådan gør du",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-saelg-motorcykel.html",
+      "viewport": 1440,
+      "kb": 958,
+      "filer": 20,
+      "lcp": 152,
+      "h1": "Sådan sælger du din motorcykel: trin for trin",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guides.html",
+      "viewport": 1440,
+      "kb": 1101,
+      "filer": 28,
+      "lcp": 132,
+      "h1": "Artikler & guides",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "index.html",
+      "viewport": 1440,
+      "kb": 1150,
+      "filer": 37,
+      "lcp": 164,
+      "h1": "Søg motorcykler efter det kørekort, du har",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "koerekort-a.html",
+      "viewport": 1440,
+      "kb": 1153,
+      "filer": 25,
+      "lcp": 168,
+      "h1": "Motorcykler til A-kørekort",
+      "tal": [
+        "58 motorcykler",
+        "58 motorcykler",
+        "58 motorcykler",
+        "1\nMotorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "koerekort-a1.html",
+      "viewport": 1440,
+      "kb": 1085,
+      "filer": 23,
+      "lcp": 164,
+      "h1": "Motorcykler til A1-kørekort",
+      "tal": [
+        "1\n\nMotorcykler",
+        "4 motorcykler",
+        "4 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "koerekort-a2.html",
+      "viewport": 1440,
+      "kb": 1159,
+      "filer": 27,
+      "lcp": 168,
+      "h1": "Motorcykler til A2-kørekort",
+      "tal": [
+        "2\n\nMotorcykler",
+        "30 motorcykler",
+        "30 motorcykler",
+        "30 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "login.html",
+      "viewport": 1440,
+      "kb": 1190,
+      "filer": 19,
+      "lcp": 128,
+      "h1": "Log ind på BikerbasenOpret din gratis konto",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-aprilia.html",
+      "viewport": 1440,
+      "kb": 1018,
+      "filer": 26,
+      "lcp": 164,
+      "h1": "Brugte Aprilia-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-bach.html",
+      "viewport": 1440,
+      "kb": 913,
+      "filer": 20,
+      "lcp": 140,
+      "h1": "Brugte Bach-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-benelli.html",
+      "viewport": 1440,
+      "kb": 958,
+      "filer": 24,
+      "lcp": 136,
+      "h1": "Brugte Benelli-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-bmw.html",
+      "viewport": 1440,
+      "kb": 1084,
+      "filer": 28,
+      "lcp": 180,
+      "h1": "Brugte BMW-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-bsa.html",
+      "viewport": 1440,
+      "kb": 947,
+      "filer": 20,
+      "lcp": 2252,
+      "h1": "BSA-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-buell.html",
+      "viewport": 1440,
+      "kb": 899,
+      "filer": 19,
+      "lcp": 236,
+      "h1": "Brugte Buell-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-cagiva.html",
+      "viewport": 1440,
+      "kb": 915,
+      "filer": 20,
+      "lcp": 224,
+      "h1": "Brugte Cagiva-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-cfmoto.html",
+      "viewport": 1440,
+      "kb": 961,
+      "filer": 24,
+      "lcp": 200,
+      "h1": "Brugte CFMoto-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-dkw.html",
+      "viewport": 1440,
+      "kb": 959,
+      "filer": 24,
+      "lcp": 144,
+      "h1": "Brugte DKW-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-ducati.html",
+      "viewport": 1440,
+      "kb": 1009,
+      "filer": 26,
+      "lcp": 176,
+      "h1": "Brugte Ducati-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-fantic.html",
+      "viewport": 1440,
+      "kb": 958,
+      "filer": 24,
+      "lcp": 132,
+      "h1": "Brugte Fantic-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-fb-mondial.html",
+      "viewport": 1440,
+      "kb": 901,
+      "filer": 19,
+      "lcp": 152,
+      "h1": "Brugte FB Mondial-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-harley-davidson.html",
+      "viewport": 1440,
+      "kb": 1058,
+      "filer": 26,
+      "lcp": 180,
+      "h1": "Brugte Harley-Davidson-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-honda.html",
+      "viewport": 1440,
+      "kb": 1168,
+      "filer": 31,
+      "lcp": 188,
+      "h1": "Honda-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-husqvarna.html",
+      "viewport": 1440,
+      "kb": 969,
+      "filer": 24,
+      "lcp": 196,
+      "h1": "Brugte Husqvarna-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-hyosung.html",
+      "viewport": 1440,
+      "kb": 899,
+      "filer": 19,
+      "lcp": 152,
+      "h1": "Brugte Hyosung-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-indian.html",
+      "viewport": 1440,
+      "kb": 974,
+      "filer": 24,
+      "lcp": 140,
+      "h1": "Brugte Indian-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-kawasaki.html",
+      "viewport": 1440,
+      "kb": 1080,
+      "filer": 28,
+      "lcp": 196,
+      "h1": "Brugte Kawasaki-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-ktm.html",
+      "viewport": 1440,
+      "kb": 1027,
+      "filer": 25,
+      "lcp": 176,
+      "h1": "Brugte KTM-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-kymco.html",
+      "viewport": 1440,
+      "kb": 983,
+      "filer": 24,
+      "lcp": 188,
+      "h1": "Kymco-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-lauge-jensen.html",
+      "viewport": 1440,
+      "kb": 902,
+      "filer": 19,
+      "lcp": 140,
+      "h1": "Brugte Lauge Jensen-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-moto-guzzi.html",
+      "viewport": 1440,
+      "kb": 990,
+      "filer": 27,
+      "lcp": 132,
+      "h1": "Brugte Moto Guzzi-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-mv-agusta.html",
+      "viewport": 1440,
+      "kb": 959,
+      "filer": 23,
+      "lcp": 128,
+      "h1": "Brugte MV Agusta-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-rewaco.html",
+      "viewport": 1440,
+      "kb": 898,
+      "filer": 19,
+      "lcp": 132,
+      "h1": "Brugte Rewaco-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-royal-enfield.html",
+      "viewport": 1440,
+      "kb": 1037,
+      "filer": 25,
+      "lcp": 168,
+      "h1": "Royal Enfield-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-suzuki.html",
+      "viewport": 1440,
+      "kb": 1097,
+      "filer": 29,
+      "lcp": 164,
+      "h1": "Brugte Suzuki-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-sym.html",
+      "viewport": 1440,
+      "kb": 943,
+      "filer": 23,
+      "lcp": 152,
+      "h1": "Brugte SYM-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-triumph.html",
+      "viewport": 1440,
+      "kb": 1119,
+      "filer": 30,
+      "lcp": 164,
+      "h1": "Brugte Triumph-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-victory.html",
+      "viewport": 1440,
+      "kb": 919,
+      "filer": 20,
+      "lcp": 148,
+      "h1": "Brugte Victory-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-yamaha.html",
+      "viewport": 1440,
+      "kb": 1132,
+      "filer": 31,
+      "lcp": 180,
+      "h1": "Brugte Yamaha-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerker.html",
+      "viewport": 1440,
+      "kb": 1084,
+      "filer": 44,
+      "lcp": 144,
+      "h1": "Motorcykler efter mærke",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-bmw-touring.html",
+      "viewport": 1440,
+      "kb": 1054,
+      "filer": 22,
+      "lcp": 188,
+      "h1": "BMW touring-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-harley-davidson-cruiser.html",
+      "viewport": 1440,
+      "kb": 1073,
+      "filer": 23,
+      "lcp": 184,
+      "h1": "Harley-Davidson cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-adventure.html",
+      "viewport": 1440,
+      "kb": 1073,
+      "filer": 23,
+      "lcp": 168,
+      "h1": "Honda adventure/enduro-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-cruiser.html",
+      "viewport": 1440,
+      "kb": 1071,
+      "filer": 23,
+      "lcp": 192,
+      "h1": "Honda cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-naked.html",
+      "viewport": 1440,
+      "kb": 1072,
+      "filer": 23,
+      "lcp": 184,
+      "h1": "Honda naked-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-sport.html",
+      "viewport": 1440,
+      "kb": 1069,
+      "filer": 23,
+      "lcp": 176,
+      "h1": "Honda sport-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-touring.html",
+      "viewport": 1440,
+      "kb": 1060,
+      "filer": 22,
+      "lcp": 184,
+      "h1": "Honda touring-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-suzuki-cruiser.html",
+      "viewport": 1440,
+      "kb": 1053,
+      "filer": 22,
+      "lcp": 160,
+      "h1": "Suzuki cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-yamaha-cruiser.html",
+      "viewport": 1440,
+      "kb": 1054,
+      "filer": 22,
+      "lcp": 180,
+      "h1": "Yamaha cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mine-annoncer.html",
+      "viewport": 1440,
+      "kb": 1190,
+      "filer": 19,
+      "lcp": 112,
+      "h1": "Dine annoncer og favoritter",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-bmw-k-1200.html",
+      "viewport": 1440,
+      "kb": 952,
+      "filer": 18,
+      "lcp": 156,
+      "h1": "BMW K 1200",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-harley-davidson-flstc-heritage-softail-classic.html",
+      "viewport": 1440,
+      "kb": 955,
+      "filer": 18,
+      "lcp": 164,
+      "h1": "Harley-Davidson FLSTC Heritage Softail Classic",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cb-1000-hornet.html",
+      "viewport": 1440,
+      "kb": 952,
+      "filer": 18,
+      "lcp": 164,
+      "h1": "Honda CB 1000 Hornet",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cb-1000-r.html",
+      "viewport": 1440,
+      "kb": 953,
+      "filer": 18,
+      "lcp": 168,
+      "h1": "Honda CB 1000 R",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cbr-1100-xx.html",
+      "viewport": 1440,
+      "kb": 957,
+      "filer": 18,
+      "lcp": 168,
+      "h1": "Honda CBR 1100 XX",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cl-500-a.html",
+      "viewport": 1440,
+      "kb": 952,
+      "filer": 18,
+      "lcp": 172,
+      "h1": "Honda CL 500 A",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cmx-1100-d-rebel.html",
+      "viewport": 1440,
+      "kb": 948,
+      "filer": 18,
+      "lcp": 176,
+      "h1": "Honda CMX 1100 D Rebel",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cmx-500-rebel.html",
+      "viewport": 1440,
+      "kb": 977,
+      "filer": 18,
+      "lcp": 184,
+      "h1": "Honda CMX 500 Rebel",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-crf-1100-l-africa.html",
+      "viewport": 1440,
+      "kb": 971,
+      "filer": 18,
+      "lcp": 180,
+      "h1": "Honda CRF 1100 L Africa Twin",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-gl-1800-gold-wing.html",
+      "viewport": 1440,
+      "kb": 988,
+      "filer": 18,
+      "lcp": 188,
+      "h1": "Honda GL 1800 Gold Wing",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-nt-1100-a.html",
+      "viewport": 1440,
+      "kb": 968,
+      "filer": 18,
+      "lcp": 180,
+      "h1": "Honda NT 1100 A",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-nx-500.html",
+      "viewport": 1440,
+      "kb": 941,
+      "filer": 18,
+      "lcp": 140,
+      "h1": "Honda NX 500",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-xl-750-transalp.html",
+      "viewport": 1440,
+      "kb": 975,
+      "filer": 19,
+      "lcp": 168,
+      "h1": "Honda XL 750 Transalp",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-suzuki-vlr-1800.html",
+      "viewport": 1440,
+      "kb": 952,
+      "filer": 18,
+      "lcp": 160,
+      "h1": "Suzuki VLR 1800",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "om-bikerbasen.html",
+      "viewport": 1440,
+      "kb": 727,
+      "filer": 15,
+      "lcp": 124,
+      "h1": "Om Bikerbasen",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "om-indeksering.html",
+      "viewport": 1440,
+      "kb": 726,
+      "filer": 15,
+      "lcp": 132,
+      "h1": "Om vores indeksering",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "opret-annonce.html",
+      "viewport": 1440,
+      "kb": 1191,
+      "filer": 22,
+      "lcp": 140,
+      "h1": "Opret annonce",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "privatlivspolitik.html",
+      "viewport": 1440,
+      "kb": 730,
+      "filer": 15,
+      "lcp": 132,
+      "h1": "Privatlivspolitik",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "region-hovedstaden.html",
+      "viewport": 1440,
+      "kb": 1155,
+      "filer": 27,
+      "lcp": 172,
+      "h1": "Motorcykler til salg i Hovedstaden",
+      "tal": [
+        "16 motorcykler",
+        "16\nmotorcykler",
+        "16 motorcykler",
+        "2 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "region-midtjylland.html",
+      "viewport": 1440,
+      "kb": 1174,
+      "filer": 27,
+      "lcp": 196,
+      "h1": "Motorcykler til salg i Midtjylland",
+      "tal": [
+        "21 motorcykler",
+        "21\nmotorcykler",
+        "21 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "region-nordjylland.html",
+      "viewport": 1440,
+      "kb": 1155,
+      "filer": 27,
+      "lcp": 180,
+      "h1": "Motorcykler til salg i Nordjylland",
+      "tal": [
+        "10 motorcykler",
+        "10\nmotorcykler",
+        "10 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "region-sjaelland.html",
+      "viewport": 1440,
+      "kb": 1091,
+      "filer": 24,
+      "lcp": 184,
+      "h1": "Motorcykler til salg i Sjælland",
+      "tal": [
+        "13 motorcykler",
+        "13\nmotorcykler",
+        "13 motorcykler",
+        "2 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "region-syddanmark.html",
+      "viewport": 1440,
+      "kb": 1186,
+      "filer": 27,
+      "lcp": 172,
+      "h1": "Motorcykler til salg i Syddanmark",
+      "tal": [
+        "36 motorcykler",
+        "36\nmotorcykler",
+        "36 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "sikkerhed.html",
+      "viewport": 1440,
+      "kb": 726,
+      "filer": 15,
+      "lcp": 124,
+      "h1": "Sikkerhed & gode råd",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "soegning.html",
+      "viewport": 1440,
+      "kb": 1146,
+      "filer": 29,
+      "lcp": 244,
+      "h1": "97 motorcykler til salg i Danmark",
+      "tal": [
+        "97 motorcykler",
+        "97 motorcykler",
+        "97 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "type-adventure.html",
+      "viewport": 1440,
+      "kb": 954,
+      "filer": 22,
+      "lcp": 184,
+      "h1": "Adventure/Enduro-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-classic.html",
+      "viewport": 1440,
+      "kb": 962,
+      "filer": 23,
+      "lcp": 172,
+      "h1": "Classic/Veteran-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-cross.html",
+      "viewport": 1440,
+      "kb": 952,
+      "filer": 23,
+      "lcp": 164,
+      "h1": "Cross/MX-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-cruiser.html",
+      "viewport": 1440,
+      "kb": 959,
+      "filer": 22,
+      "lcp": 152,
+      "h1": "Cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-naked.html",
+      "viewport": 1440,
+      "kb": 951,
+      "filer": 22,
+      "lcp": 168,
+      "h1": "Naked-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-scooter.html",
+      "viewport": 1440,
+      "kb": 939,
+      "filer": 23,
+      "lcp": 168,
+      "h1": "Scooter-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-sport.html",
+      "viewport": 1440,
+      "kb": 947,
+      "filer": 22,
+      "lcp": 180,
+      "h1": "Sport-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-touring.html",
+      "viewport": 1440,
+      "kb": 956,
+      "filer": 22,
+      "lcp": 160,
+      "h1": "Touring-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "vilkaar.html",
+      "viewport": 1440,
+      "kb": 726,
+      "filer": 15,
+      "lcp": 116,
+      "h1": "Vilkår og betingelser",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "404.html",
+      "viewport": 375,
+      "kb": 589,
+      "filer": 14,
+      "lcp": 112,
+      "h1": "Den side fandt vi ikke",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "afmeld.html",
+      "viewport": 375,
+      "kb": 594,
+      "filer": 14,
+      "lcp": 84,
+      "h1": "Linket mangler en kode",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "annonce-bmw-r45-1979-59d3a9a1.html",
+      "viewport": 375,
+      "kb": 1222,
+      "filer": 25,
+      "lcp": 164,
+      "h1": "BMW R45",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "annonce-harley-davidson-flhx-2007-541ad405.html",
+      "viewport": 375,
+      "kb": 1214,
+      "filer": 25,
+      "lcp": 156,
+      "h1": "Harley-Davidson FLHX",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "annonce.html",
+      "viewport": 375,
+      "kb": 1217,
+      "filer": 25,
+      "lcp": 184,
+      "h1": "Honda CB 1000 R",
+      "tal": [
+        "16\nMotorcykler",
+        "97\nMotorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "budget-under-100000.html",
+      "viewport": 375,
+      "kb": 1043,
+      "filer": 26,
+      "lcp": 156,
+      "h1": "Motorcykler under 100.000 kr.",
+      "tal": [
+        "77 motorcykler",
+        "77 motorcykler",
+        "4 motorcykler",
+        "8 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "budget-under-30000.html",
+      "viewport": 375,
+      "kb": 1023,
+      "filer": 26,
+      "lcp": 176,
+      "h1": "Motorcykler under 30.000 kr.",
+      "tal": [
+        "7 motorcykler",
+        "7 motorcykler",
+        "1 motorcykler",
+        "2 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "budget-under-50000.html",
+      "viewport": 375,
+      "kb": 1030,
+      "filer": 26,
+      "lcp": 172,
+      "h1": "Motorcykler under 50.000 kr.",
+      "tal": [
+        "26 motorcykler",
+        "26 motorcykler",
+        "3 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "budget-under-75000.html",
+      "viewport": 375,
+      "kb": 1035,
+      "filer": 26,
+      "lcp": 172,
+      "h1": "Motorcykler under 75.000 kr.",
+      "tal": [
+        "55 motorcykler",
+        "55 motorcykler",
+        "3 motorcykler",
+        "5 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "by-horsens.html",
+      "viewport": 375,
+      "kb": 862,
+      "filer": 19,
+      "lcp": 164,
+      "h1": "Motorcykler til salg i Horsens",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "by-skive.html",
+      "viewport": 375,
+      "kb": 861,
+      "filer": 19,
+      "lcp": 164,
+      "h1": "Motorcykler til salg i Skive",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "by-thorsoe.html",
+      "viewport": 375,
+      "kb": 866,
+      "filer": 19,
+      "lcp": 156,
+      "h1": "Motorcykler til salg i Thorsø",
+      "tal": [
+        "74 motorcykler",
+        "74 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "dashboard.html",
+      "viewport": 375,
+      "kb": 1000,
+      "filer": 19,
+      "lcp": 124,
+      "h1": "Dit overblik",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "forhandler.html",
+      "viewport": 375,
+      "kb": 1045,
+      "filer": 19,
+      "lcp": 112,
+      "h1": "Sælgerprofil på Bikerbasen",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-a2-koerekort.html",
+      "viewport": 375,
+      "kb": 803,
+      "filer": 18,
+      "lcp": 136,
+      "h1": "A2-kørekort: regler, alder og krav",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-brugt-motorcykel.html",
+      "viewport": 375,
+      "kb": 820,
+      "filer": 19,
+      "lcp": 140,
+      "h1": "Køb brugt motorcykel — det skal du tjekke",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-foerste-motorcykel.html",
+      "viewport": 375,
+      "kb": 873,
+      "filer": 23,
+      "lcp": 148,
+      "h1": "Sådan vælger du din første motorcykel",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-foraar-tjekliste.html",
+      "viewport": 375,
+      "kb": 803,
+      "filer": 18,
+      "lcp": 132,
+      "h1": "Første tur efter vinteren: tjekliste til din MC",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-forsikring.html",
+      "viewport": 375,
+      "kb": 804,
+      "filer": 18,
+      "lcp": 132,
+      "h1": "MC-forsikring: det skal du vide som ny motorcyklist",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-ordliste.html",
+      "viewport": 375,
+      "kb": 803,
+      "filer": 18,
+      "lcp": 128,
+      "h1": "MC-ordliste: ccm, kW, hk og andre begreber",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-typer.html",
+      "viewport": 375,
+      "kb": 873,
+      "filer": 23,
+      "lcp": 144,
+      "h1": "Motorcykeltyper: hvilken passer til dig?",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-mc-udstyr.html",
+      "viewport": 375,
+      "kb": 802,
+      "filer": 18,
+      "lcp": 132,
+      "h1": "MC-udstyr til ny motorcyklist: hjelm og tøj",
+      "tal": [],
+      "fund": [
+        {
+          "tjek": "overlap",
+          "niveau": "advarsel",
+          "detalje": "guiden til din første motorcyk <> guiden til MC-forsikring | vinteropbevaring <> tjeklisten til første tur efte"
+        }
+      ]
+    },
+    {
+      "side": "guide-mc-vinteropbevaring.html",
+      "viewport": 375,
+      "kb": 821,
+      "filer": 19,
+      "lcp": 144,
+      "h1": "Vinteropbevaring af motorcykel: sådan gør du",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guide-saelg-motorcykel.html",
+      "viewport": 375,
+      "kb": 807,
+      "filer": 18,
+      "lcp": 128,
+      "h1": "Sådan sælger du din motorcykel: trin for trin",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "guides.html",
+      "viewport": 375,
+      "kb": 934,
+      "filer": 25,
+      "lcp": 120,
+      "h1": "Artikler & guides",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "index.html",
+      "viewport": 375,
+      "kb": 1058,
+      "filer": 37,
+      "lcp": 120,
+      "h1": "Søg motorcykler efter det kørekort, du har",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "koerekort-a.html",
+      "viewport": 375,
+      "kb": 1027,
+      "filer": 24,
+      "lcp": 152,
+      "h1": "Motorcykler til A-kørekort",
+      "tal": [
+        "58 motorcykler",
+        "58 motorcykler",
+        "58 motorcykler",
+        "1\nMotorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "koerekort-a1.html",
+      "viewport": 375,
+      "kb": 933,
+      "filer": 20,
+      "lcp": 168,
+      "h1": "Motorcykler til A1-kørekort",
+      "tal": [
+        "1\n\nMotorcykler",
+        "4 motorcykler",
+        "4 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "koerekort-a2.html",
+      "viewport": 375,
+      "kb": 1033,
+      "filer": 26,
+      "lcp": 148,
+      "h1": "Motorcykler til A2-kørekort",
+      "tal": [
+        "2\n\nMotorcykler",
+        "30 motorcykler",
+        "30 motorcykler",
+        "30 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "login.html",
+      "viewport": 375,
+      "kb": 1000,
+      "filer": 19,
+      "lcp": 120,
+      "h1": "Log ind på BikerbasenOpret din gratis konto",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-aprilia.html",
+      "viewport": 375,
+      "kb": 926,
+      "filer": 26,
+      "lcp": 140,
+      "h1": "Brugte Aprilia-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-bach.html",
+      "viewport": 375,
+      "kb": 821,
+      "filer": 20,
+      "lcp": 140,
+      "h1": "Brugte Bach-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-benelli.html",
+      "viewport": 375,
+      "kb": 866,
+      "filer": 24,
+      "lcp": 124,
+      "h1": "Brugte Benelli-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-bmw.html",
+      "viewport": 375,
+      "kb": 992,
+      "filer": 28,
+      "lcp": 144,
+      "h1": "Brugte BMW-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-bsa.html",
+      "viewport": 375,
+      "kb": 854,
+      "filer": 20,
+      "lcp": 148,
+      "h1": "BSA-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-buell.html",
+      "viewport": 375,
+      "kb": 806,
+      "filer": 19,
+      "lcp": 132,
+      "h1": "Brugte Buell-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-cagiva.html",
+      "viewport": 375,
+      "kb": 823,
+      "filer": 20,
+      "lcp": 144,
+      "h1": "Brugte Cagiva-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-cfmoto.html",
+      "viewport": 375,
+      "kb": 868,
+      "filer": 24,
+      "lcp": 152,
+      "h1": "Brugte CFMoto-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-dkw.html",
+      "viewport": 375,
+      "kb": 866,
+      "filer": 24,
+      "lcp": 128,
+      "h1": "Brugte DKW-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-ducati.html",
+      "viewport": 375,
+      "kb": 917,
+      "filer": 26,
+      "lcp": 144,
+      "h1": "Brugte Ducati-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-fantic.html",
+      "viewport": 375,
+      "kb": 865,
+      "filer": 24,
+      "lcp": 128,
+      "h1": "Brugte Fantic-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-fb-mondial.html",
+      "viewport": 375,
+      "kb": 809,
+      "filer": 19,
+      "lcp": 132,
+      "h1": "Brugte FB Mondial-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-harley-davidson.html",
+      "viewport": 375,
+      "kb": 966,
+      "filer": 26,
+      "lcp": 140,
+      "h1": "Brugte Harley-Davidson-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-honda.html",
+      "viewport": 375,
+      "kb": 1075,
+      "filer": 31,
+      "lcp": 144,
+      "h1": "Honda-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": [
+        {
+          "tjek": "overlap",
+          "niveau": "advarsel",
+          "detalje": "Se motorcykler, der ikke er ud <> Se motorcykler, der ikke er ud"
+        }
+      ]
+    },
+    {
+      "side": "maerke-husqvarna.html",
+      "viewport": 375,
+      "kb": 876,
+      "filer": 24,
+      "lcp": 148,
+      "h1": "Brugte Husqvarna-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-hyosung.html",
+      "viewport": 375,
+      "kb": 806,
+      "filer": 19,
+      "lcp": 128,
+      "h1": "Brugte Hyosung-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-indian.html",
+      "viewport": 375,
+      "kb": 882,
+      "filer": 24,
+      "lcp": 132,
+      "h1": "Brugte Indian-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-kawasaki.html",
+      "viewport": 375,
+      "kb": 988,
+      "filer": 28,
+      "lcp": 152,
+      "h1": "Brugte Kawasaki-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-ktm.html",
+      "viewport": 375,
+      "kb": 934,
+      "filer": 25,
+      "lcp": 144,
+      "h1": "Brugte KTM-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-kymco.html",
+      "viewport": 375,
+      "kb": 891,
+      "filer": 24,
+      "lcp": 124,
+      "h1": "Kymco-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-lauge-jensen.html",
+      "viewport": 375,
+      "kb": 810,
+      "filer": 19,
+      "lcp": 140,
+      "h1": "Brugte Lauge Jensen-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-moto-guzzi.html",
+      "viewport": 375,
+      "kb": 898,
+      "filer": 27,
+      "lcp": 156,
+      "h1": "Brugte Moto Guzzi-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-mv-agusta.html",
+      "viewport": 375,
+      "kb": 866,
+      "filer": 23,
+      "lcp": 152,
+      "h1": "Brugte MV Agusta-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-rewaco.html",
+      "viewport": 375,
+      "kb": 806,
+      "filer": 19,
+      "lcp": 140,
+      "h1": "Brugte Rewaco-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-royal-enfield.html",
+      "viewport": 375,
+      "kb": 944,
+      "filer": 25,
+      "lcp": 144,
+      "h1": "Royal Enfield-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-suzuki.html",
+      "viewport": 375,
+      "kb": 1004,
+      "filer": 29,
+      "lcp": 140,
+      "h1": "Brugte Suzuki-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-sym.html",
+      "viewport": 375,
+      "kb": 850,
+      "filer": 23,
+      "lcp": 124,
+      "h1": "Brugte SYM-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-triumph.html",
+      "viewport": 375,
+      "kb": 1027,
+      "filer": 30,
+      "lcp": 144,
+      "h1": "Brugte Triumph-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-victory.html",
+      "viewport": 375,
+      "kb": 827,
+      "filer": 20,
+      "lcp": 140,
+      "h1": "Brugte Victory-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "maerke-yamaha.html",
+      "viewport": 375,
+      "kb": 1040,
+      "filer": 31,
+      "lcp": 168,
+      "h1": "Brugte Yamaha-motorcykler til salg i Danmark",
+      "tal": [],
+      "fund": [
+        {
+          "tjek": "overlap",
+          "niveau": "advarsel",
+          "detalje": "Se motorcykler, der ikke er ud <> Se motorcykler, der ikke er ud"
+        }
+      ]
+    },
+    {
+      "side": "maerker.html",
+      "viewport": 375,
+      "kb": 992,
+      "filer": 44,
+      "lcp": 120,
+      "h1": "Motorcykler efter mærke",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-bmw-touring.html",
+      "viewport": 375,
+      "kb": 933,
+      "filer": 20,
+      "lcp": 172,
+      "h1": "BMW touring-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-harley-davidson-cruiser.html",
+      "viewport": 375,
+      "kb": 967,
+      "filer": 22,
+      "lcp": 164,
+      "h1": "Harley-Davidson cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-adventure.html",
+      "viewport": 375,
+      "kb": 967,
+      "filer": 22,
+      "lcp": 168,
+      "h1": "Honda adventure/enduro-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-cruiser.html",
+      "viewport": 375,
+      "kb": 964,
+      "filer": 22,
+      "lcp": 172,
+      "h1": "Honda cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-naked.html",
+      "viewport": 375,
+      "kb": 980,
+      "filer": 23,
+      "lcp": 172,
+      "h1": "Honda naked-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-sport.html",
+      "viewport": 375,
+      "kb": 962,
+      "filer": 22,
+      "lcp": 168,
+      "h1": "Honda sport-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-honda-touring.html",
+      "viewport": 375,
+      "kb": 953,
+      "filer": 21,
+      "lcp": 152,
+      "h1": "Honda touring-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-suzuki-cruiser.html",
+      "viewport": 375,
+      "kb": 932,
+      "filer": 20,
+      "lcp": 256,
+      "h1": "Suzuki cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mc-yamaha-cruiser.html",
+      "viewport": 375,
+      "kb": 933,
+      "filer": 20,
+      "lcp": 252,
+      "h1": "Yamaha cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "mine-annoncer.html",
+      "viewport": 375,
+      "kb": 1000,
+      "filer": 19,
+      "lcp": 136,
+      "h1": "Dine annoncer og favoritter",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-bmw-k-1200.html",
+      "viewport": 375,
+      "kb": 860,
+      "filer": 18,
+      "lcp": 216,
+      "h1": "BMW K 1200",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-harley-davidson-flstc-heritage-softail-classic.html",
+      "viewport": 375,
+      "kb": 862,
+      "filer": 18,
+      "lcp": 164,
+      "h1": "Harley-Davidson FLSTC Heritage Softail Classic",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cb-1000-hornet.html",
+      "viewport": 375,
+      "kb": 859,
+      "filer": 18,
+      "lcp": 188,
+      "h1": "Honda CB 1000 Hornet",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cb-1000-r.html",
+      "viewport": 375,
+      "kb": 861,
+      "filer": 18,
+      "lcp": 160,
+      "h1": "Honda CB 1000 R",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cbr-1100-xx.html",
+      "viewport": 375,
+      "kb": 865,
+      "filer": 18,
+      "lcp": 180,
+      "h1": "Honda CBR 1100 XX",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cl-500-a.html",
+      "viewport": 375,
+      "kb": 859,
+      "filer": 18,
+      "lcp": 168,
+      "h1": "Honda CL 500 A",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cmx-1100-d-rebel.html",
+      "viewport": 375,
+      "kb": 855,
+      "filer": 18,
+      "lcp": 168,
+      "h1": "Honda CMX 1100 D Rebel",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-cmx-500-rebel.html",
+      "viewport": 375,
+      "kb": 885,
+      "filer": 18,
+      "lcp": 192,
+      "h1": "Honda CMX 500 Rebel",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-crf-1100-l-africa.html",
+      "viewport": 375,
+      "kb": 878,
+      "filer": 18,
+      "lcp": 208,
+      "h1": "Honda CRF 1100 L Africa Twin",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-gl-1800-gold-wing.html",
+      "viewport": 375,
+      "kb": 895,
+      "filer": 18,
+      "lcp": 184,
+      "h1": "Honda GL 1800 Gold Wing",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-nt-1100-a.html",
+      "viewport": 375,
+      "kb": 875,
+      "filer": 18,
+      "lcp": 192,
+      "h1": "Honda NT 1100 A",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-nx-500.html",
+      "viewport": 375,
+      "kb": 848,
+      "filer": 18,
+      "lcp": 148,
+      "h1": "Honda NX 500",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-honda-xl-750-transalp.html",
+      "viewport": 375,
+      "kb": 882,
+      "filer": 19,
+      "lcp": 164,
+      "h1": "Honda XL 750 Transalp",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "model-suzuki-vlr-1800.html",
+      "viewport": 375,
+      "kb": 859,
+      "filer": 18,
+      "lcp": 180,
+      "h1": "Suzuki VLR 1800",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "om-bikerbasen.html",
+      "viewport": 375,
+      "kb": 601,
+      "filer": 14,
+      "lcp": 124,
+      "h1": "Om Bikerbasen",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "om-indeksering.html",
+      "viewport": 375,
+      "kb": 600,
+      "filer": 14,
+      "lcp": 112,
+      "h1": "Om vores indeksering",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "opret-annonce.html",
+      "viewport": 375,
+      "kb": 1098,
+      "filer": 22,
+      "lcp": 124,
+      "h1": "Opret annonce",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "privatlivspolitik.html",
+      "viewport": 375,
+      "kb": 605,
+      "filer": 14,
+      "lcp": 120,
+      "h1": "Privatlivspolitik",
+      "tal": [],
+      "fund": [
+        {
+          "tjek": "overlap",
+          "niveau": "advarsel",
+          "detalje": "kontakt@bikerbasen.dk <> Om vores indeksering"
+        }
+      ]
+    },
+    {
+      "side": "region-hovedstaden.html",
+      "viewport": 375,
+      "kb": 1029,
+      "filer": 26,
+      "lcp": 176,
+      "h1": "Motorcykler til salg i Hovedstaden",
+      "tal": [
+        "16 motorcykler",
+        "16 motorcykler",
+        "2 motorcykler",
+        "2 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "region-midtjylland.html",
+      "viewport": 375,
+      "kb": 1048,
+      "filer": 26,
+      "lcp": 180,
+      "h1": "Motorcykler til salg i Midtjylland",
+      "tal": [
+        "21 motorcykler",
+        "21 motorcykler",
+        "4 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "region-nordjylland.html",
+      "viewport": 375,
+      "kb": 1029,
+      "filer": 26,
+      "lcp": 196,
+      "h1": "Motorcykler til salg i Nordjylland",
+      "tal": [
+        "10 motorcykler",
+        "10 motorcykler",
+        "4 motorcykler",
+        "4 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "region-sjaelland.html",
+      "viewport": 375,
+      "kb": 965,
+      "filer": 23,
+      "lcp": 184,
+      "h1": "Motorcykler til salg i Sjælland",
+      "tal": [
+        "13 motorcykler",
+        "13 motorcykler",
+        "2 motorcykler",
+        "2 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "region-syddanmark.html",
+      "viewport": 375,
+      "kb": 1060,
+      "filer": 26,
+      "lcp": 208,
+      "h1": "Motorcykler til salg i Syddanmark",
+      "tal": [
+        "36 motorcykler",
+        "36 motorcykler",
+        "4 motorcykler",
+        "3 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "sikkerhed.html",
+      "viewport": 375,
+      "kb": 600,
+      "filer": 14,
+      "lcp": 132,
+      "h1": "Sikkerhed & gode råd",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "soegning.html",
+      "viewport": 375,
+      "kb": 1134,
+      "filer": 28,
+      "lcp": 268,
+      "h1": "97 motorcykler til salg i Danmark",
+      "tal": [
+        "97 motorcykler",
+        "97 motorcykler",
+        "97 motorcykler"
+      ],
+      "fund": []
+    },
+    {
+      "side": "type-adventure.html",
+      "viewport": 375,
+      "kb": 940,
+      "filer": 21,
+      "lcp": 208,
+      "h1": "Adventure/Enduro-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-classic.html",
+      "viewport": 375,
+      "kb": 948,
+      "filer": 22,
+      "lcp": 200,
+      "h1": "Classic/Veteran-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-cross.html",
+      "viewport": 375,
+      "kb": 952,
+      "filer": 23,
+      "lcp": 180,
+      "h1": "Cross/MX-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-cruiser.html",
+      "viewport": 375,
+      "kb": 930,
+      "filer": 20,
+      "lcp": 176,
+      "h1": "Cruiser-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-naked.html",
+      "viewport": 375,
+      "kb": 951,
+      "filer": 22,
+      "lcp": 172,
+      "h1": "Naked-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-scooter.html",
+      "viewport": 375,
+      "kb": 926,
+      "filer": 22,
+      "lcp": 156,
+      "h1": "Scooter-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-sport.html",
+      "viewport": 375,
+      "kb": 947,
+      "filer": 22,
+      "lcp": 260,
+      "h1": "Sport-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "type-touring.html",
+      "viewport": 375,
+      "kb": 956,
+      "filer": 22,
+      "lcp": 248,
+      "h1": "Touring-motorcykler",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "vilkaar.html",
+      "viewport": 375,
+      "kb": 600,
+      "filer": 14,
+      "lcp": 184,
+      "h1": "Vilkår og betingelser",
+      "tal": [],
+      "fund": []
+    },
+    {
+      "side": "annonce.html",
+      "viewport": 1440,
+      "variant": "cookie-filter",
+      "fund": []
+    },
+    {
+      "side": "guides.html",
+      "viewport": 1440,
+      "variant": "cookie-filter",
+      "fund": []
+    },
+    {
+      "side": "index.html",
+      "viewport": 1440,
+      "variant": "cookie-filter",
+      "fund": []
+    },
+    {
+      "side": "login.html",
+      "viewport": 1440,
+      "variant": "cookie-filter",
+      "fund": []
+    },
+    {
+      "side": "maerker.html",
+      "viewport": 1440,
+      "variant": "cookie-filter",
+      "fund": []
+    },
+    {
+      "side": "soegning.html",
+      "viewport": 1440,
+      "variant": "cookie-filter",
+      "fund": []
+    }
+  ],
+  "konsistens": {
+    "fund": [],
+    "tallene": {
+      "soegning.html": "97"
+    }
+  },
+  "perSide": {
+    "afmeld.html": [
+      {
+        "side": "afmeld.html",
+        "query": "",
+        "cache": "kold",
+        "viewport": 375,
+        "tema": "lys",
+        "tjek": "cls",
+        "niveau": "fejl",
+        "detalje": "CLS 0.051 > 0.05",
+        "hvor": "375"
+      }
+    ],
+    "region-nordjylland.html": [
+      {
+        "side": "region-nordjylland.html",
+        "query": "",
+        "cache": "kold",
+        "viewport": 1920,
+        "tema": "mørk",
+        "tjek": "cls",
+        "niveau": "fejl",
+        "detalje": "CLS 0.088 > 0.05",
+        "hvor": "1920m"
+      },
+      {
+        "side": "region-nordjylland.html",
+        "query": "",
+        "cache": "kold",
+        "viewport": 1920,
+        "tema": "lys",
+        "tjek": "cls",
+        "niveau": "fejl",
+        "detalje": "CLS 0.088 > 0.05",
+        "hvor": "1920"
+      }
+    ],
+    "guide-mc-udstyr.html": [
+      {
+        "tjek": "overlap",
+        "niveau": "advarsel",
+        "detalje": "guiden til din første motorcyk <> guiden til MC-forsikring",
+        "hvor": "1440"
+      },
+      {
+        "tjek": "overlap",
+        "niveau": "advarsel",
+        "detalje": "guiden til din første motorcyk <> guiden til MC-forsikring | vinteropbevaring <> tjeklisten til første tur efte",
+        "hvor": "375"
+      }
+    ],
+    "maerke-honda.html": [
+      {
+        "tjek": "overlap",
+        "niveau": "advarsel",
+        "detalje": "Se motorcykler, der ikke er ud <> Se motorcykler, der ikke er ud",
+        "hvor": "375"
+      }
+    ],
+    "maerke-yamaha.html": [
+      {
+        "tjek": "overlap",
+        "niveau": "advarsel",
+        "detalje": "Se motorcykler, der ikke er ud <> Se motorcykler, der ikke er ud",
+        "hvor": "375"
+      }
+    ],
+    "privatlivspolitik.html": [
+      {
+        "tjek": "overlap",
+        "niveau": "advarsel",
+        "detalje": "kontakt@bikerbasen.dk <> Om vores indeksering",
+        "hvor": "375"
+      }
+    ]
+  }
+}

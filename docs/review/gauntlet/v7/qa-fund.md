@@ -64,3 +64,6 @@ Kritikeren retter ikke andres filer; hvert fund har fil, viewport, bevis og fors
 
 ### F-V7-13 (P3) `node --test` kører 15 filer samtidigt som standard
 - Bevis: 16 kerner -> 15 samtidige test-filer, hvoraf ca. 40 starter egen Chromium. Mål: 677 s og 562 s (to kørsler, ingen ændring), og de røde tests var forskellige hver gang (se qa.md). Rettet med `--test-concurrency=8` i `package.json` "test" (kun flaget; filllisten er urørt, så merge-konflikter begrænses).
+
+## Status efter V7-integration (fase 2)
+Se `qa-dom.md` afsnit 5 og 6: F-V7-01, -02 (delvist), -03, -05, -12 løst; -08 rettet i `opret-annonce.html`; -06 åben (bevist rettelse: `font-display: optional`); -07 delvist løst (nu P3); nye fund F-V7-14 til -18.
