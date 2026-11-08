@@ -78,12 +78,12 @@ test('side: under tærsklen er noindex, og tom facet har stadig en adresse og et
   assert.match(tom, /noindex/); assert.match(tom, /soegning\.html\?type=scooter/);
 });
 
-test('side: kørekortsiden viser kilden og de verificerede fakta', () => {
+test('side: kørekortsiden viser de verificerede fakta (kildelinjen er fjernet på ejerens ønske)', () => {
   global.ALLE_LISTINGS = [];
   const alle = Array.from({ length: 12 }, (_, i) => l(i + 1));
   const a2 = buildFacetList(alle).find(f => f.slug === 'koerekort-a2');
   const html = side(a2, alle);
-  assert.match(html, /fstyr\.dk/);
+  assert.doesNotMatch(html, /fa-fakta-kilde|Almindelige regler\. Kilde/);
   assert.match(html, /Op til 35 kW/);
   assert.match(html, /Hvad må du køre med A2\?/);
   assert.match(html, /Hvad kan du ikke se direkte i en annonce\?/);
