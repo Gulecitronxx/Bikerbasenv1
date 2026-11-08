@@ -25,7 +25,7 @@
 <meta name="twitter:title" content="Bikerbasen — motorcykler til salg i Danmark, nye og brugte">
 <meta name="twitter:description" content="Motorcykler til salg fra danske forhandlere og markedspladser — nye og brugte, samlet ét sted. Kilden står på hvert kort.">
 <meta name="twitter:image" content="https://bikerbasen.dk/og-image.png">
-<!-- meta:end -->
+<!-- meta:end -->
 
 
 
@@ -69,9 +69,9 @@ try{
 
 
 
-<link rel="stylesheet" href="css/styles.css?v=b8490f9f">
-<link rel="stylesheet" href="css/p-brand-logo.css?v=b8490f9f">
-<link rel="stylesheet" href="css/p-forside.css?v=b8490f9f">
+<link rel="stylesheet" href="css/styles.css?v=d61fc8a0">
+<link rel="stylesheet" href="css/p-brand-logo.css?v=d61fc8a0">
+<link rel="stylesheet" href="css/p-forside.css?v=d61fc8a0">
 
 <!-- jsonld:start (genereret af scripts/build-meta.js) -->
 <script type="application/ld+json">
@@ -228,9 +228,8 @@ try{
         <div class="tiles-raekke" id="category-tiles"></div>
         <button type="button" class="typer-pil" id="typer-pil" aria-label="Se flere typer" data-icon="chevronRight"></button>
       </div>
-      <!-- Teksten skrives om af js/home.js (fyldTypeAntal): hvor mange annoncer der IKKE har en type fra
-           kilden og derfor ikke ligger bag nogen flise. -->
-      <p class="sek-note" id="types-sub"></p>
+      <!-- Noten om annoncer uden type er fjernet på ejerens ønske; elementet står skjult og tomt. -->
+      <p class="sek-note" id="types-sub" hidden></p>
     </div>
   </section>
 
@@ -589,26 +588,26 @@ try{
   </div>
 </footer>
 
-<script defer src="js/security.js?v=b8490f9f"></script>
-<script defer src="js/supabase-config.js?v=b8490f9f"></script>
-<script defer src="js/supabase-api.js?v=b8490f9f"></script>
-<script defer src="js/icons.js?v=b8490f9f"></script>
-<script defer src="js/data.js?v=b8490f9f"></script>
+<script defer src="js/security.js?v=d61fc8a0"></script>
+<script defer src="js/supabase-config.js?v=d61fc8a0"></script>
+<script defer src="js/supabase-api.js?v=d61fc8a0"></script>
+<script defer src="js/icons.js?v=d61fc8a0"></script>
+<script defer src="js/data.js?v=d61fc8a0"></script>
 <!-- Filterkæden, delt med soegning.html. Skal loades EFTER js/data.js
      (bruger passerKoerekort/hkEllerNull) og FØR js/home.js. Se
      work/DECISIONS.md, blokken "Ét filterhus". -->
-<script defer src="js/filtrering.js?v=b8490f9f"></script>
+<script defer src="js/filtrering.js?v=d61fc8a0"></script>
 <!-- Runde 5 (D5-F1b): "Til salg lige nu" bruger soegesidens standardraekkefoelge
      (Sortering.sorter(…, 'blandet')), saa forsiden og soegningen viser samme
      orden. Samme fil som soegning.html og scripts/build-srp.js. -->
-<script defer src="js/sortering.js?v=b8490f9f"></script>
-<script defer src="js/store.js?v=b8490f9f"></script>
-<script defer src="js/maaling.js?v=b8490f9f"></script>
-<script defer src="js/backend-bridge.js?v=b8490f9f"></script>
-<script defer src="js/components.js?v=b8490f9f"></script>
-<script defer src="js/brand-logos-data.js?v=b8490f9f"></script>
-<script defer src="js/brand-logos.js?v=b8490f9f"></script>
-<script defer src="js/home.js?v=b8490f9f"></script>
+<script defer src="js/sortering.js?v=d61fc8a0"></script>
+<script defer src="js/store.js?v=d61fc8a0"></script>
+<script defer src="js/maaling.js?v=d61fc8a0"></script>
+<script defer src="js/backend-bridge.js?v=d61fc8a0"></script>
+<script defer src="js/components.js?v=d61fc8a0"></script>
+<script defer src="js/brand-logos-data.js?v=d61fc8a0"></script>
+<script defer src="js/brand-logos.js?v=d61fc8a0"></script>
+<script defer src="js/home.js?v=d61fc8a0"></script>
 <!--cookie:start-->
 <dialog class="cookie-modal" id="cookie-banner" aria-labelledby="cookie-modal-titel" aria-describedby="cookie-modal-tekst">
   <div class="cookie-modal-indhold">

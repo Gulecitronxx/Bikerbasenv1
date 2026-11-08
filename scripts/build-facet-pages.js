@@ -1173,7 +1173,6 @@ function faktaRaekke(facet){
   return `<section class="fa-fakta" aria-label="Fakta om kørekort ${esc(facet.id)}">
       <ul class="fa-fakta-liste">${fakta.map(x => `<li>${IKON(x.ikon)}<div><strong>${x.titel}</strong><span>${x.tekst}</span></div></li>`).join('')}</ul>
       <a class="fa-fakta-guide" href="${GUIDE.a2}">${IKON('book')}<div><strong>Er du i tvivl om reglerne?</strong><span>Læs vores guide til kørekort med krav og gode råd.</span></div><span class="fa-pil" aria-hidden="true">${EGNE_IKONER.arrow}</span></a>
-      <p class="fa-fakta-kilde">Almindelige regler. Kilde: <a href="${KILDE_URL}" rel="noopener noreferrer" target="_blank">Færdselsstyrelsen</a>. Der findes undtagelser, fx for værnepligtige og mekanikere.</p>
     </section>`;
 }
 

@@ -473,8 +473,8 @@ test('smårettelser: Engros ens overalt, hk > 1000, junk-datoer, 1-2 annoncer', 
   assert.match(soeg, /salgsmarkoerLabel\(m\)/, 'listerækken bruger samme label-funktion som kort og annonceside (kildetekst-tjek: search.js kan ikke kaldes uden DOM)');
 });
 
-test('F-003: forside og søgning viser datoen (kildekode-kontrakt)', () => {
-  for (const f of ['home.js', 'search.js']){
+test('F-003: søgningen viser datoen (kildekode-kontrakt; forsidens friskhedslinje er fjernet på ejerens ønske)', () => {
+  for (const f of ['search.js']){
     const src = fs.readFileSync(path.join(__dirname, f), 'utf8');
     assert.ok(/senesteBekraeftet\(/.test(src), f + ' skal kalde senesteBekraeftet');
     if (f === 'search.js') assert.match(src, /min-height:/, 'pladsen til #frisk-note er reserveret (CLS)');

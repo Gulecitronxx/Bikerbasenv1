@@ -8,6 +8,7 @@ const regler = css.match(/body\.home \.(sek-note|kol-note)\s*\{[^}]*\}/g) || [];
 assert(regler.length, 'ingen note-regler fundet');
 regler.forEach(r => assert(!/text-overflow:\s*ellipsis/.test(r) && !/line-clamp/.test(r), 'note afkortes: ' + r));
 assert(!/\.kol-note\{[^}]*ellipsis/.test(css), 'kol-note med ellipsis');
-assert(/#featured-sub, #types-sub\):empty\{[^}]*min-height/.test(css), 'noterne mangler reserveret plads');
+assert(/#featured-sub:empty\{[^}]*min-height/.test(css), 'noterne mangler reserveret plads');
+assert(!/#types-sub/.test(css), '#types-sub er fjernet fra forsiden; der må ikke reserveres plads til den');
 assert(!/udvalgHoved\.hidden\s*=\s*kandidater/.test(home), 'udvalg-hoved må ikke skjules (sælg-panelet hopper)');
 console.log('forside-v2: ok');
